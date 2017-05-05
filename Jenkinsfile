@@ -1,6 +1,8 @@
 import groovy.json.JsonSlurperClassic
 
 timestamps {
+	
+    node {
 
 		properties([parameters([
                 booleanParam(defaultValue: false, description: '', name: 'skip_UTests'),
@@ -57,7 +59,7 @@ timestamps {
             )
             throw error
         }		
-	
+	}
 }
 
 void printStage(stage) {
