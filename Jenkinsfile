@@ -1,6 +1,7 @@
 import groovy.json.JsonSlurperClassic
 
 timestamps {
+	def deployVersion = ''
 	
     node {
 
@@ -8,7 +9,7 @@ timestamps {
                 booleanParam(defaultValue: false, description: '', name: 'skip_UTests'),
                 booleanParam(defaultValue: false, description: '', name: 'skip_ITests'),
                 [$class: 'CredentialsParameterDefinition', credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl',
-                 defaultValue: 'ade43d98-326c-41ad-9a61-aefbf933e5d2', description: '', name: 'fasitCred', required: true]
+                 defaultValue: 'null', description: '', name: 'fasitCred', required: true]
 				 ])
         ])
 
