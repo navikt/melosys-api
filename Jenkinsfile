@@ -25,19 +25,7 @@ timestamps {
                     username = env.SAVEDUSERNAME
                     password = env.SAVEDPASSWORD
                 }
-            }  catch(error) {
-
-            def mailToDevs = !params.secScan
-            emailext (
-                    subject: "[AUTOMAIL] Feilet jobb ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
-                    body: "<p>Hei,<br><br>har du til til å ta en titt på hva som kan være feil?<br>" +
-                            "<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a><br><br>" +
-                            "Tusen takk på forhånd,<br>Miljø</p>",
-                    recipientProviders: [[$class: 'DevelopersRecipientProvider'],
-                                         [$class: 'CulpritsRecipientProvider']]
-            )
-            throw error
-        }
+            }
 
             def artifactId = readFile('pom.xml') =~ '<artifactId>(.+)</artifactId>'
             artifactId = artifactId[0][1]
@@ -57,7 +45,18 @@ timestamps {
 				}
 
 			}
-        }
+		} catch(error) {
+
+            emailext (
+                    subject: "[AUTOMAIL] Feilet jobb ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                    body: "<p>Hei,<br><br>har du tid til å ta en titt på hva som kan være feil?<br>" +
+                            "<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a><br><br>" +
+                            "Tusen takk på forhånd,<br>Miljø</p>",
+                    recipientProviders: [[$class: 'DevelopersRecipientProvider'],
+                                         [$class: 'CulpritsRecipientProvider']]
+            )
+            throw error
+        }		
 	
 }
 
