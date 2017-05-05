@@ -44,7 +44,8 @@ timestamps {
 					sh 'mvn --batch-mode -V -U -e -s $MAVEN_SETTINGS clean deploy'
 				}
 
-			}			
+			}
+        }
 	
 }
 
