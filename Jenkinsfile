@@ -24,9 +24,11 @@ timestamps {
                 checkout scm
 
                 withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: params.fasitCred,
-                                  usernameVariable: 'SAVEDUSERNAME', passwordVariable: 'SAVEDPASSWORD']]) {
-                    username = env.SAVEDUSERNAME
-                    password = env.SAVEDPASSWORD
+                                  usernameVariable: 'SAVED_USERNAME', passwordVariable: 'SAVEDPASSWORD']]) {
+                    username = env.SAVED_USERNAME
+                    password = env.SAVED_PASSWORD
+                    sh 'echo $PASSWORD'
+                	echo "${env.USERNAME}"
                 }
             }
 
