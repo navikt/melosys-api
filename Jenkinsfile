@@ -7,8 +7,10 @@ timestamps {
 
 		properties([parameters([
                 booleanParam(defaultValue: false, description: '', name: 'skip_UTests'),
-                booleanParam(defaultValue: false, description: '', name: 'skip_ITests')
-				])
+                booleanParam(defaultValue: false, description: '', name: 'skip_ITests'),
+                [$class: 'CredentialsParameterDefinition', credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl',
+                 defaultValue: 'null', description: '', name: 'fasitCred', required: true]
+				 ])
         ])
 
         try {
@@ -21,6 +23,13 @@ timestamps {
                 
                 checkout scm
 
+                withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: params.fasitCred,
+                                  usernameVariable: 'SAVED_USERNAME', passwordVariable: 'SAVEDPASSWORD']]) {
+                    username = env.SAVED_USERNAME
+                    password = env.SAVED_PASSWORD
+                    sh 'echo $PASSWORD'
+                	echo "${env.USERNAME}"
+                }
             }
 
             def artifactId = readFile('pom.xml') =~ '<artifactId>(.+)</artifactId>'
