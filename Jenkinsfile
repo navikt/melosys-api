@@ -59,7 +59,7 @@ timestamps {
                     printStage("Build")
                     configFileProvider(
                         [configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
-                        sh 'mvn --batch-mode -V -U -e -s $MAVEN_SETTINGS clean deploy'
+                        sh 'mvn -B -V -U -e -s $MAVEN_SETTINGS clean deploy'
                     }
                 }            
 
@@ -74,8 +74,7 @@ timestamps {
                     configFileProvider(
                             [configFile(fileId: 'navMavenSettings', variable: 'MAVEN_SETTINGS')]) {
                         wrap([$class: 'MaskPasswordsBuildWrapper']) {
-                            sh 'mvn --batch-mode -V -U -e -s $MAVEN_SETTINGS -Denv=' + environment + ' -Dapps=' + artifactId + ':' + deployVersion + ' -Dusername=' + username 
-                                + ' -Dpassword=' + password + ' no.nav.maven.plugins:aura-maven-plugin:RELEASE:verify no.nav.maven.plugins:aura-maven-plugin:6.1.90:deploy'
+                            sh 'mvn -B -V -U -e -s $MAVEN_SETTINGS -Denv=' + environment + ' -Dapps=' + artifactId + ':' + deployVersion + ' -Dusername=' + username + ' -Dpassword=' + password + ' no.nav.maven.plugins:aura-maven-plugin:RELEASE:verify no.nav.maven.plugins:aura-maven-plugin:6.1.90:deploy
                         }
                     }
 
