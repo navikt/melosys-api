@@ -11,6 +11,7 @@ timestamps {
         try {
             env.LANG = "nb_NO.UTF-8"
             fasitCredentialId = env.FASIT_CRED
+            sh 'echo $fasitCredentialId'
 
             stage("Init") {
                 printStage("Init")
@@ -19,12 +20,12 @@ timestamps {
                 
                 checkout scm
 
-                withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: fasitCredentialId = env.FASIT_CRED,
+                withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: fasitCredentialId,
                                   usernameVariable: 'SAVED_USERNAME', passwordVariable: 'SAVED_PASSWORD']]) {
                     username = env.SAVED_USERNAME
                     password = env.SAVED_PASSWORD
-                    sh 'echo $PASSWORD'
-                	echo "${env.USERNAME}"
+                    sh 'echo $password'
+                	echo "${username}"
                 }
             }
 
