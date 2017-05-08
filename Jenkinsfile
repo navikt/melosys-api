@@ -15,7 +15,6 @@ timestamps {
         try {
             env.LANG = "nb_NO.UTF-8"
             fasitCredentialId = env.FASIT_CRED
-            info(fasitCredentialId)
 
             stage("Init") {
                 printStage("Init")
@@ -28,8 +27,6 @@ timestamps {
                                   usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
                     username = env.USERNAME
                     password = env.PASSWORD
-                    info(username)
-					info(password)
                 }
             }
 
@@ -49,7 +46,7 @@ timestamps {
 						[configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
 					sh 'mvn --batch-mode -V -U -e -s $MAVEN_SETTINGS clean deploy'
 				}
-                info("Build -- DONE")
+                info("Build")
 
 			}
             
