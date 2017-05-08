@@ -4,6 +4,8 @@ timestamps {
 	def deployVersion = ''
     def skipUTests = '-DskipUTs'
     def skipITests = '-DskipITs'
+    def username = ''
+    def password = ''    
     def fasitCredentialId = ''
 	
     node {
