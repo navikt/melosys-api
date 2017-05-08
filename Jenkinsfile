@@ -86,7 +86,7 @@ timestamps {
             
         } catch(error) {
             if (deploy) {
-                info(miljo)
+                info(environment)
             }                
 
             throw error
