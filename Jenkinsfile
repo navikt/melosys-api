@@ -13,8 +13,10 @@ timestamps {
         build = Boolean.valueOf(BUILD)
         deploy = Boolean.valueOf(DEPLOY)
         fasitCredentialId = env.FASIT_CRED
-        deployVersion = env.DEPLOY_VERSION
-        if (env.ENVIRONMENT != "null") {
+        if (env.DEPLOY_VERSION != null) {
+            deployVersion = env.DEPLOY_VERSION
+        }
+        if (env.ENVIRONMENT != null) {
             environment = env.ENVIRONMENT
         }
 
