@@ -2,19 +2,15 @@ import groovy.json.JsonSlurperClassic
 
 timestamps {
 	def deployVersion = ''
+    def skipUTests = '-DskipUTs'
+    def skipITests = '-DskipITs'
+    def fasitCredentialId = ''
 	
     node {
 
-		properties([parameters([
-                booleanParam(defaultValue: false, description: '', name: 'skip_UTests'),
-                booleanParam(defaultValue: false, description: '', name: 'skip_ITests'),
-                [$class: 'CredentialsParameterDefinition', credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl',
-                 defaultValue: 'null', description: '', name: 'fasitCred', required: true]
-				 ])
-        ])
-
         try {
             env.LANG = "nb_NO.UTF-8"
+            fasitCredentialId = env.FASIT_CRED
 
             stage("Init") {
                 printStage("Init")
@@ -23,8 +19,8 @@ timestamps {
                 
                 checkout scm
 
-                withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: params.fasitCred,
-                                  usernameVariable: 'SAVED_USERNAME', passwordVariable: 'SAVEDPASSWORD']]) {
+                withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: fasitCredentialId = env.FASIT_CRED,
+                                  usernameVariable: 'SAVED_USERNAME', passwordVariable: 'SAVED_PASSWORD']]) {
                     username = env.SAVED_USERNAME
                     password = env.SAVED_PASSWORD
                     sh 'echo $PASSWORD'
