@@ -24,8 +24,8 @@ timestamps {
                                   usernameVariable: 'SAVED_USERNAME', passwordVariable: 'SAVED_PASSWORD']]) {
                     username = env.SAVED_USERNAME
                     password = env.SAVED_PASSWORD
-                    sh 'echo $password'
-                	echo "${username}"
+                    sh 'echo $username'
+                    sh 'echo $password'                	
                 }
             }
 
