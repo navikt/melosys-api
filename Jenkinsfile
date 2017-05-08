@@ -8,6 +8,7 @@ timestamps {
 	def deployVersion = ''
     def skipUTests = '-DskipUTs'
     def skipITests = '-DskipITs'
+    def miljo = ''
     
     node {
 
@@ -48,6 +49,7 @@ timestamps {
 						[configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
 					sh 'mvn --batch-mode -V -U -e -s $MAVEN_SETTINGS clean deploy'
 				}
+                info("Build -- DONE")
 
 			}
             
