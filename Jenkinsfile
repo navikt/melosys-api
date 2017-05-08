@@ -28,7 +28,6 @@ timestamps {
 
         try {
             env.LANG = "nb_NO.UTF-8"
-            fasitCredentialId = env.FASIT_CRED
 
             stage("Init") {
                 printStage("Init")
@@ -61,7 +60,7 @@ timestamps {
                         sh 'mvn --batch-mode -V -U -e -s $MAVEN_SETTINGS clean deploy'
                     }
                 }            
-                http://stash.devillo.no/plugins/servlet/edit/projects/MELOSYS/repos/melosys-app/Jenkinsfile?at=refs%2Fheads%2Fdevelop&path=Jenkinsfile#
+
                 info("Build ${artifactId}:${deployVersion}")
             }            
             
@@ -78,7 +77,7 @@ timestamps {
                         }
                     }
 
-                    info(environment)
+                    info("Deploy ${artifactId}:${deployVersion} to ${environment}")
 
                 }
             }            
