@@ -1,14 +1,28 @@
-import groovy.json.JsonSlurperClassic
-
 timestamps {
-	def username = ''
+    def username = ''
     def password = ''    
     def fasitCredentialId = ''
-	def deploy = false
-	def deployVersion = ''
+    def build = false
+    def deploy = false
+    def deployVersion = ''
     def skipUTests = '-DskipUTs'
     def skipITests = '-DskipITs'
-    def miljo = ''
+    def environment = ''
+    
+    try {
+        build = Boolean.valueOf(BUILD)
+        deploy = Boolean.valueOf(DEPLOY)
+        fasitCredentialId = env.FASIT_CRED
+        deployVersion = env.DEPLOY_VERSION
+        if (env.ENVIRONMENT != "null") {
+            environment = env.ENVIRONMENT
+        }
+
+    } catch (MissingPropertyException e) {
+        deploy = false
+        throw e
+    }
+    
     
     node {
 
@@ -29,18 +43,6 @@ timestamps {
                     password = env.PASSWORD
                 }
             }
-
-			if (build) {
-			    stage("Build") {
-					printStage("Build")
-					configFileProvider(
-						[configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
-						sh 'mvn --batch-mode -V -U -e -s $MAVEN_SETTINGS clean deploy'
-					}
-                }            
-                
-                info("Build ${artifactId}:${deployVersion}")
-			}
             
             def artifactId = readFile('pom.xml') =~ '<artifactId>(.+)</artifactId>'
             artifactId = artifactId[0][1]
@@ -49,6 +51,18 @@ timestamps {
                 def version = readFile('pom.xml') =~ '<version>(.+)</version>'
                 pomVersion = version[0][1]
                 deployVersion = pomVersion
+            }           
+
+            if (build) {
+                stage("Build") {
+                    printStage("Build")
+                    configFileProvider(
+                        [configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
+                        sh 'mvn --batch-mode -V -U -e -s $MAVEN_SETTINGS clean deploy'
+                    }
+                }            
+                http://stash.devillo.no/plugins/servlet/edit/projects/MELOSYS/repos/melosys-app/Jenkinsfile?at=refs%2Fheads%2Fdevelop&path=Jenkinsfile#
+                info("Build ${artifactId}:${deployVersion}")
             }            
             
             if (deploy) {
@@ -59,29 +73,24 @@ timestamps {
                     configFileProvider(
                             [configFile(fileId: 'navMavenSettings', variable: 'MAVEN_SETTINGS')]) {
                         wrap([$class: 'MaskPasswordsBuildWrapper']) {
-                            sh 'mvn -s $MAVEN_SETTINGS -Denv=' + miljo + ' -Dapps=' + artifactId + ':' + deployVersion + ' -Dusername=' + username + ' -Dpassword=' + password + ' no.nav.maven.plugins:aura-maven-plugin:RELEASE:verify no.nav.maven.plugins:aura-maven-plugin:6.1.90:deploy'
+                            sh 'mvn --batch-mode -V -U -e -s $MAVEN_SETTINGS -Denv=' + environment + ' -Dapps=' + artifactId + ':' + deployVersion + ' -Dusername=' + username 
+                                + ' -Dpassword=' + password + ' no.nav.maven.plugins:aura-maven-plugin:RELEASE:verify no.nav.maven.plugins:aura-maven-plugin:6.1.90:deploy'
                         }
                     }
-                    def appUrl = getAppUrl(miljo, artifactId)
-                    def ret = "<a href=" + appUrl + ">" + appUrl + "</a>"
-                    info(miljo)
+
+                    info(environment)
 
                 }
             }            
             
-		} catch(error) {
+        } catch(error) {
+            if (deploy) {
+                info(miljo)
+            }                
 
-            emailext (
-                    subject: "[AUTOMAIL] Feilet jobb ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
-                    body: "<p>Hei,<br><br>har du tid til å ta en titt på hva som kan være feil?<br>" +
-                            "<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a><br><br>" +
-                            "Tusen takk på forhånd,<br>Miljø</p>",
-                    recipientProviders: [[$class: 'DevelopersRecipientProvider'],
-                                         [$class: 'CulpritsRecipientProvider']]
-            )
             throw error
-        }		
-	}
+        }       
+    }
 }
 
 void info(msg) {
