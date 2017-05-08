@@ -1,19 +1,20 @@
 import groovy.json.JsonSlurperClassic
 
 timestamps {
+	def username = ''
+    def password = ''    
+    def fasitCredentialId = ''
+	def deploy = false
 	def deployVersion = ''
     def skipUTests = '-DskipUTs'
     def skipITests = '-DskipITs'
-    def username = ''
-    def password = ''    
-    def fasitCredentialId = ''
-	
+    
     node {
 
         try {
             env.LANG = "nb_NO.UTF-8"
             fasitCredentialId = env.FASIT_CRED
-            sh 'echo $fasitCredentialId'
+            info(fasitCredentialId)
 
             stage("Init") {
                 printStage("Init")
@@ -23,11 +24,11 @@ timestamps {
                 checkout scm
 
                 withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: fasitCredentialId,
-                                  usernameVariable: 'SAVED_USERNAME', passwordVariable: 'SAVED_PASSWORD']]) {
-                    username = env.SAVED_USERNAME
-                    password = env.SAVED_PASSWORD
-                    sh 'echo $username'
-                    sh 'echo $password'                	
+                                  usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                    username = env.USERNAME
+                    password = env.PASSWORD
+                    info(username)
+					info(password)
                 }
             }
 
@@ -49,6 +50,25 @@ timestamps {
 				}
 
 			}
+            
+            if (deploy) {
+
+                stage("Deploy") {
+                    printStage("Deploy")
+
+                    configFileProvider(
+                            [configFile(fileId: 'navMavenSettings', variable: 'MAVEN_SETTINGS')]) {
+                        wrap([$class: 'MaskPasswordsBuildWrapper']) {
+                            sh 'mvn -s $MAVEN_SETTINGS -Denv=' + miljo + ' -Dapps=' + artifactId + ':' + deployVersion + ' -Dusername=' + username + ' -Dpassword=' + password + ' no.nav.maven.plugins:aura-maven-plugin:RELEASE:verify no.nav.maven.plugins:aura-maven-plugin:6.1.90:deploy'
+                        }
+                    }
+                    def appUrl = getAppUrl(miljo, artifactId)
+                    def ret = "<a href=" + appUrl + ">" + appUrl + "</a>"
+                    info(miljo)
+
+                }
+            }            
+            
 		} catch(error) {
 
             emailext (
@@ -62,6 +82,13 @@ timestamps {
             throw error
         }		
 	}
+}
+
+void info(msg) {
+    ansiColor('xterm') {
+        println "\033[45m\033[37m " + msg + " \033[0m"
+    }
+    currentBuild.description = msg
 }
 
 void printStage(stage) {
