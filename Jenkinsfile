@@ -30,6 +30,18 @@ timestamps {
                 }
             }
 
+			if (build) {
+			    stage("Build") {
+					printStage("Build")
+					configFileProvider(
+						[configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
+						sh 'mvn --batch-mode -V -U -e -s $MAVEN_SETTINGS clean deploy'
+					}
+                }            
+                
+                info("Build ${artifactId}:${deployVersion}")
+			}
+            
             def artifactId = readFile('pom.xml') =~ '<artifactId>(.+)</artifactId>'
             artifactId = artifactId[0][1]
 
@@ -37,18 +49,7 @@ timestamps {
                 def version = readFile('pom.xml') =~ '<version>(.+)</version>'
                 pomVersion = version[0][1]
                 deployVersion = pomVersion
-            }
-
-			stage("Build") {
-
-				printStage("Build")
-				configFileProvider(
-						[configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
-					sh 'mvn --batch-mode -V -U -e -s $MAVEN_SETTINGS clean deploy'
-				}
-                info("Build")
-
-			}
+            }            
             
             if (deploy) {
 
