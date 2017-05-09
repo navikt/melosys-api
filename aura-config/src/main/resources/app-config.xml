@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://appconfig.aura.nav.no"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://appconfig.aura.nav.no http://maven.adeo.no/xsd/appconfig.xsd ">
+
+    <name>melosys-app</name>
+
+    <artifacts>
+        <ear groupId="no.nav.melosys" artifactId="melosys-ear">
+        </ear>
+    </artifacts>
+
+    <!--    <selftest>
+            <path>/selftest</path>
+            <humanReadablePath>/selftest</humanReadablePath>
+        </selftest>
+
+    <monitoring>
+        <metric path="/metrics" interval="60"/>
+    </monitoring>-->
+
+    <resources>
+        <datasource alias="melosysDB" jndi="java:/jdbc/melosysDB" type="ORACLE">
+        </datasource>
+
+        <!--
+            Se https://fasit.adeo.no/wicket/bookmarkable/no.nav.aura.envconfig.gui.resources.ResourceDocumentationPage
+            (se også detaljer i http://maven.adeo.no/xsd/appconfig.xsd) for hvilke system properties kommer ut av innslagene under:
+        -->
+        <ldap alias="ldap" mapToProperty="ldap"/>
+
+    </resources>
+
+</application>
