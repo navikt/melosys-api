@@ -70,6 +70,9 @@ timestamps {
 
                 stage("Deploy") {
                     printStage("Deploy")
+                    
+                    log(username)
+                    log(environment)
 
                     configFileProvider(
                             [configFile(fileId: 'navMavenSettings', variable: 'MAVEN_SETTINGS')]) {
@@ -98,6 +101,12 @@ void info(msg) {
         println "\033[45m\033[37m " + msg + " \033[0m"
     }
     currentBuild.description = msg
+}
+
+void log(msg) {
+    ansiColor('xterm') {
+        println "\033[42m " + msg + " \033[0m"
+    }
 }
 
 void printStage(stage) {
