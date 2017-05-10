@@ -59,7 +59,7 @@ timestamps {
                     }
                 }            
 
-                info("Build ${artifactId}:${deployVersion}")
+                info("Build ${artifactId}:${version}")
             }            
             
             if (s_deploy) {
