@@ -73,7 +73,8 @@ timestamps {
                     
                     log(deployVersion)
                     log(username)
-
+                    
+                    callback = "${env.BUILD_URL}input/Deploy/"
  
 					def deploy = deployApp('melosys-app', deployVersion, environment, callback, username).key  
                     
