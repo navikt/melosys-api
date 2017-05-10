@@ -34,6 +34,8 @@ timestamps {
             env.LANG = "nb_NO.UTF-8"
             def mvnHome = tool "maven-3.5.0"
             env.PATH = "${mvnHome}/bin:${env.PATH}"
+            def artifactId = readFile('pom.xml') =~ '<artifactId>(.+)</artifactId>'
+            artifactId = artifactId[0][1]
 
             stage("Init") {
                 //printStage("Init")
