@@ -3,7 +3,7 @@ timestamps {
 
     def username, password, fasitCredentialId
     
-    def committer, committerEmail, changelog, pom, releaseVersion, isSnapshot, nextVersion
+    def committer, committerEmail, changelog, pom, isSnapshot, nextVersion
     
     def s_build = false
     def s_deploy = false
@@ -43,15 +43,11 @@ timestamps {
                 checkout scm
                 
                 pom = readMavenPom file: 'pom.xml'
-                releaseVersion = pom.version.tokenize("-")[0]
-                version = pom.version.contains("-SNAPSHOT")
+                version = pom.version.tokenize("-")[0]
+                isSnapshot = pom.version.contains("-SNAPSHOT")
                 committer = sh(script: 'git log -1 --pretty=format:"%an (%ae)"', returnStdout: true).trim()
                 committerEmail = sh(script: 'git log -1 --pretty=format:"%ae"', returnStdout: true).trim()
                 changelog = sh(script: 'git log `git describe --tags --abbrev=0`..HEAD --oneline', returnStdout: true)
-                sh 'echo "Verifying that no snapshot dependencies is being used."'
-                sh 'grep module pom.xml | cut -d">" -f2 | cut -d"<" -f1 > snapshots.txt'
-                sh 'echo "./" >> snapshots.txt'
-                sh 'while read line;do if [ "$line" != "" ];then if [ `grep SNAPSHOT $line/pom.xml | wc -l` -gt 1 ];then echo "SNAPSHOT-dependencies found. See file $line/pom.xml.";exit 1;fi;fi;done < snapshots.txt'
             }          
 
             if (s_build) {
