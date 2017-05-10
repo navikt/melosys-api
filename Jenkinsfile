@@ -71,15 +71,20 @@ timestamps {
                 stage("Deploy") {
                     printStage("Deploy")
                     
+                    log(deployVersion)
                     log(username)
-                    log(environment)
 
-                    configFileProvider(
-                            [configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
-                        wrap([$class: 'MaskPasswordsBuildWrapper']) {
-                            sh 'mvn -B -V -U -e -s $MAVEN_SETTINGS -Denv=' + environment + ' -Dapps=' + artifactId + ':' + deployVersion + ' -Dusername=' + username + ' -Dpassword=' + password + ' no.nav.maven.plugins:aura-maven-plugin:RELEASE:verify no.nav.maven.plugins:aura-maven-plugin:6.1.90:deploy'
+ 
+					def deploy = deployApp('melosys-app', releaseVersion, environment, callback, username).key  
+                    
+                    try {
+                        timeout(time: 15, unit: 'MINUTES') {
+                            input id: 'deploy', message: "Check status here:  https://jira.adeo.no/browse/${deploy}"
                         }
-                    }
+                    } catch (Exception e) {
+                        throw new Exception("Deploy feilet :( \n Se https://jira.adeo.no/browse/" + deploy + " for detaljer", e)
+
+                    }                    
 
                     info("Deploy ${artifactId}:${deployVersion} to ${environment}")
 
@@ -95,6 +100,39 @@ timestamps {
         }       
     }
 }
+
+Object deployApp(app, version, environment, callback, reporter) {
+    parsedEnvironment = getEnvironmentId(environment)
+
+    println("Init deploy with the following input")
+    println("Application: \t ${app}")
+    println("Version: \t ${version}")
+    println("Environment: \t ${environment} (translated to: ${parsedEnvironment})")
+    println("On behalf of: \t ${reporter}")
+    println("Will callback on ${callback}")
+
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'jiraServiceUser', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+        def postBody = [
+                fields: [
+                        project          : [key: 'DEPLOY'],
+                        issuetype        : [id: '10902'],
+                        customfield_14811: [id: parsedEnvironment, value: parsedEnvironment],
+                        customfield_14812: "${app}:${version}",
+                        customfield_17410: callback,
+                        summary          : "Automatisk deploy på vegne av ${reporter}"
+                ]
+        ]
+
+        def postBodyString = groovy.json.JsonOutput.toJson(postBody)
+        def base64encoded = "${env.USERNAME}:${env.PASSWORD}".bytes.encodeBase64().toString()
+
+
+        def response = httpRequest url: 'https://jira.adeo.no/rest/api/2/issue/', customHeaders: [[name: "Authorization", value: "Basic ${base64encoded}"]], consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody: postBodyString
+        def slurper = new groovy.json.JsonSlurper()
+        return slurper.parseText(response.content);
+    }
+}
+
 
 void info(msg) {
     ansiColor('xterm') {
