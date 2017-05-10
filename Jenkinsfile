@@ -10,8 +10,8 @@ timestamps {
     def environment = ''
     
     try {
-        build = Boolean.valueOf(BUILD)
-        deploy = Boolean.valueOf(DEPLOY)
+        s_build = Boolean.valueOf(BUILD)
+        s_deploy = Boolean.valueOf(DEPLOY)
         fasitCredentialId = env.FASIT_CRED
         if (env.DEPLOY_VERSION != null) {
             deployVersion = env.DEPLOY_VERSION
