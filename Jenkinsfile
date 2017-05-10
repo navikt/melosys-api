@@ -1,5 +1,5 @@
 timestamps {
-	def application = "melosys"
+	def application = "melosys-app"
 
     def username, password, fasitCredentialId
     
@@ -72,7 +72,7 @@ timestamps {
                     
                     callback = "${env.BUILD_URL}input/Deploy/"
  
-					def deploy = deployApp('melosys-app', version, environment, callback, committer).key  
+					def deploy = deployApp(application, version, environment, callback, committer).key  
                     
                     try {
                         timeout(time: 15, unit: 'MINUTES') {
@@ -89,7 +89,7 @@ timestamps {
             }            
             
         } catch(error) {
-            if (deploy) {
+            if (s_deploy) {
                 info(environment)
             }                
 
