@@ -75,7 +75,7 @@ timestamps {
                     log(username)
 
  
-					def deploy = deployApp('melosys-app', releaseVersion, environment, callback, username).key  
+					def deploy = deployApp('melosys-app', deployVersion, environment, callback, username).key  
                     
                     try {
                         timeout(time: 15, unit: 'MINUTES') {
