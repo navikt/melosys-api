@@ -103,7 +103,6 @@ timestamps {
 }
 
 Object deployApp(app, version, environment, callback, reporter) {
-    parsedEnvironment = getEnvironmentId(environment)
 
     println("Init deploy with the following input")
     println("Application: \t ${app}")
