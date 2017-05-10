@@ -5,13 +5,9 @@ timestamps {
     
     def committer, committerEmail, changelog, pom, releaseVersion, isSnapshot, nextVersion
     
-    def mvnHome = tool "maven-3.5.0"
-    
     def s_build = false
     def s_deploy = false
-    def deployVersion = ''
-    def skipUTests = '-DskipUTs'
-    def skipITests = '-DskipITs'
+    def version = ''
     def environment = ''
     
     try {
@@ -20,7 +16,7 @@ timestamps {
         s_deploy = Boolean.valueOf(DEPLOY)
         fasitCredentialId = env.FASIT_CRED
         if (env.DEPLOY_VERSION != null) {
-            deployVersion = env.DEPLOY_VERSION
+            version = env.DEPLOY_VERSION
         }
         if (env.ENVIRONMENT != null) {
             environment = env.ENVIRONMENT
@@ -36,6 +32,7 @@ timestamps {
 
         try {
             env.LANG = "nb_NO.UTF-8"
+            def mvnHome = tool "maven-3.5.0"
             env.PATH = "${mvnHome}/bin:${env.PATH}"
 
             stage("Init") {
@@ -45,7 +42,7 @@ timestamps {
                 
                 pom = readMavenPom file: 'pom.xml'
                 releaseVersion = pom.version.tokenize("-")[0]
-                isSnapshot = pom.version.contains("-SNAPSHOT")
+                version = pom.version.contains("-SNAPSHOT")
                 committer = sh(script: 'git log -1 --pretty=format:"%an (%ae)"', returnStdout: true).trim()
                 committerEmail = sh(script: 'git log -1 --pretty=format:"%ae"', returnStdout: true).trim()
                 changelog = sh(script: 'git log `git describe --tags --abbrev=0`..HEAD --oneline', returnStdout: true)
@@ -72,12 +69,12 @@ timestamps {
                 stage("Deploy") {
                     printStage("Deploy")
                     
-                    log(deployVersion)
+                    log(version)
                     log(username)
                     
                     callback = "${env.BUILD_URL}input/Deploy/"
  
-					def deploy = deployApp('melosys-app', deployVersion, environment, callback, committer).key  
+					def deploy = deployApp('melosys-app', version, environment, callback, committer).key  
                     
                     try {
                         timeout(time: 15, unit: 'MINUTES') {
@@ -88,7 +85,7 @@ timestamps {
 
                     }                    
 
-                    info("Deploy ${artifactId}:${deployVersion} to ${environment}")
+                    info("Deploy ${artifactId}:${version} to ${environment}")
 
                 }
             }            
