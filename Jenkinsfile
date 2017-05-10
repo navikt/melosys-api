@@ -1,7 +1,12 @@
 timestamps {
-    def username = ''
-    def password = ''    
-    def fasitCredentialId = ''
+	def application = "melosys"
+
+    def username, password, fasitCredentialId
+    
+    def committer, committerEmail, changelog, pom, releaseVersion, isSnapshot, nextVersion
+    
+    def mvnHome = tool "maven-3.5.0"
+    
     def s_build = false
     def s_deploy = false
     def deployVersion = ''
@@ -10,6 +15,7 @@ timestamps {
     def environment = ''
     
     try {
+    	
         s_build = Boolean.valueOf(BUILD)
         s_deploy = Boolean.valueOf(DEPLOY)
         fasitCredentialId = env.FASIT_CRED
@@ -30,29 +36,24 @@ timestamps {
 
         try {
             env.LANG = "nb_NO.UTF-8"
+            env.PATH = "${mvnHome}/bin:${env.PATH}"
 
             stage("Init") {
-                printStage("Init")
-                env.JAVA_HOME = "${tool 'jdk-1.8'}"
-                env.PATH = "${tool 'maven-3.5.0'}/bin:${env.PATH}"
+                //printStage("Init")
                 
                 checkout scm
-
-                withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: fasitCredentialId,
-                                  usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                    username = env.USERNAME
-                    password = env.PASSWORD
-                }
-            }
-            
-            def artifactId = readFile('pom.xml') =~ '<artifactId>(.+)</artifactId>'
-            artifactId = artifactId[0][1]
-
-            if (deployVersion.isEmpty()) {
-                def version = readFile('pom.xml') =~ '<version>(.+)</version>'
-                pomVersion = version[0][1]
-                deployVersion = pomVersion
-            }           
+                
+                pom = readMavenPom file: 'pom.xml'
+                releaseVersion = pom.version.tokenize("-")[0]
+                isSnapshot = pom.version.contains("-SNAPSHOT")
+                committer = sh(script: 'git log -1 --pretty=format:"%an (%ae)"', returnStdout: true).trim()
+                committerEmail = sh(script: 'git log -1 --pretty=format:"%ae"', returnStdout: true).trim()
+                changelog = sh(script: 'git log `git describe --tags --abbrev=0`..HEAD --oneline', returnStdout: true)
+                sh 'echo "Verifying that no snapshot dependencies is being used."'
+                sh 'grep module pom.xml | cut -d">" -f2 | cut -d"<" -f1 > snapshots.txt'
+                sh 'echo "./" >> snapshots.txt'
+                sh 'while read line;do if [ "$line" != "" ];then if [ `grep SNAPSHOT $line/pom.xml | wc -l` -gt 1 ];then echo "SNAPSHOT-dependencies found. See file $line/pom.xml.";exit 1;fi;fi;done < snapshots.txt'
+            }          
 
             if (s_build) {
                 stage("Build") {
@@ -76,7 +77,7 @@ timestamps {
                     
                     callback = "${env.BUILD_URL}input/Deploy/"
  
-					def deploy = deployApp('melosys-app', deployVersion, environment, callback, username).key  
+					def deploy = deployApp('melosys-app', deployVersion, environment, callback, committer).key  
                     
                     try {
                         timeout(time: 15, unit: 'MINUTES') {
@@ -103,6 +104,7 @@ timestamps {
 }
 
 Object deployApp(app, version, environment, callback, reporter) {
+    parsedEnvironment = getEnvironmentId(environment)
 
     println("Init deploy with the following input")
     println("Application: \t ${app}")
