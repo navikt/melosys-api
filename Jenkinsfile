@@ -2,8 +2,8 @@ timestamps {
     def username = ''
     def password = ''    
     def fasitCredentialId = ''
-    def build = false
-    def deploy = false
+    def s_build = false
+    def s_deploy = false
     def deployVersion = ''
     def skipUTests = '-DskipUTs'
     def skipITests = '-DskipITs'
@@ -54,7 +54,7 @@ timestamps {
                 deployVersion = pomVersion
             }           
 
-            if (build) {
+            if (s_build) {
                 stage("Build") {
                     printStage("Build")
                     configFileProvider(
@@ -66,7 +66,7 @@ timestamps {
                 info("Build ${artifactId}:${deployVersion}")
             }            
             
-            if (deploy) {
+            if (s_deploy) {
 
                 stage("Deploy") {
                     printStage("Deploy")
