@@ -112,7 +112,7 @@ Object deployApp(app, version, environment, callback, reporter) {
     println("On behalf of: \t ${reporter}")
     println("Will callback on ${callback}")
 
-    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'fasitCredentialId', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: fasitCredentialId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
         def postBody = [
                 fields: [
                         project          : [key: 'DEPLOY'],
