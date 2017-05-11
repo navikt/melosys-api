@@ -6,24 +6,18 @@ timestamps {
     def committer, committerEmail, changelog, pom, isSnapshot, nextVersion
     
     def opt_deploy = false
-    def opt_sonar = false
-    def version = ''
+    def opt_sonar = false    
     def environment = ''
     
-    try {    	
-        opt_deploy = Boolean.valueOf(DEPLOY)
-        if (env.SONAR != null) {
-        	opt_sonar = Boolean.valueOf(SONAR)
-        }
-        if (env.ENVIRONMENT != null) {
-            environment = env.ENVIRONMENT
-        }
-
-    } catch (MissingPropertyException e) {
-        deploy = false
-        throw e
+    if (env.ENVIRONMENT != null) {
+    	environment = env.ENVIRONMENT
     }
-    
+    if (env.ENVIRONMENT) {
+    	opt_deploy = Boolean.valueOf(DEPLOY)
+    }        
+    if (env.SONAR != null) {
+	    opt_sonar = Boolean.valueOf(SONAR)
+    }
     
     node {
 
@@ -33,6 +27,7 @@ timestamps {
             env.PATH = "${mvnHome}/bin:${env.PATH}"            
             def artifactId = readFile('pom.xml') =~ '<artifactId>(.+)</artifactId>'
             artifactId = artifactId[0][1]
+            def version = ''
 
             stage("Init") {
                 //printStage("Init")
