@@ -5,19 +5,13 @@ timestamps {
     
     def committer, committerEmail, changelog, pom, isSnapshot, nextVersion
     
-    def s_build = false
     def s_deploy = false
     def version = ''
     def environment = ''
     
-    try {
-    	
-        s_build = Boolean.valueOf(BUILD)
+    try {    	
         s_deploy = Boolean.valueOf(DEPLOY)
         fasitCredentialId = env.FASIT_CRED
-        if (env.DEPLOY_VERSION != null) {
-            version = env.DEPLOY_VERSION
-        }
         if (env.ENVIRONMENT != null) {
             environment = env.ENVIRONMENT
         }
@@ -50,14 +44,13 @@ timestamps {
                 changelog = sh(script: 'git log `git describe --tags --abbrev=0`..HEAD --oneline', returnStdout: true)
             }          
 
-            if (s_build) {
-                stage("Build") {
-                    printStage("Build")
-                    configFileProvider(
-                        [configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
-                        sh 'mvn -B -V -U -e -s $MAVEN_SETTINGS clean deploy'
-                    }
-                }            
+
+            stage("Build") {
+                printStage("Build")
+                configFileProvider(
+                    [configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
+                    sh 'mvn -B -V -U -e -s $MAVEN_SETTINGS clean deploy'
+                }
 
                 info("Build ${artifactId}:${version}")
             }            
