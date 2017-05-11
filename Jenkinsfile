@@ -25,18 +25,16 @@ timestamps {
             env.LANG = "nb_NO.UTF-8"
             def mvnHome = tool "maven-3.5.0"
             env.PATH = "${mvnHome}/bin:${env.PATH}"            
-            def artifactId = readFile('pom.xml') =~ '<artifactId>(.+)</artifactId>'
-            artifactId = artifactId[0][1]
-            def version = ''
 
             stage("Init") {
-                //printStage("Init")
+                printStage("Init")
                 
                 checkout scm
                 
                 pom = readMavenPom file: 'pom.xml'
-                version = pom.version.tokenize("-")[0]
+                def version = pom.version.tokenize("-")[0]
                 isSnapshot = pom.version.contains("-SNAPSHOT")
+            	def artifactId = pom.artifactId
                 committer = sh(script: 'git log -1 --pretty=format:"%an (%ae)"', returnStdout: true).trim()
                 committerEmail = sh(script: 'git log -1 --pretty=format:"%ae"', returnStdout: true).trim()
                 changelog = sh(script: 'git log `git describe --tags --abbrev=0`..HEAD --oneline', returnStdout: true)
