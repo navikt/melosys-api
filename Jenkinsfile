@@ -93,14 +93,12 @@ timestamps {
 
                     withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: env.FASIT_CRED,
                                       usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                        username = env.USERNAME
-                        password = env.PASSWORD
                     }
 
                     configFileProvider(
                             [configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
                         wrap([$class: 'MaskPasswordsBuildWrapper']) {
-                            sh "mvn -P runSonar -s $MAVEN_SETTINGS sonar:sonar -Dmaven.root=${env.WORKSPACE} -Dsonar.host.url=http://a34apvl00025.devillo.no:9000/sonarqube/ -Dsonar.login=${username} -Dsonar.password=${password}"
+                            sh "mvn -P runSonar -s $MAVEN_SETTINGS sonar:sonar -Dmaven.root=${env.WORKSPACE} -Dsonar.host.url=http://a34apvl00025.devillo.no:9000/sonarqube/ -Dsonar.login=${env.USERNAME} -Dsonar.password=${env.PASSWORD}"
                         }
                     }
                 }
