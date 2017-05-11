@@ -99,7 +99,10 @@ timestamps {
 }
 
 Object deployApp(app, version, environment, callback, reporter) {
-    parsedEnvironment = getEnvironmentId(environment)
+    def envMap = [
+            'ussi1': '22579',
+    ]
+    parsedEnvironment = envMap[environment]
 
     println("Init deploy with the following input")
     println("Application: \t ${app}")
