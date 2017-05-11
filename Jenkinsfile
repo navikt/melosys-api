@@ -106,7 +106,7 @@ timestamps {
                 }
 
                 publishHTML(target: [
-                        allowMissing         : true,
+                        allowMissing         : false,
                         alwaysLinkToLastBuild: false,
                         keepAll              : true,
                         reportDir            : '/target/coverage',
