@@ -1,21 +1,17 @@
 timestamps {
-    def username = ''
-    def password = ''    
-    def fasitCredentialId = ''
-    def build = false
-    def deploy = false
-    def deployVersion = ''
-    def skipUTests = '-DskipUTs'
-    def skipITests = '-DskipITs'
+	def application = "melosys"
+
+    def username, password
+    
+    def committer, committerEmail, changelog, pom, isSnapshot, nextVersion
+    
+    def s_deploy = false
+    def version = ''
     def environment = ''
     
-    try {
-        build = Boolean.valueOf(BUILD)
-        deploy = Boolean.valueOf(DEPLOY)
+    try {    	
+        s_deploy = Boolean.valueOf(DEPLOY)
         fasitCredentialId = env.FASIT_CRED
-        if (env.DEPLOY_VERSION != null) {
-            deployVersion = env.DEPLOY_VERSION
-        }
         if (env.ENVIRONMENT != null) {
             environment = env.ENVIRONMENT
         }
@@ -30,61 +26,63 @@ timestamps {
 
         try {
             env.LANG = "nb_NO.UTF-8"
-
-            stage("Init") {
-                printStage("Init")
-                env.JAVA_HOME = "${tool 'jdk-1.8'}"
-                env.PATH = "${tool 'maven-3.5.0'}/bin:${env.PATH}"
-                
-                checkout scm
-
-                withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: fasitCredentialId,
-                                  usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                    username = env.USERNAME
-                    password = env.PASSWORD
-                }
-            }
-            
+            def mvnHome = tool "maven-3.5.0"
+            env.PATH = "${mvnHome}/bin:${env.PATH}"            
             def artifactId = readFile('pom.xml') =~ '<artifactId>(.+)</artifactId>'
             artifactId = artifactId[0][1]
 
-            if (deployVersion.isEmpty()) {
-                def version = readFile('pom.xml') =~ '<version>(.+)</version>'
-                pomVersion = version[0][1]
-                deployVersion = pomVersion
-            }           
+            stage("Init") {
+                //printStage("Init")
+                
+                checkout scm
+                
+                pom = readMavenPom file: 'pom.xml'
+                version = pom.version.tokenize("-")[0]
+                isSnapshot = pom.version.contains("-SNAPSHOT")
+                committer = sh(script: 'git log -1 --pretty=format:"%an (%ae)"', returnStdout: true).trim()
+                committerEmail = sh(script: 'git log -1 --pretty=format:"%ae"', returnStdout: true).trim()
+                changelog = sh(script: 'git log `git describe --tags --abbrev=0`..HEAD --oneline', returnStdout: true)
+            }          
 
-            if (build) {
-                stage("Build") {
-                    printStage("Build")
-                    configFileProvider(
-                        [configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
-                        sh 'mvn -B -V -U -e -s $MAVEN_SETTINGS clean deploy'
-                    }
-                }            
 
-                info("Build ${artifactId}:${deployVersion}")
+            stage("Build") {
+                printStage("Build")
+                configFileProvider(
+                    [configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
+                    sh 'mvn -B -V -U -e -s $MAVEN_SETTINGS clean deploy'
+                }
+
+                info("Build ${artifactId}:${version}")
             }            
             
-            if (deploy) {
+            if (s_deploy) {
 
                 stage("Deploy") {
-                    printStage("Deploy")
-
-                    configFileProvider(
-                            [configFile(fileId: 'navMavenSettings', variable: 'MAVEN_SETTINGS')]) {
-                        wrap([$class: 'MaskPasswordsBuildWrapper']) {
-                            sh 'mvn -B -V -U -e -s $MAVEN_SETTINGS -Denv=' + environment + ' -Dapps=' + artifactId + ':' + deployVersion + ' -Dusername=' + username + ' -Dpassword=' + password + ' no.nav.maven.plugins:aura-maven-plugin:RELEASE:verify no.nav.maven.plugins:aura-maven-plugin:6.1.90:deploy'
-                        }
+                    printStage("Deploy")                  
+                    
+                    callback = "${env.BUILD_URL}input/Deploy/"
+ 					
+                    if (isSnapshot) {
+                    	version = version + "-SNAPSHOT"
                     }
+					def deploy = deployApp(application, version, environment, callback, committer).key
+                    
+                    try {
+                        timeout(time: 15, unit: 'MINUTES') {
+                            input id: 'deploy', message: "Check status here:  https://jira.adeo.no/browse/${deploy}"
+                        }
+                    } catch (Exception e) {
+                        throw new Exception("Deploy feilet :( \n Se https://jira.adeo.no/browse/" + deploy + " for detaljer", e)
 
-                    info("Deploy ${artifactId}:${deployVersion} to ${environment}")
+                    }                    
+
+                    info("Deploy ${artifactId}:${version} to ${environment}")
 
                 }
             }            
             
         } catch(error) {
-            if (deploy) {
+            if (s_deploy) {
                 info(environment)
             }                
 
@@ -93,11 +91,55 @@ timestamps {
     }
 }
 
+Object deployApp(app, version, environment, callback, reporter) {
+    def envMap = [
+            'ussi1': '22579',
+    ]
+    parsedEnvironment = envMap[environment]
+
+    println("Init deploy with the following input")
+    println("Application: \t ${app}")
+    println("Version: \t ${version}")
+    println("Environment: \t ${environment} (translated to: ${parsedEnvironment})")
+    println("On behalf of: \t ${reporter}")
+    println("Will callback on ${callback}")
+
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: env.FASIT_CRED, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+    	log(env.USERNAME)
+    
+        def postBody = [
+                fields: [
+                        project          : [key: 'DEPLOY'],
+                        issuetype        : [id: '10902'],
+                        customfield_14811: [id: parsedEnvironment, value: parsedEnvironment],
+                        customfield_14812: "${app}:${version}",
+                        customfield_17410: callback,
+                        summary          : "Automatisk deploy på vegne av ${reporter}"
+                ]
+        ]
+
+        def postBodyString = groovy.json.JsonOutput.toJson(postBody)
+        def base64encoded = "${env.USERNAME}:${env.PASSWORD}".bytes.encodeBase64().toString()
+
+
+        def response = httpRequest url: 'https://jira.adeo.no/rest/api/2/issue/', customHeaders: [[name: "Authorization", value: "Basic ${base64encoded}"]], consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody: postBodyString
+        def slurper = new groovy.json.JsonSlurper()
+        return slurper.parseText(response.content);
+    }
+}
+
+
 void info(msg) {
     ansiColor('xterm') {
         println "\033[45m\033[37m " + msg + " \033[0m"
     }
     currentBuild.description = msg
+}
+
+void log(msg) {
+    ansiColor('xterm') {
+        println "\033[42m " + msg + " \033[0m"
+    }
 }
 
 void printStage(stage) {

@@ -3,7 +3,7 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://appconfig.aura.nav.no http://maven.adeo.no/xsd/appconfig.xsd ">
 
-    <name>melosys-app</name>
+    <name>melosys</name>
 
     <artifacts>
         <ear groupId="no.nav.melosys" artifactId="melosys-ear">
