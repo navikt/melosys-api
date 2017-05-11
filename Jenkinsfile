@@ -68,8 +68,11 @@ timestamps {
                     printStage("Deploy")                  
                     
                     callback = "${env.BUILD_URL}input/Deploy/"
- 
-					def deploy = deployApp(application, version, environment, callback, committer).key  
+ 					
+                    if (isSnapshot) {
+                    	version = version + "-SNAPSHOT"
+                    }
+					def deploy = deployApp(application, version, environment, callback, committer).key
                     
                     try {
                         timeout(time: 15, unit: 'MINUTES') {
