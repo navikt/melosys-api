@@ -65,10 +65,7 @@ timestamps {
             if (s_deploy) {
 
                 stage("Deploy") {
-                    printStage("Deploy")
-                    
-                    log(version)
-                    log(username)
+                    printStage("Deploy")                  
                     
                     callback = "${env.BUILD_URL}input/Deploy/"
  
