@@ -107,11 +107,10 @@ Object deployApp(app, version, environment, callback, reporter) {
     println("Environment: \t ${environment} (translated to: ${parsedEnvironment})")
     println("On behalf of: \t ${reporter}")
     println("Will callback on ${callback}")
-    
-    def credentials = env.FASIT_CRED
-    log(credentials)
 
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentials, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+    	log(env.USERNAME)
+    
         def postBody = [
                 fields: [
                         project          : [key: 'DEPLOY'],
