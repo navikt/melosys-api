@@ -3,7 +3,8 @@ timestamps {
 
     def username, password
     
-    def committer, committerEmail, changelog, pom, isSnapshot, nextVersion
+    def committer, committerEmail, changelog 
+    def pom, artifactId, version, isSnapshot, nextVersion
     
     def opt_deploy = false
     def opt_sonar = false    
@@ -32,9 +33,9 @@ timestamps {
                 checkout scm
                 
                 pom = readMavenPom file: 'pom.xml'
-                def version = pom.version.tokenize("-")[0]
+                version = pom.version.tokenize("-")[0]
                 isSnapshot = pom.version.contains("-SNAPSHOT")
-            	def artifactId = pom.artifactId
+            	artifactId = pom.artifactId
                 committer = sh(script: 'git log -1 --pretty=format:"%an (%ae)"', returnStdout: true).trim()
                 committerEmail = sh(script: 'git log -1 --pretty=format:"%ae"', returnStdout: true).trim()
                 changelog = sh(script: 'git log `git describe --tags --abbrev=0`..HEAD --oneline', returnStdout: true)
