@@ -1,7 +1,7 @@
 timestamps {
 	def application = "melosys-app"
 
-    def username, password, fasitCredentialId
+    def username, password
     
     def committer, committerEmail, changelog, pom, isSnapshot, nextVersion
     
@@ -33,8 +33,7 @@ timestamps {
         try {
             env.LANG = "nb_NO.UTF-8"
             def mvnHome = tool "maven-3.5.0"
-            env.PATH = "${mvnHome}/bin:${env.PATH}"
-            fasitCredentialId = env.FASIT_CRED
+            env.PATH = "${mvnHome}/bin:${env.PATH}"            
             def artifactId = readFile('pom.xml') =~ '<artifactId>(.+)</artifactId>'
             artifactId = artifactId[0][1]
 
@@ -112,7 +111,7 @@ Object deployApp(app, version, environment, callback, reporter) {
     println("On behalf of: \t ${reporter}")
     println("Will callback on ${callback}")
 
-    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: fasitCredentialId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: env.FASIT_CRED, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
         def postBody = [
                 fields: [
                         project          : [key: 'DEPLOY'],
