@@ -5,13 +5,14 @@ timestamps {
     
     def committer, committerEmail, changelog, pom, isSnapshot, nextVersion
     
-    def s_deploy = false
+    def opt_deploy = false
+    def opt_sonar = false
     def version = ''
     def environment = ''
     
     try {    	
-        s_deploy = Boolean.valueOf(DEPLOY)
-        fasitCredentialId = env.FASIT_CRED
+        opt_deploy = Boolean.valueOf(DEPLOY)
+        opt_sonar = Boolean.valueOf(SONAR)
         if (env.ENVIRONMENT != null) {
             environment = env.ENVIRONMENT
         }
@@ -55,7 +56,7 @@ timestamps {
                 info("Build ${artifactId}:${version}")
             }            
             
-            if (s_deploy) {
+            if (opt_deploy) {
 
                 stage("Deploy") {
                     printStage("Deploy")                  
@@ -79,10 +80,48 @@ timestamps {
                     info("Deploy ${artifactId}:${version} to ${environment}")
 
                 }
-            }            
+            }
+
+            if (opt_sonar) {
+
+                stage('CoCo') {
+                    printStage("Code coverage")
+                    configFileProvider(
+                            [configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
+                        sh "mvn -P runSonar -s $MAVEN_SETTINGS clean verify -Dmaven.root=${env.WORKSPACE} "
+                    }
+                }
+
+                stage("Sonar scan") {
+                    printStage("Sonar scan")
+
+                    withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: env.FASIT_CRED,
+                                      usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        username = env.USERNAME
+                        password = env.PASSWORD
+                    }
+
+                    configFileProvider(
+                            [configFile(fileId: 'navMavenSettingsUtenProxy', variable: 'MAVEN_SETTINGS')]) {
+                        wrap([$class: 'MaskPasswordsBuildWrapper']) {
+                            sh "mvn -P runSonar -s $MAVEN_SETTINGS sonar:sonar -Dmaven.root=${env.WORKSPACE} -Dsonar.host.url=http://a34apvl00025.devillo.no:9000/sonarqube/ -Dsonar.login=${username} -Dsonar.password=${password}"
+                        }
+                    }
+                }
+
+                publishHTML(target: [
+                        allowMissing         : true,
+                        alwaysLinkToLastBuild: false,
+                        keepAll              : true,
+                        reportDir            : '/target/coverage',
+                        reportFiles          : 'index.html',
+                        reportName           : "Java CoCo"
+                ])
+
+            }
             
         } catch(error) {
-            if (s_deploy) {
+            if (opt_deploy) {
                 info(environment)
             }                
 
@@ -105,7 +144,6 @@ Object deployApp(app, version, environment, callback, reporter) {
     println("Will callback on ${callback}")
 
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: env.FASIT_CRED, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-    	log(env.USERNAME)
     
         def postBody = [
                 fields: [
