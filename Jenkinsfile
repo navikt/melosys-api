@@ -12,7 +12,9 @@ timestamps {
     
     try {    	
         opt_deploy = Boolean.valueOf(DEPLOY)
-        opt_sonar = Boolean.valueOf(SONAR)
+        if (env.SONAR != null {
+        	opt_sonar = Boolean.valueOf(SONAR)
+        }
         if (env.ENVIRONMENT != null) {
             environment = env.ENVIRONMENT
         }
