@@ -111,7 +111,7 @@ Object deployApp(app, version, environment, callback, reporter) {
     println("On behalf of: \t ${reporter}")
     println("Will callback on ${callback}")
 
-    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'jiraServiceUser', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'srvEESSI2', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
         def postBody = [
                 fields: [
                         project          : [key: 'DEPLOY'],
