@@ -1,5 +1,5 @@
 timestamps {
-	def application = "melosys-app"
+	def application = "melosys"
 
     def username, password
     
