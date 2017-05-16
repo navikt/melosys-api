@@ -116,6 +116,7 @@
 	<logger name="org.hibernate.type" level="${log.level.org.hibernate.type:-WARN}" />
 	<logger name="org.hibernate" level="${log.level.org.hibernate:-WARN}" />
 	<logger name="ch.qos.logback" level="${log.level.ch.qos.logback:-WARN}" />
+    <logger name="org.springframework" level="${log.level.ch.qos.logback:-WARN}" />
 	<logger name="org.flywaydb" level="${log.level.org.flywaydb:-INFO}" />
 
 	<!-- Det er mulig å sette ROOT_LOG_LEVEL deploytime. Hvis dette ikke settes er INFO default -->
