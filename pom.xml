@@ -11,40 +11,98 @@
     <name>Medlemskap og lovvalg</name>
 
     <modules>
+        <module>config</module>
         <module>ear</module>
         <module>domain</module>
         <module>repository</module>
         <module>fitnesse</module>
         <module>aura-config</module>
-
+        <module>saksflyt</module>
     </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+
+        <!-- Versjoner av eksterne biblioteker -->
+        <spring.version>4.3.8.RELEASE</spring.version> <!-- MERK: spring-boot 1.5.3.RELEASE -->
+        <spring-boot.version>1.5.3.RELEASE</spring-boot.version> <!-- MERK: spring 4.3.8.RELEASE -->
         <assertj.version>3.6.2</assertj.version>
         <flyway.version>4.1.2</flyway.version>
         <hibernate.version>5.2.9.Final</hibernate.version>
-        <junit.version>4.12</junit.version>
-        <logback.version>1.2.2</logback.version>
+        <hibernate-annotations.version>3.3.0.GA</hibernate-annotations.version>
         <ojdbc.version>12.2.0.1</ojdbc.version>
         <slf4j.version>1.7.25</slf4j.version>
+		<logback.version>1.2.3</logback.version>
+        <junit.version>4.12</junit.version>
+        <mockito.version>2.7.22</mockito.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- Melosys moduler -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>melosys-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-annotations</artifactId>
+                <version>${hibernate-annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            
+            <!-- Test -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-test</artifactId>
+                <version>${spring.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
