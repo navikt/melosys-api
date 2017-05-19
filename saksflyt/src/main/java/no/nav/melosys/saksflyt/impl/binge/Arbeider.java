@@ -45,7 +45,7 @@ public class Arbeider {
     @Value("${melosys.saksflyt.arbeider.oppholdMellomLooping}")
     private long oppholdMellomLooping;
     
-    /** Opphold mellom hver looping */
+    /** Opphold mellom hvert steg */
     @Value("${melosys.saksflyt.arbeider.oppholdMellomSteg}")
     private long oppholdMellomSteg;
     
