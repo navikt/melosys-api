@@ -9,7 +9,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>build</artifactId>
+    <artifactId>melosys-war</artifactId>
     <packaging>war</packaging>
 
     <dependencies>
@@ -44,7 +44,6 @@
     </dependencies>
 
     <build>
-        <finalName>${project.parent.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

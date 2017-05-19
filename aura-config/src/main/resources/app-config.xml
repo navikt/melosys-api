@@ -6,8 +6,8 @@
     <name>melosys</name>
 
     <artifacts>
-        <ear groupId="no.nav.melosys" artifactId="melosys-ear">
-        </ear>
+        <war groupId="no.nav.melosys" artifactId="melosys-war">
+        </war>
     </artifacts>
 
     <!--    <selftest>
