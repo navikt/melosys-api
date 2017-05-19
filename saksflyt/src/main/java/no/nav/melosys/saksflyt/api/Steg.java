@@ -8,7 +8,7 @@ package no.nav.melosys.saksflyt.api;
 public interface Steg {
     
     /**
-     * Kalles av arbeidertråder for å gi steget mulighet til å utføre arbeis.
+     * Kalles av arbeidertråder for å gi steget mulighet til å utføre arbeid.
      * Metoden skal kunne kalles parallelt.
      */
     public void finnSakOgutfoerSteg();
