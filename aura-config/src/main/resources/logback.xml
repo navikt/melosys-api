@@ -7,7 +7,7 @@
 
 	<!-- Driftslogging/error-logg -->
 	<appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<File>${APP_LOG_HOME}/${APP_NAME}_error.log</File>
+		<File>${APP_LOG_HOME}/melosys_error.log</File>
 		<encoder>
 			<pattern>%d [%-5level] [%thread] %logger{5} - [%X{consumerId}, %X{callId}, %X{userId}] - %m%n%rEx</pattern>
 		</encoder>
@@ -16,7 +16,7 @@
 		</filter>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- Daily rollover, gir filnavn med pattern yyyy-MM-dd -->
-			<fileNamePattern>${APP_LOG_HOME}/${APP_NAME}_error.log.%d{yyyy-MM-dd}</fileNamePattern>
+			<fileNamePattern>${APP_LOG_HOME}/melosys_error.log.%d{yyyy-MM-dd}</fileNamePattern>
 			<!-- 30 dager OK? -->
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
@@ -24,7 +24,7 @@
 
 	<!-- Applikasjonslogging -->
 	<appender name="APP" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<File>${APP_LOG_HOME}/${APP_NAME}.log</File>
+		<File>${APP_LOG_HOME}/melosys.log</File>
 		<encoder>
 			<pattern>%d [%-5level] [%thread] %logger{5} - [%X{consumerId}, %X{callId}, %X{userId}] - %m%n</pattern>
 		</encoder>
@@ -32,7 +32,7 @@
 			<level>INFO</level>
 		</filter>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${APP_LOG_HOME}/${APP_LOG_HOME}/${APP_NAME}.%d{yyyy-MM-dd}</fileNamePattern>
+			<fileNamePattern>${APP_LOG_HOME}/${APP_LOG_HOME}/melosys.%d{yyyy-MM-dd}</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 	</appender>
@@ -40,12 +40,12 @@
 	<!-- Sikkerhetslogg -->
 	<!--  Pålogging av bruker, endring av tilgang, forsøk å få tilgang etc -->
 	<appender name="SIKKERHET" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<File>${APP_LOG_HOME}/${APP_NAME}_sikkerhet.log</File>
+		<File>${APP_LOG_HOME}/melosys_sikkerhet.log</File>
 		<encoder>
 			<pattern>%d [%-5level] [%thread] %logger{5} - [%X{consumerId}, %X{callId}, %X{userId}] - %m%n</pattern>
 		</encoder>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${APP_LOG_HOME}/${APP_NAME}_sikkerhet.log.%d{yyyy-MM-dd}</fileNamePattern>
+			<fileNamePattern>${APP_LOG_HOME}/melosys_sikkerhet.log.%d{yyyy-MM-dd}</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 	</appender>
@@ -54,7 +54,7 @@
 	<!-- Sporbarhetslogg -->
 	<!-- Inneholder informasjon om personer som oppdaterer eller leser sensitiv informasjon. -->
 	<appender name="SPORING" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<File>${APP_LOG_HOME}/${APP_NAME}_sporing.log</File>
+		<File>${APP_LOG_HOME}/melosys_sporing.log</File>
 		<encoder>
 			<pattern>%d [%-5level] [%thread] %logger{5} - [%X{consumerId}, %X{callId}, %X{userId}] - %m%n</pattern>
 		</encoder>
@@ -62,7 +62,7 @@
 			<level>ERROR</level>
 		</filter>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${APP_LOG_HOME}/${APP_NAME}_sporing.log.%d{yyyy-MM-dd}</fileNamePattern>
+			<fileNamePattern>${APP_LOG_HOME}/melosys_sporing.log.%d{yyyy-MM-dd}</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 	</appender>
@@ -83,7 +83,7 @@
 			I tillegg så legges det på timestamp, severity og hostnavn. Det første ordet 
 			i suffixPattern tolkes av rsyslog som programmet som sendte loggmeldingen. 
 			Denne kan feks være applikasjonsnavnet eller noe annet -->
-		<suffixPattern>${APP_NAME} %mdc %logger{30} %m %n%rEx</suffixPattern>
+		<suffixPattern>melosys %mdc %logger{30} %m %n%rEx</suffixPattern>
 		<!-- throwableExluded skal alltid være true, ellers kommer stacktrace som 
 			egne meldinger. -->
 		<throwableExcluded>true</throwableExcluded>
@@ -97,7 +97,7 @@
 			<maxHistory>1</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%date{ISO8601} ${APP_NAME} %level %mdc %m%n%rEx</pattern>
+			<pattern>%date{ISO8601} melosys %level %mdc %m%n%rEx</pattern>
 		</encoder>
 	</appender>
  
