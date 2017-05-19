@@ -3,43 +3,39 @@ timestamps {
 
     def username, password
     
-    def committer, committerEmail, changelog, pom, isSnapshot, nextVersion
-    
+    def committer, committerEmail, changelog
+    def pom, artifactId, version, isSnapshot, nextVersion
+
     def opt_deploy = false
     def opt_sonar = false
-    def version = ''
     def environment = ''
-    
-    try {    	
-        opt_deploy = Boolean.valueOf(DEPLOY)
-        opt_sonar = Boolean.valueOf(SONAR)
-        if (env.ENVIRONMENT != null) {
-            environment = env.ENVIRONMENT
-        }
 
-    } catch (MissingPropertyException e) {
-        deploy = false
-        throw e
+    if (env.ENVIRONMENT != null) {
+    	environment = env.ENVIRONMENT
     }
-    
+    if (env.DEPLOY != null) {
+    	opt_deploy = Boolean.valueOf(DEPLOY)
+    }
+    if (env.SONAR != null) {
+	    opt_sonar = Boolean.valueOf(SONAR)
+    }
     
     node {
 
         try {
             env.LANG = "nb_NO.UTF-8"
             def mvnHome = tool "maven-3.5.0"
-            env.PATH = "${mvnHome}/bin:${env.PATH}"            
-            def artifactId = readFile('pom.xml') =~ '<artifactId>(.+)</artifactId>'
-            artifactId = artifactId[0][1]
+            env.PATH = "${mvnHome}/bin:${env.PATH}"
 
             stage("Init") {
-                //printStage("Init")
-                
+                printStage("Init")
+
                 checkout scm
-                
+
                 pom = readMavenPom file: 'pom.xml'
                 version = pom.version.tokenize("-")[0]
                 isSnapshot = pom.version.contains("-SNAPSHOT")
+            	artifactId = pom.artifactId
                 committer = sh(script: 'git log -1 --pretty=format:"%an (%ae)"', returnStdout: true).trim()
                 committerEmail = sh(script: 'git log -1 --pretty=format:"%ae"', returnStdout: true).trim()
                 changelog = sh(script: 'git log `git describe --tags --abbrev=0`..HEAD --oneline', returnStdout: true)
