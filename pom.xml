@@ -38,7 +38,6 @@
         <assertj.version>3.6.2</assertj.version>
         <flyway.version>4.1.2</flyway.version>
         <hibernate.version>5.2.9.Final</hibernate.version>
-        <hibernate-annotations.version>3.3.0.GA</hibernate-annotations.version>
         <hikaricp.version>2.6.1</hikaricp.version>
         <ojdbc.version>12.2.0.1</ojdbc.version>
         <servlet-api.version>3.1.0</servlet-api.version>
@@ -111,11 +110,6 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-annotations</artifactId>
-                <version>${hibernate-annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.oracle</groupId>
