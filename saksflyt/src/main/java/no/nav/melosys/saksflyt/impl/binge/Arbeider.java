@@ -41,10 +41,6 @@ public class Arbeider {
     @Value("${melosys.saksflyt.arbeider.antallTråder}")
     private int antallTråder;
     
-    /** Opphold mellom hver looping */
-    @Value("${melosys.saksflyt.arbeider.oppholdMellomLooping}")
-    private long oppholdMellomLooping;
-    
     /** Opphold mellom hvert steg */
     @Value("${melosys.saksflyt.arbeider.oppholdMellomSteg}")
     private long oppholdMellomSteg;
@@ -155,11 +151,6 @@ public class Arbeider {
                     } catch (InterruptedException e) {
                         // OK
                     }
-                }
-                try {
-                    sleep(oppholdMellomLooping);
-                } catch (InterruptedException e) {
-                    // OK
                 }
             }
         }

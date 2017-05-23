@@ -29,7 +29,7 @@ public class BingeImpl implements Binge {
     @Override
     public synchronized boolean leggTilSak(Sak sak) {
         if (saker.containsKey(sak.getSaksId())) {
-            logger.error("Forsøk på å legge inn sak som allerede er finnes Bingen. saksid=%d", sak.getSaksId());
+            logger.error("Forsøk på å legge inn sak som allerede finnes i Bingen. saksid=%d", sak.getSaksId());
             return false;
         }
         saker.put(sak.getSaksId(), sak);
