@@ -34,7 +34,6 @@ public class ArbeiderTest {
     public void testAtStegeneBlirKalt() throws Exception {
         MockitoAnnotations.initMocks(this);
         ReflectionTestUtils.setField(arbeider, "antallTråder", 15);
-        ReflectionTestUtils.setField(arbeider, "oppholdMellomLooping", 1);
         ReflectionTestUtils.setField(arbeider, "oppholdMellomSteg", 1);
         ReflectionTestUtils.setField(arbeider, "maskinelleSteg", Arrays.asList(klargjøreSteg));
         arbeider.start();
@@ -48,7 +47,6 @@ public class ArbeiderTest {
     public void testLivssyklus() throws Exception {
         MockitoAnnotations.initMocks(this);
         ReflectionTestUtils.setField(arbeider, "antallTråder", 100);
-        ReflectionTestUtils.setField(arbeider, "oppholdMellomLooping", 1);
         ReflectionTestUtils.setField(arbeider, "oppholdMellomSteg", 1);
         ReflectionTestUtils.setField(arbeider, "maskinelleSteg", Arrays.asList(klargjøreSteg));
         arbeider.start();

@@ -1,6 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.3.RELEASE</version>
+    </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>no.nav.melosys</groupId>
@@ -12,7 +18,7 @@
 
     <modules>
         <module>config</module>
-        <module>ear</module>
+        <!--module>ear</module-->
         <module>domain</module>
         <module>repository</module>
         <module>fitnesse</module>
@@ -33,19 +39,52 @@
         <flyway.version>4.1.2</flyway.version>
         <hibernate.version>5.2.9.Final</hibernate.version>
         <hibernate-annotations.version>3.3.0.GA</hibernate-annotations.version>
+        <hikaricp.version>2.6.1</hikaricp.version>
         <ojdbc.version>12.2.0.1</ojdbc.version>
+        <servlet-api.version>3.1.0</servlet-api.version>
         <slf4j.version>1.7.25</slf4j.version>
 		<logback.version>1.2.3</logback.version>
         <junit.version>4.12</junit.version>
         <mockito.version>2.7.22</mockito.version>
     </properties>
 
+    <!-- Unngå å put scope i dependency management. Sett det heller der det brukes. -->
     <dependencyManagement>
         <dependencies>
             <!-- Melosys moduler -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>melosys-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>melosys-aura-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>melosys-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>melosys-controller</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>melosys-domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>melosys-repository</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>melosys-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -57,6 +96,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -66,7 +106,6 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
-                <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>org.hibernate</groupId>
@@ -79,29 +118,41 @@
                 <version>${hibernate-annotations.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.oracle</groupId>
+                <artifactId>ojdbc8</artifactId>
+                <version>${ojdbc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikaricp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>${servlet-api.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-web</artifactId>
                 <version>${spring-boot.version}</version>
             </dependency>
-            
+
             <!-- Test -->
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-test</artifactId>
                 <version>${spring.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>${mockito.version}</version>
-                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -123,7 +174,7 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>2.20</version>
-                </plugin>              
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -138,9 +189,9 @@
                 <!-- maven.root bør overstyres fra cmdline -->
                 <maven.root>${project.basedir}</maven.root>
 
-                <sonar.language />
+                <sonar.language/>
                 <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
-              	<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+                <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
                 <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
                 <sonar.java.source>1.8</sonar.java.source>
                 <sonar.sources>.</sonar.sources>
