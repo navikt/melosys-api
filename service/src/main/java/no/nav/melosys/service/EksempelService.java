@@ -15,4 +15,9 @@ public interface EksempelService {
 
     List<Person> findByNavn(String name);
 
+    Person addPerson(Person person);
+
+    Person updatePerson(Long id, Person updatedPerson);
+
+    void deletePerson(Long id);
 }
