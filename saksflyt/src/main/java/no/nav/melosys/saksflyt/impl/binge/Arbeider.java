@@ -51,7 +51,7 @@ public class Arbeider {
     private ArbeiderTraad[] tråder;
     
     private void loggSteg() {
-        if (!logger.isDebugEnabled()) {
+        if (!logger.isInfoEnabled()) {
             return;
         }
         List<String> klasser = new ArrayList<>();
@@ -66,10 +66,8 @@ public class Arbeider {
             klasser.add(c.getName());
         }
         klasser.sort(String.CASE_INSENSITIVE_ORDER);
-        for (String s : klasser) {
-            logger.debug(s);
-        }
-        
+        logger.info("Steg som aktiveres av arbeideren:");
+        klasser.stream().forEach(logger::info);
     }
     
     /**
@@ -93,7 +91,7 @@ public class Arbeider {
     @PreDestroy
     public void stopp() {
         for (int forsøk = 1; forsøk <= ANNTALL_RETRY_FOR_Å_STOPPE_TRÅDER; forsøk++) { // Ytre løkke for retry på å stoppe alle tråder
-            logger.info("Forsøk nr. %d på å stoppe alle arbeidertråder...");
+            logger.info("Forsøk nr. {} på å stoppe alle arbeidertråder...", forsøk);
             // Forsøk å stoppe alle trådene...
             // Dette gjøres nå i sekvens, noe som er helt greit hvis vi ikke har for mange tråder å stoppe. 
             for (ArbeiderTraad t : tråder) {
@@ -120,7 +118,7 @@ public class Arbeider {
         }
         // Vi er her bare hvis vi ikke klarte å stoppe alle trådene
         // Alt vi kan gjøre nå er å logge problemet
-        logger.error("KRITISK FEIL: Ga opp å stoppe alle arbeidertråder etter %d forsøk", ANNTALL_RETRY_FOR_Å_STOPPE_TRÅDER);
+        logger.error("KRITISK FEIL: Ga opp å stoppe alle arbeidertråder etter {} forsøk", ANNTALL_RETRY_FOR_Å_STOPPE_TRÅDER);
     }
     
     private class ArbeiderTraad extends Thread {
@@ -135,7 +133,7 @@ public class Arbeider {
                 // Ok. Skjer ikke. Og hvis det skjer, håndteres det under
             }
             if (isAlive()) {
-                logger.error("Klarte ikke å stoppe tråden i løpet av %d millisekunder", TIMEOUT_FOR_Å_STOPPE_EN_TRÅD);
+                logger.error("Klarte ikke å stoppe tråden i løpet av {} millisekunder", TIMEOUT_FOR_Å_STOPPE_EN_TRÅD);
             }
         }
         

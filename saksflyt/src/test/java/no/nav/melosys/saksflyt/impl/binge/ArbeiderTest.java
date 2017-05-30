@@ -36,11 +36,13 @@ public class ArbeiderTest {
         ReflectionTestUtils.setField(arbeider, "antallTråder", 15);
         ReflectionTestUtils.setField(arbeider, "oppholdMellomSteg", 1);
         ReflectionTestUtils.setField(arbeider, "maskinelleSteg", Arrays.asList(klargjøreSteg));
+        long medgåttTid = System.currentTimeMillis();
         arbeider.start();
         Thread.sleep(20);
         arbeider.stopp();
+        medgåttTid = System.currentTimeMillis() - medgåttTid + 1;
         Mockito.verify(klargjøreSteg, atLeast(21)).finnSakOgutfoerSteg();
-        Mockito.verify(klargjøreSteg, atMost(15 * 20)).finnSakOgutfoerSteg();
+        Mockito.verify(klargjøreSteg, atMost(15 * (int) medgåttTid)).finnSakOgutfoerSteg();
     }
 
     @Test
