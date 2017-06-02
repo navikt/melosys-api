@@ -1,21 +1,18 @@
 package no.nav.melosys.repository;
 
 
-import no.nav.melosys.domain.Person;
-import org.springframework.data.jpa.repository.Query;
+import no.nav.melosys.domain.PersonEks;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Stream;
 
-public interface PersonRepository extends CrudRepository<Person, Long> {
+public interface PersonRepository extends CrudRepository<PersonEks, Long> {
 
-    List<Person> findByDate(Date date);
+    List<PersonEks> findByDate(Date date);
 
-    List<Person> findByEmail(String email);
+    List<PersonEks> findByEmail(String email);
 
-    List<Person> findByNavn(String navn);
+    List<PersonEks> findByNavn(String navn);
 
 }

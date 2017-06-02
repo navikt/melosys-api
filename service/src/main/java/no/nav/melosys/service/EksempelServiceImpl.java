@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import no.nav.melosys.domain.Person;
+import no.nav.melosys.domain.PersonEks;
 import no.nav.melosys.repository.PersonRepository;
 
 @Service("eksempel")
@@ -18,36 +18,36 @@ public class EksempelServiceImpl implements EksempelService {
     @Autowired
     PersonRepository personRepository;
 
-    public List<Person> findAll() {
-        List<Person> list = new ArrayList<Person>();
+    public List<PersonEks> findAll() {
+        List<PersonEks> list = new ArrayList<PersonEks>();
         personRepository.findAll().forEach(list::add);
         return list;
     }
 
     @Override
-    public List<Person> findByDate(Date date) {
+    public List<PersonEks> findByDate(Date date) {
         return personRepository.findByDate(date);
     }
 
     @Override
-    public List<Person> findByEmail(String email) {
+    public List<PersonEks> findByEmail(String email) {
         return personRepository.findByEmail(email);
     }
 
     @Override
-    public List<Person> findByNavn(String navn) {
+    public List<PersonEks> findByNavn(String navn) {
         return personRepository.findByNavn(navn);
     }
 
     @Override
     @Transactional
-    public Person addPerson(Person person) {
+    public PersonEks addPerson(PersonEks person) {
         return personRepository.save(person);
     }
 
     @Override
     @Transactional
-    public Person updatePerson(Long id, Person updatedPerson) {
+    public PersonEks updatePerson(Long id, PersonEks updatedPerson) {
         return personRepository.save(updatedPerson);
     }
 

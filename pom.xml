@@ -48,7 +48,7 @@
         <assertj.version>3.6.2</assertj.version>
         <cxf.version>3.1.11</cxf.version>
         <flyway.version>4.2.0</flyway.version>
-        <hibernate.version>5.2.9.Final</hibernate.version>
+        <hibernate.version>5.2.10.Final</hibernate.version>
         <hikaricp.version>2.6.1</hikaricp.version>
         <javax.ws.rs-api.version>2.0.1</javax.ws.rs-api.version>
         <ojdbc.version>12.2.0.1</ojdbc.version>
