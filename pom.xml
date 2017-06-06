@@ -26,6 +26,8 @@
         <module>repository</module>
         <module>saksflyt</module>
         <module>service</module>
+        <module>regler-api</module>
+        <module>regler</module>
     </modules>
 
     <properties>
@@ -53,6 +55,7 @@
         <javax.ws.rs-api.version>2.0.1</javax.ws.rs-api.version>
         <ojdbc.version>12.2.0.1</ojdbc.version>
         <servlet-api.version>3.1.0</servlet-api.version>
+        <swagger.version>1.5.13</swagger.version>
         <slf4j.version>1.7.25</slf4j.version>
 		<logback.version>1.2.3</logback.version>
         <junit.version>4.12</junit.version>
@@ -91,6 +94,16 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>melosys-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>melosys-regler-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>melosys-regler</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -149,7 +162,12 @@
                 <artifactId>spring-boot-starter-web</artifactId>
                 <version>${spring-boot.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-jersey2-jaxrs</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+			
             <!-- NAV tjenester -->
             <dependency>
                 <groupId>no.nav.tjenester.fim</groupId>
