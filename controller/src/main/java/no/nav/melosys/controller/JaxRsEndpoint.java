@@ -1,6 +1,6 @@
 package no.nav.melosys.controller;
 
-import no.nav.melosys.domain.PersonEks;
+import no.nav.melosys.domain.Bruker;
 import no.nav.melosys.service.EksempelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,24 +24,24 @@ public class JaxRsEndpoint {
 
     @Path("/{navn}")
     @GET
-    public List<PersonEks> findByNavn(@PathParam("navn") String navn) {
+    public List<Bruker> findByNavn(@PathParam("navn") String navn) {
         return eksempelService.findByNavn(navn);
     }
 
     @GET
-    public Collection<PersonEks> findAll() {
+    public Collection<Bruker> findAll() {
         return eksempelService.findAll();
     }
 
     @POST
-    public PersonEks createPerson(PersonEks person) {
-        return eksempelService.addPerson(person);
+    public Bruker createPerson(Bruker person) {
+        return eksempelService.addBruker(person);
     }
 
     @Path("/{id}")
     @POST
-    public PersonEks updatePerson(@PathParam("id") Long id, PersonEks updatedPerson) {
-        return eksempelService.updatePerson(id, updatedPerson);
+    public Bruker updatePerson(@PathParam("id") Long id, Bruker updatedPerson) {
+        return eksempelService.updateBruker(id, updatedPerson);
     }
 
     @Path("/{id}")

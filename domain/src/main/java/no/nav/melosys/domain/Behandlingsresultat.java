@@ -29,11 +29,11 @@ public class Behandlingsresultat {
     private Behandling behandling;
 
     @OneToOne
-    @JoinColumn(name = "rettighet")
+    @JoinColumn(name = "rettighet_id")
     private FastsattRettighet rettighet;
 
     @OneToOne
-    @JoinColumn(name = "vedtak")
+    @JoinColumn(name = "vedtak_id")
     private Vedtak vedtak;
 
     public Long getId() {
@@ -70,6 +70,28 @@ public class Behandlingsresultat {
 
     public void setVedtak(Vedtak vedtak) {
         this.vedtak = vedtak;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Behandlingsresultat b = (Behandlingsresultat) o;
+        return Objects.equals(behandlingsMåte, b.getBehandlingsMåte())
+                && Objects.equals(behandling, b.getBehandling())
+                && Objects.equals(rettighet, b.getRettighet())
+                && Objects.equals(vedtak, b.getVedtak());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(behandlingsMåte, behandling, rettighet, vedtak);
     }
 
 }

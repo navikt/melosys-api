@@ -43,6 +43,64 @@ public class FastsattRettighet {
     @Column(name = "fritekst_begrunnelse")
     private String fritekstBegrunnelse;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "rettighet")
     List<VilkaarsResultat> vilkaarsResultatListe = new ArrayList<>();
+
+    public RettighetsType getType() {
+        return type;
+    }
+
+    public void setType(RettighetsType type) {
+        this.type = type;
+    }
+
+    public String getLovvalgsland() {
+        return lovvalgsland;
+    }
+
+    public void setLovvalgsland(String lovvalgsland) {
+        this.lovvalgsland = lovvalgsland;
+    }
+
+    public LocalDate getStartdato() {
+        return startdato;
+    }
+
+    public void setStartdato(LocalDate startdato) {
+        this.startdato = startdato;
+    }
+
+    public LocalDate getSluttdato() {
+        return sluttdato;
+    }
+
+    public void setSluttdato(LocalDate sluttdato) {
+        this.sluttdato = sluttdato;
+    }
+
+    public String getStandardBegrunnelse() {
+        return standardBegrunnelse;
+    }
+
+    public void setStandardBegrunnelse(String standardBegrunnelse) {
+        this.standardBegrunnelse = standardBegrunnelse;
+    }
+
+    public String getFritekstBegrunnelse() {
+        return fritekstBegrunnelse;
+    }
+
+    public void setFritekstBegrunnelse(String fritekstBegrunnelse) {
+        this.fritekstBegrunnelse = fritekstBegrunnelse;
+    }
+
+    public List<VilkaarsResultat> getVilkaarsResultatListe() {
+        return vilkaarsResultatListe;
+    }
+
+    public void setVilkaarsResultatListe(List<VilkaarsResultat> vilkaarsResultatListe) {
+        this.vilkaarsResultatListe = vilkaarsResultatListe;
+    }
+
+
 }

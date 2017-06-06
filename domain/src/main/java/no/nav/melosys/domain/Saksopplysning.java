@@ -30,7 +30,7 @@ public class Saksopplysning {
     private Long behandlingId;
 
     @ManyToOne
-    @JoinColumn(name = "saksopplysning_type", nullable = false)
+    @JoinColumn(name = "kilde", nullable = false)
     private SaksopplysningKilde kilde;
 
     public Long getId() {

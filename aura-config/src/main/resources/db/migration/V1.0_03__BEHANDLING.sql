@@ -1,8 +1,10 @@
 CREATE TABLE behandling (
-    id        NUMBER(19)        NOT NULL,
-    fagsak_id NUMBER(19)        NOT NULL,
-    status    VARCHAR2(20 CHAR) NOT NULL,
-    type      VARCHAR2(20 CHAR) NOT NULL,
+    id                     NUMBER(19)        NOT NULL,
+    behandling_id          NUMBER(19)        NOT NULL,
+    fagsak_id              NUMBER(19)        NOT NULL,
+    status                 VARCHAR2(20 CHAR) NOT NULL,
+    type                   VARCHAR2(20 CHAR) NOT NULL,
+    behandling_resultat_id NUMBER(19)        NOT NULL,
     CONSTRAINT pk_behandling PRIMARY KEY (id)
 );
 

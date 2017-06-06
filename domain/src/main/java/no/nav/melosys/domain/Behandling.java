@@ -21,6 +21,9 @@ public class Behandling {
     @SequenceGenerator(name= "idGen", sequenceName = "SEQ_BEHANDLING")
     private Long id;
 
+    @Column(name = "behandling_id")
+    private Long behandlingsId;
+
     @Column(name = "fagsak_id")
     private Long fagsakId;
 
@@ -35,6 +38,14 @@ public class Behandling {
     @ManyToOne
     @JoinColumn(name = "type", nullable = false)
     private BehandlingType type;
+
+    public Long getBehandlingsId() {
+        return behandlingsId;
+    }
+
+    public void setBehandlingsId(Long behandlingsId) {
+        this.behandlingsId = behandlingsId;
+    }
 
     public Long getFagsakId() {
         return fagsakId;
@@ -58,6 +69,25 @@ public class Behandling {
 
     public void setType(BehandlingType type) {
         this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Behandling beh = (Behandling) o;
+        return Objects.equals(behandlingsId, beh.getBehandlingsId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(behandlingsId);
     }
 
 }

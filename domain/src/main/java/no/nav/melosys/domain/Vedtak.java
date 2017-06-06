@@ -72,7 +72,7 @@ public class Vedtak {
         }
 
         Vedtak vedtak = (Vedtak) o;
-        return Objects.equals(id, vedtak.getId());
+        return Objects.equals(vedtaksId, vedtak.getVedtaksId());
     }
 
     @Override

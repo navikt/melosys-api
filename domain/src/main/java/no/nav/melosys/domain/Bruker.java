@@ -1,11 +1,13 @@
 package no.nav.melosys.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
@@ -17,12 +19,15 @@ public class Bruker extends Person {
     @SequenceGenerator(name= "idGen", sequenceName = "SEQ_BRUKER")
     private Long id;
 
+    private String navn;
+
+    private Long fnr;
+
+    @Column(name = "foedsel_dato")
+    private LocalDate fødselsdato;
+
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     @Override

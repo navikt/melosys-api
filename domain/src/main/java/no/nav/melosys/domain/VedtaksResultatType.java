@@ -11,10 +11,10 @@ public class VedtaksResultatType extends Kodeverk {
     public static final VedtaksResultatType DELVIS_INNVILGET = new VedtaksResultatType("DELVIS_INNVILGET");
     public static final VedtaksResultatType AVSLAG = new VedtaksResultatType("AVSLAG");
 
-    private VedtaksResultatType() {
+    VedtaksResultatType() {
     }
 
-    public VedtaksResultatType(String kode) {
+    private VedtaksResultatType(String kode) {
         super(kode);
     }
 }
