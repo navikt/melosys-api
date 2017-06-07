@@ -1,5 +1,5 @@
 CREATE TABLE regel (
-    id                  NUMBER(19)        NOT NULL,
+    id                  NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     type                VARCHAR2(20 CHAR) NOT NULL,
     referanse           VARCHAR2(50 CHAR) NOT NULL,
     forretning_versjon  VARCHAR2(20 CHAR) NOT NULL,
@@ -21,5 +21,3 @@ INSERT INTO regel_type (kode, navn) VALUES ('AVKLARE_FAKTA', 'Avklare fakta rett
 INSERT INTO regel_type (kode, navn) VALUES ('BEREGNING', 'Beregning rettsregel');
 INSERT INTO regel_type (kode, navn) VALUES ('FORRETNING', 'Forretning rettsregel');
 INSERT INTO regel_type (kode, navn) VALUES ('VILKAAR', 'Vilkår rettsregel');
-
-CREATE SEQUENCE seq_regel MINVALUE 1 START WITH 1 INCREMENT BY 50 NOCACHE NOCYCLE;

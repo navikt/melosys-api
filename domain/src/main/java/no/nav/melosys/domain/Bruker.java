@@ -1,22 +1,21 @@
 package no.nav.melosys.domain;
 
+import java.time.LocalDate;
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.time.LocalDate;
-import java.util.Objects;
 
 @Entity
 @Table(name = "BRUKER")
 public class Bruker extends Person {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idGen")
-    @SequenceGenerator(name= "idGen", sequenceName = "SEQ_BRUKER")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String navn;

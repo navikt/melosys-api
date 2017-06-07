@@ -1,5 +1,7 @@
 package no.nav.melosys.domain;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,9 +11,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.util.Objects;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -19,8 +19,7 @@ import java.util.Objects;
 public class Saksopplysning {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idGen")
-    @SequenceGenerator(name = "idGen", sequenceName = "SEQ_SAKSOPPLYSNING")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "fagsak_id", nullable = false)

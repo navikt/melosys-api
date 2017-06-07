@@ -8,7 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Objects;
 
@@ -17,8 +16,7 @@ import java.util.Objects;
 public class Behandling {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idGen")
-    @SequenceGenerator(name= "idGen", sequenceName = "SEQ_BEHANDLING")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "behandling_id")

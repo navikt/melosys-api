@@ -31,5 +31,3 @@ CREATE TABLE arbeidsforhold (
 
 ALTER TABLE arbeidsforhold ADD CONSTRAINT fk_arbeidsforhold_arbeidsgiver FOREIGN KEY (arbeidsgiver_id) REFERENCES arbeidsgiver;
 ALTER TABLE arbeidsforhold ADD CONSTRAINT fk_arbeidsforhold_arbeidstaker FOREIGN KEY (arbeidstaker_id) REFERENCES bruker;
-
-CREATE SEQUENCE seq_saksopplysning MINVALUE 1 START WITH 1 INCREMENT BY 50 NOCACHE NOCYCLE;

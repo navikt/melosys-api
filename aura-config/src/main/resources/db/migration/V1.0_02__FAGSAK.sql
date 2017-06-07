@@ -1,5 +1,5 @@
 CREATE TABLE fagsak (
-    id           NUMBER(19)        NOT NULL,
+    id           NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     saksnummer   NUMBER(19, 0),
     status       VARCHAR2(20 CHAR) NOT NULL,
     virkemiddel  VARCHAR2(20 CHAR),
@@ -25,5 +25,3 @@ ALTER TABLE fagsak ADD CONSTRAINT fk_fagsak_satus FOREIGN KEY (status) REFERENCE
 ALTER TABLE fagsak ADD CONSTRAINT fk_fagsak_bruker FOREIGN KEY (bruker) REFERENCES bruker;
 ALTER TABLE fagsak ADD CONSTRAINT fk_fagsak_arbeidsgiver FOREIGN KEY (arbeidsgiver) REFERENCES arbeidsgiver;
 ALTER TABLE fagsak ADD CONSTRAINT fk_fagsak_fullmektig FOREIGN KEY (fullmektig) REFERENCES fullmektig;
-
-CREATE SEQUENCE seq_fagsak MINVALUE 1 START WITH 1 INCREMENT BY 50 NOCACHE NOCYCLE;

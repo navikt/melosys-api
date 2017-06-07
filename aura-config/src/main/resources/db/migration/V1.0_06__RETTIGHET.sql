@@ -1,5 +1,5 @@
 CREATE TABLE fastsatt_rettighet (
-    id                   NUMBER(19)        NOT NULL,
+    id                   NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     type                 VARCHAR2(20 CHAR) NOT NULL,
     lovvalgsland         VARCHAR2(20 CHAR) NOT NULL,
     startdato            DATE              NOT NULL,
@@ -26,7 +26,7 @@ INSERT INTO rettighet_type (kode, navn) VALUES ('FRIVILIG_MEDL', 'Frivilig medle
 INSERT INTO rettighet_type (kode, navn) VALUES ('UNNTAK_MEDL', 'Unntak medlemskap');
 
 CREATE TABLE vilkaar_resultat (
-    id           NUMBER(19) NOT NULL,
+    id           NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     rettighet_id NUMBER(19) NOT NULL,
     utfall       VARCHAR2(20),
     startdato    DATE       NOT NULL,
@@ -59,6 +59,3 @@ ALTER TABLE behandling_grunnlag
     ADD CONSTRAINT fk_vilkaar_grunnlag FOREIGN KEY (vilkaar_resultat_id) REFERENCES vilkaar_resultat;
 ALTER TABLE behandling_grunnlag
     ADD CONSTRAINT fk_saksopplysning_grunnlag FOREIGN KEY (saksopplysning_id) REFERENCES saksopplysning;
-
-CREATE SEQUENCE seq_rettighet MINVALUE 1 START WITH 1 INCREMENT BY 50 NOCACHE NOCYCLE;
-CREATE SEQUENCE seq_vilkaar_resultat MINVALUE 1 START WITH 1 INCREMENT BY 50 NOCACHE NOCYCLE;

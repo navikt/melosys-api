@@ -1,5 +1,5 @@
 CREATE TABLE behandling (
-    id                     NUMBER(19)        NOT NULL,
+    id                     NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     behandling_id          NUMBER(19)        NOT NULL,
     fagsak_id              NUMBER(19)        NOT NULL,
     status                 VARCHAR2(20 CHAR) NOT NULL,
@@ -31,5 +31,3 @@ INSERT INTO behandling_status (kode, navn) VALUES ('AVSLU', 'Avsluttet');
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_fagsak_1 FOREIGN KEY (fagsak_id) REFERENCES fagsak;
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_status_1 FOREIGN KEY (status) REFERENCES behandling_status;
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_type_1 FOREIGN KEY (status) REFERENCES behandling_type;
-
-CREATE SEQUENCE seq_behandling MINVALUE 1 START WITH 1 INCREMENT BY 50 NOCACHE NOCYCLE;

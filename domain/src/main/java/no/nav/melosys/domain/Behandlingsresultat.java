@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Column;
+import java.util.Objects;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -8,17 +9,14 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.util.Objects;
 
 @Entity
 @Table(name = "BEHANDLING_RESULTAT")
 public class Behandlingsresultat {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idGen")
-    @SequenceGenerator(name= "idGen", sequenceName = "SEQ_BEHANDLING_RESULTAT")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

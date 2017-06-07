@@ -11,7 +11,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
@@ -19,8 +18,7 @@ import javax.persistence.Table;
 public class Vedtak {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idGen")
-    @SequenceGenerator(name= "idGen", sequenceName = "SEQ_VEDTAK")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "vedtak_id")

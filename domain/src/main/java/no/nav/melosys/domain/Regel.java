@@ -7,7 +7,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.Objects;
 
@@ -16,8 +15,7 @@ import java.util.Objects;
 public class Regel {
 
     @Id
-    @SequenceGenerator(name= "idGen", sequenceName = "SEQ_REGEL")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idGen")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

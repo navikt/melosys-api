@@ -15,7 +15,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
@@ -23,8 +22,7 @@ import javax.persistence.Table;
 public class VilkaarsResultat {
 
     @Id
-    @SequenceGenerator(name= "idGen", sequenceName = "SEQ_VILKAAR_RESULTAT")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idGen")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

@@ -5,7 +5,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
@@ -13,7 +12,6 @@ import javax.persistence.Table;
 public class Fullmektig extends Aktoer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idGen")
-    @SequenceGenerator(name= "idGen", sequenceName = "SEQ_FULLMEKTIG")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 }

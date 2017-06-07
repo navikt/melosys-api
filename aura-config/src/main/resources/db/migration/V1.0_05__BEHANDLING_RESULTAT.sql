@@ -1,5 +1,5 @@
 CREATE TABLE behandling_resultat (
-    id               NUMBER(19)        NOT NULL,
+    id               NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     behandling_maate VARCHAR2(20 CHAR) NOT NULL,
     rettighet_id     NUMBER(19)        NOT NULL,
     vedtak_id     NUMBER(19)        NOT NULL,
@@ -22,8 +22,6 @@ ALTER TABLE behandling_resultat
 INSERT INTO behandling_maate (kode, navn) VALUES ('AUTO', 'hel autmatisert');
 INSERT INTO behandling_maate (kode, navn) VALUES ('DELVIS_AUTO', 'delvis automatisert');
 INSERT INTO behandling_maate (kode, navn) VALUES ('MANUELT', 'hel manuelt');
-
-CREATE SEQUENCE seq_behandling_resultat MINVALUE 1 START WITH 1 INCREMENT BY 50 NOCACHE NOCYCLE;
 
 CREATE TABLE vedtak (
     id          NUMBER(19)        NOT NULL,
@@ -48,5 +46,3 @@ INSERT INTO vedtak_resultat_type (kode, navn) VALUES ('AVSLAG', 'Avslag');
 
 ALTER TABLE behandling_resultat
     ADD CONSTRAINT fk_beh_resultat_vedtak FOREIGN KEY (vedtak_id) REFERENCES vedtak;
-
-CREATE SEQUENCE seq_vedtak MINVALUE 1 START WITH 1 INCREMENT BY 50 NOCACHE NOCYCLE;
