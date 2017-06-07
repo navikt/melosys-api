@@ -1,7 +1,7 @@
 CREATE TABLE behandling_resultat (
     id               NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     behandling_maate VARCHAR2(20 CHAR) NOT NULL,
-    rettighet_id     NUMBER(19)        NOT NULL,
+    rettighet_id     NUMBER(19),
     vedtak_id     NUMBER(19)        NOT NULL,
     CONSTRAINT pk_behandling_resultat PRIMARY KEY (id)
 );

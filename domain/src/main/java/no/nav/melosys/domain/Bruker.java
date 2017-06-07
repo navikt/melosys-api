@@ -20,7 +20,7 @@ public class Bruker extends Person {
 
     private String navn;
 
-    private Long fnr;
+    private String fnr;
 
     @Column(name = "foedsel_dato")
     private LocalDate fødselsdato;

@@ -22,8 +22,9 @@ public class Behandling {
     @Column(name = "behandling_id")
     private Long behandlingsId;
 
-    @Column(name = "fagsak_id")
-    private Long fagsakId;
+    @ManyToOne
+    @JoinColumn(name = "fagsak_id")
+    private Fagsak fagsak;
 
     @ManyToOne
     @JoinColumn(name = "status", nullable = false)
@@ -45,12 +46,12 @@ public class Behandling {
         this.behandlingsId = behandlingsId;
     }
 
-    public Long getFagsakId() {
-        return fagsakId;
+    public Fagsak getFagsak() {
+        return fagsak;
     }
 
-    public void setFagsakId(Long fagsakId) {
-        this.fagsakId = fagsakId;
+    public void setFagsak(Fagsak fagsak) {
+        this.fagsak = fagsak;
     }
 
     public BehandlingStatus getStatus() {
