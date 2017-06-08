@@ -1,60 +1,49 @@
 package no.nav.melosys.service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import no.nav.melosys.domain.Person;
-import no.nav.melosys.repository.PersonRepository;
+import no.nav.melosys.domain.Bruker;
+import no.nav.melosys.repository.BrukerRepository;
 
 @Service("eksempel")
 @Transactional(readOnly = true)
 public class EksempelServiceImpl implements EksempelService {
 
     @Autowired
-    PersonRepository personRepository;
+    BrukerRepository brukerRepository;
 
-    public List<Person> findAll() {
-        List<Person> list = new ArrayList<Person>();
-        personRepository.findAll().forEach(list::add);
+    public List<Bruker> findAll() {
+        List<Bruker> list = new ArrayList<>();
+        brukerRepository.findAll().forEach(list::add);
         return list;
     }
 
     @Override
-    public List<Person> findByDate(Date date) {
-        return personRepository.findByDate(date);
-    }
-
-    @Override
-    public List<Person> findByEmail(String email) {
-        return personRepository.findByEmail(email);
-    }
-
-    @Override
-    public List<Person> findByNavn(String navn) {
-        return personRepository.findByNavn(navn);
+    public List<Bruker> findByNavn(String navn) {
+        return brukerRepository.findByNavn(navn);
     }
 
     @Override
     @Transactional
-    public Person addPerson(Person person) {
-        return personRepository.save(person);
+    public Bruker addBruker(Bruker person) {
+        return brukerRepository.save(person);
     }
 
     @Override
     @Transactional
-    public Person updatePerson(Long id, Person updatedPerson) {
-        return personRepository.save(updatedPerson);
+    public Bruker updateBruker(Long id, Bruker updatedPerson) {
+        return brukerRepository.save(updatedPerson);
     }
 
     @Override
     @Transactional
     public void deletePerson(Long id) {
-        personRepository.delete(id);
+        brukerRepository.delete(id);
     }
 
 }

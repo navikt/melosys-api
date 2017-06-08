@@ -1,23 +1,18 @@
 package no.nav.melosys.service;
 
-import no.nav.melosys.domain.Person;
-
-import java.util.Date;
 import java.util.List;
+
+import no.nav.melosys.domain.Bruker;
 
 public interface EksempelService {
 
-    List<Person> findAll();
+    List<Bruker> findAll();
 
-    List<Person> findByDate(Date date);
+    List<Bruker> findByNavn(String name);
 
-    List<Person> findByEmail(String name);
+    Bruker addBruker(Bruker bruker);
 
-    List<Person> findByNavn(String name);
-
-    Person addPerson(Person person);
-
-    Person updatePerson(Long id, Person updatedPerson);
+    Bruker updateBruker(Long id, Bruker bruker);
 
     void deletePerson(Long id);
 }

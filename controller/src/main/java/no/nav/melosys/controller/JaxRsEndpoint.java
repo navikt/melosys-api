@@ -1,13 +1,12 @@
 package no.nav.melosys.controller;
 
-import no.nav.melosys.domain.Person;
+import no.nav.melosys.domain.Bruker;
 import no.nav.melosys.service.EksempelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -25,26 +24,25 @@ public class JaxRsEndpoint {
 
     @Path("/{navn}")
     @GET
-    public List<Person> findByNavn(@PathParam("navn") String navn) {
+    public List<Bruker> findByNavn(@PathParam("navn") String navn) {
         return eksempelService.findByNavn(navn);
     }
 
     @GET
-    public Collection<Person> findAll() {
+    public Collection<Bruker> findAll() {
         return eksempelService.findAll();
     }
 
     @POST
-    public Person createPerson(Person person) {
-        return eksempelService.addPerson(person);
+    public Bruker createPerson(Bruker person) {
+        return eksempelService.addBruker(person);
     }
 
     @Path("/{id}")
     @POST
-    public Person updatePerson(@PathParam("id") Long id, Person updatedPerson) {
-        return eksempelService.updatePerson(id, updatedPerson);
+    public Bruker updatePerson(@PathParam("id") Long id, Bruker updatedPerson) {
+        return eksempelService.updateBruker(id, updatedPerson);
     }
-
 
     @Path("/{id}")
     @DELETE
