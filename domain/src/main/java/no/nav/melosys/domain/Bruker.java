@@ -29,6 +29,30 @@ public class Bruker extends Person {
         return id;
     }
 
+    public String getNavn() {
+        return navn;
+    }
+
+    public void setNavn(String navn) {
+        this.navn = navn;
+    }
+
+    public String getFnr() {
+        return fnr;
+    }
+
+    public void setFnr(String fnr) {
+        this.fnr = fnr;
+    }
+
+    public LocalDate getFødselsdato() {
+        return fødselsdato;
+    }
+
+    public void setFødselsdato(LocalDate fødselsdato) {
+        this.fødselsdato = fødselsdato;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
