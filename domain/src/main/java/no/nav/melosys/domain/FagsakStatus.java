@@ -1,8 +1,6 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
@@ -14,7 +12,7 @@ public class FagsakStatus extends Kodeverk {
     public static final FagsakStatus LØPENDE = new FagsakStatus("LOP");
     public static final FagsakStatus AVSLUTTET = new FagsakStatus("AVSLU");
 
-    FagsakStatus () {
+    FagsakStatus() {
     }
 
     private FagsakStatus(String kode) {

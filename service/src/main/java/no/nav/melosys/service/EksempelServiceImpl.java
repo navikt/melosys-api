@@ -18,7 +18,7 @@ public class EksempelServiceImpl implements EksempelService {
     BrukerRepository brukerRepository;
 
     public List<Bruker> findAll() {
-        List<Bruker> list = new ArrayList<Bruker>();
+        List<Bruker> list = new ArrayList<>();
         brukerRepository.findAll().forEach(list::add);
         return list;
     }
