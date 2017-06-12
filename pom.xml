@@ -23,6 +23,7 @@
         <module>controller</module>
         <module>domain</module>
         <module>fitnesse</module>
+        <module>integrasjon</module>
         <module>repository</module>
         <module>saksflyt</module>
         <module>service</module>
@@ -39,8 +40,10 @@
         <gsak.oppgavebehandling.version>3.1.1</gsak.oppgavebehandling.version>
         <gsak.sak.version>1.0.0</gsak.sak.version>
         <joark.journal.version>1.0.3</joark.journal.version>
+        <modig-testcertificates.version>1.2.0</modig-testcertificates.version>
         <tps.aktoer.version>2.0.1</tps.aktoer.version>
         <tps.person.version>2.0.0</tps.person.version>
+        <vl-felles.version>1.7.0-SNAPSHOT</vl-felles.version>
 
         <!-- Versjoner av eksterne biblioteker -->
         <spring.version>4.3.8.RELEASE</spring.version> <!-- MERK: spring-boot 1.5.3.RELEASE -->
@@ -54,7 +57,7 @@
         <ojdbc.version>12.2.0.1</ojdbc.version>
         <servlet-api.version>3.1.0</servlet-api.version>
         <slf4j.version>1.7.25</slf4j.version>
-		<logback.version>1.2.3</logback.version>
+        <logback.version>1.2.3</logback.version>
         <junit.version>4.12</junit.version>
         <mockito.version>2.7.22</mockito.version>
     </properties>
@@ -81,6 +84,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>melosys-domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>integrasjon</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -150,7 +158,12 @@
                 <version>${spring-boot.version}</version>
             </dependency>
 
-            <!-- NAV tjenester -->
+            <!-- NAV felleskomponenter -->
+            <dependency>
+                <groupId>no.nav.modig</groupId>
+                <artifactId>modig-testcertificates</artifactId>
+                <version>${modig-testcertificates.version}</version>
+            </dependency>
             <dependency>
                 <groupId>no.nav.tjenester.fim</groupId>
                 <artifactId>nav-fim-dokumentproduksjon-v2-tjenestespesifikasjon</artifactId>
@@ -182,6 +195,12 @@
                 <classifier>jaxws</classifier>
             </dependency>
 
+            <!-- Sikkerhet VLFP -->
+            <dependency>
+                <groupId>no.nav.vedtak</groupId>
+                <artifactId>sikkerhet</artifactId>
+                <version>${vl-felles.version}</version>
+            </dependency>
 
             <!-- Test -->
             <dependency>
@@ -293,7 +312,8 @@
                             <forkCount>1</forkCount>
                             <reuseForks>true</reuseForks>
                             <useFile>true</useFile>
-                            <argLine>${jacoco.agent.itArgLine} -Xms384M -Dfile.encoding=UTF-8 -Dsurefire.forkNumber=${surefire.forkNumber}
+                            <argLine>${jacoco.agent.itArgLine} -Xms384M -Dfile.encoding=UTF-8
+                                -Dsurefire.forkNumber=${surefire.forkNumber}
                             </argLine>
                         </configuration>
                     </plugin>

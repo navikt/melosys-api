@@ -18,8 +18,13 @@
 
         <dependency>
             <groupId>no.nav.melosys</groupId>
+            <artifactId>integrasjon</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-repository</artifactId>
         </dependency>
+
 
     </dependencies>
 
