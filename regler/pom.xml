@@ -44,13 +44,10 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-<<<<<<< HEAD
-=======
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
->>>>>>> cf2df1bd3807d09d0dbf434f50c32f1e049fa5fb
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jetty</artifactId>
         </dependency>
