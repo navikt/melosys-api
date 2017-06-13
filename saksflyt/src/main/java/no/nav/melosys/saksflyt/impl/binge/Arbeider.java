@@ -113,7 +113,7 @@ public class Arbeider {
             try {
                 Thread.sleep(OPPHOLD_MELLOM_RETRY_FOR_Å_STOPPE_TRÅDER);
             } catch (InterruptedException e) {
-                // Ok. Skjer ikke. Og ingen problem hvis det skjer heller.
+                Thread.currentThread().interrupt();
             }
         }
         // Vi er her bare hvis vi ikke klarte å stoppe alle trådene
@@ -127,10 +127,11 @@ public class Arbeider {
         public void stoppArbeider() {
             if (!isAlive()) return;
             skalStoppe = true;
+            interrupt(); 
             try {
                 join(TIMEOUT_FOR_Å_STOPPE_EN_TRÅD);
             } catch (InterruptedException e) {
-                // Ok. Skjer ikke. Og hvis det skjer, håndteres det under
+                Thread.currentThread().interrupt();
             }
             if (isAlive()) {
                 logger.error("Klarte ikke å stoppe tråden i løpet av {} millisekunder", TIMEOUT_FOR_Å_STOPPE_EN_TRÅD);
@@ -147,7 +148,7 @@ public class Arbeider {
                     try {
                         sleep(oppholdMellomSteg);
                     } catch (InterruptedException e) {
-                        // OK
+                        Thread.currentThread().interrupt();
                     }
                 }
             }

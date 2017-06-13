@@ -107,9 +107,9 @@ public class VilkaarsResultat {
         VilkaarsResultat v = (VilkaarsResultat) o;
         return Objects.equals(rettighet, v.getRettighet())
             && Objects.equals(utfall, v.getUtfall())
-            && Objects.equals(startdato, v.getUtfall())
-            && Objects.equals(sluttdato, v.getUtfall())
-            && Objects.equals(regler, v.getRegler())    ;
+            && Objects.equals(startdato, v.getStartdato())
+            && Objects.equals(sluttdato, v.getSluttdato())
+            && Objects.equals(regler, v.getRegler());
     }
 
     @Override
