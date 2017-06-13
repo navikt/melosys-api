@@ -26,7 +26,7 @@ public abstract class Regelsett {
     private List<Betingelse> betingelser = new ArrayList<>();
     
     /**
-     * Setteer artikkel/lovhjemmel for regelsettet
+     * Setter artikkel/lovhjemmel for regelsettet
      */
     public Regelsett forArtikkel(Artikkel artikkel) {
         this.artikkel = artikkel;
