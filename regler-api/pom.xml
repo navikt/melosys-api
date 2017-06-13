@@ -20,10 +20,14 @@
     </build -->
 
     <dependencies>
+<<<<<<< HEAD
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>       
+=======
+       
+>>>>>>> cf2df1bd3807d09d0dbf434f50c32f1e049fa5fb
         <!-- Test dependencies -->
         
     </dependencies>

@@ -1,17 +1,23 @@
 package no.nav.melosys.regler.service.lovvalg;
 
+<<<<<<< HEAD
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.initialiserLokalKontekst;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.respons;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.slettLokalKontekst;
 
+=======
+>>>>>>> cf2df1bd3807d09d0dbf434f50c32f1e049fa5fb
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+<<<<<<< HEAD
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+=======
+>>>>>>> cf2df1bd3807d09d0dbf434f50c32f1e049fa5fb
 import org.springframework.stereotype.Component;
 
 import io.swagger.annotations.Api;
@@ -21,8 +27,11 @@ import io.swagger.annotations.Info;
 import io.swagger.annotations.SwaggerDefinition;
 import no.nav.melosys.regler.api.lovvalg.FastsettLovvalgRequest;
 import no.nav.melosys.regler.api.lovvalg.FastsettLovvalgRespons;
+<<<<<<< HEAD
 import no.nav.melosys.regler.api.lovvalg.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.Kategori;
+=======
+>>>>>>> cf2df1bd3807d09d0dbf434f50c32f1e049fa5fb
 import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
 import no.nav.melosys.regler.lovvalg.FastsettLovvalg;
 
@@ -46,8 +55,11 @@ import no.nav.melosys.regler.lovvalg.FastsettLovvalg;
         schemes = {SwaggerDefinition.Scheme.HTTP, SwaggerDefinition.Scheme.HTTPS}
 )
 public class LovvalgTjenesteImpl implements LovvalgTjeneste {
+<<<<<<< HEAD
     
     private static Logger log = LoggerFactory.getLogger(LovvalgTjenesteImpl.class);
+=======
+>>>>>>> cf2df1bd3807d09d0dbf434f50c32f1e049fa5fb
 
     @Override
     @GET
@@ -57,6 +69,7 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
             notes = "Tjeneste som anvender lovverk til å fastsette lovvalgsland for en forespørsel"
     )
     public FastsettLovvalgRespons fastsettLovvalg(FastsettLovvalgRequest req) {
+<<<<<<< HEAD
         try {
             // Sett lokal kontekst for regelsett...
             initialiserLokalKontekst(req);
@@ -88,6 +101,9 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
             } catch (Throwable ignored) {
             }
         }
+=======
+        return FastsettLovvalg.fastsettLovvalg(req);
+>>>>>>> cf2df1bd3807d09d0dbf434f50c32f1e049fa5fb
     }
 
 }

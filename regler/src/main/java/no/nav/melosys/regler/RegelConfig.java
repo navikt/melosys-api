@@ -20,9 +20,19 @@ import no.nav.melosys.regler.service.lovvalg.LovvalgTjenesteImpl;
 @EnableAutoConfiguration
 public class RegelConfig extends ResourceConfig {
 
+<<<<<<< HEAD
     public RegelConfig() {
         register(LovvalgTjenesteImpl.class);
         register(WadlResource.class); // FIXME (farjam 2017-06-06): En smule låst til Jersey...
+=======
+    /*
+     * FIXME (farjam 2017-06-06): En smule låst til Jersey... 
+     */
+
+    public RegelConfig() {
+        register(LovvalgTjenesteImpl.class);
+        register(WadlResource.class);
+>>>>>>> cf2df1bd3807d09d0dbf434f50c32f1e049fa5fb
     }
 
     @PostConstruct
