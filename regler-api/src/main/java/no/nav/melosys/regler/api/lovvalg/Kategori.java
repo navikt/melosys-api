@@ -4,19 +4,15 @@ import static no.nav.melosys.regler.api.lovvalg.Alvorlighetsgrad.FEIL;
 
 public enum Kategori {
     
-    TEKNISK_FEIL(1000, FEIL, "Teknisk feil. Kontakt support."),
-    IKKE_STOETTET(1001, FEIL, "Det er ikke implementert maskinell støtte for denne forespørselen.");
+    // Generelle feil
+    TEKNISK_FEIL(FEIL, "Teknisk feil. Kontakt support."),
+    IKKE_STOETTET(FEIL, "Det er ikke implementert maskinell støtte for denne forespørselen."),
     
-    private int meldingNr;
-    private Alvorlighetsgrad alvorlighetsgrad;
-    private String melding;
-
-    /**
-     * @return Kategoriens unike meldingsnummer
-     */
-    public int getMeldingNr() {
-        return meldingNr;
-    }
+    // Funksjonelle feil relatert til input
+    FEIL_I_SOEKNAD(FEIL, "Ikke komplett eller inkonsistent søknad.");
+    
+    private final Alvorlighetsgrad alvorlighetsgrad;
+    private final String melding;
 
     /**
      * @return Meldingens alvorlighetsgrad
@@ -32,8 +28,7 @@ public enum Kategori {
         return melding;
     }
 
-    private Kategori(int meldingNr, Alvorlighetsgrad alvorlighetsgrad, String melding) {
-        this.meldingNr = meldingNr;
+    private Kategori(Alvorlighetsgrad alvorlighetsgrad, String melding) {
         this.alvorlighetsgrad = alvorlighetsgrad;
         this.melding = melding;
     }
