@@ -17,7 +17,7 @@ import no.nav.melosys.regler.api.lovvalg.Lovvalgsbestemmelse;
  * 
  * Tilbyr forskjellige metoder, bl.a. tilgang til søknaden og responsen.
  * 
- * Kontenksten er bundet til tråden den kjører på, slik at regelsett kan kalles i parallell.
+ * Konteksten er bundet til tråden den kjører på, slik at regelsett kan kalles i parallell.
  * 
  */
 public class LovvalgKontekst {
