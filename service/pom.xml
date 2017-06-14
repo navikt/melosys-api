@@ -18,14 +18,19 @@
 
         <dependency>
             <groupId>no.nav.melosys</groupId>
-            <artifactId>integrasjon</artifactId>
+            <artifactId>melosys-integrasjon</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-repository</artifactId>
         </dependency>
 
-
+        <!-- Test -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 

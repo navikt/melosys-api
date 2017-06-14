@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import no.nav.melosys.domain.Bruker;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakStatus;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
@@ -31,7 +32,7 @@ public class OpprettSakService {
         this.fagsakRepo = fagsakRepo;
     }
 
-    public void opprettSak(String fnr) {
+    public Fagsak opprettSak(String fnr) {
         Optional<Long> aktørId = tpsFasade.hentAktørIdForIdent(fnr);
         if (!aktørId.isPresent()) {
             throw new IllegalArgumentException("Finner ikke aktørID");
@@ -50,9 +51,12 @@ public class OpprettSakService {
         // Oppretter en sak i GSAK
         String saksNummer = gsakFasade.opprettSak(fagsak.getId(), fnr);
 
-        // Oppdaterer fagsak med saksnummer fra GSAK
+        // Oppdaterer fagsak med saksnummer fra GSAK og endre status
         fagsak.setSaksnummer(Long.parseLong(saksNummer));
+        fagsak.setStatus(FagsakStatus.UBEH); // FIXME FA riktig status
         fagsakRepo.save(fagsak);
+
+        return fagsak;
     }
 
 }

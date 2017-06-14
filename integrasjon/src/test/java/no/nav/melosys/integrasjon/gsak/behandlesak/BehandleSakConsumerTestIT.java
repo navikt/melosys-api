@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.gsak.behandlesak;
 import static junit.framework.TestCase.assertNotNull;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Sak;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.meldinger.OpprettSakRequest;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.meldinger.OpprettSakResponse;
 
+@Ignore
 @RunWith(SpringRunner.class)
 public class BehandleSakConsumerTestIT extends Gen3WsProxyServiceITBase {
     public static final String FAGOMRÅDE_KODE = "MED"; // TODO FA Hva er fagområdekoden?

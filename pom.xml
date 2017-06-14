@@ -88,7 +88,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>integrasjon</artifactId>
+                <artifactId>melosys-integrasjon</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

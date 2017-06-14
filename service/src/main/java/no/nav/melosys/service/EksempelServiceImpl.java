@@ -17,6 +17,7 @@ public class EksempelServiceImpl implements EksempelService {
     @Autowired
     BrukerRepository brukerRepository;
 
+    @Override
     public List<Bruker> findAll() {
         List<Bruker> list = new ArrayList<>();
         brukerRepository.findAll().forEach(list::add);

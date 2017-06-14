@@ -33,6 +33,7 @@ import no.nav.tjeneste.virksomhet.journal.v2.meldinger.HentDokumentResponse;
 import no.nav.tjeneste.virksomhet.journal.v2.meldinger.HentJournalpostListeRequest;
 import no.nav.tjeneste.virksomhet.journal.v2.meldinger.HentJournalpostListeResponse;
 
+@Ignore
 @RunWith(SpringRunner.class)
 public class JournalConsumerTestIT extends Gen3WsProxyServiceITBase {
     private static final Logger LOG = LoggerFactory.getLogger(JournalConsumerTestIT.class);
@@ -108,7 +109,6 @@ public class JournalConsumerTestIT extends Gen3WsProxyServiceITBase {
         LOG.info("HentJournalpostListeResponse: " + response);
     }
 
-    @Ignore
     @Test
     public void test_hent_soknads_xml() throws Exception {
 

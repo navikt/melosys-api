@@ -31,8 +31,14 @@ public class Bruker extends Person {
     @Column(name = "foedsel_dato")
     private LocalDate fødselsdato;
 
-    public Long getId() {
-        return id;
+    private String diskresjonskode;
+
+    public String getDiskresjonskode() {
+        return diskresjonskode;
+    }
+
+    public void setDiskresjonskode(String diskresjonskode) {
+        this.diskresjonskode = diskresjonskode;
     }
 
     public Kjoenn getKjønn() {

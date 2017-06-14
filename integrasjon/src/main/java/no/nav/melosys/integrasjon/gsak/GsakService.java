@@ -65,7 +65,7 @@ public class GsakService implements GsakFasade {
         } catch (OpprettSakSakEksistererAllerede e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
-        } catch (OpprettSakUgyldigInput e) {
+        } catch (OpprettSakUgyldigInput e) {// NOSONAR
             log.error(e.getMessage());
             throw new RuntimeException(e);
         }

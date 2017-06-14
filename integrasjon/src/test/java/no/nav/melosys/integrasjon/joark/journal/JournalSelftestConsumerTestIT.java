@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.joark.journal;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import no.nav.melosys.integrasjon.test.Gen3WsProxyServiceITBase;
 
+@Ignore
 @RunWith(SpringRunner.class)
 public class JournalSelftestConsumerTestIT extends Gen3WsProxyServiceITBase {
     private JournalSelftestConsumer journalSelftestConsumer;

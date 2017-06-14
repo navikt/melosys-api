@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import no.nav.melosys.domain.Bruker;
 import no.nav.melosys.domain.Kjoenn;
@@ -23,7 +23,7 @@ import no.nav.tjeneste.virksomhet.person.v2.informasjon.Person;
 import no.nav.tjeneste.virksomhet.person.v2.meldinger.HentKjerneinformasjonRequest;
 import no.nav.tjeneste.virksomhet.person.v2.meldinger.HentKjerneinformasjonResponse;
 
-@Component
+@Service
 public class TpsService implements TpsFasade {
 
     private static final Logger log = LoggerFactory.getLogger(TpsService.class);
@@ -61,19 +61,25 @@ public class TpsService implements TpsFasade {
         String navn = p.getPersonnavn().getSammensattNavn();
         bruker.setNavn(navn);
 
+        bruker.setFødselsdato(xmlTilLocalDate(p.getFoedselsdato()));
+
+        String kjønnKode = p.getKjoenn().getKjoenn().getValue();
+        Kjoenn kjønn = Kjoenn.getFraKode(kjønnKode);
+        bruker.setKjønn(kjønn);
+
+        bruker.setDiskresjonskode(p.getDiskresjonskode().getValue());
+
+        return bruker;
+
+    }
+
+    private LocalDate xmlTilLocalDate(Foedselsdato fødselsdatoXml) {
         LocalDate fødselsdato = null;
-        Foedselsdato fødselsdatoXml = p.getFoedselsdato();
         if (fødselsdatoXml != null) {
             GregorianCalendar cal = fødselsdatoXml.getFoedselsdato().toGregorianCalendar();
             fødselsdato = cal.toZonedDateTime().toLocalDate();
         }
-        bruker.setFødselsdato(fødselsdato);
-
-        String kode = p.getKjoenn().getKjoenn().getValue();
-        Kjoenn kjønn = Kjoenn.getFraKode(kode);
-        bruker.setKjønn(kjønn);
-
-        return bruker;
+        return fødselsdato;
     }
 
     private Person hentKjerneinformasjon(String fnr) {
@@ -83,12 +89,12 @@ public class TpsService implements TpsFasade {
             HentKjerneinformasjonResponse response = personConsumer.hentKjerneinformasjon(request);
             Person person = response.getPerson();
             return person;
-        } catch (HentKjerneinformasjonPersonIkkeFunnet e) { // NOSONAR
-            log.error(e.getMessage());
-            throw new RuntimeException(e);
-        } catch (HentKjerneinformasjonSikkerhetsbegrensning e) {
-            log.error(e.getMessage());
-            throw new RuntimeException(e);
+        } catch (HentKjerneinformasjonPersonIkkeFunnet e) {
+            log.error("", e);
+            throw new RuntimeException(); // TODO FA
+        } catch (HentKjerneinformasjonSikkerhetsbegrensning e) { // NOSONAR
+            log.error("", e);
+            throw new RuntimeException(); // TODO FA
         }
     }
 
