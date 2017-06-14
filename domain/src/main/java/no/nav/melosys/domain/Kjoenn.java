@@ -4,7 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "BRUKER_KJOENN")
+@Table(name = "KJOENN")
 public class Kjoenn extends Kodeverk {
 
     public static final Kjoenn KVINNE = new Kjoenn("K");

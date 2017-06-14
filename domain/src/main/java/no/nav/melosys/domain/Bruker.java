@@ -25,7 +25,7 @@ public class Bruker extends Person {
     private String fnr;
 
     @ManyToOne
-    @JoinColumn(name = "bruker_kjoenn", nullable = false)
+    @JoinColumn(name = "kjoenn", nullable = false)
     private Kjoenn kjønn;
 
     @Column(name = "foedsel_dato")

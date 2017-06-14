@@ -1,15 +1,14 @@
 package no.nav.melosys.integrasjon.tps.person;
 
-import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.OIDC_TIL_SAML;
-import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.SYSTEM_SAML;
+import static no.nav.melosys.integrasjon.felles.StsClient.Type.OIDC_TIL_SAML;
+import static no.nav.melosys.integrasjon.felles.StsClient.Type.SYSTEM_SAML;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import no.nav.melosys.integrasjon.felles.StsClient;
 import no.nav.tjeneste.virksomhet.person.v2.binding.PersonV2;
-import no.nav.vedtak.sts.client.NAVSTSClient;
-import no.nav.vedtak.sts.client.StsConfigurationUtil;
 
 @Configuration
 public class PersonConsumerProducer {
@@ -32,8 +31,8 @@ public class PersonConsumerProducer {
         return new PersonSelftestConsumerImpl(port, consumerConfig.getEndpointUrl());
     }
 
-    PersonV2 wrapWithSts(PersonV2 port, NAVSTSClient.StsClientType samlTokenType) {
-        return StsConfigurationUtil.wrapWithSts(port, samlTokenType);
+    PersonV2 wrapWithSts(PersonV2 port, StsClient.Type samlTokenType) {
+        return port; // FIXME
     }
 
 }

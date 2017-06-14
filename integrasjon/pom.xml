@@ -35,16 +35,6 @@
             <groupId>no.nav.modig</groupId>
             <artifactId>modig-testcertificates</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.nav.vedtak</groupId>
-            <artifactId>sikkerhet</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.vedtak</groupId>
-            <artifactId>sikkerhet</artifactId>
-            <type>test-jar</type>
-            <version>${vl-felles.version}</version>
-        </dependency>
 
 
         <!--GSAK-->
