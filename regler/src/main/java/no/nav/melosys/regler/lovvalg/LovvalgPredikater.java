@@ -12,9 +12,17 @@ public final class LovvalgPredikater {
     public static final Predikat personenErArbeidstaker = () -> {return søknad().arbeidstakerEllerSelvstendigNaeringsdrivende;}; 
 
     public static final Predikat personenErSelvstendigNæringasdrivende = () -> {return søknad().arbeidstakerOgSelvstendigNaeringsdrivende;}; 
+    
+    public static final Predikat personenArbeiderPåSkip = () -> {return søknad().arbeidSkip;};
+
+    public static final Predikat personenArbeiderPåSokkel = () -> {return søknad().arbeidSokkel;};
 
     public static final Predikat antallMånederIPeriodenErMindreEnnEllerLik(int maxMåneder) {
         return  () -> {return søknad().periodeFom.plusMonths(maxMåneder).isAfter(søknad().periodeTom);}; 
+    }
+
+    public static final Predikat antallLandErMindreEnnEllerLik(int maxLand) {
+        return  () -> {return søknad().land.size() <= maxLand;}; 
     }
 
 }

@@ -22,6 +22,8 @@ import no.nav.melosys.regler.api.lovvalg.Lovvalgsbestemmelse;
  */
 public class LovvalgKontekst {
     
+    // FIXME (farjam): Konteksten må instansieres, og vi må innføre en KontekstManager som gir siktig instanse (innspill fra Francois).
+    
     private static Logger log = LoggerFactory.getLogger(FastsettLovvalg.class); // Logger til FastsettLovvalg sin kanal
 
     private static ThreadLocal<FastsettLovvalgRequest> lokalFastsettLovvalgRequest = new ThreadLocal<>();
