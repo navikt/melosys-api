@@ -1,17 +1,21 @@
 package no.nav.melosys.regler.api.lovvalg;
 
+import com.google.gson.Gson;
+
 /**
  * DTO for varsler og feilmeldinger
  */
 public class Feilmelding {
 
-    /** Meldikngens kategori (inneholder bl.a. funksjonell melding */
+    /** Meldikngens kategori */
     public Kategori kategori;
     
-    /** Angivelse av felter/attributter meldingen gjelder for (hvis noen) */
-    public String[] felter;
-
     /** Teknisk melding */
     public String feilmelding;
-    
+ 
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
+    }
+
 }
