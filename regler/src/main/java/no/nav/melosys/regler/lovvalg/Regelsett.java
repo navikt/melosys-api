@@ -16,6 +16,8 @@ import no.nav.melosys.regler.nare.Predikat;
 
 /**
  * Sjekker om konteksten tilfredsstiller en bestemt artikkel
+ * 
+ * FIXME (farjam): Legg til instrukser for hvordan man lager nye Regelsett
  */
 public abstract class Regelsett {
     
@@ -25,21 +27,21 @@ public abstract class Regelsett {
     private Artikkel artikkel;
     private List<Betingelse> betingelser = new ArrayList<>();
     
+
     /**
      * Setter artikkel/lovhjemmel for regelsettet
      */
-    public Regelsett forArtikkel(Artikkel artikkel) {
+    protected void forArtikkel(Artikkel artikkel) {
         this.artikkel = artikkel;
         // Sett teknisk navn på regelsettet med det saamme. Dette er klassenavnet til kaller.
-        String regelKlasse = Thread.currentThread().getStackTrace()[2].getClassName();
+        String regelKlasse = getClass().getCanonicalName();
         tekniskNavn = regelKlasse.replaceAll("no.nav.melosys.regler.lovvalg.", "");
-        return this;
     }
     
     /**
      * Legger til en maskinell betingelse på regelsettet.
      */
-    public Regelsett medMaskinellBetingelse(String beskrivelse, Predikat... predikater) {
+    protected Regelsett medMaskinellBetingelse(String beskrivelse, Predikat... predikater) {
         MaskinellBetingelse bet = new MaskinellBetingelse(beskrivelse, predikater);
         betingelser.add(bet);
         return this;
@@ -48,7 +50,7 @@ public abstract class Regelsett {
     /**
      * Legger til en manuell betingelse på regelsettet.
      */
-    public Regelsett medManuellBetingelse(String beskrivelse) {
+    protected Regelsett medManuellBetingelse(String beskrivelse) {
         ManuellBetingelse bet = new ManuellBetingelse(beskrivelse);
         betingelser.add(bet);
         return this;
@@ -57,7 +59,7 @@ public abstract class Regelsett {
     /**
      * Kjører regelsettet og oppdaterer konteksten med rusltatet
      */
-    public void kjør() {
+    public final void kjør() {
         logg(tekniskNavn, "Sjekker betingelsene for artikkel {}", artikkel);
         Lovvalgsbestemmelse bestemmelse = new Lovvalgsbestemmelse();
         bestemmelse.artikkel = artikkel;

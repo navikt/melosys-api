@@ -10,15 +10,8 @@ import no.nav.melosys.regler.api.lovvalg.Kategori;
 public final class VerifiserInndata {
 
     public static void kjørRegler() {
-        settInndata();
         verifiserPåkrevdeFelter();
         verifiserKonsistens();
-    }
-
-    private static void settInndata() {
-        if (søknad().land == null) {
-            søknad().land = Collections.emptyList();
-        }
     }
 
     private static void verifiserPåkrevdeFelter() {
@@ -41,6 +34,9 @@ public final class VerifiserInndata {
         }
         
         // Sjekk land
+        if (søknad().land == null) { // Kun for convenience for å slippe å sjekke for null i andre tester
+            søknad().land = Collections.emptyList();
+        }
         if (søknad().land.isEmpty()) {
             leggTilMeldingOgLogg(Kategori.FEIL_I_SOEKNAD, "Ingen land oppgitt i søknaden");
         }
