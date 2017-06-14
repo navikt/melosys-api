@@ -30,13 +30,6 @@
             <artifactId>spring-context</artifactId>
         </dependency>
 
-        <!--VLFP (OK??)-->
-        <dependency>
-            <groupId>no.nav.modig</groupId>
-            <artifactId>modig-testcertificates</artifactId>
-        </dependency>
-
-
         <!--GSAK-->
         <dependency>
             <groupId>no.nav.tjenester.fim</groupId>
@@ -64,15 +57,25 @@
             <classifier>jaxws</classifier>
         </dependency>
 
+        <!--Test-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
         </dependency>
 
     </dependencies>
