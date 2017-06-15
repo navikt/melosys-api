@@ -37,7 +37,7 @@ public class OpprettSakTest {
     @Mock
     private BehandlingRepository behandlingRepo;
 
-    OpprettSakService service;
+    MottakService service;
 
     @Before
     public void setUp() {
@@ -46,7 +46,7 @@ public class OpprettSakTest {
         fagsakRepo = mock(FagsakRepository.class);
         behandlingRepo = mock(BehandlingRepository.class);
 
-        service = new OpprettSakService(gsakFasade, tpsFasade, fagsakRepo, behandlingRepo);
+        service = new MottakService(gsakFasade, tpsFasade, fagsakRepo, behandlingRepo);
     }
 
     @Test
@@ -58,12 +58,12 @@ public class OpprettSakTest {
         Bruker b = new Bruker();
         when(tpsFasade.hentKjerneinformasjon(any())).thenReturn(b);
 
-        Fagsak fagsak = service.opprettSak(fnr);
+        Behandling behandling = service.opprettSak(fnr);
 
         verify(fagsakRepo, times(2)).save(any(Fagsak.class));
         verify(behandlingRepo, times(1)).save(any(Behandling.class));
-        assertThat(fagsak.getSaksnummer()).isEqualTo(Long.parseLong("1234"));
-        assertThat(fagsak.getStatus()).isEqualTo(FagsakStatus.UBEH);
+        assertThat(behandling.getFagsak().getSaksnummer()).isEqualTo(Long.parseLong("1234"));
+        assertThat(behandling.getFagsak().getStatus()).isEqualTo(FagsakStatus.UBEH);
     }
 
 }

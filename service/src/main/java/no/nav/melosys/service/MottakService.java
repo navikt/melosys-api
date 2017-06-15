@@ -23,9 +23,9 @@ import no.nav.melosys.repository.FagsakRepository;
  * Brukes til å opprette en sak i GSAK og i databasen etter en søknad er mottat
  */
 @Component
-public class OpprettSakService {
+public class MottakService {
 
-    private static final Logger log = LoggerFactory.getLogger(OpprettSakService.class);
+    private static final Logger log = LoggerFactory.getLogger(MottakService.class);
 
     private GsakFasade gsakFasade;
 
@@ -36,7 +36,7 @@ public class OpprettSakService {
     private BehandlingRepository behandlingRepo;
 
     @Autowired
-    public OpprettSakService(GsakFasade gsakFasade, TpsFasade tpsFasade, FagsakRepository fagsakRepo, BehandlingRepository behandlingRepo) {
+    public MottakService(GsakFasade gsakFasade, TpsFasade tpsFasade, FagsakRepository fagsakRepo, BehandlingRepository behandlingRepo) {
         this.gsakFasade = gsakFasade;
         this.tpsFasade = tpsFasade;
         this.fagsakRepo = fagsakRepo;
@@ -45,7 +45,7 @@ public class OpprettSakService {
 
     // TODO En søknad skal erstatte fnr her
     @Transactional
-    public Fagsak opprettSak(String fnr) {
+    public Behandling opprettSak(String fnr) {
         Optional<Long> aktørId = tpsFasade.hentAktørIdForIdent(fnr);
         if (!aktørId.isPresent()) {
             throw new IllegalArgumentException("Finner ikke aktørID for fnr: " + fnr);
@@ -71,12 +71,12 @@ public class OpprettSakService {
         // Oppretter en sak i GSAK
         String saksNummer = gsakFasade.opprettSak(fagsak.getId(), fnr);
 
-        // Oppdaterer fagsak med saksnummer fra GSAK og endre status
+        // Oppdaterer fagsak med saksnummer fra GSAK
         fagsak.setSaksnummer(Long.parseLong(saksNummer));
         fagsak.setStatus(FagsakStatus.UBEH); // FIXME FA riktig status
         fagsakRepo.save(fagsak);
 
-        return fagsak;
+        return behandling;
     }
 
 }

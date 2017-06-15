@@ -8,6 +8,7 @@ import javax.persistence.Table;
 public class BehandlingStatus extends Kodeverk {
 
     public static final BehandlingStatus OPPRETTET = new BehandlingStatus("OPPR");
+    public static final BehandlingStatus KLARGJORT = new BehandlingStatus("KLAR");
     public static final BehandlingStatus UTREDES = new BehandlingStatus("UTRED");
     public static final BehandlingStatus FATTER_VEDTAK = new BehandlingStatus("F_VED");
     public static final BehandlingStatus IVERKSETTER_VEDTAK = new BehandlingStatus("I_VED");

@@ -1,9 +1,10 @@
 package no.nav.melosys.domain;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import java.util.Objects;
 
 @MappedSuperclass
 public abstract class Kodeverk {
@@ -48,7 +49,7 @@ public abstract class Kodeverk {
             return false;
         }
 
-        FagsakStatus status = (FagsakStatus) o;
+        Kodeverk status = (Kodeverk) o;
         return Objects.equals(kode, status.getKode());
     }
 

@@ -1,5 +1,6 @@
 package no.nav.melosys.domain;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -30,7 +31,7 @@ public class Behandling {
 
     @ManyToOne
     @JoinColumn(name = "status", nullable = false)
-    private BehandlingStatus status;
+    private BehandlingStatus status = BehandlingStatus.OPPRETTET;
 
     @OneToOne
     @JoinColumn(name = "behandling_resultat_id")
@@ -39,6 +40,9 @@ public class Behandling {
     @ManyToOne
     @JoinColumn(name = "type", nullable = false)
     private BehandlingType type;
+
+    // TOD Francois trenges?
+    private LocalDate frist;
 
     public Long getBehandlingsId() {
         return behandlingsId;
@@ -50,6 +54,14 @@ public class Behandling {
 
     public void setFagsak(Fagsak fagsak) {
         this.fagsak = fagsak;
+    }
+
+    public LocalDate getFrist() {
+        return frist;
+    }
+
+    public void setFrist(LocalDate frist) {
+        this.frist = frist;
     }
 
     public BehandlingStatus getStatus() {
