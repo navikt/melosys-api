@@ -18,18 +18,18 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import no.nav.melosys.saksflyt.SaksflytApplication;
-import no.nav.melosys.saksflyt.impl.soeka1_v1.KlargjoereSteg;
+import no.nav.melosys.saksflyt.impl.steg.a1.KlargjoereSteg;
 
 @RunWith(MockitoJUnitRunner.class)
-@ContextConfiguration(classes = {SaksflytApplication.class})
+@ContextConfiguration(classes = { SaksflytApplication.class })
 public class ArbeiderTest {
 
     @InjectMocks
     private Arbeider arbeider;
-    
+
     @Mock
-    private KlargjoereSteg klargjøreSteg; 
-    
+    private KlargjoereSteg klargjøreSteg;
+
     @Test
     public void testAtStegeneBlirKalt() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -61,5 +61,5 @@ public class ArbeiderTest {
             assertFalse(((Thread) tråd).isAlive());
         }
     }
-    
+
 }

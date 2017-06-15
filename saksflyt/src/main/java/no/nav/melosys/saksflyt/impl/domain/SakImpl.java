@@ -2,32 +2,29 @@ package no.nav.melosys.saksflyt.impl.domain;
 
 import java.time.LocalDate;
 
-import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
 import no.nav.melosys.saksflyt.api.Sak;
 import no.nav.melosys.saksflyt.api.Status;
 
 /**
  * FIXME (farjam): Avventer domenemodellen
+ * 
  * @author m126664
  *
  */
-@Entity
-@Table(name="...")
+
 public class SakImpl implements Sak {
-    
+
     @Id
     private long saksId;
-    
+
     private Status status;
-    
+
     private LocalDate registrertDato;
-    
+
     private LocalDate fristDato;
-    
-    
+
     @Override
     public long getSaksId() {
         return saksId;
@@ -41,7 +38,7 @@ public class SakImpl implements Sak {
     public void setStatus(Status status) {
         this.status = status;
     }
-    
+
     @Override
     public LocalDate getFristDato() {
         return fristDato;
