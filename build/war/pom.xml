@@ -25,6 +25,10 @@
             <artifactId>melosys-controller</artifactId>
         </dependency>
         <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-saksflyt</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>ojdbc8</artifactId>
         </dependency>
