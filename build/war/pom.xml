@@ -16,6 +16,7 @@
 
     <dependencies>
         <dependency>
+            <!--TODO Francois: For å teste flyway migrations-->
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-aura-config</artifactId>
         </dependency>

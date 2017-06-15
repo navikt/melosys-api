@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import no.nav.melosys.domain.Bruker;
 import no.nav.melosys.domain.Kjoenn;
+import no.nav.melosys.integrasjon.felles.IntegrasjonException;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
@@ -90,11 +91,9 @@ public class TpsService implements TpsFasade {
             Person person = response.getPerson();
             return person;
         } catch (HentKjerneinformasjonPersonIkkeFunnet e) {
-            log.error("", e);
-            throw new RuntimeException(); // TODO FA
+            throw new IntegrasjonException(e);
         } catch (HentKjerneinformasjonSikkerhetsbegrensning e) { // NOSONAR
-            log.error("", e);
-            throw new RuntimeException(); // TODO FA
+            throw new IntegrasjonException(e);
         }
     }
 

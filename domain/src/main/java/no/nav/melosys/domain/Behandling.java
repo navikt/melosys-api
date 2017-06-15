@@ -1,5 +1,7 @@
 package no.nav.melosys.domain;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,7 +11,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import java.util.Objects;
 
 @Entity
 @Table(name = "BEHANDLING")
@@ -20,6 +21,7 @@ public class Behandling {
     private Long id;
 
     @Column(name = "behandling_id")
+    @GeneratedValue // TODO FA Hvordan genererer vi?
     private Long behandlingsId;
 
     @ManyToOne
@@ -40,10 +42,6 @@ public class Behandling {
 
     public Long getBehandlingsId() {
         return behandlingsId;
-    }
-
-    public void setBehandlingsId(Long behandlingsId) {
-        this.behandlingsId = behandlingsId;
     }
 
     public Fagsak getFagsak() {

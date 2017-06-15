@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import no.nav.melosys.integrasjon.felles.IntegrasjonException;
 import no.nav.melosys.integrasjon.gsak.behandlesak.BehandleSakConsumer;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.OpprettSakSakEksistererAllerede;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.OpprettSakUgyldigInput;
@@ -63,11 +64,9 @@ public class GsakService implements GsakFasade {
             log.info("Sak opprettet i GSAK med saksnummer: {}", response.getSakId());
             return response.getSakId();
         } catch (OpprettSakSakEksistererAllerede e) {
-            log.error(e.getMessage());
-            throw new RuntimeException(e);
+            throw new IntegrasjonException(e);
         } catch (OpprettSakUgyldigInput e) {// NOSONAR
-            log.error(e.getMessage());
-            throw new RuntimeException(e);
+            throw new IntegrasjonException(e);
         }
     }
 }
