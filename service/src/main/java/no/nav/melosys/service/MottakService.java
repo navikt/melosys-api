@@ -51,6 +51,7 @@ public class MottakService {
         Fagsak fagsak = new Fagsak();
         Bruker bruker = new Bruker();
         bruker.setFnr(fnr);
+        fagsakRepo.save(fagsak);
 
         // Oppretter en behandling knyttet til saken
         Behandling behandling = new Behandling();

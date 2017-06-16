@@ -39,4 +39,16 @@ ALTER TABLE behandling
 ALTER TABLE behandling
     ADD CONSTRAINT fk_behandling_status_1 FOREIGN KEY (status) REFERENCES behandling_status;
 ALTER TABLE behandling
-    ADD CONSTRAINT fk_behandling_type_1 FOREIGN KEY (status) REFERENCES behandling_type;
+    ADD CONSTRAINT fk_behandling_type_1 FOREIGN KEY (type) REFERENCES behandling_type;
+
+/*Midlertidig. Til å generere behandlingsId*/
+CREATE SEQUENCE seq_behandling MINVALUE 1 START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE OR REPLACE TRIGGER trigger_behandling_id
+BEFORE INSERT ON behandling
+FOR EACH ROW
+WHEN (new.behandling_id IS NULL)
+    BEGIN
+        SELECT seq_behandling.nextval
+        INTO :new.behandling_id
+        FROM dual;
+    END;

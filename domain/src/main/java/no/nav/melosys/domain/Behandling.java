@@ -13,6 +13,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
+
 @Entity
 @Table(name = "BEHANDLING")
 public class Behandling {
@@ -21,8 +24,9 @@ public class Behandling {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // TODO Francois Hvordan genererer vi? Eksponerer vi nøkkelen?
+    @Generated(GenerationTime.INSERT)
     @Column(name = "behandling_id")
-    @GeneratedValue // TODO FA Hvordan genererer vi?
     private Long behandlingsId;
 
     @ManyToOne
