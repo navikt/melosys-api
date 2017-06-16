@@ -46,20 +46,11 @@ public class MottakService {
     // TODO En søknad skal erstatte fnr her
     @Transactional
     public Behandling opprettSak(String fnr) {
-        Optional<Long> aktørId = tpsFasade.hentAktørIdForIdent(fnr);
-        if (!aktørId.isPresent()) {
-            throw new IllegalArgumentException("Finner ikke aktørID for fnr: " + fnr);
-        }
-
-        Bruker bruker = new Bruker();
-        bruker.setAktørId(aktørId.get());
-        bruker.setFnr(fnr);
-        bruker = tpsFasade.hentKjerneinformasjon(bruker);
 
         // Oppretter en sak i DB slik at id kan brukes i GSAK
         Fagsak fagsak = new Fagsak();
-        fagsak.setBruker(bruker);
-        fagsakRepo.save(fagsak);
+        Bruker bruker = new Bruker();
+        bruker.setFnr(fnr);
 
         // Oppretter en behandling knyttet til saken
         Behandling behandling = new Behandling();
@@ -68,7 +59,32 @@ public class MottakService {
         behandling.setStatus(BehandlingStatus.OPPRETTET);
         behandlingRepo.save(behandling); // TODO Vilkårene/behandlingsgrunnlaget må lagres også
 
+        return behandling;
+    }
+
+    @Transactional
+    public Behandling klargjoer(Behandling behandling) {
+
+        String fnr = behandling.getFagsak().getBruker().getFnr();
+
+        // Henter aktørId fra TPS
+        Optional<Long> aktørId = tpsFasade.hentAktørIdForIdent(fnr);
+        if (!aktørId.isPresent()) {
+            throw new IllegalArgumentException("Finner ikke aktørID for fnr: " + fnr);
+        }
+
+        Fagsak fagsak = behandling.getFagsak();
+
+        // Beriker brukeren med informasjon fra TPS
+        Bruker bruker = new Bruker();
+        bruker.setAktørId(aktørId.get());
+        bruker.setFnr(fnr);
+        bruker = tpsFasade.hentKjerneinformasjon(bruker);
+
+        fagsak.setBruker(bruker);
+
         // Oppretter en sak i GSAK
+        // TODO Francois koble til eksisterende sak
         String saksNummer = gsakFasade.opprettSak(fagsak.getId(), fnr);
 
         // Oppdaterer fagsak med saksnummer fra GSAK

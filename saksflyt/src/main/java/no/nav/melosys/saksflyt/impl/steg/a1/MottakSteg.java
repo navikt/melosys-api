@@ -31,16 +31,16 @@ public class MottakSteg implements Steg {
     public void finnBehandlingOgUtfoerSteg() {
 
         // TODO JMS
-        if (!ready) {
+        if (ready) {
             return;
         }
 
         // Opprette en Fagsak og Behandling i databasen
-        String fnr = "FJERNET"; // FIXME: EESSI2-43
+        String fnr = "FJERNET"; // FIXME: Mottak
 
-        Behandling behandling;
         try {
-            behandling = mottakService.opprettSak(fnr);
+            Behandling behandling = mottakService.opprettSak(fnr);
+            binge.leggTil(behandling);
         } catch (Throwable t) {
             log.error("Feil ", t.getCause()); // TODO Exceptions i Melosys
         }

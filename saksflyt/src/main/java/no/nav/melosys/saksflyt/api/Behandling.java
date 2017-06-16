@@ -7,6 +7,7 @@ import no.nav.melosys.domain.BehandlingStatus;
 /**
  * Representasjon av en behandling. TODO trenges?
  */
+@Deprecated
 public interface Behandling {
 
     /**

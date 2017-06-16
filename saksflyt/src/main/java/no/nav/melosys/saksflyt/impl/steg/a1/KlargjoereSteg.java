@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingStatus;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.saksflyt.api.Steg;
@@ -44,14 +43,15 @@ public class KlargjoereSteg implements Steg {
             return;
         }
 
-        // Hent personopplysninger fra TPS
-        // Sett personopplysninger på sak
+        try {
+            // Hent personopplysninger fra TPS
+            // Sett personopplysninger på sak
+            // TODO Journalføring i JOARK
+            behandling = mottakService.klargjoer(behandling);
+        } catch (Throwable t) {
+            log.error("Feil ", t.getCause()); // TODO Exceptions i Melosys
+        }
 
-        Fagsak sak = behandling.getFagsak();
-
-        // TODO Journalføring i JOARK
-
-        // Endre status på behandlingen
         behandling.setStatus(BehandlingStatus.KLARGJORT);
         behandlingRepo.save(behandling);
         binge.leggTil(behandling);

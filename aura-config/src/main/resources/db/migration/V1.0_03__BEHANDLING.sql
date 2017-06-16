@@ -16,6 +16,13 @@ CREATE TABLE behandling_status (
     CONSTRAINT pk_behandling_status PRIMARY KEY (kode)
 );
 
+INSERT INTO behandling_status (kode, navn) VALUES ('OPPR', 'Opprettet');
+INSERT INTO behandling_status (kode, navn) VALUES ('KLAR', 'Klargjort');
+INSERT INTO behandling_status (kode, navn) VALUES ('UTRED', 'Utredes');
+INSERT INTO behandling_status (kode, navn) VALUES ('F_VED', 'Fatter vedtak');
+INSERT INTO behandling_status (kode, navn) VALUES ('I_VED', 'Iverksetter vedtak');
+INSERT INTO behandling_status (kode, navn) VALUES ('AVSLU', 'Avsluttet');
+
 CREATE TABLE behandling_type (
     kode        VARCHAR2(20 CHAR) NOT NULL,
     navn        VARCHAR2(50 CHAR) NOT NULL,
@@ -23,12 +30,9 @@ CREATE TABLE behandling_type (
     CONSTRAINT pk_behandling_type PRIMARY KEY (kode)
 );
 
-INSERT INTO behandling_status (kode, navn) VALUES ('OPPR', 'Opprettet');
-INSERT INTO behandling_status (kode, navn) VALUES ('KLAR', 'Klargjort');
-INSERT INTO behandling_status (kode, navn) VALUES ('UTRED', 'Utredes');
-INSERT INTO behandling_status (kode, navn) VALUES ('F_VED', 'Fatter vedtak');
-INSERT INTO behandling_status (kode, navn) VALUES ('I_VED', 'Iverksetter vedtak');
-INSERT INTO behandling_status (kode, navn) VALUES ('AVSLU', 'Avsluttet');
+INSERT INTO behandling_type (kode, navn) VALUES ('NY', 'Ny');
+INSERT INTO behandling_type (kode, navn) VALUES ('ENDRING', 'Endring');
+INSERT INTO behandling_type (kode, navn) VALUES ('KLAGE', 'Klage');
 
 ALTER TABLE behandling
     ADD CONSTRAINT fk_behandling_fagsak_1 FOREIGN KEY (fagsak_id) REFERENCES fagsak;
