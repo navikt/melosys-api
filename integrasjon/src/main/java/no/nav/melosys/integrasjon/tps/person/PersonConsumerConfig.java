@@ -24,7 +24,7 @@ public class PersonConsumerConfig {
 
     private String endpointUrl; // NOSONAR
 
-    public PersonConsumerConfig(@Value("Person_v2.url") String endpointUrl) {
+    public PersonConsumerConfig(@Value("${Person_v2.url}") String endpointUrl) {
         this.endpointUrl = endpointUrl;
     }
 

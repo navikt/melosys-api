@@ -27,7 +27,7 @@ public class BehandleSakConsumerConfig {
     public BehandleSakConsumerConfig() {
     }
 
-    public BehandleSakConsumerConfig(@Value("BehandleSak_v1.url") String endpointUrl) {
+    public BehandleSakConsumerConfig(@Value("${BehandleSak_v1.url}") String endpointUrl) {
         this.endpointUrl = endpointUrl;
     }
 

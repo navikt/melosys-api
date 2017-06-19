@@ -24,7 +24,7 @@ public class AktorConsumerConfig {
 
     private String endpointUrl;
 
-    public AktorConsumerConfig(@Value("Aktoer_v2.url") String endpointUrl) {
+    public AktorConsumerConfig(@Value("${Aktoer_v2.url}") String endpointUrl) {
         this.endpointUrl = endpointUrl;
     }
 

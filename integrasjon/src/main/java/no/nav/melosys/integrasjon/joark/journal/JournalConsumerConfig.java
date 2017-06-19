@@ -22,7 +22,7 @@ public class JournalConsumerConfig {
     private static final QName SERVICE = new QName(NAMESPACE, "Journal_v2");
     private static final QName PORT = new QName(NAMESPACE, "Journal_v2Port");
 
-    @Value("Journal_v2.url")
+    @Value("${Journal_v2.url}")
     private String endpointUrl; // NOSONAR
 
     JournalV2 getPort() {
