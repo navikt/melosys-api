@@ -57,6 +57,10 @@ public class TpsService implements TpsFasade {
 
     @Override
     public Bruker hentKjerneinformasjon(Bruker bruker) {
+        if (bruker.getFnr() == null) {
+            throw new IllegalArgumentException("Fnr er ikke satt");
+        }
+
         Person p = hentKjerneinformasjon(bruker.getFnr());
 
         String navn = p.getPersonnavn().getSammensattNavn();
