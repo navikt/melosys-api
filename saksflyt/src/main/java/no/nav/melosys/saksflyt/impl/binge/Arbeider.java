@@ -88,8 +88,7 @@ public class Arbeider {
      */
     @PreDestroy
     public void stopp() {
-        for (int forsøk = 1; forsøk <= ANNTALL_RETRY_FOR_Å_STOPPE_TRÅDER; forsøk++) { // Ytre løkke for retry på å stoppe alle
-                                                                                      // tråder
+        for (int forsøk = 1; forsøk <= ANNTALL_RETRY_FOR_Å_STOPPE_TRÅDER; forsøk++) { // Ytre løkke for retry på å stoppe alle tråder
             logger.info("Forsøk nr. {} på å stoppe alle arbeidertråder...", forsøk);
             // Forsøk å stoppe alle trådene...
             // Dette gjøres nå i sekvens, noe som er helt greit hvis vi ikke har for mange tråder å stoppe.
