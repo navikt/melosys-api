@@ -23,9 +23,9 @@ public class GsakService implements GsakFasade {
 
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
 
-    private static final String FAGOMRÅDE_KODE = "MED"; // -> Medlemskap
-    private static final String FAGSYSTEM_KODE = "FS22";// TODO (FA) endre når koden er opprettet i GSAK
-    private static final String SAK_TYPE = "MFS"; // -> Med fagsak
+    private static final String FAGOMRÅDE_KODE_MEDLEMSKAP = "MED"; // -> Medlemskap
+    private static final String FAGSYSTEM_KODE_MELOSYS = "FS22";// TODO (FA) endre når koden er opprettet i GSAK
+    private static final String SAK_TYPE_FAGSAK = "MFS"; // -> Med fagsak
 
     private BehandleSakConsumer behandleSakConsumer;
 
@@ -35,25 +35,25 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public String opprettSak(Long fagsakId, String fnr) {
+    public String opprettSak(Long fagsakId, String fnr) throws IntegrasjonException {
         Sak sak = new Sak();
         Fagomraader fagområde = new Fagomraader();
-        fagområde.setValue(FAGOMRÅDE_KODE);
+        fagområde.setValue(FAGOMRÅDE_KODE_MEDLEMSKAP);
         sak.setFagomraade(fagområde);
 
         Sakstyper sakstype = new Sakstyper();
-        sakstype.setValue(SAK_TYPE);
+        sakstype.setValue(SAK_TYPE_FAGSAK);
         sak.setSakstype(sakstype);
 
-        Aktoer aktoer = new Person();
-        aktoer.setIdent(fnr);
-        sak.getGjelderBrukerListe().add(aktoer);
+        Aktoer aktør = new Person();
+        aktør.setIdent(fnr);
+        sak.getGjelderBrukerListe().add(aktør);
 
         Fagsystemer fagsystem = new Fagsystemer();
-        fagsystem.setValue(FAGSYSTEM_KODE);
+        fagsystem.setValue(FAGSYSTEM_KODE_MELOSYS);
         sak.setFagsystem(fagsystem);
 
-        String fagsystemSakId = FAGSYSTEM_KODE + fagsakId.toString();
+        String fagsystemSakId = FAGSYSTEM_KODE_MELOSYS + fagsakId.toString();
         sak.setFagsystemSakId(fagsystemSakId);
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest();
