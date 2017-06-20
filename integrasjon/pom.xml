@@ -91,23 +91,6 @@
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--VLFP (OK??)-->
-        <dependency>
-            <groupId>no.nav.modig</groupId>
-            <artifactId>modig-testcertificates</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.vedtak</groupId>
-            <artifactId>sikkerhet</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.vedtak</groupId>
-            <artifactId>sikkerhet</artifactId>
-            <type>test-jar</type>
-            <scope>test</scope>
-            <version>${vl-felles.version}</version>
-        </dependency>
 
     </dependencies>
 </project>
