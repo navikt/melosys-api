@@ -15,16 +15,17 @@ import org.springframework.stereotype.Component;
 
 import no.nav.melosys.saksflyt.api.Steg;
 
+
 /**
  * Komponent med arbeidertråder som schedulerer arbeid som utføres av de maskinelle stegene.
  * 
- * Dette er en passe dum implementasjon, der x tråder hver for seg looper gjennom alle behandlingssteg og aktiverer dem. Dette
- * gjentas i det uendelige.
+ * Dette er en passe dum implementasjon, der x tråder hver for seg looper gjennom alle behandlingssteg og aktiverer dem. Dette gjentas i det uendelige.
  * 
- * Konfigurasjon: melosys.saksflyt.arbeider.antallTråder – Antall tråder melosys.saksflyt.arbeider.oppholdMellomLooping – Hvor
- * mange millisekunder trådene skal sove mellom hver løkke melosys.saksflyt.arbeider.oppholdMellomSteg – Hvor mange
- * millisekunder trådene skal sove mellom hvert steg som aktiveres
- * 
+ * Konfigurasjon:
+ *     melosys.saksflyt.arbeider.antallTråder – Antall tråder
+ *     melosys.saksflyt.arbeider.oppholdMellomLooping – Hvor mange millisekunder trådene skal sove mellom hver løkke
+ *     melosys.saksflyt.arbeider.oppholdMellomSteg – Hvor mange millisekunder trådene skal sove mellom hvert steg som aktiveres
+ *
  */
 @Component
 @Scope("singleton")
