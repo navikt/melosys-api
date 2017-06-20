@@ -16,6 +16,7 @@ public class BehandlingUtilsTest {
     @Test
     public void testPredicateMedStatus() {
         Behandling b = new Behandling();
+        b.setStatus(BehandlingStatus.OPPRETTET);
         assertFalse(Utils.medStatus(BehandlingStatus.KLARGJORT).test(b));
         b.setStatus(BehandlingStatus.OPPRETTET);
         assertFalse(Utils.medStatus(BehandlingStatus.KLARGJORT).test(b));
