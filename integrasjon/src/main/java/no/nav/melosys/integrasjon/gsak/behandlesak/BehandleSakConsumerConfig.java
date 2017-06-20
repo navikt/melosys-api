@@ -18,9 +18,9 @@ import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.BehandleSakV1;
 @Component
 public class BehandleSakConsumerConfig {
     private static final String BEHANDLE_SAK_V_1_WSDL = "wsdl/no/nav/tjeneste/virksomhet/behandleSak/v1/Binding.wsdl";
-    private static final String BEHANDLE_SAK_V1_NAMESPACE = "http://nav.no/tjeneste/virksomhet/behandleSak/v1/Binding";
-    private static final QName BEHANDLE_SAK_V_1_SERVICE = new QName(BEHANDLE_SAK_V1_NAMESPACE, "BehandleSak_v1");
-    private static final QName BEHANDLE_SAK_V_1_PORT = new QName(BEHANDLE_SAK_V1_NAMESPACE, "BehandleSak_v1Port");
+    private static final String BEHANDLE_SAK_V_1_NAMESPACE = "http://nav.no/tjeneste/virksomhet/behandleSak/v1/Binding";
+    private static final QName BEHANDLE_SAK_V_1_SERVICE = new QName(BEHANDLE_SAK_V_1_NAMESPACE, "BehandleSak_v1");
+    private static final QName BEHANDLE_SAK_V_1_PORT = new QName(BEHANDLE_SAK_V_1_NAMESPACE, "BehandleSak_v1Port");
 
     private String endpointUrl;
 
