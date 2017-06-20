@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -9,7 +10,7 @@
     </parent>
 
     <artifactId>melosys-saksflyt</artifactId>
-    
+
     <!-- build>
         <plugins>
             <plugin>
@@ -20,6 +21,10 @@
     </build-->
 
     <dependencies>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-service</artifactId>
+        </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-config</artifactId>
@@ -42,7 +47,7 @@
             <artifactId>logback-classic</artifactId>
             <scope>runtime</scope>
         </dependency>
-        
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -58,7 +63,7 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
     </dependencies>
 
 </project>

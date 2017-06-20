@@ -45,8 +45,28 @@ public class Fagsak {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Arbeidsgiver getArbeidsgiver() {
+        return arbeidsgiver;
+    }
+
+    public void setArbeidsgiver(Arbeidsgiver arbeidsgiver) {
+        this.arbeidsgiver = arbeidsgiver;
+    }
+
+    public Bruker getBruker() {
+        return bruker;
+    }
+
+    public void setBruker(Bruker bruker) {
+        this.bruker = bruker;
+    }
+
+    public Fullmektig getFullmektig() {
+        return fullmektig;
+    }
+
+    public void setFullmektig(Fullmektig fullmektig) {
+        this.fullmektig = fullmektig;
     }
 
     public Long getSaksnummer() {

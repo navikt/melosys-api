@@ -1,5 +1,8 @@
 package no.nav.melosys.domain;
 
+import java.time.LocalDate;
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,7 +12,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import java.util.Objects;
+
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 
 @Entity
 @Table(name = "BEHANDLING")
@@ -19,6 +24,8 @@ public class Behandling {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // TODO Francois Hvordan genererer vi? Eksponerer vi nøkkelen?
+    @Generated(GenerationTime.INSERT)
     @Column(name = "behandling_id")
     private Long behandlingsId;
 
@@ -38,12 +45,11 @@ public class Behandling {
     @JoinColumn(name = "type", nullable = false)
     private BehandlingType type;
 
+    // TOD Francois trenges?
+    private LocalDate frist;
+
     public Long getBehandlingsId() {
         return behandlingsId;
-    }
-
-    public void setBehandlingsId(Long behandlingsId) {
-        this.behandlingsId = behandlingsId;
     }
 
     public Fagsak getFagsak() {
@@ -52,6 +58,14 @@ public class Behandling {
 
     public void setFagsak(Fagsak fagsak) {
         this.fagsak = fagsak;
+    }
+
+    public LocalDate getFrist() {
+        return frist;
+    }
+
+    public void setFrist(LocalDate frist) {
+        this.frist = frist;
     }
 
     public BehandlingStatus getStatus() {

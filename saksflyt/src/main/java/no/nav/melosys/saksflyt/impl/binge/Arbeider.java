@@ -25,7 +25,7 @@ import no.nav.melosys.saksflyt.api.Steg;
  *     melosys.saksflyt.arbeider.antallTråder – Antall tråder
  *     melosys.saksflyt.arbeider.oppholdMellomLooping – Hvor mange millisekunder trådene skal sove mellom hver løkke
  *     melosys.saksflyt.arbeider.oppholdMellomSteg – Hvor mange millisekunder trådene skal sove mellom hvert steg som aktiveres
- *     
+ *
  */
 @Component
 @Scope("singleton")
@@ -34,22 +34,22 @@ public class Arbeider {
     private static final int ANNTALL_RETRY_FOR_Å_STOPPE_TRÅDER = 20;
     private static final int OPPHOLD_MELLOM_RETRY_FOR_Å_STOPPE_TRÅDER = 10000;
     private static final long TIMEOUT_FOR_Å_STOPPE_EN_TRÅD = 60000;
-    
+
     private static final Logger logger = LoggerFactory.getLogger(Arbeider.class);
-    
+
     /** Antall arbeidstråder */
-    @Value("${melosys.saksflyt.arbeider.antallTråder}")
+    @Value("${melosys.saksflyt.arbeider.antallTraader}")
     private int antallTråder;
-    
+
     /** Opphold mellom hvert steg */
     @Value("${melosys.saksflyt.arbeider.oppholdMellomSteg}")
     private long oppholdMellomSteg;
-    
+
     @Autowired
     private List<Steg> maskinelleSteg;
-    
+
     private ArbeiderTraad[] tråder;
-    
+
     private void loggSteg() {
         if (!logger.isInfoEnabled()) {
             return;
@@ -69,10 +69,9 @@ public class Arbeider {
         logger.info("Steg som aktiveres av arbeideren:");
         klasser.stream().forEach(logger::info);
     }
-    
+
     /**
-     * Starter prosessering. 
-     * Skal kun kalles av spring etter at alt er injisert.
+     * Starter prosessering. Skal kun kalles av spring etter at alt er injisert.
      */
     @PostConstruct
     public void start() {
@@ -83,17 +82,16 @@ public class Arbeider {
             tråder[i].start();
         }
     }
-    
+
     /**
-     * Stopper prosessering. 
-     * Skal kun kalles av spring når konteksten skal tas ned.
+     * Stopper prosessering. Skal kun kalles av spring når konteksten skal tas ned.
      */
     @PreDestroy
     public void stopp() {
         for (int forsøk = 1; forsøk <= ANNTALL_RETRY_FOR_Å_STOPPE_TRÅDER; forsøk++) { // Ytre løkke for retry på å stoppe alle tråder
             logger.info("Forsøk nr. {} på å stoppe alle arbeidertråder...", forsøk);
             // Forsøk å stoppe alle trådene...
-            // Dette gjøres nå i sekvens, noe som er helt greit hvis vi ikke har for mange tråder å stoppe. 
+            // Dette gjøres nå i sekvens, noe som er helt greit hvis vi ikke har for mange tråder å stoppe.
             for (ArbeiderTraad t : tråder) {
                 t.stoppArbeider();
             }
@@ -120,12 +118,13 @@ public class Arbeider {
         // Alt vi kan gjøre nå er å logge problemet
         logger.error("KRITISK FEIL: Ga opp å stoppe alle arbeidertråder etter {} forsøk", ANNTALL_RETRY_FOR_Å_STOPPE_TRÅDER);
     }
-    
+
     private class ArbeiderTraad extends Thread {
         private volatile boolean skalStoppe = false;
-        
+
         public void stoppArbeider() {
-            if (!isAlive()) return;
+            if (!isAlive())
+                return;
             skalStoppe = true;
             interrupt(); 
             try {
@@ -137,14 +136,14 @@ public class Arbeider {
                 logger.error("Klarte ikke å stoppe tråden i løpet av {} millisekunder", TIMEOUT_FOR_Å_STOPPE_EN_TRÅD);
             }
         }
-        
+
         public void run() {
             for (;;) {
                 for (Steg steg : maskinelleSteg) {
                     if (skalStoppe) {
                         return;
                     }
-                    steg.finnSakOgutfoerSteg();
+                    steg.finnBehandlingOgUtfoerSteg();
                     try {
                         sleep(oppholdMellomSteg);
                     } catch (InterruptedException e) {

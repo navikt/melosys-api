@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>melosys</artifactId>
+        <groupId>no.nav.melosys</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>melosys-integrasjon</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-domain</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-ws-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+
+        <!--AAREG-->
+        <dependency>
+            <groupId>no.nav.tjenester.fim</groupId>
+            <artifactId>nav-arbeidsforhold-v3-tjenestespesifikasjon</artifactId>
+            <version>${aareg.arbeidsforhold.version}</version>
+            <classifier>jaxws</classifier>
+        </dependency>
+
+        <!--GSAK-->
+        <dependency>
+            <groupId>no.nav.tjenester.fim</groupId>
+            <artifactId>nav-fim-behandleSak-v1-tjenestespesifikasjon</artifactId>
+            <version>${gsak.sak.version}</version>
+            <classifier>jaxws</classifier>
+        </dependency>
+
+        <!--JOARK-->
+        <dependency>
+            <groupId>no.nav.tjenester</groupId>
+            <artifactId>nav-journal-v2-tjenestespesifikasjon</artifactId>
+            <classifier>jaxws</classifier>
+        </dependency>
+
+        <!--TPS-->
+        <dependency>
+            <groupId>no.nav.tjenester.fim</groupId>
+            <artifactId>nav-fim-aktoer-v2-tjenestespesifikasjon</artifactId>
+            <classifier>jaxws</classifier>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.tjenester.fim</groupId>
+            <artifactId>nav-fim-person-v2-tjenestespesifikasjon</artifactId>
+            <classifier>jaxws</classifier>
+        </dependency>
+
+        <!--Test-->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+</project>

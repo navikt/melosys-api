@@ -15,10 +15,18 @@
     <packaging>war</packaging>
 
     <dependencies>
-
+        <dependency>
+            <!--TODO Francois: For å teste flyway migrations-->
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-aura-config</artifactId>
+        </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-controller</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-saksflyt</artifactId>
         </dependency>
         <dependency>
             <groupId>com.oracle</groupId>
@@ -31,7 +39,11 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>${flyway.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

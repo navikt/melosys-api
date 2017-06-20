@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -22,19 +24,29 @@ public class Bruker extends Person {
 
     private String fnr;
 
+    @ManyToOne
+    @JoinColumn(name = "kjoenn", nullable = false)
+    private Kjoenn kjønn;
+
     @Column(name = "foedsel_dato")
     private LocalDate fødselsdato;
 
-    public Long getId() {
-        return id;
+    private String diskresjonskode;
+
+    public String getDiskresjonskode() {
+        return diskresjonskode;
     }
 
-    public String getNavn() {
-        return navn;
+    public void setDiskresjonskode(String diskresjonskode) {
+        this.diskresjonskode = diskresjonskode;
     }
 
-    public void setNavn(String navn) {
-        this.navn = navn;
+    public Kjoenn getKjønn() {
+        return kjønn;
+    }
+
+    public void setKjønn(Kjoenn kjønn) {
+        this.kjønn = kjønn;
     }
 
     public String getFnr() {
@@ -51,6 +63,14 @@ public class Bruker extends Person {
 
     public void setFødselsdato(LocalDate fødselsdato) {
         this.fødselsdato = fødselsdato;
+    }
+
+    public String getNavn() {
+        return navn;
+    }
+
+    public void setNavn(String navn) {
+        this.navn = navn;
     }
 
     @Override
