@@ -35,7 +35,7 @@ public class Behandling {
 
     @ManyToOne
     @JoinColumn(name = "status", nullable = false)
-    private BehandlingStatus status = BehandlingStatus.OPPRETTET;
+    private BehandlingStatus status;
 
     @OneToOne
     @JoinColumn(name = "behandling_resultat_id")
