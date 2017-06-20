@@ -30,11 +30,19 @@
             <artifactId>spring-context</artifactId>
         </dependency>
 
+        <!--AAREG-->
+        <dependency>
+            <groupId>no.nav.tjenester.fim</groupId>
+            <artifactId>nav-arbeidsforhold-v3-tjenestespesifikasjon</artifactId>
+            <version>${aareg.arbeidsforhold.version}</version>
+            <classifier>jaxws</classifier>
+        </dependency>
+
         <!--GSAK-->
         <dependency>
             <groupId>no.nav.tjenester.fim</groupId>
             <artifactId>nav-fim-behandleSak-v1-tjenestespesifikasjon</artifactId>
-            <version>1.0.0</version>
+            <version>${gsak.sak.version}</version>
             <classifier>jaxws</classifier>
         </dependency>
 
