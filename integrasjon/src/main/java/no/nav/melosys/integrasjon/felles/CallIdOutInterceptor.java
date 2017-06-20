@@ -7,6 +7,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.cxf.binding.soap.SoapHeader;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.headers.Header;
+import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.jaxb.JAXBDataBinding;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -41,7 +42,7 @@ public class CallIdOutInterceptor extends AbstractPhaseInterceptor<Message> {
             SoapHeader header = new SoapHeader(MDCOperations.CALLID_QNAME, callId, new JAXBDataBinding(String.class));
             list.add(header);
         } catch (JAXBException e) {
-            throw new IllegalStateException("", e);
+            throw new Fault(e);
         }
     }
 }
