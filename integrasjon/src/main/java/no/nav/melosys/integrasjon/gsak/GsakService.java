@@ -34,6 +34,16 @@ public class GsakService implements GsakFasade {
         this.behandleSakConsumer = behandleSakConsumer;
     }
 
+    /**
+     * Oppretter en sak i GSAK for å få et unikt saksnummer.
+     * 
+     * @param fagsakId
+     *            fagsakId fra Melosys
+     * @param fnr
+     *            Fødselsnummer
+     * @return Saksnummer fra GSAK
+     * @throws IntegrasjonException
+     */
     @Override
     public String opprettSak(Long fagsakId, String fnr) throws IntegrasjonException {
         Sak sak = new Sak();
