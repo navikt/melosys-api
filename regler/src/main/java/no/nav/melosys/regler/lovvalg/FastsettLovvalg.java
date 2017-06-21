@@ -31,3 +31,4 @@ public final class FastsettLovvalg {
             rsett.kjør();
         }
     }
+}
