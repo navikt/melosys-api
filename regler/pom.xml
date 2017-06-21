@@ -44,8 +44,6 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jetty</artifactId>
         </dependency>

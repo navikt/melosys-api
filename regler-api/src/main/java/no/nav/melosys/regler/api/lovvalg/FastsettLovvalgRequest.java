@@ -38,6 +38,13 @@ public class FastsettLovvalgRequest {
     
     public boolean utsendtForAaErstatteEnAnnenPerson;
     
+    /**
+     * Lager en FastsettLovvalgRequest ut fra en json streng
+     */
+    public static FastsettLovvalgRequest fromString(String param) {
+        return new Gson().fromJson(param, FastsettLovvalgRequest.class);
+    } 
+    
     @Override
     public String toString() {
         return new Gson().toJson(this);

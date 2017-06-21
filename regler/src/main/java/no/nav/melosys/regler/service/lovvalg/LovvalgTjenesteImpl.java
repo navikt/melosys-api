@@ -8,7 +8,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.QueryParam;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +28,6 @@ import no.nav.melosys.regler.lovvalg.FastsettLovvalg;
 
 @Component
 @Path("Lovvalg")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
 @Api
 @SwaggerDefinition(
         basePath = "Lovvalg",
@@ -41,22 +39,27 @@ import no.nav.melosys.regler.lovvalg.FastsettLovvalg;
                 ),
                 description = "Tjenester for å fastsette lovvalg" 
         ),
-        consumes = {MediaType.APPLICATION_JSON},
-        produces = {MediaType.APPLICATION_JSON},
+        consumes = {LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8},
+        produces = {LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8},
         schemes = {SwaggerDefinition.Scheme.HTTP, SwaggerDefinition.Scheme.HTTPS}
 )
 public class LovvalgTjenesteImpl implements LovvalgTjeneste {
+    
+    // Denne kan flyttes til en felles-util modul
+    public static final String APPLICATION_JSON_UTF_8 = "application/json;charset=utf-8";
     
     private static Logger log = LoggerFactory.getLogger(LovvalgTjenesteImpl.class);
 
     @Override
     @GET
     @Path("fastsettLovvalg")
+    @Consumes(LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8)
+    @Produces(LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8)
     @ApiOperation(
             value= "Fastsetter lovvalgsland",
             notes = "Tjeneste som anvender lovverk til å fastsette lovvalgsland for en forespørsel"
     )
-    public FastsettLovvalgRespons fastsettLovvalg(FastsettLovvalgRequest req) {
+    public FastsettLovvalgRespons fastsettLovvalg(@QueryParam("req") FastsettLovvalgRequest req) {
         try {
             // Sett lokal kontekst for regelsett...
             initialiserLokalKontekst(req);

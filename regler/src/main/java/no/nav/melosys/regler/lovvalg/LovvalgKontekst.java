@@ -64,7 +64,7 @@ public class LovvalgKontekst {
             if (se.getClassName().startsWith("no.nav.melosys.regler.lovvalg.") && !se.getClassName().equals(LovvalgKontekst.class.getName())) {
                 String regelKlasse = se.getClassName();
                 String regelMetode = se.getMethodName();
-                regelnavn = regelKlasse.replaceAll("no.nav.melosys.regler.lovvalg", "") + regelMetode;
+                regelnavn = regelKlasse.replaceAll("no.nav.melosys.regler.lovvalg.", "") + "." + regelMetode;
                 break;
             }
         }
