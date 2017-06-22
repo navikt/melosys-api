@@ -1,9 +1,15 @@
 package no.nav.melosys.domain;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -21,6 +27,21 @@ public class Arbeidsforhold extends Saksopplysning {
 
     @Column(name = "ansettelse_til")
     private LocalDate ansettelseTil;
+
+    @ManyToOne
+    @JoinColumn(name = "type")
+    private ArbeidsforholdsType type;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "arbeidsforhold")
+    List<Arbeidsavtale> arbeidsavtaleListe = new ArrayList<>();
+
+    public List<Arbeidsavtale> getArbeidsavtaleListe() {
+        return arbeidsavtaleListe;
+    }
+
+    public void setArbeidsavtaleListe(List<Arbeidsavtale> arbeidsavtaleListe) {
+        this.arbeidsavtaleListe = arbeidsavtaleListe;
+    }
 
     public Long getArbeidsgiverId() {
         return arbeidsgiverId;
@@ -54,5 +75,11 @@ public class Arbeidsforhold extends Saksopplysning {
         this.ansettelseTil = ansettelseTil;
     }
 
+    public ArbeidsforholdsType getType() {
+        return type;
+    }
 
+    public void setType(ArbeidsforholdsType type) {
+        this.type = type;
+    }
 }

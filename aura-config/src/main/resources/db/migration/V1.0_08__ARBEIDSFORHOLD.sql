@@ -1,0 +1,39 @@
+CREATE TABLE arbeidsforhold (
+    id              NUMBER(19) GENERATED ALWAYS AS IDENTITY,
+    arbeidsgiver_id NUMBER(19) NOT NULL,
+    arbeidstaker_id NUMBER(19) NOT NULL,
+    ansettelse_fra  DATE,
+    ansettelse_til  DATE,
+    type            VARCHAR2(50 CHAR) NOT NULL,
+    CONSTRAINT pk_arbeidsforhold PRIMARY KEY (id)
+);
+
+ALTER TABLE arbeidsforhold ADD CONSTRAINT fk_arbeidsforhold_arbeidsgiver FOREIGN KEY (arbeidsgiver_id) REFERENCES arbeidsgiver;
+ALTER TABLE arbeidsforhold ADD CONSTRAINT fk_arbeidsforhold_arbeidstaker FOREIGN KEY (arbeidstaker_id) REFERENCES bruker;
+
+CREATE TABLE arbeidsforhold_type (
+    kode        VARCHAR2(50 CHAR) NOT NULL,
+    navn        VARCHAR2(100 CHAR) NOT NULL,
+    beskrivelse VARCHAR2(2000 CHAR),
+    CONSTRAINT pk_arbeidsforhold_type PRIMARY KEY (kode)
+);
+
+ALTER TABLE arbeidsforhold ADD CONSTRAINT fk_arbeidsforhold_type FOREIGN KEY (type) REFERENCES arbeidsforhold_type;
+
+INSERT INTO arbeidsforhold_type (kode, navn) VALUES ('ordinaertArbeidsforhold', 'ordinaertArbeidsforhold');
+INSERT INTO arbeidsforhold_type (kode, navn) VALUES ('maritimtArbeidsforhold', 'maritimtArbeidsforhold');
+INSERT INTO arbeidsforhold_type (kode, navn) VALUES ('forenkletOppgjoersordning', 'forenkletOppgjoersordning');
+INSERT INTO arbeidsforhold_type (kode, navn) VALUES ('frilanserOppdragstakerHonorarPersonerMm', 'frilanserOppdragstakerHonorarPersonerMm');
+INSERT INTO arbeidsforhold_type (kode, navn) VALUES ('pensjonOgAndreTyperYtelserUtenAnsettelsesforhold', 'pensjonOgAndreTyperYtelserUtenAnsettelsesforhold');
+
+CREATE TABLE arbeidsavtale (
+    id                NUMBER(19) GENERATED ALWAYS AS IDENTITY,
+    arbeidsforhold_id NUMBER(19)         NOT NULL,
+    fartsomraade      VARCHAR2(20 CHAR),
+    skipsregister     VARCHAR2(20 CHAR),
+    skipstype         VARCHAR2(20 CHAR),
+    yrke              VARCHAR2(100 CHAR) NOT NULL,
+    CONSTRAINT pk_arbeidsavtale PRIMARY KEY (id)
+);
+
+ALTER TABLE arbeidsavtale ADD CONSTRAINT fk_arbeidsforhold FOREIGN KEY (arbeidsforhold_id) REFERENCES arbeidsforhold;
