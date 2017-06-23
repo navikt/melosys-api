@@ -126,7 +126,7 @@ public class AaregService implements AaregFasade {
                 permisjon.setSluttDato(xmlTilLocalDate(p.getPermisjonsPeriode().getTom()));
                 // TODO Francois scale?
                 permisjon.setProsent(p.getPermisjonsprosent());
-                // TODO Når inmeldt?
+                // TODO = Når inmeldt?
                 permisjon.setEndringsTidspunkt(xmlTilLocalDateTime(p.getEndringstidspunkt()));
                 // TODO Francois Ikke med?
                 // p.getPermisjonOgPermittering().getValue(); Permisjonstypen: permisjon eller permittering (kodeverk)
@@ -134,13 +134,14 @@ public class AaregService implements AaregFasade {
             }
 
             // Utenlandsopphold
-            // startdato + sluttdato
             List<Utenlandsopphold> oppholdListe = a.getUtenlandsopphold();
             for (Utenlandsopphold o : oppholdListe) {
-                o.getLand().getValue();
-                // Tidsperioden som ble dekket i rapporten
-                o.getRapporteringsperiode();
-
+                no.nav.melosys.domain.Utenlandsopphold utenlandsopphold = new no.nav.melosys.domain.Utenlandsopphold();
+                utenlandsopphold.setLand(o.getLand().getValue());
+                // Rapporteringsperiode Tidsperioden som ble dekket i rapporten
+                // TODO rapporteringsperiode eller periode?
+                utenlandsopphold.setStartdato(xmlTilLocalDate(o.getPeriode().getFom()));
+                utenlandsopphold.setSluttdato(xmlTilLocalDate(o.getPeriode().getTom()));
             }
 
             // Arbeidsavtaler
@@ -158,7 +159,7 @@ public class AaregService implements AaregFasade {
         for (Arbeidsavtale avtale : avtaler) {
             no.nav.melosys.domain.Arbeidsavtale domeneAvtale = new no.nav.melosys.domain.Arbeidsavtale();
 
-            // TODO Perioder?
+            // TODO Francois Perioder?
 
             // Yrkesbetegnelse. Nødvendig for statistikk til EU
             domeneAvtale.setYrke(avtale.getYrke().getValue());

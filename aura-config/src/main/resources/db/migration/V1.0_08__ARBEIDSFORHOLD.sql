@@ -37,7 +37,7 @@ CREATE TABLE arbeidsavtale (
     CONSTRAINT pk_arbeidsavtale PRIMARY KEY (id)
 );
 
-ALTER TABLE arbeidsavtale ADD CONSTRAINT fk_arbeidsforhold FOREIGN KEY (arbeidsforhold_id) REFERENCES arbeidsforhold;
+ALTER TABLE arbeidsavtale ADD CONSTRAINT fk_arbeidsavtale_forhold FOREIGN KEY (arbeidsforhold_id) REFERENCES arbeidsforhold;
 
 CREATE TABLE permisjon (
     id                NUMBER(19) GENERATED ALWAYS AS IDENTITY,
@@ -49,3 +49,16 @@ CREATE TABLE permisjon (
     endret            TIMESTAMP(0),
     CONSTRAINT pk_permisjon PRIMARY KEY (id)
 );
+
+ALTER TABLE permisjon ADD CONSTRAINT fk_permisjon_forhold FOREIGN KEY (arbeidsforhold_id) REFERENCES arbeidsforhold;
+
+CREATE TABLE utenlandsopphold (
+    id                NUMBER(19) GENERATED ALWAYS AS IDENTITY,
+    arbeidsforhold_id NUMBER(19) NOT NULL,
+    land              VARCHAR2(50 CHAR),
+    startdato         DATE,
+    sluttdato         DATE,
+    CONSTRAINT pk_utenlandsopphold PRIMARY KEY (id)
+);
+
+ALTER TABLE utenlandsopphold ADD CONSTRAINT fk_opphold_forhold FOREIGN KEY (arbeidsforhold_id) REFERENCES arbeidsforhold;
