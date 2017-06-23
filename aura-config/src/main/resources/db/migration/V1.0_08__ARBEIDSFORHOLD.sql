@@ -4,7 +4,8 @@ CREATE TABLE arbeidsforhold (
     arbeidstaker_id NUMBER(19) NOT NULL,
     ansettelse_fra  DATE,
     ansettelse_til  DATE,
-    type            VARCHAR2(50 CHAR) NOT NULL,
+    sist_bekreftet  DATE,
+    type            VARCHAR2(50 CHAR),
     CONSTRAINT pk_arbeidsforhold PRIMARY KEY (id)
 );
 
@@ -37,3 +38,14 @@ CREATE TABLE arbeidsavtale (
 );
 
 ALTER TABLE arbeidsavtale ADD CONSTRAINT fk_arbeidsforhold FOREIGN KEY (arbeidsforhold_id) REFERENCES arbeidsforhold;
+
+CREATE TABLE permisjon (
+    id                NUMBER(19) GENERATED ALWAYS AS IDENTITY,
+    arbeidsforhold_id NUMBER(19) NOT NULL,
+    permisjon_id      VARCHAR2(20 CHAR),
+    startdato         DATE,
+    sluttdato         DATE,
+    prosent           NUMBER(*, 1),
+    endret            TIMESTAMP(0),
+    CONSTRAINT pk_permisjon PRIMARY KEY (id)
+);

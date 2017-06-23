@@ -7,24 +7,24 @@ import javax.persistence.MappedSuperclass;
 public abstract class Aktoer {
 
     @Column(name = "aktoer_id")
-    private Long aktørId;
+    private String aktørId;
 
     @Column(name = "org_nummer")
-    private Long orgNummer;
+    private String orgNummer;
 
-    public Long getAktørId() {
+    public String getAktørId() {
         return aktørId;
     }
 
-    public void setAktørId(Long aktørId) {
+    public void setAktørId(String aktørId) {
         this.aktørId = aktørId;
     }
 
-    public Long getOrgNummer() {
+    public String getOrgNummer() {
         return orgNummer;
     }
 
-    public void setOrgNummer(Long orgNummer) {
+    public void setOrgNummer(String orgNummer) {
         this.orgNummer = orgNummer;
     }
 }

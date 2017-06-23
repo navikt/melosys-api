@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.aareg;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import no.nav.melosys.domain.Arbeidsforhold;
 import no.nav.melosys.domain.ArbeidsforholdsType;
+import no.nav.melosys.domain.Arbeidsgiver;
+import no.nav.melosys.domain.PermisjonOgPermittering;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
 import no.nav.melosys.integrasjon.felles.IntegrasjonException;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning;
@@ -24,7 +27,7 @@ import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.A
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Fartsomraader;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.MaritimArbeidsavtale;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.NorskIdent;
-import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.PermisjonOgPermittering;
+import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Organisasjon;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Regelverker;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Skipsregistre;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Skipstyper;
@@ -46,8 +49,10 @@ public class AaregService implements AaregFasade {
     }
 
     /**
-     *  Henter en liste av arbeidsforhold for en arbeidstaker.
-     * @param fnr Fødselsnummer til arbeidstaker.
+     * Henter en liste av arbeidsforhold for en arbeidstaker.
+     * 
+     * @param fnr
+     *            Fødselsnummer til arbeidstaker.
      * @return
      */
     @Override
@@ -57,9 +62,11 @@ public class AaregService implements AaregFasade {
         ident.setIdent(fnr);
         request.setIdent(ident);
         Regelverker regelverker = new Regelverker();
+        // TODO Anders Vi har (foreløpig) sagt at vi kun skal hente arbeidsforhold rapportert på nytt regelverk.
         regelverker.setKodeverksRef(REGELVERK_ALLE);
         request.setRapportertSomRegelverk(regelverker);
 
+        // Kall til Aa-registret
         FinnArbeidsforholdPrArbeidstakerResponse response = null;
         try {
             response = arbeidsforholdConsumer.finnArbeidsforholdPrArbeidstaker(request);
@@ -77,11 +84,16 @@ public class AaregService implements AaregFasade {
         for (no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Arbeidsforhold a : liste) {
             Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
 
-            // Organisasjonsnummer -  til den virksomheten hvor arbeidsforholdet er knyttet
-            // TODO Francois hvordan finner vi ut av nummeret ut fra aktoer
-            Aktoer arbeidsgiver = a.getArbeidsgiver();
+            // Organisasjonsnummer - til den virksomheten hvor arbeidsforholdet er knyttet
+            Aktoer arbeidsgiverXml = a.getArbeidsgiver();
+            Arbeidsgiver arbeidsgiver = new Arbeidsgiver();
+            if (arbeidsgiverXml instanceof Organisasjon) {
+                // TODO Francois Test
+                arbeidsgiver.setOrgNummer(((Organisasjon) arbeidsgiverXml).getOrgnummer());
+            }
+            arbeidsgiver.setAktørId(arbeidsgiverXml.getAktoerId());
 
-            // Opplysningspliktig -  juridisk enhet (vesentlig virksomhet i  Norge?)
+            // Opplysningspliktig - juridisk enhet (vesentlig virksomhet i Norge?)
             Aktoer opplysningspliktig = a.getOpplysningspliktig();
 
             // Startdato og slutdato arbeidsforhold
@@ -91,49 +103,54 @@ public class AaregService implements AaregFasade {
             arbeidsforhold.setAnsettelseFra(xmlTilLocalDate(fraOgMed));
             arbeidsforhold.setAnsettelseTil(xmlTilLocalDate(tilOgMed));
 
-            // Dato for første gangs registrering - ikke mulig
-            // Dato sist bekreftet
-            // TODO
+            // Dato for første gangs registrering - ikke mulig?
+            // TODO Spørre Anders a.getOpprettelsestidspunkt(); ?
 
-            // Type arbeidsforhold -  "Ordinært", "Maritimt", «Forenklet oppgjørsordning»...
+            // Dato sist bekreftet
+            arbeidsforhold.setSistBekreftet(xmlTilLocalDate(a.getSistBekreftet()));
+
+            // Type arbeidsforhold - "Ordinært", "Maritimt", «Forenklet oppgjørsordning»...
+            // Ikke påkrevd i tjenesten.
             Arbeidsforholdstyper type = a.getArbeidsforholdstype();
             if (type != null) {
                 arbeidsforhold.setType(ArbeidsforholdsType.getFraKode(type.getValue()));
-            } else {
-                throw new IntegrasjonException("Arbeidsforholdstyper er null for arbeidsforhold " + a.getArbeidsforholdID());
             }
 
+            // PermisjonOgPermittering. Til å gjøre kontroll etter vedtak er innvilget. Ikke direkte vilkårvurdering.
+            // TODO Hentes separat?
+            List<no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.PermisjonOgPermittering> permisjoner = a.getPermisjonOgPermittering();
+            for (no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.PermisjonOgPermittering p : permisjoner) {
+                PermisjonOgPermittering permisjon = new PermisjonOgPermittering();
+                permisjon.setPermisjonsId(p.getPermisjonsId());
+                permisjon.setStartDato(xmlTilLocalDate(p.getPermisjonsPeriode().getFom()));
+                permisjon.setSluttDato(xmlTilLocalDate(p.getPermisjonsPeriode().getTom()));
+                // TODO Francois scale?
+                permisjon.setProsent(p.getPermisjonsprosent());
+                // TODO Når inmeldt?
+                permisjon.setEndringsTidspunkt(xmlTilLocalDateTime(p.getEndringstidspunkt()));
+                // TODO Francois Ikke med?
+                // p.getPermisjonOgPermittering().getValue(); Permisjonstypen: permisjon eller permittering (kodeverk)
 
-            // TODO
-
-            // Permisjon. Til å gjøre kontroll etter vedtak er innvilget. Ikke direkte vilkårvurdering.
-            List<PermisjonOgPermittering> permisjoner = a.getPermisjonOgPermittering();
+            }
 
             // Utenlandsopphold
             // startdato + sluttdato
             List<Utenlandsopphold> oppholdListe = a.getUtenlandsopphold();
+            for (Utenlandsopphold o : oppholdListe) {
+                o.getLand().getValue();
+                // Tidsperioden som ble dekket i rapporten
+                o.getRapporteringsperiode();
+
+            }
 
             // Arbeidsavtaler
             List<Arbeidsavtale> avtaler = a.getArbeidsavtale();
             arbeidsforhold.setArbeidsavtaleListe(tilDomeneModell(avtaler));
 
-
-
-
-
-
             resultat.add(arbeidsforhold);
         }
 
-
         return resultat;
-    }
-
-    private LocalDate xmlTilLocalDate(XMLGregorianCalendar xmlCal) {
-        if (xmlCal == null) {
-            return null;
-        }
-        return xmlCal.toGregorianCalendar().toZonedDateTime().toLocalDate();
     }
 
     private List<no.nav.melosys.domain.Arbeidsavtale> tilDomeneModell(List<Arbeidsavtale> avtaler) {
@@ -147,14 +164,13 @@ public class AaregService implements AaregFasade {
             domeneAvtale.setYrke(avtale.getYrke().getValue());
 
             // Stillingsprosent TODO avventer Anders
-            //avtale.getStillingsprosent();
-            //avtale.getBeregnetStillingsprosent();
-
+            // avtale.getStillingsprosent();
+            // avtale.getBeregnetStillingsprosent();
 
             // Lønnstype. TODO Francois (Ingen vits å ta i bruk?)
-            //avtale.getAvloenningstype();
+            // avtale.getAvloenningstype();
 
-            // For å   kunne vurderehvilke gruppen bruker faller under og hvilke artiklene skal vurderes
+            // For å kunne vurderehvilke gruppen bruker faller under og hvilke artiklene skal vurderes
             Arbeidstidsordninger arbeidstidsordning = avtale.getArbeidstidsordning();
             if (arbeidstidsordning != null) {
                 arbeidstidsordning.getValue();
@@ -176,13 +192,24 @@ public class AaregService implements AaregFasade {
                 String skipstype = (skipstypeXml == null) ? null : skipstypeXml.getValue();
                 domeneAvtale.setSkipstype(skipstype);
 
-
-
             }
-
 
         }
         return arbeidsavtaleListe;
+    }
+
+    private LocalDate xmlTilLocalDate(XMLGregorianCalendar xmlCal) {
+        if (xmlCal == null) {
+            return null;
+        }
+        return xmlCal.toGregorianCalendar().toZonedDateTime().toLocalDate();
+    }
+
+    private LocalDateTime xmlTilLocalDateTime(XMLGregorianCalendar tidspunkt) {
+        if (tidspunkt == null) {
+            return null;
+        }
+        return tidspunkt.toGregorianCalendar().toZonedDateTime().toLocalDateTime();
     }
 
 }

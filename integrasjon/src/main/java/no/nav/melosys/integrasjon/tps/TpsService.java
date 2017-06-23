@@ -40,14 +40,13 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Optional<Long> hentAktørIdForIdent(String fnr) {
+    public Optional<String> hentAktørIdForIdent(String fnr) {
         HentAktoerIdForIdentRequest request = new HentAktoerIdForIdentRequest();
         request.setIdent(fnr);
-        Optional<Long> optResult = null;
+        Optional<String> optResult = null;
         try {
             HentAktoerIdForIdentResponse response = aktorConsumer.hentAktørIdForIdent(request);
-            String aktørIdString = response.getAktoerId();
-            Long aktørId = Long.valueOf(aktørIdString);
+            String aktørId = response.getAktoerId();
             optResult = Optional.of(aktørId);
         } catch (HentAktoerIdForIdentPersonIkkeFunnet e) { // NOSONAR
             optResult = Optional.empty();

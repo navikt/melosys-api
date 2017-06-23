@@ -6,7 +6,7 @@ import no.nav.melosys.domain.Bruker;
 
 public interface TpsFasade {
 
-    Optional<Long> hentAktørIdForIdent(String fnr);
+    Optional<String> hentAktørIdForIdent(String fnr);
 
     Bruker hentKjerneinformasjon(Bruker bruker);
 }
