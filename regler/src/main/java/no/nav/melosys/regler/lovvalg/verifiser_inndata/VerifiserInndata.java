@@ -4,6 +4,7 @@ import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.leggTilMeldingOgLogg
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.søknad;
 
 import java.util.Collections;
+import java.util.HashSet;
 
 import no.nav.melosys.regler.api.lovvalg.Kategori;
 
@@ -54,6 +55,13 @@ public final class VerifiserInndata {
         }
         if (!søknad().arbeidFlereLand && søknad().land.size() > 1) {
             leggTilMeldingOgLogg(Kategori.FEIL_I_SOEKNAD, "Oppgitt arbeid i ett land, men flere land i søknaden");
+        }
+        // Verifiser unike land
+        HashSet<String> land = new HashSet<>();
+        for (String s : søknad().land) {
+            if (!land.add(s)) {
+                leggTilMeldingOgLogg(Kategori.FEIL_I_SOEKNAD, "Landet '" + s + "' er oppgitt flere ganger");
+            }
         }
         // Verifiser perioden
         if (søknad().periodeFom != null && søknad().periodeTom != null && søknad().periodeFom.isAfter(søknad().periodeTom)) {
