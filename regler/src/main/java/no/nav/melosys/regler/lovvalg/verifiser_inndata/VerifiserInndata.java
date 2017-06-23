@@ -10,6 +10,11 @@ import no.nav.melosys.regler.api.lovvalg.Kategori;
 public final class VerifiserInndata {
 
     public static void kjørRegler() {
+        // Sjekk om vi ha en søknad før all annen verifisering...
+        if (søknad() == null) {
+            leggTilMeldingOgLogg(Kategori.FEIL_I_SOEKNAD, "Ingen søknad i forespørsel");
+            return;
+        }
         verifiserPåkrevdeFelter();
         verifiserKonsistens();
     }

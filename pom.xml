@@ -65,7 +65,11 @@
         <logback.version>1.2.3</logback.version>
         <junit.version>4.12</junit.version>
         <mockito.version>2.7.22</mockito.version>
-    </properties>
+
+        <restFixture.version>4.4</restFixture.version>
+		<fitnesse.version>20161106</fitnesse.version>
+
+		</properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det brukes. -->
     <dependencyManagement>
@@ -168,6 +172,11 @@
                 <version>${cxf.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-rs-client</artifactId>
+                <version>${cxf.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
@@ -238,6 +247,17 @@
             </dependency>
 
             <!-- Test -->
+            <dependency>
+                <groupId>smartrics.restfixture</groupId>
+                <artifactId>smartrics-RestFixture</artifactId>
+                <version>${restFixture.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.fitnesse</groupId>
+                <artifactId>fitnesse</artifactId>
+                <version>${fitnesse.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
