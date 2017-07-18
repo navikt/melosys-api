@@ -4,20 +4,17 @@ import javax.annotation.PostConstruct;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.wadl.internal.WadlResource;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-//import io.swagger.annotations.Api;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
 import no.nav.melosys.regler.service.lovvalg.LovvalgTjenesteImpl;
 
+//import io.swagger.annotations.Api;
+
 @Configuration
-@ComponentScan
-@EnableAutoConfiguration
 public class RegelConfig extends ResourceConfig {
 
     public RegelConfig() {
