@@ -41,7 +41,7 @@ public class AaregService implements AaregFasade {
 
     private ArbeidsforholdConsumer arbeidsforholdConsumer;
 
-    // Kode for  arbeidsforhold basert på nytt regelverk fra 1.1.2015
+    // Kode for  arbeidsforhold basert på nytt regelverk fra 1.1.2015 (a-ordningen)
     private static final String REGELVERK_A_ORDNINGEN = "A_ORDNINGEN";
 
     @Autowired
@@ -50,18 +50,18 @@ public class AaregService implements AaregFasade {
     }
 
     /**
-     * Henter en liste av arbeidsforhold for en arbeidstaker.
+     * Etterspør og returnerer en liste av arbeidsforhold fra AA-registeret for en arbeidstaker.
      * 
-     * @param fnr
-     *            Fødselsnummer til arbeidstaker.
+     * @param ident Fødselsnummer, D-Nummer, SSN... tilhørende en arbeidstaker
+     *
      * @return
      */
     @Override
-    public List<Arbeidsforhold> finnArbeidsforholdPrArbeidstaker(String fnr) throws IntegrasjonException {
+    public List<Arbeidsforhold> finnArbeidsforholdPrArbeidstaker(String ident) throws IntegrasjonException {
         FinnArbeidsforholdPrArbeidstakerRequest request = new FinnArbeidsforholdPrArbeidstakerRequest();
-        NorskIdent ident = new NorskIdent();
-        ident.setIdent(fnr);
-        request.setIdent(ident);
+        NorskIdent norskIdent = new NorskIdent();
+        norskIdent.setIdent(ident);
+        request.setIdent(norskIdent);
         Regelverker regelverker = new Regelverker();
         // Vi har (foreløpig) sagt at vi kun skal hente arbeidsforhold rapportert på nytt regelverk.
         regelverker.setKodeverksRef(REGELVERK_A_ORDNINGEN); // Mulige verdier: FOER_A_ORDNINGEN, A_ORDNINGEN, ALLE
