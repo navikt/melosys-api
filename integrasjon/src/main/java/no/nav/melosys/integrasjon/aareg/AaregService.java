@@ -163,7 +163,7 @@ public class AaregService implements AaregFasade {
             // Yrkesbetegnelse. Nødvendig for statistikk til EU
             domeneAvtale.setYrke(avtale.getYrke().getValue());
 
-            domeneAvtale.setTimerPerUke(avtale.getAvtaltArbeidstimerPerUke());
+            domeneAvtale.setTimerPerUke(avtale.getBeregnetAntallTimerPrUke());
 
             // Stillingsprosent
             // Både når en jobber  i  utlandet, og den periode før. Dette for å avdekke reell utsending
@@ -171,7 +171,8 @@ public class AaregService implements AaregFasade {
 
             // TODO Yvonne Kanskje til visning (beregnet til   månedlig)?
             // avtale.getBeregnetStillingsprosent();
-            // antallTimerGammeltAa
+            // avtale.getAntallTimerGammeltAa();
+            // avtale.getEndringsdatoStillingsprosent(); ikke i Informasjonsbehov men i Magic Draw
 
             // For å kunne vurdere hvilke gruppen bruker faller under og hvilke artiklene skal vurderes
             Arbeidstidsordninger arbeidstidsordning = avtale.getArbeidstidsordning();
