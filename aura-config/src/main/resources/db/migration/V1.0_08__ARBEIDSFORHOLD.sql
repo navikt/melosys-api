@@ -33,6 +33,8 @@ CREATE TABLE arbeidsavtale (
     fartsomraade      VARCHAR2(20 CHAR),
     skipsregister     VARCHAR2(20 CHAR),
     skipstype         VARCHAR2(20 CHAR),
+    stillingsprosent  NUMBER,
+    timer_per_uke     NUMBER(19),
     yrke              VARCHAR2(100 CHAR) NOT NULL,
     CONSTRAINT pk_arbeidsavtale PRIMARY KEY (id)
 );
@@ -45,7 +47,7 @@ CREATE TABLE permisjon (
     permisjon_id      VARCHAR2(20 CHAR),
     startdato         DATE,
     sluttdato         DATE,
-    prosent           NUMBER(*, 1),
+    prosent           NUMBER,
     endret            TIMESTAMP(0),
     CONSTRAINT pk_permisjon PRIMARY KEY (id)
 );

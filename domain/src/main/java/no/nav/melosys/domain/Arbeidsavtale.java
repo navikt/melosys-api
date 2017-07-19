@@ -1,5 +1,7 @@
 package no.nav.melosys.domain;
 
+import java.math.BigDecimal;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -29,6 +31,12 @@ public class Arbeidsavtale {
 
     @Column(name = "skipstype")
     private String skipstype;
+
+    @Column(name = "stillingsprosent")
+    private BigDecimal stillingsprosent;
+
+    @Column(name = "timer_per_uke")
+    private BigDecimal timerPerUke;
 
     @Column(name = "yrke")
     private String yrke;
@@ -63,6 +71,22 @@ public class Arbeidsavtale {
 
     public void setSkipstype(String skipstype) {
         this.skipstype = skipstype;
+    }
+
+    public BigDecimal getStillingsprosent() {
+        return stillingsprosent;
+    }
+
+    public void setStillingsprosent(BigDecimal stillingsprosent) {
+        this.stillingsprosent = stillingsprosent;
+    }
+
+    public BigDecimal getTimerPerUke() {
+        return timerPerUke;
+    }
+
+    public void setTimerPerUke(BigDecimal timerPerUke) {
+        this.timerPerUke = timerPerUke;
     }
 
     public String getYrke() {

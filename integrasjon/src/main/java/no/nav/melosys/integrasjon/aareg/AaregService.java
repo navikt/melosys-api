@@ -41,7 +41,8 @@ public class AaregService implements AaregFasade {
 
     private ArbeidsforholdConsumer arbeidsforholdConsumer;
 
-    private static final String REGELVERK_ALLE = "ALLE";
+    // Kode for  arbeidsforhold basert på nytt regelverk fra 1.1.2015
+    private static final String REGELVERK_A_ORDNINGEN = "A_ORDNINGEN";
 
     @Autowired
     public AaregService(ArbeidsforholdConsumer arbeidsforholdConsumer) {
@@ -62,8 +63,8 @@ public class AaregService implements AaregFasade {
         ident.setIdent(fnr);
         request.setIdent(ident);
         Regelverker regelverker = new Regelverker();
-        // TODO Anders Vi har (foreløpig) sagt at vi kun skal hente arbeidsforhold rapportert på nytt regelverk.
-        regelverker.setKodeverksRef(REGELVERK_ALLE);
+        // Vi har (foreløpig) sagt at vi kun skal hente arbeidsforhold rapportert på nytt regelverk.
+        regelverker.setKodeverksRef(REGELVERK_A_ORDNINGEN); // Mulige verdier: FOER_A_ORDNINGEN, A_ORDNINGEN, ALLE
         request.setRapportertSomRegelverk(regelverker);
 
         // Kall til Aa-registret
@@ -104,7 +105,7 @@ public class AaregService implements AaregFasade {
             arbeidsforhold.setAnsettelseTil(xmlTilLocalDate(tilOgMed));
 
             // Dato for første gangs registrering - ikke mulig?
-            // TODO Spørre Anders a.getOpprettelsestidspunkt(); ?
+            // TODO Spørre Anders dato == a.getOpprettelsestidspunkt(); ?
 
             // Dato sist bekreftet
             arbeidsforhold.setSistBekreftet(xmlTilLocalDate(a.getSistBekreftet()));
@@ -117,18 +118,16 @@ public class AaregService implements AaregFasade {
             }
 
             // PermisjonOgPermittering. Til å gjøre kontroll etter vedtak er innvilget. Ikke direkte vilkårvurdering.
-            // TODO Hentes separat?
+            // TODO Hentes med et separat kall?
             List<no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.PermisjonOgPermittering> permisjoner = a.getPermisjonOgPermittering();
             for (no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.PermisjonOgPermittering p : permisjoner) {
                 PermisjonOgPermittering permisjon = new PermisjonOgPermittering();
                 permisjon.setPermisjonsId(p.getPermisjonsId());
                 permisjon.setStartDato(xmlTilLocalDate(p.getPermisjonsPeriode().getFom()));
                 permisjon.setSluttDato(xmlTilLocalDate(p.getPermisjonsPeriode().getTom()));
-                // TODO Francois scale?
                 permisjon.setProsent(p.getPermisjonsprosent());
-                // TODO = Når inmeldt?
-                permisjon.setEndringsTidspunkt(xmlTilLocalDateTime(p.getEndringstidspunkt()));
-                // TODO Francois Ikke med?
+                permisjon.setEndringsTidspunkt(xmlTilLocalDateTime(p.getEndringstidspunkt())); // TODO = Når inmeldt?
+                // TODO Francois typen ikke med?
                 // p.getPermisjonOgPermittering().getValue(); Permisjonstypen: permisjon eller permittering (kodeverk)
 
             }
@@ -138,8 +137,9 @@ public class AaregService implements AaregFasade {
             for (Utenlandsopphold o : oppholdListe) {
                 no.nav.melosys.domain.Utenlandsopphold utenlandsopphold = new no.nav.melosys.domain.Utenlandsopphold();
                 utenlandsopphold.setLand(o.getLand().getValue());
-                // Rapporteringsperiode Tidsperioden som ble dekket i rapporten
+
                 // TODO rapporteringsperiode eller periode?
+                // Rapporteringsperiode: Tidsperioden som ble dekket i rapporten
                 utenlandsopphold.setStartdato(xmlTilLocalDate(o.getPeriode().getFom()));
                 utenlandsopphold.setSluttdato(xmlTilLocalDate(o.getPeriode().getTom()));
             }
@@ -156,22 +156,24 @@ public class AaregService implements AaregFasade {
 
     private List<no.nav.melosys.domain.Arbeidsavtale> tilDomeneModell(List<Arbeidsavtale> avtaler) {
         List<no.nav.melosys.domain.Arbeidsavtale> arbeidsavtaleListe = new ArrayList<>();
+
         for (Arbeidsavtale avtale : avtaler) {
             no.nav.melosys.domain.Arbeidsavtale domeneAvtale = new no.nav.melosys.domain.Arbeidsavtale();
-
-            // TODO Francois Perioder?
 
             // Yrkesbetegnelse. Nødvendig for statistikk til EU
             domeneAvtale.setYrke(avtale.getYrke().getValue());
 
-            // Stillingsprosent TODO avventer Anders
-            // avtale.getStillingsprosent();
+            domeneAvtale.setTimerPerUke(avtale.getAvtaltArbeidstimerPerUke());
+
+            // Stillingsprosent
+            // Både når en jobber  i  utlandet, og den periode før. Dette for å avdekke reell utsending
+            domeneAvtale.setStillingsprosent(avtale.getStillingsprosent());
+
+            // TODO Yvonne Kanskje til visning (beregnet til   månedlig)?
             // avtale.getBeregnetStillingsprosent();
+            // antallTimerGammeltAa
 
-            // Lønnstype. TODO Francois (Ingen vits å ta i bruk?)
-            // avtale.getAvloenningstype();
-
-            // For å kunne vurderehvilke gruppen bruker faller under og hvilke artiklene skal vurderes
+            // For å kunne vurdere hvilke gruppen bruker faller under og hvilke artiklene skal vurderes
             Arbeidstidsordninger arbeidstidsordning = avtale.getArbeidstidsordning();
             if (arbeidstidsordning != null) {
                 arbeidstidsordning.getValue();
