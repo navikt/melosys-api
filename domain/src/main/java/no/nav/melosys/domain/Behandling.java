@@ -45,7 +45,7 @@ public class Behandling {
     @JoinColumn(name = "type", nullable = false)
     private BehandlingType type;
 
-    // TOD Francois trenges?
+    // TODO Francois trenges?
     private LocalDate frist;
 
     public Long getBehandlingsId() {
