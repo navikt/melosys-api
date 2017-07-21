@@ -31,7 +31,7 @@ public class MottakSteg implements Steg {
     public void finnBehandlingOgUtfoerSteg() {
 
         // TODO JMS
-        if (ready) {
+        if (!ready) {
             return;
         }
 
