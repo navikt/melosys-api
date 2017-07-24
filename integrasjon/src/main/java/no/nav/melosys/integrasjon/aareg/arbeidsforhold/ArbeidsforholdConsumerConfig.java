@@ -22,8 +22,12 @@ public class ArbeidsforholdConsumerConfig {
     private static final QName SERVICE = new QName(NAMESPACE, "Arbeidsforhold_v3");
     private static final QName PORT = new QName(NAMESPACE, "Arbeidsforhold_v3Port");
 
-    @Value("${Arbeidsforhold_v3.url}")
     private String endpointUrl; // NOSONAR
+
+    public ArbeidsforholdConsumerConfig(@Value("${Arbeidsforhold_v3.url}") String endpointUrl) {
+        this.endpointUrl = endpointUrl;
+    }
+
 
     ArbeidsforholdV3 getPort() {
         Map<String, Object> properties = new HashMap<>();

@@ -198,6 +198,7 @@ public class AaregService implements AaregFasade {
 
             }
 
+            arbeidsavtaleListe.add(domeneAvtale);
         }
         return arbeidsavtaleListe;
     }
