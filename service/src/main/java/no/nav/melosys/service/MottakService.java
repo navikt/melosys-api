@@ -69,7 +69,7 @@ public class MottakService {
         String fnr = behandling.getFagsak().getBruker().getFnr();
 
         // Henter aktørId fra TPS
-        Optional<Long> aktørId = tpsFasade.hentAktørIdForIdent(fnr);
+        Optional<String> aktørId = tpsFasade.hentAktørIdForIdent(fnr);
         if (!aktørId.isPresent()) {
             throw new IllegalArgumentException("Finner ikke aktørID for fnr: " + fnr);
         }

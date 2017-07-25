@@ -19,15 +19,3 @@ INSERT INTO saksopplysning_kilde (kode, navn) VALUES ('JOARK', 'JOARK');
 INSERT INTO saksopplysning_kilde (kode, navn) VALUES ('TPS', 'TPS');
 
 ALTER TABLE saksopplysning ADD CONSTRAINT fk_saksopplysning_kilde_1 FOREIGN KEY (kilde) REFERENCES saksopplysning_kilde (kode);
-
-CREATE TABLE arbeidsforhold (
-    id                NUMBER(19) NOT NULL,
-    arbeidsgiver_id      NUMBER(19) NOT NULL,
-    arbeidstaker_id      NUMBER(19) NOT NULL,
-    ansettelse_fra    DATE,
-    ansettelse_til    DATE,
-    CONSTRAINT pk_arbeidsforhold PRIMARY KEY (id)
-);
-
-ALTER TABLE arbeidsforhold ADD CONSTRAINT fk_arbeidsforhold_arbeidsgiver FOREIGN KEY (arbeidsgiver_id) REFERENCES arbeidsgiver;
-ALTER TABLE arbeidsforhold ADD CONSTRAINT fk_arbeidsforhold_arbeidstaker FOREIGN KEY (arbeidstaker_id) REFERENCES bruker;

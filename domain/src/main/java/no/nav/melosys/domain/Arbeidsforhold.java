@@ -1,20 +1,28 @@
 package no.nav.melosys.domain;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "ARBEIDSFORHOLD")
 public class Arbeidsforhold extends Saksopplysning {
 
-    @Column(name = "arbeidsgiver_id")
-    private Long arbeidsgiverId;
+    @ManyToOne
+    @JoinColumn(name = "arbeidsgiver_id", nullable = false)
+    private Arbeidsgiver arbeidsgiver;
 
-    @Column(name = "arbeidstaker_id")
-    private Long arbeidstaker;
+    @ManyToOne
+    @JoinColumn(name = "arbeidstaker_id")
+    private Bruker arbeidstaker;
 
     @Column(name = "ansettelse_fra")
     private LocalDate ansettelseFra;
@@ -22,19 +30,32 @@ public class Arbeidsforhold extends Saksopplysning {
     @Column(name = "ansettelse_til")
     private LocalDate ansettelseTil;
 
-    public Long getArbeidsgiverId() {
-        return arbeidsgiverId;
+    @Column(name = "sist_bekreftet")
+    private LocalDate sistBekreftet;
+
+    @ManyToOne
+    @JoinColumn(name = "type")
+    private ArbeidsforholdsType type;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "arbeidsforhold")
+    List<Arbeidsavtale> arbeidsavtaleListe = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "arbeidsforhold")
+    List<PermisjonOgPermittering> permisjonOgPermitteringListe = new ArrayList<>();
+
+    public Arbeidsgiver getArbeidsgiver() {
+        return arbeidsgiver;
     }
 
-    public void setArbeidsgiverId(Long arbeidsgiverId) {
-        this.arbeidsgiverId = arbeidsgiverId;
+    public void setArbeidsgiver(Arbeidsgiver arbeidsgiver) {
+        this.arbeidsgiver = arbeidsgiver;
     }
 
-    public Long getArbeidstaker() {
+    public Bruker getArbeidstaker() {
         return arbeidstaker;
     }
 
-    public void setArbeidstaker(Long arbeidstaker) {
+    public void setArbeidstaker(Bruker arbeidstaker) {
         this.arbeidstaker = arbeidstaker;
     }
 
@@ -54,5 +75,27 @@ public class Arbeidsforhold extends Saksopplysning {
         this.ansettelseTil = ansettelseTil;
     }
 
+    public LocalDate getSistBekreftet() {
+        return sistBekreftet;
+    }
 
+    public void setSistBekreftet(LocalDate sistBekreftet) {
+        this.sistBekreftet = sistBekreftet;
+    }
+
+    public ArbeidsforholdsType getType() {
+        return type;
+    }
+
+    public void setType(ArbeidsforholdsType type) {
+        this.type = type;
+    }
+
+    public List<Arbeidsavtale> getArbeidsavtaleListe() {
+        return arbeidsavtaleListe;
+    }
+
+    public void setArbeidsavtaleListe(List<Arbeidsavtale> arbeidsavtaleListe) {
+        this.arbeidsavtaleListe = arbeidsavtaleListe;
+    }
 }

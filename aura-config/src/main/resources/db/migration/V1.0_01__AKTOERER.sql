@@ -1,14 +1,14 @@
 CREATE TABLE arbeidsgiver (
     id         NUMBER(19) GENERATED ALWAYS AS IDENTITY,
-    aktoer_id  NUMBER(19),
-    org_nummer NUMBER(19),
+    aktoer_id  VARCHAR2(20),
+    org_nummer VARCHAR2(20),
     CONSTRAINT pk_arbeidsgiver PRIMARY KEY (id)
 );
 
 CREATE TABLE bruker (
     id              NUMBER(19) GENERATED ALWAYS AS IDENTITY,
-    aktoer_id       NUMBER(19),
-    org_nummer      NUMBER(19),
+    aktoer_id       VARCHAR2(20),
+    org_nummer      VARCHAR2(20),
     fnr             VARCHAR2(20),
     navn            VARCHAR2(200),
     kjoenn          VARCHAR2(7 CHAR) DEFAULT 'K' NOT NULL,
@@ -19,8 +19,8 @@ CREATE TABLE bruker (
 
 CREATE TABLE fullmektig (
     id         NUMBER(19) GENERATED ALWAYS AS IDENTITY,
-    aktoer_id  NUMBER(19),
-    org_nummer NUMBER(19),
+    aktoer_id  VARCHAR2(20),
+    org_nummer VARCHAR2(20),
     CONSTRAINT pk_fullmektig PRIMARY KEY (id)
 );
 

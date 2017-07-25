@@ -58,17 +58,17 @@ public class TpsServiceTest {
             hentAktoerIdForIdentPersonIkkeFunnet.printStackTrace();
         }
 
-        Optional<Long> optAktørId = service.hentAktørIdForIdent(FNR_1);
+        Optional<String> optAktørId = service.hentAktørIdForIdent(FNR_1);
         assertNotNull(optAktørId);
         assertTrue(optAktørId.isPresent());
-        assertEquals(AKTØRID_1, optAktørId.get());
+        assertEquals(AKTØRID_1.toString(), optAktørId.get());
     }
 
     @Test
     public void test_hentAktørIdForIdent_ikkeFunnet() throws HentAktoerIdForIdentPersonIkkeFunnet {
         when(aktorConsumer.hentAktørIdForIdent(any())).thenThrow(new HentAktoerIdForIdentPersonIkkeFunnet("test", new PersonIkkeFunnet()));
 
-        Optional<Long> optAktørId = service.hentAktørIdForIdent(FNR_UKJENT);
+        Optional<String> optAktørId = service.hentAktørIdForIdent(FNR_UKJENT);
         assertNotNull(optAktørId);
         assertFalse(optAktørId.isPresent());
     }
