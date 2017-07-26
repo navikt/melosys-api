@@ -12,6 +12,6 @@ public interface BehandlingRepository extends CrudRepository<Behandling, Long> {
 
     List<Behandling> findByStatusNot(BehandlingStatus status);
 
-    @Query("select b from Behandling b, Fagsak f where b.fagsakId = f.id and f.saksnummer = ?1") //$NON-NLS-1$
+    @Query("select b from Behandling b, Fagsak f where b.fagsak.id = f.id and f.saksnummer = ?1") //$NON-NLS-1$
     List<Behandling> findBySaksnummer(Long saksnummer);
 }

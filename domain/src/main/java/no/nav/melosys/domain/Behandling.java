@@ -13,9 +13,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.GenerationTime;
-
 @Entity
 @Table(name = "BEHANDLING")
 public class Behandling {
@@ -25,7 +22,7 @@ public class Behandling {
     private Long id;
 
     // TODO Francois Hvordan genererer vi? Eksponerer vi nøkkelen?
-    @Generated(GenerationTime.INSERT)
+    //@Generated(GenerationTime.INSERT)
     @Column(name = "behandling_id")
     private Long behandlingsId;
 
@@ -50,6 +47,10 @@ public class Behandling {
 
     public Long getBehandlingsId() {
         return behandlingsId;
+    }
+
+    public void setBehandlingsId(Long behandlingsId) {
+        this.behandlingsId = behandlingsId;
     }
 
     public Fagsak getFagsak() {
