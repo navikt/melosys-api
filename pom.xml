@@ -61,7 +61,6 @@
         <servlet-api.version>3.1.0</servlet-api.version>
         <swagger.version>1.5.13</swagger.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <logback.version>1.2.3</logback.version>
         <junit.version>4.12</junit.version>
         <mockito.version>2.7.22</mockito.version>
 
@@ -125,11 +124,7 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>com.oracle</groupId>
                 <artifactId>ojdbc8</artifactId>
