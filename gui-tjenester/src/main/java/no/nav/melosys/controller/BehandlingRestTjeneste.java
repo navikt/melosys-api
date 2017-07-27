@@ -21,6 +21,7 @@ import no.nav.melosys.repository.BehandlingRepository;
 
 @Api(tags = { "behandling" })
 @Path("/behandling")
+@Produces(MediaType.APPLICATION_JSON)
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingRestTjeneste {
@@ -33,9 +34,8 @@ public class BehandlingRestTjeneste {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Søk etter behandlinger på saksnummer", notes = ("Returnerer alle behandlinger som er tilknyttet saksnummer."))
-    public List<Behandling> hentBehandlinger(@QueryParam("snr") @ApiParam("Saksnummer må være et eksisterende saksnummer") Long saksnummer) {
+    public List<Behandling> hentBehandlinger(@QueryParam("snr") @ApiParam("Saksnummer må være et eksisterende saksnummer.") Long saksnummer) {
         List<Behandling> behandlinger = behandlingrepo.findBySaksnummer(saksnummer);
 
         return behandlinger;

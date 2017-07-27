@@ -20,9 +20,9 @@
         <module>aura-config</module>
         <module>build</module>
         <module>config</module>
-        <module>controller</module>
         <module>domain</module>
         <module>fitnesse</module>
+        <module>gui-tjenester</module>
         <module>integrasjon</module>
         <module>repository</module>
         <module>saksflyt</module>

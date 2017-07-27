@@ -35,7 +35,7 @@
                     <driver>oracle.jdbc.driver.OracleDriver</driver>
                     <encoding>ISO-8859-1</encoding>
                     <initOnMigrate>true</initOnMigrate>
-                    <location>db/migration</location>
+                    <location>db/migration/melosysDB</location>
                 </configuration>
             </plugin>
 
