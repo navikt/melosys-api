@@ -16,9 +16,14 @@
 
     <dependencies>
         <dependency>
-            <!--TODO Francois: For å teste flyway migrations-->
+            <!--TODO Francois: For å teste flyway migrations. Fjernes når modellen er stabil.-->
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-aura-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>${flyway.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
@@ -39,11 +44,6 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <version>${flyway.version}</version>
         </dependency>
 
     </dependencies>
