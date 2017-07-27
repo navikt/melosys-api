@@ -40,6 +40,16 @@
             </plugin>
 
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <!-- TODO logback.xml skal være med i prod men ikke lokalt-->
+                <excludes>
+                    <exclude>logback.xml</exclude>
+                </excludes>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
     </build>
 
 </project>
