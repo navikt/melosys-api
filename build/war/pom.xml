@@ -27,7 +27,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-controller</artifactId>
+            <artifactId>gui-tjenester</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
