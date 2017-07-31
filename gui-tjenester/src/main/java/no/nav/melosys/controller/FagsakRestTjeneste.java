@@ -20,7 +20,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.repository.FagsakRepository;
 
 @Api(tags = {"fagsak"})
-@Path("/fagsak")
+@Path("/fagsaker")
 @Produces(MediaType.APPLICATION_JSON)
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)

@@ -21,7 +21,7 @@ public class Behandling {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO Francois Hvordan genererer vi? Eksponerer vi nøkkelen?
+    // FIXME Francois Hvordan genererer vi? Eksponerer vi nøkkelen?
     //@Generated(GenerationTime.INSERT)
     @Column(name = "behandling_id")
     private Long behandlingsId;

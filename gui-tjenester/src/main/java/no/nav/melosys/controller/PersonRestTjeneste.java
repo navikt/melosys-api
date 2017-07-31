@@ -20,7 +20,7 @@ import no.nav.melosys.domain.Bruker;
 import no.nav.melosys.repository.BrukerRepository;
 
 @Api(tags = { "person" })
-@Path("/person")
+@Path("/personer")
 @Produces(MediaType.APPLICATION_JSON)
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)

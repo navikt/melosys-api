@@ -20,7 +20,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.repository.BehandlingRepository;
 
 @Api(tags = { "behandling" })
-@Path("/behandling")
+@Path("/behandlinger")
 @Produces(MediaType.APPLICATION_JSON)
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
