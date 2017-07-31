@@ -11,4 +11,5 @@ public interface BrukerRepository extends CrudRepository<Bruker, Long> {
 
     List<Bruker> findByNavn(String navn);
 
+    Bruker findByFnr(String fnr);
 }

@@ -16,29 +16,9 @@
 
     <dependencies>
         <dependency>
-            <!--TODO Francois: For å teste flyway migrations-->
+            <!--TODO Francois: For å teste flyway migrations. Fjernes når modellen er stabil.-->
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-aura-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-controller</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-saksflyt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>ojdbc8</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -46,14 +26,16 @@
             <version>${flyway.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jersey</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>gui-tjenester</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-saksflyt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
         </dependency>
 
     </dependencies>
