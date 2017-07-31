@@ -1,4 +1,4 @@
-package no.nav.melosys.controller;
+package no.nav.melosys.tjenester.gui;
 
 import java.util.List;
 
