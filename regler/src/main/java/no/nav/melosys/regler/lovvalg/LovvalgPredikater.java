@@ -11,7 +11,7 @@ public final class LovvalgPredikater {
     
     public static final Predikat personenErArbeidstaker = () -> {return søknad().arbeidstakerEllerSelvstendigNaeringsdrivende;}; 
 
-    public static final Predikat personenErSelvstendigNæringasdrivende = () -> {return søknad().arbeidstakerOgSelvstendigNaeringsdrivende;}; 
+    public static final Predikat personenErSelvstendigNæringsdrivende = () -> {return søknad().arbeidstakerOgSelvstendigNaeringsdrivende;}; 
     
     public static final Predikat personenArbeiderPåSkip = () -> {return søknad().arbeidSkip;};
 

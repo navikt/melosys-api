@@ -13,7 +13,7 @@ public class Art_12_1_UtsendtArbeidstaker extends Regelsett {
     public Art_12_1_UtsendtArbeidstaker() {
         forArtikkel(ART_12_1);
         medMaskinellBetingelse("Personen må være arbeidstaker", personenErArbeidstaker);
-        medMaskinellBetingelse("Personen må ikke være selvstendig næringsdrivende", ikke(personenErSelvstendigNæringasdrivende));
+        medMaskinellBetingelse("Personen må ikke være selvstendig næringsdrivende", ikke(personenErSelvstendigNæringsdrivende));
         medMaskinellBetingelse("Skal ikke gjelde arbeid på skip", ikke(personenArbeiderPåSkip));
         medMaskinellBetingelse("Skal ikke gjelde arbeid på sokkel", ikke(personenArbeiderPåSokkel));
         medManuellBetingelse("Arbeidsgiver driver vanligvis virksomhet i landet arbeidstakeren sendes ut fra");
