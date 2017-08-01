@@ -1,8 +1,8 @@
 package no.nav.melosys.regler.service.lovvalg;
 
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.initialiserLokalKontekst;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.respons;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.slettLokalKontekst;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.initialiserLokalKontekst;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.respons;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.slettLokalKontekst;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

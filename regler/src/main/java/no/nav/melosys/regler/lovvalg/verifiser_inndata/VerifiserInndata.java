@@ -1,7 +1,7 @@
 package no.nav.melosys.regler.lovvalg.verifiser_inndata;
 
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.leggTilMeldingOgLogg;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.søknad;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.leggTilMeldingOgLogg;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknad;
 
 import java.util.Collections;
 import java.util.HashSet;

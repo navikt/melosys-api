@@ -1,7 +1,7 @@
 package no.nav.melosys.regler.lovvalg;
 
 
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.søknad;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknad;
 
 import no.nav.melosys.regler.nare.Predikat;
 

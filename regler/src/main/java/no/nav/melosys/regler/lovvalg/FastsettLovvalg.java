@@ -1,6 +1,6 @@
 package no.nav.melosys.regler.lovvalg;
 
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.detErMeldtFeil;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.detErMeldtFeil;
 
 import no.nav.melosys.regler.lovvalg.utsendt_arbeidstaker.Art_12_1_UtsendtArbeidstaker;
 import no.nav.melosys.regler.lovvalg.verifiser_inndata.VerifiserInndata;

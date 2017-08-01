@@ -20,7 +20,7 @@ import no.nav.melosys.regler.api.lovvalg.Lovvalgsbestemmelse;
  * Konteksten er bundet til tråden den kjører på, slik at regelsett kan kalles i parallell.
  * 
  */
-public class LovvalgKontekst {
+public class LovvalgKontekstManager {
     
     private static Logger log = LoggerFactory.getLogger(FastsettLovvalg.class); // Logger til FastsettLovvalg sin kanal
 
@@ -59,7 +59,7 @@ public class LovvalgKontekst {
     public static void logg(String format, Object... arguments) {
         String regelnavn = "Ukjent regel";
         for (StackTraceElement se : Thread.currentThread().getStackTrace()) {
-            if (se.getClassName().startsWith("no.nav.melosys.regler.lovvalg.") && !se.getClassName().equals(LovvalgKontekst.class.getName())) {
+            if (se.getClassName().startsWith("no.nav.melosys.regler.lovvalg.") && !se.getClassName().equals(LovvalgKontekstManager.class.getName())) {
                 String regelKlasse = se.getClassName();
                 String regelMetode = se.getMethodName();
                 regelnavn = regelKlasse.replaceAll("no.nav.melosys.regler.lovvalg.", "") + "." + regelMetode;

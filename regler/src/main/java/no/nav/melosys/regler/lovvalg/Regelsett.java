@@ -1,7 +1,7 @@
 package no.nav.melosys.regler.lovvalg;
 
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.leggTilLovvalgsbestemmelse;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.logg;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.leggTilLovvalgsbestemmelse;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.logg;
 
 import java.util.ArrayList;
 import java.util.List;

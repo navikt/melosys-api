@@ -1,8 +1,8 @@
 package no.nav.melosys.regler.lovvalg;
 
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.initialiserLokalKontekst;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.slettLokalKontekst;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekst.søknad;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.initialiserLokalKontekst;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.slettLokalKontekst;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknad;
 import static no.nav.melosys.regler.lovvalg.LovvalgPredikater.antallMånederIPeriodenErMindreEnnEllerLik;
 import static no.nav.melosys.regler.service.lovvalg.LovvalgTjenesteImplTest.lagFastsettLovvalgRequest;
 import static org.junit.Assert.assertFalse;
