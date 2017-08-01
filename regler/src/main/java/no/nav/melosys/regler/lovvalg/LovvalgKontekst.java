@@ -13,7 +13,7 @@ import no.nav.melosys.regler.api.lovvalg.Kategori;
 import no.nav.melosys.regler.api.lovvalg.Lovvalgsbestemmelse;
 
 /**
- * Kontekst for en regelkjøring. 
+ * Kontekst (og -manager) for en regelkjøring. 
  * 
  * Tilbyr forskjellige metoder, bl.a. tilgang til søknaden og responsen.
  * 
@@ -21,8 +21,6 @@ import no.nav.melosys.regler.api.lovvalg.Lovvalgsbestemmelse;
  * 
  */
 public class LovvalgKontekst {
-    
-    // FIXME (farjam): Konteksten må instansieres, og vi må innføre en KontekstManager som gir siktig instanse (innspill fra Francois).
     
     private static Logger log = LoggerFactory.getLogger(FastsettLovvalg.class); // Logger til FastsettLovvalg sin kanal
 
