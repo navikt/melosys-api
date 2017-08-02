@@ -1,8 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -39,20 +37,4 @@ public class PersonRestTjeneste {
         return brukerRepository.findByFnr(fnr);
     }
 
-    @GET
-    @Path("/all")
-    public Iterable<Bruker> findAll() {
-        return brukerRepository.findAll();
-    }
-
-    @POST
-    public Bruker createPerson(Bruker person) {
-        return brukerRepository.save(person);
-    }
-
-    @Path("/{id}")
-    @DELETE
-    public void deletePerson(@PathParam("id") Long id) {
-        brukerRepository.delete(id);
-    }
 }
