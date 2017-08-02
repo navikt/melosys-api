@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -34,14 +35,16 @@ public class FagsakRestTjeneste {
     }
 
     @GET
-    @ApiOperation(value = "Søk etter saker på fødselsnummer eller saksnummer", notes = ("Spesifikke saker kan søkes via saksnummer. Saker knyttet til en bruker kan søkes via fødselsnummer eller d-nummer."))
-    public List<Fagsak> hentFagsaker(
-            @QueryParam("snr") @ApiParam("Saksnummer.") Long saksnummer,
-            @QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.") String fnr) {
-        if (saksnummer != null) {
-            return fagsakRepository.findBySaksnummer(saksnummer);
-        }
+    @Path("{saksnummer}")
+    @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."))
+    public  Fagsak hentFagsak(@PathParam("saksnummer") @ApiParam("Saksnummer.") Long saksnummer) {
+        return fagsakRepository.findBySaksnummer(saksnummer);
+    }
 
+    @GET
+    @ApiOperation(value = "Søk etter saker på fødselsnummer eller d-nummer", notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."))
+    public List<Fagsak> hentFagsaker(
+            @QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.") String fnr) {
         List<Fagsak> saker = fagsakRepository.findByFnr(fnr);
         return saker;
     }
