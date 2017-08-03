@@ -5,11 +5,6 @@
 
     <name>melosys</name>
 
-    <artifacts>
-        <ear groupId="no.nav.melosys" artifactId="melosys-ear">
-        </ear>
-    </artifacts>
-
     <!--    <selftest>
             <path>/selftest</path>
             <humanReadablePath>/selftest</humanReadablePath>
@@ -20,6 +15,7 @@
     </monitoring>-->
 
     <resources>
+        <applicationCertificate alias="srvmelosys"/>
         <datasource alias="melosysDB" jndi="java:/jdbc/melosysDB" type="ORACLE">
         </datasource>
 
@@ -30,5 +26,14 @@
         <ldap alias="ldap" mapToProperty="ldap"/>
 
     </resources>
+
+    <serverOptions>
+        <memoryParameters resourceAlias="melosys-memparams"/>
+    </serverOptions>
+
+    <artifacts>
+        <ear groupId="no.nav.melosys" artifactId="melosys-ear">
+        </ear>
+    </artifacts>
 
 </application>
