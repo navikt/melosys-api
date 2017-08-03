@@ -24,7 +24,7 @@ import no.nav.melosys.repository.BehandlingRepository;
 @Produces(MediaType.APPLICATION_JSON)
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class BehandlingRestTjeneste {
+public class BehandlingRestTjeneste extends RestTjeneste {
 
     private BehandlingRepository behandlingrepo;
 

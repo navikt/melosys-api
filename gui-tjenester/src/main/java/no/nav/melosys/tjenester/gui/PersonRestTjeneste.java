@@ -3,8 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -18,10 +16,9 @@ import no.nav.melosys.repository.BrukerRepository;
 
 @Api(tags = { "person" })
 @Path("/personer")
-@Produces(MediaType.APPLICATION_JSON)
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class PersonRestTjeneste {
+public class PersonRestTjeneste extends RestTjeneste {
 
     private BrukerRepository brukerRepository;
 
@@ -35,6 +32,11 @@ public class PersonRestTjeneste {
     @ApiOperation(value = "Søk en person på fødselsnummer")
     public Bruker findByFnr(@PathParam("fnr") String fnr) {
         return brukerRepository.findByFnr(fnr);
+    }
+
+    @GET
+    public Iterable<Bruker> hentPersoner() {
+        return brukerRepository.findAll();
     }
 
 }

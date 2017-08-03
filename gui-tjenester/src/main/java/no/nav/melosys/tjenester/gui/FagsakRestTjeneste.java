@@ -5,9 +5,7 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -22,10 +20,9 @@ import no.nav.melosys.repository.FagsakRepository;
 
 @Api(tags = {"fagsak"})
 @Path("/fagsaker")
-@Produces(MediaType.APPLICATION_JSON)
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
-public class FagsakRestTjeneste {
+public class FagsakRestTjeneste extends RestTjeneste {
 
     private FagsakRepository fagsakRepository;
 
