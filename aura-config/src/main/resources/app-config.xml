@@ -15,7 +15,7 @@
     </monitoring>-->
 
     <resources>
-        <applicationCertificate alias="srvmelosys"/>
+        <!--<applicationCertificate alias="srvmelosys"/>-->
         <datasource alias="melosysDB" jndi="java:/jdbc/melosysDB" type="ORACLE">
         </datasource>
 

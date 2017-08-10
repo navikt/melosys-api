@@ -49,8 +49,11 @@
                             <groupId>${project.groupId}</groupId>
                             <artifactId>melosys-war</artifactId>
                             <contextRoot>/system/melosys/</contextRoot>
-                            <moduleId>spring-boot-war</moduleId>
-                            <bundleFileName>melosys-war.war</bundleFileName>
+                        </webModule>
+                        <webModule>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>melosys-regler</artifactId>
+                            <contextRoot>/</contextRoot>
                         </webModule>
                     </modules>
                 </configuration>
