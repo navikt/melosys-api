@@ -46,7 +46,7 @@
         <modig-testcertificates.version>1.2.0</modig-testcertificates.version>
         <tps.aktoer.version>2.0.1</tps.aktoer.version>
         <tps.person.version>2.0.0</tps.person.version>
-        <vl-felles.version>1.7.0-SNAPSHOT</vl-felles.version>
+        <vl-felles.version>1.8.10-SNAPSHOT</vl-felles.version>
 
         <!-- Versjoner av eksterne biblioteker -->
         <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
@@ -123,6 +123,11 @@
                 <artifactId>melosys-regler</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>sikkerhet</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
 
             <dependency>
@@ -174,6 +179,11 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-jaxrs</artifactId>
+                <version>${swagger.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger</groupId>
@@ -233,14 +243,25 @@
                 <classifier>jaxws</classifier>
             </dependency>
 
-            <!-- Sikkerhet VLFP -->
+            <!-- Sikkerhet foreldrepenger -->
             <dependency>
-                <groupId>no.nav.vedtak</groupId>
-                <artifactId>sikkerhet</artifactId>
+                <groupId>no.nav.vedtak.felles</groupId>
+                <artifactId>felles-sikkerhet</artifactId>
                 <version>${vl-felles.version}</version>
             </dependency>
 
             <!-- Test -->
+            <dependency>
+                <groupId>no.nav.vedtak.felles</groupId>
+                <artifactId>felles-testutilities</artifactId>
+                <version>${vl-felles.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.vedtak.felles</groupId>
+                <artifactId>felles-sikkerhet</artifactId>
+                <type>test-jar</type>
+                <version>${vl-felles.version}</version>
+            </dependency>
             <dependency>
                 <groupId>smartrics.restfixture</groupId>
                 <artifactId>smartrics-RestFixture</artifactId>
