@@ -1,22 +1,22 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import no.nav.melosys.integrasjon.test.TestConfig;
+import no.nav.melosys.integrasjon.test.Gen3WsProxyServiceITBase;
+import no.nav.melosys.integrasjon.test.TpsTestData;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.NorskIdent;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Regelverker;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.FinnArbeidsforholdPrArbeidstakerRequest;
+import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.FinnArbeidsforholdPrArbeidstakerResponse;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = TestConfig.class)
-@TestPropertySource("classpath:test.properties" )
-public class ArbeidsforholdConsumerTestIT {
+public class ArbeidsforholdConsumerTestIT extends Gen3WsProxyServiceITBase {
 
     @Autowired
     private ArbeidsforholdConsumerConfig config;
@@ -36,15 +36,16 @@ public class ArbeidsforholdConsumerTestIT {
     public void finnArbeidsforholdPrArbeidstaker() throws Exception {
         FinnArbeidsforholdPrArbeidstakerRequest request = new FinnArbeidsforholdPrArbeidstakerRequest();
         NorskIdent norskIdent = new NorskIdent();
-        norskIdent.setIdent("");
+        norskIdent.setIdent(TpsTestData.STD_FNR);
         request.setIdent(norskIdent);
 
         Regelverker regelverker = new Regelverker();
         regelverker.setValue("ALLE");
         request.setRapportertSomRegelverk(regelverker);
 
-        consumer.finnArbeidsforholdPrArbeidstaker(request);
-
+        FinnArbeidsforholdPrArbeidstakerResponse response =
+                consumer.finnArbeidsforholdPrArbeidstaker(request);
+        assertThat(response.getArbeidsforhold().size()).isGreaterThan(0);
     }
 
 }

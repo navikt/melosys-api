@@ -1,13 +1,15 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
-import static no.nav.melosys.integrasjon.felles.StsClient.Type.OIDC_TIL_SAML;
+
+import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.OIDC_TIL_SAML;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import no.nav.melosys.integrasjon.felles.StsClient;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.ArbeidsforholdV3;
+import no.nav.vedtak.sts.client.NAVSTSClient;
+import no.nav.vedtak.sts.client.StsConfigurationUtil;
 
 @Configuration
 public class ArbeidsforholdConsumerProducer {
@@ -24,7 +26,8 @@ public class ArbeidsforholdConsumerProducer {
         return new ArbeidsforholdConsumerImpl(port);
     }
 
-    private ArbeidsforholdV3 wrapWithSts(ArbeidsforholdV3 port, StsClient.Type oidcTilSaml) {
-        return port; // FIXME Sikkerhet
+    private ArbeidsforholdV3 wrapWithSts(ArbeidsforholdV3 port, NAVSTSClient.StsClientType
+            oidcTilSaml) {
+        return StsConfigurationUtil.wrapWithSts(port, oidcTilSaml);
     }
 }

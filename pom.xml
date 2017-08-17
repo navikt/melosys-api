@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.4.RELEASE</version>
+        <version>1.5.6.RELEASE</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -123,12 +123,6 @@
                 <artifactId>melosys-regler</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>sikkerhet</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
 
             <dependency>
                 <groupId>com.oracle</groupId>
@@ -247,6 +241,11 @@
             <dependency>
                 <groupId>no.nav.vedtak.felles</groupId>
                 <artifactId>felles-sikkerhet</artifactId>
+                <version>${vl-felles.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.vedtak.felles</groupId>
+                <artifactId>ldap-klient</artifactId>
                 <version>${vl-felles.version}</version>
             </dependency>
 

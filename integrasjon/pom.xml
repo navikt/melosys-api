@@ -17,19 +17,17 @@
             <artifactId>melosys-domain</artifactId>
         </dependency>
 
+        <!-- Sikkerhet fra foreldrepenger -->
+        <dependency>
+            <groupId>no.nav.vedtak.felles</groupId>
+            <artifactId>felles-sikkerhet</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxws</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-ws-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-transports-http</artifactId>
-            <version>${cxf.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
@@ -76,15 +74,23 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-logging</artifactId>
+            <groupId>no.nav.vedtak.felles</groupId>
+            <artifactId>felles-testutilities</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
+            <groupId>no.nav.vedtak.felles</groupId>
+            <artifactId>felles-sikkerhet</artifactId>
+            <type>test-jar</type>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>no.nav.modig</groupId>
+            <artifactId>modig-testcertificates</artifactId>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>
