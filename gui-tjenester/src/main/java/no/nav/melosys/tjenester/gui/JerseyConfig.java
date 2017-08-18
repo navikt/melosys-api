@@ -14,6 +14,7 @@ public class JerseyConfig extends ResourceConfig {
         register(BehandlingRestTjeneste.class);
         register(FagsakRestTjeneste.class);
         register(PersonRestTjeneste.class);
+        register(SaksbehandlerTjeneste.class);
         configureSwagger();
     }
 
