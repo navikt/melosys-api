@@ -29,10 +29,10 @@
     </resources>
 
     <serverOptions>
+        <memoryParameters resourceAlias="melosys-memparams"/>
         <jvmArgs>-Xloggc:melosys_gc.log -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps
             -XX:+UseGCLogFileRotation -XX:GCLogFileSize=50M -XX:NumberOfGCLogFiles=10
         </jvmArgs>
-        <memoryParameters resourceAlias="melosys-memparams"/>
     </serverOptions>
 
     <security>
