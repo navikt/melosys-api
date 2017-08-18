@@ -46,7 +46,7 @@
         <modig-testcertificates.version>1.2.0</modig-testcertificates.version>
         <tps.aktoer.version>2.0.1</tps.aktoer.version>
         <tps.person.version>2.0.0</tps.person.version>
-        <vl-felles.version>1.8.10-SNAPSHOT</vl-felles.version>
+        <vl-felles.version>1.8.12-SNAPSHOT</vl-felles.version>
 
         <!-- Versjoner av eksterne biblioteker -->
         <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
