@@ -2,6 +2,7 @@ package no.nav.melosys;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ public class Application extends SpringBootServletInitializer implements Environ
     @Override
     public void setEnvironment(Environment environment) {
         this.environment = environment;
-        loadSystemProperties();
+        loadProperties();
     }
 
     public static void main(String[] args) throws Exception {
@@ -42,7 +43,7 @@ public class Application extends SpringBootServletInitializer implements Environ
 
     // TODO Sikkerhet fra Foreldrepenger trenger system properties.
     // De settes her for nå til utvikling. Må settes i app-config også.
-    private static void loadSystemProperties() {
+    private static void loadProperties() {
         List<String> list = new ArrayList<>();
 
         // Til StsConfigurationUtil
@@ -54,7 +55,25 @@ public class Application extends SpringBootServletInitializer implements Environ
         list.add(OpenAMHelper.ISSO_ISSUER_URL);
         list.add(OpenAMHelper.ISSO_RP_USER_USERNAME);
 
-        list.forEach(s -> System.setProperty(s, environment.getRequiredProperty(s)));
+        // Til LdapInnlogging
+        list.add("ldap.url");
+        list.add("ldap.username");
+        list.add("ldap.domain");
+        list.add("ldap.password");
+
+        // LdapBrukeroppslag
+        list.add("ldap.user.basedn");
+
+        list.forEach(key -> loadProperty(key));
+    }
+
+    private static void loadProperty(String key) {
+        Properties systemProperties = System.getProperties();
+        if (systemProperties.get(key) == null) {
+            String value = environment.getRequiredProperty(key);
+            System.setProperty(key, environment.getRequiredProperty(key));
+            log.debug("Property {} settes til {}", key, value);
+        }
     }
 
 }

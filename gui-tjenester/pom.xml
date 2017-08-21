@@ -19,6 +19,16 @@
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-repository</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>no.nav.vedtak.felles</groupId>
+            <artifactId>felles-sikkerhet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.vedtak.felles</groupId>
+            <artifactId>ldap-klient</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>

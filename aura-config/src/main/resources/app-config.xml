@@ -5,17 +5,12 @@
 
     <name>melosys</name>
 
-    <!--    <selftest>
-            <path>/selftest</path>
-            <humanReadablePath>/selftest</humanReadablePath>
-        </selftest>
-
-    <monitoring>
-        <metric path="/metrics" interval="60"/>
-    </monitoring>-->
+    <artifacts>
+        <ear groupId="no.nav.melosys" artifactId="melosys-ear">
+        </ear>
+    </artifacts>
 
     <resources>
-        <!--<applicationCertificate alias="srvmelosys"/>-->
         <datasource alias="melosysDB" jndi="java:/jdbc/melosysDB" type="ORACLE">
         </datasource>
 
@@ -23,17 +18,30 @@
             Se https://fasit.adeo.no/wicket/bookmarkable/no.nav.aura.envconfig.gui.resources.ResourceDocumentationPage
             (se også detaljer i http://maven.adeo.no/xsd/appconfig.xsd) for hvilke system properties kommer ut av innslagene under:
         -->
-        <ldap alias="ldap" mapToProperty="ldap"/>
+        <webservice alias="virksomhet:Arbeidsforhold_v3" mapToProperty="Arbeidsforhold_v3"/>
+        <webservice alias="virksomhet:Person_v2" mapToProperty="Person_v2"/>
 
+        <credential alias="srvmelosys" mapToProperty="systembruker"/>
+        <ldap alias="ldap" mapToProperty="ldap"/>
+        <baseUrl alias="isso-issuer"/>
+        <credential alias="isso-rp-user"/>
+        <baseUrl alias="securityTokenService" mapToProperty="securityTokenService"/>
     </resources>
 
     <serverOptions>
+        <jvmArgs>-Xloggc:melosys_gc.log -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps
+            -XX:+UseGCLogFileRotation -XX:GCLogFileSize=50M -XX:NumberOfGCLogFiles=10
+        </jvmArgs>
         <memoryParameters resourceAlias="melosys-memparams"/>
     </serverOptions>
 
-    <artifacts>
-        <ear groupId="no.nav.melosys" artifactId="melosys-ear">
-        </ear>
-    </artifacts>
+    <security>
+        <logins>
+            <openIdConnect moduleClass="no.nav.vedtak.sikkerhet.loginmodule.OIDCLoginModule"
+                           clientModuleClass="org.jboss.security.ClientLoginModule">
+                <contextRoot>/system/melosys/cb</contextRoot>
+            </openIdConnect>
+        </logins>
+    </security>
 
 </application>
