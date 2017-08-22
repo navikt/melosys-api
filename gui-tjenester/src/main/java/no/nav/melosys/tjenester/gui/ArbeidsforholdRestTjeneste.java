@@ -14,7 +14,7 @@ import no.nav.melosys.domain.Arbeidsforhold;
 import no.nav.melosys.repository.ArbeidsforholdRepository;
 
 @Api(tags = {"arbeidsforhold"})
-@Path("arbeidsforhold")
+@Path("/arbeidsforhold")
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 public class ArbeidsforholdRestTjeneste extends RestTjeneste {

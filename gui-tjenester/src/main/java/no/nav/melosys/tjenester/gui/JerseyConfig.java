@@ -1,5 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
+import javax.ws.rs.ApplicationPath;
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Configuration;
 
@@ -8,6 +10,7 @@ import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
 
 @Configuration
+@ApplicationPath("/api")
 public class JerseyConfig extends ResourceConfig {
 
     public JerseyConfig() {
