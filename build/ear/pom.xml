@@ -35,8 +35,9 @@
                 <version>2.8</version>
                 <configuration>
                     <version>6</version>
-                    <applicationName>${project.parent.artifactId}</applicationName>
+                    <applicationName>melosys</applicationName>
                     <defaultLibBundleDir>lib</defaultLibBundleDir>
+                    <description>Medlemskap og lovvalg</description>
                     <skinnyWars>true</skinnyWars>
                     <archive>
                         <manifest>
