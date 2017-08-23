@@ -14,19 +14,17 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
-import no.nav.melosys.domain.Bruker;
 import no.nav.melosys.integrasjon.test.TpsTestData;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.feil.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentAktoerIdForIdentResponse;
-import no.nav.tjeneste.virksomhet.person.v2.informasjon.Diskresjonskoder;
-import no.nav.tjeneste.virksomhet.person.v2.informasjon.Kjoenn;
-import no.nav.tjeneste.virksomhet.person.v2.informasjon.Kjoennstyper;
-import no.nav.tjeneste.virksomhet.person.v2.informasjon.Person;
-import no.nav.tjeneste.virksomhet.person.v2.informasjon.Personnavn;
-import no.nav.tjeneste.virksomhet.person.v2.meldinger.HentKjerneinformasjonResponse;
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kjoenn;
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kjoennstyper;
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person;
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Personnavn;
+import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 
 public class TpsServiceTest {
 
@@ -74,8 +72,7 @@ public class TpsServiceTest {
     }
 
     @Test
-    public void hentKjerneinformasjon() throws Exception {
-
+    public void hentPerson() throws Exception {
         Person p = new Person();
         p.setPersonnavn(new Personnavn());
         String navn = "Ola Normann";
@@ -87,19 +84,13 @@ public class TpsServiceTest {
         kjoenn.setKjoenn(kjoennType);
         p.setKjoenn(kjoenn);
 
-        Diskresjonskoder kode = new Diskresjonskoder();
-        kode.setValue("6");
-        p.setDiskresjonskode(kode);
-
-        HentKjerneinformasjonResponse response = new HentKjerneinformasjonResponse();
+        HentPersonResponse response = new HentPersonResponse();
         response.setPerson(p);
-        when(personConsumer.hentKjerneinformasjon(any())).thenReturn(response);
+        when(personConsumer.hentPerson(any())).thenReturn(response);
 
-        Bruker bruker = new Bruker();
-        bruker.setFnr("1234");
-        bruker = service.hentKjerneinformasjon(bruker);
-        assertThat(bruker.getNavn()).isEqualTo(navn);
-        assertThat(bruker.getKjønn().getKode()).isEqualTo(kjoennType.getValue());
-        assertThat(bruker.getDiskresjonskode()).isEqualTo(kode.getValue());
+        HentPersonResponse personOpplysninger = service.hentPerson("123");
+        assertThat(personOpplysninger.getPerson().getPersonnavn().getSammensattNavn()).isEqualTo(navn);
+        assertThat(personOpplysninger.getPerson().getKjoenn().getKjoenn().getValue()).isEqualTo(kjoennType.getValue());
+
     }
 }

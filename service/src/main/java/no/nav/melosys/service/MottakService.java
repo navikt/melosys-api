@@ -1,7 +1,5 @@
 package no.nav.melosys.service;
 
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,23 +64,19 @@ public class MottakService {
     @Transactional
     public Behandling klargjoer(Behandling behandling) {
 
-        String fnr = behandling.getFagsak().getBruker().getFnr();
+        // Har vi aktørId eller fnr her?
+        String fnr = null;
 
-        // Henter aktørId fra TPS
-        Optional<String> aktørId = tpsFasade.hentAktørIdForIdent(fnr);
+        /*Optional<String> aktørId = tpsFasade.hentAktørIdForIdent(fnr);
         if (!aktørId.isPresent()) {
             throw new IllegalArgumentException("Finner ikke aktørID for fnr: " + fnr);
-        }
+        }*/
 
         Fagsak fagsak = behandling.getFagsak();
 
         // Beriker brukeren med informasjon fra TPS
-        Bruker bruker = new Bruker();
-        bruker.setAktørId(aktørId.get());
-        bruker.setFnr(fnr);
-        bruker = tpsFasade.hentKjerneinformasjon(bruker);
-
-        fagsak.setBruker(bruker);
+        // TODO bruker eksisterer ikke lenger
+        // fagsak.setBruker(bruker);
 
         // Oppretter en sak i GSAK
         // TODO Francois koble til eksisterende sak

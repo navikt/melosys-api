@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import no.nav.tjeneste.virksomhet.person.v2.binding.PersonV2;
+import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3;
 import no.nav.vedtak.sts.client.NAVSTSClient;
 import no.nav.vedtak.sts.client.StsConfigurationUtil;
 
@@ -23,17 +23,17 @@ public class PersonConsumerProducer {
 
     @Bean
     public PersonConsumer personConsumer() {
-        PersonV2 port = wrapWithSts(consumerConfig.getPort(), OIDC_TIL_SAML);
+        PersonV3 port = wrapWithSts(consumerConfig.getPort(), OIDC_TIL_SAML);
         return new PersonConsumerImpl(port);
     }
 
     @Bean
     public PersonSelftestConsumer personSelftestConsumer() {
-        PersonV2 port = wrapWithSts(consumerConfig.getPort(), SYSTEM_SAML);
+        PersonV3 port = wrapWithSts(consumerConfig.getPort(), SYSTEM_SAML);
         return new PersonSelftestConsumerImpl(port, consumerConfig.getEndpointUrl());
     }
 
-    PersonV2 wrapWithSts(PersonV2 port, NAVSTSClient.StsClientType samlTokenType) {
+    PersonV3 wrapWithSts(PersonV3 port, NAVSTSClient.StsClientType samlTokenType) {
         return StsConfigurationUtil.wrapWithSts(port, samlTokenType);
     }
 

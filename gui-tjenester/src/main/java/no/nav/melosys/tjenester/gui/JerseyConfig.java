@@ -14,6 +14,7 @@ import io.swagger.jaxrs.listing.SwaggerSerializers;
 public class JerseyConfig extends ResourceConfig {
 
     public JerseyConfig() {
+        setApplicationName("melosys");
         register(BehandlingRestTjeneste.class);
         register(FagsakRestTjeneste.class);
         register(PersonRestTjeneste.class);

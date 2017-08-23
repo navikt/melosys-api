@@ -1,12 +1,12 @@
 package no.nav.melosys.integrasjon.tps.person;
 
-import no.nav.tjeneste.virksomhet.person.v2.binding.PersonV2;
+import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3;
 
 class PersonSelftestConsumerImpl implements PersonSelftestConsumer {
-    private PersonV2 port;
+    private PersonV3 port;
     private String endpointUrl;
 
-    public PersonSelftestConsumerImpl(PersonV2 port, String endpointUrl) {
+    public PersonSelftestConsumerImpl(PersonV3 port, String endpointUrl) {
         this.port = port;
         this.endpointUrl = endpointUrl;
     }

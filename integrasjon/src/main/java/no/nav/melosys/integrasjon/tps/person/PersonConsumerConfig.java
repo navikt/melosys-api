@@ -13,37 +13,37 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import no.nav.melosys.integrasjon.felles.CallIdOutInterceptor;
-import no.nav.tjeneste.virksomhet.person.v2.binding.PersonV2;
+import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3;
 
 @Component
 public class PersonConsumerConfig {
-    private static final String PERSON_V2_WSDL = "wsdl/no/nav/tjeneste/virksomhet/person/v2/Binding.wsdl";
-    private static final String PERSON_V2_NAMESPACE = "http://nav.no/tjeneste/virksomhet/person/v2/Binding";
-    private static final QName PERSON_V2_SERVICE = new QName(PERSON_V2_NAMESPACE, "Person_v2");
-    private static final QName PERSON_V2_PORT = new QName(PERSON_V2_NAMESPACE, "Person_v2Port");
+    private static final String PERSON_V3_WSDL = "wsdl/no/nav/tjeneste/virksomhet/person/v3/Binding.wsdl";
+    private static final String PERSON_V3_NAMESPACE = "http://nav.no/tjeneste/virksomhet/person/v3/Binding";
+    private static final QName PERSON_V3_SERVICE = new QName(PERSON_V3_NAMESPACE, "Person_v3");
+    private static final QName PERSON_V3_PORT = new QName(PERSON_V3_NAMESPACE, "Person_v3Port");
 
     private String endpointUrl; // NOSONAR
 
-    public PersonConsumerConfig(@Value("${Person_v2.url}") String endpointUrl) {
+    public PersonConsumerConfig(@Value("${Person_v3.url}") String endpointUrl) {
         this.endpointUrl = endpointUrl;
     }
 
-    PersonV2 getPort() {
+    PersonV3 getPort() {
         Map<String, Object> properties = new HashMap<>();
         // FIXME: Brukes kun ifm mock'en og MÅ fjernes når den har blitt JBoss-ifisert
         properties.put(SecurityConstants.MUST_UNDERSTAND, false);
 
         JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
-        factoryBean.setWsdlURL(PERSON_V2_WSDL);
+        factoryBean.setWsdlURL(PERSON_V3_WSDL);
         factoryBean.setProperties(properties);
-        factoryBean.setServiceName(PERSON_V2_SERVICE);
-        factoryBean.setEndpointName(PERSON_V2_PORT);
-        factoryBean.setServiceClass(PersonV2.class);
+        factoryBean.setServiceName(PERSON_V3_SERVICE);
+        factoryBean.setEndpointName(PERSON_V3_PORT);
+        factoryBean.setServiceClass(PersonV3.class);
         factoryBean.setAddress(endpointUrl);
         factoryBean.getFeatures().add(new WSAddressingFeature());
         factoryBean.getFeatures().add(new LoggingFeature());
         factoryBean.getOutInterceptors().add(new CallIdOutInterceptor());
-        return factoryBean.create(PersonV2.class);
+        return factoryBean.create(PersonV3.class);
     }
 
     public String getEndpointUrl() {
