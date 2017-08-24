@@ -1,24 +1,33 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.Converter;
 
-@Entity
-@Table(name = "BEHANDLING_STATUS")
-public class BehandlingStatus extends Kodeverk {
+public enum BehandlingStatus implements Kodeverk<BehandlingStatus> {
 
-    public static final BehandlingStatus OPPRETTET = new BehandlingStatus("OPPR");
-    public static final BehandlingStatus KLARGJORT = new BehandlingStatus("KLAR");
-    public static final BehandlingStatus UTREDES = new BehandlingStatus("UTRED");
-    public static final BehandlingStatus FATTER_VEDTAK = new BehandlingStatus("F_VED");
-    public static final BehandlingStatus IVERKSETTER_VEDTAK = new BehandlingStatus("I_VED");
-    public static final BehandlingStatus AVSLUTTET = new BehandlingStatus("AVSLU");
-
-    public BehandlingStatus() {
-    }
+    OPPRETTET("OPPR"),
+    KLARGJORT("KLAR"),
+    UTREDES("UTRED"),
+    FATTER_VEDTAK("F_VED"),
+    IVERKSETTER_VEDTAK("I_VED"),
+    AVSLUTTET("AVSLU");
+    
+    private String kode;
 
     private BehandlingStatus(String kode) {
-        super(kode);
+        this.kode = kode;
+    }
+    
+    @Override
+    public String getKode() {
+        return kode;
+    }
+
+    @Converter
+    public static class DbKonverterer extends Kodeverk.DbKonverterer<BehandlingStatus> {
+        @Override
+        protected BehandlingStatus[] getLovligeVerdier() {
+            return BehandlingStatus.values();
+        }
     }
 
 }

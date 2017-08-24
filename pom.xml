@@ -64,6 +64,7 @@
         <slf4j.version>1.7.25</slf4j.version>
         <junit.version>4.12</junit.version>
         <mockito.version>2.7.22</mockito.version>
+        <jax.version>2.2.7</jax.version>
 
         <restFixture.version>4.4</restFixture.version>
 		<fitnesse.version>20161106</fitnesse.version>
@@ -176,6 +177,11 @@
                 <version>${hibernate.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-java8</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-jaxrs</artifactId>
                 <version>${swagger.version}</version>
@@ -194,6 +200,16 @@
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
                 <version>${gson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>${jax.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>${jax.version}</version>
             </dependency>
 
             <!-- NAV felleskomponenter -->

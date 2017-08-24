@@ -1,21 +1,30 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.Converter;
 
-@Entity
-@Table(name = "BEHANDLING_TYPE")
-public class BehandlingType extends Kodeverk {
+public enum BehandlingType implements Kodeverk<BehandlingType> {
 
-    public static final BehandlingType FØRSTEGANGSSØKNAD = new BehandlingType("NY");
-    public static final BehandlingType ENDRINGSSØKNAD = new BehandlingType("ENDRING");
-    public static final BehandlingType KLAGE = new BehandlingType("KLAGE");
+    FØRSTEGANGSSØKNAD("NY"),
+    ENDRINGSSØKNAD("ENDRING"),
+    KLAGE("KLAGE");
 
-    BehandlingType() {
+    private String kode;
+
+    BehandlingType(String kode) {
+        this.kode = kode;
     }
 
-    private BehandlingType(String kode) {
-        super(kode);
+    @Override
+    public String getKode() {
+        return kode;
+    }
+
+    @Converter
+    public static class DbKonverterer extends Kodeverk.DbKonverterer<BehandlingType> {
+        @Override
+        protected BehandlingType[] getLovligeVerdier() {
+            return BehandlingType.values();
+        }
     }
 
 }

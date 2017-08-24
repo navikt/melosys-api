@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.domain.Arbeidsforhold;
 import no.nav.melosys.repository.ArbeidsforholdRepository;
 
 @Api(tags = {"arbeidsforhold"})
@@ -26,6 +25,7 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
         this.repository = repository;
     }
 
+    /* FIXME
     @GET
     @Path("{id}")
     public Arbeidsforhold hentArbeidsforhold(@PathParam("id") Long id) {
@@ -36,6 +36,7 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
     public Iterable<Arbeidsforhold> hentArbeidsforhold() {
         return repository.findAll();
     }
+    // */
 
 
 }

@@ -1,22 +1,33 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.Converter;
 
-@Entity
-@Table(name = "REGEL_TYPE")
-public class RegelType extends Kodeverk {
+//FIXME (farjam): Ikke revidert for v0
 
-    public static final RegelType AVKLARE_FAKTA = new RegelType("AVKLARE_FAKTA");
-    public static final RegelType BEREGNING = new RegelType("BEREGNING");
-    public static final RegelType FORRETNING = new RegelType("FORRETNING");
-    public static final RegelType VILKAAR = new RegelType("VILKAAR");
+public enum RegelType implements Kodeverk<RegelType> {
 
-    RegelType() {
-    }
+    AVKLARE_FAKTA("AVKLARE_FAKTA"),
+    BEREGNING("BEREGNING"),
+    FORRETNING("FORRETNING"),
+    VILKAAR("VILKAAR");
+
+    private String kode;
 
     private RegelType(String kode) {
-        super(kode);
+        this.kode = kode;
+    }
+    
+    @Override
+    public String getKode() {
+        return kode;
+    }
+
+    @Converter
+    public static class DbKonverterer extends Kodeverk.DbKonverterer<RegelType> {
+        @Override
+        protected RegelType[] getLovligeVerdier() {
+            return RegelType.values();
+        }
     }
 
 }

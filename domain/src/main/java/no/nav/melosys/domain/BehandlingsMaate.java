@@ -1,21 +1,32 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.Converter;
 
-@Entity
-@Table(name = "BEHANDLING_MAATE")
-public class BehandlingsMaate extends Kodeverk {
+// FIXME (farjam): Ikke revidert for v0
 
-    public static final BehandlingsMaate AUTOMATISERT = new BehandlingsMaate("AUTO");
-    public static final BehandlingsMaate DELVIS_AUTO = new BehandlingsMaate("DELVIS_AUTO");
-    public static final BehandlingsMaate MANUELT = new BehandlingsMaate("MANUELT");
+public enum BehandlingsMaate implements Kodeverk<BehandlingsMaate> {
 
-    BehandlingsMaate() {
+    AUTOMATISERT("AUTO"), 
+    DELVIS_AUTO("DELVIS_AUTO"), 
+    MANUELT("MANUELT");
+
+    private String kode;
+
+    private BehandlingsMaate(String kode) {
+        this.kode = kode;
+    }
+    
+    @Override
+    public String getKode() {
+        return kode;
     }
 
-    private BehandlingsMaate (String kode) {
-        super(kode);
+    @Converter
+    public static class DbKonverterer extends Kodeverk.DbKonverterer<BehandlingsMaate> {
+        @Override
+        protected BehandlingsMaate[] getLovligeVerdier() {
+            return BehandlingsMaate.values();
+        }
     }
 
 }

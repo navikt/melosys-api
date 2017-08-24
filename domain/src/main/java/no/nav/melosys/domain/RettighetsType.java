@@ -1,20 +1,32 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.Converter;
 
-@Entity
-@Table(name = "RETTIGHET_TYPE")
-public class RettighetsType extends Kodeverk {
+//FIXME (farjam): Ikke revidert for v0
 
-    public static final RettighetsType LOVVALGSLAND = new RettighetsType("LOVVALGSLAND");
-    public static final RettighetsType FRIVILIG_MEDLEMSKAP = new RettighetsType("FRIVILIG_MEDL");
-    public static final RettighetsType UNNTAK_MEDLEMSKAP = new RettighetsType("UNNTAK_MEDL");
+public enum RettighetsType implements Kodeverk<RettighetsType> {
 
-    RettighetsType() {
-    }
+    LOVVALGSLAND("LOVVALGSLAND"),
+    FRIVILIG_MEDLEMSKAP("FRIVILIG_MEDL"),
+    UNNTAK_MEDLEMSKAP("UNNTAK_MEDL");
+
+    private String kode;
 
     private RettighetsType(String kode) {
-        super(kode);
+        this.kode = kode;
     }
+    
+    @Override
+    public String getKode() {
+        return kode;
+    }
+
+    @Converter
+    public static class DbKonverterer extends Kodeverk.DbKonverterer<RettighetsType> {
+        @Override
+        protected RettighetsType[] getLovligeVerdier() {
+            return RettighetsType.values();
+        }
+    }
+
 }

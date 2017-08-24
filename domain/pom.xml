@@ -16,7 +16,39 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
         </dependency>
+        <dependency> <!-- Denne er nødvendig for å støtte bruk av java.time.* i entiteter. -->
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-java8</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+        </dependency>
+        <!--AAREG-->
+        <dependency>
+            <groupId>no.nav.tjenester.fim</groupId>
+            <artifactId>nav-arbeidsforhold-v3-tjenestespesifikasjon</artifactId>
+            <version>${aareg.arbeidsforhold.version}</version>
+            <classifier>jaxws</classifier>
+        </dependency>
+        <!--TPS-->
+        <dependency>
+            <groupId>no.nav.tjenester.fim</groupId>
+            <artifactId>nav-fim-aktoer-v2-tjenestespesifikasjon</artifactId>
+            <classifier>jaxws</classifier>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.tjenester</groupId>
+            <artifactId>nav-person-v3-tjenestespesifikasjon</artifactId>
+            <classifier>jaxws</classifier>
+        </dependency>
+        
     </dependencies>
 
 </project>

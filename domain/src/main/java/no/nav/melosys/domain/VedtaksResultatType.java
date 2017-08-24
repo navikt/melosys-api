@@ -1,20 +1,34 @@
 package no.nav.melosys.domain;
 
+import javax.persistence.Converter;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-@Entity
-@Table(name = "VEDTAK_RESULTAT_TYPE")
-public class VedtaksResultatType extends Kodeverk {
+//FIXME (farjam): Ikke revidert for v0
 
-    public static final VedtaksResultatType INNVILGET = new VedtaksResultatType("INNVILGET");
-    public static final VedtaksResultatType DELVIS_INNVILGET = new VedtaksResultatType("DELVIS_INNVILGET");
-    public static final VedtaksResultatType AVSLAG = new VedtaksResultatType("AVSLAG");
+public enum VedtaksResultatType implements Kodeverk<VedtaksResultatType> {
 
-    VedtaksResultatType() {
-    }
+    INNVILGET("INNVILGET"),
+    DELVIS_INNVILGET("DELVIS_INNVILGET"),
+    AVSLAG("AVSLAG");
+
+    private String kode;
 
     private VedtaksResultatType(String kode) {
-        super(kode);
+        this.kode = kode;
     }
+    
+    @Override
+    public String getKode() {
+        return kode;
+    }
+
+    @Converter
+    public static class DbKonverterer extends Kodeverk.DbKonverterer<VedtaksResultatType> {
+        @Override
+        protected VedtaksResultatType[] getLovligeVerdier() {
+            return VedtaksResultatType.values();
+        }
+    }
+
 }

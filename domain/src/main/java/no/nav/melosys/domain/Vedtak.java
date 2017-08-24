@@ -1,6 +1,5 @@
 package no.nav.melosys.domain;
 
-
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -12,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+//FIXME (farjam): Ikke revidert for v0
 
 @Entity
 @Table(name = "VEDTAK")

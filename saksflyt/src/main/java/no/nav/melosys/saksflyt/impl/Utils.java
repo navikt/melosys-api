@@ -23,19 +23,19 @@ public abstract class Utils {
     /**
      * Sorterer behandlinger etter frist, kortest frist først.
      */
-    public static Comparator<Behandling> kortestFristFørst() {
+    public static Comparator<Behandling> eldsteFørst() {
         return (s1, s2) -> {
             assert s1 != null && s2 != null : "Behandling kan ikke være null";
-            if (s1.getFrist() == null && s2.getFrist() == null) {
+            if (s1.getRegistrertDato() == null && s2.getRegistrertDato() == null) {
                 return 0;
             }
-            if (s1.getFrist() == null) {
+            if (s1.getRegistrertDato() == null) {
                 return -1;
             }
-            if (s2.getFrist() == null) {
+            if (s2.getRegistrertDato() == null) {
                 return 1;
             }
-            return s1.getFrist().compareTo(s2.getFrist());
+            return s1.getRegistrertDato().compareTo(s2.getRegistrertDato());
         };
     }
 

@@ -1,19 +1,29 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.Converter;
 
-@Entity(name = "SaksopplysningKilde")
-@Table(name = "SAKSOPPLYSNING_KILDE")
-public class SaksopplysningKilde extends Kodeverk {
+public enum SaksopplysningKilde implements Kodeverk<SaksopplysningKilde> {
 
-    public static final SaksopplysningKilde TPS = new SaksopplysningKilde("TPS");
-    public static final SaksopplysningKilde JOARK = new SaksopplysningKilde("JOARK");
-
-    SaksopplysningKilde() {
-    }
+    TPS("TPS"), 
+    JOARK("JOARK");
+    
+    private String kode;
 
     private SaksopplysningKilde(String kode) {
-        super(kode);
+        this.kode = kode;
     }
+    
+    @Override
+    public String getKode() {
+        return kode;
+    }
+
+    @Converter
+    public static class DbKonverterer extends Kodeverk.DbKonverterer<SaksopplysningKilde> {
+        @Override
+        protected SaksopplysningKilde[] getLovligeVerdier() {
+            return SaksopplysningKilde.values();
+        }
+    }
+
 }

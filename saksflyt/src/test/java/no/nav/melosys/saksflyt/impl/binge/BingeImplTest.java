@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -23,10 +24,10 @@ public class BingeImplTest {
     public void testGrunnleggendeFunksjonalitet() {
         BingeImpl binge = new BingeImpl();
         Behandling b1 = new Behandling(), b2 = new Behandling();
-        ReflectionTestUtils.setField(b1, "behandlingsId", 1L);
-        ReflectionTestUtils.setField(b2, "behandlingsId", 2L);
-        b1.setFrist(LocalDate.of(2017, 01, 02));
-        b2.setFrist(LocalDate.of(2017, 01, 01));
+        ReflectionTestUtils.setField(b1, "id", 1L);
+        ReflectionTestUtils.setField(b2, "id", 2L);
+        b1.setRegistrertDato(LocalDateTime.of(2017, 1, 2, 0, 0));
+        b2.setRegistrertDato(LocalDateTime.of(2017, 1, 1, 0, 0));
         b1.setStatus(BehandlingStatus.OPPRETTET);
         b2.setStatus(BehandlingStatus.KLARGJORT);
         assertTrue(binge.leggTil(b1));
@@ -35,10 +36,9 @@ public class BingeImplTest {
         assertNull(binge.hentBehandling(0)); // Ingen sak med saksId 0 er lagt inn
         assertEquals(2, binge.hentBehandlinger((s) -> true).size()); // Skal være 2 saker i bingen
         assertEquals(0, binge.hentBehandlinger((s) -> false).size()); // Skal ikke returnere noe hvis predikatet ikke slår til
-        assertEquals(b2, binge.fjernFørsteBehandling((s) -> true, Utils.kortestFristFørst())); // b2 har kortest frist
-        assertEquals(b1, binge.fjernFørsteBehandling((s) -> true, Utils.kortestFristFørst())); // Nå er det b1 som har kortest
-                                                                                               // frist
-        assertNull(binge.fjernFørsteBehandling((s) -> true, Utils.kortestFristFørst())); // Alle sakene er hentet ut. Fjern skal
+        assertEquals(b2, binge.fjernFørsteBehandling((s) -> true, Utils.eldsteFørst())); // b2 har kortest frist
+        assertEquals(b1, binge.fjernFørsteBehandling((s) -> true, Utils.eldsteFørst())); // Nå er det b1 som har kortest frist
+        assertNull(binge.fjernFørsteBehandling((s) -> true, Utils.eldsteFørst())); // Alle sakene er hentet ut. Fjern skal
         // returnere null
     }
 
