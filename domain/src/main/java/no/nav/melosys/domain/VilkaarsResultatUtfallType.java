@@ -1,20 +1,31 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.Converter;
 
-@Entity
-@Table(name = "VILKAAR_RESULTAT_UTFALL_TYPE")
-public class VilkaarsResultatUtfallType extends Kodeverk {
+//FIXME (farjam): Ikke revidert for v0
 
-    public static final VilkaarsResultatUtfallType OPPFYLT = new VilkaarsResultatUtfallType("OPPFYLT");
-    public static final VilkaarsResultatUtfallType IKKE_OPPFYLT = new VilkaarsResultatUtfallType("IKKE_OPPFYLT");
+public enum VilkaarsResultatUtfallType implements Kodeverk<VilkaarsResultatUtfallType> {
 
-    VilkaarsResultatUtfallType() {
-    }
+    OPPFYLT("OPPFYLT"),
+    IKKE_OPPFYLT("IKKE_OPPFYLT");
+
+    private String kode;
 
     private VilkaarsResultatUtfallType(String kode) {
-        super(kode);
+        this.kode = kode;
+    }
+    
+    @Override
+    public String getKode() {
+        return kode;
+    }
+
+    @Converter
+    public static class DbKonverterer extends Kodeverk.DbKonverterer<VilkaarsResultatUtfallType> {
+        @Override
+        protected VilkaarsResultatUtfallType[] getLovligeVerdier() {
+            return VilkaarsResultatUtfallType.values();
+        }
     }
 
 }

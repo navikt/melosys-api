@@ -17,6 +17,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+//FIXME (farjam): Ikke revidert for v0
+
 @Entity
 @Table(name = "VILKAAR_RESULTAT")
 public class VilkaarsResultat {

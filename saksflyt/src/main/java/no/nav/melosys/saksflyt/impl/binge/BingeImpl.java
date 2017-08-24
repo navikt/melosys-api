@@ -28,11 +28,11 @@ public class BingeImpl implements Binge {
 
     @Override
     public synchronized boolean leggTil(Behandling behandling) {
-        if (behandlinger.containsKey(behandling.getBehandlingsId())) {
-            logger.error("Forsøk på å legge inn behandling som allerede finnes i Bingen. behandlingsid=%d", behandling.getBehandlingsId());
+        if (behandlinger.containsKey(behandling.getId())) {
+            logger.error("Forsøk på å legge inn behandling som allerede finnes i Bingen. behandlingsid=%d", behandling.getId());
             return false;
         }
-        behandlinger.put(behandling.getBehandlingsId(), behandling);
+        behandlinger.put(behandling.getId(), behandling);
         return true;
     }
 
@@ -64,7 +64,7 @@ public class BingeImpl implements Binge {
     public synchronized Behandling fjernFørsteBehandling(Predicate<Behandling> predikat) {
         Behandling behandling = behandlinger.values().stream().filter(predikat).findFirst().orElse(null);
         if (behandling != null) {
-            behandlinger.remove(behandling.getBehandlingsId());
+            behandlinger.remove(behandling.getId());
         }
         return behandling;
     }
@@ -73,7 +73,7 @@ public class BingeImpl implements Binge {
     public synchronized Behandling fjernFørsteBehandling(Predicate<Behandling> predikat, Comparator<Behandling> rekkefølge) {
         Behandling behandling = behandlinger.values().stream().filter(predikat).sorted(rekkefølge).findFirst().orElse(null);
         if (behandling != null) {
-            behandlinger.remove(behandling.getBehandlingsId());
+            behandlinger.remove(behandling.getId());
         }
         return behandling;
     }

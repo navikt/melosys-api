@@ -38,7 +38,7 @@ public class InitBinge implements InitializingBean {
         for (Behandling behandling : uavsluttet) {
             if (binge.leggTil(behandling)) {
                 teller++;
-                log.debug("Behandling med behandlingsid {} er lagt i bingen", behandling.getBehandlingsId());
+                log.debug("Behandling med behandlingsid {} er lagt i bingen", behandling.getId());
             }
         }
 

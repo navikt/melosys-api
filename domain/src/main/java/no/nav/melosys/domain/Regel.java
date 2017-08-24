@@ -10,6 +10,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.util.Objects;
 
+//FIXME (farjam): Ikke revidert for v0
+
 @Entity
 @Table(name = "REGEL")
 public class Regel {
