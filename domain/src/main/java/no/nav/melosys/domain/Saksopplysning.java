@@ -26,16 +26,10 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 import org.hibernate.annotations.ColumnTransformer;
 
-import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.FinnArbeidsforholdPrArbeidstakerResponse;
-import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest;
-import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
-import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.FinnArbeidsforholdPrArbeidstakerResponse;
+
 @Entity
 @Table(name = "SAKSOPPLYSNING")
 public class Saksopplysning implements Serializable {
@@ -134,16 +128,16 @@ public class Saksopplysning implements Serializable {
     }
 
     @PostLoad
-    private void lagDokument() {
+    void lagDokument() {
         try {
             if (dokumentXml == null) {
                 dokument = null;
                 return;
             } else if (type == PERSONOPPLYSNING && kilde == TPS) {
                 StringReader reader = new StringReader(dokumentXml);
-                JAXBContext jaxbContext = JAXBContext.newInstance(HentPersonResponse.class);
+                JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
                 Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-                dokument = unmarshaller.unmarshal(reader);
+                dokument = ((no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse) unmarshaller.unmarshal(reader)).getResponse();
             } else {
                 // FIXME: Legg til relevante typer
                 throw new RuntimeException(String.format("Ukjent dokument: type=%1s, kilde=%2s, versjon=%3", type, kilde, versjon));
@@ -155,12 +149,12 @@ public class Saksopplysning implements Serializable {
     
     @PrePersist
     @PreUpdate
-    private void lagDokumentXml() {
+    void lagDokumentXml() {
         try {
             if (dokument == null) {
                 dokumentXml = null;
             } else if (type == PERSONOPPLYSNING && kilde == TPS) {
-                HentPersonResponse hentPersonResponse = (HentPersonResponse) dokument;
+                no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse hentPersonResponse = (no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse) dokument;
                 JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
                 no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse xmlRoot = new no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse();
                 xmlRoot.setResponse(hentPersonResponse);
