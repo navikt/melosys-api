@@ -2,6 +2,10 @@ package no.nav.melosys.integrasjon.tps.person;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,4 +57,35 @@ public class PersonConsumerTestIT extends Gen3WsProxyServiceITBase {
         HentPersonResponse response = personConsumer.hentPerson(request);
         assertThat(response.getPerson().getPersonnavn().getEtternavn()).isEqualTo(TpsTestData.STD_KVINNE_ETTERNAVN);
     }
+
+    @Test
+    public void xml() throws JAXBException, HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
+        JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPerson.class, no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
+        Marshaller marshaller = jaxbContext.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+        HentPersonRequest request = new HentPersonRequest();
+
+        String ident = TpsTestData.STD_KVINNE_FNR;
+
+        NorskIdent norskIdent = new NorskIdent();
+        norskIdent.setIdent(ident);
+
+        PersonIdent personIdent = new PersonIdent();
+        personIdent.setIdent(norskIdent);
+
+        request.setAktoer(personIdent);
+
+        HentPersonResponse response = personConsumer.hentPerson(request);
+
+        no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse xmlRootResponse = new no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse();
+        xmlRootResponse.setResponse(response);
+
+        no.nav.tjeneste.virksomhet.person.v3.HentPerson xmlRootRequest = new no.nav.tjeneste.virksomhet.person.v3.HentPerson();
+        xmlRootRequest.setRequest(request);
+
+        marshaller.marshal(xmlRootRequest, System.out);
+        marshaller.marshal(xmlRootResponse, System.out);
+    }
+
 }

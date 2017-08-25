@@ -8,7 +8,6 @@ import javax.xml.namespace.QName;
 import org.apache.cxf.feature.LoggingFeature;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.ws.addressing.WSAddressingFeature;
-import org.apache.cxf.ws.security.SecurityConstants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,8 +26,6 @@ public class JournalConsumerConfig {
 
     JournalV2 getPort() {
         Map<String, Object> properties = new HashMap<>();
-        // FIXME: Brukes kun ifm mock'en og MÅ fjernes når den har blitt JBoss-ifisert
-        properties.put(SecurityConstants.MUST_UNDERSTAND, false);
 
         JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
         factoryBean.setWsdlURL(WSDL);

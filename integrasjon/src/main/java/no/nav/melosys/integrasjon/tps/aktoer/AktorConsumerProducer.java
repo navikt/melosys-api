@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.tps.aktoer;
 
 
 import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.OIDC_TIL_SAML;
-import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.SYSTEM_SAML;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +28,7 @@ public class AktorConsumerProducer {
 
     @Bean
     public AktorSelftestConsumer aktorSelftestConsumer() {
-        AktoerV2 port = wrapWithSts(consumerConfig.getPort(), SYSTEM_SAML);
+        AktoerV2 port = wrapWithSts(consumerConfig.getPort(), OIDC_TIL_SAML);
         return new AktorSelftestConsumerImpl(port, consumerConfig.getEndpointUrl());
     }
 

@@ -37,7 +37,13 @@
         <dependency>
             <groupId>no.nav.tjenester.fim</groupId>
             <artifactId>nav-arbeidsforhold-v3-tjenestespesifikasjon</artifactId>
-            <version>${aareg.arbeidsforhold.version}</version>
+            <classifier>jaxws</classifier>
+        </dependency>
+
+        <!--EREG-->
+        <dependency>
+            <groupId>no.nav.tjenester.fim</groupId>
+            <artifactId>nav-fim-organisasjon-v4-tjenestespesifikasjon</artifactId>
             <classifier>jaxws</classifier>
         </dependency>
 
@@ -45,7 +51,6 @@
         <dependency>
             <groupId>no.nav.tjenester.fim</groupId>
             <artifactId>nav-fim-behandleSak-v1-tjenestespesifikasjon</artifactId>
-            <version>${gsak.sak.version}</version>
             <classifier>jaxws</classifier>
         </dependency>
 

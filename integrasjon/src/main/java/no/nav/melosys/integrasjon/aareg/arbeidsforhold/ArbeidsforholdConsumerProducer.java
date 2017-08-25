@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 
 import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.OIDC_TIL_SAML;
+import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.SYSTEM_SAML;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +25,12 @@ public class ArbeidsforholdConsumerProducer {
     ArbeidsforholdConsumer arbeidsforholdConsumer() {
         ArbeidsforholdV3 port = wrapWithSts(config.getPort(), OIDC_TIL_SAML);
         return new ArbeidsforholdConsumerImpl(port);
+    }
+
+    @Bean
+    ArbeidsforholdSelftestConsumer arbeidsforholdSelftestConsumer() {
+        ArbeidsforholdV3 port = wrapWithSts(config.getPort(), SYSTEM_SAML);
+        return new ArbeidsforholdSelftestConsumerImpl(port, config.getEndpointUrl());
     }
 
     private ArbeidsforholdV3 wrapWithSts(ArbeidsforholdV3 port, NAVSTSClient.StsClientType

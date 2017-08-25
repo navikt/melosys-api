@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
+package no.nav.melosys.integrasjon.ereg.organisasjon;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,22 +12,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import no.nav.melosys.integrasjon.felles.CallIdOutInterceptor;
-import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.ArbeidsforholdV3;
+import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.OrganisasjonV4;
 
 @Component
-public class ArbeidsforholdConsumerConfig {
-    private static final String WSDL = "wsdl/no/nav/tjeneste/virksomhet/arbeidsforhold/v3/Binding.wsdl";
-    private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/Binding";
-    private static final QName SERVICE = new QName(NAMESPACE, "Arbeidsforhold_v3");
-    private static final QName PORT = new QName(NAMESPACE, "Arbeidsforhold_v3Port");
+public class OrganisasjonConsumerConfig {
+    private static final String WSDL = "wsdl/no/nav/tjeneste/virksomhet/organisasjon/v4/Binding.wsdl";
+    private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/organisasjon/v4/Binding";
+    private static final QName SERVICE = new QName(NAMESPACE, "Organisasjon_v4");
+    private static final QName PORT = new QName(NAMESPACE, "Organisasjon_v4Port");
 
     private String endpointUrl; // NOSONAR
 
-    public ArbeidsforholdConsumerConfig(@Value("${Arbeidsforhold_v3.url}") String endpointUrl) {
+    public OrganisasjonConsumerConfig(@Value("${Organisasjon_v4.url}") String endpointUrl) {
         this.endpointUrl = endpointUrl;
     }
-
-    ArbeidsforholdV3 getPort() {
+    
+    OrganisasjonV4 getPort() {
         Map<String, Object> properties = new HashMap<>();
 
         JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
@@ -35,16 +35,15 @@ public class ArbeidsforholdConsumerConfig {
         factoryBean.setProperties(properties);
         factoryBean.setServiceName(SERVICE);
         factoryBean.setEndpointName(PORT);
-        factoryBean.setServiceClass(ArbeidsforholdV3.class);
+        factoryBean.setServiceClass(OrganisasjonV4.class);
         factoryBean.setAddress(endpointUrl);
         factoryBean.getFeatures().add(new WSAddressingFeature());
         factoryBean.getFeatures().add(new LoggingFeature());
         factoryBean.getOutInterceptors().add(new CallIdOutInterceptor());
-        return factoryBean.create(ArbeidsforholdV3.class);
+        return factoryBean.create(OrganisasjonV4.class);
     }
 
     public String getEndpointUrl() {
         return endpointUrl;
     }
-
 }

@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.config;
 
 import javax.ws.rs.ApplicationPath;
 
@@ -8,6 +8,10 @@ import org.springframework.context.annotation.Configuration;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
+import no.nav.melosys.tjenester.gui.BehandlingRestTjeneste;
+import no.nav.melosys.tjenester.gui.FagsakRestTjeneste;
+import no.nav.melosys.tjenester.gui.PersonRestTjeneste;
+import no.nav.melosys.tjenester.gui.SaksbehandlerTjeneste;
 
 @Configuration
 @ApplicationPath("/api")

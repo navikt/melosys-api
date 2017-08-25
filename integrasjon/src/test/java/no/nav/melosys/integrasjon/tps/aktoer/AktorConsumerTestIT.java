@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.tps.aktoer;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +39,6 @@ public class AktorConsumerTestIT extends Gen3WsProxyServiceITBase {
         selftestConsumer = producer.aktorSelftestConsumer();
     }
 
-    @Ignore
     @Test
     public void test_ping() {
         selftestConsumer.ping();
