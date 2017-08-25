@@ -252,11 +252,6 @@
                 <artifactId>felles-sikkerhet</artifactId>
                 <version>${vl-felles.version}</version>
             </dependency>
-            <dependency>
-                <groupId>no.nav.vedtak.felles</groupId>
-                <artifactId>ldap-klient</artifactId>
-                <version>${vl-felles.version}</version>
-            </dependency>
 
             <!-- Test -->
             <dependency>
