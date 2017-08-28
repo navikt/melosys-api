@@ -64,13 +64,8 @@ public class MottakService {
     @Transactional
     public Behandling klargjoer(Behandling behandling) {
 
-        // Har vi aktørId eller fnr her?
+        // FIXME TPS oppslag. Har vi aktørId eller fnr her?
         String fnr = null;
-
-        /*Optional<String> aktørId = tpsFasade.hentAktørIdForIdent(fnr);
-        if (!aktørId.isPresent()) {
-            throw new IllegalArgumentException("Finner ikke aktørID for fnr: " + fnr);
-        }*/
 
         Fagsak fagsak = behandling.getFagsak();
 

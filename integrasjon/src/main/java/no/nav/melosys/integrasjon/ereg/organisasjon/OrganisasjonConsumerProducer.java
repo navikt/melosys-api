@@ -32,8 +32,7 @@ public class OrganisasjonConsumerProducer {
         return new OrganisasjonSelftestConsumerImpl(port, config.getEndpointUrl());
     }
 
-    private OrganisasjonV4 wrapWithSts(OrganisasjonV4 port, NAVSTSClient.StsClientType
-            oidcTilSaml) {
+    private OrganisasjonV4 wrapWithSts(OrganisasjonV4 port, NAVSTSClient.StsClientType oidcTilSaml) {
         return StsConfigurationUtil.wrapWithSts(port, oidcTilSaml);
     }
 }
