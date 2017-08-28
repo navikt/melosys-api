@@ -7,6 +7,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ public class OrganisasjonComsumerTestIT extends Gen3WsProxyServiceITBase {
         assertThat(navn).isEqualTo("VANN- OG AVLØPSETATEN");
     }
 
+    @Ignore
     @Test
     public void xml() throws JAXBException, HentOrganisasjonOrganisasjonIkkeFunnet, HentOrganisasjonUgyldigInput {
         JAXBContext  jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse.class);
