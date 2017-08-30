@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 
 import no.nav.melosys.domain.Behandling;
 
+
 /**
  * Shared object space for alle behandlinger.
  * 

@@ -38,8 +38,7 @@ public class BingeImplTest {
         assertEquals(0, binge.hentBehandlinger((s) -> false).size()); // Skal ikke returnere noe hvis predikatet ikke slår til
         assertEquals(b2, binge.fjernFørsteBehandling((s) -> true, Utils.eldsteFørst())); // b2 har kortest frist
         assertEquals(b1, binge.fjernFørsteBehandling((s) -> true, Utils.eldsteFørst())); // Nå er det b1 som har kortest frist
-        assertNull(binge.fjernFørsteBehandling((s) -> true, Utils.eldsteFørst())); // Alle sakene er hentet ut. Fjern skal
-        // returnere null
+        assertNull(binge.fjernFørsteBehandling((s) -> true, Utils.eldsteFørst())); // Alle sakene er hentet ut. Fjern skal returnere null
     }
 
 }

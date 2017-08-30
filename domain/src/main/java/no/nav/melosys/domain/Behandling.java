@@ -135,7 +135,7 @@ public class Behandling {
         if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
             return this.id == that.id;
         }
-        // TODO (farjam 2017-08-18): Her er det en teoretisk mulighet for feil oppførsel når vi sammenligner entiteter.
+        // TODO (farjam 2017-08-18) EESSI2-217: Her er det en teoretisk mulighet for feil oppførsel når vi sammenligner entiteter.
         // For å fikse dette må equals og hashCode legge en ikke-generert og unik nøkkel til grunn.
         // Dette er for det meste kun en teoretisk mulighet for feil. Det skal mye til for at to behandlinger blir registrert på samme sak i det samme nanosekundet.
         return Objects.equals(this.registrertDato, that.registrertDato)
