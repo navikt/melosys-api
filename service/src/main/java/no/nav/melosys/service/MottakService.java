@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.BehandlingType;
-import no.nav.melosys.domain.Bruker;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakStatus;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
@@ -47,8 +46,10 @@ public class MottakService {
 
         // Oppretter en sak i DB slik at id kan brukes i GSAK
         Fagsak fagsak = new Fagsak();
+        /* FIXME
         Bruker bruker = new Bruker();
         bruker.setFnr(fnr);
+        //*/
         fagsakRepo.save(fagsak);
 
         // Oppretter en behandling knyttet til saken

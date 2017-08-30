@@ -1,72 +1,57 @@
 package no.nav.melosys.domain;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "FAGSAK")
-public class Fagsak {
+public class Fagsak implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // FIXME (farjam): Har vi en ekstern saksnummer fra GSak???
     @Column(name = "saksnummer")
     private Long saksnummer;
+    
+    @Column(name = "fagsak_type", nullable = false, updatable = false)
+    @Convert(converter = FagsakType.DbKonverterer.class)
+    private FagsakType type;
 
-    @ManyToOne
-    @JoinColumn(name = "status", nullable = false)
+    @Column(name = "versjon", nullable = false, updatable = false)
+    private int versjon;
+    
+    @Column(name = "status", nullable = false)
+    @Convert(converter = FagsakStatus.DbKonverterer.class)
     private FagsakStatus status = FagsakStatus.OPPRETTET;
 
-    @Column(name = "virkemiddel")
-    private String virkemiddel;
+    @Column(name = "registrert_dato", nullable = false, updatable = false)
+    private LocalDateTime registrertDato;
 
-    @ManyToOne
-    @JoinColumn(name = "bruker")
-    private Bruker bruker;
+    @OneToMany(mappedBy = "fagsak", fetch = FetchType.EAGER)
+    private List<Aktoer> aktører;
 
-    @ManyToOne
-    @JoinColumn(name = "arbeidsgiver")
-    private Arbeidsgiver arbeidsgiver;
+    @OneToMany(mappedBy = "fagsak", fetch = FetchType.EAGER)
+    private List<Behandling> behandlinger;
 
-    @ManyToOne
-    @JoinColumn(name = "fullmektig")
-    private Fullmektig fullmektig;
 
     public Long getId() {
         return id;
-    }
-
-    public Arbeidsgiver getArbeidsgiver() {
-        return arbeidsgiver;
-    }
-
-    public void setArbeidsgiver(Arbeidsgiver arbeidsgiver) {
-        this.arbeidsgiver = arbeidsgiver;
-    }
-
-    public Bruker getBruker() {
-        return bruker;
-    }
-
-    public void setBruker(Bruker bruker) {
-        this.bruker = bruker;
-    }
-
-    public Fullmektig getFullmektig() {
-        return fullmektig;
-    }
-
-    public void setFullmektig(Fullmektig fullmektig) {
-        this.fullmektig = fullmektig;
     }
 
     public Long getSaksnummer() {
@@ -77,6 +62,22 @@ public class Fagsak {
         this.saksnummer = saksnummer;
     }
 
+    public FagsakType getType() {
+        return type;
+    }
+
+    public void setType(FagsakType type) {
+        this.type = type;
+    }
+
+    public int getVersjon() {
+        return versjon;
+    }
+
+    public void setVersjon(int versjon) {
+        this.versjon = versjon;
+    }
+
     public FagsakStatus getStatus() {
         return status;
     }
@@ -85,12 +86,28 @@ public class Fagsak {
         this.status = status;
     }
 
-    public String getVirkemiddel() {
-        return virkemiddel;
+    public LocalDateTime getRegistrertDato() {
+        return registrertDato;
     }
 
-    public void setVirkemiddel(String virkemiddel) {
-        this.virkemiddel = virkemiddel;
+    public void setRegistrertDato(LocalDateTime registrertDato) {
+        this.registrertDato = registrertDato;
+    }
+
+    public List<Aktoer> getktoerer() {
+        return aktører;
+    }
+
+    public void setAktoerer(List<Aktoer> aktører) {
+        this.aktører = aktører;
+    }
+
+    public List<Behandling> getBehandlinger() {
+        return behandlinger;
+    }
+
+    public void setBehandlinger(List<Behandling> behandlinger) {
+        this.behandlinger = behandlinger;
     }
 
     @Override
@@ -98,17 +115,22 @@ public class Fagsak {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Fagsak)) { // Implisitt nullsjekk
             return false;
         }
-
-        Fagsak fagsak = (Fagsak) o;
-        return Objects.equals(saksnummer, fagsak.getSaksnummer());
+        Fagsak that = (Fagsak) o;
+        if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
+            return this.id == that.id;
+        }
+        // TODO (farjam 2017-08-18): Her er det en teoretisk mulighet for feil oppførsel når vi sammenligner entiteter.
+        // For å fikse dette må equals og hashCode legge en ikke-generert og unik nøkkel til grunn.
+        // Dette er for det meste kun en teoretisk mulighet for feil. Det skal mye til for at to fagsaker blir registrert i det samme nanosekundet.
+        return Objects.equals(this.registrertDato, that.registrertDato);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(saksnummer);
+        return Objects.hash(registrertDato);
     }
+
 }

@@ -1,22 +1,31 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.Converter;
 
-@Entity
-@Table(name = "FAGSAK_STATUS")
-public class FagsakStatus extends Kodeverk {
+public enum FagsakStatus implements Kodeverk<FagsakStatus> {
 
-    public static final FagsakStatus OPPRETTET = new FagsakStatus("OPPR");
-    public static final FagsakStatus UBEH = new FagsakStatus("UBEH");
-    public static final FagsakStatus LØPENDE = new FagsakStatus("LOP");
-    public static final FagsakStatus AVSLUTTET = new FagsakStatus("AVSLU");
+    OPPRETTET("OPPR"),
+    UBEH("UBEH"),
+    LØPENDE("LOP"),
+    AVSLUTTET("AVSLU");
 
-    FagsakStatus() {
-    }
+    private String kode;
 
     private FagsakStatus(String kode) {
-        super(kode);
+        this.kode = kode;
+    }
+    
+    @Override
+    public String getKode() {
+        return kode;
+    }
+
+    @Converter
+    public static class DbKonverterer extends Kodeverk.DbKonverterer<FagsakStatus> {
+        @Override
+        protected FagsakStatus[] getLovligeVerdier() {
+            return FagsakStatus.values();
+        }
     }
 
 }

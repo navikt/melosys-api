@@ -11,10 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import no.nav.melosys.domain.Arbeidsforhold;
-import no.nav.melosys.domain.ArbeidsforholdsType;
-import no.nav.melosys.domain.Arbeidsgiver;
-import no.nav.melosys.domain.PermisjonOgPermittering;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
 import no.nav.melosys.integrasjon.felles.IntegrasjonException;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning;
@@ -56,6 +52,7 @@ public class AaregService implements AaregFasade {
      *
      * @return
      */
+    /* FIXME
     @Override
     public List<Arbeidsforhold> finnArbeidsforholdPrArbeidstaker(String ident) throws IntegrasjonException {
         FinnArbeidsforholdPrArbeidstakerRequest request = new FinnArbeidsforholdPrArbeidstakerRequest();
@@ -114,7 +111,7 @@ public class AaregService implements AaregFasade {
             // Ikke påkrevd i tjenesten.
             Arbeidsforholdstyper type = a.getArbeidsforholdstype();
             if (type != null) {
-                arbeidsforhold.setType(ArbeidsforholdsType.getFraKode(type.getValue()));
+                arbeidsforhold.setType(ArbeidsforholdsType.valueOf(type.getValue()));
             }
 
             // PermisjonOgPermittering. Til å gjøre kontroll etter vedtak er innvilget. Ikke direkte vilkårvurdering.
@@ -153,7 +150,7 @@ public class AaregService implements AaregFasade {
 
         return resultat;
     }
-
+        
     private List<no.nav.melosys.domain.Arbeidsavtale> tilDomeneModell(List<Arbeidsavtale> avtaler) {
         List<no.nav.melosys.domain.Arbeidsavtale> arbeidsavtaleListe = new ArrayList<>();
 
@@ -216,5 +213,6 @@ public class AaregService implements AaregFasade {
         }
         return tidspunkt.toGregorianCalendar().toZonedDateTime().toLocalDateTime();
     }
+    // */
 
 }

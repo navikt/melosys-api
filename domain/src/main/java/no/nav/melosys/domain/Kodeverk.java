@@ -1,61 +1,43 @@
 package no.nav.melosys.domain;
 
-import java.util.Objects;
+import javax.persistence.AttributeConverter;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+/**
+ * Felles interface for alle enums som korresponderer til kodeverktabell.
+ */
+public interface Kodeverk<E extends Enum<?> & Kodeverk<?>> {
 
-@MappedSuperclass
-public abstract class Kodeverk {
-
-    @Id
-    @Column(name = "kode", updatable = false, insertable = false)
-    private String kode;
-
-    @Column(name = "navn", insertable = false, updatable = false)
-    private String navn;
-
-    @Column(name = "beskrivelse", updatable = false, insertable = false)
-    private String beskrivelse;
-
-    protected Kodeverk() {
-    }
-
-    protected Kodeverk(String kode) {
-        Objects.requireNonNull(kode);
-        this.kode = kode;
-    }
-
-    public String getKode() {
-        return kode;
-    }
-
-    public String getNavn() {
-        return navn;
-    }
-
-    public String getBeskrivelse() {
-        return beskrivelse;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+    /**
+     * Returnerer koden for enumen, altså verdien som lagres i DB.
+     */
+    public String getKode();
+    
+    /**
+     * Superklasse for AttributeConverter for kodeverk.
+     * Det skal være nok å subklasse denne og implementere getLovligeVerdier til å returnere array over alle enums av typen (altså samme 
+     * som E.values() når typen til E er kjent).
+     */
+    public abstract static class DbKonverterer<E extends Enum<?> & Kodeverk<?>> implements AttributeConverter<E, String> {
+        
+        protected abstract E[] getLovligeVerdier();
+        
+        @Override
+        public String convertToDatabaseColumn(E attribute) {
+            return attribute == null ? null : attribute.getKode();
         }
 
-        if (o == null || getClass() != o.getClass()) {
-            return false;
+        @Override
+        public E convertToEntityAttribute(String kode) {
+            if (kode == null) {
+                return null;
+            }
+            for (E kandidat : getLovligeVerdier()) {
+                if (kode.equals(kandidat.getKode())) {
+                    return kandidat;
+                }
+            }
+            throw new IllegalArgumentException("Ukjent kode for Kodeverk: " + kode);
         }
-
-        Kodeverk status = (Kodeverk) o;
-        return Objects.equals(kode, status.getKode());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(kode);
     }
 
 }
