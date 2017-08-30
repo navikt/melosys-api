@@ -27,4 +27,5 @@ public class SaksopplysningTest {
         assertEquals(initDokXml, so.getDokumentXml());
     }
     
+
 }
