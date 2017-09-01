@@ -23,13 +23,13 @@ public class ArbeidsavtaleDto {
 
     private String yrke;
 
-    private Float avtaltArbeidstimerPerUke;
+    private BigDecimal avtaltArbeidstimerPerUke;
 
-    private Float stillingsprosent;
+    private BigDecimal stillingsprosent;
 
     private LocalDate sisteLoennsendringsdato;
 
-    private Float beregnetAntallTimerPrUke;
+    private BigDecimal beregnetAntallTimerPrUke;
 
     private LocalDate endringsdatoStillingsprosent;
 
@@ -59,16 +59,12 @@ public class ArbeidsavtaleDto {
         // Yrkesbetegnelse. Nødvendig for statistikk til EU
         arbeidsavtaleDto.setYrke(avtale.getYrke().getValue());
 
-        BigDecimal avtaltArbeidstimerPerUke = avtale.getAvtaltArbeidstimerPerUke();
-        arbeidsavtaleDto.setAvtaltArbeidstimerPerUke(avtaltArbeidstimerPerUke != null ? avtaltArbeidstimerPerUke.floatValue() : null);
-
-        BigDecimal beregnetAntallTimerPrUke = avtale.getBeregnetAntallTimerPrUke();
-        arbeidsavtaleDto.setBeregnetAntallTimerPrUke(beregnetAntallTimerPrUke != null ? beregnetAntallTimerPrUke.floatValue() : null);
+        arbeidsavtaleDto.setAvtaltArbeidstimerPerUke(avtale.getAvtaltArbeidstimerPerUke());
+        arbeidsavtaleDto.setBeregnetAntallTimerPrUke(avtale.getBeregnetAntallTimerPrUke());
 
         // Stillingsprosent
         // Både når en jobber i utlandet, og den periode før. Dette for å avdekke reell utsending
-        BigDecimal stillingsprosent = avtale.getStillingsprosent();
-        arbeidsavtaleDto.setStillingsprosent(stillingsprosent != null ? stillingsprosent.floatValue() : null);
+        arbeidsavtaleDto.setStillingsprosent(avtale.getStillingsprosent());
         arbeidsavtaleDto.setEndringsdatoStillingsprosent(tilLocalDate(avtale.getEndringsdatoStillingsprosent()));
 
         // Maritimt arbeidsavtale
@@ -115,19 +111,19 @@ public class ArbeidsavtaleDto {
         this.yrke = yrke;
     }
 
-    public Float getAvtaltArbeidstimerPerUke() {
+    public BigDecimal getAvtaltArbeidstimerPerUke() {
         return avtaltArbeidstimerPerUke;
     }
 
-    public void setAvtaltArbeidstimerPerUke(Float avtaltArbeidstimerPerUke) {
+    public void setAvtaltArbeidstimerPerUke(BigDecimal avtaltArbeidstimerPerUke) {
         this.avtaltArbeidstimerPerUke = avtaltArbeidstimerPerUke;
     }
 
-    public Float getStillingsprosent() {
+    public BigDecimal getStillingsprosent() {
         return stillingsprosent;
     }
 
-    public void setStillingsprosent(Float stillingsprosent) {
+    public void setStillingsprosent(BigDecimal stillingsprosent) {
         this.stillingsprosent = stillingsprosent;
     }
 
@@ -139,11 +135,11 @@ public class ArbeidsavtaleDto {
         this.sisteLoennsendringsdato = sisteLoennsendringsdato;
     }
 
-    public Float getBeregnetAntallTimerPrUke() {
+    public BigDecimal getBeregnetAntallTimerPrUke() {
         return beregnetAntallTimerPrUke;
     }
 
-    public void setBeregnetAntallTimerPrUke(Float beregnetAntallTimerPrUke) {
+    public void setBeregnetAntallTimerPrUke(BigDecimal beregnetAntallTimerPrUke) {
         this.beregnetAntallTimerPrUke = beregnetAntallTimerPrUke;
     }
 

@@ -98,7 +98,7 @@ public class ArbeidsforholdDto {
             permisjonsPeriode.setTom(tilLocalDate(p.getPermisjonsPeriode().getTom()));
             permisjon.setPermisjonsPeriode(permisjonsPeriode);
 
-            permisjon.setPermisjonsprosent(p.getPermisjonsprosent().floatValue());
+            permisjon.setPermisjonsprosent(p.getPermisjonsprosent());
             permisjon.setPermisjonOgPermittering(p.getPermisjonOgPermittering().getValue());
         }
 

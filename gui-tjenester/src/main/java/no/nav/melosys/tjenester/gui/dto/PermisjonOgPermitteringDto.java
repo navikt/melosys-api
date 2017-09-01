@@ -1,13 +1,15 @@
 
 package no.nav.melosys.tjenester.gui.dto;
 
+import java.math.BigDecimal;
+
 public class PermisjonOgPermitteringDto {
 
     private String permisjonsId;
 
     private PeriodeDto permisjonsPeriode;
 
-    private Float permisjonsprosent;
+    private BigDecimal permisjonsprosent;
 
     private String permisjonOgPermittering;
 
@@ -41,11 +43,11 @@ public class PermisjonOgPermitteringDto {
         this.permisjonsPeriode = permisjonsPeriode;
     }
 
-    public Float getPermisjonsprosent() {
+    public BigDecimal getPermisjonsprosent() {
         return permisjonsprosent;
     }
 
-    public void setPermisjonsprosent(Float permisjonsprosent) {
+    public void setPermisjonsprosent(BigDecimal permisjonsprosent) {
         this.permisjonsprosent = permisjonsprosent;
     }
 

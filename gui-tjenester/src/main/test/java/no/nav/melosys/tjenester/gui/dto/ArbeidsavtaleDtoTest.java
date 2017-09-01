@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -414,32 +413,18 @@ public class ArbeidsavtaleDtoTest {
                 Arbeidstidsordninger arbeidstidsordning = avtale.getArbeidstidsordning();
                 assertEquals(dto.getArbeidstidsordning(), arbeidstidsordning != null ? arbeidstidsordning.getValue() : null);
 
-                Float timerPerUke = avtale.getAvtaltArbeidstimerPerUke() != null ? avtale.getAvtaltArbeidstimerPerUke().floatValue() : null;
-                if (timerPerUke == null) {
-                    assertNull(dto.getAvtaltArbeidstimerPerUke());
-                } else {
-                    assertEquals(dto.getAvtaltArbeidstimerPerUke(), timerPerUke, 0);
-                }
+                assertEquals(dto.getAvtaltArbeidstimerPerUke(), avtale.getAvtaltArbeidstimerPerUke() );
 
                 String avloenningstype = avtale.getAvloenningstype() != null ? avtale.getAvloenningstype().getValue() : null;
                 assertEquals(dto.getAvloenningstype(), avloenningstype);
 
-                Float beregnetAntallTimerPrUke = avtale.getBeregnetAntallTimerPrUke() != null ? avtale.getBeregnetAntallTimerPrUke().floatValue() : null;
-                if (beregnetAntallTimerPrUke == null) {
-                    assertNull(dto.getBeregnetAntallTimerPrUke());
-                } else {
-                    assertEquals(dto.getBeregnetAntallTimerPrUke(), beregnetAntallTimerPrUke, 0);
-                }
+                assertEquals(dto.getBeregnetAntallTimerPrUke(), avtale.getBeregnetAntallTimerPrUke());
 
                 assertEquals(dto.getEndringsdatoStillingsprosent(), DtoUtils.tilLocalDate(avtale.getEndringsdatoStillingsprosent()));
 
                 assertEquals(dto.getSisteLoennsendringsdato(), DtoUtils.tilLocalDate(avtale.getSisteLoennsendringsdato()));
 
-                if (avtale.getStillingsprosent() != null) {
-                    assertEquals(dto.getStillingsprosent(), avtale.getStillingsprosent().floatValue(), 0);
-                } else {
-                    assertNull(dto.getStillingsprosent());
-                }
+                assertEquals(dto.getStillingsprosent(), avtale.getStillingsprosent());
 
                 assertEquals(dto.getYrke(), avtale.getYrke().getValue());
 
