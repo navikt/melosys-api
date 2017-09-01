@@ -12,10 +12,10 @@
     <artifactId>melosys-integrasjon</artifactId>
 
     <dependencies>
-        <dependency>
+        <!-- dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-domain</artifactId>
-        </dependency>
+        </dependency -->
 
         <!-- Sikkerhet fra foreldrepenger -->
         <dependency>
