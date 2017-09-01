@@ -6,8 +6,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>melosys</artifactId>
         <groupId>no.nav.melosys</groupId>
+        <artifactId>melosys-pom</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 

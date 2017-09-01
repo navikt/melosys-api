@@ -11,7 +11,7 @@
 
     <groupId>no.nav.melosys</groupId>
 
-    <artifactId>melosys</artifactId>
+    <artifactId>melosys-pom</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
