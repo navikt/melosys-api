@@ -11,6 +11,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.junit.Test;
 
+import no.nav.melosys.tjenester.gui.dto.util.DtoUtils;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.FinnArbeidsforholdPrArbeidstakerResponse;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Arbeidsavtale;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Arbeidsforhold;

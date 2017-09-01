@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import static no.nav.melosys.tjenester.gui.dto.DtoUtils.tilLocalDate;
+import static no.nav.melosys.tjenester.gui.dto.util.DtoUtils.tilLocalDate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
