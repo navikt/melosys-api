@@ -72,6 +72,13 @@
             <artifactId>nav-person-v3-tjenestespesifikasjon</artifactId>
             <classifier>jaxws</classifier>
         </dependency>
+        
+        <!--Kodeverk-->
+        <dependency>
+            <groupId>no.nav.tjenester.fim</groupId>
+            <artifactId>nav-fim-kodeverk-v2-tjenestespesifikasjon</artifactId>
+            <classifier>jaxws</classifier>
+        </dependency>
 
         <!--Test-->
         <dependency>

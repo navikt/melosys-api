@@ -14,7 +14,6 @@
     <artifactId>melosys</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Medlemskap og lovvalg</name>
 
     <modules>
         <module>aura-config</module>
@@ -48,7 +47,8 @@
         <tps.aktoer.version>2.0.1</tps.aktoer.version>
         <tps.person.version>3.0.2</tps.person.version>
         <vl-felles.version>1.8.11</vl-felles.version>
-
+        <kodeverk-v2.version>2.0.0-alpha004</kodeverk-v2.version>
+        
         <!-- Versjoner av eksterne biblioteker -->
         <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
         <gson.version>2.8.0</gson.version>
@@ -242,6 +242,12 @@
                 <groupId>no.nav.tjenester.fim</groupId>
                 <artifactId>nav-fim-behandleSak-v1-tjenestespesifikasjon</artifactId>
                 <version>${gsak.sak.version}</version>
+                <classifier>jaxws</classifier>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.tjenester.fim</groupId>
+                <artifactId>nav-fim-kodeverk-v2-tjenestespesifikasjon</artifactId>
+                <version>${kodeverk-v2.version}</version>
                 <classifier>jaxws</classifier>
             </dependency>
 
