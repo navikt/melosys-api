@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.tps;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -73,6 +74,13 @@ public class TpsService implements TpsFasade {
     @Override
     public HentPersonResponse hentPerson(String ident) throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
         return hentPerson(ident, null);
+    }
+
+    @Override
+    public HentPersonResponse hentPersonMedAdresse(String ident) throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
+        Collection<Informasjonsbehov> behov = new ArrayList<>();
+        behov.add(Informasjonsbehov.ADRESSE);
+        return hentPerson(ident, behov);
     }
 
     @Override

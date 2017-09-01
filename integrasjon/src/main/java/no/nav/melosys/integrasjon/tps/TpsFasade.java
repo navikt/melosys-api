@@ -16,5 +16,7 @@ public interface TpsFasade {
 
     HentPersonResponse hentPerson(String ident) throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning;
 
+    HentPersonResponse hentPersonMedAdresse(String ident) throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning;
+
     HentPersonResponse hentPerson(String ident, Collection<Informasjonsbehov> behov) throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning;
 }

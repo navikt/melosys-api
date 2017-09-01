@@ -17,12 +17,11 @@
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-repository</artifactId>
+            <artifactId>melosys-integrasjon</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>no.nav.vedtak.felles</groupId>
-            <artifactId>felles-sikkerhet</artifactId>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-repository</artifactId>
         </dependency>
 
         <dependency>

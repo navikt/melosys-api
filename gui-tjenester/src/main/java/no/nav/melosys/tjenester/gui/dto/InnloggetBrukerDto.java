@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui.dto;
 public class InnloggetBrukerDto {
 
     private String brukernavn;
+
     private String navn;
 
     public InnloggetBrukerDto(String brukernavn, String navn) {

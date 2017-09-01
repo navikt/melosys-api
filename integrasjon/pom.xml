@@ -12,10 +12,6 @@
     <artifactId>melosys-integrasjon</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-domain</artifactId>
-        </dependency>
 
         <!-- Sikkerhet fra foreldrepenger -->
         <dependency>
