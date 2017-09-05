@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import no.nav.melosys.integrasjon.felles.CallIdOutInterceptor;
 import no.nav.tjeneste.virksomhet.kodeverk.v2.KodeverkPortType;
 
-@Component
+@Component()
 public class KodeverkConsumerConfig {
 
     private static final String KODEVERK_V2_WSDL = "wsdl/no/nav/tjeneste/virksomhet/kodeverk/v2/Kodeverk.wsdl";
