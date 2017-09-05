@@ -1,11 +1,11 @@
 CREATE TABLE behandling_historikk (
     id             NUMBER(19) GENERATED ALWAYS AS IDENTITY,
-    behandling_id  NUMBER(19)  NOT NULL,
-    dato           TIMESTAMP   NOT NULL,
-    status         VARCHAR2    NOT NULL,
-    steg           VARCHAR2    NULL,
-    ident          VARCHAR2    NOT NULL,
-    kommentar      VARCHAR2    NOT NULL,
+    behandling_id  NUMBER(19)     NOT NULL,
+    dato           TIMESTAMP      NOT NULL,
+    status         VARCHAR2(99)   NOT NULL,
+    steg           VARCHAR2(99)   NULL,
+    ident          VARCHAR2(99)   NOT NULL,
+    kommentar      VARCHAR2(4000) NOT NULL,
     CONSTRAINT pk_behandling_resultat PRIMARY KEY (id)
 );
 

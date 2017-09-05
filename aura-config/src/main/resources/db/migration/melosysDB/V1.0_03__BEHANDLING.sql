@@ -1,17 +1,17 @@
 CREATE TABLE behandling (
     id              NUMBER(19) GENERATED ALWAYS AS IDENTITY,
-    behandling_id   NUMBER(19)  NOT NULL,
-    fagsak_id       NUMBER(19)  NOT NULL,
-    status          VARCHAR2    NOT NULL,
-    steg            VARCHAR2    NULL,
-    behandling_type VARCHAR2    NOT NULL,
-    registrert_dato TIMESTAMP   NOT NULL,
+    behandling_id   NUMBER(19)   NOT NULL,
+    fagsak_id       NUMBER(19)   NOT NULL,
+    status          VARCHAR2(99) NOT NULL,
+    steg            VARCHAR2(99) NULL,
+    behandling_type VARCHAR2(99) NOT NULL,
+    registrert_dato TIMESTAMP    NOT NULL,
     CONSTRAINT pk_behandling PRIMARY KEY (id)
 );
 
 CREATE TABLE behandling_status (
-    kode    VARCHAR2  NOT NULL,
-    navn    VARCHAR2  NOT NULL,
+    kode    VARCHAR2(99)  NOT NULL,
+    navn    VARCHAR2(99)  NOT NULL,
     CONSTRAINT pk_behandling_status PRIMARY KEY (kode)
 );
 
@@ -23,8 +23,8 @@ INSERT INTO behandling_status (kode, navn) VALUES ('I_VED', 'Iverksetter vedtak'
 INSERT INTO behandling_status (kode, navn) VALUES ('AVSLU', 'Avsluttet');
 
 CREATE TABLE behandling_type (
-    kode    VARCHAR2  NOT NULL,
-    navn    VARCHAR2  NOT NULL,
+    kode    VARCHAR2(99)  NOT NULL,
+    navn    VARCHAR2(99)  NOT NULL,
     CONSTRAINT pk_behandling_type PRIMARY KEY (kode)
 );
 
