@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import no.nav.melosys.integrasjon.kodeverk.Kode;
-import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 
 /**
@@ -20,7 +19,7 @@ import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 @Service
 public class KodeverkService {
     
-    private Map<String, Kodeverk> kodeverkCache = new HashMap<>(); // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
+    private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache = new HashMap<>(); // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
     
     @Autowired
     private KodeverkRegister kodeverkRegister;
@@ -28,15 +27,15 @@ public class KodeverkService {
     /**
      * Henter alle gyldige verdier for et kodeverk på et gitt tidspunkt.
      */
-    public List<String> gyldigeVerdier(KodeverkNavn kodeverkNavn, LocalDate dato) {
-        Map<String, List<Kode>> koder = hentKodeverk(kodeverkNavn.getNavn()).getKoder();
+    public List<String> gyldigeVerdier(Kodeverk kodeverk, LocalDate dato) {
+        Map<String, List<Kode>> koder = hentKodeverk(kodeverk.getNavn()).getKoder();
         List<String> res = new ArrayList<>(koder.size());
         for (List<Kode> kodeperioder : koder.values()) {
             // Kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
             for (Kode kandidat : kodeperioder) {
                 if (!kandidat.getGyldigFom().isAfter(dato) && !kandidat.getGyldigTom().isBefore(dato)) {
                     res.add(kandidat.getKode());
-                    break;
+                    break; // Inner
                 }
             }
         }
@@ -46,8 +45,8 @@ public class KodeverkService {
     /**
      * Henter verdien for en kode i et kodeverk på en gitt dato, eller null hvis koden ikke er omfattet av kodeverket på angitt dato.
      */
-    public String dekod(KodeverkNavn kodeverkNavn, String kode, LocalDate dato) {
-        List<Kode> kodeperioder = hentKodeverk(kodeverkNavn.getNavn()).getKoder().get(kode);
+    public String dekod(Kodeverk kodeverk, String kode, LocalDate dato) {
+        List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
         if (kodeperioder == null) {
             return null;
         }
@@ -66,8 +65,8 @@ public class KodeverkService {
      * Synchronized kan fjernes hvis kodeverkCache gjøres om til ThreadLocal.
      * NB! Ikke gjør "smarte" ting her (som f.eks. delvis synkronisering) med mindre du vet om alle konsekvensene.
      */
-    private synchronized Kodeverk hentKodeverk(String kodeverkNavn) {
-        Kodeverk kodeverk = kodeverkCache.get(kodeverkNavn);
+    private synchronized no.nav.melosys.integrasjon.kodeverk.Kodeverk hentKodeverk(String kodeverkNavn) {
+        no.nav.melosys.integrasjon.kodeverk.Kodeverk kodeverk = kodeverkCache.get(kodeverkNavn);
         if (kodeverk != null)  {
             return kodeverk;
         }

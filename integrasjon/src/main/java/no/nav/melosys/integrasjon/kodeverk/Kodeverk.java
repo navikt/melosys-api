@@ -12,7 +12,7 @@ public class Kodeverk {
 
     private Map<String, List<Kode>> koder;
     
-    Kodeverk(String navn, Map<String, List<Kode>> koder) {
+    public Kodeverk(String navn, Map<String, List<Kode>> koder) {
         this.navn = navn;
         this.koder = koder;
     }

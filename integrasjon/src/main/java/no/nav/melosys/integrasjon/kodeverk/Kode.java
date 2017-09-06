@@ -9,7 +9,7 @@ public class Kode {
     private LocalDate gyldigFom;
     private LocalDate gyldigTom;
 
-    Kode(String kode, String navn, LocalDate gyldigFom, LocalDate gyldigTom) {
+    public Kode(String kode, String navn, LocalDate gyldigFom, LocalDate gyldigTom) {
         this.kode = kode;
         this.navn = navn;
         this.gyldigFom = gyldigFom;
