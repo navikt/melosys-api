@@ -1,5 +1,8 @@
 package no.nav.melosys.tjenester.gui.dto;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse;
 
 public class GateadresseDto {
@@ -56,23 +59,16 @@ public class GateadresseDto {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GateadresseDto)) return false;
+        if (this == o) {return true;}
+        if (!(o instanceof GateadresseDto)) {return false;}
 
         GateadresseDto that = (GateadresseDto) o;
 
-        if (gatenavn != null ? !gatenavn.equals(that.gatenavn) : that.gatenavn != null) return false;
-        if (gatenummer != null ? !gatenummer.equals(that.gatenummer) : that.gatenummer != null) return false;
-        if (husnummer != null ? !husnummer.equals(that.husnummer) : that.husnummer != null) return false;
-        return husbokstav != null ? husbokstav.equals(that.husbokstav) : that.husbokstav == null;
+        return new EqualsBuilder().append(gatenavn, that.gatenavn).append(gatenummer, that.gatenummer).append(husnummer, that.husnummer).append(husbokstav, that.husbokstav).isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = gatenavn != null ? gatenavn.hashCode() : 0;
-        result = 31 * result + (gatenummer != null ? gatenummer.hashCode() : 0);
-        result = 31 * result + (husnummer != null ? husnummer.hashCode() : 0);
-        result = 31 * result + (husbokstav != null ? husbokstav.hashCode() : 0);
-        return result;
+        return new HashCodeBuilder().append(gatenavn).append(gatenummer).append(husnummer).append(husbokstav).toHashCode();
     }
 }

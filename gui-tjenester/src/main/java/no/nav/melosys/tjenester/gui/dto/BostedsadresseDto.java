@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import no.nav.melosys.tjenester.gui.dto.util.AdresseUtils;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.GeografiskAdresse;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.NoekkelVerdiAdresse;
@@ -152,23 +155,16 @@ public class BostedsadresseDto {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BostedsadresseDto)) return false;
+        if (this == o) {return true;}
+        if (!(o instanceof BostedsadresseDto)) {return false;}
 
         BostedsadresseDto that = (BostedsadresseDto) o;
 
-        if (gateadresse != null ? !gateadresse.equals(that.gateadresse) : that.gateadresse != null) return false;
-        if (postnr != null ? !postnr.equals(that.postnr) : that.postnr != null) return false;
-        if (poststed != null ? !poststed.equals(that.poststed) : that.poststed != null) return false;
-        return land != null ? land.equals(that.land) : that.land == null;
+        return new EqualsBuilder().append(gateadresse, that.gateadresse).append(postnr, that.postnr).append(poststed, that.poststed).append(land, that.land).isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = gateadresse != null ? gateadresse.hashCode() : 0;
-        result = 31 * result + (postnr != null ? postnr.hashCode() : 0);
-        result = 31 * result + (poststed != null ? poststed.hashCode() : 0);
-        result = 31 * result + (land != null ? land.hashCode() : 0);
-        return result;
+        return new HashCodeBuilder().append(gateadresse).append(postnr).append(poststed).append(land).toHashCode();
     }
 }
