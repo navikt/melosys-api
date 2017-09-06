@@ -17,6 +17,7 @@ import no.nav.melosys.integrasjon.test.Gen3WsProxyServiceITBase;
 import no.nav.melosys.integrasjon.test.TpsTestData;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning;
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest;
@@ -77,6 +78,8 @@ public class PersonConsumerTestIT extends Gen3WsProxyServiceITBase {
         personIdent.setIdent(norskIdent);
 
         request.setAktoer(personIdent);
+
+        request.getInformasjonsbehov().add(Informasjonsbehov.ADRESSE);
 
         HentPersonResponse response = personConsumer.hentPerson(request);
 

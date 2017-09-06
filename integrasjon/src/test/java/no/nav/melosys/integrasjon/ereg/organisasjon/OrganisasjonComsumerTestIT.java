@@ -53,6 +53,7 @@ public class OrganisasjonComsumerTestIT extends Gen3WsProxyServiceITBase {
     public void xml() throws JAXBException, HentOrganisasjonOrganisasjonIkkeFunnet, HentOrganisasjonUgyldigInput {
         JAXBContext  jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse.class);
         Marshaller marshaller = jaxbContext.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
         HentOrganisasjonRequest request = new HentOrganisasjonRequest();
         request.setOrgnummer("974600951");

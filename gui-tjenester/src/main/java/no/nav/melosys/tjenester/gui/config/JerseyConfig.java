@@ -8,9 +8,9 @@ import org.springframework.context.annotation.Configuration;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
+import no.nav.melosys.tjenester.gui.ArbeidsforholdRestTjeneste;
 import no.nav.melosys.tjenester.gui.BehandlingRestTjeneste;
 import no.nav.melosys.tjenester.gui.FagsakRestTjeneste;
-import no.nav.melosys.tjenester.gui.PersonRestTjeneste;
 import no.nav.melosys.tjenester.gui.SaksbehandlerTjeneste;
 
 @Configuration
@@ -19,9 +19,9 @@ public class JerseyConfig extends ResourceConfig {
 
     public JerseyConfig() {
         setApplicationName("melosys");
+        register(ArbeidsforholdRestTjeneste.class);
         register(BehandlingRestTjeneste.class);
         register(FagsakRestTjeneste.class);
-        register(PersonRestTjeneste.class);
         register(SaksbehandlerTjeneste.class);
         configureSwagger();
     }
