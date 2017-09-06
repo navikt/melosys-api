@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto.util;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,7 @@ import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.SemistrukturertAdr
 import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.StedsadresseNorge;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.StrukturertAdresse;
 
-public class AdresseUtils {
+public final class AdresseUtils {
 
     public static final String ADRESSELINJE1 = "adresselinje1";
     public static final String ADRESSELINJE2 = "adresselinje2";
@@ -23,6 +23,9 @@ public class AdresseUtils {
     public static final String POSTNR = "postnr";
     public static final String POSTSTED = "poststed";
     public static final String KOMMUNENR = "kommunenr";
+
+    private AdresseUtils() {
+    }
 
     public static boolean erGyldig(GeografiskAdresse adresse) {
         if (adresse == null) {
@@ -36,12 +39,12 @@ public class AdresseUtils {
 
         boolean etterFom = true;
         if (fom != null) {
-            etterFom = nå.isAfter(fom);
+            etterFom = nå.isAfter(fom) || nå.isEqual(fom);
         }
 
         boolean førTom = true;
         if (tom != null) {
-            førTom = nå.isBefore(tom);
+            førTom = nå.isBefore(tom) || nå.isEqual(tom);
         }
 
         return etterFom && førTom;
@@ -56,12 +59,7 @@ public class AdresseUtils {
             adresseledd.forEach(n -> adresseMap.put(n.getNoekkel().getKodeRef(), n.getVerdi()));
 
             // Lage en liste over nøklene som brukes i adressen
-            List<String> nøkkler = new ArrayList<>();
-            nøkkler.add(ADRESSELINJE1);
-            nøkkler.add(ADRESSELINJE2);
-            nøkkler.add(ADRESSELINJE3);
-            nøkkler.add(POSTNR);
-            nøkkler.add(POSTSTED);
+            List<String> nøkkler = Arrays.asList(ADRESSELINJE1, ADRESSELINJE2, ADRESSELINJE3, POSTNR, POSTSTED);
 
             String s = nøkkler.stream().map(x -> adresseMap.get(x)).filter(Objects::nonNull).collect(Collectors.joining(" "));
 

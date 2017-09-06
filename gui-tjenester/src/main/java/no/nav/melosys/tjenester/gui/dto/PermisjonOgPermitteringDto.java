@@ -16,11 +16,6 @@ public class PermisjonOgPermitteringDto {
     public PermisjonOgPermitteringDto() {
     }
 
-    /**
-     *
-     * @param permisjonsPeriode
-     * @param permisjonsId
-     */
     public PermisjonOgPermitteringDto(String permisjonsId, PeriodeDto permisjonsPeriode) {
         super();
         this.permisjonsId = permisjonsId;

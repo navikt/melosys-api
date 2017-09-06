@@ -19,10 +19,6 @@ public class PeriodeDto {
     public PeriodeDto() {
     }
 
-    /**
-     * @param tom
-     * @param fom
-     */
     public PeriodeDto(LocalDate fom, LocalDate tom) {
         super();
         this.fom = fom;

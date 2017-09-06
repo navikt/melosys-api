@@ -12,6 +12,7 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.Personnavn;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Sivilstand;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Statsborgerskap;
 
+// FIXME DTO må ikke avhengige av NAV tjenestemoduler.
 public class PersonDto {
 
     private String fnr;

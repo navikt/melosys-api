@@ -28,7 +28,7 @@ public class ArbeidsforholdDto {
 
     private List<PermisjonOgPermitteringDto> permisjonOgPermittering = new ArrayList<>();
 
-    private List<Object> utenlandsopphold = new ArrayList<>();
+    private List<UtenlandsoppholdDto> utenlandsopphold = new ArrayList<>();
 
     private List<ArbeidsavtaleDto> arbeidsavtale = new ArrayList<>();
 
@@ -163,11 +163,11 @@ public class ArbeidsforholdDto {
         this.permisjonOgPermittering = permisjonOgPermittering;
     }
 
-    public List<Object> getUtenlandsopphold() {
+    public List<UtenlandsoppholdDto> getUtenlandsopphold() {
         return utenlandsopphold;
     }
 
-    public void setUtenlandsopphold(List<Object> utenlandsopphold) {
+    public void setUtenlandsopphold(List<UtenlandsoppholdDto> utenlandsopphold) {
         this.utenlandsopphold = utenlandsopphold;
     }
 

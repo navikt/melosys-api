@@ -11,10 +11,6 @@ public class OrganisajonDto {
     public OrganisajonDto() {
     }
 
-    /**
-     *
-     * @param orgnummer
-     */
     public OrganisajonDto(String orgnummer) {
         super();
         this.orgnummer = orgnummer;

@@ -5,7 +5,10 @@ import java.time.LocalDateTime;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-public class DtoUtils {
+public final class DtoUtils {
+
+    private DtoUtils() {
+    }
 
     public static LocalDate tilLocalDate(XMLGregorianCalendar xmlCal) {
         if (xmlCal == null) {
