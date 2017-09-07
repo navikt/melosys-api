@@ -58,7 +58,7 @@ public class Saksopplysning implements Serializable {
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
 
-    @Column(name = "dokument_xml", updatable = false)
+    @Column(name = "dokument_xml", updatable = false, columnDefinition = "XMLType")
     @ColumnTransformer(read = "to_clob(dokument_xml)", write = "?")
     private String dokumentXml;
     

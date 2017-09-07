@@ -5,7 +5,7 @@ CREATE TABLE saksopplysning (
     versjon         INTEGER        NOT NULL,
     kilde           VARCHAR2(99)   NOT NULL,
     registrert_dato TIMESTAMP      NOT NULL,
-    document_xml    XMLTYPE        NOT NULL,
+    dokument_xml    XMLTYPE        NOT NULL,
     CONSTRAINT pk_saksopplysning PRIMARY KEY (id)
 );
 

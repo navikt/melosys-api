@@ -1,8 +1,8 @@
 package no.nav.melosys.domain;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -41,19 +41,19 @@ public class Behandling {
     // TODO (farjam 2017-08-18): Mangler kodeverk, se EESSI2-218
     @Column(name = "steg")
     private String steg;
-    
-    @ManyToOne
-    @JoinColumn(name = "type", nullable = false, updatable = false)
+
+    @Column(name = "type", nullable = false, updatable = false)
+    @Convert(converter = BehandlingType.DbKonverterer.class)
     private BehandlingType type;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
 
     @OneToMany(mappedBy = "behandling", fetch = FetchType.EAGER)
-    private List<Saksopplysning> saksopplysninger;
+    private Set<Saksopplysning> saksopplysninger;
 
     @OneToMany(mappedBy = "behandling", fetch = FetchType.EAGER)
-    private List<BehandlingHistorikk> behandlingshistorikk;
+    private Set<BehandlingHistorikk> behandlingshistorikk;
 
     public long getId() {
         return id;
@@ -107,19 +107,19 @@ public class Behandling {
         this.registrertDato = registrertDato;
     }
 
-    public List<Saksopplysning> getSaksopplysninger() {
+    public Set<Saksopplysning> getSaksopplysninger() {
         return saksopplysninger;
     }
 
-    public void setSaksopplysninger(List<Saksopplysning> saksopplysninger) {
+    public void setSaksopplysninger(Set<Saksopplysning> saksopplysninger) {
         this.saksopplysninger = saksopplysninger;
     }
 
-    public List<BehandlingHistorikk> getBehandlingshistorikk() {
+    public Set<BehandlingHistorikk> getBehandlingshistorikk() {
         return behandlingshistorikk;
     }
 
-    public void setBehandlingshistorikk(List<BehandlingHistorikk> behandlingshistorikk) {
+    public void setBehandlingshistorikk(Set<BehandlingHistorikk> behandlingshistorikk) {
         this.behandlingshistorikk = behandlingshistorikk;
     }
 

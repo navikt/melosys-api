@@ -11,6 +11,6 @@ public interface FagsakRepository extends CrudRepository<Fagsak, Long> {
 
     Fagsak findBySaksnummer(Long saksnummer);
 
-    @Query("select f from Fagsak f, Bruker b where f.bruker = b and b.fnr = ?1") //$NON-NLS-1$
+    @Query("select f from Fagsak f, Aktoer a where a.fagsak = f and a.rolle = 'ARBTAG' and a.eksternId = ?1") //$NON-NLS-1$
     List<Fagsak> findByFnr(String fnr);
 }

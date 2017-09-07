@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -44,7 +45,7 @@ public class Fagsak implements Serializable {
     private LocalDateTime registrertDato;
 
     @OneToMany(mappedBy = "fagsak", fetch = FetchType.EAGER)
-    private List<Aktoer> aktører;
+    private Set<Aktoer> aktører;
 
     @OneToMany(mappedBy = "fagsak", fetch = FetchType.EAGER)
     private List<Behandling> behandlinger;
@@ -94,11 +95,11 @@ public class Fagsak implements Serializable {
         this.registrertDato = registrertDato;
     }
 
-    public List<Aktoer> getktoerer() {
+    public Set<Aktoer> getktoerer() {
         return aktører;
     }
 
-    public void setAktoerer(List<Aktoer> aktører) {
+    public void setAktoerer(Set<Aktoer> aktører) {
         this.aktører = aktører;
     }
 
