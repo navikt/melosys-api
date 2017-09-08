@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.kodeverk;
+package no.nav.melosys.integrasjon.kodeverk.impl;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -11,6 +11,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import no.nav.melosys.integrasjon.kodeverk.Kode;
+import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
+import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
+import no.nav.melosys.integrasjon.kodeverk.UkjentKodeverkException;
 import no.nav.tjeneste.virksomhet.kodeverk.v2.HentKodeverkHentKodeverkKodeverkIkkeFunnet;
 import no.nav.tjeneste.virksomhet.kodeverk.v2.informasjon.EnkeltKodeverk;
 import no.nav.tjeneste.virksomhet.kodeverk.v2.informasjon.Periode;

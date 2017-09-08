@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import no.nav.melosys.integrasjon.kodeverk.impl.KodeverkConsumer;
 import no.nav.melosys.integrasjon.test.Gen3WsProxyServiceITBase;
 import no.nav.tjeneste.virksomhet.kodeverk.v2.meldinger.HentKodeverkRequest;
 import no.nav.tjeneste.virksomhet.kodeverk.v2.meldinger.HentKodeverkResponse;

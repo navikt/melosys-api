@@ -1,5 +1,5 @@
 
-package no.nav.melosys.integrasjon.kodeverk;
+package no.nav.melosys.integrasjon.kodeverk.impl;
 
 import no.nav.melosys.integrasjon.felles.SelftestConsumer;
 import no.nav.tjeneste.virksomhet.kodeverk.v2.HentKodeverkHentKodeverkKodeverkIkkeFunnet;

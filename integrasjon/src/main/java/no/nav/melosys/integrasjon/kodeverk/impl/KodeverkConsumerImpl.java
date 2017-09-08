@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.kodeverk;
+package no.nav.melosys.integrasjon.kodeverk.impl;
 
 import javax.annotation.PostConstruct;
 

@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.kodeverk;
+package no.nav.melosys.integrasjon.kodeverk.impl;
 
 import java.util.HashMap;
 import java.util.Map;
