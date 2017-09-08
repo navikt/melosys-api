@@ -120,17 +120,17 @@ public class Arbeider {
     }
 
     private class ArbeiderTraad extends Thread {
-        private volatile boolean skalStoppe = false;
 
         public void stoppArbeider() {
-            if (!isAlive())
+            if (!isAlive()) {
                 return;
-            skalStoppe = true;
+            }
             interrupt(); 
             try {
                 join(TIMEOUT_FOR_Å_STOPPE_EN_TRÅD);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+                // Ellers ignorerer vi forsøk på interrupt, siden vi har et sterkt ønske om å stoppe alle arbeidere.
             }
             if (isAlive()) {
                 logger.error("Klarte ikke å stoppe tråden i løpet av {} millisekunder", TIMEOUT_FOR_Å_STOPPE_EN_TRÅD);
@@ -140,14 +140,14 @@ public class Arbeider {
         public void run() {
             for (;;) {
                 for (Steg steg : maskinelleSteg) {
-                    if (skalStoppe) {
+                    if (interrupted()) {
                         return;
                     }
                     steg.finnBehandlingOgUtfoerSteg();
                     try {
                         sleep(oppholdMellomSteg);
                     } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
+                        return;
                     }
                 }
             }
