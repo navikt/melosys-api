@@ -6,7 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import no.nav.melosys.integrasjon.kodeverk.Kode;
@@ -17,12 +24,24 @@ import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
  * Merk: Klassen casher oppslag mot felles-kodevek, og er derfor egentlig ikke stateless (men den er trådsikker).
  */
 @Service
-public class KodeverkService {
+public class KodeverkService implements ApplicationContextAware {
     
-    private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache = new HashMap<>(); // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
+    private static final long MILLIS_MELLOM_TØM_CACHE = 3600000;
+
+    private static final Logger log = LoggerFactory.getLogger(KodeverkService.class);
+    
+    private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache; // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
+    
+    private TømCacheScheduler tømCacheScheduler;
     
     @Autowired
     private KodeverkRegister kodeverkRegister;
+    
+    public KodeverkService() {
+        kodeverkCache = new HashMap<>();
+        tømCacheScheduler = new TømCacheScheduler();
+        tømCacheScheduler.start();
+    }
     
     /**
      * Henter alle gyldige verdier for et kodeverk på et gitt tidspunkt.
@@ -60,9 +79,8 @@ public class KodeverkService {
     }
     
     /*
-     * Merk: Vi har en forsvinnende liten mulighet for feil hvis dette ikke synkroniseres. 
+     * Merk: Vi har en forsvinnende liten mulighet for feil hvis dette ikke synkroniseres (også hvis vi aldri tømmer cache). 
      * Problemer kan oppstå hvis metoden kalles i parallell der det ene kallet medfører put og resize/rehash.
-     * Synchronized kan fjernes hvis kodeverkCache gjøres om til ThreadLocal.
      * NB! Ikke gjør "smarte" ting her (som f.eks. delvis synkronisering) med mindre du vet om alle konsekvensene.
      */
     private synchronized no.nav.melosys.integrasjon.kodeverk.Kodeverk hentKodeverk(String kodeverkNavn) {
@@ -72,7 +90,41 @@ public class KodeverkService {
         }
         kodeverk = kodeverkRegister.hentKodeverk(kodeverkNavn);
         kodeverkCache.put(kodeverkNavn, kodeverk);
+        log.debug("Hentet og cachet kodeverk {}", kodeverkNavn);
         return kodeverk;
+    }
+    
+    private synchronized void tømCache() {
+        kodeverkCache = new HashMap<>();
+    }
+    
+    private class TømCacheScheduler extends Thread {
+        public void run() {
+            for (;;) {
+                try {
+                    sleep(MILLIS_MELLOM_TØM_CACHE);
+                } catch (InterruptedException e) {  
+                    return;
+                }
+                if (interrupted()) {
+                    return;
+                }
+                tømCache();
+            }
+        }
+    }
+
+    // FIXME: Resten av koden er kun for demo, og skal fjernes.
+    
+    private static KodeverkService staticKs;
+    
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        staticKs = applicationContext.getBean(KodeverkService.class);
+    }
+    
+    public static String dekod(Kodeverk kodeverk, String kode) {
+        return staticKs.dekod(kodeverk, kode, LocalDate.now());
     }
 
 }
