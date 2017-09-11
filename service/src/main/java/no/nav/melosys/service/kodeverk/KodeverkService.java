@@ -12,8 +12,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import no.nav.melosys.integrasjon.kodeverk.Kode;
@@ -67,7 +65,7 @@ public class KodeverkService implements ApplicationContextAware {
     public String dekod(Kodeverk kodeverk, String kode, LocalDate dato) {
         List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
         if (kodeperioder == null) {
-            return null;
+            return null; //FIXME
         }
         // kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
         for (Kode kandidat : kodeperioder) {
@@ -75,7 +73,7 @@ public class KodeverkService implements ApplicationContextAware {
                 return kandidat.getNavn();
             }
         }
-        return null;
+        return null; //FIXME
     }
     
     /*

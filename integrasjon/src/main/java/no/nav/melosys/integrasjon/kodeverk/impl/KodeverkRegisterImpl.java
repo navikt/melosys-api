@@ -41,11 +41,11 @@ public class KodeverkRegisterImpl implements KodeverkRegister {
                     List<Kode> termer = new ArrayList<>();
                     for (Term t : k.getTerm()) {
                         for (Periode p : t.getGyldighetsperiode()) {
-                            Kode kode = new Kode(k.getNavn(), t.getNavn(), toLocalData(p.getFom()), toLocalData(p.getFom()));
+                            Kode kode = new Kode(k.getNavn(), t.getNavn(), toLocalData(p.getFom()), toLocalData(p.getTom()));
                             termer.add(kode);
                         }
                     }
-                    koder.put(ek.getNavn(), termer);
+                    koder.put(k.getNavn(), termer);
                 }
                 Kodeverk kodeverk = new Kodeverk(res.getKodeverk().getNavn(), koder);
                 return kodeverk;

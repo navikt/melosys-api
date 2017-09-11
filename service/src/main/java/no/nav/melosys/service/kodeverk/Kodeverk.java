@@ -6,6 +6,7 @@ public enum Kodeverk {
     ARBEIDSFORHOLDSTYPER("Arbeidsforholdstyper"),
     POSTNUMMER("Postnummer"),
     LANDKODER("Landkoder"),
+    LANDKODERISO2("LandkoderISO2"),
     SIVILSTANDER("Sivilstander");
     
     private Kodeverk(String navn) {
@@ -14,7 +15,7 @@ public enum Kodeverk {
     
     private String navn;
     
-    String getNavn() {
+    public String getNavn() {
         return navn;
     }
 
