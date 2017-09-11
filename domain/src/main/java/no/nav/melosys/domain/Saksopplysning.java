@@ -29,6 +29,8 @@ import javax.xml.bind.Unmarshaller;
 
 import org.hibernate.annotations.ColumnTransformer;
 
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+
 
 @Entity
 @Table(name = "SAKSOPPLYSNING")
@@ -63,8 +65,7 @@ public class Saksopplysning implements Serializable {
     private String dokumentXml;
     
     @Transient
-    // TODO (farjam 2017-08-24). Dette skal representeres med intern modell. Se EESSI2-223
-    private Object dokument;
+    private SaksopplysningDokument dokument;
 
     public long getId() {
         return id;
@@ -119,16 +120,17 @@ public class Saksopplysning implements Serializable {
         this.dokumentXml = dokumentXml;
     }
 
-    public Object getDokument() {
+    public SaksopplysningDokument getDokument() {
         return dokument;
     }
 
-    public void setDokument(Object dokument) {
+    public void setDokument(SaksopplysningDokument dokument) {
         this.dokument = dokument;
     }
 
     @PostLoad
     void lagDokument() {
+        // FIXME: Ikke oppdatert til intern modell
         try {
             if (dokumentXml == null) {
                 dokument = null;
@@ -137,7 +139,7 @@ public class Saksopplysning implements Serializable {
                 StringReader reader = new StringReader(dokumentXml);
                 JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
                 Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-                dokument = ((no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse) unmarshaller.unmarshal(reader)).getResponse();
+                dokument = null; // FIXME ((no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse) unmarshaller.unmarshal(reader)).getResponse();
             } else {
                 // FIXME: Legg til relevante typer
                 throw new RuntimeException(String.format("Ukjent dokument: type=%1s, kilde=%2s, versjon=%3", type, kilde, versjon));
@@ -150,11 +152,12 @@ public class Saksopplysning implements Serializable {
     @PrePersist
     @PreUpdate
     void lagDokumentXml() {
+        // FIXME: Ikke oppdatert til intern modell
         try {
             if (dokument == null) {
                 dokumentXml = null;
             } else if (type == PERSONOPPLYSNING && kilde == TPS) {
-                no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse hentPersonResponse = (no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse) dokument;
+                no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse hentPersonResponse = null; // FIXME s(no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse) dokument;
                 JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
                 no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse xmlRoot = new no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse();
                 xmlRoot.setResponse(hentPersonResponse);
