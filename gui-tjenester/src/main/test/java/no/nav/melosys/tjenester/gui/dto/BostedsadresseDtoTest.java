@@ -81,9 +81,7 @@ public class BostedsadresseDtoTest {
 
         if (person.getBostedsadresse().getStrukturertAdresse() instanceof StedsadresseNorge) {
             StedsadresseNorge adresseNorge = (StedsadresseNorge) person.getBostedsadresse().getStrukturertAdresse();
-            assertEquals(personDto.getBostedsadresse().getPostnr(), adresseNorge.getPoststed().getValue());
-            //TODO Poststed krever kodeverk
-            
+            assertEquals(personDto.getBostedsadresse().getPostnr(), adresseNorge.getPoststed().getValue());             
         }
 
 

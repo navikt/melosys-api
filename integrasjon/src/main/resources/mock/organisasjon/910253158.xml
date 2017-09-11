@@ -1,0 +1,188 @@
+<ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
+    <response>
+        <organisasjon xsi:type="ns4:JuridiskEnhet" xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <orgnummer>910253158</orgnummer>
+            <navn xsi:type="ns4:UstrukturertNavn">
+                <navnelinje>MULTICONSULT ASA</navnelinje>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+            </navn>
+            <organisasjonDetaljer>
+                <registreringsDato>1995-02-19+01:00</registreringsDato>
+                <datoSistEndret>2017-05-23+02:00</datoSistEndret>
+                <gjeldendeMaalform kodeRef="NB"/>
+                <registrertMVA fomBruksperiode="2014-05-21T19:02:39+02:00" fomGyldighetsperiode="2014-02-17T00:00:00.000+01:00">
+                    <registrertIMVA>true</registrertIMVA>
+                </registrertMVA>
+                <telefaks fomBruksperiode="2014-05-21T19:02:39+02:00" fomGyldighetsperiode="2014-02-17T00:00:00.000+01:00">
+                    <identifikator>21 58 50 01</identifikator>
+                </telefaks>
+                <telefon fomBruksperiode="2014-05-21T19:02:39+02:00" fomGyldighetsperiode="2014-02-17T00:00:00.000+01:00">
+                    <identifikator>21 58 50 00</identifikator>
+                </telefon>
+                <status fomBruksperiode="2017-05-24T04:02:09+02:00" fomGyldighetsperiode="2017-05-23T00:00:00.000+02:00">
+                    <statuskode kodeRef="FIPL"/>
+                </status>
+                <forretningsadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="2009-04-19T00:00:00.000+02:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Nedre Skøyen vei 2</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>0276</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>0301</verdi>
+                    </adresseledd>
+                </forretningsadresse>
+                <postadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="2012-08-15T00:00:00.000+02:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Postboks 265  Skøyen</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>0213</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>0301</verdi>
+                    </adresseledd>
+                </postadresse>
+                <navSpesifikkInformasjon fomBruksperiode="1900-01-01T00:00:00.000+01:00" fomGyldighetsperiode="1900-01-01T00:00:00.000+01:00">
+                    <erIA>false</erIA>
+                </navSpesifikkInformasjon>
+                <epostadresse fomBruksperiode="2014-05-21T19:02:39+02:00" fomGyldighetsperiode="2014-02-17T00:00:00.000+01:00">
+                    <identifikator>multiconsult@multiconsult.no</identifikator>
+                </epostadresse>
+                <naering fomBruksperiode="2015-02-10T04:11:40+01:00" fomGyldighetsperiode="2015-01-06T00:00:00.000+01:00">
+                    <naeringskode kodeRef="71.121"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <naering fomBruksperiode="2015-02-10T04:11:40+01:00" fomGyldighetsperiode="2015-01-06T00:00:00.000+01:00">
+                    <naeringskode kodeRef="71.122"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <naering fomBruksperiode="2015-02-10T04:11:40+01:00" fomGyldighetsperiode="2015-01-06T00:00:00.000+01:00">
+                    <naeringskode kodeRef="71.129"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <navn fomBruksperiode="2015-05-07T04:02:16.494+02:00" fomGyldighetsperiode="2015-05-06T00:00:00.000+02:00">
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>MULTICONSULT ASA</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <redigertNavn>MULTICONSULT ASA</redigertNavn>
+                </navn>
+                <formaal fomBruksperiode="2014-05-21T23:47:55+02:00" fomGyldighetsperiode="2014-02-17T00:00:00.000+01:00">
+                    <formaal>Å drive rådgivende ingeniørvirksomhet, eiendoms-
+                        forvaltning og annen forretningsmessig virksomhet
+                        som anses fremmende for selskapet og hva dermed
+                        står i forbindelse, herunder delta i andre
+                        selskaper.</formaal>
+                </formaal>
+                <stiftelsesdato>1973-12-28+01:00</stiftelsesdato>
+            </organisasjonDetaljer>
+            <fusjonJuridiskEnhet fomBruksperiode="2015-01-16T04:10:27.116+01:00" fomGyldighetsperiode="2014-09-17T00:00:00.000+02:00">
+                <virkningsdato>2015-01-15+01:00</virkningsdato>
+                <juridiskEnhet>
+                    <orgnummer>993593419</orgnummer>
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>MULTICONSULT VOSS AS</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <organisasjonDetaljer>
+                        <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="2012-04-04T00:00:00.000+02:00">
+                            <navn xsi:type="ns4:UstrukturertNavn">
+                                <navnelinje>MULTICONSULT VOSS AS</navnelinje>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                            </navn>
+                            <redigertNavn>MULTICONSULT VOSS AS</redigertNavn>
+                        </navn>
+                    </organisasjonDetaljer>
+                    <juridiskEnhetDetaljer/>
+                </juridiskEnhet>
+            </fusjonJuridiskEnhet>
+            <fusjonJuridiskEnhet fomBruksperiode="2016-11-06T04:05:42.587+01:00" fomGyldighetsperiode="2016-07-18T00:00:00.000+02:00">
+                <virkningsdato>2016-11-05+01:00</virkningsdato>
+                <juridiskEnhet>
+                    <orgnummer>883532872</orgnummer>
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>AKVATOR AS</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <organisasjonDetaljer>
+                        <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="2001-07-17T00:00:00.000+02:00">
+                            <navn xsi:type="ns4:UstrukturertNavn">
+                                <navnelinje>AKVATOR AS</navnelinje>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                            </navn>
+                            <redigertNavn>AKVATOR AS</redigertNavn>
+                        </navn>
+                    </organisasjonDetaljer>
+                    <juridiskEnhetDetaljer/>
+                </juridiskEnhet>
+            </fusjonJuridiskEnhet>
+            <fusjonJuridiskEnhet fomBruksperiode="2016-01-15T04:03:10.434+01:00" fomGyldighetsperiode="2015-09-17T00:00:00.000+02:00">
+                <virkningsdato>2016-01-14+01:00</virkningsdato>
+                <juridiskEnhet>
+                    <orgnummer>865285752</orgnummer>
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>MULTICONSULT STORD AS</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <organisasjonDetaljer>
+                        <navn fomBruksperiode="2014-09-30T04:03:27.966+02:00" fomGyldighetsperiode="2014-09-29T00:00:00.000+02:00">
+                            <navn xsi:type="ns4:UstrukturertNavn">
+                                <navnelinje>MULTICONSULT STORD AS</navnelinje>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                            </navn>
+                            <redigertNavn>MULTICONSULT STORD AS</redigertNavn>
+                        </navn>
+                    </organisasjonDetaljer>
+                    <juridiskEnhetDetaljer/>
+                </juridiskEnhet>
+            </fusjonJuridiskEnhet>
+            <juridiskEnhetDetaljer>
+                <sektorkode kodeRef="2100"/>
+                <enhetstype kodeRef="AS"/>
+                <kapitalopplysninger fomBruksperiode="2015-05-07T04:03:02+02:00" fomGyldighetsperiode="2015-05-06T00:00:00.000+02:00">
+                    <valuta kodeRef="NOK"/>
+                    <kapital>13124600</kapital>
+                    <kapitalInnbetalt>13124600</kapitalInnbetalt>
+                    <fritekst>null</fritekst>
+                </kapitalopplysninger>
+                <registrertIForetaksregisteret fomBruksperiode="2014-05-21T19:02:39+02:00" fomGyldighetsperiode="2014-02-17T00:00:00.000+01:00">
+                    <registrertForetaksregisteret>true</registrertForetaksregisteret>
+                </registrertIForetaksregisteret>
+            </juridiskEnhetDetaljer>
+        </organisasjon>
+    </response>
+</ns2:hentOrganisasjonResponse>

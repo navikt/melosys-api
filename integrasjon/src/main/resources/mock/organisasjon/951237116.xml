@@ -1,0 +1,84 @@
+<ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
+    <response>
+        <organisasjon xsi:type="ns4:JuridiskEnhet" xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <orgnummer>951237116</orgnummer>
+            <navn xsi:type="ns4:UstrukturertNavn">
+                <navnelinje>FLORVAAG BRUK AS</navnelinje>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+            </navn>
+            <organisasjonDetaljer>
+                <registreringsDato>1995-03-12+01:00</registreringsDato>
+                <datoSistEndret>2010-08-21+02:00</datoSistEndret>
+                <gjeldendeMaalform kodeRef="NB"/>
+                <opphoersdato>2010-08-21+02:00</opphoersdato>
+                <forretningsadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="2006-06-16T00:00:00.000+02:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Minde Allé 43</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>5068</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="poststed"/>
+                        <verdi>BERGEN</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1201</verdi>
+                    </adresseledd>
+                </forretningsadresse>
+                <postadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="2002-06-14T00:00:00.000+02:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Postboks 6144 Postterminalen</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>5892</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="poststed"/>
+                        <verdi>BERGEN</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1201</verdi>
+                    </adresseledd>
+                </postadresse>
+                <navSpesifikkInformasjon fomBruksperiode="1900-01-01T00:00:00.000+01:00" fomGyldighetsperiode="1900-01-01T00:00:00.000+01:00">
+                    <erIA>false</erIA>
+                </navSpesifikkInformasjon>
+                <naering fomBruksperiode="2014-05-23T00:08:38+02:00" fomGyldighetsperiode="2010-08-21T00:00:00.000+02:00">
+                    <naeringskode kodeRef="47.521"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="1995-03-12T00:00:00.000+01:00">
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>FLORVAAG BRUK AS</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <redigertNavn>Florvaag Bruk AS</redigertNavn>
+                </navn>
+                <formaal fomBruksperiode="2014-05-23T14:50:17+02:00" fomGyldighetsperiode="2010-08-21T00:00:00.000+02:00">
+                    <formaal>Å drive handel, produksjon og agentur og hva
+                        dermed står i forbindelse.</formaal>
+                </formaal>
+                <stiftelsesdato>1988-11-05+01:00</stiftelsesdato>
+            </organisasjonDetaljer>
+            <juridiskEnhetDetaljer>
+                <sektorkode kodeRef="710"/>
+                <enhetstype kodeRef="AS"/>
+            </juridiskEnhetDetaljer>
+        </organisasjon>
+    </response>
+</ns2:hentOrganisasjonResponse>

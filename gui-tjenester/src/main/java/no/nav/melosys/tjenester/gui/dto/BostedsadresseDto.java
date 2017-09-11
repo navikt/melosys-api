@@ -7,6 +7,8 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import no.nav.melosys.service.kodeverk.Kodeverk;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.util.AdresseUtils;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.GeografiskAdresse;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.NoekkelVerdiAdresse;
@@ -37,8 +39,7 @@ public class BostedsadresseDto {
             String postNr = adresseNorge.getPoststed().getValue();
             dto.setPostnr(postNr);
 
-            //TODO Kodeverk
-            String postSted = "Kodeverk for " + postNr;
+            String postSted = KodeverkService.dekod(Kodeverk.POSTNUMMER, postNr);
             dto.setPoststed(postSted);
         }
 
@@ -80,11 +81,15 @@ public class BostedsadresseDto {
             gateadresseDto.setGatenavn(adresseBuilder.toString());
 
             dto.setGateadresse(gateadresseDto);
-            dto.setPostnr(adresseMap.get(AdresseUtils.POSTNR));
-            dto.setPoststed(adresseMap.get(AdresseUtils.POSTSTED));
+
+            String postNr = adresseMap.get(AdresseUtils.POSTNR);
+            if (postNr != null) {
+                dto.setPostnr(postNr);
+                dto.setPoststed(KodeverkService.dekod(Kodeverk.POSTNUMMER, postNr));
+            }
 
             if (adresse.getLandkode() != null) {
-                dto.setLand(adresse.getLandkode().getKodeRef());
+                dto.setLand(KodeverkService.dekod(Kodeverk.LANDKODERISO2, adresse.getLandkode().getKodeRef()));
             }
 
             return dto;
@@ -108,11 +113,11 @@ public class BostedsadresseDto {
                 no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.StedsadresseNorge adresseNorge = (no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.StedsadresseNorge) adresse;
 
                 dto.setPostnr(adresseNorge.getPoststed().getValue());
-                //dto.setPoststed(); TODO Kodeverk
+                dto.setPoststed(KodeverkService.dekod(Kodeverk.POSTNUMMER, adresseNorge.getPoststed().getValue()));
             }
 
             if (adresse.getLandkode() != null) {
-                dto.setLand(adresse.getLandkode().getKodeRef());
+                dto.setLand(KodeverkService.dekod(Kodeverk.LANDKODER, adresse.getLandkode().getKodeRef()));
             }
 
             return  dto;

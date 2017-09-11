@@ -46,10 +46,6 @@ public class MottakService {
 
         // Oppretter en sak i DB slik at id kan brukes i GSAK
         Fagsak fagsak = new Fagsak();
-        /* FIXME
-        Bruker bruker = new Bruker();
-        bruker.setFnr(fnr);
-        //*/
         fagsakRepo.save(fagsak);
 
         // Oppretter en behandling knyttet til saken

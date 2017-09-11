@@ -1,0 +1,60 @@
+<ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
+    <response>
+        <organisasjon xsi:type="ns4:Virksomhet" xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <orgnummer>973271334</orgnummer>
+            <navn xsi:type="ns4:UstrukturertNavn">
+                <navnelinje>JOHANNESSEN ODDBJØRN</navnelinje>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+            </navn>
+            <organisasjonDetaljer>
+                <registreringsDato>1995-02-23+01:00</registreringsDato>
+                <datoSistEndret>2007-10-09+02:00</datoSistEndret>
+                <telefaks fomBruksperiode="2014-05-21T20:14:46+02:00" fomGyldighetsperiode="2007-10-09T00:00:00.000+02:00">
+                    <identifikator>55 23 34 20</identifikator>
+                </telefaks>
+                <telefon fomBruksperiode="2014-05-21T20:14:46+02:00" fomGyldighetsperiode="2007-10-09T00:00:00.000+02:00">
+                    <identifikator>55233420</identifikator>
+                </telefon>
+                <forretningsadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="2006-06-14T00:00:00.000+02:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Strandgaten 193</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>5004</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1201</verdi>
+                    </adresseledd>
+                </forretningsadresse>
+                <navSpesifikkInformasjon fomBruksperiode="1900-01-01T00:00:00.000+01:00" fomGyldighetsperiode="1900-01-01T00:00:00.000+01:00">
+                    <erIA>false</erIA>
+                </navSpesifikkInformasjon>
+                <naering fomBruksperiode="2014-05-22T00:56:55+02:00" fomGyldighetsperiode="1993-01-01T00:00:00.000+01:00">
+                    <naeringskode kodeRef="86.230"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="1995-02-23T00:00:00.000+01:00">
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>JOHANNESSEN ODDBJØRN</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <redigertNavn>JOHANNESSEN ODDBJØRN</redigertNavn>
+                </navn>
+            </organisasjonDetaljer>
+            <virksomhetDetaljer>
+                <oppstartsdato>1970-12-30+01:00</oppstartsdato>
+                <enhetstype kodeRef="BEDR"/>
+            </virksomhetDetaljer>
+        </organisasjon>
+    </response>
+</ns2:hentOrganisasjonResponse>

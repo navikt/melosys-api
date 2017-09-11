@@ -49,6 +49,8 @@ public class ArbeidsforholdDto {
         arbeidsforhold.setArbeidsforholdID(a.getArbeidsforholdID());
         arbeidsforhold.setArbeidsforholdIDnav(a.getArbeidsforholdIDnav());
 
+        arbeidsforhold.setArbeidsforholdInnrapportertEtterAOrdningen(a.isArbeidsforholdInnrapportertEtterAOrdningen());
+
         arbeidsforhold.setArbeidstaker(a.getArbeidstaker().getIdent().getIdent());
 
         Aktoer arbeidsgiverXml = a.getArbeidsgiver();

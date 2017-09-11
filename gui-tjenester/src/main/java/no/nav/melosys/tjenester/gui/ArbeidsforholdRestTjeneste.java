@@ -78,11 +78,9 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
         List<ArbeidsforholdDto> arbeidsforhold = new ArrayList<>();
         try {
             // TODO Vi har (foreløpig) sagt at vi kun skal hente arbeidsforhold rapportert på nytt regelverk.
-            boolean innrapportertEtterAOrdningen = true;
             List<Arbeidsforhold> liste = aareg.finnArbeidsforholdPrArbeidstaker(ident, AaregFasade.REGELVERK_A_ORDNINGEN);
 
             liste.forEach(x -> arbeidsforhold.add(ArbeidsforholdDto.toDto(x)));
-            arbeidsforhold.forEach(x -> x.setArbeidsforholdInnrapportertEtterAOrdningen(innrapportertEtterAOrdningen));
             view.setArbeidsforhold(arbeidsforhold);
 
         } catch (FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning finnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning) {
@@ -98,8 +96,8 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
             } catch (HentOrganisasjonUgyldigInput hentOrganisasjonUgyldigInput) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             } catch (HentOrganisasjonOrganisasjonIkkeFunnet hentOrganisasjonOrganisasjonIkkeFunnet) {
-                // TODO Avklare hva skjer når en organisasjon ikke finnes
-                return Response.status(Response.Status.NOT_FOUND).build();
+                // TODO endret til Demo. Avklare hva skjer når en organisasjon ikke finnes
+                //return Response.status(Response.Status.NOT_FOUND).build();
             }
         }
 

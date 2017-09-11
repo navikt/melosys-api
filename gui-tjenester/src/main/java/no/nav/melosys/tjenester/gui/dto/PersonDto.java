@@ -4,6 +4,8 @@ import static no.nav.melosys.tjenester.gui.dto.util.DtoUtils.tilLocalDate;
 
 import java.time.LocalDate;
 
+import no.nav.melosys.service.kodeverk.Kodeverk;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Foedselsdato;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kjoenn;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person;
@@ -45,12 +47,10 @@ public class PersonDto {
         }
 
         Sivilstand sivilstand = p.getSivilstand();
-        // TODO Kodeverk
-        person.setSivilstand(sivilstand != null ? sivilstand.getSivilstand().getValue() : null);
+        person.setSivilstand((sivilstand != null) ? KodeverkService.dekod(Kodeverk.SIVILSTANDER, sivilstand.getSivilstand().getValue()) : null);
 
         Statsborgerskap statsborgerskap = p.getStatsborgerskap();
-        //TODO Kodeverk
-        person.setStatsborgerskap(statsborgerskap != null ? statsborgerskap.getLand().getValue() : null);
+        person.setStatsborgerskap(statsborgerskap != null ? KodeverkService.dekod(Kodeverk.LANDKODER, statsborgerskap.getLand().getValue()) : null);
 
         Kjoenn kjoenn = p.getKjoenn();
         person.setKjoenn(kjoenn != null ? kjoenn.getKjoenn().getValue() : null);

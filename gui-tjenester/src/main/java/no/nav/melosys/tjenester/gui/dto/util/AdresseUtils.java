@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.service.kodeverk.Kodeverk;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.Gateadresse;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.GeografiskAdresse;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.NoekkelVerdiAdresse;
@@ -59,12 +61,16 @@ public final class AdresseUtils {
             adresseledd.forEach(n -> adresseMap.put(n.getNoekkel().getKodeRef(), n.getVerdi()));
 
             // Lage en liste over nøklene som brukes i adressen
-            List<String> nøkkler = Arrays.asList(ADRESSELINJE1, ADRESSELINJE2, ADRESSELINJE3, POSTNR, POSTSTED);
+            List<String> nøkkler = Arrays.asList(ADRESSELINJE1, ADRESSELINJE2, ADRESSELINJE3, POSTNR);
 
             String s = nøkkler.stream().map(x -> adresseMap.get(x)).filter(Objects::nonNull).collect(Collectors.joining(" "));
 
+            if (adresseMap.get(POSTNR) != null) {
+                s = s.concat(" " + KodeverkService.dekod(Kodeverk.POSTNUMMER, adresseMap.get(POSTNR)));
+            }
+
             if (geografiskAdresse.getLandkode() != null) {
-                s = s.concat(" " + geografiskAdresse.getLandkode().getKodeRef());
+                s = s.concat(" " + KodeverkService.dekod(Kodeverk.LANDKODERISO2, geografiskAdresse.getLandkode().getKodeRef()));
             }
 
             return s;
@@ -93,11 +99,12 @@ public final class AdresseUtils {
             if (geografiskAdresse instanceof StedsadresseNorge) {
                 StedsadresseNorge adresse = (StedsadresseNorge) geografiskAdresse;
 
-                sb.append(adresse.getPoststed() + " "); // TODO Kodeverk
+                sb.append(adresse.getPoststed().getValue() + " ");
+                sb.append(KodeverkService.dekod(Kodeverk.POSTNUMMER, adresse.getPoststed().getKodeRef()) + " ");
             }
 
             if (geografiskAdresse.getLandkode() != null) {
-                sb.append(geografiskAdresse.getLandkode().getKodeRef()); // TODO Kodeverk
+                sb.append(KodeverkService.dekod(Kodeverk.LANDKODER, geografiskAdresse.getLandkode().getKodeRef()));
             }
 
             return sb.toString();

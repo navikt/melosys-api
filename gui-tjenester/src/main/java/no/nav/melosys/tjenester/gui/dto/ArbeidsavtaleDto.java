@@ -49,7 +49,6 @@ public class ArbeidsavtaleDto {
 
         // For å kunne vurdere hvilke gruppen bruker faller under og hvilke artiklene skal vurderes
         Arbeidstidsordninger arbeidstidsordning = avtale.getArbeidstidsordning();
-        // TODO Kodeverk
         arbeidsavtaleDto.setArbeidstidsordning(arbeidstidsordning != null ? arbeidstidsordning.getValue() : null);
 
         Avloenningstyper avloenningstype = avtale.getAvloenningstype();

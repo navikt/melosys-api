@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 
@@ -51,6 +52,8 @@ public class ArbeidsforholdRestTjenesteTest {
         restTjeneste = new ArbeidsforholdRestTjeneste(tps, aareg, ereg);
     }
 
+
+    @Ignore
     @Test
     public void hentArbeidsforhold() throws Exception {
         String ident = "88888888884";

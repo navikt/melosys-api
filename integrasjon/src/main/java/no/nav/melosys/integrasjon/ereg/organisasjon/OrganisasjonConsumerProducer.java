@@ -6,6 +6,7 @@ import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.SYSTEM_SAML;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.OrganisasjonV4;
 import no.nav.vedtak.sts.client.NAVSTSClient;
@@ -21,6 +22,13 @@ public class OrganisasjonConsumerProducer {
     }
 
     @Bean
+    @Profile("utvikling")
+    OrganisasjonConsumer personConsumer() {
+        return new OrganisasjonMock();
+    }
+
+    @Bean
+    @Profile("!utvikling")
     OrganisasjonConsumer organisasjonConsumer() {
         OrganisasjonV4 port = wrapWithSts(config.getPort(), OIDC_TIL_SAML);
         return new OrganisasjonConsumerImpl(port);

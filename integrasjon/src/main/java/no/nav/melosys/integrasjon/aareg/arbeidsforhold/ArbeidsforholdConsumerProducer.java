@@ -7,6 +7,7 @@ import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.SYSTEM_SAML;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.ArbeidsforholdV3;
 import no.nav.vedtak.sts.client.NAVSTSClient;
@@ -22,6 +23,13 @@ public class ArbeidsforholdConsumerProducer {
     }
 
     @Bean
+    @Profile("utvikling")
+    ArbeidsforholdConsumer arbeidsforholdMock() {
+        return new ArbeidsforholdMock();
+    }
+
+    @Bean
+    @Profile("!utvikling")
     ArbeidsforholdConsumer arbeidsforholdConsumer() {
         ArbeidsforholdV3 port = wrapWithSts(config.getPort(), OIDC_TIL_SAML);
         return new ArbeidsforholdConsumerImpl(port);

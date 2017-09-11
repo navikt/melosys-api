@@ -1,0 +1,35 @@
+<b:hentPersonResponse xmlns:b="http://nav.no/tjeneste/virksomhet/person/v3" xmlns:a="http://nav.no/tjeneste/virksomhet/person/v3/informasjon">
+    <response>
+        <person c:type="a:Bruker" xmlns:c="http://www.w3.org/2001/XMLSchema-instance">
+            <sivilstand fomGyldighetsperiode="1989-07-01T00:00:00.000+02:00">
+                <sivilstand>GIFT</sivilstand>
+            </sivilstand>
+            <statsborgerskap>
+                <land>NOR</land>
+            </statsborgerskap>
+            <aktoer c:type="a:PersonIdent">
+                <ident>
+                    <ident>FJERNET</ident>
+                    <type>FNR</type>
+                </ident>
+            </aktoer>
+            <kjoenn>
+                <kjoenn>K</kjoenn>
+            </kjoenn>
+            <personnavn>
+                <etternavn>HAUKÅS</etternavn>
+                <fornavn>MARIT</fornavn>
+                <sammensattNavn>HAUKÅS MARIT</sammensattNavn>
+            </personnavn>
+            <personstatus>
+                <personstatus>BOSA</personstatus>
+            </personstatus>
+            <foedselsdato>
+                <foedselsdato>1963-05-05+02:00</foedselsdato>
+            </foedselsdato>
+            <geografiskTilknytning c:type="a:Bydel">
+                <geografiskTilknytning>120107</geografiskTilknytning>
+            </geografiskTilknytning>
+        </person>
+    </response>
+</b:hentPersonResponse>

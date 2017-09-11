@@ -23,6 +23,10 @@
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-repository</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-service</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>io.swagger</groupId>

@@ -1,0 +1,80 @@
+<ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
+    <response>
+        <organisasjon xsi:type="ns4:Virksomhet" xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <orgnummer>973162152</orgnummer>
+            <navn xsi:type="ns4:UstrukturertNavn">
+                <navnelinje>FLORVAAG BRUK AS</navnelinje>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+            </navn>
+            <organisasjonDetaljer>
+                <registreringsDato>1995-02-23+01:00</registreringsDato>
+                <datoSistEndret>1996-02-27+01:00</datoSistEndret>
+                <gjeldendeMaalform kodeRef="NB"/>
+                <opphoersdato>1996-02-27+01:00</opphoersdato>
+                <forretningsadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="1995-02-23T00:00:00.000+01:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>VALKENDORFSGATE 4</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>5012</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="poststed"/>
+                        <verdi>BERGEN</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1201</verdi>
+                    </adresseledd>
+                </forretningsadresse>
+                <postadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="1995-02-23T00:00:00.000+01:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Postboks 171</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>5001</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="poststed"/>
+                        <verdi>BERGEN</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1201</verdi>
+                    </adresseledd>
+                </postadresse>
+                <navSpesifikkInformasjon fomBruksperiode="1900-01-01T00:00:00.000+01:00" fomGyldighetsperiode="1900-01-01T00:00:00.000+01:00">
+                    <erIA>false</erIA>
+                </navSpesifikkInformasjon>
+                <naering fomBruksperiode="2014-05-23T00:16:51+02:00" fomGyldighetsperiode="1996-02-27T00:00:00.000+01:00">
+                    <naeringskode kodeRef="51532 "/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="1995-02-23T00:00:00.000+01:00">
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>FLORVAAG BRUK AS</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <redigertNavn>FLORVAAG BRUK AS</redigertNavn>
+                </navn>
+            </organisasjonDetaljer>
+            <virksomhetDetaljer>
+                <oppstartsdato>1965-12-31+01:00</oppstartsdato>
+                <enhetstype kodeRef="BEDR"/>
+                <nedleggelsesdato>1995-11-01+01:00</nedleggelsesdato>
+            </virksomhetDetaljer>
+        </organisasjon>
+    </response>
+</ns2:hentOrganisasjonResponse>
