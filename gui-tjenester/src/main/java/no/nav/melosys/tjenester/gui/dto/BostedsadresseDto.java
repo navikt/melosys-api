@@ -49,6 +49,10 @@ public class BostedsadresseDto {
             dto.setGateadresse(gateDto);
         }
 
+        if (strukturertAdresse.getLandkode() != null) {
+            dto.setLand(KodeverkService.dekod(Kodeverk.LANDKODER, strukturertAdresse.getLandkode().getValue()));
+        }
+
         return dto;
     }
 
