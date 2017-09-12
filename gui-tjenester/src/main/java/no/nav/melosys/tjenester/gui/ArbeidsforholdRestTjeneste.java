@@ -142,6 +142,7 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
         }
 
         OrganisasjonDto organisasjon = new OrganisasjonDto();
+        organisasjon.setOrgnummer(orgNummer);
         organisasjon.setNavn(navn);
         organisasjon.setOrganisasjonDetaljer(OrganisasjonsDetaljerDto.toDto(org.getOrganisasjonDetaljer()));
 
