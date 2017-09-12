@@ -15,23 +15,9 @@
 
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.4.0.M1</version>
-                <configuration>
-                    <webApp>
-                        <contextPath>/</contextPath>
-                        <webInfIncludeJarPattern>.*/^(asm-all-repackaged)[^/]*\.jar$</webInfIncludeJarPattern>
-                    </webApp>
-                    <contextHandlers>
-                        <contextHandler implementation="org.eclipse.jetty.maven.plugin.JettyWebAppContext">
-                            <war>${project.basedir}/target/melosys-regler-0.0.1-SNAPSHOT.war</war>
-                            <contextPath>/C</contextPath>
-                        </contextHandler>
-                    </contextHandlers>
-                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -76,12 +62,6 @@
         </dependency>
 
         <!-- Test dependencies -->
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-maven-plugin</artifactId>
-            <version>9.4.4.v20170414</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
