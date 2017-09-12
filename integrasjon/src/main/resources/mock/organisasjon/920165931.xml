@@ -1,0 +1,141 @@
+
+<ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
+    <response>
+        <organisasjon xsi:type="ns4:JuridiskEnhet" xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <orgnummer>920165931</orgnummer>
+            <navn xsi:type="ns4:UstrukturertNavn">
+                <navnelinje>KRISTIANSAND DYREPARK AS</navnelinje>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+            </navn>
+            <organisasjonDetaljer>
+                <registreringsDato>1995-02-19+01:00</registreringsDato>
+                <datoSistEndret>2017-04-27+02:00</datoSistEndret>
+                <gjeldendeMaalform kodeRef="NB"/>
+                <registrertMVA fomBruksperiode="2014-05-21T19:33:33+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <registrertIMVA>true</registrertIMVA>
+                </registrertMVA>
+                <telefaks fomBruksperiode="2014-05-21T19:33:33+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <identifikator>38 04 33 67</identifikator>
+                </telefaks>
+                <telefon fomBruksperiode="2014-05-21T19:33:33+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <identifikator>38 04 97 00</identifikator>
+                </telefon>
+                <status fomBruksperiode="2017-04-16T04:01:43+02:00" fomGyldighetsperiode="2017-04-11T00:00:00.000+02:00">
+                    <statuskode kodeRef="FUTA"/>
+                </status>
+                <forretningsadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="1999-07-31T00:00:00.000+02:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Kardemomme by</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>4609</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1001</verdi>
+                    </adresseledd>
+                </forretningsadresse>
+                <navSpesifikkInformasjon fomBruksperiode="2014-08-21T00:00:00+02:00" fomGyldighetsperiode="2014-08-21T00:00:00+02:00">
+                    <erIA>true</erIA>
+                </navSpesifikkInformasjon>
+                <epostadresse fomBruksperiode="2014-05-21T19:33:33+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <identifikator>info@dyreparken.no</identifikator>
+                </epostadresse>
+                <naering fomBruksperiode="2014-05-22T00:49:24+02:00" fomGyldighetsperiode="1986-01-01T00:00:00.000+01:00">
+                    <naeringskode kodeRef="91.040"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <naering fomBruksperiode="2014-05-22T00:49:24+02:00" fomGyldighetsperiode="1986-01-01T00:00:00.000+01:00">
+                    <naeringskode kodeRef="55.202"/>
+                    <hjelp920165931eenhet>false</hjelpeenhet>
+                </naering>
+                <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="2007-05-06T00:00:00.000+02:00">
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>KRISTIANSAND DYREPARK AS</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <redigertNavn>KRISTIANSAND DYREPARK AS</redigertNavn>
+                </navn>
+                <formaal fomBruksperiode="2014-05-21T23:52:25+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <formaal>Drive dyrepark med dyrehandel ved eksport og im-
+                        port samt i interessere seg i andre forretnings-
+                        foretagender gjennom direkte og indirekte deltag-
+                        else.</formaal>
+                </formaal>
+                <stiftelsesdato>1978-06-15+01:00</stiftelsesdato>
+            </organisasjonDetaljer>
+            <fusjonJuridiskEnhet fomBruksperiode="2017-04-16T04:01:41.361+02:00" fomGyldighetsperiode="2016-05-11T00:00:00.000+02:00">
+                <juridiskEnhet>
+                    <orgnummer>888035982</orgnummer>
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>HERLI LAND AS</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <organisasjonDetaljer>
+                        <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="2005-03-29T00:00:00.000+02:00">
+                            <navn xsi:type="ns4:UstrukturertNavn">
+                                <navnelinje>HERLI LAND AS</navnelinje>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                            </navn>
+                            <redigertNavn>HERLI LAND AS</redigertNavn>
+                        </navn>
+                    </organisasjonDetaljer>
+                    <juridiskEnhetDetaljer/>
+                </juridiskEnhet>
+            </fusjonJuridiskEnhet>
+            <fusjonJuridiskEnhet fomBruksperiode="2017-04-16T04:01:41.763+02:00" fomGyldighetsperiode="2016-05-11T00:00:00.000+02:00">
+                <juridiskEnhet>
+                    <orgnummer>990919909</orgnummer>
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>PIRATPRODUKTER AS</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <organisasjonDetaljer>
+                        <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="2008-04-09T00:00:00.000+02:00">
+                            <navn xsi:type="ns4:UstrukturertNavn">
+                                <navnelinje>PIRATPRODUKTER AS</navnelinje>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                            </navn>
+                            <redigertNavn>PIRATPRODUKTER AS</redigertNavn>
+                        </navn>
+                    </organisasjonDetaljer>
+                    <juridiskEnhetDetaljer/>
+                </juridiskEnhet>
+            </fusjonJuridiskEnhet>
+            <juridiskEnhetDetaljer>
+                <sektorkode kodeRef="2100"/>
+                <enhetstype kodeRef="AS"/>
+                <kapitalopplysninger fomBruksperiode="2014-05-21T18:15:03+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <valuta kodeRef="NOK"/>
+                    <kapital>32750000</kapital>
+                    <kapitalInnbetalt>32750000</kapitalInnbetalt>
+                    <fritekst>null</fritekst>
+                </kapitalopplysninger>
+                <registrertIForetaksregisteret fomBruksperiode="2014-05-21T19:33:33+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <registrertForetaksregisteret>true</registrertForetaksregisteret>
+                </registrertIForetaksregisteret>
+            </juridiskEnhetDetaljer>
+        </organisasjon>
+    </response>
+</ns2:hentOrganisasjonResponse>

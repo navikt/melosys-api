@@ -1,0 +1,89 @@
+
+<ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
+    <response>
+        <organisasjon xsi:type="ns4:JuridiskEnhet" xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <orgnummer>964338531</orgnummer>
+            <navn xsi:type="ns4:UstrukturertNavn">
+                <navnelinje>BERGEN KOMMUNE</navnelinje>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+            </navn>
+            <organisasjonDetaljer>
+                <registreringsDato>1995-06-07+02:00</registreringsDato>
+                <datoSistEndret>2016-11-24+01:00</datoSistEndret>
+                <gjeldendeMaalform kodeRef="NB"/>
+                <registrertMVA fomBruksperiode="2014-05-21T19:48:04+02:00" fomGyldighetsperiode="2014-01-21T00:00:00.000+01:00">
+                    <registrertIMVA>true</registrertIMVA>
+                </registrertMVA>
+                <telefaks fomBruksperiode="2014-05-21T19:48:04+02:00" fomGyldighetsperiode="2014-01-21T00:00:00.000+01:00">
+                    <identifikator>55 56 61 73</identifikator>
+                </telefaks>
+                <telefon fomBruksperiode="2014-05-21T19:48:04+02:00" fomGyldighetsperiode="2014-01-21T00:00:00.000+01:00">
+                    <identifikator>05556</identifikator>
+                </telefon>
+                <forretningsadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="2013-11-12T00:00:00.000+01:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Rådhusgaten 10</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>5014</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1201</verdi>
+                    </adresseledd>
+                </forretningsadresse>
+                <postadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="1999-08-14T00:00:00.000+02:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Postboks 7700</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>5020</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1201</verdi>
+                    </adresseledd>
+                </postadresse>
+                <navSpesifikkInformasjon fomBruksperiode="2014-08-21T00:00:00+02:00" fomGyldighetsperiode="2014-08-21T00:00:00+02:00">
+                    <erIA>true</erIA>
+                </navSpesifikkInformasjon>
+                <internettadresse fomBruksperiode="2014-05-21T19:48:04+02:00" fomGyldighetsperiode="2014-01-21T00:00:00.000+01:00">
+                    <identifikator>www.bergen.kommune.no/</identifikator>
+                </internettadresse>
+                <epostadresse fomBruksperiode="2014-05-21T19:48:04+02:00" fomGyldighetsperiode="2014-01-21T00:00:00.000+01:00">
+                    <identifikator>postmottak@bergen.kommune.no</identifikator>
+                </epostadresse>
+                <naering fomBruksperiode="2014-05-22T00:51:42+02:00" fomGyldighetsperiode="2012-10-29T00:00:00.000+01:00">
+                    <naeringskode kodeRef="84.110"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="1997-08-30T00:00:00.000+02:00">
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>BERGEN KOMMUNE</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <redigertNavn>BERGEN KOMMUNE</redigertNavn>
+                </navn>
+                <formaal fomBruksperiode="2016-04-22T04:04:35+02:00" fomGyldighetsperiode="2016-04-21T00:00:00.000+02:00">
+                    <formaal>Kommune</formaal>
+                </formaal>
+            </organisasjonDetaljer>
+            <juridiskEnhetDetaljer>
+                <sektorkode kodeRef="6500"/>
+                <enhetstype kodeRef="KOMM"/>
+            </juridiskEnhetDetaljer>
+        </organisasjon>
+    </response>
+</ns2:hentOrganisasjonResponse>

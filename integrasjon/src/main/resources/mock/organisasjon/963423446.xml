@@ -1,0 +1,92 @@
+
+<ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
+    <response>
+        <organisasjon xsi:type="ns4:JuridiskEnhet" xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <orgnummer>963423446</orgnummer>
+            <navn xsi:type="ns4:UstrukturertNavn">
+                <navnelinje>ELITE DRIFT AS</navnelinje>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+            </navn>
+            <organisasjonDetaljer>
+                <registreringsDato>1995-02-20+01:00</registreringsDato>
+                <datoSistEndret>2014-03-18+01:00</datoSistEndret>
+                <gjeldendeMaalform kodeRef="NB"/>
+                <registrertMVA fomBruksperiode="2014-05-21T19:47:35+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <registrertIMVA>true</registrertIMVA>
+                </registrertMVA>
+                <telefaks fomBruksperiode="2014-05-21T19:47:35+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <identifikator>23 06 93 70</identifikator>
+                </telefaks>
+                <telefon fomBruksperiode="2014-05-21T19:47:35+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <identifikator>23 06 93 60</identifikator>
+                </telefon>
+                <forretningsadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="2010-02-03T00:00:00.000+01:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Ramstadsletta 3</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>1363</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>0219</verdi>
+                    </adresseledd>
+                </forretningsadresse>
+                <navSpesifikkInformasjon fomBruksperiode="2014-08-21T00:00:00+02:00" fomGyldighetsperiode="2014-08-21T00:00:00+02:00">
+                    <erIA>true</erIA>
+                </navSpesifikkInformasjon>
+                <internettadresse fomBruksperiode="2014-05-21T19:47:35+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <identifikator>www.elite.as</identifikator>
+                </internettadresse>
+                <epostadresse fomBruksperiode="2014-05-21T19:47:35+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <identifikator>post@elite.as</identifikator>
+                </epostadresse>
+                <naering fomBruksperiode="2014-05-22T00:51:37+02:00" fomGyldighetsperiode="1992-07-01T00:00:00.000+02:00">
+                    <naeringskode kodeRef="81.210"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <naering fomBruksperiode="2014-05-22T00:51:37+02:00" fomGyldighetsperiode="1992-07-01T00:00:00.000+02:00">
+                    <naeringskode kodeRef="56.290"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <naering fomBruksperiode="2014-05-22T00:51:37+02:00" fomGyldighetsperiode="2008-08-25T00:00:00.000+02:00">
+                    <naeringskode kodeRef="78.200"/>
+                    <hjelpeenhet>true</hjelpeenhet>
+                </naering>
+                <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="2010-08-18T00:00:00.000+02:00">
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>ELITE DRIFT AS</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <redigertNavn>ELITE DRIFT AS</redigertNavn>
+                </navn>
+                <formaal fomBruksperiode="2014-05-21T23:55:54+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <formaal>Utleie av personell</formaal>
+                </formaal>
+                <stiftelsesdato>1992-01-10+01:00</stiftelsesdato>
+            </organisasjonDetaljer>
+            <juridiskEnhetDetaljer>
+                <sektorkode kodeRef="2100"/>
+                <enhetstype kodeRef="AS"/>
+                <kapitalopplysninger fomBruksperiode="2014-05-21T18:16:41+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <valuta kodeRef="NOK"/>
+                    <kapital>100000</kapital>
+                    <kapitalInnbetalt>100000</kapitalInnbetalt>
+                    <fritekst>null</fritekst>
+                </kapitalopplysninger>
+                <registrertIForetaksregisteret fomBruksperiode="2014-05-21T19:47:35+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <registrertForetaksregisteret>true</registrertForetaksregisteret>
+                </registrertIForetaksregisteret>
+            </juridiskEnhetDetaljer>
+        </organisasjon>
+    </response>
+</ns2:hentOrganisasjonResponse>
