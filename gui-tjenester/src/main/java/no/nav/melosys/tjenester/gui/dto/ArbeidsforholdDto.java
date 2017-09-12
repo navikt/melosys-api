@@ -32,11 +32,11 @@ public class ArbeidsforholdDto {
 
     private List<ArbeidsavtaleDto> arbeidsavtale = new ArrayList<>();
 
-    private String arbeidsgiver;
+    private OrganisasjonDto arbeidsgiver;
 
     private String arbeidstaker;
 
-    private String opplysningspliktig;
+    private OrganisasjonDto opplysningspliktig;
 
     private Boolean arbeidsforholdInnrapportertEtterAOrdningen;
 
@@ -57,7 +57,10 @@ public class ArbeidsforholdDto {
         if (arbeidsgiverXml instanceof Organisasjon) {
             // Organisasjonsnummer - til den virksomheten hvor arbeidsforholdet er knyttet
             String orgnummer = ((Organisasjon) arbeidsgiverXml).getOrgnummer();
-            arbeidsforhold.setArbeidsgiver(orgnummer);
+
+            OrganisasjonDto organisasjonDto = new OrganisasjonDto(orgnummer);
+            organisasjonDto.setNavn(((Organisasjon) arbeidsgiverXml).getNavn());
+            arbeidsforhold.setArbeidsgiver(organisasjonDto);
         }
 
         // Startdato og slutdato arbeidsforhold
@@ -78,8 +81,10 @@ public class ArbeidsforholdDto {
         Aktoer opplysningspliktig = a.getOpplysningspliktig();
         if (opplysningspliktig instanceof Organisasjon) {
             String orgnummer = ((Organisasjon) opplysningspliktig).getOrgnummer();
-            
-            arbeidsforhold.setOpplysningspliktig(orgnummer);
+
+            OrganisasjonDto organisasjonDto = new OrganisasjonDto(orgnummer);
+            organisasjonDto.setNavn(((Organisasjon) opplysningspliktig).getNavn());
+            arbeidsforhold.setOpplysningspliktig(organisasjonDto);
 
         }
 
@@ -179,11 +184,11 @@ public class ArbeidsforholdDto {
         this.arbeidsavtale = arbeidsavtale;
     }
 
-    public String getArbeidsgiver() {
+    public OrganisasjonDto getArbeidsgiver() {
         return arbeidsgiver;
     }
 
-    public void setArbeidsgiver(String arbeidsgiver) {
+    public void setArbeidsgiver(OrganisasjonDto arbeidsgiver) {
         this.arbeidsgiver = arbeidsgiver;
     }
 
@@ -195,11 +200,11 @@ public class ArbeidsforholdDto {
         this.arbeidstaker = arbeidstaker;
     }
 
-    public String getOpplysningspliktig() {
+    public OrganisasjonDto getOpplysningspliktig() {
         return opplysningspliktig;
     }
 
-    public void setOpplysningspliktig(String opplysningspliktig) {
+    public void setOpplysningspliktig(OrganisasjonDto opplysningspliktig) {
         this.opplysningspliktig = opplysningspliktig;
     }
 

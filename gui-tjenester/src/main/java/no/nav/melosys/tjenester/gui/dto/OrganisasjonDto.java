@@ -5,8 +5,6 @@ public class OrganisasjonDto {
     private String orgnummer;
 
     private String navn;
-    
-    private OrganisasjonsDetaljerDto organisasjonDetaljer;
 
     public OrganisasjonDto() {
     }
@@ -30,14 +28,6 @@ public class OrganisasjonDto {
 
     public void setNavn(String navn) {
         this.navn = navn;
-    }
-
-    public OrganisasjonsDetaljerDto getOrganisasjonDetaljer() {
-        return organisasjonDetaljer;
-    }
-
-    public void setOrganisasjonDetaljer(OrganisasjonsDetaljerDto organisasjonDetaljer) {
-        this.organisasjonDetaljer = organisasjonDetaljer;
     }
 
 }

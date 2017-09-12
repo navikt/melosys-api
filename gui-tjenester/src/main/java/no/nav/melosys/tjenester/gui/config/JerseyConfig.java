@@ -19,7 +19,7 @@ public class JerseyConfig extends ResourceConfig {
 
     public JerseyConfig() {
         setApplicationName("melosys");
-        register(CORSFilter.class);
+        register(CorsFilter.class);
         register(ArbeidsforholdRestTjeneste.class);
         register(BehandlingRestTjeneste.class);
         register(FagsakRestTjeneste.class);

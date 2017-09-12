@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -33,8 +31,6 @@ import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.A
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonOrganisasjonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonUgyldigInput;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.Organisasjon;
-import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.SammensattNavn;
-import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.UstrukturertNavn;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
@@ -94,14 +90,13 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
         }
 
         // Henter opplysninger om arbeidsgiveren/organisasjoner fra Enhetsregisteret
-        List<OrganisasjonDto> organisajoner = new ArrayList<>();
-        Map<String, OrganisasjonDto> orgMap = new HashMap<>();
+        List<OrganisasjonsDetaljerDto> organisajoner = new ArrayList<>();
+        Map<String, OrganisasjonsDetaljerDto> orgMap = new HashMap<>();
         for (ArbeidsforholdDto a : arbeidsforhold) {
             try {
-                hentOrganisasjoner(orgMap, a);
-
-                orgMap.values().forEach(x -> organisajoner.add(x));
-                view.setOrganisasjoner(organisajoner);
+                hentOrganisasjon(orgMap, a.getArbeidsgiver());
+                hentOrganisasjon(orgMap, a.getOpplysningspliktig());
+                // TODO Aareg kunne faktisk levere navn fra organisasjonene
             } catch (HentOrganisasjonUgyldigInput hentOrganisasjonUgyldigInput) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             } catch (HentOrganisasjonOrganisasjonIkkeFunnet hentOrganisasjonOrganisasjonIkkeFunnet) {
@@ -109,44 +104,33 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
                 //return Response.status(Response.Status.NOT_FOUND).build();
             }
         }
+        orgMap.values().forEach(x -> organisajoner.add(x));
+        view.setOrganisasjoner(organisajoner);
 
         return Response.ok(view).build();
     }
 
-    private void hentOrganisasjoner(Map orgMap, ArbeidsforholdDto arbeidsforhold) throws HentOrganisasjonUgyldigInput, HentOrganisasjonOrganisasjonIkkeFunnet {
-        String arbeidsgiver = arbeidsforhold.getArbeidsgiver();
-        String opplysningspliktig = arbeidsforhold.getOpplysningspliktig();
-
-        if (orgMap.get(arbeidsgiver) == null) {
-            orgMap.put(arbeidsgiver, hentOrganisasjon(arbeidsgiver));
+    // Mapper org. nummer til organisasjonsdetaljer
+    private void hentOrganisasjon(Map orgMap, OrganisasjonDto organisasjon) throws HentOrganisasjonUgyldigInput, HentOrganisasjonOrganisasjonIkkeFunnet {
+        if (organisasjon == null) {
+            return;
         }
 
-        if (orgMap.get(opplysningspliktig) == null) {
-            orgMap.put(opplysningspliktig, hentOrganisasjon(opplysningspliktig));
+        String orgnummer = organisasjon.getOrgnummer();
+        if (orgMap.get(orgnummer) == null) {
+            orgMap.put(orgnummer, hentOrganisasjon(orgnummer));
         }
     }
 
-    private OrganisasjonDto hentOrganisasjon(String orgNummer) throws HentOrganisasjonUgyldigInput, HentOrganisasjonOrganisasjonIkkeFunnet {
+    private OrganisasjonsDetaljerDto hentOrganisasjon(String orgNummer) throws HentOrganisasjonUgyldigInput, HentOrganisasjonOrganisasjonIkkeFunnet {
         if (orgNummer == null) {
             return null;
         }
 
         Organisasjon org = ereg.hentOrganisasjon(orgNummer);
+        OrganisasjonsDetaljerDto orgDetaljer = OrganisasjonsDetaljerDto.toDto(org);
 
-        SammensattNavn sammensattNavn = org.getNavn();
-        String navn = null;
-        if (sammensattNavn instanceof UstrukturertNavn) {
-            UstrukturertNavn ustrukturertNavn = (UstrukturertNavn) sammensattNavn;
-            List<String> navnelinje = ustrukturertNavn.getNavnelinje();
-            navn = navnelinje.stream().filter(Objects::nonNull).filter(s -> !s.isEmpty()).collect(Collectors.joining(" "));
-        }
-
-        OrganisasjonDto organisasjon = new OrganisasjonDto();
-        organisasjon.setOrgnummer(orgNummer);
-        organisasjon.setNavn(navn);
-        organisasjon.setOrganisasjonDetaljer(OrganisasjonsDetaljerDto.toDto(org.getOrganisasjonDetaljer()));
-
-        return organisasjon;
+        return orgDetaljer;
     }
 
 }

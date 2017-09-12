@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.tjenester.gui.dto.ArbeidsforholdDto;
-import no.nav.melosys.tjenester.gui.dto.OrganisasjonDto;
+import no.nav.melosys.tjenester.gui.dto.OrganisasjonsDetaljerDto;
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
 
 public class ArbeidsforholdView {
@@ -13,7 +13,7 @@ public class ArbeidsforholdView {
 
     private List<ArbeidsforholdDto> arbeidsforhold = new ArrayList<>();
 
-    private List<OrganisasjonDto> organisasjoner = new ArrayList<>();
+    private List<OrganisasjonsDetaljerDto> organisasjoner = new ArrayList<>();
 
     public ArbeidsforholdView() {
     }
@@ -34,11 +34,11 @@ public class ArbeidsforholdView {
         this.arbeidsforhold = arbeidsforhold;
     }
 
-    public List<OrganisasjonDto> getOrganisasjoner() {
+    public List<OrganisasjonsDetaljerDto> getOrganisasjoner() {
         return organisasjoner;
     }
 
-    public void setOrganisasjoner(List<OrganisasjonDto> organisasjoner) {
+    public void setOrganisasjoner(List<OrganisasjonsDetaljerDto> organisasjoner) {
         this.organisasjoner = organisasjoner;
     }
 }
