@@ -90,13 +90,24 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
         }
 
         // Henter opplysninger om arbeidsgiveren/organisasjoner fra Enhetsregisteret
+        // Oppdaterer navn på arbeidsforholdene
         List<OrganisasjonsDetaljerDto> organisajoner = new ArrayList<>();
         Map<String, OrganisasjonsDetaljerDto> orgMap = new HashMap<>();
         for (ArbeidsforholdDto a : arbeidsforhold) {
             try {
-                hentOrganisasjon(orgMap, a.getArbeidsgiver());
-                hentOrganisasjon(orgMap, a.getOpplysningspliktig());
+                OrganisasjonDto arbeidsgiver = a.getArbeidsgiver();
+                OrganisasjonsDetaljerDto orgDetaljer = hentOrganisasjon(orgMap, arbeidsgiver);
                 // TODO Aareg kunne faktisk levere navn fra organisasjonene
+                if (arbeidsgiver.getNavn() == null) {
+                    arbeidsgiver.setNavn(orgDetaljer.getNavn());
+                }
+
+                OrganisasjonDto opplysningspliktig = a.getOpplysningspliktig();
+                orgDetaljer = hentOrganisasjon(orgMap, opplysningspliktig);
+                if (opplysningspliktig.getNavn() == null) {
+                    opplysningspliktig.setNavn(orgDetaljer.getNavn());
+                }
+
             } catch (HentOrganisasjonUgyldigInput hentOrganisasjonUgyldigInput) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             } catch (HentOrganisasjonOrganisasjonIkkeFunnet hentOrganisasjonOrganisasjonIkkeFunnet) {
@@ -111,14 +122,20 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
     }
 
     // Mapper org. nummer til organisasjonsdetaljer
-    private void hentOrganisasjon(Map orgMap, OrganisasjonDto organisasjon) throws HentOrganisasjonUgyldigInput, HentOrganisasjonOrganisasjonIkkeFunnet {
+    private OrganisasjonsDetaljerDto hentOrganisasjon(Map<String, OrganisasjonsDetaljerDto> orgMap, OrganisasjonDto organisasjon) throws HentOrganisasjonUgyldigInput, HentOrganisasjonOrganisasjonIkkeFunnet {
         if (organisasjon == null) {
-            return;
+            return null;
         }
 
         String orgnummer = organisasjon.getOrgnummer();
-        if (orgMap.get(orgnummer) == null) {
-            orgMap.put(orgnummer, hentOrganisasjon(orgnummer));
+        OrganisasjonsDetaljerDto orgDetaljer = orgMap.get(orgnummer);
+
+        if (orgDetaljer == null) {
+            orgDetaljer = hentOrganisasjon(orgnummer);
+            orgMap.put(orgnummer, orgDetaljer);
+            return orgDetaljer;
+        } else {
+            return orgDetaljer;
         }
     }
 

@@ -1,4 +1,3 @@
-
 <ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
     <response>
         <organisasjon xsi:type="ns4:JuridiskEnhet" xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -53,7 +52,7 @@
                 </naering>
                 <naering fomBruksperiode="2014-05-22T00:49:24+02:00" fomGyldighetsperiode="1986-01-01T00:00:00.000+01:00">
                     <naeringskode kodeRef="55.202"/>
-                    <hjelp920165931eenhet>false</hjelpeenhet>
+                    <hjelpeenhet>false</hjelpeenhet>
                 </naering>
                 <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="2007-05-06T00:00:00.000+02:00">
                     <navn xsi:type="ns4:UstrukturertNavn">
