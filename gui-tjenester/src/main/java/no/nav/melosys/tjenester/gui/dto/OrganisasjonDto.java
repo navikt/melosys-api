@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-public class OrganisajonDto {
+public class OrganisasjonDto {
 
     private String orgnummer;
 
@@ -8,10 +8,10 @@ public class OrganisajonDto {
     
     private OrganisasjonsDetaljerDto organisasjonDetaljer;
 
-    public OrganisajonDto() {
+    public OrganisasjonDto() {
     }
 
-    public OrganisajonDto(String orgnummer) {
+    public OrganisasjonDto(String orgnummer) {
         super();
         this.orgnummer = orgnummer;
     }

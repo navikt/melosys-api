@@ -1,7 +1,9 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -21,7 +23,7 @@ import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.tjenester.gui.dto.ArbeidsforholdDto;
-import no.nav.melosys.tjenester.gui.dto.OrganisajonDto;
+import no.nav.melosys.tjenester.gui.dto.OrganisasjonDto;
 import no.nav.melosys.tjenester.gui.dto.OrganisasjonsDetaljerDto;
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
 import no.nav.melosys.tjenester.gui.dto.view.ArbeidsforholdView;
@@ -62,6 +64,7 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
     public Response hentArbeidsforhold(@PathParam("ident") String ident) {
         ArbeidsforholdView view = new ArbeidsforholdView();
 
+        // Henter personopplysninger fra TPS
         try {
             // TODO Lagre?
             HentPersonResponse hentPersonResponse = tps.hentPersonMedAdresse(ident);
@@ -75,6 +78,7 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
 
+        // Henter opplysninger om arbeidsforhold fra Aareg
         List<ArbeidsforholdDto> arbeidsforhold = new ArrayList<>();
         try {
             // TODO Vi har (foreløpig) sagt at vi kun skal hente arbeidsforhold rapportert på nytt regelverk.
@@ -90,9 +94,14 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
         }
 
         // Henter opplysninger om arbeidsgiveren/organisasjoner fra Enhetsregisteret
+        List<OrganisasjonDto> organisajoner = new ArrayList<>();
+        Map<String, OrganisasjonDto> orgMap = new HashMap<>();
         for (ArbeidsforholdDto a : arbeidsforhold) {
             try {
-                hentOrganisasjoner(a);
+                hentOrganisasjoner(orgMap, a);
+
+                orgMap.values().forEach(x -> organisajoner.add(x));
+                view.setOrganisasjoner(organisajoner);
             } catch (HentOrganisasjonUgyldigInput hentOrganisasjonUgyldigInput) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             } catch (HentOrganisasjonOrganisasjonIkkeFunnet hentOrganisasjonOrganisasjonIkkeFunnet) {
@@ -104,17 +113,25 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
         return Response.ok(view).build();
     }
 
-    private void hentOrganisasjoner(ArbeidsforholdDto arbeidsforhold) throws HentOrganisasjonUgyldigInput, HentOrganisasjonOrganisasjonIkkeFunnet {
-        hentOrganisasjon(arbeidsforhold.getArbeidsgiver());
-        hentOrganisasjon(arbeidsforhold.getOpplysningspliktig());
-    }
+    private void hentOrganisasjoner(Map orgMap, ArbeidsforholdDto arbeidsforhold) throws HentOrganisasjonUgyldigInput, HentOrganisasjonOrganisasjonIkkeFunnet {
+        String arbeidsgiver = arbeidsforhold.getArbeidsgiver();
+        String opplysningspliktig = arbeidsforhold.getOpplysningspliktig();
 
-    private void hentOrganisasjon(OrganisajonDto organisajon) throws HentOrganisasjonUgyldigInput, HentOrganisasjonOrganisasjonIkkeFunnet {
-        if (organisajon == null || organisajon.getOrgnummer() == null) {
-            return;
+        if (orgMap.get(arbeidsgiver) == null) {
+            orgMap.put(arbeidsgiver, hentOrganisasjon(arbeidsgiver));
         }
 
-        Organisasjon org = ereg.hentOrganisasjon(organisajon.getOrgnummer());
+        if (orgMap.get(opplysningspliktig) == null) {
+            orgMap.put(opplysningspliktig, hentOrganisasjon(opplysningspliktig));
+        }
+    }
+
+    private OrganisasjonDto hentOrganisasjon(String orgNummer) throws HentOrganisasjonUgyldigInput, HentOrganisasjonOrganisasjonIkkeFunnet {
+        if (orgNummer == null) {
+            return null;
+        }
+
+        Organisasjon org = ereg.hentOrganisasjon(orgNummer);
 
         SammensattNavn sammensattNavn = org.getNavn();
         String navn = null;
@@ -123,10 +140,12 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
             List<String> navnelinje = ustrukturertNavn.getNavnelinje();
             navn = navnelinje.stream().filter(Objects::nonNull).filter(s -> !s.isEmpty()).collect(Collectors.joining(" "));
         }
-        organisajon.setNavn(navn);
 
-        organisajon.setOrganisasjonDetaljer(OrganisasjonsDetaljerDto.toDto(org.getOrganisasjonDetaljer()));
+        OrganisasjonDto organisasjon = new OrganisasjonDto();
+        organisasjon.setNavn(navn);
+        organisasjon.setOrganisasjonDetaljer(OrganisasjonsDetaljerDto.toDto(org.getOrganisasjonDetaljer()));
 
+        return organisasjon;
     }
 
 }

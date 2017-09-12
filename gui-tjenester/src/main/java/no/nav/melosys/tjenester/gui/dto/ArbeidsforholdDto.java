@@ -32,11 +32,11 @@ public class ArbeidsforholdDto {
 
     private List<ArbeidsavtaleDto> arbeidsavtale = new ArrayList<>();
 
-    private OrganisajonDto arbeidsgiver;
+    private String arbeidsgiver;
 
     private String arbeidstaker;
 
-    private OrganisajonDto opplysningspliktig;
+    private String opplysningspliktig;
 
     private Boolean arbeidsforholdInnrapportertEtterAOrdningen;
 
@@ -57,8 +57,7 @@ public class ArbeidsforholdDto {
         if (arbeidsgiverXml instanceof Organisasjon) {
             // Organisasjonsnummer - til den virksomheten hvor arbeidsforholdet er knyttet
             String orgnummer = ((Organisasjon) arbeidsgiverXml).getOrgnummer();
-            OrganisajonDto arbeidsgiver = new OrganisajonDto(orgnummer);
-            arbeidsforhold.setArbeidsgiver(arbeidsgiver);
+            arbeidsforhold.setArbeidsgiver(orgnummer);
         }
 
         // Startdato og slutdato arbeidsforhold
@@ -79,9 +78,8 @@ public class ArbeidsforholdDto {
         Aktoer opplysningspliktig = a.getOpplysningspliktig();
         if (opplysningspliktig instanceof Organisasjon) {
             String orgnummer = ((Organisasjon) opplysningspliktig).getOrgnummer();
-
-            OrganisajonDto organisasjon = new OrganisajonDto(orgnummer);
-            arbeidsforhold.setOpplysningspliktig(organisasjon);
+            
+            arbeidsforhold.setOpplysningspliktig(orgnummer);
 
         }
 
@@ -181,11 +179,11 @@ public class ArbeidsforholdDto {
         this.arbeidsavtale = arbeidsavtale;
     }
 
-    public OrganisajonDto getArbeidsgiver() {
+    public String getArbeidsgiver() {
         return arbeidsgiver;
     }
 
-    public void setArbeidsgiver(OrganisajonDto arbeidsgiver) {
+    public void setArbeidsgiver(String arbeidsgiver) {
         this.arbeidsgiver = arbeidsgiver;
     }
 
@@ -197,11 +195,11 @@ public class ArbeidsforholdDto {
         this.arbeidstaker = arbeidstaker;
     }
 
-    public OrganisajonDto getOpplysningspliktig() {
+    public String getOpplysningspliktig() {
         return opplysningspliktig;
     }
 
-    public void setOpplysningspliktig(OrganisajonDto opplysningspliktig) {
+    public void setOpplysningspliktig(String opplysningspliktig) {
         this.opplysningspliktig = opplysningspliktig;
     }
 
