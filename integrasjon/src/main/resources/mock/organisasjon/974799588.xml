@@ -1,0 +1,74 @@
+
+<ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
+    <response>
+        <organisasjon xsi:type="ns4:Virksomhet" xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <orgnummer>974799588</orgnummer>
+            <navn xsi:type="ns4:UstrukturertNavn">
+                <navnelinje>HØGSKULEN PÅ VESTLANDET</navnelinje>
+                <navnelinje/>
+                <navnelinje>BERGEN - BJØRNSONSGATEN</navnelinje>
+                <navnelinje/>
+                <navnelinje/>
+            </navn>
+            <organisasjonDetaljer>
+                <registreringsDato>1995-09-14+02:00</registreringsDato>
+                <datoSistEndret>2017-01-11+01:00</datoSistEndret>
+                <telefon fomBruksperiode="2014-05-21T20:20:44+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <identifikator>55 573500</identifikator>
+                </telefon>
+                <forretningsadresse fomBruksperiode="2017-01-12T04:03:25.834+01:00" fomGyldighetsperiode="2017-01-11T00:00:00.000+01:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Bjørnsons gate 29</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>5052</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1201</verdi>
+                    </adresseledd>
+                </forretningsadresse>
+                <postadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="2000-06-30T00:00:00.000+02:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Postboks 7030</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>5020</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1201</verdi>
+                    </adresseledd>
+                </postadresse>
+                <navSpesifikkInformasjon fomBruksperiode="2017-03-13T13:16:18+01:00" fomGyldighetsperiode="2017-03-13T13:16:18+01:00">
+                    <erIA>true</erIA>
+                </navSpesifikkInformasjon>
+                <naering fomBruksperiode="2014-05-22T00:58:20+02:00" fomGyldighetsperiode="1994-08-01T00:00:00.000+02:00">
+                    <naeringskode kodeRef="85.423"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <navn fomBruksperiode="2017-01-12T04:03:03.716+01:00" fomGyldighetsperiode="2017-01-11T00:00:00.000+01:00">
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>HØGSKULEN PÅ VESTLANDET</navnelinje>
+                        <navnelinje/>
+                        <navnelinje>BERGEN - BJØRNSONSGATEN</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <redigertNavn>HØGSKULEN PÅ VESTLANDET</redigertNavn>
+                </navn>
+            </organisasjonDetaljer>
+            <virksomhetDetaljer>
+                <oppstartsdato>1994-08-01+02:00</oppstartsdato>
+                <eierskiftedato>2017-01-01+01:00</eierskiftedato>
+                <enhetstype kodeRef="BEDR"/>
+            </virksomhetDetaljer>
+        </organisasjon>
+    </response>
+</ns2:hentOrganisasjonResponse>

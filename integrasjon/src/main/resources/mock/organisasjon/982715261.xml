@@ -1,0 +1,77 @@
+
+<ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
+    <response>
+        <organisasjon xsi:type="ns4:Virksomhet" xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <orgnummer>982715261</orgnummer>
+            <navn xsi:type="ns4:UstrukturertNavn">
+                <navnelinje>BOTJENESTER FOR</navnelinje>
+                <navnelinje>UTVIKLINGSHEMMEDE I ÅRSTAD</navnelinje>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+            </navn>
+            <organisasjonDetaljer>
+                <registreringsDato>2000-11-30+01:00</registreringsDato>
+                <datoSistEndret>2013-12-18+01:00</datoSistEndret>
+                <telefon fomBruksperiode="2014-05-21T20:59:34+02:00" fomGyldighetsperiode="2013-12-18T00:00:00.000+01:00">
+                    <identifikator>55 56 51 90</identifikator>
+                </telefon>
+                <forretningsadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="2009-05-06T00:00:00.000+02:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Solheimsgaten 11</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>5058</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1201</verdi>
+                    </adresseledd>
+                </forretningsadresse>
+                <postadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="2000-11-30T00:00:00.000+01:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Postboks 7715</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>5020</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1201</verdi>
+                    </adresseledd>
+                </postadresse>
+                <navSpesifikkInformasjon fomBruksperiode="2015-03-30T10:36:34+02:00" fomGyldighetsperiode="2015-03-30T10:36:34+02:00">
+                    <erIA>true</erIA>
+                </navSpesifikkInformasjon>
+                <epostadresse fomBruksperiode="2014-05-21T20:59:34+02:00" fomGyldighetsperiode="2013-12-18T00:00:00.000+01:00">
+                    <identifikator>botjenester.arstad@bergen.kommune.no</identifikator>
+                </epostadresse>
+                <naering fomBruksperiode="2014-05-22T01:05:56+02:00" fomGyldighetsperiode="2003-01-13T00:00:00.000+01:00">
+                    <naeringskode kodeRef="87.203"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="2008-05-01T00:00:00.000+02:00">
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>BOTJENESTER FOR</navnelinje>
+                        <navnelinje>UTVIKLINGSHEMMEDE I ÅRSTAD</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <redigertNavn>BOTJENESTER UTVIKLINGSHEMM ÅRSTAD</redigertNavn>
+                </navn>
+            </organisasjonDetaljer>
+            <virksomhetDetaljer>
+                <oppstartsdato>2000-10-01+02:00</oppstartsdato>
+                <eierskiftedato>2008-01-01+01:00</eierskiftedato>
+                <enhetstype kodeRef="BEDR"/>
+            </virksomhetDetaljer>
+        </organisasjon>
+    </response>
+</ns2:hentOrganisasjonResponse>

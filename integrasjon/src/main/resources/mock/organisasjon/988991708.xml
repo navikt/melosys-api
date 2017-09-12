@@ -1,0 +1,74 @@
+
+<ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
+    <response>
+        <organisasjon xsi:type="ns4:Virksomhet" xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <orgnummer>988991708</orgnummer>
+            <navn xsi:type="ns4:UstrukturertNavn">
+                <navnelinje>ELIM BOKOLLEKTIV</navnelinje>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+            </navn>
+            <organisasjonDetaljer>
+                <registreringsDato>2005-11-29+01:00</registreringsDato>
+                <datoSistEndret>2015-01-05+01:00</datoSistEndret>
+                <forretningsadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="2005-11-29T00:00:00.000+01:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Kirkeveien 172</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>4817</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>0906</verdi>
+                    </adresseledd>
+                </forretningsadresse>
+                <postadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="2005-11-29T00:00:00.000+01:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Arendal kommune</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje2"/>
+                        <verdi>Postboks 123</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>4891</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>0906</verdi>
+                    </adresseledd>
+                </postadresse>
+                <navSpesifikkInformasjon fomBruksperiode="2014-08-21T00:00:00+02:00" fomGyldighetsperiode="2014-08-21T00:00:00+02:00">
+                    <erIA>true</erIA>
+                </navSpesifikkInformasjon>
+                <naering fomBruksperiode="2014-05-22T01:14:26+02:00" fomGyldighetsperiode="2007-01-01T00:00:00.000+01:00">
+                    <naeringskode kodeRef="87.102"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="2005-11-29T00:00:00.000+01:00">
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>ELIM BOKOLLEKTIV</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <redigertNavn>ELIM BOKOLLEKTIV</redigertNavn>
+                </navn>
+            </organisasjonDetaljer>
+            <virksomhetDetaljer>
+                <oppstartsdato>2005-01-01+01:00</oppstartsdato>
+                <enhetstype kodeRef="BEDR"/>
+            </virksomhetDetaljer>
+        </organisasjon>
+    </response>
+</ns2:hentOrganisasjonResponse>

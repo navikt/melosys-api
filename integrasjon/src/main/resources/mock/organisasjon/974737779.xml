@@ -1,0 +1,54 @@
+
+<ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
+    <response>
+        <organisasjon xsi:type="ns4:Virksomhet" xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <orgnummer>974737779</orgnummer>
+            <navn xsi:type="ns4:UstrukturertNavn">
+                <navnelinje>BETANIEN SPESIALISTPOLIKLINIKK</navnelinje>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+            </navn>
+            <organisasjonDetaljer>
+                <registreringsDato>1995-08-10+02:00</registreringsDato>
+                <datoSistEndret>2014-03-18+01:00</datoSistEndret>
+                <forretningsadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="2013-03-24T00:00:00.000+01:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Vestlundveien 23</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>5145</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1201</verdi>
+                    </adresseledd>
+                </forretningsadresse>
+                <navSpesifikkInformasjon fomBruksperiode="2015-04-14T08:33:11+02:00" fomGyldighetsperiode="2015-04-14T08:33:11+02:00">
+                    <erIA>true</erIA>
+                </navSpesifikkInformasjon>
+                <naering fomBruksperiode="2014-05-22T00:58:16+02:00" fomGyldighetsperiode="2002-10-01T00:00:00.000+02:00">
+                    <naeringskode kodeRef="86.212"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="2001-11-28T00:00:00.000+01:00">
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>BETANIEN SPESIALISTPOLIKLINIKK</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <redigertNavn>BETANIEN SPESIALISTPOLIKLINIKK</redigertNavn>
+                </navn>
+            </organisasjonDetaljer>
+            <virksomhetDetaljer>
+                <enhetstype kodeRef="BEDR"/>
+            </virksomhetDetaljer>
+        </organisasjon>
+    </response>
+</ns2:hentOrganisasjonResponse>
