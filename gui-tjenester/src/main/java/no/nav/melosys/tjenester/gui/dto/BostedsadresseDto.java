@@ -71,15 +71,15 @@ public class BostedsadresseDto {
 
             String linje1 = adresseMap.get(AdresseUtils.ADRESSELINJE1);
             if ((linje1 != null) && !(linje1.isEmpty())) {
-                adresseBuilder.append(linje1 + " ");
+                adresseBuilder.append(linje1);
             }
             String linje2 = adresseMap.get(AdresseUtils.ADRESSELINJE2);
             if ((linje2 != null) && !(linje2.isEmpty())) {
-                adresseBuilder.append(linje2 + " ");
+                adresseBuilder.append(" " + linje2);
             }
             String linje3 = adresseMap.get(AdresseUtils.ADRESSELINJE3);
             if ((linje3 != null) && !(linje3.isEmpty())) {
-                adresseBuilder.append(linje3 + " ");
+                adresseBuilder.append(" " + linje3);
             }
 
             gateadresseDto.setGatenavn(adresseBuilder.toString());

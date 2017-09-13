@@ -10,6 +10,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,8 @@ import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 public class ArbeidsforholdRestTjeneste extends RestTjeneste {
+
+    private static Logger logger = LoggerFactory.getLogger(ArbeidsforholdRestTjeneste.class);
 
     private TpsFasade tps;
 
@@ -111,6 +115,7 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
             } catch (HentOrganisasjonUgyldigInput hentOrganisasjonUgyldigInput) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             } catch (HentOrganisasjonOrganisasjonIkkeFunnet hentOrganisasjonOrganisasjonIkkeFunnet) {
+                logger.error("Organisasjon ikke funnet ", hentOrganisasjonOrganisasjonIkkeFunnet);
                 // TODO endret til Demo. Avklare hva skjer når en organisasjon ikke finnes
                 //return Response.status(Response.Status.NOT_FOUND).build();
             }
