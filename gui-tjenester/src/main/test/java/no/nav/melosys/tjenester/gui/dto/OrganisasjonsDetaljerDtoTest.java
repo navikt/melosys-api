@@ -46,7 +46,7 @@ public class OrganisasjonsDetaljerDtoTest {
         Object xmlBean = unmarshaller.unmarshal(reader);
         HentOrganisasjonResponse response = (HentOrganisasjonResponse) xmlBean;
 
-        OrganisasjonsDetaljerDto organisasjonsDetaljerDto = OrganisasjonsDetaljerDto.toDto(response.getResponse().getOrganisasjon().getOrganisasjonDetaljer());
+        OrganisasjonsDetaljerDto organisasjonsDetaljerDto = OrganisasjonsDetaljerDto.toDto(response.getResponse().getOrganisasjon());
 
         // test Forretningsadresse
         List<GeografiskAdresse> forretningsadresser = response.getResponse().getOrganisasjon().getOrganisasjonDetaljer().getForretningsadresse();

@@ -34,7 +34,7 @@ public class ArbeidsforholdDto {
 
     private OrganisasjonDto arbeidsgiver;
 
-    private String arbeidstaker;
+    private String arbeidstakerID;
 
     private OrganisasjonDto opplysningspliktig;
 
@@ -51,7 +51,7 @@ public class ArbeidsforholdDto {
 
         arbeidsforhold.setArbeidsforholdInnrapportertEtterAOrdningen(a.isArbeidsforholdInnrapportertEtterAOrdningen());
 
-        arbeidsforhold.setArbeidstaker(a.getArbeidstaker().getIdent().getIdent());
+        arbeidsforhold.setArbeidstakerID(a.getArbeidstaker().getIdent().getIdent());
 
         Aktoer arbeidsgiverXml = a.getArbeidsgiver();
         if (arbeidsgiverXml instanceof Organisasjon) {
@@ -192,12 +192,12 @@ public class ArbeidsforholdDto {
         this.arbeidsgiver = arbeidsgiver;
     }
 
-    public String getArbeidstaker() {
-        return arbeidstaker;
+    public String getArbeidstakerID() {
+        return arbeidstakerID;
     }
 
-    public void setArbeidstaker(String arbeidstaker) {
-        this.arbeidstaker = arbeidstaker;
+    public void setArbeidstakerID(String id) {
+        this.arbeidstakerID = id;
     }
 
     public OrganisasjonDto getOpplysningspliktig() {
