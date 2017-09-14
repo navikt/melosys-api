@@ -122,6 +122,9 @@ public class KodeverkService implements ApplicationContextAware {
     }
     
     public static String dekod(Kodeverk kodeverk, String kode) {
+        if (staticKs == null) {
+            return kode;
+        }
         return staticKs.dekod(kodeverk, kode, LocalDate.now());
     }
 
