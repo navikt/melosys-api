@@ -30,7 +30,7 @@ public class ArbeidsforholdDto {
 
     private List<UtenlandsoppholdDto> utenlandsopphold = new ArrayList<>();
 
-    private List<ArbeidsavtaleDto> arbeidsavtale = new ArrayList<>();
+    private List<ArbeidsavtaleDto> arbeidsavtaler = new ArrayList<>();
 
     private OrganisasjonDto arbeidsgiver;
 
@@ -74,7 +74,7 @@ public class ArbeidsforholdDto {
         // Ikke påkrevd i tjenesten.
         Arbeidsforholdstyper type = a.getArbeidsforholdstype();
         if (type != null) {
-            arbeidsforhold.setArbeidsforholdstype(type.getValue()); //TODO Kodeverk
+            arbeidsforhold.setArbeidsforholdstype(type.getValue());
         }
 
         // Opplysningspliktig - juridisk enhet (vesentlig virksomhet i Norge?)
@@ -123,7 +123,7 @@ public class ArbeidsforholdDto {
         List<Arbeidsavtale> avtaler = a.getArbeidsavtale();
         List<ArbeidsavtaleDto> arbeidsavtaleListe = new ArrayList<>();
         avtaler.forEach(x -> arbeidsavtaleListe.add(ArbeidsavtaleDto.tilDto(x)));
-        arbeidsforhold.setArbeidsavtale(arbeidsavtaleListe);
+        arbeidsforhold.setArbeidsavtaler(arbeidsavtaleListe);
 
         return arbeidsforhold;
     }
@@ -176,12 +176,12 @@ public class ArbeidsforholdDto {
         this.utenlandsopphold = utenlandsopphold;
     }
 
-    public List<ArbeidsavtaleDto> getArbeidsavtale() {
-        return arbeidsavtale;
+    public List<ArbeidsavtaleDto> getArbeidsavtaler() {
+        return arbeidsavtaler;
     }
 
-    public void setArbeidsavtale(List<ArbeidsavtaleDto> arbeidsavtale) {
-        this.arbeidsavtale = arbeidsavtale;
+    public void setArbeidsavtaler(List<ArbeidsavtaleDto> arbeidsavtaler) {
+        this.arbeidsavtaler = arbeidsavtaler;
     }
 
     public OrganisasjonDto getArbeidsgiver() {

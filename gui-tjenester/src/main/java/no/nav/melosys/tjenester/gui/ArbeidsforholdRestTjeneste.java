@@ -85,6 +85,7 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
             List<Arbeidsforhold> liste = aareg.finnArbeidsforholdPrArbeidstaker(ident, AaregFasade.REGELVERK_A_ORDNINGEN);
 
             liste.forEach(x -> arbeidsforhold.add(ArbeidsforholdDto.toDto(x)));
+            // TODO sortering
             view.setArbeidsforhold(arbeidsforhold);
 
         } catch (FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning finnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning) {
@@ -101,7 +102,7 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
             try {
                 OrganisasjonDto arbeidsgiver = a.getArbeidsgiver();
                 OrganisasjonsDetaljerDto orgDetaljer = hentOrganisasjon(orgMap, arbeidsgiver);
-                // TODO Aareg kunne faktisk levere navn fra organisasjonene
+
                 if (arbeidsgiver.getNavn() == null) {
                     arbeidsgiver.setNavn(orgDetaljer.getNavn());
                 }
@@ -121,6 +122,7 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
             }
         }
         orgMap.values().forEach(x -> organisajoner.add(x));
+        // TODO sortering med orgnr
         view.setOrganisasjoner(organisajoner);
 
         return Response.ok(view).build();
