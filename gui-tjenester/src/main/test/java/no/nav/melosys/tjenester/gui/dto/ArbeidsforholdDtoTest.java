@@ -407,7 +407,7 @@ public class ArbeidsforholdDtoTest {
             assertEquals(dto.getArbeidsforholdID(), a.getArbeidsforholdID());
             assertEquals(dto.getArbeidsforholdIDnav(), a.getArbeidsforholdIDnav());
             assertEquals(dto.getArbeidsforholdstype(), a.getArbeidsforholdstype().getValue());
-            assertEquals(dto.getArbeidstaker(), a.getArbeidstaker().getIdent().getIdent());
+            assertEquals(dto.getArbeidstakerID(), a.getArbeidstaker().getIdent().getIdent());
         }
 
 

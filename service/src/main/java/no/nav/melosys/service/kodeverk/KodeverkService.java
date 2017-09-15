@@ -120,8 +120,11 @@ public class KodeverkService implements ApplicationContextAware {
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         staticKs = applicationContext.getBean(KodeverkService.class);
     }
-    
+
     public static String dekod(Kodeverk kodeverk, String kode) {
+        if (staticKs == null) {
+            return kode;
+        }
         return staticKs.dekod(kodeverk, kode, LocalDate.now());
     }
 
