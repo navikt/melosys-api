@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBContext;
@@ -22,7 +20,6 @@ import org.modelmapper.convention.MatchingStrategies;
 
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.aareg.AaregService;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
 import no.nav.melosys.integrasjon.ereg.EregService;
@@ -53,12 +50,6 @@ public class ArbeidsforholdDokumentTest {
     @Ignore
     @Test
     public void arbeidsforholdDokumentXmlTest() throws JAXBException, FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput {
-        ArbeidsforholdDokument dokument = new ArbeidsforholdDokument();
-        dokument.setArbeidsforhold(new ArrayList<>());
-
-        AaregFasade aareg = new AaregService(new ArbeidsforholdMock());
-        List<no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Arbeidsforhold> arbeidsforhold = aareg.finnArbeidsforholdPrArbeidstaker("88888888884");
-
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.createTypeMap(ArbeidsforholdDto.class, Arbeidsforhold.class);
 
@@ -74,7 +65,7 @@ public class ArbeidsforholdDokumentTest {
 
         Response response = restTjeneste.hentArbeidsforhold("88888888885");
         ArbeidsforholdView entity = (ArbeidsforholdView) response.getEntity();
-        dokument = modelMapper.map(entity, ArbeidsforholdDokument.class);
+        ArbeidsforholdDokument dokument = modelMapper.map(entity, ArbeidsforholdDokument.class);
 
         JAXBContext jaxbContext = JAXBContext.newInstance(ArbeidsforholdDokument.class);
         Marshaller marshaller = jaxbContext.createMarshaller();

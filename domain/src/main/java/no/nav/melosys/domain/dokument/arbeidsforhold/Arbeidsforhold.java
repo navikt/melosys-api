@@ -21,17 +21,17 @@ public class Arbeidsforhold {
 
     private String arbeidsforholdstype;
 
-    @XmlElementWrapper(name="arbeidsforhold")
-    @XmlElement(name="arbeidsforhold")
+    @XmlElementWrapper(name="arbeidsavtaler")
+    @XmlElement(name="avtale")
+    private List<Arbeidsavtale> arbeidsavtaler = new ArrayList<>();
+
+    @XmlElementWrapper(name="permisjonOgPermittering")
+    @XmlElement(name="permisjonOgPermittering")
     private List<PermisjonOgPermittering> permisjonOgPermittering = new ArrayList<>();
 
     @XmlElementWrapper(name="utenlandsopphold")
     @XmlElement(name="opphold")
     private List<Utenlandsopphold> utenlandsopphold = new ArrayList<>();
-
-    @XmlElementWrapper(name="arbeidsavtaler")
-    @XmlElement(name="avtale")
-    private List<Arbeidsavtale> arbeidsavtaler = new ArrayList<>();
 
     private String arbeidsgiverID;
 
