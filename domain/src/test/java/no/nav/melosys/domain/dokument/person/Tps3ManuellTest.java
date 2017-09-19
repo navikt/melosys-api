@@ -34,7 +34,7 @@ public class Tps3ManuellTest {
         assertTrue(false); // Manuell test. Ikke sjekk inn med @Ignore utkommentert.
     }
     
-    //@Ignore
+    @Ignore
     @Test
     public void testTpsTilDomene() throws Exception {
         File inputXml = new File(getClass().getClassLoader().getResource(TPS_PERSON_3_0_MOCK).getFile());
