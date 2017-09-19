@@ -20,7 +20,7 @@ import org.junit.Test;
 public class Tps3PersonKonverteringTest {
 
     public static final String TPS_PERSON_3_0_MOCK = "mock/tps_person_3.0_mock.xml";
-    public static final String TPS_PERSON_3_0_XSLT = "tps/tps_person_3.0.xslt";  // FIXME (farjam): Denne skal defineres et annet sted.
+    public static final String TPS_PERSON_3_0_XSLT = "tps/person_3.0.xslt";  // FIXME (farjam): Denne skal defineres et annet sted.
 
     @Test
     public void testTpsTilDomene() throws Exception {
