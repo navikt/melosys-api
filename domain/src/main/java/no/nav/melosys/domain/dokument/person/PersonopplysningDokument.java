@@ -1,23 +1,18 @@
 package no.nav.melosys.domain.dokument.person;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.time.LocalDate;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.transform.Result;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
 /**
  * Representerer svar fra personregisteret (TPS)
+ * 
+ * TODO (Farjam 2017-09-19): Trenger revisjon, se EESSI2-279.
+ *  
  */
 @XmlRootElement
 public class PersonopplysningDokument extends SaksopplysningDokument {
@@ -32,38 +27,16 @@ public class PersonopplysningDokument extends SaksopplysningDokument {
     /** Kodeverk: Kjønnstyper */
     public String kjønn;
 
-    // FIXME: Trenger vi fornavn, mellomnavn og etternavn også?
     public String sammensattNavn;
 
+    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
     public LocalDate fødselsdato;
 
+    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
     public LocalDate dødsdato;
 
     public Diskresjonskode diskresjonskode;
 
     public Personstatus personstatus;
-    
-    //FIXME: Trenger vi postadresse?
-    
-    public static void main(String[] args) throws Exception {
-        // Transform...
-        Transformer t = TransformerFactory.newInstance().newTransformer(new StreamSource(new File("C:/ws/melosys-app/domain/src/main/resources/tps_person_3.0.xslt")));
-        StreamSource xmlSource = new StreamSource(new File("C:/ws/melosys-app/integrasjon/src/main/resources/mock/person/88888888884.xml"));
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        // Result outputTarget = new StreamResult(System.out);
-        Result outputTarget = new StreamResult(baos);
-        t.transform(xmlSource, outputTarget);
-        byte[] xmlBytes = baos.toByteArray();
-        // Unmarshal...
-        ByteArrayInputStream bais = new ByteArrayInputStream(xmlBytes);
-        JAXBContext ctx = JAXBContext.newInstance(PersonopplysningDokument.class);
-        Unmarshaller um = ctx.createUnmarshaller();
-        
-        PersonopplysningDokument p2 = (PersonopplysningDokument) um.unmarshal(bais);
-        
-        System.err.println("dd");
-
-        
-    }
     
 }

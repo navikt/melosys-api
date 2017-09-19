@@ -5,7 +5,7 @@ import no.nav.melosys.domain.dokument.KodeverkEnum;
 /**
  * Denne enumen er en hardkoding av kodeverket Personstatuser.
  */
-public enum Personstatus implements KodeverkEnum {
+public enum Personstatus implements KodeverkEnum<Personstatus> {
 
     ADNR("Aktivt"),
     UTPE("Utgått person"),

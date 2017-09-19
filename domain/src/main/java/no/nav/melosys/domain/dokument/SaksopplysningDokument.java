@@ -1,9 +1,7 @@
 package no.nav.melosys.domain.dokument;
 
 /**
- * Superklasse for alle dokumenter
- * @author m126664
- *
+ * Superklasse for alle dokumenter.
  */
 public abstract class SaksopplysningDokument extends Dokument {
 }

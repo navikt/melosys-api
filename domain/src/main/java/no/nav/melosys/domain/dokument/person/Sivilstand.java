@@ -5,7 +5,7 @@ import no.nav.melosys.domain.dokument.KodeverkEnum;
 /**
  * Denne enumen er en hardkoding av kodeverket Sivilstander.
  */
-public enum Sivilstand implements KodeverkEnum {
+public enum Sivilstand implements KodeverkEnum<Sivilstand> {
 
     SEPR("Separert"),
     REPA("Registrert partner"),

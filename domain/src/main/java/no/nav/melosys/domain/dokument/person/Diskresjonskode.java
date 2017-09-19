@@ -5,7 +5,7 @@ import no.nav.melosys.domain.dokument.KodeverkEnum;
 /**
  * Denne enumen er en hardkoding av kodeverket Diskresjonskoder.
  */
-public enum Diskresjonskode implements KodeverkEnum {
+public enum Diskresjonskode implements KodeverkEnum<Diskresjonskode> {
 
     MILI("Militær"),
     UFB("Uten fast bopel"),
