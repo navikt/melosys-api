@@ -24,7 +24,7 @@ public class XsltTest {
 
     @Test
     public void transform() throws TransformerFactoryConfigurationError, TransformerException, IOException, JAXBException {
-        InputStream xslt = getClass().getClassLoader().getResourceAsStream("aareg/arbeidsforhold_v3.xslt");
+        InputStream xslt = getClass().getClassLoader().getResourceAsStream("aareg/arbeidsforhold_3.0.xslt");
         InputStream kilde = getClass().getClassLoader().getResourceAsStream("arbeidsforhold/99999999999.xml");
 
         Transformer transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(xslt));
@@ -34,7 +34,7 @@ public class XsltTest {
 
         StringWriter writer = new StringWriter();
         transformer.transform(new StreamSource(kilde), new StreamResult(writer));
-        
+
         //System.out.println(writer.toString());
         JAXBContext ctx = JAXBContext.newInstance(ArbeidsforholdDokument.class);
         Unmarshaller unmarshaller = ctx.createUnmarshaller();

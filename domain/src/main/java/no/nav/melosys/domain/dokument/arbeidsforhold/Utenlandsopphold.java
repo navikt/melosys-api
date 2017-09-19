@@ -2,7 +2,7 @@ package no.nav.melosys.domain.dokument.arbeidsforhold;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
 
-//TODO Utenlandsopphold mangler testdata
+//FIXME (Francois) EESSI2-281 Utenlandsopphold mangler testdata
 public class Utenlandsopphold {
 
     private String land;
