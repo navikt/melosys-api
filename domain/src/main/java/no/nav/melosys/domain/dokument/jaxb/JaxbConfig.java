@@ -21,6 +21,7 @@ public class JaxbConfig {
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     Jaxb2Marshaller jaxb2Marshaller() {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+        @SuppressWarnings("unchecked")
         Class<? extends Dokument>[] classes = new Class[]{ArbeidsforholdDokument.class, PersonopplysningDokument.class};
         marshaller.setClassesToBeBound(classes);
         return marshaller;

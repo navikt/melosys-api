@@ -26,7 +26,7 @@ import no.nav.melosys.domain.SaksopplysningType;
 /**
  * SaksopplysningDokumentFactory konverterer et xml-resultat fra en ekstern tjeneste til et internt xml-dokument ved hejlp av XSLT med JAXP.
  * Xml-dokumentet blir deretter transformert med JAXB til et objekttre som tilhører et sentralt domene.
- *
+ * Klassen er ikke er trådsikker.
  */
 @Component
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
