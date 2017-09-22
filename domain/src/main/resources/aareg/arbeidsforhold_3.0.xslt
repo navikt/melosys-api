@@ -51,6 +51,7 @@
                                     <tom><xsl:value-of select="periode/tom" /></tom>
                                 </periode>
                                 <land><xsl:value-of select="land" /></land>
+                                <rapporteringsperiode><xsl:value-of select="rapporteringsperiode" /></rapporteringsperiode>
                             </opphold>
                         </xsl:for-each>
                         </utenlandsopphold>

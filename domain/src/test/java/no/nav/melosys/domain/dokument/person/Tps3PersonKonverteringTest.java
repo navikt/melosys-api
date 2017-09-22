@@ -9,6 +9,7 @@ import java.time.LocalDate;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.helpers.DefaultValidationEventHandler;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -40,6 +41,7 @@ public class Tps3PersonKonverteringTest {
         ByteArrayInputStream bais = new ByteArrayInputStream(xmlBytes);
         JAXBContext ctx = JAXBContext.newInstance(PersonopplysningDokument.class);
         Unmarshaller um = ctx.createUnmarshaller();
+        um.setEventHandler(new DefaultValidationEventHandler());
         PersonopplysningDokument p2 = (PersonopplysningDokument) um.unmarshal(bais);
 
         // Verifiser...

@@ -6,10 +6,16 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
+import no.nav.melosys.domain.dokument.jaxb.OffsetDateTimeToLocalDateXmlAdapter;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Periode {
+
+    @XmlJavaTypeAdapter(OffsetDateTimeToLocalDateXmlAdapter.class)
+    private LocalDate fom;
+
+    @XmlJavaTypeAdapter(OffsetDateTimeToLocalDateXmlAdapter.class)
+    private LocalDate tom;
 
     public LocalDate getFom() {
         return fom;
@@ -26,10 +32,4 @@ public class Periode {
     public void setTom(LocalDate tom) {
         this.tom = tom;
     }
-
-    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    private LocalDate fom;
-
-    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    private LocalDate tom;
 }

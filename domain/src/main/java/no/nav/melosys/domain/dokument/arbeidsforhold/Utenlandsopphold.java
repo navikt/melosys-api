@@ -1,13 +1,23 @@
 package no.nav.melosys.domain.dokument.arbeidsforhold;
 
-import no.nav.melosys.domain.dokument.felles.Periode;
+import java.time.YearMonth;
 
-//FIXME (Francois) EESSI2-281 Utenlandsopphold mangler testdata
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.jaxb.YearMonthXmlAdapter;
+
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Utenlandsopphold {
+
+    private Periode periode;
 
     private String land;
 
-    private Periode periode;
+    @XmlJavaTypeAdapter(YearMonthXmlAdapter.class)
+    private YearMonth rapporteringsperiode;
 
     public String getLand() {
         return land;
@@ -25,4 +35,11 @@ public class Utenlandsopphold {
         this.periode = periode;
     }
 
+    public YearMonth getRapporteringsperiode() {
+        return rapporteringsperiode;
+    }
+
+    public void setRapporteringsperiode(YearMonth rapporteringsperiode) {
+        this.rapporteringsperiode = rapporteringsperiode;
+    }
 }
