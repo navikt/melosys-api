@@ -44,9 +44,11 @@ public class XsltTemplatesFactory {
         Templates templates = cache.get(xsltPath);
 
         if (templates == null) {
-            InputStream is = getClass().getClassLoader().getResourceAsStream(XsltConfig.getXsltPath(type, versjon));
-            templates = transformerFactory.newTemplates(new StreamSource(is));
-            cache.put(xsltPath, templates);
+            synchronized (this) {
+                InputStream is = getClass().getClassLoader().getResourceAsStream(XsltConfig.getXsltPath(type, versjon));
+                templates = transformerFactory.newTemplates(new StreamSource(is));
+                cache.put(xsltPath, templates);
+            }
         }
 
         return templates;

@@ -18,16 +18,16 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.person.PersonopplysningDokument;
 
-public class SaksopplysningDokumentFactoryTest {
+public class DokumentFactoryTest {
 
-    SaksopplysningDokumentFactory factory;
+    DokumentFactory factory;
 
     @Before
     public void setUp() {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         marshaller.setClassesToBeBound(ArbeidsforholdDokument.class, PersonopplysningDokument.class);
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
-        factory = new SaksopplysningDokumentFactory(marshaller, xsltTemplatesFactory);
+        factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
     }
 
     @Test

@@ -11,7 +11,11 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -25,7 +29,10 @@ import no.nav.melosys.domain.SaksopplysningType;
  *
  */
 @Component
-public class SaksopplysningDokumentFactory {
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
+public class DokumentFactory {
+
+    private static final Logger log = LoggerFactory.getLogger(DokumentFactory.class);
 
     // Spring JAXB 2 marshaller og unmarshaller
     private Jaxb2Marshaller marshaller;
@@ -33,7 +40,7 @@ public class SaksopplysningDokumentFactory {
     private XsltTemplatesFactory xsltTemplatesFactory;
 
     @Autowired
-    public SaksopplysningDokumentFactory(Jaxb2Marshaller marshaller, XsltTemplatesFactory xsltTemplatesFactory) {
+    public DokumentFactory(Jaxb2Marshaller marshaller, XsltTemplatesFactory xsltTemplatesFactory) {
         this.marshaller = marshaller;
         this.xsltTemplatesFactory = xsltTemplatesFactory;
     }
@@ -41,11 +48,10 @@ public class SaksopplysningDokumentFactory {
     /**
      * lagDokument setter et {@link SaksopplysningDokument} på en {@link Saksopplysning} ut fra feltet {@code dokumentXml}
      *
-     *
      * @param saksopplysning
      * @throws TransformerException
      */
-    public void lagDokument(Saksopplysning saksopplysning) throws TransformerException {
+    public void lagDokument(Saksopplysning saksopplysning) {
         Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
 
         String dokumentXml = saksopplysning.getDokumentXml();
@@ -58,13 +64,19 @@ public class SaksopplysningDokumentFactory {
         String versjon = saksopplysning.getVersjon();
 
         // {@code dokumentXml} transformeres med en JAXP Transformer
-        Templates templates = xsltTemplatesFactory.getXsltTemplates(type, versjon);
-        Transformer transformer = templates.newTransformer();
-        transformer.setOutputProperty(OutputKeys.ENCODING, StandardCharsets.UTF_8.name());
-
-        StreamSource xmlSource = new StreamSource(new StringReader(dokumentXml));
         StreamResult outputTarget = new StreamResult(new StringWriter());
-        transformer.transform(xmlSource, outputTarget);
+        try {
+            Templates templates = xsltTemplatesFactory.getXsltTemplates(type, versjon);
+            Transformer transformer = templates.newTransformer();
+            transformer.setOutputProperty(OutputKeys.ENCODING, StandardCharsets.UTF_8.name());
+
+            StreamSource xmlSource = new StreamSource(new StringReader(dokumentXml));
+            transformer.transform(xmlSource, outputTarget);
+        } catch (TransformerException e) {
+            log.error("XSLT transformasjon feilet for type {} og versjon {} ", type , versjon);
+            log.error("Exception: ", e);
+            throw new RuntimeException(e);
+        }
 
         // JAXB brukes til å opprette et SaksopplysningDokument
         StringReader reader = new StringReader(outputTarget.getWriter().toString());

@@ -8,7 +8,7 @@ import no.nav.melosys.domain.SaksopplysningType;
  * XsltConfig inneholder informasjon om filstrukturen til xslt-filene som brukes til å konvertere eksterne
  * opplysninger fra registre til en intern dokumentmodell.
  */
-public class XsltConfig {
+class XsltConfig {
 
     /* Mapper */
     public static final String AAREG_MAPPE = "aareg";
