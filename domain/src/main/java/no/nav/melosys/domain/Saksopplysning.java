@@ -51,7 +51,7 @@ public class Saksopplysning implements Serializable {
     private SaksopplysningType type;
 
     @Column(name="versjon", nullable = false, updatable = false)
-    private int versjon;
+    private String versjon;
 
     @Column(name = "kilde", nullable = false, updatable = false)
     @Convert(converter = SaksopplysningKilde.DbKonverterer.class)
@@ -87,11 +87,11 @@ public class Saksopplysning implements Serializable {
         this.type = type;
     }
 
-    public int getVersjon() {
+    public String getVersjon() {
         return versjon;
     }
 
-    public void setVersjon(int versjon) {
+    public void setVersjon(String versjon) {
         this.versjon = versjon;
     }
 
