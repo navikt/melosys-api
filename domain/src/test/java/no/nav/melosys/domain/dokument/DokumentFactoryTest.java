@@ -16,7 +16,10 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.person.PersonopplysningDokument;
+import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 
 public class DokumentFactoryTest {
 
@@ -24,8 +27,8 @@ public class DokumentFactoryTest {
 
     @Before
     public void setUp() {
-        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        marshaller.setClassesToBeBound(ArbeidsforholdDokument.class, PersonopplysningDokument.class);
+        Jaxb2Marshaller marshaller = new JaxbConfig().jaxb2Marshaller();
+
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
     }
@@ -53,6 +56,34 @@ public class DokumentFactoryTest {
         SaksopplysningDokument dokument = test.getDokument();
         assertThat(dokument).isInstanceOf(ArbeidsforholdDokument.class);
         assertThat(((ArbeidsforholdDokument) dokument).getArbeidsforhold().get(25).getUtenlandsopphold()).isNotEmpty();
+
+    }
+
+    @Test
+    public void lagOrganisasjonDokument() throws Exception {
+        Saksopplysning test = new Saksopplysning();
+
+        InputStream kilde = getClass().getClassLoader().getResourceAsStream("organisasjon/920643043.xml");
+        StringBuilder stringBuilder = new StringBuilder();
+        try (Reader reader = new BufferedReader(new InputStreamReader
+                (kilde, Charset.forName(StandardCharsets.UTF_8.name())))) {
+            int c = 0;
+            while ((c = reader.read()) != -1) {
+                stringBuilder.append((char) c);
+            }
+        }
+        test.setDokumentXml(stringBuilder.toString());
+
+        test.setType(SaksopplysningType.ORGANISASJON);
+        test.setVersjon("4.0");
+
+        factory.lagDokument(test);
+
+        SaksopplysningDokument dokument = test.getDokument();
+        assertThat(dokument).isInstanceOf(OrganisasjonDokument.class);
+        GeografiskAdresse geografiskAdresse = ((OrganisasjonDokument) dokument).getOrganisasjonDetaljer().getPostadresse().get(0);
+        assertThat(geografiskAdresse).isInstanceOf(SemistrukturertAdresse.class);
+        assertThat(((SemistrukturertAdresse) geografiskAdresse).getAdresselinje1()).isEqualTo("Skuteviksbodene 1");
 
     }
 
