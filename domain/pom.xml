@@ -29,26 +29,6 @@
             <artifactId>spring-oxm</artifactId>
         </dependency>
 
-
-        <!--AAREG-->
-        <dependency>
-            <groupId>no.nav.tjenester.fim</groupId>
-            <artifactId>nav-arbeidsforhold-v3-tjenestespesifikasjon</artifactId>
-            <version>${aareg.arbeidsforhold.version}</version>
-            <classifier>jaxws</classifier>
-        </dependency>
-        <!--TPS-->
-        <dependency>
-            <groupId>no.nav.tjenester.fim</groupId>
-            <artifactId>nav-fim-aktoer-v2-tjenestespesifikasjon</artifactId>
-            <classifier>jaxws</classifier>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.tjenester</groupId>
-            <artifactId>nav-person-v3-tjenestespesifikasjon</artifactId>
-            <classifier>jaxws</classifier>
-        </dependency>
-
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

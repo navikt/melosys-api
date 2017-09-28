@@ -1,11 +1,6 @@
 package no.nav.melosys.domain;
 
-import static no.nav.melosys.domain.SaksopplysningKilde.TPS;
-import static no.nav.melosys.domain.SaksopplysningType.PERSONOPPLYSNING;
-
 import java.io.Serializable;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -17,15 +12,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 
 import org.hibernate.annotations.ColumnTransformer;
 
@@ -99,7 +87,6 @@ public class Saksopplysning implements Serializable {
         return kilde;
     }
     
-
     public void setKilde(SaksopplysningKilde kilde) {
         this.kilde = kilde;
     }
@@ -126,52 +113,6 @@ public class Saksopplysning implements Serializable {
 
     public void setDokument(SaksopplysningDokument dokument) {
         this.dokument = dokument;
-    }
-
-    @PostLoad
-    void lagDokument() {
-        // FIXME: Ikke oppdatert til intern modell
-        try {
-            if (dokumentXml == null) {
-                dokument = null;
-                return;
-            } else if (type == PERSONOPPLYSNING && kilde == TPS) {
-                StringReader reader = new StringReader(dokumentXml);
-                JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
-                Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-                dokument = null; // FIXME ((no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse) unmarshaller.unmarshal(reader)).getResponse();
-            } else {
-                // FIXME: Legg til relevante typer
-                throw new RuntimeException(String.format("Ukjent dokument: type=%1s, kilde=%2s, versjon=%3", type, kilde, versjon));
-            }
-        } catch (JAXBException e) {
-            throw new RuntimeException("Feil i dokumentXml", e);
-        }
-    }
-    
-    @PrePersist
-    @PreUpdate
-    void lagDokumentXml() {
-        // FIXME: Ikke oppdatert til intern modell
-        try {
-            if (dokument == null) {
-                dokumentXml = null;
-            } else if (type == PERSONOPPLYSNING && kilde == TPS) {
-                no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse hentPersonResponse = null; // FIXME s(no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse) dokument;
-                JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
-                no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse xmlRoot = new no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse();
-                xmlRoot.setResponse(hentPersonResponse);
-                StringWriter writer = new StringWriter();
-                Marshaller marshaller = jaxbContext.createMarshaller();
-                marshaller.marshal(xmlRoot, writer);
-                dokumentXml = writer.toString();
-            } else {
-                // FIXME: Legg til relevante typer
-                throw new RuntimeException(String.format("Ukjent dokument: type=%1s, kilde=%2s, versjon=%3", type, kilde, versjon));
-            }
-        } catch (JAXBException e) {
-            throw new RuntimeException("Feil i dokumentXml", e);
-        }
     }
     
     @Override
