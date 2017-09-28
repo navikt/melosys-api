@@ -4,6 +4,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = { "no.nav.melosys.integrasjon" })
+@ComponentScan(basePackages = { "no.nav.melosys.domain", "no.nav.melosys.integrasjon" })
 public class TestConfig {
 }

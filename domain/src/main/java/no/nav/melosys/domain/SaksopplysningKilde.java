@@ -4,8 +4,9 @@ import javax.persistence.Converter;
 
 public enum SaksopplysningKilde implements Kodeverk<SaksopplysningKilde> {
 
-    TPS("TPS"), 
-    JOARK("JOARK");
+    AAREG("AAREG"),
+    EREG("EREG"),
+    TPS("TPS");
     
     private String kode;
 
