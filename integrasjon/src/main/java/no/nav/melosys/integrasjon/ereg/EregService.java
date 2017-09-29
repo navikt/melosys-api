@@ -1,10 +1,20 @@
 package no.nav.melosys.integrasjon.ereg;
 
+import java.io.StringWriter;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonConsumer;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonOrganisasjonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonUgyldigInput;
@@ -17,11 +27,27 @@ public class EregService implements EregFasade {
 
     private static final Logger log = LoggerFactory.getLogger(EregService.class);
 
+    private static final String ORGANISASJON_VERSJON = "4.0";
+
     private OrganisasjonConsumer organisasjonConsumer;
 
+    private DokumentFactory dokumentFactory;
+
+    private final Marshaller marshaller;
+
     @Autowired
-    public EregService(OrganisasjonConsumer organisasjonConsumer) {
+    public EregService(OrganisasjonConsumer organisasjonConsumer, DokumentFactory dokumentFactory) {
         this.organisasjonConsumer = organisasjonConsumer;
+        this.dokumentFactory = dokumentFactory;
+
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse.class);
+            marshaller = jaxbContext.createMarshaller();
+        } catch (JAXBException e) {
+            log.error("", e);
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Override
@@ -33,4 +59,38 @@ public class EregService implements EregFasade {
 
         return response.getOrganisasjon();
     }
+
+    // TODO (Francois) endre navn til hentOrganisasjon når den tidligere versjonen
+    @Override
+    public Saksopplysning getOrganisasjon(String orgnummer) throws HentOrganisasjonOrganisasjonIkkeFunnet, HentOrganisasjonUgyldigInput {
+        HentOrganisasjonRequest request = new HentOrganisasjonRequest();
+        request.setOrgnummer(orgnummer);
+
+        // Kall til E-reg
+        HentOrganisasjonResponse response = organisasjonConsumer.hentOrganisasjon(request);
+
+        // Response -> xml
+        StringWriter xmlWriter = new StringWriter();
+        try {
+            no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse xmlRoot = new no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse();
+            xmlRoot.setResponse(response);
+            marshaller.marshal(xmlRoot, xmlWriter);
+        } catch (JAXBException e) {
+            log.error("", e);
+            throw new RuntimeException(e);
+        }
+
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokumentXml(xmlWriter.toString());
+        saksopplysning.setKilde(SaksopplysningKilde.EREG);
+        saksopplysning.setType(SaksopplysningType.ORGANISASJON);
+        saksopplysning.setVersjon(ORGANISASJON_VERSJON);
+
+        // xml -> java objekter
+        dokumentFactory.lagDokument(saksopplysning);
+
+        return saksopplysning;
+    }
+
+
 }
