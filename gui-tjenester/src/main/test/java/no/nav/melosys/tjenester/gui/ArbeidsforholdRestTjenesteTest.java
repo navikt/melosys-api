@@ -16,6 +16,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
+import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.aareg.AaregService;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
@@ -40,9 +43,10 @@ public class ArbeidsforholdRestTjenesteTest {
 
     @Before
     public void setUp() throws JAXBException {
-        tps = new TpsService(null, new PersonMock());
-        aareg = new AaregService(new ArbeidsforholdMock());
-        ereg = new EregService(new OrganisasjonMock());
+        DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
+        tps = new TpsService(null, new PersonMock(), dokumentFactory);
+        aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
+        ereg = new EregService(new OrganisasjonMock(), dokumentFactory);
 
         restTjeneste = new ArbeidsforholdRestTjeneste(tps, aareg, ereg);
     }

@@ -23,7 +23,7 @@ public class OrganisasjonConsumerProducer {
 
     @Bean
     @Profile("utvikling")
-    OrganisasjonConsumer personConsumer() {
+    OrganisasjonConsumer organisasjonMock() {
         return new OrganisasjonMock();
     }
 
