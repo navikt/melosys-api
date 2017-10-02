@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.tps;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -14,17 +14,18 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
+import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
+import no.nav.melosys.domain.dokument.person.PersonopplysningDokument;
 import no.nav.melosys.integrasjon.test.TpsTestData;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
+import no.nav.melosys.integrasjon.tps.person.PersonMock;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.feil.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentAktoerIdForIdentResponse;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kjoenn;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kjoennstyper;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Personnavn;
-import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 
 public class TpsServiceTest {
 
@@ -41,8 +42,10 @@ public class TpsServiceTest {
     @Before
     public void setUp() {
         aktorConsumer = mock(AktorConsumer.class);
-        personConsumer = mock(PersonConsumer.class);
-        service = new TpsService(aktorConsumer, personConsumer);
+        personConsumer = new PersonMock();
+
+        DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
+        service = new TpsService(aktorConsumer, personConsumer, dokumentFactory);
     }
 
     @Test
@@ -73,24 +76,8 @@ public class TpsServiceTest {
 
     @Test
     public void hentPerson() throws Exception {
-        Person p = new Person();
-        p.setPersonnavn(new Personnavn());
-        String navn = "Ola Normann";
-        p.getPersonnavn().setSammensattNavn(navn);
-
-        Kjoennstyper kjoennType = new Kjoennstyper();
-        kjoennType.setValue("M");
-        Kjoenn kjoenn = new Kjoenn();
-        kjoenn.setKjoenn(kjoennType);
-        p.setKjoenn(kjoenn);
-
-        HentPersonResponse response = new HentPersonResponse();
-        response.setPerson(p);
-        when(personConsumer.hentPerson(any())).thenReturn(response);
-
-        HentPersonResponse personOpplysninger = service.hentPerson("123");
-        assertThat(personOpplysninger.getPerson().getPersonnavn().getSammensattNavn()).isEqualTo(navn);
-        assertThat(personOpplysninger.getPerson().getKjoenn().getKjoenn().getValue()).isEqualTo(kjoennType.getValue());
-
+        Saksopplysning saksopplysning = service.hentPerson("99999999999", null);
+        PersonopplysningDokument dokument = (PersonopplysningDokument) saksopplysning.getDokument();
+        assertThat(dokument.fnr).isEqualTo("99999999999");
     }
 }

@@ -7,6 +7,8 @@ public enum Kodeverk {
     POSTNUMMER("Postnummer"),
     LANDKODER("Landkoder"),
     LANDKODERISO2("LandkoderISO2"),
+    KJØNNSTYPER("Kjønnstyper"),
+    DISKRESJONSKODER("Diskresjonskoder"),
     SIVILSTANDER("Sivilstander");
     
     private Kodeverk(String navn) {
