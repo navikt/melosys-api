@@ -67,6 +67,7 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
         // Henter personopplysninger fra TPS
         try {
             // TODO Lagre?
+            // FIXME: Fjern den deprekerte metoden og bruk riktig metode
             HentPersonResponse hentPersonResponse = tps.hentPersonMedAdresse(ident);
             view.setPerson(PersonDto.tilDto(hentPersonResponse.getPerson()));
 
@@ -82,6 +83,7 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
         List<ArbeidsforholdDto> arbeidsforhold = new ArrayList<>();
         try {
             // TODO Vi har (foreløpig) sagt at vi kun skal hente arbeidsforhold rapportert på nytt regelverk.
+            // FIXME: Fjern den deprekerte metoden og bruk riktig metode
             List<Arbeidsforhold> liste = aareg.finnArbeidsforholdPrArbeidstaker(ident, AaregFasade.REGELVERK_A_ORDNINGEN);
 
             liste.forEach(x -> arbeidsforhold.add(ArbeidsforholdDto.toDto(x)));
@@ -149,6 +151,7 @@ public class ArbeidsforholdRestTjeneste extends RestTjeneste {
             return null;
         }
 
+        // FIXME: Fjern den deprekerte metoden og bruk riktig metode
         Organisasjon org = ereg.hentOrganisasjon(orgNummer);
         OrganisasjonsDetaljerDto orgDetaljer = OrganisasjonsDetaljerDto.toDto(org);
 

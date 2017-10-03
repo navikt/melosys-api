@@ -15,7 +15,7 @@ public interface TpsFasade {
 
     Optional<String> hentIdentForAktørId(String aktørID);
 
-    @Deprecated
+    @Deprecated // FIXME: Skal fjernes før produksjon
     HentPersonResponse hentPersonMedAdresse(String ident) throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning;
 
     Saksopplysning hentPerson(String ident, Collection<Informasjonsbehov> behov) throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning;

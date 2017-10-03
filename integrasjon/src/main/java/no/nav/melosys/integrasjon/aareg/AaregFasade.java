@@ -22,10 +22,8 @@ public interface AaregFasade {
      *
      * @param ident Fødselsnummer, D-Nummer, SSN... tilhørende en arbeidstaker
      * @param regelverk Kode for  arbeidsforhold basert på nytt regelverk fra 1.1.2015 (a-ordningen). Mulige verdier: FOER_A_ORDNINGEN, A_ORDNINGEN, ALLE
-     *
-     * @return
      */
-    @Deprecated
+    @Deprecated // FIXME: Skal fjernes før produksjon
     List<Arbeidsforhold> finnArbeidsforholdPrArbeidstaker(String ident, String regelverk) throws FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput;
 
     /**
@@ -33,8 +31,6 @@ public interface AaregFasade {
      *
      * @param ident Fødselsnummer, D-Nummer, SSN... tilhørende en arbeidstaker
      * @param regelverk Kode for  arbeidsforhold basert på nytt regelverk fra 1.1.2015 (a-ordningen). Mulige verdier: FOER_A_ORDNINGEN, A_ORDNINGEN, ALLE
-     *
-     * @return Returnerer en {@code Saksopplysning}
      */
     Saksopplysning getArbeidsforholdPrArbeidstaker(String ident, String regelverk) throws FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput;
 }
