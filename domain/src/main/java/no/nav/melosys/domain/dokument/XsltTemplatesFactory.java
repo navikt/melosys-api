@@ -35,8 +35,6 @@ public class XsltTemplatesFactory {
      *
      * @param type Den typen saksopplysning
      * @param versjon Tjenesteversjonen
-     * @return
-     * @throws TransformerConfigurationException
      */
     public Templates getXsltTemplates(SaksopplysningType type, String versjon) throws TransformerConfigurationException {
         String xsltPath = XsltConfig.getXsltPath(type, versjon);
@@ -53,7 +51,5 @@ public class XsltTemplatesFactory {
 
         return templates;
     }
-
-
 
 }

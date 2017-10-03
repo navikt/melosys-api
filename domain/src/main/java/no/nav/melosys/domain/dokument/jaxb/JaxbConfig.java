@@ -33,8 +33,8 @@ public class JaxbConfig {
         return marshaller;
     }
 
-    private static Class[] getClassesToBeBound() {
-        List<Class> klasser = new ArrayList<>();
+    private static Class<?>[] getClassesToBeBound() {
+        List<Class<?>> klasser = new ArrayList<>();
 
         List<Class<? extends SaksopplysningDokument>> dokumentKlasser = Arrays.asList(ArbeidsforholdDokument.class, OrganisasjonDokument.class, PersonopplysningDokument.class);
         klasser.addAll(dokumentKlasser);
