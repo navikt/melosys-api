@@ -15,10 +15,14 @@ class XsltConfig {
 
     public static final String EREG_MAPPE = "ereg";
 
+    public static String INNTK_MAPPE= "inntk";
+
     public static final String TPS_MAPPE = "tps";
 
     /* Tjenester */
     public static final String ARBEIDSFORHOLD_TJENESTE = "arbeidsforhold";
+
+    public static final String INNTEKT_TJENESTE = "inntekt";
 
     public static final String ORGANISASJON_TJENESTE = "organisasjon";
 
@@ -43,6 +47,7 @@ class XsltConfig {
             case PERSONOPPLYSNING: return XsltConfig.PERSON_TJENESTE;
             case ORGANISASJON: return XsltConfig.ORGANISASJON_TJENESTE;
             case ARBEIDSFORHOLD: return XsltConfig.ARBEIDSFORHOLD_TJENESTE;
+            case INNTEKT: return XsltConfig.INNTEKT_TJENESTE;
             default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
         }
     }
@@ -52,6 +57,7 @@ class XsltConfig {
             case PERSONOPPLYSNING: return XsltConfig.TPS_MAPPE;
             case ORGANISASJON: return XsltConfig.EREG_MAPPE;
             case ARBEIDSFORHOLD: return XsltConfig.AAREG_MAPPE;
+            case INNTEKT: return XsltConfig.INNTK_MAPPE;
             default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
         }
     }

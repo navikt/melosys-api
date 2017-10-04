@@ -18,8 +18,11 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.modelmapper.convention.MatchingStrategies;
 
+import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.integrasjon.aareg.AaregService;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
 import no.nav.melosys.integrasjon.ereg.EregService;
@@ -38,10 +41,10 @@ public class ArbeidsforholdDokumentTest {
 
     @Before
     public void setUp() throws JAXBException {
-
-        TpsService tps = new TpsService(null, new PersonMock());
-        AaregService aareg = new AaregService(new ArbeidsforholdMock());
-        EregService ereg = new EregService(new OrganisasjonMock());
+        DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
+        TpsService tps = new TpsService(null, new PersonMock(), dokumentFactory);
+        AaregService aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
+        EregService ereg = new EregService(new OrganisasjonMock(), dokumentFactory);
 
         restTjeneste = new ArbeidsforholdRestTjeneste(tps, aareg, ereg);
     }

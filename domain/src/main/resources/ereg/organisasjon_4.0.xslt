@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4"
-                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xmlns:xslt="http://www.w3.org/1999/XSL/Transform">
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <xsl:output method="xml" indent="no"/>
 
@@ -14,7 +13,7 @@
                     <xsl:apply-templates select="."/>
                 </xsl:for-each>
             </navn>
-            <xslt:for-each select="organisasjonDetaljer">
+            <xsl:for-each select="organisasjonDetaljer">
             <organisasjonDetaljer>
                 <xsl:copy-of select="orgnummer"/>
                 <xsl:for-each select="forretningsadresse">
@@ -33,7 +32,7 @@
                 </organisasjonsnavn>
                 </xsl:for-each>
             </organisasjonDetaljer>
-            </xslt:for-each>
+            </xsl:for-each>
         </organisasjonDokument>
     </xsl:template>
 
