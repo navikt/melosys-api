@@ -2,7 +2,7 @@ CREATE TABLE saksopplysning (
     id              NUMBER(19)     NOT NULL,
     behandling_id   NUMBER(19)     NOT NULL,
     opplysning_type VARCHAR2(99)   NOT NULL,
-    versjon         INTEGER        NOT NULL,
+    versjon         VARCHAR2(99)   NOT NULL,
     kilde           VARCHAR2(99)   NOT NULL,
     registrert_dato TIMESTAMP      NOT NULL,
     dokument_xml    XMLTYPE        NOT NULL,
