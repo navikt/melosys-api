@@ -54,14 +54,23 @@
                     <xsl:apply-templates/>
                 </xsl:element>
             </xsl:when>
-            <xsl:when test="@xsi:type='ns4:StrukturertAdresse'">
+            <xsl:when test="@xsi:type='ns4:Gateadresse'">
                 <xsl:element name="{name()}">
                     <xsl:copy-of select="@*[name() != 'xsi:type']"/>
                     <xsl:attribute name="xsi:type">Gateadresse</xsl:attribute>
-                    <xsl:copy-of select="./*"/>
+                    <xsl:apply-templates select="landkode"/>
+                    <xsl:for-each select="./*[name() != 'landkode']">
+                        <xsl:call-template name="Gateadresse"/>
+                    </xsl:for-each>
                 </xsl:element>
             </xsl:when>
         </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="Gateadresse">
+        <xsl:element name="{name()}">
+            <xsl:value-of select="."/>
+        </xsl:element>
     </xsl:template>
 
     <xsl:template match="landkode">
