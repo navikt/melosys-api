@@ -51,7 +51,7 @@ public class MottakService {
         // Oppretter en behandling knyttet til saken
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        behandling.setType(BehandlingType.FØRSTEGANGSSØKNAD);
+        behandling.setType(BehandlingType.SØKNAD);
         behandling.setStatus(BehandlingStatus.OPPRETTET);
         behandlingRepo.save(behandling); // TODO Vilkårene/behandlingsgrunnlaget må lagres også
 
@@ -76,7 +76,7 @@ public class MottakService {
 
         // Oppdaterer fagsak med saksnummer fra GSAK
         fagsak.setSaksnummer(Long.parseLong(saksNummer));
-        fagsak.setStatus(FagsakStatus.UBEH); // FIXME FA riktig status
+        fagsak.setStatus(FagsakStatus.OPPRETTET); // FIXME FA riktig status
         fagsakRepo.save(fagsak);
 
         return behandling;

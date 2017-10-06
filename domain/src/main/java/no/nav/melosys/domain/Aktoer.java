@@ -1,5 +1,7 @@
 package no.nav.melosys.domain;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -11,20 +13,21 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "AKTOER")
+@Table(name = "aktoer")
 public abstract class Aktoer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name="fagsak_id", updatable = false)
     private Fagsak fagsak;
     
     @Column(name = "aktoer_id", updatable = false)
     private String aktørId;
 
+    /** Kan være orgnr. eller personnr. */
     @Column(name = "ekstern_id")
     private String eksternId;
     
@@ -38,6 +41,10 @@ public abstract class Aktoer {
 
     public Fagsak getFagsak() {
         return fagsak;
+    }
+
+    public void setFagsak(Fagsak fagsak) {
+        this.fagsak = fagsak;
     }
 
     public String getAktørId() {
@@ -63,5 +70,27 @@ public abstract class Aktoer {
     public void setRolle(RolleType rolle) {
         this.rolle = rolle;
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Aktoer)) {
+            return false;
+        }
+        Aktoer that = (Aktoer) o;
+        if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
+            return this.id == that.id;
+        }
+        return Objects.equals(this.fagsak, that.fagsak)
+            && Objects.equals(this.aktørId, that.aktørId)
+            && Objects.equals(this.rolle, that.rolle);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(fagsak, aktørId, rolle);
+    }
+    
 }
