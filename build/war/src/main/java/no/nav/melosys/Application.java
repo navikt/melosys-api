@@ -28,7 +28,7 @@ public class Application extends SpringBootServletInitializer implements Environ
 
     @Override
     public void setEnvironment(Environment environment) {
-        this.environment = environment;
+        Application.environment = environment;
         loadProperties();
     }
 

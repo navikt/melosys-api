@@ -4,22 +4,28 @@ import javax.persistence.Converter;
 
 public enum BehandlingStatus implements Kodeverk<BehandlingStatus> {
 
-    OPPRETTET("OPPR"),
-    KLARGJORT("KLAR"),
-    UTREDES("UTRED"),
-    FATTER_VEDTAK("F_VED"),
-    IVERKSETTER_VEDTAK("I_VED"),
-    AVSLUTTET("AVSLU");
+    // FIXME (farjam): Hva er riktige koder for disse?
+    OPPRETTET("OPPR", "Opprettet"),
+    UNDER_BEHANDLING("UBEH", "Under behandling"),
+    FORELØPIG("FORL", "Foreløpig lovvalg"),
+    AVSLUTTET("AVSLU", "Avsluttet");
     
     private String kode;
+    private String beskrivelse;
 
-    private BehandlingStatus(String kode) {
+    private BehandlingStatus(String kode, String beskrivelse) {
         this.kode = kode;
+        this.beskrivelse = beskrivelse;
     }
     
     @Override
     public String getKode() {
         return kode;
+    }
+
+    @Override
+    public String getBeskrivelse() {
+        return beskrivelse;
     }
 
     @Converter

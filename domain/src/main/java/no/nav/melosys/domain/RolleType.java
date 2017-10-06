@@ -4,19 +4,26 @@ import javax.persistence.Converter;
 
 public enum RolleType implements Kodeverk<RolleType> {
 
-    ARBEIDSTAGER("ARBTAG"),
-    ARBEIDSGIVER("ARBGIV"),
-    FULLMEKTIG("FULLMK");
+    BRUKER("BRUKER", "Bruker"), // Aka. arbeidstaker
+    ARBEIDSGIVER("ARBGIV", "Arbeudsgiver"),
+    REPRESENTANT("REPRESENTANT", "Representant"); // Aka. fullmektig
     
     private String kode;
+    private String beskrivelse;
 
-    private RolleType(String kode) {
+    private RolleType(String kode, String beskrivelse) {
         this.kode = kode;
+        this.beskrivelse = beskrivelse;
     }
     
     @Override
     public String getKode() {
         return kode;
+    }
+
+    @Override
+    public String getBeskrivelse() {
+        return beskrivelse;
     }
 
     @Converter

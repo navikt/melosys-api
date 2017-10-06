@@ -4,20 +4,27 @@ import javax.persistence.Converter;
 
 public enum FagsakStatus implements Kodeverk<FagsakStatus> {
 
-    OPPRETTET("OPPR"),
-    UBEH("UBEH"),
-    LØPENDE("LOP"),
-    AVSLUTTET("AVSLU");
+    OPPRETTET("OPPR", "Opprettet"),
+    LØPENDE("LOP", "Løpende"),
+    OPPHØRT("UBEH", "Opphørt"),
+    AVSLUTTET("AVSLU", "Avsluttet");
 
     private String kode;
+    private String beskrivelse;
 
-    private FagsakStatus(String kode) {
+    private FagsakStatus(String kode, String beskrivelse) {
         this.kode = kode;
+        this.beskrivelse = beskrivelse;
     }
     
     @Override
     public String getKode() {
         return kode;
+    }
+
+    @Override
+    public String getBeskrivelse() {
+        return beskrivelse;
     }
 
     @Converter
