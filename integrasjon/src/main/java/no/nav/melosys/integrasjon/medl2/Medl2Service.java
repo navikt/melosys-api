@@ -17,6 +17,8 @@ public class Medl2Service implements Medl2Fasade {
 
     private static final Logger log = LoggerFactory.getLogger(Medl2Service.class);
 
+    private static final String MEDLEMSKAP_VERSJON = "2.0";
+
     private MedlemskapConsumer medlemskapConsumer;
 
     @Autowired
@@ -39,7 +41,7 @@ public class Medl2Service implements Medl2Fasade {
         * "type", "land", "lovvalg", "kilde", "kildedokumenttype", "grunnlagstype", "studieinformasjon"]
         */
 
-        // TODO: Integrate with this domain model instead
+        // TODO: Integrate with domain model
         return res.getPeriodeListe();
     }
 }
