@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.dokument.organisasjon;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -8,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,10 +64,19 @@ public class Ereg4KonverteringTest {
         assertEquals("1201", postadresse.getKommunenr());
 
         // Test strukturert adresse...
-        Gateadresse adresse = (Gateadresse) dokument.getOrganisasjonDetaljer().getForretningsadresse().get(0);
-        assertEquals("Gatenavn", adresse.getGatenavn());
-        assertEquals("NO", adresse.getLandkode());
-
+        Gateadresse forretningsadresse = (Gateadresse) dokument.getOrganisasjonDetaljer().getForretningsadresse().get(0);
+        assertEquals("Gatenavn", forretningsadresse.getGatenavn());
+        assertEquals("NO", forretningsadresse.getLandkode());
+        
+        // Test perioder: 
+        // Forretningsadresse har ingen perioder satt...
+        assertNull(forretningsadresse.getBruksperiode());
+        assertNull(forretningsadresse.getGyldighetsperiode());
+        // Postadresse har fom-dato på begge periodene, men ikke tom-dato...
+        assertEquals(LocalDate.of(2011, 9, 14), postadresse.getGyldighetsperiode().getFom());
+        assertNull(postadresse.getGyldighetsperiode().getTom());
+        assertEquals(LocalDate.of(2015, 2, 23), postadresse.getBruksperiode().getFom());
+        assertNull(postadresse.getBruksperiode().getTom());
     }
 
 }
