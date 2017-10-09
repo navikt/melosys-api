@@ -40,7 +40,7 @@ public class Behandling {
     @Convert(converter = BehandlingSteg.DbKonverterer.class)
     private BehandlingSteg steg;
 
-    @Column(name = "type", nullable = false, updatable = false)
+    @Column(name = "beh_type", nullable = false, updatable = false)
     @Convert(converter = BehandlingType.DbKonverterer.class)
     private BehandlingType type;
 

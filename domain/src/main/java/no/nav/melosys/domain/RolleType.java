@@ -6,7 +6,7 @@ public enum RolleType implements Kodeverk<RolleType> {
 
     BRUKER("BRUKER", "Bruker"), // Aka. arbeidstaker
     ARBEIDSGIVER("ARBGIV", "Arbeudsgiver"),
-    REPRESENTANT("REPRESENTANT", "Representant"); // Aka. fullmektig
+    REPRESENTANT("REPRES", "Representant"); // Aka. fullmektig
     
     private String kode;
     private String beskrivelse;
