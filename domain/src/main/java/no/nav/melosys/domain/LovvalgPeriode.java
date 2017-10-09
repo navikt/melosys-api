@@ -42,7 +42,7 @@ public class LovvalgPeriode {
     @Column(name = "tom_dato", nullable = false, updatable = false)
     private LocalDate tomDato;
 
-    @Column(name = "type", nullable = false, updatable = false)
+    @Column(name = "bestemmelse", nullable = false, updatable = false)
     @Convert(converter = LovvalgBestemmelse.DbKonverterer.class)
     private LovvalgBestemmelse bestemmelse;
     

@@ -13,8 +13,8 @@ CREATE TABLE rolle_type (
     CONSTRAINT pk_rolle PRIMARY KEY (kode)
 );
 
-INSERT INTO rolle_type (kode, navn) VALUES ('ARBTAG', 'Arbeidstager');
+INSERT INTO rolle_type (kode, navn) VALUES ('BRUKER', 'Arbeidstager');
 INSERT INTO rolle_type (kode, navn) VALUES ('ARBGIV', 'Arbeidsgiver');
-INSERT INTO rolle_type (kode, navn) VALUES ('FULLMK', 'Fullmektig');
+INSERT INTO rolle_type (kode, navn) VALUES ('REPRES', 'Fullmektig');
 
 ALTER TABLE aktoer ADD CONSTRAINT fk_aktoer_rolle FOREIGN KEY (rolle) REFERENCES rolle_type;

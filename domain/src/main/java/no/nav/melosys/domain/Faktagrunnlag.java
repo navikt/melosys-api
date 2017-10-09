@@ -28,7 +28,7 @@ public class Faktagrunnlag {
     @JoinColumn(name="saksopplysning_id", nullable = false, updatable = false)
     private Saksopplysning saksopplysning;
     
-    @Column(name = "type", nullable = false, updatable = false)
+    @Column(name = "fakta_type", nullable = false, updatable = false)
     @Convert(converter = FaktagrunnlagType.DbKonverterer.class)
     private FaktagrunnlagType type;
 

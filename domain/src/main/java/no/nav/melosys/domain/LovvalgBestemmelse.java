@@ -18,7 +18,7 @@ public enum LovvalgBestemmelse implements Kodeverk<LovvalgBestemmelse> {
     ART_13_1B2("ART_13_1B2", "Arbeidstaker i to/flere land (art 13.1.b.ii)"),
     ART_13_1B3("ART_13_1B3", "Arbeidstaker i to/flere land (art 13.1.b.iii)"),
     ART_13_1B4("ART_13_1B4", "Arbeidstaker i to/flere land (art 13.1.b.iv)"),
-    ART_13_A2("ART_13_A2", "Selvstendig virksomhet i to/flere land - omfattet i bostedsland (art 13.2.a)"),
+    ART_13_2A("ART_13_2A", "Selvstendig virksomhet i to/flere land - omfattet i bostedsland (art 13.2.a)"),
     ART_13_2B("ART_13_2B", "Selvstendig virksomhet i to/flere land - omfattet der virksomheten har hovedtyngden av virksomheten (art 13.2.b)"),
     ART_16_1("ART_16_1", "Avtale om unntak fra artikkel 11 til 15 (art 16.1)"),
     ART_16_2("ART_16_2", "Anmodning om unntak for pensjonist (art 16.2)");
