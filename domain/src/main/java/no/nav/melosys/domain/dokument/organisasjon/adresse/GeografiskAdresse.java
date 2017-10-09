@@ -1,15 +1,10 @@
 package no.nav.melosys.domain.dokument.organisasjon.adresse;
 
-import java.time.LocalDate;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import no.nav.melosys.domain.dokument.jaxb.OffsetDateTimeToLocalDateXmlAdapter;
+import no.nav.melosys.domain.dokument.felles.Periode;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso({
@@ -17,58 +12,26 @@ import no.nav.melosys.domain.dokument.jaxb.OffsetDateTimeToLocalDateXmlAdapter;
 })
 public class GeografiskAdresse {
 
-    @XmlAttribute
-    @XmlSchemaType(name = "dateTime")
-    @XmlJavaTypeAdapter(OffsetDateTimeToLocalDateXmlAdapter.class)
-    private LocalDate fomGyldighetsperiode;
+    protected Periode bruksperiode;
 
-    @XmlAttribute
-    @XmlSchemaType(name = "dateTime")
-    @XmlJavaTypeAdapter(OffsetDateTimeToLocalDateXmlAdapter.class)
-    private LocalDate tomGyldighetsperiode;
-
-    @XmlAttribute
-    @XmlSchemaType(name = "dateTime")
-    @XmlJavaTypeAdapter(OffsetDateTimeToLocalDateXmlAdapter.class)
-    private LocalDate fomBruksperiode;
-
-    @XmlAttribute
-    @XmlSchemaType(name = "dateTime")
-    @XmlJavaTypeAdapter(OffsetDateTimeToLocalDateXmlAdapter.class)
-    private LocalDate tomBruksperiode;
-
+    protected Periode gyldighetsperiode;
+    
     private String landkode;
 
-    public LocalDate getFomGyldighetsperiode() {
-        return fomGyldighetsperiode;
+    public Periode getBruksperiode() {
+        return bruksperiode;
     }
 
-    public void setFomGyldighetsperiode(LocalDate fomGyldighetsperiode) {
-        this.fomGyldighetsperiode = fomGyldighetsperiode;
+    public void setBruksperiode(Periode bruksperiode) {
+        this.bruksperiode = bruksperiode;
     }
 
-    public LocalDate getTomGyldighetsperiode() {
-        return tomGyldighetsperiode;
+    public Periode getGyldighetsperiode() {
+        return gyldighetsperiode;
     }
 
-    public void setTomGyldighetsperiode(LocalDate tomGyldighetsperiode) {
-        this.tomGyldighetsperiode = tomGyldighetsperiode;
-    }
-
-    public LocalDate getFomBruksperiode() {
-        return fomBruksperiode;
-    }
-
-    public void setFomBruksperiode(LocalDate fomBruksperiode) {
-        this.fomBruksperiode = fomBruksperiode;
-    }
-
-    public LocalDate getTomBruksperiode() {
-        return tomBruksperiode;
-    }
-
-    public void setTomBruksperiode(LocalDate tomBruksperiode) {
-        this.tomBruksperiode = tomBruksperiode;
+    public void setGyldighetsperiode(Periode gyldighetsperiode) {
+        this.gyldighetsperiode = gyldighetsperiode;
     }
 
     public String getLandkode() {

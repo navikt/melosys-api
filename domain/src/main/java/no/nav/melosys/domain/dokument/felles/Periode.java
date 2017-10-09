@@ -6,10 +6,11 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.jaxb.OffsetDateTimeToLocalDateXmlAdapter;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Periode {
+public class Periode implements HarPeriode{
 
     @XmlJavaTypeAdapter(OffsetDateTimeToLocalDateXmlAdapter.class)
     private LocalDate fom;
@@ -17,19 +18,22 @@ public class Periode {
     @XmlJavaTypeAdapter(OffsetDateTimeToLocalDateXmlAdapter.class)
     private LocalDate tom;
 
+    public Periode () {
+    }
+    
+    @Override
     public LocalDate getFom() {
         return fom;
     }
 
-    public void setFom(LocalDate fom) {
-        this.fom = fom;
-    }
-
+    @Override
     public LocalDate getTom() {
         return tom;
     }
 
-    public void setTom(LocalDate tom) {
-        this.tom = tom;
+    @Override
+    public String toString() {
+        return new StringBuilder().append(fom).append(" → ").append(tom).toString();
     }
+    
 }

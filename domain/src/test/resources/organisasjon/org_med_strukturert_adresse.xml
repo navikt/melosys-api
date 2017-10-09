@@ -29,8 +29,7 @@
                         fomGyldighetsperiode="2015-08-20T00:00:00.000+02:00">
                     <statuskode kodeRef="OPFU"/>
                 </status>
-                <forretningsadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00"
-                                    fomGyldighetsperiode="2013-11-05T00:00:00.000+01:00" xsi:type="ns4:Gateadresse">
+                <forretningsadresse xsi:type="ns4:Gateadresse">
                     <landkode kodeRef="NO"/>
                     <poststed>1234</poststed>
                     <gatenummer>1</gatenummer>
