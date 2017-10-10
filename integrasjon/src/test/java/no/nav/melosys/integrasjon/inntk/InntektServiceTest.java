@@ -25,7 +25,7 @@ public class InntektServiceTest {
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
         inntektService = new InntektService(inntektMock, dokumentFactory);
     }
-
+    
     @Test
     public void hentInntektListe() throws Exception {
         Saksopplysning saksopplysning = inntektService.hentInntektListe("99999999992", YearMonth.of(2017, 06), YearMonth.of(2017, 8));

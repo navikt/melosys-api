@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -12,6 +14,8 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class InntektDokument extends SaksopplysningDokument {
 
+    @XmlElementWrapper(name="arbeidsInntektMaanedListe")
+    @XmlElement(name="arbeidsInntektMaaned")
     private List<ArbeidsInntektMaaned> arbeidsInntektMaanedListe;
 
     public List<ArbeidsInntektMaaned> getArbeidsInntektMaanedListe() {
