@@ -18,7 +18,7 @@ public abstract class Aktoer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
     
     @ManyToOne(optional = false)
     @JoinColumn(name="fagsak_id", updatable = false)
@@ -35,7 +35,7 @@ public abstract class Aktoer {
     @Convert(converter = RolleType.DbKonverterer.class)
     private RolleType rolle;
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 

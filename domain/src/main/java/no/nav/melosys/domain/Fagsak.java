@@ -23,7 +23,7 @@ public class Fagsak {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     /** Saksnummer fra gsak */
     @Column(name = "saksnummer")
@@ -49,7 +49,7 @@ public class Fagsak {
     @OneToMany(mappedBy = "fagsak", fetch = FetchType.EAGER)
     private List<Behandling> behandlinger;
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 

@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.vilkvurd;
+package no.nav.melosys.domain.dokument.vurdering;
 
 import no.nav.melosys.domain.dokument.Dokument;
 

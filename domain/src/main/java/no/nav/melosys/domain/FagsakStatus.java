@@ -4,6 +4,7 @@ import javax.persistence.Converter;
 
 public enum FagsakStatus implements Kodeverk<FagsakStatus> {
 
+    // FIXME (farjam): kodene må fikses. Mismatch mellom logisk modell og hva som kan lagres i gsak (husk også å rette i DB).
     OPPRETTET("OPPR", "Opprettet"),
     LØPENDE("LOP", "Løpende"),
     OPPHØRT("UBEH", "Opphørt"),

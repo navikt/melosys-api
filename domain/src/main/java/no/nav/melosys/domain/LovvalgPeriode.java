@@ -19,8 +19,8 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.ColumnTransformer;
 
-import no.nav.melosys.domain.dokument.vilkvurd.VurderingGrunnlag;
-import no.nav.melosys.domain.dokument.vilkvurd.VurderingResultat;
+import no.nav.melosys.domain.dokument.vurdering.VurderingGrunnlag;
+import no.nav.melosys.domain.dokument.vurdering.VurderingResultat;
 
 @Entity
 @Table(name = "lovvalg_periode")
@@ -30,7 +30,7 @@ public class LovvalgPeriode {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "vedtak_id", nullable = false, updatable = false)
@@ -74,7 +74,7 @@ public class LovvalgPeriode {
     @Transient
     private VurderingResultat resultatDokument;
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 

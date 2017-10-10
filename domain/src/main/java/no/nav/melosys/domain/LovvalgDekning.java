@@ -5,7 +5,7 @@ import javax.persistence.Converter;
 public enum LovvalgDekning implements Kodeverk<LovvalgDekning> {
 
     OMFATTET("OMFATTET", "Omfattet av Folketrygdloven"),
-    IKKE_DEKKET("IKKE_DEKKET", "ikke dekket i Folketrygden"),
+    IKKE_DEKKET("IKKE_DEKKET", "Ikke dekket i Folketrygden"),
     UNTATT("UNTATT", "Unttatt av Folketrygdloven");
     
     private String kode;
