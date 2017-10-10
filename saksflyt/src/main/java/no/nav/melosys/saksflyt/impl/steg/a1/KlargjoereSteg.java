@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingStatus;
+import no.nav.melosys.domain.BehandlingSteg;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.saksflyt.api.Steg;
@@ -37,7 +37,7 @@ public class KlargjoereSteg implements Steg {
 
     @Override
     public void finnBehandlingOgUtfoerSteg() {
-        Behandling behandling = binge.fjernFørsteBehandling(Utils.medStatus(BehandlingStatus.OPPRETTET));
+        Behandling behandling = binge.fjernFørsteBehandling(Utils.medSteg(BehandlingSteg.NY));
         if (behandling == null) {
             // Ingenting å gjøre
             return;
@@ -52,7 +52,7 @@ public class KlargjoereSteg implements Steg {
             log.error("Feil ", t.getCause()); // TODO Exceptions i Melosys
         }
 
-        behandling.setStatus(BehandlingStatus.KLARGJORT);
+        behandling.setSteg(BehandlingSteg.KLARGJORT);
         behandlingRepo.save(behandling);
         binge.leggTil(behandling);
     }

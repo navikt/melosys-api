@@ -1,6 +1,5 @@
 package no.nav.melosys.domain;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -21,16 +20,16 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 
 
 @Entity
-@Table(name = "SAKSOPPLYSNING")
-public class Saksopplysning implements Serializable {
+@Table(name = "saksopplysning")
+public class Saksopplysning {
 
-    private static final long serialVersionUID = 1L;
-
+    // FIXME (farjam): Ikke tatt med fra den logiske modellen: opplysningsGyldighet, beskyttelsesbehov. betydning, registreringInfo og formål
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     private Behandling behandling;
 
@@ -127,14 +126,14 @@ public class Saksopplysning implements Serializable {
         if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
             return this.id == that.id;
         }
-        return Objects.equals(this.dokumentXml, that.dokumentXml)
+        return Objects.equals(this.behandling, that.behandling)
             && Objects.equals(this.registrertDato, that.registrertDato)
-            && Objects.equals(this.behandling, that.behandling);
+            && Objects.equals(this.dokumentXml, that.dokumentXml);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dokumentXml, registrertDato, behandling);
+        return Objects.hash(behandling, registrertDato, dokumentXml);
     }
 
 }

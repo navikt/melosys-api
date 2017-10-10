@@ -88,6 +88,7 @@ public class TpsService implements TpsFasade {
         Optional<String> optResult = null;
         try {
             HentIdentForAktoerIdResponse response = aktorConsumer.hentIdentForAktoerId(request);
+            optResult = Optional.of(response.getIdent());
         } catch (HentIdentForAktoerIdPersonIkkeFunnet hentIdentForAktoerIdPersonIkkeFunnet) { // NOSONAR
             optResult = Optional.empty();
         }

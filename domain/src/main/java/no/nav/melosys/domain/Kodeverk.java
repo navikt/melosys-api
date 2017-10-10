@@ -13,6 +13,11 @@ public interface Kodeverk<E extends Enum<?> & Kodeverk<?>> {
     public String getKode();
     
     /**
+     * Returnerer en saksbehandler-vennlig beskrivelse av enumen.
+     */
+    public String getBeskrivelse();
+    
+    /**
      * Superklasse for AttributeConverter for kodeverk.
      * Det skal være nok å subklasse denne og implementere getLovligeVerdier til å returnere array over alle enums av typen (altså samme 
      * som E.values() når typen til E er kjent).

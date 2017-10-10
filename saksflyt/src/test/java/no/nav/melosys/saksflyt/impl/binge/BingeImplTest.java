@@ -5,7 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.junit.Test;
@@ -29,7 +28,7 @@ public class BingeImplTest {
         b1.setRegistrertDato(LocalDateTime.of(2017, 1, 2, 0, 0));
         b2.setRegistrertDato(LocalDateTime.of(2017, 1, 1, 0, 0));
         b1.setStatus(BehandlingStatus.OPPRETTET);
-        b2.setStatus(BehandlingStatus.KLARGJORT);
+        b2.setStatus(BehandlingStatus.UNDER_BEHANDLING);
         assertTrue(binge.leggTil(b1));
         assertTrue(binge.leggTil(b2));
         assertFalse(binge.leggTil(b2)); // Skal ikke kunne legge til samme sak flere ganger

@@ -17,20 +17,18 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "BEHANDLING")
+@Table(name = "behandling")
 public class Behandling {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    // FIXME (farjam): Har vi en ekstern behandlingsId fra GSak???
-    // FIXME Francois Hvordan genererer vi? Eksponerer vi nøkkelen?
-    //@Generated(GenerationTime.INSERT)
-    @Column(name = "behandling_id")
-    private Long behandlingId;
+    // FIXME (farjam 2017-10-06): Har vi en ekstern behandlingsId fra GSak??? I så fall bruk den for equals & hash.
+    @Column(name = "gsak_id")
+    private Long gsakId;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "fagsak_id", nullable = false, updatable = false)
     private Fagsak fagsak;
 
@@ -38,11 +36,11 @@ public class Behandling {
     @Convert(converter = BehandlingStatus.DbKonverterer.class)
     private BehandlingStatus status;
 
-    // TODO (farjam 2017-08-18): Mangler kodeverk, se EESSI2-218
-    @Column(name = "steg")
-    private String steg;
+    @Column(name = "steg", nullable = false)
+    @Convert(converter = BehandlingSteg.DbKonverterer.class)
+    private BehandlingSteg steg;
 
-    @Column(name = "type", nullable = false, updatable = false)
+    @Column(name = "beh_type", nullable = false, updatable = false)
     @Convert(converter = BehandlingType.DbKonverterer.class)
     private BehandlingType type;
 
@@ -59,12 +57,12 @@ public class Behandling {
         return id;
     }
 
-    public Long getBehandlingId() {
-        return behandlingId;
+    public Long getGsakId() {
+        return gsakId;
     }
 
-    public void setBehandlingId(Long behandlingId) {
-        this.behandlingId = behandlingId;
+    public void setGsakId(Long gsakId) {
+        this.gsakId = gsakId;
     }
 
     public Fagsak getFagsak() {
@@ -83,11 +81,11 @@ public class Behandling {
         this.status = status;
     }
 
-    public String getSteg() {
+    public BehandlingSteg getSteg() {
         return steg;
     }
 
-    public void setSteg(String steg) {
+    public void setSteg(BehandlingSteg steg) {
         this.steg = steg;
     }
 
@@ -135,9 +133,6 @@ public class Behandling {
         if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
             return this.id == that.id;
         }
-        // TODO (farjam 2017-08-18) EESSI2-217: Her er det en teoretisk mulighet for feil oppførsel når vi sammenligner entiteter.
-        // For å fikse dette må equals og hashCode legge en ikke-generert og unik nøkkel til grunn.
-        // Dette er for det meste kun en teoretisk mulighet for feil. Det skal mye til for at to behandlinger blir registrert på samme sak i det samme nanosekundet.
         return Objects.equals(this.registrertDato, that.registrertDato)
             && Objects.equals(this.fagsak, that.fagsak);
     }

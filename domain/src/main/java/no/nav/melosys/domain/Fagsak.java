@@ -1,6 +1,5 @@
 package no.nav.melosys.domain;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -17,16 +16,16 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "FAGSAK")
-public class Fagsak implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+@Table(name = "fagsak")
+public class Fagsak {
+    
+    // FIXME (farjam): Ikke tatt med fra logisk modell: tema, virkemiddel og registreringsmetainfo
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
-    // FIXME (farjam): Har vi en ekstern saksnummer fra GSak???
+    /** Saksnummer fra gsak */
     @Column(name = "saksnummer")
     private Long saksnummer;
     
@@ -39,7 +38,7 @@ public class Fagsak implements Serializable {
     
     @Column(name = "status", nullable = false)
     @Convert(converter = FagsakStatus.DbKonverterer.class)
-    private FagsakStatus status = FagsakStatus.OPPRETTET;
+    private FagsakStatus status;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
@@ -50,8 +49,7 @@ public class Fagsak implements Serializable {
     @OneToMany(mappedBy = "fagsak", fetch = FetchType.EAGER)
     private List<Behandling> behandlinger;
 
-
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
@@ -123,15 +121,12 @@ public class Fagsak implements Serializable {
         if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
             return this.id == that.id;
         }
-        // TODO (farjam 2017-08-18) EESSI2-217: Her er det en teoretisk mulighet for feil oppførsel når vi sammenligner entiteter.
-        // For å fikse dette må equals og hashCode legge en ikke-generert og unik nøkkel til grunn.
-        // Dette er for det meste kun en teoretisk mulighet for feil. Det skal mye til for at to fagsaker blir registrert i det samme nanosekundet.
-        return Objects.equals(this.registrertDato, that.registrertDato);
+        return Objects.equals(this.saksnummer, that.saksnummer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(registrertDato);
+        return Objects.hash(saksnummer);
     }
 
 }

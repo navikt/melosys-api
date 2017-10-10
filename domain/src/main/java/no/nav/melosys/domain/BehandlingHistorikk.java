@@ -14,14 +14,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "BEHANDLING_HISTORIKK")
+@Table(name = "behandling_historikk")
 public class BehandlingHistorikk {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     private Behandling behandling;
 
@@ -32,10 +32,10 @@ public class BehandlingHistorikk {
     @Convert(converter = BehandlingStatus.DbKonverterer.class)
     private BehandlingStatus status;
 
-    // TODO (farjam 2017-08-18): Mangler kodeverk, se EESSI2-218
-    @Column(name = "steg", nullable = false, updatable = false)
-    private String steg;
-    
+    @Column(name = "steg", nullable = false)
+    @Convert(converter = BehandlingSteg.DbKonverterer.class)
+    private BehandlingSteg steg;
+
     @Column(name = "ident", nullable = false, updatable = false)
     private String ident;
     
@@ -70,11 +70,11 @@ public class BehandlingHistorikk {
         this.status = status;
     }
 
-    public String getSteg() {
+    public BehandlingSteg getSteg() {
         return steg;
     }
 
-    public void setSteg(String steg) {
+    public void setSteg(BehandlingSteg steg) {
         this.steg = steg;
     }
 

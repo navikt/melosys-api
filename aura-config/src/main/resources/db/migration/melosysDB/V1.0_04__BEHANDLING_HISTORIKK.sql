@@ -10,7 +10,10 @@ CREATE TABLE behandling_historikk (
 );
 
 ALTER TABLE behandling_historikk
+    ADD CONSTRAINT fk_beh_historikk_behandling FOREIGN KEY (status) REFERENCES behandling_status;
+
+ALTER TABLE behandling_historikk
     ADD CONSTRAINT fk_beh_historikk_status FOREIGN KEY (behandling_id) REFERENCES behandling;
 
 ALTER TABLE behandling_historikk
-    ADD CONSTRAINT fk_beh_historikk_behandling FOREIGN KEY (status) REFERENCES behandling_status;
+    ADD CONSTRAINT fk_beh_historikk_steg FOREIGN KEY (steg) REFERENCES behandling_steg;
