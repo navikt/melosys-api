@@ -26,6 +26,7 @@ public enum Personstatus implements KodeverkEnum<Personstatus> {
         this.navn = navn;
     }
 
+    @Override
     public String getNavn() {
         return navn;
     }

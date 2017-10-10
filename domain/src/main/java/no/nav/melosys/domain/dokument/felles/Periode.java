@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import no.nav.melosys.domain.ErPeriode;
-import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.jaxb.OffsetDateTimeToLocalDateXmlAdapter;
 
 @XmlAccessorType(XmlAccessType.FIELD)

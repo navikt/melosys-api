@@ -26,6 +26,7 @@ public enum Sivilstand implements KodeverkEnum<Sivilstand> {
         this.navn = navn;
     }
 
+    @Override
     public String getNavn() {
         return navn;
     }

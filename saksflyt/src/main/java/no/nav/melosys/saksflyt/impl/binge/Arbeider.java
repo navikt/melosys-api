@@ -137,6 +137,7 @@ public class Arbeider {
             }
         }
 
+        @Override
         public void run() {
             for (;;) {
                 for (Steg steg : maskinelleSteg) {

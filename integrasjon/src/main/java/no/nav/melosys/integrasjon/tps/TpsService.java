@@ -150,9 +150,7 @@ public class TpsService implements TpsFasade {
         personIdent.setIdent(norskIdent);
 
         request.setAktoer(personIdent);
-        if (behov != null) {
-            request.getInformasjonsbehov().addAll(behov);
-        }
+        request.getInformasjonsbehov().addAll(behov);
 
         return personConsumer.hentPerson(request);
     }

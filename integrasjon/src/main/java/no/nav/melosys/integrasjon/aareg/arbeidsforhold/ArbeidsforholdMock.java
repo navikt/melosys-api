@@ -14,6 +14,7 @@ import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.FinnArbeidsforhold
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.FinnArbeidsforholdPrArbeidstakerResponse;
 
 public class ArbeidsforholdMock implements ArbeidsforholdConsumer {
+    @SuppressWarnings("resource")
     @Override
     public FinnArbeidsforholdPrArbeidstakerResponse finnArbeidsforholdPrArbeidstaker(FinnArbeidsforholdPrArbeidstakerRequest request) throws FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput {
         String ident = request.getIdent().getIdent();

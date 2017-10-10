@@ -5,7 +5,6 @@ import static no.nav.melosys.domain.BehandlingSteg.NY;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.junit.Test;

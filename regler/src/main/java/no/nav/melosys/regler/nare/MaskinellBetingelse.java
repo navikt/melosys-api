@@ -18,6 +18,7 @@ public class MaskinellBetingelse extends Betingelse {
         this.predikater = predikater;
     }
     
+    @Override
     public Resultat evaluer() {
         for (Predikat predikat : predikater) {
             if (!predikat.test()) {
