@@ -24,7 +24,7 @@ import no.nav.melosys.domain.dokument.vurdering.VurderingResultat;
 
 @Entity
 @Table(name = "lovvalg_periode")
-public class LovvalgPeriode {
+public class LovvalgPeriode implements ErPeriode {
     
     // FIXME: Ikke tatt med fra den logiske modellen: lovvalgsBestemmelseBegrunnelse
     
@@ -37,10 +37,10 @@ public class LovvalgPeriode {
     private Vedtak vedtak;
     
     @Column(name = "fom_dato", nullable = false, updatable = false)
-    private LocalDate fomDato;
+    private LocalDate fom;
 
     @Column(name = "tom_dato", nullable = false, updatable = false)
-    private LocalDate tomDato;
+    private LocalDate tom;
 
     @Column(name = "bestemmelse", nullable = false, updatable = false)
     @Convert(converter = LovvalgBestemmelse.DbKonverterer.class)
@@ -86,20 +86,22 @@ public class LovvalgPeriode {
         this.vedtak = vedtak;
     }
 
-    public LocalDate getFomDato() {
-        return fomDato;
+    @Override
+    public LocalDate getFom() {
+        return fom;
     }
 
-    public void setFomDato(LocalDate fomDato) {
-        this.fomDato = fomDato;
+    public void setFom(LocalDate fom) {
+        this.fom = fom;
     }
 
-    public LocalDate getTomDato() {
-        return tomDato;
+    @Override
+    public LocalDate getTom() {
+        return tom;
     }
 
-    public void setTomDato(LocalDate tomDato) {
-        this.tomDato = tomDato;
+    public void setTom(LocalDate tom) {
+        this.tom = tom;
     }
 
     public LovvalgBestemmelse getBestemmelse() {
@@ -187,12 +189,12 @@ public class LovvalgPeriode {
             return this.id == that.id;
         }
         return Objects.equals(this.vedtak, that.vedtak)
-            && Objects.equals(this.fomDato, that.fomDato);
+            && Objects.equals(this.fom, that.fom);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(vedtak, fomDato);
+        return Objects.hash(vedtak, fom);
     }
 
 }

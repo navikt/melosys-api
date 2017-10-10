@@ -5,7 +5,7 @@ import java.time.LocalDate;
 /**
  * Felles grensesnitt for perioder
  */
-public interface HarPeriode {
+public interface ErPeriode {
 
     public LocalDate getFom();
 
