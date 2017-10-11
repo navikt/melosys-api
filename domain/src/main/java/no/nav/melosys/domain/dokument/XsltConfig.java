@@ -15,7 +15,7 @@ class XsltConfig {
 
     public static final String EREG_MAPPE = "ereg";
 
-    public static String INNTK_MAPPE= "inntk";
+    public static final String INNTK_MAPPE= "inntk";
 
     public static final String TPS_MAPPE = "tps";
 

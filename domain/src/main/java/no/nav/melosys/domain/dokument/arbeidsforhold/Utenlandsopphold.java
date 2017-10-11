@@ -19,6 +19,7 @@ public class Utenlandsopphold {
     @XmlJavaTypeAdapter(YearMonthTimeZoneXmlAdapter.class)
     private YearMonth rapporteringsperiode;
 
+    /** Obs. Ikke kodeverk! */ //TODO FA: tjenesten leverer både kodeverk og verdi skal vi ha kodeverk her?
     public String getLand() {
         return land;
     }
