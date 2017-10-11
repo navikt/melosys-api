@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 public class Medl2ServiceTest {
@@ -23,12 +24,12 @@ public class Medl2ServiceTest {
         medl2Service = new Medl2Service(medlemskapMock);
     }
 
-    @Ignore
     @Test
     public void testHentPeriodeListe() throws PersonIkkeFunnet, Sikkerhetsbegrensning {
         final String fnr = "77777777773";
         List<Medlemsperiode> medlemsperiodeList = medl2Service.hentPeriodeListe(fnr);
         assertNotNull(medlemsperiodeList);
+        assertFalse(medlemsperiodeList.isEmpty());
     }
 
     @Ignore
