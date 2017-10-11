@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.medl2.medlemskap;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Foedselsnummer;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeRequest;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeResponse;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -12,6 +13,7 @@ import static org.junit.Assert.*;
 
 public class MedlemskapMockTest {
 
+    @Ignore
     @Test
     public void hentPeriodeListeTest() throws Exception {
         MedlemskapMock medlemskapMock = new MedlemskapMock();
