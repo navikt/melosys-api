@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.jaxb.YearMonthXmlAdapter;
+import no.nav.melosys.domain.dokument.jaxb.YearMonthTimeZoneXmlAdapter;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Utenlandsopphold {
@@ -16,9 +16,10 @@ public class Utenlandsopphold {
 
     private String land;
 
-    @XmlJavaTypeAdapter(YearMonthXmlAdapter.class)
+    @XmlJavaTypeAdapter(YearMonthTimeZoneXmlAdapter.class)
     private YearMonth rapporteringsperiode;
 
+    /** Obs. Ikke kodeverk! */ //TODO FA: tjenesten leverer både kodeverk og verdi skal vi ha kodeverk her?
     public String getLand() {
         return land;
     }

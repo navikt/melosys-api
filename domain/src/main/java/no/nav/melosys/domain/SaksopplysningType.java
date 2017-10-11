@@ -5,6 +5,7 @@ import javax.persistence.Converter;
 public enum SaksopplysningType implements Kodeverk<SaksopplysningType> {
     
     ARBEIDSFORHOLD("ARBFORH", "Arbeidsforhold"),
+    INNTEKT("INNTK", "Inntekt"),
     ORGANISASJON("ORG", "Arbeidsgiver"),
     PERSONOPPLYSNING("PERSOPL", "Personopplysning"),
     SØKNAD("SØKNAD", "Søknad");
