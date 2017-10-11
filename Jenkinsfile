@@ -128,7 +128,7 @@ timestamps {
 
 Object deployApp(app, version, environment, callback, reporter) {
     def envMap = [
-            'ussi1': '22579',
+            'ussi1': '22579', 't5': '16561'
     ]
     parsedEnvironment = envMap[environment]
 
