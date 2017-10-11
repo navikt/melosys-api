@@ -4,6 +4,7 @@ import javax.persistence.Converter;
 
 /**
  * Dette kodeverket angir hvilket felter fra en saksopplysning som er lagt til grunn for behandlingen.
+ * FIXME: Dette enumet slettes hvis SaksopplysningType gir oss det vi trenger
  */
 public enum FaktagrunnlagType implements Kodeverk<FaktagrunnlagType> {
 
