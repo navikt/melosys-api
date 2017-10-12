@@ -20,6 +20,8 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektConsumer;
 import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeHarIkkeTilgangTilOensketAInntektsfilter;
 import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeSikkerhetsbegrensning;
@@ -64,7 +66,7 @@ public class InntektService implements InntektFasade {
     }
 
     @Override
-    public Saksopplysning hentInntektListe(String personID, YearMonth fom, YearMonth tom) throws HentInntektListeSikkerhetsbegrensning, HentInntektListeUgyldigInput, HentInntektListeHarIkkeTilgangTilOensketAInntektsfilter {
+    public Saksopplysning hentInntektListe(String personID, YearMonth fom, YearMonth tom) throws SikkerhetsbegrensningException {
         HentInntektListeRequest request = new HentInntektListeRequest();
 
         PersonIdent personIdent = objectFactory.createPersonIdent();
@@ -94,7 +96,16 @@ public class InntektService implements InntektFasade {
         request.setFormaal(formaal);
 
         // Kall til Inntektskomponenten
-        HentInntektListeResponse response = inntektConsumer.hentInntektListe(request);
+        HentInntektListeResponse response = null;
+        try {
+            response = inntektConsumer.hentInntektListe(request);
+        } catch (HentInntektListeSikkerhetsbegrensning hentInntektListeSikkerhetsbegrensning) {
+            throw new SikkerhetsbegrensningException(hentInntektListeSikkerhetsbegrensning);
+        } catch (HentInntektListeUgyldigInput hentInntektListeUgyldigInput) {
+            throw new IntegrasjonException(hentInntektListeUgyldigInput);
+        } catch (HentInntektListeHarIkkeTilgangTilOensketAInntektsfilter hentInntektListeHarIkkeTilgangTilOensketAInntektsfilter) {
+            throw new SikkerhetsbegrensningException(hentInntektListeHarIkkeTilgangTilOensketAInntektsfilter);
+        }
 
         // Response -> xml
         StringWriter xmlWriter = new StringWriter();

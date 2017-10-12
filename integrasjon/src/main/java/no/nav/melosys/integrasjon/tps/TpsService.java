@@ -18,6 +18,8 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
@@ -97,7 +99,7 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Saksopplysning hentPerson(String ident, Collection<Informasjonsbehov> behov) throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
+    public Saksopplysning hentPerson(String ident, Collection<Informasjonsbehov> behov) throws SikkerhetsbegrensningException {
         HentPersonRequest request = new HentPersonRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -111,7 +113,14 @@ public class TpsService implements TpsFasade {
         }
 
         // Kall til TPS
-        HentPersonResponse response = personConsumer.hentPerson(request);
+        HentPersonResponse response = null;
+        try {
+            response = personConsumer.hentPerson(request);
+        } catch (HentPersonSikkerhetsbegrensning hentPersonSikkerhetsbegrensning) {
+            throw new SikkerhetsbegrensningException(hentPersonSikkerhetsbegrensning);
+        } catch (HentPersonPersonIkkeFunnet hentPersonPersonIkkeFunnet) {
+            throw new IntegrasjonException(hentPersonPersonIkkeFunnet);
+        }
 
         // Response -> xml
         StringWriter xmlWriter = new StringWriter();

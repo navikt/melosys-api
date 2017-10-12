@@ -17,6 +17,8 @@ import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
+import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerUgyldigInput;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Arbeidsforhold;
@@ -69,7 +71,7 @@ public class AaregService implements AaregFasade {
     }
 
     @Override
-    public Saksopplysning getArbeidsforholdPrArbeidstaker(String ident, String regelverk) throws FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput {
+    public Saksopplysning getArbeidsforholdPrArbeidstaker(String ident, String regelverk) throws SikkerhetsbegrensningException {
         FinnArbeidsforholdPrArbeidstakerRequest request = new FinnArbeidsforholdPrArbeidstakerRequest();
 
         NorskIdent norskIdent = new NorskIdent();
@@ -81,7 +83,14 @@ public class AaregService implements AaregFasade {
         request.setRapportertSomRegelverk(regelverker);
 
         // Kall til Aa-registret
-        FinnArbeidsforholdPrArbeidstakerResponse response = arbeidsforholdConsumer.finnArbeidsforholdPrArbeidstaker(request);
+        FinnArbeidsforholdPrArbeidstakerResponse response = null;
+        try {
+            response = arbeidsforholdConsumer.finnArbeidsforholdPrArbeidstaker(request);
+        } catch (FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning finnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning) {
+            throw new SikkerhetsbegrensningException(finnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning);
+        } catch (FinnArbeidsforholdPrArbeidstakerUgyldigInput finnArbeidsforholdPrArbeidstakerUgyldigInput) {
+            throw new IntegrasjonException(finnArbeidsforholdPrArbeidstakerUgyldigInput);
+        }
 
         // Response -> xml
         StringWriter xmlWriter = new StringWriter();
