@@ -32,7 +32,7 @@ public class InntektConsumerTestIT extends Gen3WsProxyServiceITBase {
     private static final String FORMAALSKODE_URI = "http://nav.no/kodeverk/Kode/Formaal/Medlemskap?v=5";
     private static final String FILTER = "MedlemskapA-inntekt";
     private static final String FILTER_URI = "http://nav.no/kodeverk/Kode/A-inntektsfilter/MedlemskapA-inntekt?v=6";
-    private static final String FNR = "FJERNET";
+    private static final String FNR = "99999999992";
 
     private ObjectFactory objectFactory = new ObjectFactory();
 
