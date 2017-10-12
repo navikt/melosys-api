@@ -1,6 +1,5 @@
-package no.nav.melosys.integrasjon.felles;
+package no.nav.melosys.integrasjon.felles.exception;
 
-// FIXME FA
 public class IntegrasjonException extends RuntimeException {
 
     public IntegrasjonException(String message) {

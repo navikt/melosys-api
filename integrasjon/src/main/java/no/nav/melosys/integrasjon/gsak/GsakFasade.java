@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.gsak;
 
-import no.nav.melosys.integrasjon.felles.IntegrasjonException;
+import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 
 public interface GsakFasade {
 

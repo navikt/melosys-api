@@ -11,7 +11,7 @@ import org.apache.cxf.ws.addressing.WSAddressingFeature;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
-import no.nav.melosys.integrasjon.felles.CallIdOutInterceptor;
+import no.nav.melosys.integrasjon.felles.mdc.CallIdOutInterceptor;
 import no.nav.tjeneste.virksomhet.inntekt.v3.binding.InntektV3;
 
 @Configuration

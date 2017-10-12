@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.PropertySource;
@@ -17,6 +18,7 @@ import org.springframework.core.env.Environment;
 import no.nav.vedtak.isso.OpenAMHelper;
 import no.nav.vedtak.sts.client.SecurityConstants;
 
+@ServletComponentScan("no.nav.melosys.integrasjon.felles")
 @SpringBootApplication
 @PropertySource("classpath:integrasjon.properties")
 @PropertySource("classpath:saksflyt.properties")
