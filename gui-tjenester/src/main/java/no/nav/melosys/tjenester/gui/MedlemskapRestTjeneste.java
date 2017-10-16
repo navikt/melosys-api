@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.io.AbstractResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -23,7 +24,7 @@ import java.util.List;
 @Path("/medlemskap")
 @Service
 @Scope(WebApplicationContext.SCOPE_REQUEST)
-public class MedlemskapRestTjeneste {
+public class MedlemskapRestTjeneste extends RestTjeneste {
 
     private static Logger log = LoggerFactory.getLogger(MedlemskapRestTjeneste.class);
 

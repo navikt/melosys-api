@@ -12,6 +12,7 @@ import no.nav.melosys.tjenester.gui.ArbeidsforholdRestTjeneste;
 import no.nav.melosys.tjenester.gui.BehandlingRestTjeneste;
 import no.nav.melosys.tjenester.gui.FagsakRestTjeneste;
 import no.nav.melosys.tjenester.gui.SaksbehandlerTjeneste;
+import no.nav.melosys.tjenester.gui.MedlemskapRestTjeneste;
 
 @Configuration
 @ApplicationPath("/api")
@@ -24,6 +25,7 @@ public class JerseyConfig extends ResourceConfig {
         register(BehandlingRestTjeneste.class);
         register(FagsakRestTjeneste.class);
         register(SaksbehandlerTjeneste.class);
+        register(MedlemskapRestTjeneste.class);
         configureSwagger();
     }
 
