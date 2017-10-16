@@ -6,7 +6,6 @@ import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Medlemsperiode;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -25,18 +24,19 @@ public class Medl2ServiceTest {
     }
 
     @Test
-    public void testHentPeriodeListe() throws PersonIkkeFunnet, Sikkerhetsbegrensning {
+    public void hentPeriodeListe() throws PersonIkkeFunnet, Sikkerhetsbegrensning {
         final String fnr = "77777777773";
         List<Medlemsperiode> medlemsperiodeList = medl2Service.hentPeriodeListe(fnr);
         assertNotNull(medlemsperiodeList);
         assertFalse(medlemsperiodeList.isEmpty());
     }
 
-    @Ignore
     @Test
-    public void testGetPeriodeListe() throws PersonIkkeFunnet, Sikkerhetsbegrensning {
+    public void getPeriodeListe() throws PersonIkkeFunnet, Sikkerhetsbegrensning {
         final String fnr = "77777777773";
         Saksopplysning saksopplysning = medl2Service.getPeriodeListe(fnr);
         assertNotNull(saksopplysning);
+        // XML is well-formed but lacks 'response' wrapper around 'periodeListe'
+        assertNotNull(saksopplysning.getDokumentXml());
     }
 }

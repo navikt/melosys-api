@@ -15,7 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
-public class MedlemskapConsumerTest extends Gen3WsProxyServiceITBase {
+public class MedlemskapConsumerTestIT extends Gen3WsProxyServiceITBase {
 
     @Autowired
     MedlemskapConsumerConfig config;

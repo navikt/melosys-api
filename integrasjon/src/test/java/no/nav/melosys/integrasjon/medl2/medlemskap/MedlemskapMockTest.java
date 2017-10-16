@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 public class MedlemskapMockTest {
 
     @Test
-    public void hentPeriodeListeTest() throws Exception {
+    public void hentPeriodeListe() throws Exception {
         MedlemskapMock medlemskapMock = new MedlemskapMock();
         List<String> numre = Arrays.asList(
                 "77777777773", "77777777778","77777777779",

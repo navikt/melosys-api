@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface Medl2Fasade {
 
+    @Deprecated
     List<Medlemsperiode> hentPeriodeListe(String fnr) throws PersonIkkeFunnet, Sikkerhetsbegrensning;
 
     Saksopplysning getPeriodeListe(String fnr) throws PersonIkkeFunnet, Sikkerhetsbegrensning;

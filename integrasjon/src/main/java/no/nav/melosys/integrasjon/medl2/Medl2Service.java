@@ -16,8 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.namespace.QName;
 import java.io.StringWriter;
 import java.util.List;
 
@@ -28,7 +30,7 @@ public class Medl2Service implements Medl2Fasade {
 
     private static final String MEDLEMSKAP_VERSJON = "2.0";
 
-    private MedlemskapConsumer medlemskapConsumer;
+    private final MedlemskapConsumer medlemskapConsumer;
 
     private final Marshaller marshaller;
 
@@ -59,7 +61,12 @@ public class Medl2Service implements Medl2Fasade {
         // Response -> xml
         StringWriter xmlWriter = new StringWriter();
         try {
-            marshaller.marshal(response, xmlWriter);
+            String namespace = "http://nav.no/tjeneste/virksomhet/medlemskap/v2";
+            QName qName = new QName(namespace,"hentPeriodeListeResponse");
+            JAXBElement<HentPeriodeListeResponse> root = new JAXBElement<>(qName, HentPeriodeListeResponse.class, response);
+
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            marshaller.marshal(root, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);
