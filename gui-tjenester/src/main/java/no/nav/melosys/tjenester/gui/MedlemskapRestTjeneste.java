@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.integrasjon.medl2.Medl2Fasade;
+import no.nav.melosys.tjenester.gui.dto.MedlemsperiodeDto;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Medlemsperiode;
@@ -19,6 +20,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Api(tags = {"medlemskap"})
 @Path("/medlemskap")
@@ -38,10 +40,12 @@ public class MedlemskapRestTjeneste extends RestTjeneste {
     @GET
     @Path("{ident}")
     @ApiOperation("Søk etter medlemskap på personnummer")
-    public Response hentPeriodeListe(@PathParam("ident") String fnr) {
+    public Response hentMedlemsperiodeListe(@PathParam("ident") String fnr) {
         try {
-            List<Medlemsperiode> medlemskap = medl2.hentPeriodeListe(fnr);
-            return Response.ok(medlemskap).build();
+            List<Medlemsperiode> medlemskapListe = medl2.hentPeriodeListe(fnr);
+            List<MedlemsperiodeDto> medlemskapDtoListe = medlemskapListe.stream()
+                    .map(MedlemsperiodeDto::toDto).collect(Collectors.toList());
+            return Response.ok(medlemskapDtoListe).build();
         } catch (PersonIkkeFunnet e) {
             return Response.status(Response.Status.NOT_FOUND).build();
         } catch (Sikkerhetsbegrensning e) {

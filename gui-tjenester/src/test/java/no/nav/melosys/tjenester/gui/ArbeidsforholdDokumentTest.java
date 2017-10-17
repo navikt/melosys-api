@@ -39,9 +39,9 @@ public class ArbeidsforholdDokumentTest {
     @Before
     public void setUp() throws JAXBException {
 
-        TpsService tps = new TpsService(null, new PersonMock());
-        AaregService aareg = new AaregService(new ArbeidsforholdMock());
-        EregService ereg = new EregService(new OrganisasjonMock());
+        TpsService tps = new TpsService(null, new PersonMock(), null);
+        AaregService aareg = new AaregService(new ArbeidsforholdMock(), null);
+        EregService ereg = new EregService(new OrganisasjonMock(), null);
 
         restTjeneste = new ArbeidsforholdRestTjeneste(tps, aareg, ereg);
     }
