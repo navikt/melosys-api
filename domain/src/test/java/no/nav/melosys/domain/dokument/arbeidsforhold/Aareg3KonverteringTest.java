@@ -21,7 +21,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Test;
 
-public class AaregXsltTest {
+public class Aareg3KonverteringTest {
 
     @Test
     public void transform() throws TransformerFactoryConfigurationError, TransformerException, IOException, JAXBException {

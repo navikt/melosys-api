@@ -4,20 +4,27 @@ import javax.persistence.Converter;
 
 public enum SaksopplysningKilde implements Kodeverk<SaksopplysningKilde> {
 
-    AAREG("AAREG"),
-    EREG("EREG"),
-    TPS("TPS"),
-    MEDL2("MEDL2");
-    
-    private String kode;
+    AAREG("AAREG", "Aa-registeret"),
+    EREG("EREG", "Enhetsregisteret"),
+    INNTK("INNTK", "Inntektskomponenten"),
+    TPS("TPS", "Folkeregisteret");
 
-    private SaksopplysningKilde(String kode) {
+    private String kode;
+    private String beskrivelse;
+
+    private SaksopplysningKilde(String kode, String beskrivelse) {
         this.kode = kode;
+        this.beskrivelse = beskrivelse;
     }
     
     @Override
     public String getKode() {
         return kode;
+    }
+
+    @Override
+    public String getBeskrivelse() {
+        return beskrivelse;
     }
 
     @Converter

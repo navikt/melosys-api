@@ -5,6 +5,6 @@ import java.time.format.DateTimeFormatter;
 
 public class YearMonthXmlAdapter extends AbstractDateXmlAdapter<YearMonth> {
 
-    public YearMonthXmlAdapter() { super(DateTimeFormatter.ofPattern("yyyy-MMXXX"), YearMonth::from);}
+    public YearMonthXmlAdapter() { super(DateTimeFormatter.ofPattern("yyyy-MM"), YearMonth::from);}
 
 }

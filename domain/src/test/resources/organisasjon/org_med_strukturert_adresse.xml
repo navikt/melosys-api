@@ -1,0 +1,159 @@
+<ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
+    <response>
+        <organisasjon xsi:type="ns4:JuridiskEnhet"
+                      xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xsi:schemaLocation="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon wsdl/no/nav/tjeneste/virksomhet/organisasjon/v4/informasjon/informasjon.xsd">
+            <orgnummer>920643043</orgnummer>
+            <navn xsi:type="ns4:UstrukturertNavn">
+                <navnelinje>METODE RENHOLD AS</navnelinje>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+                <navnelinje/>
+            </navn>
+            <organisasjonDetaljer>
+                <registreringsDato>1995-03-12+01:00</registreringsDato>
+                <datoSistEndret>2015-09-17+02:00</datoSistEndret>
+                <gjeldendeMaalform kodeRef="NB"/>
+                <opphoersdato>2015-10-24+02:00</opphoersdato>
+                <registrertMVA fomBruksperiode="2014-05-21T19:33:34+02:00"
+                               fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <registrertIMVA>true</registrertIMVA>
+                </registrertMVA>
+                <telefon fomBruksperiode="2014-05-21T19:33:34+02:00"
+                         fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <identifikator>69 26 71 11</identifikator>
+                </telefon>
+                <status fomBruksperiode="2015-09-01T04:04:04+02:00"
+                        fomGyldighetsperiode="2015-08-20T00:00:00.000+02:00">
+                    <statuskode kodeRef="OPFU"/>
+                </status>
+                <forretningsadresse xsi:type="ns4:Gateadresse">
+                    <landkode kodeRef="NO"/>
+                    <poststed>1234</poststed>
+                    <gatenummer>1</gatenummer>
+                    <gatenavn>Gatenavn</gatenavn>
+                    <husnummer>2</husnummer>
+                    <husbokstav>A</husbokstav>
+                </forretningsadresse>
+                <postadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00"
+                             fomGyldighetsperiode="2011-09-14T00:00:00.000+02:00" xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Skuteviksbodene 1</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>5035</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1201</verdi>
+                    </adresseledd>
+                </postadresse>
+                <navSpesifikkInformasjon fomBruksperiode="1900-01-01T00:00:00.000+01:00"
+                                         fomGyldighetsperiode="1900-01-01T00:00:00.000+01:00">
+                    <erIA>false</erIA>
+                </navSpesifikkInformasjon>
+                <naering fomBruksperiode="2014-05-22T00:49:24+02:00"
+                         fomGyldighetsperiode="1993-01-01T00:00:00.000+01:00">
+                    <naeringskode kodeRef="81.210"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00"
+                      fomGyldighetsperiode="2005-10-09T00:00:00.000+02:00">
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>METODE RENHOLD AS</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <redigertNavn>METODE RENHOLD AS</redigertNavn>
+                </navn>
+                <formaal fomBruksperiode="2014-05-21T23:52:26+02:00"
+                         fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <formaal>Renhold etter moderne metoder og hva som dermed
+                        står i forbindelse, samt handel og utleie,
+                        ervervelse av fast eiendom samt deltagelse i
+                        annen virksomhet med økonomisk formål.
+                    </formaal>
+                </formaal>
+                <stiftelsesdato>1965-01-11+01:00</stiftelsesdato>
+            </organisasjonDetaljer>
+            <fusjonJuridiskEnhet fomBruksperiode="2015-10-25T04:03:42.498+01:00"
+                                 fomGyldighetsperiode="2015-08-20T00:00:00.000+02:00">
+                <virkningsdato>2015-10-24+02:00</virkningsdato>
+                <juridiskEnhet>
+                    <orgnummer>834327082</orgnummer>
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>ELITE SERVICE PARTNER AS</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <organisasjonDetaljer>
+                        <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00"
+                              fomGyldighetsperiode="1999-01-20T00:00:00.000+01:00">
+                            <navn xsi:type="ns4:UstrukturertNavn">
+                                <navnelinje>ELITE SERVICE PARTNER AS</navnelinje>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                            </navn>
+                            <redigertNavn>ELITE SERVICE PARTNER AS</redigertNavn>
+                        </navn>
+                    </organisasjonDetaljer>
+                    <juridiskEnhetDetaljer/>
+                </juridiskEnhet>
+            </fusjonJuridiskEnhet>
+            <fusjonJuridiskEnhet fomBruksperiode="2015-10-18T04:04:12.410+02:00"
+                                 fomGyldighetsperiode="2015-08-25T00:00:00.000+02:00">
+                <virkningsdato>2015-10-17+02:00</virkningsdato>
+                <juridiskEnhet>
+                    <orgnummer>992442107</orgnummer>
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>MAX RENT SERVICE AS</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <organisasjonDetaljer>
+                        <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00"
+                              fomGyldighetsperiode="2008-03-29T00:00:00.000+01:00">
+                            <navn xsi:type="ns4:UstrukturertNavn">
+                                <navnelinje>MAX RENT SERVICE AS</navnelinje>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                            </navn>
+                            <redigertNavn>MAX RENT SERVICE AS</redigertNavn>
+                        </navn>
+                    </organisasjonDetaljer>
+                    <juridiskEnhetDetaljer/>
+                </juridiskEnhet>
+            </fusjonJuridiskEnhet>
+            <juridiskEnhetDetaljer>
+                <sektorkode kodeRef="2100"/>
+                <enhetstype kodeRef="AS"/>
+                <kapitalopplysninger fomBruksperiode="2014-05-21T18:15:03+02:00"
+                                     fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <valuta kodeRef="NOK"/>
+                    <kapital>2737800</kapital>
+                    <kapitalInnbetalt>2737800</kapitalInnbetalt>
+                    <fritekst>null</fritekst>
+                </kapitalopplysninger>
+                <registrertIForetaksregisteret fomBruksperiode="2014-05-21T19:33:34+02:00"
+                                               fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                    <registrertForetaksregisteret>true</registrertForetaksregisteret>
+                </registrertIForetaksregisteret>
+            </juridiskEnhetDetaljer>
+        </organisasjon>
+    </response>
+</ns2:hentOrganisasjonResponse>

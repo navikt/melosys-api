@@ -24,10 +24,14 @@
         </dependency>
 
         <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxws</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
@@ -51,6 +55,13 @@
         <dependency>
             <groupId>no.nav.tjenester.fim</groupId>
             <artifactId>nav-fim-behandleSak-v1-tjenestespesifikasjon</artifactId>
+            <classifier>jaxws</classifier>
+        </dependency>
+
+        <!--Inntektskomponenten-->
+        <dependency>
+            <groupId>no.nav.tjenester.fim</groupId>
+            <artifactId>nav-fim-inntekt-v3-tjenestespesifikasjon</artifactId>
             <classifier>jaxws</classifier>
         </dependency>
 

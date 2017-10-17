@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.felles;
+package no.nav.melosys.integrasjon.felles.mdc;
 
 import java.security.SecureRandom;
 

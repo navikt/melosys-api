@@ -42,7 +42,7 @@ public class InitBingeTest {
         Behandling b1 = new Behandling();
         b1.setStatus(BehandlingStatus.OPPRETTET);
         Behandling b2 = new Behandling();
-        b2.setStatus(BehandlingStatus.KLARGJORT);
+        b2.setStatus(BehandlingStatus.UNDER_BEHANDLING);
 
         testBehandlinger.add(b1);
         testBehandlinger.add(b2);

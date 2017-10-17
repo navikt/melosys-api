@@ -16,6 +16,7 @@ import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonConsumer;
+import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonOrganisasjonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonUgyldigInput;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.Organisasjon;
@@ -62,12 +63,19 @@ public class EregService implements EregFasade {
 
     // TODO (Francois) endre navn til hentOrganisasjon når den tidligere versjonen
     @Override
-    public Saksopplysning getOrganisasjon(String orgnummer) throws HentOrganisasjonOrganisasjonIkkeFunnet, HentOrganisasjonUgyldigInput {
+    public Saksopplysning getOrganisasjon(String orgnummer) {
         HentOrganisasjonRequest request = new HentOrganisasjonRequest();
         request.setOrgnummer(orgnummer);
 
         // Kall til E-reg
-        HentOrganisasjonResponse response = organisasjonConsumer.hentOrganisasjon(request);
+        HentOrganisasjonResponse response = null;
+        try {
+            response = organisasjonConsumer.hentOrganisasjon(request);
+        } catch (HentOrganisasjonOrganisasjonIkkeFunnet hentOrganisasjonOrganisasjonIkkeFunnet) {
+            throw new IntegrasjonException(hentOrganisasjonOrganisasjonIkkeFunnet);
+        } catch (HentOrganisasjonUgyldigInput hentOrganisasjonUgyldigInput) {
+            throw new IntegrasjonException(hentOrganisasjonUgyldigInput);
+        }
 
         // Response -> xml
         StringWriter xmlWriter = new StringWriter();

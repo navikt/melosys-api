@@ -7,7 +7,7 @@ import org.junit.BeforeClass;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import no.nav.melosys.integrasjon.felles.MDCOperations;
+import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import no.nav.modig.testcertificates.TestCertificates;
 import no.nav.vedtak.felles.testutilities.UnitTestConfiguration;
 import no.nav.vedtak.isso.MockServerInfo;

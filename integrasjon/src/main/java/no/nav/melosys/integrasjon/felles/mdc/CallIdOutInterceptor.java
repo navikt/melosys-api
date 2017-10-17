@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.felles;
+package no.nav.melosys.integrasjon.felles.mdc;
 
 import java.util.List;
 
@@ -18,19 +18,12 @@ import org.apache.cxf.phase.Phase;
  */
 public class CallIdOutInterceptor extends AbstractPhaseInterceptor<Message> {
 
-    //TODO Francois
-    private boolean ready = false;
-
     public CallIdOutInterceptor() {
         super(Phase.PRE_STREAM);
     }
 
     @Override
     public void handleMessage(Message message) {
-
-        if(!ready) {
-            return;
-        }
 
         String callId = MDCOperations.getFromMDC(MDCOperations.MDC_CALL_ID);
         if (callId == null) {

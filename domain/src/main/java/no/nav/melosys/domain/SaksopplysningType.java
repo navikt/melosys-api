@@ -4,21 +4,28 @@ import javax.persistence.Converter;
 
 public enum SaksopplysningType implements Kodeverk<SaksopplysningType> {
     
-    ARBEIDSFORHOLD("ARBFOR"),
-    ORGANISASJON("ORG"),
-    PERSONOPPLYSNING("PERSOPL"),
-    SØKNAD("SOKNAD"),
-    MEDLEMSKAP("MEDL");
-    
-    private String kode;
+    ARBEIDSFORHOLD("ARBFORH", "Arbeidsforhold"),
+    INNTEKT("INNTK", "Inntekt"),
+    ORGANISASJON("ORG", "Arbeidsgiver"),
+    PERSONOPPLYSNING("PERSOPL", "Personopplysning"),
+    SØKNAD("SØKNAD", "Søknad");
 
-    private SaksopplysningType(String kode) {
+    private String kode;
+    private String beskrivelse;
+
+    private SaksopplysningType(String kode, String beskrivelse) {
         this.kode = kode;
+        this.beskrivelse = beskrivelse;
     }
     
     @Override
     public String getKode() {
         return kode;
+    }
+
+    @Override
+    public String getBeskrivelse() {
+        return beskrivelse;
     }
 
     @Converter

@@ -14,6 +14,7 @@ import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonRequ
 
 public class OrganisasjonMock implements OrganisasjonConsumer {
 
+    @SuppressWarnings("resource")
     @Override
     public no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonResponse hentOrganisasjon(HentOrganisasjonRequest request) throws HentOrganisasjonOrganisasjonIkkeFunnet, HentOrganisasjonUgyldigInput {
         String orgnummer = request.getOrgnummer();

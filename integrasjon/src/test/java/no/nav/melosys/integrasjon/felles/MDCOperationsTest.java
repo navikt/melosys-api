@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
+import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
+
 public class MDCOperationsTest {
 
     @Test

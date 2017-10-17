@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.ereg;
 
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonOrganisasjonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonUgyldigInput;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.Organisasjon;
@@ -14,6 +16,6 @@ public interface EregFasade {
     @Deprecated
     Organisasjon hentOrganisasjon(String orgnummer) throws HentOrganisasjonOrganisasjonIkkeFunnet, HentOrganisasjonUgyldigInput;
 
-    Saksopplysning getOrganisasjon(String orgnummer) throws HentOrganisasjonOrganisasjonIkkeFunnet, HentOrganisasjonUgyldigInput;
+    Saksopplysning getOrganisasjon(String orgnummer) throws IntegrasjonException, SikkerhetsbegrensningException;
 
 }

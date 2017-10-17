@@ -22,6 +22,7 @@ public enum Diskresjonskode implements KodeverkEnum<Diskresjonskode> {
         this.navn = navn;
     }
 
+    @Override
     public String getNavn() {
         return navn;
     }

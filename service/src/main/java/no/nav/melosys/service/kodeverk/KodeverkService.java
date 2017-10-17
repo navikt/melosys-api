@@ -65,7 +65,7 @@ public class KodeverkService implements ApplicationContextAware {
     public String dekod(Kodeverk kodeverk, String kode, LocalDate dato) {
         List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
         if (kodeperioder == null) {
-            return null; //FIXME
+            throw new RuntimeException("Problemer med å slå opp kodeverk med navn '" + kodeverk.getNavn() + "'");
         }
         // kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
         for (Kode kandidat : kodeperioder) {
@@ -73,7 +73,7 @@ public class KodeverkService implements ApplicationContextAware {
                 return kandidat.getNavn();
             }
         }
-        return null; //FIXME
+        return null;
     }
     
     /*
@@ -97,6 +97,7 @@ public class KodeverkService implements ApplicationContextAware {
     }
     
     private class TømCacheScheduler extends Thread {
+        @Override
         public void run() {
             for (;;) {
                 try {

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4"
-                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xmlns:xslt="http://www.w3.org/1999/XSL/Transform">
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <xsl:output method="xml" indent="no"/>
 
@@ -14,7 +13,7 @@
                     <xsl:apply-templates select="."/>
                 </xsl:for-each>
             </navn>
-            <xslt:for-each select="organisasjonDetaljer">
+            <xsl:for-each select="organisasjonDetaljer">
             <organisasjonDetaljer>
                 <xsl:copy-of select="orgnummer"/>
                 <xsl:for-each select="forretningsadresse">
@@ -25,7 +24,7 @@
                 </xsl:for-each>
                 <xsl:for-each select="navn">
                 <organisasjonsnavn>
-                    <xsl:copy-of select="@*"/>
+                    <xsl:call-template name="Perioder"/>
                     <navn>
                         <xsl:apply-templates select="navn/*"/>
                     </navn>
@@ -33,7 +32,7 @@
                 </organisasjonsnavn>
                 </xsl:for-each>
             </organisasjonDetaljer>
-            </xslt:for-each>
+            </xsl:for-each>
         </organisasjonDokument>
     </xsl:template>
 
@@ -49,19 +48,28 @@
         <xsl:choose>
             <xsl:when test="@xsi:type='ns4:SemistrukturertAdresse'">
                 <xsl:element name="{name()}">
-                    <xsl:copy-of select="@*[name() != 'xsi:type']"/>
                     <xsl:attribute name="xsi:type">SemistrukturertAdresse</xsl:attribute>
+                    <xsl:call-template name="Perioder"/>
                     <xsl:apply-templates/>
                 </xsl:element>
             </xsl:when>
-            <xsl:when test="@xsi:type='ns4:StrukturertAdresse'">
+            <xsl:when test="@xsi:type='ns4:Gateadresse'">
                 <xsl:element name="{name()}">
-                    <xsl:copy-of select="@*[name() != 'xsi:type']"/>
                     <xsl:attribute name="xsi:type">Gateadresse</xsl:attribute>
-                    <xsl:copy-of select="./*"/>
+                        <xsl:call-template name="Perioder"/>
+                    <xsl:apply-templates select="landkode"/>
+                    <xsl:for-each select="./*[name() != 'landkode']">
+                        <xsl:call-template name="Gateadresse"/>
+                    </xsl:for-each>
                 </xsl:element>
             </xsl:when>
         </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="Gateadresse">
+        <xsl:element name="{name()}">
+            <xsl:value-of select="."/>
+        </xsl:element>
     </xsl:template>
 
     <xsl:template match="landkode">
@@ -72,5 +80,29 @@
         <xsl:element name="{noekkel/@kodeRef}">
             <xsl:value-of select="verdi"/>
         </xsl:element>
+    </xsl:template>
+    
+    <!-- Bruks- og gyldighetsperioder -->
+    <xsl:template name="Perioder">
+        <xsl:if test="@fomBruksperiode|@tomBruksperiode">
+            <bruksperiode>
+                <xsl:if test="@fomBruksperiode">
+                    <fom><xsl:value-of select="@fomBruksperiode"/></fom>
+                </xsl:if>
+                <xsl:if test="@tomBruksperiode">
+                    <tom><xsl:value-of select="@tomBruksperiode"/></tom>
+                </xsl:if>
+            </bruksperiode>
+        </xsl:if>
+        <xsl:if test="@fomGyldighetsperiode|@tomGyldighetsperiode">
+            <gyldighetsperiode>
+                <xsl:if test="@fomGyldighetsperiode">
+                    <fom><xsl:value-of select="@fomGyldighetsperiode"/></fom>
+                </xsl:if>
+                <xsl:if test="@tomGyldighetsperiode">
+                    <tom><xsl:value-of select="@tomGyldighetsperiode"/></tom>
+                </xsl:if>
+            </gyldighetsperiode>
+        </xsl:if>
     </xsl:template>
 </xsl:stylesheet>

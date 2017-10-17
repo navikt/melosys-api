@@ -42,6 +42,7 @@
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>
         <gsak.oppgavebehandling.version>3.1.1</gsak.oppgavebehandling.version>
         <gsak.sak.version>1.0.0</gsak.sak.version>
+        <inntekt-v3.version>2.0.0</inntekt-v3.version>
         <joark.journal.version>1.0.3</joark.journal.version>
         <modig-testcertificates.version>1.2.0</modig-testcertificates.version>
         <tps.aktoer.version>2.0.1</tps.aktoer.version>
@@ -236,6 +237,12 @@
                 <groupId>no.nav.tjenester.fim</groupId>
                 <artifactId>nav-fim-dokumentproduksjon-v2-tjenestespesifikasjon</artifactId>
                 <version>${doksys.dokumentproduksjon.version}</version>
+                <classifier>jaxws</classifier>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.tjenester.fim</groupId>
+                <artifactId>nav-fim-inntekt-v3-tjenestespesifikasjon</artifactId>
+                <version>${inntekt-v3.version}</version>
                 <classifier>jaxws</classifier>
             </dependency>
             <dependency>
