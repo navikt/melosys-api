@@ -29,8 +29,6 @@ public class MedlemskapConsumerProducer {
     @Bean
     @Profile("!utvikling")
     MedlemskapConsumer medlemskapConsumer() {
-        // This will fail, since there's no SAML.
-        //return new MedlemskapConsumerImpl(config.getPort());
         MedlemskapV2 port = wrapWithSts(config.getPort(), OIDC_TIL_SAML);
         return new MedlemskapConsumerImpl(port);
     }

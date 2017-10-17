@@ -7,5 +7,5 @@ import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeRespon
 
 public interface MedlemskapConsumer {
 
-    HentPeriodeListeResponse hentPeriodeListe(HentPeriodeListeRequest var1) throws PersonIkkeFunnet, Sikkerhetsbegrensning;
+    HentPeriodeListeResponse hentPeriodeListe(HentPeriodeListeRequest req) throws PersonIkkeFunnet, Sikkerhetsbegrensning;
 }

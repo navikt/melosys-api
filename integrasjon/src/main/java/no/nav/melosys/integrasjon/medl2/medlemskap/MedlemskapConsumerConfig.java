@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.medl2.medlemskap;
 
-import no.nav.melosys.integrasjon.felles.CallIdOutInterceptor;
+import no.nav.melosys.integrasjon.felles.mdc.CallIdOutInterceptor;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.MedlemskapV2;
 import org.apache.cxf.feature.LoggingFeature;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;

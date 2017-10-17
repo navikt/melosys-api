@@ -1,8 +1,6 @@
 package no.nav.melosys.integrasjon.medl2;
 
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKilde;
-import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.integrasjon.medl2.medlemskap.MedlemskapConsumer;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
@@ -74,8 +72,9 @@ public class Medl2Service implements Medl2Fasade {
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKilde.MEDL2);
-        saksopplysning.setType(SaksopplysningType.MEDLEMSKAP);
+        // TODO: Implementeres av EESSI2-335
+        //saksopplysning.setKilde(SaksopplysningKilde.MEDL2);
+        //saksopplysning.setType(SaksopplysningType.MEDLEMSKAP);
         saksopplysning.setVersjon(MEDLEMSKAP_VERSJON);
 
         return saksopplysning;
