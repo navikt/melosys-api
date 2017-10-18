@@ -1,6 +1,9 @@
 package no.nav.melosys.integrasjon.medl2;
 
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
+import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.integrasjon.medl2.medlemskap.MedlemskapMock;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
@@ -20,7 +23,9 @@ public class Medl2ServiceTest {
     @Before
     public void setUp() {
         MedlemskapMock medlemskapMock = new MedlemskapMock();
-        medl2Service = new Medl2Service(medlemskapMock);
+        DokumentFactory dokumentFactory =
+                new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
+        medl2Service = new Medl2Service(medlemskapMock, dokumentFactory);
     }
 
     @Test

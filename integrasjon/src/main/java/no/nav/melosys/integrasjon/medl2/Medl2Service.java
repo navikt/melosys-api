@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.medl2;
 
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.integrasjon.medl2.medlemskap.MedlemskapConsumer;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
@@ -30,11 +31,14 @@ public class Medl2Service implements Medl2Fasade {
 
     private final MedlemskapConsumer medlemskapConsumer;
 
+    private DokumentFactory dokumentFactory;
+
     private final Marshaller marshaller;
 
     @Autowired
-    public Medl2Service(MedlemskapConsumer medlemskapConsumer) {
+    public Medl2Service(MedlemskapConsumer medlemskapConsumer, DokumentFactory dokumentFactory) {
         this.medlemskapConsumer = medlemskapConsumer;
+        this.dokumentFactory = dokumentFactory;
 
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(HentPeriodeListeResponse.class);
