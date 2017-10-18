@@ -1,11 +1,13 @@
 package no.nav.melosys.integrasjon.medl2;
 
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.medl2.medlemskap.MedlemskapConsumer;
+import no.nav.melosys.integrasjon.medl2.medlemskap.MedlemskapConsumerConfig;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Foedselsnummer;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Medlemsperiode;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeRequest;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeResponse;
 import org.slf4j.Logger;
@@ -19,8 +21,10 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import java.io.StringWriter;
-import java.util.List;
 
+/*
+* FIXME: Bør flyttes til src/test, men krever større overordnede endringer.
+*/
 @Service
 public class Medl2Service implements Medl2Fasade {
 
@@ -46,25 +50,16 @@ public class Medl2Service implements Medl2Fasade {
     }
 
     @Override
-    public List<Medlemsperiode> hentPeriodeListe(String fnr) throws PersonIkkeFunnet, Sikkerhetsbegrensning {
-        HentPeriodeListeResponse res = hentPeriodeListeResponse(fnr);
-
-        return res.getPeriodeListe();
-    }
-
-    @Override
-    public Saksopplysning getPeriodeListe(String fnr) throws PersonIkkeFunnet, Sikkerhetsbegrensning {
+    public Saksopplysning getPeriodeListe(String fnr) throws IntegrasjonException, SikkerhetsbegrensningException {
         HentPeriodeListeResponse response = hentPeriodeListeResponse(fnr);
 
         // Response -> xml
         StringWriter xmlWriter = new StringWriter();
         try {
-            String namespace = "http://nav.no/tjeneste/virksomhet/medlemskap/v2";
-            QName qName = new QName(namespace,"hentPeriodeListeResponse");
-            JAXBElement<HentPeriodeListeResponse> root = new JAXBElement<>(qName, HentPeriodeListeResponse.class, response);
+            JAXBElement<HentPeriodeListeResponse> xmlRoot
+                    = new JAXBElement<>(MedlemskapConsumerConfig.getResponse(), HentPeriodeListeResponse.class, response);
 
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            marshaller.marshal(root, xmlWriter);
+            marshaller.marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);
@@ -80,13 +75,19 @@ public class Medl2Service implements Medl2Fasade {
         return saksopplysning;
     }
 
-    private HentPeriodeListeResponse hentPeriodeListeResponse(String fnr) throws PersonIkkeFunnet, Sikkerhetsbegrensning {
+    private HentPeriodeListeResponse hentPeriodeListeResponse(String fnr) throws SikkerhetsbegrensningException {
         Foedselsnummer ident = new Foedselsnummer();
         ident.setValue(fnr);
 
         HentPeriodeListeRequest req = new HentPeriodeListeRequest();
         req.setIdent(ident);
 
-        return medlemskapConsumer.hentPeriodeListe(req);
+        try {
+            return medlemskapConsumer.hentPeriodeListe(req);
+        } catch (Sikkerhetsbegrensning sikkerhetsbegrensning) {
+            throw new SikkerhetsbegrensningException(sikkerhetsbegrensning);
+        } catch (PersonIkkeFunnet personIkkeFunnet) {
+            throw new IntegrasjonException(personIkkeFunnet);
+        }
     }
 }
