@@ -1,10 +1,5 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import java.time.LocalDate;
-
-import no.nav.melosys.tjenester.gui.dto.util.DtoUtils;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Medlemsperiode;
-
 public class MedlemsperiodeDto {
 
     private PeriodeDto periode;
@@ -18,24 +13,6 @@ public class MedlemsperiodeDto {
     private String land;
 
     private String trygdedekning;
-
-    public static MedlemsperiodeDto toDto(Medlemsperiode m) {
-        MedlemsperiodeDto medlemsperiodeDto = new MedlemsperiodeDto();
-
-        LocalDate fom = DtoUtils.tilLocalDate(m.getFraOgMed());
-        LocalDate tom = DtoUtils.tilLocalDate(m.getTilOgMed());
-        medlemsperiodeDto.setPeriode(new PeriodeDto(fom, tom));
-
-        medlemsperiodeDto.setType(m.getType().getValue());
-        medlemsperiodeDto.setStatus(m.getStatus().getValue());
-        medlemsperiodeDto.setGrunnlagstype(m.getGrunnlagstype().getValue());
-        if (m.getLand() != null)
-            medlemsperiodeDto.setLand(m.getLand().getValue());
-        if (m.getTrygdedekning() != null)
-            medlemsperiodeDto.setTrygdedekning(m.getTrygdedekning().getValue());
-
-        return medlemsperiodeDto;
-    }
 
     public PeriodeDto getPeriode() {
         return periode;

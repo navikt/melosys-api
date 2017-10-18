@@ -9,6 +9,7 @@ import no.nav.melosys.integrasjon.medl2.Medl2Service;
 import no.nav.melosys.integrasjon.medl2.medlemskap.MedlemskapMock;
 import no.nav.melosys.tjenester.gui.dto.MedlemsperiodeDto;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.core.Response;
@@ -30,6 +31,8 @@ public class MedlemskapRestTjenesteTest {
         restTjeneste = new MedlemskapRestTjeneste(medl2);
     }
 
+    // FIXME: Reimplementer når EESSI2-335 er på plass
+    @Ignore
     @Test
     @SuppressWarnings("unchecked")
     public void hentMedlemsperiodeListe() throws Exception {
