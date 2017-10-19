@@ -21,9 +21,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.StringWriter;
 
-/*
-* FIXME: Bør flyttes til src/test, men krever større overordnede endringer.
-*/
 @Service
 public class Medl2Service implements Medl2Fasade {
 
