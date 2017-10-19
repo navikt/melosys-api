@@ -8,25 +8,19 @@
         <xsl:apply-templates/>
     </xsl:template>
 
+    <xsl:template name="simple" match="/ns2:hentPeriodeListeResponse/response/periodeListe/*">
+        <xsl:element name="{name()}">
+            <xsl:value-of select="."/>
+        </xsl:element>
+    </xsl:template>
 
     <xsl:template match="/">
         <medlemskapDokument>
             <medlemsperiode>
                 <xsl:for-each select="ns2:hentPeriodeListeResponse/response/periodeListe">
                     <medlemsperiode>
-                        <!-- Inneholder ikke klokkeslett og offset
-                        <periode>
-                            <fom><xsl:value-of select="fraOgMed" /></fom>
-                            <tom><xsl:value-of select="tilOgMed" /></tom>
-                        </periode>
-                        -->
-                        <fom><xsl:value-of select="fraOgMed" /></fom>
-                        <tom><xsl:value-of select="tilOgMed" /></tom>
-                        <type><xsl:value-of select="type" /></type>
-
-                        <status><xsl:value-of select="status" /></status>
-                        <grunnlagstype><xsl:value-of select="grunnlagstype" /></grunnlagstype>
-
+                        <xsl:apply-templates select="fraOgMed|tilOgMed|type|status|grunnlagstype|land" />
+                        <xsl:apply-templates select="lovvalg|trygdedekning|kildedokumenttype|kilde" />
                     </medlemsperiode>
                 </xsl:for-each>
             </medlemsperiode>

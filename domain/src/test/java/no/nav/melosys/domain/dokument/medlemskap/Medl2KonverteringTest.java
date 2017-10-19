@@ -1,6 +1,5 @@
 package no.nav.melosys.domain.dokument.medlemskap;
 
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import org.junit.Test;
 
 import javax.xml.bind.JAXBContext;
@@ -42,6 +41,10 @@ public class Medl2KonverteringTest {
 
         for (Medlemsperiode medlemsperiode : dokument.getMedlemsperiode()) {
             assertNotNull(medlemsperiode.getType());
+            assertNotNull(medlemsperiode.getStatus());
+            assertNotNull(medlemsperiode.getLovvalg());
+            assertNotNull(medlemsperiode.getKilde());
+            assertNotNull(medlemsperiode.getGrunnlagstype());
         }
     }
 }

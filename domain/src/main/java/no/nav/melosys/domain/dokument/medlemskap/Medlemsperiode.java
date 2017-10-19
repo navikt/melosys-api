@@ -11,14 +11,11 @@ import java.time.LocalDate;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Medlemsperiode {
 
-    // TODO: Konverter datofelter via settere på joda format.
-    //Periode periode;
+    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
+    private LocalDate fraOgMed;
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    private LocalDate fom;
-
-    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    private LocalDate tom;
+    private LocalDate tilOgMed;
 
     private Periodetype type;
 
@@ -30,28 +27,26 @@ public class Medlemsperiode {
 
     private String lovvalg;
 
-    // TODO: "Lovvalg periode type" avventer avklaring
-
     private String trygdedekning;
 
     private String kildedokumenttype;
 
     private String kilde;
 
-    public LocalDate getFom() {
-        return fom;
+    public LocalDate getFraOgMed() {
+        return fraOgMed;
     }
 
-    public void setFom(LocalDate fom) {
-        this.fom = fom;
+    public void setFraOgMed(LocalDate fraOgMed) {
+        this.fraOgMed = fraOgMed;
     }
 
-    public LocalDate getTom() {
-        return tom;
+    public LocalDate getTilOgMed() {
+        return tilOgMed;
     }
 
-    public void setTom(LocalDate tom) {
-        this.tom = tom;
+    public void setTilOgMed(LocalDate tilOgMed) {
+        this.tilOgMed = tilOgMed;
     }
 
     public Periodetype getType() {
