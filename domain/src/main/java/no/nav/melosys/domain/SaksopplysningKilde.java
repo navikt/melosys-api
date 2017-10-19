@@ -8,7 +8,7 @@ public enum SaksopplysningKilde implements Kodeverk<SaksopplysningKilde> {
     EREG("EREG", "Enhetsregisteret"),
     INNTK("INNTK", "Inntektskomponenten"),
     TPS("TPS", "Folkeregisteret");
-    
+
     private String kode;
     private String beskrivelse;
 

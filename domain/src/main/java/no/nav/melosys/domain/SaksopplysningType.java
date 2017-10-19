@@ -9,7 +9,7 @@ public enum SaksopplysningType implements Kodeverk<SaksopplysningType> {
     ORGANISASJON("ORG", "Arbeidsgiver"),
     PERSONOPPLYSNING("PERSOPL", "Personopplysning"),
     SØKNAD("SØKNAD", "Søknad");
-    
+
     private String kode;
     private String beskrivelse;
 

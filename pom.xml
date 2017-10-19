@@ -48,6 +48,7 @@
         <tps.aktoer.version>2.0.1</tps.aktoer.version>
         <tps.person.version>3.0.2</tps.person.version>
         <vl-felles.version>1.8.11</vl-felles.version>
+        <medl2-v2.version>2.0.6</medl2-v2.version>
         <kodeverk-v2.version>2.0.0-alpha004</kodeverk-v2.version>
         
         <!-- Versjoner av eksterne biblioteker -->
@@ -275,6 +276,15 @@
                 <version>${kodeverk-v2.version}</version>
                 <classifier>jaxws</classifier>
             </dependency>
+            <!--MEDL2-->
+            <dependency>
+                <groupId>no.nav.tjenester</groupId>
+                <artifactId>nav-medlemskap-v2-tjenestespesifikasjon</artifactId>
+                <version>${medl2-v2.version}</version>
+                <classifier>joda</classifier>
+            </dependency>
+
+
 
 
             <!-- Sikkerhet foreldrepenger -->

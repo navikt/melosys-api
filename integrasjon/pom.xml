@@ -91,6 +91,13 @@
             <classifier>jaxws</classifier>
         </dependency>
 
+        <!--MEDL2-->
+        <dependency>
+            <groupId>no.nav.tjenester</groupId>
+            <artifactId>nav-medlemskap-v2-tjenestespesifikasjon</artifactId>
+            <classifier>joda</classifier>
+        </dependency>
+
         <!--Test-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
