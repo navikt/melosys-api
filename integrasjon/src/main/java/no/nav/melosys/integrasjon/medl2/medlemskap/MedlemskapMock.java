@@ -10,11 +10,13 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.*;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 
+/*
+* FIXME: Bør flyttes til src/test, men krever større overordnede endringer.
+*/
 public class MedlemskapMock implements MedlemskapConsumer {
 
     @Override

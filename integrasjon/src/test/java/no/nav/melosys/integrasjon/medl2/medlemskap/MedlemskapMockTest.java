@@ -1,10 +1,8 @@
 package no.nav.melosys.integrasjon.medl2.medlemskap;
 
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Foedselsnummer;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Medlemsperiode;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeRequest;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeResponse;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
