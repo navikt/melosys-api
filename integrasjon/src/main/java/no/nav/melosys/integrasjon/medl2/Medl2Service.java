@@ -1,6 +1,9 @@
 package no.nav.melosys.integrasjon.medl2;
 
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.medl2.medlemskap.MedlemskapConsumer;
@@ -21,9 +24,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.StringWriter;
 
-/*
-* FIXME: Bør flyttes til src/test, men krever større overordnede endringer.
-*/
 @Service
 public class Medl2Service implements Medl2Fasade {
 
@@ -33,11 +33,14 @@ public class Medl2Service implements Medl2Fasade {
 
     private final MedlemskapConsumer medlemskapConsumer;
 
+    private DokumentFactory dokumentFactory;
+
     private final Marshaller marshaller;
 
     @Autowired
-    public Medl2Service(MedlemskapConsumer medlemskapConsumer) {
+    public Medl2Service(MedlemskapConsumer medlemskapConsumer, DokumentFactory dokumentFactory) {
         this.medlemskapConsumer = medlemskapConsumer;
+        this.dokumentFactory = dokumentFactory;
 
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(HentPeriodeListeResponse.class);
@@ -58,6 +61,7 @@ public class Medl2Service implements Medl2Fasade {
             JAXBElement<HentPeriodeListeResponse> xmlRoot
                     = new JAXBElement<>(MedlemskapConsumerConfig.getResponse(), HentPeriodeListeResponse.class, response);
 
+            // FIXME: Mister response-wrapper i XML, slik at vi ikke får unmarshallet dokument-XML med gjeldende xslt.
             marshaller.marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);
@@ -66,10 +70,12 @@ public class Medl2Service implements Medl2Fasade {
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
-        // TODO: Implementeres av EESSI2-335
-        //saksopplysning.setKilde(SaksopplysningKilde.MEDL2);
-        //saksopplysning.setType(SaksopplysningType.MEDLEMSKAP);
+        saksopplysning.setKilde(SaksopplysningKilde.MEDL2);
+        saksopplysning.setType(SaksopplysningType.MEDLEMSKAP);
         saksopplysning.setVersjon(MEDLEMSKAP_VERSJON);
+
+        // xml -> java objekter
+        dokumentFactory.lagDokument(saksopplysning);
 
         return saksopplysning;
     }
