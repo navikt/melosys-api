@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Medlemsperiode {
 
-    // TODO: Konverter datofelter via settere på annet format.
+    // TODO: Konverter datofelter via settere på joda format.
     //Periode periode;
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
@@ -29,6 +29,8 @@ public class Medlemsperiode {
     private String land;
 
     private String lovvalg;
+
+    // TODO: "Lovvalg periode type" avventer avklaring
 
     private String trygdedekning;
 

@@ -1,59 +1,18 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import java.time.LocalDate;
-
-import no.nav.melosys.tjenester.gui.dto.util.DtoUtils;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Medlemsperiode;
-
 public class MedlemsperiodeDto {
-
-    public static class ValueTerm<V> {
-        private V value;
-        private V term;
-
-        ValueTerm(V value, V term) {
-            this.value = value;
-            this.term = term;
-        }
-
-        public V getValue() {
-            return value;
-        }
-
-        public V getTerm() {
-            return term;
-        }
-    }
 
     private PeriodeDto periode;
 
-    private ValueTerm<String> type;
+    private String type;
 
-    private ValueTerm<String> status;
+    private String status;
 
-    private ValueTerm<String> grunnlagstype;
+    private String grunnlagstype;
 
-    private ValueTerm<String> land;
+    private String land;
 
-    private ValueTerm<String> trygdedekning;
-
-    public static MedlemsperiodeDto toDto(Medlemsperiode m) {
-        MedlemsperiodeDto medlemsperiodeDto = new MedlemsperiodeDto();
-
-        LocalDate fom = DtoUtils.tilLocalDate(m.getFraOgMed());
-        LocalDate tom = DtoUtils.tilLocalDate(m.getTilOgMed());
-        medlemsperiodeDto.setPeriode(new PeriodeDto(fom, tom));
-
-        medlemsperiodeDto.setType(new ValueTerm<>(m.getType().getValue(), m.getType().getTerm()));
-        medlemsperiodeDto.setStatus(new ValueTerm<>(m.getStatus().getValue(), m.getStatus().getTerm()));
-        medlemsperiodeDto.setGrunnlagstype(new ValueTerm<>(m.getGrunnlagstype().getValue(), m.getGrunnlagstype().getTerm()));
-        if (m.getLand() != null)
-            medlemsperiodeDto.setLand(new ValueTerm<>(m.getLand().getValue(), m.getLand().getTerm()));
-        if (m.getTrygdedekning() != null)
-            medlemsperiodeDto.setTrygdedekning(new ValueTerm<>(m.getTrygdedekning().getValue(), m.getTrygdedekning().getTerm()));
-
-        return medlemsperiodeDto;
-    }
+    private String trygdedekning;
 
     public PeriodeDto getPeriode() {
         return periode;
@@ -63,43 +22,43 @@ public class MedlemsperiodeDto {
         this.periode = periode;
     }
 
-    public ValueTerm<String> getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(ValueTerm<String> type) {
+    public void setType(String type) {
         this.type = type;
     }
 
-    public ValueTerm<String> getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(ValueTerm<String> status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
-    public ValueTerm<String> getGrunnlagstype() {
+    public String getGrunnlagstype() {
         return grunnlagstype;
     }
 
-    public void setGrunnlagstype(ValueTerm<String> grunnlagstype) {
+    public void setGrunnlagstype(String grunnlagstype) {
         this.grunnlagstype = grunnlagstype;
     }
 
-    public ValueTerm<String> getLand() {
+    public String getLand() {
         return land;
     }
 
-    public void setLand(ValueTerm<String> land) {
+    public void setLand(String land) {
         this.land = land;
     }
 
-    public ValueTerm<String> getTrygdedekning() {
+    public String getTrygdedekning() {
         return trygdedekning;
     }
 
-    public void setTrygdedekning(ValueTerm<String> trygdedekning) {
+    public void setTrygdedekning(String trygdedekning) {
         this.trygdedekning = trygdedekning;
     }
 }

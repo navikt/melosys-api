@@ -18,6 +18,7 @@ public class MedlemskapConsumerConfig {
     private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/medlemskap/v2";
     private static final QName SERVICE = new QName(NAMESPACE, "Medlemskap_v2");
     private static final QName PORT = new QName(NAMESPACE, "Medlemskap_v2Port");
+    private static final QName RESPONSE = new QName(NAMESPACE,"hentPeriodeListeResponse");
 
     private String endpointUrl; // NOSONAR
 
@@ -43,5 +44,9 @@ public class MedlemskapConsumerConfig {
 
     public String getEndpointUrl() {
         return endpointUrl;
+    }
+
+    public static QName getResponse() {
+        return RESPONSE;
     }
 }
