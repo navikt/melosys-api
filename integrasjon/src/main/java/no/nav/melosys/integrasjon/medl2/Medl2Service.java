@@ -6,6 +6,7 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.medl2.medlemskap.HentPeriodeListeResponseWrapper;
 import no.nav.melosys.integrasjon.medl2.medlemskap.MedlemskapConsumer;
 import no.nav.melosys.integrasjon.medl2.medlemskap.MedlemskapConsumerConfig;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
@@ -43,7 +44,7 @@ public class Medl2Service implements Medl2Fasade {
         this.dokumentFactory = dokumentFactory;
 
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(HentPeriodeListeResponse.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(HentPeriodeListeResponseWrapper.class);
             marshaller = jaxbContext.createMarshaller();
         } catch (JAXBException e) {
             log.error("", e);
@@ -58,10 +59,11 @@ public class Medl2Service implements Medl2Fasade {
         // Response -> xml
         StringWriter xmlWriter = new StringWriter();
         try {
-            JAXBElement<HentPeriodeListeResponse> xmlRoot
-                    = new JAXBElement<>(MedlemskapConsumerConfig.getResponse(), HentPeriodeListeResponse.class, response);
+            HentPeriodeListeResponseWrapper wrapper
+                    = new HentPeriodeListeResponseWrapper().withPeriodeListe(response.getPeriodeListe());
+            JAXBElement<HentPeriodeListeResponseWrapper> xmlRoot
+                    = new JAXBElement<>(MedlemskapConsumerConfig.getResponse(), HentPeriodeListeResponseWrapper.class, wrapper);
 
-            // FIXME: Mister response-wrapper i XML, slik at vi ikke får unmarshallet dokument-XML med gjeldende xslt.
             marshaller.marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);

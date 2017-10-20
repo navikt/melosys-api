@@ -26,6 +26,7 @@ public class Medl2ServiceTest {
     }
 
     @Test
+    @SuppressWarnings("Duplicates")
     public void getPeriodeListe() throws IntegrasjonException, SikkerhetsbegrensningException {
         final String fnr = "77777777773";
         Saksopplysning saksopplysning = medl2Service.getPeriodeListe(fnr);
@@ -36,11 +37,14 @@ public class Medl2ServiceTest {
 
         assertNotNull(medlemskapDokument);
         assertNotNull(medlemskapDokument.getMedlemsperiode());
-        // Feiler på grunn av problem med marshalling i Medl2Service
         assertFalse(medlemskapDokument.getMedlemsperiode().isEmpty());
 
         for (Medlemsperiode medlemsperiode : medlemskapDokument.getMedlemsperiode()) {
             assertNotNull(medlemsperiode.getType());
+            assertNotNull(medlemsperiode.getStatus());
+            assertNotNull(medlemsperiode.getLovvalg());
+            assertNotNull(medlemsperiode.getKilde());
+            assertNotNull(medlemsperiode.getGrunnlagstype());
         }
     }
 }
