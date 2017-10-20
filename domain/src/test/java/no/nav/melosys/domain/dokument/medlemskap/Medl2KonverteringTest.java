@@ -20,6 +20,7 @@ import static org.junit.Assert.assertNotNull;
 public class Medl2KonverteringTest {
 
     @Test
+    @SuppressWarnings("Duplicates")
     public void transform() throws TransformerFactoryConfigurationError, TransformerException, IOException, JAXBException {
         InputStream xslt = getClass().getClassLoader().getResourceAsStream("medl2/medlemskap_2.0.xslt");
         InputStream kilde = getClass().getClassLoader().getResourceAsStream("medlemskap/66666666661.xml");
