@@ -19,7 +19,12 @@
             <medlemsperiode>
                 <xsl:for-each select="ns2:hentPeriodeListeResponse/response/periodeListe">
                     <medlemsperiode>
-                        <xsl:apply-templates select="fraOgMed|tilOgMed|type|status|grunnlagstype|land" />
+                        <periode>
+                            <fom><xsl:value-of select ="concat(fraOgMed, 'T00:00:00.000+00:00')" /></fom>
+                            <tom><xsl:value-of select ="concat(tilOgMed, 'T00:00:00.000+00:00')" /></tom>
+                        </periode>
+
+                        <xsl:apply-templates select="type|status|grunnlagstype|land" />
                         <xsl:apply-templates select="lovvalg|trygdedekning|kildedokumenttype|kilde" />
                     </medlemsperiode>
                 </xsl:for-each>

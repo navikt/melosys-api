@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.medl2;
+package no.nav.melosys.integrasjon.medl;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;

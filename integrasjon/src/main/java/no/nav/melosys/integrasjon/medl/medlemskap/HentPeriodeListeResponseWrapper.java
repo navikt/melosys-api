@@ -1,10 +1,13 @@
-package no.nav.melosys.integrasjon.medl2.medlemskap;
+package no.nav.melosys.integrasjon.medl.medlemskap;
 
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Medlemsperiode;
 
 import javax.xml.bind.annotation.*;
 import java.util.*;
 
+/**
+ * Denne klassen har som formål å sørge for at respons fra MEDL marshalles til samme format som vi får fra tjenesten.
+ */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
         name = "hentPeriodeListeResponse",
@@ -20,8 +23,7 @@ public class HentPeriodeListeResponseWrapper {
     }
 
     public HentPeriodeListeResponseWrapper withPeriodeListe(Collection<Medlemsperiode> periodeListe) {
-        if (periodeListe != null)
-            this.periodeListe.addAll(periodeListe);
+        this.periodeListe.addAll(periodeListe);
         return this;
     }
 }

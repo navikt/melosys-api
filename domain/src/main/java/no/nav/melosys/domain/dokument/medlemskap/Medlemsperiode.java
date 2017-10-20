@@ -1,53 +1,30 @@
 package no.nav.melosys.domain.dokument.medlemskap;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.time.LocalDate;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Medlemsperiode {
 
-    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    private LocalDate fraOgMed;
+    private Periode periode;
 
-    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    private LocalDate tilOgMed;
+    private Periodetype type; //"http://nav.no/kodeverk/Kodeverk/PeriodetypeMedl"
 
-    private Periodetype type;
+    private String status; //"http://nav.no/kodeverk/Kodeverk/PeriodestatusMedl"
 
-    private String status;
+    private String grunnlagstype; //"http://nav.no/kodeverk/Kodeverk/GrunnlagMedl"
 
-    private String grunnlagstype;
+    private String land; //"http://nav.no/kodeverk/Kodeverk/Landkoder"
 
-    private String land;
+    private String lovvalg; //"http://nav.no/kodeverk/Kodeverk/LovvalgMedl"
 
-    private String lovvalg;
-
-    private String trygdedekning;
+    private String trygdedekning; //"http://nav.no/kodeverk/Kodeverk/DekningMedl"
 
     private String kildedokumenttype;
 
     private String kilde;
-
-    public LocalDate getFraOgMed() {
-        return fraOgMed;
-    }
-
-    public void setFraOgMed(LocalDate fraOgMed) {
-        this.fraOgMed = fraOgMed;
-    }
-
-    public LocalDate getTilOgMed() {
-        return tilOgMed;
-    }
-
-    public void setTilOgMed(LocalDate tilOgMed) {
-        this.tilOgMed = tilOgMed;
-    }
 
     public Periodetype getType() {
         return type;

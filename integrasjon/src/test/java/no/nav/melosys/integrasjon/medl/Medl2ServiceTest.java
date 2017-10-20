@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.medl2;
+package no.nav.melosys.integrasjon.medl;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
@@ -8,7 +8,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.medl2.medlemskap.MedlemskapMock;
+import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import org.junit.Before;
 import org.junit.Test;
 

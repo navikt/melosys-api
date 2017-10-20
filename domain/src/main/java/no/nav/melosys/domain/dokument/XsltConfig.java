@@ -19,7 +19,7 @@ class XsltConfig {
 
     public static final String TPS_MAPPE = "tps";
 
-    public static final String MEDL2_MAPPE = "medl2";
+    public static final String MEDL_MAPPE = "medl";
 
     /* Tjenester */
     public static final String ARBEIDSFORHOLD_TJENESTE = "arbeidsforhold";
@@ -63,7 +63,7 @@ class XsltConfig {
             case ORGANISASJON: return XsltConfig.EREG_MAPPE;
             case ARBEIDSFORHOLD: return XsltConfig.AAREG_MAPPE;
             case INNTEKT: return XsltConfig.INNTK_MAPPE;
-            case MEDLEMSKAP: return XsltConfig.MEDL2_MAPPE;
+            case MEDLEMSKAP: return XsltConfig.MEDL_MAPPE;
             default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
         }
     }

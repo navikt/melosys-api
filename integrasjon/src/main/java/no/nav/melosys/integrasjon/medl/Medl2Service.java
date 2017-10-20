@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.medl2;
+package no.nav.melosys.integrasjon.medl;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
@@ -6,9 +6,9 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.medl2.medlemskap.HentPeriodeListeResponseWrapper;
-import no.nav.melosys.integrasjon.medl2.medlemskap.MedlemskapConsumer;
-import no.nav.melosys.integrasjon.medl2.medlemskap.MedlemskapConsumerConfig;
+import no.nav.melosys.integrasjon.medl.medlemskap.HentPeriodeListeResponseWrapper;
+import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumer;
+import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumerConfig;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Foedselsnummer;
@@ -72,7 +72,7 @@ public class Medl2Service implements Medl2Fasade {
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKilde.MEDL2);
+        saksopplysning.setKilde(SaksopplysningKilde.MEDL);
         saksopplysning.setType(SaksopplysningType.MEDLEMSKAP);
         saksopplysning.setVersjon(MEDLEMSKAP_VERSJON);
 

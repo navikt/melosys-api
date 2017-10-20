@@ -18,6 +18,6 @@ public enum Periodetype implements KodeverkEnum<Periodetype> {
 
     @Override
     public String getNavn() {
-        return null;
+        return navn;
     }
 }
