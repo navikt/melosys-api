@@ -19,8 +19,8 @@
     <xsl:template match="periodeListe">
         <medlemsperiode>
             <periode>
-                <fom><xsl:value-of select ="concat(fraOgMed, 'T00:00:00.000+00:00')" /></fom>
-                <tom><xsl:value-of select ="concat(tilOgMed, 'T00:00:00.000+00:00')" /></tom>
+                <fom><xsl:value-of select ="fraOgMed" /></fom>
+                <tom><xsl:value-of select ="tilOgMed" /></tom>
             </periode>
             <xsl:apply-templates/>
         </medlemsperiode>

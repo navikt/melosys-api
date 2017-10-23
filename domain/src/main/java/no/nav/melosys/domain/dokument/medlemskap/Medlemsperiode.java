@@ -1,7 +1,5 @@
 package no.nav.melosys.domain.dokument.medlemskap;
 
-import no.nav.melosys.domain.dokument.felles.Periode;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
