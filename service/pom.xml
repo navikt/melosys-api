@@ -15,14 +15,13 @@
     <packaging>jar</packaging>
 
     <dependencies>
-
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-integrasjon</artifactId>
-        </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-integrasjon</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>

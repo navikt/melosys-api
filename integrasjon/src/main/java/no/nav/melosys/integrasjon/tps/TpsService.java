@@ -146,22 +146,11 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    @Deprecated
-    public HentPersonResponse hentPersonMedAdresse(String ident) throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
+    public Saksopplysning hentPersonMedAdresse(String ident) throws SikkerhetsbegrensningException {
         Collection<Informasjonsbehov> behov = new ArrayList<>();
         behov.add(Informasjonsbehov.ADRESSE);
 
-        HentPersonRequest request = new HentPersonRequest();
-        NorskIdent norskIdent = new NorskIdent();
-        norskIdent.setIdent(ident);
-
-        PersonIdent personIdent = new PersonIdent();
-        personIdent.setIdent(norskIdent);
-
-        request.setAktoer(personIdent);
-        request.getInformasjonsbehov().addAll(behov);
-
-        return personConsumer.hentPerson(request);
+        return hentPerson(ident, behov);
     }
 
 }

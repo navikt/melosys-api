@@ -8,6 +8,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.melosys.domain.dokument.felles.Periode;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -39,6 +41,7 @@ public class Arbeidsforhold {
 
     private String opplysningspliktigID;
 
+    @JsonProperty("A-ordning")
     private Boolean arbeidsforholdInnrapportertEtterAOrdningen;
 
     public String getArbeidsforholdID() {

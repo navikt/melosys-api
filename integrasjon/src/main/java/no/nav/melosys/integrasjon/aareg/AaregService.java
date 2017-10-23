@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.aareg;
 
 import java.io.StringWriter;
-import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -21,7 +20,6 @@ import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerUgyldigInput;
-import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Arbeidsforhold;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.NorskIdent;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Regelverker;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.FinnArbeidsforholdPrArbeidstakerRequest;
@@ -55,23 +53,7 @@ public class AaregService implements AaregFasade {
     }
 
     @Override
-    public List<Arbeidsforhold> finnArbeidsforholdPrArbeidstaker(String ident, String regelverk) throws FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput {
-        FinnArbeidsforholdPrArbeidstakerRequest request = new FinnArbeidsforholdPrArbeidstakerRequest();
-
-        NorskIdent norskIdent = new NorskIdent();
-        norskIdent.setIdent(ident);
-        request.setIdent(norskIdent);
-        Regelverker regelverker = new Regelverker();
-
-        regelverker.setKodeverksRef(regelverk);
-        request.setRapportertSomRegelverk(regelverker);
-
-        // Kall til Aa-registret
-        return arbeidsforholdConsumer.finnArbeidsforholdPrArbeidstaker(request).getArbeidsforhold();
-    }
-
-    @Override
-    public Saksopplysning getArbeidsforholdPrArbeidstaker(String ident, String regelverk) throws SikkerhetsbegrensningException {
+    public Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, String regelverk) throws SikkerhetsbegrensningException {
         FinnArbeidsforholdPrArbeidstakerRequest request = new FinnArbeidsforholdPrArbeidstakerRequest();
 
         NorskIdent norskIdent = new NorskIdent();

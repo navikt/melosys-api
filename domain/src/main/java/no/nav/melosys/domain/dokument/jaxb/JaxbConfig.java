@@ -16,7 +16,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonopplysningDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 
 @Configuration
 public class JaxbConfig {
@@ -37,7 +37,7 @@ public class JaxbConfig {
     private static Class<?>[] getClassesToBeBound() {
         List<Class<?>> klasser = new ArrayList<>();
 
-        List<Class<? extends SaksopplysningDokument>> dokumentKlasser = Arrays.asList(ArbeidsforholdDokument.class, InntektDokument.class, OrganisasjonDokument.class, PersonopplysningDokument.class);
+        List<Class<? extends SaksopplysningDokument>> dokumentKlasser = Arrays.asList(ArbeidsforholdDokument.class, InntektDokument.class, OrganisasjonDokument.class, PersonDokument.class);
         klasser.addAll(dokumentKlasser);
 
         return klasser.toArray(new Class[0]);

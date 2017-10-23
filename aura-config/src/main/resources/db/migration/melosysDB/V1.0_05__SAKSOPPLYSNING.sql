@@ -16,6 +16,7 @@ CREATE TABLE saksopplysning_type (
 );
 
 INSERT INTO saksopplysning_type (kode, navn) VALUES ('ARBFORH', 'Arbeidsforhold');
+INSERT INTO saksopplysning_type (kode, navn) VALUES ('INNTK', 'Inntekt');
 INSERT INTO saksopplysning_type (kode, navn) VALUES ('ORG', 'Arbeidsgiver');
 INSERT INTO saksopplysning_type (kode, navn) VALUES ('PERSOPL', 'Personopplysninger');
 INSERT INTO saksopplysning_type (kode, navn) VALUES ('SØKNAD', 'Søknad');
@@ -29,6 +30,7 @@ CREATE TABLE saksopplysning_kilde (
 
 INSERT INTO saksopplysning_kilde (kode, navn) VALUES ('AAREG', 'Aa-registeret');
 INSERT INTO saksopplysning_kilde (kode, navn) VALUES ('EREG', 'Enhetsregisteret');
+INSERT INTO saksopplysning_kilde (kode, navn) VALUES ('INNTK', 'Inntektskomponenten');
 INSERT INTO saksopplysning_kilde (kode, navn) VALUES ('TPS', 'Folkeregisteret');
 
 ALTER TABLE saksopplysning ADD CONSTRAINT fk_saksopplysning_behandling FOREIGN KEY (behandling_id) REFERENCES behandling;

@@ -1,0 +1,108 @@
+package db.migration.melosysDB.testdata;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.XsltConfig;
+import oracle.jdbc.OracleConnection;
+import oracle.jdbc.OraclePreparedStatement;
+import oracle.xdb.XMLType;
+
+
+public class V1_1_05__SAKSOPPLYSNING_data implements JdbcMigration {
+
+    private static final Logger log = LoggerFactory.getLogger(V1_1_05__SAKSOPPLYSNING_data.class);
+
+    private static final int MOCK_BEHANDLINGER_NR = 7;
+
+    private static int currentRowNum = 0;
+
+    public void migrate(Connection connection) throws Exception {
+        URI rootURI = getClass().getClassLoader().getResource("db/migration/melosysDB/testdata/xml").toURI();
+
+
+        Stream<Path> paths = Files.walk(Paths.get(rootURI));
+        List<Path> dirs = paths.filter(Files::isDirectory).filter(x -> ! x.getFileName().toString().equals("xml")).collect(Collectors.toList());
+
+        Connection conn = connection;
+
+        if (connection.isWrapperFor(OracleConnection.class)) {
+            conn = connection.unwrap(OracleConnection.class);
+        }
+
+        for (Path dir : dirs) {
+            batchInsertForDirectory(conn, dir);
+        }
+
+    }
+
+    private void batchInsertForDirectory(Connection conn, Path dir) throws IOException, SQLException {
+
+        switch (dir.getFileName().toString()) {
+            case XsltConfig.AAREG_MAPPE: generateBatch(conn, dir, SaksopplysningType.ARBEIDSFORHOLD, "3.0", SaksopplysningKilde.AAREG);
+                return;
+            case XsltConfig.EREG_MAPPE: generateBatch(conn, dir, SaksopplysningType.ORGANISASJON, "4.0", SaksopplysningKilde.EREG);
+                return;
+            case XsltConfig.INNTK_MAPPE: generateBatch(conn, dir, SaksopplysningType.INNTEKT, "3.2", SaksopplysningKilde.INNTK);
+                return;
+            case XsltConfig.TPS_MAPPE: generateBatch(conn, dir, SaksopplysningType.PERSONOPPLYSNING, "3.0", SaksopplysningKilde.TPS);
+                return;
+        }
+
+        throw new IllegalStateException("Unknown xml data directory: " + dir.getFileName());
+    }
+
+    private void generateBatch(Connection connection, Path dir, SaksopplysningType opplysning_type, String versjon, SaksopplysningKilde kilde) throws IOException, SQLException {
+        log.info("Creating batch inserts for directory: " + dir.getFileName());
+
+        List<Path> files = Files.walk(dir).filter(Files::isRegularFile).collect(Collectors.toList());
+
+        for (int i = 1; i <= files.size() ; i++) {
+            insertXML(files.get(i-1), connection, opplysning_type, versjon, kilde, i);
+        }
+    }
+
+    private void insertXML(Path file, Connection conn, SaksopplysningType opplysning_type, String versjon, SaksopplysningKilde kilde, int i) throws SQLException {
+        String query= "INSERT INTO SAKSOPPLYSNING (ID, BEHANDLING_ID, OPPLYSNING_TYPE, VERSJON, KILDE, REGISTRERT_DATO, DOKUMENT_XML) VALUES (?, ?, ?, ?, ?, ?, ?) ";
+
+        try (OraclePreparedStatement ps = (OraclePreparedStatement) conn.prepareStatement(query)) {
+            // Oppretter XML-type med Oracle API
+            XMLType xml = XMLType.createXML(conn, Files.newInputStream(file));
+
+            ps.setInt(1, currentRowNum++);
+            ps.setInt(2, i % (MOCK_BEHANDLINGER_NR + 1));
+            ps.setString(3, opplysning_type.getKode());
+            ps.setString(4, versjon);
+            ps.setString(5, kilde.getKode());
+            Timestamp x = Timestamp.valueOf(LocalDateTime.now());
+            ps.setTimestamp(6, x);
+            ps.setObject(7, xml);
+
+            if (ps.executeUpdate() == 1) {
+                log.info("Successfully inserted {} {}", file.getFileName(), i);
+            }
+
+        } catch (SQLException sqlexp) {
+            log.error("", sqlexp);
+        } catch (Exception exp) {
+            log.error("", exp);
+        }
+    }
+
+}

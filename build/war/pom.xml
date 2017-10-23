@@ -16,11 +16,6 @@
 
     <dependencies>
         <dependency>
-            <!--TODO Francois: For å teste flyway migrations. Fjernes når modellen er stabil.-->
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-aura-config</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
             <version>${flyway.version}</version>
@@ -51,7 +46,7 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <configuration>
                     <webApp>
-                        <contextPath>/system/melosys/</contextPath>
+                        <contextPath>/melosys</contextPath>
                     </webApp>
                 </configuration>
                 <dependencies>

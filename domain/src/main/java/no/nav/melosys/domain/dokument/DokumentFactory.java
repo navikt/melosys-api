@@ -46,18 +46,16 @@ public class DokumentFactory {
     }
 
     /**
-     * lagDokument setter et {@link SaksopplysningDokument} på en {@link Saksopplysning} ut fra feltet {@code dokumentXml}
-     *
-     * @param saksopplysning
-     * @throws TransformerException
+     * lagDokument setter et {@link SaksopplysningDokument} på en {@link Saksopplysning} ut fra feltet {@code dokumentXml}.
+     * SaksopplysningDokumentet returneres.
      */
-    public void lagDokument(Saksopplysning saksopplysning) {
+    public SaksopplysningDokument lagDokument(Saksopplysning saksopplysning) {
         Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
 
         String dokumentXml = saksopplysning.getDokumentXml();
         if (dokumentXml == null) {
-            saksopplysning.setDokumentXml(null);
-            return;
+            saksopplysning.setDokument(null);
+            return null;
         }
 
         SaksopplysningType type = saksopplysning.getType();
@@ -83,6 +81,7 @@ public class DokumentFactory {
         SaksopplysningDokument dokument = (SaksopplysningDokument) marshaller.unmarshal(new StreamSource(reader));
 
         saksopplysning.setDokument(dokument);
+        return dokument;
     }
 
 }

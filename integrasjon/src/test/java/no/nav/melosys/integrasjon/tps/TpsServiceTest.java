@@ -18,7 +18,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
-import no.nav.melosys.domain.dokument.person.PersonopplysningDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.integrasjon.test.TpsTestData;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
@@ -77,7 +77,7 @@ public class TpsServiceTest {
     @Test
     public void hentPerson() throws Exception {
         Saksopplysning saksopplysning = service.hentPerson("99999999999", null);
-        PersonopplysningDokument dokument = (PersonopplysningDokument) saksopplysning.getDokument();
+        PersonDokument dokument = (PersonDokument) saksopplysning.getDokument();
         assertThat(dokument.fnr).isEqualTo("99999999999");
     }
 }
