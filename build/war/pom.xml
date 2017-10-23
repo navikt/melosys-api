@@ -51,7 +51,7 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <configuration>
                     <webApp>
-                        <contextPath>/system/melosys/</contextPath>
+                        <contextPath>/melosys/</contextPath>
                     </webApp>
                 </configuration>
                 <dependencies>

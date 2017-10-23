@@ -6,13 +6,11 @@
     <name>melosys</name>
 
     <artifacts>
-        <ear groupId="no.nav.melosys" artifactId="melosys-ear">
-        </ear>
+        <ear groupId="no.nav.melosys" artifactId="melosys-ear"/>
     </artifacts>
 
     <resources>
-        <datasource alias="melosysDB" jndi="java:/jdbc/melosysDB" type="ORACLE">
-        </datasource>
+        <datasource alias="melosysDB" jndi="java:/jdbc/melosysDB" type="ORACLE"/>
 
         <!--
             Se https://fasit.adeo.no/wicket/bookmarkable/no.nav.aura.envconfig.gui.resources.ResourceDocumentationPage

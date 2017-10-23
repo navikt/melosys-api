@@ -49,7 +49,7 @@
                         <webModule>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>melosys-war</artifactId>
-                            <contextRoot>/system/melosys/</contextRoot>
+                            <contextRoot>/melosys/</contextRoot>
                         </webModule>
                         <webModule>
                             <groupId>${project.groupId}</groupId>
