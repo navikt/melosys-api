@@ -1,10 +1,14 @@
-package no.nav.melosys.integrasjon.medl2;
+package no.nav.melosys.integrasjon.medl;
 
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.medl2.medlemskap.MedlemskapConsumer;
-import no.nav.melosys.integrasjon.medl2.medlemskap.MedlemskapConsumerConfig;
+import no.nav.melosys.integrasjon.medl.medlemskap.HentPeriodeListeResponseWrapper;
+import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumer;
+import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumerConfig;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Foedselsnummer;
@@ -30,14 +34,17 @@ public class Medl2Service implements Medl2Fasade {
 
     private final MedlemskapConsumer medlemskapConsumer;
 
+    private DokumentFactory dokumentFactory;
+
     private final Marshaller marshaller;
 
     @Autowired
-    public Medl2Service(MedlemskapConsumer medlemskapConsumer) {
+    public Medl2Service(MedlemskapConsumer medlemskapConsumer, DokumentFactory dokumentFactory) {
         this.medlemskapConsumer = medlemskapConsumer;
+        this.dokumentFactory = dokumentFactory;
 
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(HentPeriodeListeResponse.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(HentPeriodeListeResponseWrapper.class);
             marshaller = jaxbContext.createMarshaller();
         } catch (JAXBException e) {
             log.error("", e);
@@ -52,8 +59,10 @@ public class Medl2Service implements Medl2Fasade {
         // Response -> xml
         StringWriter xmlWriter = new StringWriter();
         try {
-            JAXBElement<HentPeriodeListeResponse> xmlRoot
-                    = new JAXBElement<>(MedlemskapConsumerConfig.getResponse(), HentPeriodeListeResponse.class, response);
+            HentPeriodeListeResponseWrapper wrapper
+                    = new HentPeriodeListeResponseWrapper().withPeriodeListe(response.getPeriodeListe());
+            JAXBElement<HentPeriodeListeResponseWrapper> xmlRoot
+                    = new JAXBElement<>(MedlemskapConsumerConfig.getResponse(), HentPeriodeListeResponseWrapper.class, wrapper);
 
             marshaller.marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
@@ -63,10 +72,12 @@ public class Medl2Service implements Medl2Fasade {
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
-        // TODO: Implementeres av EESSI2-335
-        //saksopplysning.setKilde(SaksopplysningKilde.MEDL2);
-        //saksopplysning.setType(SaksopplysningType.MEDLEMSKAP);
+        saksopplysning.setKilde(SaksopplysningKilde.MEDL);
+        saksopplysning.setType(SaksopplysningType.MEDLEMSKAP);
         saksopplysning.setVersjon(MEDLEMSKAP_VERSJON);
+
+        // xml -> java objekter
+        dokumentFactory.lagDokument(saksopplysning);
 
         return saksopplysning;
     }

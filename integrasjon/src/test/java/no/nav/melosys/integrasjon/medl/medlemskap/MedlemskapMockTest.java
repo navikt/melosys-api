@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.medl2.medlemskap;
+package no.nav.melosys.integrasjon.medl.medlemskap;
 
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Foedselsnummer;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeRequest;

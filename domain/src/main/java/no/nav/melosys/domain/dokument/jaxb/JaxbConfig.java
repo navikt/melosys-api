@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.xml.bind.helpers.DefaultValidationEventHandler;
 
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,7 +38,7 @@ public class JaxbConfig {
     private static Class<?>[] getClassesToBeBound() {
         List<Class<?>> klasser = new ArrayList<>();
 
-        List<Class<? extends SaksopplysningDokument>> dokumentKlasser = Arrays.asList(ArbeidsforholdDokument.class, InntektDokument.class, OrganisasjonDokument.class, PersonopplysningDokument.class);
+        List<Class<? extends SaksopplysningDokument>> dokumentKlasser = Arrays.asList(ArbeidsforholdDokument.class, InntektDokument.class, OrganisasjonDokument.class, PersonopplysningDokument.class, MedlemskapDokument.class);
         klasser.addAll(dokumentKlasser);
 
         return klasser.toArray(new Class[0]);
