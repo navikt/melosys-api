@@ -44,14 +44,7 @@
                 <type><xsl:value-of select="./type"/></type>
                 <retningsnummer><xsl:value-of select="./type"/></retningsnummer>
             </xsl:if>
-            <bruksperiode>
-                <fom><xsl:value-of select="./@fomBruksperiode"/></fom>
-                <tom><xsl:value-of select="./@tomBruksperiode"/></tom>
-            </bruksperiode>
-            <gyldighetsperiode>
-                <fom><xsl:value-of select="./@fomGyldighetsperiode"/></fom>
-                <tom><xsl:value-of select="./@tomGyldighetsperiode"/></tom>
-            </gyldighetsperiode>
+            <xsl:call-template name="Perioder" />
         </xsl:element>
     </xsl:template>
 
