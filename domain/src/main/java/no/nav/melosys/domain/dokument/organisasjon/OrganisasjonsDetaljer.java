@@ -7,6 +7,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class OrganisasjonsDetaljer {
@@ -19,6 +21,10 @@ public class OrganisasjonsDetaljer {
     private List<GeografiskAdresse> forretningsadresse;
 
     private List<GeografiskAdresse> postadresse;
+
+    private List<Telefonnummer> telefon;
+
+    private List<Epost> epostadresse;
 
     public String getOrgnummer() {
         return orgnummer;
@@ -50,5 +56,21 @@ public class OrganisasjonsDetaljer {
 
     public void setPostadresse(List<GeografiskAdresse> postadresse) {
         this.postadresse = postadresse;
+    }
+
+    public List<Telefonnummer> getTelefon() {
+        return telefon;
+    }
+
+    public void setTelefon(List<Telefonnummer> telefon) {
+        this.telefon = telefon;
+    }
+
+    public List<Epost> getEpostadresse() {
+        return epostadresse;
+    }
+
+    public void setEpostadresse(List<Epost> epostadresse) {
+        this.epostadresse = epostadresse;
     }
 }
