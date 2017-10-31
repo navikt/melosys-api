@@ -31,9 +31,21 @@
                     <redigertNavn><xsl:value-of select="redigertNavn"/></redigertNavn>
                 </organisasjonsnavn>
                 </xsl:for-each>
+                <xsl:apply-templates select="telefon|epostadresse"/>
             </organisasjonDetaljer>
             </xsl:for-each>
         </organisasjonDokument>
+    </xsl:template>
+
+    <xsl:template match="telefon|epostadresse">
+        <xsl:element name="{name()}">
+            <identifikator><xsl:value-of select="normalize-space(.)"/></identifikator>
+            <xsl:if test="name()='telefon'">
+                <type><xsl:value-of select="./type"/></type>
+                <retningsnummer><xsl:value-of select="./type"/></retningsnummer>
+            </xsl:if>
+            <xsl:call-template name="Perioder" />
+        </xsl:element>
     </xsl:template>
 
     <xsl:template match="navnelinje">

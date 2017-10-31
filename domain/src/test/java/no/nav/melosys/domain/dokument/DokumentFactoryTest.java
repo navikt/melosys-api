@@ -9,6 +9,8 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -63,7 +65,7 @@ public class DokumentFactoryTest {
     public void lagOrganisasjonDokument() throws Exception {
         Saksopplysning test = new Saksopplysning();
 
-        InputStream kilde = getClass().getClassLoader().getResourceAsStream("organisasjon/920643043.xml");
+        InputStream kilde = getClass().getClassLoader().getResourceAsStream("organisasjon/974652366.xml");
         StringBuilder stringBuilder = new StringBuilder();
         try (Reader reader = new BufferedReader(new InputStreamReader
                 (kilde, Charset.forName(StandardCharsets.UTF_8.name())))) {
@@ -81,10 +83,20 @@ public class DokumentFactoryTest {
 
         SaksopplysningDokument dokument = test.getDokument();
         assertThat(dokument).isInstanceOf(OrganisasjonDokument.class);
-        GeografiskAdresse geografiskAdresse = ((OrganisasjonDokument) dokument).getOrganisasjonDetaljer().getPostadresse().get(0);
-        assertThat(geografiskAdresse).isInstanceOf(SemistrukturertAdresse.class);
-        assertThat(((SemistrukturertAdresse) geografiskAdresse).getAdresselinje1()).isEqualTo("Skuteviksbodene 1");
 
+        OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) dokument;
+
+        GeografiskAdresse geografiskAdresse = organisasjonDokument.getOrganisasjonDetaljer().getPostadresse().get(0);
+        assertThat(geografiskAdresse).isInstanceOf(SemistrukturertAdresse.class);
+        assertThat(((SemistrukturertAdresse) geografiskAdresse).getAdresselinje1()).isEqualTo("Postboks 7030");
+
+        Epost epost = organisasjonDokument.getOrganisasjonDetaljer().getEpostadresse().get(0);
+        assertThat(epost).isInstanceOf(Epost.class);
+        assertThat(epost.getIdentifikator()).isEqualTo("post@hib.no");
+
+        Telefonnummer telefon = organisasjonDokument.getOrganisasjonDetaljer().getTelefon().get(0);
+        assertThat(telefon).isInstanceOf(Telefonnummer.class);
+        assertThat(telefon.getIdentifikator()).isEqualTo("55 58 75 00");
     }
 
 }
