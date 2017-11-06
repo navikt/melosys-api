@@ -18,7 +18,7 @@ CREATE TABLE behandling_status (
 INSERT INTO behandling_status (kode, navn) VALUES ('OPPR', 'Opprettet');
 INSERT INTO behandling_status (kode, navn) VALUES ('UBEH', 'Under behandling');
 INSERT INTO behandling_status (kode, navn) VALUES ('FORL', 'Foreløpig lovvalg');
-INSERT INTO behandling_status (kode, navn) VALUES ('AVSLUTTET', 'Avsluttet');
+INSERT INTO behandling_status (kode, navn) VALUES ('AVSLU', 'Avsluttet');
 
 CREATE TABLE behandling_steg (
     kode    VARCHAR2(99)  NOT NULL,

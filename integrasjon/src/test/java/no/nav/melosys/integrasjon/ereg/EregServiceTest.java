@@ -26,7 +26,7 @@ public class EregServiceTest {
 
     @Test
     public void getOrganisasjon() throws Exception {
-        Saksopplysning saksopplysning = eregService.getOrganisasjon("873102322");
+        Saksopplysning saksopplysning = eregService.hentOrganisasjon("873102322");
         OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) saksopplysning.getDokument();
         assertThat(organisasjonDokument.getOrganisasjonDetaljer().getNavn().get(0).getRedigertNavn()).isEqualTo("MULTICONSULT ASA");
     }

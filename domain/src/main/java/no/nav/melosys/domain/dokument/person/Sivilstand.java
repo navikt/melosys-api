@@ -1,5 +1,7 @@
 package no.nav.melosys.domain.dokument.person;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import no.nav.melosys.domain.dokument.KodeverkEnum;
 
 /**
@@ -27,6 +29,7 @@ public enum Sivilstand implements KodeverkEnum<Sivilstand> {
     }
 
     @Override
+    @JsonValue
     public String getNavn() {
         return navn;
     }

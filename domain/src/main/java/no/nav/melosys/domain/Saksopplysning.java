@@ -47,8 +47,8 @@ public class Saksopplysning {
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
 
+    @ColumnTransformer(read = "NVL2(dokument_xml, (dokument_xml).getClobVal(), NULL)", write = "XMLType.createxml(?)")
     @Column(name = "dokument_xml", updatable = false, columnDefinition = "XMLType")
-    @ColumnTransformer(read = "to_clob(dokument_xml)", write = "?")
     private String dokumentXml;
     
     @Transient

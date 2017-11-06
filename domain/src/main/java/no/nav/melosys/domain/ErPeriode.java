@@ -7,11 +7,15 @@ import java.time.LocalDate;
  */
 public interface ErPeriode {
 
-    public LocalDate getFom();
+    LocalDate getFom();
 
-    public LocalDate getTom();
+    LocalDate getTom();
+
+    default boolean erGyldig() {
+        return inkluderer(LocalDate.now());
+    }
     
-    public default boolean inkluderer (LocalDate kandidat) {
+    default boolean inkluderer (LocalDate kandidat) {
         if (getFom() != null && kandidat.isBefore(getFom())) {
             return false;
         }

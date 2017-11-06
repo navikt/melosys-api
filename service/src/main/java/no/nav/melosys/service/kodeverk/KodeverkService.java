@@ -8,10 +8,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 import no.nav.melosys.integrasjon.kodeverk.Kode;
@@ -22,7 +19,7 @@ import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
  * Merk: Klassen casher oppslag mot felles-kodevek, og er derfor egentlig ikke stateless (men den er trådsikker).
  */
 @Service
-public class KodeverkService implements ApplicationContextAware {
+public class KodeverkService {
     
     private static final long MILLIS_MELLOM_TØM_CACHE = 3600000;
 
@@ -111,22 +108,6 @@ public class KodeverkService implements ApplicationContextAware {
                 tømCache();
             }
         }
-    }
-
-    // FIXME: Resten av koden er kun for demo, og skal fjernes.
-    
-    private static KodeverkService staticKs;
-    
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        staticKs = applicationContext.getBean(KodeverkService.class);
-    }
-
-    public static String dekod(Kodeverk kodeverk, String kode) {
-        if (staticKs == null) {
-            return kode;
-        }
-        return staticKs.dekod(kodeverk, kode, LocalDate.now());
     }
 
 }

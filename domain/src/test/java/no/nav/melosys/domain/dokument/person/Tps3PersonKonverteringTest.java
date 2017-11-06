@@ -39,10 +39,10 @@ public class Tps3PersonKonverteringTest {
         
         // Unmarshal...
         ByteArrayInputStream bais = new ByteArrayInputStream(xmlBytes);
-        JAXBContext ctx = JAXBContext.newInstance(PersonopplysningDokument.class);
+        JAXBContext ctx = JAXBContext.newInstance(PersonDokument.class);
         Unmarshaller um = ctx.createUnmarshaller();
         um.setEventHandler(new DefaultValidationEventHandler());
-        PersonopplysningDokument p2 = (PersonopplysningDokument) um.unmarshal(bais);
+        PersonDokument p2 = (PersonDokument) um.unmarshal(bais);
 
         // Verifiser...
         assertEquals(Diskresjonskode.MILI, p2.diskresjonskode);

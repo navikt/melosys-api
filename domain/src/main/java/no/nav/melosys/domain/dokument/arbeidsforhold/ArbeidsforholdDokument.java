@@ -8,6 +8,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 
 @XmlRootElement
@@ -18,6 +20,7 @@ public class ArbeidsforholdDokument extends SaksopplysningDokument {
     @XmlElement(name="arbeidsforhold")
     List<Arbeidsforhold> arbeidsforhold;
 
+    @JsonValue
     public List<Arbeidsforhold> getArbeidsforhold() {
         return arbeidsforhold;
     }

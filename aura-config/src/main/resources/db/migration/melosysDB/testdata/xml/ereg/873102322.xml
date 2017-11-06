@@ -1,0 +1,62 @@
+<ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
+    <response>
+        <organisasjon xsi:type="ns4:Virksomhet"
+                      xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <orgnummer>873102322</orgnummer>
+            <navn xsi:type="ns4:UstrukturertNavn">
+                <navnelinje>MULTICONSULT ASA</navnelinje>
+                <navnelinje/>
+                <navnelinje>AVD BERGEN</navnelinje>
+                <navnelinje/>
+                <navnelinje/>
+            </navn>
+            <organisasjonDetaljer>
+                <registreringsDato>1995-02-23+01:00</registreringsDato>
+                <datoSistEndret>2016-10-15+02:00</datoSistEndret>
+                <forretningsadresse fomBruksperiode="2016-10-16T04:02:43.390+02:00"
+                                    fomGyldighetsperiode="2016-10-15T00:00:00.000+02:00"
+                                    xsi:type="ns4:SemistrukturertAdresse">
+                    <landkode kodeRef="NO"/>
+                    <adresseledd>
+                        <noekkel kodeRef="adresselinje1"/>
+                        <verdi>Nesttunbrekka 99</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="postnr"/>
+                        <verdi>5221</verdi>
+                    </adresseledd>
+                    <adresseledd>
+                        <noekkel kodeRef="kommunenr"/>
+                        <verdi>1201</verdi>
+                    </adresseledd>
+                </forretningsadresse>
+                <navSpesifikkInformasjon fomBruksperiode="1900-01-01T00:00:00.000+01:00"
+                                         fomGyldighetsperiode="1900-01-01T00:00:00.000+01:00">
+                    <erIA>false</erIA>
+                </navSpesifikkInformasjon>
+                <naering fomBruksperiode="2014-05-22T00:40:59+02:00"
+                         fomGyldighetsperiode="1998-11-22T00:00:00.000+01:00">
+                    <naeringskode kodeRef="71.121"/>
+                    <hjelpeenhet>false</hjelpeenhet>
+                </naering>
+                <navn fomBruksperiode="2015-05-19T04:03:22.339+02:00"
+                      fomGyldighetsperiode="2015-05-18T00:00:00.000+02:00">
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>MULTICONSULT ASA</navnelinje>
+                        <navnelinje/>
+                        <navnelinje>AVD BERGEN</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <redigertNavn>MULTICONSULT ASA</redigertNavn>
+                </navn>
+            </organisasjonDetaljer>
+            <virksomhetDetaljer>
+                <oppstartsdato>1970-12-30+01:00</oppstartsdato>
+                <eierskiftedato>2003-01-01+01:00</eierskiftedato>
+                <enhetstype kodeRef="BEDR"/>
+            </virksomhetDetaljer>
+        </organisasjon>
+    </response>
+</ns2:hentOrganisasjonResponse>

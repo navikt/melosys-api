@@ -3,8 +3,6 @@ package no.nav.melosys.tjenester.gui.dto;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse;
-
 public class GateadresseDto {
 
     private String gatenavn;
@@ -14,16 +12,6 @@ public class GateadresseDto {
     private Integer husnummer;
 
     private String husbokstav;
-
-    public static GateadresseDto tilDto(Gateadresse gateadresse) {
-        GateadresseDto gateDto = new GateadresseDto();
-        gateDto.setGatenavn(gateadresse.getGatenavn() != null ? gateadresse.getGatenavn() : null);
-        gateDto.setGatenummer(gateadresse.getGatenummer() != null ? gateadresse.getGatenummer() : null);
-        gateDto.setHusnummer(gateadresse.getHusnummer() != null ? gateadresse.getHusnummer() : null);
-        gateDto.setHusbokstav(gateadresse.getHusbokstav() != null ? gateadresse.getHusbokstav() : null);
-
-        return gateDto;
-    }
 
     public String getGatenavn() {
         return gatenavn;

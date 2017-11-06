@@ -51,9 +51,9 @@ public class Tps3ManuellTest {
         
         // Unmarshal...
         ByteArrayInputStream bais = new ByteArrayInputStream(xmlBytes);
-        JAXBContext ctx = JAXBContext.newInstance(PersonopplysningDokument.class);
+        JAXBContext ctx = JAXBContext.newInstance(PersonDokument.class);
         Unmarshaller um = ctx.createUnmarshaller();
-        PersonopplysningDokument p2 = (PersonopplysningDokument) um.unmarshal(bais);
+        PersonDokument p2 = (PersonDokument) um.unmarshal(bais);
 
         // Sett breakpoint her for å inspisere p2
         assertTrue(p2.diskresjonskode == Diskresjonskode.MILI);
