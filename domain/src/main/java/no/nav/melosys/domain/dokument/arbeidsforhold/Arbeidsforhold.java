@@ -41,7 +41,7 @@ public class Arbeidsforhold {
 
     private String opplysningspliktigID;
 
-    @JsonProperty("A-ordning")
+    @JsonProperty("Aordning")
     private Boolean arbeidsforholdInnrapportertEtterAOrdningen;
 
     public String getArbeidsforholdID() {
