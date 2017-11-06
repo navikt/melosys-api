@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.jackson.serialize;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +21,7 @@ public class SaksopplysningSerializer extends StdSerializer<Collection<Saksopply
 
     @Override
     public void serialize(Collection<SaksopplysningDokument> dokumenter, JsonGenerator generator, SerializerProvider sp) throws IOException {
-        Map<String, List<SaksopplysningDokument>> typeMap = new HashMap<>();
+        Map<String, List<SaksopplysningDokument>> typeMap = new LinkedHashMap<>();
 
         // Grupper dokumenter avhengig av typen deres
         for (SaksopplysningDokument dokument : dokumenter) {
