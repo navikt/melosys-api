@@ -26,7 +26,7 @@ public class Behandling {
 
     // FIXME (farjam 2017-10-06): Har vi en ekstern behandlingsId fra GSak??? I så fall bruk den for equals & hash.
     @Column(name = "gsak_id")
-    private Long gsakId;
+    private Long gsakID;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "fagsak_id", nullable = false, updatable = false)
@@ -57,12 +57,12 @@ public class Behandling {
         return id;
     }
 
-    public Long getGsakId() {
-        return gsakId;
+    public Long getGsakID() {
+        return gsakID;
     }
 
-    public void setGsakId(Long gsakId) {
-        this.gsakId = gsakId;
+    public void setGsakID(Long gsakID) {
+        this.gsakID = gsakID;
     }
 
     public Fagsak getFagsak() {
