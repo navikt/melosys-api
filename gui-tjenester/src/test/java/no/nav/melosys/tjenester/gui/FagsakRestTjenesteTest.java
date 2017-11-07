@@ -1,9 +1,30 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
+import java.util.Set;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.integrasjon.aareg.AaregFasade;
+import no.nav.melosys.integrasjon.aareg.AaregService;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.integrasjon.ereg.EregService;
+import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonMock;
+import no.nav.melosys.integrasjon.medl.Medl2Fasade;
+import no.nav.melosys.integrasjon.medl.Medl2Service;
+import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.integrasjon.tps.person.PersonMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.modelmapper.ModelMapper;
@@ -18,6 +39,10 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 public class FagsakRestTjenesteTest {
 
     @Autowired
@@ -28,7 +53,13 @@ public class FagsakRestTjenesteTest {
     @Before
     public void setUp() throws JAXBException {
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
-        tjeneste = new FagsakRestTjeneste(fagsakRepo, dokumentFactory);
+
+        TpsFasade tps = new TpsService(null, new PersonMock(), dokumentFactory);
+        AaregFasade aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
+        EregFasade ereg = new EregService(new OrganisasjonMock(), dokumentFactory);
+        Medl2Fasade medl = new Medl2Service(new MedlemskapMock(), dokumentFactory);
+
+        tjeneste = new FagsakRestTjeneste(fagsakRepo, dokumentFactory, tps, aareg, ereg, medl);
     }
 
     @Test
@@ -56,8 +87,39 @@ public class FagsakRestTjenesteTest {
 
     }
 
+    @Test
+    public void nyFagsak() {
+        final String[] identer = new String[]{"88888888884", "77777777779"};
 
+        for (String fnr : identer) {
 
+            Response response = tjeneste.nyFagsak(fnr);
 
+            assertTrue(response.getEntity() instanceof FagsakDto);
 
+            FagsakDto fagsak = (FagsakDto) response.getEntity();
+
+            assertNotNull(fagsak);
+            assertFalse(fagsak.getBehandlinger().isEmpty());
+
+            printJson(response);
+        }
+    }
+
+    private void printJson(Response response) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        objectMapper.registerModule(new JavaTimeModule());
+
+        StringWriter writer = new StringWriter();
+
+        try {
+            objectMapper.writeValue(writer, response.getEntity());
+            System.out.println(writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

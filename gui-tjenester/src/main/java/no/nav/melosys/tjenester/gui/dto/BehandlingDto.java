@@ -37,6 +37,11 @@ public class BehandlingDto {
         this.saksopplysninger = saksopplysninger;
     }
 
+    public BehandlingDto withSaksopplysninger(Set<SaksopplysningDokument> saksopplysninger) {
+        this.saksopplysninger = saksopplysninger;
+        return this;
+    }
+
     public Set<BehandlingHistorikkDto> getBehandlingshistorikk() {
         return behandlingshistorikk;
     }

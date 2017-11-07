@@ -98,6 +98,7 @@ public class TpsService implements TpsFasade {
         return optResult;
     }
 
+    // FIXME: Ikke propager avhengighet til Informasjonsbehov
     @Override
     public Saksopplysning hentPerson(String ident, Collection<Informasjonsbehov> behov) throws SikkerhetsbegrensningException {
         HentPersonRequest request = new HentPersonRequest();
