@@ -7,6 +7,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -30,6 +32,7 @@ public class Arbeidsavtale {
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
     private LocalDate endringsdatoStillingsprosent;
 
+    @JsonProperty("fartsomraade")
     private String fartsområde;
 
     private String skipsregister;
