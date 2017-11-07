@@ -25,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RolleType;
@@ -109,10 +110,15 @@ public class FagsakRestTjeneste extends RestTjeneste {
                 Behandling behandling = fagsak.getBehandlinger().get(0);
                 Set<Saksopplysning> saksopplysninger = behandling.getSaksopplysninger();
 
+                Set<Aktoer> aktører = fagsak.getAktører();
+                Optional<Aktoer> bruker = aktører.stream().filter(a -> a.getRolle().equals(RolleType.BRUKER)).findFirst();
+                if (bruker.isPresent()) {
+                    fagsakOppsummeringDto.setFnr(bruker.get().getEksternId());
+                }
+
                 Optional<Saksopplysning> opt = saksopplysninger.stream().filter(s -> s.getType().equals(SaksopplysningType.PERSONOPPLYSNING)).findFirst();
                 if (opt.isPresent()) {
                     PersonDokument dokument = (PersonDokument) dokumentFactory.lagDokument(opt.get());
-                    fagsakOppsummeringDto.setFnr(dokument.fnr);
                     fagsakOppsummeringDto.setKjønn(dokument.kjønn);
                     fagsakOppsummeringDto.setNavn(dokument.sammensattNavn);
                 }

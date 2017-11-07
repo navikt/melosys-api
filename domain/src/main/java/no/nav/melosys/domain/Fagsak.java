@@ -93,11 +93,11 @@ public class Fagsak {
         this.registrertDato = registrertDato;
     }
 
-    public Set<Aktoer> getktoerer() {
+    public Set<Aktoer> getAktører() {
         return aktører;
     }
 
-    public void setAktoerer(Set<Aktoer> aktører) {
+    public void setAktører(Set<Aktoer> aktører) {
         this.aktører = aktører;
     }
 
