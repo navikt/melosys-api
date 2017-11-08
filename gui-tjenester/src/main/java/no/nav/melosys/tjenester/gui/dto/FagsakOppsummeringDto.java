@@ -11,7 +11,7 @@ public class FagsakOppsummeringDto {
 
     private Long saksnummer;
     private String fnr;
-    private String navn;
+    private String sammensattNavn;
     @JsonProperty("kjoenn")
     private String kjønn;
     private FagsakType type;
@@ -34,12 +34,12 @@ public class FagsakOppsummeringDto {
         this.fnr = fnr;
     }
 
-    public String getNavn() {
-        return navn;
+    public String getSammensattNavn() {
+        return sammensattNavn;
     }
 
-    public void setNavn(String navn) {
-        this.navn = navn;
+    public void setSammensattNavn(String sammensattNavn) {
+        this.sammensattNavn = sammensattNavn;
     }
 
     public String getKjønn() {

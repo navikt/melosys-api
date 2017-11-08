@@ -120,7 +120,7 @@ public class FagsakRestTjeneste extends RestTjeneste {
                 if (opt.isPresent()) {
                     PersonDokument dokument = (PersonDokument) dokumentFactory.lagDokument(opt.get());
                     fagsakOppsummeringDto.setKjønn(dokument.kjønn);
-                    fagsakOppsummeringDto.setNavn(dokument.sammensattNavn);
+                    fagsakOppsummeringDto.setSammensattNavn(dokument.sammensattNavn);
                 }
             }
 
