@@ -1,21 +1,7 @@
-package no.nav.melosys.regler.lovvalg;
-
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.initialiserLokalKontekst;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.slettLokalKontekst;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknad;
-import static no.nav.melosys.regler.lovvalg.LovvalgPredikater.antallMånederIPeriodenErMindreEnnEllerLik;
-import static no.nav.melosys.regler.service.lovvalg.LovvalgTjenesteImplTest.lagFastsettLovvalgRequest;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.time.LocalDate;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+package no.nav.melosys.regler.old.lovvalg;
 
 public class LovvalgPredikaterTest {
-
+/*
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         initialiserLokalKontekst(lagFastsettLovvalgRequest());
@@ -48,7 +34,8 @@ public class LovvalgPredikaterTest {
         søknad().periodeFom = LocalDate.of(2016, 2, 29);
         søknad().periodeTom = LocalDate.of(2018, 2, 28);
         assertTrue(antallMånederIPeriodenErMindreEnnEllerLik(24).test());
-        //*/
+        //*
     }
     
+//*/
 }

@@ -1,17 +1,8 @@
-package no.nav.melosys.regler.service.lovvalg;
-
-import static org.junit.Assert.assertNotNull;
-
-import java.time.LocalDate;
-import java.util.Collections;
-
-import org.junit.Test;
-
-import no.nav.melosys.regler.api.lovvalg.FastsettLovvalgRequest;
-import no.nav.melosys.regler.api.lovvalg.FastsettLovvalgRespons;
+package no.nav.melosys.regler.old.service.lovvalg;
 
 public class LovvalgTjenesteImplTest {
 
+    /*
     @Test
     public void testService() {
         LovvalgTjenesteImpl service = new LovvalgTjenesteImpl();
@@ -29,4 +20,6 @@ public class LovvalgTjenesteImplTest {
         søknad.land = Collections.singletonList("Agurkland");
         return søknad;
     }
+    
+    //*/
 }

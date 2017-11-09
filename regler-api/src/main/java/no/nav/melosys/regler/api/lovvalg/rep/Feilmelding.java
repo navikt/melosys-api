@@ -1,6 +1,4 @@
-package no.nav.melosys.regler.api.lovvalg.old;
-
-import com.google.gson.Gson;
+package no.nav.melosys.regler.api.lovvalg.rep;
 
 /**
  * DTO for varsler og feilmeldinger
@@ -13,9 +11,4 @@ public class Feilmelding {
     /** Teknisk melding */
     public String feilmelding;
  
-    @Override
-    public String toString() {
-        return new Gson().toJson(this);
-    }
-
 }

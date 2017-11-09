@@ -1,58 +1,26 @@
-package no.nav.melosys.regler.api.lovvalg.old;
+package no.nav.melosys.regler.api.lovvalg.req;
 
-import java.time.LocalDate;
 import java.util.List;
 
-import com.google.gson.Gson;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.person.PersonopplysningDokument;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 
 /**
- * DTO for forespørsler til lovvalgtjenesten
+ * Forespørsler til lovvalgtjenesten
+ * 
+ * FIXME: Trenger revisjon
  */
 public class FastsettLovvalgRequest {
     
+    public SoeknadDokument søknadDokument;
+    public PersonopplysningDokument personopplysningDokument;
+    public List<ArbeidsforholdDokument> arbeidsforholdDokumenter;
+    public List<InntektDokument> inntektDokumenter;
+    public List<MedlemskapDokument> medlemskapDokumenter;
+    public List<OrganisasjonDokument> organisasjonDokumenter;
     
-    
-    //*
-    
-    // Navn, adresse etc. har ingen effekt på utfallet
-    
-    // FIXME (farjam 2017-06-12): Javadoc
-    // FIXME (farjam 2017-06-06): Legg til kodeverk for land etc.
-    // FIXME (farjam 2017-06-06): Flat... legg til struktur
-    
-    public String statsborgerskap;
-    
-    public boolean arbeidstakerEllerSelvstendigNaeringsdrivende;
-    public boolean arbeidFlereLand;
-    public boolean arbeidstakerOgSelvstendigNaeringsdrivende;
-    public boolean arbeidSkip;
-    public String skipFlaggland;
-    public boolean arbeidInternasjonalTransport;
-    public boolean arbeidUdForsvaret;
-    public boolean arbeidSokkel;
-    public String sokkelLand;
-    public String annet;
-    
-    public LocalDate periodeFom;
-    public LocalDate periodeTom;
-    
-    
-    
-    public List<String> land;
-    
-    public boolean utsendtForAaErstatteEnAnnenPerson;
-    
-    /**
-     * Lager en FastsettLovvalgRequest ut fra en json streng
-     *
-    public static FastsettLovvalgRequest fromString(String param) {
-        return new Gson().fromJson(param, FastsettLovvalgRequest.class);
-    } 
-    
-    @Override
-    public String toString() {
-        return new Gson().toJson(this);
-    }
-    //*/
-
 }

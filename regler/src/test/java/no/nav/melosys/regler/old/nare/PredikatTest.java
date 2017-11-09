@@ -1,10 +1,12 @@
-package no.nav.melosys.regler.nare;
+package no.nav.melosys.regler.old.nare;
 
-import static no.nav.melosys.regler.nare.Predikat.ikke;
+import static no.nav.melosys.regler.motor.Predikat.ikke;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+
+import no.nav.melosys.regler.motor.Predikat;
 
 public class PredikatTest {
 

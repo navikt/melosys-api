@@ -1,4 +1,4 @@
-package no.nav.melosys.regler.api.lovvalg.old;
+package no.nav.melosys.regler.api.lovvalg.rep;
 
 /**
  * Alvorlighetsgrad for meldinger

@@ -1,16 +1,20 @@
-package no.nav.melosys.regler.api.lovvalg.old;
+package no.nav.melosys.regler.api.lovvalg.rep;
 
 /**
- * En betingelse (kriterie) som (delvis) kvalifiserer for en lovanvendelse.
- * 
- * FIXME (farjam): Denne klassen trenger et navn som gjenspeiler at den er både betingelse og resultat av regelkjøringen.
+ * En betingelse som (delvis) kvalifiserer for en lovanvendelse.
  */
 public class Betingelse {
     
-    /** Funksjonell beskrivelse av kriteriet */
-    public String beskrivelse;
+    /** Funksjonell beskrivelse av betingelsen */
+    public Argument argument;
     
-    /** Resultatet fra regelmodulen */
+    /** Kravet som må oppfylles */
+    public String krav;
+    
+    /** Verdien som er lagt til grunn */
+    public Object verdi;
+    
+    /** Resultatet av evalueringen */
     public Resultat resultat;
 
 }

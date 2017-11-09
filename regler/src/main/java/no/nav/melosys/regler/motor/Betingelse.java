@@ -1,28 +1,38 @@
-package no.nav.melosys.regler.nare;
+package no.nav.melosys.regler.motor;
 
-import no.nav.melosys.regler.api.lovvalg.Resultat;
+import net.bytebuddy.asm.Advice.Argument;
+import no.nav.melosys.regler.api.lovvalg.rep.Resultat;
 
 /**
  * Felles klasse for betingelser.
  */
-public abstract class Betingelse {
+public class Betingelse {
     
-    private String beskrivelse;
+    private Argument argument;
+    private Predikat[] predikater;
 
-    protected Betingelse(String beskrivelse) {
-        this.beskrivelse = beskrivelse;
+    /** 
+     * Oppretter en betingelse som skal vurderes maskinelt, med tilhørende kvalifiserende predikater.
+     */
+    public Betingelse(Argument beskrivelse, Predikat... predikater) {
+        this.argument = beskrivelse;
+        this.predikater = predikater;
     }
     
     /**
-     * Henter søknaden fra kjørekontekst og evaluerer den for denne betingelsen.
-     */
-    public abstract Resultat evaluer();
-
-    /**
      * Funksjonell beskrivelse av betingelsen.
      */
-    public String getBeskrivelse() {
-        return beskrivelse;
+    public Argument getBeskrivelse() {
+        return argument;
+    }
+
+    public Resultat evaluer() {
+        for (Predikat predikat : predikater) {
+            if (!predikat.test()) {
+                return Resultat.IKKE_OPPFYLT;
+            }
+        }
+        return Resultat.OPPFYLT;
     }
     
 }

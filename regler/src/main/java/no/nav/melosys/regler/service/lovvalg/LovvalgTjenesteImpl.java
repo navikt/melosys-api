@@ -1,8 +1,6 @@
 package no.nav.melosys.regler.service.lovvalg;
 
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.initialiserLokalKontekst;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.respons;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.slettLokalKontekst;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.*;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -19,12 +17,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Contact;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.SwaggerDefinition;
-import no.nav.melosys.regler.api.lovvalg.FastsettLovvalgRequest;
-import no.nav.melosys.regler.api.lovvalg.FastsettLovvalgRespons;
-import no.nav.melosys.regler.api.lovvalg.Feilmelding;
-import no.nav.melosys.regler.api.lovvalg.Kategori;
 import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
-import no.nav.melosys.regler.lovvalg.FastsettLovvalg;
+import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
+import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
+import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
+import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
+import no.nav.melosys.regler.lovvalg.LovvalgRegelflyt;
 
 @Component
 @Path("Lovvalg")
@@ -59,13 +57,13 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
             value= "Fastsetter lovvalgsland",
             notes = "Tjeneste som anvender lovverk til å fastsette lovvalgsland for en forespørsel"
     )
-    public FastsettLovvalgRespons fastsettLovvalg(@QueryParam("req") FastsettLovvalgRequest req) {
+    public FastsettLovvalgReply fastsettLovvalg(@QueryParam("req") FastsettLovvalgRequest req) {
         try {
             // Sett lokal kontekst for regelsett...
             initialiserLokalKontekst(req);
             // Kjør forretningsregler og returner respons...
-            new FastsettLovvalg().kjørRegler();
-            return respons();
+            new LovvalgRegelflyt().kjør();
+            return responsen();
         } catch(Throwable e) {
             // Forsok å logge feilen...
             try {
@@ -73,14 +71,14 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
             } catch (Throwable ignored) {
             }
             // Returner teknisk feil...
-            FastsettLovvalgRespons res = new FastsettLovvalgRespons();
+            FastsettLovvalgReply res = new FastsettLovvalgReply();
             Feilmelding feil = new Feilmelding();
             feil.kategori = Kategori.TEKNISK_FEIL;
             feil.feilmelding = "Uventet Exception";
             res.feilmeldinger.add(feil);
             // Forsøk å legge til evt. andre feil også...
             try {
-                res.feilmeldinger.addAll(respons().feilmeldinger);
+                res.feilmeldinger.addAll(responsen().feilmeldinger);
             } catch (Throwable ignored) {
             }
             return res;

@@ -1,20 +1,16 @@
-package no.nav.melosys.regler.api.lovvalg.old;
+package no.nav.melosys.regler.api.lovvalg.rep;
 
 import java.util.List;
-
-import com.google.gson.Gson;
 
 public class Lovvalgsbestemmelse {
     
     /** Artikkel/lovhjemmel */
     public Artikkel artikkel;
     
-    /** Liste med betingelser for artikkelen */
-    public List<Betingelse> betingelser;
+    /** Liste med betingelser som bestemmer om artikkelen skal vurderes eller ikke */
+    public List<Betingelse> kvalifiserendeBetingelser;
     
-    @Override
-    public String toString() {
-        return new Gson().toJson(this);
-    }
-
+    /** Liste med betingelser som bestemmer im artikkelen skal invokeres */
+    public List<Betingelse> aktiverendeBetingelser;
+    
 }

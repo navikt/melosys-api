@@ -1,6 +1,6 @@
-package no.nav.melosys.regler.api.lovvalg.old;
+package no.nav.melosys.regler.api.lovvalg.rep;
 
-import static no.nav.melosys.regler.api.lovvalg.old.Alvorlighetsgrad.FEIL;
+import static no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad.FEIL;
 
 public enum Kategori {
     
@@ -9,24 +9,10 @@ public enum Kategori {
     IKKE_STOETTET(FEIL, "Det er ikke implementert maskinell støtte for denne forespørselen."),
     
     // Funksjonelle feil relatert til input
-    FEIL_I_SOEKNAD(FEIL, "Ikke komplett eller inkonsistent søknad.");
+    VALIDERINGSFEIL(FEIL, "Ikke komplett eller inkonsistent input.");
     
-    private final Alvorlighetsgrad alvorlighetsgrad;
-    private final String melding;
-
-    /**
-     * @return Meldingens alvorlighetsgrad
-     */
-    public Alvorlighetsgrad getAlvorlighetsgrad() {
-        return alvorlighetsgrad;
-    }
-    
-    /**
-     * @return Meldingens funksjonelle tekst.
-     */
-    public String getMelding() {
-        return melding;
-    }
+    public final Alvorlighetsgrad alvorlighetsgrad;
+    public final String melding;
 
     private Kategori(Alvorlighetsgrad alvorlighetsgrad, String melding) {
         this.alvorlighetsgrad = alvorlighetsgrad;
