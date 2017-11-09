@@ -1,4 +1,4 @@
-package no.nav.melosys.regler.api.lovvalg;
+package no.nav.melosys.regler.api.lovvalg.old;
 
 /**
  * En betingelse (kriterie) som (delvis) kvalifiserer for en lovanvendelse.

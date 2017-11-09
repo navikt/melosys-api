@@ -1,4 +1,4 @@
-package no.nav.melosys.regler.api.lovvalg;
+package no.nav.melosys.regler.api.lovvalg.old;
 
 /**
  * Grensesnitt for tjenester relatert til lovvalg

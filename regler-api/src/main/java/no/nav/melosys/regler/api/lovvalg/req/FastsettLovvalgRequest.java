@@ -1,4 +1,4 @@
-package no.nav.melosys.regler.api.lovvalg;
+package no.nav.melosys.regler.api.lovvalg.old;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,6 +9,10 @@ import com.google.gson.Gson;
  * DTO for forespørsler til lovvalgtjenesten
  */
 public class FastsettLovvalgRequest {
+    
+    
+    
+    //*
     
     // Navn, adresse etc. har ingen effekt på utfallet
     
@@ -40,7 +44,7 @@ public class FastsettLovvalgRequest {
     
     /**
      * Lager en FastsettLovvalgRequest ut fra en json streng
-     */
+     *
     public static FastsettLovvalgRequest fromString(String param) {
         return new Gson().fromJson(param, FastsettLovvalgRequest.class);
     } 
@@ -49,5 +53,6 @@ public class FastsettLovvalgRequest {
     public String toString() {
         return new Gson().toJson(this);
     }
+    //*/
 
 }
