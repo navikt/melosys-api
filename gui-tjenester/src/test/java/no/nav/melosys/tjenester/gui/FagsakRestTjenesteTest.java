@@ -3,6 +3,9 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
@@ -19,14 +22,20 @@ import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.ereg.EregService;
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonMock;
+import no.nav.melosys.integrasjon.inntk.InntektFasade;
+import no.nav.melosys.integrasjon.inntk.InntektService;
+import no.nav.melosys.integrasjon.inntk.inntekt.InntektMock;
 import no.nav.melosys.integrasjon.medl.Medl2Fasade;
 import no.nav.melosys.integrasjon.medl.Medl2Service;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.integrasjon.tps.person.PersonMock;
+import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -38,6 +47,10 @@ import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -45,7 +58,6 @@ import static org.junit.Assert.assertTrue;
 
 public class FagsakRestTjenesteTest {
 
-    @Autowired
     FagsakRepository fagsakRepo;
 
     FagsakRestTjeneste tjeneste;
@@ -58,8 +70,10 @@ public class FagsakRestTjenesteTest {
         AaregFasade aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
         EregFasade ereg = new EregService(new OrganisasjonMock(), dokumentFactory);
         Medl2Fasade medl = new Medl2Service(new MedlemskapMock(), dokumentFactory);
+        InntektFasade inntekt = new InntektService(new InntektMock(), dokumentFactory);
 
-        tjeneste = new FagsakRestTjeneste(fagsakRepo, dokumentFactory, tps, aareg, ereg, medl);
+        fagsakRepo = Mockito.mock(FagsakRepository.class);
+        tjeneste = new FagsakRestTjeneste(fagsakRepo, dokumentFactory, tps, aareg, ereg, medl, inntekt);
     }
 
     @Test
@@ -83,7 +97,9 @@ public class FagsakRestTjenesteTest {
         modelMapper.map(fagsak, fagsakDto);
         modelMapper.validate();
 
+        fagsakRepo.save(fagsak);
 
+        System.out.println("ID " + fagsak.getId());
 
     }
 
@@ -92,7 +108,6 @@ public class FagsakRestTjenesteTest {
         final String[] identer = new String[]{"88888888884", "77777777779"};
 
         for (String fnr : identer) {
-
             Response response = tjeneste.nyFagsak(fnr);
 
             assertTrue(response.getEntity() instanceof FagsakDto);
@@ -101,6 +116,10 @@ public class FagsakRestTjenesteTest {
 
             assertNotNull(fagsak);
             assertFalse(fagsak.getBehandlinger().isEmpty());
+
+            for (BehandlingDto behandling : fagsak.getBehandlinger()) {
+                assertFalse(behandling.getSaksopplysninger().isEmpty());
+            }
 
             printJson(response);
         }
