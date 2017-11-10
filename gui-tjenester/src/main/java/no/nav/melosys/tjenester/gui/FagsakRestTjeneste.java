@@ -14,6 +14,7 @@ import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningExceptio
 import no.nav.melosys.integrasjon.inntk.InntektFasade;
 import no.nav.melosys.integrasjon.medl.Medl2Fasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 
 import java.time.YearMonth;
@@ -54,32 +55,17 @@ import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 public class FagsakRestTjeneste extends RestTjeneste {
 
-    private FagsakRepository fagsakRepository;
+    private FagsakService fagsakService;
 
-    private DokumentFactory dokumentFactory;
+    private FagsakRepository fagsakRepository;
 
     private ModelMapper modelMapper;
 
-    private TpsFasade tpsFasade;
-
-    private AaregFasade aaregFasade;
-
-    private EregFasade eregFasade;
-
-    private Medl2Fasade medl2Fasade;
-
-    private InntektFasade inntektFasade;
-
     @Autowired
-    public FagsakRestTjeneste(FagsakRepository fagsakRepository, DokumentFactory dokumentFactory, TpsFasade tpsFasade, AaregFasade aaregFasade, EregFasade eregFasade, Medl2Fasade medl2Fasade, InntektFasade inntektFasade) {
+    public FagsakRestTjeneste(FagsakService fagsakService, FagsakRepository fagsakRepository, DokumentFactory dokumentFactory) {
+        this.fagsakService = fagsakService;
         this.fagsakRepository = fagsakRepository;
-        this.dokumentFactory = dokumentFactory;
         this.fagsakRepository = fagsakRepository;
-        this.tpsFasade = tpsFasade;
-        this.aaregFasade = aaregFasade;
-        this.eregFasade = eregFasade;
-        this.medl2Fasade = medl2Fasade;
-        this.inntektFasade = inntektFasade;
 
         this.modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
@@ -129,43 +115,13 @@ public class FagsakRestTjeneste extends RestTjeneste {
     @Path("ny/{fnr}")
     @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.", notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."))
     public Response nyFagsak(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
-        try {
-            Set<SaksopplysningDokument> dokumenter = new HashSet<>();
+        Fagsak fagsak = fagsakService.nyFagsak(fnr);
 
-            Saksopplysning personSaksopplysning = hentPerson(fnr);
-            if (personSaksopplysning != null) {
-                dokumenter.add(dokumentFactory.lagDokument(personSaksopplysning));
-            }
-
-            Saksopplysning medlemskapSaksopplysning = hentMedlemskap(fnr);
-            if (medlemskapSaksopplysning != null) {
-                dokumenter.add(dokumentFactory.lagDokument(medlemskapSaksopplysning));
-            }
-
-            Saksopplysning arbeidsforholdSaksopplysning = hentArbeidsforhold(fnr);
-            if (arbeidsforholdSaksopplysning != null) {
-                dokumenter.add(dokumentFactory.lagDokument(arbeidsforholdSaksopplysning));
-            }
-
-            Saksopplysning inntektSaksopplysning = hentInntekt(fnr);
-            if (inntektSaksopplysning != null) {
-                dokumenter.add(dokumentFactory.lagDokument(inntektSaksopplysning));
-            }
-
-            List<Saksopplysning> organisasjonSaksopplysninger = hentOrganisasjoner(arbeidsforholdSaksopplysning, inntektSaksopplysning);
-
-            if (!organisasjonSaksopplysninger.isEmpty()) {
-                organisasjonSaksopplysninger.forEach(organisasjonSaksopplysning -> dokumenter.add(dokumentFactory.lagDokument(organisasjonSaksopplysning)));
-            }
-
-            BehandlingDto behandlingDto = new BehandlingDto().withSaksopplysninger(dokumenter);
-            FagsakDto fagsakDto = new FagsakDto().withBehandlinger(Collections.singletonList(behandlingDto));
-            fagsakDto.setBehandlinger(Collections.singletonList(behandlingDto));
-
+        if (fagsak == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        } else {
+            FagsakDto fagsakDto = tilDto(fagsak);
             return Response.ok(fagsakDto).build();
-
-        } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
         }
     }
 
@@ -184,98 +140,6 @@ public class FagsakRestTjeneste extends RestTjeneste {
         FagsakDto fagsakDto = new FagsakDto();
         modelMapper.map(fagsak, fagsakDto);
         return fagsakDto;
-    }
-
-    private Saksopplysning hentPerson(String fnr) throws SikkerhetsbegrensningException {
-        // TODO: Informasjonsbehov.FAMILIERELASJONER kommer i runde 2
-        final List<Informasjonsbehov> informasjonsbehov = Collections.singletonList(Informasjonsbehov.ADRESSE);
-        try {
-            return tpsFasade.hentPerson(fnr, informasjonsbehov);
-        } catch (IntegrasjonException e) {
-            return null;
-        }
-    }
-
-    private Saksopplysning hentMedlemskap(String fnr) throws SikkerhetsbegrensningException {
-        try {
-            return medl2Fasade.getPeriodeListe(fnr);
-        } catch (IntegrasjonException e) {
-            return null;
-        }
-    }
-
-    private Saksopplysning hentArbeidsforhold(String fnr) throws SikkerhetsbegrensningException {
-        try {
-            return aaregFasade.finnArbeidsforholdPrArbeidstaker(fnr, AaregFasade.REGELVERK_A_ORDNINGEN);
-        } catch (IntegrasjonException e) {
-            return null;
-        }
-    }
-
-    private Saksopplysning hentInntekt(String fnr) throws SikkerhetsbegrensningException {
-        final YearMonth tom = YearMonth.now();
-        final YearMonth fom = tom.minusMonths(12);
-        try {
-            return inntektFasade.hentInntektListe(fnr, fom, tom);
-        } catch (IntegrasjonException e) {
-            return null;
-        }
-    }
-
-    private List<Saksopplysning> hentOrganisasjoner(Saksopplysning arbeidsforholdSaksopplysning, Saksopplysning inntektSaksopplysning) throws SikkerhetsbegrensningException {
-        // FIXME: Gjør dette mindre grisete
-        Optional<Set<String>> orgnrArbeidsforhold = Optional.ofNullable(hentOrgnrArbeidsforhold(arbeidsforholdSaksopplysning));
-        Optional<Set<String>> orgnrInntekt = Optional.ofNullable(hentOrgnrInntekt(inntektSaksopplysning));
-
-        Set<String> orgnrAlle = new HashSet<>();
-        orgnrArbeidsforhold.ifPresent(orgnrAlle::addAll);
-        orgnrInntekt.ifPresent(orgnrAlle::addAll);
-
-        List<Saksopplysning> saksopplysninger = new ArrayList<>();
-
-        if (!orgnrAlle.isEmpty()) {
-            for (String orgnummer : orgnrAlle) {
-                Saksopplysning saksopplysning = hentOrganisasjon(orgnummer);
-                if (saksopplysning != null) {
-                    saksopplysninger.add(saksopplysning);
-                }
-            }
-        }
-        return saksopplysninger;
-    }
-
-    private Set<String> hentOrgnrArbeidsforhold(Saksopplysning saksopplysning) {
-        // FIXME: Gjør dette mindre grisete
-        if (saksopplysning == null || saksopplysning.getDokument() == null || !(saksopplysning.getDokument() instanceof ArbeidsforholdDokument)) {
-            return null;
-        }
-        return ((ArbeidsforholdDokument) saksopplysning.getDokument()).getArbeidsforhold().stream()
-                .flatMap(arbeidsforhold -> Stream.of(arbeidsforhold.getArbeidsgiverID(), arbeidsforhold.getOpplysningspliktigID()))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-    }
-
-    private Set<String> hentOrgnrInntekt(Saksopplysning saksopplysning) {
-        // FIXME: Gjør dette mindre grisete
-        if (saksopplysning == null || saksopplysning.getDokument() == null || !(saksopplysning.getDokument() instanceof InntektDokument)) {
-            return null;
-        }
-        return ((InntektDokument) saksopplysning.getDokument()).getArbeidsInntektMaanedListe().stream()
-                .map(ArbeidsInntektMaaned::getArbeidsInntektInformasjon)
-                .filter(Objects::nonNull)
-                .map(ArbeidsInntektInformasjon::getInntektListe)
-                .flatMap(List::stream)
-                .filter(Objects::nonNull)
-                .map(Inntekt::getVirksomhetID)
-                .collect(Collectors.toSet());
-    }
-
-    private Saksopplysning hentOrganisasjon(String orgnr) throws SikkerhetsbegrensningException {
-        try {
-            return eregFasade.hentOrganisasjon(orgnr);
-        } catch (IntegrasjonException e) {
-            return null;
-        }
     }
 
 }

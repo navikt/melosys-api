@@ -31,6 +31,7 @@ import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.integrasjon.tps.person.PersonMock;
+import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,7 +74,8 @@ public class FagsakRestTjenesteTest {
         InntektFasade inntekt = new InntektService(new InntektMock(), dokumentFactory);
 
         fagsakRepo = Mockito.mock(FagsakRepository.class);
-        tjeneste = new FagsakRestTjeneste(fagsakRepo, dokumentFactory, tps, aareg, ereg, medl, inntekt);
+        FagsakService fagsakService = new FagsakService(fagsakRepo, tps, aareg, ereg, medl, inntekt);
+        tjeneste = new FagsakRestTjeneste(fagsakService, fagsakRepo, dokumentFactory);
     }
 
     @Test
