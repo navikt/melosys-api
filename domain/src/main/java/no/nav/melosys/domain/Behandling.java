@@ -113,6 +113,11 @@ public class Behandling {
         this.saksopplysninger = saksopplysninger;
     }
 
+    public Behandling withSaksopplysninger(Set<Saksopplysning> saksopplysninger) {
+        this.saksopplysninger = saksopplysninger;
+        return this;
+    }
+
     public Set<BehandlingHistorikk> getBehandlingshistorikk() {
         return behandlingshistorikk;
     }
