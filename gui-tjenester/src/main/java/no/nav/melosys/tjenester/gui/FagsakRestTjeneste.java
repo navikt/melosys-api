@@ -13,6 +13,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
+import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -102,13 +104,18 @@ public class FagsakRestTjeneste extends RestTjeneste {
     @Path("ny/{fnr}")
     @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.", notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."))
     public Response nyFagsak(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
-        Fagsak fagsak = fagsakService.nyFagsak(fnr);
 
-        if (fagsak == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        } else {
-            FagsakDto fagsakDto = tilDto(fagsak);
-            return Response.ok(fagsakDto).build();
+        try {
+            Fagsak fagsak = fagsakService.nyFagsak(fnr);
+
+            if (fagsak == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            } else {
+                FagsakDto fagsakDto = tilDto(fagsak);
+                return Response.ok(fagsakDto).build();
+            }
+        } catch (SikkerhetsbegrensningException e) {
+            return Response.status(Response.Status.FORBIDDEN).build();
         }
     }
 

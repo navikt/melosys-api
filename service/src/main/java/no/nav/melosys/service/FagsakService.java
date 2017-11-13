@@ -14,7 +14,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.inntk.InntektFasade;
-import no.nav.melosys.integrasjon.medl.Medl2Fasade;
+import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov;
@@ -37,17 +37,17 @@ public class FagsakService {
 
     private EregFasade eregFasade;
 
-    private Medl2Fasade medl2Fasade;
+    private MedlFasade medlFasade;
 
     private InntektFasade inntektFasade;
 
     @Autowired
-    public FagsakService(FagsakRepository fagsakRepository, TpsFasade tpsFasade, AaregFasade aaregFasade, EregFasade eregFasade, Medl2Fasade medl2Fasade, InntektFasade inntektFasade) {
+    public FagsakService(FagsakRepository fagsakRepository, TpsFasade tpsFasade, AaregFasade aaregFasade, EregFasade eregFasade, MedlFasade medlFasade, InntektFasade inntektFasade) {
         this.fagsakRepository = fagsakRepository;
         this.tpsFasade = tpsFasade;
         this.aaregFasade = aaregFasade;
         this.eregFasade = eregFasade;
-        this.medl2Fasade = medl2Fasade;
+        this.medlFasade = medlFasade;
         this.inntektFasade = inntektFasade;
     }
 
@@ -59,37 +59,32 @@ public class FagsakService {
         return fagsakRepository.findBySaksnummer(saksnummer);
     }
 
-    public Fagsak nyFagsak(String fnr) {
+    public Fagsak nyFagsak(String fnr) throws SikkerhetsbegrensningException {
+        // FIXME: Når EESSI2-485 er ferdig må IntegrasjonsExceptions kastes videre
+        Optional<Saksopplysning> personSaksopplysning = Optional.ofNullable(hentPerson(fnr));
+        Optional<Saksopplysning> medlemskapSaksopplysning = Optional.ofNullable(hentMedlemskap(fnr));
+        Optional<Saksopplysning> arbeidsforholdSaksopplysning = Optional.ofNullable(hentArbeidsforhold(fnr));
+        Optional<Saksopplysning> inntektSaksopplysning = Optional.ofNullable(hentInntekt(fnr));
 
-        try {
-            Optional<Saksopplysning> personSaksopplysning = Optional.ofNullable(hentPerson(fnr));
-            Optional<Saksopplysning> medlemskapSaksopplysning = Optional.ofNullable(hentMedlemskap(fnr));
-            Optional<Saksopplysning> arbeidsforholdSaksopplysning = Optional.ofNullable(hentArbeidsforhold(fnr));
-            Optional<Saksopplysning> inntektSaksopplysning = Optional.ofNullable(hentInntekt(fnr));
+        Set<Saksopplysning> saksopplysninger = new HashSet<>();
 
-            Set<Saksopplysning> saksopplysninger = new HashSet<>();
+        personSaksopplysning.ifPresent(saksopplysninger::add);
+        medlemskapSaksopplysning.ifPresent(saksopplysninger::add);
+        arbeidsforholdSaksopplysning.ifPresent(saksopplysninger::add);
+        inntektSaksopplysning.ifPresent(saksopplysninger::add);
 
-            personSaksopplysning.ifPresent(saksopplysninger::add);
-            medlemskapSaksopplysning.ifPresent(saksopplysninger::add);
-            arbeidsforholdSaksopplysning.ifPresent(saksopplysninger::add);
-            inntektSaksopplysning.ifPresent(saksopplysninger::add);
+        Set<String> orgnumre = new HashSet<>();
 
-            Set<String> orgnumre = new HashSet<>();
+        arbeidsforholdSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraArbeidsforhold(saksopplysning)));
+        inntektSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraInntekt(saksopplysning)));
 
-            arbeidsforholdSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraArbeidsforhold(saksopplysning)));
-            inntektSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraInntekt(saksopplysning)));
+        if (!orgnumre.isEmpty())
+            saksopplysninger.addAll(hentOrganisasjoner(orgnumre));
 
-            if (!orgnumre.isEmpty())
-                saksopplysninger.addAll(hentOrganisasjoner(orgnumre));
+        Fagsak fagsak = new Fagsak().withBehandlinger(Collections.singletonList(new Behandling().withSaksopplysninger(saksopplysninger)));
+        fagsakRepository.save(fagsak);
 
-            Fagsak fagsak = new Fagsak().withBehandlinger(Collections.singletonList(new Behandling().withSaksopplysninger(saksopplysninger)));
-            fagsakRepository.save(fagsak);
-
-            return fagsak;
-
-        } catch (SikkerhetsbegrensningException e) {
-            return null;
-        }
+        return fagsak;
     }
 
     private Saksopplysning hentPerson(String fnr) throws SikkerhetsbegrensningException {
@@ -104,7 +99,7 @@ public class FagsakService {
 
     private Saksopplysning hentMedlemskap(String fnr) throws SikkerhetsbegrensningException {
         try {
-            return medl2Fasade.getPeriodeListe(fnr);
+            return medlFasade.getPeriodeListe(fnr);
         } catch (IntegrasjonException e) {
             return null;
         }

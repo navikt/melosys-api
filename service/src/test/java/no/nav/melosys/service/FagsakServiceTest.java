@@ -16,8 +16,8 @@ import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonMock;
 import no.nav.melosys.integrasjon.inntk.InntektFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektMock;
-import no.nav.melosys.integrasjon.medl.Medl2Fasade;
-import no.nav.melosys.integrasjon.medl.Medl2Service;
+import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
@@ -48,7 +48,7 @@ public class FagsakServiceTest {
         TpsFasade tps = new TpsService(null, new PersonMock(), dokumentFactory);
         AaregFasade aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
         EregFasade ereg = new EregService(new OrganisasjonMock(), dokumentFactory);
-        Medl2Fasade medl = new Medl2Service(new MedlemskapMock(), dokumentFactory);
+        MedlFasade medl = new MedlService(new MedlemskapMock(), dokumentFactory);
         InntektFasade inntekt = new InntektService(new InntektMock(), dokumentFactory);
 
         fagsakRepo = Mockito.mock(FagsakRepository.class);
