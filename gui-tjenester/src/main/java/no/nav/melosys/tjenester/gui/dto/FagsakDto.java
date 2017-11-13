@@ -53,9 +53,4 @@ public class FagsakDto {
     public void setBehandlinger(List<BehandlingDto> behandlinger) {
         this.behandlinger = behandlinger;
     }
-
-    public FagsakDto withBehandlinger(List<BehandlingDto> behandlinger) {
-        this.behandlinger = behandlinger;
-        return this;
-    }
 }
