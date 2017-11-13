@@ -3,10 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -15,7 +11,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.aareg.AaregService;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
@@ -35,10 +30,9 @@ import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakStatus;
@@ -48,10 +42,6 @@ import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -59,9 +49,9 @@ import static org.junit.Assert.assertTrue;
 
 public class FagsakRestTjenesteTest {
 
-    FagsakRepository fagsakRepo;
+    private FagsakRepository fagsakRepo;
 
-    FagsakRestTjeneste tjeneste;
+    private FagsakRestTjeneste tjeneste;
 
     @Before
     public void setUp() throws JAXBException {
@@ -75,7 +65,7 @@ public class FagsakRestTjenesteTest {
 
         fagsakRepo = Mockito.mock(FagsakRepository.class);
         FagsakService fagsakService = new FagsakService(fagsakRepo, tps, aareg, ereg, medl, inntekt);
-        tjeneste = new FagsakRestTjeneste(fagsakService, fagsakRepo, dokumentFactory);
+        tjeneste = new FagsakRestTjeneste(fagsakService, dokumentFactory);
     }
 
     @Test
@@ -101,7 +91,7 @@ public class FagsakRestTjenesteTest {
 
         fagsakRepo.save(fagsak);
 
-        System.out.println("ID " + fagsak.getId());
+        //System.out.println("ID " + fagsak.getId());
 
     }
 
@@ -123,7 +113,7 @@ public class FagsakRestTjenesteTest {
                 assertFalse(behandling.getSaksopplysninger().isEmpty());
             }
 
-            printJson(response);
+            //printJson(response);
         }
     }
 

@@ -57,16 +57,11 @@ public class FagsakRestTjeneste extends RestTjeneste {
 
     private FagsakService fagsakService;
 
-    private FagsakRepository fagsakRepository;
-
     private ModelMapper modelMapper;
 
     @Autowired
-    public FagsakRestTjeneste(FagsakService fagsakService, FagsakRepository fagsakRepository, DokumentFactory dokumentFactory) {
+    public FagsakRestTjeneste(FagsakService fagsakService, DokumentFactory dokumentFactory) {
         this.fagsakService = fagsakService;
-        this.fagsakRepository = fagsakRepository;
-        this.fagsakRepository = fagsakRepository;
-
         this.modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         TypeMap<Behandling, BehandlingDto> typeMapBehandling = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
@@ -92,7 +87,7 @@ public class FagsakRestTjeneste extends RestTjeneste {
 
         String aktørID = identMap.get(fnr);
 
-        List<Fagsak> saker = fagsakRepository.findByRolleAndAktør(RolleType.BRUKER, aktørID);
+        List<Fagsak> saker = fagsakService.hentFagsaker(RolleType.BRUKER, aktørID);
 
         return tilDto(saker); // TODO Bare en liste av saksnumre til frontend?
     }
@@ -100,7 +95,7 @@ public class FagsakRestTjeneste extends RestTjeneste {
     @GET
     @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."))
     public Response hentFagsak(@QueryParam("saksnr") @ApiParam("Saksnummer.") Long saksnummer) {
-        Fagsak sak = fagsakRepository.findBySaksnummer(saksnummer);
+        Fagsak sak = fagsakService.hentFagsak(saksnummer);
 
         if (sak == null) {
             return Response.status(Response.Status.NOT_FOUND).build();

@@ -2,6 +2,7 @@ package no.nav.melosys.service;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
@@ -50,6 +51,14 @@ public class FagsakService {
         this.inntektFasade = inntektFasade;
     }
 
+    public List<Fagsak> hentFagsaker(RolleType rolleType, String aktørID) {
+        return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
+    }
+
+    public Fagsak hentFagsak(Long saksnummer) {
+        return fagsakRepository.findBySaksnummer(saksnummer);
+    }
+
     public Fagsak nyFagsak(String fnr) {
 
         try {
@@ -65,7 +74,13 @@ public class FagsakService {
             arbeidsforholdSaksopplysning.ifPresent(saksopplysninger::add);
             inntektSaksopplysning.ifPresent(saksopplysninger::add);
 
-            //List<Saksopplysning> organisasjonSaksopplysninger = hentOrganisasjoner(arbeidsforholdSaksopplysning, inntektSaksopplysning);
+            Set<String> orgnumre = new HashSet<>();
+
+            arbeidsforholdSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraArbeidsforhold(saksopplysning)));
+            inntektSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraInntekt(saksopplysning)));
+
+            if (!orgnumre.isEmpty())
+                saksopplysninger.addAll(hentOrganisasjoner(orgnumre));
 
             Fagsak fagsak = new Fagsak().withBehandlinger(Collections.singletonList(new Behandling().withSaksopplysninger(saksopplysninger)));
             fagsakRepository.save(fagsak);
@@ -113,45 +128,26 @@ public class FagsakService {
         }
     }
 
-    @SuppressWarnings("Duplicates") // TODO: Fjern når duplikert kode er fjernet fra REST-laget.
-    private List<Saksopplysning> hentOrganisasjoner(Saksopplysning arbeidsforholdSaksopplysning, Saksopplysning inntektSaksopplysning) throws SikkerhetsbegrensningException {
-        // FIXME: Gjør dette mindre grisete
-        Optional<Set<String>> orgnrArbeidsforhold = Optional.ofNullable(hentOrgnrArbeidsforhold(arbeidsforholdSaksopplysning));
-        Optional<Set<String>> orgnrInntekt = Optional.ofNullable(hentOrgnrInntekt(inntektSaksopplysning));
-
-        Set<String> orgnrAlle = new HashSet<>();
-        orgnrArbeidsforhold.ifPresent(orgnrAlle::addAll);
-        orgnrInntekt.ifPresent(orgnrAlle::addAll);
-
+    private List<Saksopplysning> hentOrganisasjoner(Set<String> orgnumre) throws SikkerhetsbegrensningException {
         List<Saksopplysning> saksopplysninger = new ArrayList<>();
 
-        if (!orgnrAlle.isEmpty()) {
-            for (String orgnummer : orgnrAlle) {
-                Saksopplysning saksopplysning = hentOrganisasjon(orgnummer);
-                if (saksopplysning != null) {
-                    saksopplysninger.add(saksopplysning);
-                }
+        for (String orgnr : orgnumre) {
+            Saksopplysning saksopplysning = hentOrganisasjon(orgnr);
+            if (saksopplysning != null) {
+                saksopplysninger.add(saksopplysning);
             }
         }
         return saksopplysninger;
     }
 
-    private Set<String> hentOrgnrArbeidsforhold(Saksopplysning saksopplysning) {
-        // FIXME: Gjør dette mindre grisete
-        if (saksopplysning == null || saksopplysning.getDokument() == null || !(saksopplysning.getDokument() instanceof ArbeidsforholdDokument)) {
-            return null;
-        }
+    private static Set<String> hentOrgnumreFraArbeidsforhold(Saksopplysning saksopplysning) {
         return ((ArbeidsforholdDokument) saksopplysning.getDokument()).getArbeidsforhold().stream()
                 .flatMap(arbeidsforhold -> Stream.of(arbeidsforhold.getArbeidsgiverID(), arbeidsforhold.getOpplysningspliktigID()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> hentOrgnrInntekt(Saksopplysning saksopplysning) {
-        // FIXME: Gjør dette mindre grisete
-        if (saksopplysning == null || saksopplysning.getDokument() == null || !(saksopplysning.getDokument() instanceof InntektDokument)) {
-            return null;
-        }
+    private static Set<String> hentOrgnumreFraInntekt(Saksopplysning saksopplysning) {
         return ((InntektDokument) saksopplysning.getDokument()).getArbeidsInntektMaanedListe().stream()
                 .map(ArbeidsInntektMaaned::getArbeidsInntektInformasjon)
                 .filter(Objects::nonNull)
