@@ -1,26 +1,10 @@
 package no.nav.melosys.tjenester.gui;
 
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
-import no.nav.melosys.domain.dokument.inntekt.Inntekt;
-import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
-import no.nav.melosys.integrasjon.aareg.AaregFasade;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
-import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.inntk.InntektFasade;
-import no.nav.melosys.integrasjon.medl.Medl2Fasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 
-import java.time.YearMonth;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -28,8 +12,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import no.nav.tjeneste.virksomhet.journal.v2.informasjon.Sak;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
@@ -46,7 +28,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 
 @Api(tags = {"fagsak"})
