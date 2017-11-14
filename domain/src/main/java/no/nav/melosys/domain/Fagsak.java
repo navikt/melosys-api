@@ -46,7 +46,7 @@ public class Fagsak {
     @OneToMany(mappedBy = "fagsak", fetch = FetchType.EAGER)
     private Set<Aktoer> aktører;
 
-    @OneToMany(mappedBy = "fagsak", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "fagsak")
     private List<Behandling> behandlinger;
 
     public long getId() {
