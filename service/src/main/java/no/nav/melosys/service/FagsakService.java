@@ -1,9 +1,6 @@
 package no.nav.melosys.service;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.RolleType;
-import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
@@ -21,6 +18,7 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -78,10 +76,23 @@ public class FagsakService {
         arbeidsforholdSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraArbeidsforhold(saksopplysning)));
         inntektSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraInntekt(saksopplysning)));
 
-        if (!orgnumre.isEmpty())
+        if (!orgnumre.isEmpty()) {
             saksopplysninger.addAll(hentOrganisasjoner(orgnumre));
+        }
 
-        Fagsak fagsak = new Fagsak().withBehandlinger(Collections.singletonList(new Behandling().withSaksopplysninger(saksopplysninger)));
+        Aktoer aktoer = new Aktoer();
+        aktoer.setAktørId(fnr);
+
+        Behandling behandling = new Behandling();
+        behandling.setSaksopplysninger(saksopplysninger);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(new HashSet<>(Collections.singletonList(aktoer)));
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.setRegistrertDato(LocalDateTime.now());
+        fagsak.setType(FagsakType.SØKNAD_A1);
+        fagsak.setVersjon(0);
+
         fagsakRepository.save(fagsak);
 
         return fagsak;

@@ -109,11 +109,6 @@ public class Fagsak {
         this.behandlinger = behandlinger;
     }
 
-    public Fagsak withBehandlinger(List<Behandling> behandlinger) {
-        this.behandlinger = behandlinger;
-        return this;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
