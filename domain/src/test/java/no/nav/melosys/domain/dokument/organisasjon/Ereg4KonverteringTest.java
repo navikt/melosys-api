@@ -1,15 +1,14 @@
 package no.nav.melosys.domain.dokument.organisasjon;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,6 +76,31 @@ public class Ereg4KonverteringTest {
         assertNull(postadresse.getGyldighetsperiode().getTom());
         assertEquals(LocalDate.of(2015, 2, 23), postadresse.getBruksperiode().getFom());
         assertNull(postadresse.getBruksperiode().getTom());
+    }
+
+    @Test
+    public void testSektorkode() throws IOException {
+        final String[] ressurser = {"organisasjon/974652366.xml", EREG_4_0_MOCK};
+
+        for (String ressurs : ressurser) {
+
+            Saksopplysning saksopplysning = new Saksopplysning();
+            InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
+                String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+
+                saksopplysning.setDokumentXml(xmlStr);
+                saksopplysning.setType(SaksopplysningType.ORGANISASJON);
+                saksopplysning.setVersjon("4.0");
+
+                factory.lagDokument(saksopplysning);
+
+                OrganisasjonDokument dokument = (OrganisasjonDokument) saksopplysning.getDokument();
+
+                assertNotNull(((OrganisasjonDokument) saksopplysning.getDokument()).getSektorkode());
+            }
+        }
     }
 
 }

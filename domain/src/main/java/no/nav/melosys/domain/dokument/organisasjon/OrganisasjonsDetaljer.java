@@ -26,6 +26,8 @@ public class OrganisasjonsDetaljer {
 
     private List<Epost> epostadresse;
 
+    private List<String> naering;
+
     public String getOrgnummer() {
         return orgnummer;
     }
@@ -72,5 +74,13 @@ public class OrganisasjonsDetaljer {
 
     public void setEpostadresse(List<Epost> epostadresse) {
         this.epostadresse = epostadresse;
+    }
+
+    public List<String> getNaering() {
+        return naering;
+    }
+
+    public void setNaering(List<String> naering) {
+        this.naering = naering;
     }
 }

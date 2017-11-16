@@ -22,6 +22,8 @@ public class OrganisasjonDokument extends SaksopplysningDokument {
 
     private OrganisasjonsDetaljer organisasjonDetaljer;
 
+    private String sektorkode;
+
     public String getOrgnummer() {
         return orgnummer;
     }
@@ -46,4 +48,11 @@ public class OrganisasjonDokument extends SaksopplysningDokument {
         this.organisasjonDetaljer = organisasjonDetaljer;
     }
 
+    public String getSektorkode() {
+        return sektorkode;
+    }
+
+    public void setSektorkode(String sektorkode) {
+        this.sektorkode = sektorkode;
+    }
 }

@@ -32,8 +32,14 @@
                 </organisasjonsnavn>
                 </xsl:for-each>
                 <xsl:apply-templates select="telefon|epostadresse"/>
+                <!-- FIXME: Henter kun ut første verdi - kan være mange -->
+                <!--naering><xsl:value-of select="naering/naeringskode/@kodeRef"/></naering-->
+                <xsl:for-each select="naering/naeringskode">
+                    <naering><xsl:value-of select="@kodeRef"/></naering>
+                </xsl:for-each>
             </organisasjonDetaljer>
             </xsl:for-each>
+            <sektorkode><xsl:value-of select="(juridiskEnhetDetaljer|orgleddDetaljer)/sektorkode/@kodeRef"/></sektorkode>
         </organisasjonDokument>
     </xsl:template>
 
