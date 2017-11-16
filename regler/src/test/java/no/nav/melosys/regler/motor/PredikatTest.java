@@ -1,4 +1,4 @@
-package no.nav.melosys.regler.old.nare;
+package no.nav.melosys.regler.motor;
 
 import static no.nav.melosys.regler.motor.Predikat.ikke;
 import static org.junit.Assert.assertFalse;

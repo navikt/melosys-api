@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
-import no.nav.melosys.regler.old.service.lovvalg.LovvalgTjenesteImpl;
+import no.nav.melosys.regler.service.lovvalg.LovvalgTjenesteImpl;
 
 //import io.swagger.annotations.Api;
 

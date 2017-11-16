@@ -1,23 +1,17 @@
 package no.nav.melosys.regler.motor.dekl;
 
-import no.nav.melosys.regler.motor.KontekstManager;
 import no.nav.melosys.regler.motor.Predikat;
 
 /**
  * Klasse som støtter deklarativ programmering av typen
  * hvis(predikat).så(kommando).ellers(kommando)
- * 
- * Klassen implementerer Runable, slik at kommandoene kan være (nøstede) deklarasjoner.
+ * FIXME: Trenger bedre navn
  */
-public final class Deklarasjon implements Runnable {
+public final class Deklarasjon {
     
     private Deklarasjon() {}
     
     private Predikat betingelse;
-    
-    private Runnable[] såKommando;
-    
-    private Runnable[] ellersKommando;
     
     public static Deklarasjon hvis(Predikat p) {
         Deklarasjon d = new Deklarasjon();
@@ -25,35 +19,24 @@ public final class Deklarasjon implements Runnable {
         return d;
     }
 
-    public Deklarasjon så(Runnable... kommando) {
-        this.såKommando = kommando;
-        return this;
-    }
-    
-    public Deklarasjon ellers(Runnable... kommando) {
-        this.ellersKommando = kommando;
-        return this;
-    }
-    
-    public void utfør() {
+    public Deklarasjon så(Runnable... kommandoer) {
         if (betingelse.test()) {
-            if (såKommando != null) {
-                for (Runnable kommando : såKommando) {
-                    kommando.run();
-                }
-            }
-        } else {
-            if (ellersKommando != null) {
-                for (Runnable kommando : ellersKommando) {
-                    kommando.run();
-                }
-            }
+            utfør(kommandoer);
+        }
+        return this;
+    }
+    
+    public Deklarasjon ellers(Runnable... kommandoer) {
+        if (!betingelse.test()) {
+            utfør(kommandoer);
+        }
+        return this;
+    }
+    
+    private void utfør(Runnable... kommandoer) {
+        for (Runnable kommando : kommandoer) {
+            kommando.run();
         }
     }
 
-    @Override
-    public void run() {
-        utfør();
-    }
-    
 }

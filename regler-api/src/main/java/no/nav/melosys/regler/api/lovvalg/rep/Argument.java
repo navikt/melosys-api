@@ -12,6 +12,8 @@ public enum Argument {
     BRUKER_ARBEIDER_PÅ_SKIP("Bruker arbeider på skip"),
     BRUKER_ARBEIDER_I_FLERE_LAND("Bruker arbeider i flere land"),
     ANDEL_PROSENT_ARB_I_BOLAND("Andel % arb/inntekt i bostedsland"),
+
+    A1_BRUKER_ER_ANSATT_HOS_UTSENDENDE_ORGANISASJON_I_HELE_SØKNADSPERIODE("Bruker er ansatt hos utsendende organisasjon i hele perioden"),
     
     A1_SKAL_VURDERE_ART_11_1("Skal vurdere artikkel 11.1"),
     A1_SKAL_VURDERE_ART_11_2("Skal vurdere artikkel 11.2"),

@@ -26,5 +26,20 @@ public class Verdielement {
     public Predikat harVerdi() {
         return () -> {return verdi != null;};
     }
+    
+    public Predikat erLik(Object annetVerdi) {
+        return () -> {return verdi.equals(annetVerdi);}; // Ja, vi vil ha teknisk feil / NPE hvis verdi er null
+    }
+
+    public Predikat erEnAv(Object... andreVerdier) {
+        return () -> {
+            for (Object annetVerdi : andreVerdier) {
+                if (verdi.equals(annetVerdi)) { // Ja, vi vil ha teknisk feil / NPE hvis verdi er null
+                    return true;
+                }
+            }
+            return false;
+        };
+    }
 
 }

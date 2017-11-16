@@ -19,7 +19,7 @@ import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
  *  
  */
 @XmlRootElement
-public class PersonDokument extends SaksopplysningDokument {
+public class PersonopplysningDokument extends SaksopplysningDokument {
 
     public String fnr;
 

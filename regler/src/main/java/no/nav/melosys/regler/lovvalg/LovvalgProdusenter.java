@@ -1,0 +1,27 @@
+package no.nav.melosys.regler.lovvalg;
+
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.arbeidsforholdDokumentene;
+import static no.nav.melosys.regler.motor.dekl.VerdielementSett.forAlle;
+
+import java.util.function.Function;
+
+import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
+import no.nav.melosys.domain.dokument.arbeidsforhold.PermisjonOgPermittering;
+import no.nav.melosys.regler.motor.dekl.VerdielementSett;
+
+/**
+ * Klassen inneholder verbalisering av produsenter
+ */
+public class LovvalgProdusenter {
+    
+    private LovvalgProdusenter() {}
+    
+    /** Gir alle permisjonene til et arbeidsforhold */
+    public static Function<Arbeidsforhold, Iterable<PermisjonOgPermittering>> permitteringer = arbeidsforhold -> arbeidsforhold.getPermisjonOgPermittering();
+    
+    /** Gir alle arbeidsforhold */
+    public static VerdielementSett<Arbeidsforhold, ?> arbeidsforholdene() {
+        return forAlle(arbeidsforholdDokumentene()).sine(ad -> ad.getArbeidsforhold());
+    }
+
+}

@@ -1,12 +1,19 @@
 package no.nav.melosys.regler.lovvalg;
 
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
-import static no.nav.melosys.regler.motor.Predikat.ikke;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknadDokumentet;
 
+import java.util.function.Predicate;
+
+import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.motor.Predikat;
 
+/**
+ * Klassen inneholder verbalisering av predikater
+ */
 public final class LovvalgPredikater {
 
     private LovvalgPredikater() {}
@@ -21,27 +28,36 @@ public final class LovvalgPredikater {
         return false;
     };
 
-    /** Predikat som er sant hvis vi ikke har fått en feilmelding. */
-    public static final Predikat detErIkkeMeldtFeil = ikke(detErMeldtFeil);
+    /** Sjekker om et element sin periode dekker (hele) søknadens periode */
+    public static final Predicate<HarPeriode> dekkerHeleSøknadsperioden = e -> {
+        ErPeriode p = e.getPeriode();
+        // Teknisk feil hvis p er null. OK med NPE.
+        ErPeriode søknadsperiode = søknadDokumentet().getPeriode();
+        if (p.getFom() != null && p.getFom().isAfter(søknadsperiode.getFom())) {
+            // Elementets fom er etter søknadens fom
+            return false;
+        }
+        if (p.getTom() != null && p.getTom().isBefore(søknadsperiode.getTom())) {
+            // Elementets tom er før søknadens tom
+            return false;
+        }
+        return true;
+    };
     
-
+    /** Sjekker om et element sin periode har overlapp med søknadens periode */
+    public static final Predicate<HarPeriode> harOverlappMedSøknadsperioden = e -> {
+        ErPeriode p = e.getPeriode();
+        // Teknisk feil hvis p er null. OK med NPE.
+        ErPeriode søknadsperiode = søknadDokumentet().getPeriode();
+        if (p.getFom() != null && p.getFom().isAfter(søknadsperiode.getTom())) {
+            // Elementets fom er etter søknadens tom
+            return false;
+        }
+        if (p.getTom() != null && p.getTom().isBefore(søknadsperiode.getFom())) {
+            // Elementets tom er før søknadens fom
+            return false;
+        }
+        return true;
+    };
     
-    /*
-    public static final Predikat personenErArbeidstaker = () -> {return søknad().arbeidstakerEllerSelvstendigNaeringsdrivende;}; 
-
-    public static final Predikat personenErSelvstendigNæringsdrivende = () -> {return søknad().arbeidstakerOgSelvstendigNaeringsdrivende;}; 
-    
-    public static final Predikat personenArbeiderPåSkip = () -> {return søknad().arbeidSkip;};
-
-    public static final Predikat personenArbeiderPåSokkel = () -> {return søknad().arbeidSokkel;};
-
-    public static final Predikat antallMånederIPeriodenErMindreEnnEllerLik(int maxMåneder) {
-        return  () -> {return søknad().periodeFom.plusMonths(maxMåneder).isAfter(søknad().periodeTom);}; 
-    }
-
-    public static final Predikat antallLandErMindreEnnEllerLik(int maxLand) {
-        return  () -> {return søknad().land.size() <= maxLand;}; 
-    }
-    //*/
-
 }

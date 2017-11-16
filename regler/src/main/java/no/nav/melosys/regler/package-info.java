@@ -12,7 +12,7 @@
  * En regeltjeneste har én kontekst (som reglene kjører på på) og én regelflyt (som organiserer regelkjøring)
  * 
  * Kontekst:
- * Konteksten inneholder tilstanden for regelkjøringen, input, output og mellomregninger. Dette muliggjør implementasjon av forretningsregler som static 
+ * Konteksten inneholder tilstanden for regelkjøringen, dvsa. input, output og mellomregninger. Dette muliggjør implementasjon av forretningsregler som static 
  * metoder uten parametre. Konteksten er bundet til tråden som kjører regelflyten.
  * 
  * Regelflyt:
@@ -21,23 +21,10 @@
  * 
  * Regelpakke:
  * En regelpakke inneholder en eller flere regler. Reglene må annoteres med @Regel, og da kjøres de automatisk når pakken kjøres. Reglene kan skrives som 
- * vanlig java-kode, men de bør primært skrives deklarativt. Dette gjøres ved å lage en liste med deklarasjoner som man utfører (ved å kalle 
- * Regelpakke.utfør()).
+ * vanlig java-kode, men de bør primært skrives deklarativt.  
  * 
  * Eksempler på deklarasjoner:
  * hvis(søknaden()).mangler().så(leggTilMelding(VALIDERINGSFEIL, "Forespørselen mangler søknad"))
- * hvis(variabelen(BRUKER_ARBEIDER_PÅ_SKIP)).erSann.så(settVariabel
- * 
- * 
- * 
- * 
- * TODO (farjam 2017-06-12): Hva som må gjøres med modulen før flere regelpakker legges til:
- * 
- * 1) Lag superklasser for respons i api-modulen. Denne skal ha støtte for å legge på feilmeldinger og lovvalgsbestemmelser.
- * 2) Lag superlklasse for request i api-modulen.
- * 3) Lag en typet og instansierbar superklasse for Kontekst. Flytt gjenbrukbar kode fra LovvalgKontekst til superklassen.
- * 4) Tilby en enkel måte å få riktig kontekst.
- * 5) Flytt Regelsett til no.nav..nare og fjern avhengigheter til LovvalgKontekst
  */
 package no.nav.melosys.regler;
 

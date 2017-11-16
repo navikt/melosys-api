@@ -13,14 +13,13 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonopplysningDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
-import no.nav.melosys.regler.api.lovvalg.rep.Lovvalgsbestemmelse;
 import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
 import no.nav.melosys.regler.motor.KontekstManager;
 
 /**
  * Kontekst (og -manager) for lovvalgregler.
  * 
- * Tilbyr forskjellige metoder, bl.a. tilgang til søknaden og responsen.
+ * Tilbyr verbalisering for tilgang til søknaden og responsen.
  * 
  * Konteksten er bundet til tråden den kjører på, slik at regelsett kan kalles i parallell.
  * 
@@ -88,9 +87,4 @@ public class LovvalgKontekstManager {
         return lokalFastsettLovvalgRespons.get();
     }
 
-    /** Legger til em lovvalgsbestemmelse (med tilhørende resultat av evaluering). */
-    public static void leggTilLovvalgsbestemmelse(Lovvalgsbestemmelse lovvalgsbestemmelse) {
-        responsen().lovvalgsbestemmelser.add(lovvalgsbestemmelse);
-    }
-    
 }

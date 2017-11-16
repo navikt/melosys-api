@@ -20,36 +20,21 @@ public class Regelflyt {
     
     private static Logger log = LoggerFactory.getLogger(Regelflyt.class);
     
-    private static class FlytElement {
-        public Predikat predikat;
-        public Class<? extends Regelpakke> regelpakke;
-    }
-    
     /** Dersom false, vil regelflyten avbrytes */
-    private List<FlytElement> flytSekvens;
+    private List<Class<? extends Regelpakke>> flytSekvens;
     
     public Regelflyt() {
         flytSekvens = new ArrayList<>();
     }
     
     public Regelflyt leggTilRegelpakke(Class<? extends Regelpakke> regelpakke) {
-        return leggTilRegelpakke(null, regelpakke);
-    }
-
-    public Regelflyt leggTilRegelpakke(Predikat predikat, Class<? extends Regelpakke> regelpakke) {
-        FlytElement fe = new FlytElement();
-        fe.predikat = predikat;
-        fe.regelpakke = regelpakke;
-        flytSekvens.add(fe);
+        flytSekvens.add(regelpakke);
         return this;
     }
  
     public void kjør() {
-        for (FlytElement fe : flytSekvens) {
-            // Utfør steget hvis predikatet er sant...
-            if (fe.predikat.test()) {
-                kjørRegelPakke(fe.regelpakke);
-            }
+        for (Class<? extends Regelpakke> regelpakke : flytSekvens) {
+            kjørRegelPakke(regelpakke);
         }
     }
 
@@ -73,7 +58,7 @@ public class Regelflyt {
                     log.error(feilmelding, e);
                     throw new RuntimeException(feilmelding, e.getCause());
                 } catch (AvbrytRegelkjoeringIStillhetException e) {
-                    // Denne exceptionen kan bare kastes av klasser i denne pakken. Med andre ord er regelpakken AvbrytRegelkjoeringIStgillhet blitt aktivert
+                    // En av reglene har avbrutt videre regelkjøring. Returner i stillhet.
                     return;
                 }
             }

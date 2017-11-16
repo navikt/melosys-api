@@ -1,13 +1,9 @@
 package no.nav.melosys.regler.lovvalg;
 
-import static no.nav.melosys.regler.lovvalg.LovvalgPredikater.*;
-import static no.nav.melosys.regler.motor.Predikat.*;
-
+import no.nav.melosys.regler.lovvalg.sett_variabler.SettVariabler;
+import no.nav.melosys.regler.lovvalg.verifiser_inndata.AvbrytRegelkjoeringHvisFeil;
 import no.nav.melosys.regler.lovvalg.verifiser_inndata.ValiderInndata;
-import no.nav.melosys.regler.lovvalg.verifiser_inndata.VerifiserPaakrevdeElementer;
 import no.nav.melosys.regler.lovvalg.verifiser_inndata.VerifiserPaakrevdeFelter;
-import no.nav.melosys.regler.motor.AvbrytRegelkjoeringIStillhet;
-import no.nav.melosys.regler.motor.Predikat;
 import no.nav.melosys.regler.motor.Regelflyt;
 
 public class LovvalgRegelflyt extends Regelflyt {
@@ -15,14 +11,12 @@ public class LovvalgRegelflyt extends Regelflyt {
     public LovvalgRegelflyt() {
         
         // Steg 1: Verifiser inndata
-        leggTilRegelpakke(VerifiserPaakrevdeElementer.class);
-        leggTilRegelpakke(detErIkkeMeldtFeil, VerifiserPaakrevdeFelter.class);
-        leggTilRegelpakke(detErIkkeMeldtFeil, ValiderInndata.class);
-
-        // Avbryt regelflyten hvis det flagges feil
-        leggTilRegelpakke(detErMeldtFeil, AvbrytRegelkjoeringIStillhet.class);
+        leggTilRegelpakke(VerifiserPaakrevdeFelter.class);
+        leggTilRegelpakke(ValiderInndata.class);
+        leggTilRegelpakke(AvbrytRegelkjoeringHvisFeil.class);
         
         // Steg 2: Sett verdier
+        leggTilRegelpakke(SettVariabler.class);
         
         // Steg X: Finn ut hvilke(t) artikler som er relevante
         

@@ -2,9 +2,10 @@ package no.nav.melosys.domain.dokument.arbeidsforhold;
 
 import java.math.BigDecimal;
 
+import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
 
-public class PermisjonOgPermittering {
+public class PermisjonOgPermittering implements HarPeriode {
 
     private String permisjonsId;
 
@@ -13,6 +14,11 @@ public class PermisjonOgPermittering {
     private BigDecimal permisjonsprosent;
 
     private String permisjonOgPermittering;
+    
+    @Override
+    public Periode getPeriode() {
+        return permisjonsPeriode;
+    }
 
     public String getPermisjonsId() {
         return permisjonsId;

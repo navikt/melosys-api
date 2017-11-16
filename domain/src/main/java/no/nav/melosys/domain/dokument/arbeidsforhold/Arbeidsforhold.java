@@ -10,10 +10,12 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Arbeidsforhold {
+public class Arbeidsforhold implements HarPeriode {
 
     private String arbeidsforholdID;
 
@@ -43,6 +45,11 @@ public class Arbeidsforhold {
 
     @JsonProperty("Aordning")
     private Boolean arbeidsforholdInnrapportertEtterAOrdningen;
+
+    @Override
+    public ErPeriode getPeriode() {
+        return ansettelsesPeriode;
+    }
 
     public String getArbeidsforholdID() {
         return arbeidsforholdID;
@@ -131,4 +138,5 @@ public class Arbeidsforhold {
     public void setArbeidsforholdInnrapportertEtterAOrdningen(Boolean arbeidsforholdInnrapportertEtterAOrdningen) {
         this.arbeidsforholdInnrapportertEtterAOrdningen = arbeidsforholdInnrapportertEtterAOrdningen;
     }
+
 }

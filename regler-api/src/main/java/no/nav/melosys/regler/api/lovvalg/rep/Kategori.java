@@ -1,6 +1,6 @@
 package no.nav.melosys.regler.api.lovvalg.rep;
 
-import static no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad.FEIL;
+import static no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad.*;
 
 public enum Kategori {
     
@@ -9,7 +9,10 @@ public enum Kategori {
     IKKE_STOETTET(FEIL, "Det er ikke implementert maskinell støtte for denne forespørselen."),
     
     // Funksjonelle feil relatert til input
-    VALIDERINGSFEIL(FEIL, "Ikke komplett eller inkonsistent input.");
+    VALIDERINGSFEIL(FEIL, "Ikke komplett eller inkonsistent input."),
+    
+    // Varsel
+    DELVIS_STOETTET(VARSEL, "Det er kanskje ikke implementert maskinell støtte for denne forespørselen.");
     
     public final Alvorlighetsgrad alvorlighetsgrad;
     public final String melding;

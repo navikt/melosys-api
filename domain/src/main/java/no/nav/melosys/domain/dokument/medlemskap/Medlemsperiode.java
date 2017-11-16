@@ -3,8 +3,10 @@ package no.nav.melosys.domain.dokument.medlemskap;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
+import no.nav.melosys.domain.HarPeriode;
+
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Medlemsperiode {
+public class Medlemsperiode implements HarPeriode {
 
     private Periode periode;
 
@@ -24,6 +26,11 @@ public class Medlemsperiode {
 
     private String kilde;
 
+    @Override
+    public Periode getPeriode() {
+        return periode;
+    }
+    
     public Periodetype getType() {
         return type;
     }

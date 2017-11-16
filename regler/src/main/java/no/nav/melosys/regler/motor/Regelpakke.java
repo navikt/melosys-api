@@ -1,7 +1,5 @@
 package no.nav.melosys.regler.motor;
 
-import no.nav.melosys.regler.motor.dekl.Deklarasjon;
-
 /**
  * Superklasse for regelpakker.
  * 
@@ -9,14 +7,4 @@ import no.nav.melosys.regler.motor.dekl.Deklarasjon;
  * 
  */
 public abstract class Regelpakke {
-    
-    /**
-     * Støttefunksjon som utfører alle deklarasjoner den får
-     */
-    public static void utfør(Deklarasjon... deklarasjoner) {
-        for (Deklarasjon d : deklarasjoner) {
-            d.utfør();
-        }
-    }
-
 }
