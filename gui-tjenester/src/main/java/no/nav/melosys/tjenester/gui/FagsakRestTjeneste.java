@@ -13,6 +13,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
+import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.service.FagsakService;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
@@ -33,7 +36,6 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
@@ -44,15 +46,15 @@ import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 public class FagsakRestTjeneste extends RestTjeneste {
 
-    private FagsakRepository fagsakRepository;
+    private FagsakService fagsakService;
 
     private DokumentFactory dokumentFactory;
 
     private ModelMapper modelMapper;
 
     @Autowired
-    public FagsakRestTjeneste(FagsakRepository fagsakRepository, DokumentFactory dokumentFactory) {
-        this.fagsakRepository = fagsakRepository;
+    public FagsakRestTjeneste(FagsakService fagsakService, DokumentFactory dokumentFactory) {
+        this.fagsakService = fagsakService;
         this.dokumentFactory = dokumentFactory;
 
         this.modelMapper = new ModelMapper();
@@ -78,7 +80,7 @@ public class FagsakRestTjeneste extends RestTjeneste {
         Map<String, String> identMap = new HashMap<>();
         String aktørID = fnr; // test data har aktørID = fnr
 
-        List<Fagsak> saker = fagsakRepository.findByRolleAndAktør(RolleType.BRUKER, aktørID);
+        List<Fagsak> saker = fagsakService.hentFagsaker(RolleType.BRUKER, aktørID);
 
         return tilDtoer(saker);
     }
@@ -87,7 +89,7 @@ public class FagsakRestTjeneste extends RestTjeneste {
     @Path("{saksnr}")
     @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."))
     public Response hentFagsak(@PathParam("saksnr") @ApiParam("Saksnummer.") Long saksnummer) {
-        Fagsak sak = fagsakRepository.findBySaksnummer(saksnummer);
+        Fagsak sak = fagsakService.hentFagsak(saksnummer);
 
         if (sak == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -96,6 +98,25 @@ public class FagsakRestTjeneste extends RestTjeneste {
             return Response.ok(fagsakDto).build();
         }
 
+    }
+
+    @GET
+    @Path("ny/{fnr}")
+    @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.", notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."))
+    public Response nyFagsak(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
+
+        try {
+            Fagsak fagsak = fagsakService.nyFagsak(fnr);
+
+            if (fagsak == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            } else {
+                FagsakDto fagsakDto = tilDto(fagsak);
+                return Response.ok(fagsakDto).build();
+            }
+        } catch (SikkerhetsbegrensningException e) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
     }
 
     private List<FagsakOppsummeringDto> tilDtoer(List<Fagsak> saker) {

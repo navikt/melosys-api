@@ -16,13 +16,13 @@ import static org.junit.Assert.*;
 
 public class Medl2ServiceTest {
 
-    private Medl2Service medl2Service;
+    private MedlService medl2Service;
 
     @Before
     public void setUp() {
         MedlemskapMock medlemskapMock = new MedlemskapMock();
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
-        medl2Service = new Medl2Service(medlemskapMock, dokumentFactory);
+        medl2Service = new MedlService(medlemskapMock, dokumentFactory);
     }
 
     @Test
