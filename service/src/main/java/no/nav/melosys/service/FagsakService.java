@@ -17,6 +17,7 @@ import no.nav.melosys.repository.FagsakRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.*;
@@ -119,8 +120,10 @@ public class FagsakService {
     }
 
     private Saksopplysning hentArbeidsforhold(String fnr) throws SikkerhetsbegrensningException {
+        final LocalDate tom  = LocalDate.now();
+        final LocalDate fom = tom.minusMonths(12);
         try {
-            return aaregFasade.finnArbeidsforholdPrArbeidstaker(fnr, AaregFasade.REGELVERK_A_ORDNINGEN);
+            return aaregFasade.finnArbeidsforholdPrArbeidstaker(fnr, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
         } catch (IntegrasjonException e) {
             return null;
         }
