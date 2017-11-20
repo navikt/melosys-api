@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.organisasjon;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -7,8 +8,10 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -22,7 +25,12 @@ public class OrganisasjonDokument extends SaksopplysningDokument {
 
     private OrganisasjonsDetaljer organisasjonDetaljer;
 
-    private String sektorkode;
+    private String sektorkode; //"http://nav.no/kodeverk/Kodeverk/Sektorkoder"
+
+    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
+    private LocalDate oppstartsdato;
+
+    private String enhetstype; //"http://nav.no/kodeverk/Kodeverk/EnhetstyperJuridiskEnhet"
 
     public String getOrgnummer() {
         return orgnummer;
@@ -54,5 +62,21 @@ public class OrganisasjonDokument extends SaksopplysningDokument {
 
     public void setSektorkode(String sektorkode) {
         this.sektorkode = sektorkode;
+    }
+
+    public LocalDate getOppstartsdato() {
+        return oppstartsdato;
+    }
+
+    public void setOppstartsdato(LocalDate oppstartsdato) {
+        this.oppstartsdato = oppstartsdato;
+    }
+
+    public String getEnhetstype() {
+        return enhetstype;
+    }
+
+    public void setEnhetstype(String enhetstype) {
+        this.enhetstype = enhetstype;
     }
 }

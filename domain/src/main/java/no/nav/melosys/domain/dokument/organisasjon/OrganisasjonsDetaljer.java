@@ -26,7 +26,7 @@ public class OrganisasjonsDetaljer {
 
     private List<Epost> epostadresse;
 
-    private List<String> naering;
+    private List<String> naering; //"http://nav.no/kodeverk/Kodeverk/Næringskoder"
 
     public String getOrgnummer() {
         return orgnummer;
