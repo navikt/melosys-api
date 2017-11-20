@@ -1,15 +1,10 @@
 package no.nav.melosys.domain.dokument.organisasjon;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,12 +18,14 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.Gateadresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 
+import static org.junit.Assert.*;
+
 // Denne konverteringen testes også i DokumentFactoryTest, uten strukturert adresse
 public class Ereg4KonverteringTest {
 
-    public static final String EREG_4_0_MOCK = "organisasjon/org_med_strukturert_adresse.xml";
+    private static final String EREG_4_0_MOCK = "organisasjon/org_med_strukturert_adresse.xml";
 
-    DokumentFactory factory;
+    private DokumentFactory factory;
 
     @Before
     public void setUp() {
@@ -77,6 +74,59 @@ public class Ereg4KonverteringTest {
         assertNull(postadresse.getGyldighetsperiode().getTom());
         assertEquals(LocalDate.of(2015, 2, 23), postadresse.getBruksperiode().getFom());
         assertNull(postadresse.getBruksperiode().getTom());
+    }
+
+    @Test
+    public void testJuridiskEnhet() throws IOException {
+        Saksopplysning saksopplysning = getSaksopplysning(EREG_4_0_MOCK);
+        OrganisasjonDokument dokument = (OrganisasjonDokument) saksopplysning.getDokument();
+
+        assertNotEquals("", dokument.getSektorkode());
+        assertFalse(dokument.getOrganisasjonDetaljer().getNaering().isEmpty());
+        assertNull(dokument.getOppstartsdato());
+        assertNotEquals("", dokument.getEnhetstype());
+    }
+
+    @Test
+    public void testOrgledd() throws IOException {
+        final String ressurs = "organisasjon/974652366.xml";
+        Saksopplysning saksopplysning = getSaksopplysning(ressurs);
+        OrganisasjonDokument dokument = (OrganisasjonDokument) saksopplysning.getDokument();
+
+        assertNotEquals("", dokument.getSektorkode());
+        assertFalse(dokument.getOrganisasjonDetaljer().getNaering().isEmpty());
+        assertNull(dokument.getOppstartsdato());
+        assertEquals("", dokument.getEnhetstype());
+    }
+
+    @Test
+    public void testVirksomhet() throws IOException {
+        final String ressurs = "organisasjon/975270211.xml";
+        Saksopplysning saksopplysning = getSaksopplysning(ressurs);
+        OrganisasjonDokument dokument = (OrganisasjonDokument) saksopplysning.getDokument();
+
+        assertEquals("", dokument.getSektorkode());
+        assertFalse(dokument.getOrganisasjonDetaljer().getNaering().isEmpty());
+        assertNotNull(dokument.getOppstartsdato());
+        assertEquals("", dokument.getEnhetstype());
+    }
+
+    private Saksopplysning getSaksopplysning(String ressurs) throws IOException {
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
+            Saksopplysning saksopplysning = new Saksopplysning();
+
+            String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+
+            saksopplysning.setDokumentXml(xmlStr);
+            saksopplysning.setType(SaksopplysningType.ORGANISASJON);
+            saksopplysning.setVersjon("4.0");
+
+            factory.lagDokument(saksopplysning);
+
+            return saksopplysning;
+        }
     }
 
 }
