@@ -76,7 +76,7 @@ public class TpsServiceTest {
 
     @Test
     public void hentPerson() throws Exception {
-        Saksopplysning saksopplysning = service.hentPerson("99999999999", null);
+        Saksopplysning saksopplysning = service.hentPerson("99999999999");
         PersonDokument dokument = (PersonDokument) saksopplysning.getDokument();
         assertThat(dokument.fnr).isEqualTo("99999999999");
     }

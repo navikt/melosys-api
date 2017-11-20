@@ -14,7 +14,6 @@ import no.nav.melosys.integrasjon.inntk.InntektFasade;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -100,9 +99,8 @@ public class FagsakService {
 
     private Saksopplysning hentPerson(String fnr) throws SikkerhetsbegrensningException {
         // TODO: Informasjonsbehov.FAMILIERELASJONER kommer i runde 2
-        final List<Informasjonsbehov> informasjonsbehov = Collections.singletonList(Informasjonsbehov.ADRESSE);
         try {
-            return tpsFasade.hentPerson(fnr, informasjonsbehov);
+            return tpsFasade.hentPersonMedAdresse(fnr);
         } catch (IntegrasjonException e) {
             return null;
         }
