@@ -28,3 +28,10 @@
  */
 package no.nav.melosys.regler;
 
+/*
+ * FIXME (innspill fra francois)
+ * no.nav.melosys.regler -> no.nav.melosys.lovvalg
+ * no.nav.melosys.regler.api -> no.nav.melosys.lovvalg.api
+ *
+ * Og så blir regler en pakke under lovvalg eller kanskje en egen pakke.
+ */

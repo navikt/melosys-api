@@ -10,7 +10,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonopplysningDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
@@ -58,7 +58,7 @@ public class LovvalgKontekstManager {
     }
 
     /** Returnerer personopplysnng fra input. */
-    public static PersonopplysningDokument personopplysningDokumentet() {
+    public static PersonDokument personopplysningDokumentet() {
         return lokalFastsettLovvalgRequest.get().personopplysningDokument;
     }
 

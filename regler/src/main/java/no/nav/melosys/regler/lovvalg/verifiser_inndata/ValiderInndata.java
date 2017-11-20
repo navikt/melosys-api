@@ -3,12 +3,12 @@ package no.nav.melosys.regler.lovvalg.verifiser_inndata;
 
 import static no.nav.melosys.domain.dokument.person.Personstatus.DØD;
 import static no.nav.melosys.domain.dokument.person.Personstatus.DØDD;
+import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.IKKE_STOETTET;
+import static no.nav.melosys.regler.lovvalg.LovvalgImparater.leggTilMelding;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.personopplysningDokumentet;
 import static no.nav.melosys.regler.motor.dekl.Deklarasjon.hvis;
 import static no.nav.melosys.regler.motor.dekl.Verdielement.verdien;
 
-import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
-import no.nav.melosys.regler.lovvalg.LovvalgImparater;
 import no.nav.melosys.regler.motor.Regel;
 import no.nav.melosys.regler.motor.Regelpakke;
 
@@ -18,7 +18,7 @@ public final class ValiderInndata extends Regelpakke {
     @Regel
     public static void giVarselHvisBrukerErDød() {
         hvis(verdien(personopplysningDokumentet().personstatus).erEnAv(DØD, DØDD))
-        .så(LovvalgImparater.leggTilMelding(Kategori.IKKE_STOETTET, "Bruker er død"));
+        .så(leggTilMelding(IKKE_STOETTET, "Bruker er død"));
     }
     
     // FIXME: Mer validering

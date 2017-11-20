@@ -41,13 +41,6 @@ public class VerdielementSett<T, S> implements Iterable<T> {
         vs.verdieelementer = samling;
         return vs;
     }
-    
-    /**
-     * Alternativ verbalisering av forAlle.
-     */
-    public static <T> VerdielementSett<T, ?> settet(Iterable<T> samling) {
-        return forAlle(samling);
-    }
 
     /**
      * Legger til et filter på dette settet.
@@ -83,7 +76,7 @@ public class VerdielementSett<T, S> implements Iterable<T> {
     public Iterator<T> iterator() {
         Iterator<T> res = new Iterator<T>() {
             T neste = null;
-            boolean harNeste = false;
+            boolean harNeste = true; // Settes til true for å gjøre første iterering
             Iterator<T> denneIterator = overordnetVerdielementSett == null ? verdieelementer.iterator() : null;
             Iterator<S> superIterator = overordnetVerdielementSett == null ? null : overordnetVerdielementSett.iterator();
             @Override public boolean hasNext() {
@@ -102,7 +95,7 @@ public class VerdielementSett<T, S> implements Iterable<T> {
                             neste = null;
                             return nåværende;
                         }
-                        denneIterator = nøstetSupplier.apply(superIterator.next()).iterator();
+                        denneIterator = nøstetSupplier.apply(superIterator.next()).iterator(); 
                         continue; // I tilfelle den nye iteratoren ikke gir noen elementer
                     }
                     neste = denneIterator.next();
@@ -116,7 +109,7 @@ public class VerdielementSett<T, S> implements Iterable<T> {
                 }
             }
         };
-        res.next();
+        try {res.next();} catch (NoSuchElementException e) {}
         return res;
     }
 

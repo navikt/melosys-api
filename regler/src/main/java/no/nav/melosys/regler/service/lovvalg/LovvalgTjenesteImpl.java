@@ -25,12 +25,12 @@ import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
 import no.nav.melosys.regler.lovvalg.LovvalgRegelflyt;
 
 @Component
-@Path("Lovvalg")
+@Path("lovvalg")
 @Api
 @SwaggerDefinition(
-        basePath = "Lovvalg",
+        basePath = "lovvalg",
         info = @Info(
-                title = "Lovvalg",
+                title = "lovvalg",
                 version = "0",
                 contact = @Contact(
                         name = "Team MELOSYS"
@@ -50,7 +50,7 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
 
     @Override
     @GET
-    @Path("fastsettLovvalg")
+    @Path("fastsettLovvalg") // FIXME: Denne tjenesten er nært bundet til søknad a1. Bør gjenspeiles i tjenestenavn.
     @Consumes(LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8)
     @Produces(LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8)
     @ApiOperation(

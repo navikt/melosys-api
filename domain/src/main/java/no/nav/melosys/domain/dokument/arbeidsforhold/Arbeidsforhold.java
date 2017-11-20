@@ -46,6 +46,8 @@ public class Arbeidsforhold implements HarPeriode {
     @JsonProperty("Aordning")
     private Boolean arbeidsforholdInnrapportertEtterAOrdningen;
 
+    // FIXME: Sjekk om dette påvirker JAX. 
+    // Hvis det gjør det, gjør nødvendige endringer slik at det ikke gjør det. Gjør samme endringer også i andre relevante klasser som implementerer HarPeriode
     @Override
     public ErPeriode getPeriode() {
         return ansettelsesPeriode;

@@ -19,6 +19,15 @@ public class Verdielement {
         return verdien(KontekstManager.hentVariabel(variabel));
     }
 
+    @SuppressWarnings("unused") 
+    public static Verdielement antallet(Iterable<?> settet) {
+        int ant = 0;
+        for (Object t : settet) {
+            ant++;
+        }
+        return Verdielement.verdien(ant);
+    }
+    
     public Predikat mangler() {
         return () -> {return verdi == null;};
     }
@@ -40,6 +49,28 @@ public class Verdielement {
             }
             return false;
         };
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <T> Predikat erStørreEnn(T grense) {
+        return () -> {
+            return sammenliknMed(grense) > 0;
+        };
+    }
+
+    public Predikat erStørreEnnEllerLik(Object grense) {
+        return () -> {
+            return sammenliknMed(grense) >= 0;
+        };
+    }
+    
+    @SuppressWarnings("unchecked")
+    private int sammenliknMed(Object grense) {
+        try {
+            return ((Comparable<Object>) verdi).compareTo(grense);
+        } catch (ClassCastException e) {
+            throw new RuntimeException("Kan ikke sammenligne en " + verdi.getClass() + " med en " + grense.getClass());
+        }
     }
 
 }

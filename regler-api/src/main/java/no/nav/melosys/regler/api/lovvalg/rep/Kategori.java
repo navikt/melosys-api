@@ -12,7 +12,7 @@ public enum Kategori {
     VALIDERINGSFEIL(FEIL, "Ikke komplett eller inkonsistent input."),
     
     // Varsel
-    DELVIS_STOETTET(VARSEL, "Det er kanskje ikke implementert maskinell støtte for denne forespørselen.");
+    DELVIS_STOETTET(VARSEL, "Det er implementert maskinell støtte for denne forespørselen."); // FIXME: Teit navn og tekst
     
     public final Alvorlighetsgrad alvorlighetsgrad;
     public final String melding;

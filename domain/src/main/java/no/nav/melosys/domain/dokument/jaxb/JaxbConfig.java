@@ -14,9 +14,10 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import no.nav.melosys.domain.dokument.Dokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonopplysningDokument;;
+import no.nav.melosys.domain.dokument.person.PersonDokument;;
 
 @Configuration
 public class JaxbConfig {
@@ -37,7 +38,7 @@ public class JaxbConfig {
     private static Class<?>[] getClassesToBeBound() {
         List<Class<?>> klasser = new ArrayList<>();
 
-        List<Class<? extends Dokument>> dokumentKlasser = Arrays.asList(ArbeidsforholdDokument.class, PersonopplysningDokument.class, OrganisasjonDokument.class, MedlemskapDokument.class);
+        List<Class<? extends Dokument>> dokumentKlasser = Arrays.asList(ArbeidsforholdDokument.class, PersonDokument.class, InntektDokument.class, OrganisasjonDokument.class, MedlemskapDokument.class);
         klasser.addAll(dokumentKlasser);
 
         return klasser.toArray(new Class[0]);

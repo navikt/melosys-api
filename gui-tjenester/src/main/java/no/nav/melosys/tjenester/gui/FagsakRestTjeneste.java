@@ -32,7 +32,7 @@ import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.domain.dokument.person.PersonopplysningDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
@@ -118,7 +118,7 @@ public class FagsakRestTjeneste extends RestTjeneste {
 
                 Optional<Saksopplysning> opt = saksopplysninger.stream().filter(s -> s.getType().equals(SaksopplysningType.PERSONOPPLYSNING)).findFirst();
                 if (opt.isPresent()) {
-                    PersonopplysningDokument dokument = (PersonopplysningDokument) dokumentFactory.lagDokument(opt.get());
+                    PersonDokument dokument = (PersonDokument) dokumentFactory.lagDokument(opt.get());
                     fagsakOppsummeringDto.setKjønn(dokument.kjønn);
                     fagsakOppsummeringDto.setSammensattNavn(dokument.sammensattNavn);
                 }

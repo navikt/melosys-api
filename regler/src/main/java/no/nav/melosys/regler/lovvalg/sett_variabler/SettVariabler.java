@@ -9,7 +9,7 @@ import static no.nav.melosys.regler.lovvalg.LovvalgPredikater.harOverlappMedSøk
 import static no.nav.melosys.regler.lovvalg.LovvalgProdusenter.arbeidsforholdene;
 import static no.nav.melosys.regler.lovvalg.LovvalgProdusenter.permitteringer;
 import static no.nav.melosys.regler.motor.dekl.Deklarasjon.hvis;
-import static no.nav.melosys.regler.motor.dekl.VerdielementSett.settet;
+import static no.nav.melosys.regler.motor.dekl.Verdielement.antallet;
 
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -19,7 +19,7 @@ import no.nav.melosys.regler.motor.KontekstManager;
 import no.nav.melosys.regler.motor.Regel;
 import no.nav.melosys.regler.motor.Regelpakke;
 
-public class SettVariabler extends Regelpakke {
+public class SettVariabler extends Regelpakke { // Utled fakta
     
     /**
      * Gir et varsel dersom bruker har en permittering som overlapper med søknadsperioden.
@@ -36,7 +36,7 @@ public class SettVariabler extends Regelpakke {
                 }
             }
         }
-    }
+    }   
     
     /**
      * Gir et varsel dersom bruker har en permittering som overlapper med søknadsperioden.
@@ -56,9 +56,8 @@ public class SettVariabler extends Regelpakke {
      */
     @Regel
     public static void giVarselHvisPermitteringISøknadsperioden_DEKLARATIVT() {
-        hvis(
-            settet(arbeidsforholdene().sine(permitteringer).som(harOverlappMedSøknadsperioden))
-            .inneholderMinst(1))
+        hvis(antallet(arbeidsforholdene().sine(permitteringer).som(harOverlappMedSøknadsperioden))
+            .erStørreEnnEllerLik(1))
         .så(leggTilMelding(DELVIS_STOETTET, "Bruker har en eller flere permitteringer som overlapper med søknadsperioden"));
     }
     
@@ -89,10 +88,9 @@ public class SettVariabler extends Regelpakke {
      * Setter variabelen BRUKER_ER_ARBEIDSTAKER
      */
     @Regel
-    public static void finnUtOmBrukerErArbeidstaker_SEMIDEKLARATIVT() {
-        hvis(
-            settet(arbeidsforholdene()).som(harOverlappMedSøknadsperioden)
-            .inneholderMinst(1))
+    public static void finnUtOmBrukerErArbeidstaker_DEKLARATIVT() {
+        hvis(antallet(arbeidsforholdene().som(harOverlappMedSøknadsperioden))
+            .erStørreEnnEllerLik(1))
         .så(settVariabel(BRUKER_ER_ARBEIDSTAKER, true));
     }
 
