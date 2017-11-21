@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.felles.exception.TekniskException;
 
 import java.time.LocalDate;
 
@@ -25,5 +26,5 @@ public interface AaregFasade {
      */
     Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, String regelverk) throws IntegrasjonException, SikkerhetsbegrensningException;
 
-    Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, String regelverk, LocalDate fom, LocalDate tom) throws IntegrasjonException, SikkerhetsbegrensningException;
+    Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, String regelverk, LocalDate fom, LocalDate tom) throws IntegrasjonException, TekniskException, SikkerhetsbegrensningException;
 }

@@ -2,15 +2,14 @@ package no.nav.melosys.integrasjon.aareg;
 
 import java.io.StringWriter;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
+import no.nav.melosys.integrasjon.KonverteringsUtils;
+import no.nav.melosys.integrasjon.felles.exception.TekniskException;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Periode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +73,7 @@ public class AaregService implements AaregFasade {
     }
 
     @Override
-    public Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, String regelverk, LocalDate fom, LocalDate tom) throws IntegrasjonException, SikkerhetsbegrensningException {
+    public Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, String regelverk, LocalDate fom, LocalDate tom) throws IntegrasjonException, TekniskException, SikkerhetsbegrensningException {
         FinnArbeidsforholdPrArbeidstakerRequest request = new FinnArbeidsforholdPrArbeidstakerRequest();
 
         NorskIdent norskIdent = new NorskIdent();
@@ -83,8 +82,16 @@ public class AaregService implements AaregFasade {
         Regelverker regelverker = new Regelverker();
 
         Periode periode = new Periode();
-        periode.setFom(localDateToXMLGregorianCalendar(fom));
-        periode.setTom(localDateToXMLGregorianCalendar(tom));
+        try {
+            if (fom != null) {
+                periode.setFom(KonverteringsUtils.localDateToXMLGregorianCalendar(fom));
+            }
+            if (tom != null) {
+                periode.setTom(KonverteringsUtils.localDateToXMLGregorianCalendar(tom));
+            }
+        } catch (DatatypeConfigurationException DatatypeConfigurationException) {
+            throw new TekniskException(DatatypeConfigurationException);
+        }
 
         regelverker.setKodeverksRef(regelverk);
         request.setRapportertSomRegelverk(regelverker);
@@ -125,18 +132,5 @@ public class AaregService implements AaregFasade {
         dokumentFactory.lagDokument(saksopplysning);
 
         return saksopplysning;
-    }
-
-    private static XMLGregorianCalendar localDateToXMLGregorianCalendar(LocalDate date) throws IntegrasjonException {
-        if (date == null) {
-            return null;
-        }
-        try {
-            final DatatypeFactory factory = DatatypeFactory.newInstance();
-            final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
-            return factory.newXMLGregorianCalendar(date.format(formatter));
-        } catch (DatatypeConfigurationException datatypeConfigurationException) {
-            throw new IntegrasjonException(datatypeConfigurationException);
-        }
     }
 }
