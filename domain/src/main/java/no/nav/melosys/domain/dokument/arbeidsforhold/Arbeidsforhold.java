@@ -36,8 +36,6 @@ public class Arbeidsforhold implements HarPeriode {
     @XmlElement(name="permisjonOgPermittering")
     private List<PermisjonOgPermittering> permisjonOgPermittering = new ArrayList<>();
 
-    @XmlElementWrapper(name="utenlandsopphold")
-    @XmlElement(name="opphold")
     private List<Utenlandsopphold> utenlandsopphold = new ArrayList<>();
 
     private String arbeidsgiverID;
@@ -54,6 +52,8 @@ public class Arbeidsforhold implements HarPeriode {
 
     @XmlJavaTypeAdapter(XMLDateTimeToOffsetDateTime.class)
     private OffsetDateTime sistBekreftet;
+
+    private List<AntallTimerIPerioden> antallTimerForTimeloennet;
 
     // FIXME: Sjekk om dette påvirker JAX.
     // Hvis det gjør det, gjør nødvendige endringer slik at det ikke gjør det. Gjør samme endringer også i andre relevante klasser som implementerer HarPeriode
@@ -164,5 +164,13 @@ public class Arbeidsforhold implements HarPeriode {
 
     public void setSistBekreftet(OffsetDateTime sistBekreftet) {
         this.sistBekreftet = sistBekreftet;
+    }
+
+    public List<AntallTimerIPerioden> getAntallTimerForTimeloennet() {
+        return antallTimerForTimeloennet;
+    }
+
+    public void setAntallTimerForTimeloennet(List<AntallTimerIPerioden> antallTimerForTimeloennet) {
+        this.antallTimerForTimeloennet = antallTimerForTimeloennet;
     }
 }

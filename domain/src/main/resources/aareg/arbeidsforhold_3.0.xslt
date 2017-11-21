@@ -43,27 +43,34 @@
                             </permisjonOgPermittering>
                         </xsl:for-each>
                         </permisjonOgPermittering>
-                        <utenlandsopphold>
-                        <xsl:for-each select="utenlandsopphold">
-                            <opphold>
-                                <periode>
-                                    <fom><xsl:value-of select="periode/fom" /></fom>
-                                    <tom><xsl:value-of select="periode/tom" /></tom>
-                                </periode>
-                                <land><xsl:value-of select="land" /></land>
-                                <rapporteringsperiode><xsl:value-of select="rapporteringsperiode" /></rapporteringsperiode>
-                            </opphold>
-                        </xsl:for-each>
-                        </utenlandsopphold>
                         <arbeidsgiverID><xsl:value-of select="arbeidsgiver/orgnummer" /></arbeidsgiverID>
                         <arbeidstakerID><xsl:value-of select="arbeidstaker/ident/ident" /></arbeidstakerID>
                         <opplysningspliktigID><xsl:value-of select="opplysningspliktig/orgnummer" /></opplysningspliktigID>
                         <arbeidsforholdInnrapportertEtterAOrdningen><xsl:value-of select="arbeidsforholdInnrapportertEtterAOrdningen" /></arbeidsforholdInnrapportertEtterAOrdningen>
                         <opprettelsestidspunkt><xsl:value-of select="@opprettelsestidspunkt"/></opprettelsestidspunkt>
                         <sistBekreftet><xsl:value-of select="@sistBekreftet"/></sistBekreftet>
+                        <xsl:apply-templates />
                     </arbeidsforhold>
                 </xsl:for-each>
             </arbeidsforhold>
         </arbeidsforholdDokument>
+    </xsl:template>
+
+    <xsl:template match="utenlandsopphold|antallTimerForTimeloennet">
+        <xsl:for-each select=".">
+            <xsl:element name="{name()}">
+                <periode>
+                    <fom><xsl:value-of select="periode/fom" /></fom>
+                    <tom><xsl:value-of select="periode/tom" /></tom>
+                </periode>
+                <xsl:if test="name()='utenlandsopphold'">
+                    <land><xsl:value-of select="land" /></land>
+                </xsl:if>
+                <xsl:if test="name()='antallTimerForTimeloennet'">
+                    <antallTimer><xsl:value-of select="antallTimer" /></antallTimer>
+                </xsl:if>
+                <rapporteringsperiode><xsl:value-of select="rapporteringsperiode" /></rapporteringsperiode>
+            </xsl:element>
+        </xsl:for-each>
     </xsl:template>
 </xsl:stylesheet>
