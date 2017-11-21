@@ -10,6 +10,8 @@ import no.nav.melosys.tjenester.gui.jackson.serialize.SaksopplysningSerializer;
 
 public class BehandlingDto {
 
+    private long id;
+
     private BehandlingOppsummeringDto oppsummering;
 
     @JsonSerialize(using = SaksopplysningSerializer.class)
@@ -17,6 +19,13 @@ public class BehandlingDto {
 
     private Set<BehandlingHistorikkDto> behandlingshistorikk;
 
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public BehandlingOppsummeringDto getOppsummering() {
         return oppsummering;

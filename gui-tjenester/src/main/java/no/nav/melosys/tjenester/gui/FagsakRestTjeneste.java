@@ -1,21 +1,17 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Response;
-
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
@@ -26,20 +22,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.RolleType;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
-import no.nav.melosys.tjenester.gui.dto.FagsakDto;
-import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
+import java.util.HashSet;
+import java.util.Set;
 
 @Api(tags = {"fagsak"})
 @Path("/fagsaker")
@@ -50,41 +38,28 @@ public class FagsakRestTjeneste extends RestTjeneste {
 
     private FagsakService fagsakService;
 
-    private DokumentFactory dokumentFactory;
-
     private ModelMapper modelMapper;
 
     @Autowired
     public FagsakRestTjeneste(FagsakService fagsakService, DokumentFactory dokumentFactory) {
         this.fagsakService = fagsakService;
-        this.dokumentFactory = dokumentFactory;
 
         this.modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
-        TypeMap<Behandling, BehandlingDto> typeMapBehandling = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
-        
-        Converter<Set, Set> converterSaksopplysning = ctx -> {
+
+        TypeMap<Behandling, BehandlingDto> typeMapBehandlingUt = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
+
+        Converter<Set<Saksopplysning>, Set<SaksopplysningDokument>> saksopplysningTilDokument = ctx -> {
             Set dokumenter = new HashSet();
             if (ctx.getSource() != null) {
+                //ctx.getSource().forEach(x -> dokumenter.add(((Saksopplysning) x).getDokument()));
+                // TODO dokumentFactory er ikke nødvendig hvis vi lagrer den interne modellen fra starten.
                 ctx.getSource().forEach(x -> dokumenter.add(dokumentFactory.lagDokument((Saksopplysning) x)));
             }
             return dokumenter;
         };
+        typeMapBehandlingUt.addMappings(mapper -> mapper.using(saksopplysningTilDokument).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
 
-        typeMapBehandling.addMappings(mapper -> mapper.using(converterSaksopplysning).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
-    }
-
-    @GET
-    @Path("/fnr/{fnr}")
-    @ApiOperation(value = "Søk etter saker på fødselsnummer eller d-nummer", notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."))
-    public List<FagsakOppsummeringDto> hentFagsaker(@PathParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
-        // TODO Oppslag mot TPS for å få aktørID
-        Map<String, String> identMap = new HashMap<>();
-        String aktørID = fnr; // test data har aktørID = fnr
-
-        List<Fagsak> saker = fagsakService.hentFagsaker(RolleType.BRUKER, aktørID);
-
-        return tilDtoer(saker);
     }
 
     @GET
@@ -119,38 +94,6 @@ public class FagsakRestTjeneste extends RestTjeneste {
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
-    }
-
-    private List<FagsakOppsummeringDto> tilDtoer(List<Fagsak> saker) {
-        List<FagsakOppsummeringDto> fagsakListe = new ArrayList<>();
-
-        for (Fagsak  fagsak : saker) {
-            FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
-            modelMapper.map(fagsak, fagsakOppsummeringDto);
-
-            // FIXME Er datamodellen riktig her?
-            if (fagsak.getBehandlinger() != null && fagsak.getBehandlinger().size() > 0) {
-                Behandling behandling = fagsak.getBehandlinger().get(0);
-                Set<Saksopplysning> saksopplysninger = behandling.getSaksopplysninger();
-
-                Set<Aktoer> aktører = fagsak.getAktører();
-                Optional<Aktoer> bruker = aktører.stream().filter(a -> a.getRolle().equals(RolleType.BRUKER)).findFirst();
-                if (bruker.isPresent()) {
-                    fagsakOppsummeringDto.setFnr(bruker.get().getEksternId());
-                }
-
-                Optional<Saksopplysning> opt = saksopplysninger.stream().filter(s -> s.getType().equals(SaksopplysningType.PERSONOPPLYSNING)).findFirst();
-                if (opt.isPresent()) {
-                    PersonDokument dokument = (PersonDokument) dokumentFactory.lagDokument(opt.get());
-                    fagsakOppsummeringDto.setKjønn(dokument.kjønn);
-                    fagsakOppsummeringDto.setSammensattNavn(dokument.sammensattNavn);
-                }
-            }
-
-            fagsakListe.add(fagsakOppsummeringDto);
-        }
-
-        return fagsakListe;
     }
 
     private FagsakDto tilDto(Fagsak fagsak) {

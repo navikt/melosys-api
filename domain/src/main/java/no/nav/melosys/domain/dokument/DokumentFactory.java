@@ -1,16 +1,7 @@
 package no.nav.melosys.domain.dokument;
 
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Templates;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +11,15 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Templates;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 
 /**
  * SaksopplysningDokumentFactory konverterer et xml-resultat fra en ekstern tjeneste til et internt xml-dokument ved hejlp av XSLT med JAXP.
@@ -46,7 +44,7 @@ public class DokumentFactory {
     }
 
     /**
-     * lagDokument setter et {@link SaksopplysningDokument} på en {@link Saksopplysning} ut fra feltet {@code dokumentXml}.
+     * lagDokument setter et {@link SaksopplysningDokument} og {@code internXml} på en {@link Saksopplysning} ut fra feltet {@code dokumentXml}.
      * SaksopplysningDokumentet returneres.
      */
     public SaksopplysningDokument lagDokument(Saksopplysning saksopplysning) {
@@ -77,10 +75,13 @@ public class DokumentFactory {
         }
 
         // JAXB brukes til å opprette et SaksopplysningDokument
-        StringReader reader = new StringReader(outputTarget.getWriter().toString());
+        String internXml = outputTarget.getWriter().toString();
+        StringReader reader = new StringReader(internXml);
         SaksopplysningDokument dokument = (SaksopplysningDokument) marshaller.unmarshal(new StreamSource(reader));
+        dokument.setType(saksopplysning.getType());
 
         saksopplysning.setDokument(dokument);
+        saksopplysning.setInternXml(internXml);
         return dokument;
     }
 

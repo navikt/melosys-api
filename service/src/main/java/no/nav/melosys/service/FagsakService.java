@@ -56,6 +56,10 @@ public class FagsakService {
         return fagsakRepository.findBySaksnummer(saksnummer);
     }
 
+    public void lagre(Fagsak sak) {
+        fagsakRepository.save(sak);
+    }
+
     public Fagsak nyFagsak(String fnr) throws SikkerhetsbegrensningException {
         // FIXME: Når EESSI2-485 er ferdig må IntegrasjonsExceptions kastes videre
         Optional<Saksopplysning> personSaksopplysning = Optional.ofNullable(hentPerson(fnr));
