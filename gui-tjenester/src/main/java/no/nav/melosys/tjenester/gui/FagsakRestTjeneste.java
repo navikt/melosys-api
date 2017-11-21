@@ -23,6 +23,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import io.swagger.annotations.Api;
@@ -44,6 +45,7 @@ import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
 @Path("/fagsaker")
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
+@Transactional
 public class FagsakRestTjeneste extends RestTjeneste {
 
     private FagsakService fagsakService;
