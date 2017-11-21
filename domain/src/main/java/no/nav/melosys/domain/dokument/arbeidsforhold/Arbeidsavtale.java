@@ -14,11 +14,11 @@ import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Arbeidsavtale {
 
-    private String arbeidstidsordning;
+    private String arbeidstidsordning; //"http://nav.no/kodeverk/Kodeverk/Arbeidstidsordninger"
 
-    private String avloenningstype;
+    private String avloenningstype; //"http://nav.no/kodeverk/Kodeverk/Avl_c3_b8nningstyper"
 
-    private String yrke;
+    private String yrke; //"http://nav.no/kodeverk/Kodeverk/Yrker"
 
     private BigDecimal avtaltArbeidstimerPerUke;
 

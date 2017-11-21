@@ -44,5 +44,9 @@ public class Aareg3KonverteringTest {
         ArbeidsforholdDokument dokument = (ArbeidsforholdDokument) unmarshaller.unmarshal(new StringReader(writer.toString()));
         assertThat(dokument.getArbeidsforhold()).isNotEmpty();
         assertThat(dokument.getArbeidsforhold().get(0).getArbeidsforholdIDnav()).isEqualTo(19353321);
+
+        for (Arbeidsforhold arbeidsforhold : dokument.getArbeidsforhold()) {
+            assertThat(arbeidsforhold.getArbeidsavtaler()).isNotEmpty();
+        }
     }
 }

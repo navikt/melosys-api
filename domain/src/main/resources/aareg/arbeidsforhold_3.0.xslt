@@ -59,6 +59,8 @@
                         <arbeidstakerID><xsl:value-of select="arbeidstaker/ident/ident" /></arbeidstakerID>
                         <opplysningspliktigID><xsl:value-of select="opplysningspliktig/orgnummer" /></opplysningspliktigID>
                         <arbeidsforholdInnrapportertEtterAOrdningen><xsl:value-of select="arbeidsforholdInnrapportertEtterAOrdningen" /></arbeidsforholdInnrapportertEtterAOrdningen>
+                        <opprettelsestidspunkt><xsl:value-of select="@opprettelsestidspunkt"/></opprettelsestidspunkt>
+                        <sistBekreftet><xsl:value-of select="@sistBekreftet"/></sistBekreftet>
                     </arbeidsforhold>
                 </xsl:for-each>
             </arbeidsforhold>
