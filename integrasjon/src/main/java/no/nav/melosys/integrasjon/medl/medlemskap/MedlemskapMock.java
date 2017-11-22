@@ -29,7 +29,7 @@ public class MedlemskapMock implements MedlemskapConsumer {
             InputStream is = getClass().getClassLoader().getResourceAsStream("mock/medlemskap/" + ident + ".xml");
 
             if (is == null) {
-                throw new PersonIkkeFunnet("Person med ident " + ident + "ikke funnet.", null);
+                throw new PersonIkkeFunnet("Person med ident " + ident + " ikke funnet.", null);
             }
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

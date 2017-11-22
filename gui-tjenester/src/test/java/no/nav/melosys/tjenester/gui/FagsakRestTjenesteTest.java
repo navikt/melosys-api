@@ -41,6 +41,7 @@ import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -65,6 +66,9 @@ public class FagsakRestTjenesteTest {
         fagsakRepo = Mockito.mock(FagsakRepository.class);
         FagsakService fagsakService = new FagsakService(fagsakRepo, tps, aareg, ereg, medl, inntekt);
         tjeneste = new FagsakRestTjeneste(fagsakService, dokumentFactory);
+
+        ReflectionTestUtils.setField(fagsakService, "arbeidsforholdAntallMåneder", 12);
+        ReflectionTestUtils.setField(fagsakService, "inntektAntallMåneder", 12);
     }
 
     @Test

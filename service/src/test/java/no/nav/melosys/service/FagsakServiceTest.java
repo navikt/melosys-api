@@ -27,12 +27,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class FagsakServiceTest {
 
@@ -53,6 +52,9 @@ public class FagsakServiceTest {
 
         fagsakRepo = Mockito.mock(FagsakRepository.class);
         fagsakService = new FagsakService(fagsakRepo, tps, aareg, ereg, medl, inntekt);
+
+        ReflectionTestUtils.setField(fagsakService, "arbeidsforholdAntallMåneder", 12);
+        ReflectionTestUtils.setField(fagsakService, "inntektAntallMåneder", 12);
     }
 
     @Test
