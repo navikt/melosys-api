@@ -1,5 +1,7 @@
 package no.nav.melosys.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakStatus;
@@ -27,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
@@ -72,6 +75,11 @@ public class FagsakServiceTest {
 
     @Test
     public void nyFagsak() throws Exception {
+        // Skru av logging for denne testen siden den skaper mye forventet støy
+        final Logger log = (Logger) LoggerFactory.getLogger(FagsakService.class);
+        Level opprinneligLevel = log.getLevel();
+        log.setLevel(Level.OFF);
+
         final String[] identer = new String[]{"88888888884", "77777777779"};
 
         for (String fnr : identer) {
@@ -86,6 +94,8 @@ public class FagsakServiceTest {
 
             //printJson(fagsak);
         }
+        // Skru på logging igjen
+        log.setLevel(opprinneligLevel);
     }
 
 }

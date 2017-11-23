@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -41,6 +43,7 @@ import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.Assert.assertFalse;
@@ -100,6 +103,11 @@ public class FagsakRestTjenesteTest {
 
     @Test
     public void nyFagsak() {
+        // Skru av logging for denne testen siden den skaper mye forventet støy
+        final Logger log = (Logger) LoggerFactory.getLogger(FagsakService.class);
+        Level opprinneligLevel = log.getLevel();
+        log.setLevel(Level.OFF);
+
         final String[] identer = new String[]{"88888888884", "77777777779"};
 
         for (String fnr : identer) {
@@ -118,6 +126,8 @@ public class FagsakRestTjenesteTest {
 
             //printJson(response);
         }
+        // Skru på logging igjen
+        log.setLevel(opprinneligLevel);
     }
 
     private void printJson(Response response) {
