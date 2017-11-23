@@ -67,8 +67,8 @@ public class FagsakRestTjenesteTest {
         FagsakService fagsakService = new FagsakService(fagsakRepo, tps, aareg, ereg, medl, inntekt);
         tjeneste = new FagsakRestTjeneste(fagsakService, dokumentFactory);
 
-        ReflectionTestUtils.setField(fagsakService, "arbeidsforholdAntallMåneder", 12);
-        ReflectionTestUtils.setField(fagsakService, "inntektAntallMåneder", 12);
+        ReflectionTestUtils.setField(fagsakService, "arbeidsforholdhistorikkAntallMåneder", 12);
+        ReflectionTestUtils.setField(fagsakService, "inntektshistorikkAntallMåneder", 12);
     }
 
     @Test

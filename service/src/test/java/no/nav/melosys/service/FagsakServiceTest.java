@@ -53,8 +53,8 @@ public class FagsakServiceTest {
         fagsakRepo = Mockito.mock(FagsakRepository.class);
         fagsakService = new FagsakService(fagsakRepo, tps, aareg, ereg, medl, inntekt);
 
-        ReflectionTestUtils.setField(fagsakService, "arbeidsforholdAntallMåneder", 12);
-        ReflectionTestUtils.setField(fagsakService, "inntektAntallMåneder", 12);
+        ReflectionTestUtils.setField(fagsakService, "arbeidsforholdhistorikkAntallMåneder", 12);
+        ReflectionTestUtils.setField(fagsakService, "inntektshistorikkAntallMåneder", 12);
     }
 
     @Test

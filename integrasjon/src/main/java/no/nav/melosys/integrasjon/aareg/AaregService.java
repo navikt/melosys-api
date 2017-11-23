@@ -58,21 +58,6 @@ public class AaregService implements AaregFasade {
     }
 
     @Override
-    public Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, String regelverk) throws SikkerhetsbegrensningException {
-        FinnArbeidsforholdPrArbeidstakerRequest request = new FinnArbeidsforholdPrArbeidstakerRequest();
-
-        NorskIdent norskIdent = new NorskIdent();
-        norskIdent.setIdent(ident);
-        request.setIdent(norskIdent);
-        Regelverker regelverker = new Regelverker();
-
-        regelverker.setKodeverksRef(regelverk);
-        request.setRapportertSomRegelverk(regelverker);
-
-        return finnArbeidsforholdPrArbeidstaker(request);
-    }
-
-    @Override
     public Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, String regelverk, LocalDate fom, LocalDate tom) throws IntegrasjonException, TekniskException, SikkerhetsbegrensningException {
         FinnArbeidsforholdPrArbeidstakerRequest request = new FinnArbeidsforholdPrArbeidstakerRequest();
 

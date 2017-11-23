@@ -45,11 +45,11 @@ public class FagsakService {
 
     private InntektFasade inntektFasade;
 
-    @Value("${melosys.service.fagsak.arbeidsforhold.antall_måneder}")
-    private Integer arbeidsforholdAntallMåneder;
+    @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antall_måneder}")
+    private Integer arbeidsforholdhistorikkAntallMåneder;
 
-    @Value("${melosys.service.fagsak.inntekt.antall_måneder}")
-    private Integer inntektAntallMåneder;
+    @Value("${melosys.service.fagsak.inntektshistorikk.antall_måneder}")
+    private Integer inntektshistorikkAntallMåneder;
 
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository, TpsFasade tpsFasade, AaregFasade aaregFasade, EregFasade eregFasade, MedlFasade medlFasade, InntektFasade inntektFasade) {
@@ -119,7 +119,7 @@ public class FagsakService {
         try {
             return tpsFasade.hentPersonMedAdresse(fnr);
         } catch (IntegrasjonException integrasjonException) {
-            log.error("", integrasjonException);
+            log.error("Uventet feil ved oppslag mot TPS", integrasjonException);
             return null;
         }
     }
@@ -128,29 +128,29 @@ public class FagsakService {
         try {
             return medlFasade.getPeriodeListe(fnr);
         } catch (IntegrasjonException integrasjonException) {
-            log.error("", integrasjonException);
+            log.error("Uventet feil ved oppslag mot MEDL", integrasjonException);
             return null;
         }
     }
 
     private Saksopplysning hentArbeidsforhold(String fnr) throws SikkerhetsbegrensningException {
         final LocalDate tom  = LocalDate.now();
-        final LocalDate fom = tom.minusMonths(arbeidsforholdAntallMåneder);
+        final LocalDate fom = tom.minusMonths(arbeidsforholdhistorikkAntallMåneder);
         try {
             return aaregFasade.finnArbeidsforholdPrArbeidstaker(fnr, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
         } catch (IntegrasjonException | TekniskException exception) {
-            log.error("", exception);
+            log.error("Uventet feil ved oppslag mot AAREG", exception);
             return null;
         }
     }
 
     private Saksopplysning hentInntekt(String fnr) throws SikkerhetsbegrensningException {
         final YearMonth tom = YearMonth.now();
-        final YearMonth fom = tom.minusMonths(inntektAntallMåneder);
+        final YearMonth fom = tom.minusMonths(inntektshistorikkAntallMåneder);
         try {
             return inntektFasade.hentInntektListe(fnr, fom, tom);
         } catch (IntegrasjonException integrasjonException) {
-            log.error("", integrasjonException);
+            log.error("Uventet feil ved oppslag mot Inntekt", integrasjonException);
             return null;
         }
     }
@@ -189,7 +189,7 @@ public class FagsakService {
         try {
             return eregFasade.hentOrganisasjon(orgnr);
         } catch (IntegrasjonException integrasjonException) {
-            log.error("", integrasjonException);
+            log.error("Uventet feil ved oppslag mot EREG", integrasjonException);
             return null;
         }
     }
