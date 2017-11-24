@@ -6,6 +6,7 @@ CREATE TABLE saksopplysning (
     kilde           VARCHAR2(99)   NOT NULL,
     registrert_dato TIMESTAMP      NOT NULL,
     dokument_xml    XMLTYPE        NOT NULL,
+    intern_xml      XMLTYPE        ,
     CONSTRAINT pk_saksopplysning PRIMARY KEY (id)
 );
 
@@ -32,8 +33,9 @@ CREATE TABLE saksopplysning_kilde (
 INSERT INTO saksopplysning_kilde (kode, navn) VALUES ('AAREG', 'Aa-registeret');
 INSERT INTO saksopplysning_kilde (kode, navn) VALUES ('EREG', 'Enhetsregisteret');
 INSERT INTO saksopplysning_kilde (kode, navn) VALUES ('INNTK', 'Inntektskomponenten');
-INSERT INTO saksopplysning_kilde (kode, navn) VALUES ('TPS', 'Folkeregisteret');
 INSERT INTO saksopplysning_kilde (kode, navn) VALUES ('MEDL', 'Medlemskapsunntak');
+INSERT INTO saksopplysning_kilde (kode, navn) VALUES ('SBH', 'Saksbehandler');
+INSERT INTO saksopplysning_kilde (kode, navn) VALUES ('TPS', 'Folkeregisteret');
 
 ALTER TABLE saksopplysning ADD CONSTRAINT fk_saksopplysning_behandling FOREIGN KEY (behandling_id) REFERENCES behandling;
 ALTER TABLE saksopplysning ADD CONSTRAINT fk_saksopplysning_type FOREIGN KEY (opplysning_type) REFERENCES saksopplysning_type;

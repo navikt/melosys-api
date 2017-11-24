@@ -1,7 +1,7 @@
 package no.nav.melosys.domain;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import org.hibernate.annotations.ColumnTransformer;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -10,13 +10,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import org.hibernate.annotations.ColumnTransformer;
-
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 
 @Entity
@@ -48,11 +47,30 @@ public class Saksopplysning {
     private LocalDateTime registrertDato;
 
     @ColumnTransformer(read = "NVL2(dokument_xml, (dokument_xml).getClobVal(), NULL)", write = "XMLType.createxml(?)")
+    @Lob
     @Column(name = "dokument_xml", updatable = false, columnDefinition = "XMLType")
     private String dokumentXml;
+
+    @ColumnTransformer(read = "NVL2(intern_xml, (intern_xml).getClobVal(), NULL)", write = "XMLType.createxml(?)")
+    @Lob
+    @Column(name = "intern_xml", updatable = false, columnDefinition = "XMLType")
+    private String internXml;
     
     @Transient
     private SaksopplysningDokument dokument;
+
+    public Saksopplysning() {
+    }
+
+    /**
+     * Brukes når en saksbehandler oppretter saksopplysninger manuelt.
+     */
+    public Saksopplysning(SaksopplysningDokument saksopplysningDokument) {
+        setType(saksopplysningDokument.getType());
+        setKilde(SaksopplysningKilde.SBH);
+        setRegistrertDato(LocalDateTime.now());
+        //TODO setInternXml();
+    }
 
     public long getId() {
         return id;
@@ -104,6 +122,14 @@ public class Saksopplysning {
 
     public void setDokumentXml(String dokumentXml) {
         this.dokumentXml = dokumentXml;
+    }
+
+    public String getInternXml() {
+        return internXml;
+    }
+
+    public void setInternXml(String internXml) {
+        this.internXml = internXml;
     }
 
     public SaksopplysningDokument getDokument() {
