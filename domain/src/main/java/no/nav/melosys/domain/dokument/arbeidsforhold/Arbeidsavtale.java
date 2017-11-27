@@ -33,11 +33,13 @@ public class Arbeidsavtale {
     private LocalDate endringsdatoStillingsprosent;
 
     @JsonProperty("fartsomraade")
-    private String fartsområde;
+    private String fartsområde; //"http://nav.no/kodeverk/Kodeverk/Fartsomr_c3_a5der"
 
-    private String skipsregister;
+    private String skipsregister; //"http://nav.no/kodeverk/Kodeverk/Skipsregistre"
 
-    private String skipstype;
+    private String skipstype; //"http://nav.no/kodeverk/Kodeverk/Skipstyper"
+
+    private Boolean maritimArbeidsavtale;
 
     public String getArbeidstidsordning() {
         return arbeidstidsordning;
@@ -127,6 +129,12 @@ public class Arbeidsavtale {
         this.skipstype = skipstype;
     }
 
+    public Boolean getMaritimArbeidsavtale() {
+        return maritimArbeidsavtale;
+    }
 
+    public void setMaritimArbeidsavtale(Boolean maritimArbeidsavtale) {
+        this.maritimArbeidsavtale = maritimArbeidsavtale;
+    }
 
 }

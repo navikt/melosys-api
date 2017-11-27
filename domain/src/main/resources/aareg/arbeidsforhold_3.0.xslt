@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                 xmlns:ns2="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3">
 
     <xsl:output method="xml" indent="no"/>
@@ -27,6 +28,17 @@
                                 <sisteLoennsendringsdato><xsl:value-of select="sisteLoennsendringsdato" /></sisteLoennsendringsdato>
                                 <beregnetAntallTimerPrUke><xsl:value-of select="beregnetAntallTimerPrUke" /></beregnetAntallTimerPrUke>
                                 <endringsdatoStillingsprosent><xsl:value-of select="endringsdatoStillingsprosent" /></endringsdatoStillingsprosent>
+                                <xsl:choose>
+                                    <xsl:when test="@xsi:type='ns4:MaritimArbeidsavtale'">
+                                        <maritimArbeidsavtale>true</maritimArbeidsavtale>
+                                        <fartsområde><xsl:value-of select="fartsomraade" /></fartsområde>
+                                        <skipsregister><xsl:value-of select="skipsregister" /></skipsregister>
+                                        <skipstype><xsl:value-of select="skipstype" /></skipstype>
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        <maritimArbeidsavtale>false</maritimArbeidsavtale>
+                                    </xsl:otherwise>
+                                </xsl:choose>
                             </avtale>
                         </xsl:for-each>
                         </arbeidsavtaler>

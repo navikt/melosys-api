@@ -2,10 +2,9 @@ package no.nav.melosys.domain.dokument.arbeidsforhold;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -19,9 +18,26 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
+import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import org.junit.Before;
 import org.junit.Test;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 public class Aareg3KonverteringTest {
+
+    private DokumentFactory factory;
+
+    @Before
+    public void setUp() {
+        Jaxb2Marshaller marshaller = new JaxbConfig().jaxb2Marshaller();
+        XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
+        factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
+    }
 
     @Test
     public void transform() throws TransformerFactoryConfigurationError, TransformerException, IOException, JAXBException {
@@ -47,6 +63,39 @@ public class Aareg3KonverteringTest {
 
         for (Arbeidsforhold arbeidsforhold : dokument.getArbeidsforhold()) {
             assertThat(arbeidsforhold.getArbeidsavtaler()).isNotEmpty();
+        }
+    }
+
+    @Test
+    public void maritimArbeidsavtale() throws IOException {
+        final String ressurs = "arbeidsforhold/99999999999.xml";
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
+            Saksopplysning saksopplysning = new Saksopplysning();
+
+            String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+
+            saksopplysning.setDokumentXml(xmlStr);
+            saksopplysning.setType(SaksopplysningType.ARBEIDSFORHOLD);
+            saksopplysning.setVersjon("3.0");
+
+            factory.lagDokument(saksopplysning);
+
+            ArbeidsforholdDokument dokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
+
+            assertThat(dokument).isNotNull();
+            assertThat(dokument.getArbeidsforhold()).isNotEmpty();
+
+            for (Arbeidsforhold arbeidsforhold : dokument.getArbeidsforhold()) {
+
+                assertThat(arbeidsforhold.getArbeidsavtaler()).isNotEmpty();
+
+                for (Arbeidsavtale arbeidsavtale : arbeidsforhold.getArbeidsavtaler()) {
+
+                    assertThat(arbeidsavtale).isNotNull();
+                }
+            }
         }
     }
 }
