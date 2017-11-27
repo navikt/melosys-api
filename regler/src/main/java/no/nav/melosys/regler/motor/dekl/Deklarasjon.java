@@ -1,11 +1,10 @@
 package no.nav.melosys.regler.motor.dekl;
 
-import no.nav.melosys.regler.motor.Predikat;
-
 /**
  * Klasse som støtter deklarativ programmering av typen
+ * 
  * hvis(predikat).så(kommando).ellers(kommando)
- * FIXME: Trenger bedre navn
+ * 
  */
 public final class Deklarasjon {
     
@@ -32,6 +31,8 @@ public final class Deklarasjon {
         }
         return this;
     }
+    
+    
     
     private void utfør(Runnable... kommandoer) {
         for (Runnable kommando : kommandoer) {

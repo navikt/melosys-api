@@ -1,10 +1,10 @@
 
 package no.nav.melosys.regler.motor.dekl;
 
-import static no.nav.melosys.regler.motor.dekl.Verdielement.*;
+import static no.nav.melosys.regler.motor.dekl.Verdielement.antallet;
 import static no.nav.melosys.regler.motor.dekl.VerdielementSett.forAlle;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +25,7 @@ public class VerdielementSettTest {
      * 
      */
     @Test
-    public void testNøstedeElementsett() {
+    public void testItereringAvNøstedeElementsett() {
         Verden univers = settOppDisneyUnivers();
         forAlle(univers.avdelinger)
         .sine(a -> {return a.faksjoner;})
@@ -55,16 +55,16 @@ public class VerdielementSettTest {
     
     private Verden settOppDisneyUnivers() {
         // StarWars...
-        Faksjon irriterendeFurballs = new Faksjon(150); // Samtlige ewoker i universet
+        Faksjon irriterendeFurballs = new Faksjon(150); // Samtlige ewoker i galaksen far far away
         Faksjon ikkeIrriterendeFurBalls = new Faksjon(1); // Chewbaka
         Faksjon alleKvinnenerIFørsteTriologi = new Faksjon(1); // Leia
         Avdeling starWarsReservat = new Avdeling(irriterendeFurballs, ikkeIrriterendeFurBalls, alleKvinnenerIFørsteTriologi);
         // Pirates of the Careebean
         Faksjon alleKvinnenerIFørsteFilm = new Faksjon(1); // Elizabeth Swann
         Faksjon soldaterViBlirKjentMed = new Faksjon(0);
-        Faksjon klassiskePiraterMedPappegøye = new Faksjon(1);
-        Avdeling piratesOfTheCareebeanLand = new Avdeling(alleKvinnenerIFørsteFilm, soldaterViBlirKjentMed, klassiskePiraterMedPappegøye);
-        Verden disneyland = new Verden(starWarsReservat, piratesOfTheCareebeanLand);
+        Faksjon klassiskePiraterMedPappegøye = new Faksjon(1); // Mr. Cotton
+        Avdeling piratesOfTheCaribbeanLand = new Avdeling(alleKvinnenerIFørsteFilm, soldaterViBlirKjentMed, klassiskePiraterMedPappegøye);
+        Verden disneyland = new Verden(starWarsReservat, piratesOfTheCaribbeanLand);
         return disneyland;
     }
     

@@ -5,6 +5,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tilbyr forskjellige metoder for logging
+ * 
+ * Metodene som tilbys av denne klassen skal prefikse alle loggmeldingene med regelnavn.
+ * 
  */
 public class RegelLogg {
 
@@ -34,7 +37,7 @@ public class RegelLogg {
             String regelMetode = se.getMethodName();
             return  regelKlasse + "." + regelMetode;
         }
-        // Er vi her betyr det at vi kalle denne klassen fra utsiden av no.nav.melosys.regler.lovvalg 
+        // Er vi her betyr det at vi kaller denne klassen fra utsiden av no.nav.melosys.regler.lovvalg 
         throw new RuntimeException("Intern feil: RegelLogg (eller en annen klasse i samme pakke) skal ikke kalles fra andre pakker enn no.nav.melosys.regler.*");
     }
 

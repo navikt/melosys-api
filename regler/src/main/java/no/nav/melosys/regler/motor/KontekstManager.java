@@ -36,8 +36,8 @@ public class KontekstManager {
 
     public static Object hentVariabel(Object variabel) {
         if (!lokaleVerdier.get().containsKey(variabel)) {
-            // FIXME: Hva skal oppførsel være her? Logge? Stillhet? Exception?
-            loggError("Forsøk på å hente variabelen '{}' før den er satt");
+            loggError("Forsøk på å hente variabelen '{}' før den er satt", variabel);
+            throw new RuntimeException();
         }
         return lokaleVerdier.get().get(variabel);
     }

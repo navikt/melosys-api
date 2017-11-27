@@ -7,10 +7,7 @@ public class Lovvalgsbestemmelse {
     /** Artikkel/lovhjemmel */
     public Artikkel artikkel;
     
-    /** Liste med betingelser som bestemmer om artikkelen skal vurderes eller ikke */
-    public List<Betingelse> kvalifiserendeBetingelser;
-    
     /** Liste med betingelser som bestemmer im artikkelen skal invokeres */
-    public List<Betingelse> aktiverendeBetingelser;
+    public List<Betingelse> betingelser;
     
 }

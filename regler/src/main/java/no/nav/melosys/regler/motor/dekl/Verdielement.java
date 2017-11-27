@@ -1,7 +1,6 @@
 package no.nav.melosys.regler.motor.dekl;
 
 import no.nav.melosys.regler.motor.KontekstManager;
-import no.nav.melosys.regler.motor.Predikat;
 
 public class Verdielement {
     
@@ -29,21 +28,21 @@ public class Verdielement {
     }
     
     public Predikat mangler() {
-        return () -> {return verdi == null;};
+        return () -> verdi == null;
     }
 
     public Predikat harVerdi() {
-        return () -> {return verdi != null;};
+        return () -> verdi != null;
     }
     
     public Predikat erLik(Object annetVerdi) {
-        return () -> {return verdi.equals(annetVerdi);}; // Ja, vi vil ha teknisk feil / NPE hvis verdi er null
+        return () -> harVerdiLik(annetVerdi); // Ja, vi vil gjerne ha teknisk feil / NPE hvis verdi er null
     }
 
     public Predikat erEnAv(Object... andreVerdier) {
         return () -> {
             for (Object annetVerdi : andreVerdier) {
-                if (verdi.equals(annetVerdi)) { // Ja, vi vil ha teknisk feil / NPE hvis verdi er null
+                if (harVerdiLik(annetVerdi)) { // Ja, vi vil ha teknisk feil / NPE hvis verdi er null
                     return true;
                 }
             }
@@ -51,19 +50,27 @@ public class Verdielement {
         };
     }
     
+    public Predikat erSann() {
+        return () -> harVerdiLik(true);
+    }
+
+    public Predikat erIkkeSann() {
+        return () -> harVerdiLik(false);
+    }
+
     @SuppressWarnings("unchecked")
     public <T> Predikat erStørreEnn(T grense) {
-        return () -> {
-            return sammenliknMed(grense) > 0;
-        };
+        return () -> sammenliknMed(grense) > 0;
     }
 
     public Predikat erStørreEnnEllerLik(Object grense) {
-        return () -> {
-            return sammenliknMed(grense) >= 0;
-        };
+        return () -> sammenliknMed(grense) >= 0;
     }
     
+    private boolean harVerdiLik(Object annetVerdi) {
+        return verdi.equals(annetVerdi);
+    }
+
     @SuppressWarnings("unchecked")
     private int sammenliknMed(Object grense) {
         try {

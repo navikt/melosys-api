@@ -1,4 +1,4 @@
-package no.nav.melosys.regler.motor;
+package no.nav.melosys.regler.motor.dekl;
 
 /**
  * Et predikat som tester konteksten. 

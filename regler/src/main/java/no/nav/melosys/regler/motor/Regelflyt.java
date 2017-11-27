@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  * 
  * En regelflyt inneholder regelpakker som eksekveres sekvensielt. 
  * 
- * Det er inntil videre ikke behov for komplekse regelflyt (som f.eks. inneholder løkker eller subflyt).
+ * Det er inntil videre ikke behov for komplekse regelflyt (som f.eks. inneholder forgreninger eller løkker).
  * 
  */
 public class Regelflyt {

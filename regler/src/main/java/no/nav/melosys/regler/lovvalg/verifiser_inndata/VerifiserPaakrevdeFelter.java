@@ -31,9 +31,9 @@ public class VerifiserPaakrevdeFelter extends Regelpakke {
         hvis(verdien(søknadDokumentet()).mangler()).så(leggTilMeldingOgAvbryt(VALIDERINGSFEIL, "Forespørselen mangler søknad"));
 
         // Sjekk periode
-        hvis(verdien(søknadDokumentet().periode).mangler()).så(leggTilMeldingOgAvbryt(VALIDERINGSFEIL, "Søknaden mangler periode"));
-        hvis(verdien(søknadDokumentet().periode.getFom()).mangler()).så(leggTilMeldingOgAvbryt(VALIDERINGSFEIL, "Søknaden mangler fomDato"));
-        hvis(verdien(søknadDokumentet().periode.getTom()).mangler()).så(leggTilMeldingOgAvbryt(VALIDERINGSFEIL, "Søknaden mangler tomDato"));
+        hvis(verdien(søknadDokumentet().arbeidsperiode).mangler()).så(leggTilMeldingOgAvbryt(VALIDERINGSFEIL, "Søknaden mangler periode"));
+        hvis(verdien(søknadDokumentet().arbeidsperiode.getFom()).mangler()).så(leggTilMeldingOgAvbryt(VALIDERINGSFEIL, "Søknaden mangler fomDato"));
+        hvis(verdien(søknadDokumentet().arbeidsperiode.getTom()).mangler()).så(leggTilMeldingOgAvbryt(VALIDERINGSFEIL, "Søknaden mangler tomDato"));
 
         /* FIXME: Sjekk alle felter som er påkrevd for alle søknader
             // Sjekk flaggland...

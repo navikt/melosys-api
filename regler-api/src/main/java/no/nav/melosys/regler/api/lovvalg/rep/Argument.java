@@ -13,26 +13,30 @@ public enum Argument {
     BRUKER_ARBEIDER_I_FLERE_LAND("Bruker arbeider i flere land"),
     ANDEL_PROSENT_ARB_I_BOLAND("Andel % arb/inntekt i bostedsland"),
 
-    A1_BRUKER_ER_ANSATT_HOS_UTSENDENDE_ORGANISASJON_I_HELE_SØKNADSPERIODE("Bruker er ansatt hos utsendende organisasjon i hele perioden"),
+    BRUKER_ER_ANSATT_HOS_UTSENDENDE_ORGANISASJON_I_HELE_SØKNADSPERIODE("Bruker er ansatt hos utsendende organisasjon i hele perioden"),
     
-    A1_SKAL_VURDERE_ART_11_1("Skal vurdere artikkel 11.1"),
-    A1_SKAL_VURDERE_ART_11_2("Skal vurdere artikkel 11.2"),
-    A1_SKAL_VURDERE_ART_11_3A("Skal vurdere artikkel 11.3a"),
-    A1_SKAL_VURDERE_ART_11_3B("Skal vurdere artikkel 11.3b"),
-    A1_SKAL_VURDERE_ART_11_3C("Skal vurdere artikkel 11.3c"),
-    A1_SKAL_VURDERE_ART_11_3D("Skal vurdere artikkel 11.3d"),
-    A1_SKAL_VURDERE_ART_11_3E("Skal vurdere artikkel 11.3e"),
-    A1_SKAL_VURDERE_ART_12_1("Skal vurdere artikkel 12.1"),
-    A1_SKAL_VURDERE_ART_12_2("Skal vurdere artikkel 12.2"),
-    A1_SKAL_VURDERE_ART_13_1A("Skal vurdere artikkel 13.1a"),
-    A1_SKAL_VURDERE_ART_13_1B1("Skal vurdere artikkel 13.1b1"),
-    A1_SKAL_VURDERE_ART_13_1B2("Skal vurdere artikkel 13.1b2"),
-    A1_SKAL_VURDERE_ART_13_1B3("Skal vurdere artikkel 13.1b3"),
-    A1_SKAL_VURDERE_ART_13_1B4("Skal vurdere artikkel 13.1b4"),
-    A1_SKAL_VURDERE_ART_13_2A("Skal vurdere artikkel 13.2a"),
-    A1_SKAL_VURDERE_ART_13_2B("Skal vurdere artikkel 13.2b"),
-    A1_SKAL_VURDERE_ART_16_1("Skal vurdere artikkel 16.1"),
-    A1_SKAL_VURDERE_ART_16_2("Skal vurdere artikkel 16.2"),
+    SKAL_VURDERE_ART_11_2("Skal vurdere artikkel 11.2"),
+    SKAL_VURDERE_ART_11_3A("Skal vurdere artikkel 11.3a"),
+    SKAL_VURDERE_ART_11_3B("Skal vurdere artikkel 11.3b"),
+    SKAL_VURDERE_ART_11_3C("Skal vurdere artikkel 11.3c"),
+    SKAL_VURDERE_ART_11_3D("Skal vurdere artikkel 11.3d"),
+    SKAL_VURDERE_ART_11_3E("Skal vurdere artikkel 11.3e"),
+    SKAL_VURDERE_ART_11_4_1("Skal vurdere artikkel 11.4 første punktum"),
+    SKAL_VURDERE_ART_11_4_2("Skal vurdere artikkel 11.4 annet punktum"),
+    SKAL_VURDERE_ART_11_5("Skal vurdere artikkel 11.5"),
+    SKAL_VURDERE_ART_12_1("Skal vurdere artikkel 12.1"),
+    SKAL_VURDERE_ART_12_2("Skal vurdere artikkel 12.2"),
+    SKAL_VURDERE_ART_13_1A("Skal vurdere artikkel 13.1a"),
+    SKAL_VURDERE_ART_13_1B1("Skal vurdere artikkel 13.1b1"),
+    SKAL_VURDERE_ART_13_1B2("Skal vurdere artikkel 13.1b2"),
+    SKAL_VURDERE_ART_13_1B3("Skal vurdere artikkel 13.1b3"),
+    SKAL_VURDERE_ART_13_1B4("Skal vurdere artikkel 13.1b4"),
+    SKAL_VURDERE_ART_13_2A("Skal vurdere artikkel 13.2a"),
+    SKAL_VURDERE_ART_13_2B("Skal vurdere artikkel 13.2b"),
+    SKAL_VURDERE_ART_13_3("Skal vurdere artikkel 13.3"),
+    SKAL_VURDERE_ART_13_4("Skal vurdere artikkel 13.4"),
+    SKAL_VURDERE_ART_16_M("Skal vurdere artikkel 16 medlem"),
+    SKAL_VURDERE_ART_16_U("Skal vurdere artikkel 16 unntak"),
 
     // Overgangsregler
     A1_FORORDNING_1408_71_SKAL_ANVENDES("forordning 1408/71 skal anvendes"),
@@ -40,13 +44,9 @@ public enum Argument {
     // Kriterier for 12.1
     A1_12_1_VIRKSOMHET_I_UTSENDERLAND("Arbeidsgiver har virksomhet i landet arbeidstakeren sendes fra"),
     A1_12_1_SENDES_TIL_ANNEN_MEDLEMSSTAT("Arbeidstakeren sendes til en annen medlemsstat for å utføre arbeid for arbeidsgiveren"),
-    A1_12_1_LENGDE_MND_UTENLANDSOPPHOLD("Antall måneder utenlandsoppholded varer"),
+    A1_12_1_UTENLANDSOPPHOLDET_ER_IKKE_OVER_24_MND("Utenlandsoppholdet er ikke lengre enn 24 måneder"),
     A1_12_1_SKAL_ERSTATTE_ANNEN_PERSON("Arbeidstakeren er utsendt for å erstatte en annen person"),
     
-    // ARGUMENTER SOM ER INTERNE FOR REGELMOTOREN
-    REGELKJØRINGEN_SKAL_AVBRYTES("Regelkjøringen skal avbrytes"),
-    
-
     
     FIXME("FIXME"); // FIXME: Fjern
     

@@ -1,6 +1,6 @@
 package no.nav.melosys.regler.lovvalg;
 
-import no.nav.melosys.regler.lovvalg.sett_variabler.SettVariabler;
+import no.nav.melosys.regler.lovvalg.utled_fakta.UtledFakta;
 import no.nav.melosys.regler.lovvalg.verifiser_inndata.AvbrytRegelkjoeringHvisFeil;
 import no.nav.melosys.regler.lovvalg.verifiser_inndata.ValiderInndata;
 import no.nav.melosys.regler.lovvalg.verifiser_inndata.VerifiserPaakrevdeFelter;
@@ -16,7 +16,7 @@ public class LovvalgRegelflyt extends Regelflyt {
         leggTilRegelpakke(AvbrytRegelkjoeringHvisFeil.class);
         
         // Steg 2: Sett verdier
-        leggTilRegelpakke(SettVariabler.class);
+        leggTilRegelpakke(UtledFakta.class);
         
         // Steg X: Finn ut hvilke(t) artikler som er relevante
         

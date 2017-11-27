@@ -23,6 +23,9 @@ public final class ValiderInndata extends Regelpakke {
     
     // FIXME: Mer validering
     
+    
+    // Kan ikke arbeid skip el. hvis ikke arbeidstaker
+    
     /*
     private static void verifiserKonsistens() {
         // Veriser flere land

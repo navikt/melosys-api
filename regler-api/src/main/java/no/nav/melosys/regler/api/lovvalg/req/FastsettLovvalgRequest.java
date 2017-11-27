@@ -11,8 +11,6 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 
 /**
  * Forespørsler til lovvalgtjenesten
- * 
- * FIXME: Trenger revisjon
  */
 public class FastsettLovvalgRequest {
     

@@ -9,7 +9,7 @@ import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
-import no.nav.melosys.regler.motor.Predikat;
+import no.nav.melosys.regler.motor.dekl.Predikat;
 
 /**
  * Klassen inneholder verbalisering av predikater

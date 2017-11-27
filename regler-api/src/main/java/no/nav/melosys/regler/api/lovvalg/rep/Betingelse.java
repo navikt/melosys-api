@@ -5,14 +5,8 @@ package no.nav.melosys.regler.api.lovvalg.rep;
  */
 public class Betingelse {
     
-    /** Funksjonell beskrivelse av betingelsen */
-    public Argument argument;
-    
     /** Kravet som må oppfylles */
-    public String krav;
-    
-    /** Verdien som er lagt til grunn */
-    public Object verdi;
+    public Argument krav;
     
     /** Resultatet av evalueringen */
     public Resultat resultat;

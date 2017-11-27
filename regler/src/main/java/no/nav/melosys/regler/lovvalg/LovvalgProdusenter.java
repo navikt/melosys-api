@@ -1,7 +1,7 @@
 package no.nav.melosys.regler.lovvalg;
 
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.arbeidsforholdDokumentene;
-import static no.nav.melosys.regler.motor.dekl.VerdielementSett.forAlle;
+import static no.nav.melosys.regler.motor.dekl.VerdielementSett.alle;
 
 import java.util.function.Function;
 
@@ -21,7 +21,7 @@ public class LovvalgProdusenter {
     
     /** Gir alle arbeidsforhold */
     public static VerdielementSett<Arbeidsforhold, ?> arbeidsforholdene() {
-        return forAlle(arbeidsforholdDokumentene()).sine(ad -> ad.getArbeidsforhold());
+        return alle(arbeidsforholdDokumentene()).sine(ad -> ad.getArbeidsforhold());
     }
 
 }

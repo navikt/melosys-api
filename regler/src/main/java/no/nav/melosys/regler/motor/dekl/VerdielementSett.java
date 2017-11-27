@@ -12,8 +12,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import no.nav.melosys.regler.motor.Predikat;
-
 /**
  * Klasse som støtter verbalisering av mengder og sett.
  * 
@@ -28,15 +26,25 @@ public class VerdielementSett<T, S> implements Iterable<T> {
     List<Predicate<? super T>> predikater = new ArrayList<>();
     
     // Støtte for nøstede sett
-    private VerdielementSett<S, ?> overordnetVerdielementSett;
+    private Iterable<S> overordnetVerdielementSett;
     private Function<S, Iterable<T>> nøstetSupplier;
 
     private VerdielementSett() {}
     
     /**
      * Lager en VerdielementSett baser på en Iterable
+     * TODO (farjam 2017-11-27): Denne klassen er nå en hybrid av deklarasjon og sett. Dette må gjøres:
+     * 1) Metoden "forAlle" må fjernes
+     * 2) Metoden "for" som tar en iterable må legges utenfor denne klassen (slik at vi støtter verbaliseringen for(alle(søknadene).som(...)).utfør(...)
      */
     public static <T> VerdielementSett<T, ?> forAlle(Iterable<T> samling) {
+        return alle(samling);
+    }
+
+    /**
+     * Lager en VerdielementSett baser på en Iterable
+     */
+    public static <T> VerdielementSett<T, ?> alle(Iterable<T> samling) {
         VerdielementSett<T, ?> vs = new VerdielementSett<>();
         vs.verdieelementer = samling;
         return vs;
@@ -109,45 +117,8 @@ public class VerdielementSett<T, S> implements Iterable<T> {
                 }
             }
         };
-        try {res.next();} catch (NoSuchElementException e) {}
+        res.next();
         return res;
     }
 
-    /**
-     * Predikat som evaluerer om settet inneholder et minimum antall verdier.
-     */
-    public Predikat inneholderMinst(int min) {
-        return () -> {
-            return antallElementer() >= min;
-        };
-    }
-    
-    /**
-     * Predikat som evaluerer om settet inneholder færre enn (eller lik) et maximum antall verdier.
-     */
-    public Predikat inneholderMax(int max) {
-        return () -> {
-            return antallElementer() <= max;
-        };
-    }
-    
-    /**
-     * Predikat som evaluerer om settet er tomt.
-     */
-    public Predikat erTomt() {
-        return inneholderMax(0);
-    }
-    
-    /**
-     * Returnerer antall elementer i settet.
-     */
-    @SuppressWarnings("unused") 
-    public int antallElementer() {
-        int antTreff = 0;
-        for (T t : this) {
-            antTreff++;
-        }
-        return antTreff;
-    }
-    
 }
