@@ -45,7 +45,7 @@ public final class LovvalgImparater {
     
     /** Avbryter regelkjøringen i stillhet */
     public static final Runnable avbrytRegelkjøring = () -> {
-        loggInfo("Anbryter regelkjøring");
+        loggInfo("Avbryter regelkjøring");
         throw new AvbrytRegelkjoeringIStillhetException();
     };
     

@@ -59,7 +59,7 @@ public class VerdielementSettTest {
         Faksjon ikkeIrriterendeFurBalls = new Faksjon(1); // Chewbaka
         Faksjon alleKvinnenerIFørsteTriologi = new Faksjon(1); // Leia
         Avdeling starWarsReservat = new Avdeling(irriterendeFurballs, ikkeIrriterendeFurBalls, alleKvinnenerIFørsteTriologi);
-        // Pirates of the Careebean
+        // Pirates of the Caribbean...
         Faksjon alleKvinnenerIFørsteFilm = new Faksjon(1); // Elizabeth Swann
         Faksjon soldaterViBlirKjentMed = new Faksjon(0);
         Faksjon klassiskePiraterMedPappegøye = new Faksjon(1); // Mr. Cotton

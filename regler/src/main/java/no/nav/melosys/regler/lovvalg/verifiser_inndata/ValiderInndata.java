@@ -28,7 +28,7 @@ public final class ValiderInndata extends Regelpakke {
     
     /*
     private static void verifiserKonsistens() {
-        // Veriser flere land
+        // Verifiser flere land
         if (søknad().arbeidFlereLand && søknad().land.size() < 2) {
             leggTilMeldingOgLogg(Kategori.FEIL_I_SOEKNAD, "Oppgitt arbeid i flere land, men kun ett land i søknaden");
         }
