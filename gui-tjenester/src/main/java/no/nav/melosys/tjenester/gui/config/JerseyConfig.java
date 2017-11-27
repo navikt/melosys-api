@@ -1,16 +1,17 @@
 package no.nav.melosys.tjenester.gui.config;
 
-import javax.ws.rs.ApplicationPath;
-
-import org.glassfish.jersey.server.ResourceConfig;
-import org.springframework.context.annotation.Configuration;
-
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
 import no.nav.melosys.tjenester.gui.BehandlingRestTjeneste;
 import no.nav.melosys.tjenester.gui.FagsakRestTjeneste;
 import no.nav.melosys.tjenester.gui.SaksbehandlerTjeneste;
+import no.nav.melosys.tjenester.gui.SokRestTjeneste;
+import no.nav.melosys.tjenester.gui.patch.JsonPatchReader;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.context.annotation.Configuration;
+
+import javax.ws.rs.ApplicationPath;
 
 @Configuration
 @ApplicationPath("/api")
@@ -21,7 +22,9 @@ public class JerseyConfig extends ResourceConfig {
         register(CorsFilter.class);
         register(BehandlingRestTjeneste.class);
         register(FagsakRestTjeneste.class);
+        register(JsonPatchReader.class);
         register(SaksbehandlerTjeneste.class);
+        register(SokRestTjeneste.class);
         configureSwagger();
     }
 

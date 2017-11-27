@@ -26,9 +26,9 @@ import javax.xml.bind.Marshaller;
 import java.io.StringWriter;
 
 @Service
-public class Medl2Service implements Medl2Fasade {
+public class MedlService implements MedlFasade {
 
-    private static final Logger log = LoggerFactory.getLogger(Medl2Service.class);
+    private static final Logger log = LoggerFactory.getLogger(MedlService.class);
 
     private static final String MEDLEMSKAP_VERSJON = "2.0";
 
@@ -39,7 +39,7 @@ public class Medl2Service implements Medl2Fasade {
     private final Marshaller marshaller;
 
     @Autowired
-    public Medl2Service(MedlemskapConsumer medlemskapConsumer, DokumentFactory dokumentFactory) {
+    public MedlService(MedlemskapConsumer medlemskapConsumer, DokumentFactory dokumentFactory) {
         this.medlemskapConsumer = medlemskapConsumer;
         this.dokumentFactory = dokumentFactory;
 

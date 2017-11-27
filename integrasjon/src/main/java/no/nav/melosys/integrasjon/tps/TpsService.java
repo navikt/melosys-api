@@ -98,8 +98,7 @@ public class TpsService implements TpsFasade {
         return optResult;
     }
 
-    @Override
-    public Saksopplysning hentPerson(String ident, Collection<Informasjonsbehov> behov) throws SikkerhetsbegrensningException {
+    private Saksopplysning hentPerson(String ident, Collection<Informasjonsbehov> behov) throws SikkerhetsbegrensningException {
         HentPersonRequest request = new HentPersonRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -143,6 +142,11 @@ public class TpsService implements TpsFasade {
         dokumentFactory.lagDokument(saksopplysning);
 
         return saksopplysning;
+    }
+
+    @Override
+    public Saksopplysning hentPerson(String ident) throws IntegrasjonException, SikkerhetsbegrensningException {
+        return hentPerson(ident, null);
     }
 
     @Override
