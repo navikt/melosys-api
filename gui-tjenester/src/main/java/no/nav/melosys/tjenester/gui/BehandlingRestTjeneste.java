@@ -2,17 +2,15 @@ package no.nav.melosys.tjenester.gui;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.converter.DtoTilSaksopplysningerConverter;
+import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
 import no.nav.melosys.tjenester.gui.patch.ObjectPatch;
 import no.nav.melosys.tjenester.gui.patch.ObjectPatchException;
-import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -27,8 +25,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.HashSet;
-import java.util.Set;
 
 @Api(tags = { "behandling" })
 @Path("/behandlinger")
@@ -47,30 +43,13 @@ public class BehandlingRestTjeneste extends RestTjeneste {
         this.behandlingrepo = behandlingrepo;
 
         this.modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
 
         TypeMap<Behandling, BehandlingDto> typeMapBehandlingUt = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
+        typeMapBehandlingUt.addMappings(mapper -> mapper.using(new SaksopplysningerTilDtoConverter()).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
 
-        Converter<Set<Saksopplysning>, Set<SaksopplysningDokument>> saksopplysningTilDokument = ctx -> {
-            Set dokumenter = new HashSet();
-            if (ctx.getSource() != null) {
-                //ctx.getSource().forEach(x -> dokumenter.add(((Saksopplysning) x).getDokument()));
-                // TODO dokumentFactory er ikke nødvendig hvis vi lagrer den interne modellen fra starten.
-                ctx.getSource().forEach(x -> dokumenter.add(dokumentFactory.lagDokument((Saksopplysning) x)));
-            }
-            return dokumenter;
-        };
-        typeMapBehandlingUt.addMappings(mapper -> mapper.using(saksopplysningTilDokument).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
-
+        // Brukes til PATCH
         TypeMap<BehandlingDto, Behandling> typeMapBehandlingInn = modelMapper.createTypeMap(BehandlingDto.class, Behandling.class);
-        Converter<Set<SaksopplysningDokument>, Set<Saksopplysning>> dokumentTilSaksopplysning = ctx -> {
-            Set opplysninger = new HashSet();
-            if (ctx.getSource() != null) {
-                ctx.getSource().forEach(x -> opplysninger.add(new Saksopplysning(x))); // ny saksopplysning ut fra dokument
-            }
-            return opplysninger;
-        };
-        typeMapBehandlingInn.addMappings(mapper -> mapper.using(dokumentTilSaksopplysning).map(BehandlingDto::getSaksopplysninger, Behandling::setSaksopplysninger));
+        typeMapBehandlingInn.addMappings(mapper -> mapper.using(new DtoTilSaksopplysningerConverter()).map(BehandlingDto::getSaksopplysninger, Behandling::setSaksopplysninger));
     }
 
     @GET

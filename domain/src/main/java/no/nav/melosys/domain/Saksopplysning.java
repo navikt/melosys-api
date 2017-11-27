@@ -1,11 +1,13 @@
 package no.nav.melosys.domain;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.jpa.SaksopplysningListener;
 import org.hibernate.annotations.ColumnTransformer;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -19,6 +21,7 @@ import java.util.Objects;
 
 
 @Entity
+@EntityListeners({SaksopplysningListener.class})
 @Table(name = "saksopplysning")
 public class Saksopplysning {
 
@@ -64,9 +67,10 @@ public class Saksopplysning {
 
     /**
      * Brukes når en saksbehandler oppretter saksopplysninger manuelt.
+     * FIXME
      */
-    public Saksopplysning(SaksopplysningDokument saksopplysningDokument) {
-        setType(saksopplysningDokument.getType());
+    public Saksopplysning(SaksopplysningDokument saksopplysningDokument, SaksopplysningType type) {
+        setType(type);
         setKilde(SaksopplysningKilde.SBH);
         setRegistrertDato(LocalDateTime.now());
         //TODO setInternXml();
