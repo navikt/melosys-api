@@ -2,16 +2,18 @@ package no.nav.melosys.regler.lovvalg.utled_fakta;
 
 import static no.nav.melosys.regler.api.lovvalg.rep.Argument.BRUKER_ER_ARBEIDSTAKER;
 import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.DELVIS_STOETTET;
-import static no.nav.melosys.regler.lovvalg.LovvalgImparater.leggTilMelding;
-import static no.nav.melosys.regler.lovvalg.LovvalgImparater.settVariabel;
+import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.leggTilMelding;
+import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.settVariabel;
 import static no.nav.melosys.regler.lovvalg.LovvalgPredikater.harOverlappMedSøknadsperioden;
 import static no.nav.melosys.regler.lovvalg.LovvalgProdusenter.arbeidsforholdene;
 import static no.nav.melosys.regler.lovvalg.LovvalgProdusenter.permitteringer;
 import static no.nav.melosys.regler.motor.dekl.Deklarasjon.hvis;
+import static no.nav.melosys.regler.motor.dekl.FellesVokabular.JA;
 import static no.nav.melosys.regler.motor.dekl.Verdielement.antallet;
 
 import no.nav.melosys.regler.motor.Regel;
 import no.nav.melosys.regler.motor.Regelpakke;
+import no.nav.melosys.regler.motor.dekl.FellesVokabular;
 
 public class UtledFakta extends Regelpakke {
     
@@ -33,7 +35,7 @@ public class UtledFakta extends Regelpakke {
     public static void finnUtOmBrukerErArbeidstaker() {
         hvis(antallet(arbeidsforholdene().som(harOverlappMedSøknadsperioden))
             .erStørreEnnEllerLik(1))
-        .så(settVariabel(BRUKER_ER_ARBEIDSTAKER, true));
+        .så(settVariabel(BRUKER_ER_ARBEIDSTAKER, JA));
     }
 
     

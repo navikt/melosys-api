@@ -18,6 +18,10 @@ public final class Deklarasjon {
         return d;
     }
 
+    public static Deklarasjon hvis(Verdielement ve) {
+        return Deklarasjon.hvis(ve.erSann());
+    }
+
     public Deklarasjon så(Runnable... kommandoer) {
         if (betingelse.test()) {
             utfør(kommandoer);

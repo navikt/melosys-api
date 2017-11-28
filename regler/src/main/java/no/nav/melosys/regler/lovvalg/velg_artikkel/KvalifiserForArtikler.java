@@ -28,11 +28,14 @@ import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_13
 import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_13_4;
 import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_16_M;
 import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_16_U;
-import static no.nav.melosys.regler.lovvalg.LovvalgImparater.settVariabel;
+import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.settVariabel;
 import static no.nav.melosys.regler.motor.dekl.Deklarasjon.hvis;
+import static no.nav.melosys.regler.motor.dekl.FellesVokabular.JA;
+import static no.nav.melosys.regler.motor.dekl.FellesVokabular.NEI;
 import static no.nav.melosys.regler.motor.dekl.Verdielement.variabelen;
 
 import no.nav.melosys.regler.motor.Regel;
+import no.nav.melosys.regler.motor.dekl.FellesVokabular;
 
 public class KvalifiserForArtikler {
     
@@ -41,9 +44,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_2, true)
+            settVariabel(SKAL_VURDERE_ART_11_2, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_2, false)
+            settVariabel(SKAL_VURDERE_ART_11_2, NEI)
         );
     }
 
@@ -52,9 +55,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_3A, true)
+            settVariabel(SKAL_VURDERE_ART_11_3A, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_3A, false)
+            settVariabel(SKAL_VURDERE_ART_11_3A, NEI)
         );
     }
 
@@ -63,9 +66,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_3B, true)
+            settVariabel(SKAL_VURDERE_ART_11_3B, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_3B, false)
+            settVariabel(SKAL_VURDERE_ART_11_3B, NEI)
         );
     }
 
@@ -74,9 +77,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_3C, true)
+            settVariabel(SKAL_VURDERE_ART_11_3C, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_3C, false)
+            settVariabel(SKAL_VURDERE_ART_11_3C, NEI)
         );
     }
 
@@ -85,9 +88,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_3D, true)
+            settVariabel(SKAL_VURDERE_ART_11_3D, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_3D, false)
+            settVariabel(SKAL_VURDERE_ART_11_3D, NEI)
         );
     }
 
@@ -96,9 +99,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_3E, true)
+            settVariabel(SKAL_VURDERE_ART_11_3E, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_3E, false)
+            settVariabel(SKAL_VURDERE_ART_11_3E, NEI)
         );
     }
 
@@ -107,9 +110,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_4_1, true)
+            settVariabel(SKAL_VURDERE_ART_11_4_1, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_4_1, false)
+            settVariabel(SKAL_VURDERE_ART_11_4_1, NEI)
         );
     }
 
@@ -118,9 +121,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_4_2, true)
+            settVariabel(SKAL_VURDERE_ART_11_4_2, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_4_2, false)
+            settVariabel(SKAL_VURDERE_ART_11_4_2, NEI)
         );
     }
 
@@ -129,9 +132,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_5, true)
+            settVariabel(SKAL_VURDERE_ART_11_5, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_5, false)
+            settVariabel(SKAL_VURDERE_ART_11_5, NEI)
         );
     }
 
@@ -145,9 +148,9 @@ public class KvalifiserForArtikler {
             .og(variabelen(BRUKER_ER_TJENESTEMANN).erIkkeSann())
             .og(variabelen(BRUKER_ARBEIDER_I_FLERE_LAND).erIkkeSann())
         ).så(
-            settVariabel(SKAL_VURDERE_ART_12_1, true)
+            settVariabel(SKAL_VURDERE_ART_12_1, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_12_1, false)
+            settVariabel(SKAL_VURDERE_ART_12_1, NEI)
         );
     }
 
@@ -156,9 +159,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_12_2, true)
+            settVariabel(SKAL_VURDERE_ART_12_2, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_12_2, false)
+            settVariabel(SKAL_VURDERE_ART_12_2, NEI)
         );
     }
 
@@ -167,9 +170,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_1A, true)
+            settVariabel(SKAL_VURDERE_ART_13_1A, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_1A, false)
+            settVariabel(SKAL_VURDERE_ART_13_1A, NEI)
         );
     }
 
@@ -178,9 +181,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_1B1, true)
+            settVariabel(SKAL_VURDERE_ART_13_1B1, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_1B1, false)
+            settVariabel(SKAL_VURDERE_ART_13_1B1, NEI)
         );
     }
 
@@ -189,9 +192,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_1B2, true)
+            settVariabel(SKAL_VURDERE_ART_13_1B2, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_1B2, false)
+            settVariabel(SKAL_VURDERE_ART_13_1B2, NEI)
         );
     }
 
@@ -200,9 +203,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_1B3, true)
+            settVariabel(SKAL_VURDERE_ART_13_1B3, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_1B3, false)
+            settVariabel(SKAL_VURDERE_ART_13_1B3, NEI)
         );
     }
 
@@ -211,9 +214,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_1B4, true)
+            settVariabel(SKAL_VURDERE_ART_13_1B4, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_1B4, false)
+            settVariabel(SKAL_VURDERE_ART_13_1B4, NEI)
         );
     }
 
@@ -222,9 +225,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_2A, true)
+            settVariabel(SKAL_VURDERE_ART_13_2A, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_2A, false)
+            settVariabel(SKAL_VURDERE_ART_13_2A, NEI)
         );
     }
 
@@ -233,9 +236,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_2B, true)
+            settVariabel(SKAL_VURDERE_ART_13_2B, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_2B, false)
+            settVariabel(SKAL_VURDERE_ART_13_2B, NEI)
         );
     }
 
@@ -244,9 +247,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_3, true)
+            settVariabel(SKAL_VURDERE_ART_13_3, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_3, false)
+            settVariabel(SKAL_VURDERE_ART_13_3, NEI)
         );
     }
 
@@ -255,9 +258,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_4, true)
+            settVariabel(SKAL_VURDERE_ART_13_4, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_4, false)
+            settVariabel(SKAL_VURDERE_ART_13_4, NEI)
         );
     }
 
@@ -266,9 +269,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_16_M, true)
+            settVariabel(SKAL_VURDERE_ART_16_M, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_16_M, false)
+            settVariabel(SKAL_VURDERE_ART_16_M, NEI)
         );
     }
 
@@ -277,9 +280,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_16_U, true)
+            settVariabel(SKAL_VURDERE_ART_16_U, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_16_U, false)
+            settVariabel(SKAL_VURDERE_ART_16_U, NEI)
         );
     }
 

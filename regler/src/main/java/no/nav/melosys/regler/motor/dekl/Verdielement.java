@@ -1,5 +1,7 @@
 package no.nav.melosys.regler.motor.dekl;
 
+import org.springframework.util.Assert;
+
 import no.nav.melosys.regler.motor.KontekstManager;
 
 public class Verdielement {
@@ -51,11 +53,17 @@ public class Verdielement {
     }
     
     public Predikat erSann() {
-        return () -> harVerdiLik(true);
+        return () -> {
+            Assert.isTrue(verdi instanceof Boolean || Boolean.TYPE.isInstance(verdi), "Kun boolske verdier kan være sanne eller usanne");
+            return harVerdiLik(true);
+        };
     }
 
     public Predikat erIkkeSann() {
-        return () -> harVerdiLik(false);
+        return () -> {
+            Assert.isTrue(verdi instanceof Boolean || Boolean.TYPE.isInstance(verdi), "Kun boolske verdier kan være sanne eller usanne");
+            return harVerdiLik(false);
+        };
     }
 
     @SuppressWarnings("unchecked")

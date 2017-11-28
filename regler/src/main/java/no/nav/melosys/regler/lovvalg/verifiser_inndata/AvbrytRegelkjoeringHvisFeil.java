@@ -1,6 +1,6 @@
 package no.nav.melosys.regler.lovvalg.verifiser_inndata;
 
-import static no.nav.melosys.regler.lovvalg.LovvalgImparater.avbrytRegelkjøring;
+import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.avbrytRegelkjøring;
 import static no.nav.melosys.regler.lovvalg.LovvalgPredikater.detErMeldtFeil;
 import static no.nav.melosys.regler.motor.dekl.Deklarasjon.hvis;
 

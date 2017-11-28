@@ -13,9 +13,9 @@ import no.nav.melosys.regler.motor.KontekstManager;
 /**
  * Klassen inneholder verbalisering av kommandoer
  */
-public final class LovvalgImparater {
+public final class LovvalgKommandoer {
 
-    private LovvalgImparater() {}
+    private LovvalgKommandoer() {}
 
     /** Legger til en feil eller varsel på responsen som skal returneres, og skriver til logg. */
     public static Runnable leggTilMelding(Kategori kat, String melding) {

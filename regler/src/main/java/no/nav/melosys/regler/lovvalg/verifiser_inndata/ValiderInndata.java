@@ -4,7 +4,7 @@ package no.nav.melosys.regler.lovvalg.verifiser_inndata;
 import static no.nav.melosys.domain.dokument.person.Personstatus.DØD;
 import static no.nav.melosys.domain.dokument.person.Personstatus.DØDD;
 import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.IKKE_STOETTET;
-import static no.nav.melosys.regler.lovvalg.LovvalgImparater.leggTilMelding;
+import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.leggTilMelding;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.personopplysningDokumentet;
 import static no.nav.melosys.regler.motor.dekl.Deklarasjon.hvis;
 import static no.nav.melosys.regler.motor.dekl.Verdielement.verdien;

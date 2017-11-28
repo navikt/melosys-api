@@ -1,7 +1,7 @@
 package no.nav.melosys.regler.lovvalg.verifiser_inndata;
 
 import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.VALIDERINGSFEIL;
-import static no.nav.melosys.regler.lovvalg.LovvalgImparater.leggTilMeldingOgAvbryt;
+import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.leggTilMeldingOgAvbryt;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.inntektDokumentene;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.medlemskapDokumentene;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.organisasjonDokumentene;
