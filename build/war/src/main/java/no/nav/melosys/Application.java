@@ -22,6 +22,7 @@ import no.nav.vedtak.sts.client.SecurityConstants;
 @SpringBootApplication
 @PropertySource("classpath:integrasjon.properties")
 @PropertySource("classpath:saksflyt.properties")
+@PropertySource("classpath:service.properties")
 public class Application extends SpringBootServletInitializer implements EnvironmentAware {
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);

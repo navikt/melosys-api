@@ -10,13 +10,18 @@ import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.felles.exception.TekniskException;
 import no.nav.melosys.integrasjon.inntk.InntektFasade;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.*;
@@ -25,6 +30,8 @@ import java.util.stream.Stream;
 
 @Service
 public class FagsakService {
+
+    private static final Logger log = LoggerFactory.getLogger(FagsakService.class);
 
     private FagsakRepository fagsakRepository;
 
@@ -37,6 +44,12 @@ public class FagsakService {
     private MedlFasade medlFasade;
 
     private InntektFasade inntektFasade;
+
+    @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antall_maaneder}")
+    private Integer arbeidsforholdhistorikkAntallMåneder;
+
+    @Value("${melosys.service.fagsak.inntektshistorikk.antall_maaneder}")
+    private Integer inntektshistorikkAntallMåneder;
 
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository, TpsFasade tpsFasade, AaregFasade aaregFasade, EregFasade eregFasade, MedlFasade medlFasade, InntektFasade inntektFasade) {
@@ -105,7 +118,8 @@ public class FagsakService {
         // TODO: Informasjonsbehov.FAMILIERELASJONER kommer i runde 2
         try {
             return tpsFasade.hentPersonMedAdresse(fnr);
-        } catch (IntegrasjonException e) {
+        } catch (IntegrasjonException integrasjonException) {
+            log.error("Uventet feil ved oppslag mot TPS", integrasjonException);
             return null;
         }
     }
@@ -113,25 +127,30 @@ public class FagsakService {
     private Saksopplysning hentMedlemskap(String fnr) throws SikkerhetsbegrensningException {
         try {
             return medlFasade.getPeriodeListe(fnr);
-        } catch (IntegrasjonException e) {
+        } catch (IntegrasjonException integrasjonException) {
+            log.error("Uventet feil ved oppslag mot MEDL", integrasjonException);
             return null;
         }
     }
 
     private Saksopplysning hentArbeidsforhold(String fnr) throws SikkerhetsbegrensningException {
+        final LocalDate tom  = LocalDate.now();
+        final LocalDate fom = tom.minusMonths(arbeidsforholdhistorikkAntallMåneder);
         try {
-            return aaregFasade.finnArbeidsforholdPrArbeidstaker(fnr, AaregFasade.REGELVERK_A_ORDNINGEN);
-        } catch (IntegrasjonException e) {
+            return aaregFasade.finnArbeidsforholdPrArbeidstaker(fnr, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
+        } catch (IntegrasjonException | TekniskException exception) {
+            log.error("Uventet feil ved oppslag mot AAREG", exception);
             return null;
         }
     }
 
     private Saksopplysning hentInntekt(String fnr) throws SikkerhetsbegrensningException {
         final YearMonth tom = YearMonth.now();
-        final YearMonth fom = tom.minusMonths(12);
+        final YearMonth fom = tom.minusMonths(inntektshistorikkAntallMåneder);
         try {
             return inntektFasade.hentInntektListe(fnr, fom, tom);
-        } catch (IntegrasjonException e) {
+        } catch (IntegrasjonException integrasjonException) {
+            log.error("Uventet feil ved oppslag mot Inntekt", integrasjonException);
             return null;
         }
     }
@@ -169,7 +188,8 @@ public class FagsakService {
     private Saksopplysning hentOrganisasjon(String orgnr) throws SikkerhetsbegrensningException {
         try {
             return eregFasade.hentOrganisasjon(orgnr);
-        } catch (IntegrasjonException e) {
+        } catch (IntegrasjonException integrasjonException) {
+            log.error("Uventet feil ved oppslag mot EREG", integrasjonException);
             return null;
         }
     }

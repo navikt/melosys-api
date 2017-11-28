@@ -27,7 +27,7 @@ public class AaregServiceTest {
 
     @Test
     public void getArbeidsforholdDokument() throws Exception {
-        Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker("FJERNET", REGELVERK_A_ORDNINGEN);
+        Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker("FJERNET", REGELVERK_A_ORDNINGEN, null, null);
         ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
         assertThat(arbeidsforholdDokument.getArbeidsforhold().size()).isGreaterThan(0);
     }
