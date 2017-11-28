@@ -38,7 +38,7 @@ public class Arbeider {
     private static final Logger logger = LoggerFactory.getLogger(Arbeider.class);
 
     /** Antall arbeidstråder */
-    @Value("${melosys.saksflyt.arbeider.antallTraader}")
+    @Value("${melosys.saksflyt.arbeider.antallTråder}")
     private int antallTråder;
 
     /** Opphold mellom hvert steg */

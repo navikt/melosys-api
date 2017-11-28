@@ -20,9 +20,9 @@ import no.nav.vedtak.sts.client.SecurityConstants;
 
 @ServletComponentScan("no.nav.melosys.integrasjon.felles")
 @SpringBootApplication
-@PropertySource("classpath:integrasjon.properties")
-@PropertySource("classpath:saksflyt.properties")
-@PropertySource("classpath:service.properties")
+@PropertySource(value = "classpath:integrasjon.properties", encoding = "utf-8")
+@PropertySource(value = "classpath:saksflyt.properties", encoding = "utf-8")
+@PropertySource(value = "classpath:service.properties", encoding = "utf-8")
 public class Application extends SpringBootServletInitializer implements EnvironmentAware {
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
