@@ -45,10 +45,10 @@ public class FagsakService {
 
     private InntektFasade inntektFasade;
 
-    @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antall_måneder}")
+    @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antall_maaneder}")
     private Integer arbeidsforholdhistorikkAntallMåneder;
 
-    @Value("${melosys.service.fagsak.inntektshistorikk.antall_måneder}")
+    @Value("${melosys.service.fagsak.inntektshistorikk.antall_maaneder}")
     private Integer inntektshistorikkAntallMåneder;
 
     @Autowired
