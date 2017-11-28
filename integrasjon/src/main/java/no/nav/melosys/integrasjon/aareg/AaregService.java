@@ -1,11 +1,16 @@
 package no.nav.melosys.integrasjon.aareg;
 
 import java.io.StringWriter;
+import java.time.LocalDate;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.datatype.DatatypeConfigurationException;
 
+import no.nav.melosys.integrasjon.KonverteringsUtils;
+import no.nav.melosys.integrasjon.felles.exception.TekniskException;
+import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Periode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +58,7 @@ public class AaregService implements AaregFasade {
     }
 
     @Override
-    public Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, String regelverk) throws SikkerhetsbegrensningException {
+    public Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, String regelverk, LocalDate fom, LocalDate tom) throws IntegrasjonException, TekniskException, SikkerhetsbegrensningException {
         FinnArbeidsforholdPrArbeidstakerRequest request = new FinnArbeidsforholdPrArbeidstakerRequest();
 
         NorskIdent norskIdent = new NorskIdent();
@@ -61,9 +66,26 @@ public class AaregService implements AaregFasade {
         request.setIdent(norskIdent);
         Regelverker regelverker = new Regelverker();
 
+        Periode periode = new Periode();
+        try {
+            if (fom != null) {
+                periode.setFom(KonverteringsUtils.localDateToXMLGregorianCalendar(fom));
+            }
+            if (tom != null) {
+                periode.setTom(KonverteringsUtils.localDateToXMLGregorianCalendar(tom));
+            }
+        } catch (DatatypeConfigurationException DatatypeConfigurationException) {
+            throw new TekniskException(DatatypeConfigurationException);
+        }
+
         regelverker.setKodeverksRef(regelverk);
         request.setRapportertSomRegelverk(regelverker);
+        request.setArbeidsforholdIPeriode(periode);
 
+        return finnArbeidsforholdPrArbeidstaker(request);
+    }
+
+    private Saksopplysning finnArbeidsforholdPrArbeidstaker(FinnArbeidsforholdPrArbeidstakerRequest request) throws SikkerhetsbegrensningException {
         // Kall til Aa-registret
         FinnArbeidsforholdPrArbeidstakerResponse response = null;
         try {
@@ -96,5 +118,4 @@ public class AaregService implements AaregFasade {
 
         return saksopplysning;
     }
-
 }
