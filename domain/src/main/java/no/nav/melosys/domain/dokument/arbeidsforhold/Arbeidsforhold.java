@@ -38,9 +38,13 @@ public class Arbeidsforhold implements HarPeriode {
 
     private List<Utenlandsopphold> utenlandsopphold = new ArrayList<>();
 
+    private Aktoertype arbeidsgivertype;
+
     private String arbeidsgiverID;
 
     private String arbeidstakerID;
+
+    private Aktoertype opplysningspliktigtype;
 
     private String opplysningspliktigID;
 
@@ -118,6 +122,14 @@ public class Arbeidsforhold implements HarPeriode {
         this.arbeidsavtaler = arbeidsavtaler;
     }
 
+    public Aktoertype getArbeidsgivertype() {
+        return arbeidsgivertype;
+    }
+
+    public void setArbeidsgivertype(Aktoertype arbeidsgivertype) {
+        this.arbeidsgivertype = arbeidsgivertype;
+    }
+
     public String getArbeidsgiverID() {
         return arbeidsgiverID;
     }
@@ -132,6 +144,14 @@ public class Arbeidsforhold implements HarPeriode {
 
     public void setArbeidstakerID(String arbeidstakerID) {
         this.arbeidstakerID = arbeidstakerID;
+    }
+
+    public Aktoertype getOpplysningspliktigtype() {
+        return opplysningspliktigtype;
+    }
+
+    public void setOpplysningspliktigtype(Aktoertype opplysningspliktigtype) {
+        this.opplysningspliktigtype = opplysningspliktigtype;
     }
 
     public String getOpplysningspliktigID() {

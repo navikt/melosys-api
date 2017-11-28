@@ -55,9 +55,7 @@
                             </permisjonOgPermittering>
                         </xsl:for-each>
                         </permisjonOgPermittering>
-                        <arbeidsgiverID><xsl:value-of select="arbeidsgiver/orgnummer" /></arbeidsgiverID>
                         <arbeidstakerID><xsl:value-of select="arbeidstaker/ident/ident" /></arbeidstakerID>
-                        <opplysningspliktigID><xsl:value-of select="opplysningspliktig/orgnummer" /></opplysningspliktigID>
                         <arbeidsforholdInnrapportertEtterAOrdningen><xsl:value-of select="arbeidsforholdInnrapportertEtterAOrdningen" /></arbeidsforholdInnrapportertEtterAOrdningen>
                         <opprettelsestidspunkt><xsl:value-of select="@opprettelsestidspunkt"/></opprettelsestidspunkt>
                         <sistBekreftet><xsl:value-of select="@sistBekreftet"/></sistBekreftet>
@@ -66,6 +64,26 @@
                 </xsl:for-each>
             </arbeidsforhold>
         </arbeidsforholdDokument>
+    </xsl:template>
+
+    <xsl:template match="arbeidsgiver|opplysningspliktig">
+        <xsl:element name="{concat(name(), 'type')}">
+            <!-- FIXME: Dette virker ikke -->
+            <xsl:value-of select="substring-after(@xsi:type, 'ns4')" />
+        </xsl:element>
+        <xsl:element name="{concat(name(), 'ID')}">
+            <xsl:choose>
+                <xsl:when test="@xsi:type='ns4:Organisasjon'">
+                    <xsl:value-of select="orgnummer" />
+                </xsl:when>
+                <xsl:when test="@xsi:type='ns4:Person'">
+                    <xsl:value-of select="ident/ident" />
+                </xsl:when>
+                <xsl:when test="@xsi:type='ns4:HistoriskArbeidsgiverMedArbeidsgivernummer'">
+                    <xsl:value-of select="arbeidsgivernummer" />
+                </xsl:when>
+            </xsl:choose>
+        </xsl:element>
     </xsl:template>
 
     <xsl:template match="utenlandsopphold|antallTimerForTimeloennet">
