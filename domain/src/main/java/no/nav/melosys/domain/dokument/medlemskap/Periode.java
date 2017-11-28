@@ -1,11 +1,12 @@
 package no.nav.melosys.domain.dokument.medlemskap;
 
-import no.nav.melosys.domain.ErPeriode;
-import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
+import java.time.LocalDate;
 
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.time.LocalDate;
+
+import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
 @XmlType(name = "Periode") // Løser navnekonflikt med no.nav.melosys.domain.dokument.felles.Periode
 public class Periode implements ErPeriode {

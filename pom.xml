@@ -123,11 +123,12 @@
                 <artifactId>melosys-regler-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
+            <!-- dependency> FIXME: 
                 <groupId>${project.groupId}</groupId>
                 <artifactId>melosys-regler</artifactId>
+                <type>war</type>
                 <version>${project.version}</version>
-            </dependency>
+            </dependency-->
 
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>

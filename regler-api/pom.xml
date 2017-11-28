@@ -21,6 +21,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-domain</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>       

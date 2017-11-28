@@ -48,13 +48,6 @@ public class PersonDokument extends SaksopplysningDokument {
     @JsonIgnore
     public Personstatus personstatus;
 
-    private Bostedsadresse bostedsadresse;
+    public Bostedsadresse bostedsadresse;
 
-    public Bostedsadresse getBostedsadresse() {
-        return bostedsadresse;
-    }
-
-    public void setBostedsadresse(Bostedsadresse bostedsadresse) {
-        this.bostedsadresse = bostedsadresse;
-    }
 }
