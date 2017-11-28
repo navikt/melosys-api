@@ -68,8 +68,7 @@
 
     <xsl:template match="arbeidsgiver|opplysningspliktig">
         <xsl:element name="{concat(name(), 'type')}">
-            <!-- FIXME: Dette virker ikke -->
-            <xsl:value-of select="substring-after(@xsi:type, 'ns4')" />
+            <xsl:value-of select="substring-after(@xsi:type, 'ns4:')" />
         </xsl:element>
         <xsl:element name="{concat(name(), 'ID')}">
             <xsl:choose>
