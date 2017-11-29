@@ -1,10 +1,10 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
-import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.ArbeidsforholdV3;
-import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerUgyldigInput;
+import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.*;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.FinnArbeidsforholdPrArbeidstakerRequest;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.FinnArbeidsforholdPrArbeidstakerResponse;
+import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkRequest;
+import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkResponse;
 
 public class ArbeidsforholdConsumerImpl implements ArbeidsforholdConsumer {
     private ArbeidsforholdV3 port;
@@ -19,4 +19,9 @@ public class ArbeidsforholdConsumerImpl implements ArbeidsforholdConsumer {
         return port.finnArbeidsforholdPrArbeidstaker(request);
     }
 
+    @Override
+    public HentArbeidsforholdHistorikkResponse hentArbeidsforholdHistorikk(HentArbeidsforholdHistorikkRequest request)
+            throws HentArbeidsforholdHistorikkSikkerhetsbegrensning, HentArbeidsforholdHistorikkArbeidsforholdIkkeFunnet {
+        return port.hentArbeidsforholdHistorikk(request);
+    }
 }

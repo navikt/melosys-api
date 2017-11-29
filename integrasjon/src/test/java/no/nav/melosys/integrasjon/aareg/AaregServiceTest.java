@@ -32,7 +32,12 @@ public class AaregServiceTest {
         assertThat(arbeidsforholdDokument.getArbeidsforhold().size()).isGreaterThan(0);
     }
 
-
-
+    @Test
+    public void getHistoriskArbeidsforholdDokument() throws Exception {
+        Saksopplysning saksopplysning = aaregService.hentArbeidsforholdHistorikk(12608035L);
+        ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
+        assertThat(arbeidsforholdDokument.getArbeidsforhold().size()).isGreaterThan(0);
+        assertThat(arbeidsforholdDokument.getArbeidsforhold().get(0).getArbeidsavtaler().size()).isGreaterThan(1);
+    }
 
 }

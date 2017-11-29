@@ -24,4 +24,11 @@ public interface AaregFasade {
      * @param regelverk Kode for  arbeidsforhold basert på nytt regelverk fra 1.1.2015 (a-ordningen). Mulige verdier: FOER_A_ORDNINGEN, A_ORDNINGEN, ALLE
      */
     Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, String regelverk, LocalDate fom, LocalDate tom) throws IntegrasjonException, TekniskException, SikkerhetsbegrensningException;
+
+    /**
+     * Etterspør et arbeidsforhold fra AA-registeret med gjeldende og historiske arbeidsavtaler.
+     *
+     * @param arbeidsforholdsID Unik ID til et arbeidsforhold i NAV
+     */
+    Saksopplysning hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws IntegrasjonException, SikkerhetsbegrensningException;
 }

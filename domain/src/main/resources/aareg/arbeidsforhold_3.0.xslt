@@ -8,7 +8,7 @@
     <xsl:template match="/">
         <arbeidsforholdDokument>
             <arbeidsforhold>
-                <xsl:for-each select="ns2:finnArbeidsforholdPrArbeidstakerResponse/parameters/arbeidsforhold">
+                <xsl:for-each select="(ns2:finnArbeidsforholdPrArbeidstakerResponse|ns2:hentArbeidsforholdHistorikkResponse)/parameters/arbeidsforhold">
                     <arbeidsforhold>
                         <arbeidsforholdID><xsl:value-of select="arbeidsforholdID" /></arbeidsforholdID>
                         <arbeidsforholdIDnav><xsl:value-of select="arbeidsforholdIDnav" /></arbeidsforholdIDnav>

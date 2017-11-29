@@ -1,0 +1,42 @@
+<ns2:hentArbeidsforholdHistorikkResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3">
+    <parameters>
+        <arbeidsforhold applikasjonsID="KONVERTERING" endretAv="EDAG-1456" endringstidspunkt="2015-05-31T14:45:59.976+02:00" opprettelsestidspunkt="2014-12-13T15:04:07.636+01:00" opprettetAv="BAAREG002" sistBekreftet="2006-08-22T00:00:00.000+02:00">
+            <arbeidsforholdID>konvertert_58ba7447-265e-4b83-b6a3-6b6614987d61</arbeidsforholdID>
+            <arbeidsforholdIDnav>12608035</arbeidsforholdIDnav>
+            <ansettelsesPeriode applikasjonsID="KONVERTERING" endretAv="BAAREG002" endringstidspunkt="2014-12-13T15:04:07.638+01:00" fomBruksperiode="2014-12-13+01:00">
+                <periode>
+                    <fom>1998-12-24T00:00:00.000+01:00</fom>
+                    <tom>2006-08-22T00:00:00.000+02:00</tom>
+                </periode>
+            </ansettelsesPeriode>
+            <arbeidsforholdstype kodeRef="ordinaertArbeidsforhold">Ordinært arbeidsforhold</arbeidsforholdstype>
+            <arbeidsavtale applikasjonsID="KONVERTERING" endretAv="BAAREG002" endringstidspunkt="2014-12-13T15:04:07.638+01:00" fomBruksperiode="2014-12-13+01:00" fomGyldighetsperiode="2006-08-01T00:00:00.000+02:00">
+                <yrke kodeRef="0021507">AMBASSADØR</yrke>
+                <beregnetAntallTimerPrUke>37.5</beregnetAntallTimerPrUke>
+                <endringsdatoStillingsprosent>1998-12-24+01:00</endringsdatoStillingsprosent>
+            </arbeidsavtale>
+            <arbeidsavtale applikasjonsID="KONVERTERING" endretAv="BAAREG002" endringstidspunkt="2014-12-13T15:04:07.638+01:00" fomBruksperiode="2014-12-13+01:00" fomGyldighetsperiode="2002-09-01T00:00:00.000+02:00" tomGyldighetsperiode="2006-07-31T00:00:00.000+02:00">
+                <yrke kodeRef="0029146">EKSPEDISJONSSJEF</yrke>
+                <beregnetAntallTimerPrUke>37.5</beregnetAntallTimerPrUke>
+                <endringsdatoStillingsprosent>1998-12-24+01:00</endringsdatoStillingsprosent>
+            </arbeidsavtale>
+            <arbeidsavtale applikasjonsID="KONVERTERING" endretAv="BAAREG002" endringstidspunkt="2014-12-13T15:04:07.638+01:00" fomBruksperiode="2014-12-13+01:00" fomGyldighetsperiode="1998-12-01T00:00:00.000+01:00" tomGyldighetsperiode="2002-08-31T00:00:00.000+02:00">
+                <yrke kodeRef="0021218">AVDELINGSDIREKTØR</yrke>
+                <beregnetAntallTimerPrUke>37.5</beregnetAntallTimerPrUke>
+                <endringsdatoStillingsprosent>1998-12-24+01:00</endringsdatoStillingsprosent>
+            </arbeidsavtale>
+            <arbeidsgiver xsi:type="ns4:Organisasjon" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <orgnummer>974625806</orgnummer>
+            </arbeidsgiver>
+            <arbeidstaker>
+                <ident>
+                    <ident>88888888887</ident>
+                </ident>
+            </arbeidstaker>
+            <opplysningspliktig xsi:type="ns4:Organisasjon" xmlns:ns4="http://nav.no/tjeneste/virksomhet/arbeidsforhold/v3/informasjon/arbeidsforhold" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <orgnummer>972417920</orgnummer>
+            </opplysningspliktig>
+            <arbeidsforholdInnrapportertEtterAOrdningen>false</arbeidsforholdInnrapportertEtterAOrdningen>
+        </arbeidsforhold>
+    </parameters>
+</ns2:hentArbeidsforholdHistorikkResponse>
