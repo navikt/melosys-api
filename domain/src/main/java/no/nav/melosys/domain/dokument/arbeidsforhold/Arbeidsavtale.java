@@ -41,6 +41,10 @@ public class Arbeidsavtale {
 
     private Boolean maritimArbeidsavtale;
 
+    private BigDecimal beregnetStillingsprosent;
+
+    private BigDecimal antallTimerGammeltAa;
+
     public String getArbeidstidsordning() {
         return arbeidstidsordning;
     }
@@ -137,4 +141,19 @@ public class Arbeidsavtale {
         this.maritimArbeidsavtale = maritimArbeidsavtale;
     }
 
+    public BigDecimal getBeregnetStillingsprosent() {
+        return beregnetStillingsprosent;
+    }
+
+    public void setBeregnetStillingsprosent(BigDecimal beregnetStillingsprosent) {
+        this.beregnetStillingsprosent = beregnetStillingsprosent;
+    }
+
+    public BigDecimal getAntallTimerGammeltAa() {
+        return antallTimerGammeltAa;
+    }
+
+    public void setAntallTimerGammeltAa(BigDecimal antallTimerGammeltAa) {
+        this.antallTimerGammeltAa = antallTimerGammeltAa;
+    }
 }

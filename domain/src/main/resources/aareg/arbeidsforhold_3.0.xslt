@@ -39,6 +39,8 @@
                                         <maritimArbeidsavtale>false</maritimArbeidsavtale>
                                     </xsl:otherwise>
                                 </xsl:choose>
+                                <beregnetStillingsprosent><xsl:value-of select="beregnetStillingsprosent" /></beregnetStillingsprosent>
+                                <antallTimerGammeltAa><xsl:value-of select="antallTimerGammeltAa" /></antallTimerGammeltAa>
                             </avtale>
                         </xsl:for-each>
                         </arbeidsavtaler>

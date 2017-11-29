@@ -23,7 +23,6 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -42,7 +41,7 @@ public class Aareg3KonverteringTest {
     @Test
     public void transform() throws TransformerFactoryConfigurationError, TransformerException, IOException, JAXBException {
         InputStream xslt = getClass().getClassLoader().getResourceAsStream("aareg/arbeidsforhold_3.0.xslt");
-        InputStream kilde = getClass().getClassLoader().getResourceAsStream("arbeidsforhold/99999999999.xml");
+        InputStream kilde = getClass().getClassLoader().getResourceAsStream("arbeidsforhold/99999999999_med_mock.xml");
         
         Transformer transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(xslt));
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
@@ -68,7 +67,7 @@ public class Aareg3KonverteringTest {
 
     @Test
     public void maritimArbeidsavtale() throws IOException {
-        final String ressurs = "arbeidsforhold/99999999999.xml";
+        final String ressurs = "arbeidsforhold/99999999999_med_mock.xml";
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
