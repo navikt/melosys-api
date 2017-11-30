@@ -11,6 +11,10 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.felles.exception.TekniskException;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.Periode;
+import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkArbeidsforholdIkkeFunnet;
+import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkSikkerhetsbegrensning;
+import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkRequest;
+import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +47,8 @@ public class AaregService implements AaregFasade {
 
     private final Marshaller marshaller;
 
+    private final Marshaller historikkMarshaller;
+
     @Autowired
     public AaregService(ArbeidsforholdConsumer arbeidsforholdConsumer, DokumentFactory dokumentFactory) {
         this.arbeidsforholdConsumer = arbeidsforholdConsumer;
@@ -51,6 +57,8 @@ public class AaregService implements AaregFasade {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.arbeidsforhold.v3.FinnArbeidsforholdPrArbeidstakerResponse.class);
             marshaller = jaxbContext.createMarshaller();
+            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.arbeidsforhold.v3.HentArbeidsforholdHistorikkResponse.class);
+            historikkMarshaller = jaxbContext.createMarshaller();
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);
@@ -102,6 +110,44 @@ public class AaregService implements AaregFasade {
             no.nav.tjeneste.virksomhet.arbeidsforhold.v3.FinnArbeidsforholdPrArbeidstakerResponse xmlRoot = new no.nav.tjeneste.virksomhet.arbeidsforhold.v3.FinnArbeidsforholdPrArbeidstakerResponse();
             xmlRoot.setParameters(response);
             marshaller.marshal(xmlRoot, xmlWriter);
+        } catch (JAXBException e) {
+            log.error("", e);
+            throw new RuntimeException(e);
+        }
+
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokumentXml(xmlWriter.toString());
+        saksopplysning.setKilde(SaksopplysningKilde.AAREG);
+        saksopplysning.setType(SaksopplysningType.ARBEIDSFORHOLD);
+        saksopplysning.setVersjon(ARBEIDSFORHOLD_VERSJON);
+
+        // xml -> java objekter
+        dokumentFactory.lagDokument(saksopplysning);
+
+        return saksopplysning;
+    }
+
+    @Override
+    public Saksopplysning hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws IntegrasjonException, SikkerhetsbegrensningException {
+        HentArbeidsforholdHistorikkRequest request = new HentArbeidsforholdHistorikkRequest();
+        request.setArbeidsforholdId(arbeidsforholdsID);
+
+        // Kall til Aa-registret
+        HentArbeidsforholdHistorikkResponse response = null;
+        try {
+            response = arbeidsforholdConsumer.hentArbeidsforholdHistorikk(request);
+        } catch (HentArbeidsforholdHistorikkSikkerhetsbegrensning hentArbeidsforholdHistorikkSikkerhetsbegrensning) {
+            throw new SikkerhetsbegrensningException(hentArbeidsforholdHistorikkSikkerhetsbegrensning);
+        } catch (HentArbeidsforholdHistorikkArbeidsforholdIkkeFunnet hentArbeidsforholdHistorikkArbeidsforholdIkkeFunnet) {
+            throw new IntegrasjonException(hentArbeidsforholdHistorikkArbeidsforholdIkkeFunnet);
+        }
+
+        // Response -> xml
+        StringWriter xmlWriter = new StringWriter();
+        try {
+            no.nav.tjeneste.virksomhet.arbeidsforhold.v3.HentArbeidsforholdHistorikkResponse xmlRoot = new no.nav.tjeneste.virksomhet.arbeidsforhold.v3.HentArbeidsforholdHistorikkResponse();
+            xmlRoot.setParameters(response);
+            historikkMarshaller.marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);

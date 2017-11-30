@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Arrays;
 import java.util.List;
 
+import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkRequest;
+import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkResponse;
 import org.junit.Test;
 
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.informasjon.arbeidsforhold.NorskIdent;
@@ -29,6 +31,19 @@ public class ArbeidsforholdMockTest {
             assertThat(response.getArbeidsforhold()).isNotEmpty();
         }
 
+    }
+
+    @Test
+    public void hentArbeidsforholdHistorikk() throws Exception {
+        ArbeidsforholdMock arbeidsforholdMock = new ArbeidsforholdMock();
+
+        final Long arbeidsforholdsID = 12608035L;
+
+        HentArbeidsforholdHistorikkRequest request = new HentArbeidsforholdHistorikkRequest();
+        request.setArbeidsforholdId(arbeidsforholdsID);
+
+        HentArbeidsforholdHistorikkResponse response = arbeidsforholdMock.hentArbeidsforholdHistorikk(request);
+        assertThat(response.getArbeidsforhold()).isNotNull();
     }
 
 }

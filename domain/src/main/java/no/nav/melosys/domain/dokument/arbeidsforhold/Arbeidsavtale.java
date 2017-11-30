@@ -14,11 +14,11 @@ import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Arbeidsavtale {
 
-    private String arbeidstidsordning;
+    private String arbeidstidsordning; //"http://nav.no/kodeverk/Kodeverk/Arbeidstidsordninger"
 
-    private String avloenningstype;
+    private String avloenningstype; //"http://nav.no/kodeverk/Kodeverk/Avl_c3_b8nningstyper"
 
-    private String yrke;
+    private String yrke; //"http://nav.no/kodeverk/Kodeverk/Yrker"
 
     private BigDecimal avtaltArbeidstimerPerUke;
 
@@ -33,11 +33,17 @@ public class Arbeidsavtale {
     private LocalDate endringsdatoStillingsprosent;
 
     @JsonProperty("fartsomraade")
-    private String fartsområde;
+    private String fartsområde; //"http://nav.no/kodeverk/Kodeverk/Fartsomr_c3_a5der"
 
-    private String skipsregister;
+    private String skipsregister; //"http://nav.no/kodeverk/Kodeverk/Skipsregistre"
 
-    private String skipstype;
+    private String skipstype; //"http://nav.no/kodeverk/Kodeverk/Skipstyper"
+
+    private Boolean maritimArbeidsavtale;
+
+    private BigDecimal beregnetStillingsprosent;
+
+    private BigDecimal antallTimerGammeltAa;
 
     public String getArbeidstidsordning() {
         return arbeidstidsordning;
@@ -127,6 +133,27 @@ public class Arbeidsavtale {
         this.skipstype = skipstype;
     }
 
+    public Boolean getMaritimArbeidsavtale() {
+        return maritimArbeidsavtale;
+    }
 
+    public void setMaritimArbeidsavtale(Boolean maritimArbeidsavtale) {
+        this.maritimArbeidsavtale = maritimArbeidsavtale;
+    }
 
+    public BigDecimal getBeregnetStillingsprosent() {
+        return beregnetStillingsprosent;
+    }
+
+    public void setBeregnetStillingsprosent(BigDecimal beregnetStillingsprosent) {
+        this.beregnetStillingsprosent = beregnetStillingsprosent;
+    }
+
+    public BigDecimal getAntallTimerGammeltAa() {
+        return antallTimerGammeltAa;
+    }
+
+    public void setAntallTimerGammeltAa(BigDecimal antallTimerGammeltAa) {
+        this.antallTimerGammeltAa = antallTimerGammeltAa;
+    }
 }

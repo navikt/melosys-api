@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.arbeidsforhold;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,12 +8,14 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.jaxb.XMLDateTimeToOffsetDateTime;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Arbeidsforhold implements HarPeriode {
@@ -23,7 +26,7 @@ public class Arbeidsforhold implements HarPeriode {
 
     private Periode ansettelsesPeriode;
 
-    private String arbeidsforholdstype;
+    private String arbeidsforholdstype; //"http://nav.no/kodeverk/Kodeverk/Arbeidsforholdstyper"
 
     @XmlElementWrapper(name="arbeidsavtaler")
     @XmlElement(name="avtale")
@@ -33,20 +36,30 @@ public class Arbeidsforhold implements HarPeriode {
     @XmlElement(name="permisjonOgPermittering")
     private List<PermisjonOgPermittering> permisjonOgPermittering = new ArrayList<>();
 
-    @XmlElementWrapper(name="utenlandsopphold")
-    @XmlElement(name="opphold")
     private List<Utenlandsopphold> utenlandsopphold = new ArrayList<>();
+
+    private Aktoertype arbeidsgivertype;
 
     private String arbeidsgiverID;
 
     private String arbeidstakerID;
+
+    private Aktoertype opplysningspliktigtype;
 
     private String opplysningspliktigID;
 
     @JsonProperty("Aordning")
     private Boolean arbeidsforholdInnrapportertEtterAOrdningen;
 
-    // FIXME: Sjekk om dette påvirker JAX. 
+    @XmlJavaTypeAdapter(XMLDateTimeToOffsetDateTime.class)
+    private OffsetDateTime opprettelsestidspunkt;
+
+    @XmlJavaTypeAdapter(XMLDateTimeToOffsetDateTime.class)
+    private OffsetDateTime sistBekreftet;
+
+    private List<AntallTimerIPerioden> antallTimerForTimeloennet;
+
+    // FIXME: Sjekk om dette påvirker JAX.
     // Hvis det gjør det, gjør nødvendige endringer slik at det ikke gjør det. Gjør samme endringer også i andre relevante klasser som implementerer HarPeriode
     @Override
     public ErPeriode getPeriode() {
@@ -109,6 +122,14 @@ public class Arbeidsforhold implements HarPeriode {
         this.arbeidsavtaler = arbeidsavtaler;
     }
 
+    public Aktoertype getArbeidsgivertype() {
+        return arbeidsgivertype;
+    }
+
+    public void setArbeidsgivertype(Aktoertype arbeidsgivertype) {
+        this.arbeidsgivertype = arbeidsgivertype;
+    }
+
     public String getArbeidsgiverID() {
         return arbeidsgiverID;
     }
@@ -123,6 +144,14 @@ public class Arbeidsforhold implements HarPeriode {
 
     public void setArbeidstakerID(String arbeidstakerID) {
         this.arbeidstakerID = arbeidstakerID;
+    }
+
+    public Aktoertype getOpplysningspliktigtype() {
+        return opplysningspliktigtype;
+    }
+
+    public void setOpplysningspliktigtype(Aktoertype opplysningspliktigtype) {
+        this.opplysningspliktigtype = opplysningspliktigtype;
     }
 
     public String getOpplysningspliktigID() {
@@ -141,4 +170,27 @@ public class Arbeidsforhold implements HarPeriode {
         this.arbeidsforholdInnrapportertEtterAOrdningen = arbeidsforholdInnrapportertEtterAOrdningen;
     }
 
+    public OffsetDateTime getOpprettelsestidspunkt() {
+        return opprettelsestidspunkt;
+    }
+
+    public void setOpprettelsestidspunkt(OffsetDateTime opprettelsestidspunkt) {
+        this.opprettelsestidspunkt = opprettelsestidspunkt;
+    }
+
+    public OffsetDateTime getSistBekreftet() {
+        return sistBekreftet;
+    }
+
+    public void setSistBekreftet(OffsetDateTime sistBekreftet) {
+        this.sistBekreftet = sistBekreftet;
+    }
+
+    public List<AntallTimerIPerioden> getAntallTimerForTimeloennet() {
+        return antallTimerForTimeloennet;
+    }
+
+    public void setAntallTimerForTimeloennet(List<AntallTimerIPerioden> antallTimerForTimeloennet) {
+        this.antallTimerForTimeloennet = antallTimerForTimeloennet;
+    }
 }
