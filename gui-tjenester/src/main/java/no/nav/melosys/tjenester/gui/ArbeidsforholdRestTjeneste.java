@@ -15,8 +15,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
-@Api(tags = {"arbeidsforhold"})
-@Path("/arbeidsforhold")
+@Api(tags = {"arbeidsforholdhistorikk"})
+@Path("/arbeidsforholdhistorikk")
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 public class ArbeidsforholdRestTjeneste extends RestTjeneste {
