@@ -108,6 +108,7 @@ public class FagsakService {
         fagsak.setRegistrertDato(LocalDateTime.now());
         fagsak.setType(FagsakType.SØKNAD_A1);
         fagsak.setVersjon(0);
+        fagsak.setStatus(FagsakStatus.OPPRETTET);
 
         fagsakRepository.save(fagsak);
 
