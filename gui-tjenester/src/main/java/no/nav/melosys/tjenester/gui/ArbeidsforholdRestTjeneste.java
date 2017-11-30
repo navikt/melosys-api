@@ -1,0 +1,43 @@
+package no.nav.melosys.tjenester.gui;
+
+import io.swagger.annotations.Api;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.service.FagsakService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.WebApplicationContext;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
+
+@Api(tags = {"arbeidsforhold"})
+@Path("/arbeidsforhold")
+@Service
+@Scope(value= WebApplicationContext.SCOPE_REQUEST)
+public class ArbeidsforholdRestTjeneste extends RestTjeneste {
+
+    private FagsakService fagsakService;
+
+    @Autowired
+    public ArbeidsforholdRestTjeneste(FagsakService fagsakService) {
+        this.fagsakService = fagsakService;
+    }
+
+    @GET
+    @Path("{arbeidsforholdsID}")
+    public Response hentArbeidsforholdHistorikk(@PathParam("arbeidsforholdsID") Long arbeidsforholdsID) {
+        try {
+            ArbeidsforholdDokument dokument = fagsakService.hentArbeidsforholdHistorikk(arbeidsforholdsID);
+            return Response.ok(dokument).build();
+        } catch (SikkerhetsbegrensningException SikkerhetsbegrensningException) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (IntegrasjonException IntegrasjonException) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+    }
+}

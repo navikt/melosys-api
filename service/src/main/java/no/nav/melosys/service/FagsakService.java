@@ -115,6 +115,11 @@ public class FagsakService {
         return fagsak;
     }
 
+    public ArbeidsforholdDokument hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws SikkerhetsbegrensningException {
+        Saksopplysning saksopplysning = aaregFasade.hentArbeidsforholdHistorikk(arbeidsforholdsID);
+        return (ArbeidsforholdDokument) saksopplysning.getDokument();
+    }
+
     private Saksopplysning hentPerson(String fnr) throws SikkerhetsbegrensningException {
         // TODO: Informasjonsbehov.FAMILIERELASJONER kommer i runde 2
         try {

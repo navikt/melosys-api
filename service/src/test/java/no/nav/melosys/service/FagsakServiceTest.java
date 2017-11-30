@@ -8,6 +8,7 @@ import no.nav.melosys.domain.FagsakStatus;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.aareg.AaregService;
@@ -96,6 +97,14 @@ public class FagsakServiceTest {
         }
         // Skru på logging igjen
         log.setLevel(opprinneligLevel);
+    }
+
+    @Test
+    public void hentArbeidsforholdHistorikk() throws Exception {
+        final Long arbeidsforholdsID = 12608035L;
+        ArbeidsforholdDokument dokument = fagsakService.hentArbeidsforholdHistorikk(arbeidsforholdsID);
+        assertFalse(dokument.getArbeidsforhold().isEmpty());
+        assertTrue(dokument.getArbeidsforhold().get(0).getArbeidsavtaler().size() > 1);
     }
 
 }
