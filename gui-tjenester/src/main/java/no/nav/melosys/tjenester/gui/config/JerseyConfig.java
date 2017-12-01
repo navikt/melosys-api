@@ -16,13 +16,14 @@ public class JerseyConfig extends ResourceConfig {
 
     public JerseyConfig() {
         setApplicationName("melosys");
+        register(ArbeidsforholdHistorikkRestTjeneste.class);
         register(CorsFilter.class);
         register(BehandlingRestTjeneste.class);
         register(FagsakRestTjeneste.class);
         register(JsonPatchReader.class);
         register(SaksbehandlerTjeneste.class);
+        register(SoknadRestTjeneste.class);
         register(SokRestTjeneste.class);
-        register(ArbeidsforholdRestTjeneste.class);
         configureSwagger();
     }
 

@@ -19,12 +19,12 @@ import javax.ws.rs.core.Response;
 @Path("/arbeidsforholdhistorikk")
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
-public class ArbeidsforholdRestTjeneste extends RestTjeneste {
+public class ArbeidsforholdHistorikkRestTjeneste extends RestTjeneste {
 
     private FagsakService fagsakService;
 
     @Autowired
-    public ArbeidsforholdRestTjeneste(FagsakService fagsakService) {
+    public ArbeidsforholdHistorikkRestTjeneste(FagsakService fagsakService) {
         this.fagsakService = fagsakService;
     }
 

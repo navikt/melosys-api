@@ -1,5 +1,8 @@
 package no.nav.melosys.regler.lovvalg.verifiser_inndata;
 
+import no.nav.melosys.regler.motor.Regel;
+import no.nav.melosys.regler.motor.Regelpakke;
+
 import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.VALIDERINGSFEIL;
 import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.leggTilMeldingOgAvbryt;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.inntektDokumentene;
@@ -11,9 +14,6 @@ import static no.nav.melosys.regler.lovvalg.LovvalgProdusenter.arbeidsforholdene
 import static no.nav.melosys.regler.motor.dekl.Deklarasjon.hvis;
 import static no.nav.melosys.regler.motor.dekl.Verdielement.verdien;
 import static no.nav.melosys.regler.motor.dekl.VerdielementSett.forAlle;
-
-import no.nav.melosys.regler.motor.Regel;
-import no.nav.melosys.regler.motor.Regelpakke;
 
 public class VerifiserPaakrevdeFelter extends Regelpakke {
     
@@ -31,9 +31,9 @@ public class VerifiserPaakrevdeFelter extends Regelpakke {
         hvis(verdien(søknadDokumentet()).mangler()).så(leggTilMeldingOgAvbryt(VALIDERINGSFEIL, "Forespørselen mangler søknad"));
 
         // Sjekk periode
-        hvis(verdien(søknadDokumentet().arbeidsperiode).mangler()).så(leggTilMeldingOgAvbryt(VALIDERINGSFEIL, "Søknaden mangler periode"));
-        hvis(verdien(søknadDokumentet().arbeidsperiode.getFom()).mangler()).så(leggTilMeldingOgAvbryt(VALIDERINGSFEIL, "Søknaden mangler fomDato"));
-        hvis(verdien(søknadDokumentet().arbeidsperiode.getTom()).mangler()).så(leggTilMeldingOgAvbryt(VALIDERINGSFEIL, "Søknaden mangler tomDato"));
+        hvis(verdien(søknadDokumentet().arbeidUtland.arbeidsperiode).mangler()).så(leggTilMeldingOgAvbryt(VALIDERINGSFEIL, "Søknaden mangler periode"));
+        hvis(verdien(søknadDokumentet().arbeidUtland.arbeidsperiode.getFom()).mangler()).så(leggTilMeldingOgAvbryt(VALIDERINGSFEIL, "Søknaden mangler fomDato"));
+        hvis(verdien(søknadDokumentet().arbeidUtland.arbeidsperiode.getTom()).mangler()).så(leggTilMeldingOgAvbryt(VALIDERINGSFEIL, "Søknaden mangler tomDato"));
 
         /* FIXME: Sjekk alle felter som er påkrevd for alle søknader
             // Sjekk flaggland...

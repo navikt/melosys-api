@@ -1,15 +1,15 @@
 package no.nav.melosys.regler.lovvalg;
 
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknadDokumentet;
-
-import java.util.function.Predicate;
-
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.motor.dekl.Predikat;
+
+import java.util.function.Predicate;
+
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknadDokumentet;
 
 /**
  * Klassen inneholder verbalisering av predikater
@@ -32,7 +32,7 @@ public final class LovvalgPredikater {
     public static final Predicate<HarPeriode> dekkerHeleSøknadsperioden = e -> {
         ErPeriode p = e.getPeriode();
         // Teknisk feil hvis p er null. OK med NPE.
-        ErPeriode søknadsperiode = søknadDokumentet().getPeriode();
+        ErPeriode søknadsperiode = søknadDokumentet().oppholdUtland.getPeriode();
         if (p.getFom() != null && p.getFom().isAfter(søknadsperiode.getFom())) {
             // Elementets fom er etter søknadens fom
             return false;
@@ -48,7 +48,7 @@ public final class LovvalgPredikater {
     public static final Predicate<HarPeriode> harOverlappMedSøknadsperioden = e -> {
         ErPeriode p = e.getPeriode();
         // Teknisk feil hvis p er null. OK med NPE.
-        ErPeriode søknadsperiode = søknadDokumentet().getPeriode();
+        ErPeriode søknadsperiode = søknadDokumentet().oppholdUtland.getPeriode();
         if (p.getFom() != null && p.getFom().isAfter(søknadsperiode.getTom())) {
             // Elementets fom er etter søknadens tom
             return false;

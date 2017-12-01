@@ -1,26 +1,18 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
-import no.nav.melosys.domain.ErPeriode;
-import no.nav.melosys.domain.HarPeriode;
+import com.fasterxml.jackson.annotation.JsonRootName;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Landkode;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.Gateadresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 
-/**
- * FIXME: EESSI2-424. Flat struktur, tatt ut fra https://confluence.adeo.no/pages/viewpage.action?pageId=239369913
- * Avventer Json struktur før vi gjør noe mer
- */
+import javax.xml.bind.annotation.XmlRootElement;
+import java.time.LocalDate;
+
+@JsonRootName("soknadDokument")
 @XmlRootElement
-public class SoeknadDokument extends SaksopplysningDokument implements HarPeriode {
-    
-    // Personopplysninger
+public class SoeknadDokument extends SaksopplysningDokument {
+
+    // Personopplysninger(FIXME er det en del av søknaden?)
     public String sammensattNavn;
     public String fnr;
     public LocalDate fødselsdato;
@@ -28,43 +20,36 @@ public class SoeknadDokument extends SaksopplysningDokument implements HarPeriod
     public Bostedsadresse bostedsadresseUtland;
     public Landkode statsborgerskap;
     public String utenlandskId;
-    // FIXME: Barn?
-    
+    // FIXME: Barn? (Barn kan utfylles med TPS)
+
     // Opplysninger om arbeid i utlandet
-    public Iterable<Landkode> arbeidsland; // FIXME
-    public Periode arbeidsperiode;
-    public Gateadresse arbeidsstedUtland;
-    public BigDecimal arbeidsandelNorge;
-    public BigDecimal arbeidsanderUtland;
-    // FIXME: Bostedsland?
-    public Boolean erstatterTidligereUtsendt;
-    
+    public ArbeidUtland arbeidUtland;
+
     // Opplysninger om foretak i utlandet
-    // TODO
-    
+    public ForetakUtland foretakUtland;
+
     // Opplysninger om opphold i utland
-    public Landkode oppholdsland;
-    public Periode oppholdsPeriode;
-    // TODO: resten
-    
+    public OppholdUtland oppholdUtland;
+
     // Opplysninger om arbeid i Norge
-    public Boolean brukerErSelvstendigNæringsdrivende;
-    public Boolean brukerArbeiderIVikarbyrå;
-    public Boolean ansattPåSokkelEllerSkip;
-    public String navnSkipEllerSokkel;
-    public Landkode sokkelLand;
-    public Landkode skipFlaggLand;
-    // TODO: resten
-    
-    // Opplysninger om juridiske arbeidsgivere i Norge
-    // TODO
-    
+    public ArbeidNorge arbeidNorge;
+
+    // Opplysninger om juridiske arbeidsgiver i Norge
+    public JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge;
+
     // Opplysninger om arbeidsinntekt
-    // TODO
-    
-    @Override
-    public ErPeriode getPeriode() {
-        return oppholdsPeriode;
+    public Arbeidsinntekt arbeidsinntekt;
+
+    // Øvrige
+    public String tilleggsopplysninger;
+
+    public SoeknadDokument() {
+        arbeidUtland = new ArbeidUtland();
+        foretakUtland = new ForetakUtland();
+        oppholdUtland = new OppholdUtland();
+        arbeidNorge = new ArbeidNorge();
+        juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
+        arbeidsinntekt = new Arbeidsinntekt();
     }
 
 }

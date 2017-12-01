@@ -44,16 +44,26 @@ public class DokumentFactory {
     }
 
     /**
-     * lagDokument setter et {@link SaksopplysningDokument} og {@code internXml} på en {@link Saksopplysning} ut fra feltet {@code dokumentXml}.
-     * SaksopplysningDokumentet returneres.
+     * Setter {@code internXml} på en {@link Saksopplysning} ut fra en predefinert xslt anvendt på feltet {@code dokumentXml}
+     * eller fra feltet {@code dokument} hvis feltet er ikke null.
+     * Det resulterende xml returneres.
      */
-    public SaksopplysningDokument lagDokument(Saksopplysning saksopplysning) {
+    public String lagInternXml(Saksopplysning saksopplysning) {
         Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
 
         String dokumentXml = saksopplysning.getDokumentXml();
-        if (dokumentXml == null) {
-            saksopplysning.setDokument(null);
+        SaksopplysningDokument dokument = saksopplysning.getDokument();
+        if (dokumentXml == null && dokument == null) {
+            saksopplysning.setInternXml(null);
             return null;
+        }
+
+        if (dokument != null) {
+            StreamResult result = new StreamResult(new StringWriter());
+            marshaller.marshal(dokument, result);
+            String xml = result.getWriter().toString();
+            saksopplysning.setInternXml(xml);
+            return  xml;
         }
 
         SaksopplysningType type = saksopplysning.getType();
@@ -74,14 +84,34 @@ public class DokumentFactory {
             throw new RuntimeException(e);
         }
 
-        // JAXB brukes til å opprette et SaksopplysningDokument
         String internXml = outputTarget.getWriter().toString();
-        StringReader reader = new StringReader(internXml);
-        SaksopplysningDokument dokument = (SaksopplysningDokument) marshaller.unmarshal(new StreamSource(reader));
-        dokument.setType(saksopplysning.getType());
+        if (saksopplysning.getInternXml() == null) {
+            saksopplysning.setInternXml(internXml);
+        }
 
+        return internXml;
+    }
+
+    /**
+     * Setter et {@link SaksopplysningDokument} og {@code internXml} på en {@link Saksopplysning} ut fra feltet {@code dokumentXml}.
+     * SaksopplysningDokumentet returneres.
+     */
+    public SaksopplysningDokument lagDokument(Saksopplysning saksopplysning) {
+        Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
+
+        String dokumentXml = saksopplysning.getDokumentXml();
+        if (dokumentXml == null) {
+            saksopplysning.setDokument(null);
+            return null;
+        }
+
+        // JAXB brukes til å opprette et SaksopplysningDokument
+        String internXml = saksopplysning.getInternXml() == null ? lagInternXml(saksopplysning) : saksopplysning.getInternXml();
+        StringReader reader = new StringReader(internXml);
+
+        SaksopplysningDokument dokument = (SaksopplysningDokument) marshaller.unmarshal(new StreamSource(reader));
         saksopplysning.setDokument(dokument);
-        saksopplysning.setInternXml(internXml);
+
         return dokument;
     }
 

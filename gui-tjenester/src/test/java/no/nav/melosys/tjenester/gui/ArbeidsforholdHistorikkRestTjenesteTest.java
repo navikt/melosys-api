@@ -16,16 +16,16 @@ import javax.xml.bind.JAXBException;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class ArbeidsforholdRestTjenesteTest {
+public class ArbeidsforholdHistorikkRestTjenesteTest {
 
-    private ArbeidsforholdRestTjeneste tjeneste;
+    private ArbeidsforholdHistorikkRestTjeneste tjeneste;
 
     @Before
     public void setUp() throws JAXBException {
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
         AaregFasade aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
         FagsakService fagsakService = new FagsakService(null, null, aareg, null, null, null);
-        tjeneste = new ArbeidsforholdRestTjeneste(fagsakService);
+        tjeneste = new ArbeidsforholdHistorikkRestTjeneste(fagsakService);
     }
 
     @Test

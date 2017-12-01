@@ -1,18 +1,17 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.time.LocalDateTime;
-
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakStatus;
+import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
+import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.aareg.AaregService;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
@@ -28,23 +27,21 @@ import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.integrasjon.tps.person.PersonMock;
+import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.FagsakService;
-import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
-
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakStatus;
-import no.nav.melosys.domain.FagsakType;
-import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
-import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
-import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.time.LocalDateTime;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -119,10 +116,6 @@ public class FagsakRestTjenesteTest {
 
             assertNotNull(fagsak);
             assertFalse(fagsak.getBehandlinger().isEmpty());
-
-            for (BehandlingDto behandling : fagsak.getBehandlinger()) {
-                assertFalse(behandling.getSaksopplysninger().isEmpty());
-            }
 
             //printJson(response);
         }

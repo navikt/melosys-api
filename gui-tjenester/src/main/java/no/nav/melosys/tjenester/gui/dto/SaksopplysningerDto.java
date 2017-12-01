@@ -7,6 +7,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonPropertyOrder({"person", "arbeidsforhold", "organisasjoner", "medlemskap", "inntekt" })
@@ -18,9 +19,14 @@ public class SaksopplysningerDto {
 
     private List<OrganisasjonDokument> organisasjoner;
 
-    private List<MedlemskapDokument> medlemskap;
+    private MedlemskapDokument medlemskap;
 
     private InntektDokument inntekt;
+
+    public SaksopplysningerDto() {
+        this.arbeidsforhold = new ArrayList<>();
+        this.organisasjoner = new ArrayList<>();
+    }
 
     public PersonDokument getPerson() {
         return person;
@@ -46,11 +52,11 @@ public class SaksopplysningerDto {
         this.organisasjoner = organisasjoner;
     }
 
-    public List<MedlemskapDokument> getMedlemskap() {
+    public MedlemskapDokument getMedlemskap() {
         return medlemskap;
     }
 
-    public void setMedlemskap(List<MedlemskapDokument> medlemskap) {
+    public void setMedlemskap(MedlemskapDokument medlemskap) {
         this.medlemskap = medlemskap;
     }
 

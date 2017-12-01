@@ -1,12 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.tjenester.gui.jackson.serialize.SaksopplysningSerializer;
+import java.util.List;
 
 public class BehandlingDto {
 
@@ -14,10 +8,9 @@ public class BehandlingDto {
 
     private BehandlingOppsummeringDto oppsummering;
 
-    @JsonSerialize(using = SaksopplysningSerializer.class)
-    private Set<SaksopplysningDokument> saksopplysninger;
+    private SaksopplysningerDto saksopplysninger;
 
-    private Set<BehandlingHistorikkDto> behandlingshistorikk;
+    private List<BehandlingHistorikkDto> behandlingshistorikk;
 
     public long getId() {
         return id;
@@ -35,22 +28,19 @@ public class BehandlingDto {
         this.oppsummering = oppsummering;
     }
 
-    public Set<SaksopplysningDokument> getSaksopplysninger() {
-        if (saksopplysninger == null) {
-            saksopplysninger = new HashSet<>();
-        }
+    public SaksopplysningerDto getSaksopplysninger() {
         return saksopplysninger;
     }
 
-    public void setSaksopplysninger(Set<SaksopplysningDokument> saksopplysninger) {
+    public void setSaksopplysninger(SaksopplysningerDto saksopplysninger) {
         this.saksopplysninger = saksopplysninger;
     }
 
-    public Set<BehandlingHistorikkDto> getBehandlingshistorikk() {
+    public List<BehandlingHistorikkDto> getBehandlingshistorikk() {
         return behandlingshistorikk;
     }
 
-    public void setBehandlingshistorikk(Set<BehandlingHistorikkDto> behandlingshistorikk) {
+    public void setBehandlingshistorikk(List<BehandlingHistorikkDto> behandlingshistorikk) {
         this.behandlingshistorikk = behandlingshistorikk;
     }
 
