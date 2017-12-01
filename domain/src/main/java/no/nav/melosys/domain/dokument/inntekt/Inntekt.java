@@ -209,6 +209,14 @@ public class Inntekt {
         this.virksomhetID = virksomhetID;
     }
 
+    public Tilleggsinformasjon getTilleggsinformasjon() {
+        return tilleggsinformasjon;
+    }
+
+    public void setTilleggsinformasjon(Tilleggsinformasjon tilleggsinformasjon) {
+        this.tilleggsinformasjon = tilleggsinformasjon;
+    }
+
     public String getInntektsmottakerID() {
         return inntektsmottakerID;
     }

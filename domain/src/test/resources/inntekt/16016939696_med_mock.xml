@@ -1,0 +1,102 @@
+<ns2:hentInntektListeResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/inntekt/v3">
+    <response>
+        <arbeidsInntektIdent>
+            <arbeidsInntektMaaned>
+                <aarMaaned>2017-06+02:00</aarMaaned>
+                <arbeidsInntektInformasjon>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>25000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.993+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-06</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>873152362</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>873152362</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>Periode</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:Etterbetalingsperiode">
+                                <etterbetalingsperiode>
+                                    <startDato>2017-03-01T15:00:00+01:00</startDato>
+                                    <sluttDato>2017-03-31T15:00:00+02:00</sluttDato>
+                                </etterbetalingsperiode>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                        <opptjeningsperiode xsi:type="ns4:Periode">
+                            <!-- TODO: Sjekk om dette er riktig format -->
+                            <startDato>2017-04-01T15:00:00+01:00</startDato>
+                            <sluttDato>2017-04-30T15:00:00+01:00</sluttDato>
+                        </opptjeningsperiode>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <beloep>25000</beloep>
+                        <fordel>kontantytelse</fordel>
+                        <inntektskilde>A-ordningen</inntektskilde>
+                        <inntektsperiodetype>Maaned</inntektsperiodetype>
+                        <inntektsstatus>LoependeInnrapportert</inntektsstatus>
+                        <levereringstidspunkt>2017-10-06T12:52:58.999+02:00</levereringstidspunkt>
+                        <utbetaltIPeriode>2017-06</utbetaltIPeriode>
+                        <opplysningspliktig xsi:type="ns4:Organisasjon">
+                            <orgnummer>873152362</orgnummer>
+                        </opplysningspliktig>
+                        <virksomhet xsi:type="ns4:Organisasjon">
+                            <orgnummer>873152362</orgnummer>
+                        </virksomhet>
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <tidsrom>
+                                    <startDato>2017-04-01T15:00:00+02:00</startDato>
+                                    <sluttDato>2017-04-30T15:00:00+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                        <inntektsmottaker xsi:type="ns4:PersonIdent">
+                            <personIdent>99999999992</personIdent>
+                        </inntektsmottaker>
+                        <inngaarIGrunnlagForTrekk>true</inngaarIGrunnlagForTrekk>
+                        <utloeserArbeidsgiveravgift>true</utloeserArbeidsgiveravgift>
+                        <informasjonsstatus>InngaarAlltid</informasjonsstatus>
+                        <beskrivelse>fastloenn</beskrivelse>
+                        <opptjeningsperiode xsi:type="ns4:Periode">
+                            <!-- TODO: Sjekk om dette er riktig format -->
+                            <startDato>2017-05-01T15:00:00+01:00</startDato>
+                            <sluttDato>2017-05-31T15:00:00+01:00</sluttDato>
+                        </opptjeningsperiode>
+                    </inntektListe>
+                    <arbeidsforholdListe xsi:type="ns4:ArbeidsforholdFrilanser" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <frilansPeriode xsi:type="ns4:AapenPeriode">
+                            <!-- TODO: Sjekk om dette er riktig format -->
+                            <fom>2017-01-01T15:00:00+02:00</fom>
+                            <tom>2017-02-15T15:00:00+02:00</tom>
+                        </frilansPeriode>
+                        <yrke kodeRef="5221126">BUTIKKMEDARBEIDER</yrke>
+                    </arbeidsforholdListe>
+                    <arbeidsforholdListe xsi:type="ns4:ArbeidsforholdFrilanser" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <frilansPeriode xsi:type="ns4:AapenPeriode">
+                            <!-- TODO: Sjekk om dette er riktig format -->
+                            <fom>2017-02-16T15:00:00+02:00</fom>
+                            <tom>2017-03-31T15:00:00+02:00</tom>
+                        </frilansPeriode>
+                        <yrke kodeRef="3119136">INGENIØR (ØVRIG TEKNISK VIRKSOMHET)</yrke>
+                    </arbeidsforholdListe>
+                </arbeidsInntektInformasjon>
+            </arbeidsInntektMaaned>
+            <ident xsi:type="ns4:PersonIdent" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <personIdent>99999999992</personIdent>
+            </ident>
+        </arbeidsInntektIdent>
+    </response>
+</ns2:hentInntektListeResponse>

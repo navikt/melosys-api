@@ -10,6 +10,7 @@ public class ArbeidsInntektInformasjon {
 
     private List<Fradrag> fradragListe;
 
+    private List<ArbeidsforholdFrilanser> arbeidsforholdListe;
 
     public List<Inntekt> getInntektListe() {
         return inntektListe;
@@ -33,5 +34,13 @@ public class ArbeidsInntektInformasjon {
 
     public void setFradragListe(List<Fradrag> fradragListe) {
         this.fradragListe = fradragListe;
+    }
+
+    public List<ArbeidsforholdFrilanser> getArbeidsforholdListe() {
+        return arbeidsforholdListe;
+    }
+
+    public void setArbeidsforholdListe(List<ArbeidsforholdFrilanser> arbeidsforholdListe) {
+        this.arbeidsforholdListe = arbeidsforholdListe;
     }
 }

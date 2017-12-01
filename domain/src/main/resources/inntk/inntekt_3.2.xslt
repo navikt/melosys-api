@@ -49,8 +49,49 @@
         </xsl:element>
     </xsl:template>
 
+    <xsl:template match="arbeidsforholdListe">
+        <arbeidsforholdListe>
+            <frilansPeriode>
+                <fom><xsl:value-of select="frilansPeriode/fom" /></fom>
+                <tom><xsl:value-of select="frilansPeriode/tom" /></tom>
+            </frilansPeriode>
+            <yrke><xsl:value-of select="yrke" /></yrke>
+        </arbeidsforholdListe>
+    </xsl:template>
+
+    <xsl:template match="opptjeningsperiode">
+        <opptjeningsperiode>
+            <fom><xsl:value-of select="startDato" /></fom>
+            <tom><xsl:value-of select="sluttDato" /></tom>
+        </opptjeningsperiode>
+    </xsl:template>
+
     <xsl:template match="tilleggsinformasjon">
-        <!--FIXME-->
+        <!-- TODO: Bør forbedres -->
+        <tilleggsinformasjon>
+            <kategori><xsl:value-of select="kategori" /></kategori>
+            <xsl:apply-templates/>
+        </tilleggsinformasjon>
+    </xsl:template>
+
+    <!-- TODO: Bør forbedres -->
+    <xsl:template match="tilleggsinformasjonDetaljer[@xsi:type='ns4:Etterbetalingsperiode']">
+        <tilleggsinformasjonDetaljer xsi:type="{substring-after(@xsi:type, 'ns4:')}">
+            <etterbetalingsperiode>
+                <fom><xsl:value-of select="etterbetalingsperiode/startDato" /></fom>
+                <tom><xsl:value-of select="etterbetalingsperiode/sluttDato" /></tom>
+            </etterbetalingsperiode>
+        </tilleggsinformasjonDetaljer>
+    </xsl:template>
+
+    <!-- TODO: Bør forbedres -->
+    <xsl:template match="tilleggsinformasjonDetaljer[@xsi:type='ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon']">
+        <tilleggsinformasjonDetaljer xsi:type="{substring-after(@xsi:type, 'ns4:')}">
+            <tidsrom>
+                <fom><xsl:value-of select="tidsrom/startDato" /></fom>
+                <tom><xsl:value-of select="tidsrom/sluttDato" /></tom>
+            </tidsrom>
+        </tilleggsinformasjonDetaljer>
     </xsl:template>
 
     <xsl:template match="forskuddstrekkListe">
