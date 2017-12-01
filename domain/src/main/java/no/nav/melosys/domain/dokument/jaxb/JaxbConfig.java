@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.dokument.jaxb;
 
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.Dokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
@@ -37,7 +37,7 @@ public class JaxbConfig {
     private static Class<?>[] getClassesToBeBound() {
         List<Class<?>> klasser = new ArrayList<>();
 
-        List<Class<? extends SaksopplysningDokument>> dokumentKlasser = Arrays.asList(ArbeidsforholdDokument.class, InntektDokument.class, MedlemskapDokument.class, OrganisasjonDokument.class, PersonDokument.class, SoeknadDokument.class);
+        List<Class<? extends Dokument>> dokumentKlasser = Arrays.asList(ArbeidsforholdDokument.class, InntektDokument.class, MedlemskapDokument.class, OrganisasjonDokument.class, PersonDokument.class, SoeknadDokument.class);
         klasser.addAll(dokumentKlasser);
 
         return klasser.toArray(new Class[0]);

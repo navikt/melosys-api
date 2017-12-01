@@ -36,12 +36,7 @@ public class SoeknadService {
             return null; // Behandling ikke funnet
         }
 
-        Comparator<? super Saksopplysning> comparator = new Comparator<Saksopplysning>() {
-            @Override
-            public int compare(Saksopplysning o1, Saksopplysning o2) {
-                return o1.getRegistrertDato().compareTo(o2.getRegistrertDato());
-            }
-        };
+        Comparator<? super Saksopplysning> comparator = Comparator.comparing(Saksopplysning::getRegistrertDato);
 
         // Vi henter den nyeste søknaden
         Optional<Saksopplysning> nyeste = behandling.getSaksopplysninger().stream().filter(s -> s.getType().equals(SaksopplysningType.SØKNAD)).sorted(comparator.reversed()).findFirst();
