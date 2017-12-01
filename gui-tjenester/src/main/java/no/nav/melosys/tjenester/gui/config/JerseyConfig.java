@@ -6,6 +6,7 @@ import io.swagger.jaxrs.listing.SwaggerSerializers;
 import no.nav.melosys.tjenester.gui.BehandlingRestTjeneste;
 import no.nav.melosys.tjenester.gui.FagsakRestTjeneste;
 import no.nav.melosys.tjenester.gui.SaksbehandlerTjeneste;
+import no.nav.melosys.tjenester.gui.SoknadRestTjeneste;
 import no.nav.melosys.tjenester.gui.SokRestTjeneste;
 import no.nav.melosys.tjenester.gui.patch.JsonPatchReader;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -24,6 +25,7 @@ public class JerseyConfig extends ResourceConfig {
         register(FagsakRestTjeneste.class);
         register(JsonPatchReader.class);
         register(SaksbehandlerTjeneste.class);
+        register(SoknadRestTjeneste.class);
         register(SokRestTjeneste.class);
         configureSwagger();
     }

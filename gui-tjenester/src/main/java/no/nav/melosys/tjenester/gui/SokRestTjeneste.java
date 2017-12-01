@@ -24,9 +24,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -55,16 +53,19 @@ public class SokRestTjeneste extends RestTjeneste {
     @Path("/fagsaker")
     @ApiOperation(value = "Søk etter saker på fødselsnummer eller d-nummer", notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."))
     public List<FagsakOppsummeringDto> hentFagsaker(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
-        // TODO Oppslag mot TPS for å få aktørID
-        Map<String, String> identMap = new HashMap<>();
-        String aktørID = fnr; // test data har aktørID = fnr
+        Iterable<Fagsak> saker = null;
 
-        List<Fagsak> saker = fagsakService.hentFagsaker(RolleType.BRUKER, aktørID);
-
+        if (fnr == null) {
+            saker = fagsakService.hentAlle(); //TODO hente alle søknader for en saksbehandler?
+        } else {
+            // TODO Oppslag mot TPS for å få aktørID
+            String aktørID = fnr; // test data har aktørID = fnr
+            saker = fagsakService.hentFagsaker(RolleType.BRUKER, aktørID);
+        }
         return tilDtoer(saker);
     }
 
-    private List<FagsakOppsummeringDto> tilDtoer(List<Fagsak> saker) {
+    private List<FagsakOppsummeringDto> tilDtoer(Iterable<Fagsak> saker) {
         List<FagsakOppsummeringDto> fagsakListe = new ArrayList<>();
 
         for (Fagsak  fagsak : saker) {

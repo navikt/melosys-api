@@ -67,13 +67,12 @@ public class Saksopplysning {
 
     /**
      * Brukes når en saksbehandler oppretter saksopplysninger manuelt.
-     * FIXME
      */
-    public Saksopplysning(SaksopplysningDokument saksopplysningDokument, SaksopplysningType type) {
-        setType(type);
+    public Saksopplysning(SaksopplysningDokument saksopplysningDokument) {
+        setType(SaksopplysningType.SØKNAD);
+        setVersjon("0.1"); // FIXME Hvor lagrer vi versjonen?
         setKilde(SaksopplysningKilde.SBH);
         setRegistrertDato(LocalDateTime.now());
-        //TODO setInternXml();
     }
 
     public long getId() {
@@ -158,12 +157,13 @@ public class Saksopplysning {
         }
         return Objects.equals(this.behandling, that.behandling)
             && Objects.equals(this.registrertDato, that.registrertDato)
+            && Objects.equals(this.kilde, that.kilde)
             && Objects.equals(this.dokumentXml, that.dokumentXml);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(behandling, registrertDato, dokumentXml);
+        return Objects.hash(behandling, registrertDato, kilde, dokumentXml);
     }
 
 }

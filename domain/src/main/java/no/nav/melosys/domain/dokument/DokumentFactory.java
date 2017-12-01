@@ -44,16 +44,26 @@ public class DokumentFactory {
     }
 
     /**
-     * Setter {@code internXml} på en {@link Saksopplysning} ut fra en predefinert xslt anvendt på feltet {@code dokumentXml}.
+     * Setter {@code internXml} på en {@link Saksopplysning} ut fra en predefinert xslt anvendt på feltet {@code dokumentXml}
+     * eller fra feltet {@code dokument} hvis feltet er ikke null.
      * Det resulterende xml returneres.
      */
     public String lagInternXml(Saksopplysning saksopplysning) {
         Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
 
         String dokumentXml = saksopplysning.getDokumentXml();
-        if (dokumentXml == null) {
+        SaksopplysningDokument dokument = saksopplysning.getDokument();
+        if (dokumentXml == null && dokument == null) {
             saksopplysning.setInternXml(null);
             return null;
+        }
+
+        if (dokument != null) {
+            StreamResult result = new StreamResult(new StringWriter());
+            marshaller.marshal(dokument, result);
+            String xml = result.getWriter().toString();
+            saksopplysning.setInternXml(xml);
+            return  xml;
         }
 
         SaksopplysningType type = saksopplysning.getType();

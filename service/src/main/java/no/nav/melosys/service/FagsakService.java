@@ -52,6 +52,11 @@ public class FagsakService {
         return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
     }
 
+    // FIXME: Den metoden er bare for å hjelpe frontend midlertidig. Må slettes.
+    public Iterable<Fagsak> hentAlle() {
+        return fagsakRepository.findAll();
+    }
+
     public Fagsak hentFagsak(Long saksnummer) {
         return fagsakRepository.findBySaksnummer(saksnummer);
     }

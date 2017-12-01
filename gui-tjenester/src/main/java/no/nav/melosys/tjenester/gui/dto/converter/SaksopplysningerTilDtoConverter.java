@@ -14,6 +14,9 @@ import org.modelmapper.spi.MappingContext;
 
 import java.util.Set;
 
+/**
+ * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
+ */
 public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplysning>, SaksopplysningerDto> {
 
     @Override
@@ -21,6 +24,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
         SaksopplysningerDto dto = new SaksopplysningerDto();
 
         if (context.getSource() == null) {
+            // Frontend ønsker å motta et objekt, selv når saksopplysninger ikke finnes.
             return dto;
         }
 
@@ -43,6 +47,9 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     break;
                 case INNTEKT:
                     dto.setInntekt((InntektDokument)dokument);
+                    break;
+                case SØKNAD:
+                    // N.B. Frontend ønsker ikke å få søknaden på /fagsaker
                     break;
                 default:
                     throw new IllegalArgumentException("Type " + type.getKode() + " ikke støtet.");
