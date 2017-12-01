@@ -17,12 +17,6 @@
             <artifactId>melosys-domain</artifactId>
         </dependency>
 
-        <!-- Sikkerhet fra foreldrepenger -->
-        <dependency>
-            <groupId>no.nav.vedtak.felles</groupId>
-            <artifactId>felles-sikkerhet</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -102,18 +96,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>no.nav.vedtak.felles</groupId>
-            <artifactId>felles-testutilities</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.vedtak.felles</groupId>
-            <artifactId>felles-sikkerhet</artifactId>
-            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
 

@@ -28,6 +28,7 @@
         <module>service</module>
         <module>regler-api</module>
         <module>regler</module>
+        <module>sikkerhet</module>
     </modules>
 
     <properties>
@@ -47,7 +48,6 @@
         <modig-testcertificates.version>1.2.0</modig-testcertificates.version>
         <tps.aktoer.version>2.0.1</tps.aktoer.version>
         <tps.person.version>3.0.2</tps.person.version>
-        <vl-felles.version>1.8.11</vl-felles.version>
         <medl2-v2.version>2.0.6</medl2-v2.version>
         <kodeverk-v2.version>2.0.0-alpha004</kodeverk-v2.version>
         
@@ -300,28 +300,7 @@
                 <classifier>joda</classifier>
             </dependency>
 
-
-
-
-            <!-- Sikkerhet foreldrepenger -->
-            <dependency>
-                <groupId>no.nav.vedtak.felles</groupId>
-                <artifactId>felles-sikkerhet</artifactId>
-                <version>${vl-felles.version}</version>
-            </dependency>
-
             <!-- Test -->
-            <dependency>
-                <groupId>no.nav.vedtak.felles</groupId>
-                <artifactId>felles-testutilities</artifactId>
-                <version>${vl-felles.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.vedtak.felles</groupId>
-                <artifactId>felles-sikkerhet</artifactId>
-                <type>test-jar</type>
-                <version>${vl-felles.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.modelmapper</groupId>
                 <artifactId>modelmapper</artifactId>
