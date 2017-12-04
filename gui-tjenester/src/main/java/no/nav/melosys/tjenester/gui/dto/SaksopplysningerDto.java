@@ -15,7 +15,7 @@ public class SaksopplysningerDto {
 
     private PersonDokument person;
 
-    private List<ArbeidsforholdDokument> arbeidsforhold;
+    private ArbeidsforholdDokument arbeidsforhold;
 
     private List<OrganisasjonDokument> organisasjoner;
 
@@ -24,7 +24,6 @@ public class SaksopplysningerDto {
     private InntektDokument inntekt;
 
     public SaksopplysningerDto() {
-        this.arbeidsforhold = new ArrayList<>();
         this.organisasjoner = new ArrayList<>();
     }
 
@@ -36,11 +35,11 @@ public class SaksopplysningerDto {
         this.person = person;
     }
 
-    public List<ArbeidsforholdDokument> getArbeidsforhold() {
+    public ArbeidsforholdDokument getArbeidsforhold() {
         return arbeidsforhold;
     }
 
-    public void setArbeidsforhold(List<ArbeidsforholdDokument> arbeidsforhold) {
+    public void setArbeidsforhold(ArbeidsforholdDokument arbeidsforhold) {
         this.arbeidsforhold = arbeidsforhold;
     }
 

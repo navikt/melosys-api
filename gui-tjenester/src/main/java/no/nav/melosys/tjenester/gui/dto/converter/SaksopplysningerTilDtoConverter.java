@@ -37,7 +37,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     dto.setPerson((PersonDokument)dokument);
                     break;
                 case ARBEIDSFORHOLD:
-                    dto.getArbeidsforhold().add((ArbeidsforholdDokument)dokument);
+                    dto.setArbeidsforhold((ArbeidsforholdDokument)dokument);
                     break;
                 case ORGANISASJON:
                     dto.getOrganisasjoner().add((OrganisasjonDokument)dokument);
