@@ -16,6 +16,10 @@
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-domain</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>sikkerhet</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>javax.servlet</groupId>

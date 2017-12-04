@@ -1,14 +1,15 @@
 package no.nav.melosys.integrasjon.medl.medlemskap;
 
+import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
+import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.MedlemskapV2;
-import no.nav.vedtak.sts.client.NAVSTSClient;
-import no.nav.vedtak.sts.client.StsConfigurationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.OIDC_TIL_SAML;
+import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML;
+
 
 @Configuration
 public class MedlemskapConsumerProducer {
@@ -29,7 +30,7 @@ public class MedlemskapConsumerProducer {
     @Bean
     @Profile("!utvikling")
     MedlemskapConsumer medlemskapConsumer() {
-        MedlemskapV2 port = wrapWithSts(config.getPort(), OIDC_TIL_SAML);
+        MedlemskapV2 port = wrapWithSts(config.getPort(), SECURITYCONTEXT_TIL_SAML);
         return new MedlemskapConsumerImpl(port);
     }
 
