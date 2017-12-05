@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,20 +84,18 @@ public class Inntekt3KonverteringTest {
             for (ArbeidsInntektMaaned arbeidsInntektMaaned : dokument.getArbeidsInntektMaanedListe()) {
 
                 assertThat(arbeidsInntektMaaned.getArbeidsInntektInformasjon()).isNotNull();
+                assertThat(arbeidsInntektMaaned.getArbeidsInntektInformasjon().getArbeidsforholdListe()).isNotEmpty();
 
-                assertThat(arbeidsInntektMaaned.getArbeidsInntektInformasjon().getInntektListe()).isNotEmpty();
-
-                for (Inntekt inntekt : arbeidsInntektMaaned.getArbeidsInntektInformasjon().getInntektListe()) {
-                    assertThat(inntekt.getTilleggsinformasjon()).isNotNull();
-                    Tilleggsinformasjon tilleggsinformasjon = inntekt.getTilleggsinformasjon();
-                    assertThat(tilleggsinformasjon.kategori).isNotBlank();
+                for (ArbeidsforholdFrilanser arbeidsforhold : arbeidsInntektMaaned.getArbeidsInntektInformasjon().getArbeidsforholdListe()) {
+                    assertThat(arbeidsforhold.yrke).isNotBlank();
+                    assertThat(arbeidsforhold.frilansPeriode).isNotNull();
                 }
             }
         }
     }
 
     @Test
-    public void tilleggsinformasjon() throws Exception {
+    public void testKonverteringTilleggsinformasjon() throws Exception {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(INNTEKT_3_2_MOCK_TILLEGGSINFO);
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
