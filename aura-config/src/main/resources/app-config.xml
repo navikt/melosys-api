@@ -39,6 +39,7 @@
 
     <security>
         <logins>
+            <!-- Vi benytter ikke "no.nav.aura.loginModule.JWTLoginModule", men moduleClass er required-->
             <openIdConnect moduleClass="no.nav.aura.loginModule.JWTLoginModule">
                 <contextRoot>/melosys/openid_connect_login</contextRoot>
             </openIdConnect>
