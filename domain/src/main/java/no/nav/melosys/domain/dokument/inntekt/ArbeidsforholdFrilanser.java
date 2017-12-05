@@ -1,16 +1,9 @@
 package no.nav.melosys.domain.dokument.inntekt;
 
-import no.nav.melosys.domain.dokument.felles.Periode;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-/*@XmlType(name = "ArbeidsforholdFrilanser", propOrder = {
-        "frilansPeriode",
-        "yrke"
-})*/
 public class ArbeidsforholdFrilanser {
 
     public Periode frilansPeriode;

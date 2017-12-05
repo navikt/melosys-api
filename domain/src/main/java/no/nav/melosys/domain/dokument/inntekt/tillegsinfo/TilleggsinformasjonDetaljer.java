@@ -8,8 +8,13 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "TilleggsinformasjonDetaljer")
 @XmlSeeAlso({
+        AldersUfoereEtterlatteAvtalefestetOgKrigspensjon.class,
+        BarnepensjonOgUnderholdsbidrag.class,
+        BonusFraForsvaret.class,
         Etterbetalingsperiode.class,
-        AldersUfoereEtterlatteAvtalefestetOgKrigspensjon.class
+        Inntjeningsforhold.class,
+        Svalbardinntekt.class,
+        ReiseKostOgLosji.class
 })
 public abstract class TilleggsinformasjonDetaljer {
 }

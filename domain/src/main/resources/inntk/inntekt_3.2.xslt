@@ -59,39 +59,36 @@
         </arbeidsforholdListe>
     </xsl:template>
 
-    <xsl:template match="opptjeningsperiode">
-        <opptjeningsperiode>
+    <xsl:template match="opptjeningsperiode|tidsrom|etterbetalingsperiode">
+        <xsl:element name="{name()}">
             <fom><xsl:value-of select="startDato" /></fom>
             <tom><xsl:value-of select="sluttDato" /></tom>
-        </opptjeningsperiode>
+        </xsl:element>
     </xsl:template>
 
     <xsl:template match="tilleggsinformasjon">
-        <!-- TODO: Bør forbedres -->
         <tilleggsinformasjon>
             <kategori><xsl:value-of select="kategori" /></kategori>
-            <xsl:apply-templates/>
+            <xsl:element name="tilleggsinformasjonDetaljer">
+                <xsl:attribute name="xsi:type">
+                    <xsl:apply-templates select="tilleggsinformasjonDetaljer/@xsi:type"/>
+                </xsl:attribute>
+                <xsl:apply-templates select="tilleggsinformasjonDetaljer" />
+            </xsl:element>
         </tilleggsinformasjon>
     </xsl:template>
 
-    <!-- TODO: Bør forbedres -->
-    <xsl:template match="tilleggsinformasjonDetaljer[@xsi:type='ns4:Etterbetalingsperiode']">
-        <tilleggsinformasjonDetaljer xsi:type="{substring-after(@xsi:type, 'ns4:')}">
-            <etterbetalingsperiode>
-                <fom><xsl:value-of select="etterbetalingsperiode/startDato" /></fom>
-                <tom><xsl:value-of select="etterbetalingsperiode/sluttDato" /></tom>
-            </etterbetalingsperiode>
-        </tilleggsinformasjonDetaljer>
+    <xsl:template match="tilleggsinformasjonDetaljer[*]">
+        <!-- Kopier verdier under tilleggsinformasjonDetaljer -->
+        <xsl:apply-templates />
     </xsl:template>
 
-    <!-- TODO: Bør forbedres -->
-    <xsl:template match="tilleggsinformasjonDetaljer[@xsi:type='ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon']">
-        <tilleggsinformasjonDetaljer xsi:type="{substring-after(@xsi:type, 'ns4:')}">
-            <tidsrom>
-                <fom><xsl:value-of select="tidsrom/startDato" /></fom>
-                <tom><xsl:value-of select="tidsrom/sluttDato" /></tom>
-            </tidsrom>
-        </tilleggsinformasjonDetaljer>
+    <xsl:template match="tilleggsinformasjonDetaljer">
+        <xsl:element name="{name()}">
+            <xsl:value-of select="."/>
+        </xsl:element>
+        <!-- Kopier datoverdier (tidsrom og etterbetalingsperiode) -->
+        <xsl:apply-templates select="tidsrom|etterbetalingsperiode" />
     </xsl:template>
 
     <xsl:template match="forskuddstrekkListe">

@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
-import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -25,7 +24,8 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 public class Inntekt3KonverteringTest {
 
     public static final String INNTEKT_3_2_MOCK = "inntekt/99999999992.xml";
-    private static final String INNTEKT_3_2_MOCK_FRILANS = "inntekt/99999999992_med_mock.xml";
+    private static final String INNTEKT_3_2_MOCK_FRILANS = "inntekt/99999999992_mock_frilans.xml";
+    private static final String INNTEKT_3_2_MOCK_TILLEGGSINFO = "inntekt/99999999992_mock_tilleggsinformasjon.xml";
 
     DokumentFactory factory;
 
@@ -89,7 +89,38 @@ public class Inntekt3KonverteringTest {
                 for (Inntekt inntekt : arbeidsInntektMaaned.getArbeidsInntektInformasjon().getInntektListe()) {
                     assertThat(inntekt.getTilleggsinformasjon()).isNotNull();
                     Tilleggsinformasjon tilleggsinformasjon = inntekt.getTilleggsinformasjon();
-                    assertThat(tilleggsinformasjon.getKategori()).isNotBlank();
+                    assertThat(tilleggsinformasjon.kategori).isNotBlank();
+                }
+            }
+        }
+    }
+
+    @Test
+    public void tilleggsinformasjon() throws Exception {
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream(INNTEKT_3_2_MOCK_TILLEGGSINFO);
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
+            Saksopplysning saksopplysning = new Saksopplysning();
+
+            String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+
+            saksopplysning.setDokumentXml(xmlStr);
+            saksopplysning.setType(SaksopplysningType.INNTEKT);
+            saksopplysning.setVersjon("3.2");
+
+            factory.lagDokument(saksopplysning);
+
+            InntektDokument dokument = (InntektDokument) saksopplysning.getDokument();
+
+            assertThat(dokument.getArbeidsInntektMaanedListe()).isNotEmpty();
+
+            for (ArbeidsInntektMaaned arbeidsInntektMaaned : dokument.getArbeidsInntektMaanedListe()) {
+
+                for (Inntekt inntekt : arbeidsInntektMaaned.getArbeidsInntektInformasjon().getInntektListe()) {
+                    assertThat(inntekt.getTilleggsinformasjon()).isNotNull();
+                    Tilleggsinformasjon tilleggsinformasjon = inntekt.getTilleggsinformasjon();
+                    assertThat(tilleggsinformasjon.kategori).isNotBlank();
+                    assertThat(tilleggsinformasjon.tilleggsinformasjonDetaljer).isNotNull();
                 }
             }
         }

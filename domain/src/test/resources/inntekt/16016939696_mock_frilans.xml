@@ -22,8 +22,8 @@
                             <kategori>Periode</kategori>
                             <tilleggsinformasjonDetaljer xsi:type="ns4:Etterbetalingsperiode">
                                 <etterbetalingsperiode>
-                                    <startDato>2017-03-01T15:00:00+01:00</startDato>
-                                    <sluttDato>2017-03-31T15:00:00+02:00</sluttDato>
+                                    <startDato>2017-03-01+01:00</startDato>
+                                    <sluttDato>2017-03-31+02:00</sluttDato>
                                 </etterbetalingsperiode>
                             </tilleggsinformasjonDetaljer>
                         </tilleggsinformasjon>
@@ -35,9 +35,8 @@
                         <informasjonsstatus>InngaarAlltid</informasjonsstatus>
                         <beskrivelse>fastloenn</beskrivelse>
                         <opptjeningsperiode xsi:type="ns4:Periode">
-                            <!-- TODO: Sjekk om dette er riktig format -->
-                            <startDato>2017-04-01T15:00:00+01:00</startDato>
-                            <sluttDato>2017-04-30T15:00:00+01:00</sluttDato>
+                            <startDato>2017-04-01+01:00</startDato>
+                            <sluttDato>2017-04-30+01:00</sluttDato>
                         </opptjeningsperiode>
                     </inntektListe>
                     <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -58,8 +57,8 @@
                             <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
                             <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
                                 <tidsrom>
-                                    <startDato>2017-04-01T15:00:00+02:00</startDato>
-                                    <sluttDato>2017-04-30T15:00:00+02:00</sluttDato>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
                                 </tidsrom>
                             </tilleggsinformasjonDetaljer>
                         </tilleggsinformasjon>
@@ -71,24 +70,21 @@
                         <informasjonsstatus>InngaarAlltid</informasjonsstatus>
                         <beskrivelse>fastloenn</beskrivelse>
                         <opptjeningsperiode xsi:type="ns4:Periode">
-                            <!-- TODO: Sjekk om dette er riktig format -->
-                            <startDato>2017-05-01T15:00:00+01:00</startDato>
-                            <sluttDato>2017-05-31T15:00:00+01:00</sluttDato>
+                            <startDato>2017-05-01+01:00</startDato>
+                            <sluttDato>2017-05-31+01:00</sluttDato>
                         </opptjeningsperiode>
                     </inntektListe>
                     <arbeidsforholdListe xsi:type="ns4:ArbeidsforholdFrilanser" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                         <frilansPeriode xsi:type="ns4:AapenPeriode">
-                            <!-- TODO: Sjekk om dette er riktig format -->
-                            <fom>2017-01-01T15:00:00+02:00</fom>
-                            <tom>2017-02-15T15:00:00+02:00</tom>
+                            <fom>2017-01-01+02:00</fom>
+                            <tom>2017-02-15+02:00</tom>
                         </frilansPeriode>
                         <yrke kodeRef="5221126">BUTIKKMEDARBEIDER</yrke>
                     </arbeidsforholdListe>
                     <arbeidsforholdListe xsi:type="ns4:ArbeidsforholdFrilanser" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                         <frilansPeriode xsi:type="ns4:AapenPeriode">
-                            <!-- TODO: Sjekk om dette er riktig format -->
-                            <fom>2017-02-16T15:00:00+02:00</fom>
-                            <tom>2017-03-31T15:00:00+02:00</tom>
+                            <fom>2017-02-16+02:00</fom>
+                            <tom>2017-03-31+02:00</tom>
                         </frilansPeriode>
                         <yrke kodeRef="3119136">INGENIØR (ØVRIG TEKNISK VIRKSOMHET)</yrke>
                     </arbeidsforholdListe>

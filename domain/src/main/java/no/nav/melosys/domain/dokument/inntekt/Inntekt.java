@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.Loennsinntekt;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.Naeringsinntekt;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.PensjonEllerTrygd;
