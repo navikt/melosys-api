@@ -13,8 +13,7 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
 /**
- * The configuration class uses a spring filter created with the MITREid library and configures it with the required
- * spring options for OpenID Connect through http.
+ * Spring security {@code @Configuration}
  */
 @Configuration
 @EnableWebSecurity

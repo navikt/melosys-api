@@ -8,7 +8,6 @@ public class SpringSubjectHandler {
     public static String getOidcTokenString() {
         OIDCAuthenticationToken auth = (OIDCAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         return auth.getIdToken().getParsedString();
-        //return auth.getAccessTokenValue();
     }
 
     public static String getUserID() {

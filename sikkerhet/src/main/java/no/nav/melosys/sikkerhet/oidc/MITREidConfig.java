@@ -24,10 +24,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * The configuration class creates spring filter with OpenID Connect server and client services, and a manager
- * through the MITREid library.
- */
 @Configuration
 public class MITREidConfig {
 
@@ -43,7 +39,6 @@ public class MITREidConfig {
     public OIDCAuthenticationFilter oidcAuthenticationFilter(AuthenticationManager authManager, IssuerService issuerService,
                                                              ServerConfigurationService scs, ClientConfigurationService ccs) {
         OIDCAuthenticationFilter filter = new OIDCAuthenticationFilter();
-
         filter.setAuthenticationManager(authManager);
         filter.setIssuerService(issuerService);
         filter.setServerConfigurationService(scs);
@@ -53,7 +48,7 @@ public class MITREidConfig {
     }
 
     @Bean
-    public AuthenticationManager authManager() {
+    public AuthenticationManager authenticationManager() {
         return new ProviderManager(Collections.singletonList(oidcAuthenticationProvider()));
     }
 
@@ -61,12 +56,11 @@ public class MITREidConfig {
     public IssuerService issuerService(Environment env) {
         StaticSingleIssuerService is = new StaticSingleIssuerService();
         is.setIssuer(env.getRequiredProperty("OpenIdConnect.issoIssuer"));
-        //is.setIssuer(env.getRequiredProperty("isso-issuer"));
         return is;
     }
 
     @Bean
-    public ServerConfigurationService scs(Environment env) {
+    public ServerConfigurationService serverConfiguration(Environment env) {
         StaticServerConfigurationService sscs = new StaticServerConfigurationService();
 
         Map<String, ServerConfiguration> servers = new HashMap<>();
@@ -84,7 +78,7 @@ public class MITREidConfig {
     }
 
     @Bean
-    public ClientConfigurationService ccs(Environment env) {
+    public ClientConfigurationService clientConfigurationService(Environment env) {
         StaticClientConfigurationService sccs = new StaticClientConfigurationService();
 
         Map<String, RegisteredClient> clients = new HashMap<>();

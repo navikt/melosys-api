@@ -16,6 +16,7 @@
             Se https://fasit.adeo.no/wicket/bookmarkable/no.nav.aura.envconfig.gui.resources.ResourceDocumentationPage
             (se også detaljer i http://maven.adeo.no/xsd/appconfig.xsd) for hvilke system properties kommer ut av innslagene under:
         -->
+        <ldap alias="ldap" mapToProperty="ldap"/>
         <webservice alias="virksomhet:Arbeidsforhold_v3" mapToProperty="Arbeidsforhold_v3"/>
         <webservice alias="virksomhet:Inntekt_v3" mapToProperty="Inntekt_v3"/>
         <webservice alias="virksomhet:Kodeverk_v2" mapToProperty="Kodeverk_v2"/>
@@ -24,10 +25,7 @@
         <!--<webservice alias="virksomhet:Person_v3" mapToProperty="Person_v3"/>-->
 
         <credential alias="srvmelosys" mapToProperty="systembruker"/>
-        <ldap alias="ldap" mapToProperty="ldap"/>
-        <baseUrl alias="isso-issuer"/>
-        <credential alias="isso-rp-user"/>
-        <baseUrl alias="securityTokenService" mapToProperty="securityTokenService"/>
+
     </resources>
 
     <serverOptions>
