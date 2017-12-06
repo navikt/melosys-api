@@ -47,9 +47,9 @@ public class Application extends SpringBootServletInitializer implements Environ
         List<String> list = new ArrayList<>();
 
         // Til StsConfigurationUtil
-        list.add("securityTokenService.endpoint.url");
-        list.add("securityTokenService.user.username");
-        list.add("securityTokenService.user.password");
+        list.add("securityTokenService.url");
+        list.add("systemuser.username");
+        list.add("systemuser.password");
 
         list.forEach(key -> loadProperty(key));
     }
