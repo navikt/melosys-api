@@ -5,6 +5,8 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ import javax.ws.rs.core.Response;
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 public class ArbeidsforholdHistorikkRestTjeneste extends RestTjeneste {
 
+    private static final Logger log = LoggerFactory.getLogger(ArbeidsforholdHistorikkRestTjeneste.class);
+
     private FagsakService fagsakService;
 
     @Autowired
@@ -34,9 +38,11 @@ public class ArbeidsforholdHistorikkRestTjeneste extends RestTjeneste {
         try {
             ArbeidsforholdDokument dokument = fagsakService.hentArbeidsforholdHistorikk(arbeidsforholdsID);
             return Response.ok(dokument).build();
-        } catch (SikkerhetsbegrensningException SikkerhetsbegrensningException) {
+        } catch (SikkerhetsbegrensningException sikkerhetsbegrensningException) {
+            log.error("", sikkerhetsbegrensningException);
             return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (IntegrasjonException IntegrasjonException) {
+        } catch (IntegrasjonException integrasjonException) {
+            log.error("", integrasjonException);
             return Response.status(Response.Status.NOT_FOUND).build();
         }
     }
