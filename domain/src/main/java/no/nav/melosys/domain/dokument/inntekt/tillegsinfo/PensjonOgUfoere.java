@@ -4,16 +4,15 @@ import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.inntekt.Periode;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 import java.math.BigDecimal;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AldersUfoereEtterlatteAvtalefestetOgKrigspensjon")
-public class AldersUfoereEtterlatteAvtalefestetOgKrigspensjon extends TilleggsinformasjonDetaljer implements HarPeriode {
+public class PensjonOgUfoere extends TilleggsinformasjonDetaljer implements HarPeriode {
 
-    public BigDecimal grunnpensjonbeloep;
+    @XmlElement(name = "grunnpensjonbeloep")
+    public BigDecimal grunnpensjonbeløp;
 
     public BigDecimal heravEtterlattepensjon;
 
@@ -21,9 +20,11 @@ public class AldersUfoereEtterlatteAvtalefestetOgKrigspensjon extends Tilleggsin
 
     public Periode tidsrom;
 
-    public BigDecimal tillegspensjonbeloep;
+    @XmlElement(name = "tillegspensjonbeloep")
+    public BigDecimal tillegspensjonbeløp;
 
-    public Integer ufoeregradpensjonsgrad;
+    @XmlElement(name = "ufoeregradpensjonsgrad")
+    public Integer uføreEllerPensjonsgrad;
 
     @Override
     public ErPeriode getPeriode() {

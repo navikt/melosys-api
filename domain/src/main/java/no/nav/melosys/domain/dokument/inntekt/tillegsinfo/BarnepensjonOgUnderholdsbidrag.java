@@ -6,13 +6,15 @@ import no.nav.melosys.domain.dokument.inntekt.Periode;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "BarnepensjonOgUnderholdsbidrag")
 public class BarnepensjonOgUnderholdsbidrag extends TilleggsinformasjonDetaljer implements HarPeriode {
 
-    public String forsoergersFoedselnummer;
+    @XmlElement(name = "forsoergersFoedselnummer")
+    public String forsørgersFødselnummer;
 
     public Periode tidsrom;
 
