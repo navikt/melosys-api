@@ -28,9 +28,9 @@ import java.util.HashMap;
 
 public class StsConfigurationUtil {
 
-    private static final String STS_URL_KEY = "securityTokenService.endpoint.url";
-    private static final String STS_USER_USERNAME = "securityTokenService.user.username";
-    private static final String STS_USER_PASSWORD = "securityTokenService.user.password";
+    private static final String STS_URL_KEY = "securityTokenService.url";
+    private static final String STS_USER_USERNAME = "systemuser.username";
+    private static final String STS_USER_PASSWORD = "systemuser.password";
 
     private StsConfigurationUtil() {
         throw new IllegalAccessError("Skal ikke instansieres");
