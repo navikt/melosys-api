@@ -1,0 +1,28 @@
+<ns2:hentInntektListeResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/inntekt/v3">
+    <response>
+        <arbeidsInntektIdent>
+            <arbeidsInntektMaaned>
+                <aarMaaned>2017-06+02:00</aarMaaned>
+                <arbeidsInntektInformasjon>
+                    <arbeidsforholdListe xsi:type="ns4:ArbeidsforholdFrilanser" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <frilansPeriode xsi:type="ns4:AapenPeriode">
+                            <fom>2017-01-01+02:00</fom>
+                            <tom>2017-02-15+02:00</tom>
+                        </frilansPeriode>
+                        <yrke kodeRef="5221126">BUTIKKMEDARBEIDER</yrke>
+                    </arbeidsforholdListe>
+                    <arbeidsforholdListe xsi:type="ns4:ArbeidsforholdFrilanser" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <frilansPeriode xsi:type="ns4:AapenPeriode">
+                            <fom>2017-02-16+02:00</fom>
+                            <tom>2017-03-31+02:00</tom>
+                        </frilansPeriode>
+                        <yrke kodeRef="3119136">INGENIØR (ØVRIG TEKNISK VIRKSOMHET)</yrke>
+                    </arbeidsforholdListe>
+                </arbeidsInntektInformasjon>
+            </arbeidsInntektMaaned>
+            <ident xsi:type="ns4:PersonIdent" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <personIdent>99999999992</personIdent>
+            </ident>
+        </arbeidsInntektIdent>
+    </response>
+</ns2:hentInntektListeResponse>

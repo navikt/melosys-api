@@ -1,4 +1,20 @@
 package no.nav.melosys.domain.dokument.inntekt.tillegsinfo;
-// FIXME Ikke implementert, se xslt
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "TilleggsinformasjonDetaljer")
+@XmlSeeAlso({
+        PensjonOgUfoere.class,
+        BarnepensjonOgUnderholdsbidrag.class,
+        BonusFraForsvaret.class,
+        Etterbetalingsperiode.class,
+        Inntjeningsforhold.class,
+        Svalbardinntekt.class,
+        ReiseKostOgLosji.class
+})
 public abstract class TilleggsinformasjonDetaljer {
 }
