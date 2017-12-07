@@ -1,5 +1,6 @@
 package no.nav.melosys;
 
+import no.nav.modig.testcertificates.TestCertificates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -29,7 +30,10 @@ public class Application extends SpringBootServletInitializer implements Environ
     @Override
     public void setEnvironment(Environment environment) {
         Application.environment = environment;
+
+        // TODO Fjerne. For å kunne kjøre lokalt:
         loadProperties();
+        TestCertificates.setupKeyAndTrustStore();
     }
 
     public static void main(String[] args) throws Exception {
@@ -41,8 +45,7 @@ public class Application extends SpringBootServletInitializer implements Environ
         return builder.sources(Application.class);
     }
 
-    // TODO Fjern test. Sikkerhet trenger system properties.
-    // De settes her for nå til utvikling. Må settes i app-config også.
+    // Sikkerhet trenger system properties.
     private static void loadProperties() {
         List<String> list = new ArrayList<>();
 
