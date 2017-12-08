@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Se om nødvendig http://confluence.adeo.no/display/AURA/Logging og http://confluence.adeo.no/display/AURA/Logback -->
-<!--TODO Ved bruk av daglige logger (RollingFileAppender) må det angis hvor 
-	lenge filer skal tas vare på før de slettes og de skal være komprimert -->
 <configuration scan="true" scanPeriod="60 seconds">
 
     <!-- Driftslogging/error-logg -->
@@ -16,7 +14,6 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- Daily rollover, gir filnavn med pattern yyyy-MM-dd -->
             <fileNamePattern>${APP_LOG_HOME}/melosys_error.log.%d{yyyy-MM-dd}</fileNamePattern>
-            <!-- 30 dager OK? -->
             <maxHistory>30</maxHistory>
         </rollingPolicy>
     </appender>
@@ -104,7 +101,7 @@
         <appender-ref ref="SERVICE_CALLS"/>
     </logger>
 
-    <logger name="no.nav" level="${log.level.no.nav:-INFO}"/>
+    <logger name="no.nav" level="${log.level.no.nav:-DEBUG}"/>
 
     <!-- Skru på for å logge sql statements med parametere -->
     <logger name="jdbc.sql" level="${log.level.jdbc.sql:-ERROR}"/>
@@ -116,8 +113,7 @@
     <logger name="ch.qos.logback" level="${log.level.ch.qos.logback:-WARN}"/>
     <logger name="org.flywaydb" level="${log.level.org.flywaydb:-INFO}"/>
 
-    <!-- Det er mulig å sette ROOT_LOG_LEVEL deploytime. Hvis dette ikke settes er INFO default -->
-    <root level="${ROOT_LOG_LEVEL:-INFO}">
+    <root level="${log.level.root:-INFO}">
         <appender-ref ref="APP"/>
         <appender-ref ref="ERROR"/>
     </root>

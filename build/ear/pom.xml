@@ -20,12 +20,6 @@
             <version>${project.version}</version>
             <type>war</type>
         </dependency>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-regler</artifactId>
-            <version>${project.version}</version>
-            <type>war</type>
-        </dependency>
     </dependencies>
 
     <build>
@@ -50,11 +44,6 @@
                             <groupId>${project.groupId}</groupId>
                             <artifactId>melosys-war</artifactId>
                             <contextRoot>/melosys</contextRoot>
-                        </webModule>
-                        <webModule>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>melosys-regler</artifactId>
-                            <contextRoot>/</contextRoot>
                         </webModule>
                     </modules>
                 </configuration>
