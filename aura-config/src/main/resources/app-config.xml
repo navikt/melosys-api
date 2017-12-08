@@ -23,9 +23,9 @@
         <webservice alias="virksomhet:Arbeidsforhold_v3" mapToProperty="Arbeidsforhold_v3"/>
         <webservice alias="virksomhet:Inntekt_v3" mapToProperty="Inntekt_v3"/>
         <webservice alias="virksomhet:Kodeverk_v2" mapToProperty="Kodeverk_v2"/>
-        <!--<webservice alias="virksomhet:Medlemskap_v2" mapToProperty="Medlemskap_v2"/>-->
+        <webservice alias="virksomhet:Medlemskap_v2" mapToProperty="Medlemskap_v2"/>
         <webservice alias="virksomhet:Organisasjon_v4" mapToProperty="Organisasjon_v4"/>
-        <!--<webservice alias="virksomhet:Person_v3" mapToProperty="Person_v3"/>-->
+        <webservice alias="virksomhet:Person_v3" mapToProperty="Person_v3"/>
 
     </resources>
 
