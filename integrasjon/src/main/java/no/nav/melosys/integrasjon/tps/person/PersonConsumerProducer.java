@@ -1,17 +1,17 @@
 package no.nav.melosys.integrasjon.tps.person;
 
 
-import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.OIDC_TIL_SAML;
-import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.SYSTEM_SAML;
-
+import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
+import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
+import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3;
-import no.nav.vedtak.sts.client.NAVSTSClient;
-import no.nav.vedtak.sts.client.StsConfigurationUtil;
+import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML;
+import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SYSTEM_SAML;
+
 
 @Configuration
 public class PersonConsumerProducer {
@@ -31,7 +31,7 @@ public class PersonConsumerProducer {
     @Bean
     @Profile("!utvikling")
     public PersonConsumer personConsumer() {
-        PersonV3 port = wrapWithSts(consumerConfig.getPort(), OIDC_TIL_SAML);
+        PersonV3 port = wrapWithSts(consumerConfig.getPort(), SECURITYCONTEXT_TIL_SAML);
         return new PersonConsumerImpl(port);
     }
 

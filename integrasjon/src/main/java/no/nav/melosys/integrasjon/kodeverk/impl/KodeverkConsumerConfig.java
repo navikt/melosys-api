@@ -24,7 +24,7 @@ public class KodeverkConsumerConfig {
 
     private String endpointUrl;
 
-    public KodeverkConsumerConfig(@Value("${koveverk_v2.url}") String endpointUrl) {
+    public KodeverkConsumerConfig(@Value("${Kodeverk_v2.url}") String endpointUrl) {
         this.endpointUrl = endpointUrl;
     }
 

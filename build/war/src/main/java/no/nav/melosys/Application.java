@@ -1,9 +1,6 @@
 package no.nav.melosys;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
+import no.nav.modig.testcertificates.TestCertificates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -15,8 +12,9 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
-import no.nav.vedtak.isso.OpenAMHelper;
-import no.nav.vedtak.sts.client.SecurityConstants;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 @ServletComponentScan("no.nav.melosys.integrasjon.felles")
 @SpringBootApplication
@@ -32,7 +30,10 @@ public class Application extends SpringBootServletInitializer implements Environ
     @Override
     public void setEnvironment(Environment environment) {
         Application.environment = environment;
+
+        // TODO Fjerne. For å kunne kjøre lokalt:
         loadProperties();
+        TestCertificates.setupKeyAndTrustStore();
     }
 
     public static void main(String[] args) throws Exception {
@@ -44,28 +45,14 @@ public class Application extends SpringBootServletInitializer implements Environ
         return builder.sources(Application.class);
     }
 
-    // TODO Sikkerhet fra Foreldrepenger trenger system properties.
-    // De settes her for nå til utvikling. Må settes i app-config også.
+    // Sikkerhet trenger system properties.
     private static void loadProperties() {
         List<String> list = new ArrayList<>();
 
         // Til StsConfigurationUtil
-        list.add(SecurityConstants.STS_URL_KEY);
-        list.add(SecurityConstants.SYSTEMUSER_USERNAME);
-        list.add(SecurityConstants.SYSTEMUSER_PASSWORD);
-
-        // Til OpenAMHelper
-        list.add(OpenAMHelper.ISSO_ISSUER_URL);
-        list.add(OpenAMHelper.ISSO_RP_USER_USERNAME);
-
-        // Til LdapInnlogging
-        list.add("ldap.url");
-        list.add("ldap.username");
-        list.add("ldap.domain");
-        list.add("ldap.password");
-
-        // LdapBrukeroppslag
-        list.add("ldap.user.basedn");
+        list.add("securityTokenService.url");
+        list.add("systemuser.username");
+        list.add("systemuser.password");
 
         list.forEach(key -> loadProperty(key));
     }

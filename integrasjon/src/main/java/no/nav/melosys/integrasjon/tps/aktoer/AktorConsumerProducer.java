@@ -1,15 +1,15 @@
 package no.nav.melosys.integrasjon.tps.aktoer;
 
 
-import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.OIDC_TIL_SAML;
-
+import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
+import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
+import no.nav.tjeneste.virksomhet.aktoer.v2.binding.AktoerV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import no.nav.tjeneste.virksomhet.aktoer.v2.binding.AktoerV2;
-import no.nav.vedtak.sts.client.NAVSTSClient;
-import no.nav.vedtak.sts.client.StsConfigurationUtil;
+import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML;
+
 
 @Configuration
 public class AktorConsumerProducer {
@@ -22,13 +22,13 @@ public class AktorConsumerProducer {
 
     @Bean
     public AktorConsumer aktorConsumer() {
-        AktoerV2 port = wrapWithSts(consumerConfig.getPort(), OIDC_TIL_SAML);
+        AktoerV2 port = wrapWithSts(consumerConfig.getPort(), SECURITYCONTEXT_TIL_SAML);
         return new AktorConsumerImpl(port);
     }
 
     @Bean
     public AktorSelftestConsumer aktorSelftestConsumer() {
-        AktoerV2 port = wrapWithSts(consumerConfig.getPort(), OIDC_TIL_SAML);
+        AktoerV2 port = wrapWithSts(consumerConfig.getPort(), SECURITYCONTEXT_TIL_SAML);
         return new AktorSelftestConsumerImpl(port, consumerConfig.getEndpointUrl());
     }
 

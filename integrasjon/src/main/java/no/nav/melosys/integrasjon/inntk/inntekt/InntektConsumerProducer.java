@@ -1,16 +1,17 @@
 package no.nav.melosys.integrasjon.inntk.inntekt;
 
-import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.OIDC_TIL_SAML;
-import static no.nav.vedtak.sts.client.NAVSTSClient.StsClientType.SYSTEM_SAML;
 
+import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
+import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
+import no.nav.tjeneste.virksomhet.inntekt.v3.binding.InntektV3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import no.nav.tjeneste.virksomhet.inntekt.v3.binding.InntektV3;
-import no.nav.vedtak.sts.client.NAVSTSClient;
-import no.nav.vedtak.sts.client.StsConfigurationUtil;
+import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML;
+import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SYSTEM_SAML;
+
 
 @Configuration
 public class InntektConsumerProducer {
@@ -31,7 +32,7 @@ public class InntektConsumerProducer {
     @Bean
     @Profile("!utvikling")
     InntektConsumer inntektConsumer() {
-        InntektV3 port = wrapWithSts(config.getPort(), OIDC_TIL_SAML);
+        InntektV3 port = wrapWithSts(config.getPort(), SECURITYCONTEXT_TIL_SAML);
         return new InntektConsumerImpl(port);
     }
 
