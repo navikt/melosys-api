@@ -29,17 +29,14 @@ public class OIDCSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers("/webjars/**", "/css/**", "/internal/**");
+        web.ignoring().antMatchers("/internal/health");
     }
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http
-                .addFilterAfter(new OAuth2ClientContextFilter(), AbstractPreAuthenticatedProcessingFilter.class)
+        http.addFilterAfter(new OAuth2ClientContextFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                 .addFilterAfter(filter, OAuth2ClientContextFilter.class)
-                .authorizeRequests()
-                .antMatchers("/isReady", "/isAlive")
-                .permitAll()
+                .authorizeRequests().antMatchers("/internal/health").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and().csrf().disable()
