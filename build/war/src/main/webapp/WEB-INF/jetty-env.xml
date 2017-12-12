@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+FIXME: Feiler med java.net.ConnectException
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
+-->
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+    <Call name="setProperty" class="java.lang.System">
+        <Arg>org.eclipse.jetty.annotations.maxWait</Arg>
+        <Arg>180</Arg>
+    </Call>
+</Configure>
