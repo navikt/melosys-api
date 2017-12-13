@@ -1,5 +1,8 @@
 package no.nav.melosys.sikkerhet.oidc;
 
+import com.nimbusds.jwt.JWTParser;
+import no.nav.melosys.sikkerhet.jwks.JwksCache;
+import no.nav.melosys.sikkerhet.jwks.JwksSupplier;
 import org.mitre.oauth2.model.ClientDetailsEntity;
 import org.mitre.oauth2.model.RegisteredClient;
 import org.mitre.openid.connect.client.NamedAdminAuthoritiesMapper;
@@ -19,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +52,25 @@ public class MITREidConfig {
     }
 
     @Bean
+    OidcTokenRefreshingFilter oidcTokenRefreshingFilter(OidcTokenValidator validator, Environment env) {
+        OidcTokenRefreshingFilter filter = new OidcTokenRefreshingFilter(new OidcRefresher(new RestTemplate(), env), serverConfiguration(env), validator, JWTParser::parse);
+        filter.setAuthenticationManager(authenticationManager());
+        filter.setContinueChainBeforeSuccessfulAuthentication(true); // Only refreshes the token, no redirect etc is required and chain should be continued.
+        filter.setAuthenticationSuccessHandler((request, response, authentication) -> {}); // NOSONAR - Kan ikke bruke default
+        return filter;
+    }
+
+    @Bean
+    JwksSupplier jwksSupplier(Environment env) {
+        return new JwksSupplier(new RestTemplate(), env.getRequiredProperty("OpenIdConnect.issoJwks"));
+    }
+
+    @Bean
+    JwksCache jwksCache(JwksSupplier supplier) {
+        return new JwksCache(supplier);
+    }
+
+    @Bean
     public AuthenticationManager authenticationManager() {
         return new ProviderManager(Collections.singletonList(oidcAuthenticationProvider()));
     }
@@ -60,21 +83,25 @@ public class MITREidConfig {
     }
 
     @Bean
-    public ServerConfigurationService serverConfiguration(Environment env) {
+    public ServerConfigurationService serverConfigurationService(ServerConfiguration serverConfiguration, Environment env) {
         StaticServerConfigurationService sscs = new StaticServerConfigurationService();
 
         Map<String, ServerConfiguration> servers = new HashMap<>();
+        servers.put(env.getRequiredProperty("OpenIdConnect.issoIssuer"), serverConfiguration);
+
+        sscs.setServers(servers);
+        return sscs;
+    }
+
+    @Bean
+    ServerConfiguration serverConfiguration(Environment env) {
         ServerConfiguration serverConfig = new ServerConfiguration();
         serverConfig.setIssuer(env.getRequiredProperty("OpenIdConnect.issoIssuer"));
         serverConfig.setAuthorizationEndpointUri(env.getRequiredProperty("OpenIdConnect.issoHost") + "/authorize");
         serverConfig.setTokenEndpointUri(env.getRequiredProperty("OpenIdConnect.issoHost") + "/access_token");
         serverConfig.setUserInfoUri(env.getRequiredProperty("OpenIdConnect.issoHost") + "/userinfo");
         serverConfig.setJwksUri(env.getRequiredProperty("OpenIdConnect.issoJwks"));
-
-        servers.put(env.getRequiredProperty("OpenIdConnect.issoIssuer"), serverConfig);
-
-        sscs.setServers(servers);
-        return sscs;
+        return serverConfig;
     }
 
     @Bean
