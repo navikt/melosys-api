@@ -1,6 +1,6 @@
 package no.nav.melosys.sikkerhet.oidc;
 
-import jwks.JwksCache;
+import no.nav.melosys.sikkerhet.jwks.JwksCache;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.InvalidJwtException;

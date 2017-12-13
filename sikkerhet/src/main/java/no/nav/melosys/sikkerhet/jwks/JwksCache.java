@@ -1,4 +1,4 @@
-package jwks;
+package no.nav.melosys.sikkerhet.jwks;
 
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.JsonWebKeySet;
