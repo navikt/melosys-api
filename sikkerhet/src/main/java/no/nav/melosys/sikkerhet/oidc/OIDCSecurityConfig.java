@@ -22,9 +22,12 @@ public class OIDCSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private OIDCAuthenticationFilter filter;
 
+    private OidcTokenRefreshingFilter refreshingFilter;
+
     @Autowired
-    public void setOIDCAuthenticationFilter(OIDCAuthenticationFilter filter) {
+    public OIDCSecurityConfig(OIDCAuthenticationFilter filter, OidcTokenRefreshingFilter refreshingFilter) {
         this.filter = filter;
+        this.refreshingFilter = refreshingFilter;
     }
 
     @Override
@@ -36,6 +39,7 @@ public class OIDCSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(HttpSecurity http) throws Exception {
         http.addFilterAfter(new OAuth2ClientContextFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                 .addFilterAfter(filter, OAuth2ClientContextFilter.class)
+                .addFilterAfter(refreshingFilter, OIDCAuthenticationFilter.class)
                 .authorizeRequests().antMatchers("/internal/health").permitAll()
                 .anyRequest()
                 .authenticated()
