@@ -1,47 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Se om nødvendig http://confluence.adeo.no/display/AURA/Logging og http://confluence.adeo.no/display/AURA/Logback -->
-<configuration scan="true" scanPeriod="60 seconds">
+<configuration scan="true" scanPeriod="60 seconds" >
+
+    <property name="messagePattern" value="%date [%-5level] [%X{consumerId},%X{userId},%X{callId}] %logger{5} - %message%n%rEx"/>
 
     <!-- Driftslogging/error-logg -->
-    <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>${APP_LOG_HOME}/melosys_error.log</File>
+    <appender name="errorFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${APP_LOG_HOME}/error.log</File>
         <encoder>
-            <pattern>%d [%-5level] [%thread] %logger{5} - [%X{consumerId}, %X{callId}, %X{userId}] - %m%n%rEx</pattern>
+            <charset>UTF-8</charset>
+            <pattern>${messagePattern}</pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>ERROR</level>
+            <level>WARN</level>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- Daily rollover, gir filnavn med pattern yyyy-MM-dd -->
-            <fileNamePattern>${APP_LOG_HOME}/melosys_error.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <fileNamePattern>${APP_LOG_HOME}/error.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
     </appender>
 
     <!-- Applikasjonslogging -->
-    <appender name="APP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="appFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <File>${APP_LOG_HOME}/melosys.log</File>
         <encoder>
-            <pattern>%d [%-5level] [%thread] %logger{5} - [%X{consumerId}, %X{callId}, %X{userId}] - %m%n</pattern>
+            <charset>UTF-8</charset>
+            <pattern>${messagePattern}</pattern>
         </encoder>
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>INFO</level>
-        </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${APP_LOG_HOME}/${APP_LOG_HOME}/melosys.%d{yyyy-MM-dd}</fileNamePattern>
+            <fileNamePattern>${APP_LOG_HOME}/melosys.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
     </appender>
 
     <!-- Sikkerhetslogg -->
     <!--  Pålogging av bruker, endring av tilgang, forsøk å få tilgang etc -->
-    <appender name="SIKKERHET" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>${APP_LOG_HOME}/melosys_sikkerhet.log</File>
+    <appender name="sikkerhetFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${APP_LOG_HOME}/sikkerhet.log</File>
         <encoder>
+            <charset>UTF-8</charset>
             <pattern>%d [%-5level] [%thread] %logger{5} - [%X{consumerId}, %X{callId}, %X{userId}] - %m%n</pattern>
         </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${APP_LOG_HOME}/melosys_sikkerhet.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <fileNamePattern>${APP_LOG_HOME}/sikkerhet.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
     </appender>
@@ -49,39 +54,36 @@
 
     <!-- Sporbarhetslogg -->
     <!-- Inneholder informasjon om personer som oppdaterer eller leser sensitiv informasjon. -->
-    <appender name="SPORING" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>${APP_LOG_HOME}/melosys_sporing.log</File>
+    <appender name="sporingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${APP_LOG_HOME}/sporing.log</File>
         <encoder>
-            <pattern>%d [%-5level] [%thread] %logger{5} - [%X{consumerId}, %X{callId}, %X{userId}] - %m%n</pattern>
+            <charset>UTF-8</charset>
+            <pattern>%date %X{consumerId},%X{userId},%X{callId}] - %message%n</pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>ERROR</level>
+            <level>INFO</level>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${APP_LOG_HOME}/melosys_sporing.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <fileNamePattern>${APP_LOG_HOME}/sporing.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
     </appender>
 
     <!-- Syslogappender  -->
-    <!-- Syslogappender brukes til å videresende logmeldingene til syslog.
-    Dette gjør at loggene kan sentraliseres og behandles i feks Splunk -->
-    <!-- Størrelsen på meldingen er begrenset, så det er lurt å begrense exceptions
-        og andre ting som kan bli langt. %rEx gir caused by først. Exceptions må
-        inkluderes i meldingen for å få det med på samme melding. -->
+    <!-- Syslogappender brukes til å videresende logmeldingene til syslog. -->
+    <!-- Dette gjør at loggene kan sentraliseres. -->
+    <!-- Størrelsen på meldingen er begrenset, så det er lurt å begrense exceptions og andre ting som kan bli langt. -->
+    <!-- %rEx gir caused by først. Exceptions måinkluderes i meldingen for å få det med på samme melding. -->
     <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
-
         <syslogHost>localhost</syslogHost>
-        <!-- facility er en syslogspesifikk kategoriering. For applikasjonslogger
-            skal vi bruke LOCAL1 -->
+        <!-- Facility er en syslogspesifikk kategoriering. For applikasjonslogger skal vi bruke LOCAL1 -->
         <facility>LOCAL1</facility>
-        <!-- suffixpattern er formateringen av selve meldingen som sendes til syslog.
-            I tillegg så legges det på timestamp, severity og hostnavn. Det første ordet
-            i suffixPattern tolkes av rsyslog som programmet som sendte loggmeldingen.
-            Denne kan feks være applikasjonsnavnet eller noe annet -->
-        <suffixPattern>melosys %mdc %logger{30} %m %n%rEx</suffixPattern>
-        <!-- throwableExluded skal alltid være true, ellers kommer stacktrace som
-            egne meldinger. -->
+        <!-- Suffixpattern er formateringen av selve meldingen som sendes til syslog. -->
+        <!-- I tillegg så legges det på timestamp, severity og hostnavn. -->
+        <!-- Det første ordet i suffixPattern tolkes av rsyslog som programmet som sendte loggmeldingen. -->
+        <!-- Denne skal alltid være logback. -->
+        <suffixPattern>logback %mdc %logger{30} %m %n%rEx</suffixPattern>
+        <!-- ThrowableExluded skal alltid være true, ellers kommer stacktrace som egne meldinger. -->
         <throwableExcluded>true</throwableExcluded>
     </appender>
 
@@ -89,19 +91,13 @@
     <appender name="SERVICE_CALLS" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${APP_LOG_HOME}/tjenestekall.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${SERVICE_CALLS_HOME}/tjenestekall.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <fileNamePattern>${SERVICE_CALLS_HOME}/tjenestekall.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>1</maxHistory>
         </rollingPolicy>
         <encoder>
             <pattern>%date{ISO8601} melosys %level %mdc %m%n%rEx</pattern>
         </encoder>
     </appender>
-
-    <logger name="ServiceCalls" level="INFO" additivity="false">
-        <appender-ref ref="SERVICE_CALLS"/>
-    </logger>
-
-    <logger name="no.nav" level="${log.level.no.nav:-DEBUG}"/>
 
     <!-- Skru på for å logge sql statements med parametere -->
     <logger name="jdbc.sql" level="${log.level.jdbc.sql:-ERROR}"/>
@@ -113,8 +109,14 @@
     <logger name="ch.qos.logback" level="${log.level.ch.qos.logback:-WARN}"/>
     <logger name="org.flywaydb" level="${log.level.org.flywaydb:-INFO}"/>
 
+    <logger name="ServiceCalls" level="INFO" additivity="false">
+        <appender-ref ref="SERVICE_CALLS"/>
+    </logger>
+
+    <logger name="no.nav" level="${log.level.no.nav:-DEBUG}"/>
+
     <root level="${log.level.root:-INFO}">
-        <appender-ref ref="APP"/>
-        <appender-ref ref="ERROR"/>
+        <appender-ref ref="errorFileAppender"/>
+        <appender-ref ref="appFileAppender"/>
     </root>
 </configuration>
