@@ -9,6 +9,7 @@ import java.security.Key;
 @Component
 public class JwtConsumerFactory {
 
+    // JwtConsumerBuilder fra jose4j er trådsikker
     private JwtConsumerBuilder jwtConsumerBuilder;
 
     public JwtConsumerFactory() {
