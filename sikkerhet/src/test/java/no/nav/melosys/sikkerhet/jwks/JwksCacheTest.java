@@ -35,8 +35,9 @@ public class JwksCacheTest {
 
     @Before
     public void before() {
-        cache = new JwksCache(supplierMock);
         when(supplierMock.get()).thenReturn(webKeySetMock);
+        cache = new JwksCache(supplierMock);
+
         JsonWebKey webKey = mock(JsonWebKey.class);
         when(webKeySetMock.findJsonWebKey(anyString(), anyString(), anyString(), anyString())).thenReturn(webKey);
         when(webKey.getKey()).thenReturn(keyMock);
