@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.dokument.person;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -33,6 +34,8 @@ public class PersonDokument extends SaksopplysningDokument {
     public String kjønn;
 
     public String sammensattNavn;
+
+    public List<Familierelasjon> familierelasjoner;
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
     @JsonProperty("foedselsdato")

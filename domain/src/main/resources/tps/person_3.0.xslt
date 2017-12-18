@@ -2,8 +2,7 @@
 
 <xsl:transform version="2.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:tps3="http://nav.no/tjeneste/virksomhet/person/v3"
->
+    xmlns:tps3="http://nav.no/tjeneste/virksomhet/person/v3">
 
     <xsl:template match="/tps3:hentPersonResponse/response/person">
         <personDokument>
@@ -30,7 +29,16 @@
             <dødsdato><xsl:value-of select="doedsdato/doedsdato"/></dødsdato>
             <diskresjonskode><xsl:value-of select="diskresjonskode/diskresjonskode"/></diskresjonskode>
             <personstatus><xsl:value-of select="personstatus/personstatus"/></personstatus>
+            <xsl:apply-templates />
         </personDokument>
+    </xsl:template>
+
+    <xsl:template match="harFraRolleI">
+        <familierelasjoner>
+            <fnr><xsl:value-of select="tilPerson/aktoer/ident/ident" /></fnr>
+            <navn><xsl:value-of select="tilPerson/personnavn/sammensattNavn" /></navn>
+            <relasjon><xsl:value-of select="tilRolle" /></relasjon>
+        </familierelasjoner>
     </xsl:template>
 
 </xsl:transform>
