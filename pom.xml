@@ -61,6 +61,7 @@
         <hibernate.version>5.2.10.Final</hibernate.version>
         <hikaricp.version>2.6.1</hikaricp.version>
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
+        <jose4j.version>0.6.2</jose4j.version>
         <json-patch.version>1.9</json-patch.version>
         <junit.version>4.12</junit.version>
         <mitreid-connect-version>1.3.1</mitreid-connect-version>
@@ -215,6 +216,11 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bitbucket.b_c</groupId>
+                <artifactId>jose4j</artifactId>
+                <version>${jose4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mitre</groupId>

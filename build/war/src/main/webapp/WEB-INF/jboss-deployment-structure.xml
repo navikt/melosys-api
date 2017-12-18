@@ -6,6 +6,7 @@
 			<subsystem name="resteasy" />
 			<subsystem name="jpa" />
 			<subsystem name="jaxrs" />
+            <subsystem name="logging" />
             <subsystem name="weld" />
 		</exclude-subsystems>
 		<exclusions>

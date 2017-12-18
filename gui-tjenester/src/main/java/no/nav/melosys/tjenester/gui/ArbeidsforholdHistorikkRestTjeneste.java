@@ -39,10 +39,10 @@ public class ArbeidsforholdHistorikkRestTjeneste extends RestTjeneste {
             ArbeidsforholdDokument dokument = fagsakService.hentArbeidsforholdHistorikk(arbeidsforholdsID);
             return Response.ok(dokument).build();
         } catch (SikkerhetsbegrensningException sikkerhetsbegrensningException) {
-            log.error("", sikkerhetsbegrensningException);
+            log.error("SikkerhetsbegrensningException under oppslag av arbeidsforhold: ", sikkerhetsbegrensningException);
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (IntegrasjonException integrasjonException) {
-            log.error("", integrasjonException);
+            log.error("Uventet IntegrasjonException under oppslag av arbeidsforhold: ", integrasjonException);
             return Response.status(Response.Status.NOT_FOUND).build();
         }
     }
