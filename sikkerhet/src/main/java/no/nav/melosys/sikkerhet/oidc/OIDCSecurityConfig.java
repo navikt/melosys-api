@@ -38,13 +38,11 @@ public class OIDCSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http.addFilterAfter(new OAuth2ClientContextFilter(), AbstractPreAuthenticatedProcessingFilter.class)
-                .addFilterAfter(filter, OAuth2ClientContextFilter.class)
-                .addFilterAfter(refreshingFilter, OIDCAuthenticationFilter.class)
-                .authorizeRequests().antMatchers("/internal/health").permitAll()
-                .anyRequest()
-                .authenticated()
-                .and().csrf().disable()
-                .httpBasic().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/openid_connect_login"));
+            .addFilterAfter(filter, OAuth2ClientContextFilter.class)
+            .addFilterAfter(refreshingFilter, OIDCAuthenticationFilter.class)
+            .authorizeRequests().anyRequest().authenticated()
+            .and().csrf().disable()
+            .httpBasic().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/openid_connect_login"));
     }
 
 }
