@@ -28,7 +28,7 @@ public class VurderArtikkel12_1 implements Regelpakke {
     @Regel
     public static void vurderArtikke12_1() {
         hvis(
-            argumentet(SKAL_VURDERE_ART_12_1).erSann()
+            argumentet(SKAL_VURDERE_ART_12_1)
         ).så(
             opprettLovvalgbestemmelse(
                 ART_12_1,

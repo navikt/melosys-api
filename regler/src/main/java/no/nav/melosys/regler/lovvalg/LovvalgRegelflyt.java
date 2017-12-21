@@ -2,6 +2,7 @@ package no.nav.melosys.regler.lovvalg;
 
 import no.nav.melosys.regler.lovvalg.utled_fakta.SjekkOmSoeknadenDekkesAvEf_883_2004;
 import no.nav.melosys.regler.lovvalg.utled_fakta.UtledFaktaOmArbeid;
+import no.nav.melosys.regler.lovvalg.utled_fakta.UtledFaktaOmPerson;
 import no.nav.melosys.regler.lovvalg.utled_fakta.UtledFaktaOmUtenlandsopphold;
 import no.nav.melosys.regler.lovvalg.velg_artikkel.KvalifiserForArtikler;
 import no.nav.melosys.regler.lovvalg.verifiser_inndata.AvbrytRegelkjoeringHvisFeil;
@@ -27,6 +28,7 @@ public class LovvalgRegelflyt extends Regelflyt {
         // Steg 2: Utled fakta
         leggTilRegelpakker(
             SjekkOmSoeknadenDekkesAvEf_883_2004.class,
+            UtledFaktaOmPerson.class,
             UtledFaktaOmArbeid.class,
             UtledFaktaOmUtenlandsopphold.class
         );

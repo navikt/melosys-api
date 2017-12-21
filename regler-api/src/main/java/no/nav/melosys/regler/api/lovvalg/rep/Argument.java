@@ -2,20 +2,18 @@ package no.nav.melosys.regler.api.lovvalg.rep;
 
 public enum Argument {
     
-    // FIXME: Sjekk at alle argumenter utledes
-    
     // KRITERIER FOR SØKNAD OM A1
     SØKNADEN_KVALIFISERER_FOR_EF_883_2004("Søknaden kvalifiserer for forordning (EF) 883/2004"),
     
     // Kriterier som velger artikkel 
     BRUKER_ER_ARBEIDSTAKER("Bruker er arbeidstaker"),
-    BRUKER_ER_NÆRINGSDRIVENDE("Bruker er næringsdrivende"),
-    BRUKER_ER_TJENESTEMANN("Bruker er tjenestemann"),
-    BRUKER_ARBEIDER_I_FLY("Bruker arbeider i fly"),
-    BRUKER_ARBEIDER_PÅ_SKIP("Bruker arbeider på skip"),
+    BRUKER_ER_NÆRINGSDRIVENDE("Bruker er næringsdrivende"), // FIXME: Må settes
+    // BRUKER_ER_TJENESTEMANN("Bruker er tjenestemann"),
+    // BRUKER_ARBEIDER_I_FLY("Bruker arbeider i fly"),
+    // BRUKER_ARBEIDER_PÅ_SKIP("Bruker arbeider på skip"),
     ANTALL_UTLAND_BRUKER_ARBEIDER_I("Antall land bruker arbeider i"),
     BRUKER_ARBEIDER_I_NORGE("Bruker arbeider i Norge"),
-    ARBEIDSGIVER_HAR_VESENTLIG_VIRKSOMHET_I_NORGE("arbeidsgiver har vesentlig virksomhet i Norge"),
+    ARBEIDSGIVER_HAR_VESENTLIG_VIRKSOMHET_I_NORGE("arbeidsgiver har vesentlig virksomhet i Norge"), // FIXME: Må settes
     
     SKAL_VURDERE_ART_11_2("Skal vurdere artikkel 11.2"),
     SKAL_VURDERE_ART_11_3A("Skal vurdere artikkel 11.3a"),
@@ -44,25 +42,15 @@ public enum Argument {
     // FORORDNING_1408_71_SKAL_ANVENDES("forordning 1408/71 skal anvendes"),
 
     // Kriterier for de forskjellige artiklene
-    ARBEIDSPLASSEN_I_UTLANDET_DEKKES_AV_EF_883_2004("Arbeidsplassen i utlandet er på et sted som dekkes av EF 883/2004"), // 12.1
-    BRUKER_HAR_NORSK_ARBEIDSGIVER("Bruker har norsk arbeidsgiver"), // 12.1
-    ANTALL_ARBEIDSGIVERE_I_SØKNADSPERIODEN("Antall arbeidsgivere i søknadsperioden"), // 12.1
-    HOVEDARBEIDSFORHOLDET_VARER_I_HELE_SØKNADSPERIODEN("Hovedarbeidsforholdet varer i hele søknadsperioden"), // 12.1
+    ARBEIDSPLASSEN_I_UTLANDET_DEKKES_AV_EF_883_2004("Arbeidsplassen i utlandet er på et sted som dekkes av EF 883/2004"), // 12.1 // FIXME: Må settes
+    BRUKER_HAR_NORSK_ARBEIDSGIVER("Bruker har norsk arbeidsgiver"), // 12.1 // FIXME: Må settes
+    ANTALL_ARBEIDSGIVERE_I_SØKNADSPERIODEN("Antall arbeidsgivere i søknadsperioden"), // 12.1 // FIXME: Må settes
+    HOVEDARBEIDSFORHOLDET_VARER_I_HELE_SØKNADSPERIODEN("Hovedarbeidsforholdet varer i hele søknadsperioden"), // 12.1 // FIXME: Må settes
     LENGDE_MND_UTENLANDSOPPHOLD("Antall måneder utenlandsoppholdet varer"), // 12.1
-    BRUKEREN_SKAL_ERSTATTE_EN_ANNEN_ARBEIDSTAKER("Brukeren skal ikke erstatte en annen utsendt arbeidstaker"), // 12.1
-    BRUKER_ER_MEDLEM_AV_FTR_MÅNEDEN_FØR_PERIODESTART("Bruker er medlem av FTR måneden før periodestart"), // 12.1
+    BRUKEREN_SKAL_ERSTATTE_EN_ANNEN_ARBEIDSTAKER("Brukeren skal ikke erstatte en annen utsendt arbeidstaker"), // 12.1 // FIXME: Må settes
+    BRUKER_ER_MEDLEM_AV_FTR_MÅNEDEN_FØR_PERIODESTART("Bruker er medlem av FTR måneden før periodestart"), // 12.1 // FIXME: Må settes
     
-    
-
-    // Kriterier for 12.1
-    /*
-    ANDEL_PROSENT_ARB_I_BOLAND("Andel % arb/inntekt i bostedsland"),
-    BRUKER_ER_ANSATT_HOS_UTSENDENDE_ORGANISASJON_I_HELE_SØKNADSPERIODE("Bruker er ansatt hos utsendende organisasjon i hele perioden"),
-    A1_12_1_VIRKSOMHET_I_UTSENDERLAND("Arbeidsgiver har virksomhet i landet arbeidstakeren sendes fra"),
-    A1_12_1_SENDES_TIL_ANNEN_MEDLEMSSTAT("Arbeidstakeren sendes til en annen medlemsstat for å utføre arbeid for arbeidsgiveren"),
-    A1_12_1_UTENLANDSOPPHOLDET_ER_IKKE_OVER_24_MND("Utenlandsoppholdet er ikke lengre enn 24 måneder"),
-    A1_12_1_SKAL_ERSTATTE_ANNEN_PERSON("Arbeidstakeren er utsendt for å erstatte en annen person"),
-    */
+    // FIXME BRUKER_ER_ANSATT_HOS_UTSENDENDE_ORGANISASJON_I_HELE_SØKNADSPERIODE("Bruker er ansatt hos utsendende organisasjon i hele perioden"),
     
     FIXME("FIXME"); // FIXME: Fjern
     
