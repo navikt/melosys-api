@@ -8,16 +8,17 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import no.nav.melosys.regler.motor.KontekstManager;
-import no.nav.melosys.regler.motor.Regel;
 import no.nav.melosys.regler.motor.Regelflyt;
 import no.nav.melosys.regler.motor.Regelpakke;
 
-public class TestMotor extends Regelpakke {
+public class TestMotor extends Regelflyt implements Regelpakke {
 
     @Test
     public void testMotor() {
         initialiserLokalKontekst();
-        new Regelflyt().leggTilRegelpakke(TestMotor.class).kjør();
+        TestMotor testMotor = new TestMotor();
+        testMotor.leggTilRegelpakker(TestMotor.class);
+        testMotor.kjør();
         assertEquals(6, KontekstManager.hentVariabel("seks"));
         slettLokalKontekst();
     }

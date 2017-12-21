@@ -1,15 +1,16 @@
 package no.nav.melosys.regler.motor.dekl;
 
-import static no.nav.melosys.regler.motor.dekl.Verdielement.antallet;
-import static no.nav.melosys.regler.motor.dekl.Verdielement.verdien;
-import static org.junit.Assert.*;
+import static no.nav.melosys.regler.motor.voc.Verdielement.antallet;
+import static no.nav.melosys.regler.motor.voc.Verdielement.verdien;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import no.nav.melosys.regler.motor.voc.Verdielement;
 
 public class VerdielementTest {
     

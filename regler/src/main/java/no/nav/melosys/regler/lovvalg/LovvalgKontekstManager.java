@@ -1,6 +1,7 @@
 package no.nav.melosys.regler.lovvalg;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -26,13 +27,13 @@ import no.nav.melosys.regler.motor.KontekstManager;
  */
 public class LovvalgKontekstManager {
 
-    private static Logger log = LoggerFactory.getLogger(LovvalgKontekstManager.class);
+    private static final Logger log = LoggerFactory.getLogger(LovvalgKontekstManager.class);
 
-    private static ThreadLocal<FastsettLovvalgRequest> lokalFastsettLovvalgRequest = new ThreadLocal<>();
-    private static ThreadLocal<FastsettLovvalgReply> lokalFastsettLovvalgRespons = new ThreadLocal<>();
+    private static final ThreadLocal<FastsettLovvalgRequest> lokalFastsettLovvalgRequest = new ThreadLocal<>();
+    private static final ThreadLocal<FastsettLovvalgReply> lokalFastsettLovvalgRespons = new ThreadLocal<>();
 
     /** Initialiserer regelkjøringens kontekst. Må gjøres før man oppretter eller kjører regler. */
-    public static void initialiserLokalKontekst(FastsettLovvalgRequest req) {
+    public static final void initialiserLokalKontekst(FastsettLovvalgRequest req) {
         if (lokalFastsettLovvalgRequest.get() != null) {
             log.error("Forsøk på å sette kontekst før eksisterende kontekst er slettet.");
             throw new RuntimeException("Forsøk på å sette kontekst før eksisterende kontekst er slettet.");
@@ -41,49 +42,49 @@ public class LovvalgKontekstManager {
         lokalFastsettLovvalgRequest.set(req);
         FastsettLovvalgReply rep = new FastsettLovvalgReply();
         rep.feilmeldinger = new ArrayList<>();
-        rep.lovvalgsbestemmelser = new ArrayList<>();
+        rep.lovvalgsbestemmelser = new HashMap<>();
         lokalFastsettLovvalgRespons.set(rep);
     }
     
     /** Sletter regelkjøringens kontekst. Må gjøres etter at alle regelsettene er kjørt. */
-    public static void slettLokalKontekst() {
+    public static final void slettLokalKontekst() {
         lokalFastsettLovvalgRequest.set(null);
         lokalFastsettLovvalgRespons.set(null);
         KontekstManager.slettLokalKontekst();
     }
 
     /** Returnerer søknaden fra input. */
-    public static SoeknadDokument søknadDokumentet() {
+    public static final SoeknadDokument søknadDokumentet() {
         return lokalFastsettLovvalgRequest.get().søknadDokument;
     }
 
     /** Returnerer personopplysnng fra input. */
-    public static PersonDokument personopplysningDokumentet() {
+    public static final PersonDokument personopplysningDokumentet() {
         return lokalFastsettLovvalgRequest.get().personopplysningDokument;
     }
 
     /** Returnerer arbeidsforholdDokumenter fra input. */
-    public static List<ArbeidsforholdDokument> arbeidsforholdDokumentene() {
+    public static final List<ArbeidsforholdDokument> arbeidsforholdDokumentene() {
         return lokalFastsettLovvalgRequest.get().arbeidsforholdDokumenter;
     }
     
     /** Returnerer inntektDokumenter fra input. */
-    public static List<InntektDokument> inntektDokumentene() {
+    public static final List<InntektDokument> inntektDokumentene() {
         return lokalFastsettLovvalgRequest.get().inntektDokumenter;
     }
     
     /** Returnerer medlemskapDokumenter fra input. */
-    public static List<MedlemskapDokument> medlemskapDokumentene() {
+    public static final List<MedlemskapDokument> medlemskapDokumentene() {
         return lokalFastsettLovvalgRequest.get().medlemskapDokumenter;
     }
     
     /** Returnerer organisasjonDokumenter fra input. */
-    public static List<OrganisasjonDokument> organisasjonDokumentene() {
+    public static final List<OrganisasjonDokument> organisasjonDokumentene() {
         return lokalFastsettLovvalgRequest.get().organisasjonDokumenter;
     }
     
     /** Returnerer FastsettLovvalgRespons som regelsettet jobber med. */
-    public static FastsettLovvalgReply responsen() {
+    public static final FastsettLovvalgReply responsen() {
         return lokalFastsettLovvalgRespons.get();
     }
 

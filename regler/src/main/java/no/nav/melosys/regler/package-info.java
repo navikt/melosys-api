@@ -21,10 +21,14 @@
  * 
  * Regelpakke:
  * En regelpakke inneholder en eller flere regler. Reglene må annoteres med @Regel, og da kjøres de automatisk når pakken kjøres. Reglene kan skrives som 
- * vanlig java-kode, men de bør primært skrives deklarativt.  
+ * vanlig java-kode, men de skal primært skrives verbalisert og deklarativt.  
  * 
  * Eksempler på deklarasjoner:
  * hvis(søknaden()).mangler().så(leggTilMelding(VALIDERINGSFEIL, "Forespørselen mangler søknad"))
+ * 
+ * Logging:
+ * Verbaliseringen inkluderer også magi for logging. Det betyr at vi i de fleste tilfeller får logging gratis ved å bruke de verbaliserte metodene. Loggingen 
+ * inneholder funksjonalitet for å logge med riktig regelnavn (hentes fra stack trace).
  */
 package no.nav.melosys.regler;
 

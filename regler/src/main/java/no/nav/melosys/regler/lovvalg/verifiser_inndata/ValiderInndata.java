@@ -6,13 +6,12 @@ import static no.nav.melosys.domain.dokument.person.Personstatus.DØDD;
 import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.IKKE_STOETTET;
 import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.leggTilMelding;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.personopplysningDokumentet;
-import static no.nav.melosys.regler.motor.dekl.Deklarasjon.hvis;
-import static no.nav.melosys.regler.motor.dekl.Verdielement.verdien;
+import static no.nav.melosys.regler.motor.voc.Deklarasjon.hvis;
+import static no.nav.melosys.regler.motor.voc.Verdielement.verdien;
 
-import no.nav.melosys.regler.motor.Regel;
 import no.nav.melosys.regler.motor.Regelpakke;
 
-public final class ValiderInndata extends Regelpakke {
+public final class ValiderInndata implements Regelpakke {
     
     /** Gi feil hvis bruker er død. */
     @Regel
@@ -21,10 +20,8 @@ public final class ValiderInndata extends Regelpakke {
         .så(leggTilMelding(IKKE_STOETTET, "Bruker er død"));
     }
     
+    
     // FIXME: Mer validering
-    
-    
-    // Kan ikke arbeid skip el. hvis ikke arbeidstaker
     
     /*
     private static void verifiserKonsistens() {

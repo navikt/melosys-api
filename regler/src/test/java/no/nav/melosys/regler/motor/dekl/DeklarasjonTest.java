@@ -1,10 +1,11 @@
 package no.nav.melosys.regler.motor.dekl;
 
-import org.junit.Test;
-
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Assert;
+import org.junit.Test;
+
+import no.nav.melosys.regler.motor.voc.Deklarasjon;
 
 public class DeklarasjonTest {
 
