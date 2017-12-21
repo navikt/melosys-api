@@ -1,29 +1,17 @@
 package no.nav.melosys.regler.lovvalg.verifiser_inndata;
 
-import no.nav.melosys.regler.motor.Regel;
-import no.nav.melosys.regler.motor.Regelpakke;
-
 import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.VALIDERINGSFEIL;
 import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.leggTilMeldingOgAvbryt;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.inntektDokumentene;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.medlemskapDokumentene;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.organisasjonDokumentene;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.personopplysningDokumentet;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknadDokumentet;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.*;
 import static no.nav.melosys.regler.lovvalg.LovvalgProdusenter.arbeidsforholdene;
-import static no.nav.melosys.regler.motor.dekl.Deklarasjon.hvis;
-import static no.nav.melosys.regler.motor.dekl.Verdielement.verdien;
-import static no.nav.melosys.regler.motor.dekl.VerdielementSett.forAlle;
+import static no.nav.melosys.regler.motor.voc.Deklarasjon.hvis;
+import static no.nav.melosys.regler.motor.voc.Verdielement.verdien;
+import static no.nav.melosys.regler.motor.voc.VerdielementSett.forAlle;
 
-public class VerifiserPaakrevdeFelter extends Regelpakke {
+import no.nav.melosys.regler.motor.Regelpakke;
+
+public class VerifiserPaakrevdeFelter implements Regelpakke {
     
-    /*
-     * 
-     * FIXME: Her kan vi vurdere å kun gjøre dette "verbalisert" der det er funksjonelt relevant (noe det stort sett ikke er).
-     * Mao. kan denne funksjonaliteten godt skrives som vanlig java-kode.
-     * 
-     */
-
     /** Verifiserer at vi har en søknaden, og at den inneholder alle felter som er på påkrevd. */
     @Regel
     public static void sjekkSøknaden() {
@@ -86,7 +74,7 @@ public class VerifiserPaakrevdeFelter extends Regelpakke {
     @Regel
     public static void sjekkInntekt() {
         forAlle(inntektDokumentene())
-        // .hvor(relevant periode) FIXME 
+        // .som(relevant periode) FIXME 
         .utfør(inntektDokument -> {
             // FIXME
         });
@@ -95,7 +83,7 @@ public class VerifiserPaakrevdeFelter extends Regelpakke {
     @Regel
     public static void sjekkMedlemskap() {
         forAlle(medlemskapDokumentene())
-        // .hvor(relevant periode) FIXME 
+        // .som(relevant periode) FIXME 
         .utfør(medlemskapDokument -> {
             // FIXME
         });
@@ -104,7 +92,7 @@ public class VerifiserPaakrevdeFelter extends Regelpakke {
     @Regel
     public static void sjekkOrganisasjon() {
         forAlle(organisasjonDokumentene())
-        // .hvor(relevant periode) FIXME 
+        // .som(relevant periode) FIXME 
         .utfør(organisasjonDokument -> {
             // FIXME
         });

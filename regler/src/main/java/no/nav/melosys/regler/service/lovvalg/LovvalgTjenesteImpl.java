@@ -1,6 +1,8 @@
 package no.nav.melosys.regler.service.lovvalg;
 
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.*;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.initialiserLokalKontekst;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.slettLokalKontekst;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -62,7 +64,7 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
             // Sett lokal kontekst for regelsett...
             initialiserLokalKontekst(req);
             // Kjør forretningsregler og returner respons...
-            new LovvalgRegelflyt().kjør();
+            LovvalgRegelflyt.getInstanse().kjør();
             return responsen();
         } catch(Throwable e) {
             // Forsok å logge feilen...

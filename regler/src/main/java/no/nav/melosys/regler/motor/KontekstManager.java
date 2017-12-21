@@ -14,10 +14,10 @@ import java.util.Map;
  */
 public class KontekstManager {
 
-    private static ThreadLocal<Map<Object, Object>> lokaleVerdier = new ThreadLocal<>();
+    private static final ThreadLocal<Map<Object, Object>> lokaleVerdier = new ThreadLocal<>();
 
     /** Initialiserer regelkjøringens kontekst. Må gjøres før man oppretter eller kjører regler. */
-    public static void initialiserLokalKontekst() {
+    public static final void initialiserLokalKontekst() {
         if (lokaleVerdier.get() != null) {
             throw new RuntimeException("Forsøk på å sette kontekst før eksisterende kontekst er slettet.");
         }
@@ -25,16 +25,16 @@ public class KontekstManager {
     }
     
     /** Sletter regelkjøringens kontekst. Må gjøres etter at alle regelsettene er kjørt. */
-    public static void slettLokalKontekst() {
+    public static final void slettLokalKontekst() {
         lokaleVerdier.set(null);
     }
 
-    public static void settVariabel(Object variabel, Object verdi) {
+    public static final void settVariabel(Object variabel, Object verdi) {
         loggInfo("Setter '{}' til {}", variabel, verdi.toString());
         lokaleVerdier.get().put(variabel, verdi);
     }
 
-    public static Object hentVariabel(Object variabel) {
+    public static final Object hentVariabel(Object variabel) {
         if (!lokaleVerdier.get().containsKey(variabel)) {
             loggError("Forsøk på å hente variabelen '{}' før den er satt", variabel);
             throw new RuntimeException();

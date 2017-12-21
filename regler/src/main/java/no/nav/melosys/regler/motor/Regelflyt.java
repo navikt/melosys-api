@@ -8,6 +8,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.melosys.regler.motor.Regelpakke.Regel;
+
 /**
  * Støtte for en sekvensiell regelflyt.
  * 
@@ -18,30 +20,31 @@ import org.slf4j.LoggerFactory;
  */
 public class Regelflyt {
     
-    private static Logger log = LoggerFactory.getLogger(Regelflyt.class);
+    private static final Logger log = LoggerFactory.getLogger(Regelflyt.class);
     
-    /** Dersom false, vil regelflyten avbrytes */
-    private List<Class<? extends Regelpakke>> flytSekvens;
+    /** Regelpakkene som skal kjøres i sekvens */
+    private List<Class<? extends Regelpakke>> flytSekvens = new ArrayList<>();
     
     public Regelflyt() {
-        flytSekvens = new ArrayList<>();
     }
     
-    public Regelflyt leggTilRegelpakke(Class<? extends Regelpakke> regelpakke) {
-        flytSekvens.add(regelpakke);
-        return this;
-    }
- 
+    /** kjører alle regelpakkene i flyten */
     public void kjør() {
         for (Class<? extends Regelpakke> regelpakke : flytSekvens) {
             kjørRegelPakke(regelpakke);
         }
     }
 
-    /*
-     * Kjører alle klassens static metoder som er annotert som Regel i tilfeldig rekkefølge
-     */
-    private static void kjørRegelPakke(Class<? extends Regelpakke> regelpakke) {
+    /** Legger til en eller flere regelpakket til flyten. */
+    @SafeVarargs // OK at vararg blir upcastet til Object[]
+    protected final void leggTilRegelpakker(Class<? extends Regelpakke>... regelpakker) {
+        for (Class<? extends Regelpakke> regelpakke : regelpakker) {
+            flytSekvens.add(regelpakke);
+        }
+    }
+ 
+    /* Kjører alle klassens static metoder som er annotert som Regel i tilfeldig rekkefølge */
+    private static final void kjørRegelPakke(Class<? extends Regelpakke> regelpakke) {
         log.debug("Kjører alle reglene i pakke {}...", regelpakke.getSimpleName());
         for (Method regelKandidat : regelpakke.getDeclaredMethods()) {
             if (regelKandidat.isAnnotationPresent(Regel.class)) {
@@ -49,6 +52,10 @@ public class Regelflyt {
                     regelKandidat.invoke(null);
                 } catch (InvocationTargetException e) {
                     // Vi er her hvis regelmetoden kaster exception
+                    if (e.getCause() instanceof AvbrytRegelkjoeringIStillhetException) {
+                        // En av reglene har avbrutt videre regelkjøring. Returner i stillhet.
+                        return;
+                    }
                     String feilmelding = "Ubehandlet exception ved kjøring av regel " + regelpakke.getSimpleName() + "." + regelKandidat.getName();
                     log.error(feilmelding, e.getCause());
                     throw new RuntimeException(feilmelding, e.getCause());
@@ -56,10 +63,7 @@ public class Regelflyt {
                     // Vi er her enten hvis metoden ikke er static, eller hvis initialiseringen av klassen kastet exception, eller hvis metoden har parametere
                     String feilmelding = "Teknisk feil i implementasjonen av regel " + regelpakke.getSimpleName() + "." + regelKandidat.getName();
                     log.error(feilmelding, e);
-                    throw new RuntimeException(feilmelding, e.getCause());
-                } catch (AvbrytRegelkjoeringIStillhetException e) {
-                    // En av reglene har avbrutt videre regelkjøring. Returner i stillhet.
-                    return;
+                    throw new RuntimeException(feilmelding, e);
                 }
             }
         }

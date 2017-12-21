@@ -1,4 +1,6 @@
-package no.nav.melosys.regler.motor.dekl;
+package no.nav.melosys.regler.motor.voc;
+
+import static no.nav.melosys.regler.motor.voc.FellesVokabular.utfør;
 
 /**
  * Klasse som støtter deklarativ programmering av typen
@@ -12,13 +14,13 @@ public final class Deklarasjon {
     
     private Predikat betingelse;
     
-    public static Deklarasjon hvis(Predikat p) {
+    public static final Deklarasjon hvis(Predikat betingelse) {
         Deklarasjon d = new Deklarasjon();
-        d.betingelse = p;
+        d.betingelse = betingelse;
         return d;
     }
 
-    public static Deklarasjon hvis(Verdielement ve) {
+    public static final Deklarasjon hvis(Verdielement ve) {
         return Deklarasjon.hvis(ve.erSann());
     }
 
@@ -36,12 +38,4 @@ public final class Deklarasjon {
         return this;
     }
     
-    
-    
-    private void utfør(Runnable... kommandoer) {
-        for (Runnable kommando : kommandoer) {
-            kommando.run();
-        }
-    }
-
 }

@@ -1,8 +1,8 @@
 
 package no.nav.melosys.regler.motor.dekl;
 
-import static no.nav.melosys.regler.motor.dekl.Verdielement.antallet;
-import static no.nav.melosys.regler.motor.dekl.VerdielementSett.forAlle;
+import static no.nav.melosys.regler.motor.voc.Verdielement.antallet;
+import static no.nav.melosys.regler.motor.voc.VerdielementSett.forAlle;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

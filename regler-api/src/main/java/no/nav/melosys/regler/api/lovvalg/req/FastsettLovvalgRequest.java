@@ -20,5 +20,6 @@ public class FastsettLovvalgRequest {
     public List<InntektDokument> inntektDokumenter;
     public List<MedlemskapDokument> medlemskapDokumenter;
     public List<OrganisasjonDokument> organisasjonDokumenter;
+    // public List arbeidUtland; // FIXME
     
 }

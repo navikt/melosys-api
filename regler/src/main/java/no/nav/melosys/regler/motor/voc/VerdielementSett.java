@@ -1,10 +1,8 @@
-/**
- * 
- */
-package no.nav.melosys.regler.motor.dekl;
+package no.nav.melosys.regler.motor.voc;
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -32,10 +30,7 @@ public class VerdielementSett<T, S> implements Iterable<T> {
     private VerdielementSett() {}
     
     /**
-     * Lager en VerdielementSett baser på en Iterable
-     * TODO (farjam 2017-11-27): Denne klassen er nå en hybrid av deklarasjon og sett. Dette må gjøres:
-     * 1) Metoden "forAlle" må fjernes
-     * 2) Metoden "for" som tar en iterable må legges utenfor denne klassen (slik at vi støtter verbaliseringen for(alle(søknadene).som(...)).utfør(...)
+     * Lager en VerdielementSett baser på en Iterable.
      */
     public static <T> VerdielementSett<T, ?> forAlle(Iterable<T> samling) {
         return alle(samling);
@@ -69,6 +64,15 @@ public class VerdielementSett<T, S> implements Iterable<T> {
     }
 
     /**
+     * Returnerer en ny VerdielementSett som er lik denne, men uten duplikater. Metoden bevarer ikke rekkefølgen til elementene.
+     */
+    public VerdielementSett<T, ?> somErUnike() {
+        HashSet<T> unike = new HashSet<>();
+        utfør(unike::add);
+        return alle(unike);
+    }
+
+    /**
      * Utfører en kommando for alle elementene.
      */
     public void utfør(Consumer<? super T> kommando) {
@@ -82,6 +86,9 @@ public class VerdielementSett<T, S> implements Iterable<T> {
      */
     @Override
     public Iterator<T> iterator() {
+        /*
+         * ADVARSEL: UTFORDRENDE KODE.
+         */
         Iterator<T> res = new Iterator<T>() {
             T neste = null;
             boolean harNeste = true; // Settes til true for å gjøre første iterering
@@ -120,5 +127,5 @@ public class VerdielementSett<T, S> implements Iterable<T> {
         res.next();
         return res;
     }
-
+    
 }

@@ -1,10 +1,20 @@
 package no.nav.melosys.regler.motor;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
- * Superklasse for regelpakker.
+ * Tægge-interface for regelpakker.
  * 
- * Subklassene skal bare trenge å implementere en eller flere metoder som annoteres med @Regel
+ * Instansene trenger kun implementere en eller flere static metoder som annoteres med @Regel
  * 
  */
-public abstract class Regelpakke {
+public interface Regelpakke {
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    public @interface Regel {}
+
 }
