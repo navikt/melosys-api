@@ -50,7 +50,7 @@ public class UtledFaktaOmArbeid implements Regelpakke {
      */
     @Regel
     public static void finnUtOmBrukerArbeiderINorge() {
-        // FIXME: Riktig implementert?
+        // FIXME: Ikke riktig implementert...
         hvis(
             verdien(søknadDokumentet().arbeidNorge).harVerdi()
         ).så(
