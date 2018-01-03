@@ -23,6 +23,9 @@ import java.util.Properties;
 @PropertySource(value = "classpath:service.properties", encoding = "utf-8")
 public class Application extends SpringBootServletInitializer implements EnvironmentAware {
 
+    private static final String TRUST_STORE = "javax.net.ssl.trustStore";
+    private static final String TRUST_STORE_PWD = "javax.net.ssl.trustStorePassword";
+
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     private static Environment environment;
@@ -33,7 +36,7 @@ public class Application extends SpringBootServletInitializer implements Environ
 
         // TODO Fjerne. For å kunne kjøre lokalt:
         loadProperties();
-        TestCertificates.setupKeyAndTrustStore();
+        configureSsl();
     }
 
     public static void main(String[] args) throws Exception {
@@ -43,6 +46,27 @@ public class Application extends SpringBootServletInitializer implements Environ
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
         return builder.sources(Application.class);
+    }
+
+    private void configureSsl() {
+        String trustStore = System.getenv(TRUST_STORE);
+        if (trustStore != null) {
+            System.setProperty(TRUST_STORE, trustStore);
+            log.info("Property {} satt til {}", TRUST_STORE, trustStore);
+
+            String trustStorePwd = System.getenv(TRUST_STORE_PWD);
+            if (trustStorePwd != null) {
+                System.setProperty(TRUST_STORE_PWD, trustStorePwd);
+            } else {
+                throw new IllegalStateException("Property " + TRUST_STORE_PWD + " mangler.");
+            }
+
+        } else {
+            // lokalt
+            log.debug("Property {} ikke satt.", TRUST_STORE);
+            log.info("Test sertifikater brukes.");
+            TestCertificates.setupKeyAndTrustStore();
+        }
     }
 
     // Sikkerhet trenger system properties.
