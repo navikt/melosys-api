@@ -47,11 +47,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class FagsakRestTjenesteTest {
+public class FagsakTjenesteTest {
 
     private FagsakRepository fagsakRepo;
 
-    private FagsakRestTjeneste tjeneste;
+    private FagsakTjeneste tjeneste;
 
     @Before
     public void setUp() throws JAXBException {
@@ -65,7 +65,7 @@ public class FagsakRestTjenesteTest {
 
         fagsakRepo = Mockito.mock(FagsakRepository.class);
         FagsakService fagsakService = new FagsakService(fagsakRepo, tps, aareg, ereg, medl, inntekt);
-        tjeneste = new FagsakRestTjeneste(fagsakService, dokumentFactory);
+        tjeneste = new FagsakTjeneste(fagsakService, dokumentFactory);
 
         ReflectionTestUtils.setField(fagsakService, "arbeidsforholdhistorikkAntallMåneder", 12);
         ReflectionTestUtils.setField(fagsakService, "inntektshistorikkAntallMåneder", 12);
