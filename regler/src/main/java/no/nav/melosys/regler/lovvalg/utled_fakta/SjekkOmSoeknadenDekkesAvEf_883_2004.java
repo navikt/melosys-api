@@ -11,9 +11,7 @@ import static no.nav.melosys.regler.motor.voc.FellesVokabular.JA;
 import static no.nav.melosys.regler.motor.voc.Predikat.*;
 
 import no.nav.melosys.domain.dokument.felles.Landkode;
-import no.nav.melosys.regler.lovvalg.LovvalgKontekstManager;
 import no.nav.melosys.regler.motor.Regelpakke;
-import no.nav.melosys.regler.motor.voc.FellesVokabular;
 import no.nav.melosys.regler.motor.voc.Predikat;
 
 /*'
@@ -81,6 +79,15 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
             ).og(minstEttAvFølgendeErSant(
                 // FIXME: Implementer 2a-2c
             ))
+            /*
+            brukerErEøsBorger // Tilfelle 1
+            .eller(brukerErSveitsiskStatsborger) // Tilfelle 2
+            .eller(brukerErStatsløs) // Tilfelle 3
+            .eller(brukerErFlyktning) // Tilfelle 4
+            .eller(brukerSendesTilEtNordiskLand) // Tilfelle 5
+            .eller(brukerDekkesAvTrygdeavtalenMedNederland) // Tilfelle 6
+            .eller(brukerDekkesAvTrygdeavtalenMedLuxembourg) // Tilfelle 7
+            */
         ).så(
             settArgument(SØKNADEN_KVALIFISERER_FOR_EF_883_2004, JA)
         ).ellers(
@@ -90,24 +97,26 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
         );
     }
     
-    private static final Predikat brukerErEøsBorger = () -> {
-        // FIXME: Implementer
+    private static Predikat brukerErEøsBorger = () -> personopplysningDokumentet().statsborgerskap.erEØS();
+
+    private static Predikat brukerErSveitsiskStatsborger = () -> personopplysningDokumentet().statsborgerskap.erSveits();
+
+    private static Predikat brukerErStatsløs = () -> personopplysningDokumentet().statsborgerskap.erStatsløs();
+
+    private static Predikat brukerErFlyktning = () -> {
+        // FIXME: Må finne ut om bruker er flyktning
         return false;
     };
-    
-    private static final Predikat brukerErSveitsiskStatsborger = () -> {
-        // FIXME: Implementer
-        return false;
+
+    private static Predikat brukerSendesTilEtNordiskLand = () -> {
+        // FIXME: Uavklart hvis bruker sendes til mer enn ett land
+        return søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Landkode::erDekketAvNordiskKonvensjonOmTrygd);
     };
-    
-    private static final Predikat brukerErStatsløs = () -> {
-        // FIXME: Implementer
-        return false;
-    };
-    
-    private static final Predikat brukerSendesTilEtNordiskLand = () -> {
-        // FIXME: Implementer
-        return false;
-    };
+
+    private static Predikat brukerDekkesAvTrygdeavtalenMedNederland = () ->
+        søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Landkode::erNederland);
+
+    private static Predikat brukerDekkesAvTrygdeavtalenMedLuxembourg = () ->
+        søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Landkode::erLuxembourg);
 
 }
