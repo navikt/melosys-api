@@ -53,4 +53,8 @@ public class PersonDokument extends SaksopplysningDokument {
 
     public Bostedsadresse bostedsadresse;
 
+    public UstrukturertAdresse postadresse;
+
+    public MidlertidigPostadresse midlertidigPostadresse;
+
 }

@@ -72,4 +72,32 @@ public class Tps3PersonKonverteringTest {
         assertThat(dokument.familierelasjoner).isNotEmpty();
     }
 
+    @Test
+    public void testPostadresse() throws Exception {
+        final String kilde = "person/midlertidig_postadresse_utland.xml";
+        PersonDokument dokument = getPersonDokument(kilde);
+
+        assertThat(dokument).isNotNull();
+        assertThat(dokument.postadresse).isNotNull();
+        assertThat(dokument.midlertidigPostadresse).isNotNull();
+    }
+
+    private PersonDokument getPersonDokument(String kilde) throws Exception {
+        StreamSource xmlSource = new StreamSource(getClass().getClassLoader().getResourceAsStream(kilde));
+        StreamSource streamSource = new StreamSource(getClass().getClassLoader().getResourceAsStream(TPS_PERSON_3_0_XSLT));
+
+        Transformer transformer = TransformerFactory.newInstance().newTransformer(streamSource);
+        StringWriter writer = new StringWriter();
+        Result outputTarget = new StreamResult(writer);
+        transformer.transform(xmlSource, outputTarget);
+        writer.flush();
+
+        // Unmarshal...
+        StringReader reader = new StringReader(writer.toString());
+        JAXBContext ctx = JAXBContext.newInstance(PersonDokument.class);
+        Unmarshaller unmarshaller = ctx.createUnmarshaller();
+        unmarshaller.setEventHandler(new DefaultValidationEventHandler());
+        return (PersonDokument) unmarshaller.unmarshal(reader);
+    }
+
 }
