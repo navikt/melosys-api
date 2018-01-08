@@ -20,7 +20,7 @@ public class JerseyConfig extends ResourceConfig {
         register(BehandlingTjeneste.class);
         register(FagsakTjeneste.class);
         register(JsonPatchReader.class);
-        register(RegelmotorTjeneste.class);
+        register(RegelmodulTjeneste.class);
         register(SaksbehandlerTjeneste.class);
         register(SoknadTjeneste.class);
         register(SokTjeneste.class);

@@ -21,24 +21,24 @@ import javax.ws.rs.client.ClientBuilder;
 import java.util.ArrayList;
 
 /**
- * Service som kaller regelmotoren.
+ * Service som kaller regelmodulen.
  */
 @Service
-public class RegelmotorService {
+public class RegelmodulService {
 
-    private String regelmotorUrl;
+    private String regelmodulUrl;
 
     private BehandlingRepository behandlingRepo;
 
     @Autowired
-    public RegelmotorService(@Value("${melosys.service.regelmotor.url}") String regelmotorUrl, BehandlingRepository repository) {
-        this.regelmotorUrl = regelmotorUrl;
+    public RegelmodulService(@Value("${melosys.service.regelmodul.url}") String regelmodulUrl, BehandlingRepository repository) {
+        this.regelmodulUrl = regelmodulUrl;
         this.behandlingRepo = repository;
     }
 
     /**
-     * Kall til regelmotoren med opplysninger knyttet til behandlingen med ID {@code behandlingID}.
-     * @param behandlingID Database ID til den behandlingen som brukes for å konstruere requesten til regelmotoren.
+     * Kall til regelmodulen med opplysninger knyttet til behandlingen med ID {@code behandlingID}.
+     * @param behandlingID Database ID til den behandlingen som brukes for å konstruere requesten til regelmodulen.
      */
     public FastsettLovvalgReply fastsettLovvalg(Long behandlingID) {
         Behandling behandling = behandlingRepo.findOne(behandlingID);
@@ -49,7 +49,7 @@ public class RegelmotorService {
 
         FastsettLovvalgRequest fastsettLovvalgRequest = lagRequest(behandling);
 
-        FastsettLovvalgReply fastsettLovvalgReply = ClientBuilder.newClient().target(regelmotorUrl)
+        FastsettLovvalgReply fastsettLovvalgReply = ClientBuilder.newClient().target(regelmodulUrl)
                 .queryParam("req", fastsettLovvalgRequest)
                 .request()
                 .get(FastsettLovvalgReply.class);
@@ -58,7 +58,7 @@ public class RegelmotorService {
     }
 
     /**
-     * Lager en request til regelmotoren for en gitt behandling.
+     * Lager en request til regelmodulen for en gitt behandling.
      */
     FastsettLovvalgRequest lagRequest(Behandling behandling) {
         FastsettLovvalgRequest fastsettLovvalgRequest = new FastsettLovvalgRequest();

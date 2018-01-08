@@ -22,23 +22,23 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-public class RegelmotorServiceTest {
+public class RegelmodulServiceTest {
 
     private BehandlingRepository behandlingRepository;
 
-    private RegelmotorService regelmotorService;
+    private RegelmodulService regelmodulService;
 
     @Before
     public void setUp() {
         behandlingRepository = Mockito.mock(BehandlingRepository.class);
-        regelmotorService = new RegelmotorService("", behandlingRepository);
+        regelmodulService = new RegelmodulService("", behandlingRepository);
     }
 
     @Test
     public void fastsettLovvalg_behandlingIkkeFunnet() {
         when(behandlingRepository.findOne(0L)).thenReturn(null);
 
-        FastsettLovvalgReply fastsettLovvalgReply = regelmotorService.fastsettLovvalg(0L);
+        FastsettLovvalgReply fastsettLovvalgReply = regelmodulService.fastsettLovvalg(0L);
         assertThat(fastsettLovvalgReply).isNull();
     }
 
@@ -86,7 +86,7 @@ public class RegelmotorServiceTest {
 
         behandling.setSaksopplysninger(saksopplysninger);
 
-        FastsettLovvalgRequest fastsettLovvalgRequest = regelmotorService.lagRequest(behandling);
+        FastsettLovvalgRequest fastsettLovvalgRequest = regelmodulService.lagRequest(behandling);
 
         assertThat(fastsettLovvalgRequest.arbeidsforholdDokumenter.get(0)).isEqualTo(arbeidsforholdDokument);
         assertThat(fastsettLovvalgRequest.inntektDokumenter.get(0)).isEqualTo(inntektDokument);
