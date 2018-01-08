@@ -16,6 +16,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
 import no.nav.melosys.regler.motor.KontekstManager;
+import no.nav.melosys.regler.motor.voc.Verdielement;
 
 /**
  * Kontekst (og -manager) for lovvalgregler.
@@ -88,4 +89,9 @@ public class LovvalgKontekstManager {
         return lokalFastsettLovvalgRespons.get();
     }
 
+    /** Returnerer søknadsperioden som Verdielement. */
+    public static final Verdielement søknadsperioden() {
+        return Verdielement.verdien(søknadDokumentet().arbeidUtland.arbeidsperiode);
+    }
+    
 }

@@ -4,10 +4,16 @@ import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SØKNADEN_KVALIFISE
 import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.DELVIS_STOETTET;
 import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.leggTilMelding;
 import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.settArgument;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.*;
 import static no.nav.melosys.regler.motor.voc.Deklarasjon.hvis;
+import static no.nav.melosys.regler.motor.voc.FellesVokabular.*;
 import static no.nav.melosys.regler.motor.voc.FellesVokabular.JA;
+import static no.nav.melosys.regler.motor.voc.Predikat.*;
 
+import no.nav.melosys.domain.dokument.felles.Landkode;
+import no.nav.melosys.regler.lovvalg.LovvalgKontekstManager;
 import no.nav.melosys.regler.motor.Regelpakke;
+import no.nav.melosys.regler.motor.voc.FellesVokabular;
 import no.nav.melosys.regler.motor.voc.Predikat;
 
 /*'
@@ -18,26 +24,63 @@ import no.nav.melosys.regler.motor.voc.Predikat;
 public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
     
     /**
+     * Gir varsel hvis det er evt. flyktningstatus som avgjør om bruker kvalifiserer for forordningen.
+     * 
+     * Varsel gis hvis ingen av følgende slår til:
+     *   1a) Brukeren er statsborger av et EU/EØS-land og perioden starter etter 01.06.2012
+     *   1b) Brukeren er statsborger av Sveits og perioden starter etter 01.06.2016
+     *   1c) Bruker er statsløs
+     *   1d) Tilfellet dekkes av nordisk konvensjon om trygd (gjelder fom. 01.05.2014)
+     *   
+     * I tillegg må minst ett av følgende slå til: 
+     *   2a) Bruker arbeider i annet EØS land og perioden starter etter 01.06.2012
+     *   2b) Bruker arbeider i annet nordisk land og perioden starter etter 01.05.2014
+     *   2c) Tilfellet dekkes av nordisk konvensjon om trygd (gjelder fom. 01.05.2014)
+     */
+    @Regel
+    public static void giVarselHvisEvtFlyktningstatusErAvgjørende() {
+        hvis(
+            ingenAvFølgendeErSant(
+                brukerErEøsBorger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2012)), // 1a
+                brukerErSveitsiskStatsborger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2016)), // 1b
+                brukerErStatsløs, // 1c
+                brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)) // 1b
+            ).og(minstEttAvFølgendeErSant(
+                // FIXME: Implementer 2a-2c
+            ))
+        ).så(
+            leggTilMelding(DELVIS_STOETTET, "Tilfellet dekkes av forordning 883/2004 bare hvis brukeren har flykningstatus. Dette kan ikke sjekkes automatisk. Ring UDI.")
+        );
+    }
+    
+    
+    /**
      * Setter argumentet SØKNADEN_KVALIFISERER_FOR_EF_883_2004.
      * 
-     * Tilfellet i søknaden er dekket av forordningen dersom ett av følgende slår til:
-     * 
-     * 1) Brukeren er statsborger av et EU/EØS-land
-     * 2) Brukeren er statsborger av Sveits (etter en viss dato)
-     * 3) Bruker er statsløs
-     * 4) Bruker er flyktning
-     * 5) Tilfellet dekkes av nordisk konvensjon om trygd
-     *    Dvs. tredjelandsborger som sendes til Sverige, Finland, Danmark, Island, Grønland eller Færøyene
-     * 6) Tilfellet dekkes av trygdeavtalen med Nederland
-     *    Dvs. tredjelandsborger som sendes til Nederland
-     * 7) Tilfellet dekkes av trygdeavtalen med Luxemburg
-     *    Dvs. tredjelandsborger som sendes til Luxemburg
+     * Tilfellet i søknaden er dekket av forordningen dersom minst ett av følgende slår til:
+     *   1a) Brukeren er statsborger av et EU/EØS-land og perioden starter etter 01.06.2012
+     *   1b) Brukeren er statsborger av Sveits og perioden starter etter 01.06.2016
+     *   1c) Bruker er statsløs
+     *   1d) Bruker er flyktning
+     *   1e) Tilfellet dekkes av nordisk konvensjon om trygd (gjelder fom. 01.05.2014)
+     *   
+     * I tillegg må minst ett av følgende slå til: 
+     *   2a) Bruker arbeider i annet EØS land og perioden starter etter 01.06.2012
+     *   2b) Bruker arbeider i annet nordisk land og perioden starter etter 01.05.2014
+     *   2c) Tilfellet dekkes av nordisk konvensjon om trygd (gjelder fom. 01.05.2014)
+     *
+     * Nordisk konvensjon om trygd: tredjelandsborger som sendes til Sverige, Finland, Danmark, Island, Grønland eller Færøyene 
      */
     @Regel
     public static void sjekkOmSoeknadenDekkesAvEf_883_2004() {
-        hvis(brukerErEøsBorger // Tilfelle 1
-            // .eller(...)
-            // FIXME: Legg til alle tilfellene som dekkes
+        hvis(
+            minstEttAvFølgendeErSant(
+                brukerErEøsBorger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2012)), // 1a
+                brukerErSveitsiskStatsborger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2016)) // 1b
+                // FIXME: Implementer 1c-1e
+            ).og(minstEttAvFølgendeErSant(
+                // FIXME: Implementer 2a-2c
+            ))
         ).så(
             settArgument(SØKNADEN_KVALIFISERER_FOR_EF_883_2004, JA)
         ).ellers(
@@ -47,9 +90,24 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
         );
     }
     
-    private static Predikat brukerErEøsBorger = () -> {
+    private static final Predikat brukerErEøsBorger = () -> {
         // FIXME: Implementer
         return false;
     };
     
+    private static final Predikat brukerErSveitsiskStatsborger = () -> {
+        // FIXME: Implementer
+        return false;
+    };
+    
+    private static final Predikat brukerErStatsløs = () -> {
+        // FIXME: Implementer
+        return false;
+    };
+    
+    private static final Predikat brukerSendesTilEtNordiskLand = () -> {
+        // FIXME: Implementer
+        return false;
+    };
+
 }

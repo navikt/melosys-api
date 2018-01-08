@@ -115,10 +115,12 @@ public class KvalifiserForArtikler implements Regelpakke {
     /**
      * Kriteriene for at 12.1 skal vurderes:
      * 1) Brukeren (tilfellet) er omfattet av forordning (EF) 883/2004
-     * 2) Bruker utfører lønnet arbeid (inkl.frilansere)
-     * 3) Bruker er ikke næringsdrivende
-     * 4) Arbeidsgiver må ha vesentlig aktivitet i Norge
-     * 5) Bruker arbeider i kun 1 land, ikke Norge
+     * 3) Bruker utfører lønnet arbeid (inkl.frilansere)
+     * 4) Bruker er ikke næringsdrivende
+     * 5) Arbeidsgiver må ha vesentlig aktivitet i Norge
+     * 6) Bruker arbeider i kun 1 land, ikke Norge
+     * 
+     * FIXME: Revider kommentar og implementasjon.
      */
     @Regel
     public static void kvalifiserFor12_1() {
@@ -128,7 +130,7 @@ public class KvalifiserForArtikler implements Regelpakke {
             .og(argumentet(BRUKER_ER_NÆRINGSDRIVENDE).erIkkeSann()) // 3
             .og(argumentet(ARBEIDSGIVER_HAR_VESENTLIG_VIRKSOMHET_I_NORGE).erSann()) // 4
             .og(argumentet(ANTALL_UTLAND_BRUKER_ARBEIDER_I).erLik(1)) // 5
-            .og(argumentet(BRUKER_ARBEIDER_I_NORGE).erIkkeSann())
+            .og(argumentet(BRUKER_ARBEIDER_I_NORGE).erIkkeSann()) // 6
         ).så(
             settArgument(SKAL_VURDERE_ART_12_1, JA)
         ).ellers(

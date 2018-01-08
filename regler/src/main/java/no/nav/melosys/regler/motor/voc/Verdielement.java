@@ -1,9 +1,15 @@
 package no.nav.melosys.regler.motor.voc;
 
+import java.time.LocalDate;
+
 import org.springframework.util.Assert;
 
+import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.regler.motor.KontekstManager;
 
+/*
+ * TODO: Denne klassen kan types + subklasses for konkrete typer for å få typesikkerhet
+ */
 public class Verdielement {
     
     private Verdielement() {} // Skal ikke instansieres direkte
@@ -71,6 +77,11 @@ public class Verdielement {
         };
     }
 
+    public Predikat starterPåEllerEtter(LocalDate dato) {
+        ErPeriode periode = (ErPeriode) verdi;
+        return () -> periode.getFom() != null && !dato.isAfter(periode.getFom());
+    }
+    
     public <T> Predikat erStørreEnn(T grense) {
         return () -> sammenliknMed(grense) > 0;
     }

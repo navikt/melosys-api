@@ -7,7 +7,7 @@ public enum Argument {
     
     // Kriterier som velger artikkel 
     BRUKER_ER_ARBEIDSTAKER("Bruker er arbeidstaker"),
-    BRUKER_ER_NÆRINGSDRIVENDE("Bruker er næringsdrivende"), // FIXME: Må settes
+    BRUKER_ER_NÆRINGSDRIVENDE("Bruker er næringsdrivende"),
     // BRUKER_ER_TJENESTEMANN("Bruker er tjenestemann"),
     // BRUKER_ARBEIDER_I_FLY("Bruker arbeider i fly"),
     // BRUKER_ARBEIDER_PÅ_SKIP("Bruker arbeider på skip"),
@@ -48,7 +48,7 @@ public enum Argument {
     HOVEDARBEIDSFORHOLDET_VARER_I_HELE_SØKNADSPERIODEN("Hovedarbeidsforholdet varer i hele søknadsperioden"), // 12.1 // FIXME: Må settes
     LENGDE_MND_UTENLANDSOPPHOLD("Antall måneder utenlandsoppholdet varer"), // 12.1
     BRUKEREN_SKAL_ERSTATTE_EN_ANNEN_ARBEIDSTAKER("Brukeren skal ikke erstatte en annen utsendt arbeidstaker"), // 12.1 // FIXME: Må settes
-    BRUKER_ER_MEDLEM_AV_FTR_MÅNEDEN_FØR_PERIODESTART("Bruker er medlem av FTR måneden før periodestart"), // 12.1 // FIXME: Må settes
+    BRUKER_ER_MEDLEM_AV_FTR_MÅNEDEN_FØR_PERIODESTART("Bruker er medlem av FTR måneden før periodestart"), // 12.1
     
     // FIXME BRUKER_ER_ANSATT_HOS_UTSENDENDE_ORGANISASJON_I_HELE_SØKNADSPERIODE("Bruker er ansatt hos utsendende organisasjon i hele perioden"),
     
