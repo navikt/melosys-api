@@ -13,16 +13,16 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
-@Api(tags = {"regelmodul"})
-@Path("/regelmodul")
+@Api(tags = {"vurdering"})
+@Path("/vurdering")
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
-public class RegelmodulTjeneste {
+public class VurderingTjeneste {
 
     private RegelmodulService regelmodulService;
 
     @Autowired
-    public RegelmodulTjeneste(RegelmodulService regelmodulService) {
+    public VurderingTjeneste(RegelmodulService regelmodulService) {
         this.regelmodulService = regelmodulService;
     }
 
