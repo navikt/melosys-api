@@ -2,6 +2,7 @@ package no.nav.melosys.regler.lovvalg.utled_fakta;
 
 import static no.nav.melosys.regler.api.lovvalg.rep.Argument.BRUKER_ARBEIDER_I_NORGE;
 import static no.nav.melosys.regler.api.lovvalg.rep.Argument.BRUKER_ER_ARBEIDSTAKER;
+import static no.nav.melosys.regler.api.lovvalg.rep.Argument.BRUKER_ER_NÆRINGSDRIVENDE;
 import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.DELVIS_STOETTET;
 import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.leggTilMelding;
 import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.settArgument;
@@ -46,7 +47,7 @@ public class UtledFaktaOmArbeid implements Regelpakke {
     }
 
     /**
-     * Fastslår om bruker arbeider i Norge eller ikke
+     * Fastslår om bruker arbeider i Norge eller ikke.
      */
     @Regel
     public static void finnUtOmBrukerArbeiderINorge() {
@@ -60,4 +61,18 @@ public class UtledFaktaOmArbeid implements Regelpakke {
         );
     }
     
+    /**
+     * Fastslå om bruker er selvstendig næringsdrivende.
+     * Hentes fra søknadsdokumentet.
+     */
+    @Regel
+    public static void finnUtOmBrukerErNæringsdrivende() {
+        hvis(
+            verdien(søknadDokumentet().arbeidNorge.brukerErSelvstendigNæringsdrivende)
+        ).så(
+            settArgument(BRUKER_ER_NÆRINGSDRIVENDE, JA)
+        ).ellers(
+            settArgument(BRUKER_ER_NÆRINGSDRIVENDE, NEI)
+        );
+    }
 }

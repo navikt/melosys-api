@@ -31,11 +31,18 @@ public final class Deklarasjon {
         return this;
     }
     
-    public Deklarasjon ellers(Runnable... kommandoer) {
+    public Deklarasjon ellersHvis(Predikat betingelse) {
+        if (this.betingelse.test()) {
+            return hvis(() -> false);
+        } else {
+            return hvis(betingelse);
+        }
+    }
+    
+    public void ellers(Runnable... kommandoer) {
         if (!betingelse.test()) {
             utfør(kommandoer);
         }
-        return this;
     }
     
 }
