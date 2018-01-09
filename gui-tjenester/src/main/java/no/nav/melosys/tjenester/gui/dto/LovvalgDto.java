@@ -8,7 +8,7 @@ public class LovvalgDto {
 
     private FastsettLovvalgReply vurdering;
 
-    public LovvalgDto(Long behandlingID, FastsettLovvalgReply fastsettLovvalgReply) {
+    public LovvalgDto(long behandlingID, FastsettLovvalgReply fastsettLovvalgReply) {
         this.behandlingId = behandlingID;
         this.vurdering = fastsettLovvalgReply;
     }
