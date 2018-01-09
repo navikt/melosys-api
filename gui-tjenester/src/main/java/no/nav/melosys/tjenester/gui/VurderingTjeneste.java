@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import io.swagger.annotations.Api;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.service.RegelmodulService;
+import no.nav.melosys.tjenester.gui.dto.LovvalgDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -28,13 +29,15 @@ public class VurderingTjeneste {
 
     @GET
     @Path("{behandlingID}")
-    public Response regelModulKall(@PathParam("behandlingID") Long behandlingID) {
+    public Response regelModulKall(@PathParam("behandlingID") long behandlingID) {
         FastsettLovvalgReply fastsettLovvalgReply = regelmodulService.fastsettLovvalg(behandlingID);
+
         if (fastsettLovvalgReply == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
+        } else {
+            LovvalgDto lovvalgDto = new LovvalgDto(behandlingID, fastsettLovvalgReply);
+            return Response.ok(lovvalgDto).build();
         }
-
-        return Response.ok(fastsettLovvalgReply).build();
     }
 
 }
