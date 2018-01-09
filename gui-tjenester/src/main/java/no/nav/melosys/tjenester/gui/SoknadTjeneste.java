@@ -23,14 +23,14 @@ import javax.ws.rs.core.Response;
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 @Transactional
-public class SoknadRestTjeneste extends RestTjeneste  {
+public class SoknadTjeneste extends RestTjeneste  {
 
     private SoeknadService soeknadService;
 
     private ValideringService valideringService;
 
     @Autowired
-    public SoknadRestTjeneste(SoeknadService soeknadService, ValideringService valideringService) {
+    public SoknadTjeneste(SoeknadService soeknadService, ValideringService valideringService) {
         this.soeknadService = soeknadService;
         this.valideringService = valideringService;
     }

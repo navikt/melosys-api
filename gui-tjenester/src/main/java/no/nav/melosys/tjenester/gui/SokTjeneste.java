@@ -33,7 +33,7 @@ import java.util.Set;
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 @Transactional
-public class SokRestTjeneste extends RestTjeneste {
+public class SokTjeneste extends RestTjeneste {
 
     private FagsakService fagsakService;
 
@@ -42,7 +42,7 @@ public class SokRestTjeneste extends RestTjeneste {
     private ModelMapper modelMapper;
 
     @Autowired
-    public SokRestTjeneste(FagsakService fagsakService, DokumentFactory dokumentFactory) {
+    public SokTjeneste(FagsakService fagsakService, DokumentFactory dokumentFactory) {
         this.fagsakService = fagsakService;
         this.dokumentFactory = dokumentFactory;
 

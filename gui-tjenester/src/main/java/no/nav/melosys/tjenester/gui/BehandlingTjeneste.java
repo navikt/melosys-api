@@ -31,14 +31,14 @@ import java.util.List;
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 @Transactional
-public class BehandlingRestTjeneste extends RestTjeneste {
+public class BehandlingTjeneste extends RestTjeneste {
 
     private BehandlingRepository behandlingrepo;
 
     private ModelMapper modelMapper;
 
     @Autowired
-    public BehandlingRestTjeneste(BehandlingRepository behandlingrepo, DokumentFactory dokumentFactory) {
+    public BehandlingTjeneste(BehandlingRepository behandlingrepo, DokumentFactory dokumentFactory) {
         this.behandlingrepo = behandlingrepo;
 
         this.modelMapper = new ModelMapper();

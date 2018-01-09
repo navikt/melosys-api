@@ -52,7 +52,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     // N.B. Frontend ønsker ikke å få søknaden på /fagsaker
                     break;
                 default:
-                    throw new IllegalArgumentException("Type " + type.getKode() + " ikke støtet.");
+                    throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");
             }
         }
 

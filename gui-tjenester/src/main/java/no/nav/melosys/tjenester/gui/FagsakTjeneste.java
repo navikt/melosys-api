@@ -29,14 +29,14 @@ import javax.ws.rs.core.Response;
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 @Transactional
-public class FagsakRestTjeneste extends RestTjeneste {
+public class FagsakTjeneste extends RestTjeneste {
 
     private FagsakService fagsakService;
 
     private ModelMapper modelMapper;
 
     @Autowired
-    public FagsakRestTjeneste(FagsakService fagsakService, DokumentFactory dokumentFactory) {
+    public FagsakTjeneste(FagsakService fagsakService, DokumentFactory dokumentFactory) {
         this.fagsakService = fagsakService;
 
         this.modelMapper = new ModelMapper();

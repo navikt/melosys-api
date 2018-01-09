@@ -1,0 +1,98 @@
+package no.nav.melosys.service;
+
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
+import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
+import no.nav.melosys.repository.BehandlingRepository;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+public class RegelmodulServiceTest {
+
+    private BehandlingRepository behandlingRepository;
+
+    private RegelmodulService regelmodulService;
+
+    @Before
+    public void setUp() {
+        behandlingRepository = Mockito.mock(BehandlingRepository.class);
+        regelmodulService = new RegelmodulService("", behandlingRepository);
+    }
+
+    @Test
+    public void fastsettLovvalg_behandlingIkkeFunnet() {
+        when(behandlingRepository.findOne(0L)).thenReturn(null);
+
+        FastsettLovvalgReply fastsettLovvalgReply = regelmodulService.fastsettLovvalg(0L);
+        assertThat(fastsettLovvalgReply).isNull();
+    }
+
+    @Test
+    public void lagRequest() {
+        Behandling behandling = new Behandling();
+
+        Set<Saksopplysning> saksopplysninger = new HashSet<>();
+
+        Saksopplysning arbeidsforhold = new Saksopplysning();
+        arbeidsforhold.setType(SaksopplysningType.ARBEIDSFORHOLD);
+        ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument();
+        arbeidsforhold.setDokument(arbeidsforholdDokument);
+        saksopplysninger.add(arbeidsforhold);
+
+        Saksopplysning inntekt = new Saksopplysning();
+        inntekt.setType(SaksopplysningType.INNTEKT);
+        InntektDokument inntektDokument = new InntektDokument();
+        inntekt.setDokument(inntektDokument);
+        saksopplysninger.add(inntekt);
+
+        Saksopplysning medl = new Saksopplysning();
+        medl.setType(SaksopplysningType.MEDLEMSKAP);
+        MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
+        medl.setDokument(medlemskapDokument);
+        saksopplysninger.add(medl);
+
+        Saksopplysning org = new Saksopplysning();
+        org.setType(SaksopplysningType.ORGANISASJON);
+        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
+        org.setDokument(organisasjonDokument);
+        saksopplysninger.add(org);
+
+        Saksopplysning person = new Saksopplysning();
+        person.setType(SaksopplysningType.PERSONOPPLYSNING);
+        PersonDokument personDokument = new PersonDokument();
+        person.setDokument(personDokument);
+        saksopplysninger.add(person);
+
+        Saksopplysning søknad = new Saksopplysning();
+        søknad.setType(SaksopplysningType.SØKNAD);
+        SoeknadDokument søknadDokument = new SoeknadDokument();
+        søknad.setDokument(søknadDokument);
+        saksopplysninger.add(søknad);
+
+        behandling.setSaksopplysninger(saksopplysninger);
+
+        FastsettLovvalgRequest fastsettLovvalgRequest = regelmodulService.lagRequest(behandling);
+
+        assertThat(fastsettLovvalgRequest.arbeidsforholdDokumenter.get(0)).isEqualTo(arbeidsforholdDokument);
+        assertThat(fastsettLovvalgRequest.inntektDokumenter.get(0)).isEqualTo(inntektDokument);
+        assertThat(fastsettLovvalgRequest.medlemskapDokumenter.get(0)).isEqualTo(medlemskapDokument);
+        assertThat(fastsettLovvalgRequest.organisasjonDokumenter.get(0)).isEqualTo(organisasjonDokument);
+        assertThat(fastsettLovvalgRequest.personopplysningDokument).isEqualTo(personDokument);
+        assertThat(fastsettLovvalgRequest.søknadDokument).isEqualTo(søknadDokument);
+    }
+}
