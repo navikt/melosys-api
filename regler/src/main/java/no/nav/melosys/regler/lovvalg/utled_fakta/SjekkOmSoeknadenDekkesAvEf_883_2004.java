@@ -74,20 +74,13 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
         hvis(
             minstEttAvFølgendeErSant(
                 brukerErEøsBorger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2012)), // 1a
-                brukerErSveitsiskStatsborger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2016)) // 1b
-                // FIXME: Implementer 1c-1e
+                brukerErSveitsiskStatsborger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2016)), // 1b
+                brukerErStatsløs, // 1c
+                brukerErFlyktning, // 1d
+                brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)) // 1e
             ).og(minstEttAvFølgendeErSant(
                 // FIXME: Implementer 2a-2c
             ))
-            /*
-            brukerErEøsBorger // Tilfelle 1
-            .eller(brukerErSveitsiskStatsborger) // Tilfelle 2
-            .eller(brukerErStatsløs) // Tilfelle 3
-            .eller(brukerErFlyktning) // Tilfelle 4
-            .eller(brukerSendesTilEtNordiskLand) // Tilfelle 5
-            .eller(brukerDekkesAvTrygdeavtalenMedNederland) // Tilfelle 6
-            .eller(brukerDekkesAvTrygdeavtalenMedLuxembourg) // Tilfelle 7
-            */
         ).så(
             settArgument(SØKNADEN_KVALIFISERER_FOR_EF_883_2004, JA)
         ).ellers(
@@ -114,10 +107,10 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
                 && søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Landkode::erDekketAvNordiskKonvensjonOmTrygd);
     };
 
-    private static Predikat brukerDekkesAvTrygdeavtalenMedNederland = () ->
+    private static Predikat brukerSendesTilNederland = () ->
         søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Landkode::erNederland);
 
-    private static Predikat brukerDekkesAvTrygdeavtalenMedLuxembourg = () ->
+    private static Predikat brukerSendesTilLuxembourg = () ->
         søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Landkode::erLuxembourg);
 
 }
