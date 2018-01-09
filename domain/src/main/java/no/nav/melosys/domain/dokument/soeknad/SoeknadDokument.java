@@ -40,6 +40,9 @@ public class SoeknadDokument extends SaksopplysningDokument {
     // Opplysninger om arbeidsinntekt
     public Arbeidsinntekt arbeidsinntekt;
 
+    // TODO: Må avklare hvordan Melosys skal forholde seg til flyktningstatus, da opplysningen ikke kommer inn via søknad og må sjekkes med UDI av saksbehandler.
+    public Boolean erFlyktning;
+
     // Øvrige
     public String tilleggsopplysninger;
 

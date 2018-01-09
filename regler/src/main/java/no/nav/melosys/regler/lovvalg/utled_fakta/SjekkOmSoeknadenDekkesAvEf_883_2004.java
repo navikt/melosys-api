@@ -105,12 +105,13 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
 
     private static Predikat brukerErFlyktning = () -> {
         // FIXME: Må finne ut om bruker er flyktning
-        return false;
+        return søknadDokumentet().erFlyktning;
     };
 
     private static Predikat brukerSendesTilEtNordiskLand = () -> {
         // FIXME: Uavklart hvis bruker sendes til mer enn ett land
-        return søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Landkode::erDekketAvNordiskKonvensjonOmTrygd);
+        return personopplysningDokumentet().statsborgerskap.erTredjeland()
+                && søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Landkode::erDekketAvNordiskKonvensjonOmTrygd);
     };
 
     private static Predikat brukerDekkesAvTrygdeavtalenMedNederland = () ->
