@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.validering.ValideringService;
+import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -44,7 +45,8 @@ public class SoknadTjeneste extends RestTjeneste  {
         if (soeknad == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         } else {
-            return Response.ok(soeknad).build();
+            SoeknadDto soeknadDto = new SoeknadDto(behandlingID, soeknad);
+            return Response.ok(soeknadDto).build();
         }
     }
 
@@ -55,7 +57,8 @@ public class SoknadTjeneste extends RestTjeneste  {
         valideringService.validerOpplysninger(soeknadDokument);
         SoeknadDokument soeknad = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
 
-        return Response.ok(soeknad).build();
+        SoeknadDto soeknadDto = new SoeknadDto(behandlingID, soeknad);
+        return Response.ok(soeknadDto).build();
     }
 
 }
