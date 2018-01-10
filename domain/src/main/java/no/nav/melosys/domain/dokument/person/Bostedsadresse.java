@@ -1,9 +1,8 @@
 package no.nav.melosys.domain.dokument.person;
 
+import no.nav.melosys.domain.dokument.felles.Land;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import no.nav.melosys.domain.dokument.felles.Landkode;
 
 public class Bostedsadresse {
 
@@ -13,7 +12,7 @@ public class Bostedsadresse {
 
     private String poststed;
 
-    private Landkode land;
+    private Land land;
 
     public Gateadresse getGateadresse() {
         return gateadresse;
@@ -23,11 +22,11 @@ public class Bostedsadresse {
         this.gateadresse = gateadresse;
     }
 
-    public Landkode getLand() {
+    public Land getLand() {
         return land;
     }
 
-    public void setLand(Landkode land) {
+    public void setLand(Land land) {
         this.land = land;
     }
 

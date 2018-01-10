@@ -7,15 +7,14 @@ import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.settArgument;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.*;
 import static no.nav.melosys.regler.motor.voc.Deklarasjon.hvis;
 import static no.nav.melosys.regler.motor.voc.FellesVokabular.*;
-import static no.nav.melosys.regler.motor.voc.FellesVokabular.JA;
 import static no.nav.melosys.regler.motor.voc.Predikat.*;
 
-import no.nav.melosys.domain.dokument.felles.Landkode;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.regler.motor.Regelpakke;
 import no.nav.melosys.regler.motor.voc.Predikat;
 
 /*'
- * Regelpakken slår fast om søknaden dekkes aV forordning (EF) 883/2004
+ * Regelpakken slår fast om søknaden dekkes av forordning (EF) 883/2004
  * 
  * FIXME: Ikke ferdig implementert. Pakken gir varsel dersom den ikke kan slå fast at søknaden dekkes. 
  */
@@ -42,8 +41,10 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
                 brukerErEøsBorger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2012)), // 1a
                 brukerErSveitsiskStatsborger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2016)), // 1b
                 brukerErStatsløs, // 1c
-                brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)) // 1b
+                brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)) // 1d
             ).og(minstEttAvFølgendeErSant(
+                brukerSendesTilEØSLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2012)), // 2a
+                brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)) // 2b
                 // FIXME: Implementer 2a-2c
             ))
         ).så(
@@ -79,6 +80,8 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
                 brukerErFlyktning, // 1d
                 brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)) // 1e
             ).og(minstEttAvFølgendeErSant(
+                brukerSendesTilEØSLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2012)), // 2a
+                brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)) // 2b
                 // FIXME: Implementer 2a-2c
             ))
         ).så(
@@ -104,13 +107,19 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
     private static Predikat brukerSendesTilEtNordiskLand = () -> {
         // FIXME: Uavklart hvis bruker sendes til mer enn ett land
         return personopplysningDokumentet().statsborgerskap.erTredjeland()
-                && søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Landkode::erDekketAvNordiskKonvensjonOmTrygd);
+                && søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erNordenUtenNorge);
     };
 
+    private static Predikat brukerSendesTilEØSLand = () ->
+        søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erEØS);
+
+    private static Predikat brukerSendesTilEULand = () ->
+        søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erEU);
+
     private static Predikat brukerSendesTilNederland = () ->
-        søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Landkode::erNederland);
+        søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erNederland);
 
     private static Predikat brukerSendesTilLuxembourg = () ->
-        søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Landkode::erLuxembourg);
+        søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erLuxembourg);
 
 }

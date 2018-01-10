@@ -17,7 +17,7 @@ public class ArbeidNorge {
     @JsonProperty("ansattPaSokkelEllerSkip")
     public String ansattPaSokkelEllerSkip; //TODO boolean?
     public String navnSkipEllerSokkel;
-    public String sokkelLand; //TODO Landkode?
+    public String sokkelLand; //TODO Land?
     @JsonProperty("skipFartsomrade")
     public String skipFartsområde;
     public String skipFlaggLand;

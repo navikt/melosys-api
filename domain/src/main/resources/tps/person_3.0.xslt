@@ -16,13 +16,13 @@
                 </gateadresse>
                 <postnr><xsl:value-of select="bostedsadresse/strukturertAdresse/poststed"/></postnr>
                 <land>
-                    <kode><xsl:value-of select="bostedsadresse/strukturertAdresse/landkode"/></kode>
+                    <xsl:value-of select="bostedsadresse/strukturertAdresse/landkode"/>
                 </land>
             </bostedsadresse>
             <fnr><xsl:value-of select="aktoer/ident/ident"/></fnr>
             <sivilstand><xsl:value-of select="sivilstand/sivilstand"/></sivilstand>
             <statsborgerskap>
-                <kode><xsl:value-of select="statsborgerskap/land"/></kode>
+                <xsl:value-of select="statsborgerskap/land"/>
             </statsborgerskap>
             <kjønn><xsl:value-of select="kjoenn/kjoenn"/></kjønn>
             <sammensattNavn><xsl:value-of select="personnavn/sammensattNavn"/></sammensattNavn>
