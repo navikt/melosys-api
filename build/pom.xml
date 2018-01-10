@@ -12,6 +12,7 @@
     <modules>
         <module>ear</module>
         <module>war</module>
+        <module>jar</module>
     </modules>
 
     <artifactId>build</artifactId>
