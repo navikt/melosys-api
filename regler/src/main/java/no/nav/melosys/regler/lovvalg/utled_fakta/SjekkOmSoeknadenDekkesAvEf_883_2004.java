@@ -32,7 +32,7 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
      * I tillegg må minst ett av følgende slå til: 
      *   2a) Bruker arbeider i annet EØS land og perioden starter etter 01.06.2012
      *   2b) Bruker arbeider i annet nordisk land og perioden starter etter 01.05.2014
-     *   2c) Tilfellet dekkes av nordisk konvensjon om trygd (gjelder fom. 01.05.2014)
+     *   2c) Bruker arbeider i Sveits og perioden starter etter 01.06.2016
      */
     @Regel
     public static void giVarselHvisEvtFlyktningstatusErAvgjørende() {
@@ -44,8 +44,8 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
                 brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)) // 1d
             ).og(minstEttAvFølgendeErSant(
                 brukerSendesTilEØSLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2012)), // 2a
-                brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)) // 2b
-                // FIXME: Implementer 2a-2c
+                brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)), // 2b
+                brukerSendesTilSveits.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2016)) // 2c
             ))
         ).så(
             leggTilMelding(DELVIS_STOETTET, "Tilfellet dekkes av forordning 883/2004 bare hvis brukeren har flykningstatus. Dette kan ikke sjekkes automatisk. Ring UDI.")
@@ -66,7 +66,7 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
      * I tillegg må minst ett av følgende slå til: 
      *   2a) Bruker arbeider i annet EØS land og perioden starter etter 01.06.2012
      *   2b) Bruker arbeider i annet nordisk land og perioden starter etter 01.05.2014
-     *   2c) Tilfellet dekkes av nordisk konvensjon om trygd (gjelder fom. 01.05.2014)
+     *   2c) Bruker arbeider i Sveits og perioden starter etter 01.06.2016
      *
      * Nordisk konvensjon om trygd: tredjelandsborger som sendes til Sverige, Finland, Danmark, Island, Grønland eller Færøyene 
      */
@@ -81,8 +81,8 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
                 brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)) // 1e
             ).og(minstEttAvFølgendeErSant(
                 brukerSendesTilEØSLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2012)), // 2a
-                brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)) // 2b
-                // FIXME: Implementer 2a-2c
+                brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)), // 2b
+                brukerSendesTilSveits.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2016)) // 2c
             ))
         ).så(
             settArgument(SØKNADEN_KVALIFISERER_FOR_EF_883_2004, JA)
@@ -109,6 +109,9 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
         return personopplysningDokumentet().statsborgerskap.erTredjeland()
                 && søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erNordenUtenNorge);
     };
+
+    private static Predikat brukerSendesTilSveits = () ->
+        søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erSveits);
 
     private static Predikat brukerSendesTilEØSLand = () ->
         søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erEØS);
