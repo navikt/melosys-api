@@ -1,119 +1,71 @@
 package no.nav.melosys.domain.dokument.felles;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import no.nav.melosys.domain.dokument.KodeverkEnum;
 
 import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 import java.util.*;
 
 @XmlType(name = "Land")
 @XmlEnum
 public enum Land implements KodeverkEnum<Land> {
-    // TODO: Bytt om på kode og navn slik at mapping fra XML og JSON fungerer uten videre
-    @XmlEnumValue("BEL")
-    BELGIA("BEL"),
-    @XmlEnumValue("BGR")
-    BULGARIA("BGR"),
-    @XmlEnumValue("DNK")
-    DANMARK("DNK"),
-    @XmlEnumValue("CZE")
-    TSJEKKIA("CZE"),
-    @XmlEnumValue("EST")
-    ESTLAND("EST"),
-    @XmlEnumValue("FIN")
-    FINLAND("FIN"),
-    @XmlEnumValue("FRA")
-    FRANKRIKE("FRA"),
-    @XmlEnumValue("FRO")
-    FÆRØYENE("FRO"),
-    @XmlEnumValue("GRL")
-    GRØNLAND("GRL"),
-    @XmlEnumValue("GRC")
-    HELLAS("GRC"),
-    @XmlEnumValue("IRL")
-    IRLAND("IRL"),
-    @XmlEnumValue("ISL")
-    ISLAND("ISL"),
-    @XmlEnumValue("ITA")
-    ITALIA("ITA"),
-    @XmlEnumValue("HRV")
-    KROATIA("HRV"),
-    @XmlEnumValue("CYP")
-    KYPROS("CYP"),
-    @XmlEnumValue("LVA")
-    LATVIA("LVA"),
-    @XmlEnumValue("LIE")
-    LIECHTENSTEIN("LIE"),
-    @XmlEnumValue("LTU")
-    LITAUEN("LTU"),
-    @XmlEnumValue("LUX")
-    LUXEMBOURG("LUX"),
-    @XmlEnumValue("MLT")
-    MALTA("MLT"),
-    @XmlEnumValue("NLD")
-    NEDERLAND("NLD"),
-    @XmlEnumValue("NOR")
-    NORGE("NOR"),
-    @XmlEnumValue("POL")
-    POLEN("POL"),
-    @XmlEnumValue("PRT")
-    PORTUGAL("PRT"),
-    @XmlEnumValue("ROU")
-    ROMANIA("ROU"),
-    @XmlEnumValue("SVK")
-    SLOVAKIA("SVK"),
-    @XmlEnumValue("SVN")
-    SLOVENIA("SVN"),
-    @XmlEnumValue("ESP")
-    SPANIA("ESP"),
-    @XmlEnumValue("GBR")
-    STORBRITANNIA("GBR"),
-    @XmlEnumValue("SWZ")
-    SVEITS("SWZ"),
-    @XmlEnumValue("SWE")
-    SVERIGE("SWE"),
-    @XmlEnumValue("DEU")
-    TYSKLAND("DEU"),
-    @XmlEnumValue("HUN")
-    UNGARN("HUN"),
-    @XmlEnumValue("AUT")
-    ØSTERRIKE("AUT"),
-    UKJENT(null);
+    BEL("BELGIA"),
+    BGR("BULGARIA"),
+    DNK("DANMARK"),
+    CZE("TSJEKKIA"),
+    EST("ESTLAND"),
+    FIN("FINLAND"),
+    FRA("FRANKRIKE"),
+    FRO("FÆRØYENE"),
+    GRL("GRØNLAND"),
+    GRC("HELLAS"),
+    IRL("IRLAND"),
+    ISL("ISLAND"),
+    ITA("ITALIA"),
+    HRV("KROATIA"),
+    CYP("KYPROS"),
+    LVA("LATVIA"),
+    LIE("LIECHTENSTEIN"),
+    LTU("LITAUEN"),
+    LUX("LUXEMBOURG"),
+    MLT("MALTA"),
+    NLD("NEDERLAND"),
+    NOR("NORGE"),
+    POL("POLEN"),
+    PRT("PORTUGAL"),
+    ROU("ROMANIA"),
+    SVK("SLOVAKIA"),
+    SVN("SLOVENIA"),
+    ESP("SPANIA"),
+    GBR("STORBRITANNIA"),
+    SWZ("SVEITS"),
+    SWE("SVERIGE"),
+    DEU("TYSKLAND"),
+    HUN("UNGARN"),
+    AUT("ØSTERRIKE"),
+    UKJ("UOPPGITT/UKJENT"); // Egentlig kodeverdi er '???'
 
     // TODO: Sjekk om/hvordan vi skal håndtere Sveits og Svalbard
-    private static final Set<Land> EØS = new HashSet<>(Arrays.asList(ISLAND, LIECHTENSTEIN, NORGE));
+    private static final Set<Land> EØS = new HashSet<>(Arrays.asList(ISL, LIE, NOR));
     private static final Set<Land> EU = new HashSet<>(Arrays.asList(
-            BELGIA, BULGARIA, DANMARK, ESTLAND, FINLAND, FRANKRIKE, HELLAS, IRLAND, ITALIA, KROATIA, KYPROS,
-            LATVIA, LITAUEN, LUXEMBOURG, MALTA, NEDERLAND, POLEN, PORTUGAL, ROMANIA, SLOVAKIA, SLOVENIA, SPANIA,
-            STORBRITANNIA, SVERIGE, TSJEKKIA, TYSKLAND, UNGARN, ØSTERRIKE));
+            BEL, BGR, DNK, EST, FIN, FRA, GRC, IRL, ITA, HRV, CYP,
+            LVA, LTU, LUX, MLT, NLD, POL, PRT, ROU, SVK, SVN, ESP,
+            GBR, SWE, CZE, DEU, HUN, AUT));
     // TODO: Sjekk om Åland skal være med
-    private static final Set<Land> NORDEN_UTEN_NORGE = new HashSet<>(Arrays.asList(
-            DANMARK, FINLAND, FÆRØYENE, GRØNLAND, ISLAND, SVERIGE));
+    private static final Set<Land> NORDEN_UTEN_NORGE = new HashSet<>(Arrays.asList(DNK, FIN, FRO, GRL, ISL, SWE));
 
-    private String kode;
+    private String navn;
 
     // Brukes av JAXB
     Land() {}
 
-    Land(String kode) {
-        this.kode = kode;
-    }
-
-    @JsonCreator
-    public static Land getLand(String kode) {
-        for (Land land : values()) {
-            if (kode.equals(land.kode)) {
-                return land;
-            }
-        }
-        return UKJENT;
+    Land(String navn) {
+        this.navn = navn;
     }
 
     @Override
     public String getNavn() {
-        return kode;
+        return navn;
     }
 
     public boolean erEØS() {
@@ -125,11 +77,11 @@ public enum Land implements KodeverkEnum<Land> {
     }
 
     public boolean erSveits() {
-        return SVEITS.kode.equals(kode);
+        return SWZ.navn.equals(navn);
     }
 
     public boolean erStatsløs() {
-        return kode == null;
+        return navn == null;
     }
 
     public boolean erNordenUtenNorge() {
@@ -137,14 +89,14 @@ public enum Land implements KodeverkEnum<Land> {
     }
 
     public boolean erNederland() {
-        return NEDERLAND.kode.equals(kode);
+        return NLD.navn.equals(navn);
     }
 
     public boolean erLuxembourg() {
-        return LUXEMBOURG.kode.equals(kode);
+        return LUX.navn.equals(navn);
     }
 
     public boolean erTredjeland() {
-        return kode != null && !erEU() && !erEØS();
+        return navn != null && !erEU() && !erEØS();
     }
 }
