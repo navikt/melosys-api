@@ -29,6 +29,7 @@
         <module>regler-api</module>
         <module>regler</module>
         <module>sikkerhet</module>
+        <module>app</module>
     </modules>
 
     <properties>
@@ -80,6 +81,11 @@
     <dependencyManagement>
         <dependencies>
             <!-- Melosys moduler -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>app</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>melosys-aura-config</artifactId>
