@@ -60,7 +60,7 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
      *   1a) Brukeren er statsborger av et EU/EØS-land og perioden starter etter 01.06.2012
      *   1b) Brukeren er statsborger av Sveits og perioden starter etter 01.06.2016
      *   1c) Bruker er statsløs
-     *   1d) Bruker er flyktning
+     *   1d) Bruker er flyktning (kan ikke sjekkes maskinelt)
      *   1e) Tilfellet dekkes av nordisk konvensjon om trygd (gjelder fom. 01.05.2014)
      *   
      * I tillegg må minst ett av følgende slå til: 
@@ -77,7 +77,6 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
                 brukerErEøsBorger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2012)), // 1a
                 brukerErSveitsiskStatsborger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2016)), // 1b
                 brukerErStatsløs, // 1c
-                brukerErFlyktning, // 1d
                 brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)) // 1e
             ).og(minstEttAvFølgendeErSant(
                 brukerSendesTilEØSLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2012)), // 2a
@@ -93,36 +92,31 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
         );
     }
     
-    private static Predikat brukerErEøsBorger = () -> personopplysningDokumentet().statsborgerskap.erEØS();
+    private static final Predikat brukerErEøsBorger = () -> personopplysningDokumentet().statsborgerskap.erEØS();
 
-    private static Predikat brukerErSveitsiskStatsborger = () -> personopplysningDokumentet().statsborgerskap.erSveits();
+    private static final Predikat brukerErSveitsiskStatsborger = () -> personopplysningDokumentet().statsborgerskap.erSveits();
 
-    private static Predikat brukerErStatsløs = () -> personopplysningDokumentet().statsborgerskap.erStatsløs();
+    private static final Predikat brukerErStatsløs = () -> personopplysningDokumentet().statsborgerskap.erStatsløs();
 
-    private static Predikat brukerErFlyktning = () -> {
-        // FIXME: Må finne ut om bruker er flyktning
-        return søknadDokumentet().erFlyktning;
-    };
-
-    private static Predikat brukerSendesTilEtNordiskLand = () -> {
+    private static final Predikat brukerSendesTilEtNordiskLand = () -> {
         // FIXME: Uavklart hvis bruker sendes til mer enn ett land
         return personopplysningDokumentet().statsborgerskap.erTredjeland()
                 && søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erNordenUtenNorge);
     };
 
-    private static Predikat brukerSendesTilSveits = () ->
+    private static final Predikat brukerSendesTilSveits = () ->
         søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erSveits);
 
-    private static Predikat brukerSendesTilEØSLand = () ->
+    private static final Predikat brukerSendesTilEØSLand = () ->
         søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erEØS);
 
-    private static Predikat brukerSendesTilEULand = () ->
+    private static final Predikat brukerSendesTilEULand = () ->
         søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erEU);
 
-    private static Predikat brukerSendesTilNederland = () ->
+    private static final Predikat brukerSendesTilNederland = () ->
         søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erNederland);
 
-    private static Predikat brukerSendesTilLuxembourg = () ->
+    private static final Predikat brukerSendesTilLuxembourg = () ->
         søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erLuxembourg);
 
 }

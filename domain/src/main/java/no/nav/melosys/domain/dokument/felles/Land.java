@@ -1,102 +1,99 @@
 package no.nav.melosys.domain.dokument.felles;
 
-import no.nav.melosys.domain.dokument.KodeverkEnum;
-
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
 import java.util.*;
 
-@XmlType(name = "Land")
-@XmlEnum
-public enum Land implements KodeverkEnum<Land> {
-    BEL("BELGIA"),
-    BGR("BULGARIA"),
-    DNK("DANMARK"),
-    CZE("TSJEKKIA"),
-    EST("ESTLAND"),
-    FIN("FINLAND"),
-    FRA("FRANKRIKE"),
-    FRO("FÆRØYENE"),
-    GRL("GRØNLAND"),
-    GRC("HELLAS"),
-    IRL("IRLAND"),
-    ISL("ISLAND"),
-    ITA("ITALIA"),
-    HRV("KROATIA"),
-    CYP("KYPROS"),
-    LVA("LATVIA"),
-    LIE("LIECHTENSTEIN"),
-    LTU("LITAUEN"),
-    LUX("LUXEMBOURG"),
-    MLT("MALTA"),
-    NLD("NEDERLAND"),
-    NOR("NORGE"),
-    POL("POLEN"),
-    PRT("PORTUGAL"),
-    ROU("ROMANIA"),
-    SVK("SLOVAKIA"),
-    SVN("SLOVENIA"),
-    ESP("SPANIA"),
-    GBR("STORBRITANNIA"),
-    SWZ("SVEITS"),
-    SWE("SVERIGE"),
-    DEU("TYSKLAND"),
-    HUN("UNGARN"),
-    AUT("ØSTERRIKE"),
-    UKJ("UOPPGITT/UKJENT"); // Egentlig kodeverdi er '???'
+public class Land {
+    private static final String BELGIA = "BEL";
+    private static final String BULGARIA = "BGR";
+    private static final String DANMARK = "DNK";
+    private static final String TSJEKKIA = "CZE";
+    private static final String ESTLAND = "EST";
+    private static final String FINLAND = "FIN";
+    private static final String FRANKRIKE = "FRA";
+    private static final String FÆRØYENE = "FRO";
+    private static final String GRØNLAND = "GRL";
+    private static final String HELLAS = "GRC";
+    private static final String IRLAND = "IRL";
+    private static final String ISLAND = "ISL";
+    private static final String ITALIA = "ITA";
+    private static final String KROATIA = "HRV";
+    private static final String KYPROS = "CYP";
+    private static final String LATVIA = "LVA";
+    private static final String LIECHTENSTEIN = "LIE";
+    private static final String LITAUEN = "LTU";
+    private static final String LUXEMBOURG = "LUX";
+    private static final String MALTA = "MLT";
+    private static final String NEDERLAND = "NLD";
+    private static final String NORGE = "NOR";
+    private static final String POLEN = "POL";
+    private static final String PORTUGAL = "PRT";
+    private static final String ROMANIA = "ROU";
+    private static final String SLOVAKIA = "SVK";
+    private static final String SLOVENIA = "SVN";
+    private static final String SPANIA = "ESP";
+    private static final String STORBRITANNIA = "GBR";
+    private static final String SVEITS = "SWZ";
+    private static final String SVERIGE = "SWE";
+    private static final String TYSKLAND = "DEU";
+    private static final String UNGARN = "HUN";
+    private static final String ØSTERRIKE = "AUT";
 
     // TODO: Sjekk om/hvordan vi skal håndtere Sveits og Svalbard
-    private static final Set<Land> EØS = new HashSet<>(Arrays.asList(ISL, LIE, NOR));
-    private static final Set<Land> EU = new HashSet<>(Arrays.asList(
-            BEL, BGR, DNK, EST, FIN, FRA, GRC, IRL, ITA, HRV, CYP,
-            LVA, LTU, LUX, MLT, NLD, POL, PRT, ROU, SVK, SVN, ESP,
-            GBR, SWE, CZE, DEU, HUN, AUT));
+    private static final Set<String> EØS = new HashSet<>(Arrays.asList(ISLAND, LIECHTENSTEIN, NORGE));
+    private static final Set<String> EU = new HashSet<>(Arrays.asList(
+            BELGIA, BULGARIA, DANMARK, ESTLAND, FINLAND, FRANKRIKE, HELLAS, IRLAND, ITALIA, KROATIA, KYPROS,
+            LATVIA, LITAUEN, LUXEMBOURG, MALTA, NEDERLAND, POLEN, PORTUGAL, ROMANIA, SLOVAKIA, SLOVENIA, SPANIA,
+            STORBRITANNIA, SVERIGE, TSJEKKIA, TYSKLAND, UNGARN, ØSTERRIKE));
     // TODO: Sjekk om Åland skal være med
-    private static final Set<Land> NORDEN_UTEN_NORGE = new HashSet<>(Arrays.asList(DNK, FIN, FRO, GRL, ISL, SWE));
+    private static final Set<String> NORDEN_UTEN_NORGE = new HashSet<>(Arrays.asList(
+            DANMARK, FINLAND, FÆRØYENE, GRØNLAND, ISLAND, SVERIGE));
 
-    private String navn;
+    private String kode;
 
     // Brukes av JAXB
-    Land() {}
+    public Land() {}
 
-    Land(String navn) {
-        this.navn = navn;
+    public Land(String landkode) {
+        this.kode = landkode;
     }
 
-    @Override
-    public String getNavn() {
-        return navn;
+    public String getKode() {
+        return kode;
+    }
+
+    public void setKode(String kode) {
+        this.kode = kode;
     }
 
     public boolean erEØS() {
-        return EØS.contains(this);
+        return EØS.contains(kode);
     }
 
     public boolean erEU() {
-        return EU.contains(this);
+        return EU.contains(kode);
     }
 
     public boolean erSveits() {
-        return SWZ.navn.equals(navn);
+        return SVEITS.equals(kode);
     }
 
     public boolean erStatsløs() {
-        return navn == null;
+        return kode == null;
     }
 
     public boolean erNordenUtenNorge() {
-        return NORDEN_UTEN_NORGE.contains(this);
+        return NORDEN_UTEN_NORGE.contains(kode);
     }
 
     public boolean erNederland() {
-        return NLD.navn.equals(navn);
+        return NEDERLAND.equals(kode);
     }
 
     public boolean erLuxembourg() {
-        return LUX.navn.equals(navn);
+        return LUXEMBOURG.equals(kode);
     }
 
     public boolean erTredjeland() {
-        return navn != null && !erEU() && !erEØS();
+        return kode != null && !erEU() && !erEØS();
     }
 }
