@@ -82,6 +82,15 @@ public class Tps3PersonKonverteringTest {
         assertThat(dokument.midlertidigPostadresse).isNotNull();
     }
 
+    @Test
+    public void testMidlertidigPostadresseNorge() throws Exception {
+        final String kilde = "person/midlertidig_postadresse_norge.xml";
+        PersonDokument dokument = getPersonDokument(kilde);
+
+        assertThat(dokument).isNotNull();
+        assertThat(dokument.midlertidigPostadresse).isNotNull();
+    }
+
     private PersonDokument getPersonDokument(String kilde) throws Exception {
         StreamSource xmlSource = new StreamSource(getClass().getClassLoader().getResourceAsStream(kilde));
         StreamSource streamSource = new StreamSource(getClass().getClassLoader().getResourceAsStream(TPS_PERSON_3_0_XSLT));

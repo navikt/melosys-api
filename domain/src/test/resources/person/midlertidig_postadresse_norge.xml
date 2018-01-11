@@ -1,0 +1,23 @@
+<b:hentPersonResponse xmlns:b="http://nav.no/tjeneste/virksomhet/person/v3" xmlns:a="http://nav.no/tjeneste/virksomhet/person/v3/informasjon">
+    <response>
+        <person c:type="a:Bruker" xmlns:c="http://www.w3.org/2001/XMLSchema-instance">
+            <midlertidigPostadresse c:type="a:MidlertidigPostadresseNorge">
+                <strukturertAdresse c:type="a:Gateadresse">
+                    <landkode>NOR</landkode>
+                    <tilleggsadresseType>Offisiell adresse</tilleggsadresseType>
+                    <poststed>5141</poststed>
+                    <kommunenummer>1201</kommunenummer>
+                    <gatenavn>XXXXXX</gatenavn>
+                    <husnummer>7</husnummer>
+                    <husbokstav>A</husbokstav>
+                </strukturertAdresse>
+            </midlertidigPostadresse>
+            <aktoer c:type="a:PersonIdent">
+                <ident>
+                    <ident>11111111111</ident>
+                    <type>FNR</type>
+                </ident>
+            </aktoer>
+        </person>
+    </response>
+</b:hentPersonResponse>

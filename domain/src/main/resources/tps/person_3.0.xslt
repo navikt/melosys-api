@@ -3,7 +3,6 @@
 <xsl:transform version="2.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:a="http://nav.no/tjeneste/virksomhet/person/v3/informasjon"
     xmlns:tps3="http://nav.no/tjeneste/virksomhet/person/v3">
 
     <xsl:template match="/tps3:hentPersonResponse/response/person">
@@ -50,24 +49,33 @@
         </postadresse>
     </xsl:template>
 
-    <!--<xsl:template match="midlertidigPostadresse[@xsi:type=a:MidlertidigPostadresseUtland]">-->
     <xsl:template match="midlertidigPostadresse">
         <midlertidigPostadresse>
-            <!--<xsl:attribute name="xsi:type">
-                <xsl:apply-templates select="@xsi:type"/>
-            </xsl:attribute>-->
-            <xsl:attribute name="xsi:type">MidlertidigPostadresseUtland</xsl:attribute>
-            <!--<test><xsl:value-of select="substring-after(':', @xsi:type)" /></test>-->
-            <ustrukturertAdresse>
-                <!--<test><xsl:value-of select="substring-after(':', @xsi:type)" /></test>-->
-                <adresselinje1><xsl:value-of select="ustrukturertAdresse/adresselinje1" /></adresselinje1>
-                <adresselinje2><xsl:value-of select="ustrukturertAdresse/adresselinje2" /></adresselinje2>
-                <adresselinje3><xsl:value-of select="ustrukturertAdresse/adresselinje3" /></adresselinje3>
-                <adresselinje4><xsl:value-of select="substring-after(':', @xsi:type)" /></adresselinje4>
-                <land>
-                    <kode><xsl:value-of select="ustrukturertAdresse/landkode"/></kode>
-                </land>
-            </ustrukturertAdresse>
+            <xsl:attribute name="xsi:type">
+                <xsl:value-of select="substring-after(@xsi:type, ':')" />
+            </xsl:attribute>
+            <xsl:choose>
+                <xsl:when test="@xsi:type='a:MidlertidigPostadresseUtland'">
+                    <adresselinje1><xsl:value-of select="ustrukturertAdresse/adresselinje1" /></adresselinje1>
+                    <adresselinje2><xsl:value-of select="ustrukturertAdresse/adresselinje2" /></adresselinje2>
+                    <adresselinje3><xsl:value-of select="ustrukturertAdresse/adresselinje3" /></adresselinje3>
+                    <adresselinje4><xsl:value-of select="ustrukturertAdresse/adresselinje4" /></adresselinje4>
+                    <land>
+                        <kode><xsl:value-of select="ustrukturertAdresse/landkode"/></kode>
+                    </land>
+                </xsl:when>
+                <xsl:when test="@xsi:type='a:MidlertidigPostadresseNorge'">
+                    <!-- FIXME: MidlertidigPostadresseNorge kan også være en matrikkeladresse - trenger testdata -->
+                    <tilleggsadresse><xsl:value-of select="strukturertAdresse/tilleggsadresse" /></tilleggsadresse>
+                    <tilleggsadresseType><xsl:value-of select="strukturertAdresse/tilleggsadresseType" /></tilleggsadresseType>
+                    <gateadresse>
+                        <gatenavn><xsl:value-of select="strukturertAdresse/gatenavn"/></gatenavn>
+                        <gatenummer><xsl:value-of select="strukturertAdresse/gatenummer"/></gatenummer>
+                        <husnummer><xsl:value-of select="strukturertAdresse/husnummer"/></husnummer>
+                        <husbokstav><xsl:value-of select="strukturertAdresse/husbokstav"/></husbokstav>
+                    </gateadresse>
+                </xsl:when>
+            </xsl:choose>
         </midlertidigPostadresse>
     </xsl:template>
 
