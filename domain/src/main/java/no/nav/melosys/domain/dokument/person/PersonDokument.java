@@ -35,7 +35,7 @@ public class PersonDokument extends SaksopplysningDokument {
 
     public String sammensattNavn;
 
-    public List<Familierelasjon> familierelasjoner;
+    public List<Familiemedlem> familiemedlemmer;
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
     @JsonProperty("foedselsdato")

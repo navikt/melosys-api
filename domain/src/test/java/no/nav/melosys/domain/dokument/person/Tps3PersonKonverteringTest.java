@@ -69,7 +69,7 @@ public class Tps3PersonKonverteringTest {
 
         // Verifiser...
         assertThat(dokument).isNotNull();
-        assertThat(dokument.familierelasjoner).isNotEmpty();
+        assertThat(dokument.familiemedlemmer).isNotEmpty();
     }
 
     @Test

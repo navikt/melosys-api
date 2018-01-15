@@ -80,11 +80,11 @@
     </xsl:template>
 
     <xsl:template match="harFraRolleI">
-        <familierelasjoner>
+        <familiemedlemmer>
             <fnr><xsl:value-of select="tilPerson/aktoer/ident/ident" /></fnr>
             <navn><xsl:value-of select="tilPerson/personnavn/sammensattNavn" /></navn>
-            <relasjon><xsl:value-of select="tilRolle" /></relasjon>
-        </familierelasjoner>
+            <familierelasjon><xsl:value-of select="tilRolle" /></familierelasjon>
+        </familiemedlemmer>
     </xsl:template>
 
 </xsl:transform>

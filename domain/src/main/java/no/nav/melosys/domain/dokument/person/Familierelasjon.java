@@ -1,10 +1,26 @@
 package no.nav.melosys.domain.dokument.person;
 
-public class Familierelasjon {
+import no.nav.melosys.domain.dokument.KodeverkEnum;
 
-    public String fnr;
+/**
+ * Denne enumen er en hardkoding av kodeverket Familierelasjoner.
+ */
+public enum Familierelasjon implements KodeverkEnum<Familierelasjon> {
+    EKTE("Ektefelle til"),
+    SAM("Samboer med"),
+    FARA("Far til"),
+    REPA("Registrert partner med"),
+    BARN("Barn av"),
+    MORA("Mor til");
 
-    public String navn;
+    private String navn;
 
-    public String relasjon; //"http://nav.no/kodeverk/Kodeverk/Familierelasjoner"
+    Familierelasjon(String navn) {
+        this.navn = navn;
+    }
+
+    @Override
+    public String getNavn() {
+        return navn;
+    }
 }
