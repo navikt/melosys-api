@@ -100,8 +100,7 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
 
     private static final Predikat brukerSendesTilEtNordiskLand = () -> {
         // FIXME: Uavklart hvis bruker sendes til mer enn ett land
-        return personopplysningDokumentet().statsborgerskap.erTredjeland()
-                && søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erNordenUtenNorge);
+        return søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erNorden);
     };
 
     private static final Predikat brukerSendesTilSveits = () ->

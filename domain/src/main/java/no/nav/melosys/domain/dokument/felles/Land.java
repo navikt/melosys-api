@@ -31,12 +31,15 @@ public class Land {
     private static final String SLOVAKIA = "SVK";
     private static final String SLOVENIA = "SVN";
     private static final String SPANIA = "ESP";
+    private static final String STATSLØS = "XXX";
     private static final String STORBRITANNIA = "GBR";
+    private static final String SVALBARD_OG_JAN_MAYEN = "SJM";
     private static final String SVEITS = "SWZ";
     private static final String SVERIGE = "SWE";
     private static final String TYSKLAND = "DEU";
     private static final String UNGARN = "HUN";
     private static final String ØSTERRIKE = "AUT";
+    private static final String ÅLAND = "ALA";
 
     // TODO: Sjekk om/hvordan vi skal håndtere Sveits og Svalbard
     private static final Set<String> EØS = new HashSet<>(Arrays.asList(ISLAND, LIECHTENSTEIN, NORGE));
@@ -45,8 +48,8 @@ public class Land {
             LATVIA, LITAUEN, LUXEMBOURG, MALTA, NEDERLAND, POLEN, PORTUGAL, ROMANIA, SLOVAKIA, SLOVENIA, SPANIA,
             STORBRITANNIA, SVERIGE, TSJEKKIA, TYSKLAND, UNGARN, ØSTERRIKE));
     // TODO: Sjekk om Åland skal være med
-    private static final Set<String> NORDEN_UTEN_NORGE = new HashSet<>(Arrays.asList(
-            DANMARK, FINLAND, FÆRØYENE, GRØNLAND, ISLAND, SVERIGE));
+    private static final Set<String> NORDEN = new HashSet<>(Arrays.asList(
+            DANMARK, FINLAND, FÆRØYENE, GRØNLAND, ISLAND, NORGE, SVALBARD_OG_JAN_MAYEN, SVERIGE, ÅLAND));
 
     private String kode;
 
@@ -78,11 +81,11 @@ public class Land {
     }
 
     public boolean erStatsløs() {
-        return kode == null;
+        return STATSLØS.equals(kode);
     }
 
-    public boolean erNordenUtenNorge() {
-        return NORDEN_UTEN_NORGE.contains(kode);
+    public boolean erNorden() {
+        return NORDEN.contains(kode);
     }
 
     public boolean erNederland() {
@@ -91,9 +94,5 @@ public class Land {
 
     public boolean erLuxembourg() {
         return LUXEMBOURG.equals(kode);
-    }
-
-    public boolean erTredjeland() {
-        return kode != null && !erEU() && !erEØS();
     }
 }
