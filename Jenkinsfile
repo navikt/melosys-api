@@ -1,4 +1,4 @@
 backendPipeline {
-    applicationName = "melosys"
+    applicationName = "melosys-api"
     deployEnvironmentT = "t5"
 }

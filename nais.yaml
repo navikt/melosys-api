@@ -8,13 +8,13 @@ port: 8080
 healthcheck:
     liveness:
       initialDelay: 120
-      path: internal/health
+      path: melosys-api/internal/health
     readiness:
       initialDelay: 120
-      path: internal/health
+      path: melosys-api/internal/health
 prometheus:
-    enabled: true
-    path: internal/metrics
+    enabled: false
+    path: melosys-api/internal/metrics
 resources:
   requests:
     cpu: 1000m
