@@ -1,5 +1,7 @@
 package no.nav.melosys.domain;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import javax.persistence.Converter;
 
 /**
@@ -9,7 +11,7 @@ import javax.persistence.Converter;
  */
 public enum FagsakType implements Kodeverk<FagsakType> {
 
-    SØKNAD_A1("SØKNAD_A1", "Søknad om A1");
+    SØKNAD_A1("A1", "Søknad om A1");
 
     private String kode;
     private String beskrivelse;
@@ -20,6 +22,7 @@ public enum FagsakType implements Kodeverk<FagsakType> {
     }
     
     @Override
+    @JsonValue
     public String getKode() {
         return kode;
     }
