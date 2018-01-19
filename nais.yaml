@@ -13,8 +13,8 @@ healthcheck:
       initialDelay: 120
       path: melosys-api/internal/health
 prometheus:
-    enabled: false
-    path: melosys-api/internal/metrics
+    enabled: true
+    path: melosys-api/internal/prometheus
 resources:
   requests:
     cpu: 300m
