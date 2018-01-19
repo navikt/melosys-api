@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.arbeidsforhold;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.YearMonthTimeZoneXmlAdapter;
 
@@ -12,6 +13,7 @@ import java.time.YearMonth;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AntallTimerIPerioden {
 
+    @JsonProperty("timelonnetPeriode")
     private Periode periode;
 
     private BigDecimal antallTimer;
