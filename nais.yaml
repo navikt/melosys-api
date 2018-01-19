@@ -17,11 +17,11 @@ prometheus:
     path: melosys-api/internal/prometheus
 resources:
   requests:
-    cpu: 300m
-    memory: 2048Mi
-  limits:
     cpu: 1000m
-    memory: 3072Mi
+    memory: 768Mi
+  limits:
+    cpu: 2000m
+    memory: 1536Mi
 fasitResources:
   used:
   - alias: srvmelosys
