@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.aareg;
 
 import java.io.StringWriter;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -80,7 +81,7 @@ public class AaregService implements AaregFasade {
                 periode.setFom(KonverteringsUtils.localDateTimeToXMLGregorianCalendar(fom.atStartOfDay()));
             }
             if (tom != null) {
-                periode.setTom(KonverteringsUtils.localDateTimeToXMLGregorianCalendar(tom.atStartOfDay()));
+                periode.setTom(KonverteringsUtils.localDateTimeToXMLGregorianCalendar(tom.atTime(LocalTime.MAX)));
             }
         } catch (DatatypeConfigurationException DatatypeConfigurationException) {
             throw new TekniskException(DatatypeConfigurationException);
