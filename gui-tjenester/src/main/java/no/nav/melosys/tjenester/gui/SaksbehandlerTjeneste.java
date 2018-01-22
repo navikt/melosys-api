@@ -15,7 +15,7 @@ import javax.ws.rs.Path;
 @Path("/saksbehandler")
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
-public class SaksbehandlerTjeneste {
+public class SaksbehandlerTjeneste  extends RestTjeneste {
 
     @GET
     @ApiOperation(value = "Returnerer fullt navn for ident",
