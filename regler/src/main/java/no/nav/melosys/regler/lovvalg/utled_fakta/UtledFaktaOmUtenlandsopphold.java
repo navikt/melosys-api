@@ -13,6 +13,9 @@ import no.nav.melosys.regler.motor.Regelpakke;
 
 public class UtledFaktaOmUtenlandsopphold implements Regelpakke {
     
+    /**
+     * FIXME: Funksjonell beskrivelse?? Minstekrav til andel inntekt i hvert land?
+     */
     @Regel
     public static void settAntallLandBrukerArbeiderI() {
         utfør(

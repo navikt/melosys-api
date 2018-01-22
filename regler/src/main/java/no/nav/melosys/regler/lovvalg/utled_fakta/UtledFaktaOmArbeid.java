@@ -37,6 +37,7 @@ public class UtledFaktaOmArbeid implements Regelpakke {
      */
     @Regel
     public static void finnUtOmBrukerErArbeidstaker() {
+        // FIXME: Hva med utenlansk arbeidsgiver?? Varsel + JA?? 
         hvis(
             antallet(arbeidsforholdene().som(harOverlappMedSøknadsperioden)).erStørreEnnEllerLik(1)
         ).så(
@@ -48,12 +49,12 @@ public class UtledFaktaOmArbeid implements Regelpakke {
 
     /**
      * Fastslår om bruker arbeider i Norge eller ikke.
+     * FIXME: Hva er de funksjonelle kriteriene?
      */
     @Regel
     public static void finnUtOmBrukerArbeiderINorge() {
-        // FIXME: Ikke riktig implementert...
         hvis(
-            verdien(søknadDokumentet().arbeidNorge).harVerdi()
+            antallet(arbeidsforholdene().som(harOverlappMedSøknadsperioden)).erStørreEnnEllerLik(1)
         ).så(
             settArgument(BRUKER_ARBEIDER_I_NORGE, JA)
         ).ellers(
