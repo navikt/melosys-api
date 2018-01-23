@@ -18,7 +18,7 @@ import javax.ws.rs.core.Response;
 @Path("/vurdering")
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
-public class VurderingTjeneste {
+public class VurderingTjeneste extends RestTjeneste {
 
     private RegelmodulService regelmodulService;
 
