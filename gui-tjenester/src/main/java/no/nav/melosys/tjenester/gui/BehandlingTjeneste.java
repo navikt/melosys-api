@@ -2,6 +2,8 @@ package no.nav.melosys.tjenester.gui;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingStatus;
+import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
@@ -19,6 +21,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +47,11 @@ public class BehandlingTjeneste extends RestTjeneste {
         this.modelMapper = new ModelMapper();
 
         TypeMap<Behandling, BehandlingDto> typeMapBehandlingUt = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
+        typeMapBehandlingUt.<Long>addMapping(src -> src.getId(), (dest, id) -> dest.getOppsummering().setBehandlingID(id));
+        typeMapBehandlingUt.<Long>addMapping(src -> src.getGsakID(), (dest, id) -> dest.getOppsummering().setGsakId(id));
+        typeMapBehandlingUt.<BehandlingStatus>addMapping(src -> src.getStatus(), (dest, status) -> dest.getOppsummering().setStatus(status));
+        typeMapBehandlingUt.<BehandlingType>addMapping(src -> src.getType(), (dest, type) -> dest.getOppsummering().setType(type));
+        typeMapBehandlingUt.<LocalDateTime>addMapping(src -> src.getRegistrertDato(), (dest, dato) -> dest.getOppsummering().setRegistrertDato(dato));
         typeMapBehandlingUt.addMappings(mapper -> mapper.using(new SaksopplysningerTilDtoConverter()).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
     }
 

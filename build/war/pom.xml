@@ -30,6 +30,8 @@
                 <configuration>
                     <webApp>
                         <contextPath>/melosys</contextPath>
+                        <!-- https://www.eclipse.org/jetty/documentation/9.4.x/configuring-webapps.html#web-inf-include-jar-pattern -->
+                        <webInfIncludeJarPattern>.*/spring-[^/]+\.jar$|.*/classes/.*</webInfIncludeJarPattern>
                     </webApp>
                 </configuration>
                 <dependencies>
