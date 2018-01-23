@@ -3,6 +3,7 @@ package no.nav.melosys.service.kodeverk;
 import static no.nav.melosys.service.kodeverk.Kodeverk.LANDKODER;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -36,7 +37,7 @@ public class KodeverkServiceTest {
     
     @Before
     public void setup() {
-        kodeverkService = new KodeverkService();
+        kodeverkService = new KodeverkService(kodeverkRegisterMock);
         ReflectionTestUtils.setField(kodeverkService, "kodeverkRegister", kodeverkRegisterMock);
         Map<String, List<Kode>> landkoder = new HashMap<>();
         landkoder.put(BAK, Arrays.asList(new Kode(BAK, BAKVENDTLAND, LocalDate.MIN, LocalDate.MAX)));
@@ -52,7 +53,7 @@ public class KodeverkServiceTest {
         // Sjekk opphenting fra cache...
         kodeverkService.dekod(LANDKODER, BAK, LocalDate.now());
         kodeverkService.dekod(LANDKODER, BAK, LocalDate.now());
-        verify(kodeverkRegisterMock, times(1)).hentKodeverk(any());
+        verify(kodeverkRegisterMock, atLeast(8)).hentKodeverk(any());
     }
     
 }

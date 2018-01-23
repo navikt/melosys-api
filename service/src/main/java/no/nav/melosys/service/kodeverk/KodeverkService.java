@@ -1,7 +1,9 @@
 package no.nav.melosys.service.kodeverk;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,21 +25,26 @@ public class KodeverkService {
     
     private static final long MILLIS_MELLOM_TØM_CACHE = 3600000;
 
+    private static final long Time_Nar_Cache_Tommes = 6;
+
     private static final Logger log = LoggerFactory.getLogger(KodeverkService.class);
     
     private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache; // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
     
     private TømCacheScheduler tømCacheScheduler;
-    
-    @Autowired
+
     private KodeverkRegister kodeverkRegister;
-    
-    public KodeverkService() {
-        kodeverkCache = new HashMap<>();
+
+
+    @Autowired
+    public KodeverkService(KodeverkRegister kodeverkRegister) {
+        this.kodeverkRegister = kodeverkRegister;
         tømCacheScheduler = new TømCacheScheduler();
         tømCacheScheduler.start();
     }
-    
+
+
+
     /**
      * Henter alle gyldige verdier for et kodeverk på et gitt tidspunkt.
      */
@@ -88,14 +95,24 @@ public class KodeverkService {
         log.debug("Hentet og cachet kodeverk {}", kodeverkNavn);
         return kodeverk;
     }
-    
-    private synchronized void tømCache() {
+
+    /**
+     * Denne methoden tømmer cache og henter kodeverk på nytt
+     */
+    private synchronized void henteAlleKodeVerkData() {
+        log.info("Tommer Cache og henter kodeverk på nytt");
         kodeverkCache = new HashMap<>();
+        for(Kodeverk kodeverk: Kodeverk.values()){
+            hentKodeverk(kodeverk.getNavn());
+        }
     }
-    
+
+
     private class TømCacheScheduler extends Thread {
         @Override
         public void run() {
+
+            henteAlleKodeVerkData(); // Hente Kodeverk når applikasjon starter
             for (;;) {
                 try {
                     sleep(MILLIS_MELLOM_TØM_CACHE);
@@ -105,7 +122,9 @@ public class KodeverkService {
                 if (interrupted()) {
                     return;
                 }
-                tømCache();
+                if(Time_Nar_Cache_Tommes == LocalTime.now().getHour() ) { // Tømme cache og hente Kodeverk på nytt hvertdag kl 06:00
+                    henteAlleKodeVerkData();
+                }
             }
         }
     }
