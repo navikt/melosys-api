@@ -2,7 +2,7 @@ package no.nav.melosys.domain.dokument.soeknad;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.Landkode;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -18,7 +18,7 @@ public class SoeknadDokument extends SaksopplysningDokument {
     public LocalDate fødselsdato;
     public Bostedsadresse bostedsadresseNorge;
     public Bostedsadresse bostedsadresseUtland;
-    public Landkode statsborgerskap;
+    public Land statsborgerskap;
     public String utenlandskId;
     // FIXME: Barn? (Barn kan utfylles med TPS)
 

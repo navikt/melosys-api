@@ -80,7 +80,21 @@ public class VerdielementSett<T, S> implements Iterable<T> {
             kommando.accept(t);
         }
     }
-    
+
+    /**
+     * Returnerer et Predikat som oppfylles hvis minst en test slår til
+     */
+    public Predikat inneholderMinstEn(Predicate<? super T> predikat) {
+        return () -> {
+            for (T t : this) {
+                if (predikat.test(t)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+    }
+
     /**
      * Returnerer en Iterator som itererer over alle verdiene.
      */
