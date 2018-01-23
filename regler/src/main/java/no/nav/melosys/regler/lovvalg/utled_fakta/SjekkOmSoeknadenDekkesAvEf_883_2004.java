@@ -8,15 +8,14 @@ import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.*;
 import static no.nav.melosys.regler.motor.voc.Deklarasjon.hvis;
 import static no.nav.melosys.regler.motor.voc.FellesVokabular.*;
 import static no.nav.melosys.regler.motor.voc.Predikat.*;
+import static no.nav.melosys.regler.motor.voc.VerdielementSett.alle;
 
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.regler.motor.Regelpakke;
 import no.nav.melosys.regler.motor.voc.Predikat;
 
-/*'
+/**
  * Regelpakken slår fast om søknaden dekkes av forordning (EF) 883/2004
- * 
- * FIXME: Ikke ferdig implementert. Pakken gir varsel dersom den ikke kan slå fast at søknaden dekkes. 
  */
 public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
     
@@ -39,13 +38,13 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
         hvis(
             ingenAvFølgendeErSant(
                 brukerErEøsBorger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2012)), // 1a
-                brukerErSveitsiskStatsborger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2016)), // 1b
+                brukerErSveitsiskStatsborger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JANUAR_2016)), // 1b
                 brukerErStatsløs, // 1c
                 brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)) // 1d
             ).og(minstEttAvFølgendeErSant(
                 brukerSendesTilEØSLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2012)), // 2a
                 brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)), // 2b
-                brukerSendesTilSveits.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2016)) // 2c
+                brukerSendesTilSveits.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JANUAR_2016)) // 2c
             ))
         ).så(
             leggTilMelding(DELVIS_STOETTET, "Tilfellet dekkes av forordning 883/2004 bare hvis brukeren har flykningstatus. Dette kan ikke sjekkes automatisk. Ring UDI.")
@@ -75,13 +74,13 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
         hvis(
             minstEttAvFølgendeErSant(
                 brukerErEøsBorger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2012)), // 1a
-                brukerErSveitsiskStatsborger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2016)), // 1b
+                brukerErSveitsiskStatsborger.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JANUAR_2016)), // 1b
                 brukerErStatsløs, // 1c
                 brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)) // 1e
             ).og(minstEttAvFølgendeErSant(
                 brukerSendesTilEØSLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2012)), // 2a
                 brukerSendesTilEtNordiskLand.og(søknadsperioden().starterPåEllerEtter(FØRSTE_MAI_2014)), // 2b
-                brukerSendesTilSveits.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JUNI_2016)) // 2c
+                brukerSendesTilSveits.og(søknadsperioden().starterPåEllerEtter(FØRSTE_JANUAR_2016)) // 2c
             ))
         ).så(
             settArgument(SØKNADEN_KVALIFISERER_FOR_EF_883_2004, JA)
@@ -98,24 +97,14 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
 
     private static final Predikat brukerErStatsløs = () -> personopplysningDokumentet().statsborgerskap.erStatsløs();
 
-    private static final Predikat brukerSendesTilEtNordiskLand = () -> {
-        // FIXME: Uavklart hvis bruker sendes til mer enn ett land
-        return søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erNorden);
-    };
+    // FIXME: Uavklart hvis bruker sendes til mer enn ett land
+    private static final Predikat brukerSendesTilEtNordiskLand
+            = alle(søknadDokumentet().arbeidUtland.arbeidsland).inneholderMinstEn(Land::erNorden);
 
-    private static final Predikat brukerSendesTilSveits = () ->
-        søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erSveits);
+    private static final Predikat brukerSendesTilSveits
+            = alle(søknadDokumentet().arbeidUtland.arbeidsland).inneholderMinstEn(Land::erSveits);
 
-    private static final Predikat brukerSendesTilEØSLand = () ->
-        søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erEØS);
-
-    private static final Predikat brukerSendesTilEULand = () ->
-        søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erEU);
-
-    private static final Predikat brukerSendesTilNederland = () ->
-        søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erNederland);
-
-    private static final Predikat brukerSendesTilLuxembourg = () ->
-        søknadDokumentet().arbeidUtland.arbeidsland.stream().anyMatch(Land::erLuxembourg);
+    private static final Predikat brukerSendesTilEØSLand
+            = alle(søknadDokumentet().arbeidUtland.arbeidsland).inneholderMinstEn(Land::erEØS);
 
 }

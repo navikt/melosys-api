@@ -42,14 +42,13 @@ public class Land {
     private static final String ÅLAND = "ALA";
 
     // TODO: Sjekk om/hvordan vi skal håndtere Sveits og Svalbard
-    private static final Set<String> EØS = new HashSet<>(Arrays.asList(ISLAND, LIECHTENSTEIN, NORGE));
-    private static final Set<String> EU = new HashSet<>(Arrays.asList(
-            BELGIA, BULGARIA, DANMARK, ESTLAND, FINLAND, FRANKRIKE, HELLAS, IRLAND, ITALIA, KROATIA, KYPROS,
-            LATVIA, LITAUEN, LUXEMBOURG, MALTA, NEDERLAND, POLEN, PORTUGAL, ROMANIA, SLOVAKIA, SLOVENIA, SPANIA,
-            STORBRITANNIA, SVERIGE, TSJEKKIA, TYSKLAND, UNGARN, ØSTERRIKE));
+    private static final Set<String> EØS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            BELGIA, BULGARIA, DANMARK, ESTLAND, FINLAND, FRANKRIKE, HELLAS, IRLAND, ISLAND, ITALIA, KROATIA, KYPROS,
+            LATVIA, LIECHTENSTEIN, LITAUEN, LUXEMBOURG, MALTA, NEDERLAND, NORGE, POLEN, PORTUGAL, ROMANIA, SLOVAKIA,
+            SLOVENIA, SPANIA, STORBRITANNIA, SVERIGE, TSJEKKIA, TYSKLAND, UNGARN, ØSTERRIKE)));
     // TODO: Sjekk om Åland skal være med
-    private static final Set<String> NORDEN = new HashSet<>(Arrays.asList(
-            DANMARK, FINLAND, FÆRØYENE, GRØNLAND, ISLAND, NORGE, SVALBARD_OG_JAN_MAYEN, SVERIGE, ÅLAND));
+    private static final Set<String> NORDEN = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            DANMARK, FINLAND, FÆRØYENE, GRØNLAND, ISLAND, NORGE, SVALBARD_OG_JAN_MAYEN, SVERIGE, ÅLAND)));
 
     private String kode;
 
@@ -72,10 +71,6 @@ public class Land {
         return EØS.contains(kode);
     }
 
-    public boolean erEU() {
-        return EU.contains(kode);
-    }
-
     public boolean erSveits() {
         return SVEITS.equals(kode);
     }
@@ -86,13 +81,5 @@ public class Land {
 
     public boolean erNorden() {
         return NORDEN.contains(kode);
-    }
-
-    public boolean erNederland() {
-        return NEDERLAND.equals(kode);
-    }
-
-    public boolean erLuxembourg() {
-        return LUXEMBOURG.equals(kode);
     }
 }
