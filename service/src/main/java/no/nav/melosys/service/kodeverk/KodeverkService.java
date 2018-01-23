@@ -22,15 +22,15 @@ import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
  */
 @Service
 public class KodeverkService {
-    
+
     private static final long MILLIS_MELLOM_TØM_CACHE = 3600000;
 
-    private static final long Time_Nar_Cache_Tommes = 6;
+    private static final long TIME_NÅR_CACHE_TØMMES = 6;
 
     private static final Logger log = LoggerFactory.getLogger(KodeverkService.class);
-    
+
     private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache; // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
-    
+
     private TømCacheScheduler tømCacheScheduler;
 
     private KodeverkRegister kodeverkRegister;
@@ -42,7 +42,6 @@ public class KodeverkService {
         tømCacheScheduler = new TømCacheScheduler();
         tømCacheScheduler.start();
     }
-
 
 
     /**
@@ -62,7 +61,7 @@ public class KodeverkService {
         }
         return res;
     }
-    
+
     /**
      * Henter verdien for en kode i et kodeverk på en gitt dato, eller null hvis koden ikke er omfattet av kodeverket på angitt dato.
      */
@@ -79,7 +78,7 @@ public class KodeverkService {
         }
         return null;
     }
-    
+
     /*
      * Merk: Vi har en forsvinnende liten mulighet for feil hvis dette ikke synkroniseres (også hvis vi aldri tømmer cache). 
      * Problemer kan oppstå hvis metoden kalles i parallell der det ene kallet medfører put og resize/rehash.
@@ -87,7 +86,7 @@ public class KodeverkService {
      */
     private synchronized no.nav.melosys.integrasjon.kodeverk.Kodeverk hentKodeverk(String kodeverkNavn) {
         no.nav.melosys.integrasjon.kodeverk.Kodeverk kodeverk = kodeverkCache.get(kodeverkNavn);
-        if (kodeverk != null)  {
+        if (kodeverk != null) {
             return kodeverk;
         }
         kodeverk = kodeverkRegister.hentKodeverk(kodeverkNavn);
@@ -100,9 +99,9 @@ public class KodeverkService {
      * Denne methoden tømmer cache og henter kodeverk på nytt
      */
     private synchronized void henteAlleKodeVerkData() {
-        log.info("Tommer Cache og henter kodeverk på nytt");
+        log.info("Tømmer cache og henter kodeverk på nytt");
         kodeverkCache = new HashMap<>();
-        for(Kodeverk kodeverk: Kodeverk.values()){
+        for (Kodeverk kodeverk : Kodeverk.values()) {
             hentKodeverk(kodeverk.getNavn());
         }
     }
@@ -113,16 +112,16 @@ public class KodeverkService {
         public void run() {
 
             henteAlleKodeVerkData(); // Hente Kodeverk når applikasjon starter
-            for (;;) {
+            for (; ; ) {
                 try {
                     sleep(MILLIS_MELLOM_TØM_CACHE);
-                } catch (InterruptedException e) {  
+                } catch (InterruptedException e) {
                     return;
                 }
                 if (interrupted()) {
                     return;
                 }
-                if(Time_Nar_Cache_Tommes == LocalTime.now().getHour() ) { // Tømme cache og hente Kodeverk på nytt hvertdag kl 06:00
+                if (TIME_NÅR_CACHE_TØMMES == LocalTime.now().getHour()) { // Tømme cache og hente Kodeverk på nytt hvertdag kl 06:00
                     henteAlleKodeVerkData();
                 }
             }
