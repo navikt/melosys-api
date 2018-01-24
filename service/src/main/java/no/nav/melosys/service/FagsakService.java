@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -74,8 +75,10 @@ public class FagsakService {
         return fagsakRepository.findBySaksnummer(saksnummer);
     }
 
-    public void lagre(Fagsak sak) {
+    @Transactional
+    public Fagsak lagre(Fagsak sak) {
         fagsakRepository.save(sak);
+        return sak;
     }
 
     public Fagsak nyFagsak(String fnr) throws SikkerhetsbegrensningException {
@@ -115,9 +118,7 @@ public class FagsakService {
         fagsak.setVersjon(0);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
 
-        fagsakRepository.save(fagsak);
-
-        return fagsak;
+        return lagre(fagsak);
     }
 
     public ArbeidsforholdDokument hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws SikkerhetsbegrensningException {
