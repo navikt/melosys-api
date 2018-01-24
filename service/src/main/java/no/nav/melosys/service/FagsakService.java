@@ -72,7 +72,8 @@ public class FagsakService {
     }
 
     public Fagsak hentFagsak(Long saksnummer) {
-        return fagsakRepository.findBySaksnummer(saksnummer);
+        // FIXME return fagsakRepository.findBySaksnummer(saksnummer);
+        return fagsakRepository.findById(saksnummer);
     }
 
     @Transactional

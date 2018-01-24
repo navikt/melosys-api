@@ -90,6 +90,8 @@ public class FagsakTjeneste extends RestTjeneste {
     private FagsakDto tilDto(Fagsak fagsak) {
         FagsakDto fagsakDto = new FagsakDto();
         modelMapper.map(fagsak, fagsakDto);
+        // FIXME saksnummer fra Fagsak bruker id fra DB (midlertidig)
+        fagsakDto.setSaksnummer(fagsak.getId());
         return fagsakDto;
     }
 

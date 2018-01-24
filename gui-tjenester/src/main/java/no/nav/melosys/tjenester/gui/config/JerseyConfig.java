@@ -16,6 +16,7 @@ public class JerseyConfig extends ResourceConfig {
 
     public JerseyConfig() {
         setApplicationName("melosys");
+        // N.B. alfabetisk rekkefølge
         register(ArbeidsforholdHistorikkTjeneste.class);
         register(BehandlingTjeneste.class);
         register(FagsakTjeneste.class);
