@@ -23,7 +23,7 @@ import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 @Service
 public class KodeverkService {
 
-    private static final long MILLIS_MELLOM_TØM_CACHE = 3600000;
+    private static final long MILLIS_MELLOM_VÅKNE_OPP = 3600000;
 
     private static final long TIME_NÅR_CACHE_TØMMES = 6;
 
@@ -106,6 +106,9 @@ public class KodeverkService {
         }
     }
 
+    /**
+     * Obs: Hvis applikasjon starter rett før kl 5 da risikorio man at tømm cache og hente ny kodeverk blir ikke kallet
+     */
 
     private class TømCacheScheduler extends Thread {
         @Override
@@ -114,16 +117,16 @@ public class KodeverkService {
             henteAlleKodeVerkData(); // Hente Kodeverk når applikasjon starter
             for (; ; ) {
                 try {
-                    sleep(MILLIS_MELLOM_TØM_CACHE);
+                    if (TIME_NÅR_CACHE_TØMMES == LocalTime.now().getHour())  // Tømme cache og hente Kodeverk på nytt hvertdag kl 06:00
+                        henteAlleKodeVerkData();
+                    sleep(MILLIS_MELLOM_VÅKNE_OPP);
                 } catch (InterruptedException e) {
                     return;
                 }
                 if (interrupted()) {
                     return;
                 }
-                if (TIME_NÅR_CACHE_TØMMES == LocalTime.now().getHour()) { // Tømme cache og hente Kodeverk på nytt hvertdag kl 06:00
-                    henteAlleKodeVerkData();
-                }
+
             }
         }
     }
