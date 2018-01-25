@@ -1,28 +1,22 @@
 package no.nav.melosys.tjenester.gui;
 
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
+import io.swagger.annotations.Api;
+import no.nav.melosys.regler.api.lovvalg.rep.*;
+import no.nav.melosys.service.RegelmodulService;
+import no.nav.melosys.tjenester.gui.dto.LovvalgDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
-import io.swagger.annotations.Api;
-import no.nav.melosys.regler.api.lovvalg.rep.Artikkel;
-import no.nav.melosys.regler.api.lovvalg.rep.Betingelse;
-import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
-import no.nav.melosys.regler.api.lovvalg.rep.Lovvalgsbestemmelse;
-import no.nav.melosys.regler.api.lovvalg.rep.Resultat;
-import no.nav.melosys.service.RegelmodulService;
-import no.nav.melosys.tjenester.gui.dto.LovvalgDto;
+import static no.nav.melosys.regler.api.lovvalg.rep.Argument.*;
 
 @Api(tags = {"vurdering"})
 @Path("/vurdering")
@@ -101,7 +95,7 @@ public class VurderingTjeneste extends RestTjeneste {
         lovvalgsbestemmelse.betingelser.add(betingelse);
 
         betingelse = new Betingelse();
-        betingelse.argument = BRUKER_ER_MEDLEM_AV_FTR_MÅNEDEN_FØR_PERIODESTART;
+        betingelse.argument = BRUKER_ER_MEDLEM_AV_FTRL_MÅNEDEN_FØR_PERIODESTART;
         betingelse.krav = "Bruker er medlem av FTR måneden før periodestart er sann";
         betingelse.resultat = Resultat.OPPFYLT;
         lovvalgsbestemmelse.betingelser.add(betingelse);

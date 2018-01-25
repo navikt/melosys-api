@@ -1,5 +1,7 @@
 package no.nav.melosys.regler.lovvalg.vurder_artikler;
 
+import no.nav.melosys.regler.motor.Regelpakke;
+
 import static no.nav.melosys.regler.api.lovvalg.rep.Argument.*;
 import static no.nav.melosys.regler.api.lovvalg.rep.Artikkel.ART_12_1;
 import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.DELVIS_STOETTET;
@@ -8,8 +10,6 @@ import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.opprettLovvalgbest
 import static no.nav.melosys.regler.lovvalg.LovvalgKrav.*;
 import static no.nav.melosys.regler.motor.voc.Deklarasjon.hvis;
 import static no.nav.melosys.regler.motor.voc.Verdielement.argumentet;
-
-import no.nav.melosys.regler.motor.Regelpakke;
 
 public class VurderArtikkel12_1 implements Regelpakke {
     
@@ -38,7 +38,7 @@ public class VurderArtikkel12_1 implements Regelpakke {
                 betingelse(HOVEDARBEIDSFORHOLDET_VARER_I_HELE_SØKNADSPERIODEN, erSann), // Krav 4
                 betingelse(LENGDE_MND_UTENLANDSOPPHOLD, erMindreEnnEllerLik(24)), // Krav 5
                 // Krav 6 gir heller en varsel, siden 12.1 kanskje skal innvilges likevel.
-                betingelse(BRUKER_ER_MEDLEM_AV_FTR_MÅNEDEN_FØR_PERIODESTART, erSann) // Krav 7
+                betingelse(BRUKER_ER_MEDLEM_AV_FTRL_MÅNEDEN_FØR_PERIODESTART, erSann) // Krav 7
             )
         );
     }
