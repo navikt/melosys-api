@@ -1,5 +1,7 @@
 package no.nav.melosys.regler.api.lovvalg.rep;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum Artikkel {
 
     ART_11_1("Artikkel 11.1"),
@@ -21,7 +23,7 @@ public enum Artikkel {
     ART_16_1("Artikkel 16.1"),
     ART_16_2("Artikkel 16.2");
 
-    
+    @JsonValue
     public final String beskrivelse;
     
     private Artikkel(String beskrivelse) {

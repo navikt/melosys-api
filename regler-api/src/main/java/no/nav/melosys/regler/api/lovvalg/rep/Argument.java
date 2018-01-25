@@ -1,5 +1,7 @@
 package no.nav.melosys.regler.api.lovvalg.rep;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum Argument {
     
     // KRITERIER FOR SØKNAD OM A1
@@ -49,7 +51,8 @@ public enum Argument {
     
     
     FIXME("FIXME"); // FIXME: Fjern
-    
+
+    @JsonValue
     public final String beskrivelse;
     
     private Argument(String beskrivelse) {
