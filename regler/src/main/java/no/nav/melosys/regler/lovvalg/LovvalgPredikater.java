@@ -1,15 +1,16 @@
 package no.nav.melosys.regler.lovvalg;
 
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknadDokumentet;
-
 import java.util.function.Predicate;
 
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
+import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.motor.voc.Predikat;
+
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknadDokumentet;
 
 /**
  * Verbalisering av predikater
@@ -59,5 +60,10 @@ public final class LovvalgPredikater {
         }
         return true;
     };
+
+    /** Sjekker om bostedsadresse er i Norge */
+    // TODO: Kan gjøres mer generisk ved å innføre et interface for adresseelementer med land/landkode
+    public static final Predicate<Bostedsadresse> bostedsadresseErINorge
+            = (Bostedsadresse b) -> b.getLand().getKode().equals("NOR");
     
 }
