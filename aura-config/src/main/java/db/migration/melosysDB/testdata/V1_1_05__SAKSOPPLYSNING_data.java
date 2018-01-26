@@ -30,7 +30,7 @@ public class V1_1_05__SAKSOPPLYSNING_data implements JdbcMigration {
 
     private static final Logger log = LoggerFactory.getLogger(V1_1_05__SAKSOPPLYSNING_data.class);
 
-    private static final int MOCK_BEHANDLINGER_NR = 7;
+    private static final int MOCK_BEHANDLINGER_NR = 3;
 
     private static int currentRowNum = 0;
 
