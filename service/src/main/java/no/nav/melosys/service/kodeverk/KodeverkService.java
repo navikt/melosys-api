@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -23,21 +24,19 @@ public class KodeverkService {
 
     private static final long MILLIS_MELLOM_VÅKNE_OPP = 3600000;
 
-    private static final long TIME_NÅR_CACHE_TØMMES = 6;
+    private static final long KLOKKESLETT_FOR_CACHE_REFRESH = 6;
 
     private static final Logger log = LoggerFactory.getLogger(KodeverkService.class);
 
     private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache; // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
 
-    private TømCacheScheduler tømCacheScheduler;
-
-    private KodeverkRegister kodeverkRegister;
+    private final KodeverkRegister kodeverkRegister;
 
 
     @Autowired
     public KodeverkService(KodeverkRegister kodeverkRegister) {
         this.kodeverkRegister = kodeverkRegister;
-        tømCacheScheduler = new TømCacheScheduler();
+        TømCacheScheduler tømCacheScheduler = new TømCacheScheduler();
         tømCacheScheduler.start();
     }
 
@@ -45,6 +44,7 @@ public class KodeverkService {
     /**
      * Henter alle gyldige verdier for et kodeverk på et gitt tidspunkt.
      */
+    //TODO: Dobble sjekk med Farjam før slette den methoden
     public List<String> gyldigeVerdier(Kodeverk kodeverk, LocalDate dato) {
         Map<String, List<Kode>> koder = hentKodeverk(kodeverk.getNavn()).getKoder();
         List<String> res = new ArrayList<>(koder.size());
@@ -66,7 +66,7 @@ public class KodeverkService {
     public String dekod(Kodeverk kodeverk, String kode, LocalDate dato) {
         List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
         if (kodeperioder == null) {
-            throw new RuntimeException("Problemer med å slå opp kodeverk med navn '" + kodeverk.getNavn() + "'");
+            throw new RuntimeException("Problemer med å slå opp Kodeverk med navn '" + kodeverk.getNavn() + "'");
         }
         // kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
         for (Kode kandidat : kodeperioder) {
@@ -89,7 +89,7 @@ public class KodeverkService {
         }
         kodeverk = kodeverkRegister.hentKodeverk(kodeverkNavn);
         kodeverkCache.put(kodeverkNavn, kodeverk);
-        log.debug("Hentet og cachet kodeverk {}", kodeverkNavn);
+        log.debug("Hentet og cachet Kodeverk {}", kodeverkNavn);
         return kodeverk;
     }
 
@@ -97,17 +97,15 @@ public class KodeverkService {
      * Denne methoden tømmer cache og henter kodeverk på nytt
      */
     private synchronized void henteAlleKodeVerkData() {
-        log.info("Tømmer cache og henter kodeverk på nytt");
+        log.info("Tømmer cache og henter Kodeverk på nytt");
         kodeverkCache = new HashMap<>();
         for (Kodeverk kodeverk : Kodeverk.values()) {
             hentKodeverk(kodeverk.getNavn());
         }
     }
 
-    /**
-     * Obs: Hvis applikasjon starter rett før kl 5 da risikorio man at tømm cache og hente ny kodeverk blir ikke kallet
-     */
 
+    //Obs: Hvis applikasjon starter rett før kl 5 da risikerer man at tømm cache og hente ny Kodeverk blir ikke kallet
     private class TømCacheScheduler extends Thread {
         @Override
         public void run() {
@@ -115,8 +113,9 @@ public class KodeverkService {
             henteAlleKodeVerkData(); // Hente Kodeverk når applikasjon starter
             for (; ; ) {
                 try {
-                    if (TIME_NÅR_CACHE_TØMMES == LocalTime.now().getHour())  // Tømme cache og hente Kodeverk på nytt hvertdag kl 06:00
+                    if (KLOKKESLETT_FOR_CACHE_REFRESH == LocalTime.now().getHour()) { // Tømme cache og hente Kodeverk på nytt hvertdag kl 06:00
                         henteAlleKodeVerkData();
+                    }
                     sleep(MILLIS_MELLOM_VÅKNE_OPP);
                 } catch (InterruptedException e) {
                     return;
