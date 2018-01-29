@@ -52,13 +52,6 @@ public enum Argument {
     BRUKEREN_SKAL_ERSTATTE_EN_ANNEN_ARBEIDSTAKER("Brukeren skal ikke erstatte en annen utsendt arbeidstaker"), // 12.1 // FIXME: Må settes
     BRUKER_ER_MEDLEM_AV_FTR_MÅNEDEN_FØR_PERIODESTART("Bruker er medlem av FTR måneden før periodestart"), // 12.1
 
-    // FIXME: Brukes av VurderingTjeneste
-    // Kriterier for 12.1
-    A1_12_1_VIRKSOMHET_I_UTSENDERLAND("Arbeidsgiver har virksomhet i landet arbeidstakeren sendes fra"),
-    A1_12_1_SENDES_TIL_ANNEN_MEDLEMSSTAT("Arbeidstakeren sendes til en annen medlemsstat for å utføre arbeid for arbeidsgiveren"),
-    A1_12_1_UTENLANDSOPPHOLDET_ER_IKKE_OVER_24_MND("Utenlandsoppholdet er ikke lengre enn 24 måneder"),
-    A1_12_1_SKAL_ERSTATTE_ANNEN_PERSON("Arbeidstakeren er utsendt for å erstatte en annen person"),
-
     // FIXME BRUKER_ER_ANSATT_HOS_UTSENDENDE_ORGANISASJON_I_HELE_SØKNADSPERIODE("Bruker er ansatt hos utsendende organisasjon i hele perioden"),
     
     FIXME("FIXME"); // FIXME: Fjern
