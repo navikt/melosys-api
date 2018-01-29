@@ -4,21 +4,21 @@ import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 
 public class LovvalgDto {
 
-    private long behandlingId;
+    private long behandlingID;
 
     private FastsettLovvalgReply vurdering;
 
     public LovvalgDto(long behandlingID, FastsettLovvalgReply fastsettLovvalgReply) {
-        this.behandlingId = behandlingID;
+        this.behandlingID = behandlingID;
         this.vurdering = fastsettLovvalgReply;
     }
 
-    public long getBehandlingId() {
-        return behandlingId;
+    public long getBehandlingID() {
+        return behandlingID;
     }
 
-    public void setBehandlingId(long behandlingId) {
-        this.behandlingId = behandlingId;
+    public void setBehandlingID(long behandlingId) {
+        this.behandlingID = behandlingID;
     }
 
     public FastsettLovvalgReply getVurdering() {

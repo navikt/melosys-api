@@ -4,21 +4,21 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 
 public class SoeknadDto {
 
-    private long behandlingId;
+    private long behandlingID;
 
     private SoeknadDokument soknadDokument;
 
     public SoeknadDto(long behandlingID, SoeknadDokument soeknad) {
-        this.behandlingId = behandlingID;
+        this.behandlingID = behandlingID;
         this.soknadDokument = soeknad;
     }
 
-    public long getBehandlingId() {
-        return behandlingId;
+    public long getBehandlingID() {
+        return behandlingID;
     }
 
-    public void setBehandlingId(long behandlingId) {
-        this.behandlingId = behandlingId;
+    public void setBehandlingID(long behandlingID) {
+        this.behandlingID = behandlingID;
     }
 
     public SoeknadDokument getSoknadDokument() {

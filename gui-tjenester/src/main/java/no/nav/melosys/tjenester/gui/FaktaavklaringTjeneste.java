@@ -26,29 +26,34 @@ public class FaktaavklaringTjeneste extends RestTjeneste {
                 "  \"behandlingId\": 123456789,\n" +
                 "  \"faktaavklaring\": {\n" +
                 "    \"periode\": {\n" +
-                "      \"land\": [],\n" +
-                "      \"periodeFraOgMed\": null,\n" +
-                "      \"periodeTilOgMed\": null\n" +
+                "      \"land\": [\"FR\"],\n" +
+                "      \"periodeFraOgMed\": \"2018-01-01\",\n" +
+                "      \"periodeTilOgMed\": \"2019-01-01\"\n" +
                 "    },\n" +
                 "    \"aktivitet\": {\n" +
-                "      \"aktivitetLand\": []\n" +
+                "      \"aktivitetLand\": [\"DE\"]\n" +
                 "    },\n" +
                 "    \"sysselsetting\": {\n" +
-                "      \"sysselsettingType\": \"\"\n" +
+                "      \"sysselsettingType\": \"ARBEIDSTAKER\"\n" +
                 "    },\n" +
                 "    \"utsending\": {\n" +
-                "      \"ansattINorskSelskap\": null,\n" +
-                "      \"erstatterTidligereUtsendt\": null,\n" +
-                "      \"utsendingMindreEnn24Mnd\": null\n" +
+                "      \"ansattINorskSelskap\": true,\n" +
+                "      \"erstatterTidligereUtsendt\": false,\n" +
+                "      \"utsendingMindreEnn24Mnd\": true\n" +
+                "    },\n" +
+                "    \"bostedsland\": {\n" +
+                "      \"bekrefterFamiliebosted\": null,\n" +
+                "      \"bekrefterDisponering\": null,\n" +
+                "      \"bostedsLand\": []\n" +
                 "    },\n" +
                 "    \"sektor\": {\n" +
-                "      \"ansattISektor\": \"\"\n" +
+                "      \"ansattISektor\": \"INGEN_AV_DISSE\"\n" +
                 "    },\n" +
                 "    \"virksomhet\": {\n" +
-                "      \"antallLand\": \"\",\n" +
-                "      \"aktivitetINorge\": \"\",\n" +
-                "      \"marginaltArbeid\": \"\",\n" +
-                "      \"vekslingMellomLand\": \"\"\n" +
+                "      \"antallLand\": \"ETT_LAND_IKKE_NORGE\",\n" +
+                "      \"aktivitetINorge\": \"OVER_25_PROSENT\",\n" +
+                "      \"marginaltArbeid\": \"MARGINALT_JA\",\n" +
+                "      \"vekslingMellomLand\": \"EN_ELLER_BEGGE\"\n" +
                 "    }\n" +
                 "  },\n" +
                 "  \"status\": {\n" +
