@@ -1,20 +1,18 @@
 package no.nav.melosys.service.kodeverk;
 
-import no.nav.melosys.integrasjon.kodeverk.Kode;
-import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+
+import no.nav.melosys.integrasjon.kodeverk.Kode;
+import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Klassen tilbyr tjenester for å slå opp kodeverk.
@@ -31,14 +29,15 @@ public class KodeverkService {
 
     private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache; // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
 
-    KodeverkRegister kodeverkRegister;
+    private KodeverkRegister kodeverkRegister;
 
-    TømCacheScheduler tømCacheScheduler;
+    private TømCacheScheduler tømCacheScheduler;
 
 
     @Autowired
     public KodeverkService(KodeverkRegister kodeverkRegister) {
         this.kodeverkRegister = kodeverkRegister;
+        this.kodeverkCache = new HashMap<>();
         tømCacheScheduler = new TømCacheScheduler();
         tømCacheScheduler.start();
     }
@@ -99,19 +98,18 @@ public class KodeverkService {
      */
     private synchronized void henteAlleKodeVerkData() {
         log.info("Tømmer cache og henter Kodeverk på nytt");
-        kodeverkCache = new HashMap<>();
+        kodeverkCache.clear();
         for (Kodeverk kodeverk : Kodeverk.values()) {
             hentKodeverk(kodeverk.getNavn());
         }
     }
-
 
     //Obs: Hvis applikasjon starter rett før kl 5 da risikerer man at tømm cache og hente ny Kodeverk blir ikke kallet
     private class TømCacheScheduler extends Thread {
         @Override
         public void run() {
             henteAlleKodeVerkData(); // Hente Kodeverk når applikasjon starter
-            for (; ; ) {
+            for (;;) {
                 if (KLOKKESLETT_FOR_CACHE_REFRESH == LocalTime.now().getHour()) { // Tømme cache og hente Kodeverk på nytt hvertdag kl 06:00
                     henteAlleKodeVerkData();
                 }

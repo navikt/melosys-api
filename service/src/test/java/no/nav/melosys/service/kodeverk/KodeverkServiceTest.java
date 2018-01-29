@@ -34,18 +34,14 @@ public class KodeverkServiceTest {
     
     private static String BAK = "BAK", BAKVENDTLAND = "BAKVENDTLAND";
 
-    @InjectMocks
     private KodeverkService kodeverkService;
     
     @Mock
     private KodeverkRegister kodeverkRegisterMock;
 
-
     @Before
     public void setup() {
-        //kodeverkService = new KodeverkService(kodeverkRegisterMock);
-        ReflectionTestUtils.setField(kodeverkService, "kodeverkRegister", kodeverkRegisterMock);
-
+        kodeverkService = new KodeverkService(kodeverkRegisterMock);
         Map<String, List<Kode>> landkoder = new HashMap<>();
         landkoder.put(BAK, Arrays.asList(new Kode(BAK, BAKVENDTLAND, LocalDate.MIN, LocalDate.MAX)));
         Kodeverk mockLandkoder = new Kodeverk(LANDKODER.getNavn(), landkoder);
@@ -55,22 +51,11 @@ public class KodeverkServiceTest {
     @Test
     public void testKodeverkService() {
         // Sjekk opphenting av kodeverk...
-        if(Objects.isNull(kodeverkRegisterMock))
-            System.out.println("---kodeverkRegister er null");
-
-        System.out.println("\n-----kodeverkService-----"+kodeverkService.toString()+"\n");
-        String res ="";
-        try {
-            res = kodeverkService.dekod(LANDKODER, BAK, LocalDate.now());
-        }catch (Exception e){
-            e.getStackTrace();
-        }
-
+        String res = kodeverkService.dekod(LANDKODER, BAK, LocalDate.now());
         assertEquals(BAKVENDTLAND, res);
         // Sjekk opphenting fra cache...
         kodeverkService.dekod(LANDKODER, BAK, LocalDate.now());
-        kodeverkService.dekod(LANDKODER, BAK, LocalDate.now());
-        verify(kodeverkRegisterMock, atLeast(8)).hentKodeverk(any());
+        verify(kodeverkRegisterMock, atLeast(1)).hentKodeverk(any());
     }
     
 }
