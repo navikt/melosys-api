@@ -11,13 +11,13 @@ public class ArbeidNorge {
     public Boolean brukerErSelvstendigNæringsdrivende;
     public Boolean selvstendigFortsetterEtterArbeidIUtlandet;
     @JsonProperty("brukerArbeiderIVikarbyra")
-    public Boolean brukerArbeiderIVikarbyrå; //TODO fjernes?
+    public Boolean brukerArbeiderIVikarbyrå; //FIXME: fjernes?
     public String vikarOrgnr;
     public String flyendePersonellHjemmebase;
     @JsonProperty("ansattPaSokkelEllerSkip")
-    public String ansattPaSokkelEllerSkip; //TODO boolean?
+    public String ansattPaSokkelEllerSkip; //FIXME: boolean?
     public String navnSkipEllerSokkel;
-    public String sokkelLand; //TODO Land?
+    public String sokkelLand; //FIXME: Land?
     @JsonProperty("skipFartsomrade")
     public String skipFartsområde;
     public String skipFlaggLand;

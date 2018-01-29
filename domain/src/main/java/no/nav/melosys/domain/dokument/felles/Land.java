@@ -41,12 +41,12 @@ public class Land {
     private static final String ØSTERRIKE = "AUT";
     private static final String ÅLAND = "ALA";
 
-    // TODO: Sjekk om/hvordan vi skal håndtere Sveits og Svalbard
+    // FIXME: Sjekk om/hvordan vi skal håndtere Sveits og Svalbard
     private static final Set<String> EØS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
             BELGIA, BULGARIA, DANMARK, ESTLAND, FINLAND, FRANKRIKE, HELLAS, IRLAND, ISLAND, ITALIA, KROATIA, KYPROS,
             LATVIA, LIECHTENSTEIN, LITAUEN, LUXEMBOURG, MALTA, NEDERLAND, NORGE, POLEN, PORTUGAL, ROMANIA, SLOVAKIA,
             SLOVENIA, SPANIA, STORBRITANNIA, SVERIGE, TSJEKKIA, TYSKLAND, UNGARN, ØSTERRIKE)));
-    // TODO: Sjekk om Åland skal være med
+    // FIXME: Sjekk om Åland skal være med
     private static final Set<String> NORDEN = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
             DANMARK, FINLAND, FÆRØYENE, GRØNLAND, ISLAND, NORGE, SVALBARD_OG_JAN_MAYEN, SVERIGE, ÅLAND)));
 
