@@ -4,6 +4,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingStatus;
+import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
@@ -23,25 +25,31 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
+import java.time.LocalDateTime;
 
 @Api(tags = {"fagsak"})
 @Path("/fagsaker")
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 @Transactional
-public class FagsakRestTjeneste extends RestTjeneste {
+public class FagsakTjeneste extends RestTjeneste {
 
     private FagsakService fagsakService;
 
     private ModelMapper modelMapper;
 
     @Autowired
-    public FagsakRestTjeneste(FagsakService fagsakService, DokumentFactory dokumentFactory) {
+    public FagsakTjeneste(FagsakService fagsakService, DokumentFactory dokumentFactory) {
         this.fagsakService = fagsakService;
 
         this.modelMapper = new ModelMapper();
 
         TypeMap<Behandling, BehandlingDto> typeMapBehandlingUt = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
+        typeMapBehandlingUt.<Long>addMapping(src -> src.getId(), (dest, id) -> dest.getOppsummering().setBehandlingID(id));
+        typeMapBehandlingUt.<Long>addMapping(src -> src.getGsakID(), (dest, id) -> dest.getOppsummering().setGsakId(id));
+        typeMapBehandlingUt.<BehandlingStatus>addMapping(src -> src.getStatus(), (dest, status) -> dest.getOppsummering().setStatus(status));
+        typeMapBehandlingUt.<BehandlingType>addMapping(src -> src.getType(), (dest, type) -> dest.getOppsummering().setType(type));
+        typeMapBehandlingUt.<LocalDateTime>addMapping(src -> src.getRegistrertDato(), (dest, dato) -> dest.getOppsummering().setRegistrertDato(dato));
         typeMapBehandlingUt.addMappings(mapper -> mapper.using(new SaksopplysningerTilDtoConverter()).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
     }
 
@@ -82,6 +90,8 @@ public class FagsakRestTjeneste extends RestTjeneste {
     private FagsakDto tilDto(Fagsak fagsak) {
         FagsakDto fagsakDto = new FagsakDto();
         modelMapper.map(fagsak, fagsakDto);
+        // FIXME saksnummer fra Fagsak bruker id fra DB (midlertidig)
+        fagsakDto.setSaksnummer(fagsak.getId());
         return fagsakDto;
     }
 

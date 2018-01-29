@@ -1,5 +1,7 @@
 package no.nav.melosys.regler.api.lovvalg.rep;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum Argument {
     
     // KRITERIER FOR SØKNAD OM A1
@@ -49,11 +51,12 @@ public enum Argument {
     LENGDE_MND_UTENLANDSOPPHOLD("Antall måneder utenlandsoppholdet varer"), // 12.1
     BRUKEREN_SKAL_ERSTATTE_EN_ANNEN_ARBEIDSTAKER("Brukeren skal ikke erstatte en annen utsendt arbeidstaker"), // 12.1 // FIXME: Må settes
     BRUKER_ER_MEDLEM_AV_FTR_MÅNEDEN_FØR_PERIODESTART("Bruker er medlem av FTR måneden før periodestart"), // 12.1
-    
+
     // FIXME BRUKER_ER_ANSATT_HOS_UTSENDENDE_ORGANISASJON_I_HELE_SØKNADSPERIODE("Bruker er ansatt hos utsendende organisasjon i hele perioden"),
     
     FIXME("FIXME"); // FIXME: Fjern
-    
+
+    @JsonValue
     public final String beskrivelse;
     
     private Argument(String beskrivelse) {

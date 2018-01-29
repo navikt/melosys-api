@@ -21,14 +21,14 @@ import javax.ws.rs.core.Response;
 @Path("/arbeidsforholdhistorikk")
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
-public class ArbeidsforholdHistorikkRestTjeneste extends RestTjeneste {
+public class ArbeidsforholdHistorikkTjeneste extends RestTjeneste {
 
-    private static final Logger log = LoggerFactory.getLogger(ArbeidsforholdHistorikkRestTjeneste.class);
+    private static final Logger log = LoggerFactory.getLogger(ArbeidsforholdHistorikkTjeneste.class);
 
     private FagsakService fagsakService;
 
     @Autowired
-    public ArbeidsforholdHistorikkRestTjeneste(FagsakService fagsakService) {
+    public ArbeidsforholdHistorikkTjeneste(FagsakService fagsakService) {
         this.fagsakService = fagsakService;
     }
 
