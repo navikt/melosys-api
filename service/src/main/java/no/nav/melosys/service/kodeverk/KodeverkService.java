@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Klassen tilbyr tjenester for å slå opp kodeverk.
@@ -30,21 +31,21 @@ public class KodeverkService {
 
     private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache; // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
 
-    private final KodeverkRegister kodeverkRegister;
+    KodeverkRegister kodeverkRegister;
+
+    TømCacheScheduler tømCacheScheduler;
 
 
     @Autowired
     public KodeverkService(KodeverkRegister kodeverkRegister) {
         this.kodeverkRegister = kodeverkRegister;
-        TømCacheScheduler tømCacheScheduler = new TømCacheScheduler();
+        tømCacheScheduler = new TømCacheScheduler();
         tømCacheScheduler.start();
     }
-
 
     /**
      * Henter alle gyldige verdier for et kodeverk på et gitt tidspunkt.
      */
-    //TODO: Dobble sjekk med Farjam før slette den methoden
     public List<String> gyldigeVerdier(Kodeverk kodeverk, LocalDate dato) {
         Map<String, List<Kode>> koder = hentKodeverk(kodeverk.getNavn()).getKoder();
         List<String> res = new ArrayList<>(koder.size());
@@ -109,18 +110,14 @@ public class KodeverkService {
     private class TømCacheScheduler extends Thread {
         @Override
         public void run() {
-
             henteAlleKodeVerkData(); // Hente Kodeverk når applikasjon starter
             for (; ; ) {
+                if (KLOKKESLETT_FOR_CACHE_REFRESH == LocalTime.now().getHour()) { // Tømme cache og hente Kodeverk på nytt hvertdag kl 06:00
+                    henteAlleKodeVerkData();
+                }
                 try {
-                    if (KLOKKESLETT_FOR_CACHE_REFRESH == LocalTime.now().getHour()) { // Tømme cache og hente Kodeverk på nytt hvertdag kl 06:00
-                        henteAlleKodeVerkData();
-                    }
                     sleep(MILLIS_MELLOM_VÅKNE_OPP);
                 } catch (InterruptedException e) {
-                    return;
-                }
-                if (interrupted()) {
                     return;
                 }
 
