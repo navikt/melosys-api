@@ -31,15 +31,11 @@ public class KodeverkService {
 
     private KodeverkRegister kodeverkRegister;
 
-    private TømCacheScheduler tømCacheScheduler;
-
-
     @Autowired
     public KodeverkService(KodeverkRegister kodeverkRegister) {
         this.kodeverkRegister = kodeverkRegister;
         this.kodeverkCache = new HashMap<>();
-        tømCacheScheduler = new TømCacheScheduler();
-        tømCacheScheduler.start();
+        new TømCacheScheduler().start();
     }
 
     /**
@@ -104,7 +100,6 @@ public class KodeverkService {
         }
     }
 
-    //Obs: Hvis applikasjon starter rett før kl 5 da risikerer man at tømm cache og hente ny Kodeverk blir ikke kallet
     private class TømCacheScheduler extends Thread {
         @Override
         public void run() {
