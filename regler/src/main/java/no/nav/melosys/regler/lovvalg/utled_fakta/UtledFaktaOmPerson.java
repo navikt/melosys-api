@@ -1,9 +1,5 @@
 package no.nav.melosys.regler.lovvalg.utled_fakta;
 
-import java.util.function.Predicate;
-
-import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
-import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.regler.motor.Regelpakke;
 import no.nav.melosys.regler.motor.voc.Predikat;
 
@@ -12,7 +8,7 @@ import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.DELVIS_STOETTET;
 import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.leggTilMelding;
 import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.settArgument;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.*;
-import static no.nav.melosys.regler.lovvalg.LovvalgPredikater.bostedsadresseErINorge;
+import static no.nav.melosys.regler.lovvalg.LovvalgPredikater.*;
 import static no.nav.melosys.regler.lovvalg.LovvalgProdusenter.arbeidsforhold;
 import static no.nav.melosys.regler.lovvalg.LovvalgProdusenter.medlemsperioder;
 import static no.nav.melosys.regler.motor.voc.Deklarasjon.hvis;
@@ -49,20 +45,10 @@ public class UtledFaktaOmPerson implements Regelpakke {
         // TODO (farjam 2017-12-21): Denne kan pr. i dag ikke implementeres på bakgrunn av innhentet data
     }
 
-    private static final Predicate<Arbeidsforhold> ansattFørPeriodestart = (Arbeidsforhold arbeidsforhold) -> {
-        // FIXME: Bedre verbalisering
-        return søknadsperioden().starterPåEllerEtter(verdien(arbeidsforhold).startdato()).test();
-    };
-
-    private static final Predicate<Medlemsperiode> medlemFørPeriodestart = (Medlemsperiode medlemsperiode)
-        // FIXME: Bedre verbalisering
-        -> søknadsperioden().starterPåEllerEtter(verdien(medlemsperiode).startdato()).test();
-
     private static final Predikat brukerenVarIJobbINorgeMånedenFørPeriodestart
-        = alle(arbeidsforholdDokumentene()).sine(arbeidsforhold).inneholderMinstEn(ansattFørPeriodestart);
+        = alle(arbeidsforholdDokumentene()).sine(arbeidsforhold).inneholderMinstEn(ansattINorgeFørPeriodestart);
 
     private static final Predikat brukerenVarMedlemAvFtrlMånedenFørPeriodestartIFølgeMEDL
-        // FIXME: Sjekk om medlemskapet gjelder ftrl
         = alle(medlemskapDokumentene()).sine(medlemsperioder).inneholderMinstEn(medlemFørPeriodestart);
 
     private static final Predikat brukerenHarIkkeAdresseIUtlandet

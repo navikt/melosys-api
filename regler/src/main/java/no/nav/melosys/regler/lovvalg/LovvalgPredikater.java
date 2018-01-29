@@ -4,6 +4,8 @@ import java.util.function.Predicate;
 
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
+import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
@@ -11,6 +13,8 @@ import no.nav.melosys.regler.motor.voc.Predikat;
 
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknadDokumentet;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknadsperioden;
+import static no.nav.melosys.regler.motor.voc.Verdielement.verdien;
 
 /**
  * Verbalisering av predikater
@@ -65,5 +69,15 @@ public final class LovvalgPredikater {
     // TODO: Kan gjøres mer generisk ved å innføre et interface for adresseelementer med land/landkode
     public static final Predicate<Bostedsadresse> bostedsadresseErINorge
             = (Bostedsadresse b) -> b.getLand().getKode().equals("NOR");
-    
+
+    /** Sjekker om brukeren arbeidet i Norge før periodestart */
+    public static final Predicate<Arbeidsforhold> ansattINorgeFørPeriodestart = (Arbeidsforhold arbeidsforhold) -> {
+        return søknadsperioden().starterPåEllerEtter(verdien(arbeidsforhold).startdato())
+                .og(verdien(arbeidsforhold.getUtenlandsopphold()).mangler()).test();
+    };
+
+    public static final Predicate<Medlemsperiode> medlemFørPeriodestart = (Medlemsperiode medlemsperiode)
+        // FIXME: Sjekk om medlemskapet gjelder ftrl
+        -> søknadsperioden().starterPåEllerEtter(verdien(medlemsperiode).startdato()).test();
+
 }
