@@ -1,5 +1,13 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -20,20 +28,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 @Api(tags = {"sok"})
 @Path("/sok")
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 @Transactional
-public class SokRestTjeneste extends RestTjeneste {
+public class SokTjeneste extends RestTjeneste {
 
     private FagsakService fagsakService;
 
@@ -42,7 +42,7 @@ public class SokRestTjeneste extends RestTjeneste {
     private ModelMapper modelMapper;
 
     @Autowired
-    public SokRestTjeneste(FagsakService fagsakService, DokumentFactory dokumentFactory) {
+    public SokTjeneste(FagsakService fagsakService, DokumentFactory dokumentFactory) {
         this.fagsakService = fagsakService;
         this.dokumentFactory = dokumentFactory;
 
@@ -91,6 +91,8 @@ public class SokRestTjeneste extends RestTjeneste {
                 }
             }
 
+            // FIXME saksnummer fra Fagsak bruker id fra DB (midlertidig)
+            fagsakOppsummeringDto.setSaksnummer(fagsak.getId());
             fagsakListe.add(fagsakOppsummeringDto);
         }
 

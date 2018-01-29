@@ -10,6 +10,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.ws.soap.SOAPFaultException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,6 +106,9 @@ public class InntektService implements InntektFasade {
             throw new IntegrasjonException(hentInntektListeUgyldigInput);
         } catch (HentInntektListeHarIkkeTilgangTilOensketAInntektsfilter hentInntektListeHarIkkeTilgangTilOensketAInntektsfilter) {
             throw new SikkerhetsbegrensningException(hentInntektListeHarIkkeTilgangTilOensketAInntektsfilter);
+        } catch (SOAPFaultException soapFaultException) {
+            // Det er ingen integrasjon mot SKATT i testmiljø, så det er forventet at oppslag på reelle brukere feiler
+            throw new IntegrasjonException(soapFaultException);
         }
 
         // Response -> xml

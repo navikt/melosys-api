@@ -157,13 +157,14 @@ public class Saksopplysning {
         }
         return Objects.equals(this.behandling, that.behandling)
             && Objects.equals(this.registrertDato, that.registrertDato)
+            && Objects.equals(this.type, that.type)
             && Objects.equals(this.kilde, that.kilde)
             && Objects.equals(this.dokumentXml, that.dokumentXml);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(behandling, registrertDato, kilde, dokumentXml);
+        return Objects.hash(behandling, registrertDato, type, kilde, dokumentXml);
     }
 
 }

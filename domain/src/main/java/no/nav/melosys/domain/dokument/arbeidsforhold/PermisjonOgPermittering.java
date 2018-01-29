@@ -1,9 +1,10 @@
 package no.nav.melosys.domain.dokument.arbeidsforhold;
 
-import java.math.BigDecimal;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
+
+import java.math.BigDecimal;
 
 public class PermisjonOgPermittering implements HarPeriode {
 
@@ -16,6 +17,7 @@ public class PermisjonOgPermittering implements HarPeriode {
     private String permisjonOgPermittering;
     
     @Override
+    @JsonIgnore
     public Periode getPeriode() {
         return permisjonsPeriode;
     }

@@ -1,5 +1,7 @@
 package no.nav.melosys.regler.api.lovvalg.rep;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum Argument {
     
     // KRITERIER FOR SØKNAD OM A1
@@ -53,7 +55,8 @@ public enum Argument {
     // FIXME BRUKER_ER_ANSATT_HOS_UTSENDENDE_ORGANISASJON_I_HELE_SØKNADSPERIODE("Bruker er ansatt hos utsendende organisasjon i hele perioden"),
     
     FIXME("FIXME"); // FIXME: Fjern
-    
+
+    @JsonValue
     public final String beskrivelse;
     
     private Argument(String beskrivelse) {

@@ -4,9 +4,12 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.Familiemedlem;
+import no.nav.melosys.domain.dokument.person.Sivilstand;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.time.LocalDate;
+import java.util.List;
 
 @JsonRootName("soknadDokument")
 @XmlRootElement
@@ -20,7 +23,9 @@ public class SoeknadDokument extends SaksopplysningDokument {
     public Bostedsadresse bostedsadresseUtland;
     public Land statsborgerskap;
     public String utenlandskId;
-    // FIXME: Barn? (Barn kan utfylles med TPS)
+    // Barn sendes med i søknaden, da det ikke er gitt av TPS hvilke som er medfølgende.
+    public List<Familiemedlem> familiemedlemmer;
+    public Sivilstand sivilstand;
 
     // Opplysninger om arbeid i utlandet
     public ArbeidUtland arbeidUtland;

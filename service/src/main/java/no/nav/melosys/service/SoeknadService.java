@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.ws.rs.NotFoundException;
 import java.util.Comparator;
 import java.util.Optional;
 
@@ -33,7 +34,7 @@ public class SoeknadService {
     public SoeknadDokument hentSoeknad(long behandlingID) {
         Behandling behandling = behandlingRepo.findOne(behandlingID);
         if (behandling == null) {
-            return null; // Behandling ikke funnet
+            throw new NotFoundException("Behandling ikke funnet"); // Behandling ikke funnet
         }
 
         Comparator<? super Saksopplysning> comparator = Comparator.comparing(Saksopplysning::getRegistrertDato);

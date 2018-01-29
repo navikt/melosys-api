@@ -13,7 +13,7 @@ CREATE TABLE fagsak_type (
     navn        VARCHAR2(99)  NOT NULL,
     CONSTRAINT pk_fagsak_type PRIMARY KEY (kode)
 );
-INSERT INTO fagsak_type (kode, navn) VALUES ('SØKNAD_A1', 'Søknad A1');
+INSERT INTO fagsak_type (kode, navn) VALUES ('A1', 'Søknad A1');
 
 CREATE TABLE fagsak_status (
     kode        VARCHAR2(99)  NOT NULL,

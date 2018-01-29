@@ -49,10 +49,10 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     dto.setInntekt((InntektDokument)dokument);
                     break;
                 case SØKNAD:
-                    // N.B. Frontend ønsker ikke å få søknaden på /fagsaker
+                    // N.B. Frontend ønsker ikke å få søknaden på /fagsaker slik at opplysninger fra registrene er adskilt
                     break;
                 default:
-                    throw new IllegalArgumentException("Type " + type.getKode() + " ikke støtet.");
+                    throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");
             }
         }
 
