@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -58,31 +59,31 @@ public class VurderingTjeneste extends RestTjeneste {
 
     public FastsettLovvalgReply mockKall() {
         FastsettLovvalgReply mockFastsettLovvalgReply = new FastsettLovvalgReply();
-        mockFastsettLovvalgReply.lovvalgsbestemmelser = new ArrayList<>();
+        mockFastsettLovvalgReply.lovvalgsbestemmelser = new HashMap<>();
 
         Lovvalgsbestemmelse lovvalgsbestemmelse = new Lovvalgsbestemmelse();
-        mockFastsettLovvalgReply.lovvalgsbestemmelser.add(lovvalgsbestemmelse);
+        mockFastsettLovvalgReply.lovvalgsbestemmelser.put(Artikkel.ART_12_1, lovvalgsbestemmelse);
 
         lovvalgsbestemmelse.artikkel = Artikkel.ART_12_1;
 
         lovvalgsbestemmelse.betingelser = new ArrayList<>();
         Betingelse betingelse = new Betingelse();
-        betingelse.krav = Argument.A1_12_1_VIRKSOMHET_I_UTSENDERLAND;
+        betingelse.argument = Argument.A1_12_1_VIRKSOMHET_I_UTSENDERLAND;
         betingelse.resultat = Resultat.OPPFYLT;
         lovvalgsbestemmelse.betingelser.add(betingelse);
 
         betingelse = new Betingelse();
-        betingelse.krav = Argument.A1_12_1_SENDES_TIL_ANNEN_MEDLEMSSTAT;
+        betingelse.argument = Argument.A1_12_1_SENDES_TIL_ANNEN_MEDLEMSSTAT;
         betingelse.resultat = Resultat.OPPFYLT;
         lovvalgsbestemmelse.betingelser.add(betingelse);
 
         betingelse = new Betingelse();
-        betingelse.krav = Argument.A1_12_1_UTENLANDSOPPHOLDET_ER_IKKE_OVER_24_MND;
+        betingelse.argument = Argument.A1_12_1_UTENLANDSOPPHOLDET_ER_IKKE_OVER_24_MND;
         betingelse.resultat = Resultat.OPPFYLT;
         lovvalgsbestemmelse.betingelser.add(betingelse);
 
         betingelse = new Betingelse();
-        betingelse.krav = Argument.A1_12_1_SKAL_ERSTATTE_ANNEN_PERSON;
+        betingelse.argument = Argument.A1_12_1_SKAL_ERSTATTE_ANNEN_PERSON;
         betingelse.resultat = Resultat.OPPFYLT;
         lovvalgsbestemmelse.betingelser.add(betingelse);
 
