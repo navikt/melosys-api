@@ -1,7 +1,7 @@
 package no.nav.melosys.regler.lovvalg.utled_fakta;
 
 import static no.nav.melosys.regler.api.lovvalg.rep.Argument.BRUKER_ARBEIDER_I_NORGE;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.BRUKER_ER_ARBEIDSTAKER;
+import static no.nav.melosys.regler.api.lovvalg.rep.Argument.*;
 import static no.nav.melosys.regler.api.lovvalg.rep.Argument.BRUKER_ER_NÆRINGSDRIVENDE;
 import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.DELVIS_STOETTET;
 import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.leggTilMelding;
@@ -13,6 +13,7 @@ import static no.nav.melosys.regler.lovvalg.LovvalgProdusenter.permitteringer;
 import static no.nav.melosys.regler.motor.voc.Deklarasjon.hvis;
 import static no.nav.melosys.regler.motor.voc.FellesVokabular.JA;
 import static no.nav.melosys.regler.motor.voc.FellesVokabular.NEI;
+import static no.nav.melosys.regler.motor.voc.FellesVokabular.utfør;
 import static no.nav.melosys.regler.motor.voc.Verdielement.antallet;
 import static no.nav.melosys.regler.motor.voc.Verdielement.verdien;
 
@@ -76,4 +77,32 @@ public class UtledFaktaOmArbeid implements Regelpakke {
             settArgument(BRUKER_ER_NÆRINGSDRIVENDE, NEI)
         );
     }
+    
+    /**
+     * Gjetter diverse argumenter vi ikke har implementert regler for enda.
+     * FIXME: Denne metoden må fjernes, og disse verdiene må settes etter riktige regler.
+     */
+    @Regel
+    public static void gjettDiverseVerdier() {
+        utfør(
+            settArgument(BRUKEREN_SKAL_ERSTATTE_EN_ANNEN_ARBEIDSTAKER, NEI),
+            leggTilMelding(DELVIS_STOETTET, "(Ikke implementert) Legger til grunn at bruker ikke skal erstatte annen arbeidstaker"),
+
+            settArgument(HOVEDARBEIDSFORHOLDET_VARER_I_HELE_SØKNADSPERIODEN, JA),
+            leggTilMelding(DELVIS_STOETTET, "(Ikke implementert) Legger til grunn at arbeidsforholdet varer i hele utsendelsesperioden"),
+            
+            settArgument(ANTALL_ARBEIDSGIVERE_I_SØKNADSPERIODEN, 1),
+            leggTilMelding(DELVIS_STOETTET, "(Ikke implementert) Legger til grunn at bruker har kun 1 arbeidsgiver i søknadsperioden"),
+            
+            settArgument(ARBEIDSGIVER_HAR_VESENTLIG_VIRKSOMHET_I_NORGE, JA),
+            leggTilMelding(DELVIS_STOETTET, "(Ikke implementert) Legger til grunn at arbeidsgiver har vesentlig virksomhet i Norge"),
+
+            settArgument(ARBEIDSPLASSEN_I_UTLANDET_DEKKES_AV_EF_883_2004, JA),
+            leggTilMelding(DELVIS_STOETTET, "(Ikke implementert) Legger til grunn at arbeidsplassen i utlandet dekkes av forordningen"),
+            
+            settArgument(BRUKER_HAR_NORSK_ARBEIDSGIVER, JA),
+            leggTilMelding(DELVIS_STOETTET, "(Ikke implementert) Legger til grunn at bruker har norsk arbeidsgiver")
+        );
+    }
+
 }

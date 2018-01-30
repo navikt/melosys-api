@@ -7,9 +7,6 @@ import org.springframework.util.Assert;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.regler.motor.KontekstManager;
 
-/*
- * TODO: Denne klassen kan types + subklasses for konkrete typer for å få typesikkerhet
- */
 public class Verdielement {
     
     private Verdielement() {} // Skal ikke instansieres direkte
