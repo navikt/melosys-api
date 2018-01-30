@@ -1,5 +1,7 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -21,4 +23,5 @@ public class ArbeidNorge {
     @JsonProperty("skipFartsomrade")
     public String skipFartsområde;
     public String skipFlaggLand;
+    public List<String> valgteArbeidsforhold;
 }

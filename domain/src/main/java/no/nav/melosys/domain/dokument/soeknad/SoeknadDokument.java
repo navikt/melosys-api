@@ -1,15 +1,15 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
+import java.time.LocalDate;
+import java.util.List;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.fasterxml.jackson.annotation.JsonRootName;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Landkode;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Sivilstand;
-
-import javax.xml.bind.annotation.XmlRootElement;
-import java.time.LocalDate;
-import java.util.List;
 
 @JsonRootName("soknadDokument")
 @XmlRootElement
@@ -41,6 +41,9 @@ public class SoeknadDokument extends SaksopplysningDokument {
 
     // Opplysninger om juridiske arbeidsgiver i Norge
     public JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge;
+
+    // Bekreftelser fra arbeidsgiveren
+    public ArbeidsgiversBekreftelse arbeidsgiversBekreftelse;
 
     // Opplysninger om arbeidsinntekt
     public Arbeidsinntekt arbeidsinntekt;
