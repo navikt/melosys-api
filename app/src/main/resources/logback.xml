@@ -8,6 +8,8 @@
         <appender-ref ref="stdout_json"/>
     </logger>
 
+    <logger name="org.mitre.openid.connect.client.OIDCAuthenticationFilter" level="DEBUG" additivity="false"/>
+
     <root level="INFO">
         <appender-ref ref="stdout_json"/>
     </root>
