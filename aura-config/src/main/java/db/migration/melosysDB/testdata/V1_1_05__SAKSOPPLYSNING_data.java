@@ -30,7 +30,7 @@ public class V1_1_05__SAKSOPPLYSNING_data implements JdbcMigration {
 
     private static final Logger log = LoggerFactory.getLogger(V1_1_05__SAKSOPPLYSNING_data.class);
 
-    private static final int MOCK_BEHANDLINGER_NR = 3;
+    private static final int MOCK_BEHANDLING_ID = 3;
 
     private static int currentRowNum = 0;
 
@@ -98,7 +98,7 @@ public class V1_1_05__SAKSOPPLYSNING_data implements JdbcMigration {
             XMLType xml = XMLType.createXML(conn, Files.newInputStream(file));
 
             ps.setInt(1, currentRowNum++);
-            ps.setInt(2, i % (MOCK_BEHANDLINGER_NR + 1));
+            ps.setInt(2, MOCK_BEHANDLING_ID);
             ps.setString(3, opplysning_type.getKode());
             ps.setString(4, versjon);
             ps.setString(5, kilde.getKode());
