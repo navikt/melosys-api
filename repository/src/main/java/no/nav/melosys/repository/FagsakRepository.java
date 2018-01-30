@@ -1,15 +1,16 @@
 package no.nav.melosys.repository;
 
-import java.util.List;
-
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.RolleType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.RolleType;
+import java.util.List;
 
 public interface FagsakRepository extends CrudRepository<Fagsak, Long> {
+
+    Fagsak findById(Long id);
 
     Fagsak findBySaksnummer(Long saksnummer);
 

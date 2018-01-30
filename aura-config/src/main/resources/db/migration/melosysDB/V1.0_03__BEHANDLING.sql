@@ -1,6 +1,6 @@
 CREATE TABLE behandling (
     id              NUMBER(19) GENERATED ALWAYS AS IDENTITY,
-    gsak_id         NUMBER(19)   NOT NULL,
+    gsak_id         NUMBER(19),
     fagsak_id       NUMBER(19)   NOT NULL,
     status          VARCHAR2(99) NOT NULL,
     steg            VARCHAR2(99) NULL,

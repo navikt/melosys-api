@@ -1,6 +1,27 @@
 package no.nav.melosys.service;
 
-import no.nav.melosys.domain.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingStatus;
+import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakStatus;
+import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.RolleType;
+import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
@@ -20,13 +41,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class FagsakService {
@@ -71,14 +86,20 @@ public class FagsakService {
     }
 
     public Fagsak hentFagsak(Long saksnummer) {
-        return fagsakRepository.findBySaksnummer(saksnummer);
+        // FIXME return fagsakRepository.findBySaksnummer(saksnummer);
+        return fagsakRepository.findById(saksnummer);
     }
 
-    public void lagre(Fagsak sak) {
+    @Transactional
+    public Fagsak lagre(Fagsak sak) {
         fagsakRepository.save(sak);
+        return sak;
     }
 
     public Fagsak nyFagsak(String fnr) throws SikkerhetsbegrensningException {
+        Fagsak fagsak = new Fagsak();
+        Behandling behandling = new Behandling();
+
         // FIXME: Når EESSI2-485 er ferdig må IntegrasjonsExceptions kastes videre
         Optional<Saksopplysning> personSaksopplysning = Optional.ofNullable(hentPerson(fnr));
         Optional<Saksopplysning> medlemskapSaksopplysning = Optional.ofNullable(hentMedlemskap(fnr));
@@ -101,13 +122,21 @@ public class FagsakService {
             saksopplysninger.addAll(hentOrganisasjoner(orgnumre));
         }
 
+        saksopplysninger.forEach(x -> x.setBehandling(behandling));
+        saksopplysninger.forEach(x -> x.setRegistrertDato(LocalDateTime.now()));
+
         Aktoer aktoer = new Aktoer();
         aktoer.setAktørId(fnr);
+        aktoer.setEksternId(fnr);
+        aktoer.setFagsak(fagsak);
+        aktoer.setRolle(RolleType.BRUKER);
 
-        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setRegistrertDato(LocalDateTime.now());
         behandling.setSaksopplysninger(saksopplysninger);
+        behandling.setStatus(BehandlingStatus.OPPRETTET);
+        behandling.setType(BehandlingType.SØKNAD);
 
-        Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>(Collections.singletonList(aktoer)));
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         fagsak.setRegistrertDato(LocalDateTime.now());
@@ -115,9 +144,7 @@ public class FagsakService {
         fagsak.setVersjon(0);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
 
-        fagsakRepository.save(fagsak);
-
-        return fagsak;
+        return lagre(fagsak);
     }
 
     public ArbeidsforholdDokument hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws SikkerhetsbegrensningException {

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -43,10 +44,10 @@ public class Fagsak {
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
 
-    @OneToMany(mappedBy = "fagsak", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Aktoer> aktører;
 
-    @OneToMany(mappedBy = "fagsak")
+    @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL)
     private List<Behandling> behandlinger;
 
     public long getId() {

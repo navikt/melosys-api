@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 @Api(tags = {"soknad"})
@@ -40,14 +37,16 @@ public class SoknadTjeneste extends RestTjeneste  {
     @Path("{behandlingID}")
     @ApiOperation(value = "Henter en søknad som hører til en gitt behandling", notes = ("Spesifikke saker kan hentes via saksnummer."))
     public Response hentSøknad(@PathParam("behandlingID") long behandlingID) {
-        SoeknadDokument soeknad = soeknadService.hentSoeknad(behandlingID);
+        SoeknadDokument soeknad = null;
 
-        if (soeknad == null) {
+        try {
+            soeknad = soeknadService.hentSoeknad(behandlingID);
+        } catch (NotFoundException notFoundException) {
             return Response.status(Response.Status.NOT_FOUND).build();
-        } else {
-            SoeknadDto soeknadDto = new SoeknadDto(behandlingID, soeknad);
-            return Response.ok(soeknadDto).build();
         }
+
+        SoeknadDto soeknadDto = new SoeknadDto(behandlingID, soeknad);
+        return Response.ok(soeknadDto).build();
     }
 
     @POST
