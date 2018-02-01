@@ -1,0 +1,101 @@
+ <ns2:hentOrganisasjonResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/organisasjon/v4">
+            <response>
+                <organisasjon xsi:type="ns4:JuridiskEnhet" xmlns:ns4="http://nav.no/tjeneste/virksomhet/organisasjon/v4/informasjon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <orgnummer>982683955</orgnummer>
+                    <navn xsi:type="ns4:UstrukturertNavn">
+                        <navnelinje>EXPERIS AS</navnelinje>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                        <navnelinje/>
+                    </navn>
+                    <organisasjonDetaljer>
+                        <registreringsDato>2000-11-29+01:00</registreringsDato>
+                        <datoSistEndret>2017-10-14+02:00</datoSistEndret>
+                        <gjeldendeMaalform kodeRef="NB"/>
+                        <registrertMVA fomBruksperiode="2014-05-21T20:59:22+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                            <registrertIMVA>true</registrertIMVA>
+                        </registrertMVA>
+                        <telefaks fomBruksperiode="2014-05-21T20:59:22+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                            <identifikator>22 01 80 01</identifikator>
+                        </telefaks>
+                        <telefon fomBruksperiode="2014-05-21T20:59:22+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                            <identifikator>22 01 80 00</identifikator>
+                        </telefon>
+                        <forretningsadresse fomBruksperiode="2017-06-08T04:01:26.711+02:00" fomGyldighetsperiode="2017-06-07T00:00:00.000+02:00" xsi:type="ns4:SemistrukturertAdresse">
+                            <landkode kodeRef="NO"/>
+                            <adresseledd>
+                                <noekkel kodeRef="adresselinje1"/>
+                                <verdi>Lakkegata 53</verdi>
+                            </adresseledd>
+                            <adresseledd>
+                                <noekkel kodeRef="postnr"/>
+                                <verdi>0187</verdi>
+                            </adresseledd>
+                            <adresseledd>
+                                <noekkel kodeRef="kommunenr"/>
+                                <verdi>0301</verdi>
+                            </adresseledd>
+                        </forretningsadresse>
+                        <postadresse fomBruksperiode="2015-02-23T10:38:34.403+01:00" fomGyldighetsperiode="2012-05-30T00:00:00.000+02:00" xsi:type="ns4:SemistrukturertAdresse">
+                            <landkode kodeRef="NO"/>
+                            <adresseledd>
+                                <noekkel kodeRef="adresselinje1"/>
+                                <verdi>Postboks 2506 Solli</verdi>
+                            </adresseledd>
+                            <adresseledd>
+                                <noekkel kodeRef="postnr"/>
+                                <verdi>0202</verdi>
+                            </adresseledd>
+                            <adresseledd>
+                                <noekkel kodeRef="kommunenr"/>
+                                <verdi>0301</verdi>
+                            </adresseledd>
+                        </postadresse>
+                        <navSpesifikkInformasjon fomBruksperiode="2014-12-22T14:48:11+01:00" fomGyldighetsperiode="2014-12-22T14:48:11+01:00">
+                            <erIA>true</erIA>
+                        </navSpesifikkInformasjon>
+                        <internettadresse fomBruksperiode="2014-05-21T20:59:22+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                            <identifikator>www.experis.no</identifikator>
+                        </internettadresse>
+                        <epostadresse fomBruksperiode="2014-05-21T20:59:22+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                            <identifikator>firmapost@no.experis.com</identifikator>
+                        </epostadresse>
+                        <naering fomBruksperiode="2014-05-22T01:05:54+02:00" fomGyldighetsperiode="2007-01-01T00:00:00.000+01:00">
+                            <naeringskode kodeRef="78.200"/>
+                            <hjelpeenhet>false</hjelpeenhet>
+                        </naering>
+                        <navn fomBruksperiode="2015-02-23T08:04:53.200+01:00" fomGyldighetsperiode="2012-04-29T00:00:00.000+02:00">
+                            <navn xsi:type="ns4:UstrukturertNavn">
+                                <navnelinje>EXPERIS AS</navnelinje>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                                <navnelinje/>
+                            </navn>
+                            <redigertNavn>EXPERIS AS</redigertNavn>
+                        </navn>
+                        <formaal fomBruksperiode="2014-05-22T00:08:02+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                            <formaal>Rekruttering og formidling av arbeidskraft. Utleie av arbeidskraft.
+                                Annen teknisk konsulentvirksomhet. Konsulentvirksomhet tilknyttet
+                                informasjonsteknologi. Bedriftsrådgivning og annen administrativ
+                                rådgivning.</formaal>
+                        </formaal>
+                        <stiftelsesdato>2000-11-02+01:00</stiftelsesdato>
+                    </organisasjonDetaljer>
+                    <juridiskEnhetDetaljer>
+                        <sektorkode kodeRef="2100"/>
+                        <enhetstype kodeRef="AS"/>
+                        <kapitalopplysninger fomBruksperiode="2014-05-21T18:20:06+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                            <valuta kodeRef="NOK"/>
+                            <kapital>1000000</kapital>
+                            <kapitalInnbetalt>1000000</kapitalInnbetalt>
+                            <fritekst>null</fritekst>
+                        </kapitalopplysninger>
+                        <registrertIForetaksregisteret fomBruksperiode="2014-05-21T20:59:22+02:00" fomGyldighetsperiode="2014-03-18T00:00:00.000+01:00">
+                            <registrertForetaksregisteret>true</registrertForetaksregisteret>
+                        </registrertIForetaksregisteret>
+                    </juridiskEnhetDetaljer>
+                </organisasjon>
+            </response>
+        </ns2:hentOrganisasjonResponse>
