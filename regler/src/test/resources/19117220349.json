@@ -1,0 +1,120 @@
+{
+  "søknadDokument": {
+    "fnr": "88888888882",
+    "sammensattNavn": "HATT GLITRENDE",
+    "arbeidUtland": {
+      "arbeidsperiode": {
+        "fom": "2018-01-01",
+        "tom": "9999-12-31"
+      }
+    }
+  },
+  "personopplysningDokument": {
+    "fnr": "88888888882",
+    "sivilstand": "Registrert partner",
+    "statsborgerskap": "NOR",
+    "sammensattNavn": "HATT GLITRENDE",
+    "familiemedlemmer": [
+      {
+        "fnr": "FJERNET",
+        "navn": "KONSOLL BLÅ",
+        "familierelasjon": "REPA"
+      }
+    ],
+    "kjoenn": "M",
+    "foedselsdato": "1972-11-19",
+    "personstatus": "Aktivt"
+  },
+  "arbeidsforholdDokumenter": [
+    {
+      "arbeidsforhold": [
+        {
+          "arbeidsforholdID": "",
+          "arbeidsforholdIDnav": 44137899,
+          "ansettelsesPeriode": {
+            "fom": "2004-01-01T00:00:00.000Z"
+          },
+          "arbeidsforholdstype": "Forenklet oppgjørsordning",
+          "arbeidsavtaler": [
+            {
+              "arbeidstidsordning": "Ikke skift",
+              "avloenningstype": "Fastlønn",
+              "yrke": "ALTMULIGMANN (PRIVATHJEM)",
+              "avtaltArbeidstimerPerUke": 37.5,
+              "stillingsprosent": 100.0,
+              "beregnetAntallTimerPrUke": 37.5,
+              "maritimArbeidsavtale": false
+            }
+          ],
+          "permisjonOgPermittering": [],
+          "utenlandsopphold": [],
+          "arbeidsgivertype": "Person",
+          "arbeidsgiverID": "FJERNET",
+          "arbeidstakerID": "88888888882",
+          "opplysningspliktigtype": "Person",
+          "opplysningspliktigID": "FJERNET",
+          "opprettelsestidspunkt": "2018-01-19T13:27:52.427+01:00",
+          "sistBekreftet": "2018-01-19T13:27:52+01:00",
+          "periode": {
+            "fom": "2004-01-01"
+          },
+          "Aordning": true
+        }
+      ]
+    }
+  ],
+  "inntektDokumenter": [
+    {
+      "arbeidsInntektMaanedListe": [
+        {
+          "aarMaaned": "2018-01",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-01-22T13:46:04.11",
+                "utbetaltIPeriode": "2018-01",
+                "opplysningspliktigID": "873152362",
+                "virksomhetID": "873152362",
+                "inntektsmottakerID": "88888888882",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "medlemskapDokumenter": [
+    {
+      "medlemsperiode": [
+        {
+          "periode": {
+            "fom": "2018-01-01",
+            "tom": "9999-12-31"
+          },
+          "type": "PMMEDSKP",
+          "status": "GYLD",
+          "grunnlagstype": "MEDEOS",
+          "land": "NOR",
+          "lovvalg": "ENDL",
+          "trygdedekning": "Full",
+          "kildedokumenttype": "E101",
+          "kilde": "FS22"
+        }
+      ]
+    }
+  ],
+  "organisasjonDokumenter": [
+    {
+      "orgnummer": "873152362",
+      "navn": ["STATOIL ASA"]
+    }
+  ]
+}
