@@ -19,7 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class FaktaavklaringTjeneste extends RestTjeneste {
 
     private String jsonFaktaAvklaring = "{\n" +
-            "  \"behandlingId\": 123456789,\n" +
+            "  \"behandlingID\": 123456789,\n" +
             "  \"faktaavklaring\": {\n" +
             "    \"periode\": {\n" +
             "      \"land\": [\"FR\"],\n" +
