@@ -7,6 +7,12 @@
         "fom": "2018-01-01",
         "tom": "9999-12-31"
       }
+    },
+    "oppholdUtland": {
+      "oppholdsPeriode": {
+        "fom": "2018-01-01",
+        "tom": "9999-12-31"
+      }
     }
   },
   "personopplysningDokument": {
