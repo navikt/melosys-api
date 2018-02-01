@@ -32,42 +32,40 @@
     "personstatus": "Aktivt"
   },
   "arbeidsforholdDokumenter": [
-    {
-      "arbeidsforhold": [
-        {
-          "arbeidsforholdID": "",
-          "arbeidsforholdIDnav": 44137899,
-          "ansettelsesPeriode": {
-            "fom": "2004-01-01T00:00:00.000Z"
-          },
-          "arbeidsforholdstype": "Forenklet oppgjørsordning",
-          "arbeidsavtaler": [
-            {
-              "arbeidstidsordning": "Ikke skift",
-              "avloenningstype": "Fastlønn",
-              "yrke": "ALTMULIGMANN (PRIVATHJEM)",
-              "avtaltArbeidstimerPerUke": 37.5,
-              "stillingsprosent": 100.0,
-              "beregnetAntallTimerPrUke": 37.5,
-              "maritimArbeidsavtale": false
-            }
-          ],
-          "permisjonOgPermittering": [],
-          "utenlandsopphold": [],
-          "arbeidsgivertype": "Person",
-          "arbeidsgiverID": "FJERNET",
-          "arbeidstakerID": "88888888882",
-          "opplysningspliktigtype": "Person",
-          "opplysningspliktigID": "FJERNET",
-          "opprettelsestidspunkt": "2018-01-19T13:27:52.427+01:00",
-          "sistBekreftet": "2018-01-19T13:27:52+01:00",
-          "periode": {
-            "fom": "2004-01-01"
-          },
-          "Aordning": true
-        }
-      ]
-    }
+    [
+      {
+        "arbeidsforholdID": "",
+        "arbeidsforholdIDnav": 44137899,
+        "ansettelsesPeriode": {
+          "fom": "2004-01-01T00:00:00.000Z"
+        },
+        "arbeidsforholdstype": "Forenklet oppgjørsordning",
+        "arbeidsavtaler": [
+          {
+            "arbeidstidsordning": "Ikke skift",
+            "avloenningstype": "Fastlønn",
+            "yrke": "ALTMULIGMANN (PRIVATHJEM)",
+            "avtaltArbeidstimerPerUke": 37.5,
+            "stillingsprosent": 100.0,
+            "beregnetAntallTimerPrUke": 37.5,
+            "maritimArbeidsavtale": false
+          }
+        ],
+        "permisjonOgPermittering": [],
+        "utenlandsopphold": [],
+        "arbeidsgivertype": "Person",
+        "arbeidsgiverID": "FJERNET",
+        "arbeidstakerID": "88888888882",
+        "opplysningspliktigtype": "Person",
+        "opplysningspliktigID": "FJERNET",
+        "opprettelsestidspunkt": "2018-01-19T13:27:52.427+01:00",
+        "sistBekreftet": "2018-01-19T13:27:52+01:00",
+        "periode": {
+          "fom": "2004-01-01"
+        },
+        "Aordning": true
+      }
+    ]
   ],
   "inntektDokumenter": [
     {
@@ -119,8 +117,8 @@
   ],
   "organisasjonDokumenter": [
     {
-      "orgnummer": "873152362",
-      "navn": ["STATOIL ASA"]
+      "orgnr": "873152362",
+      "navn": "STATOIL ASA"
     }
   ]
 }

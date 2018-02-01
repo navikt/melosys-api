@@ -68,6 +68,7 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
             // Returner teknisk feil...
             FastsettLovvalgReply res = new FastsettLovvalgReply();
             res.feilmeldinger = new ArrayList<>();
+            res.lovvalgsbestemmelser = new ArrayList<>();
 
             Feilmelding feil = new Feilmelding();
             feil.kategori = Kategori.TEKNISK_FEIL;
