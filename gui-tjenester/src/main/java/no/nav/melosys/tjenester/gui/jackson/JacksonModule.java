@@ -1,5 +1,7 @@
 package no.nav.melosys.tjenester.gui.jackson;
 
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.tjenester.gui.jackson.serialize.OrganisasjonDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,6 @@ public class JacksonModule extends SimpleModule {
 
         addSerializer(new LandkodeSerializer(kodeverkService));
         addSerializer(new OrganisasjonSerializer(kodeverkService));
-
+        addDeserializer(OrganisasjonDokument.class, new OrganisasjonDeserializer());
     }
 }
