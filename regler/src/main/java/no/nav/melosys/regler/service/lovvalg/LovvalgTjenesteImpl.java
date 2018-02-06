@@ -38,7 +38,7 @@ import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.*;
 )
 public class LovvalgTjenesteImpl implements LovvalgTjeneste {
     
-    // Denne kan flyttes til en felles-util modul
+    // TODO: Denne kan flyttes til en felles-util modul
     public static final String APPLICATION_JSON_UTF_8 = "application/json;charset=utf-8";
     
     private static Logger log = LoggerFactory.getLogger(LovvalgTjenesteImpl.class);

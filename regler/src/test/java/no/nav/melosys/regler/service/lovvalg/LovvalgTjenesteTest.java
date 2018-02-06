@@ -36,7 +36,6 @@ public class LovvalgTjenesteTest {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         final ClassLoader classLoader = getClass().getClassLoader();
-        //InputStream inputStream = classLoader.getResourceAsStream("88888888882.json");
         InputStream inputStream = classLoader.getResourceAsStream("99999999999.json");
 
         FastsettLovvalgRequest request = mapper.readValue(inputStream, FastsettLovvalgRequest.class);

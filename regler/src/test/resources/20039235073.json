@@ -1,4 +1,20 @@
 {
+  "søknadDokument": {
+    "fnr": "99999999999",
+    "sammensattNavn": "FALLBERG TORDIS",
+    "arbeidUtland": {
+      "arbeidsperiode": {
+        "fom": "2018-01-01",
+        "tom": "9999-12-31"
+      }
+    },
+    "oppholdUtland": {
+      "oppholdsPeriode": {
+        "fom": "2018-01-01",
+        "tom": "9999-12-31"
+      }
+    }
+  },
   "personopplysningDokument": {
     "fnr": "99999999999",
     "sivilstand": "Ugift",
@@ -464,7 +480,276 @@
       }
     ]
   ],
-  "inntektDokumenter": [],
+  "inntektDokumenter": [
+    {
+      "arbeidsInntektMaanedListe": [
+        {
+          "aarMaaned": "2018-01",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.713",
+                "utbetaltIPeriode": "2018-01",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "88888888882",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-11",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 30000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.713",
+                "utbetaltIPeriode": "2017-11",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "88888888882",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-12",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.712",
+                "utbetaltIPeriode": "2017-12",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "88888888882",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-03",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.713",
+                "utbetaltIPeriode": "2017-03",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "88888888882",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-05",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.713",
+                "utbetaltIPeriode": "2017-05",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "88888888882",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-04",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.712",
+                "utbetaltIPeriode": "2017-04",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "88888888882",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-02",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.711",
+                "utbetaltIPeriode": "2017-02",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "88888888882",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-07",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.712",
+                "utbetaltIPeriode": "2017-07",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "88888888882",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-06",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 28000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.711",
+                "utbetaltIPeriode": "2017-06",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "88888888882",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-08",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.712",
+                "utbetaltIPeriode": "2017-08",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "88888888882",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-09",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.713",
+                "utbetaltIPeriode": "2017-09",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "88888888882",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-10",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 28000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.712",
+                "utbetaltIPeriode": "2017-10",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "88888888882",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
   "medlemskapDokumenter": [
     {
       "medlemsperiode": [
