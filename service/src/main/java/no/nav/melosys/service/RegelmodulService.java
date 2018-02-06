@@ -1,5 +1,9 @@
 package no.nav.melosys.service;
 
+import java.util.ArrayList;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -17,14 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.client.ClientBuilder;
-import java.util.ArrayList;
-
 /**
  * Service som kaller regelmodulen.
  */
 @Service
 public class RegelmodulService {
+
+    // TODO: Denne kan flyttes til en felles-util modul
+    private final String APPLICATION_JSON_UTF_8 = "application/json;charset=utf-8";
 
     private String regelmodulUrl;
 
@@ -49,12 +53,9 @@ public class RegelmodulService {
 
         FastsettLovvalgRequest fastsettLovvalgRequest = lagRequest(behandling);
 
-        FastsettLovvalgReply fastsettLovvalgReply = ClientBuilder.newClient().target(regelmodulUrl)
-                .queryParam("req", fastsettLovvalgRequest)
-                .request()
-                .get(FastsettLovvalgReply.class);
-
-        return fastsettLovvalgReply;
+        return ClientBuilder.newClient().target(regelmodulUrl)
+                .request(APPLICATION_JSON_UTF_8)
+                .post(Entity.entity(fastsettLovvalgRequest, APPLICATION_JSON_UTF_8), FastsettLovvalgReply.class);
     }
 
     /**

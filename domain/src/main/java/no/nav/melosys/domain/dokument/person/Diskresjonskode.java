@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.person;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.melosys.domain.dokument.KodeverkEnum;
 
 /**
@@ -22,6 +23,7 @@ public enum Diskresjonskode implements KodeverkEnum<Diskresjonskode> {
         this.navn = navn;
     }
 
+    @JsonValue
     @Override
     public String getNavn() {
         return navn;
