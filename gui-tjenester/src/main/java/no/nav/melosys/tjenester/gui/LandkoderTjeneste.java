@@ -32,7 +32,6 @@ public class LandkoderTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     public String getLandkoder() {
         return jsonLandkoder;
     }
