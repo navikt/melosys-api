@@ -36,7 +36,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>no.nav.melosys.Application</mainClass>
-                    <finalName>melosys-api</finalName>
+                    <finalName>melosys</finalName>
                 </configuration>
             </plugin>
         </plugins>

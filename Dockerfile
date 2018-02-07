@@ -9,7 +9,7 @@ ENV TZ="Europe/Oslo"
 # Tell the JVM to be aware of Docker memory limits
 ENV DEFAULT_JAVA_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
 
-COPY /build/jar/target/melosys-api.jar "/app/app.jar"
+COPY /build/jar/target/melosys.jar "/app/app.jar"
 
 WORKDIR /app
 
