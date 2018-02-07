@@ -47,8 +47,6 @@ public class PersonDokument extends SaksopplysningDokument {
 
     public Diskresjonskode diskresjonskode;
 
-    // TODO trenger vi den?
-    @JsonIgnore
     public Personstatus personstatus;
 
     public Bostedsadresse bostedsadresse;

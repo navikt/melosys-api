@@ -1,0 +1,793 @@
+{
+  "søknadDokument": {
+    "fnr": "FJERNET",
+    "sammensattNavn": "FALLBERG TORDIS",
+    "arbeidUtland": {
+      "arbeidsperiode": {
+        "fom": "2018-01-01",
+        "tom": "9999-12-31"
+      }
+    },
+    "oppholdUtland": {
+      "oppholdsPeriode": {
+        "fom": "2018-01-01",
+        "tom": "9999-12-31"
+      }
+    }
+  },
+  "personopplysningDokument": {
+    "fnr": "FJERNET",
+    "sivilstand": "Ugift",
+    "statsborgerskap": "NOR",
+    "sammensattNavn": "FALLBERG TORDIS",
+    "personstatus": "Bosatt",
+    "bostedsadresse": {
+      "gateadresse": {
+        "gatenavn": "STONGAFJELLSVEGEN",
+        "gatenummer": 0,
+        "husnummer": 310,
+        "husbokstav": ""
+      },
+      "postnr": "5301",
+      "land": "NOR"
+    },
+    "kjoenn": "K",
+    "foedselsdato": "1992-03-20"
+  },
+  "arbeidsforholdDokumenter": [
+    [
+      {
+        "arbeidsforholdID": "konvertert_e184423b-060e-4600-a635-e79f34acc2a8",
+        "arbeidsforholdIDnav": 19353321,
+        "ansettelsesPeriode": {
+          "fom": "2010-06-21",
+          "tom": "2010-08-15"
+        },
+        "arbeidsforholdstype": "Ordinært arbeidsforhold",
+        "arbeidsavtaler": [
+          {
+            "arbeidstidsordning": "",
+            "avloenningstype": "",
+            "yrke": "SERVERINGSHJELP",
+            "beregnetAntallTimerPrUke": 30.0,
+            "endringsdatoStillingsprosent": "2010-06-21",
+            "maritimArbeidsavtale": false
+          }
+        ],
+        "permisjonOgPermittering": [],
+        "utenlandsopphold": [],
+        "arbeidsgivertype": "Organisasjon",
+        "arbeidsgiverID": "973147536",
+        "arbeidstakerID": "FJERNET",
+        "opplysningspliktigtype": "Organisasjon",
+        "opplysningspliktigID": "920165931",
+        "opprettelsestidspunkt": "2014-12-13T16:33:52.361+01:00",
+        "sistBekreftet": "2010-08-15T00:00:00+02:00",
+        "Aordning": false
+      },
+      {
+        "arbeidsforholdID": "konvertert_953cfb6a-de9d-45f9-ae73-4797f57e69e6",
+        "arbeidsforholdIDnav": 19353320,
+        "ansettelsesPeriode": {
+          "fom": "2014-05-03",
+          "tom": "2014-05-31"
+        },
+        "arbeidsforholdstype": "Ordinært arbeidsforhold",
+        "arbeidsavtaler": [
+          {
+            "arbeidstidsordning": "",
+            "avloenningstype": "",
+            "yrke": "HELSEINSTITUSJONSASSISTENT",
+            "beregnetAntallTimerPrUke": 4.15,
+            "endringsdatoStillingsprosent": "2014-05-03",
+            "maritimArbeidsavtale": false
+          }
+        ],
+        "permisjonOgPermittering": [],
+        "utenlandsopphold": [],
+        "arbeidsgivertype": "Organisasjon",
+        "arbeidsgiverID": "975270211",
+        "arbeidstakerID": "FJERNET",
+        "opplysningspliktigtype": "Organisasjon",
+        "opplysningspliktigID": "940493021",
+        "opprettelsestidspunkt": "2014-12-13T16:33:52.361+01:00",
+        "sistBekreftet": "2014-05-31T00:00:00+02:00",
+        "Aordning": false
+      },
+      {
+        "arbeidsforholdID": "konvertert_020c103f-ce5c-43bf-b523-022138a414c5",
+        "arbeidsforholdIDnav": 19353323,
+        "ansettelsesPeriode": {
+          "fom": "2011-09-01",
+          "tom": "2011-09-30"
+        },
+        "arbeidsforholdstype": "Ordinært arbeidsforhold",
+        "arbeidsavtaler": [
+          {
+            "arbeidstidsordning": "",
+            "avloenningstype": "",
+            "yrke": "HELSEINSTITUSJONSASSISTENT",
+            "beregnetAntallTimerPrUke": 23.65,
+            "endringsdatoStillingsprosent": "2011-09-01",
+            "maritimArbeidsavtale": false
+          }
+        ],
+        "permisjonOgPermittering": [],
+        "utenlandsopphold": [],
+        "arbeidsgivertype": "Organisasjon",
+        "arbeidsgiverID": "988991708",
+        "arbeidstakerID": "FJERNET",
+        "opplysningspliktigtype": "Organisasjon",
+        "opplysningspliktigID": "940493021",
+        "opprettelsestidspunkt": "2014-12-13T16:33:52.361+01:00",
+        "sistBekreftet": "2011-09-30T00:00:00+02:00",
+        "Aordning": false
+      },
+      {
+        "arbeidsforholdID": "konvertert_847485b8-c211-434f-a4e7-f3deabd1d750",
+        "arbeidsforholdIDnav": 19353322,
+        "ansettelsesPeriode": {
+          "fom": "2011-08-01",
+          "tom": "2011-08-31"
+        },
+        "arbeidsforholdstype": "Ordinært arbeidsforhold",
+        "arbeidsavtaler": [
+          {
+            "arbeidstidsordning": "",
+            "avloenningstype": "",
+            "yrke": "HELSEINSTITUSJONSASSISTENT",
+            "beregnetAntallTimerPrUke": 25.73,
+            "endringsdatoStillingsprosent": "2011-08-01",
+            "maritimArbeidsavtale": false
+          }
+        ],
+        "permisjonOgPermittering": [],
+        "utenlandsopphold": [],
+        "arbeidsgivertype": "Organisasjon",
+        "arbeidsgiverID": "988991708",
+        "arbeidstakerID": "FJERNET",
+        "opplysningspliktigtype": "Organisasjon",
+        "opplysningspliktigID": "940493021",
+        "opprettelsestidspunkt": "2014-12-13T16:33:52.361+01:00",
+        "sistBekreftet": "2011-08-31T00:00:00+02:00",
+        "Aordning": false
+      },
+      {
+        "arbeidsforholdID": "V995816598R111289S1001L0001",
+        "arbeidsforholdIDnav": 34697783,
+        "ansettelsesPeriode": {
+          "fom": "2013-11-01",
+          "tom": "2014-10-26"
+        },
+        "arbeidsforholdstype": "Ordinært arbeidsforhold",
+        "arbeidsavtaler": [
+          {
+            "arbeidstidsordning": "Døgnkontinuerlig skiftarbeid og turnusarbeid (35,5 t/u)",
+            "avloenningstype": "Fastlønn",
+            "yrke": "VERNEPLEIER",
+            "avtaltArbeidstimerPerUke": 35.5,
+            "stillingsprosent": 30.52,
+            "sisteLoennsendringsdato": "2014-05-01",
+            "beregnetAntallTimerPrUke": 10.834599999999998,
+            "maritimArbeidsavtale": false
+          }
+        ],
+        "permisjonOgPermittering": [],
+        "utenlandsopphold": [],
+        "arbeidsgivertype": "Organisasjon",
+        "arbeidsgiverID": "995816598",
+        "arbeidstakerID": "FJERNET",
+        "opplysningspliktigtype": "Organisasjon",
+        "opplysningspliktigID": "964338531",
+        "opprettelsestidspunkt": "2015-02-02T14:31:53.893+01:00",
+        "sistBekreftet": "2015-04-24T06:51:00+02:00",
+        "Aordning": true
+      },
+      {
+        "arbeidsforholdID": "konvertert_fecf93c9-c401-44ac-bb3c-87b5132047b7",
+        "arbeidsforholdIDnav": 19353324,
+        "ansettelsesPeriode": {
+          "fom": "2012-08-27",
+          "tom": "2014-12-31"
+        },
+        "arbeidsforholdstype": "Ordinært arbeidsforhold",
+        "arbeidsavtaler": [
+          {
+            "arbeidstidsordning": "",
+            "avloenningstype": "",
+            "yrke": "VERNEPLEIER",
+            "beregnetAntallTimerPrUke": 35.5,
+            "endringsdatoStillingsprosent": "2014-07-01",
+            "maritimArbeidsavtale": false
+          }
+        ],
+        "permisjonOgPermittering": [],
+        "utenlandsopphold": [],
+        "arbeidsgivertype": "Organisasjon",
+        "arbeidsgiverID": "995816598",
+        "arbeidstakerID": "FJERNET",
+        "opplysningspliktigtype": "Organisasjon",
+        "opplysningspliktigID": "974773880",
+        "opprettelsestidspunkt": "2014-12-13T16:33:52.361+01:00",
+        "sistBekreftet": "2014-07-01T00:00:00+02:00",
+        "Aordning": false
+      },
+      {
+        "arbeidsforholdID": "V995816598R111289S1003L0003",
+        "arbeidsforholdIDnav": 34697960,
+        "ansettelsesPeriode": {
+          "fom": "2014-10-27"
+        },
+        "arbeidsforholdstype": "Ordinært arbeidsforhold",
+        "arbeidsavtaler": [
+          {
+            "arbeidstidsordning": "Døgnkontinuerlig skiftarbeid og turnusarbeid (35,5 t/u)",
+            "avloenningstype": "Fastlønn",
+            "yrke": "VERNEPLEIER",
+            "avtaltArbeidstimerPerUke": 35.5,
+            "stillingsprosent": 100.0,
+            "sisteLoennsendringsdato": "2014-10-27",
+            "beregnetAntallTimerPrUke": 35.5,
+            "endringsdatoStillingsprosent": "2014-10-27",
+            "maritimArbeidsavtale": false
+          }
+        ],
+        "permisjonOgPermittering": [
+          {
+            "permisjonsId": "P00001",
+            "permisjonsPeriode": {
+              "fom": "2015-05-20",
+              "tom": "2015-05-21"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00010",
+            "permisjonsPeriode": {
+              "fom": "2017-03-01",
+              "tom": "2017-03-31"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00008",
+            "permisjonsPeriode": {
+              "fom": "2017-01-01",
+              "tom": "2017-01-31"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00009",
+            "permisjonsPeriode": {
+              "fom": "2017-02-01",
+              "tom": "2017-02-28"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00017",
+            "permisjonsPeriode": {
+              "fom": "2017-10-01",
+              "tom": "2017-10-28"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00007",
+            "permisjonsPeriode": {
+              "fom": "2016-08-10",
+              "tom": "2016-08-11"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00015",
+            "permisjonsPeriode": {
+              "fom": "2017-08-01",
+              "tom": "2017-08-31"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00016",
+            "permisjonsPeriode": {
+              "fom": "2017-09-01",
+              "tom": "2017-09-30"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00013",
+            "permisjonsPeriode": {
+              "fom": "2017-06-01",
+              "tom": "2017-06-11"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00014",
+            "permisjonsPeriode": {
+              "fom": "2017-07-10",
+              "tom": "2017-07-31"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00011",
+            "permisjonsPeriode": {
+              "fom": "2017-04-01",
+              "tom": "2017-04-30"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00012",
+            "permisjonsPeriode": {
+              "fom": "2017-05-01",
+              "tom": "2017-05-31"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00005",
+            "permisjonsPeriode": {
+              "fom": "2016-05-02",
+              "tom": "2016-05-02"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00002",
+            "permisjonsPeriode": {
+              "fom": "2015-11-03",
+              "tom": "2015-11-05"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00003",
+            "permisjonsPeriode": {
+              "fom": "2015-12-12",
+              "tom": "2015-12-12"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00004",
+            "permisjonsPeriode": {
+              "fom": "2016-02-13",
+              "tom": "2016-02-14"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          },
+          {
+            "permisjonsId": "P00006",
+            "permisjonsPeriode": {
+              "fom": "2016-05-06",
+              "tom": "2016-05-06"
+            },
+            "permisjonsprosent": 100.0,
+            "permisjonOgPermittering": "Permisjon"
+          }
+        ],
+        "utenlandsopphold": [],
+        "arbeidsgivertype": "Organisasjon",
+        "arbeidsgiverID": "995816598",
+        "arbeidstakerID": "FJERNET",
+        "opplysningspliktigtype": "Organisasjon",
+        "opplysningspliktigID": "964338531",
+        "opprettelsestidspunkt": "2015-02-02T14:31:53.901+01:00",
+        "sistBekreftet": "2017-06-28T14:01:30+02:00",
+        "Aordning": true,
+        "timerTimelonnet": [
+          {
+            "antallTimer": 7.1,
+            "rapporteringsperiode": "2015-05",
+            "timelonnetPeriode": {
+              "fom": "2015-04-03",
+              "tom": "2015-04-03"
+            }
+          },
+          {
+            "antallTimer": 7.0,
+            "rapporteringsperiode": "2016-01",
+            "timelonnetPeriode": {
+              "fom": "2015-12-12",
+              "tom": "2015-12-12"
+            }
+          },
+          {
+            "antallTimer": 0.0,
+            "rapporteringsperiode": "2016-10",
+            "timelonnetPeriode": {
+              "fom": "2016-08-10",
+              "tom": "2016-08-10"
+            }
+          },
+          {
+            "antallTimer": 14.0,
+            "rapporteringsperiode": "2016-03",
+            "timelonnetPeriode": {
+              "fom": "2016-02-13",
+              "tom": "2016-02-13"
+            }
+          },
+          {
+            "antallTimer": 0.1,
+            "rapporteringsperiode": "2016-05",
+            "timelonnetPeriode": {
+              "fom": "2016-03-24",
+              "tom": "2016-03-24"
+            }
+          },
+          {
+            "antallTimer": 16.0,
+            "rapporteringsperiode": "2016-09",
+            "timelonnetPeriode": {
+              "fom": "2016-08-10",
+              "tom": "2016-08-10"
+            }
+          }
+        ]
+      },
+      {
+        "arbeidsforholdID": "V995816598R111289S1002L0002",
+        "arbeidsforholdIDnav": 34697784,
+        "ansettelsesPeriode": {
+          "fom": "2014-05-28",
+          "tom": "2014-10-26"
+        },
+        "arbeidsforholdstype": "Ordinært arbeidsforhold",
+        "arbeidsavtaler": [
+          {
+            "arbeidstidsordning": "Døgnkontinuerlig skiftarbeid og turnusarbeid (35,5 t/u)",
+            "avloenningstype": "Fastlønn",
+            "yrke": "VERNEPLEIER",
+            "avtaltArbeidstimerPerUke": 35.5,
+            "stillingsprosent": 100.0,
+            "sisteLoennsendringsdato": "2014-05-28",
+            "beregnetAntallTimerPrUke": 35.5,
+            "maritimArbeidsavtale": false
+          }
+        ],
+        "permisjonOgPermittering": [],
+        "utenlandsopphold": [],
+        "arbeidsgivertype": "Organisasjon",
+        "arbeidsgiverID": "995816598",
+        "arbeidstakerID": "FJERNET",
+        "opplysningspliktigtype": "Organisasjon",
+        "opplysningspliktigID": "964338531",
+        "opprettelsestidspunkt": "2015-02-02T14:31:53.897+01:00",
+        "sistBekreftet": "2015-11-27T13:42:00+01:00",
+        "Aordning": true
+      }
+    ]
+  ],
+  "inntektDokumenter": [
+    {
+      "arbeidsInntektMaanedListe": [
+        {
+          "aarMaaned": "2018-01",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.713",
+                "utbetaltIPeriode": "2018-01",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "FJERNET",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-11",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 30000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.713",
+                "utbetaltIPeriode": "2017-11",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "FJERNET",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-12",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.712",
+                "utbetaltIPeriode": "2017-12",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "FJERNET",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-03",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.713",
+                "utbetaltIPeriode": "2017-03",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "FJERNET",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-05",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.713",
+                "utbetaltIPeriode": "2017-05",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "FJERNET",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-04",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.712",
+                "utbetaltIPeriode": "2017-04",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "FJERNET",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-02",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.711",
+                "utbetaltIPeriode": "2017-02",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "FJERNET",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-07",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.712",
+                "utbetaltIPeriode": "2017-07",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "FJERNET",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-06",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 28000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.711",
+                "utbetaltIPeriode": "2017-06",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "FJERNET",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-08",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.712",
+                "utbetaltIPeriode": "2017-08",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "FJERNET",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-09",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 25000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.713",
+                "utbetaltIPeriode": "2017-09",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "FJERNET",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        },
+        {
+          "aarMaaned": "2017-10",
+          "arbeidsInntektInformasjon": {
+            "inntektListe": [
+              {
+                "beloep": 28000,
+                "fordel": "kontantytelse",
+                "inntektskilde": "A-ordningen",
+                "inntektsperiodetype": "Maaned",
+                "inntektsstatus": "LoependeInnrapportert",
+                "levereringstidspunkt": "2018-02-05T17:37:30.712",
+                "utbetaltIPeriode": "2017-10",
+                "opplysningspliktigID": "912499693",
+                "virksomhetID": "912499693",
+                "inntektsmottakerID": "FJERNET",
+                "inngaarIGrunnlagForTrekk": true,
+                "utloeserArbeidsgiveravgift": true,
+                "beskrivelse": "fastloenn"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "medlemskapDokumenter": [
+    {
+      "medlemsperiode": [
+        {
+          "periode": {
+            "fom": "2012-10-09",
+            "tom": "2012-10-25"
+          },
+          "type": "PUMEDSKP",
+          "status": "GYLD",
+          "grunnlagstype": "FO_12_1",
+          "land": "AUT",
+          "lovvalg": "ENDL",
+          "trygdedekning": "Unntatt",
+          "kildedokumenttype": "PortBlank_A1",
+          "kilde": "FS22"
+        }
+      ]
+    }
+  ],
+  "organisasjonDokumenter": [
+    {
+      "orgnr": "920643043",
+      "navn": "METODE RENHOLD AS",
+      "forretningsadresse": {
+        "gateadresse": {
+          "gatenavn": "Varnaveien 34"
+        },
+        "postnr": "1523",
+        "land": "NO"
+      },
+      "postadresse": {
+        "gateadresse": {
+          "gatenavn": "Skuteviksbodene 1"
+        },
+        "postnr": "5035",
+        "land": "NO"
+      }
+    }
+  ]
+}

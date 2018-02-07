@@ -4,11 +4,12 @@ import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.initialiserLo
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.slettLokalKontekst;
 
+import java.util.ArrayList;
+
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,13 +46,12 @@ import no.nav.melosys.regler.lovvalg.LovvalgRegelflyt;
 )
 public class LovvalgTjenesteImpl implements LovvalgTjeneste {
     
-    // Denne kan flyttes til en felles-util modul
     public static final String APPLICATION_JSON_UTF_8 = "application/json;charset=utf-8";
     
     private static Logger log = LoggerFactory.getLogger(LovvalgTjenesteImpl.class);
 
     @Override
-    @GET
+    @POST
     @Path("fastsettLovvalg") // FIXME: Denne tjenesten er nært bundet til søknad a1. Bør gjenspeiles i tjenestenavn.
     @Consumes(LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8)
     @Produces(LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8)
@@ -59,14 +59,14 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
             value= "Fastsetter lovvalgsland",
             notes = "Tjeneste som anvender lovverk til å fastsette lovvalgsland for en forespørsel"
     )
-    public FastsettLovvalgReply fastsettLovvalg(@QueryParam("req") FastsettLovvalgRequest req) {
+    public FastsettLovvalgReply fastsettLovvalg(FastsettLovvalgRequest req) {
         try {
             // Sett lokal kontekst for regelsett...
             initialiserLokalKontekst(req);
             // Kjør forretningsregler og returner respons...
             LovvalgRegelflyt.getInstanse().kjør();
             return responsen();
-        } catch(Throwable e) {
+        } catch (Throwable e) {
             // Forsok å logge feilen...
             try {
                 log.error("Uventet Exception", e);
@@ -74,6 +74,8 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
             }
             // Returner teknisk feil...
             FastsettLovvalgReply res = new FastsettLovvalgReply();
+            res.feilmeldinger = new ArrayList<>();
+
             Feilmelding feil = new Feilmelding();
             feil.kategori = Kategori.TEKNISK_FEIL;
             feil.feilmelding = "Uventet Exception";

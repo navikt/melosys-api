@@ -42,6 +42,9 @@ public class SoeknadDokument extends SaksopplysningDokument {
     // Opplysninger om juridiske arbeidsgiver i Norge
     public JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge;
 
+    // Bekreftelser fra arbeidsgiveren
+    public ArbeidsgiversBekreftelse arbeidsgiversBekreftelse;
+
     // Opplysninger om arbeidsinntekt
     public Arbeidsinntekt arbeidsinntekt;
 

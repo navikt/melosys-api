@@ -8,8 +8,8 @@
                     <poststed>5081</poststed>
                     <bolignummer>H0304</bolignummer>
                     <kommunenummer>1201</kommunenummer>
-                    <gatenavn>VILHELM BJERKNES' VEI</gatenavn>
-                    <husnummer>58</husnummer>
+                    <gatenavn>ANDEBYVEIEN</gatenavn>
+                    <husnummer>123</husnummer>
                     <husbokstav>A</husbokstav>
                 </strukturertAdresse>
             </bostedsadresse>
@@ -29,9 +29,9 @@
                 <kjoenn>K</kjoenn>
             </kjoenn>
             <personnavn>
-                <etternavn>HAUKÅS</etternavn>
-                <fornavn>MARIT</fornavn>
-                <sammensattNavn>HAUKÅS MARIT</sammensattNavn>
+                <etternavn>LILLA</etternavn>
+                <fornavn>HEST</fornavn>
+                <sammensattNavn>LILLA HEST</sammensattNavn>
             </personnavn>
             <personstatus>
                 <personstatus>BOSA</personstatus>

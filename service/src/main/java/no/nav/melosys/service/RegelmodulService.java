@@ -3,6 +3,7 @@ package no.nav.melosys.service;
 import java.util.ArrayList;
 
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,8 @@ import no.nav.melosys.repository.BehandlingRepository;
 @Service
 public class RegelmodulService {
 
+    private final String APPLICATION_JSON_UTF_8 = "application/json;charset=utf-8";
+
     private String regelmodulUrl;
 
     private BehandlingRepository behandlingRepo;
@@ -51,12 +54,9 @@ public class RegelmodulService {
 
         FastsettLovvalgRequest fastsettLovvalgRequest = lagRequest(behandling);
 
-        FastsettLovvalgReply fastsettLovvalgReply = ClientBuilder.newClient().target(regelmodulUrl)
-                .queryParam("req", fastsettLovvalgRequest)
-                .request()
-                .get(FastsettLovvalgReply.class);
-
-        return fastsettLovvalgReply;
+        return ClientBuilder.newClient().target(regelmodulUrl)
+                .request(APPLICATION_JSON_UTF_8)
+                .post(Entity.entity(fastsettLovvalgRequest, APPLICATION_JSON_UTF_8), FastsettLovvalgReply.class);
     }
 
     /**
