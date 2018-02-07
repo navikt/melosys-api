@@ -129,7 +129,7 @@ public class KvalifiserForArtikler implements Regelpakke {
             argumentet(BRUKER_ER_ARBEIDSTAKER).erSann() // 2
             .og(argumentet(BRUKER_ER_NÆRINGSDRIVENDE).erIkkeSann()) // 3
             .og(argumentet(ARBEIDSGIVER_HAR_VESENTLIG_VIRKSOMHET_I_NORGE).erSann()) // 4
-            .og(argumentet(ANTALL_UTLAND_BRUKER_ARBEIDER_I).erLik(1)) // 5
+            .og(argumentet(ANTALL_UTLAND_BRUKER_ARBEIDER_I).erLik(1)) // 6
             .og(argumentet(BRUKER_ARBEIDER_I_NORGE).erIkkeSann()) // 6
         ).så(
             settArgument(SKAL_VURDERE_ART_12_1, JA)

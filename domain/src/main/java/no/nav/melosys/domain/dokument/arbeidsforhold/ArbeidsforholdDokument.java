@@ -18,14 +18,11 @@ public class ArbeidsforholdDokument extends SaksopplysningDokument {
 
     @XmlElementWrapper(name="arbeidsforhold")
     @XmlElement(name="arbeidsforhold")
-    List<Arbeidsforhold> arbeidsforhold;
+    public List<Arbeidsforhold> arbeidsforhold;
 
     @JsonValue
     public List<Arbeidsforhold> getArbeidsforhold() {
         return arbeidsforhold;
     }
 
-    public void setArbeidsforhold(List<Arbeidsforhold> arbeidsforhold) {
-        this.arbeidsforhold = arbeidsforhold;
-    }
 }

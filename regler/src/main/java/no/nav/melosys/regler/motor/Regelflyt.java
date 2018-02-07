@@ -3,6 +3,7 @@ package no.nav.melosys.regler.motor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -30,17 +31,20 @@ public class Regelflyt {
     
     /** kjører alle regelpakkene i flyten */
     public void kjør() {
-        for (Class<? extends Regelpakke> regelpakke : flytSekvens) {
-            kjørRegelPakke(regelpakke);
+        try {
+            for (Class<? extends Regelpakke> regelpakke : flytSekvens) {
+                kjørRegelPakke(regelpakke);
+            }
+        } catch (AvbrytRegelkjoeringIStillhetException e) {
+            // En av reglene har avbrutt videre regelkjøring. Returner i stillhet.
+                return;
         }
     }
 
     /** Legger til en eller flere regelpakket til flyten. */
     @SafeVarargs // OK at vararg blir upcastet til Object[]
     protected final void leggTilRegelpakker(Class<? extends Regelpakke>... regelpakker) {
-        for (Class<? extends Regelpakke> regelpakke : regelpakker) {
-            flytSekvens.add(regelpakke);
-        }
+        Collections.addAll(flytSekvens, regelpakker);
     }
  
     /* Kjører alle klassens static metoder som er annotert som Regel i tilfeldig rekkefølge */
@@ -53,8 +57,8 @@ public class Regelflyt {
                 } catch (InvocationTargetException e) {
                     // Vi er her hvis regelmetoden kaster exception
                     if (e.getCause() instanceof AvbrytRegelkjoeringIStillhetException) {
-                        // En av reglene har avbrutt videre regelkjøring. Returner i stillhet.
-                        return;
+                        // En av reglene har avbrutt videre regelkjøring
+                        throw (AvbrytRegelkjoeringIStillhetException) e.getCause();
                     }
                     String feilmelding = "Ubehandlet exception ved kjøring av regel " + regelpakke.getSimpleName() + "." + regelKandidat.getName();
                     log.error(feilmelding, e.getCause());

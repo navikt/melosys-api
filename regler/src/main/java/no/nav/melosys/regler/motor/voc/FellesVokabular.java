@@ -18,6 +18,7 @@ public class FellesVokabular {
 
     /**
      * Utfører alle kommandoene i sekvens
+     * OBS! Kommandoene utføres i sekvens. Men husk at alle kommandoene konstrueres FØR den første eksekveres.
      */
     public static final void utfør(Runnable... runnables) {
         for (Runnable r : runnables) {

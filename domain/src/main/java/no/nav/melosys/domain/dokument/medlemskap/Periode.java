@@ -20,6 +20,11 @@ public class Periode implements ErPeriode {
     public Periode () {
     }
 
+    public Periode (LocalDate fom, LocalDate tom) {
+        this.fom = fom;
+        this.tom = tom;
+    }
+
     @Override
     public LocalDate getFom() {
         return fom;

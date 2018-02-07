@@ -7,7 +7,7 @@ import no.nav.melosys.domain.dokument.felles.Land;
 /**
  * Opplysninger om opphold i utland
  */
-public class OppholdUtland implements HarPeriode{
+public class OppholdUtland implements HarPeriode {
     public Land oppholdsland;
     public Periode oppholdsPeriode;
     public Boolean studentIEOS;

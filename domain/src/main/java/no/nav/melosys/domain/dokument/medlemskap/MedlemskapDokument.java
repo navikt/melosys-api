@@ -11,13 +11,10 @@ public class MedlemskapDokument extends SaksopplysningDokument {
 
     @XmlElementWrapper(name="medlemsperiode")
     @XmlElement(name="medlemsperiode")
-    private List<Medlemsperiode> medlemsperiode;
+    public List<Medlemsperiode> medlemsperiode;
 
     public List<Medlemsperiode> getMedlemsperiode() {
         return medlemsperiode;
     }
 
-    public void setMedlemsperiode(List<Medlemsperiode> medlemsperiode) {
-        this.medlemsperiode = medlemsperiode;
-    }
 }

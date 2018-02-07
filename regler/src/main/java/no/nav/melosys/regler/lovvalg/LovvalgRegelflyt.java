@@ -1,5 +1,6 @@
 package no.nav.melosys.regler.lovvalg;
 
+import no.nav.melosys.regler.lovvalg.temp.WhatEver;
 import no.nav.melosys.regler.lovvalg.utled_fakta.SjekkOmSoeknadenDekkesAvEf_883_2004;
 import no.nav.melosys.regler.lovvalg.utled_fakta.UtledFaktaOmArbeid;
 import no.nav.melosys.regler.lovvalg.utled_fakta.UtledFaktaOmPerson;
@@ -17,6 +18,11 @@ public class LovvalgRegelflyt extends Regelflyt {
     private static final LovvalgRegelflyt instanse = new LovvalgRegelflyt();
     
     private LovvalgRegelflyt() {
+
+        // FIXME: Fjernes. Denne setter 12.1 og avbryter regelkjøring.
+        leggTilRegelpakker(
+            WhatEver.class
+        );
         
         // Steg 1: Verifiser inndata
         leggTilRegelpakker(

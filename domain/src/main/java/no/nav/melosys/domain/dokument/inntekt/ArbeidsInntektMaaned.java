@@ -13,33 +13,14 @@ import no.nav.melosys.domain.dokument.jaxb.YearMonthTimeZoneXmlAdapter;
 public class ArbeidsInntektMaaned {
 
     @XmlJavaTypeAdapter(YearMonthTimeZoneXmlAdapter.class)
-    private YearMonth aarMaaned;
+    public YearMonth aarMaaned;
 
-    private List<Avvik> avvikListe;
+    public List<Avvik> avvikListe;
 
-    private ArbeidsInntektInformasjon arbeidsInntektInformasjon;
-
-    public YearMonth getAarMaaned() {
-        return aarMaaned;
-    }
-
-    public void setAarMaaned(YearMonth aarMaaned) {
-        this.aarMaaned = aarMaaned;
-    }
-
-    public List<Avvik> getAvvikListe() {
-        return avvikListe;
-    }
-
-    public void setAvvikListe(List<Avvik> avvikListe) {
-        this.avvikListe = avvikListe;
-    }
+    public ArbeidsInntektInformasjon arbeidsInntektInformasjon;
 
     public ArbeidsInntektInformasjon getArbeidsInntektInformasjon() {
         return arbeidsInntektInformasjon;
     }
 
-    public void setArbeidsInntektInformasjon(ArbeidsInntektInformasjon arbeidsInntektInformasjon) {
-        this.arbeidsInntektInformasjon = arbeidsInntektInformasjon;
-    }
 }
