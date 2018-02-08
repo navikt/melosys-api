@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.Landkode;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Sivilstand;
@@ -21,7 +21,7 @@ public class SoeknadDokument extends SaksopplysningDokument {
     public LocalDate fødselsdato;
     public Bostedsadresse bostedsadresseNorge;
     public Bostedsadresse bostedsadresseUtland;
-    public Landkode statsborgerskap;
+    public Land statsborgerskap;
     public String utenlandskId;
     // Barn sendes med i søknaden, da det ikke er gitt av TPS hvilke som er medfølgende.
     public List<Familiemedlem> familiemedlemmer;

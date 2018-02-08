@@ -1,8 +1,9 @@
 
 package no.nav.melosys.regler.motor.dekl;
 
-import static no.nav.melosys.regler.motor.dekl.Verdielement.antallet;
-import static no.nav.melosys.regler.motor.dekl.VerdielementSett.forAlle;
+import static no.nav.melosys.regler.motor.voc.Verdielement.antallet;
+import static no.nav.melosys.regler.motor.voc.VerdielementSett.alle;
+import static no.nav.melosys.regler.motor.voc.VerdielementSett.forAlle;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -19,7 +20,7 @@ public class VerdielementSettTest {
     private static class Verden {List<Avdeling> avdelinger; Verden(Avdeling... a) {avdelinger = Arrays.asList(a);}}
     private static class Avdeling {List<Faksjon> faksjoner; Avdeling(Faksjon... f) {faksjoner = Arrays.asList(f);}}
     private static class Faksjon {List<Innbygger> innbyggere; Faksjon(int antInnb) {innbyggere = new ArrayList<>(); for (int i = 0; i < antInnb; i++) innbyggere.add(new Innbygger());}}
-    private static class Innbygger {boolean harHoppet = false; void hopp() {harHoppet = true;}}
+    private static class Innbygger {boolean harHoppet = false; boolean harHoppet() {return harHoppet;} void hopp() {harHoppet = true;}}
 
     /**
      * 
@@ -51,8 +52,12 @@ public class VerdielementSettTest {
             .sine(s -> {return s.innbyggere;})
             .som(i -> {return !i.harHoppet;}))
             .erLik(0).test());
+        assertTrue(alle(univers.avdelinger)
+            .sine(a -> a.faksjoner)
+            .sine(f -> f.innbyggere)
+            .inneholderMinstEn(Innbygger::harHoppet).test());
     }
-    
+
     private Verden settOppDisneyUnivers() {
         // StarWars...
         Faksjon irriterendeFurballs = new Faksjon(150); // Samtlige ewoker i galaksen far far away

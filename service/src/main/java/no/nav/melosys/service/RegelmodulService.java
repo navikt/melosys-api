@@ -1,8 +1,13 @@
 package no.nav.melosys.service;
 
 import java.util.ArrayList;
+
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
@@ -17,9 +22,6 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
 import no.nav.melosys.repository.BehandlingRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 /**
  * Service som kaller regelmodulen.
@@ -27,7 +29,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class RegelmodulService {
 
-    // TODO: Denne kan flyttes til en felles-util modul
     private final String APPLICATION_JSON_UTF_8 = "application/json;charset=utf-8";
 
     private String regelmodulUrl;

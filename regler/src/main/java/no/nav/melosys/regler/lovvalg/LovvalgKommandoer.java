@@ -1,24 +1,35 @@
 package no.nav.melosys.regler.lovvalg;
 
+import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.TEKNISK_FEIL;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
+import static no.nav.melosys.regler.motor.RegelLogg.loggError;
 import static no.nav.melosys.regler.motor.RegelLogg.loggInfo;
+
+import java.util.ArrayList;
 
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Argument;
+import no.nav.melosys.regler.api.lovvalg.rep.Artikkel;
+import no.nav.melosys.regler.api.lovvalg.rep.Betingelse;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
+import no.nav.melosys.regler.api.lovvalg.rep.Lovvalgsbestemmelse;
 import no.nav.melosys.regler.motor.AvbrytRegelkjoeringIStillhetException;
 import no.nav.melosys.regler.motor.KontekstManager;
+import no.nav.melosys.regler.motor.voc.Verdielement;
 
 /**
  * Klassen inneholder verbalisering av kommandoer
+ * 
+ * Alle metodene i denne klassen skriver til regellogg.
+ * 
  */
 public final class LovvalgKommandoer {
 
     private LovvalgKommandoer() {}
 
-    /** Legger til en feil eller varsel på responsen som skal returneres, og skriver til logg. */
-    public static Runnable leggTilMelding(Kategori kat, String melding) {
+    /** Legger til en feil eller varsel på responsen som skal returnerer. */
+    public static final Runnable leggTilMelding(Kategori kat, String melding) {
         return () -> {
             Feilmelding feil = new Feilmelding();
             feil.kategori = kat;
@@ -28,25 +39,49 @@ public final class LovvalgKommandoer {
         };
     }
 
-    /** Legger til en feil eller varsel på responsen som skal returneres, skriver til logg og avbryter videre regelkjøring. */
-    public static Runnable leggTilMeldingOgAvbryt(Kategori kat, String melding) {
+    /** Legger til en feil eller varsel på responsen som skal returneres og avbryter videre regelkjøring. */
+    public static final Runnable leggTilMeldingOgAvbryt(Kategori kat, String melding) {
         return () -> {
             leggTilMelding(kat, melding).run();
             avbrytRegelkjøring.run();
         };
     }
     
-    /** Setter en variabel (beregnet verdi) */
-    public static Runnable settVariabel(Argument variabel, Object verdi) {
+    /** Avbryter regelkjøringen i stillhet. */
+    public static final Runnable avbrytRegelkjøring = () -> {
+        loggInfo("Avbryter regelkjøring");
+        throw new AvbrytRegelkjoeringIStillhetException();
+    };
+    
+    /** Setter en variabel (beregnet verdi). */
+    public static final Runnable settArgument(Argument variabel, Verdielement verdi) {
+        return settArgument(variabel, verdi.verdi());
+    }
+    
+    /** Setter en variabel (beregnet verdi). */
+    public static final Runnable settArgument(Argument variabel, Object verdi) {
         return () -> {
             KontekstManager.settVariabel(variabel, verdi);
         };
     }
     
-    /** Avbryter regelkjøringen i stillhet */
-    public static final Runnable avbrytRegelkjøring = () -> {
-        loggInfo("Avbryter regelkjøring");
-        throw new AvbrytRegelkjoeringIStillhetException();
-    };
+    /** Kommando som legger til en lovvalgsbestemmelse for en artikkel. */
+    public static final Runnable opprettLovvalgbestemmelse(Artikkel artikkel, Betingelse... betingelser) {
+        return () -> {
+            if (responsen().lovvalgsbestemmelser.get(artikkel) != null) {
+                loggError("Forsøk på å opprette eksisterende artikkel {}", artikkel);
+                leggTilMeldingOgAvbryt(TEKNISK_FEIL, "Teknisk feil i regelmodulen").run();
+            }
+            Lovvalgsbestemmelse lb = new Lovvalgsbestemmelse();
+            lb.artikkel = artikkel;
+            lb.betingelser = new ArrayList<>();
+            responsen().lovvalgsbestemmelser.put(artikkel, lb);
+            loggInfo("Opprettet lovvalgsbestemmelse for artikkel {}", artikkel);
+            for (Betingelse bet : betingelser) {
+                lb.betingelser.add(bet);
+                loggInfo("  med betingelse \"{}\" som {}", bet.argument, bet.resultat);
+            }
+        };
+    }
     
 }

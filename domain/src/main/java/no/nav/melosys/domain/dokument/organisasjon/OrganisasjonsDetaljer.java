@@ -13,74 +13,47 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnu
 @XmlAccessorType(XmlAccessType.FIELD)
 public class OrganisasjonsDetaljer {
 
-    private String orgnummer;
+    public String orgnummer;
 
     @XmlElement(name="organisasjonsnavn")
-    private List<Organisasjonsnavn> navn;
+    public List<Organisasjonsnavn> navn;
 
-    private List<GeografiskAdresse> forretningsadresse;
+    public List<GeografiskAdresse> forretningsadresse;
 
-    private List<GeografiskAdresse> postadresse;
+    public List<GeografiskAdresse> postadresse;
 
-    private List<Telefonnummer> telefon;
+    public List<Telefonnummer> telefon;
 
-    private List<Epost> epostadresse;
+    public List<Epost> epostadresse;
 
-    private List<String> naering; //"http://nav.no/kodeverk/Kodeverk/Næringskoder"
+    public List<String> naering; //"http://nav.no/kodeverk/Kodeverk/Næringskoder"
 
     public String getOrgnummer() {
         return orgnummer;
-    }
-
-    public void setOrgnummer(String orgnummer) {
-        this.orgnummer = orgnummer;
     }
 
     public List<Organisasjonsnavn> getNavn() {
         return navn;
     }
 
-    public void setNavn(List<Organisasjonsnavn> navn) {
-        this.navn = navn;
-    }
-
     public List<GeografiskAdresse> getForretningsadresse() {
         return forretningsadresse;
-    }
-
-    public void setForretningsadresse(List<GeografiskAdresse> forretningsadresse) {
-        this.forretningsadresse = forretningsadresse;
     }
 
     public List<GeografiskAdresse> getPostadresse() {
         return postadresse;
     }
 
-    public void setPostadresse(List<GeografiskAdresse> postadresse) {
-        this.postadresse = postadresse;
-    }
-
     public List<Telefonnummer> getTelefon() {
         return telefon;
-    }
-
-    public void setTelefon(List<Telefonnummer> telefon) {
-        this.telefon = telefon;
     }
 
     public List<Epost> getEpostadresse() {
         return epostadresse;
     }
 
-    public void setEpostadresse(List<Epost> epostadresse) {
-        this.epostadresse = epostadresse;
-    }
-
     public List<String> getNaering() {
         return naering;
     }
 
-    public void setNaering(List<String> naering) {
-        this.naering = naering;
-    }
 }

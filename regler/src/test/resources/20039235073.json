@@ -1,6 +1,6 @@
 {
   "søknadDokument": {
-    "fnr": "99999999999",
+    "fnr": "FJERNET",
     "sammensattNavn": "FALLBERG TORDIS",
     "arbeidUtland": {
       "arbeidsperiode": {
@@ -16,7 +16,7 @@
     }
   },
   "personopplysningDokument": {
-    "fnr": "99999999999",
+    "fnr": "FJERNET",
     "sivilstand": "Ugift",
     "statsborgerskap": "NOR",
     "sammensattNavn": "FALLBERG TORDIS",
@@ -58,7 +58,7 @@
         "utenlandsopphold": [],
         "arbeidsgivertype": "Organisasjon",
         "arbeidsgiverID": "973147536",
-        "arbeidstakerID": "99999999999",
+        "arbeidstakerID": "FJERNET",
         "opplysningspliktigtype": "Organisasjon",
         "opplysningspliktigID": "920165931",
         "opprettelsestidspunkt": "2014-12-13T16:33:52.361+01:00",
@@ -87,7 +87,7 @@
         "utenlandsopphold": [],
         "arbeidsgivertype": "Organisasjon",
         "arbeidsgiverID": "975270211",
-        "arbeidstakerID": "99999999999",
+        "arbeidstakerID": "FJERNET",
         "opplysningspliktigtype": "Organisasjon",
         "opplysningspliktigID": "940493021",
         "opprettelsestidspunkt": "2014-12-13T16:33:52.361+01:00",
@@ -116,7 +116,7 @@
         "utenlandsopphold": [],
         "arbeidsgivertype": "Organisasjon",
         "arbeidsgiverID": "988991708",
-        "arbeidstakerID": "99999999999",
+        "arbeidstakerID": "FJERNET",
         "opplysningspliktigtype": "Organisasjon",
         "opplysningspliktigID": "940493021",
         "opprettelsestidspunkt": "2014-12-13T16:33:52.361+01:00",
@@ -145,7 +145,7 @@
         "utenlandsopphold": [],
         "arbeidsgivertype": "Organisasjon",
         "arbeidsgiverID": "988991708",
-        "arbeidstakerID": "99999999999",
+        "arbeidstakerID": "FJERNET",
         "opplysningspliktigtype": "Organisasjon",
         "opplysningspliktigID": "940493021",
         "opprettelsestidspunkt": "2014-12-13T16:33:52.361+01:00",
@@ -176,7 +176,7 @@
         "utenlandsopphold": [],
         "arbeidsgivertype": "Organisasjon",
         "arbeidsgiverID": "995816598",
-        "arbeidstakerID": "99999999999",
+        "arbeidstakerID": "FJERNET",
         "opplysningspliktigtype": "Organisasjon",
         "opplysningspliktigID": "964338531",
         "opprettelsestidspunkt": "2015-02-02T14:31:53.893+01:00",
@@ -205,7 +205,7 @@
         "utenlandsopphold": [],
         "arbeidsgivertype": "Organisasjon",
         "arbeidsgiverID": "995816598",
-        "arbeidstakerID": "99999999999",
+        "arbeidstakerID": "FJERNET",
         "opplysningspliktigtype": "Organisasjon",
         "opplysningspliktigID": "974773880",
         "opprettelsestidspunkt": "2014-12-13T16:33:52.361+01:00",
@@ -390,7 +390,7 @@
         "utenlandsopphold": [],
         "arbeidsgivertype": "Organisasjon",
         "arbeidsgiverID": "995816598",
-        "arbeidstakerID": "99999999999",
+        "arbeidstakerID": "FJERNET",
         "opplysningspliktigtype": "Organisasjon",
         "opplysningspliktigID": "964338531",
         "opprettelsestidspunkt": "2015-02-02T14:31:53.901+01:00",
@@ -471,7 +471,7 @@
         "utenlandsopphold": [],
         "arbeidsgivertype": "Organisasjon",
         "arbeidsgiverID": "995816598",
-        "arbeidstakerID": "99999999999",
+        "arbeidstakerID": "FJERNET",
         "opplysningspliktigtype": "Organisasjon",
         "opplysningspliktigID": "964338531",
         "opprettelsestidspunkt": "2015-02-02T14:31:53.897+01:00",
@@ -497,7 +497,7 @@
                 "utbetaltIPeriode": "2018-01",
                 "opplysningspliktigID": "912499693",
                 "virksomhetID": "912499693",
-                "inntektsmottakerID": "88888888882",
+                "inntektsmottakerID": "FJERNET",
                 "inngaarIGrunnlagForTrekk": true,
                 "utloeserArbeidsgiveravgift": true,
                 "beskrivelse": "fastloenn"
@@ -519,7 +519,7 @@
                 "utbetaltIPeriode": "2017-11",
                 "opplysningspliktigID": "912499693",
                 "virksomhetID": "912499693",
-                "inntektsmottakerID": "88888888882",
+                "inntektsmottakerID": "FJERNET",
                 "inngaarIGrunnlagForTrekk": true,
                 "utloeserArbeidsgiveravgift": true,
                 "beskrivelse": "fastloenn"
@@ -541,7 +541,7 @@
                 "utbetaltIPeriode": "2017-12",
                 "opplysningspliktigID": "912499693",
                 "virksomhetID": "912499693",
-                "inntektsmottakerID": "88888888882",
+                "inntektsmottakerID": "FJERNET",
                 "inngaarIGrunnlagForTrekk": true,
                 "utloeserArbeidsgiveravgift": true,
                 "beskrivelse": "fastloenn"
@@ -563,7 +563,7 @@
                 "utbetaltIPeriode": "2017-03",
                 "opplysningspliktigID": "912499693",
                 "virksomhetID": "912499693",
-                "inntektsmottakerID": "88888888882",
+                "inntektsmottakerID": "FJERNET",
                 "inngaarIGrunnlagForTrekk": true,
                 "utloeserArbeidsgiveravgift": true,
                 "beskrivelse": "fastloenn"
@@ -585,7 +585,7 @@
                 "utbetaltIPeriode": "2017-05",
                 "opplysningspliktigID": "912499693",
                 "virksomhetID": "912499693",
-                "inntektsmottakerID": "88888888882",
+                "inntektsmottakerID": "FJERNET",
                 "inngaarIGrunnlagForTrekk": true,
                 "utloeserArbeidsgiveravgift": true,
                 "beskrivelse": "fastloenn"
@@ -607,7 +607,7 @@
                 "utbetaltIPeriode": "2017-04",
                 "opplysningspliktigID": "912499693",
                 "virksomhetID": "912499693",
-                "inntektsmottakerID": "88888888882",
+                "inntektsmottakerID": "FJERNET",
                 "inngaarIGrunnlagForTrekk": true,
                 "utloeserArbeidsgiveravgift": true,
                 "beskrivelse": "fastloenn"
@@ -629,7 +629,7 @@
                 "utbetaltIPeriode": "2017-02",
                 "opplysningspliktigID": "912499693",
                 "virksomhetID": "912499693",
-                "inntektsmottakerID": "88888888882",
+                "inntektsmottakerID": "FJERNET",
                 "inngaarIGrunnlagForTrekk": true,
                 "utloeserArbeidsgiveravgift": true,
                 "beskrivelse": "fastloenn"
@@ -651,7 +651,7 @@
                 "utbetaltIPeriode": "2017-07",
                 "opplysningspliktigID": "912499693",
                 "virksomhetID": "912499693",
-                "inntektsmottakerID": "88888888882",
+                "inntektsmottakerID": "FJERNET",
                 "inngaarIGrunnlagForTrekk": true,
                 "utloeserArbeidsgiveravgift": true,
                 "beskrivelse": "fastloenn"
@@ -673,7 +673,7 @@
                 "utbetaltIPeriode": "2017-06",
                 "opplysningspliktigID": "912499693",
                 "virksomhetID": "912499693",
-                "inntektsmottakerID": "88888888882",
+                "inntektsmottakerID": "FJERNET",
                 "inngaarIGrunnlagForTrekk": true,
                 "utloeserArbeidsgiveravgift": true,
                 "beskrivelse": "fastloenn"
@@ -695,7 +695,7 @@
                 "utbetaltIPeriode": "2017-08",
                 "opplysningspliktigID": "912499693",
                 "virksomhetID": "912499693",
-                "inntektsmottakerID": "88888888882",
+                "inntektsmottakerID": "FJERNET",
                 "inngaarIGrunnlagForTrekk": true,
                 "utloeserArbeidsgiveravgift": true,
                 "beskrivelse": "fastloenn"
@@ -717,7 +717,7 @@
                 "utbetaltIPeriode": "2017-09",
                 "opplysningspliktigID": "912499693",
                 "virksomhetID": "912499693",
-                "inntektsmottakerID": "88888888882",
+                "inntektsmottakerID": "FJERNET",
                 "inngaarIGrunnlagForTrekk": true,
                 "utloeserArbeidsgiveravgift": true,
                 "beskrivelse": "fastloenn"
@@ -739,7 +739,7 @@
                 "utbetaltIPeriode": "2017-10",
                 "opplysningspliktigID": "912499693",
                 "virksomhetID": "912499693",
-                "inntektsmottakerID": "88888888882",
+                "inntektsmottakerID": "FJERNET",
                 "inngaarIGrunnlagForTrekk": true,
                 "utloeserArbeidsgiveravgift": true,
                 "beskrivelse": "fastloenn"

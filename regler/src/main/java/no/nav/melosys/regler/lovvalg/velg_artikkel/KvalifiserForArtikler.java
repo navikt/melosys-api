@@ -1,52 +1,26 @@
 package no.nav.melosys.regler.lovvalg.velg_artikkel;
 
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.BRUKER_ARBEIDER_I_FLERE_LAND;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.BRUKER_ARBEIDER_I_FLY;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.BRUKER_ARBEIDER_PÅ_SKIP;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.BRUKER_ER_ARBEIDSTAKER;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.BRUKER_ER_NÆRINGSDRIVENDE;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.BRUKER_ER_TJENESTEMANN;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_11_2;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_11_3A;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_11_3B;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_11_3C;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_11_3D;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_11_3E;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_11_4_1;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_11_4_2;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_11_5;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_12_1;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_12_2;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_13_1A;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_13_1B1;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_13_1B2;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_13_1B3;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_13_1B4;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_13_2A;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_13_2B;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_13_3;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_13_4;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_16_M;
-import static no.nav.melosys.regler.api.lovvalg.rep.Argument.SKAL_VURDERE_ART_16_U;
-import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.settVariabel;
-import static no.nav.melosys.regler.motor.dekl.Deklarasjon.hvis;
-import static no.nav.melosys.regler.motor.dekl.FellesVokabular.JA;
-import static no.nav.melosys.regler.motor.dekl.FellesVokabular.NEI;
-import static no.nav.melosys.regler.motor.dekl.Verdielement.variabelen;
+import static no.nav.melosys.regler.api.lovvalg.rep.Argument.*;
+import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.IKKE_STOETTET;
+import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.leggTilMeldingOgAvbryt;
+import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.settArgument;
+import static no.nav.melosys.regler.motor.voc.Deklarasjon.hvis;
+import static no.nav.melosys.regler.motor.voc.FellesVokabular.JA;
+import static no.nav.melosys.regler.motor.voc.FellesVokabular.NEI;
+import static no.nav.melosys.regler.motor.voc.Verdielement.argumentet;
 
-import no.nav.melosys.regler.motor.Regel;
-import no.nav.melosys.regler.motor.dekl.FellesVokabular;
+import no.nav.melosys.regler.motor.Regelpakke;
 
-public class KvalifiserForArtikler {
+public class KvalifiserForArtikler implements Regelpakke {
     
     @Regel
     public static void kvalifiserFor11_2() {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_2, JA)
+            settArgument(SKAL_VURDERE_ART_11_2, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_2, NEI)
+            settArgument(SKAL_VURDERE_ART_11_2, NEI)
         );
     }
 
@@ -55,9 +29,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_3A, JA)
+            settArgument(SKAL_VURDERE_ART_11_3A, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_3A, NEI)
+            settArgument(SKAL_VURDERE_ART_11_3A, NEI)
         );
     }
 
@@ -66,9 +40,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_3B, JA)
+            settArgument(SKAL_VURDERE_ART_11_3B, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_3B, NEI)
+            settArgument(SKAL_VURDERE_ART_11_3B, NEI)
         );
     }
 
@@ -77,9 +51,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_3C, JA)
+            settArgument(SKAL_VURDERE_ART_11_3C, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_3C, NEI)
+            settArgument(SKAL_VURDERE_ART_11_3C, NEI)
         );
     }
 
@@ -88,9 +62,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_3D, JA)
+            settArgument(SKAL_VURDERE_ART_11_3D, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_3D, NEI)
+            settArgument(SKAL_VURDERE_ART_11_3D, NEI)
         );
     }
 
@@ -99,9 +73,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_3E, JA)
+            settArgument(SKAL_VURDERE_ART_11_3E, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_3E, NEI)
+            settArgument(SKAL_VURDERE_ART_11_3E, NEI)
         );
     }
 
@@ -110,9 +84,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_4_1, JA)
+            settArgument(SKAL_VURDERE_ART_11_4_1, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_4_1, NEI)
+            settArgument(SKAL_VURDERE_ART_11_4_1, NEI)
         );
     }
 
@@ -121,9 +95,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_4_2, JA)
+            settArgument(SKAL_VURDERE_ART_11_4_2, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_4_2, NEI)
+            settArgument(SKAL_VURDERE_ART_11_4_2, NEI)
         );
     }
 
@@ -132,25 +106,41 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_11_5, JA)
+            settArgument(SKAL_VURDERE_ART_11_5, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_11_5, NEI)
+            settArgument(SKAL_VURDERE_ART_11_5, NEI)
         );
     }
 
+    /**
+     * Kriteriene for at 12.1 skal vurderes:
+     * 1) Brukeren (tilfellet) er omfattet av forordning (EF) 883/2004
+     * 3) Bruker utfører lønnet arbeid (inkl.frilansere)
+     * 4) Bruker er ikke næringsdrivende
+     * 5) Arbeidsgiver må ha vesentlig aktivitet i Norge
+     * 6) Bruker arbeider i kun 1 land, ikke Norge
+     * 
+     * FIXME: Revider kommentar og implementasjon.
+     */
     @Regel
     public static void kvalifiserFor12_1() {
         hvis(
-            variabelen(BRUKER_ER_ARBEIDSTAKER).erSann()
-            .og(variabelen(BRUKER_ER_NÆRINGSDRIVENDE).erIkkeSann())
-            .og(variabelen(BRUKER_ARBEIDER_I_FLY).erIkkeSann())
-            .og(variabelen(BRUKER_ARBEIDER_PÅ_SKIP).erIkkeSann())
-            .og(variabelen(BRUKER_ER_TJENESTEMANN).erIkkeSann())
-            .og(variabelen(BRUKER_ARBEIDER_I_FLERE_LAND).erIkkeSann())
+            // Vi forusetter at 1 alltid er oppfylt her (skal ha feilmelding hvis ikke)
+            argumentet(BRUKER_ER_ARBEIDSTAKER).erSann() // 2
+            .og(argumentet(BRUKER_ER_NÆRINGSDRIVENDE).erIkkeSann()) // 3
+            .og(argumentet(ARBEIDSGIVER_HAR_VESENTLIG_VIRKSOMHET_I_NORGE).erSann()) // 4
+            .og(argumentet(ANTALL_UTLAND_BRUKER_ARBEIDER_I).erLik(1)) // 6
+            .og(argumentet(BRUKER_ARBEIDER_I_NORGE).erIkkeSann()) // 6
         ).så(
-            settVariabel(SKAL_VURDERE_ART_12_1, JA)
+            settArgument(SKAL_VURDERE_ART_12_1, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_12_1, NEI)
+            settArgument(SKAL_VURDERE_ART_12_1, NEI)
+        );
+        // FIXME: Fjern midlertidig kode under
+        hvis(
+            argumentet(SKAL_VURDERE_ART_12_1).erIkkeSann()
+        ).så(
+            leggTilMeldingOgAvbryt(IKKE_STOETTET, "Denne versjonen av Melosys støtter kun artikkel 12.1. Søknaden kvalifiserer ikke for denne artikkelen.")
         );
     }
 
@@ -159,9 +149,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_12_2, JA)
+            settArgument(SKAL_VURDERE_ART_12_2, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_12_2, NEI)
+            settArgument(SKAL_VURDERE_ART_12_2, NEI)
         );
     }
 
@@ -170,9 +160,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_1A, JA)
+            settArgument(SKAL_VURDERE_ART_13_1A, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_1A, NEI)
+            settArgument(SKAL_VURDERE_ART_13_1A, NEI)
         );
     }
 
@@ -181,9 +171,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_1B1, JA)
+            settArgument(SKAL_VURDERE_ART_13_1B1, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_1B1, NEI)
+            settArgument(SKAL_VURDERE_ART_13_1B1, NEI)
         );
     }
 
@@ -192,9 +182,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_1B2, JA)
+            settArgument(SKAL_VURDERE_ART_13_1B2, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_1B2, NEI)
+            settArgument(SKAL_VURDERE_ART_13_1B2, NEI)
         );
     }
 
@@ -203,9 +193,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_1B3, JA)
+            settArgument(SKAL_VURDERE_ART_13_1B3, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_1B3, NEI)
+            settArgument(SKAL_VURDERE_ART_13_1B3, NEI)
         );
     }
 
@@ -214,9 +204,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_1B4, JA)
+            settArgument(SKAL_VURDERE_ART_13_1B4, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_1B4, NEI)
+            settArgument(SKAL_VURDERE_ART_13_1B4, NEI)
         );
     }
 
@@ -225,9 +215,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_2A, JA)
+            settArgument(SKAL_VURDERE_ART_13_2A, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_2A, NEI)
+            settArgument(SKAL_VURDERE_ART_13_2A, NEI)
         );
     }
 
@@ -236,9 +226,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_2B, JA)
+            settArgument(SKAL_VURDERE_ART_13_2B, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_2B, NEI)
+            settArgument(SKAL_VURDERE_ART_13_2B, NEI)
         );
     }
 
@@ -247,9 +237,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_3, JA)
+            settArgument(SKAL_VURDERE_ART_13_3, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_3, NEI)
+            settArgument(SKAL_VURDERE_ART_13_3, NEI)
         );
     }
 
@@ -258,9 +248,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_13_4, JA)
+            settArgument(SKAL_VURDERE_ART_13_4, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_13_4, NEI)
+            settArgument(SKAL_VURDERE_ART_13_4, NEI)
         );
     }
 
@@ -269,9 +259,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_16_M, JA)
+            settArgument(SKAL_VURDERE_ART_16_M, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_16_M, NEI)
+            settArgument(SKAL_VURDERE_ART_16_M, NEI)
         );
     }
 
@@ -280,9 +270,9 @@ public class KvalifiserForArtikler {
         hvis(
             () -> false // FIXME
         ).så(
-            settVariabel(SKAL_VURDERE_ART_16_U, JA)
+            settArgument(SKAL_VURDERE_ART_16_U, JA)
         ).ellers(
-            settVariabel(SKAL_VURDERE_ART_16_U, NEI)
+            settArgument(SKAL_VURDERE_ART_16_U, NEI)
         );
     }
 

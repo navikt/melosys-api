@@ -16,13 +16,10 @@ public class InntektDokument extends SaksopplysningDokument {
 
     @XmlElementWrapper(name="arbeidsInntektMaanedListe")
     @XmlElement(name="arbeidsInntektMaaned")
-    private List<ArbeidsInntektMaaned> arbeidsInntektMaanedListe;
+    public List<ArbeidsInntektMaaned> arbeidsInntektMaanedListe;
 
     public List<ArbeidsInntektMaaned> getArbeidsInntektMaanedListe() {
         return arbeidsInntektMaanedListe;
     }
 
-    public void setArbeidsInntektMaanedListe(List<ArbeidsInntektMaaned> arbeidsInntektMaanedListe) {
-        this.arbeidsInntektMaanedListe = arbeidsInntektMaanedListe;
-    }
 }

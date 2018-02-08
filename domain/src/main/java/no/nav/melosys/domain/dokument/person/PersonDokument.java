@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.Landkode;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
 /**
@@ -27,7 +27,7 @@ public class PersonDokument extends SaksopplysningDokument {
     public Sivilstand sivilstand;
 
     /** Kodeverk: Landkoder */
-    public Landkode statsborgerskap;
+    public Land statsborgerskap;
 
     /** Kodeverk: Kjønnstyper */
     @JsonProperty("kjoenn")

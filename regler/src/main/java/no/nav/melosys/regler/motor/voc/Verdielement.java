@@ -1,7 +1,10 @@
-package no.nav.melosys.regler.motor.dekl;
+package no.nav.melosys.regler.motor.voc;
+
+import java.time.LocalDate;
 
 import org.springframework.util.Assert;
 
+import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.regler.motor.KontekstManager;
 
 public class Verdielement {
@@ -10,23 +13,28 @@ public class Verdielement {
     
     private Object verdi;
     
-    public static Verdielement verdien(Object verdi) {
+    public static final Verdielement verdien(Object verdi) {
         Verdielement ve = new Verdielement();
-        ve.verdi = verdi;
+        
+        ve.verdi = generaliser(verdi);
         return ve;
     }
     
-    public static Verdielement variabelen(Object variabel) {
+    public static final Verdielement argumentet(Object variabel) {
         return verdien(KontekstManager.hentVariabel(variabel));
     }
 
-    @SuppressWarnings("unused") 
-    public static Verdielement antallet(Iterable<?> settet) {
+    @SuppressWarnings("unused")
+    public static final Verdielement antallet(Iterable<?> settet) {
         int ant = 0;
-        for (Object t : settet) {
+        for (Object whatever : settet) {
             ant++;
         }
-        return Verdielement.verdien(ant);
+        return verdien(ant);
+    }
+    
+    public Object verdi() {
+        return verdi;
     }
     
     public Predikat mangler() {
@@ -66,7 +74,11 @@ public class Verdielement {
         };
     }
 
-    @SuppressWarnings("unchecked")
+    public Predikat starterPåEllerEtter(LocalDate dato) {
+        ErPeriode periode = (ErPeriode) verdi;
+        return () -> periode.getFom() != null && !dato.isAfter(periode.getFom());
+    }
+    
     public <T> Predikat erStørreEnn(T grense) {
         return () -> sammenliknMed(grense) > 0;
     }
@@ -75,17 +87,34 @@ public class Verdielement {
         return () -> sammenliknMed(grense) >= 0;
     }
     
+    public Predikat erMindreEnnEllerLik(Object grense) {
+        return () -> sammenliknMed(grense) <= 0;
+    }
+    
     private boolean harVerdiLik(Object annetVerdi) {
-        return verdi.equals(annetVerdi);
+        return verdi.equals(generaliser(annetVerdi));
     }
 
     @SuppressWarnings("unchecked")
     private int sammenliknMed(Object grense) {
         try {
-            return ((Comparable<Object>) verdi).compareTo(grense);
+            return ((Comparable<Object>) verdi).compareTo(generaliser(grense));
         } catch (ClassCastException e) {
             throw new RuntimeException("Kan ikke sammenligne en " + verdi.getClass() + " med en " + grense.getClass());
         }
     }
 
+    /**
+     * "Forfremmer" enkelte objekter (som f.eks. int til long).
+     */
+    private static Object generaliser(Object v) {
+        if (v instanceof Integer) return ((Integer) v).longValue();
+        return v;
+    }
+    
+    @Override
+    public String toString() {
+        return verdi == null ? "null" : verdi.toString();
+    }
+    
 }

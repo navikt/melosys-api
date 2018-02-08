@@ -1,16 +1,16 @@
 package no.nav.melosys.domain.dokument.person;
 
-import no.nav.melosys.domain.dokument.felles.Landkode;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
+
+import no.nav.melosys.domain.dokument.felles.Land;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "MidlertidigPostadresseNorge")
 public class MidlertidigPostadresseNorge extends MidlertidigPostadresse {
 
-    public Landkode land;
+    public Land land;
 
     public String tilleggsadresse;
 

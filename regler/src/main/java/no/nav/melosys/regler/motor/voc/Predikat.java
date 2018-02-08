@@ -1,4 +1,4 @@
-package no.nav.melosys.regler.motor.dekl;
+package no.nav.melosys.regler.motor.voc;
 
 /**
  * Et predikat som tester konteksten. 
@@ -29,6 +29,28 @@ public interface Predikat {
      */
     public default Predikat eller(Predikat p) {
         return () -> this.test() || p.test();
+    }
+    
+    public static Predikat minstEttAvFølgendeErSant(Predikat... predikater) {
+        return () -> {
+            for (Predikat p : predikater) {
+                if (p.test()) {
+                    return true;
+                }
+            }
+            return false;
+        };
+    }
+
+    public static Predikat ingenAvFølgendeErSant(Predikat... predikater) {
+        return () -> {
+            for (Predikat p : predikater) {
+                if (p.test()) {
+                    return false;
+                }
+            }
+            return true;
+        };
     }
 
 }

@@ -21,16 +21,16 @@ public class OrganisasjonDokument extends SaksopplysningDokument {
 
     @XmlElementWrapper(name="navn")
     @XmlElement(name="navnelinje")
-    private List<String> navn;
+    public List<String> navn;
 
-    private OrganisasjonsDetaljer organisasjonDetaljer;
+    public OrganisasjonsDetaljer organisasjonDetaljer;
 
-    private String sektorkode; //"http://nav.no/kodeverk/Kodeverk/Sektorkoder"
+    public String sektorkode; //"http://nav.no/kodeverk/Kodeverk/Sektorkoder"
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    private LocalDate oppstartsdato;
+    public LocalDate oppstartsdato;
 
-    private String enhetstype; //"http://nav.no/kodeverk/Kodeverk/EnhetstyperJuridiskEnhet"
+    public String enhetstype; //"http://nav.no/kodeverk/Kodeverk/EnhetstyperJuridiskEnhet"
 
     public String getOrgnummer() {
         return orgnummer;

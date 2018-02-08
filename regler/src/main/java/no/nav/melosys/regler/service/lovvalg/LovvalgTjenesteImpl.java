@@ -1,23 +1,31 @@
 package no.nav.melosys.regler.service.lovvalg;
 
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.initialiserLokalKontekst;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.slettLokalKontekst;
+
 import java.util.ArrayList;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
-import io.swagger.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Contact;
+import io.swagger.annotations.Info;
+import io.swagger.annotations.SwaggerDefinition;
 import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
 import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
 import no.nav.melosys.regler.lovvalg.LovvalgRegelflyt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.*;
 
 @Component
 @Path("lovvalg")
@@ -38,7 +46,6 @@ import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.*;
 )
 public class LovvalgTjenesteImpl implements LovvalgTjeneste {
     
-    // TODO: Denne kan flyttes til en felles-util modul
     public static final String APPLICATION_JSON_UTF_8 = "application/json;charset=utf-8";
     
     private static Logger log = LoggerFactory.getLogger(LovvalgTjenesteImpl.class);
@@ -57,7 +64,7 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
             // Sett lokal kontekst for regelsett...
             initialiserLokalKontekst(req);
             // Kjør forretningsregler og returner respons...
-            new LovvalgRegelflyt().kjør();
+            LovvalgRegelflyt.getInstanse().kjør();
             return responsen();
         } catch (Throwable e) {
             // Forsok å logge feilen...
@@ -68,7 +75,6 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
             // Returner teknisk feil...
             FastsettLovvalgReply res = new FastsettLovvalgReply();
             res.feilmeldinger = new ArrayList<>();
-            res.lovvalgsbestemmelser = new ArrayList<>();
 
             Feilmelding feil = new Feilmelding();
             feil.kategori = Kategori.TEKNISK_FEIL;

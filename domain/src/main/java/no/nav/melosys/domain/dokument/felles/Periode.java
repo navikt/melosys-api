@@ -10,7 +10,7 @@ import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.jaxb.OffsetDateTimeToLocalDateXmlAdapter;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Periode implements ErPeriode{
+public class Periode implements ErPeriode {
 
     @XmlJavaTypeAdapter(OffsetDateTimeToLocalDateXmlAdapter.class)
     private LocalDate fom;
@@ -21,6 +21,11 @@ public class Periode implements ErPeriode{
     public Periode () {
     }
     
+    public Periode (LocalDate fom, LocalDate tom) {
+        this.fom = fom;
+        this.tom = tom;
+    }
+
     @Override
     public LocalDate getFom() {
         return fom;
