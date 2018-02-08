@@ -2,6 +2,8 @@ package no.nav.melosys.domain.dokument.felles;
 
 import java.util.*;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public class Land {
     private static final String BELGIA = "BEL";
     private static final String BULGARIA = "BGR";
@@ -59,6 +61,7 @@ public class Land {
         this.kode = landkode;
     }
 
+    @JsonValue
     public String getKode() {
         return kode;
     }

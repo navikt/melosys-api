@@ -27,8 +27,10 @@ public class UtledFaktaOmArbeid implements Regelpakke {
     @Regel
     public static void giVarselHvisPermitteringISøknadsperioden() {
         hvis(
-            antallet(arbeidsforholdene().sine(permitteringer).som(harOverlappMedSøknadsperioden)).erStørreEnnEllerLik(1))
-        .så(leggTilMelding(DELVIS_STOETTET, "Bruker har en eller flere permitteringer som overlapper med søknadsperioden. Disse ignoreres av systemet."));
+            antallet(arbeidsforholdene().sine(permitteringer).som(harOverlappMedSøknadsperioden)).erStørreEnnEllerLik(1)
+        ).så(
+            leggTilMelding(DELVIS_STOETTET, "Bruker har en eller flere permitteringer som overlapper med søknadsperioden. Disse ignoreres av systemet.")
+        );
     }
     
     /**

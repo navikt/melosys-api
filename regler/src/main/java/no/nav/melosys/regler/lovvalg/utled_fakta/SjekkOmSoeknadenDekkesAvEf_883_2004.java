@@ -24,14 +24,16 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
      * 
      * Varsel gis hvis ingen av følgende slår til:
      *   1a) Brukeren er statsborger av et EU/EØS-land og perioden starter etter 01.06.2012
-     *   1b) Brukeren er statsborger av Sveits og perioden starter etter 01.06.2016
+     *   1b) Brukeren er statsborger av Sveits og perioden starter etter 01.01.2016
      *   1c) Bruker er statsløs
      *   1d) Tilfellet dekkes av nordisk konvensjon om trygd (gjelder fom. 01.05.2014)
      *   
      * I tillegg må minst ett av følgende slå til: 
      *   2a) Bruker arbeider i annet EØS land og perioden starter etter 01.06.2012
      *   2b) Bruker arbeider i annet nordisk land og perioden starter etter 01.05.2014
-     *   2c) Bruker arbeider i Sveits og perioden starter etter 01.06.2016
+     *   2c) Bruker arbeider i Sveits og perioden starter etter 01.01.2016
+     *   
+     * FIXME: Dette er ikke riktig funksjonelt. bl.a. Grønland og Færøyene har en annen dato for Nordisk konvensjon. 
      */
     @Regel
     public static void giVarselHvisEvtFlyktningstatusErAvgjørende() {
@@ -57,7 +59,7 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
      * 
      * Tilfellet i søknaden er dekket av forordningen dersom minst ett av følgende slår til:
      *   1a) Brukeren er statsborger av et EU/EØS-land og perioden starter etter 01.06.2012
-     *   1b) Brukeren er statsborger av Sveits og perioden starter etter 01.06.2016
+     *   1b) Brukeren er statsborger av Sveits og perioden starter etter 01.01.2016
      *   1c) Bruker er statsløs
      *   1d) Bruker er flyktning (kan ikke sjekkes maskinelt)
      *   1e) Tilfellet dekkes av nordisk konvensjon om trygd (gjelder fom. 01.05.2014)
@@ -65,7 +67,7 @@ public class SjekkOmSoeknadenDekkesAvEf_883_2004 implements Regelpakke {
      * I tillegg må minst ett av følgende slå til: 
      *   2a) Bruker arbeider i annet EØS land og perioden starter etter 01.06.2012
      *   2b) Bruker arbeider i annet nordisk land og perioden starter etter 01.05.2014
-     *   2c) Bruker arbeider i Sveits og perioden starter etter 01.06.2016
+     *   2c) Bruker arbeider i Sveits og perioden starter etter 01.01.2016
      *
      * Nordisk konvensjon om trygd: tredjelandsborger som sendes til Sverige, Finland, Danmark, Island, Grønland eller Færøyene 
      */
