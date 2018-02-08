@@ -12,6 +12,8 @@ import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,7 +21,7 @@ import org.springframework.stereotype.Service;
  * Merk: Klassen casher oppslag mot felles-kodevek, og er derfor egentlig ikke stateless (men den er trådsikker).
  */
 @Service
-public class KodeverkService {
+public class KodeverkService implements ApplicationListener<ContextRefreshedEvent> {
 
     private static final long MILLIS_MELLOM_VÅKNE_OPP = 3600000;
 
@@ -35,6 +37,11 @@ public class KodeverkService {
     public KodeverkService(KodeverkRegister kodeverkRegister) {
         this.kodeverkRegister = kodeverkRegister;
         this.kodeverkCache = new HashMap<>();
+    }
+
+    @Override
+    // FIXME MDCFilter er ikke klar og CallIdOutInterceptor feiler fordi CallId mangler.
+    public void onApplicationEvent(ContextRefreshedEvent event) {
         new TømCacheScheduler().start();
     }
 
