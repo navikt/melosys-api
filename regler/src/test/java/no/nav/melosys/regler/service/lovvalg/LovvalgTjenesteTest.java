@@ -1,17 +1,22 @@
 package no.nav.melosys.regler.service.lovvalg;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.util.JAXBResult;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamSource;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
-import no.nav.melosys.tjenester.gui.jackson.serialize.OrganisasjonDeserializer;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
@@ -27,22 +32,57 @@ public class LovvalgTjenesteTest {
 
     @Test
     public void fastsettLovvalg() throws Exception {
-        final ObjectMapper mapper = new ObjectMapper();
-        final SimpleModule simpleModule = new SimpleModule();
-        simpleModule.addDeserializer(OrganisasjonDokument.class, new OrganisasjonDeserializer());
-        mapper.registerModule(simpleModule);
-        mapper.registerModule(new JavaTimeModule());
-        // FIXME: Sørg for at json kan mappes uten problemer
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream("99999999999.xml");
+        final InputStream xslt = getClass().getClassLoader().getResourceAsStream("fastsett-lovvalg-request.xslt");
 
-        final ClassLoader classLoader = getClass().getClassLoader();
-        InputStream inputStream = classLoader.getResourceAsStream("99999999999.json");
-        FastsettLovvalgRequest request = mapper.readValue(inputStream, FastsettLovvalgRequest.class);
-        inputStream.close();
-        
+        JAXBContext context = JAXBContext.newInstance(FastsettLovvalgRequest.class);
+        JAXBResult result = new JAXBResult(context);
+
+        TransformerFactory factory = TransformerFactory.newInstance();
+        Transformer transformer = factory.newTransformer(new StreamSource(xslt));
+        transformer.transform(new StreamSource(kilde), result);
+
+        FastsettLovvalgRequest request = (FastsettLovvalgRequest) result.getResult();
+
         assertNotNull(request);
 
         FastsettLovvalgReply reply = lovvalgTjeneste.fastsettLovvalg(request);
+
         assertNotNull(reply);
+    }
+
+    @Ignore // Funger bare med kjørende API, med mindre vi snurrer opp applikasjonen som en del av testen
+    @Test
+    public void sendXmlRequest() {
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream("99999999999.xml");
+        BufferedReader buffer = new BufferedReader(new InputStreamReader(kilde));
+        String xml = buffer.lines().collect(Collectors.joining());
+
+        assertNotNull(xml);
+
+        final String regelmodulUrl = "http://localhost:8081/lovvalg/fastsettLovvalg";
+
+        FastsettLovvalgReply reply = ClientBuilder.newClient().target(regelmodulUrl)
+                .request(LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8)
+                .post(Entity.entity(xml, LovvalgTjenesteImpl.APPLICATION_XML_UTF_8), FastsettLovvalgReply.class);
+
+        assertNotNull(reply);
+    }
+
+    @Test
+    public void unmarshallFastsettLovvalgRequest() throws Exception {
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream("99999999999.xml");
+        final InputStream xslt = getClass().getClassLoader().getResourceAsStream("fastsett-lovvalg-request.xslt");
+
+        JAXBContext context = JAXBContext.newInstance(FastsettLovvalgRequest.class);
+        JAXBResult result = new JAXBResult(context);
+
+        TransformerFactory factory = TransformerFactory.newInstance();
+        Transformer transformer = factory.newTransformer(new StreamSource(xslt));
+        transformer.transform(new StreamSource(kilde), result);
+
+        FastsettLovvalgRequest dokument = (FastsettLovvalgRequest) result.getResult();
+
+        assertNotNull(dokument);
     }
 }

@@ -1,27 +1,34 @@
 package no.nav.melosys.service;
 
-import java.util.ArrayList;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
-import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
-import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
 import no.nav.melosys.repository.BehandlingRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /**
  * Service som kaller regelmodulen.
@@ -35,10 +42,23 @@ public class RegelmodulService {
 
     private BehandlingRepository behandlingRepo;
 
+    DocumentBuilder documentBuilder;
+
+    private Transformer transformer;
+
+    private static Logger log = LoggerFactory.getLogger(RegelmodulService.class);
+
     @Autowired
     public RegelmodulService(@Value("${melosys.service.regelmodul.url}") String regelmodulUrl, BehandlingRepository repository) {
         this.regelmodulUrl = regelmodulUrl;
         this.behandlingRepo = repository;
+        try {
+            transformer = TransformerFactory.newInstance().newTransformer();
+            documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        } catch (TransformerConfigurationException | ParserConfigurationException e) {
+            log.error("", e);
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -52,52 +72,109 @@ public class RegelmodulService {
             return null;
         }
 
-        FastsettLovvalgRequest fastsettLovvalgRequest = lagRequest(behandling);
+        try {
+            String APPLICATION_JSON_UTF_8 = "application/json;charset=utf-8";
+            String APPLICATION_XML_UTF_8 = "application/xml;charset=utf-8";
 
-        return ClientBuilder.newClient().target(regelmodulUrl)
-                .request(APPLICATION_JSON_UTF_8)
-                .post(Entity.entity(fastsettLovvalgRequest, APPLICATION_JSON_UTF_8), FastsettLovvalgReply.class);
+            String fastsettLovvalgRequest = lagNyRequest(behandling);
+
+            return ClientBuilder.newClient().target(regelmodulUrl)
+                    .request(APPLICATION_JSON_UTF_8)
+                    .post(Entity.entity(fastsettLovvalgRequest, APPLICATION_XML_UTF_8), FastsettLovvalgReply.class);
+
+        } catch (RuntimeException e) {
+            log.error("", e);
+            return null;
+        }
     }
 
     /**
      * Lager en request til regelmodulen for en gitt behandling.
      */
-    FastsettLovvalgRequest lagRequest(Behandling behandling) {
-        FastsettLovvalgRequest fastsettLovvalgRequest = new FastsettLovvalgRequest();
-        fastsettLovvalgRequest.arbeidsforholdDokumenter = new ArrayList<>();
-        fastsettLovvalgRequest.inntektDokumenter = new ArrayList<>();
-        fastsettLovvalgRequest.medlemskapDokumenter = new ArrayList<>();
-        fastsettLovvalgRequest.organisasjonDokumenter = new ArrayList<>();
+    private String lagNyRequest(Behandling behandling) {
+        // FIXME: Bedre feilhåndtering + rydd kode
+        Document document = documentBuilder.newDocument();
+
+        Element dokumenter = document.createElement("dokumenter");
+        Element søknadDokument = document.createElement("søknadDokument");
+        Element personopplysningDokument = document.createElement("personopplysningDokument");
+        Element arbeidsforholdDokumenter = document.createElement("arbeidsforholdDokumenter");
+        Element inntektDokumenter = document.createElement("inntektDokumenter");
+        Element medlemskapDokumenter = document.createElement("medlemskapDokumenter");
+        Element organisasjonDokumenter = document.createElement("organisasjonDokumenter");
 
         for (Saksopplysning saksopplysning : behandling.getSaksopplysninger()) {
             SaksopplysningType type = saksopplysning.getType();
-            SaksopplysningDokument dokument = saksopplysning.getDokument();
+            Element dokumentnode = xmlTilNode(saksopplysning.getInternXml(), documentBuilder, document);
 
             switch (type) {
                 case ARBEIDSFORHOLD:
-                    fastsettLovvalgRequest.arbeidsforholdDokumenter.add((ArbeidsforholdDokument)dokument);
+                    arbeidsforholdDokumenter.appendChild(dokumentnode);
                     break;
                 case INNTEKT:
-                    fastsettLovvalgRequest.inntektDokumenter.add((InntektDokument)dokument);
+                    inntektDokumenter.appendChild(dokumentnode);
                     break;
                 case MEDLEMSKAP:
-                    fastsettLovvalgRequest.medlemskapDokumenter.add((MedlemskapDokument)dokument);
+                    medlemskapDokumenter.appendChild(dokumentnode);
                     break;
                 case ORGANISASJON:
-                    fastsettLovvalgRequest.organisasjonDokumenter.add((OrganisasjonDokument)dokument);
+                    organisasjonDokumenter.appendChild(dokumentnode);
                     break;
                 case PERSONOPPLYSNING:
-                    fastsettLovvalgRequest.personopplysningDokument = (PersonDokument) dokument;
+                    personopplysningDokument.appendChild(dokumentnode);
                     break;
                 case SØKNAD:
-                    fastsettLovvalgRequest.søknadDokument = (SoeknadDokument) dokument;
+                    søknadDokument.appendChild(dokumentnode);
                     break;
                 default:
                     throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");
             }
         }
 
-        return fastsettLovvalgRequest;
+        if (søknadDokument.hasChildNodes()) {
+            dokumenter.appendChild(søknadDokument);
+        }
+        if (personopplysningDokument.hasChildNodes()) {
+            dokumenter.appendChild(personopplysningDokument);
+        }
+        if (arbeidsforholdDokumenter.hasChildNodes()) {
+            dokumenter.appendChild(arbeidsforholdDokumenter);
+        }
+        if (inntektDokumenter.hasChildNodes()) {
+            dokumenter.appendChild(inntektDokumenter);
+        }
+        if (medlemskapDokumenter.hasChildNodes()) {
+            dokumenter.appendChild(medlemskapDokumenter);
+        }
+        if (organisasjonDokumenter.hasChildNodes()) {
+            dokumenter.appendChild(organisasjonDokumenter);
+        }
+
+        document.appendChild(dokumenter);
+
+        DOMSource source = new DOMSource(document);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        StreamResult result = new StreamResult(outputStream);
+
+        try {
+            transformer.transform(source, result);
+        } catch (TransformerException e) {
+            log.error("", e);
+            throw new RuntimeException(e);
+        }
+
+        return outputStream.toString();
     }
 
+    private Element xmlTilNode(String xml, DocumentBuilder builder, Document document) {
+        InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
+        try {
+            Element node = builder.parse(inputStream).getDocumentElement();
+            document.adoptNode(node);
+            return node;
+        } catch (SAXException | IOException e) {
+            log.error("", e);
+            throw new RuntimeException(e);
+        }
+    }
 }

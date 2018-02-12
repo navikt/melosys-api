@@ -1,15 +1,27 @@
 package no.nav.melosys.regler.service.lovvalg;
 
+import java.util.ArrayList;
+
+import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
+import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
+import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
+
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.initialiserLokalKontekst;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.slettLokalKontekst;
 
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.io.StringReader;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.util.JAXBResult;
+import javax.xml.transform.*;
+import javax.xml.transform.stream.StreamSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +33,6 @@ import io.swagger.annotations.Contact;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.SwaggerDefinition;
 import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
-import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
-import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
-import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
 import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
 import no.nav.melosys.regler.lovvalg.LovvalgRegelflyt;
 
@@ -46,19 +55,51 @@ import no.nav.melosys.regler.lovvalg.LovvalgRegelflyt;
 )
 public class LovvalgTjenesteImpl implements LovvalgTjeneste {
     
+    // Disse kan flyttes til en felles-util modul
     public static final String APPLICATION_JSON_UTF_8 = "application/json;charset=utf-8";
-    
+    public static final String APPLICATION_XML_UTF_8 = "application/xml;charset=utf-8";
+
     private static Logger log = LoggerFactory.getLogger(LovvalgTjenesteImpl.class);
+
+    private final JAXBContext context;
+
+    private final Transformer transformer;
+
+    public LovvalgTjenesteImpl() {
+        final InputStream xslt = getClass().getClassLoader().getResourceAsStream("fastsett-lovvalg-request.xslt");
+        final Source source = new StreamSource(xslt);
+
+        try {
+            context = JAXBContext.newInstance(FastsettLovvalgRequest.class);
+            transformer = TransformerFactory.newInstance().newTransformer(source);
+        } catch (JAXBException | TransformerConfigurationException e) {
+            log.error("", e);
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     @POST
     @Path("fastsettLovvalg") // FIXME: Denne tjenesten er nært bundet til søknad a1. Bør gjenspeiles i tjenestenavn.
-    @Consumes(LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8)
+    @Consumes(LovvalgTjenesteImpl.APPLICATION_XML_UTF_8)
     @Produces(LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8)
     @ApiOperation(
             value= "Fastsetter lovvalgsland",
             notes = "Tjeneste som anvender lovverk til å fastsette lovvalgsland for en forespørsel"
     )
+    public FastsettLovvalgReply fastsettLovvalgApi(String xml) {
+        try {
+            JAXBResult result = new JAXBResult(context);
+            StringReader reader = new StringReader(xml);
+            transformer.transform(new StreamSource(reader), result);
+            FastsettLovvalgRequest request = (FastsettLovvalgRequest) result.getResult();
+            return fastsettLovvalg(request);
+        } catch (JAXBException | TransformerException e) {
+            log.error("", e);
+        }
+        return null;
+    }
+
     public FastsettLovvalgReply fastsettLovvalg(FastsettLovvalgRequest req) {
         try {
             // Sett lokal kontekst for regelsett...
