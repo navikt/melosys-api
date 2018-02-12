@@ -35,11 +35,12 @@ public class LovvalgTjenesteTest {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream("99999999999.xml");
         final InputStream xslt = getClass().getClassLoader().getResourceAsStream("fastsett-lovvalg-request.xslt");
 
+        TransformerFactory factory = TransformerFactory.newInstance();
+        Transformer transformer = factory.newTransformer(new StreamSource(xslt));
+
         JAXBContext context = JAXBContext.newInstance(FastsettLovvalgRequest.class);
         JAXBResult result = new JAXBResult(context);
 
-        TransformerFactory factory = TransformerFactory.newInstance();
-        Transformer transformer = factory.newTransformer(new StreamSource(xslt));
         transformer.transform(new StreamSource(kilde), result);
 
         FastsettLovvalgRequest request = (FastsettLovvalgRequest) result.getResult();
@@ -67,22 +68,5 @@ public class LovvalgTjenesteTest {
                 .post(Entity.entity(xml, LovvalgTjenesteImpl.APPLICATION_XML_UTF_8), FastsettLovvalgReply.class);
 
         assertNotNull(reply);
-    }
-
-    @Test
-    public void unmarshallFastsettLovvalgRequest() throws Exception {
-        final InputStream kilde = getClass().getClassLoader().getResourceAsStream("99999999999.xml");
-        final InputStream xslt = getClass().getClassLoader().getResourceAsStream("fastsett-lovvalg-request.xslt");
-
-        JAXBContext context = JAXBContext.newInstance(FastsettLovvalgRequest.class);
-        JAXBResult result = new JAXBResult(context);
-
-        TransformerFactory factory = TransformerFactory.newInstance();
-        Transformer transformer = factory.newTransformer(new StreamSource(xslt));
-        transformer.transform(new StreamSource(kilde), result);
-
-        FastsettLovvalgRequest dokument = (FastsettLovvalgRequest) result.getResult();
-
-        assertNotNull(dokument);
     }
 }

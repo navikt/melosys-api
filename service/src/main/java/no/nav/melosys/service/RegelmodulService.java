@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.xml.parsers.DocumentBuilder;
@@ -96,12 +98,13 @@ public class RegelmodulService {
         Document document = documentBuilder.newDocument();
 
         Element dokumenter = document.createElement("dokumenter");
-        Element søknadDokument = document.createElement("søknadDokument");
-        Element personopplysningDokument = document.createElement("personopplysningDokument");
-        Element arbeidsforholdDokumenter = document.createElement("arbeidsforholdDokumenter");
-        Element inntektDokumenter = document.createElement("inntektDokumenter");
-        Element medlemskapDokumenter = document.createElement("medlemskapDokumenter");
-        Element organisasjonDokumenter = document.createElement("organisasjonDokumenter");
+        Map<String, Element> dokumentnoder = new HashMap<>();
+        dokumentnoder.put("søknadDokument", document.createElement("søknadDokument"));
+        dokumentnoder.put("personopplysningDokument", document.createElement("personopplysningDokument"));
+        dokumentnoder.put("arbeidsforholdDokumenter", document.createElement("arbeidsforholdDokumenter"));
+        dokumentnoder.put("inntektDokumenter", document.createElement("inntektDokumenter"));
+        dokumentnoder.put("medlemskapDokumenter", document.createElement("medlemskapDokumenter"));
+        dokumentnoder.put("organisasjonDokumenter", document.createElement("organisasjonDokumenter"));
 
         for (Saksopplysning saksopplysning : behandling.getSaksopplysninger()) {
             SaksopplysningType type = saksopplysning.getType();
@@ -109,48 +112,37 @@ public class RegelmodulService {
 
             switch (type) {
                 case ARBEIDSFORHOLD:
-                    arbeidsforholdDokumenter.appendChild(dokumentnode);
+                    dokumentnoder.get("arbeidsforholdDokumenter").appendChild(dokumentnode);
                     break;
                 case INNTEKT:
-                    inntektDokumenter.appendChild(dokumentnode);
+                    dokumentnoder.get("inntektDokumenter").appendChild(dokumentnode);
                     break;
                 case MEDLEMSKAP:
-                    medlemskapDokumenter.appendChild(dokumentnode);
+                    dokumentnoder.get("medlemskapDokumenter").appendChild(dokumentnode);
                     break;
                 case ORGANISASJON:
-                    organisasjonDokumenter.appendChild(dokumentnode);
+                    dokumentnoder.get("organisasjonDokumenter").appendChild(dokumentnode);
                     break;
                 case PERSONOPPLYSNING:
-                    personopplysningDokument.appendChild(dokumentnode);
+                    dokumentnoder.get("personopplysningDokument").appendChild(dokumentnode);
                     break;
                 case SØKNAD:
-                    søknadDokument.appendChild(dokumentnode);
+                    dokumentnoder.get("søknadDokument").appendChild(dokumentnode);
                     break;
                 default:
                     throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");
             }
         }
 
-        if (søknadDokument.hasChildNodes()) {
-            dokumenter.appendChild(søknadDokument);
-        }
-        if (personopplysningDokument.hasChildNodes()) {
-            dokumenter.appendChild(personopplysningDokument);
-        }
-        if (arbeidsforholdDokumenter.hasChildNodes()) {
-            dokumenter.appendChild(arbeidsforholdDokumenter);
-        }
-        if (inntektDokumenter.hasChildNodes()) {
-            dokumenter.appendChild(inntektDokumenter);
-        }
-        if (medlemskapDokumenter.hasChildNodes()) {
-            dokumenter.appendChild(medlemskapDokumenter);
-        }
-        if (organisasjonDokumenter.hasChildNodes()) {
-            dokumenter.appendChild(organisasjonDokumenter);
+        for (Element dokumentnode : dokumentnoder.values()) {
+            if (dokumentnode.hasChildNodes()) {
+                dokumenter.appendChild(dokumentnode);
+            }
         }
 
-        document.appendChild(dokumenter);
+        if (dokumenter.hasChildNodes()) {
+            document.appendChild(dokumenter);
+        }
 
         DOMSource source = new DOMSource(document);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
