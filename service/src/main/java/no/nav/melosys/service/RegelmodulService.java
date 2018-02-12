@@ -18,6 +18,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -44,9 +45,11 @@ public class RegelmodulService {
 
     private BehandlingRepository behandlingRepo;
 
-    DocumentBuilder documentBuilder;
+    private DocumentBuilder documentBuilder;
 
     private Transformer transformer;
+
+    private ObjectMapper mapper;
 
     private static Logger log = LoggerFactory.getLogger(RegelmodulService.class);
 
@@ -61,6 +64,7 @@ public class RegelmodulService {
             log.error("", e);
             throw new RuntimeException(e);
         }
+        mapper = new ObjectMapper();
     }
 
     /**
@@ -80,11 +84,19 @@ public class RegelmodulService {
 
             String fastsettLovvalgRequest = lagNyRequest(behandling);
 
+            /* FIXME: Feiler med exception
             return ClientBuilder.newClient().target(regelmodulUrl)
                     .request(APPLICATION_JSON_UTF_8)
                     .post(Entity.entity(fastsettLovvalgRequest, APPLICATION_XML_UTF_8), FastsettLovvalgReply.class);
+            */
 
-        } catch (RuntimeException e) {
+            String json = ClientBuilder.newClient().target(regelmodulUrl)
+                    .request(APPLICATION_JSON_UTF_8)
+                    .post(Entity.entity(fastsettLovvalgRequest, APPLICATION_XML_UTF_8), String.class);
+
+            return mapper.readValue(json, FastsettLovvalgReply.class);
+
+        } catch (RuntimeException | IOException e) {
             log.error("", e);
             return null;
         }
