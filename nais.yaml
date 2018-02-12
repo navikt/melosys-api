@@ -46,3 +46,5 @@ fasitResources:
     resourceType: credential
   - alias: OpenIdConnect
     resourceType: baseurl
+  - alias: loadbalancer:melosys
+    resourceType: loadbalancerconfig
