@@ -10,6 +10,7 @@ import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.settArgument;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.*;
 import static no.nav.melosys.regler.lovvalg.LovvalgPredikater.*;
 import static no.nav.melosys.regler.lovvalg.LovvalgProdusenter.arbeidsforhold;
+import static no.nav.melosys.regler.lovvalg.LovvalgProdusenter.inntekter;
 import static no.nav.melosys.regler.lovvalg.LovvalgProdusenter.medlemsperioder;
 import static no.nav.melosys.regler.motor.voc.Deklarasjon.hvis;
 import static no.nav.melosys.regler.motor.voc.FellesVokabular.JA;
@@ -37,13 +38,21 @@ public class UtledFaktaOmPerson implements Regelpakke {
    
     @Regel
     public static void giVarselHvisInntektOpptjentIUtlandet() {
-        // FIXME (MELOSYS-755): Ikke implementert. Se https://confluence.adeo.no/pages/viewpage.action?pageId=255102083
+        hvis(
+            brukerenHarInntektOpptjentIUtlandet
+        ).så(
+            // FIXME: Sjekk om meldingen duger
+            leggTilMelding(DELVIS_STOETTET, "Bruker har inntekt opptjent i utlandet.")
+        );
     }
 
     @Regel
     public static void giVarselHvisTvilOmBostedsland() {
         // TODO (farjam 2017-12-21): Denne kan pr. i dag ikke implementeres på bakgrunn av innhentet data
     }
+
+    private static final Predikat brukerenHarInntektOpptjentIUtlandet
+        = alle(inntektDokumentene()).sine(inntekter).inneholderMinstEn(inntektOpptjentIUtlandet);
 
     private static final Predikat brukerenVarIJobbINorgeMånedenFørPeriodestart
         = alle(arbeidsforholdDokumentene()).sine(arbeidsforhold).inneholderMinstEn(ansattINorgeFørPeriodestart);

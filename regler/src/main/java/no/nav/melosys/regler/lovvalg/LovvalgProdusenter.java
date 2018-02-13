@@ -1,10 +1,14 @@
 package no.nav.melosys.regler.lovvalg;
 
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.PermisjonOgPermittering;
+import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
+import no.nav.melosys.domain.dokument.inntekt.Inntekt;
+import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.regler.motor.voc.VerdielementSett;
@@ -38,4 +42,9 @@ public class LovvalgProdusenter {
     /** Gir alle medlemsperiodene til et medlemskapdokument */
     public static final Function<MedlemskapDokument, Iterable<Medlemsperiode>> medlemsperioder = MedlemskapDokument::getMedlemsperiode;
 
+    /** Gir alle inntektene til et inntektdokument */
+    public static final Function<InntektDokument, Iterable<Inntekt>> inntekter = (inntektDokument)
+        -> inntektDokument.arbeidsInntektMaanedListe.stream().map(ArbeidsInntektMaaned::getArbeidsInntektInformasjon)
+            .flatMap(arbeidsInntektInformasjon -> arbeidsInntektInformasjon.inntektListe.stream())
+            .collect(Collectors.toList());
 }

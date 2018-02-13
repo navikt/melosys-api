@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
+import no.nav.melosys.domain.dokument.inntekt.Inntekt;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
@@ -65,8 +66,11 @@ public final class LovvalgPredikater {
         return true;
     };
 
+    /** Sjekker om opptjeningsland er i utlandet */
+    public static final Predicate<Inntekt> inntektOpptjentIUtlandet
+            = (Inntekt inntekt) -> !"NOR".equals(inntekt.opptjeningsland);
+
     /** Sjekker om bostedsadresse er i Norge */
-    // TODO: Kan gjøres mer generisk ved å innføre et interface for adresseelementer med land/landkode
     public static final Predicate<Bostedsadresse> bostedsadresseErINorge
             = (Bostedsadresse b) -> b.getLand().getKode().equals("NOR");
 
