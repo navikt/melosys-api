@@ -1,18 +1,8 @@
 package no.nav.melosys.regler.service.lovvalg;
 
-import java.util.ArrayList;
-
-import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
-import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
-import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
-
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.initialiserLokalKontekst;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.slettLokalKontekst;
-
 import java.io.InputStream;
 import java.io.StringReader;
-
+import java.util.ArrayList;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -23,18 +13,18 @@ import javax.xml.bind.util.JAXBResult;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamSource;
 
+import io.swagger.annotations.*;
+import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
+import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
+import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
+import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
+import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
+import no.nav.melosys.regler.lovvalg.LovvalgRegelflyt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Contact;
-import io.swagger.annotations.Info;
-import io.swagger.annotations.SwaggerDefinition;
-import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
-import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
-import no.nav.melosys.regler.lovvalg.LovvalgRegelflyt;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.*;
 
 @Component
 @Path("lovvalg")
@@ -119,7 +109,7 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
 
             Feilmelding feil = new Feilmelding();
             feil.kategori = Kategori.TEKNISK_FEIL;
-            feil.feilmelding = "Uventet Exception";
+            feil.melding = "Uventet Exception";
             res.feilmeldinger.add(feil);
             // Forsøk å legge til evt. andre feil også...
             try {

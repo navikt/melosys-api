@@ -11,6 +11,10 @@ public class LovvalgDto {
     public LovvalgDto(long behandlingID, FastsettLovvalgReply fastsettLovvalgReply) {
         this.behandlingID = behandlingID;
         this.vurdering = fastsettLovvalgReply;
+        // FIXME: Midlertidig løsning for å støtte kontrakten med frontend. Implementeres i regelmodul?
+        this.vurdering.feilmeldinger.forEach(feilmelding -> {
+            feilmelding.alvorlighetsgrad = "INFO";
+        });
     }
 
     public long getBehandlingID() {

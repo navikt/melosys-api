@@ -7,8 +7,11 @@ public class Feilmelding {
 
     /** Meldikngens kategori */
     public Kategori kategori;
+
+    // FIXME: Frontend har behov for Alvorlighetsgrad("FEIL", "VARSEL", "INFO") Implementeres i regelmodul?
+    public String alvorlighetsgrad;
     
     /** Teknisk melding */
-    public String feilmelding;
+    public String melding;
  
 }
