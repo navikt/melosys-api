@@ -80,7 +80,7 @@ public class RegelmodulService {
             String APPLICATION_JSON_UTF_8 = "application/json;charset=utf-8";
             String APPLICATION_XML_UTF_8 = "application/xml;charset=utf-8";
 
-            String fastsettLovvalgRequest = lagNyRequest(behandling);
+            String fastsettLovvalgRequest = lagRequest(behandling);
 
             /* FIXME: Feiler med exception
             return ClientBuilder.newClient().target(regelmodulUrl)
@@ -105,14 +105,12 @@ public class RegelmodulService {
     /**
      * Lager en request til regelmodulen for en gitt behandling.
      */
-    private String lagNyRequest(Behandling behandling) {
+    private String lagRequest(Behandling behandling) {
         // FIXME: Bedre feilhåndtering + rydd kode
         Document document = documentBuilder.newDocument();
 
         Element dokumenter = document.createElement("dokumenter");
         Map<String, Element> dokumentnoder = new HashMap<>();
-        dokumentnoder.put("søknadDokument", document.createElement("søknadDokument"));
-        dokumentnoder.put("personopplysningDokument", document.createElement("personopplysningDokument"));
         dokumentnoder.put("arbeidsforholdDokumenter", document.createElement("arbeidsforholdDokumenter"));
         dokumentnoder.put("inntektDokumenter", document.createElement("inntektDokumenter"));
         dokumentnoder.put("medlemskapDokumenter", document.createElement("medlemskapDokumenter"));
@@ -136,10 +134,10 @@ public class RegelmodulService {
                     dokumentnoder.get("organisasjonDokumenter").appendChild(dokumentnode);
                     break;
                 case PERSONOPPLYSNING:
-                    dokumentnoder.get("personopplysningDokument").appendChild(dokumentnode);
+                    dokumentnoder.put("personDokument", dokumentnode);
                     break;
                 case SØKNAD:
-                    dokumentnoder.get("søknadDokument").appendChild(dokumentnode);
+                    dokumentnoder.put("soeknadDokument", dokumentnode);
                     break;
                 default:
                     throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");

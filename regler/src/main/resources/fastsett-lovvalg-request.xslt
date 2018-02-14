@@ -8,14 +8,16 @@
         </fastsettLovvalgRequest>
     </xsl:template>
 
-    <xsl:template match="soeknadDokument/soeknadDokument">
+    <xsl:template match="soeknadDokument">
         <søknadDokument>
             <xsl:apply-templates/>
         </søknadDokument>
     </xsl:template>
 
-    <xsl:template match="personDokument|soeknadDokument">
-        <xsl:apply-templates/>
+    <xsl:template match="personDokument">
+        <personopplysningDokument>
+            <xsl:apply-templates/>
+        </personopplysningDokument>
     </xsl:template>
 
     <xsl:template match="*">

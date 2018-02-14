@@ -85,7 +85,7 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
             FastsettLovvalgRequest request = (FastsettLovvalgRequest) result.getResult();
             return fastsettLovvalg(request);
         } catch (JAXBException | TransformerException e) {
-            log.error("", e);
+            log.error("Uventet feil ved lesing av inndata i Regelmodul", e);
         }
         return null;
     }

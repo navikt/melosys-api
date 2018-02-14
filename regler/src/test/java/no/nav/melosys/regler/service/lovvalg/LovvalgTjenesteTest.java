@@ -32,7 +32,7 @@ public class LovvalgTjenesteTest {
 
     @Test
     public void fastsettLovvalg() throws Exception {
-        final InputStream kilde = getClass().getClassLoader().getResourceAsStream("88888888882.xml");
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream("FJERNET.xml");
         final InputStream xslt = getClass().getClassLoader().getResourceAsStream("fastsett-lovvalg-request.xslt");
 
         TransformerFactory factory = TransformerFactory.newInstance();
@@ -55,7 +55,7 @@ public class LovvalgTjenesteTest {
     @Ignore // Funger bare med kjørende API, med mindre vi snurrer opp applikasjonen som en del av testen
     @Test
     public void sendXmlRequest() {
-        final InputStream kilde = getClass().getClassLoader().getResourceAsStream("88888888882.xml");
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream("FJERNET.xml");
         BufferedReader buffer = new BufferedReader(new InputStreamReader(kilde));
         String xml = buffer.lines().collect(Collectors.joining());
 
