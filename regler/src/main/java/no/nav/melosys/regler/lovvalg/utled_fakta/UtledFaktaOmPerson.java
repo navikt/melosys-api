@@ -24,15 +24,15 @@ public class UtledFaktaOmPerson implements Regelpakke {
     public static void sjekkOmBrukerenVarMedlemAvFtrMånedenFørPeriodestart() {
         // FIXME (MELOSYS-755): Ikke implementert. Se https://confluence.adeo.no/pages/viewpage.action?pageId=255102083
         hvis(
-                minstEttAvFølgendeErSant(
-                        brukerenHarIkkeAdresseIUtlandet,
-                        brukerenVarIJobbINorgeMånedenFørPeriodestart,
-                        brukerenVarMedlemAvFtrlMånedenFørPeriodestartIFølgeMEDL
-                )
+            minstEttAvFølgendeErSant(
+                brukerenHarIkkeAdresseIUtlandet,
+                brukerenVarIJobbINorgeMånedenFørPeriodestart,
+                brukerenVarMedlemAvFtrlMånedenFørPeriodestart
+            )
         ).så(
-                settArgument(BRUKER_ER_MEDLEM_AV_FTRL_MÅNEDEN_FØR_PERIODESTART, JA)
+            settArgument(BRUKER_ER_MEDLEM_AV_FTRL_MÅNEDEN_FØR_PERIODESTART, JA)
         ).ellers(
-                leggTilMelding(DELVIS_STOETTET, "Kan ikke fastslå om bruker var medlem av ftrl måneden før utenlandsopphold.")
+            leggTilMelding(DELVIS_STOETTET, "Kan ikke fastslå om bruker var medlem av ftrl måneden før utenlandsopphold.")
         );
     }
    
@@ -57,8 +57,8 @@ public class UtledFaktaOmPerson implements Regelpakke {
     private static final Predikat brukerenVarIJobbINorgeMånedenFørPeriodestart
         = alle(arbeidsforholdDokumentene()).sine(arbeidsforhold).inneholderMinstEn(ansattINorgeFørPeriodestart);
 
-    private static final Predikat brukerenVarMedlemAvFtrlMånedenFørPeriodestartIFølgeMEDL
-        = alle(medlemskapDokumentene()).sine(medlemsperioder).inneholderMinstEn(medlemFørPeriodestart);
+    private static final Predikat brukerenVarMedlemAvFtrlMånedenFørPeriodestart
+        = alle(medlemskapDokumentene()).sine(medlemsperioder).inneholderMinstEn(medlemAvFtrlFørPeriodestart);
 
     private static final Predikat brukerenHarIkkeAdresseIUtlandet
         // FIXME: Postadresse og midlertidig postadresse implementeres etter merge med develop
