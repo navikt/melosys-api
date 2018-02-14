@@ -75,7 +75,7 @@ public class FagsakTjeneste extends RestTjeneste {
     @GET
     @Path("ny/{fnr}")
     @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.", notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."))
-    public Response nyFagsakSikkret(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
+    public Response nyFagsakSikret(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
 
         // FIXME Midlertidig tilgangskontroll
         Tilgangskontroll.sjekk();
