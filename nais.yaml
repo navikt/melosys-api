@@ -24,6 +24,8 @@ resources:
     memory: 1536Mi
 fasitResources:
   used:
+  - alias: ldap
+    resourceType: ldap
   - alias: srvmelosys
     resourceType: credential
   - alias: melosysDB
