@@ -34,6 +34,10 @@ public class SaksbehandlerTjeneste extends RestTjeneste {
         LdapBruker ldapBruker;
         try {
             ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
+
+            // FIXME Midlertidig tilgangskontroll
+            Tilgangskontroll.sjekk(ldapBruker);
+
         } catch (IntegrasjonException | TekniskException e) {
             log.warn("", e);
             throw e;

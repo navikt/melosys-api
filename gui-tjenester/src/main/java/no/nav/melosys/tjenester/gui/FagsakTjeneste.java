@@ -1,5 +1,11 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.time.LocalDateTime;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -15,17 +21,13 @@ import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Response;
-import java.time.LocalDateTime;
 
 @Api(tags = {"fagsak"})
 @Path("/fagsaker")
@@ -33,6 +35,8 @@ import java.time.LocalDateTime;
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 @Transactional
 public class FagsakTjeneste extends RestTjeneste {
+
+    private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
 
     private FagsakService fagsakService;
 
@@ -71,8 +75,15 @@ public class FagsakTjeneste extends RestTjeneste {
     @GET
     @Path("ny/{fnr}")
     @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.", notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."))
-    public Response nyFagsak(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
+    public Response nyFagsakSikkret(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
 
+        // FIXME Midlertidig tilgangskontroll
+        Tilgangskontroll.sjekk();
+
+        return nyFagsak(fnr);
+    }
+
+    public Response nyFagsak(String fnr) {
         try {
             Fagsak fagsak = fagsakService.nyFagsak(fnr);
 
