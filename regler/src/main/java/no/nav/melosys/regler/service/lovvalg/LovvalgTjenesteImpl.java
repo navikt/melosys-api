@@ -1,5 +1,6 @@
 package no.nav.melosys.regler.service.lovvalg;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -56,14 +57,13 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
     private final Transformer transformer;
 
     public LovvalgTjenesteImpl() {
-        final InputStream xslt = getClass().getClassLoader().getResourceAsStream("fastsett-lovvalg-request.xslt");
-        final Source source = new StreamSource(xslt);
+        final String resource = "fastsett-lovvalg-request.xslt";
 
-        try {
+        try (InputStream xslt = getClass().getClassLoader().getResourceAsStream(resource)) {
+            final Source source = new StreamSource(xslt);
             context = JAXBContext.newInstance(FastsettLovvalgRequest.class);
             transformer = TransformerFactory.newInstance().newTransformer(source);
-        } catch (JAXBException | TransformerConfigurationException e) {
-            log.error("", e);
+        } catch (IOException | JAXBException | TransformerConfigurationException e) {
             throw new RuntimeException(e);
         }
     }

@@ -18,19 +18,25 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 public class FastsettLovvalgRequest {
     
     public SoeknadDokument søknadDokument;
+
     public PersonDokument personopplysningDokument;
+
     @XmlElementWrapper(name="arbeidsforholdDokumenter")
     @XmlElement(name="arbeidsforholdDokument")
     public List<ArbeidsforholdDokument> arbeidsforholdDokumenter;
+
     @XmlElementWrapper(name="inntektDokumenter")
     @XmlElement(name="inntektDokument")
     public List<InntektDokument> inntektDokumenter;
+
     @XmlElementWrapper(name="medlemskapDokumenter")
     @XmlElement(name="medlemskapDokument")
     public List<MedlemskapDokument> medlemskapDokumenter;
+
     @XmlElementWrapper(name="organisasjonDokumenter")
     @XmlElement(name="organisasjonDokument")
     public List<OrganisasjonDokument> organisasjonDokumenter;
+
     // public List arbeidUtland; // FIXME
     
 }

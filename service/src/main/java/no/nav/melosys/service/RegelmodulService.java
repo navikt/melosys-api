@@ -39,8 +39,6 @@ import org.xml.sax.SAXException;
 @Service
 public class RegelmodulService {
 
-    private final String APPLICATION_JSON_UTF_8 = "application/json;charset=utf-8";
-
     private String regelmodulUrl;
 
     private BehandlingRepository behandlingRepo;
@@ -61,7 +59,7 @@ public class RegelmodulService {
             transformer = TransformerFactory.newInstance().newTransformer();
             documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         } catch (TransformerConfigurationException | ParserConfigurationException e) {
-            log.error("", e);
+            log.error("Uventet feil ved oppretting av RegelmodulService", e);
             throw new RuntimeException(e);
         }
         mapper = new ObjectMapper();
@@ -96,10 +94,12 @@ public class RegelmodulService {
 
             return mapper.readValue(json, FastsettLovvalgReply.class);
 
-        } catch (RuntimeException | IOException e) {
-            log.error("", e);
-            return null;
+        } catch (IOException e) {
+            log.error("Uventet feil ved kall til Regelmodul", e);
+        } catch (RuntimeException e) {
+            log.error("Uventet feil ved generering av inndata til Regelmodul", e);
         }
+        return null;
     }
 
     /**
@@ -163,7 +163,6 @@ public class RegelmodulService {
         try {
             transformer.transform(source, result);
         } catch (TransformerException e) {
-            log.error("", e);
             throw new RuntimeException(e);
         }
 
@@ -177,7 +176,6 @@ public class RegelmodulService {
             document.adoptNode(node);
             return node;
         } catch (SAXException | IOException e) {
-            log.error("", e);
             throw new RuntimeException(e);
         }
     }
