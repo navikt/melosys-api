@@ -31,7 +31,7 @@ public class SaksbehandlerTjeneste extends RestTjeneste {
     public InnloggetBrukerDto innloggetBruker() {
         String ident = SpringSubjectHandler.getUserID();
 
-        LdapBruker ldapBruker;
+        LdapBruker ldapBruker = null;
         try {
             ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
 
@@ -39,11 +39,15 @@ public class SaksbehandlerTjeneste extends RestTjeneste {
             Tilgangskontroll.sjekk(ldapBruker);
 
         } catch (IntegrasjonException | TekniskException e) {
-            log.warn("", e);
-            throw e;
+            log.warn("Det oppstod en feil under henting av LDAP-profil for bruker {}: ", ident, e);
         }
 
-       return new InnloggetBrukerDto(ident, ldapBruker.getDisplayName());
+        String navn = "FEIL";
+        if (ldapBruker != null) {
+            navn = ldapBruker.getDisplayName();
+        }
+
+       return new InnloggetBrukerDto(ident, navn);
     }
 
 }
