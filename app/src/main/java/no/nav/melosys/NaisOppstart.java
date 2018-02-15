@@ -2,19 +2,20 @@ package no.nav.melosys;
 
 import java.util.Properties;
 
-import no.nav.modig.testcertificates.TestCertificates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
-@Configuration
-@Profile("local")
-public class LocalConfig implements Config, EnvironmentAware {
+@Component
+@Profile("nais")
+public class NaisOppstart implements Oppstart, EnvironmentAware {
 
-    private static final Logger log = LoggerFactory.getLogger(LocalConfig.class);
+    private static final String TRUST_STORE_KEY = "javax.net.ssl.trustStore";
+
+    private static final Logger log = LoggerFactory.getLogger(NaisOppstart.class);
 
     private static Environment environment;
 
@@ -28,11 +29,10 @@ public class LocalConfig implements Config, EnvironmentAware {
 
     @Override
     public void configureSsl() {
-        log.info("Test sertifikater brukes.");
-        TestCertificates.setupKeyAndTrustStore();
+        // Navikt javabaseimaget setter keystore/passord automatisk
+        log.debug("Truststore: " + System.getProperty(TRUST_STORE_KEY));
     }
 
-    @Override
     public void loadProperty(String key) {
         Properties systemProperties = System.getProperties();
         if (systemProperties.get(key) == null) {

@@ -3,7 +3,7 @@ package no.nav.melosys;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface Config {
+public interface Oppstart {
 
     void configureSsl();
 
