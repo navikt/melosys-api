@@ -10,4 +10,8 @@ public class IntegrasjonException extends RuntimeException {
         super(throwable);
     }
 
+    public IntegrasjonException(String message, Throwable throwable) {
+        super(message, throwable);
+    }
+
 }
