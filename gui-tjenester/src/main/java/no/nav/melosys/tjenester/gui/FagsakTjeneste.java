@@ -13,7 +13,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
@@ -21,8 +20,6 @@ import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -36,24 +33,22 @@ import org.springframework.web.context.WebApplicationContext;
 @Transactional
 public class FagsakTjeneste extends RestTjeneste {
 
-    private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
-
     private FagsakService fagsakService;
 
     private ModelMapper modelMapper;
 
     @Autowired
-    public FagsakTjeneste(FagsakService fagsakService, DokumentFactory dokumentFactory) {
+    public FagsakTjeneste(FagsakService fagsakService) {
         this.fagsakService = fagsakService;
 
         this.modelMapper = new ModelMapper();
 
         TypeMap<Behandling, BehandlingDto> typeMapBehandlingUt = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
-        typeMapBehandlingUt.<Long>addMapping(src -> src.getId(), (dest, id) -> dest.getOppsummering().setBehandlingID(id));
-        typeMapBehandlingUt.<Long>addMapping(src -> src.getGsakID(), (dest, id) -> dest.getOppsummering().setGsakId(id));
-        typeMapBehandlingUt.<BehandlingStatus>addMapping(src -> src.getStatus(), (dest, status) -> dest.getOppsummering().setStatus(status));
-        typeMapBehandlingUt.<BehandlingType>addMapping(src -> src.getType(), (dest, type) -> dest.getOppsummering().setType(type));
-        typeMapBehandlingUt.<LocalDateTime>addMapping(src -> src.getRegistrertDato(), (dest, dato) -> dest.getOppsummering().setRegistrertDato(dato));
+        typeMapBehandlingUt.<Long>addMapping(Behandling::getId, (dest, id) -> dest.getOppsummering().setBehandlingID(id));
+        typeMapBehandlingUt.<Long>addMapping(Behandling::getGsakID, (dest, id) -> dest.getOppsummering().setGsakId(id));
+        typeMapBehandlingUt.<BehandlingStatus>addMapping(Behandling::getStatus, (dest, status) -> dest.getOppsummering().setStatus(status));
+        typeMapBehandlingUt.<BehandlingType>addMapping(Behandling::getType, (dest, type) -> dest.getOppsummering().setType(type));
+        typeMapBehandlingUt.<LocalDateTime>addMapping(Behandling::getRegistrertDato, (dest, dato) -> dest.getOppsummering().setRegistrertDato(dato));
         typeMapBehandlingUt.addMappings(mapper -> mapper.using(new SaksopplysningerTilDtoConverter()).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
     }
 
