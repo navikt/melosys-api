@@ -1,5 +1,11 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.time.LocalDateTime;
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -37,12 +43,6 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.time.LocalDateTime;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -65,7 +65,7 @@ public class FagsakTjenesteTest {
 
         fagsakRepo = Mockito.mock(FagsakRepository.class);
         FagsakService fagsakService = new FagsakService(fagsakRepo, tps, aareg, ereg, medl, inntekt);
-        tjeneste = new FagsakTjeneste(fagsakService, dokumentFactory);
+        tjeneste = new FagsakTjeneste(fagsakService);
 
         ReflectionTestUtils.setField(fagsakService, "arbeidsforholdhistorikkAntallMåneder", 12);
         ReflectionTestUtils.setField(fagsakService, "inntektshistorikkAntallMåneder", 12);
