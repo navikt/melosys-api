@@ -32,7 +32,7 @@ public class Tilgangskontroll {
 
     public static void sjekk(LdapBruker ldapBruker) {
         Collection<String> groups = ldapBruker.getGroups();
-        if (!groups.contains(MELOSYS_GRUPPE)) {
+        if (!(groups.stream().anyMatch(g -> g.equalsIgnoreCase(MELOSYS_GRUPPE)))) {
             throw new ForbiddenException();
         }
     }
