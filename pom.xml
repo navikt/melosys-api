@@ -21,7 +21,7 @@
         <module>config</module>
         <module>domain</module>
         <module>fitnesse</module>
-        <module>gui-tjenester</module>
+        <module>frontend-api</module>
         <module>integrasjon</module>
         <module>repository</module>
         <module>saksflyt</module>
@@ -101,7 +101,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>gui-tjenester</artifactId>
+                <artifactId>frontend-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

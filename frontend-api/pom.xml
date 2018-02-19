@@ -7,7 +7,7 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>gui-tjenester</artifactId>
+    <artifactId>frontend-api</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>

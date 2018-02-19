@@ -73,7 +73,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
-            <artifactId>gui-tjenester</artifactId>
+            <artifactId>frontend-api</artifactId>
             <scope>test</scope>
         </dependency>
 
