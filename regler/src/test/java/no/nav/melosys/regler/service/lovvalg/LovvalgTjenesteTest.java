@@ -1,6 +1,7 @@
 package no.nav.melosys.regler.service.lovvalg;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
@@ -12,6 +13,9 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
@@ -54,7 +58,7 @@ public class LovvalgTjenesteTest {
 
     @Ignore // Funger bare med kjørende API, med mindre vi snurrer opp applikasjonen som en del av testen
     @Test
-    public void sendXmlRequest() {
+    public void sendXmlRequest() throws IOException {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream("FJERNET.xml");
         BufferedReader buffer = new BufferedReader(new InputStreamReader(kilde));
         String xml = buffer.lines().collect(Collectors.joining());
@@ -63,9 +67,15 @@ public class LovvalgTjenesteTest {
 
         final String regelmodulUrl = "http://localhost:8081/lovvalg/fastsettLovvalg";
 
-        FastsettLovvalgReply reply = ClientBuilder.newClient().target(regelmodulUrl)
-                .request(LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8)
-                .post(Entity.entity(xml, LovvalgTjenesteImpl.APPLICATION_XML_UTF_8), FastsettLovvalgReply.class);
+        String response = ClientBuilder.newClient().target(regelmodulUrl)
+                .request(LovvalgTjenesteImpl.APPLICATION_XML_UTF_8)
+                .post(Entity.entity(xml, LovvalgTjenesteImpl.APPLICATION_XML_UTF_8), String.class);
+
+        assertNotNull(response);
+
+        ObjectMapper mapper = new XmlMapper(new JacksonXmlModule());
+
+        FastsettLovvalgReply reply = mapper.readValue(response, FastsettLovvalgReply.class);
 
         assertNotNull(reply);
     }

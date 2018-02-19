@@ -19,6 +19,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -62,7 +64,7 @@ public class RegelmodulService {
             log.error("Uventet feil ved oppretting av RegelmodulService", e);
             throw new RuntimeException(e);
         }
-        mapper = new ObjectMapper();
+        mapper = new XmlMapper(new JacksonXmlModule());
     }
 
     /**
@@ -77,22 +79,21 @@ public class RegelmodulService {
         }
 
         try {
-            String APPLICATION_JSON_UTF_8 = "application/json;charset=utf-8";
             String APPLICATION_XML_UTF_8 = "application/xml;charset=utf-8";
 
             String fastsettLovvalgRequest = lagRequest(behandling);
 
             /* FIXME: Feiler med exception
             return ClientBuilder.newClient().target(regelmodulUrl)
-                    .request(APPLICATION_JSON_UTF_8)
+                    .request(APPLICATION_XML_UTF_8)
                     .post(Entity.entity(fastsettLovvalgRequest, APPLICATION_XML_UTF_8), FastsettLovvalgReply.class);
             */
 
-            String json = ClientBuilder.newClient().target(regelmodulUrl)
-                    .request(APPLICATION_JSON_UTF_8)
+            String xml = ClientBuilder.newClient().target(regelmodulUrl)
+                    .request(APPLICATION_XML_UTF_8)
                     .post(Entity.entity(fastsettLovvalgRequest, APPLICATION_XML_UTF_8), String.class);
 
-            return mapper.readValue(json, FastsettLovvalgReply.class);
+            return mapper.readValue(xml, FastsettLovvalgReply.class);
 
         } catch (IOException e) {
             log.error("Uventet feil ved kall til Regelmodul", e);

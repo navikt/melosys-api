@@ -16,9 +16,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import io.swagger.annotations.*;
 import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
-import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
-import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
-import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
+import no.nav.melosys.regler.api.lovvalg.rep.*;
 import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
 import no.nav.melosys.regler.lovvalg.LovvalgRegelflyt;
 import org.slf4j.Logger;
@@ -72,7 +70,7 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
     @POST
     @Path("fastsettLovvalg") // FIXME: Denne tjenesten er nært bundet til søknad a1. Bør gjenspeiles i tjenestenavn.
     @Consumes(LovvalgTjenesteImpl.APPLICATION_XML_UTF_8)
-    @Produces(LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8)
+    @Produces(LovvalgTjenesteImpl.APPLICATION_XML_UTF_8)
     @ApiOperation(
             value= "Fastsetter lovvalgsland",
             notes = "Tjeneste som anvender lovverk til å fastsette lovvalgsland for en forespørsel"

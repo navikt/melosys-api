@@ -44,6 +44,10 @@
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-repository</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+        </dependency>
 
         <!-- Test -->
         <dependency>
