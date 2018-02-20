@@ -21,6 +21,8 @@
         </personopplysningDokument>
     </xsl:template>
 
+    <!-- FIXME: Mulig behov for tilpasset transformasjon av ulike dokumentobjekter -->
+
     <!-- Inntekt -->
     <xsl:template match="tilleggsinformasjon">
         <tilleggsinformasjon>

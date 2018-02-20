@@ -52,15 +52,15 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
 
     private final JAXBContext context;
 
-    private final Transformer transformer;
+    private final Templates templates;
 
     public LovvalgTjenesteImpl() {
         final String resource = "fastsett-lovvalg-request.xslt";
 
         try (InputStream xslt = getClass().getClassLoader().getResourceAsStream(resource)) {
-            final Source source = new StreamSource(xslt);
+            TransformerFactory factory = TransformerFactory.newInstance();
+            templates = factory.newTemplates(new StreamSource(xslt));
             context = JAXBContext.newInstance(FastsettLovvalgRequest.class);
-            transformer = TransformerFactory.newInstance().newTransformer(source);
         } catch (IOException | JAXBException | TransformerConfigurationException e) {
             throw new RuntimeException(e);
         }
@@ -79,7 +79,7 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
         try {
             JAXBResult result = new JAXBResult(context);
             StringReader reader = new StringReader(xml);
-            transformer.transform(new StreamSource(reader), result);
+            templates.newTransformer().transform(new StreamSource(reader), result);
             FastsettLovvalgRequest request = (FastsettLovvalgRequest) result.getResult();
             return fastsettLovvalg(request);
         } catch (JAXBException | TransformerException e) {

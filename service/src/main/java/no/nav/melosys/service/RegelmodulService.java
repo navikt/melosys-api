@@ -11,10 +11,7 @@ import javax.ws.rs.client.Entity;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -42,9 +39,9 @@ public class RegelmodulService {
 
     private BehandlingRepository behandlingRepo;
 
-    private DocumentBuilder documentBuilder;
+    private DocumentBuilderFactory documentBuilderFactory;
 
-    private Transformer transformer;
+    private TransformerFactory transformerFactory;
 
     private static Logger log = LoggerFactory.getLogger(RegelmodulService.class);
 
@@ -52,13 +49,8 @@ public class RegelmodulService {
     public RegelmodulService(@Value("${melosys.service.regelmodul.url}") String regelmodulUrl, BehandlingRepository repository) {
         this.regelmodulUrl = regelmodulUrl;
         this.behandlingRepo = repository;
-        try {
-            transformer = TransformerFactory.newInstance().newTransformer();
-            documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        } catch (TransformerConfigurationException | ParserConfigurationException e) {
-            log.error("Uventet feil ved oppretting av RegelmodulService", e);
-            throw new RuntimeException(e);
-        }
+        this.transformerFactory = TransformerFactory.newInstance();
+        this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
     }
 
     /**
@@ -74,14 +66,13 @@ public class RegelmodulService {
 
         try {
             String APPLICATION_XML_UTF_8 = "application/xml;charset=utf-8";
-
             String fastsettLovvalgRequest = lagRequest(behandling);
 
             return ClientBuilder.newClient().target(regelmodulUrl)
                     .request(APPLICATION_XML_UTF_8)
                     .post(Entity.entity(fastsettLovvalgRequest, APPLICATION_XML_UTF_8), FastsettLovvalgReply.class);
 
-        } catch (RuntimeException e) {
+        } catch (ParserConfigurationException | TransformerException | IOException | SAXException e) {
             log.error("Uventet feil ved generering av inndata til Regelmodul", e);
         }
         return null;
@@ -90,8 +81,8 @@ public class RegelmodulService {
     /**
      * Lager en request til regelmodulen for en gitt behandling.
      */
-    private String lagRequest(Behandling behandling) {
-        // FIXME: Bedre feilhåndtering + rydd kode
+    private String lagRequest(Behandling behandling) throws ParserConfigurationException, TransformerException, IOException, SAXException {
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
         Document document = documentBuilder.newDocument();
 
         Element dokumenter = document.createElement("dokumenter");
@@ -143,23 +134,14 @@ public class RegelmodulService {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         StreamResult result = new StreamResult(outputStream);
 
-        try {
-            transformer.transform(source, result);
-        } catch (TransformerException e) {
-            throw new RuntimeException(e);
-        }
-
+        transformerFactory.newTransformer().transform(source, result);
         return outputStream.toString();
     }
 
-    private Element xmlTilNode(String xml, DocumentBuilder builder, Document document) {
+    private Element xmlTilNode(String xml, DocumentBuilder builder, Document document) throws IOException, SAXException {
         InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
-        try {
-            Element node = builder.parse(inputStream).getDocumentElement();
-            document.adoptNode(node);
-            return node;
-        } catch (SAXException | IOException e) {
-            throw new RuntimeException(e);
-        }
+        Element node = builder.parse(inputStream).getDocumentElement();
+        document.adoptNode(node);
+        return node;
     }
 }
