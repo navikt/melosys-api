@@ -8,8 +8,10 @@ import java.util.stream.Collectors;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.util.JAXBResult;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 
@@ -36,24 +38,17 @@ public class LovvalgTjenesteTest {
 
     @Test
     public void fastsettLovvalg() throws Exception {
-        final InputStream kilde = getClass().getClassLoader().getResourceAsStream("FJERNET.xml");
-        final InputStream xslt = getClass().getClassLoader().getResourceAsStream("fastsett-lovvalg-request.xslt");
+        //final InputStream kilde = getClass().getClassLoader().getResourceAsStream("FJERNET.xml");
+        for (String xmlFile : new String[]{"FJERNET.xml", "FJERNET.xml"}) {
 
-        TransformerFactory factory = TransformerFactory.newInstance();
-        Transformer transformer = factory.newTransformer(new StreamSource(xslt));
+            FastsettLovvalgRequest request = getFastsettLovvalgRequest(xmlFile);
 
-        JAXBContext context = JAXBContext.newInstance(FastsettLovvalgRequest.class);
-        JAXBResult result = new JAXBResult(context);
+            assertNotNull(request);
 
-        transformer.transform(new StreamSource(kilde), result);
+            FastsettLovvalgReply reply = lovvalgTjeneste.fastsettLovvalg(request);
 
-        FastsettLovvalgRequest request = (FastsettLovvalgRequest) result.getResult();
-
-        assertNotNull(request);
-
-        FastsettLovvalgReply reply = lovvalgTjeneste.fastsettLovvalg(request);
-
-        assertNotNull(reply);
+            assertNotNull(reply);
+        }
     }
 
     @Ignore // Funger bare med kjørende API, med mindre vi snurrer opp applikasjonen som en del av testen
@@ -78,5 +73,20 @@ public class LovvalgTjenesteTest {
         FastsettLovvalgReply reply = mapper.readValue(response, FastsettLovvalgReply.class);
 
         assertNotNull(reply);
+    }
+
+    private FastsettLovvalgRequest getFastsettLovvalgRequest(String xmlFile) throws TransformerException, JAXBException {
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream(xmlFile);
+        final InputStream xslt = getClass().getClassLoader().getResourceAsStream("fastsett-lovvalg-request.xslt");
+
+        TransformerFactory factory = TransformerFactory.newInstance();
+        Transformer transformer = factory.newTransformer(new StreamSource(xslt));
+
+        JAXBContext context = JAXBContext.newInstance(FastsettLovvalgRequest.class);
+        JAXBResult result = new JAXBResult(context);
+
+        transformer.transform(new StreamSource(kilde), result);
+
+        return (FastsettLovvalgRequest) result.getResult();
     }
 }
