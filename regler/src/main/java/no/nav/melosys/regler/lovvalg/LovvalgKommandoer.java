@@ -62,14 +62,14 @@ public final class LovvalgKommandoer {
     /** Kommando som legger til en lovvalgsbestemmelse for en artikkel. */
     public static final Runnable opprettLovvalgbestemmelse(Artikkel artikkel, Betingelse... betingelser) {
         return () -> {
-            if (responsen().lovvalgsbestemmelser.get(artikkel) != null) {
-                loggError("Forsøk på å opprette eksisterende artikkel {}", artikkel);
-                leggTilMeldingOgAvbryt(TEKNISK_FEIL, "Teknisk feil i regelmodulen").run();
-            }
             Lovvalgsbestemmelse lb = new Lovvalgsbestemmelse();
             lb.artikkel = artikkel;
             lb.betingelser = new ArrayList<>();
-            responsen().lovvalgsbestemmelser.put(artikkel, lb);
+            if (responsen().lovvalgsbestemmelser.contains(lb)) {
+                loggError("Forsøk på å opprette eksisterende artikkel {}", artikkel);
+                leggTilMeldingOgAvbryt(TEKNISK_FEIL, "Teknisk feil i regelmodulen").run();
+            }
+            responsen().lovvalgsbestemmelser.add(lb);
             loggInfo("Opprettet lovvalgsbestemmelse for artikkel {}", artikkel);
             for (Betingelse bet : betingelser) {
                 lb.betingelser.add(bet);

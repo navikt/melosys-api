@@ -18,9 +18,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -49,8 +46,6 @@ public class RegelmodulService {
 
     private Transformer transformer;
 
-    private ObjectMapper mapper;
-
     private static Logger log = LoggerFactory.getLogger(RegelmodulService.class);
 
     @Autowired
@@ -64,7 +59,6 @@ public class RegelmodulService {
             log.error("Uventet feil ved oppretting av RegelmodulService", e);
             throw new RuntimeException(e);
         }
-        mapper = new XmlMapper(new JacksonXmlModule());
     }
 
     /**
@@ -83,20 +77,10 @@ public class RegelmodulService {
 
             String fastsettLovvalgRequest = lagRequest(behandling);
 
-            /* FIXME: Feiler med exception
             return ClientBuilder.newClient().target(regelmodulUrl)
                     .request(APPLICATION_XML_UTF_8)
                     .post(Entity.entity(fastsettLovvalgRequest, APPLICATION_XML_UTF_8), FastsettLovvalgReply.class);
-            */
 
-            String xml = ClientBuilder.newClient().target(regelmodulUrl)
-                    .request(APPLICATION_XML_UTF_8)
-                    .post(Entity.entity(fastsettLovvalgRequest, APPLICATION_XML_UTF_8), String.class);
-
-            return mapper.readValue(xml, FastsettLovvalgReply.class);
-
-        } catch (IOException e) {
-            log.error("Uventet feil ved kall til Regelmodul", e);
         } catch (RuntimeException e) {
             log.error("Uventet feil ved generering av inndata til Regelmodul", e);
         }

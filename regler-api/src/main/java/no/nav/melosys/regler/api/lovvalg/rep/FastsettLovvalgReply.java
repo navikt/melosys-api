@@ -10,23 +10,12 @@ import javax.xml.bind.annotation.*;
 public class FastsettLovvalgReply {
     
     /** Liste med bestemmelser (artikler) søknaden er vurdert mot */
-    @XmlTransient
-    public Map<Artikkel, Lovvalgsbestemmelse> lovvalgsbestemmelser;
+    @XmlElementWrapper(name="lovvalgsbestemmelser")
+    @XmlElement(name = "lovvalgsbestemmelse")
+    public List<Lovvalgsbestemmelse> lovvalgsbestemmelser;
     
     /** Liste med evt. feilmeldinger */
     @XmlElementWrapper(name="feilmeldinger")
+    @XmlElement(name = "feilmelding")
     public List<Feilmelding> feilmeldinger;
-
-    @XmlElementWrapper(name="lovvalgsbestemmelser")
-    public Collection<Lovvalgsbestemmelse> getLovvalgsbestemmelser() {
-        return lovvalgsbestemmelser == null ? Collections.EMPTY_LIST : lovvalgsbestemmelser.values();
-    }
-
-    @XmlElementWrapper(name="lovvalgsbestemmelser")
-    public void setLovvalgsbestemmelser(List<Lovvalgsbestemmelse> lovvalgsbestemmelser) {
-        this.lovvalgsbestemmelser = new HashMap<>();
-        lovvalgsbestemmelser.forEach(lovvalgsbestemmelse -> {
-            this.lovvalgsbestemmelser.put(lovvalgsbestemmelse.artikkel, lovvalgsbestemmelse);
-        });
-    }
 }

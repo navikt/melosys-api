@@ -1,8 +1,12 @@
 package no.nav.melosys.service;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
@@ -134,5 +138,19 @@ public class RegelmodulServiceTest {
         }
 
         return fastsettLovvalgRequest;
+    }
+
+    @Test
+    public void unmarshallFastsettLovvalgReply() throws JAXBException {
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream("fastsett-lovvalg-reply.xml");
+
+        JAXBContext context = JAXBContext.newInstance(FastsettLovvalgReply.class);
+        Unmarshaller unmarshaller = context.createUnmarshaller();
+        
+        FastsettLovvalgReply reply = (FastsettLovvalgReply) unmarshaller.unmarshal(kilde);
+
+        assertThat(reply).isNotNull();
+        assertThat(reply.feilmeldinger).isNotEmpty();
+        assertThat(reply.lovvalgsbestemmelser).isNotEmpty();
     }
 }
