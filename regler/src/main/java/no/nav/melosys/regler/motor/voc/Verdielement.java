@@ -1,11 +1,12 @@
 package no.nav.melosys.regler.motor.voc;
 
 import java.time.LocalDate;
-
-import org.springframework.util.Assert;
+import java.util.function.Predicate;
 
 import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.regler.motor.KontekstManager;
+import org.springframework.util.Assert;
 
 public class Verdielement {
     
@@ -78,7 +79,11 @@ public class Verdielement {
         ErPeriode periode = (ErPeriode) verdi;
         return () -> periode.getFom() != null && !dato.isAfter(periode.getFom());
     }
-    
+
+    public LocalDate startdato() {
+        return ((HarPeriode) verdi).getPeriode().getFom();
+    }
+
     public <T> Predikat erStørreEnn(T grense) {
         return () -> sammenliknMed(grense) > 0;
     }
@@ -89,6 +94,10 @@ public class Verdielement {
     
     public Predikat erMindreEnnEllerLik(Object grense) {
         return () -> sammenliknMed(grense) <= 0;
+    }
+
+    public <T> Predikat oppfyller(Predicate<T> predicate) {
+        return () -> predicate.test((T) verdi);
     }
     
     private boolean harVerdiLik(Object annetVerdi) {

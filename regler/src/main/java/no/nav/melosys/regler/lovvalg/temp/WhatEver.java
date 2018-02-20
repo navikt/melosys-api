@@ -1,5 +1,7 @@
 package no.nav.melosys.regler.lovvalg.temp;
 
+import no.nav.melosys.regler.motor.Regelpakke;
+
 import static no.nav.melosys.regler.api.lovvalg.rep.Argument.*;
 import static no.nav.melosys.regler.api.lovvalg.rep.Artikkel.ART_12_1;
 import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.DELVIS_STOETTET;
@@ -7,8 +9,6 @@ import static no.nav.melosys.regler.lovvalg.LovvalgKommandoer.*;
 import static no.nav.melosys.regler.lovvalg.LovvalgKrav.*;
 import static no.nav.melosys.regler.motor.voc.FellesVokabular.JA;
 import static no.nav.melosys.regler.motor.voc.FellesVokabular.utfør;
-
-import no.nav.melosys.regler.motor.Regelpakke;
 
 // FIXME: Slett denne pakken
 public class WhatEver implements Regelpakke {
@@ -23,7 +23,7 @@ public class WhatEver implements Regelpakke {
             settArgument(ANTALL_ARBEIDSGIVERE_I_SØKNADSPERIODEN, 1),
             settArgument(HOVEDARBEIDSFORHOLDET_VARER_I_HELE_SØKNADSPERIODEN, JA),
             settArgument(LENGDE_MND_UTENLANDSOPPHOLD, 12),
-            settArgument(BRUKER_ER_MEDLEM_AV_FTR_MÅNEDEN_FØR_PERIODESTART, JA)
+            settArgument(BRUKER_ER_MEDLEM_AV_FTRL_MÅNEDEN_FØR_PERIODESTART, JA)
         );
         
         utfør(
@@ -34,7 +34,7 @@ public class WhatEver implements Regelpakke {
                 betingelse(ANTALL_ARBEIDSGIVERE_I_SØKNADSPERIODEN, erLik(1)), // Krav 3
                 betingelse(HOVEDARBEIDSFORHOLDET_VARER_I_HELE_SØKNADSPERIODEN, erSann), // Krav 4
                 betingelse(LENGDE_MND_UTENLANDSOPPHOLD, erMindreEnnEllerLik(24)), // Krav 5
-                betingelse(BRUKER_ER_MEDLEM_AV_FTR_MÅNEDEN_FØR_PERIODESTART, erSann) // Krav 7
+                betingelse(BRUKER_ER_MEDLEM_AV_FTRL_MÅNEDEN_FØR_PERIODESTART, erSann) // Krav 7
             ),
             
             avbrytRegelkjøring

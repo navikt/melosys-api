@@ -50,10 +50,9 @@ public enum Argument {
     HOVEDARBEIDSFORHOLDET_VARER_I_HELE_SØKNADSPERIODEN("Hovedarbeidsforholdet varer i hele søknadsperioden"), // 12.1
     LENGDE_MND_UTENLANDSOPPHOLD("Antall måneder utenlandsoppholdet varer"), // 12.1
     BRUKEREN_SKAL_ERSTATTE_EN_ANNEN_ARBEIDSTAKER("Brukeren skal ikke erstatte en annen utsendt arbeidstaker"), // 12.1
-    BRUKER_ER_MEDLEM_AV_FTR_MÅNEDEN_FØR_PERIODESTART("Bruker er medlem av FTR måneden før periodestart"); // 12.1
-
-    // FIXME BRUKER_ER_ANSATT_HOS_UTSENDENDE_ORGANISASJON_I_HELE_SØKNADSPERIODE("Bruker er ansatt hos utsendende organisasjon i hele perioden"),
+    BRUKER_ER_MEDLEM_AV_FTRL_MÅNEDEN_FØR_PERIODESTART("Bruker er medlem av ftrl måneden før periodestart"); // 12.1
     
+    // FIXME BRUKER_ER_ANSATT_HOS_UTSENDENDE_ORGANISASJON_I_HELE_SØKNADSPERIODE("Bruker er ansatt hos utsendende organisasjon i hele perioden"),
 
     @JsonValue
     public final String beskrivelse;
