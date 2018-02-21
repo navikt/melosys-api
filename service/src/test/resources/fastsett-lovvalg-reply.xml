@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <fastsettLovvalgReply>
-    <feilmeldinger>
-        <feilmelding>
-            <kategori>DELVIS_STOETTET</kategori>
-            <melding>Bryr meg ikke... 12.1 samma hva.</melding>
-        </feilmelding>
-    </feilmeldinger>
     <lovvalgsbestemmelser>
         <lovvalgsbestemmelse>
             <artikkel>ART_12_1</artikkel>
@@ -36,11 +30,27 @@
                     <resultat>OPPFYLT</resultat>
                 </betingelse>
                 <betingelse>
-                    <argument>BRUKER_ER_MEDLEM_AV_FTR_MÅNEDEN_FØR_PERIODESTART</argument>
+                    <argument>BRUKER_ER_MEDLEM_AV_FTRL_MÅNEDEN_FØR_PERIODESTART</argument>
                     <krav>er sann</krav>
                     <resultat>OPPFYLT</resultat>
                 </betingelse>
             </betingelser>
         </lovvalgsbestemmelse>
     </lovvalgsbestemmelser>
+    <feilmeldinger>
+        <feilmelding>
+            <kategori>
+                <alvorlighetsgrad>VARSEL</alvorlighetsgrad>
+                <melding>Det er implementert delvis maskinell støtte for denne forespørselen.</melding>
+            </kategori>
+            <melding>Bryr meg ikke... 12.1 samma hva.</melding>
+        </feilmelding>
+        <feilmelding>
+            <kategori>
+                <alvorlighetsgrad>FEIL</alvorlighetsgrad>
+                <melding>Det er ikke implementert maskinell støtte for denne forespørselen.</melding>
+            </kategori>
+            <melding>Bryr meg ikke... 12.1 samma hva.</melding>
+        </feilmelding>
+    </feilmeldinger>
 </fastsettLovvalgReply>
