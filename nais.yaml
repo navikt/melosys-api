@@ -17,10 +17,10 @@ prometheus:
     path: internal/prometheus
 resources:
   requests:
-    cpu: 500m
+    cpu: 100m
     memory: 768Mi
   limits:
-    cpu: 2000m
+    cpu: 1000m
     memory: 1536Mi
 fasitResources:
   used:
