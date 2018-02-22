@@ -141,6 +141,7 @@ public class RegelmodulServiceTest {
     }
 
     @Test
+    @SuppressWarnings("ALL")
     public void unmarshallFastsettLovvalgReply() throws JAXBException {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream("fastsett-lovvalg-reply.xml");
 

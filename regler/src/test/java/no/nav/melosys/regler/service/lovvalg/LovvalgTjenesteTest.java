@@ -18,7 +18,6 @@ import javax.xml.transform.stream.StreamSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
 import org.junit.Before;
@@ -29,7 +28,7 @@ import static org.junit.Assert.assertNotNull;
 
 public class LovvalgTjenesteTest {
 
-    private LovvalgTjeneste lovvalgTjeneste;
+    private LovvalgTjenesteImpl lovvalgTjeneste;
 
     @Before
     public void setUp() {
@@ -53,6 +52,7 @@ public class LovvalgTjenesteTest {
 
     @Ignore // Funger bare med kjørende API, med mindre vi snurrer opp applikasjonen som en del av testen
     @Test
+    @SuppressWarnings("ALL")
     public void sendXmlRequest() throws IOException {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream("FJERNET.xml");
         BufferedReader buffer = new BufferedReader(new InputStreamReader(kilde));

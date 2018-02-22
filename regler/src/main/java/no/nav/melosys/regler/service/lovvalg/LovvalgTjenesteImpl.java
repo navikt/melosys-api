@@ -50,14 +50,18 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
 
     private static Logger log = LoggerFactory.getLogger(LovvalgTjenesteImpl.class);
 
+    /*
+        Referanseimplementasjonen av JAXBContext er thread-safe, men det er ikke en del av spesifikasjonen
+        (og da heller ikke javadoc). Dette er ok så lenge vi ikke bytter implementasjon av JAX.
+    */
     private final JAXBContext context;
 
     private final Templates templates;
 
-    public LovvalgTjenesteImpl() {
-        final String resource = "fastsett-lovvalg-request.xslt";
+    private static final String LOVVALG_REQUEST_XSLT = "fastsett-lovvalg-request.xslt";
 
-        try (InputStream xslt = getClass().getClassLoader().getResourceAsStream(resource)) {
+    public LovvalgTjenesteImpl() {
+        try (InputStream xslt = getClass().getClassLoader().getResourceAsStream(LOVVALG_REQUEST_XSLT)) {
             TransformerFactory factory = TransformerFactory.newInstance();
             templates = factory.newTemplates(new StreamSource(xslt));
             context = JAXBContext.newInstance(FastsettLovvalgRequest.class);

@@ -1,7 +1,5 @@
 package no.nav.melosys.regler.service.lovvalg;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,9 +7,6 @@ import java.time.OffsetDateTime;
 import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.Collections;
-
-import org.junit.Before;
-import org.junit.Test;
 
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsavtale;
@@ -28,23 +23,18 @@ import no.nav.melosys.domain.dokument.medlemskap.Periodetype;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.Organisasjonsnavn;
-import no.nav.melosys.domain.dokument.person.Familiemedlem;
-import no.nav.melosys.domain.dokument.person.Familierelasjon;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.Personstatus;
-import no.nav.melosys.domain.dokument.person.Sivilstand;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidNorge;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.OppholdUtland;
-import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
+import no.nav.melosys.domain.dokument.person.*;
+import no.nav.melosys.domain.dokument.soeknad.*;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertNotNull;
 
 public class ManuellTest {
     
-    private LovvalgTjeneste lovvalgTjeneste;
+    private LovvalgTjenesteImpl lovvalgTjeneste;
 
     @Before
     public void setUp() {

@@ -4,13 +4,13 @@ import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 
 public class KategoriDto {
     public Alvorlighetsgrad alvorlighetsgrad;
-    public String melding;
+    public String beskrivelse;
 
     // Brukes av JAXB
     public KategoriDto() {}
 
-    public KategoriDto(Alvorlighetsgrad alvorlighetsgrad, String melding) {
+    public KategoriDto(Alvorlighetsgrad alvorlighetsgrad, String beskrivelse) {
         this.alvorlighetsgrad = alvorlighetsgrad;
-        this.melding = melding;
+        this.beskrivelse = beskrivelse;
     }
 }

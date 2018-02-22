@@ -10,7 +10,7 @@ public class KategoriAdapter extends XmlAdapter<KategoriDto, Kategori> {
     @Override
     public Kategori unmarshal(KategoriDto kategoriDto) throws Exception {
         return Stream.of(Kategori.values())
-            .filter(kategori -> kategori.beskrivelse.equals(kategoriDto.melding)
+            .filter(kategori -> kategori.beskrivelse.equals(kategoriDto.beskrivelse)
                     && kategori.alvorlighetsgrad == kategoriDto.alvorlighetsgrad)
             .findFirst().orElse(null);
     }

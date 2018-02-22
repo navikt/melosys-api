@@ -41,14 +41,14 @@
         <feilmelding>
             <kategori>
                 <alvorlighetsgrad>VARSEL</alvorlighetsgrad>
-                <melding>Det er implementert delvis maskinell støtte for denne forespørselen.</melding>
+                <beskrivelse>Det er implementert delvis maskinell støtte for denne forespørselen.</beskrivelse>
             </kategori>
             <melding>Bryr meg ikke... 12.1 samma hva.</melding>
         </feilmelding>
         <feilmelding>
             <kategori>
                 <alvorlighetsgrad>FEIL</alvorlighetsgrad>
-                <melding>Det er ikke implementert maskinell støtte for denne forespørselen.</melding>
+                <beskrivelse>Det er ikke implementert maskinell støtte for denne forespørselen.</beskrivelse>
             </kategori>
             <melding>Bryr meg ikke... 12.1 samma hva.</melding>
         </feilmelding>
