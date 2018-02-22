@@ -14,3 +14,4 @@ es.properties
 *.log
 es-local.properties
 *.db
+build/jar/src/main/resources/public/

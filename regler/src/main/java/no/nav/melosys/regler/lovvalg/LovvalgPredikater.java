@@ -1,15 +1,23 @@
 package no.nav.melosys.regler.lovvalg;
 
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknadDokumentet;
-
 import java.util.function.Predicate;
 
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
+import no.nav.melosys.domain.dokument.inntekt.Inntekt;
+import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
+import no.nav.melosys.domain.dokument.medlemskap.Periodetype;
+import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.motor.voc.Predikat;
+
+import static no.nav.melosys.domain.dokument.felles.Land.NORGE;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknadDokumentet;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.søknadsperioden;
+import static no.nav.melosys.regler.motor.voc.Verdielement.verdien;
 
 /**
  * Verbalisering av predikater
@@ -59,5 +67,25 @@ public final class LovvalgPredikater {
         }
         return true;
     };
-    
+
+    /** Sjekker om opptjeningsland er i utlandet */
+    public static final Predicate<Inntekt> inntektOpptjentIUtlandet = (Inntekt inntekt)
+        -> !inntekt.opptjeningsland.equals(NORGE);
+
+    /** Sjekker om bostedsadresse er i Norge */
+    public static final Predicate<Bostedsadresse> bostedsadresseErINorge = (Bostedsadresse b)
+        -> b.getLand().getKode().equals(NORGE);
+
+    /** Sjekker om brukeren arbeidet i Norge før periodestart */
+    public static final Predicate<Arbeidsforhold> ansattINorgeFørPeriodestart = (Arbeidsforhold arbeidsforhold)
+        -> søknadsperioden()
+            .starterPåEllerEtter(verdien(arbeidsforhold).startdato())
+            .og(verdien(arbeidsforhold.getUtenlandsopphold()).mangler()).test();
+
+    public static final Predicate<Medlemsperiode> medlemAvFtrlFørPeriodestart = (Medlemsperiode medlemsperiode)
+        // FIXME: Skal sjekke om medlemsperioden var måneden før utenlandsopphold
+        -> søknadsperioden()
+            .starterPåEllerEtter(verdien(medlemsperiode).startdato())
+            .og(verdien(medlemsperiode.type).oppfyller(type -> type.equals(Periodetype.PMMEDSKP))).test();
+
 }
