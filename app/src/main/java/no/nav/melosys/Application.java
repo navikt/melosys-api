@@ -1,7 +1,5 @@
 package no.nav.melosys;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -14,8 +12,6 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource(value = "classpath:saksflyt.properties", encoding = "utf-8")
 @PropertySource(value = "classpath:service.properties", encoding = "utf-8")
 public class Application extends SpringBootServletInitializer {
-
-    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) throws Exception {
         SpringApplication.run(Application.class, args);

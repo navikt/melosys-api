@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.inntk.inntekt;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import javax.xml.bind.JAXBContext;
@@ -18,13 +19,12 @@ public class InntektMock implements InntektConsumer {
 
     @Override
     public HentInntektListeResponse hentInntektListe(HentInntektListeRequest request) throws HentInntektListeSikkerhetsbegrensning, HentInntektListeUgyldigInput, HentInntektListeHarIkkeTilgangTilOensketAInntektsfilter {
-        try {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("mock/inntekt/" + FNR + ".xml")) {
             JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeResponse.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            InputStream is = getClass().getClassLoader().getResourceAsStream("mock/inntekt/" + FNR + ".xml");
             Object xmlBean = unmarshaller.unmarshal(is);
             return ((no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeResponse) xmlBean).getResponse();
-        } catch (JAXBException e) {
+        } catch (JAXBException | IOException e) {
             throw new RuntimeException(e);
         }
     }

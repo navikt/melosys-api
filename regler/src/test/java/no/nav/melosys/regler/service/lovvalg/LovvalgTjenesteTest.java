@@ -37,8 +37,9 @@ public class LovvalgTjenesteTest {
 
         final ClassLoader classLoader = getClass().getClassLoader();
         InputStream inputStream = classLoader.getResourceAsStream("99999999999.json");
-
         FastsettLovvalgRequest request = mapper.readValue(inputStream, FastsettLovvalgRequest.class);
+        inputStream.close();
+        
         assertNotNull(request);
 
         FastsettLovvalgReply reply = lovvalgTjeneste.fastsettLovvalg(request);

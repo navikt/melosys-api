@@ -18,7 +18,7 @@ public class LovvalgDto {
     }
 
     public void setBehandlingID(long behandlingId) {
-        this.behandlingID = behandlingID;
+        this.behandlingID = behandlingId;
     }
 
     public FastsettLovvalgReply getVurdering() {

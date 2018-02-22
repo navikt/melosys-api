@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -52,14 +53,13 @@ public class ArbeidsforholdMock implements ArbeidsforholdConsumer {
         }
 
         no.nav.tjeneste.virksomhet.arbeidsforhold.v3.HentArbeidsforholdHistorikkResponse response = null;
-        try {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("mock/arbeidsforhold/" + arbeidsforholdId + ".xml")) {
             JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.arbeidsforhold.v3.HentArbeidsforholdHistorikkResponse.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            InputStream is = getClass().getClassLoader().getResourceAsStream("mock/arbeidsforhold/" + arbeidsforholdId + ".xml");
             Object xmlBean = unmarshaller.unmarshal(is);
             response = (no.nav.tjeneste.virksomhet.arbeidsforhold.v3.HentArbeidsforholdHistorikkResponse) xmlBean;
             return response.getParameters();
-        } catch (JAXBException e) {
+        } catch (JAXBException | IOException e) {
             throw new RuntimeException(e);
         }
     }

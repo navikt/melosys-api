@@ -18,6 +18,7 @@ import no.nav.melosys.tjenester.gui.dto.GateadresseDto;
 
 public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> {
 
+    // FIXME: Ikke i bruk
     private final KodeverkService kodeverkService;
 
     public OrganisasjonSerializer(KodeverkService kodeverkService) {

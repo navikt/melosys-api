@@ -47,5 +47,7 @@ public class MedlKonverteringTest {
             assertNotNull(medlemsperiode.getKilde());
             assertNotNull(medlemsperiode.getGrunnlagstype());
         }
+        kilde.close();
+        xslt.close();
     }
 }

@@ -37,6 +37,7 @@ public class ArbeidsforholdHistorikkTjenesteTest {
         ArbeidsforholdDokument dokument = (ArbeidsforholdDokument) response.getEntity();
         assertThat(dokument.getArbeidsforhold().size()).isGreaterThan(0);
         assertThat(dokument.getArbeidsforhold().get(0).getArbeidsavtaler().size()).isGreaterThan(1);
+        response.close();
     }
 
 }

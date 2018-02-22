@@ -23,10 +23,9 @@ public class MedlemskapMock implements MedlemskapConsumer {
     public HentPeriodeListeResponse hentPeriodeListe(HentPeriodeListeRequest request) throws PersonIkkeFunnet, Sikkerhetsbegrensning {
         String ident = request.getIdent().getValue();
 
-        try {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("mock/medlemskap/" + ident + ".xml")) {
             JAXBContext jaxbContext = JAXBContext.newInstance(HentPeriodeListeResponse.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            InputStream is = getClass().getClassLoader().getResourceAsStream("mock/medlemskap/" + ident + ".xml");
 
             if (is == null) {
                 throw new PersonIkkeFunnet("Person med ident " + ident + " ikke funnet.", null);

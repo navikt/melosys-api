@@ -20,7 +20,7 @@ public class LocalOppstart implements Oppstart, EnvironmentAware {
 
     @Override
     public void setEnvironment(Environment environment) {
-        this.environment = environment;
+        LocalOppstart.environment = environment;
 
         configureSsl();
         loadSystemProperties();

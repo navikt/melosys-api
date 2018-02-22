@@ -63,6 +63,8 @@ public class Aareg3KonverteringTest {
         for (Arbeidsforhold arbeidsforhold : dokument.getArbeidsforhold()) {
             assertThat(arbeidsforhold.getArbeidsavtaler()).isNotEmpty();
         }
+        xslt.close();
+        kilde.close();
     }
 
     @Test

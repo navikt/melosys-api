@@ -1,17 +1,23 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
-import java.io.StringWriter;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.time.LocalDateTime;
+
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
+import org.slf4j.LoggerFactory;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakStatus;
 import no.nav.melosys.domain.FagsakType;
@@ -36,16 +42,6 @@ import no.nav.melosys.integrasjon.tps.person.PersonMock;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.modelmapper.ModelMapper;
-import org.slf4j.LoggerFactory;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class FagsakTjenesteTest {
 
@@ -73,10 +69,7 @@ public class FagsakTjenesteTest {
 
     @Test
     public void hentFagsak() throws Exception {
-        long saksnummer = 123;
-
-        //Response response = tjeneste.hentFagsak(saksnummer);
-
+        // FIXME: Manglende test?
     }
 
     @Test
@@ -117,26 +110,10 @@ public class FagsakTjenesteTest {
             assertNotNull(fagsak);
             assertFalse(fagsak.getBehandlinger().isEmpty());
 
-            //printJson(response);
+            response.close();
         }
         // Skru på logging igjen
         log.setLevel(opprinneligLevel);
     }
 
-    private void printJson(Response response) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-        objectMapper.registerModule(new JavaTimeModule());
-
-        StringWriter writer = new StringWriter();
-
-        try {
-            objectMapper.writeValue(writer, response.getEntity());
-            System.out.println(writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }

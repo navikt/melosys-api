@@ -21,7 +21,7 @@ public class NaisOppstart implements Oppstart, EnvironmentAware {
 
     @Override
     public void setEnvironment(Environment environment) {
-        this.environment = environment;
+        NaisOppstart.environment = environment;
 
         configureSsl();
         loadSystemProperties();
@@ -33,6 +33,7 @@ public class NaisOppstart implements Oppstart, EnvironmentAware {
         log.debug("Truststore: " + System.getProperty(TRUST_STORE_KEY));
     }
 
+    @Override
     public void loadProperty(String key) {
         Properties systemProperties = System.getProperties();
         if (systemProperties.get(key) == null) {

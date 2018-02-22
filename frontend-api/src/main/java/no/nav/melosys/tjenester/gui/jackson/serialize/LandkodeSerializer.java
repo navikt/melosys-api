@@ -11,6 +11,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class LandkodeSerializer extends StdSerializer<Land> {
 
+    // FIXME: Ikke i bruk
     private final KodeverkService kodeverkService;
 
     public LandkodeSerializer(KodeverkService kodeverkService) {

@@ -21,6 +21,7 @@ import no.nav.melosys.domain.FagsakStatus;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Ignore
+@SuppressWarnings("all")
 public class BehandlingRepositoryTest {
 
     @Autowired

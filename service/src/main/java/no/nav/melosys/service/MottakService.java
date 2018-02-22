@@ -52,7 +52,7 @@ public class MottakService {
         behandling.setFagsak(fagsak);
         behandling.setType(BehandlingType.SØKNAD);
         behandling.setStatus(BehandlingStatus.OPPRETTET);
-        behandlingRepo.save(behandling); // TODO Vilkårene/behandlingsgrunnlaget må lagres også
+        behandlingRepo.save(behandling); // FIXME: Vilkårene/behandlingsgrunnlaget må lagres også
 
         return behandling;
     }
@@ -70,7 +70,7 @@ public class MottakService {
         // fagsak.setBruker(bruker);
 
         // Oppretter en sak i GSAK
-        // TODO Francois koble til eksisterende sak
+        // FIXME Francois koble til eksisterende sak
         String saksNummer = gsakFasade.opprettSak(fagsak.getId(), fnr);
 
         // Oppdaterer fagsak med saksnummer fra GSAK

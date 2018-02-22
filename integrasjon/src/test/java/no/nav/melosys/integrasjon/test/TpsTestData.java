@@ -1,11 +1,6 @@
 package no.nav.melosys.integrasjon.test;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class TpsTestData {
-
-    private static final Logger LOG = LoggerFactory.getLogger(TpsTestData.class);
 
     // Konstanter for standardbrukere (kan refereres eksternt)
     public static final long STD_KVINNE_AKTØR_ID = FJERNET67L;
