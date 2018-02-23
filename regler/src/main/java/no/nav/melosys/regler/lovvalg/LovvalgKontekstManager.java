@@ -1,11 +1,7 @@
 package no.nav.melosys.regler.lovvalg;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
@@ -17,6 +13,8 @@ import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
 import no.nav.melosys.regler.motor.KontekstManager;
 import no.nav.melosys.regler.motor.voc.Verdielement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Kontekst (og -manager) for lovvalgregler.
@@ -43,7 +41,7 @@ public class LovvalgKontekstManager {
         lokalFastsettLovvalgRequest.set(req);
         FastsettLovvalgReply rep = new FastsettLovvalgReply();
         rep.feilmeldinger = new ArrayList<>();
-        rep.lovvalgsbestemmelser = new HashMap<>();
+        rep.lovvalgsbestemmelser = new ArrayList<>();
         lokalFastsettLovvalgRespons.set(rep);
     }
     

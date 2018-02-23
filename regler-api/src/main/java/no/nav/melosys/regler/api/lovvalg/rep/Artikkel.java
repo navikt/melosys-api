@@ -1,5 +1,6 @@
 package no.nav.melosys.regler.api.lovvalg.rep;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum Artikkel {
@@ -30,4 +31,8 @@ public enum Artikkel {
         this.beskrivelse = beskrivelse;
     }
 
+    @JsonCreator
+    public static Artikkel forVerdi(String verdi) {
+        return valueOf(verdi);
+    }
 }

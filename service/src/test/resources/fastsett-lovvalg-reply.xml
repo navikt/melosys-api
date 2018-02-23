@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<fastsettLovvalgReply>
+    <lovvalgsbestemmelser>
+        <lovvalgsbestemmelse>
+            <artikkel>ART_12_1</artikkel>
+            <betingelser>
+                <betingelse>
+                    <argument>ARBEIDSPLASSEN_I_UTLANDET_DEKKES_AV_EF_883_2004</argument>
+                    <krav>er sann</krav>
+                    <resultat>OPPFYLT</resultat>
+                </betingelse>
+                <betingelse>
+                    <argument>BRUKER_HAR_NORSK_ARBEIDSGIVER</argument>
+                    <krav>er sann</krav>
+                    <resultat>OPPFYLT</resultat>
+                </betingelse>
+                <betingelse>
+                    <argument>ANTALL_ARBEIDSGIVERE_I_SØKNADSPERIODEN</argument>
+                    <krav>er lik 1</krav>
+                    <resultat>OPPFYLT</resultat>
+                </betingelse>
+                <betingelse>
+                    <argument>HOVEDARBEIDSFORHOLDET_VARER_I_HELE_SØKNADSPERIODEN</argument>
+                    <krav>er sann</krav>
+                    <resultat>OPPFYLT</resultat>
+                </betingelse>
+                <betingelse>
+                    <argument>LENGDE_MND_UTENLANDSOPPHOLD</argument>
+                    <krav>er mindre enn eller lik 24</krav>
+                    <resultat>OPPFYLT</resultat>
+                </betingelse>
+                <betingelse>
+                    <argument>BRUKER_ER_MEDLEM_AV_FTRL_MÅNEDEN_FØR_PERIODESTART</argument>
+                    <krav>er sann</krav>
+                    <resultat>OPPFYLT</resultat>
+                </betingelse>
+            </betingelser>
+        </lovvalgsbestemmelse>
+    </lovvalgsbestemmelser>
+    <feilmeldinger>
+        <feilmelding>
+            <kategori>
+                <alvorlighetsgrad>VARSEL</alvorlighetsgrad>
+                <beskrivelse>Det er implementert delvis maskinell støtte for denne forespørselen.</beskrivelse>
+            </kategori>
+            <melding>Bryr meg ikke... 12.1 samma hva.</melding>
+        </feilmelding>
+        <feilmelding>
+            <kategori>
+                <alvorlighetsgrad>FEIL</alvorlighetsgrad>
+                <beskrivelse>Det er ikke implementert maskinell støtte for denne forespørselen.</beskrivelse>
+            </kategori>
+            <melding>Bryr meg ikke... 12.1 samma hva.</melding>
+        </feilmelding>
+    </feilmeldinger>
+</fastsettLovvalgReply>

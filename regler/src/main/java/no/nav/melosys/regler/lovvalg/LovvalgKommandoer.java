@@ -1,22 +1,16 @@
 package no.nav.melosys.regler.lovvalg;
 
+import java.util.ArrayList;
+
+import no.nav.melosys.regler.api.lovvalg.rep.*;
+import no.nav.melosys.regler.motor.AvbrytRegelkjoeringIStillhetException;
+import no.nav.melosys.regler.motor.KontekstManager;
+import no.nav.melosys.regler.motor.voc.Verdielement;
+
 import static no.nav.melosys.regler.api.lovvalg.rep.Kategori.TEKNISK_FEIL;
 import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
 import static no.nav.melosys.regler.motor.RegelLogg.loggError;
 import static no.nav.melosys.regler.motor.RegelLogg.loggInfo;
-
-import java.util.ArrayList;
-
-import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
-import no.nav.melosys.regler.api.lovvalg.rep.Argument;
-import no.nav.melosys.regler.api.lovvalg.rep.Artikkel;
-import no.nav.melosys.regler.api.lovvalg.rep.Betingelse;
-import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
-import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
-import no.nav.melosys.regler.api.lovvalg.rep.Lovvalgsbestemmelse;
-import no.nav.melosys.regler.motor.AvbrytRegelkjoeringIStillhetException;
-import no.nav.melosys.regler.motor.KontekstManager;
-import no.nav.melosys.regler.motor.voc.Verdielement;
 
 /**
  * Klassen inneholder verbalisering av kommandoer
@@ -33,7 +27,7 @@ public final class LovvalgKommandoer {
         return () -> {
             Feilmelding feil = new Feilmelding();
             feil.kategori = kat;
-            feil.feilmelding = melding;
+            feil.melding = melding;
             responsen().feilmeldinger.add(feil);
             loggInfo("Setter {}: {}", (kat.alvorlighetsgrad == Alvorlighetsgrad.FEIL ? "feil" : "varsel"), melding);
         };
@@ -68,14 +62,14 @@ public final class LovvalgKommandoer {
     /** Kommando som legger til en lovvalgsbestemmelse for en artikkel. */
     public static final Runnable opprettLovvalgbestemmelse(Artikkel artikkel, Betingelse... betingelser) {
         return () -> {
-            if (responsen().lovvalgsbestemmelser.get(artikkel) != null) {
-                loggError("Forsøk på å opprette eksisterende artikkel {}", artikkel);
-                leggTilMeldingOgAvbryt(TEKNISK_FEIL, "Teknisk feil i regelmodulen").run();
-            }
             Lovvalgsbestemmelse lb = new Lovvalgsbestemmelse();
             lb.artikkel = artikkel;
             lb.betingelser = new ArrayList<>();
-            responsen().lovvalgsbestemmelser.put(artikkel, lb);
+            if (responsen().lovvalgsbestemmelser.contains(lb)) {
+                loggError("Forsøk på å opprette eksisterende artikkel {}", artikkel);
+                leggTilMeldingOgAvbryt(TEKNISK_FEIL, "Teknisk feil i regelmodulen").run();
+            }
+            responsen().lovvalgsbestemmelser.add(lb);
             loggInfo("Opprettet lovvalgsbestemmelse for artikkel {}", artikkel);
             for (Betingelse bet : betingelser) {
                 lb.betingelser.add(bet);

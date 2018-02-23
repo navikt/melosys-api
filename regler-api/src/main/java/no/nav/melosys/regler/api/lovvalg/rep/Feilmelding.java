@@ -7,8 +7,8 @@ public class Feilmelding {
 
     /** Meldikngens kategori */
     public Kategori kategori;
-    
+
     /** Teknisk melding */
-    public String feilmelding;
+    public String melding;
  
 }

@@ -1,27 +1,33 @@
 package no.nav.melosys.service;
 
-import java.util.ArrayList;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
-import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
-import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
 import no.nav.melosys.repository.BehandlingRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /**
  * Service som kaller regelmodulen.
@@ -29,16 +35,22 @@ import no.nav.melosys.repository.BehandlingRepository;
 @Service
 public class RegelmodulService {
 
-    private final String APPLICATION_JSON_UTF_8 = "application/json;charset=utf-8";
-
     private String regelmodulUrl;
 
     private BehandlingRepository behandlingRepo;
+
+    private DocumentBuilderFactory documentBuilderFactory;
+
+    private TransformerFactory transformerFactory;
+
+    private static Logger log = LoggerFactory.getLogger(RegelmodulService.class);
 
     @Autowired
     public RegelmodulService(@Value("${melosys.service.regelmodul.url}") String regelmodulUrl, BehandlingRepository repository) {
         this.regelmodulUrl = regelmodulUrl;
         this.behandlingRepo = repository;
+        this.transformerFactory = TransformerFactory.newInstance();
+        this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
     }
 
     /**
@@ -52,52 +64,84 @@ public class RegelmodulService {
             return null;
         }
 
-        FastsettLovvalgRequest fastsettLovvalgRequest = lagRequest(behandling);
+        try {
+            String APPLICATION_XML_UTF_8 = "application/xml;charset=utf-8";
+            String fastsettLovvalgRequest = lagRequest(behandling);
 
-        return ClientBuilder.newClient().target(regelmodulUrl)
-                .request(APPLICATION_JSON_UTF_8)
-                .post(Entity.entity(fastsettLovvalgRequest, APPLICATION_JSON_UTF_8), FastsettLovvalgReply.class);
+            return ClientBuilder.newClient().target(regelmodulUrl)
+                    .request(APPLICATION_XML_UTF_8)
+                    .post(Entity.entity(fastsettLovvalgRequest, APPLICATION_XML_UTF_8), FastsettLovvalgReply.class);
+
+        } catch (ParserConfigurationException | TransformerException | IOException | SAXException e) {
+            log.error("Uventet feil ved generering av inndata til Regelmodul", e);
+        }
+        return null;
     }
 
     /**
      * Lager en request til regelmodulen for en gitt behandling.
      */
-    FastsettLovvalgRequest lagRequest(Behandling behandling) {
-        FastsettLovvalgRequest fastsettLovvalgRequest = new FastsettLovvalgRequest();
-        fastsettLovvalgRequest.arbeidsforholdDokumenter = new ArrayList<>();
-        fastsettLovvalgRequest.inntektDokumenter = new ArrayList<>();
-        fastsettLovvalgRequest.medlemskapDokumenter = new ArrayList<>();
-        fastsettLovvalgRequest.organisasjonDokumenter = new ArrayList<>();
+    private String lagRequest(Behandling behandling) throws ParserConfigurationException, TransformerException, IOException, SAXException {
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document document = documentBuilder.newDocument();
+
+        Element dokumenter = document.createElement("dokumenter");
+        Map<String, Element> dokumentnoder = new HashMap<>();
+        dokumentnoder.put("arbeidsforholdDokumenter", document.createElement("arbeidsforholdDokumenter"));
+        dokumentnoder.put("inntektDokumenter", document.createElement("inntektDokumenter"));
+        dokumentnoder.put("medlemskapDokumenter", document.createElement("medlemskapDokumenter"));
+        dokumentnoder.put("organisasjonDokumenter", document.createElement("organisasjonDokumenter"));
 
         for (Saksopplysning saksopplysning : behandling.getSaksopplysninger()) {
             SaksopplysningType type = saksopplysning.getType();
-            SaksopplysningDokument dokument = saksopplysning.getDokument();
+            Element dokumentnode = xmlTilNode(saksopplysning.getInternXml(), documentBuilder, document);
 
             switch (type) {
                 case ARBEIDSFORHOLD:
-                    fastsettLovvalgRequest.arbeidsforholdDokumenter.add((ArbeidsforholdDokument)dokument);
+                    dokumentnoder.get("arbeidsforholdDokumenter").appendChild(dokumentnode);
                     break;
                 case INNTEKT:
-                    fastsettLovvalgRequest.inntektDokumenter.add((InntektDokument)dokument);
+                    dokumentnoder.get("inntektDokumenter").appendChild(dokumentnode);
                     break;
                 case MEDLEMSKAP:
-                    fastsettLovvalgRequest.medlemskapDokumenter.add((MedlemskapDokument)dokument);
+                    dokumentnoder.get("medlemskapDokumenter").appendChild(dokumentnode);
                     break;
                 case ORGANISASJON:
-                    fastsettLovvalgRequest.organisasjonDokumenter.add((OrganisasjonDokument)dokument);
+                    dokumentnoder.get("organisasjonDokumenter").appendChild(dokumentnode);
                     break;
                 case PERSONOPPLYSNING:
-                    fastsettLovvalgRequest.personopplysningDokument = (PersonDokument) dokument;
+                    dokumentnoder.put("personDokument", dokumentnode);
                     break;
                 case SØKNAD:
-                    fastsettLovvalgRequest.søknadDokument = (SoeknadDokument) dokument;
+                    dokumentnoder.put("soeknadDokument", dokumentnode);
                     break;
                 default:
                     throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");
             }
         }
 
-        return fastsettLovvalgRequest;
+        for (Element dokumentnode : dokumentnoder.values()) {
+            if (dokumentnode.hasChildNodes()) {
+                dokumenter.appendChild(dokumentnode);
+            }
+        }
+
+        if (dokumenter.hasChildNodes()) {
+            document.appendChild(dokumenter);
+        }
+
+        DOMSource source = new DOMSource(document);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        StreamResult result = new StreamResult(outputStream);
+
+        transformerFactory.newTransformer().transform(source, result);
+        return outputStream.toString();
     }
 
+    private Element xmlTilNode(String xml, DocumentBuilder builder, Document document) throws IOException, SAXException {
+        InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
+        Element node = builder.parse(inputStream).getDocumentElement();
+        document.adoptNode(node);
+        return node;
+    }
 }

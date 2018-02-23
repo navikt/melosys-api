@@ -1,31 +1,29 @@
 package no.nav.melosys.regler.service.lovvalg;
 
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.initialiserLokalKontekst;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.responsen;
-import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.slettLokalKontekst;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.util.ArrayList;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.util.JAXBResult;
+import javax.xml.transform.*;
+import javax.xml.transform.stream.StreamSource;
 
+import io.swagger.annotations.*;
+import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
+import no.nav.melosys.regler.api.lovvalg.rep.*;
+import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
+import no.nav.melosys.regler.lovvalg.LovvalgRegelflyt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Contact;
-import io.swagger.annotations.Info;
-import io.swagger.annotations.SwaggerDefinition;
-import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
-import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
-import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
-import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
-import no.nav.melosys.regler.api.lovvalg.req.FastsettLovvalgRequest;
-import no.nav.melosys.regler.lovvalg.LovvalgRegelflyt;
+import static no.nav.melosys.regler.lovvalg.LovvalgKontekstManager.*;
 
 @Component
 @Path("lovvalg")
@@ -46,19 +44,54 @@ import no.nav.melosys.regler.lovvalg.LovvalgRegelflyt;
 )
 public class LovvalgTjenesteImpl implements LovvalgTjeneste {
     
+    // Disse kan flyttes til en felles-util modul
     public static final String APPLICATION_JSON_UTF_8 = "application/json;charset=utf-8";
-    
+    public static final String APPLICATION_XML_UTF_8 = "application/xml;charset=utf-8";
+
     private static Logger log = LoggerFactory.getLogger(LovvalgTjenesteImpl.class);
+
+    /*
+        Referanseimplementasjonen av JAXBContext er thread-safe, men det er ikke en del av spesifikasjonen
+        (og da heller ikke javadoc). Dette er ok så lenge vi ikke bytter implementasjon av JAX.
+    */
+    private final JAXBContext context;
+
+    private final Templates templates;
+
+    private static final String LOVVALG_REQUEST_XSLT = "fastsett-lovvalg-request.xslt";
+
+    public LovvalgTjenesteImpl() {
+        try (InputStream xslt = getClass().getClassLoader().getResourceAsStream(LOVVALG_REQUEST_XSLT)) {
+            TransformerFactory factory = TransformerFactory.newInstance();
+            templates = factory.newTemplates(new StreamSource(xslt));
+            context = JAXBContext.newInstance(FastsettLovvalgRequest.class);
+        } catch (IOException | JAXBException | TransformerConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     @POST
     @Path("fastsettLovvalg") // FIXME: Denne tjenesten er nært bundet til søknad a1. Bør gjenspeiles i tjenestenavn.
-    @Consumes(LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8)
-    @Produces(LovvalgTjenesteImpl.APPLICATION_JSON_UTF_8)
+    @Consumes(LovvalgTjenesteImpl.APPLICATION_XML_UTF_8)
+    @Produces(LovvalgTjenesteImpl.APPLICATION_XML_UTF_8)
     @ApiOperation(
             value= "Fastsetter lovvalgsland",
             notes = "Tjeneste som anvender lovverk til å fastsette lovvalgsland for en forespørsel"
     )
+    public FastsettLovvalgReply fastsettLovvalgApi(String xml) {
+        try {
+            JAXBResult result = new JAXBResult(context);
+            StringReader reader = new StringReader(xml);
+            templates.newTransformer().transform(new StreamSource(reader), result);
+            FastsettLovvalgRequest request = (FastsettLovvalgRequest) result.getResult();
+            return fastsettLovvalg(request);
+        } catch (JAXBException | TransformerException e) {
+            log.error("Uventet feil ved lesing av inndata i Regelmodul", e);
+        }
+        return null;
+    }
+
     public FastsettLovvalgReply fastsettLovvalg(FastsettLovvalgRequest req) {
         try {
             // Sett lokal kontekst for regelsett...
@@ -78,7 +111,7 @@ public class LovvalgTjenesteImpl implements LovvalgTjeneste {
 
             Feilmelding feil = new Feilmelding();
             feil.kategori = Kategori.TEKNISK_FEIL;
-            feil.feilmelding = "Uventet Exception";
+            feil.melding = "Uventet Exception";
             res.feilmeldinger.add(feil);
             // Forsøk å legge til evt. andre feil også...
             try {
