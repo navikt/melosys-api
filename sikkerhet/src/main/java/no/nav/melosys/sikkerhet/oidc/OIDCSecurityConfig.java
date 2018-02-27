@@ -32,7 +32,7 @@ public class OIDCSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers("/internal/**");
+        web.ignoring().antMatchers("/static/**", "/internal/**");
     }
 
     @Override
