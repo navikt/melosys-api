@@ -130,7 +130,7 @@
             <!-- FIXME: Finnes ikke i Nexus; installeres lokalt -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>regler</artifactId>
+                <artifactId>regler-api</artifactId>
                 <version>${melosys.regler.version}</version>
             </dependency>
             <dependency>
