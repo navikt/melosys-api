@@ -30,6 +30,8 @@ fasitResources:
     resourceType: credential
   - alias: melosysDB
     resourceType: datasource
+  - alias: melosys:regelmodul
+    resourceType: webserviceendpoint
   - alias: virksomhet:Arbeidsforhold_v3
     resourceType: webserviceendpoint
   - alias: virksomhet:Inntekt_v3
@@ -48,7 +50,3 @@ fasitResources:
     resourceType: credential
   - alias: OpenIdConnect
     resourceType: baseurl
-  - alias: loadbalancer:melosys
-    resourceType: loadbalancerconfig
-  - alias: melosys:regelmodul
-    resourceType: webserviceendpoint
