@@ -50,3 +50,5 @@ fasitResources:
     resourceType: baseurl
   - alias: loadbalancer:melosys
     resourceType: loadbalancerconfig
+  - alias: melosys:regelmodul
+    resourceType: webserviceendpoint

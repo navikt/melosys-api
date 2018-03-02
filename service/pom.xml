@@ -38,7 +38,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-regler-api</artifactId>
+            <artifactId>regler-api</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
