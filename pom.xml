@@ -36,7 +36,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- NAV -->
-        <melosys.regler.version>0.0.1-SNAPSHOT</melosys.regler.version>
+        <melosys.regler.version>0.42.0-SNAPSHOT</melosys.regler.version>
         <aareg.arbeidsforhold.version>3.0.0</aareg.arbeidsforhold.version>
         <doksys.dokumentproduksjon.version>2.1.3</doksys.dokumentproduksjon.version>
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>
@@ -127,7 +127,6 @@
                 <artifactId>melosys-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <!-- FIXME: Finnes ikke i Nexus; installeres lokalt -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>regler-api</artifactId>
