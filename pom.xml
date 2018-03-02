@@ -16,7 +16,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>aura-config</module>
         <module>build</module>
         <module>config</module>
         <module>domain</module>
