@@ -32,8 +32,20 @@
         </dependency>
 
         <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc8</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>xdb6</artifactId>
+        </dependency>
+        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -62,4 +74,38 @@
             </exclusions>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>${flyway.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.flywaydb</groupId>
+                        <artifactId>flyway-core</artifactId>
+                        <version>${flyway.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.oracle</groupId>
+                        <artifactId>ojdbc8</artifactId>
+                        <version>${ojdbc.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.oracle</groupId>
+                        <artifactId>xmlparserv2</artifactId>
+                        <version>${oxmlparserv2.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <driver>oracle.jdbc.driver.OracleDriver</driver>
+                    <encoding>ISO-8859-1</encoding>
+                    <initOnMigrate>true</initOnMigrate>
+                    <location>db/migration/melosysDB</location>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
