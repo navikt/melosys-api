@@ -1,5 +1,9 @@
 package no.nav.melosys.domain.dokument.medlemskap;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.melosys.domain.dokument.KodeverkEnum;
 
 /**
@@ -14,6 +18,14 @@ public enum Periodetype implements KodeverkEnum<Periodetype> {
 
     Periodetype(String navn) {
         this.navn = navn;
+    }
+
+    @JsonValue
+    public Map getJson() {
+        Map<String, String> periodetypeMap = new HashMap<>();
+        periodetypeMap.put("kode", name());
+        periodetypeMap.put("term", navn);
+        return periodetypeMap;
     }
 
     @Override
