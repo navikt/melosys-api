@@ -2,6 +2,18 @@ package no.nav.melosys.integrasjon.gsak;
 
 import java.util.ArrayList;
 import java.util.List;
+import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.felles.exception.TekniskException;
+import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumer;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSFerdigstillOppgaveException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOppgaveIkkeFunnetException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOptimistiskLasingException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSSikkerhetsbegrensningException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.gsak.behandlesak.BehandleSakConsumer;
@@ -23,10 +35,6 @@ import no.nav.tjeneste.virksomhet.behandlesak.v1.meldinger.OpprettSakResponse;
 import no.nav.tjeneste.virksomhet.oppgave.v3.informasjon.oppgave.Oppgave;
 import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeResponse;
 import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeSortering;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class GsakService implements GsakFasade {
@@ -40,11 +48,13 @@ public class GsakService implements GsakFasade {
 
     private OppgaveConsumer oppgaveConsumer;
 
-    @Autowired
-    public GsakService(BehandleSakConsumer behandleSakConsumer, OppgaveConsumer oppgaveConsumer) {
+    private BehandleOppgaveConsumer behandleOppgaveConsumer;
 
+    @Autowired
+    public GsakService(BehandleSakConsumer behandleSakConsumer, OppgaveConsumer oppgaveConsumer, BehandleOppgaveConsumer behandleOppgaveConsumer) {
         this.behandleSakConsumer = behandleSakConsumer;
         this.oppgaveConsumer = oppgaveConsumer;
+        this.behandleOppgaveConsumer = behandleOppgaveConsumer;
     }
 
     @Override
@@ -83,7 +93,6 @@ public class GsakService implements GsakFasade {
         }
     }
 
-
     @Override
     public List<OppgaveDTO> finnOppgaveListe(String ansvarligEnhetId,
                                              String brukerID,
@@ -109,5 +118,47 @@ public class GsakService implements GsakFasade {
             log.error("Fant ingen oppgaver: {}", e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    public void lagreOppgave(WSLagreOppgaveRequest request) throws IntegrasjonException, SikkerhetsbegrensningException, TekniskException {
+        WSLagreOppgaveRequest req = new WSLagreOppgaveRequest();
+        // FIXME: Populer requesten
+
+        try {
+            behandleOppgaveConsumer.lagreOppgave(req);
+        } catch (WSOppgaveIkkeFunnetException e) {
+            throw new IntegrasjonException(e);
+        } catch (WSSikkerhetsbegrensningException e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (WSOptimistiskLasingException e) {
+            throw new TekniskException(e);
+        }
+    }
+
+    @Override
+    public WSFerdigstillOppgaveResponse ferdigstillOppgave(WSFerdigstillOppgaveRequest request) throws SikkerhetsbegrensningException, TekniskException {
+        WSFerdigstillOppgaveRequest req = new WSFerdigstillOppgaveRequest();
+        // FIXME: Populer requesten
+
+        try {
+            return behandleOppgaveConsumer.ferdigstillOppgave(req);
+        } catch (WSSikkerhetsbegrensningException e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (WSFerdigstillOppgaveException e) {
+            throw new TekniskException(e);
+        }
+    }
+
+    @Override
+    public WSOpprettOppgaveResponse opprettOppgave(WSOpprettOppgaveRequest request) throws SikkerhetsbegrensningException {
+        WSOpprettOppgaveRequest req = new WSOpprettOppgaveRequest();
+        // FIXME: Populer requesten
+
+        try {
+            return behandleOppgaveConsumer.opprettOppgave(req);
+        } catch (WSSikkerhetsbegrensningException e) {
+            throw new SikkerhetsbegrensningException(e);
+        }
     }
 }
