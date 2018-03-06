@@ -6,7 +6,7 @@ import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.gsak.dto.OppgaveDTO;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.felles.exception.TekniskException;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.*;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSLagreOppgaveRequest;
 
 public interface GsakFasade {
 
@@ -41,7 +41,7 @@ public interface GsakFasade {
     // FIXME: Ikke eksponer eksterne avhengigheter
     void lagreOppgave(WSLagreOppgaveRequest request) throws IntegrasjonException, SikkerhetsbegrensningException, TekniskException;
 
-    WSFerdigstillOppgaveResponse ferdigstillOppgave(WSFerdigstillOppgaveRequest request) throws SikkerhetsbegrensningException, TekniskException;
+    void ferdigstillOppgave(String oppgaveId) throws SikkerhetsbegrensningException, TekniskException;
 
-    WSOpprettOppgaveResponse opprettOppgave(WSOpprettOppgaveRequest request) throws SikkerhetsbegrensningException;
+    String opprettOppgave() throws SikkerhetsbegrensningException;
 }

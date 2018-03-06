@@ -43,6 +43,8 @@ public class GsakService implements GsakFasade {
     private static final String FAGOMRÅDE_KODE_MEDLEMSKAP = "MED"; // -> Medlemskap
     private static final String FAGSYSTEM_KODE_MELOSYS = "FS22";// TODO (FA) endre når koden er opprettet i GSAK
     private static final String SAK_TYPE_FAGSAK = "MFS"; // -> Med fagsak
+    private static final int ENHET_ID_MELOSYS = 0; // FIXME
+    private static final String HENVENDELSETYPE_KODE = ""; // FIXME
 
     private BehandleSakConsumer behandleSakConsumer;
 
@@ -124,9 +126,13 @@ public class GsakService implements GsakFasade {
     public void lagreOppgave(WSLagreOppgaveRequest request) throws IntegrasjonException, SikkerhetsbegrensningException, TekniskException {
         WSLagreOppgaveRequest req = new WSLagreOppgaveRequest();
         // FIXME: Populer requesten
+        WSLagreOppgave lagreOppgave = new WSLagreOppgave();
+
+        request.setWsLagreOppgave(lagreOppgave);
+        request.setEndretAvEnhetId(ENHET_ID_MELOSYS);
 
         try {
-            behandleOppgaveConsumer.lagreOppgave(req);
+            behandleOppgaveConsumer.lagreOppgave(request);
         } catch (WSOppgaveIkkeFunnetException e) {
             throw new IntegrasjonException(e);
         } catch (WSSikkerhetsbegrensningException e) {
@@ -137,12 +143,14 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public WSFerdigstillOppgaveResponse ferdigstillOppgave(WSFerdigstillOppgaveRequest request) throws SikkerhetsbegrensningException, TekniskException {
-        WSFerdigstillOppgaveRequest req = new WSFerdigstillOppgaveRequest();
-        // FIXME: Populer requesten
+    public void ferdigstillOppgave(String oppgaveId) throws SikkerhetsbegrensningException, TekniskException {
+        WSFerdigstillOppgaveRequest request = new WSFerdigstillOppgaveRequest();
+
+        request.setOppgaveId(oppgaveId);
+        request.setFerdigstiltAvEnhetId(ENHET_ID_MELOSYS);
 
         try {
-            return behandleOppgaveConsumer.ferdigstillOppgave(req);
+            behandleOppgaveConsumer.ferdigstillOppgave(request);
         } catch (WSSikkerhetsbegrensningException e) {
             throw new SikkerhetsbegrensningException(e);
         } catch (WSFerdigstillOppgaveException e) {
@@ -151,12 +159,18 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public WSOpprettOppgaveResponse opprettOppgave(WSOpprettOppgaveRequest request) throws SikkerhetsbegrensningException {
-        WSOpprettOppgaveRequest req = new WSOpprettOppgaveRequest();
-        // FIXME: Populer requesten
+    public String opprettOppgave() throws SikkerhetsbegrensningException {
+        WSOpprettOppgaveRequest request = new WSOpprettOppgaveRequest();
+        // FIXME: Populeres med data
+        WSOppgave oppgave = new WSOppgave();
+
+        request.setWsOppgave(oppgave);
+        request.setOpprettetAvEnhetId(ENHET_ID_MELOSYS);
+        request.setHenvendelsetypeKode(HENVENDELSETYPE_KODE);
 
         try {
-            return behandleOppgaveConsumer.opprettOppgave(req);
+            WSOpprettOppgaveResponse response = behandleOppgaveConsumer.opprettOppgave(request);
+            return response.getOppgaveId();
         } catch (WSSikkerhetsbegrensningException e) {
             throw new SikkerhetsbegrensningException(e);
         }
