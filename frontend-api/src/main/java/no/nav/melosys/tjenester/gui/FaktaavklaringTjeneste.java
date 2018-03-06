@@ -8,9 +8,16 @@ import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 @Api(tags = {"faktaavklaring"})
 @Path("/faktaavklaring")
@@ -18,49 +25,25 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 public class FaktaavklaringTjeneste extends RestTjeneste {
 
-    private String jsonFaktaAvklaring = "{\n" +
-            "  \"behandlingID\": 123456789,\n" +
-            "  \"faktaavklaring\": {\n" +
-            "    \"periode\": {\n" +
-            "      \"land\": [\"FR\"],\n" +
-            "      \"periodeFraOgMed\": \"2018-01-01\",\n" +
-            "      \"periodeTilOgMed\": \"2019-01-01\"\n" +
-            "    },\n" +
-            "    \"aktivitet\": {\n" +
-            "      \"aktivitetLand\": [\"DE\"]\n" +
-            "    },\n" +
-            "    \"sysselsetting\": {\n" +
-            "      \"sysselsettingType\": \"ARBEIDSTAKER\"\n" +
-            "    },\n" +
-            "    \"utsending\": {\n" +
-            "      \"ansattINorskSelskap\": true,\n" +
-            "      \"erstatterTidligereUtsendt\": false,\n" +
-            "      \"utsendingMindreEnn24Mnd\": true\n" +
-            "    },\n" +
-            "    \"bostedsland\": {\n" +
-            "      \"bekrefterFamiliebosted\": null,\n" +
-            "      \"bekrefterDisponering\": null,\n" +
-            "      \"bostedsLand\": []\n" +
-            "    },\n" +
-            "    \"sektor\": {\n" +
-            "      \"ansattISektor\": \"INGEN_AV_DISSE\"\n" +
-            "    },\n" +
-            "    \"virksomhet\": {\n" +
-            "      \"antallLand\": \"ETT_LAND_IKKE_NORGE\",\n" +
-            "      \"aktivitetINorge\": \"OVER_25_PROSENT\",\n" +
-            "      \"marginaltArbeid\": \"MARGINALT_JA\",\n" +
-            "      \"vekslingMellomLand\": \"EN_ELLER_BEGGE\"\n" +
-            "    }\n" +
-            "  },\n" +
-            "  \"status\": {\n" +
-            "    \"periode\": \"OK\",\n" +
-            "    \"aktivitet\": \"OK\",\n" +
-            "    \"sysselsetting\": \"OK\",\n" +
-            "    \"utsending\": \"OK\",\n" +
-            "    \"sektor\": \"OK\",\n" +
-            "    \"virksomhet\": \"OK\"\n" +
-            "  }\n" +
-            "}";
+    private String jsonFaktaAvklaring;
+
+    @Autowired
+    public FaktaavklaringTjeneste(ResourceLoader resourceLoader) throws IOException {
+        Resource resource = resourceLoader.getResource("classpath:faktaavklaring.json");
+
+        InputStream inputStream = resource.getInputStream();
+
+        StringBuilder stringBuilder = new StringBuilder();
+        try (Reader reader = new BufferedReader(new InputStreamReader
+                (inputStream, Charset.forName(StandardCharsets.UTF_8.name())))) {
+            int c = 0;
+            while ((c = reader.read()) != -1) {
+                stringBuilder.append((char) c);
+            }
+        }
+
+        jsonFaktaAvklaring = stringBuilder.toString();
+    }
 
     @GET
     @Path("{behandlingID}")
