@@ -7,7 +7,7 @@ replicas:
 port: 8080
 healthcheck:
     liveness:
-      initialDelay: 180
+      initialDelay: 240
       path: internal/health
     readiness:
       initialDelay: 120
