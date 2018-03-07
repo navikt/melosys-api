@@ -33,9 +33,8 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-
-        <!-- NAV -->
         <melosys.regler.version>0.42.0-SNAPSHOT</melosys.regler.version>
+        <oppgave.version>3.0.0</oppgave.version>
         <aareg.arbeidsforhold.version>3.0.0</aareg.arbeidsforhold.version>
         <doksys.dokumentproduksjon.version>2.1.3</doksys.dokumentproduksjon.version>
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>
@@ -287,6 +286,13 @@
             </dependency>
 
             <!-- NAV felleskomponenter -->
+            <!--Gsak-->
+            <dependency>
+                <groupId>no.nav.tjenester.fim</groupId>
+                <artifactId>nav-fim-oppgave-v3-tjenestespesifikasjon</artifactId>
+                <version>${oppgave.version}</version>
+                <classifier>jaxws</classifier>
+            </dependency>
             <dependency>
                 <groupId>no.nav.modig</groupId>
                 <artifactId>modig-testcertificates</artifactId>

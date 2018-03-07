@@ -22,7 +22,6 @@ import no.nav.tjeneste.virksomhet.behandlesak.v1.meldinger.OpprettSakResponse;
 public class GsakService implements GsakFasade {
 
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
-
     private static final String FAGOMRÅDE_KODE_MEDLEMSKAP = "MED"; // -> Medlemskap
     private static final String FAGSYSTEM_KODE_MELOSYS = "FS22";// TODO (FA) endre når koden er opprettet i GSAK
     private static final String SAK_TYPE_FAGSAK = "MFS"; // -> Med fagsak
