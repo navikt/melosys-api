@@ -16,3 +16,4 @@ es-local.properties
 *.db
 build/jar/src/main/resources/public/
 app/src/main/resources/db/flyway_q1.properties
+app/src/main/resources/db/flyway_p.properties
