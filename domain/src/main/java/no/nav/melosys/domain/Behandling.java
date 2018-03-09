@@ -25,21 +25,13 @@ public class Behandling {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    // FIXME (farjam 2017-10-06): Har vi en ekstern behandlingsId fra GSak??? I så fall bruk den for equals & hash.
-    @Column(name = "gsak_id")
-    private Long gsakID;
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "fagsak_id", nullable = false, updatable = false)
     private Fagsak fagsak;
 
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, updatable = true)
     @Convert(converter = BehandlingStatus.DbKonverterer.class)
     private BehandlingStatus status;
-
-    @Column(name = "steg", nullable = false)
-    @Convert(converter = BehandlingSteg.DbKonverterer.class)
-    private BehandlingSteg steg;
 
     @Column(name = "beh_type", nullable = false, updatable = false)
     @Convert(converter = BehandlingType.DbKonverterer.class)
@@ -47,6 +39,9 @@ public class Behandling {
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
+
+    @Column(name = "endret_dato", nullable = false, updatable = true)
+    private LocalDateTime endretDato;
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Saksopplysning> saksopplysninger;
@@ -56,14 +51,6 @@ public class Behandling {
 
     public long getId() {
         return id;
-    }
-
-    public Long getGsakID() {
-        return gsakID;
-    }
-
-    public void setGsakID(Long gsakID) {
-        this.gsakID = gsakID;
     }
 
     public Fagsak getFagsak() {
@@ -82,14 +69,6 @@ public class Behandling {
         this.status = status;
     }
 
-    public BehandlingSteg getSteg() {
-        return steg;
-    }
-
-    public void setSteg(BehandlingSteg steg) {
-        this.steg = steg;
-    }
-
     public BehandlingType getType() {
         return type;
     }
@@ -104,6 +83,14 @@ public class Behandling {
 
     public void setRegistrertDato(LocalDateTime registrertDato) {
         this.registrertDato = registrertDato;
+    }
+
+    public LocalDateTime getEndretDato() {
+        return endretDato;
+    }
+
+    public void setEndretDato(LocalDateTime endretDato) {
+        this.endretDato = endretDato;
     }
 
     public Set<Saksopplysning> getSaksopplysninger() {

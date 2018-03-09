@@ -32,10 +32,6 @@ public class BehandlingHistorikk {
     @Convert(converter = BehandlingStatus.DbKonverterer.class)
     private BehandlingStatus status;
 
-    @Column(name = "steg", nullable = false)
-    @Convert(converter = BehandlingSteg.DbKonverterer.class)
-    private BehandlingSteg steg;
-
     @Column(name = "ident", nullable = false, updatable = false)
     private String ident;
     
@@ -68,14 +64,6 @@ public class BehandlingHistorikk {
 
     public void setStatus(BehandlingStatus status) {
         this.status = status;
-    }
-
-    public BehandlingSteg getSteg() {
-        return steg;
-    }
-
-    public void setSteg(BehandlingSteg steg) {
-        this.steg = steg;
     }
 
     public String getIdent() {

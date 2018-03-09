@@ -71,10 +71,10 @@ public class MottakService {
 
         // Oppretter en sak i GSAK
         // FIXME Francois koble til eksisterende sak
-        String saksNummer = gsakFasade.opprettSak(fagsak.getId(), fnr);
+        String gsakSaksNummer = gsakFasade.opprettSak(fagsak.getId(), fnr);
 
         // Oppdaterer fagsak med saksnummer fra GSAK
-        fagsak.setSaksnummer(Long.parseLong(saksNummer));
+        fagsak.setGsakSaksnummer(Long.parseLong(gsakSaksNummer));
         fagsak.setStatus(FagsakStatus.OPPRETTET); // FIXME FA riktig status
         fagsakRepo.save(fagsak);
 
