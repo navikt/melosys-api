@@ -12,6 +12,7 @@ public class BehandlingOppsummeringDto {
     private BehandlingStatus status;
     private BehandlingType type;
     private LocalDateTime registrertDato;
+    private LocalDateTime endretDato;
 
     public Long getBehandlingID() {
         return behandlingID;
@@ -51,6 +52,14 @@ public class BehandlingOppsummeringDto {
 
     public void setRegistrertDato(LocalDateTime registrertDato) {
         this.registrertDato = registrertDato;
+    }
+
+    public LocalDateTime getEndretDato() {
+        return endretDato;
+    }
+
+    public void setEndretDato(LocalDateTime endretDato) {
+        this.endretDato = endretDato;
     }
 
 }

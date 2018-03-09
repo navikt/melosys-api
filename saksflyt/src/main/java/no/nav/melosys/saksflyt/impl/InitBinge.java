@@ -1,16 +1,13 @@
 package no.nav.melosys.saksflyt.impl;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingStatus;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 
 @Component
@@ -20,28 +17,30 @@ public class InitBinge implements InitializingBean {
 
     private Binge binge;
 
-    private BehandlingRepository behandlingRepo;
+    private ProsessinstansRepository prosessinstansRepo;
 
     @Autowired
-    public InitBinge(Binge binge, BehandlingRepository behandlingRepo) {
+    public InitBinge(Binge binge, ProsessinstansRepository prosessinstansRepo) {
         this.binge = binge;
-        this.behandlingRepo = behandlingRepo;
+        this.prosessinstansRepo = prosessinstansRepo;
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
 
-        List<Behandling> uavsluttet = behandlingRepo.findByStatusNot(BehandlingStatus.AVSLUTTET);
+        Iterable<Prosessinstans> alleProsessinstanser = prosessinstansRepo.findAll();
 
         int teller = 0;
 
-        for (Behandling behandling : uavsluttet) {
-            if (binge.leggTil(behandling)) {
+        for (Prosessinstans pi : alleProsessinstanser) {
+            if (binge.leggTil(pi)) {
                 teller++;
-                log.debug("Behandling med id {} er lagt i bingen", behandling.getId());
+                log.debug("Prosessinstans med id {} er lagt i bingen", pi.getId());
+            } else {
+                assert false;
             }
         }
 
-        log.info("{} behandling(er) er lagt i bingen", teller);
+        log.info("{} prosessinstans(er) er lagt i bingen", teller);
     }
 }

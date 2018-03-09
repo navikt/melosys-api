@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.impl.domain;
 
-import static no.nav.melosys.domain.BehandlingSteg.KLARGJORT;
-import static no.nav.melosys.domain.BehandlingSteg.NY;
+import static no.nav.melosys.domain.ProsessSteg.KLARGJORT;
+import static no.nav.melosys.domain.ProsessSteg.NY;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import org.junit.Test;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingSteg;
+import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.saksflyt.impl.Utils;
 
 public class BehandlingUtilsTest {
@@ -20,7 +20,7 @@ public class BehandlingUtilsTest {
         Behandling b = new Behandling();
         b.setSteg(NY);
         assertFalse(Utils.medSteg(KLARGJORT).test(b));
-        b.setSteg(BehandlingSteg.KLARGJORT);
+        b.setSteg(ProsessSteg.KLARGJORT);
         assertTrue(Utils.medSteg(KLARGJORT).test(b));
     }
 

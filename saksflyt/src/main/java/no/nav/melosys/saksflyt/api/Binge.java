@@ -5,62 +5,61 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Prosessinstans;
 
 
 /**
- * Shared object space for alle behandlinger.
+ * Shared object space for alle prosessinstanser.
  * 
- * Implementasjonen tilbyr operasjoner for å legge til, hente og fjerne behandlinger.
+ * Implementasjonen tilbyr operasjoner for å legge til, hente og fjerne prosessinstanser.
  * 
- * Å legge til behandlinger putter dem inn i bingen. Å hente behandlinger vil vise hva som finnes i bingen (uten å fjerne dem).
- * Å fjerne behandlinger vil hente ut behandlingen og samtidig fjerne dem fra bingen.
+ * Å legge til prosessinstanser putter dem inn i bingen. Å hente prosessinstanser vil vise hva som finnes i bingen (uten å fjerne dem).
+ * Å fjerne prosessinstanser vil hente ut prosessinstanser og samtidig fjerne dem fra bingen.
  * 
  */
 public interface Binge {
 
     /**
-     * Legger til en behandling hvis det allerede ikke finnes en behandling i bingen med samme behandlingsId.
+     * Legger til en prosessinstans hvis det allerede ikke finnes en prosessinstans i bingen med samme prosessinstansId.
      *
-     * @return True hvis behandlingen ble lagt til
+     * @return True hvis prosessinstansen ble lagt til
      */
-    public boolean leggTil(Behandling behandling);
+    public boolean leggTil(Prosessinstans prosessinstans);
 
     /**
-     * Henter en behandling med en gitt id uten å fjerne den fra lageret.
+     * Henter en prosessinstans med en gitt id uten å fjerne den fra lageret.
      * 
-     * @return Angitt behandling, eller null hvis ingen slik behandling i lageret.
+     * @return Angitt prosessinstans, eller null hvis ingen slik prosessinstans i lageret.
      */
-    public Behandling hentBehandling(long behandlingsId);
+    public Prosessinstans hentProsessinstans(long prosessinstansId);
 
     /**
-     * Henter alle behandlinger som tilfredsstiller et predikat fra lageret (uten å fjerne dem fra lageret).
+     * Henter alle prosessinstanser som tilfredsstiller et predikat fra lageret (uten å fjerne dem fra lageret).
      */
-    public Collection<Behandling> hentBehandlinger(Predicate<Behandling> predikat);
+    public Collection<Prosessinstans> hentProsessinstanser(Predicate<Prosessinstans> predikat);
 
     /**
-     * Henter alle behandlinger som tilfredsstiller et predikat fra lageret (uten å fjerne dem fra lageret). Listen sorteres
-     * etter et gitt kriterium.
+     * Henter alle prosessinstanser som tilfredsstiller et predikat fra lageret (uten å fjerne dem fra lageret). Listen sorteres etter et gitt kriterium.
      */
-    public List<Behandling> hentBehandlinger(Predicate<Behandling> predikat, Comparator<Behandling> rekkefølge);
+    public List<Prosessinstans> hentProsessinstanser(Predicate<Prosessinstans> predikat, Comparator<Prosessinstans> rekkefølge);
 
     /**
-     * Fjerner en behandling med en gitt id fra lageret.
+     * Fjerner en prosessinstans med en gitt id fra lageret.
      * 
-     * @return Angitt behandling, eller null hvis ingen slik behandling i lageret.
+     * @return Angitt prosessinstans, eller null hvis ingen slik prosessinstans i lageret.
      */
-    public Behandling fjernBehandling(long behandlingsId);
+    public Prosessinstans fjernProsessinstans(long prosessinstansId);
 
     /**
-     * Fjerner og returnerer den første behandlingen som tilfredsstiller det gitte predikatet, eller null hvis ingen
-     * behandlinger tilfredsstiller kriteriet.
+     * Fjerner og returnerer den første prosessinstansen som tilfredsstiller det gitte predikatet, eller null hvis ingen
+     * prosessinstanser tilfredsstiller kriteriet.
      */
-    public Behandling fjernFørsteBehandling(Predicate<Behandling> predikat);
+    public Prosessinstans fjernFørsteProsessinstans(Predicate<Prosessinstans> predikat);
 
     /**
-     * Fjerner og returnerer den første behandlingen som tilfredsstiller det gitte predikatet, eller null hvis ingen
-     * behandlinger tilfredsstiller kriteriet. Listen sorteres etter et gitt kriterium.
+     * Fjerner og returnerer den første prosessinstansen som tilfredsstiller det gitte predikatet, eller null hvis ingen
+     * prosessinstanser tilfredsstiller kriteriet. Listen sorteres etter et gitt kriterium.
      */
-    public Behandling fjernFørsteBehandling(Predicate<Behandling> predikat, Comparator<Behandling> rekkefølge);
+    public Prosessinstans fjernFørsteProsessinstans(Predicate<Prosessinstans> predikat, Comparator<Prosessinstans> rekkefølge);
 
 }

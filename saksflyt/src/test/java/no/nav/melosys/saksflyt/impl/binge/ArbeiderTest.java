@@ -7,7 +7,6 @@ import static org.mockito.Mockito.atMost;
 
 import java.util.Arrays;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -19,7 +18,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import no.nav.melosys.saksflyt.SaksflytApplication;
-import no.nav.melosys.saksflyt.impl.steg.a1.KlargjoereSteg;
+import no.nav.melosys.saksflyt.impl.steg.a1.HentPersonopplysningerAgent;
 
 @RunWith(MockitoJUnitRunner.class)
 @ContextConfiguration(classes = { SaksflytApplication.class })
@@ -29,10 +28,9 @@ public class ArbeiderTest {
     private Arbeider arbeider;
 
     @Mock
-    private KlargjoereSteg klargjøreSteg;
+    private HentPersonopplysningerAgent klargjøreSteg;
 
     @Test
-    @Ignore
     /** FIXME Farjam Using Thread.sleep in a test is just generally a bad idea. (fra Sonar)
     It creates brittle tests that can fail unpredictably depending on environment ("Passes on my machine!") or load. **/
     public void testAtStegeneBlirKalt() throws Exception {
