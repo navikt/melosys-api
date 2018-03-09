@@ -7,6 +7,7 @@ import no.nav.melosys.integrasjon.gsak.dto.OppgaveDTO;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.felles.exception.TekniskException;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSLagreOppgaveRequest;
+import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
 
 public interface GsakFasade {
 
@@ -43,5 +44,5 @@ public interface GsakFasade {
 
     void ferdigstillOppgave(String oppgaveId) throws SikkerhetsbegrensningException, TekniskException;
 
-    String opprettOppgave() throws SikkerhetsbegrensningException;
+    String opprettOppgave(OpprettOppgaveRequest request) throws SikkerhetsbegrensningException;
 }
