@@ -3,12 +3,10 @@ package no.nav.melosys.integrasjon.gsak.oppgave;
 
 import javax.xml.namespace.QName;
 
+import no.nav.tjeneste.virksomhet.oppgave.v3.binding.OppgaveV3;
 import org.apache.cxf.feature.LoggingFeature;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.ws.addressing.WSAddressingFeature;
-import org.apache.cxf.ws.security.SecurityConstants;
-
-import no.nav.tjeneste.virksomhet.oppgave.v3.binding.OppgaveV3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,7 +21,7 @@ public class OppgaveConsumerConfig {
     private String endpointUrl;  // NOSONAR
 
     @Autowired
-    public OppgaveConsumerConfig(@Value("Oppgave_v3.url") String endpointUrl) {
+    public OppgaveConsumerConfig(@Value("${Oppgave_v3.url}") String endpointUrl) {
         this.endpointUrl = endpointUrl;
     }
 

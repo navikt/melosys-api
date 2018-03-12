@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.gsak.oppgave;
 
 import java.util.Objects;
+
 import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeSortering;
 
 public class FinnOppgaveListeRequestMal {

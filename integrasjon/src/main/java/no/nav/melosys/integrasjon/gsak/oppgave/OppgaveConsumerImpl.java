@@ -29,7 +29,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
             result.setFilter(mapFilter(request.getFilter()));
         }
 
-        if (! (request.getIkkeTidligereFordeltTil() == null)) {
+        if (!(request.getIkkeTidligereFordeltTil() == null)) {
             result.setIkkeTidligereFordeltTil(request.getIkkeTidligereFordeltTil());
         }
         return result;
