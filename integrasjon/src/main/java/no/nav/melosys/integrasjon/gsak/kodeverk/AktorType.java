@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.kodeverk;
+package no.nav.melosys.integrasjon.gsak.kodeverk;
 
 /**
  * Denne enumen er en hardkoding av kodeverket AktorT:

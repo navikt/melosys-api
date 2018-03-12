@@ -26,7 +26,7 @@ public class BehandleOppgaveConsumerProducer {
 
     @Bean
     public BehandleOppgaveSelftestConsumer behandleOppgaveSelftestConsumer() {
-        BehandleOppgaveV1 port = config.getPort();
+        BehandleOppgaveV1 port = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SYSTEM_SAML);
         return new BehandleOppgaveSelftestConsumerImpl(port, config.getEndpointUrl());
     }
 

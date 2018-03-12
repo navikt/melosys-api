@@ -11,7 +11,7 @@ import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningExceptio
 import no.nav.melosys.integrasjon.felles.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
-import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.kodeverk.AktorType;
+import no.nav.melosys.integrasjon.gsak.kodeverk.AktorType;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSFerdigstillOppgaveException;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOppgaveIkkeFunnetException;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOptimistiskLasingException;
@@ -50,7 +50,7 @@ public class GsakService implements GsakFasade {
     private static final String FAGOMRÅDE_KODE_MEDLEMSKAP = "MED"; // -> Medlemskap
     private static final String FAGSYSTEM_KODE_MELOSYS = "FS22";// TODO (FA) endre når koden er opprettet i GSAK
     private static final String SAK_TYPE_FAGSAK = "MFS"; // -> Med fagsak
-    private static final int ENHET_ID_MELOSYS = 0; // FIXME: Endre når ID er opprettet i GSAK
+    private static final int ENHET_ID_MELOSYS = 4530;
 
     private BehandleSakConsumer behandleSakConsumer;
 
@@ -180,11 +180,16 @@ public class GsakService implements GsakFasade {
         WSOppgave oppgave = new WSOppgave();
         oppgave.setSaksnummer(request.getSaksnummer());
         oppgave.setAnsvarligEnhetId(request.getAnsvarligEnhetId());
-        oppgave.setFagomradeKode(request.getFagområde().toString());
+        if (request.getFagområde() != null) {
+            oppgave.setFagomradeKode(request.getFagområde().name());
+        }
         oppgave.setGjelderBruker(byggWSAktør(request.getFnr(), request.getAktørType()));
 
         try {
-            oppgave.setAktivFra(KonverteringsUtils.localDateTimeToXMLGregorianCalendar(request.getAktivFra().atStartOfDay()));
+            Optional<LocalDate> aktivFra = request.getAktivFra();
+            if (aktivFra.isPresent()) {
+                oppgave.setAktivFra(KonverteringsUtils.localDateTimeToXMLGregorianCalendar(aktivFra.get().atStartOfDay()));
+            }
         } catch (DatatypeConfigurationException e) {
             throw new IllegalArgumentException("Kan ikke sette aktiv fradato", e);
         }
@@ -198,12 +203,19 @@ public class GsakService implements GsakFasade {
             throw new IllegalArgumentException("Kan ikke sette aktiv tildato", e);
         }
 
-        oppgave.setOppgavetypeKode(request.getOppgaveType().name());
-        oppgave.setUnderkategoriKode(request.getUnderkategoriKode().name());
-        oppgave.setPrioritetKode(request.getPrioritetType().toString());
+        if (request.getOppgaveType() != null) {
+            oppgave.setOppgavetypeKode(request.getOppgaveType().name());
+        }
+        if (request.getUnderkategoriKode() != null) {
+            oppgave.setUnderkategoriKode(request.getUnderkategoriKode().name());
+        }
+        if (request.getPrioritetType() != null) {
+            oppgave.setPrioritetKode(request.getPrioritetType().name());
+        }
         oppgave.setBeskrivelse(request.getBeskrivelse());
         oppgave.setLest(request.isLest());
         oppgave.setDokumentId(request.getDokumentId());
+
         try {
             oppgave.setNormDato(KonverteringsUtils.localDateToXMLGregorianCalendar(request.getNormertBehandlingsTidInnen()));
         } catch (DatatypeConfigurationException e) {

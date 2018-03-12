@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.kodeverk;
+package no.nav.melosys.integrasjon.gsak.kodeverk;
 
 import no.nav.melosys.domain.dokument.KodeverkEnum;
 

@@ -1,10 +1,8 @@
 package no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave;
 
-import javax.xml.bind.Unmarshaller;
-
-import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.kodeverk.Fagomrade;
-import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.kodeverk.OppgaveType;
-import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.kodeverk.Underkategori;
+import no.nav.melosys.integrasjon.gsak.kodeverk.Fagomrade;
+import no.nav.melosys.integrasjon.gsak.kodeverk.OppgaveType;
+import no.nav.melosys.integrasjon.gsak.kodeverk.Underkategori;
 
 public class OpprettOppgave {
 

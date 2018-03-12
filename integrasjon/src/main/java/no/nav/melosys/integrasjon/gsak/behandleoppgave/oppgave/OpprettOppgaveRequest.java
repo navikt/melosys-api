@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.kodeverk.*;
+import no.nav.melosys.integrasjon.gsak.kodeverk.*;
 
 public class OpprettOppgaveRequest {
 
@@ -50,8 +50,8 @@ public class OpprettOppgaveRequest {
         return oppgave.getFagområde();
     }
 
-    public LocalDate getAktivFra() {
-        return fristOgPrioritet.getAktivFra();
+    public Optional<LocalDate> getAktivFra() {
+        return Optional.ofNullable(fristOgPrioritet.getAktivFra());
     }
 
     public Optional<LocalDate> getAktivTil() {

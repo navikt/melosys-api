@@ -6,11 +6,11 @@ import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumerImpl;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
-import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.kodeverk.*;
 import no.nav.melosys.integrasjon.gsak.behandlesak.BehandleSakConsumer;
 import no.nav.melosys.integrasjon.gsak.behandlesak.BehandleSakConsumerImpl;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumerImpl;
+import no.nav.melosys.integrasjon.gsak.kodeverk.*;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.BehandleOppgaveV1;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOppgave;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveRequest;
@@ -64,7 +64,7 @@ public class GsakServiceTest {
         final WSOppgave oppgave = request.getWsOppgave();
 
         assertThat(request.getOpprettetAvEnhetId()).isEqualTo(mal.getOpprettetAvEnhetId());
-        assertThat(KonverteringsUtils.xmlGregorianCalendarToLocalDate(oppgave.getAktivFra())).isEqualTo(mal.getAktivFra());
+        assertThat(KonverteringsUtils.xmlGregorianCalendarToLocalDate(oppgave.getAktivFra())).isEqualTo(mal.getAktivFra().orElseGet(null));
         assertThat(KonverteringsUtils.xmlGregorianCalendarToLocalDate(oppgave.getAktivTil())).isEqualTo(mal.getAktivTil().orElseGet(null));
         assertThat(oppgave.getGjelderBruker().getIdent()).isEqualTo(mal.getFnr());
         assertThat(oppgave.getBeskrivelse()).isEqualTo(mal.getBeskrivelse());
