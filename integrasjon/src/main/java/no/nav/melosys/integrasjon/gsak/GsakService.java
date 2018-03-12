@@ -74,7 +74,7 @@ public class GsakService implements GsakFasade {
 
         try {
             OpprettSakResponse response = behandleSakConsumer.opprettSak(opprettSakRequest);
-            log.info("Sak opprettet i GSAK med saksnummer: {}", response.getSakId());
+            log.debug("Sak opprettet i GSAK med saksnummer: {}", response.getSakId());
             return response.getSakId();
         } catch (OpprettSakSakEksistererAllerede e) {
             throw new IntegrasjonException(e);
