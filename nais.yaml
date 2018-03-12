@@ -32,7 +32,15 @@ fasitResources:
     resourceType: datasource
   - alias: melosys:regelmodul
     resourceType: webserviceendpoint
+  - alias: BehandleInngaaendeJournal_v1
+    resourceType: webserviceendpoint
+  - alias: InngaaendeJournal_v1
+    resourceType: webserviceendpoint
+  - alias: Journal_v3
+    resourceType: webserviceendpoint
   - alias: virksomhet:Arbeidsforhold_v3
+    resourceType: webserviceendpoint
+  - alias: virksomhet:BehandleSak_v1
     resourceType: webserviceendpoint
   - alias: virksomhet:Oppgave_v3
     resourceType: webserviceendpoint
@@ -45,6 +53,8 @@ fasitResources:
   - alias: virksomhet:Organisasjon_v4
     resourceType: webserviceendpoint
   - alias: virksomhet:Person_v3
+    resourceType: webserviceendpoint
+  - alias: virksomhet:Sak_v1
     resourceType: webserviceendpoint
   - alias: securityTokenService
     resourceType: baseurl
