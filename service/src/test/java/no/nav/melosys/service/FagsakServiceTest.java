@@ -93,7 +93,6 @@ public class FagsakServiceTest {
                 assertFalse(behandling.getSaksopplysninger().isEmpty());
             }
 
-            //printJson(fagsak);
         }
         // Skru på logging igjen
         log.setLevel(opprinneligLevel);

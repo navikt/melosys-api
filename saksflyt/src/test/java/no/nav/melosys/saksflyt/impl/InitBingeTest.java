@@ -14,47 +14,41 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingStatus;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 
-//@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class InitBingeTest {
 
-    /* FIXME
     @Mock
     private Binge binge;
 
     @Mock
-    private BehandlingRepository behandlingRepo;
+    private ProsessinstansRepository prosessinstansRepo;
 
     private InitBinge initBinge;
 
     @Before
     public void setUp() {
-        initBinge = new InitBinge(binge, behandlingRepo);
+        initBinge = new InitBinge(binge, prosessinstansRepo);
     }
 
     @Test
     public void afterPropertiesSet() throws Exception {
-        List<Behandling> testBehandlinger = new ArrayList<>();
+        List<Prosessinstans> testBehandlinger = new ArrayList<>();
 
-        Behandling b1 = new Behandling();
-        b1.setStatus(BehandlingStatus.OPPRETTET);
-        Behandling b2 = new Behandling();
-        b2.setStatus(BehandlingStatus.UNDER_BEHANDLING);
+        Prosessinstans pi1 = new Prosessinstans(), pi2 = new Prosessinstans();
 
-        testBehandlinger.add(b1);
-        testBehandlinger.add(b2);
+        testBehandlinger.add(pi1);
+        testBehandlinger.add(pi2);
 
-        when(behandlingRepo.findByStatusNot(BehandlingStatus.AVSLUTTET)).thenReturn(testBehandlinger);
-        when(binge.leggTil(any(Behandling.class))).thenReturn(true);
+        when(prosessinstansRepo.findAll()).thenReturn(testBehandlinger);
+        when(binge.leggTil(any(Prosessinstans.class))).thenReturn(true);
 
         initBinge.afterPropertiesSet();
 
-        verify(binge, times(testBehandlinger.size())).leggTil(any(Behandling.class));
+        verify(binge, times(testBehandlinger.size())).leggTil(any(Prosessinstans.class));
     }
 
-*/
 }
