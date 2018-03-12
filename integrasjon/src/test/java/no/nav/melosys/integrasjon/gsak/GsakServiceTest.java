@@ -2,6 +2,11 @@ package no.nav.melosys.integrasjon.gsak;
 
 import java.time.LocalDate;
 
+import no.nav.melosys.domain.gsak.AktorType;
+import no.nav.melosys.domain.gsak.Fagomrade;
+import no.nav.melosys.domain.gsak.OppgaveType;
+import no.nav.melosys.domain.gsak.PrioritetType;
+import no.nav.melosys.domain.gsak.Underkategori;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumerImpl;
@@ -10,7 +15,6 @@ import no.nav.melosys.integrasjon.gsak.behandlesak.BehandleSakConsumer;
 import no.nav.melosys.integrasjon.gsak.behandlesak.BehandleSakConsumerImpl;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumerImpl;
-import no.nav.melosys.integrasjon.gsak.kodeverk.*;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.BehandleOppgaveV1;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOppgave;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveRequest;
@@ -21,6 +25,8 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+
+;
 
 public class GsakServiceTest {
 

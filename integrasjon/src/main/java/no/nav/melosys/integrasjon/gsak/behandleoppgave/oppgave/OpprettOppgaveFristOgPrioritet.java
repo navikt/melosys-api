@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.integrasjon.gsak.kodeverk.PrioritetType;
+import no.nav.melosys.domain.gsak.PrioritetType;
 
 public class OpprettOppgaveFristOgPrioritet {
     private LocalDate aktivFra;

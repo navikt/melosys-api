@@ -29,7 +29,11 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
             result.setFilter(mapFilter(request.getFilter()));
         }
 
-        if (!(request.getIkkeTidligereFordeltTil() == null)) {
+        if (request.getSortering() != null) {
+            result.setSorteringKode(request.getSortering());
+        }
+
+        if (request.getIkkeTidligereFordeltTil() != null) {
             result.setIkkeTidligereFordeltTil(request.getIkkeTidligereFordeltTil());
         }
         return result;
@@ -37,6 +41,11 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
 
     private FinnOppgaveListeSok mapSok(FinnOppgaveListeSokMal sokMal) {
         FinnOppgaveListeSok oppgaveListeSok = new FinnOppgaveListeSok();
+
+        if (sokMal.getFagområdeKodeListe() != null) {
+            oppgaveListeSok.getFagomradeKodeListe().addAll(sokMal.getFagområdeKodeListe());
+        }
+
         oppgaveListeSok.setAnsvarligEnhetId(sokMal.getAnsvarligEnhetId());
         oppgaveListeSok.setBrukerId(sokMal.getBrukerId());
         oppgaveListeSok.setSakId(sokMal.getSakId());
@@ -46,18 +55,22 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
 
     private FinnOppgaveListeFilter mapFilter(FinnOppgaveListeFilterMal filterMal) {
         FinnOppgaveListeFilter oppgaveListeFilter = new FinnOppgaveListeFilter();
-        oppgaveListeFilter.setOpprettetEnhetId(filterMal.getOpprettetEnhetId());
-        oppgaveListeFilter.setOpprettetEnhetNavn(filterMal.getOpprettetEnhetNavn());
-        oppgaveListeFilter.setAnsvarligEnhetNavn(filterMal.getAnsvarligEnhetNavn());
+
+        if (filterMal.getAktiv() != null) {
+            oppgaveListeFilter.setAktiv(filterMal.getAktiv());
+        }
+
+        if (filterMal.getUfordelte() != null) {
+            oppgaveListeFilter.setUfordelte(filterMal.getUfordelte());
+        }
+
+        if (filterMal.getUnderkategoriKode() != null) {
+            oppgaveListeFilter.setUnderkategoriKode(filterMal.getUnderkategoriKode());
+        }
 
         if (filterMal.getOppgavetypeKodeListe() != null) {
             List<String> oppgavetypeKodeListe = oppgaveListeFilter.getOppgavetypeKodeListe();
             oppgavetypeKodeListe.addAll(filterMal.getOppgavetypeKodeListe());
-        }
-
-        if (filterMal.getBrukertypeKodeListe() != null) {
-            List<String> brukertypeKodeListe = oppgaveListeFilter.getBrukertypeKodeListe();
-            brukertypeKodeListe.addAll(filterMal.getBrukertypeKodeListe());
         }
 
         return oppgaveListeFilter;

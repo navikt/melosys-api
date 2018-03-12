@@ -1,8 +1,8 @@
 package no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave;
 
-import no.nav.melosys.integrasjon.gsak.kodeverk.Fagomrade;
-import no.nav.melosys.integrasjon.gsak.kodeverk.OppgaveType;
-import no.nav.melosys.integrasjon.gsak.kodeverk.Underkategori;
+import no.nav.melosys.domain.gsak.Fagomrade;
+import no.nav.melosys.domain.gsak.OppgaveType;
+import no.nav.melosys.domain.gsak.Underkategori;
 
 public class OpprettOppgave {
 

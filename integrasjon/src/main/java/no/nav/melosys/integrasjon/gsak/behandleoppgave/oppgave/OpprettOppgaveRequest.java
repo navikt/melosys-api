@@ -3,7 +3,11 @@ package no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.melosys.integrasjon.gsak.kodeverk.*;
+import no.nav.melosys.domain.gsak.AktorType;
+import no.nav.melosys.domain.gsak.Fagomrade;
+import no.nav.melosys.domain.gsak.OppgaveType;
+import no.nav.melosys.domain.gsak.PrioritetType;
+import no.nav.melosys.domain.gsak.Underkategori;
 
 public class OpprettOppgaveRequest {
 

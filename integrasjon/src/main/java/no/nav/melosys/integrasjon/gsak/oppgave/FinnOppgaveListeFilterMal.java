@@ -3,66 +3,57 @@ package no.nav.melosys.integrasjon.gsak.oppgave;
 import java.util.List;
 
 public class FinnOppgaveListeFilterMal {
-    private String opprettetEnhetId;
-    private String opprettetEnhetNavn;
-    private String ansvarligEnhetNavn;
+    private String underkategoriKode;
+    private Boolean aktiv;
+    private Boolean ufordelte;
     private List<String> oppgavetypeKodeListe;
-    private List<String> brukertypeKodeListe;
 
-    // Har fjernet en del filter kriterier. Kan legges til senere ved behov.
-    public FinnOppgaveListeFilterMal(String opprettetEnhetId, String opprettetEnhetNavn, String ansvarligEnhetNavn,
-                                     List<String> oppgavetypeKodeListe, List<String> brukertypeKodeListe) {
-        this.opprettetEnhetId = opprettetEnhetId;
-        this.opprettetEnhetNavn = opprettetEnhetNavn;
-        this.ansvarligEnhetNavn = ansvarligEnhetNavn;
+    public FinnOppgaveListeFilterMal(String underkategoriKode, boolean aktiv, boolean ufordelte, List<String> oppgavetypeKodeListe) {
+        this.underkategoriKode = underkategoriKode;
         this.oppgavetypeKodeListe = oppgavetypeKodeListe;
-        this.brukertypeKodeListe = brukertypeKodeListe;
+        this.aktiv = aktiv;
+        this.ufordelte = ufordelte;
+        this.oppgavetypeKodeListe = oppgavetypeKodeListe;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public String getOpprettetEnhetId() {
-        return opprettetEnhetId;
+    public Boolean getAktiv() {
+        return aktiv;
     }
 
-    public String getOpprettetEnhetNavn() {
-        return opprettetEnhetNavn;
+    public Boolean getUfordelte() {
+        return ufordelte;
     }
 
-    public String getAnsvarligEnhetNavn() {
-        return ansvarligEnhetNavn;
+    public String getUnderkategoriKode() {
+        return underkategoriKode;
     }
 
     public List<String> getOppgavetypeKodeListe() {
         return oppgavetypeKodeListe;
     }
 
-    public List<String> getBrukertypeKodeListe() {
-        return brukertypeKodeListe;
-    }
-
     public static class Builder {
-        private String opprettetEnhetId;
-        private String opprettetEnhetNavn;
-        private String ansvarligEnhetNavn;
+        private String underkategoriKode;
+        private boolean aktiv;
+        private boolean ufordelte;
         private List<String> oppgavetypeKodeListe;
-        private List<String> brukertypeKodeListe;
 
-
-        public Builder medOpprettetEnhetId(String opprettetEnhetId) {
-            this.opprettetEnhetId = opprettetEnhetId;
+        public Builder medUnderkategori(String underkategoriKode) {
+            this.underkategoriKode = underkategoriKode;
             return this;
         }
 
-        public Builder medOpprettetEnhetNavn(String opprettetEnhetNavn) {
-            this.opprettetEnhetNavn = opprettetEnhetNavn;
+        public Builder medAktiv(boolean aktiv) {
+            this.aktiv = aktiv;
             return this;
         }
 
-        public Builder medAnsvarligEnhetNavn(String ansvarligEnhetNavn) {
-            this.ansvarligEnhetNavn = ansvarligEnhetNavn;
+        public Builder medUfordelte(boolean ufordelte) {
+            this.ufordelte = ufordelte;
             return this;
         }
 
@@ -71,13 +62,8 @@ public class FinnOppgaveListeFilterMal {
             return this;
         }
 
-        public Builder medBrukertypeKodeListe(List<String> brukertypeKodeListe) {
-            this.brukertypeKodeListe = brukertypeKodeListe;
-            return this;
-        }
-
         public FinnOppgaveListeFilterMal build() {
-            return new FinnOppgaveListeFilterMal(opprettetEnhetId, opprettetEnhetNavn, ansvarligEnhetNavn, oppgavetypeKodeListe, brukertypeKodeListe);
+            return new FinnOppgaveListeFilterMal(underkategoriKode, aktiv, ufordelte, oppgavetypeKodeListe);
         }
     }
 }
