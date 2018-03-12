@@ -20,10 +20,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import no.nav.melosys.saksflyt.SaksflytApplication;
 import no.nav.melosys.saksflyt.impl.steg.a1.HentPersonopplysningerAgent;
 
-//@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 @ContextConfiguration(classes = { SaksflytApplication.class })
 public class ArbeiderTest {
-    /* FIXME
+
     @InjectMocks
     private Arbeider arbeider;
 
@@ -35,14 +35,14 @@ public class ArbeiderTest {
         MockitoAnnotations.initMocks(this);
         ReflectionTestUtils.setField(arbeider, "antallTråder", 15);
         ReflectionTestUtils.setField(arbeider, "oppholdMellomSteg", 1);
-        ReflectionTestUtils.setField(arbeider, "maskinelleSteg", Arrays.asList(klargjøreSteg));
+        ReflectionTestUtils.setField(arbeider, "agenter", Arrays.asList(klargjøreSteg));
         long medgåttTid = System.currentTimeMillis();
         arbeider.start();
         Thread.sleep(20);
         arbeider.stopp();
         medgåttTid = System.currentTimeMillis() - medgåttTid + 1;
-        Mockito.verify(klargjøreSteg, atLeast(21)).finnBehandlingOgUtfoerSteg();
-        Mockito.verify(klargjøreSteg, atMost(15 * (int) medgåttTid)).finnBehandlingOgUtfoerSteg();
+        Mockito.verify(klargjøreSteg, atLeast(21)).finnProsessinstansOgUtfoerSteg();
+        Mockito.verify(klargjøreSteg, atMost(15 * (int) medgåttTid)).finnProsessinstansOgUtfoerSteg();
     }
 
     @Test
@@ -50,7 +50,7 @@ public class ArbeiderTest {
         MockitoAnnotations.initMocks(this);
         ReflectionTestUtils.setField(arbeider, "antallTråder", 100);
         ReflectionTestUtils.setField(arbeider, "oppholdMellomSteg", 1);
-        ReflectionTestUtils.setField(arbeider, "maskinelleSteg", Arrays.asList(klargjøreSteg));
+        ReflectionTestUtils.setField(arbeider, "agenter", Arrays.asList(klargjøreSteg));
         arbeider.start();
         Object[] tråder = (Object[]) ReflectionTestUtils.getField(arbeider, "tråder");
         for (Object tråd : tråder) {
@@ -61,6 +61,5 @@ public class ArbeiderTest {
             assertFalse(((Thread) tråd).isAlive());
         }
     }
-    */
 
 }
