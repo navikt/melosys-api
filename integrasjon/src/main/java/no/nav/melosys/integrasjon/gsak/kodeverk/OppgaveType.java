@@ -1,12 +1,10 @@
 package no.nav.melosys.integrasjon.gsak.kodeverk;
 
-import no.nav.melosys.domain.dokument.KodeverkEnum;
-
 /**
  * Denne enumen er en hardkoding av kodeverket OppgaveT:
  * https://kodeverkviewer.adeo.no/kodeverk/xml/oppgaveT.xml
  */
-public enum OppgaveType implements KodeverkEnum<OppgaveType> {
+public enum OppgaveType {
     BEH_SAK_MK_MED("Behandle sak (Manuell)"),
     BEH_SED_MED("Behandle SED"),
     FDR_MED("Fordeling"),
@@ -40,10 +38,5 @@ public enum OppgaveType implements KodeverkEnum<OppgaveType> {
 
     OppgaveType(String navn) {
         this.navn = navn;
-    }
-
-    @Override
-    public String getNavn() {
-        return navn;
     }
 }

@@ -13,8 +13,6 @@ import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
 import no.nav.melosys.integrasjon.gsak.kodeverk.AktorType;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSFerdigstillOppgaveException;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOppgaveIkkeFunnetException;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOptimistiskLasingException;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSSikkerhetsbegrensningException;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.*;
 import org.slf4j.Logger;
@@ -126,26 +124,6 @@ public class GsakService implements GsakFasade {
             log.error("Fant ingen oppgaver: {}", e.getMessage());
         }
         return null;
-    }
-
-    @Override
-    public void lagreOppgave(WSLagreOppgaveRequest request) throws IntegrasjonException, SikkerhetsbegrensningException, TekniskException {
-        WSLagreOppgaveRequest req = new WSLagreOppgaveRequest();
-        // FIXME: Populer requesten
-        WSLagreOppgave lagreOppgave = new WSLagreOppgave();
-
-        request.setWsLagreOppgave(lagreOppgave);
-        request.setEndretAvEnhetId(ENHET_ID_MELOSYS);
-
-        try {
-            behandleOppgaveConsumer.lagreOppgave(request);
-        } catch (WSOppgaveIkkeFunnetException e) {
-            throw new IntegrasjonException(e);
-        } catch (WSSikkerhetsbegrensningException e) {
-            throw new SikkerhetsbegrensningException(e);
-        } catch (WSOptimistiskLasingException e) {
-            throw new TekniskException(e);
-        }
     }
 
     @Override

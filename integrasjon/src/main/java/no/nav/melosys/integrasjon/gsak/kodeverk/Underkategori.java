@@ -1,12 +1,10 @@
 package no.nav.melosys.integrasjon.gsak.kodeverk;
 
-import no.nav.melosys.domain.dokument.KodeverkEnum;
-
 /**
  * Denne enumen er en hardkoding av kodeverket Underkategori:
  * https://kodeverkviewer.adeo.no/kodeverk/xml/underkategori.xml
  */
-public enum Underkategori implements KodeverkEnum<Underkategori> {
+public enum Underkategori {
     ANNET_MED("Annet"),
     ARB_AA_MED("Arbeidstakere annen avtale"),
     ARB_E101_MED("Forespørsel om trygdetid/E 104"),
@@ -62,10 +60,5 @@ public enum Underkategori implements KodeverkEnum<Underkategori> {
 
     Underkategori(String navn) {
         this.navn = navn;
-    }
-
-    @Override
-    public String getNavn() {
-        return navn;
     }
 }

@@ -1,12 +1,10 @@
 package no.nav.melosys.integrasjon.gsak.kodeverk;
 
-import no.nav.melosys.domain.dokument.KodeverkEnum;
-
 /**
  * Denne enumen er en hardkoding av kodeverket HenvendelseT:
  * https://kodeverkviewer.adeo.no/kodeverk/xml/henvendelseT.xml
  */
-public enum HenvendelseType implements KodeverkEnum<HenvendelseType> {
+public enum HenvendelseType {
     BER_UT_MED("Beregning og utbetaling"),
     FORESP_MOTE_MED("Forespørsel møte"),
     FOR_SAK_MED("Forespørsel saksdokumenter"),
@@ -20,10 +18,5 @@ public enum HenvendelseType implements KodeverkEnum<HenvendelseType> {
 
     HenvendelseType(String navn) {
         this.navn = navn;
-    }
-
-    @Override
-    public String getNavn() {
-        return navn;
     }
 }

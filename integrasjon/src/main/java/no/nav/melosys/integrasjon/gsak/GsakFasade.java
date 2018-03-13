@@ -6,7 +6,6 @@ import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.gsak.dto.OppgaveDTO;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.felles.exception.TekniskException;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSLagreOppgaveRequest;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
 
 public interface GsakFasade {
@@ -38,9 +37,6 @@ public interface GsakFasade {
                                       String sorteringKode, //STIGENDE ellers SYNKENDE
                                       String ikkeTidligereFordeltTil
     ) throws IntegrasjonException;
-
-    // FIXME: Ikke eksponer eksterne avhengigheter
-    void lagreOppgave(WSLagreOppgaveRequest request) throws IntegrasjonException, SikkerhetsbegrensningException, TekniskException;
 
     /**
      * Ferdigstiller en opprettet oppgave i GSAK
