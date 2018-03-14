@@ -11,6 +11,7 @@ import no.nav.melosys.tjenester.gui.FagsakTjeneste;
 import no.nav.melosys.tjenester.gui.FaktaavklaringTjeneste;
 import no.nav.melosys.tjenester.gui.KodeverkTjeneste;
 import no.nav.melosys.tjenester.gui.OppgaveTjeneste;
+import no.nav.melosys.tjenester.gui.OppgaveListeTjeneste;
 import no.nav.melosys.tjenester.gui.SaksbehandlerTjeneste;
 import no.nav.melosys.tjenester.gui.SokTjeneste;
 import no.nav.melosys.tjenester.gui.SoknadTjeneste;
@@ -34,9 +35,11 @@ public class JerseyConfig extends ResourceConfig {
         register(KodeverkTjeneste.class);
         register(OppgaveTjeneste.class);
         register(VurderingTjeneste.class);
+        register(OppgaveListeTjeneste.class);
         register(SaksbehandlerTjeneste.class);
         register(SoknadTjeneste.class);
         register(SokTjeneste.class);
+        register(VurderingTjeneste.class);
         configureSwagger();
     }
 

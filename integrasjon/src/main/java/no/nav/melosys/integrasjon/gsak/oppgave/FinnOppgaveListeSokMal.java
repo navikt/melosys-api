@@ -5,12 +5,16 @@ import java.util.List;
 
 public class FinnOppgaveListeSokMal {
     private String ansvarligEnhetId;
+    private String ansvarligId;
     private String brukerId;
     private String sakId;
     private List<String> fagområdeKodeListe;
 
-    public FinnOppgaveListeSokMal(String ansvarligEnhetId, String brukerId, String sakId, List<String> fagområdeKodeListe) {
+
+    public FinnOppgaveListeSokMal(String ansvarligEnhetId, String ansvarligId, String sakId, List<String> fagområdeKodeListe) {
+    // Har fjernet en del søkefelter. Kan legges til senere ved behov.
         this.ansvarligEnhetId = ansvarligEnhetId;
+        this.ansvarligId=ansvarligId;
         this.brukerId = brukerId;
         this.fagområdeKodeListe = fagområdeKodeListe;;
         this.sakId = sakId;
@@ -38,6 +42,7 @@ public class FinnOppgaveListeSokMal {
 
     public static class Builder {
         private String ansvarligEnhetId;
+        private String ansvarligId;
         private String brukerId;
         private String sakId;
         private List<String> fagområdeKodeListe;
@@ -63,7 +68,12 @@ public class FinnOppgaveListeSokMal {
         }
 
         public FinnOppgaveListeSokMal build() {
-            return new FinnOppgaveListeSokMal(ansvarligEnhetId, brukerId, sakId, fagområdeKodeListe);
+            return new FinnOppgaveListeSokMal(ansvarligEnhetId, ansvarligId, sakId, fagområdeKodeListe);
+        }
+
+        public Builder medAnsvarligId(String ansvarligId) {
+            this.ansvarligId = ansvarligId;
+            return this;
         }
     }
 }

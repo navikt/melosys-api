@@ -30,10 +30,22 @@ public interface GsakFasade {
      * @return
      * @throws IntegrasjonException
      */
+
     List<Oppgave> finnUtildelteOppgaverEtterFrist(String oppgavetype,
                                                   List<String> fagområdeKodeListe,
                                                   List<String> sakstyper,
                                                   List<String> behandlingstyper
+
+    ) throws IntegrasjonException;
+
+
+    List<Oppgave> finnOppgaveListe(String ansvarligEnhetId,
+                                      String ansvarligId,
+                                      String brukerID,
+                                      String sorteringselementKode,
+                                      String sorteringKode, //STIGENDE ellers SYNKENDE
+                                      String ikkeTidligereFordeltTil
+
     ) throws IntegrasjonException;
 
     /**

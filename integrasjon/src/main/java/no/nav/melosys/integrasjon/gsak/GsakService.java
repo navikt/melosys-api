@@ -6,7 +6,11 @@ import java.util.List;
 import java.util.Optional;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.melosys.domain.gsak.*;
+import no.nav.melosys.domain.gsak.AktorType;
+import no.nav.melosys.domain.gsak.Fagomrade;
+import no.nav.melosys.domain.gsak.Oppgavetype;
+import no.nav.melosys.domain.gsak.PrioritetType;
+import no.nav.melosys.domain.gsak.Underkategori;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
@@ -22,7 +26,14 @@ import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSFerdigstillOppgaveExcepti
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOppgaveIkkeFunnetException;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOptimistiskLasingException;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSSikkerhetsbegrensningException;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.*;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSAktor;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSAktorType;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSFerdigstillOppgaveRequest;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSLagreOppgave;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSLagreOppgaveRequest;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOppgave;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveRequest;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveResponse;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.OpprettSakSakEksistererAllerede;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.OpprettSakUgyldigInput;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Aktoer;
@@ -189,6 +200,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
+
     public String opprettOppgave(OpprettOppgaveRequest request) throws SikkerhetsbegrensningException {
         WSOpprettOppgaveRequest wsRequest = convertToWSRequest(request);
 
@@ -267,7 +279,6 @@ public class GsakService implements GsakFasade {
         oppgave.setBeskrivelse(request.getBeskrivelse());
         oppgave.setLest(request.isLest());
         oppgave.setDokumentId(request.getDokumentId());
-
         try {
             oppgave.setNormDato(KonverteringsUtils.localDateToXMLGregorianCalendar(request.getNormertBehandlingsTidInnen()));
         } catch (DatatypeConfigurationException e) {
@@ -283,6 +294,38 @@ public class GsakService implements GsakFasade {
         wsRequest.setOpprettetAvEnhetId(request.getOpprettetAvEnhetId());
         wsRequest.setWsOppgave(oppgave);
         return wsRequest;
+    }
+
+    @Override
+    public List<no.nav.melosys.domain.Oppgave> finnOppgaveListe(String ansvarligEnhetId,
+                                                                String ansvarligId,
+                                                                String brukerID,
+                                                                String sorteringselementKode, //OPPRETTET_DATO ellers FRIST_DATO
+                                                                String sorteringKode, //STIGENDE ellers SYNKENDE
+                                                                String ikkeTidligereFordeltTil) //Saksbehandlerident
+            throws IntegrasjonException {
+        FinnOppgaveListeSortering finnOppgaveListeSortering = new FinnOppgaveListeSortering();
+        finnOppgaveListeSortering.setSorteringselementKode(sorteringselementKode);
+        finnOppgaveListeSortering.setSorteringKode(sorteringKode);
+
+        FinnOppgaveListeRequestMal finnOppgaveListeRequestMal = new FinnOppgaveListeRequestMal(
+                FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(ansvarligEnhetId).medBrukerId(brukerID).medAnsvarligId(ansvarligId).build(),
+                FinnOppgaveListeFilterMal.builder().build(), finnOppgaveListeSortering, ikkeTidligereFordeltTil);
+
+        List<no.nav.melosys.domain.Oppgave> localDomainObjects = new ArrayList<>();
+        FinnOppgaveListeResponse finnOppgaveListeResponse = oppgaveConsumer.finnOppgaveListe(finnOppgaveListeRequestMal);
+        finnOppgaveListeResponse.getOppgaveListe().stream().forEach(oppgave -> {
+            no.nav.melosys.domain.Oppgave domainOppave;
+            domainOppave = new no.nav.melosys.domain.Oppgave();
+            domainOppave.setOppgaveId(oppgave.getOppgaveId());
+            domainOppave.setPrioritet(PrioritetType.valueOf(oppgave.getPrioritet().getKode()));
+            domainOppave.setAktivTil(oppgave.getAktivTil().toGregorianCalendar().toZonedDateTime().toLocalDate());
+            domainOppave.setDokumentId(oppgave.getDokumentId());
+            domainOppave.setOppgavetype(Oppgavetype.valueOf(oppgave.getOppgavetype().getKode()));
+            localDomainObjects.add(domainOppave);
+        });
+        return localDomainObjects;
+
     }
 
     @Override
