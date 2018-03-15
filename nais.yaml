@@ -44,6 +44,8 @@ fasitResources:
     resourceType: webserviceendpoint
   - alias: virksomhet:Oppgave_v3
     resourceType: webserviceendpoint
+  - alias: virksomhet:BehandleOppgave_v1
+    resourceType: webserviceendpoint
   - alias: virksomhet:Inntekt_v3
     resourceType: webserviceendpoint
   - alias: virksomhet:Kodeverk_v2

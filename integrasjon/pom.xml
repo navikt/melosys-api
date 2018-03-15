@@ -60,6 +60,10 @@
             <artifactId>nav-fim-oppgave-v3-tjenestespesifikasjon</artifactId>
             <classifier>jaxws</classifier>
         </dependency>
+        <dependency>
+            <groupId>no.nav.sbl.dialogarena</groupId>
+            <artifactId>behandleoppgave-v1-tjenestespesifikasjon</artifactId>
+        </dependency>
 
         <!--Inntektskomponenten-->
         <dependency>

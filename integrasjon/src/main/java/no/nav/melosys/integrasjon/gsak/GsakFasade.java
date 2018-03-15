@@ -4,28 +4,31 @@ import java.util.List;
 
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.gsak.dto.OppgaveDTO;
+import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.felles.exception.TekniskException;
+import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
 
 public interface GsakFasade {
 
     /**
-     * Oppretter en sak i GSAK for å få et unikt saksnummer.
+     * Oppretter en sak i GSAK for å få et unikt saksnummer
      *
-     * @param fagsakId fagsakId fra Melosys
-     * @param fnr      Fødselsnummer
-     * @return Saksnummer fra GSAK
-     * @throws IntegrasjonException
+     * @param fagsakId                  fagsakId fra Melosys
+     * @param fnr                       Fødselsnummer
+     * @return                          Saksnummer fra GSAK
+     * @throws                          IntegrasjonException
      */
     String opprettSak(Long fagsakId, String fnr) throws IntegrasjonException;
 
     /**
      * Hent OppgaveListe
      *
-     * @param ansvarligEnhetId        fagsakId fra Melosys
-     * @param brukerID                Fødselsnummer
-     * @param sorteringselementKode   OPPRETTET_DATO ellers FRIST_DATO
-     * @param sorteringKode           STIGENDE ellers SYNKENDE
-     * @param ikkeTidligereFordeltTil Saksbehandlerident
-     * @return ArrayList av OppgaveDTO som har oppgaveID
+     * @param ansvarligEnhetId          fagsakId fra Melosys
+     * @param brukerID                  Fødselsnummer
+     * @param sorteringselementKode     OPPRETTET_DATO ellers FRIST_DATO
+     * @param sorteringKode             STIGENDE ellers SYNKENDE
+     * @param ikkeTidligereFordeltTil   Saksbehandlerident
+     * @return                          ArrayList av OppgaveDTO som har oppgaveID
      * @throws IntegrasjonException
      */
     List<OppgaveDTO> finnOppgaveListe(String ansvarligEnhetId,
@@ -34,4 +37,22 @@ public interface GsakFasade {
                                       String sorteringKode, //STIGENDE ellers SYNKENDE
                                       String ikkeTidligereFordeltTil
     ) throws IntegrasjonException;
+
+    /**
+     * Ferdigstiller en opprettet oppgave i GSAK
+     *
+     * @param oppgaveId                 GSAK-oppgave som skal ferdigstilles
+     * @throws                          SikkerhetsbegrensningException
+     * @throws                          TekniskException
+     */
+    void ferdigstillOppgave(String oppgaveId) throws SikkerhetsbegrensningException, TekniskException;
+
+    /**
+     * Oppretter en oppgave i GSAK for å få en unik oppgaveId
+     *
+     * @param request                   Intern representasjon av oppgaven som skal opprettes i GSAK
+     * @return                          GSAK oppgaveId til den opprettede oppgaven
+     * @throws                          SikkerhetsbegrensningException
+     */
+    String opprettOppgave(OpprettOppgaveRequest request) throws SikkerhetsbegrensningException;
 }

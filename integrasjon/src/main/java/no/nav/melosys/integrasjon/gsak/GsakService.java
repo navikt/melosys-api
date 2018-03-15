@@ -2,6 +2,23 @@ package no.nav.melosys.integrasjon.gsak;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
+import java.util.Optional;
+import javax.xml.datatype.DatatypeConfigurationException;
+
+import no.nav.melosys.integrasjon.KonverteringsUtils;
+import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.felles.exception.TekniskException;
+import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumer;
+import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
+import no.nav.melosys.integrasjon.gsak.kodeverk.AktorType;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSFerdigstillOppgaveException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSSikkerhetsbegrensningException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.gsak.behandlesak.BehandleSakConsumer;
@@ -23,10 +40,6 @@ import no.nav.tjeneste.virksomhet.behandlesak.v1.meldinger.OpprettSakResponse;
 import no.nav.tjeneste.virksomhet.oppgave.v3.informasjon.oppgave.Oppgave;
 import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeResponse;
 import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeSortering;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class GsakService implements GsakFasade {
@@ -35,16 +48,19 @@ public class GsakService implements GsakFasade {
     private static final String FAGOMRÅDE_KODE_MEDLEMSKAP = "MED"; // -> Medlemskap
     private static final String FAGSYSTEM_KODE_MELOSYS = "FS22";// TODO (FA) endre når koden er opprettet i GSAK
     private static final String SAK_TYPE_FAGSAK = "MFS"; // -> Med fagsak
+    private static final int ENHET_ID_MELOSYS = 4530;
 
     private BehandleSakConsumer behandleSakConsumer;
 
     private OppgaveConsumer oppgaveConsumer;
 
-    @Autowired
-    public GsakService(BehandleSakConsumer behandleSakConsumer, OppgaveConsumer oppgaveConsumer) {
+    private BehandleOppgaveConsumer behandleOppgaveConsumer;
 
+    @Autowired
+    public GsakService(BehandleSakConsumer behandleSakConsumer, OppgaveConsumer oppgaveConsumer, BehandleOppgaveConsumer behandleOppgaveConsumer) {
         this.behandleSakConsumer = behandleSakConsumer;
         this.oppgaveConsumer = oppgaveConsumer;
+        this.behandleOppgaveConsumer = behandleOppgaveConsumer;
     }
 
     @Override
@@ -83,7 +99,6 @@ public class GsakService implements GsakFasade {
         }
     }
 
-
     @Override
     public List<OppgaveDTO> finnOppgaveListe(String ansvarligEnhetId,
                                              String brukerID,
@@ -109,5 +124,105 @@ public class GsakService implements GsakFasade {
             log.error("Fant ingen oppgaver: {}", e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    public void ferdigstillOppgave(String oppgaveId) throws SikkerhetsbegrensningException, TekniskException {
+        WSFerdigstillOppgaveRequest request = new WSFerdigstillOppgaveRequest();
+
+        request.setOppgaveId(oppgaveId);
+        request.setFerdigstiltAvEnhetId(ENHET_ID_MELOSYS);
+
+        try {
+            behandleOppgaveConsumer.ferdigstillOppgave(request);
+        } catch (WSSikkerhetsbegrensningException e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (WSFerdigstillOppgaveException e) {
+            throw new TekniskException(e);
+        }
+    }
+
+    @Override
+    public String opprettOppgave(OpprettOppgaveRequest request) throws SikkerhetsbegrensningException {
+        WSOpprettOppgaveRequest wsRequest = convertToWSRequest(request);
+
+        try {
+            WSOpprettOppgaveResponse response = behandleOppgaveConsumer.opprettOppgave(wsRequest);
+            return response.getOppgaveId();
+        } catch (WSSikkerhetsbegrensningException e) {
+            throw new SikkerhetsbegrensningException(e);
+        }
+    }
+
+    WSOpprettOppgaveRequest convertToWSRequest(OpprettOppgaveRequest request) {
+        WSOppgave oppgave = new WSOppgave();
+        oppgave.setSaksnummer(request.getSaksnummer());
+        oppgave.setAnsvarligEnhetId(request.getAnsvarligEnhetId());
+        if (request.getFagområde() != null) {
+            oppgave.setFagomradeKode(request.getFagområde().name());
+        }
+        oppgave.setGjelderBruker(byggWSAktør(request.getFnr(), request.getAktørType()));
+
+        try {
+            Optional<LocalDate> aktivFra = request.getAktivFra();
+            if (aktivFra.isPresent()) {
+                oppgave.setAktivFra(KonverteringsUtils.localDateTimeToXMLGregorianCalendar(aktivFra.get().atStartOfDay()));
+            }
+        } catch (DatatypeConfigurationException e) {
+            throw new IllegalArgumentException("Kan ikke sette aktiv fradato", e);
+        }
+
+        try {
+            Optional<LocalDate> aktivTil = request.getAktivTil();
+            if (aktivTil.isPresent()) {
+                oppgave.setAktivTil(KonverteringsUtils.localDateTimeToXMLGregorianCalendar(aktivTil.get().atStartOfDay()));
+            }
+        } catch (DatatypeConfigurationException e) {
+            throw new IllegalArgumentException("Kan ikke sette aktiv tildato", e);
+        }
+
+        if (request.getOppgaveType() != null) {
+            oppgave.setOppgavetypeKode(request.getOppgaveType().name());
+        }
+        if (request.getUnderkategoriKode() != null) {
+            oppgave.setUnderkategoriKode(request.getUnderkategoriKode().name());
+        }
+        if (request.getPrioritetType() != null) {
+            oppgave.setPrioritetKode(request.getPrioritetType().name());
+        }
+        oppgave.setBeskrivelse(request.getBeskrivelse());
+        oppgave.setLest(request.isLest());
+        oppgave.setDokumentId(request.getDokumentId());
+
+        try {
+            oppgave.setNormDato(KonverteringsUtils.localDateToXMLGregorianCalendar(request.getNormertBehandlingsTidInnen()));
+        } catch (DatatypeConfigurationException e) {
+            throw new IllegalArgumentException("Kan ikke sette NormDato", e);
+        }
+        try {
+            oppgave.setMottattDato(KonverteringsUtils.localDateToXMLGregorianCalendar(request.getMottattDato()));
+        } catch (DatatypeConfigurationException e) {
+            throw new IllegalArgumentException("Kan ikke sette MottattDato", e);
+        }
+
+        WSOpprettOppgaveRequest wsRequest = new WSOpprettOppgaveRequest();
+        wsRequest.setOpprettetAvEnhetId(request.getOpprettetAvEnhetId());
+        wsRequest.setWsOppgave(oppgave);
+        return wsRequest;
+    }
+
+    private WSAktor byggWSAktør(String ident, AktorType aktørType) {
+        WSAktor wsAktor = new WSAktor();
+        wsAktor.setIdent(ident);
+        if (aktørType == null || AktorType.BLANK == aktørType) {
+            return wsAktor;
+        } else if (AktorType.ORGANISASJON == aktørType) {
+            wsAktor.setAktorType(WSAktorType.ORGANISASJON);
+        } else if (AktorType.PERSON == aktørType) {
+            wsAktor.setAktorType(WSAktorType.PERSON);
+        } else {
+            wsAktor.setAktorType(WSAktorType.UKJENT);
+        }
+        return wsAktor;
     }
 }
