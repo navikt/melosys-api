@@ -1,8 +1,7 @@
 CREATE TABLE fagsak (
     id              NUMBER(19) GENERATED ALWAYS AS IDENTITY,
-    gsak_saksnummer NUMBER(19, 0) NULL,
+    gsak_saksnummer VARCHAR2(99)  NULL,
     fagsak_type     VARCHAR2(99)  NOT NULL,
-    versjon         INTEGER       NOT NULL,
     status          VARCHAR2(99)  NOT NULL,
     registrert_dato TIMESTAMP     NOT NULL,
     endret_dato     TIMESTAMP     NOT NULL,

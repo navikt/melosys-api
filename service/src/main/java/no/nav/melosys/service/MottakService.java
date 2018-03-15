@@ -1,5 +1,11 @@
 package no.nav.melosys.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.BehandlingType;
@@ -9,11 +15,6 @@ import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Brukes til å opprette en sak i GSAK og i databasen etter en søknad er mottat
@@ -74,7 +75,7 @@ public class MottakService {
         String gsakSaksNummer = gsakFasade.opprettSak(fagsak.getId(), fnr);
 
         // Oppdaterer fagsak med saksnummer fra GSAK
-        fagsak.setGsakSaksnummer(Long.parseLong(gsakSaksNummer));
+        fagsak.setGsakSaksnummer(gsakSaksNummer);
         fagsak.setStatus(FagsakStatus.OPPRETTET); // FIXME FA riktig status
         fagsakRepo.save(fagsak);
 

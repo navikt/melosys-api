@@ -27,15 +27,12 @@ public class Fagsak {
     private long id;
 
     @Column(name = "gsak_saksnummer")
-    private Long gsakSaksnummer;
+    private String gsakSaksnummer;
     
     @Column(name = "fagsak_type", nullable = false, updatable = false)
     @Convert(converter = FagsakType.DbKonverterer.class)
     private FagsakType type;
 
-    @Column(name = "versjon", nullable = false, updatable = false)
-    private int versjon;
-    
     @Column(name = "status", nullable = false)
     @Convert(converter = FagsakStatus.DbKonverterer.class)
     private FagsakStatus status;
@@ -56,11 +53,11 @@ public class Fagsak {
         return id;
     }
 
-    public Long getGsakSaksnummer() {
+    public String getGsakSaksnummer() {
         return gsakSaksnummer;
     }
 
-    public void setGsakSaksnummer(Long gsakSaksnummer) {
+    public void setGsakSaksnummer(String gsakSaksnummer) {
         this.gsakSaksnummer = gsakSaksnummer;
     }
 
@@ -70,14 +67,6 @@ public class Fagsak {
 
     public void setType(FagsakType type) {
         this.type = type;
-    }
-
-    public int getVersjon() {
-        return versjon;
-    }
-
-    public void setVersjon(int versjon) {
-        this.versjon = versjon;
     }
 
     public FagsakStatus getStatus() {

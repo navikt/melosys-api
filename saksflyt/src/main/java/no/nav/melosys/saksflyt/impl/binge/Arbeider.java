@@ -23,7 +23,7 @@ import no.nav.melosys.saksflyt.api.Agent;
  * 
  * Konfigurasjon:
  *     melosys.saksflyt.arbeider.antallTråder – Antall tråder (default 1)
- *     melosys.saksflyt.arbeider.oppholdMellomSteg – Hvor mange millisekunder trådene skal sove mellom hvert steg som aktiveres (default 37)
+ *     melosys.saksflyt.arbeider.oppholdMellomSteg – Hvor mange millisekunder trådene skal sove mellom hvert steg som aktiveres (default 47)
  *
  */
 @Component

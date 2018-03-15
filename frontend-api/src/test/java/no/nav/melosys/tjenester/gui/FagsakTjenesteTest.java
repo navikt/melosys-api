@@ -75,7 +75,7 @@ public class FagsakTjenesteTest {
     @Test
     public void testMapping() throws Exception {
         Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(123L);
+        fagsak.setGsakSaksnummer("123");
         fagsak.setStatus(FagsakStatus.OPPRETTET);
         fagsak.setType(FagsakType.SØKNAD_A1);
         fagsak.setRegistrertDato(LocalDateTime.now());
@@ -86,9 +86,6 @@ public class FagsakTjenesteTest {
         modelMapper.validate();
 
         fagsakRepo.save(fagsak);
-
-        //System.out.println("ID " + fagsak.getId());
-
     }
 
     @Test

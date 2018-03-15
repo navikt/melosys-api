@@ -24,9 +24,9 @@ CREATE TABLE prosess_steg (
     CONSTRAINT pk_behandling_steg PRIMARY KEY (kode)
 );
 
-INSERT INTO behandling_steg (kode, navn) VALUES ('A001_JOURF', 'A1 journalføring');
-INSERT INTO behandling_steg (kode, navn) VALUES ('A001_HENT_PERS_OPPL', 'A001 hent personopplysninger');
-INSERT INTO behandling_steg (kode, navn) VALUES ('A001_HENT_ARBF_OPPL', 'A001 hent arbeidsforhold');
+INSERT INTO behandling_steg (kode, navn) VALUES ('A1_JOURF', 'A1 journalføring');
+INSERT INTO behandling_steg (kode, navn) VALUES ('A1_HENT_PERS_OPPL', 'A1 hent personopplysninger');
+INSERT INTO behandling_steg (kode, navn) VALUES ('A1_HENT_ARBF_OPPL', 'A1 hent arbeidsforhold');
 INSERT INTO behandling_steg (kode, navn) VALUES ('FEILET_MASKINELT', 'Feilet maskinelt');
 
 ALTER TABLE prosessinstans ADD CONSTRAINT fk_prosinst_behandling FOREIGN KEY (behandling_id) REFERENCES behandling;

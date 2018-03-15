@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.impl.binge;
 
-import static no.nav.melosys.domain.ProsessSteg.A001_HENT_ARBF_OPPL;
-import static no.nav.melosys.domain.ProsessSteg.A001_JOURF;
+import static no.nav.melosys.domain.ProsessSteg.A1_HENT_ARBF_OPPL;
+import static no.nav.melosys.domain.ProsessSteg.A1_JOURF;
 import static org.junit.Assert.*;
 
 import java.time.LocalDateTime;
@@ -25,8 +25,8 @@ public class BingeImplTest {
         ReflectionTestUtils.setField(pi2, "id", 2L);
         pi1.setRegistrertDato(LocalDateTime.of(2017, 1, 2, 0, 0));
         pi2.setRegistrertDato(LocalDateTime.of(2017, 1, 1, 0, 0));
-        pi1.setSteg(A001_JOURF);
-        pi2.setSteg(A001_HENT_ARBF_OPPL);
+        pi1.setSteg(A1_JOURF);
+        pi2.setSteg(A1_HENT_ARBF_OPPL);
         assertTrue(binge.leggTil(pi1));
         assertTrue(binge.leggTil(pi2));
         assertFalse(binge.leggTil(pi2)); // Skal ikke kunne legge til samme sak flere ganger

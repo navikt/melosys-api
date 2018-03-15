@@ -4,10 +4,9 @@ import javax.persistence.Converter;
 
 public enum ProsessSteg implements Kodeverk<ProsessSteg> {
 
-    // FIXME (farjam EESSI2-291): Venter på tilstandsmodellen
-    A001_JOURF("A1_JOURF", "A001 journalføring"),
-    A001_HENT_PERS_OPPL("A001_HENT_PERS_OPPL", "A001 hent personopplysninger"),
-    A001_HENT_ARBF_OPPL("A001_HENT_ARBF_OPPL", "A001 hent arbeidsforhold"),
+    A1_JOURF("A1_JOURF", "A1 journalføring"),
+    A1_HENT_PERS_OPPL("A1_HENT_PERS_OPPL", "A1 hent personopplysninger"),
+    A1_HENT_ARBF_OPPL("A1_HENT_ARBF_OPPL", "A1 hent arbeidsforhold"),
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt");
 
     private String kode;
