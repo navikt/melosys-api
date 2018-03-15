@@ -6,7 +6,7 @@ CREATE TABLE prosessinstans (
     data            VARCHAR2(4000) NULL,
     steg            VARCHAR2(99)   NULL,
     registrert_dato TIMESTAMP      NOT NULL,
-    sist_endret     TIMESTAMP      NOT NULL,
+    endret_dato     TIMESTAMP      NOT NULL,
     CONSTRAINT pk_prosessinstans PRIMARY KEY (id)
 );
 
