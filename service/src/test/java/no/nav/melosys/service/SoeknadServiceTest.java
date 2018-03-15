@@ -61,8 +61,87 @@ public class SoeknadServiceTest {
         mapper.registerModule(new JavaTimeModule());
         mapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
 
-
-        String json = "{\"soknadDokument\":{\"arbeidUtland\":{\"arbeidsland\":[\"ESP\",\"DNK\"],\"arbeidsperiode\":{\"fom\":\"2018-01-01\",\"tom\":\"2018-06-01\"},\"arbeidsandelNorge\":33.3,\"arbeidsandelUtland\":66.6,\"arbeidsstedUtland\":null,\"bostedsland\":\"SWE\",\"erstatterTidligereUtsendt\":false},\"foretakUtland\":{\"foretakUtlandNavn\":\"Volkswagen AG\",\"foretakUtlandOrgnr\":\"1122334444\",\"foretakUtlandAdresse\":null},\"oppholdUtland\":{\"oppholdsland\":\"DEU\",\"oppholdsPeriode\":{\"fom\":\"2018-01-01\",\"tom\":\"2018-06-01\"},\"studentIEOS\":false,\"studentFinansiering\":\"Beskrivelse av hvordan studiene finansieres\",\"studentSemester\":\"2018/2019\",\"studieLand\":\"SWE\"},\"arbeidNorge\":{\"arbeidsforholdOpprettholdIHelePerioden\":true,\"brukerErSelvstendigNaeringsdrivende\":true,\"selvstendigFortsetterEtterArbeidIUtlandet\":true,\"brukerArbeiderIVikarbyra\":\"false\",\"vikarOrgnr\":\"Ola Nordmann 22334455\",\"flyendePersonellHjemmebase\":\"Flybasen Int. Airport, ....\",\"ansattPaSokkelEllerSkip\":\"sokkel | skip\",\"navnSkipEllerSokkel\":\"Trym-sokkelen\",\"sokkelLand\":\"SE\",\"skipFartsomrade\":\"Europeisk fart\",\"skipFlaggLand\":\"SE\"},\"juridiskArbeidsgiverNorge\":{\"antallAnsatte\":350,\"antallAdminAnsatte\":250,\"antallAdminAnsatteEOS\":75,\"andelOmsetningINorge\":78.5,\"andelKontrakterINorge\":50.5,\"erBemanningsbyra\":false,\"hattDriftSiste12Mnd\":true,\"antallUtsendte\":30},\"arbeidsinntekt\":{\"inntektNorskIPerioden\":5500,\"inntektUtenlandskIPerioden\":2000,\"inntektNaeringIPerioden\":0,\"inntektNaturalYtelser\":[\"Fri bolig\",\"Fri bil\"],\"inntektErInnrapporteringspliktig\":true,\"inntektTrygdeavgiftBlirTrukket\":true},\"tilleggsopplysninger\":\"Lang utgreiing om utsendelsen som egentlig ikke er relevant for saksbehandlingen...\"}}";
+        // FIXME: Last json fra fil
+        String json = "{\n" +
+                "  \"soknadDokument\": {\n" +
+                "    \"arbeidUtland\": {\n" +
+                "      \"arbeidsland\": [\n" +
+                "        \"ESP\",\n" +
+                "        \"DNK\"\n" +
+                "      ],\n" +
+                "      \"arbeidsperiode\": {\n" +
+                "        \"fom\": \"2018-01-01\",\n" +
+                "        \"tom\": \"2018-06-01\"\n" +
+                "      },\n" +
+                "      \"arbeidsandelNorge\": 33.3,\n" +
+                "      \"arbeidsandelUtland\": 66.6,\n" +
+                "      \"bostedsland\": \"SWE\",\n" +
+                "      \"erstatterTidligereUtsendt\": false\n" +
+                "    },\n" +
+                "    \"foretakUtland\": {\n" +
+                "      \"foretakUtlandNavn\": \"Volkswagen AG\",\n" +
+                "      \"foretakUtlandOrgnr\": \"1122334444\"\n" +
+                "    },\n" +
+                "    \"oppholdUtland\": {\n" +
+                "      \"oppholdsland\": [\n" +
+                "        \"GB\"\n" +
+                "      ],\n" +
+                "      \"oppholdsPeriode\": {\n" +
+                "        \"fom\": \"2018-01-01\",\n" +
+                "        \"tom\": \"2019-01-01\"\n" +
+                "      },\n" +
+                "      \"studentIEOS\": false,\n" +
+                "      \"studentFinansiering\": \"Beskrivelse av hvordan studiene finansieres\",\n" +
+                "      \"studentSemester\": \"2018/2019\",\n" +
+                "      \"studieLand\": \"SWE\"\n" +
+                "    },\n" +
+                "    \"arbeidNorge\": {\n" +
+                "      \"arbeidsforholdOpprettholdIHelePerioden\": true,\n" +
+                "      \"selvstendigFortsetterEtterArbeidIUtlandet\": true,\n" +
+                "      \"vikarOrgnr\": \"Ola Nordmann 22334455\",\n" +
+                "      \"flyendePersonellHjemmebase\": \"Flybasen Int. Airport, ....\",\n" +
+                "      \"navnSkipEllerSokkel\": \"Trym-sokkelen\",\n" +
+                "      \"sokkelLand\": \"SE\",\n" +
+                "      \"skipFlaggLand\": \"SE\",\n" +
+                "      \"brukerErSelvstendigNaeringsdrivende\": true,\n" +
+                "      \"brukerArbeiderIVikarbyra\": false,\n" +
+                "      \"ansattPaSokkelEllerSkip\": \"sokkel | skip\",\n" +
+                "      \"skipFartsomrade\": \"Europeisk fart\",\n" +
+                "      \"valgteArbeidsforhold\": []\n" +
+                "    },\n" +
+                "    \"juridiskArbeidsgiverNorge\": {\n" +
+                "      \"antallAnsatte\": 350,\n" +
+                "      \"antallAdminAnsatte\": 250,\n" +
+                "      \"andelOmsetningINorge\": 78.5,\n" +
+                "      \"andelKontrakterINorge\": 50.5,\n" +
+                "      \"erBemanningsbyra\": false,\n" +
+                "      \"hattDriftSiste12Mnd\": true,\n" +
+                "      \"antallUtsendte\": 30,\n" +
+                "      \"antallAdminAnsatteEOS\": 75\n" +
+                "    },\n" +
+                "    \"arbeidsinntekt\": {\n" +
+                "      \"inntektNorskIPerioden\": 5500,\n" +
+                "      \"inntektUtenlandskIPerioden\": 2000,\n" +
+                "      \"inntektNaeringIPerioden\": 0,\n" +
+                "      \"inntektNaturalYtelser\": [\n" +
+                "        \"Fri bolig\",\n" +
+                "        \"Fri bil\"\n" +
+                "      ],\n" +
+                "      \"inntektErInnrapporteringspliktig\": true,\n" +
+                "      \"inntektTrygdeavgiftBlirTrukket\": true\n" +
+                "    },\n" +
+                "    \"tilleggsopplysninger\": \"Lang utgreiing om utsendelsen som egentlig ikke er relevant for saksbehandlingen...\",\n" +
+                "    \"arbeidsgiversBekreftelse\": {\n" +
+                "      \"arbeidsgiverBekrefterUtsendelse\": true,\n" +
+                "      \"arbeidstakerAnsattUnderUtsendelsen\": true,\n" +
+                "      \"erstatterArbeidstakerenUtsendte\": true,\n" +
+                "      \"arbeidstakerTidligereUtsendt24Mnd\": true,\n" +
+                "      \"arbeidsgiverBetalerArbeidsgiveravgift\": true,\n" +
+                "      \"trygdeavgiftTrukketGjennomSkatt\": true,\n" +
+                "      \"trygdeavgiftTrukketGjennomSkattDato\": \"2020-02-02\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
 
         soeknadDokument = mapper.readValue(json, SoeknadDokument.class);
 
