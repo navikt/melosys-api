@@ -131,15 +131,19 @@ public class FagsakService {
         aktoer.setFagsak(fagsak);
         aktoer.setRolle(RolleType.BRUKER);
 
+        LocalDateTime dato = LocalDateTime.now();
+
         behandling.setFagsak(fagsak);
-        behandling.setRegistrertDato(LocalDateTime.now());
+        behandling.setRegistrertDato(dato);
+        behandling.setEndretDato(dato);
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.setStatus(BehandlingStatus.OPPRETTET);
         behandling.setType(BehandlingType.SØKNAD);
 
         fagsak.setAktører(new HashSet<>(Collections.singletonList(aktoer)));
         fagsak.setBehandlinger(Collections.singletonList(behandling));
-        fagsak.setRegistrertDato(LocalDateTime.now());
+        fagsak.setRegistrertDato(dato);
+        fagsak.setEndretDato(dato);
         fagsak.setType(FagsakType.SØKNAD_A1);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
 
