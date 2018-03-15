@@ -9,9 +9,11 @@ import no.nav.melosys.domain.FagsakType;
 public class FagsakDto {
 
     private Long saksnummer;
+    private String gsakSaksnummer; // Denne blir sendt til front-end, men er stadig ikke i bruk
     private FagsakType type;
     private FagsakStatus status;
     private LocalDateTime registrertDato;
+    private LocalDateTime endretDato;
     private List<BehandlingDto> behandlinger;
 
     public Long getSaksnummer() {
@@ -20,6 +22,14 @@ public class FagsakDto {
 
     public void setSaksnummer(Long saksnummer) {
         this.saksnummer = saksnummer;
+    }
+
+    public String getGsakSaksnummer() {
+        return gsakSaksnummer;
+    }
+
+    public void setGsakSaksnummer(String gsakSaksnummer) {
+        this.gsakSaksnummer = gsakSaksnummer;
     }
 
     public FagsakType getType() {
@@ -44,6 +54,14 @@ public class FagsakDto {
 
     public void setRegistrertDato(LocalDateTime registrertDato) {
         this.registrertDato = registrertDato;
+    }
+
+    public LocalDateTime getEndretDato() {
+        return endretDato;
+    }
+
+    public void setEndretDato(LocalDateTime endretDato) {
+        this.endretDato = endretDato;
     }
 
     public List<BehandlingDto> getBehandlinger() {

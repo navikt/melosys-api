@@ -64,7 +64,7 @@ public class FagsakServiceTest {
     @Test
     public void lagFagsak() throws Exception {
         Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(123L);
+        fagsak.setGsakSaksnummer("123");
         fagsak.setStatus(FagsakStatus.OPPRETTET);
         fagsak.setType(FagsakType.SØKNAD_A1);
         fagsak.setRegistrertDato(LocalDateTime.now());
@@ -93,7 +93,6 @@ public class FagsakServiceTest {
                 assertFalse(behandling.getSaksopplysninger().isEmpty());
             }
 
-            //printJson(fagsak);
         }
         // Skru på logging igjen
         log.setLevel(opprinneligLevel);

@@ -45,10 +45,10 @@ public class FagsakTjeneste extends RestTjeneste {
 
         TypeMap<Behandling, BehandlingDto> typeMapBehandlingUt = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
         typeMapBehandlingUt.<Long>addMapping(Behandling::getId, (dest, id) -> dest.getOppsummering().setBehandlingID(id));
-        typeMapBehandlingUt.<Long>addMapping(Behandling::getGsakID, (dest, id) -> dest.getOppsummering().setGsakId(id));
         typeMapBehandlingUt.<BehandlingStatus>addMapping(Behandling::getStatus, (dest, status) -> dest.getOppsummering().setStatus(status));
         typeMapBehandlingUt.<BehandlingType>addMapping(Behandling::getType, (dest, type) -> dest.getOppsummering().setType(type));
         typeMapBehandlingUt.<LocalDateTime>addMapping(Behandling::getRegistrertDato, (dest, dato) -> dest.getOppsummering().setRegistrertDato(dato));
+        typeMapBehandlingUt.<LocalDateTime>addMapping(Behandling::getEndretDato, (dest, dato) -> dest.getOppsummering().setEndretDato(dato));
         typeMapBehandlingUt.addMappings(mapper -> mapper.using(new SaksopplysningerTilDtoConverter()).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
     }
 
@@ -96,7 +96,6 @@ public class FagsakTjeneste extends RestTjeneste {
     private FagsakDto tilDto(Fagsak fagsak) {
         FagsakDto fagsakDto = new FagsakDto();
         modelMapper.map(fagsak, fagsakDto);
-        // FIXME saksnummer fra Fagsak bruker id fra DB (midlertidig)
         fagsakDto.setSaksnummer(fagsak.getId());
         return fagsakDto;
     }

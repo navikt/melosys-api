@@ -7,7 +7,6 @@ import static org.mockito.Mockito.atMost;
 
 import java.util.Arrays;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -19,7 +18,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import no.nav.melosys.saksflyt.SaksflytApplication;
-import no.nav.melosys.saksflyt.impl.steg.a1.KlargjoereSteg;
+import no.nav.melosys.saksflyt.impl.steg.a1.HentPersonopplysningerAgent;
 
 @RunWith(MockitoJUnitRunner.class)
 @ContextConfiguration(classes = { SaksflytApplication.class })
@@ -29,24 +28,21 @@ public class ArbeiderTest {
     private Arbeider arbeider;
 
     @Mock
-    private KlargjoereSteg klargjøreSteg;
+    private HentPersonopplysningerAgent klargjøreSteg;
 
     @Test
-    @Ignore
-    /** FIXME Farjam Using Thread.sleep in a test is just generally a bad idea. (fra Sonar)
-    It creates brittle tests that can fail unpredictably depending on environment ("Passes on my machine!") or load. **/
     public void testAtStegeneBlirKalt() throws Exception {
         MockitoAnnotations.initMocks(this);
         ReflectionTestUtils.setField(arbeider, "antallTråder", 15);
         ReflectionTestUtils.setField(arbeider, "oppholdMellomSteg", 1);
-        ReflectionTestUtils.setField(arbeider, "maskinelleSteg", Arrays.asList(klargjøreSteg));
+        ReflectionTestUtils.setField(arbeider, "agenter", Arrays.asList(klargjøreSteg));
         long medgåttTid = System.currentTimeMillis();
         arbeider.start();
         Thread.sleep(20);
         arbeider.stopp();
         medgåttTid = System.currentTimeMillis() - medgåttTid + 1;
-        Mockito.verify(klargjøreSteg, atLeast(21)).finnBehandlingOgUtfoerSteg();
-        Mockito.verify(klargjøreSteg, atMost(15 * (int) medgåttTid)).finnBehandlingOgUtfoerSteg();
+        Mockito.verify(klargjøreSteg, atLeast(21)).finnProsessinstansOgUtfoerSteg();
+        Mockito.verify(klargjøreSteg, atMost(15 * (int) medgåttTid)).finnProsessinstansOgUtfoerSteg();
     }
 
     @Test
@@ -54,7 +50,7 @@ public class ArbeiderTest {
         MockitoAnnotations.initMocks(this);
         ReflectionTestUtils.setField(arbeider, "antallTråder", 100);
         ReflectionTestUtils.setField(arbeider, "oppholdMellomSteg", 1);
-        ReflectionTestUtils.setField(arbeider, "maskinelleSteg", Arrays.asList(klargjøreSteg));
+        ReflectionTestUtils.setField(arbeider, "agenter", Arrays.asList(klargjøreSteg));
         arbeider.start();
         Object[] tråder = (Object[]) ReflectionTestUtils.getField(arbeider, "tråder");
         for (Object tråd : tråder) {

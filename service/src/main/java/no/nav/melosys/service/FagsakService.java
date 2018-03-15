@@ -141,7 +141,6 @@ public class FagsakService {
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         fagsak.setRegistrertDato(LocalDateTime.now());
         fagsak.setType(FagsakType.SØKNAD_A1);
-        fagsak.setVersjon(0);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
 
         return lagre(fagsak);

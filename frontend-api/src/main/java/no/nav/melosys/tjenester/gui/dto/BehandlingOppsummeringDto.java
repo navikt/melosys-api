@@ -8,10 +8,10 @@ import java.time.LocalDateTime;
 public class BehandlingOppsummeringDto {
 
     private Long behandlingID;
-    private Long gsakId;
     private BehandlingStatus status;
     private BehandlingType type;
     private LocalDateTime registrertDato;
+    private LocalDateTime endretDato;
 
     public Long getBehandlingID() {
         return behandlingID;
@@ -19,14 +19,6 @@ public class BehandlingOppsummeringDto {
 
     public void setBehandlingID(Long behandlingID) {
         this.behandlingID = behandlingID;
-    }
-
-    public Long getGsakId() {
-        return gsakId;
-    }
-
-    public void setGsakId(Long gsakId) {
-        this.gsakId = gsakId;
     }
 
     public BehandlingStatus getStatus() {
@@ -51,6 +43,14 @@ public class BehandlingOppsummeringDto {
 
     public void setRegistrertDato(LocalDateTime registrertDato) {
         this.registrertDato = registrertDato;
+    }
+
+    public LocalDateTime getEndretDato() {
+        return endretDato;
+    }
+
+    public void setEndretDato(LocalDateTime endretDato) {
+        this.endretDato = endretDato;
     }
 
 }

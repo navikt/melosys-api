@@ -26,23 +26,22 @@ public class Fagsak {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    /** Saksnummer fra gsak */
-    @Column(name = "saksnummer")
-    private Long saksnummer;
+    @Column(name = "gsak_saksnummer")
+    private String gsakSaksnummer;
     
     @Column(name = "fagsak_type", nullable = false, updatable = false)
     @Convert(converter = FagsakType.DbKonverterer.class)
     private FagsakType type;
 
-    @Column(name = "versjon", nullable = false, updatable = false)
-    private int versjon;
-    
     @Column(name = "status", nullable = false)
     @Convert(converter = FagsakStatus.DbKonverterer.class)
     private FagsakStatus status;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
+
+    @Column(name = "endret_dato", nullable = false, updatable = false)
+    private LocalDateTime endretDato;
 
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Aktoer> aktører;
@@ -54,12 +53,12 @@ public class Fagsak {
         return id;
     }
 
-    public Long getSaksnummer() {
-        return saksnummer;
+    public String getGsakSaksnummer() {
+        return gsakSaksnummer;
     }
 
-    public void setSaksnummer(Long saksnummer) {
-        this.saksnummer = saksnummer;
+    public void setGsakSaksnummer(String gsakSaksnummer) {
+        this.gsakSaksnummer = gsakSaksnummer;
     }
 
     public FagsakType getType() {
@@ -68,14 +67,6 @@ public class Fagsak {
 
     public void setType(FagsakType type) {
         this.type = type;
-    }
-
-    public int getVersjon() {
-        return versjon;
-    }
-
-    public void setVersjon(int versjon) {
-        this.versjon = versjon;
     }
 
     public FagsakStatus getStatus() {
@@ -92,6 +83,14 @@ public class Fagsak {
 
     public void setRegistrertDato(LocalDateTime registrertDato) {
         this.registrertDato = registrertDato;
+    }
+
+    public LocalDateTime getEndretDato() {
+        return endretDato;
+    }
+
+    public void setEndretDato(LocalDateTime endretDato) {
+        this.endretDato = endretDato;
     }
 
     public Set<Aktoer> getAktører() {
@@ -122,12 +121,12 @@ public class Fagsak {
         if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
             return this.id == that.id;
         }
-        return Objects.equals(this.saksnummer, that.saksnummer);
+        return Objects.equals(this.gsakSaksnummer, that.gsakSaksnummer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(saksnummer);
+        return Objects.hash(gsakSaksnummer);
     }
 
 }
