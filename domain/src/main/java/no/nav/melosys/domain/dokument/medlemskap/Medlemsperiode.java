@@ -22,9 +22,9 @@ public class Medlemsperiode implements HarPeriode {
 
     public String trygdedekning; //"http://nav.no/kodeverk/Kodeverk/DekningMedl"
 
-    public String kildedokumenttype;
+    public String kildedokumenttype; //"http://nav.no/kodeverk/Kodeverk/KildedokumentMedl"
 
-    public String kilde;
+    public String kilde; //"http://nav.no/kodeverk/Kodeverk/KildesystemMedl"
 
     @Override
     public Periode getPeriode() {

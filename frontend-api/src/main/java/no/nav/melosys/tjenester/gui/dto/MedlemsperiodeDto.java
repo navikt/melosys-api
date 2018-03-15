@@ -1,64 +1,26 @@
 package no.nav.melosys.tjenester.gui.dto;
 
+import java.util.Map;
+
+import no.nav.melosys.domain.dokument.medlemskap.Periodetype;
+
 public class MedlemsperiodeDto {
 
-    private PeriodeDto periode;
+    public PeriodeDto periode;
 
-    private String type;
+    public Periodetype type;
 
-    private String status;
+    public Map<String, String> status;
 
-    private String grunnlagstype;
+    public Map<String, String> grunnlagstype;
 
-    private String land;
+    public Map<String, String> land;
 
-    private String trygdedekning;
+    public Map<String, String> lovvalg;
 
-    public PeriodeDto getPeriode() {
-        return periode;
-    }
+    public Map<String, String> trygdedekning;
 
-    public void setPeriode(PeriodeDto periode) {
-        this.periode = periode;
-    }
+    public Map<String, String> kildedokumenttype;
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getGrunnlagstype() {
-        return grunnlagstype;
-    }
-
-    public void setGrunnlagstype(String grunnlagstype) {
-        this.grunnlagstype = grunnlagstype;
-    }
-
-    public String getLand() {
-        return land;
-    }
-
-    public void setLand(String land) {
-        this.land = land;
-    }
-
-    public String getTrygdedekning() {
-        return trygdedekning;
-    }
-
-    public void setTrygdedekning(String trygdedekning) {
-        this.trygdedekning = trygdedekning;
-    }
+    public Map<String, String> kilde;
 }
