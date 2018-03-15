@@ -13,7 +13,7 @@ CREATE TABLE prosessinstans (
 CREATE TABLE prosess_type (
     kode    VARCHAR2(99)  NOT NULL,
     navn    VARCHAR2(99)  NOT NULL,
-    CONSTRAINT pk_behandling_type PRIMARY KEY (kode)
+    CONSTRAINT pk_prosess_type PRIMARY KEY (kode)
 );
 
 INSERT INTO prosess_type (kode, navn) VALUES ('SØKNAD_A1', 'Søknad A1');
@@ -24,11 +24,11 @@ CREATE TABLE prosess_steg (
     CONSTRAINT pk_behandling_steg PRIMARY KEY (kode)
 );
 
-INSERT INTO behandling_steg (kode, navn) VALUES ('A1_JOURF', 'A1 journalføring');
-INSERT INTO behandling_steg (kode, navn) VALUES ('A1_HENT_PERS_OPPL', 'A1 hent personopplysninger');
-INSERT INTO behandling_steg (kode, navn) VALUES ('A1_HENT_ARBF_OPPL', 'A1 hent arbeidsforhold');
-INSERT INTO behandling_steg (kode, navn) VALUES ('FEILET_MASKINELT', 'Feilet maskinelt');
+INSERT INTO prosess_steg (kode, navn) VALUES ('A1_JOURF', 'A1 journalføring');
+INSERT INTO prosess_steg (kode, navn) VALUES ('A1_HENT_PERS_OPPL', 'A1 hent personopplysninger');
+INSERT INTO prosess_steg (kode, navn) VALUES ('A1_HENT_ARBF_OPPL', 'A1 hent arbeidsforhold');
+INSERT INTO prosess_steg (kode, navn) VALUES ('FEILET_MASKINELT', 'Feilet maskinelt');
 
 ALTER TABLE prosessinstans ADD CONSTRAINT fk_prosinst_behandling FOREIGN KEY (behandling_id) REFERENCES behandling;
 ALTER TABLE prosessinstans ADD CONSTRAINT fk_prosinst_type FOREIGN KEY (prosess_type) REFERENCES prosess_type;
-ALTER TABLE behandling ADD CONSTRAINT fk_prosinst_steg FOREIGN KEY (steg) REFERENCES behandling_steg;
+ALTER TABLE prosessinstans ADD CONSTRAINT fk_prosinst_steg FOREIGN KEY (steg) REFERENCES prosess_steg;
