@@ -1,7 +1,5 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import java.util.Map;
-
 import no.nav.melosys.domain.dokument.medlemskap.Periodetype;
 
 public class MedlemsperiodeDto {
@@ -10,17 +8,17 @@ public class MedlemsperiodeDto {
 
     public Periodetype type;
 
-    public Map<String, String> status;
+    public KodeDto status;
 
-    public Map<String, String> grunnlagstype;
+    public KodeDto grunnlagstype;
 
-    public Map<String, String> land;
+    public KodeDto land;
 
-    public Map<String, String> lovvalg;
+    public KodeDto lovvalg;
 
-    public Map<String, String> trygdedekning;
+    public KodeDto trygdedekning;
 
-    public Map<String, String> kildedokumenttype;
+    public KodeDto kildedokumenttype;
 
-    public Map<String, String> kilde;
+    public KodeDto kilde;
 }

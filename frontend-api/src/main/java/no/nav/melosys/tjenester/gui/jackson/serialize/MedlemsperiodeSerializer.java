@@ -2,8 +2,6 @@ package no.nav.melosys.tjenester.gui.jackson.serialize;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -12,6 +10,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.service.kodeverk.Kodeverk;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.tjenester.gui.dto.KodeDto;
 import no.nav.melosys.tjenester.gui.dto.MedlemsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
 
@@ -50,15 +49,10 @@ public class MedlemsperiodeSerializer extends StdSerializer<Medlemsperiode> {
         return new PeriodeDto(periode.getFom(), periode.getTom());
     }
 
-    private Map<String, String> getKodeverdi(Kodeverk kodeverk, String kode) {
+    private KodeDto getKodeverdi(Kodeverk kodeverk, String kode) {
         if (kode == null) {
             return null;
         }
-        Map<String, String> kodeverdi = new HashMap<>();
-
-        kodeverdi.put("kode", kode);
-        kodeverdi.put("term", kodeverkService.dekod(kodeverk, kode, LocalDate.now()));
-
-        return kodeverdi;
+        return new KodeDto(kode, kodeverkService.dekod(kodeverk, kode, LocalDate.now()));
     }
 }
