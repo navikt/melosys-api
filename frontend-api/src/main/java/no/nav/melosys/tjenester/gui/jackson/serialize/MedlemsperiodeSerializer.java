@@ -30,40 +30,34 @@ public class MedlemsperiodeSerializer extends StdSerializer<Medlemsperiode> {
         Periode periode = medlemsperiode.getPeriode();
 
         medlemsperiodeDto.type = medlemsperiode.type;
-        if (periode != null) {
-            medlemsperiodeDto.periode = new PeriodeDto(periode.getFom(), periode.getTom());
-        }
-        if (medlemsperiode.land != null) {
-            medlemsperiodeDto.land = getKodeverdi(Kodeverk.LANDKODER, medlemsperiode.land);
-        }
-        if (medlemsperiode.grunnlagstype != null) {
-            medlemsperiodeDto.grunnlagstype = getKodeverdi(Kodeverk.GRUNNLAG_MEDL, medlemsperiode.grunnlagstype);
-        }
-        if (medlemsperiode.kilde != null) {
-            medlemsperiodeDto.kilde = getKodeverdi(Kodeverk.KILDESYSTEM_MEDL, medlemsperiode.kilde);
-        }
-        if (medlemsperiode.kildedokumenttype != null) {
-            medlemsperiodeDto.kildedokumenttype = getKodeverdi(Kodeverk.KILDEDOKUMENT_MEDL, medlemsperiode.kildedokumenttype);
-        }
-        if (medlemsperiode.lovvalg != null) {
-            medlemsperiodeDto.lovvalg = getKodeverdi(Kodeverk.LOVVALG_MEDL, medlemsperiode.lovvalg);
-        }
-        if (medlemsperiode.status != null) {
-            medlemsperiodeDto.status = getKodeverdi(Kodeverk.PERIODESTATUS_MEDL, medlemsperiode.status);
-        }
-        if (medlemsperiode.trygdedekning != null) {
-            medlemsperiodeDto.trygdedekning = getKodeverdi(Kodeverk.DEKNING_MEDL, medlemsperiode.trygdedekning);
-        }
+        medlemsperiodeDto.periode = getPeriode(periode);
+        medlemsperiodeDto.land = getKodeverdi(Kodeverk.LANDKODER, medlemsperiode.land);
+        medlemsperiodeDto.grunnlagstype = getKodeverdi(Kodeverk.GRUNNLAG_MEDL, medlemsperiode.grunnlagstype);
+        medlemsperiodeDto.grunnlagstype = getKodeverdi(Kodeverk.GRUNNLAG_MEDL, medlemsperiode.land);
+        medlemsperiodeDto.kilde = getKodeverdi(Kodeverk.KILDESYSTEM_MEDL, medlemsperiode.kilde);
+        medlemsperiodeDto.kildedokumenttype = getKodeverdi(Kodeverk.KILDEDOKUMENT_MEDL, medlemsperiode.kildedokumenttype);
+        medlemsperiodeDto.lovvalg = getKodeverdi(Kodeverk.LOVVALG_MEDL, medlemsperiode.lovvalg);
+        medlemsperiodeDto.status = getKodeverdi(Kodeverk.PERIODESTATUS_MEDL, medlemsperiode.status);
+        medlemsperiodeDto.trygdedekning = getKodeverdi(Kodeverk.DEKNING_MEDL, medlemsperiode.trygdedekning);
 
         generator.writeObject(medlemsperiodeDto);
     }
 
-    private Map<String, String> getKodeverdi(Kodeverk kodeverk, String kode) {
-        Map<String, String> kodeverdi = new HashMap<>();
-        kodeverdi.put("kode", kode);
+    private PeriodeDto getPeriode(Periode periode) {
+        if (periode == null) {
+            return null;
+        }
+        return new PeriodeDto(periode.getFom(), periode.getTom());
+    }
 
-        String term = kodeverkService.dekod(kodeverk, kode, LocalDate.now());
-        kodeverdi.put("term", term);
+    private Map<String, String> getKodeverdi(Kodeverk kodeverk, String kode) {
+        if (kode == null) {
+            return null;
+        }
+        Map<String, String> kodeverdi = new HashMap<>();
+
+        kodeverdi.put("kode", kode);
+        kodeverdi.put("term", kodeverkService.dekod(kodeverk, kode, LocalDate.now()));
 
         return kodeverdi;
     }

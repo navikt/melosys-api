@@ -69,7 +69,8 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     public String dekod(Kodeverk kodeverk, String kode, LocalDate dato) {
         List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
         if (kodeperioder == null) {
-            throw new RuntimeException("Problemer med å slå opp Kodeverk med navn '" + kodeverk.getNavn() + "'");
+            log.error("Fant ikke term for kode '{}' kodeverk '{}'", kode, kodeverk.getNavn());
+            throw new RuntimeException("Fant ikke term for kode '" + kode + "' kodeverk '" + kodeverk.getNavn() + "'");
         }
         // kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
         for (Kode kandidat : kodeperioder) {
