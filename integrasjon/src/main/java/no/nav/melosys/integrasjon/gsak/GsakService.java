@@ -22,13 +22,10 @@ import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeRequestMal;
 import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeSokMal;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSFerdigstillOppgaveException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOppgaveIkkeFunnetException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOptimistiskLasingException;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSSikkerhetsbegrensningException;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSAktor;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSAktorType;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSFerdigstillOppgaveRequest;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOppgave;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveRequest;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveResponse;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.*;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.OpprettSakSakEksistererAllerede;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.OpprettSakUgyldigInput;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Aktoer;
@@ -167,6 +164,19 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
+    public no.nav.melosys.domain.Oppgave finnOppgaveMedSaksnummerOgSaksbehandler(String saksnummer, String saksbehandlerID) {
+        FinnOppgaveListeSokMal sokMal = FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(Integer.toString(MELOSYS_ENHET_ID))
+            .medSakId(saksnummer).medBrukerId(saksbehandlerID).build();
+        FinnOppgaveListeRequestMal requestMal = FinnOppgaveListeRequestMal.builder().medSok(sokMal).build();
+
+        FinnOppgaveListeResponse finnOppgaveListeResponse = oppgaveConsumer.finnOppgaveListe(requestMal);
+        List<Oppgave> oppgaver = finnOppgaveListeResponse.getOppgaveListe();
+
+        return oppgaver.stream().map(o -> new no.nav.melosys.domain.Oppgave(o.getOppgaveId(), o.getPrioritet().getKode()))
+            .findFirst().orElse(null);
+    }
+
+    @Override
     public String opprettOppgave(OpprettOppgaveRequest request) throws SikkerhetsbegrensningException {
         WSOpprettOppgaveRequest wsRequest = convertToWSRequest(request);
 
@@ -175,6 +185,34 @@ public class GsakService implements GsakFasade {
             return response.getOppgaveId();
         } catch (WSSikkerhetsbegrensningException e) {
             throw new SikkerhetsbegrensningException(e);
+        }
+    }
+
+    @Override
+    public void leggTilbakeOppgave(no.nav.melosys.domain.Oppgave oppgave) throws IntegrasjonException, SikkerhetsbegrensningException, TekniskException {
+        WSLagreOppgaveRequest wsRequest = new WSLagreOppgaveRequest();
+        WSLagreOppgave wsOppgave = new WSLagreOppgave();
+
+        try {
+            // oppgaveId er String i BehandleOppgave_v1.opprettOppgave og Oppgave_v3.finnUtildelteOppgaverEtterFrist,
+            // men int i BehandleOppgave_v1.lagreOppgave
+            int oppgaveId = Integer.parseInt(oppgave.getOppgaveId());
+            wsOppgave.setOppgaveId(oppgaveId);
+        } catch (NumberFormatException e) {
+            throw new IntegrasjonException("'" + oppgave.getOppgaveId() + "' er ikke en gyldig oppgaveId");
+        }
+        wsOppgave.setGjelderBruker(null);
+        wsRequest.setEndretAvEnhetId(MELOSYS_ENHET_ID);
+        wsRequest.setWsLagreOppgave(wsOppgave);
+
+        try {
+            behandleOppgaveConsumer.lagreOppgave(wsRequest);
+        } catch (WSOppgaveIkkeFunnetException e) {
+            throw new IntegrasjonException(e);
+        } catch (WSSikkerhetsbegrensningException e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (WSOptimistiskLasingException e) {
+            throw new TekniskException(e);
         }
     }
 
