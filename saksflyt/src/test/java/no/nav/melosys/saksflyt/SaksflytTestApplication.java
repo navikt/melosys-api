@@ -10,12 +10,11 @@ import org.springframework.context.annotation.PropertySource;
  */
 @SpringBootApplication
 @PropertySource("classpath:saksflyt.properties")
-public class SaksflytApplication {
+public class SaksflytTestApplication {
 
     @SuppressWarnings("resource")
     public static void main(String[] args) {
-        ConfigurableApplicationContext ctx = SpringApplication.run(SaksflytApplication.class, args);
-        ctx.registerShutdownHook(); // FIXME (farjam): Tror ikke vi trenger dette. Sjekk om PreDestroy metoder kalles hvis dette fjernes.
+        ConfigurableApplicationContext ctx = SpringApplication.run(SaksflytTestApplication.class, args);
     }
 
 }
