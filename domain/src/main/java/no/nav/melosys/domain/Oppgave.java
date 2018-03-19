@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.gsak.PrioritetType;
+import no.nav.melosys.domain.gsak.*;
 
 /**
  * Den klassen mapper Oppgaver fra GSAK og er derfor ikke en @Entity
@@ -14,18 +14,21 @@ public class Oppgave {
     //private Status status;
     private LocalDate aktivFra;
     private LocalDate aktivTil;
-    private String ansvarligId;
-    //private Fagomrade fagomrade;
-    //private Underkategori underkategori;
-    //private Oppgavetype oppgavetype;
+    //private String ansvarligId;
+    private Fagomrade fagomrade;
+    private Underkategori underkategori;
+    private Oppgavetype oppgavetype;
     private String beskrivelse;
-    private String oppfolging;
+    //private String oppfolging;
     private PrioritetType prioritet;
-    private Integer versjon;
+    //private Integer versjon;
     private String saksnummer;
-    private String kravId;
+    //private String kravId;
     private String dokumentId;
     private String soknadsId;
+
+    public Oppgave() {
+    }
 
     public Oppgave(String oppgaveId, String prioritet) {
         this.oppgaveId = oppgaveId;
@@ -40,8 +43,63 @@ public class Oppgave {
         return oppgaveId;
     }
 
-    public PrioritetType getPrioritet() {
-        return prioritet;
+    public void setOppgaveId(String oppgaveId) {
+        this.oppgaveId = oppgaveId;
     }
 
+    public LocalDate getAktivFra() {
+        return aktivFra;
+    }
+
+    public void setAktivFra(LocalDate aktivFra) {
+        this.aktivFra = aktivFra;
+    }
+
+    public LocalDate getAktivTil() {
+        return aktivTil;
+    }
+
+    public void setAktivTil(LocalDate aktivTil) {
+        this.aktivTil = aktivTil;
+    }
+
+    public Fagomrade getFagomrade() {
+        return fagomrade;
+    }
+
+    public void setFagomrade(Fagomrade fagomrade) {
+        this.fagomrade = fagomrade;
+    }
+
+    public Underkategori getUnderkategori() {
+        return underkategori;
+    }
+
+    public void setUnderkategori(Underkategori underkategori) {
+        this.underkategori = underkategori;
+    }
+
+    public Oppgavetype getOppgavetype() {
+        return oppgavetype;
+    }
+
+    public void setOppgavetype(Oppgavetype oppgavetype) {
+        this.oppgavetype = oppgavetype;
+    }
+
+    public String getSaksnummer() {
+        return saksnummer;
+    }
+
+    public void setSaksnummer(String saksnummer) {
+        this.saksnummer = saksnummer;
+    }
+
+    public String getDokumentId() {
+        return dokumentId;
+    }
+
+    public void setDokumentId(String dokumentId) {
+        this.dokumentId = dokumentId;
+    }
 }

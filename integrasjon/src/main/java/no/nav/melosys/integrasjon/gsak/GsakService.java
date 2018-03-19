@@ -1,11 +1,15 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.xml.datatype.DatatypeConfigurationException;
 
+import no.nav.melosys.domain.gsak.AktorType;
+import no.nav.melosys.domain.gsak.Fagomrade;
+import no.nav.melosys.domain.gsak.Oppgavetype;
+import no.nav.melosys.domain.gsak.Underkategori;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
@@ -13,7 +17,6 @@ import no.nav.melosys.integrasjon.felles.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
 import no.nav.melosys.integrasjon.gsak.behandlesak.BehandleSakConsumer;
-import no.nav.melosys.domain.gsak.AktorType;
 import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeFilterMal;
 import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeRequestMal;
 import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeSokMal;
@@ -122,6 +125,7 @@ public class GsakService implements GsakFasade {
         }
     }
 
+    // FIXME GSAK oppretter et nytt API med REST tjenester.
     @Override
     public List<no.nav.melosys.domain.Oppgave> finnUtildelteOppgaverEtterFrist(List<String> fagområdeKodeListe, String underkategori, List<String> oppgavetypeKodeListe) throws IntegrasjonException {
         FinnOppgaveListeSokMal sokMal = FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(Integer.toString(MELOSYS_ENHET_ID)).medFagområdeKodeListe(fagområdeKodeListe).build();
@@ -135,8 +139,30 @@ public class GsakService implements GsakFasade {
 
         FinnOppgaveListeRequestMal requestMal = FinnOppgaveListeRequestMal.builder().medSok(sokMal).medFilter(filterMal).medSortering(sortering).build();
         FinnOppgaveListeResponse finnOppgaveListeResponse = oppgaveConsumer.finnOppgaveListe(requestMal);
+
         List<Oppgave> oppgaver = finnOppgaveListeResponse.getOppgaveListe();
-        return oppgaver.stream().map(o -> new no.nav.melosys.domain.Oppgave(o.getOppgaveId(), o.getPrioritet().getKode())).collect(Collectors.toList());
+        List<no.nav.melosys.domain.Oppgave> funnet = new ArrayList<>();
+        for (Oppgave o : oppgaver) {
+            no.nav.melosys.domain.Oppgave oppgave = new no.nav.melosys.domain.Oppgave();
+            oppgave.setOppgaveId(o.getOppgaveId());
+            oppgave.setAktivFra(KonverteringsUtils.xmlGregorianCalendarToLocalDate(o.getAktivFra()));
+            oppgave.setAktivTil(KonverteringsUtils.xmlGregorianCalendarToLocalDate(o.getAktivTil()));
+            if (o.getFagomrade() != null) {
+                oppgave.setFagomrade(Fagomrade.valueOf(o.getFagomrade().getKode()));
+            }
+            if (o.getUnderkategori() != null) {
+                oppgave.setUnderkategori(Underkategori.valueOf(o.getUnderkategori().getKode()));
+            }
+            if (o.getOppgavetype() != null) {
+                oppgave.setOppgavetype(Oppgavetype.valueOf(o.getOppgavetype().getKode()));
+            }
+            oppgave.setSaksnummer(o.getSaksnummer());
+            oppgave.setDokumentId(o.getDokumentId());
+
+            funnet.add(oppgave);
+        }
+
+        return funnet;
     }
 
     @Override

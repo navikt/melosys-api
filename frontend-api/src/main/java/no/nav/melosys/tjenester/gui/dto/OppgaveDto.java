@@ -2,16 +2,17 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 
+import java.time.LocalDate;
+
 public class OppgaveDto {
 
     private String oppgaveId;
     private String oppgavetype;
     private String grunnlagstype;
     private String sammensattNavn;
-    private Integer saksnummer;
-    private Object dokumentID;
-    private String String;
-    private String aktivTil;
+    private String saksnummer;
+    private String dokumentID;
+    private LocalDate aktivTil;
     private PeriodeDto soknadsperiode;
 
     public String getOppgaveId() {
@@ -46,35 +47,27 @@ public class OppgaveDto {
         this.sammensattNavn = sammensattNavn;
     }
 
-    public Integer getSaksnummer() {
+    public String getSaksnummer() {
         return saksnummer;
     }
 
-    public void setSaksnummer(Integer saksnummer) {
+    public void setSaksnummer(String saksnummer) {
         this.saksnummer = saksnummer;
     }
 
-    public Object getDokumentID() {
+    public String getDokumentID() {
         return dokumentID;
     }
 
-    public void setDokumentID(Object dokumentID) {
+    public void setDokumentID(String dokumentID) {
         this.dokumentID = dokumentID;
     }
 
-    public String getString() {
-        return String;
-    }
-
-    public void setString(String String) {
-        this.String = String;
-    }
-
-    public String getAktivTil() {
+    public LocalDate getAktivTil() {
         return aktivTil;
     }
 
-    public void setAktivTil(String aktivTil) {
+    public void setAktivTil(LocalDate aktivTil) {
         this.aktivTil = aktivTil;
     }
 

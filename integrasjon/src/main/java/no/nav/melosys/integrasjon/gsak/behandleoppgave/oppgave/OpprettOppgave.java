@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave;
 
 import no.nav.melosys.domain.gsak.Fagomrade;
-import no.nav.melosys.domain.gsak.OppgaveType;
+import no.nav.melosys.domain.gsak.Oppgavetype;
 import no.nav.melosys.domain.gsak.Underkategori;
 
 public class OpprettOppgave {
@@ -10,15 +10,15 @@ public class OpprettOppgave {
     private int opprettetAvEnhetId;
     private String ansvarligEnhetId;
     private Fagomrade fagområde;
-    private OppgaveType oppgaveType;
+    private Oppgavetype oppgavetype;
     private Underkategori underkategori;
 
-    private OpprettOppgave(String beskrivelse, int opprettetAvEnhetId, String ansvarligEnhetId, Fagomrade fagområde, OppgaveType oppgaveType, Underkategori underkategori) {
+    private OpprettOppgave(String beskrivelse, int opprettetAvEnhetId, String ansvarligEnhetId, Fagomrade fagområde, Oppgavetype oppgavetype, Underkategori underkategori) {
         this.beskrivelse = beskrivelse;
         this.opprettetAvEnhetId = opprettetAvEnhetId;
         this.ansvarligEnhetId = ansvarligEnhetId;
         this.fagområde = fagområde;
-        this.oppgaveType = oppgaveType;
+        this.oppgavetype = oppgavetype;
         this.underkategori = underkategori;
     }
 
@@ -34,8 +34,8 @@ public class OpprettOppgave {
         return fagområde;
     }
 
-    public OppgaveType getOppgaveType() {
-        return oppgaveType;
+    public Oppgavetype getOppgavetype() {
+        return oppgavetype;
     }
 
     public Underkategori getUnderkategori() {
@@ -55,7 +55,7 @@ public class OpprettOppgave {
         private int opprettetAvEnhetId;
         private String ansvarligEnhetId;
         private Fagomrade fagområde;
-        private OppgaveType oppgaveType;
+        private Oppgavetype oppgavetype;
         private Underkategori underkategori;
 
         public Builder medBeskrivelse(String beskrivelse) {
@@ -78,8 +78,8 @@ public class OpprettOppgave {
             return this;
         }
 
-        public Builder medOppgaveType(OppgaveType oppgaveType) {
-            this.oppgaveType = oppgaveType;
+        public Builder medOppgaveType(Oppgavetype oppgavetype) {
+            this.oppgavetype = oppgavetype;
             return this;
         }
 
@@ -89,7 +89,7 @@ public class OpprettOppgave {
         }
 
         public OpprettOppgave build() {
-            return new OpprettOppgave(beskrivelse, opprettetAvEnhetId, ansvarligEnhetId, fagområde, oppgaveType, underkategori);
+            return new OpprettOppgave(beskrivelse, opprettetAvEnhetId, ansvarligEnhetId, fagområde, oppgavetype, underkategori);
         }
     }
 }

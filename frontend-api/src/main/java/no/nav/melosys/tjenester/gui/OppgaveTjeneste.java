@@ -1,15 +1,17 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.ws.rs.GET;
+import java.util.Optional;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.service.Oppgaveplukker;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.tjenester.gui.dto.OppgaveDto;
+import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -28,19 +30,31 @@ public class OppgaveTjeneste {
         this.oppgaveplukker = oppgaveplukker;
     }
 
-    @GET
+    @POST
     @Path("{plukk}")
     @ApiOperation(value = "Plukker fra GSAK neste oppgave som saksbehandler skal arbeide med.")
-    public Response plukkOppgave() { //FIXME avklare parametre.
+    public Response plukkOppgave(PlukkOppgaveInnDto plukkDto) {
         String ident = SpringSubjectHandler.getUserID();
 
-        List<String> fagområdeKodeListe = new ArrayList<>();
-        fagområdeKodeListe.add("MED");
-        fagområdeKodeListe.add("UFM");
+        Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto.getFagområdeKodeListe(), plukkDto.getUnderkategori(), plukkDto.getOppgavetypeListe());
 
-        oppgaveplukker.plukkOppgave(ident, fagområdeKodeListe, null, null);
+        if (plukket.isPresent()) {
+            Oppgave oppgave = plukket.get();
 
-        return Response.ok().build();
+            OppgaveDto dto = new OppgaveDto();
+            dto.setOppgaveId(oppgave.getOppgaveId());
+            dto.setAktivTil(oppgave.getAktivTil());
+            if (oppgave.getOppgavetype() != null) {
+                dto.setOppgavetype(oppgave.getOppgavetype().toString());
+            }
+            dto.setSaksnummer(oppgave.getSaksnummer());
+            dto.setDokumentID(oppgave.getDokumentId());
+
+            return Response.ok(dto).build();
+        } else {
+            return Response.ok().build();
+        }
+
     }
 
 }
