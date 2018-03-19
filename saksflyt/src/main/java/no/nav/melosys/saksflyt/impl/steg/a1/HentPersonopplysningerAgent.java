@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
@@ -27,14 +26,18 @@ public class HentPersonopplysningerAgent implements Agent {
 
     private static final Logger log = LoggerFactory.getLogger(HentPersonopplysningerAgent.class);
 
-    @Autowired
     private Binge binge;
 
-    @Autowired
     private BehandlingRepository behandlingRepo;
 
-    @Autowired
     private ProsessinstansRepository prosessinstansRepo;
+    
+    @Autowired
+    public HentPersonopplysningerAgent(Binge binge, BehandlingRepository behandlingRepo, ProsessinstansRepository prosessinstansRepo) {
+        this.binge = binge;
+        this.behandlingRepo = behandlingRepo;
+        this.prosessinstansRepo = prosessinstansRepo;
+    }
 
     @Override
     public void finnProsessinstansOgUtfoerSteg() {

@@ -17,11 +17,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import no.nav.melosys.saksflyt.SaksflytApplication;
+import no.nav.melosys.saksflyt.SaksflytTestApplication;
 import no.nav.melosys.saksflyt.impl.steg.a1.HentPersonopplysningerAgent;
 
 @RunWith(MockitoJUnitRunner.class)
-@ContextConfiguration(classes = { SaksflytApplication.class })
+@ContextConfiguration(classes = { SaksflytTestApplication.class })
 public class ArbeiderTest {
 
     @InjectMocks
