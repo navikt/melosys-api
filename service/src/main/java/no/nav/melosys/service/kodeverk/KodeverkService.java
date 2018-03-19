@@ -64,6 +64,16 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     }
 
     /**
+     * Henter verdien for en kode i et kodeverk ved mapping til DTO i frontend-API.
+     */
+    public KodeDto getKodeverdi(Kodeverk kodeverk, String kode) {
+        if (kode == null) {
+            return null;
+        }
+        return new KodeDto(kode, dekod(kodeverk, kode, LocalDate.now()));
+    }
+
+    /**
      * Henter verdien for en kode i et kodeverk på en gitt dato, eller null hvis koden ikke er omfattet av kodeverket på angitt dato.
      */
     public String dekod(Kodeverk kodeverk, String kode, LocalDate dato) {
