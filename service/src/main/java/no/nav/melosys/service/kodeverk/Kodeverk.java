@@ -4,13 +4,19 @@ public enum Kodeverk {
     
     ARBEIDSTIDSORDNINGER("Arbeidstidsordninger"),
     ARBEIDSFORHOLDSTYPER("Arbeidsforholdstyper"),
-    POSTNUMMER("Postnummer"),
+    DEKNING_MEDL("DekningMedl"),
+    DISKRESJONSKODER("Diskresjonskoder"),
+    GRUNNLAG_MEDL("GrunnlagMedl"),
+    KILDEDOKUMENT_MEDL("KildedokumentMedl"),
+    KILDESYSTEM_MEDL("KildesystemMedl"),
+    KJØNNSTYPER("Kjønnstyper"),
     LANDKODER("Landkoder"),
     LANDKODERISO2("LandkoderISO2"),
-    KJØNNSTYPER("Kjønnstyper"),
-    DISKRESJONSKODER("Diskresjonskoder"),
+    LOVVALG_MEDL("LovvalgMedl"),
+    PERIODESTATUS_MEDL("PeriodestatusMedl"),
+    POSTNUMMER("Postnummer"),
     SIVILSTANDER("Sivilstander");
-    
+
     private Kodeverk(String navn) {
         this.navn = navn;
     }

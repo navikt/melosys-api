@@ -1,64 +1,25 @@
 package no.nav.melosys.tjenester.gui.dto;
 
+import no.nav.melosys.domain.dokument.medlemskap.Periodetype;
+import no.nav.melosys.service.kodeverk.KodeDto;
+
 public class MedlemsperiodeDto {
 
-    private PeriodeDto periode;
+    public PeriodeDto periode;
 
-    private String type;
+    public Periodetype type;
 
-    private String status;
+    public KodeDto status;
 
-    private String grunnlagstype;
+    public KodeDto grunnlagstype;
 
-    private String land;
+    public KodeDto land;
 
-    private String trygdedekning;
+    public KodeDto lovvalg;
 
-    public PeriodeDto getPeriode() {
-        return periode;
-    }
+    public KodeDto trygdedekning;
 
-    public void setPeriode(PeriodeDto periode) {
-        this.periode = periode;
-    }
+    public KodeDto kildedokumenttype;
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getGrunnlagstype() {
-        return grunnlagstype;
-    }
-
-    public void setGrunnlagstype(String grunnlagstype) {
-        this.grunnlagstype = grunnlagstype;
-    }
-
-    public String getLand() {
-        return land;
-    }
-
-    public void setLand(String land) {
-        this.land = land;
-    }
-
-    public String getTrygdedekning() {
-        return trygdedekning;
-    }
-
-    public void setTrygdedekning(String trygdedekning) {
-        this.trygdedekning = trygdedekning;
-    }
+    public KodeDto kilde;
 }

@@ -64,12 +64,23 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     }
 
     /**
+     * Henter verdien for en kode i et kodeverk ved mapping til DTO i frontend-API.
+     */
+    public KodeDto getKodeverdi(Kodeverk kodeverk, String kode) {
+        if (kode == null) {
+            return null;
+        }
+        return new KodeDto(kode, dekod(kodeverk, kode, LocalDate.now()));
+    }
+
+    /**
      * Henter verdien for en kode i et kodeverk på en gitt dato, eller null hvis koden ikke er omfattet av kodeverket på angitt dato.
      */
     public String dekod(Kodeverk kodeverk, String kode, LocalDate dato) {
         List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
         if (kodeperioder == null) {
-            throw new RuntimeException("Problemer med å slå opp Kodeverk med navn '" + kodeverk.getNavn() + "'");
+            log.error("Fant ikke term for kode '{}' kodeverk '{}'", kode, kodeverk.getNavn());
+            throw new RuntimeException("Fant ikke term for kode '" + kode + "' kodeverk '" + kodeverk.getNavn() + "'");
         }
         // kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
         for (Kode kandidat : kodeperioder) {
