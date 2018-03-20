@@ -13,15 +13,15 @@ import no.nav.melosys.domain.gsak.Underkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -34,6 +34,9 @@ public class OppgaveplukkerTest {
     private OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
 
     private Oppgaveplukker oppgaveplukker;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -135,5 +138,34 @@ public class OppgaveplukkerTest {
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", "BEH_SAK", sakstyper, behandlingstyper);
 
         assertThat(oppgave.isPresent()).isFalse();
+    }
+
+    @Test
+    public void leggTilbakeOppgave() {
+        final Oppgave oppgave = new Oppgave();
+        oppgave.setOppgaveId("7");
+        oppgave.setPrioritet(PrioritetType.valueOf("HOY_MED"));
+        final String saksnummer = "42";
+        final String saksbehandlerID = "test";
+        final String begrunnelse = "Oppgaven er kjedelig";
+
+        when(gsakFasade.finnOppgaveMedSaksnummerOgSaksbehandler(saksnummer, saksbehandlerID)).thenReturn(oppgave);
+        when(oppgaveTilbakkeleggingRepo.save(any(OppgaveTilbakelegging.class))).then(arguments -> {
+            OppgaveTilbakelegging oppgaveTilbakelegging = arguments.getArgument(0);
+            assertThat(oppgaveTilbakelegging.getOppgaveId()).isEqualTo("7");
+            assertThat(oppgaveTilbakelegging.getSaksbehandlerId()).isEqualTo("test");
+            assertThat(oppgaveTilbakelegging.getBegrunnelse()).isEqualTo("Oppgaven er kjedelig");
+            return oppgaveTilbakelegging;
+        }).getMock();
+
+        oppgaveplukker.leggTilbakeOppgave(saksnummer, saksbehandlerID, begrunnelse);
+
+        final String ugyldigSaksnummer = "13";
+        final String forventetFeilmelding = String.format("Fant ikke oppgave med saksnummer %s og saksbehandlerID %s", ugyldigSaksnummer, saksbehandlerID);
+
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage(forventetFeilmelding);
+
+        oppgaveplukker.leggTilbakeOppgave(ugyldigSaksnummer, saksbehandlerID, begrunnelse);
     }
 }

@@ -6,10 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.melosys.domain.gsak.AktorType;
-import no.nav.melosys.domain.gsak.Fagomrade;
-import no.nav.melosys.domain.gsak.Oppgavetype;
-import no.nav.melosys.domain.gsak.Underkategori;
+import no.nav.melosys.domain.gsak.*;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
@@ -172,8 +169,12 @@ public class GsakService implements GsakFasade {
         FinnOppgaveListeResponse finnOppgaveListeResponse = oppgaveConsumer.finnOppgaveListe(requestMal);
         List<Oppgave> oppgaver = finnOppgaveListeResponse.getOppgaveListe();
 
-        return oppgaver.stream().map(o -> new no.nav.melosys.domain.Oppgave(o.getOppgaveId(), o.getPrioritet().getKode()))
-            .findFirst().orElse(null);
+        return oppgaver.stream().map(o -> {
+            no.nav.melosys.domain.Oppgave oppgave = new no.nav.melosys.domain.Oppgave();
+            oppgave.setOppgaveId(o.getOppgaveId());
+            oppgave.setPrioritet(PrioritetType.valueOf(o.getPrioritet().getKode()));
+            return oppgave;
+        }).findFirst().orElse(null);
     }
 
     @Override
@@ -194,7 +195,7 @@ public class GsakService implements GsakFasade {
         WSLagreOppgave wsOppgave = new WSLagreOppgave();
 
         try {
-            // oppgaveId er String i BehandleOppgave_v1.opprettOppgave og Oppgave_v3.finnUtildelteOppgaverEtterFrist,
+            // oppgaveId er String i BehandleOppgave_v1.opprettOppgave og i respons fra Oppgave_v3.finnUtildelteOppgaverEtterFrist,
             // men int i BehandleOppgave_v1.lagreOppgave
             int oppgaveId = Integer.parseInt(oppgave.getOppgaveId());
             wsOppgave.setOppgaveId(oppgaveId);
