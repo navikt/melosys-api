@@ -1,14 +1,9 @@
 package no.nav.melosys.sikkerhet.sts;
 
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
-import org.apache.cxf.ws.security.trust.delegation.DelegationCallback;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
@@ -16,10 +11,15 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import org.apache.cxf.ws.security.trust.delegation.DelegationCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * Inserts the OIDC token string into the xml message under wsse:BinarySecurityToken
@@ -68,7 +68,8 @@ public class OnBehalfOfWithOidcCallbackHandler implements CallbackHandler {
     }
 
     private static String getOnBehalfOfString() {
-        String jwt = SpringSubjectHandler.getOidcTokenString();
+        SubjectHandler subjectHandler = SubjectHandler.getInstance();
+        String jwt = subjectHandler.getOidcTokenString();
         String base64encodedJTW = Base64.getEncoder().encodeToString(jwt.getBytes(StandardCharsets.UTF_8));
         return "<wsse:BinarySecurityToken" +
                 " EncodingType=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary\"" +

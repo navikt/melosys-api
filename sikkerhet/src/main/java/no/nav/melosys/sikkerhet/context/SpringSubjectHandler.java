@@ -3,16 +3,26 @@ package no.nav.melosys.sikkerhet.context;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-public class SpringSubjectHandler {
+public class SpringSubjectHandler extends SubjectHandler {
 
-    public static String getOidcTokenString() {
+    public String getOidcTokenString() {
         OIDCAuthenticationToken auth = (OIDCAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        return auth.getIdToken().getParsedString();
+
+        if (auth != null) {
+            return auth.getIdToken().getParsedString();
+        } else {
+            return null;
+        }
     }
 
-    public static String getUserID() {
+    public String getUserID() {
         OIDCAuthenticationToken auth = (OIDCAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        return auth.getSub();
+
+        if (auth != null) {
+            return auth.getSub();
+        } else {
+            return null;
+        }
     }
 
 }

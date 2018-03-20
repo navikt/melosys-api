@@ -31,6 +31,10 @@
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-service</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>sikkerhet</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -77,6 +81,13 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>sikkerhet</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 

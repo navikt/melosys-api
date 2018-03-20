@@ -1,5 +1,6 @@
 package no.nav.melosys.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,8 +29,18 @@ public class Oppgaveplukker {
      * 2) Oppgaveplukker velger neste oppgave basert på prioritet (først) og frist.
      * 3) Oppgaveplukker tildeler oppgaven til saksbehandleren..
      */
-    public Optional<Oppgave> plukkOppgave(String saksbehandlerID, List<String> fagområdeKodeListe, String underkategori, List<String> oppgavetypeListe) {
-        List<Oppgave> oppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(fagområdeKodeListe, underkategori, oppgavetypeListe);
+    public Optional<Oppgave> plukkOppgave(String saksbehandlerID, List<String> sakstyper, List<String> behandlingstyper) {
+
+        // TODO Mapping til fagområde i GSAK må avklares
+        List<String> fagområdeKodeListe = new ArrayList<>();
+        fagområdeKodeListe.add("MED");
+        fagområdeKodeListe.add("UFM");
+
+        // TODO Mapping mellom sakstyper og underkategori
+
+        // TODO Mapping mellom behandlingstyper og oppgavetyper
+
+        List<Oppgave> oppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(fagområdeKodeListe, sakstyper.get(0), behandlingstyper);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, oppgaver);
 

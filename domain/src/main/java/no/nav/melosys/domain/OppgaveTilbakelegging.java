@@ -25,7 +25,7 @@ public class OppgaveTilbakelegging {
     @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
 
-    @Column(name = "tom_dato", nullable = false, updatable = false)
+    @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
 
     public String getOppgaveId() {

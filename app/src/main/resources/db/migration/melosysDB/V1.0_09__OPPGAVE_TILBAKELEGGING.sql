@@ -1,4 +1,4 @@
-CREATE TABLE oppgave_tilbakkelegging (
+CREATE TABLE oppgave_tilbakelegging (
     id                 NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     oppgave_id         VARCHAR2(99)  NOT NULL,
     saksbehandler_id   VARCHAR2(99)  NOT NULL,

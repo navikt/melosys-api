@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Oppgave;
+import no.nav.melosys.domain.gsak.Underkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import org.junit.Before;
@@ -52,10 +53,13 @@ public class OppgaveplukkerTest {
         fagområdeListe.add("MED");
         fagområdeListe.add("UFM");
 
+        List<String> sakstyper = new ArrayList<>();
+        sakstyper.add(Underkategori.MIDL_LOVVALG_MED.toString());
+
         List<String> oppgavetypeListe = new ArrayList<>();
         oppgavetypeListe.add("");
 
-        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave(ident, fagområdeListe, "", oppgavetypeListe);
+        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave(ident, sakstyper, oppgavetypeListe);
 
         assertThat(oppgave.isPresent()).isTrue();
         assertThat(oppgave.get().getOppgaveId()).isEqualTo("1");

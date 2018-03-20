@@ -9,7 +9,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.service.Oppgaveplukker;
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.OppgaveDto;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = {"oppgaver"})
 @Path("/oppgaver")
 @Service
-@Scope(value = WebApplicationContext.SCOPE_APPLICATION)
+@Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class OppgaveTjeneste {
 
     private Oppgaveplukker oppgaveplukker;
@@ -34,19 +34,15 @@ public class OppgaveTjeneste {
     @Path("{plukk}")
     @ApiOperation(value = "Plukker fra GSAK neste oppgave som saksbehandler skal arbeide med.")
     public Response plukkOppgave(PlukkOppgaveInnDto plukkDto) {
-        String ident = SpringSubjectHandler.getUserID();
+        String ident = SubjectHandler.getInstance().getUserID();
 
-        Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto.getFagområdeKodeListe(), plukkDto.getUnderkategori(), plukkDto.getOppgavetypeListe());
+        Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto.getSakstyper(), plukkDto.getSakstyper());
 
         if (plukket.isPresent()) {
             Oppgave oppgave = plukket.get();
 
             OppgaveDto dto = new OppgaveDto();
             dto.setOppgaveId(oppgave.getOppgaveId());
-            dto.setAktivTil(oppgave.getAktivTil());
-            if (oppgave.getOppgavetype() != null) {
-                dto.setOppgavetype(oppgave.getOppgavetype().toString());
-            }
             dto.setSaksnummer(oppgave.getSaksnummer());
             dto.setDokumentID(oppgave.getDokumentId());
 

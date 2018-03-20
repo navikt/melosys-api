@@ -1,34 +1,26 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import java.util.List;
+        import java.util.List;
 
 public class PlukkOppgaveInnDto {
 
-    public List<String> fagområdeKodeListe;
-    private String underkategori;
-    private List<String> oppgavetypeListe;
+    private List<String> sakstyper;
+    private List<String> behandlingstyper;
 
-    public List<String> getFagområdeKodeListe() {
-        return fagområdeKodeListe;
+    public List<String> getSakstyper() {
+        return sakstyper;
     }
 
-    public void setFagområdeKodeListe(List<String> fagområdeKodeListe) {
-        this.fagområdeKodeListe = fagområdeKodeListe;
+    public void setSakstyper(List<String> sakstyper) {
+        this.sakstyper = sakstyper;
     }
 
-    public String getUnderkategori() {
-        return underkategori;
+    public List<String> getBehandlingstyper() {
+        return behandlingstyper;
     }
 
-    public void setUnderkategori(String underkategori) {
-        this.underkategori = underkategori;
+    public void setBehandlingstyper(List<String> behandlingstyper) {
+        this.behandlingstyper = behandlingstyper;
     }
 
-    public List<String> getOppgavetypeListe() {
-        return oppgavetypeListe;
-    }
-
-    public void setOppgavetypeListe(List<String> oppgavetypeListe) {
-        this.oppgavetypeListe = oppgavetypeListe;
-    }
 }
