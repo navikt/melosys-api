@@ -36,7 +36,7 @@ public class Oppgaveplukker {
         fagområdeKodeListe.add("MED");
         fagområdeKodeListe.add("UFM");
 
-        // TODO Mapping mellom sakstyper og underkategori
+        // TODO Mapping mellom sakstyper og underkategori. Vi trenger en liste (Yvonne).
 
         // TODO Mapping mellom behandlingstyper og oppgavetyper
 
@@ -66,7 +66,7 @@ public class Oppgaveplukker {
         // Vi må ikke tildele en oppgave som var tilbakelagt.
         if (valg.isPresent()) {
             String oppgaveId = valg.get().getOppgaveId();
-            if (erTilbakeLagt(oppgaveId, saksbehandlerID)) {
+            if (erTilbakeLagt(saksbehandlerID, oppgaveId)) {
                 oppgaver.remove(valg.get());
                 return velgNeste(saksbehandlerID, oppgaver);
             }

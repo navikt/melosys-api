@@ -30,13 +30,8 @@ public class Oppgave {
     public Oppgave() {
     }
 
-    public Oppgave(String oppgaveId, String prioritet) {
-        this.oppgaveId = oppgaveId;
-        this.prioritet = PrioritetType.valueOf(prioritet);
-    }
-
     public boolean harHøyPrioritet() {
-        return (prioritet.equals(PrioritetType.HOY_MED) || prioritet.equals(PrioritetType.HOY_UFM));
+        return ((PrioritetType.HOY_MED.equals(prioritet)) || PrioritetType.HOY_UFM.equals(prioritet));
     }
 
     public String getOppgaveId() {
@@ -85,6 +80,14 @@ public class Oppgave {
 
     public void setOppgavetype(Oppgavetype oppgavetype) {
         this.oppgavetype = oppgavetype;
+    }
+
+    public PrioritetType getPrioritet() {
+        return prioritet;
+    }
+
+    public void setPrioritet(PrioritetType prioritet) {
+        this.prioritet = prioritet;
     }
 
     public String getSaksnummer() {
