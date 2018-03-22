@@ -23,15 +23,17 @@ public interface GsakFasade {
      * Finner aktive og utildelte oppgaver som svarer til noen gitt kriterier.
      * GSAK sorterer oppgavene stigende etter frist.
      *
+     * @param oppavetype
      * @param fagområdeKodeListe
-     * @param underkategori
-     * @param oppgavetypeKodeListe
+     * @param sakstyper
+     * @param behandlingstyper
      * @return
      * @throws IntegrasjonException
      */
-    List<Oppgave> finnUtildelteOppgaverEtterFrist(List<String> fagområdeKodeListe,
-                                                  String underkategori,
-                                                  List<String> oppgavetypeKodeListe
+    List<Oppgave> finnUtildelteOppgaverEtterFrist(String oppavetype,
+                                                  List<String> fagområdeKodeListe,
+                                                  List<String> sakstyper,
+                                                  List<String> behandlingstyper
     ) throws IntegrasjonException;
 
     /**

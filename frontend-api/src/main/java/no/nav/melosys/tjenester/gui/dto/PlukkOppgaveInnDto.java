@@ -4,8 +4,17 @@ package no.nav.melosys.tjenester.gui.dto;
 
 public class PlukkOppgaveInnDto {
 
+    private String oppgavetype;
     private List<String> sakstyper;
     private List<String> behandlingstyper;
+
+    public String getOppgavetype() {
+        return oppgavetype;
+    }
+
+    public void setOppgavetype(String oppgavetype) {
+        this.oppgavetype = oppgavetype;
+    }
 
     public List<String> getSakstyper() {
         return sakstyper;

@@ -14,6 +14,9 @@ CREATE TABLE fagsak_type (
     CONSTRAINT pk_fagsak_type PRIMARY KEY (kode)
 );
 INSERT INTO fagsak_type (kode, navn) VALUES ('A1', 'Søknad A1');
+INSERT INTO fagsak_type (kode, navn) VALUES ('EU_EOS', 'EU/EØS');
+INSERT INTO fagsak_type (kode, navn) VALUES ('TRYGDEAVTALE', 'Trygdeavtale');
+INSERT INTO fagsak_type (kode, navn) VALUES ('FOLKETRYGD', 'Folketrygd');
 
 CREATE TABLE fagsak_status (
     kode        VARCHAR2(99)  NOT NULL,

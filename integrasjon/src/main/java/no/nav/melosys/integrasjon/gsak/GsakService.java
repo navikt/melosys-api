@@ -125,13 +125,14 @@ public class GsakService implements GsakFasade {
         }
     }
 
-    // FIXME GSAK oppretter et nytt API med REST tjenester.
+    // FIXME GSAK oppretter et nytt API med REST tjenester. Den metoden må endres når disse kommer.
     @Override
-    public List<no.nav.melosys.domain.Oppgave> finnUtildelteOppgaverEtterFrist(List<String> fagområdeKodeListe, String underkategori, List<String> oppgavetypeKodeListe) throws IntegrasjonException {
+    public List<no.nav.melosys.domain.Oppgave> finnUtildelteOppgaverEtterFrist(String oppavetype, List<String> fagområdeKodeListe, List<String> sakstyper, List<String> behandlingstyper) throws IntegrasjonException {
         FinnOppgaveListeSokMal sokMal = FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(Integer.toString(MELOSYS_ENHET_ID)).medFagområdeKodeListe(fagområdeKodeListe).build();
 
         FinnOppgaveListeFilterMal.Builder filterMalBuilder = FinnOppgaveListeFilterMal.builder();
-        FinnOppgaveListeFilterMal filterMal = filterMalBuilder.medAktiv(true).medUfordelte(true).medUnderkategori(underkategori).medOppgavetypeKodeListe(oppgavetypeKodeListe).build();
+        FinnOppgaveListeFilterMal filterMal = filterMalBuilder.medAktiv(true).medUfordelte(true).build();
+        // TODO mapping med behandlingstyper og sakstyper
 
         FinnOppgaveListeSortering sortering = new FinnOppgaveListeSortering();
         sortering.setSorteringselementKode(SORTERING_MED_FRIST);

@@ -25,10 +25,12 @@ CREATE TABLE behandling_type (
     CONSTRAINT pk_behandling_type PRIMARY KEY (kode)
 );
 
-INSERT INTO behandling_type (kode, navn) VALUES ('SØKNAD', 'Behandling av søknad');
-INSERT INTO behandling_type (kode, navn) VALUES ('KLAGE', 'Behandling av klage');
-INSERT INTO behandling_type (kode, navn) VALUES ('MELDING_UTL', 'Behandling av meldinger fra utenlandske myndigheter');
-INSERT INTO behandling_type (kode, navn) VALUES ('PÅSTAND_UTL', 'Behandling av påstander fra utenlandske myndigheter');
+INSERT INTO behandling_type (kode, navn) VALUES ('ae0034', 'Søknad');
+INSERT INTO behandling_type (kode, navn) VALUES ('UFM', 'Unntak medlemskap');
+INSERT INTO behandling_type (kode, navn) VALUES ('ae0058', 'Klage');
+INSERT INTO behandling_type (kode, navn) VALUES ('ae0028', 'Revurdering');
+INSERT INTO behandling_type (kode, navn) VALUES ('MELDING_UTL', 'Melding fra utenlandsk myndighet');
+INSERT INTO behandling_type (kode, navn) VALUES ('PÅSTAND_UTL', 'Påstand fra utenlandsk myndighet');
 
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_fagsak FOREIGN KEY (fagsak_id) REFERENCES fagsak;
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_status FOREIGN KEY (status) REFERENCES behandling_status;

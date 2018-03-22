@@ -1,8 +1,8 @@
 package no.nav.melosys.domain;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
 import javax.persistence.Converter;
+
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * De forskjellige sakstypene Melosys skal kunne behandle.
@@ -11,7 +11,11 @@ import javax.persistence.Converter;
  */
 public enum FagsakType implements Kodeverk<FagsakType> {
 
-    SØKNAD_A1("A1", "Søknad om A1");
+    SØKNAD_A1("A1", "Søknad om A1"), //FIXME Fjernes??
+    EU_EØS("EU_EOS", "EU/EØS"),
+    TRYGDEAVTALE("TRYGDEAVTALE", "Trygdeavtale"),
+    FOLKETRYGD("FOLKETRYGD", "Folketrygd");
+
 
     private String kode;
     private String beskrivelse;

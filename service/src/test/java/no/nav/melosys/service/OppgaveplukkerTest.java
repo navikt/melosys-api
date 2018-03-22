@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.OppgaveTilbakelegging;
 import no.nav.melosys.domain.gsak.PrioritetType;
@@ -17,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -55,15 +56,15 @@ public class OppgaveplukkerTest {
         oppgave3.setPrioritet(PrioritetType.NORM_MED);
         oppgaver.add(oppgave3);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anyList(), any(String.class), anyList())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anyString(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(Underkategori.MIDL_LOVVALG_MED.toString());
+        sakstyper.add(FagsakType.EU_EØS.getKode());
 
-        List<String> oppgavetypeListe = new ArrayList<>();
-        oppgavetypeListe.add("");
+        List<String> behandlingstyper = new ArrayList<>();
+        behandlingstyper.add(BehandlingType.SØKNAD.getKode());
 
-        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", sakstyper, oppgavetypeListe);
+        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", "JFR", sakstyper, behandlingstyper);
 
         assertThat(oppgave.isPresent()).isTrue();
         assertThat(oppgave.get().getOppgaveId()).isEqualTo("2");
@@ -85,19 +86,19 @@ public class OppgaveplukkerTest {
         oppgave3.setPrioritet(PrioritetType.NORM_MED);
         oppgaver.add(oppgave3);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anyList(), any(String.class), anyList())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anyString(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
         tilbakelagt.add(new OppgaveTilbakelegging());
         when(oppgaveTilbakkeleggingRepo.findBySaksbehandlerAndOppgaveId(anyString(), eq("1"))).thenReturn(tilbakelagt);
 
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(Underkategori.MIDL_LOVVALG_MED.toString());
+        sakstyper.add(FagsakType.FOLKETRYGD.getKode());
 
-        List<String> oppgavetypeListe = new ArrayList<>();
-        oppgavetypeListe.add("");
+        List<String> behandlingstyper = new ArrayList<>();
+        behandlingstyper.add(BehandlingType.REVURDERING.getKode());
 
-        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", sakstyper, oppgavetypeListe);
+        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", "BEH_SAK", sakstyper, behandlingstyper);
 
         assertThat(oppgave.isPresent()).isTrue();
         assertThat(oppgave.get().getOppgaveId()).isEqualTo("2");
@@ -119,7 +120,7 @@ public class OppgaveplukkerTest {
         oppgave3.setPrioritet(PrioritetType.NORM_MED);
         oppgaver.add(oppgave3);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anyList(), any(String.class), anyList())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(anyString(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
         tilbakelagt.add(new OppgaveTilbakelegging());
@@ -128,10 +129,10 @@ public class OppgaveplukkerTest {
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(Underkategori.MIDL_LOVVALG_MED.toString());
 
-        List<String> oppgavetypeListe = new ArrayList<>();
-        oppgavetypeListe.add("");
+        List<String> behandlingstyper = new ArrayList<>();
+        behandlingstyper.add(FagsakType.TRYGDEAVTALE.getKode());
 
-        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", sakstyper, oppgavetypeListe);
+        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", "BEH_SAK", sakstyper, behandlingstyper);
 
         assertThat(oppgave.isPresent()).isFalse();
     }

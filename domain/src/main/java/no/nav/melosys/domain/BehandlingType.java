@@ -4,10 +4,12 @@ import javax.persistence.Converter;
 
 public enum BehandlingType implements Kodeverk<BehandlingType> {
 
-    SØKNAD("SØKNAD", "Behandling av søknad"),
-    KLAGE("KLAGE", "Behandling av klage"),
-    MELDING_UTL("MELDING_UTL", "Behandling av meldinger fra utenlandske myndigheter"),
-    PÅSTAND_UTL("PÅSTAND_UTL", "Behandling av påstander fra utenlandske myndigheter");
+    SØKNAD("ae0034", "Søknad"),
+    UNNTAK_MEDL("UFM", "Unntak medlemskap"),
+    KLAGE("ae0058", "Klage"),
+    REVURDERING("ae0028", "Revurdering"),
+    MELDING_UTL("MELDING_UTL", "Melding fra utenlandsk myndighet"),
+    PÅSTAND_UTL("PÅSTAND_UTL", "Påstand fra utenlandsk myndighet");
 
     private String kode;
     private String beskrivelse;

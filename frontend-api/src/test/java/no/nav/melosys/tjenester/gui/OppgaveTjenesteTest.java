@@ -6,14 +6,15 @@ import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.Response;
 
+import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.gsak.Oppgavetype;
-import no.nav.melosys.domain.gsak.Underkategori;
 import no.nav.melosys.service.Oppgaveplukker;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.OppgaveDto;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
+import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,8 +23,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -44,25 +45,28 @@ public class OppgaveTjenesteTest {
     public void plukkOppgave() {
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
+        innData.setOppgavetype("BEH_SAK");
+
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(Underkategori.BOSTED_MED.toString());
+        sakstyper.add(FagsakType.SØKNAD_A1.getKode());
         innData.setSakstyper(sakstyper);
 
         List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(Oppgavetype.JFR_MED.toString());
+        behandlingstyper.add(BehandlingType.SØKNAD.getKode());
         innData.setBehandlingstyper(behandlingstyper);
 
         Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId("1");
+        oppgave.setOppgavetype(Oppgavetype.BEH_SAK_MED);
         Optional<Oppgave> plukket = Optional.of(oppgave);
 
-        when(oppgaveplukker.plukkOppgave(any(String.class), anyList(), anyList())).thenReturn(plukket);
+        when(oppgaveplukker.plukkOppgave(anyString(), anyString(), anyList(), anyList())).thenReturn(plukket);
 
         Response response = tjeneste.plukkOppgave(innData);
 
-        assertThat(response.getEntity()).isExactlyInstanceOf(OppgaveDto.class);
+        assertThat(response.getEntity()).isExactlyInstanceOf(PlukketOppgaveDto.class);
 
-        OppgaveDto entity = (OppgaveDto) response.getEntity();
+        PlukketOppgaveDto entity = (PlukketOppgaveDto) response.getEntity();
         assertThat(entity.getOppgaveId()).isEqualTo("1");
 
     }
@@ -72,14 +76,17 @@ public class OppgaveTjenesteTest {
 
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
+        innData.setOppgavetype("BEH_SAK"); // eller JFR
+
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(Underkategori.BOSTED_MED.toString());
-        sakstyper.add(Underkategori.MIDL_LOVVALG_MED.toString());
+        sakstyper.add(FagsakType.EU_EØS.getKode());
+        sakstyper.add(FagsakType.TRYGDEAVTALE.getKode());
+        sakstyper.add(FagsakType.FOLKETRYGD.getKode());
         innData.setSakstyper(sakstyper);
 
         List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(Oppgavetype.JFR_MED.toString());
-        behandlingstyper.add(Oppgavetype.BEH_SED_MED.toString());
+        behandlingstyper.add(BehandlingType.SØKNAD.getKode()); // Felleskodeverk finnes
+        behandlingstyper.add(BehandlingType.KLAGE.getKode());
         innData.setBehandlingstyper(behandlingstyper);
 
         try {
@@ -91,13 +98,15 @@ public class OppgaveTjenesteTest {
         }
     }
 
+    @Test
     public void jsonUt() {
         ObjectMapper mapper = new ObjectMapper();
 
-        OppgaveDto dto = new OppgaveDto();
+        PlukketOppgaveDto dto = new PlukketOppgaveDto();
         dto.setOppgaveId("1");
+        dto.setOppgavetype("JFR");
         dto.setSaksnummer("123");
-        dto.setDokumentID("DOK_321");
+        dto.setJournalpostId("JOUR_321");
 
         try {
             String json = mapper.writeValueAsString(dto);

@@ -10,8 +10,8 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.service.Oppgaveplukker;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.OppgaveDto;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
+import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -36,15 +36,16 @@ public class OppgaveTjeneste {
     public Response plukkOppgave(PlukkOppgaveInnDto plukkDto) {
         String ident = SubjectHandler.getInstance().getUserID();
 
-        Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto.getSakstyper(), plukkDto.getSakstyper());
+        Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto.getOppgavetype(), plukkDto.getSakstyper(), plukkDto.getBehandlingstyper());
 
         if (plukket.isPresent()) {
             Oppgave oppgave = plukket.get();
 
-            OppgaveDto dto = new OppgaveDto();
+            PlukketOppgaveDto dto = new PlukketOppgaveDto();
             dto.setOppgaveId(oppgave.getOppgaveId());
+            dto.setOppgavetype(oppgave.getOppgavetype().name());
             dto.setSaksnummer(oppgave.getSaksnummer());
-            dto.setDokumentID(oppgave.getDokumentId());
+            dto.setJournalpostId(oppgave.getDokumentId());
 
             return Response.ok(dto).build();
         } else {
