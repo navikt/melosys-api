@@ -2,7 +2,10 @@ package no.nav.melosys.domain;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.gsak.*;
+import no.nav.melosys.domain.gsak.Fagomrade;
+import no.nav.melosys.domain.gsak.Oppgavetype;
+import no.nav.melosys.domain.gsak.PrioritetType;
+import no.nav.melosys.domain.gsak.Underkategori;
 
 /**
  * Den klassen mapper Oppgaver fra GSAK og er derfor ikke en @Entity

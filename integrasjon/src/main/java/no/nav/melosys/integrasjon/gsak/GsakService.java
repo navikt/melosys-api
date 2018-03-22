@@ -304,12 +304,14 @@ public class GsakService implements GsakFasade {
                                                                 String sorteringKode, //STIGENDE ellers SYNKENDE
                                                                 String ikkeTidligereFordeltTil) //Saksbehandlerident
             throws IntegrasjonException {
+
         FinnOppgaveListeSortering finnOppgaveListeSortering = new FinnOppgaveListeSortering();
+
         finnOppgaveListeSortering.setSorteringselementKode(sorteringselementKode);
         finnOppgaveListeSortering.setSorteringKode(sorteringKode);
 
         FinnOppgaveListeRequestMal finnOppgaveListeRequestMal = new FinnOppgaveListeRequestMal(
-                FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(ansvarligEnhetId).medBrukerId(brukerID).medAnsvarligId(ansvarligId).build(),
+                FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(Integer.toString(MELOSYS_ENHET_ID)).medBrukerId(brukerID).medAnsvarligId(ansvarligId).build(),
                 FinnOppgaveListeFilterMal.builder().build(), finnOppgaveListeSortering, ikkeTidligereFordeltTil);
 
         List<no.nav.melosys.domain.Oppgave> localDomainObjects = new ArrayList<>();

@@ -1,18 +1,37 @@
+
 package no.nav.melosys.tjenester.gui.dto;
 
 
-import java.time.LocalDate;
+import no.nav.melosys.domain.Oppgave;
+import no.nav.melosys.tjenester.gui.dto.oppgave.SaksTypeDto;
 
-public class OppgaveDto {
+public class MinSakDto {
 
     private String oppgaveId;
     private String oppgavetype;
-    private String grunnlagstype;
     private String sammensattNavn;
-    private String saksnummer;
+    private Long saksnummer;
     private String dokumentID;
-    private LocalDate aktivTil;
+    private String aktivTil;
     private PeriodeDto soknadsperiode;
+    private SaksTypeDto saksTypeDto;
+    private String[] land;
+
+    public java.lang.String[] getLand() {
+        return land;
+    }
+
+    public void setLand(java.lang.String[] land) {
+        this.land = land;
+    }
+
+    public SaksTypeDto getSaksTypeDto() {
+        return saksTypeDto;
+    }
+
+    public void setSaksTypeDto(SaksTypeDto saksTypeDto) {
+        this.saksTypeDto = saksTypeDto;
+    }
 
     public String getOppgaveId() {
         return oppgaveId;
@@ -30,14 +49,6 @@ public class OppgaveDto {
         this.oppgavetype = oppgavetype;
     }
 
-    public String getGrunnlagstype() {
-        return grunnlagstype;
-    }
-
-    public void setGrunnlagstype(String grunnlagstype) {
-        this.grunnlagstype = grunnlagstype;
-    }
-
     public String getSammensattNavn() {
         return sammensattNavn;
     }
@@ -46,23 +57,27 @@ public class OppgaveDto {
         this.sammensattNavn = sammensattNavn;
     }
 
-    public String getSaksnummer() {
+    public Long getSaksnummer() {
         return saksnummer;
     }
 
-    public void setSaksnummer(String saksnummer) {
+    public void setSaksnummer(Long saksnummer) {
         this.saksnummer = saksnummer;
+    }
+
+    public String getDokumentID() {
+        return dokumentID;
     }
 
     public void setDokumentID(String dokumentID) {
         this.dokumentID = dokumentID;
     }
 
-    public LocalDate getAktivTil() {
+    public String getAktivTil() {
         return aktivTil;
     }
 
-    public void setAktivTil(LocalDate aktivTil) {
+    public void setAktivTil(String aktivTil) {
         this.aktivTil = aktivTil;
     }
 
@@ -73,4 +88,6 @@ public class OppgaveDto {
     public void setSoknadsperiode(PeriodeDto soknadsperiode) {
         this.soknadsperiode = soknadsperiode;
     }
+
+
 }

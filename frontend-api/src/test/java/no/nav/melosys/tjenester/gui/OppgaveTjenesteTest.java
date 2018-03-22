@@ -10,6 +10,7 @@ import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.gsak.Oppgavetype;
+import no.nav.melosys.service.OppgaveService;
 import no.nav.melosys.service.Oppgaveplukker;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
@@ -25,6 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,12 +34,16 @@ public class OppgaveTjenesteTest {
 
     @Mock
     private Oppgaveplukker oppgaveplukker;
-    
-    private OppgaveTjeneste tjeneste;
+
+
+    OppgaveTjeneste tjeneste;
+
+    @Mock
+    private OppgaveService oppgaveService;
 
     @Before
     public void setUp() {
-        tjeneste = new OppgaveTjeneste(oppgaveplukker);
+        tjeneste = new OppgaveTjeneste(oppgaveplukker, oppgaveService);
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 

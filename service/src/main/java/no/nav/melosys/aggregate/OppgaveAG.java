@@ -1,13 +1,16 @@
 package no.nav.melosys.aggregate;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Oppgave;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.Oppgave;
 
 public class OppgaveAG {
 
@@ -36,7 +39,8 @@ public class OppgaveAG {
         return soeknadDokument;
     }
 
-    public void setSoeknadDokument(SoeknadDokument soeknadDokument) {
+    public void setSoeknadDokument(SoeknadDokument
+                   soeknadDokument) {
         this.soeknadDokument = soeknadDokument;
     }
 
