@@ -20,6 +20,10 @@
                         <arbeidsavtaler>
                         <xsl:for-each select="arbeidsavtale">
                             <avtale>
+                                <gyldighetsperiode>
+                                    <fom><xsl:value-of select="@fomGyldighetsperiode"/></fom>
+                                    <tom><xsl:value-of select="@tomGyldighetsperiode"/></tom>
+                                </gyldighetsperiode>
                                 <arbeidstidsordning><xsl:value-of select="arbeidstidsordning" /></arbeidstidsordning>
                                 <avloenningstype><xsl:value-of select="avloenningstype" /></avloenningstype>
                                 <yrke><xsl:value-of select="yrke" /></yrke>

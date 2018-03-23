@@ -9,16 +9,21 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.domain.HarPeriode;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Arbeidsavtale {
+public class Arbeidsavtale implements HarPeriode {
 
     public String arbeidstidsordning; //"http://nav.no/kodeverk/Kodeverk/Arbeidstidsordninger"
 
     public String avloenningstype; //"http://nav.no/kodeverk/Kodeverk/Avl_c3_b8nningstyper"
 
     public String yrke; //"http://nav.no/kodeverk/Kodeverk/Yrker"
+
+    public Periode gyldighetsperiode;
 
     public BigDecimal avtaltArbeidstimerPerUke;
 
@@ -55,6 +60,11 @@ public class Arbeidsavtale {
 
     public String getYrke() {
         return yrke;
+    }
+
+    @Override
+    public ErPeriode getPeriode() {
+        return gyldighetsperiode;
     }
 
     public BigDecimal getAvtaltArbeidstimerPerUke() {
