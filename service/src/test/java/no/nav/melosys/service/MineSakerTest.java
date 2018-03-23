@@ -17,7 +17,6 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
-import org.junit.Ignore;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,8 +56,7 @@ public class MineSakerTest {
     }
 
     @Test
-    @Ignore
-    public void henteMineSaker(){
+    public void henteMineSaker() {
 
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave("1", "HOY_MED");
@@ -66,9 +64,9 @@ public class MineSakerTest {
         oppgave1.setAnsvarligId("12345678901");
         oppgaver.add(oppgave1);
 
-        when(gsakFasade.finnOppgaveListe(anyString(), anyString(), anyString(), anyString(),anyString(), anyString())).
+        when(gsakFasade.finnOppgaveListe(anyString(), anyString(), anyString(), anyString(), anyString(), anyString())).
                 thenAnswer((Answer) invocation -> {
-                    String string = invocation.getArgument(0);
+                    String string = invocation.getArgument(1);//AnsvarligID
                     return (string.equals("12345678901")) ? oppgaver : new ArrayList<>();
                 });
 
