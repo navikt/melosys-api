@@ -48,7 +48,7 @@ public class OppgaveTjenesteTest {
         innData.setOppgavetype("BEH_SAK");
 
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(FagsakType.SØKNAD_A1.getKode());
+        sakstyper.add(FagsakType.EU_EØS.getKode());
         innData.setSakstyper(sakstyper);
 
         List<String> behandlingstyper = new ArrayList<>();

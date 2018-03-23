@@ -1,20 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.time.LocalDateTime;
-
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.modelmapper.ModelMapper;
-import org.slf4j.LoggerFactory;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -42,6 +30,16 @@ import no.nav.melosys.integrasjon.tps.person.PersonMock;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
+import org.slf4j.LoggerFactory;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class FagsakTjenesteTest {
 
@@ -77,7 +75,7 @@ public class FagsakTjenesteTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer("123");
         fagsak.setStatus(FagsakStatus.OPPRETTET);
-        fagsak.setType(FagsakType.SØKNAD_A1);
+        fagsak.setType(FagsakType.EU_EØS);
         fagsak.setRegistrertDato(LocalDateTime.now());
 
         ModelMapper modelMapper = new ModelMapper();

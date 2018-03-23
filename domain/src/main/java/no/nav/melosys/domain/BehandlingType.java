@@ -2,14 +2,16 @@ package no.nav.melosys.domain;
 
 import javax.persistence.Converter;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum BehandlingType implements Kodeverk<BehandlingType> {
 
-    SØKNAD("ae0034", "Søknad"),
+    SØKNAD("SKND", "Søknad"),
     UNNTAK_MEDL("UFM", "Unntak medlemskap"),
-    KLAGE("ae0058", "Klage"),
-    REVURDERING("ae0028", "Revurdering"),
-    MELDING_UTL("MELDING_UTL", "Melding fra utenlandsk myndighet"),
-    PÅSTAND_UTL("PÅSTAND_UTL", "Påstand fra utenlandsk myndighet");
+    KLAGE("KLG", "Klage"),
+    REVURDERING("REV", "Revurdering"),
+    MELDING_UTL("ML_U", "Melding fra utenlandsk myndighet"),
+    PÅSTAND_UTL("PS_U", "Påstand fra utenlandsk myndighet");
 
     private String kode;
     private String beskrivelse;
@@ -25,6 +27,7 @@ public enum BehandlingType implements Kodeverk<BehandlingType> {
     }
 
     @Override
+    @JsonValue
     public String getBeskrivelse() {
         return beskrivelse;
     }

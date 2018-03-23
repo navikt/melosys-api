@@ -144,7 +144,7 @@ public class FagsakService {
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         fagsak.setRegistrertDato(dato);
         fagsak.setEndretDato(dato);
-        fagsak.setType(FagsakType.SØKNAD_A1);
+        fagsak.setType(FagsakType.EU_EØS);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
 
         return lagre(fagsak);

@@ -1,5 +1,7 @@
 package no.nav.melosys.service;
 
+import java.time.LocalDateTime;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import no.nav.melosys.domain.Behandling;
@@ -33,9 +35,9 @@ import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.LocalDateTime;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class FagsakServiceTest {
 
@@ -66,7 +68,7 @@ public class FagsakServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer("123");
         fagsak.setStatus(FagsakStatus.OPPRETTET);
-        fagsak.setType(FagsakType.SØKNAD_A1);
+        fagsak.setType(FagsakType.EU_EØS);
         fagsak.setRegistrertDato(LocalDateTime.now());
 
         fagsakRepo.save(fagsak);

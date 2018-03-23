@@ -11,10 +11,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum FagsakType implements Kodeverk<FagsakType> {
 
-    SØKNAD_A1("A1", "Søknad om A1"), //FIXME Fjernes??
     EU_EØS("EU_EOS", "EU/EØS"),
-    TRYGDEAVTALE("TRYGDEAVTALE", "Trygdeavtale"),
-    FOLKETRYGD("FOLKETRYGD", "Folketrygd");
+    TRYGDEAVTALE("TRG_AVT", "Trygdeavtale"),
+    FOLKETRYGD("FLK_TRG", "Folketrygd");
 
 
     private String kode;
@@ -26,12 +25,12 @@ public enum FagsakType implements Kodeverk<FagsakType> {
     }
     
     @Override
-    @JsonValue
     public String getKode() {
         return kode;
     }
 
     @Override
+    @JsonValue
     public String getBeskrivelse() {
         return beskrivelse;
     }
