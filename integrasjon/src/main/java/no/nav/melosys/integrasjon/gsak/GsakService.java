@@ -6,10 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.melosys.domain.gsak.AktorType;
-import no.nav.melosys.domain.gsak.Fagomrade;
-import no.nav.melosys.domain.gsak.Oppgavetype;
-import no.nav.melosys.domain.gsak.Underkategori;
+import no.nav.melosys.domain.gsak.*;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
@@ -22,13 +19,10 @@ import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeRequestMal;
 import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeSokMal;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSFerdigstillOppgaveException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOppgaveIkkeFunnetException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOptimistiskLasingException;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSSikkerhetsbegrensningException;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSAktor;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSAktorType;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSFerdigstillOppgaveRequest;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOppgave;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveRequest;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveResponse;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.*;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.OpprettSakSakEksistererAllerede;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.OpprettSakUgyldigInput;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Aktoer;
@@ -39,9 +33,12 @@ import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Sak;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Sakstyper;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.meldinger.OpprettSakRequest;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.meldinger.OpprettSakResponse;
+import no.nav.tjeneste.virksomhet.oppgave.v3.binding.HentOppgaveOppgaveIkkeFunnet;
 import no.nav.tjeneste.virksomhet.oppgave.v3.informasjon.oppgave.Oppgave;
 import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeResponse;
 import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeSortering;
+import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.HentOppgaveRequest;
+import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.HentOppgaveResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,6 +164,29 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
+    public no.nav.melosys.domain.Oppgave hentOppgave(String oppgaveId) {
+        HentOppgaveRequest request = new HentOppgaveRequest();
+        request.setOppgaveId(oppgaveId);
+
+        try {
+            HentOppgaveResponse response = oppgaveConsumer.hentOppgave(request);
+            Oppgave gsakOppgave = response.getOppgave();
+
+            if (gsakOppgave == null) {
+                return null;
+            }
+            no.nav.melosys.domain.Oppgave oppgave = new no.nav.melosys.domain.Oppgave();
+            oppgave.setOppgaveId(gsakOppgave.getOppgaveId());
+            if (gsakOppgave.getPrioritet() != null) {
+                oppgave.setPrioritet(PrioritetType.valueOf(gsakOppgave.getPrioritet().getKode()));
+            }
+            return oppgave;
+        } catch (HentOppgaveOppgaveIkkeFunnet hentOppgaveOppgaveIkkeFunnet) {
+            throw new IntegrasjonException(hentOppgaveOppgaveIkkeFunnet);
+        }
+    }
+
+    @Override
     public String opprettOppgave(OpprettOppgaveRequest request) throws SikkerhetsbegrensningException {
         WSOpprettOppgaveRequest wsRequest = convertToWSRequest(request);
 
@@ -175,6 +195,34 @@ public class GsakService implements GsakFasade {
             return response.getOppgaveId();
         } catch (WSSikkerhetsbegrensningException e) {
             throw new SikkerhetsbegrensningException(e);
+        }
+    }
+
+    @Override
+    public void leggTilbakeOppgave(no.nav.melosys.domain.Oppgave oppgave) throws IntegrasjonException, SikkerhetsbegrensningException, TekniskException {
+        WSLagreOppgaveRequest wsRequest = new WSLagreOppgaveRequest();
+        WSLagreOppgave wsOppgave = new WSLagreOppgave();
+
+        try {
+            // oppgaveId er String i request til BehandleOppgave_v1.opprettOppgave og i respons fra
+            // Oppgave_v3.finnUtildelteOppgaverEtterFrist, men int i request til BehandleOppgave_v1.lagreOppgave
+            int oppgaveId = Integer.parseInt(oppgave.getOppgaveId());
+            wsOppgave.setOppgaveId(oppgaveId);
+        } catch (NumberFormatException e) {
+            throw new IntegrasjonException("'" + oppgave.getOppgaveId() + "' er ikke en gyldig oppgaveId");
+        }
+        wsOppgave.setGjelderBruker(null);
+        wsRequest.setEndretAvEnhetId(MELOSYS_ENHET_ID);
+        wsRequest.setWsLagreOppgave(wsOppgave);
+
+        try {
+            behandleOppgaveConsumer.lagreOppgave(wsRequest);
+        } catch (WSOppgaveIkkeFunnetException e) {
+            throw new IntegrasjonException(e);
+        } catch (WSSikkerhetsbegrensningException e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (WSOptimistiskLasingException e) {
+            throw new TekniskException(e);
         }
     }
 

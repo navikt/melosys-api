@@ -1,18 +1,26 @@
 package no.nav.melosys.service;
 
 import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.OppgaveTilbakelegging;
+import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.felles.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class Oppgaveplukker {
+
+    Logger log =  LoggerFactory.getLogger(Oppgaveplukker.class);
 
     private GsakFasade gsakFasade;
 
@@ -45,6 +53,29 @@ public class Oppgaveplukker {
         }
 
         return valg;
+    }
+
+    public void leggTilbakeOppgave(String oppgaveId, String saksbehandlerID, String begrunnelse) {
+        Oppgave oppgave = gsakFasade.hentOppgave(oppgaveId);
+
+        if (oppgave == null) {
+            log.error("Fant ikke oppgave med oppgaveId " + oppgaveId);
+            throw new RuntimeException("Fant ikke oppgave med oppgaveId " + oppgaveId);
+        }
+
+        try {
+            gsakFasade.leggTilbakeOppgave(oppgave);
+
+            OppgaveTilbakelegging oppgaveTilbakelegging = new OppgaveTilbakelegging();
+            oppgaveTilbakelegging.setOppgaveId(oppgave.getOppgaveId());
+            oppgaveTilbakelegging.setSaksbehandlerId(saksbehandlerID);
+            oppgaveTilbakelegging.setBegrunnelse(begrunnelse);
+            oppgaveTilbakelegging.setRegistrertDato(LocalDateTime.now());
+            oppgaveTilbakkeleggingRepo.save(oppgaveTilbakelegging);
+        } catch (IntegrasjonException | SikkerhetsbegrensningException | TekniskException e) {
+            log.error("Tilbakelegging av oppgave med oppgaveId " + oppgaveId + " feilet");
+            throw new RuntimeException("Tilbakelegging av oppgave med oppgaveId " + oppgaveId + " feilet");
+        }
     }
 
     private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {

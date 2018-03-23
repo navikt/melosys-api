@@ -37,6 +37,14 @@ public interface GsakFasade {
     ) throws IntegrasjonException;
 
     /**
+     * Hent oppgave fra GSAK på en gitt oppgaveId
+     *
+     * @param oppgaveId
+     * @return
+     */
+    Oppgave hentOppgave(String oppgaveId);
+
+    /**
      * Oppretter en oppgave i GSAK for å få en unik oppgaveId
      *
      * @param request                   Intern representasjon av oppgaven som skal opprettes i GSAK
@@ -44,6 +52,16 @@ public interface GsakFasade {
      * @throws                          SikkerhetsbegrensningException
      */
     String opprettOppgave(OpprettOppgaveRequest request) throws SikkerhetsbegrensningException;
+
+    /**
+     * Legger tilbake en oppgave i GSAK
+     *
+     * @param oppgave
+     * @throws IntegrasjonException
+     * @throws SikkerhetsbegrensningException
+     * @throws TekniskException
+     */
+    void leggTilbakeOppgave(Oppgave oppgave) throws IntegrasjonException, SikkerhetsbegrensningException, TekniskException;
 
     /**
      * Oppretter en sak i GSAK
