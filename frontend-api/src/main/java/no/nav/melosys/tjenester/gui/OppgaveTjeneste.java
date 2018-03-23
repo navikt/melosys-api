@@ -7,13 +7,12 @@ import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.service.Oppgaveplukker;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
-import io.swagger.annotations.ApiParam;
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.TilbakeleggingDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -60,7 +59,7 @@ public class OppgaveTjeneste {
     @POST
     @ApiOperation(value = "Legger tilbake oppgaven med gitt saksnummer i GSAK")
     public Response leggTilbakeOppgave(@ApiParam("Tilbakeleggingsinformasjon") TilbakeleggingDto tilbakelegging) {
-        String ident = SpringSubjectHandler.getInstance().getUserID();
+        String ident = SubjectHandler.getInstance().getUserID();
 
         oppgaveplukker.leggTilbakeOppgave(tilbakelegging.getOppgaveId(), ident, tilbakelegging.getBegrunnelse());
 
