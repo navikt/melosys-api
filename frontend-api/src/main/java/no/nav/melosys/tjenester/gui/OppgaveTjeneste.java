@@ -44,10 +44,10 @@ public class OppgaveTjeneste {
             Oppgave oppgave = plukket.get();
 
             PlukketOppgaveDto dto = new PlukketOppgaveDto();
-            dto.setOppgaveId(oppgave.getOppgaveId());
+            dto.setOppgaveID(oppgave.getOppgaveId());
             dto.setOppgavetype(oppgave.getOppgavetype().name());
             dto.setSaksnummer(oppgave.getSaksnummer());
-            dto.setJournalpostId(oppgave.getDokumentId());
+            dto.setJournalpostID(oppgave.getDokumentId());
 
             return Response.ok(dto).build();
         } else {
@@ -57,7 +57,7 @@ public class OppgaveTjeneste {
     }
 
     @POST
-    @ApiOperation(value = "Legger tilbake oppgaven med gitt saksnummer i GSAK")
+    @ApiOperation(value = "Legger tilbake oppgaven med gitt oppgaveId i GSAK")
     public Response leggTilbakeOppgave(@ApiParam("Tilbakeleggingsinformasjon") TilbakeleggingDto tilbakelegging) {
         String ident = SubjectHandler.getInstance().getUserID();
 

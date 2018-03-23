@@ -104,7 +104,7 @@ public class Oppgaveplukker {
 
     // Sjekker tabellen for tilbakelegging.
     private boolean erTilbakeLagt(String saksbehandlerID, String oppgaveId) {
-        List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerAndOppgaveId(saksbehandlerID, oppgaveId);
+        List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(saksbehandlerID, oppgaveId);
         return !tilbakelegging.isEmpty();
     }
 

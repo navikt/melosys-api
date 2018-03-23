@@ -67,7 +67,7 @@ public class OppgaveTjenesteTest {
         assertThat(response.getEntity()).isExactlyInstanceOf(PlukketOppgaveDto.class);
 
         PlukketOppgaveDto entity = (PlukketOppgaveDto) response.getEntity();
-        assertThat(entity.getOppgaveId()).isEqualTo("1");
+        assertThat(entity.getOppgaveID()).isEqualTo("1");
 
     }
 
@@ -98,15 +98,14 @@ public class OppgaveTjenesteTest {
         }
     }
 
-    @Test
     public void jsonUt() {
         ObjectMapper mapper = new ObjectMapper();
 
         PlukketOppgaveDto dto = new PlukketOppgaveDto();
-        dto.setOppgaveId("1");
+        dto.setOppgaveID("1");
         dto.setOppgavetype("JFR");
         dto.setSaksnummer("123");
-        dto.setJournalpostId("JOUR_321");
+        dto.setJournalpostID("JOUR_321");
 
         try {
             String json = mapper.writeValueAsString(dto);

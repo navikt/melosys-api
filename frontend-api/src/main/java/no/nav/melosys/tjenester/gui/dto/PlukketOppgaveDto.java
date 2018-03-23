@@ -2,17 +2,17 @@ package no.nav.melosys.tjenester.gui.dto;
 
 public class PlukketOppgaveDto {
 
-    private String oppgaveId;
+    private String oppgaveID;
     private String oppgavetype;
     private String saksnummer;
-    private String journalpostId;
+    private String journalpostID;
 
-    public String getOppgaveId() {
-        return oppgaveId;
+    public String getOppgaveID() {
+        return oppgaveID;
     }
 
-    public void setOppgaveId(String oppgaveId) {
-        this.oppgaveId = oppgaveId;
+    public void setOppgaveID(String oppgaveId) {
+        this.oppgaveID = oppgaveId;
     }
 
     public String getOppgavetype() {
@@ -31,12 +31,12 @@ public class PlukketOppgaveDto {
         this.saksnummer = saksnummer;
     }
 
-    public String getJournalpostId() {
-        return journalpostId;
+    public String getJournalpostID() {
+        return journalpostID;
     }
 
-    public void setJournalpostId(String journalpostId) {
-        this.journalpostId = journalpostId;
+    public void setJournalpostID(String journalpostId) {
+        this.journalpostID = journalpostId;
     }
 
 }

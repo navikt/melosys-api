@@ -93,7 +93,7 @@ public class OppgaveplukkerTest {
 
         List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
         tilbakelagt.add(new OppgaveTilbakelegging());
-        when(oppgaveTilbakkeleggingRepo.findBySaksbehandlerAndOppgaveId(anyString(), eq("1"))).thenReturn(tilbakelagt);
+        when(oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(anyString(), eq("1"))).thenReturn(tilbakelagt);
 
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(FagsakType.FOLKETRYGD.getKode());
@@ -127,7 +127,7 @@ public class OppgaveplukkerTest {
 
         List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
         tilbakelagt.add(new OppgaveTilbakelegging());
-        when(oppgaveTilbakkeleggingRepo.findBySaksbehandlerAndOppgaveId(anyString(), anyString())).thenReturn(tilbakelagt);
+        when(oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(anyString(), anyString())).thenReturn(tilbakelagt);
 
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(Underkategori.MIDL_LOVVALG_MED.toString());
