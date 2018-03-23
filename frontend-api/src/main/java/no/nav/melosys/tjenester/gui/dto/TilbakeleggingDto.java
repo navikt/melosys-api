@@ -2,16 +2,16 @@ package no.nav.melosys.tjenester.gui.dto;
 
 public class TilbakeleggingDto {
 
-    private String saksnummer;
+    private String oppgaveId;
 
     private String begrunnelse;
 
-    public String getSaksnummer() {
-        return saksnummer;
+    public String getOppgaveId() {
+        return oppgaveId;
     }
 
-    public void setSaksnummer(String saksnummer) {
-        this.saksnummer = saksnummer;
+    public void setOppgaveId(String oppgaveId) {
+        this.oppgaveId = oppgaveId;
     }
 
     public String getBegrunnelse() {

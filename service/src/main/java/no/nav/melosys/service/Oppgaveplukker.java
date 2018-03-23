@@ -55,12 +55,12 @@ public class Oppgaveplukker {
         return valg;
     }
 
-    public void leggTilbakeOppgave(String saksnummer, String saksbehandlerID, String begrunnelse) {
-        Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummerOgSaksbehandler(saksnummer, saksbehandlerID);
+    public void leggTilbakeOppgave(String oppgaveId, String saksbehandlerID, String begrunnelse) {
+        Oppgave oppgave = gsakFasade.hentOppgave(oppgaveId);
 
         if (oppgave == null) {
-            log.error("Fant ikke oppgave med saksnummer " + saksnummer + " og saksbehandlerID " + saksbehandlerID);
-            throw new RuntimeException("Fant ikke oppgave med saksnummer " + saksnummer + " og saksbehandlerID " + saksbehandlerID);
+            log.error("Fant ikke oppgave med oppgaveId " + oppgaveId);
+            throw new RuntimeException("Fant ikke oppgave med oppgaveId " + oppgaveId);
         }
 
         try {
@@ -73,8 +73,8 @@ public class Oppgaveplukker {
             oppgaveTilbakelegging.setRegistrertDato(LocalDateTime.now());
             oppgaveTilbakkeleggingRepo.save(oppgaveTilbakelegging);
         } catch (IntegrasjonException | SikkerhetsbegrensningException | TekniskException e) {
-            log.error("Tilbakelegging av oppgave med saksnummer " + saksnummer + " og saksbehandlerID " + saksbehandlerID + " feilet");
-            throw new RuntimeException("Tilbakelegging av oppgave med saksnummer " + saksnummer + " og saksbehandlerID " + saksbehandlerID + " feilet");
+            log.error("Tilbakelegging av oppgave med oppgaveId " + oppgaveId + " feilet");
+            throw new RuntimeException("Tilbakelegging av oppgave med oppgaveId " + oppgaveId + " feilet");
         }
     }
 

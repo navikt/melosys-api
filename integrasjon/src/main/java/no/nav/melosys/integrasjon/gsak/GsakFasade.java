@@ -37,13 +37,12 @@ public interface GsakFasade {
     ) throws IntegrasjonException;
 
     /**
-     * Finner oppgave på en gitt saksbehandler med et gitt saksnummer
+     * Hent oppgave fra GSAK på en gitt oppgaveId
      *
-     * @param saksnummer
-     * @param saksbehandlerID
+     * @param oppgaveId
      * @return
      */
-    Oppgave finnOppgaveMedSaksnummerOgSaksbehandler(String saksnummer, String saksbehandlerID);
+    Oppgave hentOppgave(String oppgaveId);
 
     /**
      * Oppretter en oppgave i GSAK for å få en unik oppgaveId

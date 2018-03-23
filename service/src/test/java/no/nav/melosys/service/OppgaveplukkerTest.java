@@ -142,30 +142,30 @@ public class OppgaveplukkerTest {
 
     @Test
     public void leggTilbakeOppgave() {
+        final String oppgaveId = "42";
         final Oppgave oppgave = new Oppgave();
-        oppgave.setOppgaveId("7");
+        oppgave.setOppgaveId(oppgaveId);
         oppgave.setPrioritet(PrioritetType.valueOf("HOY_MED"));
-        final String saksnummer = "42";
         final String saksbehandlerID = "test";
         final String begrunnelse = "Oppgaven er kjedelig";
 
-        when(gsakFasade.finnOppgaveMedSaksnummerOgSaksbehandler(saksnummer, saksbehandlerID)).thenReturn(oppgave);
+        when(gsakFasade.hentOppgave(oppgaveId)).thenReturn(oppgave);
         when(oppgaveTilbakkeleggingRepo.save(any(OppgaveTilbakelegging.class))).then(arguments -> {
             OppgaveTilbakelegging oppgaveTilbakelegging = arguments.getArgument(0);
-            assertThat(oppgaveTilbakelegging.getOppgaveId()).isEqualTo("7");
+            assertThat(oppgaveTilbakelegging.getOppgaveId()).isEqualTo("42");
             assertThat(oppgaveTilbakelegging.getSaksbehandlerId()).isEqualTo("test");
             assertThat(oppgaveTilbakelegging.getBegrunnelse()).isEqualTo("Oppgaven er kjedelig");
             return oppgaveTilbakelegging;
         }).getMock();
 
-        oppgaveplukker.leggTilbakeOppgave(saksnummer, saksbehandlerID, begrunnelse);
+        oppgaveplukker.leggTilbakeOppgave(oppgaveId, saksbehandlerID, begrunnelse);
 
-        final String ugyldigSaksnummer = "13";
-        final String forventetFeilmelding = String.format("Fant ikke oppgave med saksnummer %s og saksbehandlerID %s", ugyldigSaksnummer, saksbehandlerID);
+        final String ugyldigOppgaveId = "13";
+        final String forventetFeilmelding = String.format("Fant ikke oppgave med oppgaveId %s", ugyldigOppgaveId);
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage(forventetFeilmelding);
 
-        oppgaveplukker.leggTilbakeOppgave(ugyldigSaksnummer, saksbehandlerID, begrunnelse);
+        oppgaveplukker.leggTilbakeOppgave(ugyldigOppgaveId, saksbehandlerID, begrunnelse);
     }
 }

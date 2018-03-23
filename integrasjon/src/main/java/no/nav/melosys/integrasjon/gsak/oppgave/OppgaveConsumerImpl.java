@@ -2,11 +2,9 @@ package no.nav.melosys.integrasjon.gsak.oppgave;
 
 import java.util.List;
 
+import no.nav.tjeneste.virksomhet.oppgave.v3.binding.HentOppgaveOppgaveIkkeFunnet;
 import no.nav.tjeneste.virksomhet.oppgave.v3.binding.OppgaveV3;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeFilter;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeRequest;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeResponse;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeSok;
+import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.*;
 
 public class OppgaveConsumerImpl implements OppgaveConsumer {
     private OppgaveV3 port;
@@ -18,6 +16,11 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     @Override
     public FinnOppgaveListeResponse finnOppgaveListe(FinnOppgaveListeRequestMal request) {
         return port.finnOppgaveListe(convertToWSRequest(request));
+    }
+
+    @Override
+    public HentOppgaveResponse hentOppgave(HentOppgaveRequest request) throws HentOppgaveOppgaveIkkeFunnet {
+        return port.hentOppgave(request);
     }
 
     private FinnOppgaveListeRequest convertToWSRequest(FinnOppgaveListeRequestMal request) {

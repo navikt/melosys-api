@@ -33,9 +33,12 @@ import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Sak;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Sakstyper;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.meldinger.OpprettSakRequest;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.meldinger.OpprettSakResponse;
+import no.nav.tjeneste.virksomhet.oppgave.v3.binding.HentOppgaveOppgaveIkkeFunnet;
 import no.nav.tjeneste.virksomhet.oppgave.v3.informasjon.oppgave.Oppgave;
 import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeResponse;
 import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeSortering;
+import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.HentOppgaveRequest;
+import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.HentOppgaveResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -161,20 +164,26 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public no.nav.melosys.domain.Oppgave finnOppgaveMedSaksnummerOgSaksbehandler(String saksnummer, String saksbehandlerID) {
-        FinnOppgaveListeSokMal sokMal = FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(Integer.toString(MELOSYS_ENHET_ID))
-            .medSakId(saksnummer).medBrukerId(saksbehandlerID).build();
-        FinnOppgaveListeRequestMal requestMal = FinnOppgaveListeRequestMal.builder().medSok(sokMal).build();
+    public no.nav.melosys.domain.Oppgave hentOppgave(String oppgaveId) {
+        HentOppgaveRequest request = new HentOppgaveRequest();
+        request.setOppgaveId(oppgaveId);
 
-        FinnOppgaveListeResponse finnOppgaveListeResponse = oppgaveConsumer.finnOppgaveListe(requestMal);
-        List<Oppgave> oppgaver = finnOppgaveListeResponse.getOppgaveListe();
+        try {
+            HentOppgaveResponse response = oppgaveConsumer.hentOppgave(request);
+            Oppgave gsakOppgave = response.getOppgave();
 
-        return oppgaver.stream().map(o -> {
+            if (gsakOppgave == null) {
+                return null;
+            }
             no.nav.melosys.domain.Oppgave oppgave = new no.nav.melosys.domain.Oppgave();
-            oppgave.setOppgaveId(o.getOppgaveId());
-            oppgave.setPrioritet(PrioritetType.valueOf(o.getPrioritet().getKode()));
+            oppgave.setOppgaveId(gsakOppgave.getOppgaveId());
+            if (gsakOppgave.getPrioritet() != null) {
+                oppgave.setPrioritet(PrioritetType.valueOf(gsakOppgave.getPrioritet().getKode()));
+            }
             return oppgave;
-        }).findFirst().orElse(null);
+        } catch (HentOppgaveOppgaveIkkeFunnet hentOppgaveOppgaveIkkeFunnet) {
+            throw new IntegrasjonException(hentOppgaveOppgaveIkkeFunnet);
+        }
     }
 
     @Override
@@ -195,8 +204,8 @@ public class GsakService implements GsakFasade {
         WSLagreOppgave wsOppgave = new WSLagreOppgave();
 
         try {
-            // oppgaveId er String i BehandleOppgave_v1.opprettOppgave og i respons fra Oppgave_v3.finnUtildelteOppgaverEtterFrist,
-            // men int i BehandleOppgave_v1.lagreOppgave
+            // oppgaveId er String i request til BehandleOppgave_v1.opprettOppgave og i respons fra
+            // Oppgave_v3.finnUtildelteOppgaverEtterFrist, men int i request til BehandleOppgave_v1.lagreOppgave
             int oppgaveId = Integer.parseInt(oppgave.getOppgaveId());
             wsOppgave.setOppgaveId(oppgaveId);
         } catch (NumberFormatException e) {

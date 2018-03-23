@@ -62,7 +62,7 @@ public class OppgaveTjeneste {
     public Response leggTilbakeOppgave(@ApiParam("Tilbakeleggingsinformasjon") TilbakeleggingDto tilbakelegging) {
         String ident = SpringSubjectHandler.getInstance().getUserID();
 
-        oppgaveplukker.leggTilbakeOppgave(tilbakelegging.getSaksnummer(), ident, tilbakelegging.getBegrunnelse());
+        oppgaveplukker.leggTilbakeOppgave(tilbakelegging.getOppgaveId(), ident, tilbakelegging.getBegrunnelse());
 
         return Response.ok().build();
     }
