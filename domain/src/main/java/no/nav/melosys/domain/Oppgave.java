@@ -20,15 +20,23 @@ public class Oppgave {
     private String ansvarligId;
     private Fagomrade fagomrade;
     private Underkategori underkategori;
+    private String ansvarligId;
+    //private Fagomrade fagomrade;
+    //private Underkategori underkategori;
     private Oppgavetype oppgavetype;
     private String beskrivelse;
-    //private String oppfolging;
+    private String oppfolging;
     private PrioritetType prioritet;
-    //private Integer versjon;
+    private Integer versjon;
     private String saksnummer;
-    //private String kravId;
+    private String kravId;
     private String dokumentId;
     private String soknadsId;
+
+    public Oppgave(String oppgaveId, String prioritet) {
+        this.oppgaveId = oppgaveId;
+        this.prioritet = PrioritetType.valueOf(prioritet);
+    }
 
     public Oppgave() {
     }
@@ -99,6 +107,14 @@ public class Oppgave {
 
     public void setUnderkategori(Underkategori underkategori) {
         this.underkategori = underkategori;
+    }
+
+    public String getAnsvarligId() {
+        return ansvarligId;
+    }
+
+    public void setAnsvarligId(String ansvarligId) {
+        this.ansvarligId = ansvarligId;
     }
 
     public Oppgavetype getOppgavetype() {

@@ -7,33 +7,34 @@ import java.util.Set;
 
 import no.nav.melosys.aggregate.OppgaveAG;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Ignore;
+import no.nav.melosys.repository.SaksopplysningRepository;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MineSakerTest {
-    @Mock
+
     private OppgaveService oppgaveService;
 
     @Mock
@@ -45,48 +46,70 @@ public class MineSakerTest {
     @Mock
     private BehandlingRepository behandlingRepository;
 
+    @Before
+    public void setUp() {
+        this.oppgaveService = new OppgaveService(gsakFasade,
+                fagsakRepository,
+                mock(SaksopplysningRepository.class),
+                mock(SoeknadService.class),
+                behandlingRepository);
+
+    }
+
     @Test
     @Ignore
     public void henteMineSaker(){
 
         List<Oppgave> oppgaver = new ArrayList<>();
-        Oppgave oppgave1 = mock(Oppgave.class);
-        when(oppgave1.getSaksnummer()).thenReturn("1");
+        Oppgave oppgave1 = new Oppgave("1", "HOY_MED");
+        oppgave1.setSaksnummer("11");
+        oppgave1.setAnsvarligId("12345678901");
         oppgaver.add(oppgave1);
-        when(gsakFasade.finnOppgaveListe(any(String.class),any(String.class),any(String.class),any(String.class),any(String.class),any(String.class))).thenReturn(oppgaver);
 
-        Fagsak fagsak = mock(Fagsak.class);
-        when(fagsak.getId()).thenReturn(12L);
+        when(gsakFasade.finnOppgaveListe(anyString(), anyString(), anyString(), anyString(),anyString(), anyString())).
+                thenAnswer((Answer) invocation -> {
+                    String string = invocation.getArgument(0);
+                    return (string.equals("12345678901")) ? oppgaver : new ArrayList<>();
+                });
+
+        Fagsak fagsak = new Fagsak();
         when(fagsakRepository.findByGsakSaksnummer(any(Long.class))).thenReturn(fagsak);
 
+        List<Behandling> behandlinger = getBehandlings();
+        when(behandlingRepository.findBySaksnummer(any(Long.class))).thenReturn(behandlinger).getMock();
 
-        SoeknadDokument soeknadDokument = mock(SoeknadDokument.class);
-        soeknadDokument.fnr ="111111111111";
+        List<OppgaveAG> mineSaker = oppgaveService.hentMineSaker("12345678901");
+        assertThat(mineSaker.size()).isEqualTo(1);
+        assertThat(mineSaker.get(0).getOppgave().getOppgaveId()).isEqualTo("1");
 
+        mineSaker = oppgaveService.hentMineSaker("12346678902");
+        assertThat(mineSaker.size()).isEqualTo(0);
 
+    }
+
+    private List<Behandling> getBehandlings() {
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
-        Saksopplysning saksopplysning = Mockito.spy(Saksopplysning.class);
-        saksopplysning.setType(mock(SaksopplysningType.class));
-        when(saksopplysning.getType().getBeskrivelse()).thenReturn("søkand");
-        doReturn(soeknadDokument).when(saksopplysning).getDokument();
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.fnr = "111111111111";
 
+        Saksopplysning personOpplysning = new Saksopplysning();
+        personOpplysning.setType(SaksopplysningType.PERSONOPPLYSNING);
+        personOpplysning.setDokument(personDokument);
+        saksopplysninger.add(personOpplysning);
+
+        SoeknadDokument soeknadDokument = new SoeknadDokument();
+        soeknadDokument.fnr = "111111111111";
+
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SØKNAD);
+        saksopplysning.setDokument(soeknadDokument);
         saksopplysninger.add(saksopplysning);
 
         List<Behandling> behandlinger = new ArrayList<>();
-        Behandling behandling = mock(Behandling.class);
+        Behandling behandling = new Behandling();
         behandling.setSaksopplysninger(saksopplysninger);
-        when(behandling.getStatus().getKode()).thenReturn("Opprettet");
+        behandling.setStatus(BehandlingStatus.OPPRETTET);
         behandlinger.add(behandling);
-        when(behandlingRepository.findBySaksnummer(any(Long.class))).thenReturn(behandlinger);
-
-        List<OppgaveAG> mineSaker = oppgaveService.hentMineSaker(any(String.class));
-
-        assertThat(mineSaker.get(0).getFagsak()).isEqualTo(12L);
-
-
-
-
-
-
+        return behandlinger;
     }
 }

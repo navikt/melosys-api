@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto.oppgave;
 
 public class SaksInfoDto {
-    private String kode ;
+    private String kode;
     private String term;
 
     public SaksInfoDto(String kode, String term) {

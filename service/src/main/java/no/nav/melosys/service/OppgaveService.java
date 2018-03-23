@@ -8,7 +8,6 @@ import java.util.Optional;
 import no.nav.melosys.aggregate.OppgaveAG;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Oppgave;
-import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -50,7 +49,7 @@ public class OppgaveService {
         this.behandlingRepository=behandlingRepository;
     }
 
-    public List<OppgaveAG> hentMineSaker(String ansvarligID){
+    public List<OppgaveAG> hentMineSaker(String ansvarligID) {
 
         List <Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListe(ansvarligEnhetID,ansvarligID,ansvarligID,sorteringselementKode_FRIST_DATO,sorteringKode_FRIST_DATO,ansvarligID);
 
@@ -70,10 +69,10 @@ public class OppgaveService {
         //Hent FagSak
         oppgaveAG.setFagsak(fagsakRepository.findByGsakSaksnummer(saksnummer));
 
-        //Hent Dokumenter for soeknad og personal infomrasjon
-        List<Behandling> behandlinger  = behandlingRepository.findBySaksnummer(saksnummer);
-        oppgaveAG.setSoeknadDokument((SoeknadDokument) ekstraktSokenadDokument(behandlinger,SaksopplysningType.SØKNAD.getKode()).get());
-        oppgaveAG.setPersonDokument((PersonDokument) ekstraktSokenadDokument(behandlinger,SaksopplysningType.PERSONOPPLYSNING.getKode()).get());
+        //Hent Dokumenter for soeknad og personal informasjon
+        List<Behandling> behandlinger = behandlingRepository.findBySaksnummer(saksnummer);
+        oppgaveAG.setSoeknadDokument((SoeknadDokument) ekstraktSokenadDokument(behandlinger, SaksopplysningType.SØKNAD.getKode()).get());
+        oppgaveAG.setPersonDokument((PersonDokument) ekstraktSokenadDokument(behandlinger, SaksopplysningType.PERSONOPPLYSNING.getKode()).get());
         return oppgaveAG;
     }
 
