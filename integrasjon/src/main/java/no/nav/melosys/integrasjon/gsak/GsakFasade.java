@@ -39,6 +39,20 @@ public interface GsakFasade {
     ) throws IntegrasjonException;
 
 
+
+    /**
+     * Finner Oppgaver basert på ansvarlig saksbehandler
+     * GSAK sorterer oppgavene stigende etter frist.
+     *
+     * @param ansvarligEnhetId
+     * @param ansvarligId
+     * @param brukerID
+     * @param sorteringselementKode
+     * @param sorteringKode
+     * @param ikkeTidligereFordeltTil
+     * @return List<no.nav.melosys.domain.Oppgave>
+     * @throws IntegrasjonException
+     */
     public List<no.nav.melosys.domain.Oppgave> finnOppgaveListe(String ansvarligEnhetId,
                                                                 String ansvarligId,
                                                                 String brukerID,
