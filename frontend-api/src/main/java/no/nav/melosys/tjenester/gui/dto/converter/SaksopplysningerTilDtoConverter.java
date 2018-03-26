@@ -1,8 +1,12 @@
 package no.nav.melosys.tjenester.gui.dto.converter;
 
+import java.util.Comparator;
+import java.util.Set;
+
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
@@ -11,8 +15,6 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
-
-import java.util.Set;
 
 /**
  * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
@@ -37,7 +39,11 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     dto.setPerson((PersonDokument)dokument);
                     break;
                 case ARBEIDSFORHOLD:
-                    dto.setArbeidsforhold((ArbeidsforholdDokument)dokument);
+                    // MELOSYS-850: Frontend ønsker å sortere med nyeste ansettelsesPerioder først.
+                    ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) dokument;
+                    Comparator<Arbeidsforhold> comparator = Comparator.comparing(a -> a.getAnsettelsesPeriode().getFom());
+                    arbeidsforholdDokument.getArbeidsforhold().sort(comparator.reversed());
+                    dto.setArbeidsforhold(arbeidsforholdDokument);
                     break;
                 case ORGANISASJON:
                     dto.getOrganisasjoner().add((OrganisasjonDokument)dokument);
