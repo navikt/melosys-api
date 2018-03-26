@@ -31,11 +31,11 @@ public class GsakMockService implements GsakFasade {
     }
 
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(String oppavetype, List<String> fagområdeKodeListe, List<String> sakstyper, List<String> behandlingstyper) throws IntegrasjonException {
-        if ("BEH_SAK".equals(oppavetype) || "JFR".equals(oppavetype)) {
-            return oppgaveRepo.find(oppavetype, sakstyper, behandlingstyper);
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(String oppgavetype, List<String> fagområdeKodeListe, List<String> sakstyper, List<String> behandlingstyper) throws IntegrasjonException {
+        if ("BEH_SAK".equals(oppgavetype) || "JFR".equals(oppgavetype)) {
+            return oppgaveRepo.find(oppgavetype, sakstyper, behandlingstyper);
         } else {
-            throw new  IllegalArgumentException(oppavetype);
+            throw new  IllegalArgumentException(oppgavetype);
         }
     }
 
@@ -67,6 +67,7 @@ public class GsakMockService implements GsakFasade {
     @Override
     public void leggTilbakeOppgave(Oppgave oppgave) throws IntegrasjonException, SikkerhetsbegrensningException, TekniskException {
         oppgave.setAnsvarligId(null);
+        oppgaveRepo.save(oppgave);
     }
 
     @Override
@@ -78,6 +79,7 @@ public class GsakMockService implements GsakFasade {
     public void tildelOppgave(String oppgaveId, String saksbehandlerID) {
         Oppgave oppgave = hentOppgave(oppgaveId);
         oppgave.setAnsvarligId(saksbehandlerID);
+        oppgaveRepo.save(oppgave);
     }
 
 }

@@ -72,21 +72,26 @@ public class GsakMock implements OppgaveMockRepository {
 
     @Override
     public synchronized String save(Oppgave o) {
-        oppgaveNr++;
-        String oppgaveId = Integer.toString(oppgaveNr);
-        o.setOppgaveId(oppgaveId);
-        oppgaver.put(oppgaveId, o);
-        return oppgaveId;
+        if (o.getOppgaveId() == null) {
+            oppgaveNr++;
+            String oppgaveId = Integer.toString(oppgaveNr);
+            o.setOppgaveId(oppgaveId);
+            oppgaver.put(oppgaveId, o);
+            return oppgaveId;
+        } else {
+            oppgaver.put(o.getOppgaveId(), o);
+            return o.getOppgaveId();
+        }
     }
 
     @Override
-    public List<Oppgave> find(String oppavetype, List<String> sakstyper, List<String> behandlingstyper) {
-        if ("BEH_SAK".equals(oppavetype)) {
+    public List<Oppgave> find(String oppgavetype, List<String> sakstyper, List<String> behandlingstyper) {
+        if ("BEH_SAK".equals(oppgavetype)) {
             return oppgaver.values().stream().filter(o -> o.erBehandling()).sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
-        } else if ("JFR".equals(oppavetype)) {
+        } else if ("JFR".equals(oppgavetype)) {
             return oppgaver.values().stream().filter(o -> o.erJournalFøring()).sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
         } else {
-            throw new IllegalArgumentException(oppavetype);
+            throw new IllegalArgumentException(oppgavetype);
         }
     }
 }
