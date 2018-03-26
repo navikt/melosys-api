@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import no.nav.melosys.aggregate.OppgaveAG;
+import no.nav.melosys.aggregate.OppgaveAggregate;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.service.OppgaveService;
 import no.nav.melosys.service.Oppgaveplukker;
@@ -84,20 +84,21 @@ public class OppgaveTjeneste {
     @Path("{minesaker}")
     @ApiOperation(value = "hent mine saker.")
     public Response mineSaker() {
-        List<OppgaveAG> oppgaveAGS = oppgaveService.hentMineSaker(SpringSubjectHandler.getInstance().getUserID());
-        return Response.ok(mappeOppgaveDtoTilMinSak(oppgaveAGS)).build();
+        List<OppgaveAggregate> oppgaveAggregates = oppgaveService.hentMineSaker(SpringSubjectHandler.getInstance().getUserID());
+
+        return Response.ok(mappeOppgaveDtoTilMinSak(oppgaveAggregates)).build();
     }
 
 
-    private List<MinSakDto> mappeOppgaveDtoTilMinSak(List<OppgaveAG> oppgaveAGList) {
+    private List<MinSakDto> mappeOppgaveDtoTilMinSak(List<OppgaveAggregate> oppgaveAggregateList) {
 
-        Function<OppgaveAG, MinSakDto> transformToMineSaker = new Function<OppgaveAG, MinSakDto>() {
+        Function<OppgaveAggregate, MinSakDto> transformToMineSaker = new Function<OppgaveAggregate, MinSakDto>() {
             @Override
-            public MinSakDto apply(OppgaveAG oppgaveAG) {
+            public MinSakDto apply(OppgaveAggregate oppgaveAG) {
                 MinSakDto dest = new MinSakDto();
                 dest.setOppgaveId(oppgaveAG.getOppgave().getOppgaveId());
                 dest.setDokumentID(oppgaveAG.getOppgave().getDokumentId());
-                dest.setAktivTil(oppgaveAG.getOppgave().getAktivTil().toString());
+                dest.setAktivTil(oppgaveAG.getOppgave().getAktivTil());
                 dest.setSammensattNavn(oppgaveAG.getPersonDokument().sammensattNavn);
                 dest.setSaksnummer(oppgaveAG.getFagsak().getId());
                 dest.setLand(OppgaverAGTilMineSakerDTOConverter.mappeLander(oppgaveAG.getSoeknadDokument()));
@@ -106,7 +107,7 @@ public class OppgaveTjeneste {
                 return dest;
             }
         };
-        return oppgaveAGList.stream().map(transformToMineSaker).collect(Collectors.<MinSakDto>toList());
+        return oppgaveAggregateList.stream().map(transformToMineSaker).collect(Collectors.<MinSakDto>toList());
     }
 
 }

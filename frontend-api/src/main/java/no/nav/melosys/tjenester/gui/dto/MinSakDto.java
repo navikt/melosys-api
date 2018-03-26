@@ -1,6 +1,9 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 
+import java.time.LocalDate;
+import java.util.List;
+
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.tjenester.gui.dto.oppgave.SaksTypeDto;
 
@@ -11,16 +14,16 @@ public class MinSakDto {
     private String sammensattNavn;
     private Long saksnummer;
     private String dokumentID;
-    private String aktivTil;
+    private LocalDate aktivTil;
     private PeriodeDto soknadsperiode;
     private SaksTypeDto saksTypeDto;
-    private String[] land;
+    private List<String> land;
 
-    public java.lang.String[] getLand() {
+    public List<String> getLand() {
         return land;
     }
 
-    public void setLand(java.lang.String[] land) {
+    public void setLand(List<String> land) {
         this.land = land;
     }
 
@@ -72,11 +75,11 @@ public class MinSakDto {
         this.dokumentID = dokumentID;
     }
 
-    public String getAktivTil() {
+    public LocalDate getAktivTil() {
         return aktivTil;
     }
 
-    public void setAktivTil(String aktivTil) {
+    public void setAktivTil(LocalDate aktivTil) {
         this.aktivTil = aktivTil;
     }
 

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.aggregate.OppgaveAG;
+import no.nav.melosys.aggregate.OppgaveAggregate;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.Fagsak;
@@ -76,7 +76,7 @@ public class MineSakerTest {
         List<Behandling> behandlinger = getBehandlings();
         when(behandlingRepository.findBySaksnummer(any(Long.class))).thenReturn(behandlinger).getMock();
 
-        List<OppgaveAG> mineSaker = oppgaveService.hentMineSaker("12345678901");
+        List<OppgaveAggregate> mineSaker = oppgaveService.hentMineSaker("12345678901");
         assertThat(mineSaker.size()).isEqualTo(1);
         assertThat(mineSaker.get(0).getOppgave().getOppgaveId()).isEqualTo("1");
 

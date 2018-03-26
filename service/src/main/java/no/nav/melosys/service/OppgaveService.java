@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.aggregate.OppgaveAG;
+import no.nav.melosys.aggregate.OppgaveAggregate;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -49,31 +49,31 @@ public class OppgaveService {
         this.behandlingRepository=behandlingRepository;
     }
 
-    public List<OppgaveAG> hentMineSaker(String ansvarligID) {
+    public List<OppgaveAggregate> hentMineSaker(String ansvarligID) {
 
         List <Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListe(ansvarligEnhetID,ansvarligID,ansvarligID,sorteringselementKode_FRIST_DATO,sorteringKode_FRIST_DATO,ansvarligID);
 
-        List<OppgaveAG> oppgaveAGList = new ArrayList<>();
-        oppgaverFraDomain.stream().forEach(oppgave -> oppgaveAGList.add(byggOppgaveAG(oppgave)));
-        return oppgaveAGList;
+        List<OppgaveAggregate> oppgaveAggregateList = new ArrayList<>();
+        oppgaverFraDomain.stream().forEach(oppgave -> oppgaveAggregateList.add(byggOppgaveAG(oppgave)));
+        return oppgaveAggregateList;
     }
 
-    private OppgaveAG byggOppgaveAG(Oppgave oppgave) {
-        OppgaveAG oppgaveAG = new OppgaveAG();
+    private OppgaveAggregate byggOppgaveAG(Oppgave oppgave) {
+        OppgaveAggregate oppgaveAggregate = new OppgaveAggregate();
 
         //Set Oppgave
-        oppgaveAG.setOppgave(oppgave);
+        oppgaveAggregate.setOppgave(oppgave);
 
         Long saksnummer = Long.parseLong(oppgave.getSaksnummer());
 
         //Hent FagSak
-        oppgaveAG.setFagsak(fagsakRepository.findByGsakSaksnummer(saksnummer));
+        oppgaveAggregate.setFagsak(fagsakRepository.findByGsakSaksnummer(saksnummer));
 
         //Hent Dokumenter for soeknad og personal informasjon
         List<Behandling> behandlinger = behandlingRepository.findBySaksnummer(saksnummer);
-        oppgaveAG.setSoeknadDokument((SoeknadDokument) ekstraktSokenadDokument(behandlinger, SaksopplysningType.SØKNAD.getKode()).get());
-        oppgaveAG.setPersonDokument((PersonDokument) ekstraktSokenadDokument(behandlinger, SaksopplysningType.PERSONOPPLYSNING.getKode()).get());
-        return oppgaveAG;
+        oppgaveAggregate.setSoeknadDokument((SoeknadDokument) ekstraktSokenadDokument(behandlinger, SaksopplysningType.SØKNAD.getKode()).get());
+        oppgaveAggregate.setPersonDokument((PersonDokument) ekstraktSokenadDokument(behandlinger, SaksopplysningType.PERSONOPPLYSNING.getKode()).get());
+        return oppgaveAggregate;
     }
 
     private Optional<SaksopplysningDokument> ekstraktSokenadDokument(List<Behandling> behandlinger, String saksopplysningType) {
