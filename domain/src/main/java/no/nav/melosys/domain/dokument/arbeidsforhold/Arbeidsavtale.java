@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.melosys.domain.ErPeriode;
@@ -63,6 +64,7 @@ public class Arbeidsavtale implements HarPeriode {
     }
 
     @Override
+    @JsonIgnore
     public ErPeriode getPeriode() {
         return gyldighetsperiode;
     }
