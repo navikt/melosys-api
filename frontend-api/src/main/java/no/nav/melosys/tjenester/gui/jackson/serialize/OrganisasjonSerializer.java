@@ -1,24 +1,23 @@
 package no.nav.melosys.tjenester.gui.jackson.serialize;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.Organisasjonsnavn;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
+import no.nav.melosys.service.kodeverk.Kodeverk;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.AdresseDto;
 import no.nav.melosys.tjenester.gui.dto.GateadresseDto;
 
 public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> {
 
-    // FIXME: Ikke i bruk
     private final KodeverkService kodeverkService;
 
     public OrganisasjonSerializer(KodeverkService kodeverkService) {
@@ -70,7 +69,7 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
             GateadresseDto gateadresse = new GateadresseDto();
             dto.setGateadresse(gateadresse);
 
-            // FIXME Se EESSI2-331. Hvordan formaterer vi adresselinjer?
+            // FIXME Hvordan formaterer vi adresselinjer?
             StringBuilder stringBuilder = new StringBuilder();
 
             String linje1 = sAdresse.getAdresselinje1();
@@ -87,12 +86,11 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
 
 
             String postNummer = sAdresse.getPostnr();
-            // FIXME Kodeverk oppslag koster mye i svartid
-            dto.setPostnr(postNummer);
-            //dto.setPoststed(kodeverkService.dekod(Kodeverk.POSTNUMMER, postNummer, LocalDate.now()));
 
-            //dto.setLand(kodeverkService.dekod(Kodeverk.LANDKODERISO2, sAdresse.getLandkode(), LocalDate.now()));
-            dto.setLand(sAdresse.getLandkode());
+            dto.setPostnr(postNummer);
+            dto.setPoststed(kodeverkService.dekod(Kodeverk.POSTNUMMER, postNummer, LocalDate.now()));
+
+            dto.setLand(kodeverkService.dekod(Kodeverk.LANDKODERISO2, sAdresse.getLandkode(), LocalDate.now()));
 
             return  dto;
         }
@@ -100,25 +98,9 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         return null;
     }
 
+    // Hvis man ikke har bruk for historikk på navn så er det best å bruke navn på nivå organisasjon.
     private String getNavn(OrganisasjonDokument organisasjon) {
-        if (organisasjon.getOrganisasjonDetaljer() != null && organisasjon.getOrganisasjonDetaljer().getNavn() != null) {
-            List<Organisasjonsnavn> navn = organisasjon.getOrganisasjonDetaljer().getNavn();
-
-            for (Organisasjonsnavn n : navn) {
-                if (n.getGyldighetsperiode().erGyldig()) { // TODO hvis det finnes flere gyldige navn?
-                    if (n.getRedigertNavn() != null && ! n.getRedigertNavn().isEmpty()) {
-                        return n.getRedigertNavn();
-                    } else {
-                        return n.getNavn() == null ? null : String.join(" ", n.getNavn());
-                    }
-                }
-            }
-
-            return null;
-
-        } else {
-            return organisasjon.getNavn() == null ? null : String.join(" ", organisasjon.getNavn());
-        }
+        return organisasjon.getNavn() == null ? null : String.join(" ", organisasjon.getNavn());
     }
 
 }
