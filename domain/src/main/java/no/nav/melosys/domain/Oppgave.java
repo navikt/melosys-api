@@ -14,7 +14,7 @@ public class Oppgave {
     //private Status status;
     private LocalDate aktivFra;
     private LocalDate aktivTil;
-    //private String ansvarligId;
+    private String ansvarligId;
     private Fagomrade fagomrade;
     private Underkategori underkategori;
     private Oppgavetype oppgavetype;
@@ -30,8 +30,32 @@ public class Oppgave {
     public Oppgave() {
     }
 
+    public boolean erBehandling() {
+        if (oppgavetype != null) {
+            return oppgavetype.equals(Oppgavetype.BEH_SAK_MED) || oppgavetype.equals(Oppgavetype.BEH_SAK_MK_UFM);
+        } else {
+            return false;
+        }
+    }
+
+    public boolean erJournalFøring() {
+        if (oppgavetype != null) {
+            return oppgavetype.equals(Oppgavetype.JFR_MED) || oppgavetype.equals(Oppgavetype.JFR_UFM);
+        } else {
+            return false;
+        }
+    }
+
     public boolean harHøyPrioritet() {
         return ((PrioritetType.HOY_MED.equals(prioritet)) || PrioritetType.HOY_UFM.equals(prioritet));
+    }
+
+    public String getAnsvarligId() {
+        return ansvarligId;
+    }
+
+    public void setAnsvarligId(String ansvarligId) {
+        this.ansvarligId = ansvarligId;
     }
 
     public String getOppgaveId() {
@@ -105,4 +129,5 @@ public class Oppgave {
     public void setDokumentId(String dokumentId) {
         this.dokumentId = dokumentId;
     }
+
 }
