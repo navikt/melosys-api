@@ -17,7 +17,6 @@ public class Oppgave {
     //private Status status;
     private LocalDate aktivFra;
     private LocalDate aktivTil;
-    private String ansvarligId;
     private Fagomrade fagomrade;
     private Underkategori underkategori;
     private String ansvarligId;
@@ -107,14 +106,6 @@ public class Oppgave {
 
     public void setUnderkategori(Underkategori underkategori) {
         this.underkategori = underkategori;
-    }
-
-    public String getAnsvarligId() {
-        return ansvarligId;
-    }
-
-    public void setAnsvarligId(String ansvarligId) {
-        this.ansvarligId = ansvarligId;
     }
 
     public Oppgavetype getOppgavetype() {

@@ -59,7 +59,7 @@ public class MineSakerTjenesteTest {
         oppgaveAggregate.setOppgave(oppgave1);
 
         Fagsak fagsak = new Fagsak();
-        fagsak.setType(FagsakType.SØKNAD_A1);
+        fagsak.setType(FagsakType.EU_EØS);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
         List<Behandling> behandlinger = new ArrayList<>();
         Behandling behandling = new Behandling();
