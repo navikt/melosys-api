@@ -44,6 +44,7 @@
         <gsak.oppgave.version>3.0.0</gsak.oppgave.version>
         <gsak.behandleoppgave.version>1.0.7</gsak.behandleoppgave.version>
         <inntekt-v3.version>2.0.0</inntekt-v3.version>
+        <joark.behandleinngaaendejournal.version>1.0.1</joark.behandleinngaaendejournal.version>
         <joark.journal.version>1.0.3</joark.journal.version>
         <modig-testcertificates.version>1.2.0</modig-testcertificates.version>
         <tps.aktoer.version>2.0.1</tps.aktoer.version>
@@ -298,6 +299,12 @@
                 <groupId>no.nav.tjenester.fim</groupId>
                 <artifactId>nav-arbeidsforhold-v3-tjenestespesifikasjon</artifactId>
                 <version>${aareg.arbeidsforhold.version}</version>
+                <classifier>jaxws</classifier>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.tjenester</groupId>
+                <artifactId>nav-behandleInngaaendeJournal-v1-tjenestespesifikasjon</artifactId>
+                <version>${joark.behandleinngaaendejournal.version}</version>
                 <classifier>jaxws</classifier>
             </dependency>
             <dependency>
