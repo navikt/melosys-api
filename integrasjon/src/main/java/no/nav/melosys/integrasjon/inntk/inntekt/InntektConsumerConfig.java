@@ -2,19 +2,17 @@ package no.nav.melosys.integrasjon.inntk.inntekt;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.namespace.QName;
 
+import no.nav.melosys.integrasjon.felles.mdc.CallIdOutInterceptor;
+import no.nav.tjeneste.virksomhet.inntekt.v3.binding.InntektV3;
 import org.apache.cxf.feature.LoggingFeature;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.ws.addressing.WSAddressingFeature;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-import no.nav.melosys.integrasjon.felles.mdc.CallIdOutInterceptor;
-import no.nav.tjeneste.virksomhet.inntekt.v3.binding.InntektV3;
-
-@Configuration
+@Component
 public class InntektConsumerConfig {
     private static final String WSDL = "wsdl/no/nav/tjeneste/virksomhet/inntekt/v3/Binding.wsdl";
     private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/inntekt/v3/Binding";

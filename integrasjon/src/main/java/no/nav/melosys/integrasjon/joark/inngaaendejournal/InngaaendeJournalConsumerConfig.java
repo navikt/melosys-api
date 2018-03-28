@@ -9,9 +9,9 @@ import org.apache.cxf.feature.LoggingFeature;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.ws.addressing.WSAddressingFeature;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
 class InngaaendeJournalConsumerConfig {
 
     private static final String WSDL = "wsdl/no/nav/tjeneste/virksomhet/inngaaendeJournal/v1/Binding.wsdl";
