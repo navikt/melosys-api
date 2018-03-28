@@ -1,10 +1,10 @@
-package no.nav.melosys.tjenester.gui.dto.oppgave;
+package no.nav.melosys.service.oppgave.dto;
 
-public class SaksInfoDto {
+public class KodeverdiDto {
     private String kode;
     private String term;
 
-    public SaksInfoDto(String kode, String term) {
+    public KodeverdiDto(String kode, String term) {
         this.kode = kode;
         this.term = term;
     }

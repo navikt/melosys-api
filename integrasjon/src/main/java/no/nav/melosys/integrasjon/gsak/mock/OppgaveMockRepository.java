@@ -13,4 +13,7 @@ public interface OppgaveMockRepository {
     String save(Oppgave o);
 
     List<Oppgave> find(String oppavetype, List<String> sakstyper, List<String> behandlingstyper);
+
+    List<Oppgave> finnOppgaverMedAnsvarligID(String ansvarligID);
+
 }

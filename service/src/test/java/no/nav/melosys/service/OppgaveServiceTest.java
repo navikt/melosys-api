@@ -1,23 +1,30 @@
 package no.nav.melosys.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.aggregate.OppgaveAggregate;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakStatus;
+import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +39,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MineSakerTest {
+public class OppgaveServiceTest {
 
     private OppgaveService oppgaveService;
 
@@ -47,12 +54,10 @@ public class MineSakerTest {
 
     @Before
     public void setUp() {
-        this.oppgaveService = new OppgaveService(gsakFasade,
+        this.oppgaveService = new OppgaveService(
+                gsakFasade,
                 fagsakRepository,
-                mock(SaksopplysningRepository.class),
-                mock(SoeknadService.class),
                 behandlingRepository);
-
     }
 
     @Test
@@ -64,21 +69,23 @@ public class MineSakerTest {
         oppgave1.setAnsvarligId("12345678901");
         oppgaver.add(oppgave1);
 
-        when(gsakFasade.finnOppgaveListe(anyString(), anyString(), anyString(), anyString(), anyString(), anyString())).
+        when(gsakFasade.finnOppgaveListe(anyString())).
                 thenAnswer((Answer) invocation -> {
-                    String string = invocation.getArgument(1);//AnsvarligID
+                    String string = invocation.getArgument(0);//AnsvarligID
                     return (string.equals("12345678901")) ? oppgaver : new ArrayList<>();
                 });
 
         Fagsak fagsak = new Fagsak();
-        when(fagsakRepository.findByGsakSaksnummer(any(Long.class))).thenReturn(fagsak);
-
+        fagsak.setType(FagsakType.EU_EØS);
+        fagsak.setStatus(FagsakStatus.OPPRETTET);
         List<Behandling> behandlinger = getBehandlings();
-        when(behandlingRepository.findBySaksnummer(any(Long.class))).thenReturn(behandlinger).getMock();
+        fagsak.setBehandlinger(behandlinger);
+        when(fagsakRepository.findByGsakSaksnummer(any(String.class))).thenReturn(fagsak);
+        when(behandlingRepository.findBySaksnummer(any(String.class))).thenReturn(behandlinger);
 
-        List<OppgaveAggregate> mineSaker = oppgaveService.hentMineSaker("12345678901");
+        List<SakOgOppgaveDto> mineSaker = oppgaveService.hentMineSaker("12345678901");
         assertThat(mineSaker.size()).isEqualTo(1);
-        assertThat(mineSaker.get(0).getOppgave().getOppgaveId()).isEqualTo("1");
+        assertThat(mineSaker.get(0).getOppgaveId()).isEqualTo("1");
 
         mineSaker = oppgaveService.hentMineSaker("12346678902");
         assertThat(mineSaker.size()).isEqualTo(0);
@@ -95,8 +102,14 @@ public class MineSakerTest {
         personOpplysning.setDokument(personDokument);
         saksopplysninger.add(personOpplysning);
 
+
+        // oppgaveAggregate.setPersonDokument(personDokument);
+
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         soeknadDokument.fnr = "111111111111";
+        soeknadDokument.arbeidUtland = new ArbeidUtland();
+        soeknadDokument.arbeidUtland.arbeidsland = Arrays.asList(new Land(Land.NORGE));
+        soeknadDokument.arbeidUtland.arbeidsperiode = new Periode(LocalDate.of(2018, 1, 21), LocalDate.of(2018, 5, 21));
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SØKNAD);

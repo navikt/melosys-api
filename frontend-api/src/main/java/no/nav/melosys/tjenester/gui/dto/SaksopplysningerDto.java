@@ -23,7 +23,6 @@ public class SaksopplysningerDto {
 
     private InntektDokument inntekt;
 
-    //Stemmer det ?
     public SaksopplysningerDto() {
         this.organisasjoner = new ArrayList<>();
     }

@@ -1,11 +1,10 @@
 package no.nav.melosys.service;
 
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import no.nav.melosys.aggregate.OppgaveAggregate;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -15,7 +14,8 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.service.oppgave.converter.OppgaverDomainTilOppgaveogSakDtoConverterUtil;
+import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,61 +24,46 @@ public class OppgaveService {
 
     private GsakFasade gsakFasade;
     private FagsakRepository fagsakRepository;
-    private SaksopplysningRepository saksopplysningRepo;
-    private SoeknadService soeknadService;
     private BehandlingRepository behandlingRepository;
-    private String ansvarligEnhetID="4530";
-    private String sorteringselementKode_OPPRETTET_DATO = "OPPRETTET_DATO";
-    private String sorteringselementKode_FRIST_DATO = "FRIST_DATO";
-
-
-    private String sorteringKode_OPPRETTET_DATO = "OPPRETTET_DATO";
-    private String sorteringKode_FRIST_DATO = "FRIST_DATO";
-
 
     @Autowired
     public OppgaveService(GsakFasade gsakFasade,
                           FagsakRepository fagsakRepository,
-                          SaksopplysningRepository saksopplysningRepo,
-                          SoeknadService soeknadService,
                           BehandlingRepository behandlingRepository) {
         this.gsakFasade = gsakFasade;
         this.fagsakRepository = fagsakRepository;
-        this.saksopplysningRepo = saksopplysningRepo;
-        this.soeknadService=soeknadService;
-        this.behandlingRepository=behandlingRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
-    public List<OppgaveAggregate> hentMineSaker(String ansvarligID) {
+    public List<SakOgOppgaveDto> hentMineSaker(String ansvarligID) {
+        List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListe(ansvarligID);
+        return mappeOppgaveDtoTilMinSak(oppgaverFraDomain);
 
-        List <Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListe(ansvarligEnhetID,ansvarligID,ansvarligID,sorteringselementKode_FRIST_DATO,sorteringKode_FRIST_DATO,ansvarligID);
-
-        List<OppgaveAggregate> oppgaveAggregateList = new ArrayList<>();
-        oppgaverFraDomain.stream().forEach(oppgave -> oppgaveAggregateList.add(byggOppgaveAG(oppgave)));
-        return oppgaveAggregateList;
     }
 
-    private OppgaveAggregate byggOppgaveAG(Oppgave oppgave) {
-        OppgaveAggregate oppgaveAggregate = new OppgaveAggregate();
+    private List<SakOgOppgaveDto> mappeOppgaveDtoTilMinSak(List<Oppgave> oppgaverFraDomain) {
 
-        //Set Oppgave
-        oppgaveAggregate.setOppgave(oppgave);
-
-        Long saksnummer = Long.parseLong(oppgave.getSaksnummer());
-
-        //Hent FagSak
-        oppgaveAggregate.setFagsak(fagsakRepository.findByGsakSaksnummer(saksnummer));
-
-        //Hent Dokumenter for soeknad og personal informasjon
-        List<Behandling> behandlinger = behandlingRepository.findBySaksnummer(saksnummer);
-        oppgaveAggregate.setSoeknadDokument((SoeknadDokument) ekstraktSokenadDokument(behandlinger, SaksopplysningType.SØKNAD.getKode()).get());
-        oppgaveAggregate.setPersonDokument((PersonDokument) ekstraktSokenadDokument(behandlinger, SaksopplysningType.PERSONOPPLYSNING.getKode()).get());
-        return oppgaveAggregate;
+        return oppgaverFraDomain.stream().map(oppgave -> {
+            SakOgOppgaveDto dest = new SakOgOppgaveDto();
+            dest.setOppgaveId(oppgave.getOppgaveId());
+            dest.setDokumentID(oppgave.getDokumentId());
+            dest.setAktivTil(oppgave.getAktivTil());
+            List<Behandling> behandlinger = behandlingRepository.findBySaksnummer(oppgave.getSaksnummer());
+            dest.setSaksnummer(oppgave.getSaksnummer());
+            SoeknadDokument søknadDokument = (SoeknadDokument) ekstraktSokenadDokument(behandlinger, SaksopplysningType.SØKNAD).get();
+            PersonDokument personDokument = (PersonDokument) ekstraktSokenadDokument(behandlinger, SaksopplysningType.PERSONOPPLYSNING).get();
+            dest.setSammensattNavn(personDokument.sammensattNavn);
+            dest.setLand(OppgaverDomainTilOppgaveogSakDtoConverterUtil.mappeLander(søknadDokument));
+            dest.setSoknadsperiode(OppgaverDomainTilOppgaveogSakDtoConverterUtil.mappeDato(søknadDokument));
+            dest.setSaksType(OppgaverDomainTilOppgaveogSakDtoConverterUtil.mappeSaksTypeOgBehandling(fagsakRepository.findByGsakSaksnummer(oppgave.getSaksnummer())));
+            return dest;
+        }).
+                collect(Collectors.<SakOgOppgaveDto>toList());
     }
 
-    private Optional<SaksopplysningDokument> ekstraktSokenadDokument(List<Behandling> behandlinger, String saksopplysningType) {
+    private Optional<SaksopplysningDokument> ekstraktSokenadDokument(List<Behandling> behandlinger, SaksopplysningType saksopplysningType) {
         return behandlinger.stream().flatMap(behandling -> behandling.getSaksopplysninger().stream()).filter(
-                saksopplysning -> saksopplysning.getType().getKode().equals(
+                saksopplysning -> saksopplysning.getType().equals(
                         saksopplysningType)).findFirst().map(saksopplysning -> saksopplysning.getDokument());
     }
 }

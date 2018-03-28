@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.gsak.Oppgavetype;
 import no.nav.melosys.service.OppgaveService;
 import no.nav.melosys.service.Oppgaveplukker;
+import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
@@ -26,18 +27,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppgaveTjenesteTest {
 
+    private OppgaveTjeneste tjeneste;
     @Mock
     private Oppgaveplukker oppgaveplukker;
-
-
-    OppgaveTjeneste tjeneste;
-
     @Mock
     private OppgaveService oppgaveService;
 
@@ -74,7 +71,20 @@ public class OppgaveTjenesteTest {
 
         PlukketOppgaveDto entity = (PlukketOppgaveDto) response.getEntity();
         assertThat(entity.getOppgaveID()).isEqualTo("1");
+    }
 
+    @Test
+    public void mineSaker() {
+        SakOgOppgaveDto oppgave = new SakOgOppgaveDto();
+        oppgave.setOppgaveId("1");
+        List<SakOgOppgaveDto> oppgaver = new ArrayList<>();
+        oppgaver.add(oppgave);
+
+        when(oppgaveService.hentMineSaker(anyString())).thenReturn(oppgaver);
+        Response response = tjeneste.mineSaker();
+        assertThat(response.getEntity()).isExactlyInstanceOf(ArrayList.class);
+        List<SakOgOppgaveDto> entity = (List<SakOgOppgaveDto>) response.getEntity();
+        assertThat(entity.get(0).getOppgaveId()).isEqualTo("1");
     }
 
     public void jsonInn() {
@@ -97,7 +107,6 @@ public class OppgaveTjenesteTest {
 
         try {
             String json = mapper.writeValueAsString(innData);
-
             System.out.println(json);
         } catch (IOException e) {
             e.printStackTrace();
@@ -106,16 +115,13 @@ public class OppgaveTjenesteTest {
 
     public void jsonUt() {
         ObjectMapper mapper = new ObjectMapper();
-
         PlukketOppgaveDto dto = new PlukketOppgaveDto();
         dto.setOppgaveID("1");
         dto.setOppgavetype("JFR");
         dto.setSaksnummer("123");
         dto.setJournalpostID("JOUR_321");
-
         try {
             String json = mapper.writeValueAsString(dto);
-
             System.out.println(json);
         } catch (IOException e) {
             e.printStackTrace();

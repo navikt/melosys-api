@@ -61,7 +61,6 @@ import org.springframework.stereotype.Service;
 public class GsakService implements GsakFasade {
 
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
-
     private static final String FAGOMRÅDE_KODE_MEDLEMSKAP = "MED";
     private static final String FAGOMRÅDE_KODE_UNNTAK = "UFM";
     private static final String FAGSYSTEM_KODE_MELOSYS = "FS22";// TODO (FA) endre når koden er opprettet i GSAK
@@ -200,7 +199,6 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-
     public String opprettOppgave(OpprettOppgaveRequest request) throws SikkerhetsbegrensningException {
         WSOpprettOppgaveRequest wsRequest = convertToWSRequest(request);
 
@@ -297,28 +295,24 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public List<no.nav.melosys.domain.Oppgave> finnOppgaveListe(String ansvarligEnhetId,
-                                                                String ansvarligId,
-                                                                String brukerID,
-                                                                String sorteringselementKode, //OPPRETTET_DATO ellers FRIST_DATO
-                                                                String sorteringKode, //STIGENDE ellers SYNKENDE
-                                                                String ikkeTidligereFordeltTil) //Saksbehandlerident
+    public List<no.nav.melosys.domain.Oppgave> finnOppgaveListe(String ansvarligId)
             throws IntegrasjonException {
 
-        FinnOppgaveListeSortering finnOppgaveListeSortering = new FinnOppgaveListeSortering();
+        FinnOppgaveListeSokMal sokMal = FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(Integer.toString(MELOSYS_ENHET_ID)).medAnsvarligId(ansvarligId).build();
 
-        finnOppgaveListeSortering.setSorteringselementKode(sorteringselementKode);
-        finnOppgaveListeSortering.setSorteringKode(sorteringKode);
+        FinnOppgaveListeFilterMal.Builder filterMalBuilder = FinnOppgaveListeFilterMal.builder();
+        FinnOppgaveListeFilterMal filterMal = filterMalBuilder.medAktiv(true).build();
 
-        FinnOppgaveListeRequestMal finnOppgaveListeRequestMal = new FinnOppgaveListeRequestMal(
-                FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(Integer.toString(MELOSYS_ENHET_ID)).medBrukerId(brukerID).medAnsvarligId(ansvarligId).build(),
-                FinnOppgaveListeFilterMal.builder().build(), finnOppgaveListeSortering, ikkeTidligereFordeltTil);
+        FinnOppgaveListeSortering sortering = new FinnOppgaveListeSortering();
+        sortering.setSorteringselementKode(SORTERING_MED_FRIST);
+        sortering.setSorteringKode(SORTERING_STIGENDE);
+
+        FinnOppgaveListeRequestMal requestMal = FinnOppgaveListeRequestMal.builder().medSok(sokMal).medFilter(filterMal).medSortering(sortering).build();
 
         List<no.nav.melosys.domain.Oppgave> localDomainObjects = new ArrayList<>();
-        FinnOppgaveListeResponse finnOppgaveListeResponse = oppgaveConsumer.finnOppgaveListe(finnOppgaveListeRequestMal);
-        finnOppgaveListeResponse.getOppgaveListe().stream().forEach(oppgave -> {
-            no.nav.melosys.domain.Oppgave domainOppave;
-            domainOppave = new no.nav.melosys.domain.Oppgave();
+        FinnOppgaveListeResponse finnOppgaveListeResponse = oppgaveConsumer.finnOppgaveListe(requestMal);
+        finnOppgaveListeResponse.getOppgaveListe().forEach(oppgave -> {
+            no.nav.melosys.domain.Oppgave domainOppave = new no.nav.melosys.domain.Oppgave();
             domainOppave.setOppgaveId(oppgave.getOppgaveId());
             domainOppave.setPrioritet(PrioritetType.valueOf(oppgave.getPrioritet().getKode()));
             domainOppave.setAktivTil(oppgave.getAktivTil().toGregorianCalendar().toZonedDateTime().toLocalDate());
@@ -327,7 +321,6 @@ public class GsakService implements GsakFasade {
             localDomainObjects.add(domainOppave);
         });
         return localDomainObjects;
-
     }
 
     @Override

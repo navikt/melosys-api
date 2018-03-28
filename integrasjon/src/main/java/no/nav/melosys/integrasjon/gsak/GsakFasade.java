@@ -30,35 +30,21 @@ public interface GsakFasade {
      * @return
      * @throws IntegrasjonException
      */
-
     List<Oppgave> finnUtildelteOppgaverEtterFrist(String oppgavetype,
                                                   List<String> fagområdeKodeListe,
                                                   List<String> sakstyper,
                                                   List<String> behandlingstyper
-
     ) throws IntegrasjonException;
-
-
 
     /**
      * Finner Oppgaver basert på ansvarlig saksbehandler
      * GSAK sorterer oppgavene stigende etter frist.
      *
-     * @param ansvarligEnhetId
      * @param ansvarligId
-     * @param brukerID
-     * @param sorteringselementKode
-     * @param sorteringKode
-     * @param ikkeTidligereFordeltTil
      * @return List<no.nav.melosys.domain.Oppgave>
      * @throws IntegrasjonException
      */
-    public List<no.nav.melosys.domain.Oppgave> finnOppgaveListe(String ansvarligEnhetId,
-                                                                String ansvarligId,
-                                                                String brukerID,
-                                                                String sorteringselementKode, //OPPRETTET_DATO ellers FRIST_DATO
-                                                                String sorteringKode, //STIGENDE ellers SYNKENDE
-                                                                String ikkeTidligereFordeltTil) //Saksbehandlerident
+    public List<no.nav.melosys.domain.Oppgave> finnOppgaveListe(String ansvarligId)
             throws IntegrasjonException;
 
     /**
@@ -104,6 +90,6 @@ public interface GsakFasade {
      * @param oppgaveId
      * @param saksbehandlerID
      */
-    void tildelOppgave(String oppgaveId, String saksbehandlerID);
-
+    void tildelOppgave(String oppgaveId,
+                       String saksbehandlerID);
 }

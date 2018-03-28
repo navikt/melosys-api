@@ -59,6 +59,11 @@ public class GsakMock implements OppgaveMockRepository {
     }
 
     @Override
+    public List<Oppgave> finnOppgaverMedAnsvarligID(String ansvarligID){
+        return oppgaver.values().stream().filter(oppgave -> oppgave.getAnsvarligId().equals(ansvarligID)).collect(Collectors.toList());
+    }
+
+    @Override
     public Oppgave findOne(String id) {
         return oppgaver.get(id);
     }

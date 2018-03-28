@@ -12,7 +12,6 @@ public class FinnOppgaveListeSokMal {
 
 
     public FinnOppgaveListeSokMal(String ansvarligEnhetId, String ansvarligId, String sakId, List<String> fagområdeKodeListe) {
-    // Har fjernet en del søkefelter. Kan legges til senere ved behov.
         this.ansvarligEnhetId = ansvarligEnhetId;
         this.ansvarligId=ansvarligId;
         this.brukerId = brukerId;

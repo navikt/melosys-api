@@ -1,22 +1,19 @@
-package no.nav.melosys.tjenester.gui.dto;
+package no.nav.melosys.service.oppgave.dto;
 
 
 import java.time.LocalDate;
 import java.util.List;
 
-import no.nav.melosys.domain.Oppgave;
-import no.nav.melosys.tjenester.gui.dto.oppgave.SaksTypeDto;
-
-public class MinSakDto {
+public class SakOgOppgaveDto {
 
     private String oppgaveId;
     private String oppgavetype;
     private String sammensattNavn;
-    private Long saksnummer;
+    private String saksnummer;
     private String dokumentID;
     private LocalDate aktivTil;
     private PeriodeDto soknadsperiode;
-    private SaksTypeDto saksTypeDto;
+    private SaksType saksType;
     private List<String> land;
 
     public List<String> getLand() {
@@ -27,12 +24,12 @@ public class MinSakDto {
         this.land = land;
     }
 
-    public SaksTypeDto getSaksTypeDto() {
-        return saksTypeDto;
+    public SaksType getSaksType() {
+        return saksType;
     }
 
-    public void setSaksTypeDto(SaksTypeDto saksTypeDto) {
-        this.saksTypeDto = saksTypeDto;
+    public void setSaksType(SaksType saksType) {
+        this.saksType = saksType;
     }
 
     public String getOppgaveId() {
@@ -59,11 +56,11 @@ public class MinSakDto {
         this.sammensattNavn = sammensattNavn;
     }
 
-    public Long getSaksnummer() {
+    public String getSaksnummer() {
         return saksnummer;
     }
 
-    public void setSaksnummer(Long saksnummer) {
+    public void setSaksnummer(String saksnummer) {
         this.saksnummer = saksnummer;
     }
 
@@ -90,6 +87,4 @@ public class MinSakDto {
     public void setSoknadsperiode(PeriodeDto soknadsperiode) {
         this.soknadsperiode = soknadsperiode;
     }
-
-
 }
