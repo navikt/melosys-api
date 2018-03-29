@@ -22,10 +22,9 @@ public class OppgaverDomainTilOppgaveogSakDtoConverterUtil {
         SaksType saksType = new SaksType();
         saksType.setStatus(new KodeverdiDto(fagsak.getStatus().getKode(), fagsak.getStatus().getBeskrivelse()));
 
-        //TODO: Vi trenger avklaring fra Are T ellers Yvonne  hvis det er mulig å ha mange aktiv behanldinger for sak.
         List<Behandling> aktivBehandlinger = fagsak.getBehandlinger().stream().filter(behandling -> !behandling.getStatus().getKode().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
         if (aktivBehandlinger.size() > 1) {
-            throw new RuntimeException("Finnes to aktiv behandlinger");
+            throw new RuntimeException("Finnes mer en to aktiv behandlinger");
         } else {
             saksType.setBehandlingDto(new KodeverdiDto(aktivBehandlinger.get(0).getStatus().getKode(), aktivBehandlinger.get(0).getStatus().getBeskrivelse()));
         }
