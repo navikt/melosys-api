@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.gsak.kodeverk;
+package no.nav.melosys.domain.gsak;
 
 /**
  * Denne enumen er en hardkoding av kodeverket Underkategori:

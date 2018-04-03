@@ -3,7 +3,11 @@ package no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.melosys.integrasjon.gsak.kodeverk.*;
+import no.nav.melosys.domain.gsak.AktorType;
+import no.nav.melosys.domain.gsak.Fagomrade;
+import no.nav.melosys.domain.gsak.Oppgavetype;
+import no.nav.melosys.domain.gsak.PrioritetType;
+import no.nav.melosys.domain.gsak.Underkategori;
 
 public class OpprettOppgaveRequest {
 
@@ -58,8 +62,8 @@ public class OpprettOppgaveRequest {
         return Optional.ofNullable(fristOgPrioritet.getAktivTil());
     }
 
-    public OppgaveType getOppgaveType() {
-        return oppgave.getOppgaveType();
+    public Oppgavetype getOppgaveType() {
+        return oppgave.getOppgavetype();
     }
 
     public Underkategori getUnderkategoriKode() {
@@ -128,8 +132,8 @@ public class OpprettOppgaveRequest {
             return this;
         }
 
-        public Builder medOppgaveType(OppgaveType oppgaveType) {
-            this.oppgaveBuilder.medOppgaveType(oppgaveType);
+        public Builder medOppgaveType(Oppgavetype oppgavetype) {
+            this.oppgaveBuilder.medOppgaveType(oppgavetype);
             return this;
         }
 

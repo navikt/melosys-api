@@ -7,15 +7,19 @@ import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeSortering
 public class FinnOppgaveListeRequestMal {
     private FinnOppgaveListeSokMal sok;
     private FinnOppgaveListeFilterMal filter;
-    private FinnOppgaveListeSortering sorteringKode;
+    private FinnOppgaveListeSortering sortering;
     private String ikkeTidligereFordeltTil;
 
     public FinnOppgaveListeRequestMal(FinnOppgaveListeSokMal sok, FinnOppgaveListeFilterMal filter,
-                                      FinnOppgaveListeSortering sorteringKode, String ikkeTidligereFordeltTil) {
+                                      FinnOppgaveListeSortering sortering, String ikkeTidligereFordeltTil) {
         this.sok = sok;
         this.filter = filter;
-        this.sorteringKode = sorteringKode;
+        this.sortering = sortering;
         this.ikkeTidligereFordeltTil = ikkeTidligereFordeltTil;
+    }
+
+    public static FinnOppgaveListeRequestMal.Builder builder() {
+        return new FinnOppgaveListeRequestMal.Builder();
     }
 
     public FinnOppgaveListeSokMal getSok() {
@@ -26,8 +30,8 @@ public class FinnOppgaveListeRequestMal {
         return filter;
     }
 
-    public FinnOppgaveListeSortering getSorteringKode() {
-        return sorteringKode;
+    public FinnOppgaveListeSortering getSortering() {
+        return sortering;
     }
 
     public String getIkkeTidligereFordeltTil() {
@@ -37,7 +41,7 @@ public class FinnOppgaveListeRequestMal {
     public static class Builder {
         private FinnOppgaveListeSokMal sok;
         private FinnOppgaveListeFilterMal filter;
-        private FinnOppgaveListeSortering sorteringKode;
+        private FinnOppgaveListeSortering sortering;
         private String ikkeTidligereFordeltTil;
 
         public Builder medSok(FinnOppgaveListeSokMal sok) {
@@ -50,8 +54,8 @@ public class FinnOppgaveListeRequestMal {
             return this;
         }
 
-        public Builder medSorteringKode(FinnOppgaveListeSortering sorteringKode) {
-            this.sorteringKode = sorteringKode;
+        public Builder medSortering(FinnOppgaveListeSortering sortering) {
+            this.sortering = sortering;
             return this;
         }
 
@@ -62,7 +66,7 @@ public class FinnOppgaveListeRequestMal {
 
         public FinnOppgaveListeRequestMal build() {
             Objects.requireNonNull(sok, "FinnOppgaveListeSokMal");
-            return new FinnOppgaveListeRequestMal(sok, filter, sorteringKode, ikkeTidligereFordeltTil);
+            return new FinnOppgaveListeRequestMal(sok, filter, sortering, ikkeTidligereFordeltTil);
         }
     }
 }

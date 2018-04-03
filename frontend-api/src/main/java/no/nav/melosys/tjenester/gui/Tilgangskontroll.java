@@ -7,7 +7,7 @@ import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.TekniskException;
 import no.nav.melosys.integrasjon.ldap.LdapBruker;
 import no.nav.melosys.integrasjon.ldap.LdapBrukeroppslag;
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +22,7 @@ public class Tilgangskontroll {
     }
 
     public static void sjekk() {
-        String ident = SpringSubjectHandler.getUserID();
+        String ident = SubjectHandler.getInstance().getUserID();
 
         LdapBruker ldapBruker;
         try {

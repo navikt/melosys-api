@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave;
 
-import no.nav.melosys.integrasjon.gsak.kodeverk.AktorType;
+import no.nav.melosys.domain.gsak.AktorType;
 
 public class OpprettOppgaveBruker {
     private String fnr;

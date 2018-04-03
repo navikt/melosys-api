@@ -1,6 +1,6 @@
 package no.nav.melosys.sikkerhet.sts;
 
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.cxf.Bus;
 import org.apache.cxf.ws.security.SecurityConstants;
 import org.apache.cxf.ws.security.tokenstore.SecurityToken;
@@ -34,7 +34,8 @@ public class NAVSTSClient extends STSClient {
     public SecurityToken requestSecurityToken(String appliesTo, String action, String requestType, String binaryExchange) throws Exception {
         ensureTokenStoreExists();
 
-        final String userId = getUserId();
+        final SubjectHandler subjectHandler = SubjectHandler.getInstance();
+        final String userId = subjectHandler.getUserID();
         final String key = getTokenStoreKey();
         if (key == null) {
             throw new RuntimeException("Cannot retrieve SAML without security token!");
@@ -60,7 +61,7 @@ public class NAVSTSClient extends STSClient {
 
         switch (type) {
             case SECURITYCONTEXT_TIL_SAML:
-                jwt = SpringSubjectHandler.getOidcTokenString();
+                jwt = SubjectHandler.getInstance().getOidcTokenString();
                 break;
             case SYSTEM_SAML:
                 jwt = "systemSAML";
@@ -70,10 +71,6 @@ public class NAVSTSClient extends STSClient {
         }
 
         return jwt;
-    }
-
-    private String getUserId() {
-        return SpringSubjectHandler.getUserID();
     }
 
     private void ensureTokenStoreExists() {

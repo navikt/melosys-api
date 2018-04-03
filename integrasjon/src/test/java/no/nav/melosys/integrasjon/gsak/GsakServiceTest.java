@@ -2,6 +2,11 @@ package no.nav.melosys.integrasjon.gsak;
 
 import java.time.LocalDate;
 
+import no.nav.melosys.domain.gsak.AktorType;
+import no.nav.melosys.domain.gsak.Fagomrade;
+import no.nav.melosys.domain.gsak.Oppgavetype;
+import no.nav.melosys.domain.gsak.PrioritetType;
+import no.nav.melosys.domain.gsak.Underkategori;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumerImpl;
@@ -10,7 +15,6 @@ import no.nav.melosys.integrasjon.gsak.behandlesak.BehandleSakConsumer;
 import no.nav.melosys.integrasjon.gsak.behandlesak.BehandleSakConsumerImpl;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumerImpl;
-import no.nav.melosys.integrasjon.gsak.kodeverk.*;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.BehandleOppgaveV1;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOppgave;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveRequest;
@@ -55,7 +59,7 @@ public class GsakServiceTest {
                 .medAnsvarligEnhetId("EnhetId")
                 .medBeskrivelse("Beskrivelse")
                 .medLest(true)
-                .medOppgaveType(OppgaveType.BEH_SAK_MED)
+                .medOppgaveType(Oppgavetype.BEH_SAK_MED)
                 .medPrioritetType(PrioritetType.NORM_MED)
                 .medNormertBehandlingsTidInnen(now.plusDays((long) (Math.random() * 6L)))
                 .build();

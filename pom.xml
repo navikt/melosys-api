@@ -377,6 +377,13 @@
 
             <!-- Test -->
             <dependency>
+                <groupId>no.nav.melosys</groupId>
+                <artifactId>sikkerhet</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>smartrics.restfixture</groupId>
                 <artifactId>smartrics-RestFixture</artifactId>
                 <version>${restFixture.version}</version>

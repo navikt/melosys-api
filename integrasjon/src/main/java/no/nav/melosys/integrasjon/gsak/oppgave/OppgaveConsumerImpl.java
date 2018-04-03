@@ -2,11 +2,9 @@ package no.nav.melosys.integrasjon.gsak.oppgave;
 
 import java.util.List;
 
+import no.nav.tjeneste.virksomhet.oppgave.v3.binding.HentOppgaveOppgaveIkkeFunnet;
 import no.nav.tjeneste.virksomhet.oppgave.v3.binding.OppgaveV3;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeFilter;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeRequest;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeResponse;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeSok;
+import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.*;
 
 public class OppgaveConsumerImpl implements OppgaveConsumer {
     private OppgaveV3 port;
@@ -20,6 +18,11 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
         return port.finnOppgaveListe(convertToWSRequest(request));
     }
 
+    @Override
+    public HentOppgaveResponse hentOppgave(HentOppgaveRequest request) throws HentOppgaveOppgaveIkkeFunnet {
+        return port.hentOppgave(request);
+    }
+
     private FinnOppgaveListeRequest convertToWSRequest(FinnOppgaveListeRequestMal request) {
         FinnOppgaveListeRequest result = new FinnOppgaveListeRequest();
 
@@ -29,7 +32,11 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
             result.setFilter(mapFilter(request.getFilter()));
         }
 
-        if (!(request.getIkkeTidligereFordeltTil() == null)) {
+        if (request.getSortering() != null) {
+            result.setSorteringKode(request.getSortering());
+        }
+
+        if (request.getIkkeTidligereFordeltTil() != null) {
             result.setIkkeTidligereFordeltTil(request.getIkkeTidligereFordeltTil());
         }
         return result;
@@ -37,6 +44,11 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
 
     private FinnOppgaveListeSok mapSok(FinnOppgaveListeSokMal sokMal) {
         FinnOppgaveListeSok oppgaveListeSok = new FinnOppgaveListeSok();
+
+        if (sokMal.getFagområdeKodeListe() != null) {
+            oppgaveListeSok.getFagomradeKodeListe().addAll(sokMal.getFagområdeKodeListe());
+        }
+
         oppgaveListeSok.setAnsvarligEnhetId(sokMal.getAnsvarligEnhetId());
         oppgaveListeSok.setBrukerId(sokMal.getBrukerId());
         oppgaveListeSok.setSakId(sokMal.getSakId());
@@ -46,18 +58,22 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
 
     private FinnOppgaveListeFilter mapFilter(FinnOppgaveListeFilterMal filterMal) {
         FinnOppgaveListeFilter oppgaveListeFilter = new FinnOppgaveListeFilter();
-        oppgaveListeFilter.setOpprettetEnhetId(filterMal.getOpprettetEnhetId());
-        oppgaveListeFilter.setOpprettetEnhetNavn(filterMal.getOpprettetEnhetNavn());
-        oppgaveListeFilter.setAnsvarligEnhetNavn(filterMal.getAnsvarligEnhetNavn());
+
+        if (filterMal.getAktiv() != null) {
+            oppgaveListeFilter.setAktiv(filterMal.getAktiv());
+        }
+
+        if (filterMal.getUfordelte() != null) {
+            oppgaveListeFilter.setUfordelte(filterMal.getUfordelte());
+        }
+
+        if (filterMal.getUnderkategoriKode() != null) {
+            oppgaveListeFilter.setUnderkategoriKode(filterMal.getUnderkategoriKode());
+        }
 
         if (filterMal.getOppgavetypeKodeListe() != null) {
             List<String> oppgavetypeKodeListe = oppgaveListeFilter.getOppgavetypeKodeListe();
             oppgavetypeKodeListe.addAll(filterMal.getOppgavetypeKodeListe());
-        }
-
-        if (filterMal.getBrukertypeKodeListe() != null) {
-            List<String> brukertypeKodeListe = oppgaveListeFilter.getBrukertypeKodeListe();
-            brukertypeKodeListe.addAll(filterMal.getBrukertypeKodeListe());
         }
 
         return oppgaveListeFilter;

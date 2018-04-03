@@ -1,15 +1,18 @@
 package no.nav.melosys.integrasjon.gsak.oppgave;
 
 
+import java.util.List;
+
 public class FinnOppgaveListeSokMal {
     private String ansvarligEnhetId;
     private String brukerId;
     private String sakId;
+    private List<String> fagområdeKodeListe;
 
-    // Har fjernet en del søkefelter. Kan legges til senere ved behov.
-    public FinnOppgaveListeSokMal(String ansvarligEnhetId, String brukerId, String sakId) {
+    public FinnOppgaveListeSokMal(String ansvarligEnhetId, String brukerId, String sakId, List<String> fagområdeKodeListe) {
         this.ansvarligEnhetId = ansvarligEnhetId;
         this.brukerId = brukerId;
+        this.fagområdeKodeListe = fagområdeKodeListe;;
         this.sakId = sakId;
     }
 
@@ -25,6 +28,10 @@ public class FinnOppgaveListeSokMal {
         return brukerId;
     }
 
+    public List<String> getFagområdeKodeListe() {
+        return fagområdeKodeListe;
+    }
+
     public String getSakId() {
         return sakId;
     }
@@ -33,6 +40,7 @@ public class FinnOppgaveListeSokMal {
         private String ansvarligEnhetId;
         private String brukerId;
         private String sakId;
+        private List<String> fagområdeKodeListe;
 
         public Builder medAnsvarligEnhetId(String ansvarligEnhetId) {
             this.ansvarligEnhetId = ansvarligEnhetId;
@@ -49,8 +57,13 @@ public class FinnOppgaveListeSokMal {
             return this;
         }
 
+        public Builder medFagområdeKodeListe(List<String> fagområdeKodeListe) {
+            this.fagområdeKodeListe = fagområdeKodeListe;
+            return this;
+        }
+
         public FinnOppgaveListeSokMal build() {
-            return new FinnOppgaveListeSokMal(ansvarligEnhetId, brukerId, sakId);
+            return new FinnOppgaveListeSokMal(ansvarligEnhetId, brukerId, sakId, fagområdeKodeListe);
         }
     }
 }

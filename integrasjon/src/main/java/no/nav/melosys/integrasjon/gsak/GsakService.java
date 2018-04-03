@@ -1,32 +1,28 @@
 package no.nav.melosys.integrasjon.gsak;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDate;
 import java.util.Optional;
 import javax.xml.datatype.DatatypeConfigurationException;
 
+import no.nav.melosys.domain.gsak.*;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
+import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.felles.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
-import no.nav.melosys.integrasjon.gsak.kodeverk.AktorType;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSFerdigstillOppgaveException;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSSikkerhetsbegrensningException;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.gsak.behandlesak.BehandleSakConsumer;
-import no.nav.melosys.integrasjon.gsak.dto.OppgaveDTO;
 import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeFilterMal;
 import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeRequestMal;
 import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeSokMal;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSFerdigstillOppgaveException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOppgaveIkkeFunnetException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOptimistiskLasingException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSSikkerhetsbegrensningException;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.*;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.OpprettSakSakEksistererAllerede;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.OpprettSakUgyldigInput;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Aktoer;
@@ -37,18 +33,31 @@ import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Sak;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Sakstyper;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.meldinger.OpprettSakRequest;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.meldinger.OpprettSakResponse;
+import no.nav.tjeneste.virksomhet.oppgave.v3.binding.HentOppgaveOppgaveIkkeFunnet;
 import no.nav.tjeneste.virksomhet.oppgave.v3.informasjon.oppgave.Oppgave;
 import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeResponse;
 import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeSortering;
+import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.HentOppgaveRequest;
+import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.HentOppgaveResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 
 @Service
+@Profile("!mocking")
 public class GsakService implements GsakFasade {
 
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
-    private static final String FAGOMRÅDE_KODE_MEDLEMSKAP = "MED"; // -> Medlemskap
+
+    private static final String FAGOMRÅDE_KODE_MEDLEMSKAP = "MED";
+    private static final String FAGOMRÅDE_KODE_UNNTAK = "UFM";
     private static final String FAGSYSTEM_KODE_MELOSYS = "FS22";// TODO (FA) endre når koden er opprettet i GSAK
+    private static final int MELOSYS_ENHET_ID = 4530;
     private static final String SAK_TYPE_FAGSAK = "MFS"; // -> Med fagsak
-    private static final int ENHET_ID_MELOSYS = 4530;
+    private static final String SORTERING_MED_FRIST = "FRIST_DATO";
+    private static final String SORTERING_STIGENDE = "STIGENDE";
 
     private BehandleSakConsumer behandleSakConsumer;
 
@@ -100,38 +109,11 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public List<OppgaveDTO> finnOppgaveListe(String ansvarligEnhetId,
-                                             String brukerID,
-                                             String sorteringselementKode, //OPPRETTET_DATO ellers FRIST_DATO
-                                             String sorteringKode, //STIGENDE ellers SYNKENDE
-                                             String ikkeTidligereFordeltTil) //Saksbehandlerident
-            throws IntegrasjonException {
-        FinnOppgaveListeSortering finnOppgaveListeSortering = new FinnOppgaveListeSortering();
-        finnOppgaveListeSortering.setSorteringselementKode(sorteringselementKode);
-        finnOppgaveListeSortering.setSorteringKode(sorteringKode);
-
-        FinnOppgaveListeRequestMal finnOppgaveListeRequestMal = new FinnOppgaveListeRequestMal(
-                FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(ansvarligEnhetId).medBrukerId(brukerID).build(),
-                FinnOppgaveListeFilterMal.builder().build(), finnOppgaveListeSortering, ikkeTidligereFordeltTil);
-
-        try {
-            FinnOppgaveListeResponse finnOppgaveListeResponse = oppgaveConsumer.finnOppgaveListe(finnOppgaveListeRequestMal);
-            List oppgaveDTOs = new ArrayList();
-            finnOppgaveListeResponse.getOppgaveListe().stream().forEach((Oppgave oppgave) -> oppgaveDTOs.add((new OppgaveDTO(oppgave.getOppgaveId()))));
-            log.info("OppgaveListe lengde: {}", oppgaveDTOs.size());
-            return oppgaveDTOs;
-        } catch (Exception e) {
-            log.error("Fant ingen oppgaver: {}", e.getMessage());
-        }
-        return null;
-    }
-
-    @Override
     public void ferdigstillOppgave(String oppgaveId) throws SikkerhetsbegrensningException, TekniskException {
         WSFerdigstillOppgaveRequest request = new WSFerdigstillOppgaveRequest();
 
         request.setOppgaveId(oppgaveId);
-        request.setFerdigstiltAvEnhetId(ENHET_ID_MELOSYS);
+        request.setFerdigstiltAvEnhetId(MELOSYS_ENHET_ID);
 
         try {
             behandleOppgaveConsumer.ferdigstillOppgave(request);
@@ -139,6 +121,70 @@ public class GsakService implements GsakFasade {
             throw new SikkerhetsbegrensningException(e);
         } catch (WSFerdigstillOppgaveException e) {
             throw new TekniskException(e);
+        }
+    }
+
+    // FIXME GSAK oppretter et nytt API med REST tjenester. Den metoden må endres når disse kommer.
+    @Override
+    public List<no.nav.melosys.domain.Oppgave> finnUtildelteOppgaverEtterFrist(String oppavetype, List<String> fagområdeKodeListe, List<String> sakstyper, List<String> behandlingstyper) throws IntegrasjonException {
+        FinnOppgaveListeSokMal sokMal = FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(Integer.toString(MELOSYS_ENHET_ID)).medFagområdeKodeListe(fagområdeKodeListe).build();
+
+        FinnOppgaveListeFilterMal.Builder filterMalBuilder = FinnOppgaveListeFilterMal.builder();
+        FinnOppgaveListeFilterMal filterMal = filterMalBuilder.medAktiv(true).medUfordelte(true).build();
+        // TODO mapping med behandlingstyper og sakstyper
+
+        FinnOppgaveListeSortering sortering = new FinnOppgaveListeSortering();
+        sortering.setSorteringselementKode(SORTERING_MED_FRIST);
+        sortering.setSorteringKode(SORTERING_STIGENDE);
+
+        FinnOppgaveListeRequestMal requestMal = FinnOppgaveListeRequestMal.builder().medSok(sokMal).medFilter(filterMal).medSortering(sortering).build();
+        FinnOppgaveListeResponse finnOppgaveListeResponse = oppgaveConsumer.finnOppgaveListe(requestMal);
+
+        List<Oppgave> oppgaver = finnOppgaveListeResponse.getOppgaveListe();
+        List<no.nav.melosys.domain.Oppgave> funnet = new ArrayList<>();
+        for (Oppgave o : oppgaver) {
+            no.nav.melosys.domain.Oppgave oppgave = new no.nav.melosys.domain.Oppgave();
+            oppgave.setOppgaveId(o.getOppgaveId());
+            oppgave.setAktivFra(KonverteringsUtils.xmlGregorianCalendarToLocalDate(o.getAktivFra()));
+            oppgave.setAktivTil(KonverteringsUtils.xmlGregorianCalendarToLocalDate(o.getAktivTil()));
+            if (o.getFagomrade() != null) {
+                oppgave.setFagomrade(Fagomrade.valueOf(o.getFagomrade().getKode()));
+            }
+            if (o.getUnderkategori() != null) {
+                oppgave.setUnderkategori(Underkategori.valueOf(o.getUnderkategori().getKode()));
+            }
+            if (o.getOppgavetype() != null) {
+                oppgave.setOppgavetype(Oppgavetype.valueOf(o.getOppgavetype().getKode()));
+            }
+            oppgave.setSaksnummer(o.getSaksnummer());
+            oppgave.setDokumentId(o.getDokumentId());
+
+            funnet.add(oppgave);
+        }
+
+        return funnet;
+    }
+
+    @Override
+    public no.nav.melosys.domain.Oppgave hentOppgave(String oppgaveId) {
+        HentOppgaveRequest request = new HentOppgaveRequest();
+        request.setOppgaveId(oppgaveId);
+
+        try {
+            HentOppgaveResponse response = oppgaveConsumer.hentOppgave(request);
+            Oppgave gsakOppgave = response.getOppgave();
+
+            if (gsakOppgave == null) {
+                return null;
+            }
+            no.nav.melosys.domain.Oppgave oppgave = new no.nav.melosys.domain.Oppgave();
+            oppgave.setOppgaveId(gsakOppgave.getOppgaveId());
+            if (gsakOppgave.getPrioritet() != null) {
+                oppgave.setPrioritet(PrioritetType.valueOf(gsakOppgave.getPrioritet().getKode()));
+            }
+            return oppgave;
+        } catch (HentOppgaveOppgaveIkkeFunnet hentOppgaveOppgaveIkkeFunnet) {
+            throw new IntegrasjonException(hentOppgaveOppgaveIkkeFunnet);
         }
     }
 
@@ -151,6 +197,34 @@ public class GsakService implements GsakFasade {
             return response.getOppgaveId();
         } catch (WSSikkerhetsbegrensningException e) {
             throw new SikkerhetsbegrensningException(e);
+        }
+    }
+
+    @Override
+    public void leggTilbakeOppgave(no.nav.melosys.domain.Oppgave oppgave) throws IntegrasjonException, SikkerhetsbegrensningException, TekniskException {
+        WSLagreOppgaveRequest wsRequest = new WSLagreOppgaveRequest();
+        WSLagreOppgave wsOppgave = new WSLagreOppgave();
+
+        try {
+            // oppgaveId er String i request til BehandleOppgave_v1.opprettOppgave og i respons fra
+            // Oppgave_v3.finnUtildelteOppgaverEtterFrist, men int i request til BehandleOppgave_v1.lagreOppgave
+            int oppgaveId = Integer.parseInt(oppgave.getOppgaveId());
+            wsOppgave.setOppgaveId(oppgaveId);
+        } catch (NumberFormatException e) {
+            throw new IntegrasjonException("'" + oppgave.getOppgaveId() + "' er ikke en gyldig oppgaveId");
+        }
+        wsOppgave.setGjelderBruker(null);
+        wsRequest.setEndretAvEnhetId(MELOSYS_ENHET_ID);
+        wsRequest.setWsLagreOppgave(wsOppgave);
+
+        try {
+            behandleOppgaveConsumer.lagreOppgave(wsRequest);
+        } catch (WSOppgaveIkkeFunnetException e) {
+            throw new IntegrasjonException(e);
+        } catch (WSSikkerhetsbegrensningException e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (WSOptimistiskLasingException e) {
+            throw new TekniskException(e);
         }
     }
 
@@ -209,6 +283,11 @@ public class GsakService implements GsakFasade {
         wsRequest.setOpprettetAvEnhetId(request.getOpprettetAvEnhetId());
         wsRequest.setWsOppgave(oppgave);
         return wsRequest;
+    }
+
+    @Override
+    public void tildelOppgave(String oppgaveId, String saksbehandlerID) {
+        // FIXME Francois venter på kall
     }
 
     private WSAktor byggWSAktør(String ident, AktorType aktørType) {

@@ -1,12 +1,10 @@
 package no.nav.melosys.saksflyt.impl.binge;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.atMost;
-
 import java.util.Arrays;
 
+import no.nav.melosys.saksflyt.SaksflytTestApplication;
+import no.nav.melosys.saksflyt.impl.steg.a1.HentPersonopplysningerAgent;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -17,8 +15,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import no.nav.melosys.saksflyt.SaksflytTestApplication;
-import no.nav.melosys.saksflyt.impl.steg.a1.HentPersonopplysningerAgent;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atMost;
+
 
 @RunWith(MockitoJUnitRunner.class)
 @ContextConfiguration(classes = { SaksflytTestApplication.class })
@@ -31,6 +32,7 @@ public class ArbeiderTest {
     private HentPersonopplysningerAgent klargjøreSteg;
 
     @Test
+    @Ignore
     public void testAtStegeneBlirKalt() throws Exception {
         MockitoAnnotations.initMocks(this);
         ReflectionTestUtils.setField(arbeider, "antallTråder", 15);
