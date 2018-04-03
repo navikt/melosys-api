@@ -1,28 +1,37 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import javax.ws.rs.core.Response;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.gsak.Oppgavetype;
 import no.nav.melosys.service.OppgaveService;
 import no.nav.melosys.service.Oppgaveplukker;
+import no.nav.melosys.service.oppgave.dto.KodeverdiDto;
+import no.nav.melosys.service.oppgave.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
+import no.nav.melosys.service.oppgave.dto.SaksType;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.cglib.core.Local;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -76,7 +85,24 @@ public class OppgaveTjenesteTest {
     @Test
     public void mineSaker() {
         SakOgOppgaveDto oppgave = new SakOgOppgaveDto();
-        oppgave.setOppgaveId("1");
+        oppgave.setOppgaveId("177057928");
+        oppgave.setOppgavetype("journalforing");
+        oppgave.setSammensattNavn("GLITRENDE HATT");
+        oppgave.setSaksnummer("4");
+
+        SaksType saksType =new SaksType();
+        KodeverdiDto behandling = new KodeverdiDto("MEDEOS","Meldlem, EØS-avtalen");
+        KodeverdiDto fagsak= new KodeverdiDto("MEDEOS","Trygdeavtalen");
+        KodeverdiDto status = new KodeverdiDto("A","Oversett Kode til Display text");
+        saksType.setBehandlingDto(behandling);
+        saksType.setFagSakType(fagsak);
+        saksType.setStatus(status);
+        oppgave.setSaksType(saksType);
+
+        oppgave.setAktivTil(LocalDate.of(2016,03,30));
+
+        oppgave.setSoknadsperiode(new PeriodeDto(LocalDate.of(2016,01,01),LocalDate.of(2020,01,01)));
+
         List<SakOgOppgaveDto> oppgaver = new ArrayList<>();
         oppgaver.add(oppgave);
 
@@ -84,7 +110,16 @@ public class OppgaveTjenesteTest {
         Response response = tjeneste.mineSaker();
         assertThat(response.getEntity()).isExactlyInstanceOf(ArrayList.class);
         List<SakOgOppgaveDto> entity = (List<SakOgOppgaveDto>) response.getEntity();
-        assertThat(entity.get(0).getOppgaveId()).isEqualTo("1");
+        assertThat(entity.get(0).getOppgaveId()).isEqualTo("177057928");
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        try {
+            assertThat(objectMapper.writeValueAsString(entity)).contains("GLITRENDE HATT");
+            assertThat(objectMapper.writeValueAsString(entity)).contains("Trygdeavtalen");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void jsonInn() {
