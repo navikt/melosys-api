@@ -23,7 +23,6 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,7 +64,7 @@ public class OppgaveServiceTest {
 
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave("1", "HOY_MED");
-        oppgave1.setSaksnummer("11");
+        oppgave1.setGsakSaksnummer("11");
         oppgave1.setAnsvarligId("12345678901");
         oppgaver.add(oppgave1);
 
@@ -78,7 +77,7 @@ public class OppgaveServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(FagsakType.EU_EØS);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
-        List<Behandling> behandlinger = getBehandlings();
+        List<Behandling> behandlinger = hentBehandlinger();
         fagsak.setBehandlinger(behandlinger);
         when(fagsakRepository.findByGsakSaksnummer(any(String.class))).thenReturn(fagsak);
         when(behandlingRepository.findBySaksnummer(any(String.class))).thenReturn(behandlinger);
@@ -92,7 +91,7 @@ public class OppgaveServiceTest {
 
     }
 
-    private List<Behandling> getBehandlings() {
+    private List<Behandling> hentBehandlinger() {
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
         PersonDokument personDokument = new PersonDokument();
         personDokument.fnr = "111111111111";
@@ -101,9 +100,6 @@ public class OppgaveServiceTest {
         personOpplysning.setType(SaksopplysningType.PERSONOPPLYSNING);
         personOpplysning.setDokument(personDokument);
         saksopplysninger.add(personOpplysning);
-
-
-        // oppgaveAggregate.setPersonDokument(personDokument);
 
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         soeknadDokument.fnr = "111111111111";

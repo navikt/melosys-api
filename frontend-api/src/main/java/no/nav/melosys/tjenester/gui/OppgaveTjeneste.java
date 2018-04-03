@@ -51,7 +51,7 @@ public class OppgaveTjeneste {
             PlukketOppgaveDto dto = new PlukketOppgaveDto();
             dto.setOppgaveID(oppgave.getOppgaveId());
             dto.setOppgavetype(oppgave.getOppgavetype().name());
-            dto.setSaksnummer(oppgave.getSaksnummer());
+            dto.setSaksnummer(oppgave.getGsakSaksnummer());
             dto.setJournalpostID(oppgave.getDokumentId());
 
             return Response.ok(dto).build();

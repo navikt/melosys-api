@@ -1,12 +1,10 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Executors;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +19,7 @@ import no.nav.melosys.service.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.KodeverdiDto;
 import no.nav.melosys.service.oppgave.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
-import no.nav.melosys.service.oppgave.dto.SaksType;
+import no.nav.melosys.service.oppgave.dto.Sakstype;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
@@ -31,7 +29,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.cglib.core.Local;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -90,14 +87,14 @@ public class OppgaveTjenesteTest {
         oppgave.setSammensattNavn("GLITRENDE HATT");
         oppgave.setSaksnummer("4");
 
-        SaksType saksType =new SaksType();
+        Sakstype sakstype =new Sakstype();
         KodeverdiDto behandling = new KodeverdiDto("MEDEOS","Meldlem, EØS-avtalen");
         KodeverdiDto fagsak= new KodeverdiDto("MEDEOS","Trygdeavtalen");
         KodeverdiDto status = new KodeverdiDto("A","Oversett Kode til Display text");
-        saksType.setBehandlingDto(behandling);
-        saksType.setFagSakType(fagsak);
-        saksType.setStatus(status);
-        oppgave.setSaksType(saksType);
+        sakstype.setBehandlingDto(behandling);
+        sakstype.setFagSakType(fagsak);
+        sakstype.setStatus(status);
+        oppgave.setSakstype(sakstype);
 
         oppgave.setAktivTil(LocalDate.of(2016,03,30));
 

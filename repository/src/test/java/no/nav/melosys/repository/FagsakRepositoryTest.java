@@ -39,7 +39,7 @@ public class FagsakRepositoryTest {
 
         Fagsak fagsak = new Fagsak();
         fagsak.setBruker(bruker);
-        fagsak.setSaksnummer(123L);
+        fagsak.setGsakSaksnummer(123L);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
         entityManager.persist(fagsak);
 
@@ -47,7 +47,7 @@ public class FagsakRepositoryTest {
 
         assertThat(byFnr.size()).isEqualTo(1);
         Fagsak funnet = byFnr.get(0);
-        assertThat(funnet.getSaksnummer()).isEqualTo(123);
+        assertThat(funnet.getGsakSaksnummer()).isEqualTo(123);
 
     }
 
@@ -61,7 +61,7 @@ public class FagsakRepositoryTest {
 
         Fagsak fagsak = new Fagsak();
         fagsak.setBruker(bruker);
-        fagsak.setSaksnummer(123L);
+        fagsak.setGsakSaksnummer(123L);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
         entityManager.persist(fagsak);
 

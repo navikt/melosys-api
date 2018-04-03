@@ -166,7 +166,7 @@ public class GsakService implements GsakFasade {
             if (o.getOppgavetype() != null) {
                 oppgave.setOppgavetype(Oppgavetype.valueOf(o.getOppgavetype().getKode()));
             }
-            oppgave.setSaksnummer(o.getSaksnummer());
+            oppgave.setGsakSaksnummer(o.getSaksnummer());
             oppgave.setDokumentId(o.getDokumentId());
 
             funnet.add(oppgave);
@@ -318,6 +318,7 @@ public class GsakService implements GsakFasade {
             domainOppave.setAktivTil(oppgave.getAktivTil().toGregorianCalendar().toZonedDateTime().toLocalDate());
             domainOppave.setDokumentId(oppgave.getDokumentId());
             domainOppave.setOppgavetype(Oppgavetype.valueOf(oppgave.getOppgavetype().getKode()));
+            domainOppave.setGsakSaksnummer(oppgave.getSaksnummer());
             localDomainObjects.add(domainOppave);
         });
         return localDomainObjects;

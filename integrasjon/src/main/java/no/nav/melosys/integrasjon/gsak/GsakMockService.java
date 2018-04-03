@@ -63,7 +63,7 @@ public class GsakMockService implements GsakFasade {
         oppgave.setFagomrade(request.getFagområde());
         oppgave.setOppgavetype(request.getOppgaveType());
         oppgave.setPrioritet(request.getPrioritetType());
-        oppgave.setSaksnummer(request.getSaksnummer());
+        oppgave.setGsakSaksnummer(request.getSaksnummer());
         oppgave.setUnderkategori(request.getUnderkategoriKode());
 
         return oppgaveRepo.save(oppgave);

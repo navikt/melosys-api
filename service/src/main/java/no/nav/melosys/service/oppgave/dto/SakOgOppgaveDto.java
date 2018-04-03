@@ -13,7 +13,7 @@ public class SakOgOppgaveDto {
     private String dokumentID;
     private LocalDate aktivTil;
     private PeriodeDto soknadsperiode;
-    private SaksType saksType;
+    private Sakstype sakstype;
     private List<String> land;
 
     public List<String> getLand() {
@@ -24,12 +24,12 @@ public class SakOgOppgaveDto {
         this.land = land;
     }
 
-    public SaksType getSaksType() {
-        return saksType;
+    public Sakstype getSakstype() {
+        return sakstype;
     }
 
-    public void setSaksType(SaksType saksType) {
-        this.saksType = saksType;
+    public void setSakstype(Sakstype sakstype) {
+        this.sakstype = sakstype;
     }
 
     public String getOppgaveId() {

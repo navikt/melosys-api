@@ -19,7 +19,7 @@ public class Oppgave {
     private String ansvarligId;
     private Oppgavetype oppgavetype;
     private PrioritetType prioritet;
-    private String saksnummer;
+    private String gsakSaksnummer;
     private String dokumentId;
 
     public Oppgave(String oppgaveId, String prioritet) {
@@ -98,12 +98,12 @@ public class Oppgave {
         this.prioritet = prioritet;
     }
 
-    public String getSaksnummer() {
-        return saksnummer;
+    public String getGsakSaksnummer() {
+        return gsakSaksnummer;
     }
 
-    public void setSaksnummer(String saksnummer) {
-        this.saksnummer = saksnummer;
+    public void setGsakSaksnummer(String gsakSaksnummer) {
+        this.gsakSaksnummer = gsakSaksnummer;
     }
 
     public String getDokumentId() {

@@ -32,7 +32,7 @@ public class GsakMock implements OppgaveMockRepository {
         o1.setFagomrade(Fagomrade.MED);
         o1.setOppgavetype(Oppgavetype.BEH_SAK_MED);
         o1.setPrioritet(PrioritetType.NORM_MED);
-        o1.setSaksnummer("SAK_111");
+        o1.setGsakSaksnummer("SAK_111");
         o1.setAktivTil(LocalDate.now().plusYears(1));
 
         Oppgave o2 = new Oppgave();
@@ -40,7 +40,7 @@ public class GsakMock implements OppgaveMockRepository {
         o2.setFagomrade(Fagomrade.UFM);
         o2.setOppgavetype(Oppgavetype.BEH_SAK_MK_UFM);
         o2.setPrioritet(PrioritetType.NORM_MED);
-        o2.setSaksnummer("SAK_222");
+        o2.setGsakSaksnummer("SAK_222");
         o2.setAktivTil(LocalDate.now().plusYears(1));
 
         Oppgave o3 = new Oppgave();

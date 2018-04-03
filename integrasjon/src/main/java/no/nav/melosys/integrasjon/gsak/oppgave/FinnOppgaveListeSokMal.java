@@ -10,7 +10,6 @@ public class FinnOppgaveListeSokMal {
     private String sakId;
     private List<String> fagområdeKodeListe;
 
-
     public FinnOppgaveListeSokMal(String ansvarligEnhetId, String ansvarligId, String sakId, List<String> fagområdeKodeListe) {
         this.ansvarligEnhetId = ansvarligEnhetId;
         this.ansvarligId=ansvarligId;

@@ -1,6 +1,6 @@
 package no.nav.melosys.service.oppgave.dto;
 
-public class SaksType {
+public class Sakstype {
     private KodeverdiDto fagSakType;
     private KodeverdiDto behandling;
     private KodeverdiDto status;
