@@ -33,7 +33,7 @@ public class OppgaveTjeneste {
     }
 
     @POST
-    @Path("{plukk}")
+    @Path("/plukk")
     @ApiOperation(value = "Plukker fra GSAK neste oppgave som saksbehandler skal arbeide med.")
     public Response plukkOppgave(PlukkOppgaveInnDto plukkDto) {
         String ident = SubjectHandler.getInstance().getUserID();
