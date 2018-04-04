@@ -100,7 +100,7 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
 
     // Hvis man ikke har bruk for historikk på navn så er det best å bruke navn på nivå organisasjon.
     private String getNavn(OrganisasjonDokument organisasjon) {
-        return organisasjon.getNavn() == null ? null : String.join(" ", organisasjon.getNavn());
+        return organisasjon.getNavn() == null ? "UKJENT" : String.join(" ", organisasjon.getNavn());
     }
 
 }
