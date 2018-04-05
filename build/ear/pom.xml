@@ -7,7 +7,7 @@
     <parent>
         <artifactId>build</artifactId>
         <groupId>no.nav.melosys</groupId>
-        <version>0.49.0</version>
+        <version>0.50.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>melosys-ear</artifactId>
