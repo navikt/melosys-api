@@ -44,11 +44,11 @@ public class GsakMock implements OppgaveMockRepository {
         o2.setAktivTil(LocalDate.now().plusYears(1));
 
         Oppgave o3 = new Oppgave();
-        o2.setOppgaveId("3");
-        o2.setFagomrade(Fagomrade.MED);
-        o2.setOppgavetype(Oppgavetype.JFR_MED);
-        o2.setPrioritet(PrioritetType.HOY_MED);
-        o2.setAktivTil(LocalDate.now().plusYears(1));
+        o3.setOppgaveId("3");
+        o3.setFagomrade(Fagomrade.MED);
+        o3.setOppgavetype(Oppgavetype.JFR_MED);
+        o3.setPrioritet(PrioritetType.HOY_MED);
+        o3.setAktivTil(LocalDate.now().plusYears(1));
 
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(o1);
