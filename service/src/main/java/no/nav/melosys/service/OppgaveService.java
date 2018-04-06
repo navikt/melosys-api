@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Oppgave;
@@ -21,10 +20,10 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.service.oppgave.dto.Behandling;
 import no.nav.melosys.service.oppgave.dto.KodeverdiDto;
 import no.nav.melosys.service.oppgave.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
-import no.nav.melosys.service.oppgave.dto.Sakstype;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,17 +43,16 @@ public class OppgaveService {
         this.behandlingRepository = behandlingRepository;
     }
 
-    private static Sakstype mappeSaksTypeOgBehandling(Fagsak fagsak) {
-        Sakstype sakstype = new Sakstype();
-        sakstype.setStatus(new KodeverdiDto(fagsak.getStatus().getKode(), fagsak.getStatus().getBeskrivelse()));
-        List<Behandling> aktivBehandlinger = fagsak.getBehandlinger().stream().filter(behandling -> !behandling.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
+    private static Behandling mappeSaksTypeOgBehandling(Fagsak fagsak) {
+        Behandling behandling = new Behandling();
+        behandling.setStatus(new KodeverdiDto(fagsak.getStatus().getKode(), fagsak.getStatus().getBeskrivelse()));
+        List<no.nav.melosys.domain.Behandling> aktivBehandlinger = fagsak.getBehandlinger().stream().filter(varBehandling -> !varBehandling.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
         if (aktivBehandlinger.size() > 1) {
             throw new RuntimeException("Finnes mer en to aktiv behandlinger");
         } else {
-            sakstype.setBehandlingDto(new KodeverdiDto(aktivBehandlinger.get(0).getStatus().getKode(), aktivBehandlinger.get(0).getStatus().getBeskrivelse()));
+            behandling.setType((new KodeverdiDto(aktivBehandlinger.get(0).getStatus().getKode(), aktivBehandlinger.get(0).getStatus().getBeskrivelse())));
         }
-        sakstype.setFagSakType(new KodeverdiDto(fagsak.getType().getKode(), fagsak.getType().getBeskrivelse()));
-        return sakstype;
+        return behandling;
     }
 
     private static PeriodeDto mappeDato(SoeknadDokument soeknadDokument) {
@@ -88,7 +86,7 @@ public class OppgaveService {
             dest.setOppgaveId(oppgave.getOppgaveId());
             dest.setDokumentID(oppgave.getDokumentId());
             dest.setAktivTil(oppgave.getAktivTil());
-            List<Behandling> behandlinger = behandlingRepository.findBySaksnummer(oppgave.getGsakSaksnummer());
+            List<no.nav.melosys.domain.Behandling> behandlinger = behandlingRepository.findBySaksnummer(oppgave.getGsakSaksnummer());
             dest.setSaksnummer(oppgave.getGsakSaksnummer());
             ekstraktSokenadDokument(behandlinger, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
                 SoeknadDokument søknadDokument = (SoeknadDokument) saksopplysningDokument;
@@ -101,13 +99,15 @@ public class OppgaveService {
                         dest.setSammensattNavn(personDokument.sammensattNavn);
                     }
             );
-            dest.setSakstype(mappeSaksTypeOgBehandling(fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer())));
+            Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
+            dest.setSakstype(new KodeverdiDto(fagsak.getType().getKode(), fagsak.getType().getBeskrivelse()));
+            dest.setBehandling(mappeSaksTypeOgBehandling(fagsak));
             return dest;
         }).
                 collect(Collectors.<SakOgOppgaveDto>toList());
     }
 
-    private Optional<SaksopplysningDokument> ekstraktSokenadDokument(List<Behandling> behandlinger, SaksopplysningType saksopplysningType) {
+    private Optional<SaksopplysningDokument> ekstraktSokenadDokument(List<no.nav.melosys.domain.Behandling> behandlinger, SaksopplysningType saksopplysningType) {
         return behandlinger.stream().flatMap(behandling -> behandling.getSaksopplysninger().stream()).filter(
                 saksopplysning -> saksopplysning.getType().equals(
                         saksopplysningType)).findFirst().map(Saksopplysning::getDokument);

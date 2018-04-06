@@ -19,7 +19,7 @@ import no.nav.melosys.service.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.KodeverdiDto;
 import no.nav.melosys.service.oppgave.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
-import no.nav.melosys.service.oppgave.dto.Sakstype;
+import no.nav.melosys.service.oppgave.dto.Behandling;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
@@ -87,13 +87,14 @@ public class OppgaveTjenesteTest {
         oppgave.setSammensattNavn("GLITRENDE HATT");
         oppgave.setSaksnummer("4");
 
-        Sakstype sakstype =new Sakstype();
-        KodeverdiDto behandling = new KodeverdiDto("MEDEOS","Meldlem, EØS-avtalen");
-        KodeverdiDto fagsak= new KodeverdiDto("MEDEOS","Trygdeavtalen");
+        Behandling behandling =new Behandling();
+        KodeverdiDto sakstype= new KodeverdiDto("EU_EOS","EU/EØS");
+        KodeverdiDto type= new KodeverdiDto("todo0003","Påstand fra utenlandsk myndighet");
         KodeverdiDto status = new KodeverdiDto("A","Oversett Kode til Display text");
-        sakstype.setBehandlingDto(behandling);
-        sakstype.setFagSakType(fagsak);
-        sakstype.setStatus(status);
+        oppgave.setSakstype(sakstype);
+        behandling.setType(type);
+        behandling.setStatus(status);
+        oppgave.setBehandling(behandling);
         oppgave.setSakstype(sakstype);
 
         oppgave.setAktivTil(LocalDate.of(2016,03,30));
@@ -107,13 +108,13 @@ public class OppgaveTjenesteTest {
         Response response = tjeneste.mineSaker();
         assertThat(response.getEntity()).isExactlyInstanceOf(ArrayList.class);
         List<SakOgOppgaveDto> entity = (List<SakOgOppgaveDto>) response.getEntity();
-        assertThat(entity.get(0).getOppgaveId()).isEqualTo("177057928");
+        assertThat(entity.get(0).getOppgaveID()).isEqualTo("177057928");
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         try {
             assertThat(objectMapper.writeValueAsString(entity)).contains("GLITRENDE HATT");
-            assertThat(objectMapper.writeValueAsString(entity)).contains("Trygdeavtalen");
+            assertThat(objectMapper.writeValueAsString(entity)).contains("todo0003");
         } catch (IOException e) {
             e.printStackTrace();
         }

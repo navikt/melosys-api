@@ -84,7 +84,7 @@ public class OppgaveServiceTest {
 
         List<SakOgOppgaveDto> mineSaker = oppgaveService.hentMineSaker("12345678901");
         assertThat(mineSaker.size()).isEqualTo(1);
-        assertThat(mineSaker.get(0).getOppgaveId()).isEqualTo("1");
+        assertThat(mineSaker.get(0).getOppgaveID()).isEqualTo("1");
 
         mineSaker = oppgaveService.hentMineSaker("12346678902");
         assertThat(mineSaker.size()).isEqualTo(0);

@@ -277,6 +277,7 @@ public class GsakService implements GsakFasade {
         oppgave.setBeskrivelse(request.getBeskrivelse());
         oppgave.setLest(request.isLest());
         oppgave.setDokumentId(request.getDokumentId());
+
         try {
             oppgave.setNormDato(KonverteringsUtils.localDateToXMLGregorianCalendar(request.getNormertBehandlingsTidInnen()));
         } catch (DatatypeConfigurationException e) {

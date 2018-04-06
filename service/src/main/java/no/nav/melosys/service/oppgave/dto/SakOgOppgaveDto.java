@@ -6,14 +6,36 @@ import java.util.List;
 
 public class SakOgOppgaveDto {
 
-    private String oppgaveId;
+    private String oppgaveID;
     private String oppgavetype;
     private String sammensattNavn;
     private String saksnummer;
     private String dokumentID;
     private LocalDate aktivTil;
     private PeriodeDto soknadsperiode;
-    private Sakstype sakstype;
+    private KodeverdiDto sakstype;
+    private Behandling behandling;
+
+    public void setOppgaveID(String oppgaveID) {
+        this.oppgaveID = oppgaveID;
+    }
+
+    public KodeverdiDto getSakstype() {
+        return sakstype;
+    }
+
+    public void setSakstype(KodeverdiDto sakstype) {
+        this.sakstype = sakstype;
+    }
+
+    public Behandling getBehandling() {
+        return behandling;
+    }
+
+    public void setBehandling(Behandling behandling) {
+        this.behandling = behandling;
+    }
+
     private List<String> land;
 
     public List<String> getLand() {
@@ -24,20 +46,12 @@ public class SakOgOppgaveDto {
         this.land = land;
     }
 
-    public Sakstype getSakstype() {
-        return sakstype;
+    public String getOppgaveID() {
+        return oppgaveID;
     }
 
-    public void setSakstype(Sakstype sakstype) {
-        this.sakstype = sakstype;
-    }
-
-    public String getOppgaveId() {
-        return oppgaveId;
-    }
-
-    public void setOppgaveId(String oppgaveId) {
-        this.oppgaveId = oppgaveId;
+    public void setOppgaveId(String oppgaveID) {
+        this.oppgaveID = oppgaveID;
     }
 
     public String getOppgavetype() {
