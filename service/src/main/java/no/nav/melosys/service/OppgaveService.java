@@ -48,7 +48,7 @@ public class OppgaveService {
         behandling.setStatus(new KodeverdiDto(fagsak.getStatus().getKode(), fagsak.getStatus().getBeskrivelse()));
         List<no.nav.melosys.domain.Behandling> aktivBehandlinger = fagsak.getBehandlinger().stream().filter(varBehandling -> !varBehandling.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
         if (aktivBehandlinger.size() > 1) {
-            throw new RuntimeException("Finnes mer en to aktiv behandlinger");
+            throw new RuntimeException("Det finnes mer enn to aktive behandlinger");
         } else {
             behandling.setType((new KodeverdiDto(aktivBehandlinger.get(0).getStatus().getKode(), aktivBehandlinger.get(0).getStatus().getBeskrivelse())));
         }
@@ -63,7 +63,7 @@ public class OppgaveService {
         } else if (oppholdsPeriode.isPresent()) {
             return new PeriodeDto(oppholdsPeriode.get().getFom(), oppholdsPeriode.get().getTom());
         }
-        throw new RuntimeException("Finnes ikke noen Arbeidsperiode ellers oppholdsPeriode");
+        throw new RuntimeException("Det finnes ikke noen arbeidsperiode eller oppholdsPeriode");
     }
 
     private static List<String> mappeLand(SoeknadDokument soeknadDokument) {
@@ -74,6 +74,7 @@ public class OppgaveService {
         landListe.ifPresent(lands -> landkoder.addAll(soeknadDokument.oppholdUtland.oppholdsland.stream().filter(Objects::nonNull).map(Land::getKode).collect(Collectors.toList())));
         return landkoder;
     }
+
 
     public List<SakOgOppgaveDto> hentMineSaker(String ansvarligID) {
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListe(ansvarligID);

@@ -61,6 +61,7 @@ import org.springframework.stereotype.Service;
 public class GsakService implements GsakFasade {
 
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
+
     private static final String FAGOMRÅDE_KODE_MEDLEMSKAP = "MED";
     private static final String FAGOMRÅDE_KODE_UNNTAK = "UFM";
     private static final String FAGSYSTEM_KODE_MELOSYS = "FS22";// TODO (FA) endre når koden er opprettet i GSAK
