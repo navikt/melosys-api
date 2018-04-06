@@ -1,29 +1,14 @@
 package no.nav.melosys.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
@@ -34,6 +19,18 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class SoeknadServiceTest {
 
@@ -59,11 +56,9 @@ public class SoeknadServiceTest {
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         mapper.registerModule(new JavaTimeModule());
-        mapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
 
         // FIXME: Last json fra fil
         String json = "{\n" +
-                "  \"soknadDokument\": {\n" +
                 "    \"arbeidUtland\": {\n" +
                 "      \"arbeidsland\": [\n" +
                 "        \"ESP\",\n" +
@@ -140,7 +135,6 @@ public class SoeknadServiceTest {
                 "      \"trygdeavgiftTrukketGjennomSkatt\": true,\n" +
                 "      \"trygdeavgiftTrukketGjennomSkattDato\": \"2020-02-02\"\n" +
                 "    }\n" +
-                "  }\n" +
                 "}";
 
         soeknadDokument = mapper.readValue(json, SoeknadDokument.class);

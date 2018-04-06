@@ -1,5 +1,12 @@
 package no.nav.melosys.tjenester.gui;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -7,14 +14,12 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.validering.ValideringService;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
+import no.nav.melosys.tjenester.gui.dto.SoeknadInnDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 
 @Api(tags = {"soknad"})
 @Path("/soknader")
@@ -52,7 +57,9 @@ public class SoknadTjeneste extends RestTjeneste  {
     @POST
     @Path("{behandlingID}")
     @ApiOperation(value = "Tjeneste for å registrere opplysninger fra papirsøknaden manuelt.")
-    public Response registrerSøknad(@PathParam("behandlingID") long behandlingID, @ApiParam("Søknadsdata") SoeknadDokument soeknadDokument) {
+    public Response registrerSøknad(@PathParam("behandlingID") long behandlingID, @ApiParam("Søknadsdata") SoeknadInnDto soeknadInnDto) {
+        SoeknadDokument soeknadDokument = soeknadInnDto.getSoknadDokument();
+
         valideringService.validerOpplysninger(soeknadDokument);
         SoeknadDokument soeknad = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
 

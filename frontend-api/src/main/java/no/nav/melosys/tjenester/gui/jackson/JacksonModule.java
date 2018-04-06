@@ -1,16 +1,12 @@
 package no.nav.melosys.tjenester.gui.jackson;
 
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.tjenester.gui.jackson.serialize.MedlemsperiodeSerializer;
-import no.nav.melosys.tjenester.gui.jackson.serialize.OrganisasjonDeserializer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.jackson.serialize.LandkodeSerializer;
+import no.nav.melosys.tjenester.gui.jackson.serialize.MedlemsperiodeSerializer;
 import no.nav.melosys.tjenester.gui.jackson.serialize.OrganisasjonSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class JacksonModule extends SimpleModule {
@@ -22,6 +18,5 @@ public class JacksonModule extends SimpleModule {
         addSerializer(new LandkodeSerializer(kodeverkService));
         addSerializer(new MedlemsperiodeSerializer(kodeverkService));
         addSerializer(new OrganisasjonSerializer(kodeverkService));
-        addDeserializer(OrganisasjonDokument.class, new OrganisasjonDeserializer());
     }
 }

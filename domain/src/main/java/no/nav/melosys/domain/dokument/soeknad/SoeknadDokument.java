@@ -4,14 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.fasterxml.jackson.annotation.JsonRootName;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Sivilstand;
 
-@JsonRootName("soknadDokument")
 @XmlRootElement
 public class SoeknadDokument extends SaksopplysningDokument {
 
