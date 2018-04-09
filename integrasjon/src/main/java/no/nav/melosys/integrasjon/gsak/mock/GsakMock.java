@@ -47,23 +47,31 @@ public class GsakMock implements OppgaveMockRepository {
         o2.setAktivTil(LocalDate.now().plusYears(1));
 
         Oppgave o3 = new Oppgave();
-        o2.setOppgaveId("3");
-        o2.setFagomrade(Fagomrade.MED);
-        o2.setOppgavetype(Oppgavetype.JFR_MED);
-        o2.setPrioritet(PrioritetType.HOY_MED);
-        o2.setAktivTil(LocalDate.now().plusYears(1));
+        o3.setOppgaveId("3");
+        o3.setFagomrade(Fagomrade.MED);
+        o3.setOppgavetype(Oppgavetype.JFR_MED);
+        o3.setPrioritet(PrioritetType.HOY_MED);
+        o3.setAktivTil(LocalDate.now().plusYears(1));
+
+        Oppgave o4 = new Oppgave();
+        o4.setOppgaveId("4");
+        o4.setFagomrade(Fagomrade.MED);
+        o4.setOppgavetype(Oppgavetype.JFR_MED);
+        o4.setPrioritet(PrioritetType.HOY_MED);
+        o4.setAktivTil(LocalDate.now().plusYears(1));
 
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(o1);
         oppgaver.add(o2);
         oppgaver.add(o3);
+        oppgaver.add(o4);
 
         return oppgaver;
     }
 
     @Override
     public List<Oppgave> finnOppgaverMedAnsvarligID(String ansvarligID){
-        return oppgaver.values().stream().filter(oppgave -> oppgave.getAnsvarligId().equals(ansvarligID)).collect(Collectors.toList());
+        return oppgaver.values().stream().filter(oppgave -> ansvarligID.equals(oppgave.getAnsvarligId())).collect(Collectors.toList());
     }
 
     @Override

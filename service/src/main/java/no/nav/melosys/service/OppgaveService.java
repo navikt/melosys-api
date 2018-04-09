@@ -46,11 +46,15 @@ public class OppgaveService {
     private static Behandling mappeSaksTypeOgBehandling(Fagsak fagsak) {
         Behandling behandling = new Behandling();
         behandling.setStatus(new KodeverdiDto(fagsak.getStatus().getKode(), fagsak.getStatus().getBeskrivelse()));
-        List<no.nav.melosys.domain.Behandling> aktivBehandlinger = fagsak.getBehandlinger().stream().filter(varBehandling -> !varBehandling.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
+        List<no.nav.melosys.domain.Behandling> aktivBehandlinger = fagsak.getBehandlinger().stream().
+                filter(varBehandling -> !varBehandling.getStatus().equals(BehandlingStatus.AVSLUTTET)).
+                collect(Collectors.toList());
         if (aktivBehandlinger.size() > 1) {
-            throw new RuntimeException("Det finnes mer enn to aktive behandlinger");
-        } else {
+            throw new RuntimeException("Det finnes mer enn en aktive behandlinger");
+        } else if (aktivBehandlinger.size() == 1) {
             behandling.setType((new KodeverdiDto(aktivBehandlinger.get(0).getStatus().getKode(), aktivBehandlinger.get(0).getStatus().getBeskrivelse())));
+        } else{
+            throw new RuntimeException("Det finnes ingen aktive behandlinger");
         }
         return behandling;
     }
@@ -104,8 +108,7 @@ public class OppgaveService {
             dest.setSakstype(new KodeverdiDto(fagsak.getType().getKode(), fagsak.getType().getBeskrivelse()));
             dest.setBehandling(mappeSaksTypeOgBehandling(fagsak));
             return dest;
-        }).
-                collect(Collectors.<SakOgOppgaveDto>toList());
+        }).collect(Collectors.<SakOgOppgaveDto>toList());
     }
 
     private Optional<SaksopplysningDokument> ekstraktSokenadDokument(List<no.nav.melosys.domain.Behandling> behandlinger, SaksopplysningType saksopplysningType) {

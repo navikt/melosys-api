@@ -314,6 +314,7 @@ public class GsakService implements GsakFasade {
         List<no.nav.melosys.domain.Oppgave> localDomainObjects = new ArrayList<>();
         FinnOppgaveListeResponse finnOppgaveListeResponse = oppgaveConsumer.finnOppgaveListe(requestMal);
         finnOppgaveListeResponse.getOppgaveListe().forEach(oppgave -> {
+            //FIXME: Sjekk for NPE
             no.nav.melosys.domain.Oppgave domainOppave = new no.nav.melosys.domain.Oppgave();
             domainOppave.setOppgaveId(oppgave.getOppgaveId());
             domainOppave.setPrioritet(PrioritetType.valueOf(oppgave.getPrioritet().getKode()));
