@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+//FIXME Fjernes når GSAK leverer nye REST tjenester
 @Service
 @Profile("mocking")
 public class GsakMockService implements GsakFasade {
@@ -40,6 +41,11 @@ public class GsakMockService implements GsakFasade {
     }
 
     @Override
+    public List<Oppgave> finnOppgaveListe(String ansvarligId) throws IntegrasjonException {
+        return oppgaveRepo.finnOppgaverMedAnsvarligID(ansvarligId);
+    }
+
+    @Override
     public Oppgave hentOppgave(String oppgaveId) {
         return oppgaveRepo.findOne(oppgaveId);
     }
@@ -58,7 +64,7 @@ public class GsakMockService implements GsakFasade {
         oppgave.setFagomrade(request.getFagområde());
         oppgave.setOppgavetype(request.getOppgaveType());
         oppgave.setPrioritet(request.getPrioritetType());
-        oppgave.setSaksnummer(request.getSaksnummer());
+        oppgave.setGsakSaksnummer(request.getSaksnummer());
         oppgave.setUnderkategori(request.getUnderkategoriKode());
 
         return oppgaveRepo.save(oppgave);

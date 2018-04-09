@@ -28,7 +28,7 @@ public class Fagsak {
 
     @Column(name = "gsak_saksnummer")
     private String gsakSaksnummer;
-    
+
     @Column(name = "fagsak_type", nullable = false, updatable = false)
     @Convert(converter = FagsakType.DbKonverterer.class)
     private FagsakType type;

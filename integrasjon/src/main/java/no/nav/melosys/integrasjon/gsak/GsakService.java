@@ -6,7 +6,11 @@ import java.util.List;
 import java.util.Optional;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.melosys.domain.gsak.*;
+import no.nav.melosys.domain.gsak.AktorType;
+import no.nav.melosys.domain.gsak.Fagomrade;
+import no.nav.melosys.domain.gsak.Oppgavetype;
+import no.nav.melosys.domain.gsak.PrioritetType;
+import no.nav.melosys.domain.gsak.Underkategori;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
@@ -22,7 +26,14 @@ import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSFerdigstillOppgaveExcepti
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOppgaveIkkeFunnetException;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOptimistiskLasingException;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSSikkerhetsbegrensningException;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.*;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSAktor;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSAktorType;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSFerdigstillOppgaveRequest;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSLagreOppgave;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSLagreOppgaveRequest;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOppgave;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveRequest;
+import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveResponse;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.OpprettSakSakEksistererAllerede;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.OpprettSakUgyldigInput;
 import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Aktoer;
@@ -156,7 +167,7 @@ public class GsakService implements GsakFasade {
             if (o.getOppgavetype() != null) {
                 oppgave.setOppgavetype(Oppgavetype.valueOf(o.getOppgavetype().getKode()));
             }
-            oppgave.setSaksnummer(o.getSaksnummer());
+            oppgave.setGsakSaksnummer(o.getSaksnummer());
             oppgave.setDokumentId(o.getDokumentId());
 
             funnet.add(oppgave);
@@ -283,6 +294,37 @@ public class GsakService implements GsakFasade {
         wsRequest.setOpprettetAvEnhetId(request.getOpprettetAvEnhetId());
         wsRequest.setWsOppgave(oppgave);
         return wsRequest;
+    }
+
+    @Override
+    public List<no.nav.melosys.domain.Oppgave> finnOppgaveListe(String ansvarligId)
+            throws IntegrasjonException {
+
+        FinnOppgaveListeSokMal sokMal = FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(Integer.toString(MELOSYS_ENHET_ID)).medAnsvarligId(ansvarligId).build();
+
+        FinnOppgaveListeFilterMal.Builder filterMalBuilder = FinnOppgaveListeFilterMal.builder();
+        FinnOppgaveListeFilterMal filterMal = filterMalBuilder.medAktiv(true).build();
+
+        FinnOppgaveListeSortering sortering = new FinnOppgaveListeSortering();
+        sortering.setSorteringselementKode(SORTERING_MED_FRIST);
+        sortering.setSorteringKode(SORTERING_STIGENDE);
+
+        FinnOppgaveListeRequestMal requestMal = FinnOppgaveListeRequestMal.builder().medSok(sokMal).medFilter(filterMal).medSortering(sortering).build();
+
+        List<no.nav.melosys.domain.Oppgave> localDomainObjects = new ArrayList<>();
+        FinnOppgaveListeResponse finnOppgaveListeResponse = oppgaveConsumer.finnOppgaveListe(requestMal);
+        finnOppgaveListeResponse.getOppgaveListe().forEach(oppgave -> {
+            //FIXME: Sjekk for NPE
+            no.nav.melosys.domain.Oppgave domainOppave = new no.nav.melosys.domain.Oppgave();
+            domainOppave.setOppgaveId(oppgave.getOppgaveId());
+            domainOppave.setPrioritet(PrioritetType.valueOf(oppgave.getPrioritet().getKode()));
+            domainOppave.setAktivTil(oppgave.getAktivTil().toGregorianCalendar().toZonedDateTime().toLocalDate());
+            domainOppave.setDokumentId(oppgave.getDokumentId());
+            domainOppave.setOppgavetype(Oppgavetype.valueOf(oppgave.getOppgavetype().getKode()));
+            domainOppave.setGsakSaksnummer(oppgave.getSaksnummer());
+            localDomainObjects.add(domainOppave);
+        });
+        return localDomainObjects;
     }
 
     @Override

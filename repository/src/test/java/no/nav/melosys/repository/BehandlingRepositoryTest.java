@@ -34,7 +34,7 @@ public class BehandlingRepositoryTest {
     @Test
     public void testFindBySaksnummerIkkeFunnet() throws Exception {
         Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(123L);
+        fagsak.setGsakSaksnummer(123L);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
         entityManager.persist(fagsak);
 
@@ -53,7 +53,7 @@ public class BehandlingRepositoryTest {
     @Test
     public void testFindBySaksnummer() throws Exception {
         Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(123L);
+        fagsak.setGsakSaksnummer(123L);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
         entityManager.persist(fagsak);
 
@@ -72,7 +72,7 @@ public class BehandlingRepositoryTest {
         Behandling funnet = (Behandling) bySaksnummer.get(0);
         assertThat(funnet.getBehandlingsId()).isEqualTo(777L);
         assertThat(funnet.getFagsak()).isNotNull();
-        assertThat(funnet.getFagsak().getSaksnummer()).isEqualTo(123L);
+        assertThat(funnet.getFagsak().getGsakSaksnummer()).isEqualTo(123L);
     }
     //*/
 

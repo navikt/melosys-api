@@ -1,26 +1,57 @@
-
-package no.nav.melosys.tjenester.gui.dto;
+package no.nav.melosys.service.oppgave.dto;
 
 
 import java.time.LocalDate;
+import java.util.List;
 
-public class OppgaveDto {
+public class SakOgOppgaveDto {
 
-    private String oppgaveId;
+    private String oppgaveID;
     private String oppgavetype;
-    private String grunnlagstype;
     private String sammensattNavn;
     private String saksnummer;
     private String dokumentID;
     private LocalDate aktivTil;
     private PeriodeDto soknadsperiode;
+    private KodeverdiDto sakstype;
+    private BehandlingDto behandling;
 
-    public String getOppgaveId() {
-        return oppgaveId;
+    public void setOppgaveID(String oppgaveID) {
+        this.oppgaveID = oppgaveID;
     }
 
-    public void setOppgaveId(String oppgaveId) {
-        this.oppgaveId = oppgaveId;
+    public KodeverdiDto getSakstype() {
+        return sakstype;
+    }
+
+    public void setSakstype(KodeverdiDto sakstype) {
+        this.sakstype = sakstype;
+    }
+
+    public BehandlingDto getBehandling() {
+        return behandling;
+    }
+
+    public void setBehandling(BehandlingDto behandling) {
+        this.behandling = behandling;
+    }
+
+    private List<String> land;
+
+    public List<String> getLand() {
+        return land;
+    }
+
+    public void setLand(List<String> land) {
+        this.land = land;
+    }
+
+    public String getOppgaveID() {
+        return oppgaveID;
+    }
+
+    public void setOppgaveId(String oppgaveID) {
+        this.oppgaveID = oppgaveID;
     }
 
     public String getOppgavetype() {
@@ -29,14 +60,6 @@ public class OppgaveDto {
 
     public void setOppgavetype(String oppgavetype) {
         this.oppgavetype = oppgavetype;
-    }
-
-    public String getGrunnlagstype() {
-        return grunnlagstype;
-    }
-
-    public void setGrunnlagstype(String grunnlagstype) {
-        this.grunnlagstype = grunnlagstype;
     }
 
     public String getSammensattNavn() {

@@ -2,30 +2,30 @@ package no.nav.melosys.domain;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.gsak.*;
+import no.nav.melosys.domain.gsak.Fagomrade;
+import no.nav.melosys.domain.gsak.Oppgavetype;
+import no.nav.melosys.domain.gsak.PrioritetType;
+import no.nav.melosys.domain.gsak.Underkategori;
 
 /**
  * Den klassen mapper Oppgaver fra GSAK og er derfor ikke en @Entity
  */
 public class Oppgave {
-
     private String oppgaveId;
-    //private Bruker gjelder;
-    //private Status status;
     private LocalDate aktivFra;
     private LocalDate aktivTil;
-    private String ansvarligId;
     private Fagomrade fagomrade;
     private Underkategori underkategori;
+    private String ansvarligId;
     private Oppgavetype oppgavetype;
-    private String beskrivelse;
-    //private String oppfolging;
     private PrioritetType prioritet;
-    //private Integer versjon;
-    private String saksnummer;
-    //private String kravId;
+    private String gsakSaksnummer;
     private String dokumentId;
-    private String soknadsId;
+
+    public Oppgave(String oppgaveId, String prioritet) {
+        this.oppgaveId = oppgaveId;
+        this.prioritet = PrioritetType.valueOf(prioritet);
+    }
 
     public Oppgave() {
     }
@@ -66,10 +66,6 @@ public class Oppgave {
         this.oppgaveId = oppgaveId;
     }
 
-    public LocalDate getAktivFra() {
-        return aktivFra;
-    }
-
     public void setAktivFra(LocalDate aktivFra) {
         this.aktivFra = aktivFra;
     }
@@ -82,16 +78,8 @@ public class Oppgave {
         this.aktivTil = aktivTil;
     }
 
-    public Fagomrade getFagomrade() {
-        return fagomrade;
-    }
-
     public void setFagomrade(Fagomrade fagomrade) {
         this.fagomrade = fagomrade;
-    }
-
-    public Underkategori getUnderkategori() {
-        return underkategori;
     }
 
     public void setUnderkategori(Underkategori underkategori) {
@@ -106,20 +94,16 @@ public class Oppgave {
         this.oppgavetype = oppgavetype;
     }
 
-    public PrioritetType getPrioritet() {
-        return prioritet;
-    }
-
     public void setPrioritet(PrioritetType prioritet) {
         this.prioritet = prioritet;
     }
 
-    public String getSaksnummer() {
-        return saksnummer;
+    public String getGsakSaksnummer() {
+        return gsakSaksnummer;
     }
 
-    public void setSaksnummer(String saksnummer) {
-        this.saksnummer = saksnummer;
+    public void setGsakSaksnummer(String gsakSaksnummer) {
+        this.gsakSaksnummer = gsakSaksnummer;
     }
 
     public String getDokumentId() {

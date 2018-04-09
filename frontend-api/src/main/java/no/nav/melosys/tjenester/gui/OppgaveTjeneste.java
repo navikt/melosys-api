@@ -1,6 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.List;
 import java.util.Optional;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
@@ -9,7 +11,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Oppgave;
+import no.nav.melosys.service.OppgaveService;
 import no.nav.melosys.service.Oppgaveplukker;
+import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
@@ -24,12 +28,13 @@ import org.springframework.web.context.WebApplicationContext;
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class OppgaveTjeneste {
-
     private Oppgaveplukker oppgaveplukker;
+    private OppgaveService oppgaveService;
 
     @Autowired
-    public OppgaveTjeneste(Oppgaveplukker oppgaveplukker) {
+    public OppgaveTjeneste(Oppgaveplukker oppgaveplukker, OppgaveService oppgaveService) {
         this.oppgaveplukker = oppgaveplukker;
+        this.oppgaveService = oppgaveService;
     }
 
     @POST
@@ -46,7 +51,7 @@ public class OppgaveTjeneste {
             PlukketOppgaveDto dto = new PlukketOppgaveDto();
             dto.setOppgaveID(oppgave.getOppgaveId());
             dto.setOppgavetype(oppgave.getOppgavetype().name());
-            dto.setSaksnummer(oppgave.getSaksnummer());
+            dto.setSaksnummer(oppgave.getGsakSaksnummer());
             dto.setJournalpostID(oppgave.getDokumentId());
 
             return Response.ok(dto).build();
@@ -66,4 +71,12 @@ public class OppgaveTjeneste {
         return Response.ok().build();
     }
 
+    @GET
+    @Path("/oversikt")
+    @ApiOperation(value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.")
+    public Response mineSaker() {
+        String ident = SubjectHandler.getInstance().getUserID();
+        List<SakOgOppgaveDto> sakOgOppgaveDtos = oppgaveService.hentMineSaker(ident);
+        return Response.ok(sakOgOppgaveDtos).build();
+    }
 }
