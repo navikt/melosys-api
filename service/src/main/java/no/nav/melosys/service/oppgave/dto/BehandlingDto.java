@@ -1,6 +1,6 @@
 package no.nav.melosys.service.oppgave.dto;
 
-public class Behandling {
+public class BehandlingDto {
     private KodeverdiDto type;
     private KodeverdiDto status;
 

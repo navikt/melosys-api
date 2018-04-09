@@ -16,10 +16,10 @@ import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.gsak.Oppgavetype;
 import no.nav.melosys.service.OppgaveService;
 import no.nav.melosys.service.Oppgaveplukker;
+import no.nav.melosys.service.oppgave.dto.BehandlingDto;
 import no.nav.melosys.service.oppgave.dto.KodeverdiDto;
 import no.nav.melosys.service.oppgave.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
-import no.nav.melosys.service.oppgave.dto.Behandling;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
@@ -87,14 +87,14 @@ public class OppgaveTjenesteTest {
         oppgave.setSammensattNavn("GLITRENDE HATT");
         oppgave.setSaksnummer("4");
 
-        Behandling behandling =new Behandling();
+        BehandlingDto behandlingDto =new BehandlingDto();
         KodeverdiDto sakstype= new KodeverdiDto("EU_EOS","EU/EØS");
         KodeverdiDto type= new KodeverdiDto("todo0003","Påstand fra utenlandsk myndighet");
         KodeverdiDto status = new KodeverdiDto("A","Oversett Kode til Display text");
         oppgave.setSakstype(sakstype);
-        behandling.setType(type);
-        behandling.setStatus(status);
-        oppgave.setBehandling(behandling);
+        behandlingDto.setType(type);
+        behandlingDto.setStatus(status);
+        oppgave.setBehandling(behandlingDto);
         oppgave.setSakstype(sakstype);
 
         oppgave.setAktivTil(LocalDate.of(2016,03,30));

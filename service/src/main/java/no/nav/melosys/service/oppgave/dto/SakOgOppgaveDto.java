@@ -14,7 +14,7 @@ public class SakOgOppgaveDto {
     private LocalDate aktivTil;
     private PeriodeDto soknadsperiode;
     private KodeverdiDto sakstype;
-    private Behandling behandling;
+    private BehandlingDto behandling;
 
     public void setOppgaveID(String oppgaveID) {
         this.oppgaveID = oppgaveID;
@@ -28,11 +28,11 @@ public class SakOgOppgaveDto {
         this.sakstype = sakstype;
     }
 
-    public Behandling getBehandling() {
+    public BehandlingDto getBehandling() {
         return behandling;
     }
 
-    public void setBehandling(Behandling behandling) {
+    public void setBehandling(BehandlingDto behandling) {
         this.behandling = behandling;
     }
 

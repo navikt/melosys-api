@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Oppgave;
@@ -20,7 +21,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.service.oppgave.dto.Behandling;
+import no.nav.melosys.service.oppgave.dto.BehandlingDto;
 import no.nav.melosys.service.oppgave.dto.KodeverdiDto;
 import no.nav.melosys.service.oppgave.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
@@ -43,12 +44,11 @@ public class OppgaveService {
         this.behandlingRepository = behandlingRepository;
     }
 
-    private static Behandling mappeSaksTypeOgBehandling(Fagsak fagsak) {
-        Behandling behandling = new Behandling();
+    private static BehandlingDto mappeSaksTypeOgBehandling(Fagsak fagsak) {
+        BehandlingDto behandling = new BehandlingDto();
         behandling.setStatus(new KodeverdiDto(fagsak.getStatus().getKode(), fagsak.getStatus().getBeskrivelse()));
-        List<no.nav.melosys.domain.Behandling> aktivBehandlinger = fagsak.getBehandlinger().stream().
-                filter(varBehandling -> !varBehandling.getStatus().equals(BehandlingStatus.AVSLUTTET)).
-                collect(Collectors.toList());
+        List<Behandling> aktivBehandlinger = fagsak.getBehandlinger().stream().
+                filter(varBehandling -> !varBehandling.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
         if (aktivBehandlinger.size() > 1) {
             throw new RuntimeException("Det finnes mer enn en aktive behandlinger");
         } else if (aktivBehandlinger.size() == 1) {
@@ -91,7 +91,7 @@ public class OppgaveService {
             dest.setOppgaveId(oppgave.getOppgaveId());
             dest.setDokumentID(oppgave.getDokumentId());
             dest.setAktivTil(oppgave.getAktivTil());
-            List<no.nav.melosys.domain.Behandling> behandlinger = behandlingRepository.findBySaksnummer(oppgave.getGsakSaksnummer());
+            List<Behandling> behandlinger = behandlingRepository.findBySaksnummer(oppgave.getGsakSaksnummer());
             dest.setSaksnummer(oppgave.getGsakSaksnummer());
             ekstraktSokenadDokument(behandlinger, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
                 SoeknadDokument søknadDokument = (SoeknadDokument) saksopplysningDokument;
@@ -111,7 +111,7 @@ public class OppgaveService {
         }).collect(Collectors.<SakOgOppgaveDto>toList());
     }
 
-    private Optional<SaksopplysningDokument> ekstraktSokenadDokument(List<no.nav.melosys.domain.Behandling> behandlinger, SaksopplysningType saksopplysningType) {
+    private Optional<SaksopplysningDokument> ekstraktSokenadDokument(List<Behandling> behandlinger, SaksopplysningType saksopplysningType) {
         return behandlinger.stream().flatMap(behandling -> behandling.getSaksopplysninger().stream()).filter(
                 saksopplysning -> saksopplysning.getType().equals(
                         saksopplysningType)).findFirst().map(Saksopplysning::getDokument);
