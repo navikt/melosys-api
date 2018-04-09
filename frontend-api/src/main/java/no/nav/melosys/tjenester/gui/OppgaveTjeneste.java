@@ -72,7 +72,7 @@ public class OppgaveTjeneste {
     }
 
     @GET
-    @Path("{minesaker}")
+    @Path("/oversikt")
     @ApiOperation(value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.")
     public Response mineSaker() {
         String ident = SubjectHandler.getInstance().getUserID();
