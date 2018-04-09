@@ -41,10 +41,10 @@ public interface GsakFasade {
      * GSAK sorterer oppgavene stigende etter frist.
      *
      * @param ansvarligId
-     * @return List<no.nav.melosys.domain.Oppgave>
+     * @return List<Oppgave>
      * @throws IntegrasjonException
      */
-    public List<no.nav.melosys.domain.Oppgave> finnOppgaveListe(String ansvarligId)
+    public List<Oppgave> finnOppgaveListe(String ansvarligId)
             throws IntegrasjonException;
 
     /**
