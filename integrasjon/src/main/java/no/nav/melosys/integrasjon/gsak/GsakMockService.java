@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+//FIXME Fjernes når GSAK leverer nye REST tjenester
 @Service
 @Profile("mocking")
 public class GsakMockService implements GsakFasade {

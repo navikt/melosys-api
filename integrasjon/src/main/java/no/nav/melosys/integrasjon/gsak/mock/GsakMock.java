@@ -15,6 +15,7 @@ import no.nav.melosys.domain.gsak.PrioritetType;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+//FIXME Fjernes når GSAK leverer nye REST tjenester
 @Component
 @Profile("mocking")
 public class GsakMock implements OppgaveMockRepository {

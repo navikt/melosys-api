@@ -4,6 +4,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Oppgave;
 
+//FIXME Fjernes når GSAK leverer nye REST tjenester
 public interface OppgaveMockRepository {
 
     Oppgave findOne(String id);
