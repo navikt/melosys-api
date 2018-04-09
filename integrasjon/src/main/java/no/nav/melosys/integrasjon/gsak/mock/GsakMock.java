@@ -12,9 +12,11 @@ import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.gsak.Fagomrade;
 import no.nav.melosys.domain.gsak.Oppgavetype;
 import no.nav.melosys.domain.gsak.PrioritetType;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("mocking")
 public class GsakMock implements OppgaveMockRepository {
 
     private Map<String, Oppgave> oppgaver;
