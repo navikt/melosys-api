@@ -51,7 +51,7 @@ public class GsakMock implements OppgaveMockRepository {
         o3.setFagomrade(Fagomrade.MED);
         o3.setOppgavetype(Oppgavetype.JFR_MED);
         o3.setPrioritet(PrioritetType.HOY_MED);
-        o3.setDokumentId("DOK_789");
+        o3.setDokumentId("DOK_3789");
         o3.setAktivTil(LocalDate.now().plusYears(1));
 
         Oppgave o4 = new Oppgave();
@@ -59,8 +59,26 @@ public class GsakMock implements OppgaveMockRepository {
         o4.setFagomrade(Fagomrade.MED);
         o4.setOppgavetype(Oppgavetype.JFR_MED);
         o4.setPrioritet(PrioritetType.NORM_MED);
-        o3.setDokumentId("DOK_987");
+        o4.setDokumentId("DOK_4987");
         o4.setAktivTil(LocalDate.now().plusYears(1));
+
+        Oppgave o5 = new Oppgave();
+        o5.setOppgaveId("5");
+        o5.setFagomrade(Fagomrade.MED);
+        o5.setOppgavetype(Oppgavetype.JFR_MED);
+        o5.setPrioritet(PrioritetType.HOY_MED);
+        o5.setDokumentId("DOK_5678");
+        o5.setAktivTil(LocalDate.now().plusYears(1));
+        o5.setAnsvarligId("Z990749");
+
+        Oppgave o6 = new Oppgave();
+        o6.setOppgaveId("1");
+        o6.setFagomrade(Fagomrade.MED);
+        o6.setOppgavetype(Oppgavetype.BEH_SAK_MED);
+        o6.setPrioritet(PrioritetType.NORM_MED);
+        o6.setGsakSaksnummer("123");
+        o6.setAktivTil(LocalDate.now().plusYears(1));
+        o6.setAnsvarligId("Z990749");
 
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(o1);
