@@ -11,7 +11,7 @@ public class FinnOppgaveListeSokMal {
     private List<String> fagområdeKodeListe;
 
 
-    public FinnOppgaveListeSokMal(String ansvarligEnhetId, String ansvarligId, String sakId, List<String> fagområdeKodeListe) {
+    private FinnOppgaveListeSokMal(String ansvarligEnhetId, String ansvarligId, String brukerId, String sakId, List<String> fagområdeKodeListe) {
         this.ansvarligEnhetId = ansvarligEnhetId;
         this.ansvarligId = ansvarligId;
         this.brukerId = brukerId;
@@ -25,6 +25,10 @@ public class FinnOppgaveListeSokMal {
 
     public String getAnsvarligEnhetId() {
         return ansvarligEnhetId;
+    }
+
+    public String getAnsvarligId() {
+        return ansvarligId;
     }
 
     public String getBrukerId() {
@@ -67,7 +71,7 @@ public class FinnOppgaveListeSokMal {
         }
 
         public FinnOppgaveListeSokMal build() {
-            return new FinnOppgaveListeSokMal(ansvarligEnhetId, ansvarligId, sakId, fagområdeKodeListe);
+            return new FinnOppgaveListeSokMal(ansvarligEnhetId, ansvarligId, brukerId, sakId, fagområdeKodeListe);
         }
 
         public Builder medAnsvarligId(String ansvarligId) {
