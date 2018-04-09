@@ -72,7 +72,7 @@ public class GsakMock implements OppgaveMockRepository {
         o5.setAnsvarligId("Z990749");
 
         Oppgave o6 = new Oppgave();
-        o6.setOppgaveId("1");
+        o6.setOppgaveId("6");
         o6.setFagomrade(Fagomrade.MED);
         o6.setOppgavetype(Oppgavetype.BEH_SAK_MED);
         o6.setPrioritet(PrioritetType.NORM_MED);
@@ -85,6 +85,8 @@ public class GsakMock implements OppgaveMockRepository {
         oppgaver.add(o2);
         oppgaver.add(o3);
         oppgaver.add(o4);
+        oppgaver.add(o5);
+        oppgaver.add(o6);
 
         return oppgaver;
     }

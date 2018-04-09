@@ -26,6 +26,7 @@ import no.nav.melosys.service.oppgave.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OppgaveService {
@@ -40,6 +41,7 @@ public class OppgaveService {
         this.fagsakRepository = fagsakRepository;
     }
 
+    @Transactional
     public List<SakOgOppgaveDto> hentMineSaker(String ansvarligID) {
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListe(ansvarligID);
         return mappeOppgaveDtoTilMineSaker(oppgaverFraDomain);
