@@ -20,6 +20,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.gsak.Oppgavetype;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -60,6 +61,7 @@ public class OppgaveServiceTest {
 
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave("1", "HOY_MED");
+        oppgave1.setOppgavetype(Oppgavetype.BEH_SAK_MED);
         oppgave1.setGsakSaksnummer("11");
         oppgave1.setAnsvarligId("12345678901");
         oppgaver.add(oppgave1);
