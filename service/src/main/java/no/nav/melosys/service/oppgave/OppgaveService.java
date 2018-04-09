@@ -1,4 +1,4 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.oppgave;
 
 
 import java.util.ArrayList;
@@ -19,7 +19,6 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.oppgave.dto.BehandlingDto;
 import no.nav.melosys.service.oppgave.dto.KodeverdiDto;
@@ -33,15 +32,50 @@ public class OppgaveService {
 
     private GsakFasade gsakFasade;
     private FagsakRepository fagsakRepository;
-    private BehandlingRepository behandlingRepository;
 
     @Autowired
     public OppgaveService(GsakFasade gsakFasade,
-                          FagsakRepository fagsakRepository,
-                          BehandlingRepository behandlingRepository) {
+                          FagsakRepository fagsakRepository) {
         this.gsakFasade = gsakFasade;
         this.fagsakRepository = fagsakRepository;
-        this.behandlingRepository = behandlingRepository;
+    }
+
+    public List<SakOgOppgaveDto> hentMineSaker(String ansvarligID) {
+        List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListe(ansvarligID);
+        return mappeOppgaveDtoTilMineSaker(oppgaverFraDomain);
+    }
+
+    private List<SakOgOppgaveDto> mappeOppgaveDtoTilMineSaker(List<Oppgave> oppgaverFraDomain) {
+        return oppgaverFraDomain.stream().map(oppgave -> {
+            SakOgOppgaveDto dest = new SakOgOppgaveDto();
+            dest.setOppgaveId(oppgave.getOppgaveId());
+            dest.setAktivTil(oppgave.getAktivTil());
+            dest.setDokumentID(oppgave.getDokumentId());
+            dest.setSaksnummer(oppgave.getGsakSaksnummer());
+            Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
+            List<Behandling> behandlinger = fagsak.getBehandlinger();
+
+            ekstraktSokenadDokument(behandlinger, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
+                SoeknadDokument søknadDokument = (SoeknadDokument) saksopplysningDokument;
+                dest.setLand(mappeLand(søknadDokument));
+                dest.setSoknadsperiode(mappeDato(søknadDokument));
+            });
+            ekstraktSokenadDokument(behandlinger, SaksopplysningType.PERSONOPPLYSNING).ifPresent(
+                    saksopplysningDokument -> {
+                        PersonDokument personDokument = (PersonDokument) saksopplysningDokument;
+                        dest.setSammensattNavn(personDokument.sammensattNavn);
+                    }
+            );
+
+            dest.setBehandling(mappeSaksTypeOgBehandling(fagsak));
+            dest.setSakstype(new KodeverdiDto(fagsak.getType().getKode(), fagsak.getType().getBeskrivelse()));
+            return dest;
+        }).collect(Collectors.toList());
+    }
+
+    private Optional<SaksopplysningDokument> ekstraktSokenadDokument(List<Behandling> behandlinger, SaksopplysningType saksopplysningType) {
+        return behandlinger.stream().flatMap(behandling -> behandling.getSaksopplysninger().stream()).filter(
+                saksopplysning -> saksopplysning.getType().equals(saksopplysningType)).findFirst().map(Saksopplysning::getDokument);
     }
 
     private static BehandlingDto mappeSaksTypeOgBehandling(Fagsak fagsak) {
@@ -71,49 +105,11 @@ public class OppgaveService {
     }
 
     private static List<String> mappeLand(SoeknadDokument soeknadDokument) {
-        List<String> landkoder = new ArrayList<String>();
+        List<String> landkoder = new ArrayList<>();
         Optional<List<Land>> landListe = Optional.ofNullable(soeknadDokument.arbeidUtland.arbeidsland);
         landListe.ifPresent(lands -> landkoder.addAll(soeknadDokument.arbeidUtland.arbeidsland.stream().filter(Objects::nonNull).map(Land::getKode).collect(Collectors.toList())));
         landListe = Optional.ofNullable(soeknadDokument.oppholdUtland.oppholdsland);
         landListe.ifPresent(lands -> landkoder.addAll(soeknadDokument.oppholdUtland.oppholdsland.stream().filter(Objects::nonNull).map(Land::getKode).collect(Collectors.toList())));
         return landkoder;
-    }
-
-
-    public List<SakOgOppgaveDto> hentMineSaker(String ansvarligID) {
-        List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListe(ansvarligID);
-        return mappeOppgaveDtoTilMinSak(oppgaverFraDomain);
-    }
-
-    private List<SakOgOppgaveDto> mappeOppgaveDtoTilMinSak(List<Oppgave> oppgaverFraDomain) {
-        return oppgaverFraDomain.stream().map(oppgave -> {
-            SakOgOppgaveDto dest = new SakOgOppgaveDto();
-            dest.setOppgaveId(oppgave.getOppgaveId());
-            dest.setDokumentID(oppgave.getDokumentId());
-            dest.setAktivTil(oppgave.getAktivTil());
-            List<Behandling> behandlinger = behandlingRepository.findBySaksnummer(oppgave.getGsakSaksnummer());
-            dest.setSaksnummer(oppgave.getGsakSaksnummer());
-            ekstraktSokenadDokument(behandlinger, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
-                SoeknadDokument søknadDokument = (SoeknadDokument) saksopplysningDokument;
-                dest.setLand(mappeLand(søknadDokument));
-                dest.setSoknadsperiode(mappeDato(søknadDokument));
-            });
-            ekstraktSokenadDokument(behandlinger, SaksopplysningType.PERSONOPPLYSNING).ifPresent(
-                    saksopplysningDokument -> {
-                        PersonDokument personDokument = (PersonDokument) saksopplysningDokument;
-                        dest.setSammensattNavn(personDokument.sammensattNavn);
-                    }
-            );
-            Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
-            dest.setSakstype(new KodeverdiDto(fagsak.getType().getKode(), fagsak.getType().getBeskrivelse()));
-            dest.setBehandling(mappeSaksTypeOgBehandling(fagsak));
-            return dest;
-        }).collect(Collectors.<SakOgOppgaveDto>toList());
-    }
-
-    private Optional<SaksopplysningDokument> ekstraktSokenadDokument(List<Behandling> behandlinger, SaksopplysningType saksopplysningType) {
-        return behandlinger.stream().flatMap(behandling -> behandling.getSaksopplysninger().stream()).filter(
-                saksopplysning -> saksopplysning.getType().equals(
-                        saksopplysningType)).findFirst().map(Saksopplysning::getDokument);
     }
 }

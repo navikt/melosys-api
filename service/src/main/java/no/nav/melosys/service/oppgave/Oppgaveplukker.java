@@ -1,4 +1,4 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.oppgave;
 
 import java.util.ArrayList;
 import java.time.LocalDateTime;

@@ -11,8 +11,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Oppgave;
-import no.nav.melosys.service.OppgaveService;
-import no.nav.melosys.service.Oppgaveplukker;
+import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
@@ -27,7 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Path("/oppgaver")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class OppgaveTjeneste {
+public class OppgaveTjeneste extends RestTjeneste {
     private Oppgaveplukker oppgaveplukker;
     private OppgaveService oppgaveService;
 

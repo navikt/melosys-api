@@ -21,8 +21,8 @@ import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +34,6 @@ import org.mockito.stubbing.Answer;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -48,15 +47,12 @@ public class OppgaveServiceTest {
     @Mock
     private GsakFasade gsakFasade;
 
-    @Mock
-    private BehandlingRepository behandlingRepository;
 
     @Before
     public void setUp() {
         this.oppgaveService = new OppgaveService(
                 gsakFasade,
-                fagsakRepository,
-                behandlingRepository);
+                fagsakRepository);
     }
 
     @Test
@@ -80,7 +76,6 @@ public class OppgaveServiceTest {
         List<Behandling> behandlinger = hentBehandlinger();
         fagsak.setBehandlinger(behandlinger);
         when(fagsakRepository.findByGsakSaksnummer(any(String.class))).thenReturn(fagsak);
-        when(behandlingRepository.findBySaksnummer(any(String.class))).thenReturn(behandlinger);
 
         List<SakOgOppgaveDto> mineSaker = oppgaveService.hentMineSaker("12345678901");
         assertThat(mineSaker.size()).isEqualTo(1);

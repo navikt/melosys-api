@@ -12,6 +12,7 @@ import no.nav.melosys.domain.gsak.PrioritetType;
 import no.nav.melosys.domain.gsak.Underkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
+import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
