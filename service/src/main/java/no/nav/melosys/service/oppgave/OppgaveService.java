@@ -44,23 +44,29 @@ public class OppgaveService {
     @Transactional
     public List<SakOgOppgaveDto> hentMineSaker(String ansvarligID) {
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListe(ansvarligID);
-        return mappeOppgaveDtoTilMineSaker(oppgaverFraDomain);
+        return oppgaverTilMineSaker(oppgaverFraDomain);
     }
 
-    private List<SakOgOppgaveDto> mappeOppgaveDtoTilMineSaker(List<Oppgave> oppgaverFraDomain) {
-        return oppgaverFraDomain.stream().map(oppgave -> {
-            SakOgOppgaveDto dest = new SakOgOppgaveDto();
-            dest.setOppgaveId(oppgave.getOppgaveId());
-            dest.setAktivTil(oppgave.getAktivTil());
+    private List<SakOgOppgaveDto> oppgaverTilMineSaker(List<Oppgave> oppgaverFraDomain) {
+        return oppgaverFraDomain.stream().map(oppgave -> oppgaveDtoTilSakOgOppgaveDto(oppgave)).collect(Collectors.toList());
+    }
+
+    private SakOgOppgaveDto oppgaveDtoTilSakOgOppgaveDto(Oppgave oppgave) {
+        SakOgOppgaveDto dest = new SakOgOppgaveDto();
+        dest.setOppgaveId(oppgave.getOppgaveId());
+        dest.setAktivTil(oppgave.getAktivTil());
+        dest.setSaksnummer(oppgave.getGsakSaksnummer());
+
+        if (oppgave.erJournalFøring()) {
             dest.setDokumentID(oppgave.getDokumentId());
-            dest.setSaksnummer(oppgave.getGsakSaksnummer());
+        } else if (oppgave.erBehandling()) {
             Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
             List<Behandling> behandlinger = fagsak.getBehandlinger();
 
             ekstraktSokenadDokument(behandlinger, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
                 SoeknadDokument søknadDokument = (SoeknadDokument) saksopplysningDokument;
-                dest.setLand(mappeLand(søknadDokument));
-                dest.setSoknadsperiode(mappeDato(søknadDokument));
+                dest.setLand(mapLand(søknadDokument));
+                dest.setSoknadsperiode(mapDato(søknadDokument));
             });
             ekstraktSokenadDokument(behandlinger, SaksopplysningType.PERSONOPPLYSNING).ifPresent(
                     saksopplysningDokument -> {
@@ -69,10 +75,13 @@ public class OppgaveService {
                     }
             );
 
-            dest.setBehandling(mappeSaksTypeOgBehandling(fagsak));
+            dest.setBehandling(mapSaksTypeOgBehandling(fagsak));
             dest.setSakstype(new KodeverdiDto(fagsak.getType().getKode(), fagsak.getType().getBeskrivelse()));
-            return dest;
-        }).collect(Collectors.toList());
+        } else {
+            throw new RuntimeException("Oppgavetype " + oppgave.getOppgavetype() + " støttes ikke");
+        }
+
+        return dest;
     }
 
     private Optional<SaksopplysningDokument> ekstraktSokenadDokument(List<Behandling> behandlinger, SaksopplysningType saksopplysningType) {
@@ -80,7 +89,7 @@ public class OppgaveService {
                 saksopplysning -> saksopplysning.getType().equals(saksopplysningType)).findFirst().map(Saksopplysning::getDokument);
     }
 
-    private static BehandlingDto mappeSaksTypeOgBehandling(Fagsak fagsak) {
+    private static BehandlingDto mapSaksTypeOgBehandling(Fagsak fagsak) {
         BehandlingDto behandling = new BehandlingDto();
         behandling.setStatus(new KodeverdiDto(fagsak.getStatus().getKode(), fagsak.getStatus().getBeskrivelse()));
         List<Behandling> aktivBehandlinger = fagsak.getBehandlinger().stream().
@@ -95,7 +104,7 @@ public class OppgaveService {
         return behandling;
     }
 
-    private static PeriodeDto mappeDato(SoeknadDokument soeknadDokument) {
+    private static PeriodeDto mapDato(SoeknadDokument soeknadDokument) {
         Optional<Periode> arbeidsperiode = Optional.ofNullable(soeknadDokument.arbeidUtland.arbeidsperiode);
         Optional<Periode> oppholdsPeriode = Optional.ofNullable(soeknadDokument.oppholdUtland.oppholdsPeriode);
         if (arbeidsperiode.isPresent()) {
@@ -106,7 +115,7 @@ public class OppgaveService {
         throw new RuntimeException("Det finnes ikke noen arbeidsperiode eller oppholdsPeriode");
     }
 
-    private static List<String> mappeLand(SoeknadDokument soeknadDokument) {
+    private static List<String> mapLand(SoeknadDokument soeknadDokument) {
         List<String> landkoder = new ArrayList<>();
         Optional<List<Land>> landListe = Optional.ofNullable(soeknadDokument.arbeidUtland.arbeidsland);
         landListe.ifPresent(lands -> landkoder.addAll(soeknadDokument.arbeidUtland.arbeidsland.stream().filter(Objects::nonNull).map(Land::getKode).collect(Collectors.toList())));
