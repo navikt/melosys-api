@@ -6,6 +6,7 @@ public class KodeverkDto {
     private List<KodeverdiDto> behandlingstyper;
     private List<KodeverdiDto> behandlingsstatus;
     private List<KodeverdiDto> landkoder;
+    private List<KodeverdiDto> oppgavetyper;
     private List<KodeverdiDto> sakstyper;
 
     public List<KodeverdiDto> getBehandlingstyper() {
@@ -30,6 +31,14 @@ public class KodeverkDto {
 
     public void setLandkoder(List<KodeverdiDto> landkoder) {
         this.landkoder = landkoder;
+    }
+
+    public List<KodeverdiDto> getOppgavetyper() {
+        return oppgavetyper;
+    }
+
+    public void setOppgavetyper(List<KodeverdiDto> oppgavetyper) {
+        this.oppgavetyper = oppgavetyper;
     }
 
     public List<KodeverdiDto> getSakstyper() {
