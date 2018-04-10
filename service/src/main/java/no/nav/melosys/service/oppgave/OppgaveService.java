@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Oppgave;
+import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -53,13 +54,18 @@ public class OppgaveService {
 
     private SakOgOppgaveDto oppgaveDtoTilSakOgOppgaveDto(Oppgave oppgave) {
         SakOgOppgaveDto dest = new SakOgOppgaveDto();
-        dest.setOppgaveId(oppgave.getOppgaveId());
+        dest.setOppgaveID(oppgave.getOppgaveId());
         dest.setAktivTil(oppgave.getAktivTil());
-        dest.setSaksnummer(oppgave.getGsakSaksnummer());
 
         if (oppgave.erJournalFøring()) {
-            dest.setDokumentID(oppgave.getDokumentId());
+            Oppgavetype type = Oppgavetype.JFR;
+            dest.setOppgavetype(new KodeverdiDto(type.getKode(), type.getBeskrivelse()));
+            dest.setJournalpostID(oppgave.getDokumentId());
         } else if (oppgave.erBehandling()) {
+            Oppgavetype type = Oppgavetype.BEH_SAK;
+            dest.setOppgavetype(new KodeverdiDto(type.getKode(), type.getBeskrivelse()));
+            dest.setSaksnummer(oppgave.getGsakSaksnummer());
+
             Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
             List<Behandling> behandlinger = fagsak.getBehandlinger();
 

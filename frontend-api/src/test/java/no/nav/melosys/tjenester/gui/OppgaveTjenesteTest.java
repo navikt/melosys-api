@@ -84,7 +84,7 @@ public class OppgaveTjenesteTest {
     public void mineSaker() {
         SakOgOppgaveDto oppgave = new SakOgOppgaveDto();
         oppgave.setOppgaveID("177057928");
-        oppgave.setOppgavetype("journalforing");
+        oppgave.setOppgavetype(new KodeverdiDto("JFR", "Journalføring"));
         oppgave.setSammensattNavn("GLITRENDE HATT");
         oppgave.setSaksnummer("4");
 

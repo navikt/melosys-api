@@ -7,18 +7,14 @@ import java.util.List;
 public class SakOgOppgaveDto {
 
     private String oppgaveID;
-    private String oppgavetype;
+    private KodeverdiDto oppgavetype;
     private String sammensattNavn;
     private String saksnummer;
-    private String dokumentID;
+    private String journalpostID;
     private LocalDate aktivTil;
     private PeriodeDto soknadsperiode;
     private KodeverdiDto sakstype;
     private BehandlingDto behandling;
-
-    public void setOppgaveID(String oppgaveID) {
-        this.oppgaveID = oppgaveID;
-    }
 
     public KodeverdiDto getSakstype() {
         return sakstype;
@@ -50,15 +46,15 @@ public class SakOgOppgaveDto {
         return oppgaveID;
     }
 
-    public void setOppgaveId(String oppgaveID) {
+    public void setOppgaveID(String oppgaveID) {
         this.oppgaveID = oppgaveID;
     }
 
-    public String getOppgavetype() {
+    public KodeverdiDto getOppgavetype() {
         return oppgavetype;
     }
 
-    public void setOppgavetype(String oppgavetype) {
+    public void setOppgavetype(KodeverdiDto oppgavetype) {
         this.oppgavetype = oppgavetype;
     }
 
@@ -78,12 +74,12 @@ public class SakOgOppgaveDto {
         this.saksnummer = saksnummer;
     }
 
-    public String getDokumentID() {
-        return dokumentID;
+    public String getJournalpostID() {
+        return journalpostID;
     }
 
-    public void setDokumentID(String dokumentID) {
-        this.dokumentID = dokumentID;
+    public void setJournalpostID(String journalpostID) {
+        this.journalpostID = journalpostID;
     }
 
     public LocalDate getAktivTil() {
