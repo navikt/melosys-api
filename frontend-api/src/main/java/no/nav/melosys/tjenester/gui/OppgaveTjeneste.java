@@ -14,7 +14,7 @@ import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
-import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
+import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
@@ -77,9 +77,9 @@ public class OppgaveTjeneste extends RestTjeneste {
     @GET
     @Path("/oversikt")
     @ApiOperation(value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.")
-    public Response mineSaker() {
+    public Response mineOppgaver() {
         String ident = SubjectHandler.getInstance().getUserID();
-        List<SakOgOppgaveDto> sakOgOppgaveDtos = oppgaveService.hentMineSaker(ident);
-        return Response.ok(sakOgOppgaveDtos).build();
+        List<OppgaveDto> oppgaveDtoListe = oppgaveService.hentOppgaver(ident);
+        return Response.ok(oppgaveDtoListe).build();
     }
 }

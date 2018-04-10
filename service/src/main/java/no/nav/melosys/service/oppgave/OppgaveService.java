@@ -24,7 +24,7 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.oppgave.dto.BehandlingDto;
 import no.nav.melosys.service.oppgave.dto.KodeverdiDto;
 import no.nav.melosys.service.oppgave.dto.PeriodeDto;
-import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
+import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,17 +43,17 @@ public class OppgaveService {
     }
 
     @Transactional
-    public List<SakOgOppgaveDto> hentMineSaker(String ansvarligID) {
+    public List<OppgaveDto> hentOppgaver(String ansvarligID) {
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListe(ansvarligID);
         return oppgaverTilMineSaker(oppgaverFraDomain);
     }
 
-    private List<SakOgOppgaveDto> oppgaverTilMineSaker(List<Oppgave> oppgaverFraDomain) {
+    private List<OppgaveDto> oppgaverTilMineSaker(List<Oppgave> oppgaverFraDomain) {
         return oppgaverFraDomain.stream().map(oppgave -> oppgaveDtoTilSakOgOppgaveDto(oppgave)).collect(Collectors.toList());
     }
 
-    private SakOgOppgaveDto oppgaveDtoTilSakOgOppgaveDto(Oppgave oppgave) {
-        SakOgOppgaveDto dest = new SakOgOppgaveDto();
+    private OppgaveDto oppgaveDtoTilSakOgOppgaveDto(Oppgave oppgave) {
+        OppgaveDto dest = new OppgaveDto();
         dest.setOppgaveID(oppgave.getOppgaveId());
         dest.setAktivTil(oppgave.getAktivTil());
 

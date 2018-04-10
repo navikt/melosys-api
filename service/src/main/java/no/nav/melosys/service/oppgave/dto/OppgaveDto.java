@@ -4,7 +4,7 @@ package no.nav.melosys.service.oppgave.dto;
 import java.time.LocalDate;
 import java.util.List;
 
-public class SakOgOppgaveDto {
+public class OppgaveDto {
 
     private String oppgaveID;
     private KodeverdiDto oppgavetype;

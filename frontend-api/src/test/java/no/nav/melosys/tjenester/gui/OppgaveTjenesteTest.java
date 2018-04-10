@@ -19,7 +19,7 @@ import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.BehandlingDto;
 import no.nav.melosys.service.oppgave.dto.KodeverdiDto;
 import no.nav.melosys.service.oppgave.dto.PeriodeDto;
-import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
+import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
@@ -82,7 +82,7 @@ public class OppgaveTjenesteTest {
 
     @Test
     public void mineSaker() {
-        SakOgOppgaveDto oppgave = new SakOgOppgaveDto();
+        OppgaveDto oppgave = new OppgaveDto();
         oppgave.setOppgaveID("177057928");
         oppgave.setOppgavetype(new KodeverdiDto("JFR", "Journalføring"));
         oppgave.setSammensattNavn("GLITRENDE HATT");
@@ -102,13 +102,13 @@ public class OppgaveTjenesteTest {
 
         oppgave.setSoknadsperiode(new PeriodeDto(LocalDate.of(2016,01,01),LocalDate.of(2020,01,01)));
 
-        List<SakOgOppgaveDto> oppgaver = new ArrayList<>();
+        List<OppgaveDto> oppgaver = new ArrayList<>();
         oppgaver.add(oppgave);
 
-        when(oppgaveService.hentMineSaker(anyString())).thenReturn(oppgaver);
-        Response response = tjeneste.mineSaker();
+        when(oppgaveService.hentOppgaver(anyString())).thenReturn(oppgaver);
+        Response response = tjeneste.mineOppgaver();
         assertThat(response.getEntity()).isExactlyInstanceOf(ArrayList.class);
-        List<SakOgOppgaveDto> entity = (List<SakOgOppgaveDto>) response.getEntity();
+        List<OppgaveDto> entity = (List<OppgaveDto>) response.getEntity();
         assertThat(entity.get(0).getOppgaveID()).isEqualTo("177057928");
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
