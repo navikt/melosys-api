@@ -11,6 +11,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Oppgave;
+import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
@@ -43,7 +44,9 @@ public class OppgaveTjeneste extends RestTjeneste {
     public Response plukkOppgave(PlukkOppgaveInnDto plukkDto) {
         String ident = SubjectHandler.getInstance().getUserID();
 
-        Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto.getOppgavetype(), plukkDto.getSakstyper(), plukkDto.getBehandlingstyper());
+        Oppgavetype oppgavetype = Oppgavetype.valueOf(plukkDto.getOppgavetype());
+
+        Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, oppgavetype, plukkDto.getSakstyper(), plukkDto.getBehandlingstyper());
 
         if (plukket.isPresent()) {
             Oppgave oppgave = plukket.get();

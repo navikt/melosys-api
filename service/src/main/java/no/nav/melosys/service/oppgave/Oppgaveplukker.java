@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.OppgaveTilbakelegging;
+import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.felles.exception.TekniskException;
@@ -37,7 +38,7 @@ public class Oppgaveplukker {
      * 2) Oppgaveplukker velger neste oppgave basert på prioritet (først) og frist.
      * 3) Oppgaveplukker tildeler oppgaven til saksbehandleren..
      */
-    public Optional<Oppgave> plukkOppgave(String saksbehandlerID, String oppgavetype, List<String> sakstyper, List<String> behandlingstyper) {
+    public Optional<Oppgave> plukkOppgave(String saksbehandlerID, Oppgavetype oppgavetype, List<String> sakstyper, List<String> behandlingstyper) {
 
         // TODO Mapping med fagområde i GSAK må avklares
         List<String> fagområdeKodeListe = new ArrayList<>();

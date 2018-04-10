@@ -31,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -69,7 +70,7 @@ public class OppgaveTjenesteTest {
         oppgave.setOppgavetype(Oppgavetype.BEH_SAK_MED);
         Optional<Oppgave> plukket = Optional.of(oppgave);
 
-        when(oppgaveplukker.plukkOppgave(anyString(), anyString(), anyList(), anyList())).thenReturn(plukket);
+        when(oppgaveplukker.plukkOppgave(anyString(), any(), anyList(), anyList())).thenReturn(plukket);
 
         Response response = tjeneste.plukkOppgave(innData);
 
@@ -82,7 +83,7 @@ public class OppgaveTjenesteTest {
     @Test
     public void mineSaker() {
         SakOgOppgaveDto oppgave = new SakOgOppgaveDto();
-        oppgave.setOppgaveId("177057928");
+        oppgave.setOppgaveID("177057928");
         oppgave.setOppgavetype("journalforing");
         oppgave.setSammensattNavn("GLITRENDE HATT");
         oppgave.setSaksnummer("4");
@@ -125,7 +126,7 @@ public class OppgaveTjenesteTest {
 
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
-        innData.setOppgavetype("BEH_SAK"); // eller JFR
+        innData.setOppgavetype(no.nav.melosys.domain.Oppgavetype.BEH_SAK.getKode()); // eller JFR
 
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(FagsakType.EU_EØS.getKode());
@@ -150,7 +151,7 @@ public class OppgaveTjenesteTest {
         ObjectMapper mapper = new ObjectMapper();
         PlukketOppgaveDto dto = new PlukketOppgaveDto();
         dto.setOppgaveID("1");
-        dto.setOppgavetype("JFR");
+        dto.setOppgavetype(no.nav.melosys.domain.Oppgavetype.JFR.getKode());
         dto.setSaksnummer("123");
         dto.setJournalpostID("JOUR_321");
         try {
