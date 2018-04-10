@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 import javax.persistence.Converter;
 
-public enum SaksopplysningKilde implements Kodeverk<SaksopplysningKilde> {
+public enum SaksopplysningKilde implements KodeverkTabell<SaksopplysningKilde> {
 
     AAREG("AAREG", "Aa-registeret"),
     EREG("EREG", "Enhetsregisteret"),
@@ -31,7 +31,7 @@ public enum SaksopplysningKilde implements Kodeverk<SaksopplysningKilde> {
     }
 
     @Converter
-    public static class DbKonverterer extends Kodeverk.DbKonverterer<SaksopplysningKilde> {
+    public static class DbKonverterer extends KodeverkTabell.DbKonverterer<SaksopplysningKilde> {
         @Override
         protected SaksopplysningKilde[] getLovligeVerdier() {
             return SaksopplysningKilde.values();

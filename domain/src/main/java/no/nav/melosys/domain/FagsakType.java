@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * 
  * MERK: Dette kodeverket gjenspeiler IKKE "SakstypeMedOgLov" i den logisk modellen
  */
-public enum FagsakType implements Kodeverk<FagsakType> {
+public enum FagsakType implements KodeverkTabell<FagsakType> {
 
     EU_EØS("EU_EOS", "EU/EØS"),
     TRYGDEAVTALE("TRG_AVT", "Trygdeavtale"),
@@ -36,7 +36,7 @@ public enum FagsakType implements Kodeverk<FagsakType> {
     }
 
     @Converter
-    public static class DbKonverterer extends Kodeverk.DbKonverterer<FagsakType> {
+    public static class DbKonverterer extends KodeverkTabell.DbKonverterer<FagsakType> {
         @Override
         protected FagsakType[] getLovligeVerdier() {
             return FagsakType.values();

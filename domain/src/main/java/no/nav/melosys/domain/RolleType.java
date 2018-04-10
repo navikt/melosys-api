@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 import javax.persistence.Converter;
 
-public enum RolleType implements Kodeverk<RolleType> {
+public enum RolleType implements KodeverkTabell<RolleType> {
 
     BRUKER("BRUKER", "Bruker"), // Aka. arbeidstaker
     ARBEIDSGIVER("ARBGIV", "Arbeudsgiver"),
@@ -27,7 +27,7 @@ public enum RolleType implements Kodeverk<RolleType> {
     }
 
     @Converter
-    public static class DbKonverterer extends Kodeverk.DbKonverterer<RolleType> {
+    public static class DbKonverterer extends KodeverkTabell.DbKonverterer<RolleType> {
         @Override
         protected RolleType[] getLovligeVerdier() {
             return RolleType.values();
