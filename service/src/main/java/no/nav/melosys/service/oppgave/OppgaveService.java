@@ -66,6 +66,9 @@ public class OppgaveService {
             dest.setOppgavetype(new KodeverdiDto(type.getKode(), type.getBeskrivelse()));
 
             Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
+            if (fagsak == null) {
+                throw new RuntimeException("Fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer() + " ikke funnet!");
+            }
             List<Behandling> behandlinger = fagsak.getBehandlinger();
             // FIXME MELOSYS-1119 logisk ID for Fagsak
             dest.setSaksnummer(""+fagsak.getId());

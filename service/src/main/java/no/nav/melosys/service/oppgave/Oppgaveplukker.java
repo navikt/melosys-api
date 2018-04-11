@@ -60,6 +60,9 @@ public class Oppgaveplukker {
 
             if (oppgave.erBehandling()) {
                 Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
+                if (fagsak == null) {
+                    throw new RuntimeException("Fant ikke fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer());
+                }
                 // FIXME MELOSYS-1119 logisk ID for Fagsak
                 oppgave.setGsakSaksnummer(""+fagsak.getId());
             }
