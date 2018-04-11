@@ -1,3 +1,4 @@
-backendPipeline {
+applicationPipeline {
     applicationName = "melosys"
+    copyFrontendInBackend = true
 }
