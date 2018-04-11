@@ -64,10 +64,11 @@ public class OppgaveService {
         } else if (oppgave.erBehandling()) {
             Oppgavetype type = Oppgavetype.BEH_SAK;
             dest.setOppgavetype(new KodeverdiDto(type.getKode(), type.getBeskrivelse()));
-            dest.setSaksnummer(oppgave.getGsakSaksnummer());
 
             Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
             List<Behandling> behandlinger = fagsak.getBehandlinger();
+            // FIXME MELOSYS-1119 logisk ID for Fagsak
+            dest.setSaksnummer(""+fagsak.getId());
 
             ekstraktSokenadDokument(behandlinger, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
                 SoeknadDokument søknadDokument = (SoeknadDokument) saksopplysningDokument;
