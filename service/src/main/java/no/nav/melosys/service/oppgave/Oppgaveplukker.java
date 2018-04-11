@@ -64,7 +64,7 @@ public class Oppgaveplukker {
                     throw new RuntimeException("Fant ikke fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer());
                 }
                 // FIXME MELOSYS-1119 logisk ID for Fagsak
-                oppgave.setGsakSaksnummer(""+fagsak.getId());
+                oppgave.setSaksnummer(""+fagsak.getId());
             }
         }
 

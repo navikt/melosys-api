@@ -56,7 +56,7 @@ public class OppgaveTjeneste extends RestTjeneste {
             if (oppgave.erBehandling()) {
                 dto.setOppgavetype(Oppgavetype.BEH_SAK.getKode());
                 // FIXME MELOSYS-1119 logisk ID for Fagsak
-                dto.setSaksnummer(oppgave.getGsakSaksnummer());
+                dto.setSaksnummer(oppgave.getSaksnummer());
             } else if (oppgave.erJournalFøring()) {
                 dto.setOppgavetype(Oppgavetype.JFR.getKode());
             }
