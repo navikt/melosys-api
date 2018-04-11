@@ -53,8 +53,13 @@ public class OppgaveTjeneste extends RestTjeneste {
 
             PlukketOppgaveDto dto = new PlukketOppgaveDto();
             dto.setOppgaveID(oppgave.getOppgaveId());
-            dto.setOppgavetype(oppgave.getOppgavetype().name());
-            dto.setSaksnummer(oppgave.getGsakSaksnummer());
+            if (oppgave.erBehandling()) {
+                dto.setOppgavetype(Oppgavetype.BEH_SAK.getKode());
+                // FIXME MELOSYS-1119 logisk ID for Fagsak
+                dto.setSaksnummer(oppgave.getGsakSaksnummer());
+            } else if (oppgave.erJournalFøring()) {
+                dto.setOppgavetype(Oppgavetype.JFR.getKode());
+            }
             dto.setJournalpostID(oppgave.getDokumentId());
 
             return Response.ok(dto).build();

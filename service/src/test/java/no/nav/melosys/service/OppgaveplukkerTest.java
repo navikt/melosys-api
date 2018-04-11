@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.domain.gsak.PrioritetType;
 import no.nav.melosys.domain.gsak.Underkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import org.junit.Before;
@@ -23,7 +24,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -31,6 +35,9 @@ public class OppgaveplukkerTest {
 
     @Mock
     private GsakFasade gsakFasade;
+
+    @Mock
+    private FagsakRepository fagsakRepository;
 
     @Mock
     private OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
@@ -42,7 +49,7 @@ public class OppgaveplukkerTest {
 
     @Before
     public void setUp() {
-        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, oppgaveTilbakkeleggingRepo);
+        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, fagsakRepository, oppgaveTilbakkeleggingRepo);
     }
 
     @Test

@@ -49,10 +49,10 @@ public class OppgaveService {
     }
 
     private List<OppgaveDto> oppgaverTilMineSaker(List<Oppgave> oppgaverFraDomain) {
-        return oppgaverFraDomain.stream().map(oppgave -> oppgaveDtoTilSakOgOppgaveDto(oppgave)).collect(Collectors.toList());
+        return oppgaverFraDomain.stream().map(oppgave -> tilOppgaveDto(oppgave)).collect(Collectors.toList());
     }
 
-    private OppgaveDto oppgaveDtoTilSakOgOppgaveDto(Oppgave oppgave) {
+    private OppgaveDto tilOppgaveDto(Oppgave oppgave) {
         OppgaveDto dest = new OppgaveDto();
         dest.setOppgaveID(oppgave.getOppgaveId());
         dest.setAktivTil(oppgave.getAktivTil());

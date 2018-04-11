@@ -1,10 +1,11 @@
 package no.nav.melosys.service.oppgave;
 
-import java.util.ArrayList;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.OppgaveTilbakelegging;
 import no.nav.melosys.domain.Oppgavetype;
@@ -12,6 +13,7 @@ import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.felles.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,23 +26,25 @@ public class Oppgaveplukker {
     Logger log =  LoggerFactory.getLogger(Oppgaveplukker.class);
 
     private GsakFasade gsakFasade;
-
+    private FagsakRepository fagsakRepository;
     private OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
 
     @Autowired
-    public Oppgaveplukker(GsakFasade gsakFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo) {
+    public Oppgaveplukker(GsakFasade gsakFasade, FagsakRepository fagsakRepository, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo) {
         this.gsakFasade = gsakFasade;
+        this.fagsakRepository = fagsakRepository;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
     }
 
     /**
      * 1) Oppgaveplukker henter i GSAK en liste over alle aktive, ikke tildelte oppgaver med oppgitt parametre.
      * 2) Oppgaveplukker velger neste oppgave basert på prioritet (først) og frist.
-     * 3) Oppgaveplukker tildeler oppgaven til saksbehandleren..
+     * 3) Oppgaveplukker tildeler oppgaven til saksbehandleren.
+     * 4) Melosys saksnummer knyttes til oppgaven hvis oppgaven er en behandlingsoppgave.
      */
     public Optional<Oppgave> plukkOppgave(String saksbehandlerID, Oppgavetype oppgavetype, List<String> sakstyper, List<String> behandlingstyper) {
 
-        // TODO Mapping med fagområde i GSAK må avklares
+        // TODO Vi må håndtere tema for journalføringsoppgaver
         List<String> fagområdeKodeListe = new ArrayList<>();
         fagområdeKodeListe.add("MED");
         fagområdeKodeListe.add("UFM");
@@ -50,7 +54,15 @@ public class Oppgaveplukker {
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, oppgaver);
 
         if (valg.isPresent()) {
-            gsakFasade.tildelOppgave(valg.get().getOppgaveId(), saksbehandlerID);
+            Oppgave oppgave = valg.get();
+            // Tildeler oppgaven
+            gsakFasade.tildelOppgave(oppgave.getOppgaveId(), saksbehandlerID);
+
+            if (oppgave.erBehandling()) {
+                Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
+                // FIXME MELOSYS-1119 logisk ID for Fagsak
+                oppgave.setGsakSaksnummer(""+fagsak.getId());
+            }
         }
 
         return valg;
