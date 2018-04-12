@@ -40,7 +40,6 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     }
 
     @Override
-    // FIXME MDCFilter er ikke klar og CallIdOutInterceptor feiler fordi CallId mangler.
     public void onApplicationEvent(ContextRefreshedEvent event) {
         new TømCacheScheduler().start();
     }
