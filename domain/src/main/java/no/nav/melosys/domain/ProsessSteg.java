@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 import javax.persistence.Converter;
 
-public enum ProsessSteg implements Kodeverk<ProsessSteg> {
+public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
 
     A1_JOURF("A1_JOURF", "A1 journalføring"),
     A1_HENT_PERS_OPPL("A1_HENT_PERS_OPPL", "A1 hent personopplysninger"),
@@ -28,7 +28,7 @@ public enum ProsessSteg implements Kodeverk<ProsessSteg> {
     }
 
     @Converter
-    public static class DbKonverterer extends Kodeverk.DbKonverterer<ProsessSteg> {
+    public static class DbKonverterer extends KodeverkTabell.DbKonverterer<ProsessSteg> {
         @Override
         protected ProsessSteg[] getLovligeVerdier() {
             return ProsessSteg.values();

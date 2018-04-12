@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Oppgave;
+import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -23,7 +24,7 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.oppgave.dto.BehandlingDto;
 import no.nav.melosys.service.oppgave.dto.KodeverdiDto;
 import no.nav.melosys.service.oppgave.dto.PeriodeDto;
-import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
+import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,26 +43,35 @@ public class OppgaveService {
     }
 
     @Transactional
-    public List<SakOgOppgaveDto> hentMineSaker(String ansvarligID) {
+    public List<OppgaveDto> hentOppgaver(String ansvarligID) {
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListe(ansvarligID);
         return oppgaverTilMineSaker(oppgaverFraDomain);
     }
 
-    private List<SakOgOppgaveDto> oppgaverTilMineSaker(List<Oppgave> oppgaverFraDomain) {
-        return oppgaverFraDomain.stream().map(oppgave -> oppgaveDtoTilSakOgOppgaveDto(oppgave)).collect(Collectors.toList());
+    private List<OppgaveDto> oppgaverTilMineSaker(List<Oppgave> oppgaverFraDomain) {
+        return oppgaverFraDomain.stream().map(oppgave -> tilOppgaveDto(oppgave)).collect(Collectors.toList());
     }
 
-    private SakOgOppgaveDto oppgaveDtoTilSakOgOppgaveDto(Oppgave oppgave) {
-        SakOgOppgaveDto dest = new SakOgOppgaveDto();
-        dest.setOppgaveId(oppgave.getOppgaveId());
+    private OppgaveDto tilOppgaveDto(Oppgave oppgave) {
+        OppgaveDto dest = new OppgaveDto();
+        dest.setOppgaveID(oppgave.getOppgaveId());
         dest.setAktivTil(oppgave.getAktivTil());
-        dest.setSaksnummer(oppgave.getGsakSaksnummer());
 
         if (oppgave.erJournalFøring()) {
-            dest.setDokumentID(oppgave.getDokumentId());
+            Oppgavetype type = Oppgavetype.JFR;
+            dest.setOppgavetype(new KodeverdiDto(type.getKode(), type.getBeskrivelse()));
+            dest.setJournalpostID(oppgave.getDokumentId());
         } else if (oppgave.erBehandling()) {
+            Oppgavetype type = Oppgavetype.BEH_SAK;
+            dest.setOppgavetype(new KodeverdiDto(type.getKode(), type.getBeskrivelse()));
+
             Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
+            if (fagsak == null) {
+                throw new RuntimeException("Fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer() + " ikke funnet!");
+            }
             List<Behandling> behandlinger = fagsak.getBehandlinger();
+            // FIXME MELOSYS-1119 logisk ID for Fagsak
+            dest.setSaksnummer(""+fagsak.getId());
 
             ekstraktSokenadDokument(behandlinger, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
                 SoeknadDokument søknadDokument = (SoeknadDokument) saksopplysningDokument;

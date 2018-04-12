@@ -24,7 +24,7 @@ import no.nav.melosys.domain.gsak.Oppgavetype;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
+import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,11 +79,11 @@ public class OppgaveServiceTest {
         fagsak.setBehandlinger(behandlinger);
         when(fagsakRepository.findByGsakSaksnummer(any(String.class))).thenReturn(fagsak);
 
-        List<SakOgOppgaveDto> mineSaker = oppgaveService.hentMineSaker("12345678901");
+        List<OppgaveDto> mineSaker = oppgaveService.hentOppgaver("12345678901");
         assertThat(mineSaker.size()).isEqualTo(1);
         assertThat(mineSaker.get(0).getOppgaveID()).isEqualTo("1");
 
-        mineSaker = oppgaveService.hentMineSaker("12346678902");
+        mineSaker = oppgaveService.hentOppgaver("12346678902");
         assertThat(mineSaker.size()).isEqualTo(0);
 
     }

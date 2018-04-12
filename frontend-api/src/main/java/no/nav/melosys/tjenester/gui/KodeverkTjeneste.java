@@ -11,6 +11,7 @@ import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.Kodeverk;
 import no.nav.melosys.domain.Landkoder;
+import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.tjenester.gui.dto.KodeverdiDto;
 import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
 import org.springframework.context.annotation.Scope;
@@ -29,6 +30,7 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.setBehandlingsstatus(tilKodeverdiListe(BehandlingStatus.values()));
         kodeverk.setBehandlingstyper(tilKodeverdiListe(BehandlingType.values()));
         kodeverk.setLandkoder(tilKodeverdiListe(Landkoder.values()));
+        kodeverk.setOppgavetyper(tilKodeverdiListe(Oppgavetype.values()));
         kodeverk.setSakstyper(tilKodeverdiListe(FagsakType.values()));
         return kodeverk;
     }

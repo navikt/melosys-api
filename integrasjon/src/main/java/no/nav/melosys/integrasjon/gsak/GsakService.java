@@ -8,7 +8,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.melosys.domain.gsak.AktorType;
 import no.nav.melosys.domain.gsak.Fagomrade;
-import no.nav.melosys.domain.gsak.Oppgavetype;
+import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.domain.gsak.PrioritetType;
 import no.nav.melosys.domain.gsak.Underkategori;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
@@ -137,7 +137,7 @@ public class GsakService implements GsakFasade {
 
     // FIXME GSAK oppretter et nytt API med REST tjenester. Den metoden må endres når disse kommer.
     @Override
-    public List<no.nav.melosys.domain.Oppgave> finnUtildelteOppgaverEtterFrist(String oppavetype, List<String> fagområdeKodeListe, List<String> sakstyper, List<String> behandlingstyper) throws IntegrasjonException {
+    public List<no.nav.melosys.domain.Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppavetype, List<String> fagområdeKodeListe, List<String> sakstyper, List<String> behandlingstyper) throws IntegrasjonException {
         FinnOppgaveListeSokMal sokMal = FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(Integer.toString(MELOSYS_ENHET_ID)).medFagområdeKodeListe(fagområdeKodeListe).build();
 
         FinnOppgaveListeFilterMal.Builder filterMalBuilder = FinnOppgaveListeFilterMal.builder();
@@ -165,7 +165,7 @@ public class GsakService implements GsakFasade {
                 oppgave.setUnderkategori(Underkategori.valueOf(o.getUnderkategori().getKode()));
             }
             if (o.getOppgavetype() != null) {
-                oppgave.setOppgavetype(Oppgavetype.valueOf(o.getOppgavetype().getKode()));
+                oppgave.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.valueOf(o.getOppgavetype().getKode()));
             }
             oppgave.setGsakSaksnummer(o.getSaksnummer());
             oppgave.setDokumentId(o.getDokumentId());
@@ -320,7 +320,7 @@ public class GsakService implements GsakFasade {
             domainOppave.setPrioritet(PrioritetType.valueOf(oppgave.getPrioritet().getKode()));
             domainOppave.setAktivTil(oppgave.getAktivTil().toGregorianCalendar().toZonedDateTime().toLocalDate());
             domainOppave.setDokumentId(oppgave.getDokumentId());
-            domainOppave.setOppgavetype(Oppgavetype.valueOf(oppgave.getOppgavetype().getKode()));
+            domainOppave.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.valueOf(oppgave.getOppgavetype().getKode()));
             domainOppave.setGsakSaksnummer(oppgave.getSaksnummer());
             localDomainObjects.add(domainOppave);
         });

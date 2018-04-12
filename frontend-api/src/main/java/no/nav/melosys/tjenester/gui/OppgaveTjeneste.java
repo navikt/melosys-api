@@ -11,9 +11,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Oppgave;
+import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
-import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
+import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
@@ -43,15 +44,22 @@ public class OppgaveTjeneste extends RestTjeneste {
     public Response plukkOppgave(PlukkOppgaveInnDto plukkDto) {
         String ident = SubjectHandler.getInstance().getUserID();
 
-        Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto.getOppgavetype(), plukkDto.getSakstyper(), plukkDto.getBehandlingstyper());
+        Oppgavetype oppgavetype = Oppgavetype.valueOf(plukkDto.getOppgavetype());
+
+        Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, oppgavetype, plukkDto.getSakstyper(), plukkDto.getBehandlingstyper());
 
         if (plukket.isPresent()) {
             Oppgave oppgave = plukket.get();
 
             PlukketOppgaveDto dto = new PlukketOppgaveDto();
             dto.setOppgaveID(oppgave.getOppgaveId());
-            dto.setOppgavetype(oppgave.getOppgavetype().name());
-            dto.setSaksnummer(oppgave.getGsakSaksnummer());
+            if (oppgave.erBehandling()) {
+                dto.setOppgavetype(Oppgavetype.BEH_SAK.getKode());
+                // FIXME MELOSYS-1119 logisk ID for Fagsak
+                dto.setSaksnummer(oppgave.getSaksnummer());
+            } else if (oppgave.erJournalFøring()) {
+                dto.setOppgavetype(Oppgavetype.JFR.getKode());
+            }
             dto.setJournalpostID(oppgave.getDokumentId());
 
             return Response.ok(dto).build();
@@ -74,9 +82,9 @@ public class OppgaveTjeneste extends RestTjeneste {
     @GET
     @Path("/oversikt")
     @ApiOperation(value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.")
-    public Response mineSaker() {
+    public Response mineOppgaver() {
         String ident = SubjectHandler.getInstance().getUserID();
-        List<SakOgOppgaveDto> sakOgOppgaveDtos = oppgaveService.hentMineSaker(ident);
-        return Response.ok(sakOgOppgaveDtos).build();
+        List<OppgaveDto> oppgaveDtoListe = oppgaveService.hentOppgaver(ident);
+        return Response.ok(oppgaveDtoListe).build();
     }
 }

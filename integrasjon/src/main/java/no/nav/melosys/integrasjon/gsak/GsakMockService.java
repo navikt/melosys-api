@@ -2,8 +2,10 @@ package no.nav.melosys.integrasjon.gsak;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Oppgave;
+import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.felles.exception.TekniskException;
@@ -32,11 +34,11 @@ public class GsakMockService implements GsakFasade {
     }
 
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(String oppgavetype, List<String> fagområdeKodeListe, List<String> sakstyper, List<String> behandlingstyper) throws IntegrasjonException {
-        if ("BEH_SAK".equals(oppgavetype) || "JFR".equals(oppgavetype)) {
-            return oppgaveRepo.find(oppgavetype, sakstyper, behandlingstyper);
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, List<String> fagområdeKodeListe, List<String> sakstyper, List<String> behandlingstyper) throws IntegrasjonException {
+        if (Oppgavetype.BEH_SAK.equals(oppgavetype) || Oppgavetype.JFR.equals(oppgavetype)) {
+            return oppgaveRepo.find(oppgavetype, sakstyper, behandlingstyper).stream().filter(o -> o.getAnsvarligId() == null).collect(Collectors.toList());
         } else {
-            throw new  IllegalArgumentException(oppgavetype);
+            throw new  IllegalArgumentException(oppgavetype.toString());
         }
     }
 

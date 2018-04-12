@@ -4,7 +4,7 @@ import javax.persistence.Converter;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum BehandlingType implements Kodeverk<BehandlingType> {
+public enum BehandlingType implements KodeverkTabell<BehandlingType> {
 
     SØKNAD("SKND", "Søknad"),
     UNNTAK_MEDL("UFM", "Unntak medlemskap"),
@@ -33,7 +33,7 @@ public enum BehandlingType implements Kodeverk<BehandlingType> {
     }
 
     @Converter
-    public static class DbKonverterer extends Kodeverk.DbKonverterer<BehandlingType> {
+    public static class DbKonverterer extends KodeverkTabell.DbKonverterer<BehandlingType> {
         @Override
         protected BehandlingType[] getLovligeVerdier() {
             return BehandlingType.values();

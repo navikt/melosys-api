@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.gsak.Fagomrade;
-import no.nav.melosys.domain.gsak.Oppgavetype;
+import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.domain.gsak.PrioritetType;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -33,7 +33,7 @@ public class GsakMock implements OppgaveMockRepository {
         Oppgave o1 = new Oppgave();
         o1.setOppgaveId("1");
         o1.setFagomrade(Fagomrade.MED);
-        o1.setOppgavetype(Oppgavetype.BEH_SAK_MED);
+        o1.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.BEH_SAK_MED);
         o1.setPrioritet(PrioritetType.NORM_MED);
         o1.setGsakSaksnummer("123");
         o1.setAktivTil(LocalDate.now().plusYears(1));
@@ -41,7 +41,7 @@ public class GsakMock implements OppgaveMockRepository {
         Oppgave o2 = new Oppgave();
         o2.setOppgaveId("2");
         o2.setFagomrade(Fagomrade.UFM);
-        o2.setOppgavetype(Oppgavetype.BEH_SAK_MK_UFM);
+        o2.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.BEH_SAK_MK_UFM);
         o2.setPrioritet(PrioritetType.NORM_MED);
         o2.setGsakSaksnummer("123");
         o2.setAktivTil(LocalDate.now().plusYears(1));
@@ -49,7 +49,7 @@ public class GsakMock implements OppgaveMockRepository {
         Oppgave o3 = new Oppgave();
         o3.setOppgaveId("3");
         o3.setFagomrade(Fagomrade.MED);
-        o3.setOppgavetype(Oppgavetype.JFR_MED);
+        o3.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.JFR_MED);
         o3.setPrioritet(PrioritetType.HOY_MED);
         o3.setDokumentId("DOK_3789");
         o3.setAktivTil(LocalDate.now().plusYears(1));
@@ -57,7 +57,7 @@ public class GsakMock implements OppgaveMockRepository {
         Oppgave o4 = new Oppgave();
         o4.setOppgaveId("4");
         o4.setFagomrade(Fagomrade.MED);
-        o4.setOppgavetype(Oppgavetype.JFR_MED);
+        o4.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.JFR_MED);
         o4.setPrioritet(PrioritetType.NORM_MED);
         o4.setDokumentId("DOK_4987");
         o4.setAktivTil(LocalDate.now().plusYears(1));
@@ -65,7 +65,7 @@ public class GsakMock implements OppgaveMockRepository {
         Oppgave o5 = new Oppgave();
         o5.setOppgaveId("5");
         o5.setFagomrade(Fagomrade.MED);
-        o5.setOppgavetype(Oppgavetype.JFR_MED);
+        o5.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.JFR_MED);
         o5.setPrioritet(PrioritetType.HOY_MED);
         o5.setDokumentId("DOK_5678");
         o5.setAktivTil(LocalDate.now().plusYears(1));
@@ -74,7 +74,7 @@ public class GsakMock implements OppgaveMockRepository {
         Oppgave o6 = new Oppgave();
         o6.setOppgaveId("6");
         o6.setFagomrade(Fagomrade.MED);
-        o6.setOppgavetype(Oppgavetype.BEH_SAK_MED);
+        o6.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.BEH_SAK_MED);
         o6.setPrioritet(PrioritetType.NORM_MED);
         o6.setGsakSaksnummer("123");
         o6.setAktivTil(LocalDate.now().plusYears(1));
@@ -123,13 +123,13 @@ public class GsakMock implements OppgaveMockRepository {
     }
 
     @Override
-    public List<Oppgave> find(String oppgavetype, List<String> sakstyper, List<String> behandlingstyper) {
-        if ("BEH_SAK".equals(oppgavetype)) {
+    public List<Oppgave> find(Oppgavetype oppgavetype, List<String> sakstyper, List<String> behandlingstyper) {
+        if (Oppgavetype.BEH_SAK.equals(oppgavetype)) {
             return oppgaver.values().stream().filter(o -> o.erBehandling()).sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
-        } else if ("JFR".equals(oppgavetype)) {
+        } else if (Oppgavetype.JFR.equals(oppgavetype)) {
             return oppgaver.values().stream().filter(o -> o.erJournalFøring()).sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
         } else {
-            throw new IllegalArgumentException(oppgavetype);
+            throw new IllegalArgumentException(oppgavetype.toString());
         }
     }
 }

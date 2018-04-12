@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 import javax.persistence.Converter;
 
-public enum LovvalgDekning implements Kodeverk<LovvalgDekning> {
+public enum LovvalgDekning implements KodeverkTabell<LovvalgDekning> {
 
     OMFATTET("OMFATTET", "Omfattet av Folketrygdloven"),
     IKKE_DEKKET("IKKE_DEKKET", "Ikke dekket i Folketrygden"),
@@ -27,7 +27,7 @@ public enum LovvalgDekning implements Kodeverk<LovvalgDekning> {
     }
 
     @Converter
-    public static class DbKonverterer extends Kodeverk.DbKonverterer<LovvalgDekning> {
+    public static class DbKonverterer extends KodeverkTabell.DbKonverterer<LovvalgDekning> {
         @Override
         protected LovvalgDekning[] getLovligeVerdier() {
             return LovvalgDekning.values();

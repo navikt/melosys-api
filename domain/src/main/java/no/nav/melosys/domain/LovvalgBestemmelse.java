@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 import javax.persistence.Converter;
 
-public enum LovvalgBestemmelse implements Kodeverk<LovvalgBestemmelse> {
+public enum LovvalgBestemmelse implements KodeverkTabell<LovvalgBestemmelse> {
 
     ART_11_1("ART_11_1", "Kun omfattet i en medlemsstat (art 11.1)"),
     ART_11_2("ART_11_2", "Omfattet i medlemsstaten som utbetaler kontantytelsen (art 11.2)"),
@@ -42,7 +42,7 @@ public enum LovvalgBestemmelse implements Kodeverk<LovvalgBestemmelse> {
     }
 
     @Converter
-    public static class DbKonverterer extends Kodeverk.DbKonverterer<LovvalgBestemmelse> {
+    public static class DbKonverterer extends KodeverkTabell.DbKonverterer<LovvalgBestemmelse> {
         @Override
         protected LovvalgBestemmelse[] getLovligeVerdier() {
             return LovvalgBestemmelse.values();

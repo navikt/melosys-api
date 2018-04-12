@@ -12,6 +12,7 @@ import no.nav.melosys.domain.gsak.Underkategori;
  */
 public class Oppgave {
     private String oppgaveId;
+    private String saksnummer;
     private LocalDate aktivFra;
     private LocalDate aktivTil;
     private Fagomrade fagomrade;
@@ -114,4 +115,11 @@ public class Oppgave {
         this.dokumentId = dokumentId;
     }
 
+    public String getSaksnummer() {
+        return saksnummer;
+    }
+
+    public void setSaksnummer(String saksnummer) {
+        this.saksnummer = saksnummer;
+    }
 }

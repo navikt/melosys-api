@@ -19,7 +19,7 @@ import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.BehandlingDto;
 import no.nav.melosys.service.oppgave.dto.KodeverdiDto;
 import no.nav.melosys.service.oppgave.dto.PeriodeDto;
-import no.nav.melosys.service.oppgave.dto.SakOgOppgaveDto;
+import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
@@ -31,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -69,7 +70,7 @@ public class OppgaveTjenesteTest {
         oppgave.setOppgavetype(Oppgavetype.BEH_SAK_MED);
         Optional<Oppgave> plukket = Optional.of(oppgave);
 
-        when(oppgaveplukker.plukkOppgave(anyString(), anyString(), anyList(), anyList())).thenReturn(plukket);
+        when(oppgaveplukker.plukkOppgave(anyString(), any(), anyList(), anyList())).thenReturn(plukket);
 
         Response response = tjeneste.plukkOppgave(innData);
 
@@ -81,9 +82,9 @@ public class OppgaveTjenesteTest {
 
     @Test
     public void mineSaker() {
-        SakOgOppgaveDto oppgave = new SakOgOppgaveDto();
-        oppgave.setOppgaveId("177057928");
-        oppgave.setOppgavetype("journalforing");
+        OppgaveDto oppgave = new OppgaveDto();
+        oppgave.setOppgaveID("177057928");
+        oppgave.setOppgavetype(new KodeverdiDto("JFR", "Journalføring"));
         oppgave.setSammensattNavn("GLITRENDE HATT");
         oppgave.setSaksnummer("4");
 
@@ -101,13 +102,13 @@ public class OppgaveTjenesteTest {
 
         oppgave.setSoknadsperiode(new PeriodeDto(LocalDate.of(2016,01,01),LocalDate.of(2020,01,01)));
 
-        List<SakOgOppgaveDto> oppgaver = new ArrayList<>();
+        List<OppgaveDto> oppgaver = new ArrayList<>();
         oppgaver.add(oppgave);
 
-        when(oppgaveService.hentMineSaker(anyString())).thenReturn(oppgaver);
-        Response response = tjeneste.mineSaker();
+        when(oppgaveService.hentOppgaver(anyString())).thenReturn(oppgaver);
+        Response response = tjeneste.mineOppgaver();
         assertThat(response.getEntity()).isExactlyInstanceOf(ArrayList.class);
-        List<SakOgOppgaveDto> entity = (List<SakOgOppgaveDto>) response.getEntity();
+        List<OppgaveDto> entity = (List<OppgaveDto>) response.getEntity();
         assertThat(entity.get(0).getOppgaveID()).isEqualTo("177057928");
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
@@ -125,7 +126,7 @@ public class OppgaveTjenesteTest {
 
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
-        innData.setOppgavetype("BEH_SAK"); // eller JFR
+        innData.setOppgavetype(no.nav.melosys.domain.Oppgavetype.BEH_SAK.getKode()); // eller JFR
 
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(FagsakType.EU_EØS.getKode());
@@ -150,7 +151,7 @@ public class OppgaveTjenesteTest {
         ObjectMapper mapper = new ObjectMapper();
         PlukketOppgaveDto dto = new PlukketOppgaveDto();
         dto.setOppgaveID("1");
-        dto.setOppgavetype("JFR");
+        dto.setOppgavetype(no.nav.melosys.domain.Oppgavetype.JFR.getKode());
         dto.setSaksnummer("123");
         dto.setJournalpostID("JOUR_321");
         try {
