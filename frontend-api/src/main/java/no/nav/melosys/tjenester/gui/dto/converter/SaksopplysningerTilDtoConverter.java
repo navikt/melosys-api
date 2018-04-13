@@ -40,8 +40,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     break;
                 case ARBEIDSFORHOLD:
                     ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) dokument;
-                    Comparator<Arbeidsforhold> comparatorFom = Comparator.comparing(a -> a.getAnsettelsesPeriode().getFom());
-                    arbeidsforholdDokument.getArbeidsforhold().sort(new ArbeidsforholdComparator().thenComparing(comparatorFom.reversed()));
+                    arbeidsforholdDokument.getArbeidsforhold().sort(new ArbeidsforholdComparator());
                     dto.setArbeidsforhold(arbeidsforholdDokument);
                     break;
                 case ORGANISASJON:
@@ -68,12 +67,16 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
      * - Åpent arbeidsforhold uten sluttdato sorteres foran/over arbeidsforhold med sluttdato.
      * - Arbeidsforhold må ellers sorteres med nyeste fra-og-med-dato øverst.
      */
-    private final static class ArbeidsforholdComparator implements Comparator<Arbeidsforhold> {
+    final static class ArbeidsforholdComparator implements Comparator<Arbeidsforhold> {
 
         @Override
         public int compare(Arbeidsforhold a, Arbeidsforhold b) {
             if (a.getAnsettelsesPeriode().getTom() == null) {
-                return (b.getAnsettelsesPeriode().getTom() == null) ? 0 : -1;
+                if (b.getAnsettelsesPeriode().getTom() == null) {
+                    return b.getAnsettelsesPeriode().getFom().compareTo(a.getAnsettelsesPeriode().getFom());
+                } else {
+                    return -1;
+                }
             } else if (b.getAnsettelsesPeriode().getTom() == null) {
                 return 1;
             } else {
