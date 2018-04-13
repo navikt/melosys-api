@@ -28,12 +28,10 @@ public class CallIdOutInterceptor extends AbstractPhaseInterceptor<Message> {
 
     @Override
     public void handleMessage(Message message) {
-        /*Call Id egentlig settes i MDCFilter og Forespørsel til gui tjeneste kaller MDCFilter.
-         *Gjennom initialisering av Melosys App, KodeVerkService henter kodeverk med bruk av Kodeverk Web Service og
-         * legger inn i cache. I det tilfelle MDCFilter blir ikke kallet fordi at det er ikke noen forespørsel
-         * fra gui tjeneste lag. Så vi må sette Call Id eksplisitt.
+        /* Call Id settes normalt i MDCFilter etter en forespørsel fra frontend-api.
+         * Etter initialisering av Melosys, KodeverkService henter kodeverk og legger det inn i en cache.
+         * I det tilfellet er MDCFilter ikke kalt fordi det ikke er noen forespørsel fra frontend-api. Derfor må vi sette Call Id eksplisitt.
          */
-        //TODO: vi trenger bedre løsning enn bare sette Call Id fordi det kan påvirker alle tjenester siden alle bruker denne interceptor men det er veldig liten sannsynlighet at MDFilter klarer ikke å sette Call Id.
         String callId = getFromMDC(MDC_CALL_ID);
         if (callId == null) {
             callId = generateCallId();
