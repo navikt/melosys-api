@@ -15,7 +15,6 @@ import no.nav.melosys.tjenester.gui.SaksbehandlerTjeneste;
 import no.nav.melosys.tjenester.gui.SokTjeneste;
 import no.nav.melosys.tjenester.gui.SoknadTjeneste;
 import no.nav.melosys.tjenester.gui.VurderingTjeneste;
-import no.nav.melosys.tjenester.gui.patch.JsonPatchReader;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,7 +29,6 @@ public class JerseyConfig extends ResourceConfig {
         register(BehandlingTjeneste.class);
         register(FagsakTjeneste.class);
         register(FaktaavklaringTjeneste.class);
-        register(JsonPatchReader.class);
         register(KodeverkTjeneste.class);
         register(OppgaveTjeneste.class);
         register(SaksbehandlerTjeneste.class);
