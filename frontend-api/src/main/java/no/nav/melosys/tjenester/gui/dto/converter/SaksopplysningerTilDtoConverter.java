@@ -39,10 +39,9 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     dto.setPerson((PersonDokument)dokument);
                     break;
                 case ARBEIDSFORHOLD:
-                    // MELOSYS-850: Frontend ønsker å sortere med nyeste ansettelsesPerioder først.
                     ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) dokument;
-                    Comparator<Arbeidsforhold> comparator = Comparator.comparing(a -> a.getAnsettelsesPeriode().getFom());
-                    arbeidsforholdDokument.getArbeidsforhold().sort(comparator.reversed());
+                    Comparator<Arbeidsforhold> comparatorFom = Comparator.comparing(a -> a.getAnsettelsesPeriode().getFom());
+                    arbeidsforholdDokument.getArbeidsforhold().sort(new ArbeidsforholdComparator().thenComparing(comparatorFom.reversed()));
                     dto.setArbeidsforhold(arbeidsforholdDokument);
                     break;
                 case ORGANISASJON:
@@ -63,5 +62,23 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
         }
 
         return dto;
+    }
+
+    /**
+     * - Åpent arbeidsforhold uten sluttdato sorteres foran/over arbeidsforhold med sluttdato.
+     * - Arbeidsforhold må ellers sorteres med nyeste fra-og-med-dato øverst.
+     */
+    private final static class ArbeidsforholdComparator implements Comparator<Arbeidsforhold> {
+
+        @Override
+        public int compare(Arbeidsforhold a, Arbeidsforhold b) {
+            if (a.getAnsettelsesPeriode().getTom() == null) {
+                return (b.getAnsettelsesPeriode().getTom() == null) ? 0 : -1;
+            } else if (b.getAnsettelsesPeriode().getTom() == null) {
+                return 1;
+            } else {
+                return b.getAnsettelsesPeriode().getFom().compareTo(a.getAnsettelsesPeriode().getFom());
+            }
+        }
     }
 }
