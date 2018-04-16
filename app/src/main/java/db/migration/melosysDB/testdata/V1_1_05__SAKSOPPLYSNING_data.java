@@ -33,17 +33,17 @@ public class V1_1_05__SAKSOPPLYSNING_data implements JdbcMigration {
     private static final Logger log = LoggerFactory.getLogger(V1_1_05__SAKSOPPLYSNING_data.class);
 
     private static final int MOCK_BEHANDLING_ID = 3;
-    private static final String flywayMigreringsScriptSti = "db/migration/melosysDB/testdata/xml";
+    private static final String DB_FLYWAY_MIGRATION_TESTDATA_XML = "db/migration/melosysDB/testdata/xml";
     private static int currentRowNum = 0;
 
     @Override
     public void migrate(Connection connection) throws Exception {
-        Resource resource = new DefaultResourceLoader().getResource("classpath:" + flywayMigreringsScriptSti);
+        Resource resource = new DefaultResourceLoader().getResource("classpath:" + DB_FLYWAY_MIGRATION_TESTDATA_XML);
         Stream<Path> paths;
         if (resource.exists()) {
             paths = Files.walk(uriToPath(resource.getURI()));
         } else {
-            throw new RuntimeException("Feil ved aksisere flyway migrering script sti : " + flywayMigreringsScriptSti);
+            throw new RuntimeException("Filområdet for Flyway-migreringstestdata script finnes ikke : " + DB_FLYWAY_MIGRATION_TESTDATA_XML);
         }
         List<Path> dirs = paths.filter(Files::isDirectory).filter(x -> !x.getFileName().toString().equals("xml")).collect(Collectors.toList());
         Connection conn = connection;
@@ -111,7 +111,7 @@ public class V1_1_05__SAKSOPPLYSNING_data implements JdbcMigration {
         }
     }
 
-    // Det er fiks for feil i MELOSYS-1032 : https://bugs.openjdk.java.net/browse/JDK-7181278
+    // https://bugs.openjdk.java.net/browse/JDK-7181278
     private Path uriToPath(URI uri) {
         try {
             String spec = uri.getRawSchemeSpecificPart();
