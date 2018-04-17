@@ -8,9 +8,11 @@ public class KodeverkDto {
     private List<KodeDto> behandlingstyper;
     private List<KodeDto> behandlingsstatus;
     private List<KodeDto> dokumentkategorier;
+    private List<KodeDto> dokumenttitler;
     private List<KodeDto> landkoder;
     private List<KodeDto> oppgavetyper;
     private List<KodeDto> sakstyper;
+    private List<KodeDto> vedleggstitler;
 
     public List<KodeDto> getBehandlingstyper() {
         return behandlingstyper;
@@ -36,6 +38,14 @@ public class KodeverkDto {
         this.dokumentkategorier = dokumentkategorier;
     }
 
+    public List<KodeDto> getDokumenttitler() {
+        return dokumenttitler;
+    }
+
+    public void setDokumenttitler(List<KodeDto> dokumenttitler) {
+        this.dokumenttitler = dokumenttitler;
+    }
+
     public List<KodeDto> getLandkoder() {
         return landkoder;
     }
@@ -58,5 +68,13 @@ public class KodeverkDto {
 
     public void setSakstyper(List<KodeDto> sakstyper) {
         this.sakstyper = sakstyper;
+    }
+
+    public List<KodeDto> getVedleggstitler() {
+        return vedleggstitler;
+    }
+
+    public void setVedleggstitler(List<KodeDto> vedleggstitler) {
+        this.vedleggstitler = vedleggstitler;
     }
 }

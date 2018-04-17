@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.GET;
@@ -9,14 +8,16 @@ import javax.ws.rs.Path;
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.DokumentTittel;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.Kodeverk;
 import no.nav.melosys.domain.Landkoder;
 import no.nav.melosys.domain.Oppgavetype;
-import no.nav.melosys.service.kodeverk.FellesKodeverk;
+import no.nav.melosys.domain.VedleggTittel;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
@@ -29,25 +30,29 @@ public class KodeverkTjeneste extends RestTjeneste {
 
     private KodeverkService kodeverkService;
 
+    @Autowired
+    public KodeverkTjeneste(KodeverkService kodeverkService) {
+        this.kodeverkService = kodeverkService;
+    }
+
     @GET
     public KodeverkDto getKodeverk() {
         KodeverkDto kodeverk = new KodeverkDto();
-        kodeverk.setBehandlingsstatus(tilKodeverdiListe(BehandlingStatus.values()));
-        kodeverk.setBehandlingstyper(tilKodeverdiListe(BehandlingType.values()));
-        kodeverk.setDokumentkategorier(kodeverkService.gyldigeVerdier(FellesKodeverk.DOKUMENTKATEGORIER, LocalDate.now()));
-        kodeverk.setLandkoder(tilKodeverdiListe(Landkoder.values()));
-        kodeverk.setOppgavetyper(tilKodeverdiListe(Oppgavetype.values()));
-        kodeverk.setSakstyper(tilKodeverdiListe(FagsakType.values()));
-        //kodeverk.setTittel();
-        //kodeverk.setVedleggstittel();
+        kodeverk.setBehandlingsstatus(tilKoder(BehandlingStatus.values()));
+        kodeverk.setBehandlingstyper(tilKoder(BehandlingType.values()));
+        kodeverk.setDokumenttitler(tilKoder(DokumentTittel.values()));
+        kodeverk.setLandkoder(tilKoder(Landkoder.values()));
+        kodeverk.setOppgavetyper(tilKoder(Oppgavetype.values()));
+        kodeverk.setSakstyper(tilKoder(FagsakType.values()));
+        kodeverk.setVedleggstitler(tilKoder(VedleggTittel.values()));
         return kodeverk;
     }
 
-    private List<KodeDto> tilKodeverdiListe(Kodeverk[] kodeverk) {
-        List<KodeDto> kodeverkListe = new ArrayList<>();
+    private List<KodeDto> tilKoder(Kodeverk[] kodeverk) {
+        List<KodeDto> kodeListe = new ArrayList<>();
         for (Kodeverk k : kodeverk) {
-            kodeverkListe.add(new KodeDto(k.getKode(), k.getBeskrivelse()));
+            kodeListe.add(new KodeDto(k.getKode(), k.getBeskrivelse()));
         }
-        return kodeverkListe;
+        return kodeListe;
     }
 }
