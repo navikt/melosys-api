@@ -21,7 +21,7 @@ public class LandkodeSerializer extends StdSerializer<Land> {
 
     @Override
     public void serialize(Land landkode, JsonGenerator generator, SerializerProvider serializerProvider) throws IOException {
-        // String land = kodeverkService.dekod(Kodeverk.LANDKODER, landkode.getKode(), LocalDate.now());
+        // String land = kodeverkService.dekod(FellesKodeverk.LANDKODER, landkode.getKode(), LocalDate.now());
         String land = landkode.getKode();
         generator.writeString(land);
     }

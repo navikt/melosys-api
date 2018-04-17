@@ -2,50 +2,61 @@ package no.nav.melosys.tjenester.gui.dto;
 
 import java.util.List;
 
-public class KodeverkDto {
-    private List<KodeverdiDto> behandlingstyper;
-    private List<KodeverdiDto> behandlingsstatus;
-    private List<KodeverdiDto> landkoder;
-    private List<KodeverdiDto> oppgavetyper;
-    private List<KodeverdiDto> sakstyper;
+import no.nav.melosys.service.kodeverk.KodeDto;
 
-    public List<KodeverdiDto> getBehandlingstyper() {
+public class KodeverkDto {
+    private List<KodeDto> behandlingstyper;
+    private List<KodeDto> behandlingsstatus;
+    private List<KodeDto> dokumentkategorier;
+    private List<KodeDto> landkoder;
+    private List<KodeDto> oppgavetyper;
+    private List<KodeDto> sakstyper;
+
+    public List<KodeDto> getBehandlingstyper() {
         return behandlingstyper;
     }
 
-    public void setBehandlingstyper(List<KodeverdiDto> behandlingstyper) {
+    public void setBehandlingstyper(List<KodeDto> behandlingstyper) {
         this.behandlingstyper = behandlingstyper;
     }
 
-    public List<KodeverdiDto> getBehandlingsstatus() {
+    public List<KodeDto> getBehandlingsstatus() {
         return behandlingsstatus;
     }
 
-    public void setBehandlingsstatus(List<KodeverdiDto> behandlingsstatus) {
+    public void setBehandlingsstatus(List<KodeDto> behandlingsstatus) {
         this.behandlingsstatus = behandlingsstatus;
     }
 
-    public List<KodeverdiDto> getLandkoder() {
+    public List<KodeDto> getDokumentkategorier() {
+        return dokumentkategorier;
+    }
+
+    public void setDokumentkategorier(List<KodeDto> dokumentkategorier) {
+        this.dokumentkategorier = dokumentkategorier;
+    }
+
+    public List<KodeDto> getLandkoder() {
         return landkoder;
     }
 
-    public void setLandkoder(List<KodeverdiDto> landkoder) {
+    public void setLandkoder(List<KodeDto> landkoder) {
         this.landkoder = landkoder;
     }
 
-    public List<KodeverdiDto> getOppgavetyper() {
+    public List<KodeDto> getOppgavetyper() {
         return oppgavetyper;
     }
 
-    public void setOppgavetyper(List<KodeverdiDto> oppgavetyper) {
+    public void setOppgavetyper(List<KodeDto> oppgavetyper) {
         this.oppgavetyper = oppgavetyper;
     }
 
-    public List<KodeverdiDto> getSakstyper() {
+    public List<KodeDto> getSakstyper() {
         return sakstyper;
     }
 
-    public void setSakstyper(List<KodeverdiDto> sakstyper) {
+    public void setSakstyper(List<KodeDto> sakstyper) {
         this.sakstyper = sakstyper;
     }
 }

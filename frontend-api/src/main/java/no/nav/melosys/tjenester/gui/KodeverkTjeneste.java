@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.GET;
@@ -12,7 +13,9 @@ import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.Kodeverk;
 import no.nav.melosys.domain.Landkoder;
 import no.nav.melosys.domain.Oppgavetype;
-import no.nav.melosys.tjenester.gui.dto.KodeverdiDto;
+import no.nav.melosys.service.kodeverk.FellesKodeverk;
+import no.nav.melosys.service.kodeverk.KodeDto;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -24,21 +27,26 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 public class KodeverkTjeneste extends RestTjeneste {
 
+    private KodeverkService kodeverkService;
+
     @GET
     public KodeverkDto getKodeverk() {
         KodeverkDto kodeverk = new KodeverkDto();
         kodeverk.setBehandlingsstatus(tilKodeverdiListe(BehandlingStatus.values()));
         kodeverk.setBehandlingstyper(tilKodeverdiListe(BehandlingType.values()));
+        kodeverk.setDokumentkategorier(kodeverkService.gyldigeVerdier(FellesKodeverk.DOKUMENTKATEGORIER, LocalDate.now()));
         kodeverk.setLandkoder(tilKodeverdiListe(Landkoder.values()));
         kodeverk.setOppgavetyper(tilKodeverdiListe(Oppgavetype.values()));
         kodeverk.setSakstyper(tilKodeverdiListe(FagsakType.values()));
+        //kodeverk.setTittel();
+        //kodeverk.setVedleggstittel();
         return kodeverk;
     }
 
-    private List<KodeverdiDto> tilKodeverdiListe(Kodeverk[] kodeverk) {
-        List<KodeverdiDto> kodeverkListe = new ArrayList<>();
+    private List<KodeDto> tilKodeverdiListe(Kodeverk[] kodeverk) {
+        List<KodeDto> kodeverkListe = new ArrayList<>();
         for (Kodeverk k : kodeverk) {
-            kodeverkListe.add(new KodeverdiDto(k.getKode(), k.getBeskrivelse()));
+            kodeverkListe.add(new KodeDto(k.getKode(), k.getBeskrivelse()));
         }
         return kodeverkListe;
     }

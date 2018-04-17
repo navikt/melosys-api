@@ -1,11 +1,12 @@
 package no.nav.melosys.service.kodeverk;
 
-public enum Kodeverk {
+public enum FellesKodeverk {
     
     ARBEIDSTIDSORDNINGER("Arbeidstidsordninger"),
     ARBEIDSFORHOLDSTYPER("Arbeidsforholdstyper"),
     DEKNING_MEDL("DekningMedl"),
     DISKRESJONSKODER("Diskresjonskoder"),
+    DOKUMENTKATEGORIER("Dokumentkategorier"),
     GRUNNLAG_MEDL("GrunnlagMedl"),
     KILDEDOKUMENT_MEDL("KildedokumentMedl"),
     KILDESYSTEM_MEDL("KildesystemMedl"),
@@ -17,7 +18,7 @@ public enum Kodeverk {
     POSTNUMMER("Postnummer"),
     SIVILSTANDER("Sivilstander");
 
-    private Kodeverk(String navn) {
+    private FellesKodeverk(String navn) {
         this.navn = navn;
     }
     
