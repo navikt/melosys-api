@@ -8,12 +8,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Opplysninger om arbeid i Norge
  */
 public class ArbeidNorge {
+    public List<String> valgteArbeidsforhold;
     public Boolean arbeidsforholdOpprettholdIHelePerioden;
     @JsonProperty("brukerErSelvstendigNaeringsdrivende")
     public Boolean brukerErSelvstendigNæringsdrivende;
     public Boolean selvstendigFortsetterEtterArbeidIUtlandet;
-    @JsonProperty("brukerArbeiderIVikarbyra")
-    public Boolean brukerArbeiderIVikarbyrå; //FIXME: fjernes?
+    @JsonProperty("arbeidsforholdVikarNavn")
+    public String brukerArbeiderIVikarbyrå;
     public String vikarOrgnr;
     public String flyendePersonellHjemmebase;
     @JsonProperty("ansattPaSokkelEllerSkip")
@@ -23,5 +24,8 @@ public class ArbeidNorge {
     @JsonProperty("skipFartsomrade")
     public String skipFartsområde;
     public String skipFlaggLand;
-    public List<String> valgteArbeidsforhold;
+    public String kontaktNavn;
+    public String kontaktEpost;
+    public String fullmektigFirma;
+    public String fullmektigAdresse;
 }
