@@ -24,7 +24,6 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -39,6 +38,8 @@ import static org.mockito.Mockito.when;
 
 public class SoeknadServiceTest {
 
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
     private SoeknadService soeknadService;
 
     @Mock
@@ -49,12 +50,8 @@ public class SoeknadServiceTest {
 
     private SoeknadDokument soeknadDokument;
 
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule();
-
-
     @Before
-    public void setUp() throws IOException,URISyntaxException {
+    public void setUp() throws IOException, URISyntaxException {
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
 
         ObjectMapper mapper = new ObjectMapper();
@@ -63,9 +60,8 @@ public class SoeknadServiceTest {
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         mapper.registerModule(new JavaTimeModule());
 
-        URI url = (getClass().getClassLoader().getResource("sokand-test.json")).toURI();
-        String json = new String(Files.readAllBytes(Paths.get(url)));
-
+        URI urlSokand = (getClass().getClassLoader().getResource("sokand-test.json")).toURI();
+        String json = new String(Files.readAllBytes(Paths.get(urlSokand)));
         soeknadDokument = mapper.readValue(json, SoeknadDokument.class);
 
         soeknadService = new SoeknadService(behandlingRepo, saksopplysningRepo, dokumentFactory);
@@ -107,8 +103,6 @@ public class SoeknadServiceTest {
 
     @Test
     public void registrerSøknad() throws Exception {
-
-
         soeknadDokument.arbeidNorge.ansattPaSokkelEllerSkip = "sokkel";
         long behandlingID = 1L;
         Behandling b = new Behandling();
@@ -119,5 +113,4 @@ public class SoeknadServiceTest {
 
         verify(saksopplysningRepo, times(1)).save((Saksopplysning) any());
     }
-
 }
