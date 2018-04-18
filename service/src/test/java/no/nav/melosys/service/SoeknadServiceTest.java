@@ -40,6 +40,7 @@ public class SoeknadServiceTest {
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
+
     private SoeknadService soeknadService;
 
     @Mock
@@ -60,8 +61,8 @@ public class SoeknadServiceTest {
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         mapper.registerModule(new JavaTimeModule());
 
-        URI urlSokand = (getClass().getClassLoader().getResource("sokand-test.json")).toURI();
-        String json = new String(Files.readAllBytes(Paths.get(urlSokand)));
+        URI søknadURI = (getClass().getClassLoader().getResource("soknad.json")).toURI();
+        String json = new String(Files.readAllBytes(Paths.get(søknadURI)));
         soeknadDokument = mapper.readValue(json, SoeknadDokument.class);
 
         soeknadService = new SoeknadService(behandlingRepo, saksopplysningRepo, dokumentFactory);
@@ -103,6 +104,7 @@ public class SoeknadServiceTest {
 
     @Test
     public void registrerSøknad() throws Exception {
+
         soeknadDokument.arbeidNorge.ansattPaSokkelEllerSkip = "sokkel";
         long behandlingID = 1L;
         Behandling b = new Behandling();
