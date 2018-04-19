@@ -48,8 +48,8 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     dto.getOrganisasjoner().add((OrganisasjonDokument)dokument);
                     break;
                 case MEDLEMSKAP:
-                    MedlemskapDokument medlemskapDokument =(MedlemskapDokument)dokument;
-                    medlemskapDokument.getMedlemsperiode().sort(new MedlemsPeriodComparator());
+                    MedlemskapDokument medlemskapDokument = (MedlemskapDokument) dokument;
+                    medlemskapDokument.getMedlemsperiode().sort(Comparator.comparing(Medlemsperiode::getType).thenComparing(new MedlemsPeriodComparator()));
                     dto.setMedlemskap(medlemskapDokument);
                     break;
                 case INNTEKT:
@@ -89,7 +89,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
     }
 
     /**
-     * Medlemsperioder sorters fra de siste til de gamle.
+     * Medlemsperioder sorteres fra nyest til eldst.
      */
     final static class MedlemsPeriodComparator implements Comparator<Medlemsperiode> {
         @Override
