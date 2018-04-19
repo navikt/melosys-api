@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
@@ -47,7 +48,9 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     dto.getOrganisasjoner().add((OrganisasjonDokument)dokument);
                     break;
                 case MEDLEMSKAP:
-                    dto.setMedlemskap((MedlemskapDokument)dokument);
+                    MedlemskapDokument medlemskapDokument =(MedlemskapDokument)dokument;
+                    medlemskapDokument.getMedlemsperiode().sort(new MedlemsPeriodComparator());
+                    dto.setMedlemskap(medlemskapDokument);
                     break;
                 case INNTEKT:
                     dto.setInntekt((InntektDokument)dokument);
@@ -82,6 +85,16 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
             } else {
                 return b.getAnsettelsesPeriode().getFom().compareTo(a.getAnsettelsesPeriode().getFom());
             }
+        }
+    }
+
+    /**
+     * Medlemsperioder sorters fra de siste til de gamle.
+     */
+    final static class MedlemsPeriodComparator implements Comparator<Medlemsperiode> {
+        @Override
+        public int compare(Medlemsperiode o1, Medlemsperiode o2) {
+            return o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());
         }
     }
 }
