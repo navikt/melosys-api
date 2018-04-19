@@ -14,7 +14,7 @@ public class ArbeidNorge {
     public Boolean brukerErSelvstendigNæringsdrivende;
     public Boolean selvstendigFortsetterEtterArbeidIUtlandet;
     @JsonProperty("arbeidsforholdVikarNavn")
-    public String brukerArbeiderIVikarbyrå;
+    public String brukerArbeiderIVikarbyrå; //FIXME: Fjernes ?
     public String vikarOrgnr;
     public String flyendePersonellHjemmebase;
     @JsonProperty("ansattPaSokkelEllerSkip")
