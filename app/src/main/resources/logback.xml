@@ -18,6 +18,7 @@
         <appender-ref ref="stdout_json"/>
     </root>
 
+    <logger name="org.apache.cxf.services" level="WARN" additivity="false"/>
     <logger name="org.springframework.oxm.jaxb.Jaxb2Marshaller" level="WARN" additivity="false"/>
 
 </configuration>
