@@ -12,6 +12,8 @@ import no.nav.melosys.tjenester.gui.FaktaavklaringTjeneste;
 import no.nav.melosys.tjenester.gui.JournalforingTjeneste;
 import no.nav.melosys.tjenester.gui.KodeverkTjeneste;
 import no.nav.melosys.tjenester.gui.OppgaveTjeneste;
+import no.nav.melosys.tjenester.gui.OrganisasjonTjeneste;
+import no.nav.melosys.tjenester.gui.PersonTjeneste;
 import no.nav.melosys.tjenester.gui.SaksbehandlerTjeneste;
 import no.nav.melosys.tjenester.gui.SokTjeneste;
 import no.nav.melosys.tjenester.gui.SoknadTjeneste;
@@ -33,6 +35,8 @@ public class JerseyConfig extends ResourceConfig {
         register(JournalforingTjeneste.class);
         register(KodeverkTjeneste.class);
         register(OppgaveTjeneste.class);
+        register(OrganisasjonTjeneste.class);
+        register(PersonTjeneste.class);
         register(SaksbehandlerTjeneste.class);
         register(SoknadTjeneste.class);
         register(SokTjeneste.class);
