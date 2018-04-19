@@ -4,15 +4,14 @@ import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.melosys.domain.DokumentTittel;
-import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.VedleggTittel;
 
 public class DokumentDto {
     private String navn;
     private LocalDate mottattDato;
-    private FagsakType sakstype;
     private DokumentTittel tittel;
     private List<VedleggTittel> vedleggstitler;
+    private String url;
 
     public String getNavn() {
         return navn;
@@ -30,14 +29,6 @@ public class DokumentDto {
         this.mottattDato = mottattDato;
     }
 
-    public FagsakType getSakstype() {
-        return sakstype;
-    }
-
-    public void setSakstype(FagsakType sakstype) {
-        this.sakstype = sakstype;
-    }
-
     public DokumentTittel getTittel() {
         return tittel;
     }
@@ -52,5 +43,13 @@ public class DokumentDto {
 
     public void setVedleggstitler(List<VedleggTittel> vedleggstitler) {
         this.vedleggstitler = vedleggstitler;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

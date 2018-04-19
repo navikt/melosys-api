@@ -35,12 +35,6 @@ public class JournalforingTjeneste extends RestTjeneste {
         return journalpostDto;
     }
 
-    @GET
-    @Path("/dokument/{journalpostID}")
-    public void hentDokument(@PathParam("journalpostID") String journalpostID) {
-
-    }
-
     @POST
     public void journalfør(JournalforingDto journalforingDto) {
 

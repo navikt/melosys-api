@@ -1,22 +1,25 @@
 package no.nav.melosys.service.oppgave.dto;
 
-public class BehandlingDto {
-    private KodeverdiDto type;
-    private KodeverdiDto status;
+import no.nav.melosys.domain.BehandlingStatus;
+import no.nav.melosys.domain.BehandlingType;
 
-    public KodeverdiDto getType() {
+public class BehandlingDto {
+    private BehandlingType type;
+    private BehandlingStatus status;
+
+    public BehandlingType getType() {
         return type;
     }
 
-    public void setType(KodeverdiDto type) {
+    public void setType(BehandlingType type) {
         this.type = type;
     }
 
-    public KodeverdiDto getStatus() {
+    public BehandlingStatus getStatus() {
         return status;
     }
 
-    public void setStatus(KodeverdiDto status) {
+    public void setStatus(BehandlingStatus status) {
         this.status = status;
     }
 }

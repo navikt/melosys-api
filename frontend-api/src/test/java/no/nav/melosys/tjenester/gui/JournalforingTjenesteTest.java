@@ -2,20 +2,29 @@ package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.domain.BehandlingStatus;
+import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.DokumentTittel;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.VedleggTittel;
 import no.nav.melosys.service.journalforing.JournalforingService;
-import no.nav.melosys.tjenester.gui.dto.PersonDto;
+import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.tjenester.gui.dto.FagsakOppsummering2Dto;
+import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
+import no.nav.melosys.tjenester.gui.dto.journalforing.AktoerDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.DokumentDto;
+import no.nav.melosys.tjenester.gui.dto.journalforing.JournalforingDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
+import no.nav.melosys.tjenester.gui.jackson.JacksonModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,34 +39,77 @@ public class JournalforingTjenesteTest {
     @Mock
     private JournalforingService journalføringService;
 
+    @Mock
+    private KodeverkService kodeverkService;
+
+    private ObjectMapper mapper;
+
     @Before
     public void setUp() {
-        tjeneste = new JournalforingTjeneste(journalføringService);
-    }
-
-    @Test
-    public void jsonUt() {
-        ObjectMapper mapper = new ObjectMapper();
+        mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         mapper.registerModule(new JavaTimeModule());
+        mapper.registerModule(new JacksonModule(kodeverkService));
 
+        tjeneste = new JournalforingTjeneste(journalføringService);
+    }
+
+    @Test
+    public void jfrJsonUt() {
         JournalpostDto dto = new JournalpostDto();
-        dto.setJournalpostID("JOUR_321");
-        dto.setBruker(new PersonDto("12345", "Bruker ABC"));
-        dto.setAvsender(new PersonDto("56890", "Avsender XYZ"));
+        dto.setBruker(new AktoerDto("12345", "Bruker ABC"));
+        dto.setAvsender(new AktoerDto("56890", "Avsender XYZ"));
         dto.setErBrukerAvsender(false);
+        dto.setSakstype(FagsakType.EU_EØS);
         DokumentDto dokumentDto = new DokumentDto();
         dokumentDto.setNavn("Navn");
         dokumentDto.setMottattDato(LocalDate.now());
-        dokumentDto.setSakstype(FagsakType.EU_EØS);
         dokumentDto.setTittel(DokumentTittel.SØKNAD_MEDLEMSSKAP);
         List<VedleggTittel> titler = new ArrayList<>();
         titler.add(VedleggTittel.TODO_1);
         titler.add(VedleggTittel.TODO_2);
         dokumentDto.setVedleggstitler(titler);
+        dokumentDto.setUrl("/dokumenttest.pdf");
         dto.setDokument(dokumentDto);
+
+        FagsakOppsummering2Dto fagsakOppsummering2Dto = new FagsakOppsummering2Dto();
+        fagsakOppsummering2Dto.setSaksnummer("MEL-1234");
+        fagsakOppsummering2Dto.setSøknadsperiode(new PeriodeDto(LocalDate.now(), LocalDate.MAX));
+        fagsakOppsummering2Dto.setSakstype(FagsakType.EU_EØS);
+        fagsakOppsummering2Dto.setBehandlingstype(BehandlingType.SØKNAD);
+        fagsakOppsummering2Dto.setBehandlingsstatus(BehandlingStatus.UNDER_BEHANDLING);
+        fagsakOppsummering2Dto.setLand(Arrays.asList("DK","SE"));
+        fagsakOppsummering2Dto.setRegistrertDato(LocalDateTime.MIN);
+
+        try {
+            String json = mapper.writeValueAsString(dto);
+            System.out.println(json);
+
+            System.out.println(mapper.writeValueAsString(fagsakOppsummering2Dto));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void jfrJsonInn() {
+        JournalforingDto dto = new JournalforingDto();
+        dto.setJournalpostID("Journal_1234");
+        dto.setOppgaveID("Oppgave_ABC");
+        dto.setSaksnummer("MEL-1234");
+        dto.setBruker(new AktoerDto("12345", "Bruker ABC"));
+        dto.setAvsender(new AktoerDto("56890", "Avsender XYZ"));
+
+        dto.setDokumenttittel(DokumentTittel.SØKNAD_MEDLEMSSKAP.getKode());
+        List<String> titler = new ArrayList<>();
+        titler.add(VedleggTittel.TODO_1.getKode());
+        titler.add(VedleggTittel.TODO_2.getKode());
+        dto.setVedleggstitler(titler);
+
+        dto.setSoknadsperiode(new PeriodeDto(LocalDate.now(), LocalDate.now().plusYears(1)));
+        dto.setLand(Arrays.asList("DK","GB"));
 
         try {
             String json = mapper.writeValueAsString(dto);

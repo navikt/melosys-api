@@ -2,8 +2,6 @@ package no.nav.melosys.domain;
 
 import javax.persistence.Converter;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
 /**
  * De forskjellige sakstypene Melosys skal kunne behandle.
  * 
@@ -30,7 +28,6 @@ public enum FagsakType implements KodeverkTabell<FagsakType> {
     }
 
     @Override
-    @JsonValue
     public String getBeskrivelse() {
         return beskrivelse;
     }

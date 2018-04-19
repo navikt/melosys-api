@@ -1,16 +1,19 @@
 package no.nav.melosys.tjenester.gui.dto.journalforing;
 
+import java.util.List;
+
 import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
-import no.nav.melosys.tjenester.gui.dto.PersonDto;
 
 public class JournalforingDto {
     private String journalpostID;
     private String oppgaveID;
-    private PersonDto bruker;
-    private PersonDto avsender;
-    private DokumentDto dokumentDto;
+    private String saksnummer;
+    private AktoerDto bruker;
+    private AktoerDto avsender;
+    private String dokumenttittel;
+    private List<String> vedleggstitler;
     private PeriodeDto soknadsperiode;
-    private String land;
+    private List<String> land;
 
     public String getJournalpostID() {
         return journalpostID;
@@ -28,28 +31,44 @@ public class JournalforingDto {
         this.oppgaveID = oppgaveID;
     }
 
-    public PersonDto getBruker() {
+    public String getSaksnummer() {
+        return saksnummer;
+    }
+
+    public void setSaksnummer(String saksnummer) {
+        this.saksnummer = saksnummer;
+    }
+
+    public AktoerDto getBruker() {
         return bruker;
     }
 
-    public void setBruker(PersonDto bruker) {
+    public void setBruker(AktoerDto bruker) {
         this.bruker = bruker;
     }
 
-    public PersonDto getAvsender() {
+    public AktoerDto getAvsender() {
         return avsender;
     }
 
-    public void setAvsender(PersonDto avsender) {
+    public void setAvsender(AktoerDto avsender) {
         this.avsender = avsender;
     }
 
-    public DokumentDto getDokumentDto() {
-        return dokumentDto;
+    public String getDokumenttittel() {
+        return dokumenttittel;
     }
 
-    public void setDokumentDto(DokumentDto dokumentDto) {
-        this.dokumentDto = dokumentDto;
+    public void setDokumenttittel(String dokumenttittel) {
+        this.dokumenttittel = dokumenttittel;
+    }
+
+    public List<String> getVedleggstitler() {
+        return vedleggstitler;
+    }
+
+    public void setVedleggstitler(List<String> vedleggstitler) {
+        this.vedleggstitler = vedleggstitler;
     }
 
     public PeriodeDto getSoknadsperiode() {
@@ -60,11 +79,11 @@ public class JournalforingDto {
         this.soknadsperiode = soknadsperiode;
     }
 
-    public String getLand() {
+    public List<String> getLand() {
         return land;
     }
 
-    public void setLand(String land) {
+    public void setLand(List<String> land) {
         this.land = land;
     }
 }

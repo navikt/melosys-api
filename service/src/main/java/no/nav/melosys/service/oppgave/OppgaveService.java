@@ -22,9 +22,8 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.oppgave.dto.BehandlingDto;
-import no.nav.melosys.service.oppgave.dto.KodeverdiDto;
-import no.nav.melosys.service.oppgave.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
+import no.nav.melosys.service.oppgave.dto.PeriodeDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,12 +57,10 @@ public class OppgaveService {
         dest.setAktivTil(oppgave.getAktivTil());
 
         if (oppgave.erJournalFøring()) {
-            Oppgavetype type = Oppgavetype.JFR;
-            dest.setOppgavetype(new KodeverdiDto(type.getKode(), type.getBeskrivelse()));
+            dest.setOppgavetype(Oppgavetype.JFR);
             dest.setJournalpostID(oppgave.getDokumentId());
         } else if (oppgave.erBehandling()) {
-            Oppgavetype type = Oppgavetype.BEH_SAK;
-            dest.setOppgavetype(new KodeverdiDto(type.getKode(), type.getBeskrivelse()));
+            dest.setOppgavetype(Oppgavetype.BEH_SAK);
 
             Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
             if (fagsak == null) {
@@ -86,7 +83,7 @@ public class OppgaveService {
             );
 
             dest.setBehandling(mapSaksTypeOgBehandling(fagsak));
-            dest.setSakstype(new KodeverdiDto(fagsak.getType().getKode(), fagsak.getType().getBeskrivelse()));
+            dest.setSakstype(fagsak.getType());
         } else {
             throw new RuntimeException("Oppgavetype " + oppgave.getOppgavetype() + " støttes ikke");
         }
@@ -100,18 +97,19 @@ public class OppgaveService {
     }
 
     private static BehandlingDto mapSaksTypeOgBehandling(Fagsak fagsak) {
-        BehandlingDto behandling = new BehandlingDto();
-        behandling.setStatus(new KodeverdiDto(fagsak.getStatus().getKode(), fagsak.getStatus().getBeskrivelse()));
+        BehandlingDto behandlingDto = new BehandlingDto();
         List<Behandling> aktivBehandlinger = fagsak.getBehandlinger().stream().
                 filter(varBehandling -> !varBehandling.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
         if (aktivBehandlinger.size() > 1) {
             throw new RuntimeException("Det finnes mer enn en aktive behandlinger");
         } else if (aktivBehandlinger.size() == 1) {
-            behandling.setType((new KodeverdiDto(aktivBehandlinger.get(0).getStatus().getKode(), aktivBehandlinger.get(0).getStatus().getBeskrivelse())));
+            Behandling aktivBehandling = aktivBehandlinger.get(0);
+            behandlingDto.setStatus(aktivBehandling.getStatus());
+            behandlingDto.setType(aktivBehandling.getType());
         } else{
             throw new RuntimeException("Det finnes ingen aktive behandlinger");
         }
-        return behandling;
+        return behandlingDto;
     }
 
     private static PeriodeDto mapDato(SoeknadDokument soeknadDokument) {

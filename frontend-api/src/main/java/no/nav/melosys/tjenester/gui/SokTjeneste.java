@@ -56,7 +56,7 @@ public class SokTjeneste extends RestTjeneste {
         Iterable<Fagsak> saker = null;
 
         if (fnr == null) {
-            saker = fagsakService.hentAlle(); //TODO hente alle søknader for en saksbehandler?
+            saker = fagsakService.hentAlle();
         } else {
             // TODO Oppslag mot TPS for å få aktørID
             String aktørID = fnr; // test data har aktørID = fnr
