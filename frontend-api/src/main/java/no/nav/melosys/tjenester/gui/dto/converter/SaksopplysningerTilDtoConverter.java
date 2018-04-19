@@ -22,6 +22,11 @@ import org.modelmapper.spi.MappingContext;
  */
 public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplysning>, SaksopplysningerDto> {
 
+
+    //Medlemsperioder sorteres fra nyest til eldst.
+    public static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
+            ((o1, o2) -> {return o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());});
+
     @Override
     public SaksopplysningerDto convert(MappingContext<Set<Saksopplysning>, SaksopplysningerDto> context) {
         SaksopplysningerDto dto = new SaksopplysningerDto();
@@ -49,7 +54,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     break;
                 case MEDLEMSKAP:
                     MedlemskapDokument medlemskapDokument = (MedlemskapDokument) dokument;
-                    medlemskapDokument.getMedlemsperiode().sort(Comparator.comparing(Medlemsperiode::getType).thenComparing(new MedlemsPeriodComparator()));
+                    medlemskapDokument.getMedlemsperiode().sort(Comparator.comparing(Medlemsperiode::getType).thenComparing(medlemsperiodeKomparator));
                     dto.setMedlemskap(medlemskapDokument);
                     break;
                 case INNTEKT:
@@ -85,16 +90,6 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
             } else {
                 return b.getAnsettelsesPeriode().getFom().compareTo(a.getAnsettelsesPeriode().getFom());
             }
-        }
-    }
-
-    /**
-     * Medlemsperioder sorteres fra nyest til eldst.
-     */
-    final static class MedlemsPeriodComparator implements Comparator<Medlemsperiode> {
-        @Override
-        public int compare(Medlemsperiode o1, Medlemsperiode o2) {
-            return o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());
         }
     }
 }

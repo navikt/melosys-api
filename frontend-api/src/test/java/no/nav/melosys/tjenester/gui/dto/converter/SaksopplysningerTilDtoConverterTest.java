@@ -61,12 +61,11 @@ public class SaksopplysningerTilDtoConverterTest {
         medlemsperioder.add(medlemsperiode3);
         medlemsperioder.add(medlemsperiode4);
 
-        medlemsperioder.sort(Comparator.comparing(Medlemsperiode::getType ).thenComparing(new SaksopplysningerTilDtoConverter.MedlemsPeriodComparator()));
+        medlemsperioder.sort(Comparator.comparing(Medlemsperiode::getType ).thenComparing(SaksopplysningerTilDtoConverter.medlemsperiodeKomparator));
 
         assertThat(medlemsperioder.get(0)).isEqualTo(medlemsperiode4);
         assertThat(medlemsperioder.get(1)).isEqualTo(medlemsperiode1);
         assertThat(medlemsperioder.get(2)).isEqualTo(medlemsperiode3);
         assertThat(medlemsperioder.get(3)).isEqualTo(medlemsperiode2);
-
     }
 }
