@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
@@ -20,6 +21,11 @@ import org.modelmapper.spi.MappingContext;
  * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
  */
 public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplysning>, SaksopplysningerDto> {
+
+
+    //Medlemsperioder sorteres fra nyest til eldst.
+     static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
+            (o1, o2) -> o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());
 
     @Override
     public SaksopplysningerDto convert(MappingContext<Set<Saksopplysning>, SaksopplysningerDto> context) {
@@ -47,7 +53,9 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     dto.getOrganisasjoner().add((OrganisasjonDokument)dokument);
                     break;
                 case MEDLEMSKAP:
-                    dto.setMedlemskap((MedlemskapDokument)dokument);
+                    MedlemskapDokument medlemskapDokument = (MedlemskapDokument) dokument;
+                    medlemskapDokument.getMedlemsperiode().sort(Comparator.comparing(Medlemsperiode::getType).thenComparing(medlemsperiodeKomparator));
+                    dto.setMedlemskap(medlemskapDokument);
                     break;
                 case INNTEKT:
                     dto.setInntekt((InntektDokument)dokument);
