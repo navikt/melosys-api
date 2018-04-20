@@ -1,6 +1,10 @@
 package no.nav.melosys.service;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,6 +38,9 @@ import static org.mockito.Mockito.when;
 
 public class SoeknadServiceTest {
 
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
+
     private SoeknadService soeknadService;
 
     @Mock
@@ -44,11 +51,8 @@ public class SoeknadServiceTest {
 
     private SoeknadDokument soeknadDokument;
 
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule();
-
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, URISyntaxException {
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
 
         ObjectMapper mapper = new ObjectMapper();
@@ -57,86 +61,8 @@ public class SoeknadServiceTest {
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         mapper.registerModule(new JavaTimeModule());
 
-        // FIXME: Last json fra fil
-        String json = "{\n" +
-                "    \"arbeidUtland\": {\n" +
-                "      \"arbeidsland\": [\n" +
-                "        \"ESP\",\n" +
-                "        \"DNK\"\n" +
-                "      ],\n" +
-                "      \"arbeidsperiode\": {\n" +
-                "        \"fom\": \"2018-01-01\",\n" +
-                "        \"tom\": \"2018-06-01\"\n" +
-                "      },\n" +
-                "      \"arbeidsandelNorge\": 33.3,\n" +
-                "      \"arbeidsandelUtland\": 66.6,\n" +
-                "      \"bostedsland\": \"SWE\",\n" +
-                "      \"erstatterTidligereUtsendt\": false\n" +
-                "    },\n" +
-                "    \"foretakUtland\": {\n" +
-                "      \"foretakUtlandNavn\": \"Volkswagen AG\",\n" +
-                "      \"foretakUtlandOrgnr\": \"1122334444\"\n" +
-                "    },\n" +
-                "    \"oppholdUtland\": {\n" +
-                "      \"oppholdsland\": [\n" +
-                "        \"GB\"\n" +
-                "      ],\n" +
-                "      \"oppholdsPeriode\": {\n" +
-                "        \"fom\": \"2018-01-01\",\n" +
-                "        \"tom\": \"2019-01-01\"\n" +
-                "      },\n" +
-                "      \"studentIEOS\": false,\n" +
-                "      \"studentFinansiering\": \"Beskrivelse av hvordan studiene finansieres\",\n" +
-                "      \"studentSemester\": \"2018/2019\",\n" +
-                "      \"studieLand\": \"SWE\"\n" +
-                "    },\n" +
-                "    \"arbeidNorge\": {\n" +
-                "      \"arbeidsforholdOpprettholdIHelePerioden\": true,\n" +
-                "      \"selvstendigFortsetterEtterArbeidIUtlandet\": true,\n" +
-                "      \"vikarOrgnr\": \"Ola Nordmann 22334455\",\n" +
-                "      \"flyendePersonellHjemmebase\": \"Flybasen Int. Airport, ....\",\n" +
-                "      \"navnSkipEllerSokkel\": \"Trym-sokkelen\",\n" +
-                "      \"sokkelLand\": \"SE\",\n" +
-                "      \"skipFlaggLand\": \"SE\",\n" +
-                "      \"brukerErSelvstendigNaeringsdrivende\": true,\n" +
-                "      \"brukerArbeiderIVikarbyra\": false,\n" +
-                "      \"ansattPaSokkelEllerSkip\": \"sokkel | skip\",\n" +
-                "      \"skipFartsomrade\": \"Europeisk fart\",\n" +
-                "      \"valgteArbeidsforhold\": []\n" +
-                "    },\n" +
-                "    \"juridiskArbeidsgiverNorge\": {\n" +
-                "      \"antallAnsatte\": 350,\n" +
-                "      \"antallAdminAnsatte\": 250,\n" +
-                "      \"andelOmsetningINorge\": 78.5,\n" +
-                "      \"andelKontrakterINorge\": 50.5,\n" +
-                "      \"erBemanningsbyra\": false,\n" +
-                "      \"hattDriftSiste12Mnd\": true,\n" +
-                "      \"antallUtsendte\": 30,\n" +
-                "      \"antallAdminAnsatteEOS\": 75\n" +
-                "    },\n" +
-                "    \"arbeidsinntekt\": {\n" +
-                "      \"inntektNorskIPerioden\": 5500,\n" +
-                "      \"inntektUtenlandskIPerioden\": 2000,\n" +
-                "      \"inntektNaeringIPerioden\": 0,\n" +
-                "      \"inntektNaturalYtelser\": [\n" +
-                "        \"Fri bolig\",\n" +
-                "        \"Fri bil\"\n" +
-                "      ],\n" +
-                "      \"inntektErInnrapporteringspliktig\": true,\n" +
-                "      \"inntektTrygdeavgiftBlirTrukket\": true\n" +
-                "    },\n" +
-                "    \"tilleggsopplysninger\": \"Lang utgreiing om utsendelsen som egentlig ikke er relevant for saksbehandlingen...\",\n" +
-                "    \"arbeidsgiversBekreftelse\": {\n" +
-                "      \"arbeidsgiverBekrefterUtsendelse\": true,\n" +
-                "      \"arbeidstakerAnsattUnderUtsendelsen\": true,\n" +
-                "      \"erstatterArbeidstakerenUtsendte\": true,\n" +
-                "      \"arbeidstakerTidligereUtsendt24Mnd\": true,\n" +
-                "      \"arbeidsgiverBetalerArbeidsgiveravgift\": true,\n" +
-                "      \"trygdeavgiftTrukketGjennomSkatt\": true,\n" +
-                "      \"trygdeavgiftTrukketGjennomSkattDato\": \"2020-02-02\"\n" +
-                "    }\n" +
-                "}";
-
+        URI søknadURI = (getClass().getClassLoader().getResource("soknad.json")).toURI();
+        String json = new String(Files.readAllBytes(Paths.get(søknadURI)));
         soeknadDokument = mapper.readValue(json, SoeknadDokument.class);
 
         soeknadService = new SoeknadService(behandlingRepo, saksopplysningRepo, dokumentFactory);
@@ -179,7 +105,6 @@ public class SoeknadServiceTest {
     @Test
     public void registrerSøknad() throws Exception {
 
-
         soeknadDokument.arbeidNorge.ansattPaSokkelEllerSkip = "sokkel";
         long behandlingID = 1L;
         Behandling b = new Behandling();
@@ -190,5 +115,4 @@ public class SoeknadServiceTest {
 
         verify(saksopplysningRepo, times(1)).save((Saksopplysning) any());
     }
-
 }

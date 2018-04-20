@@ -49,6 +49,8 @@ public class SoeknadDokument extends SaksopplysningDokument {
     // Øvrige
     public String tilleggsopplysninger;
 
+    public OpplysningerOmBrukeren opplysningerOmBrukeren;
+
     public SoeknadDokument() {
         arbeidUtland = new ArbeidUtland();
         foretakUtland = new ForetakUtland();
@@ -56,6 +58,6 @@ public class SoeknadDokument extends SaksopplysningDokument {
         arbeidNorge = new ArbeidNorge();
         juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
         arbeidsinntekt = new Arbeidsinntekt();
+        opplysningerOmBrukeren = new OpplysningerOmBrukeren();
     }
-
 }
