@@ -31,12 +31,13 @@ public class JournalforingTjeneste extends RestTjeneste {
     @Path("{journalpostID}")
     public JournalpostDto hentJournalpostOpplysninger(@PathParam("journalpostID") String journalpostID) {
         JournalpostDto journalpostDto = new JournalpostDto();
+        // TODO
         journalføringService.hentJournalpost(journalpostID);
         return journalpostDto;
     }
 
     @POST
     public void journalfør(JournalforingDto journalforingDto) {
-
+        // TODO
     }
 }

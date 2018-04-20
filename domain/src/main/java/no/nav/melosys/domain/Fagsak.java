@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -107,6 +107,21 @@ public class Fagsak {
 
     public void setBehandlinger(List<Behandling> behandlinger) {
         this.behandlinger = behandlinger;
+    }
+
+    /**
+     * Returnerer den aktive behandlingen knyttet til saken eller {@code null} hvis den ikke finnes.
+     */
+    public Behandling getAktivBehandling() {
+        List<Behandling> behandlinger = getBehandlinger().stream().
+            filter(b -> !b.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
+        if (behandlinger.size() > 1) {
+            throw new RuntimeException("Det finnes mer enn en aktive behandlinger");
+        } else if (behandlinger.size() == 1) {
+            return behandlinger.get(0);
+        } else{
+            return null;
+        }
     }
 
     @Override

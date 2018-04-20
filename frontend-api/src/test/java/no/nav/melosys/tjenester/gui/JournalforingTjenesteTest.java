@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -18,7 +19,7 @@ import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.VedleggTittel;
 import no.nav.melosys.service.journalforing.JournalforingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.tjenester.gui.dto.FagsakOppsummering2Dto;
+import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.AktoerDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.DokumentDto;
@@ -56,7 +57,6 @@ public class JournalforingTjenesteTest {
         tjeneste = new JournalforingTjeneste(journalføringService);
     }
 
-    @Test
     public void jfrJsonUt() {
         JournalpostDto dto = new JournalpostDto();
         dto.setBruker(new AktoerDto("12345", "Bruker ABC"));
@@ -74,26 +74,33 @@ public class JournalforingTjenesteTest {
         dokumentDto.setUrl("/dokumenttest.pdf");
         dto.setDokument(dokumentDto);
 
-        FagsakOppsummering2Dto fagsakOppsummering2Dto = new FagsakOppsummering2Dto();
-        fagsakOppsummering2Dto.setSaksnummer("MEL-1234");
-        fagsakOppsummering2Dto.setSøknadsperiode(new PeriodeDto(LocalDate.now(), LocalDate.MAX));
-        fagsakOppsummering2Dto.setSakstype(FagsakType.EU_EØS);
-        fagsakOppsummering2Dto.setBehandlingstype(BehandlingType.SØKNAD);
-        fagsakOppsummering2Dto.setBehandlingsstatus(BehandlingStatus.UNDER_BEHANDLING);
-        fagsakOppsummering2Dto.setLand(Arrays.asList("DK","SE"));
-        fagsakOppsummering2Dto.setRegistrertDato(LocalDateTime.MIN);
-
         try {
             String json = mapper.writeValueAsString(dto);
             System.out.println(json);
-
-            System.out.println(mapper.writeValueAsString(fagsakOppsummering2Dto));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Test
+    public void fagsakJsonUt() {
+        FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
+        fagsakOppsummeringDto.setSaksnummer("MEL-1234");
+        fagsakOppsummeringDto.setSøknadsperiode(new PeriodeDto(LocalDate.now(), LocalDate.MAX));
+        fagsakOppsummeringDto.setSakstype(FagsakType.EU_EØS);
+        fagsakOppsummeringDto.setBehandlingstype(BehandlingType.SØKNAD);
+        fagsakOppsummeringDto.setBehandlingsstatus(BehandlingStatus.UNDER_BEHANDLING);
+        fagsakOppsummeringDto.setLand(Arrays.asList("DK","SE"));
+        fagsakOppsummeringDto.setRegistrertDato(LocalDateTime.MIN);
+
+        try {
+            System.out.println(mapper.writeValueAsString(fagsakOppsummeringDto));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public void jfrJsonInn() {
         JournalforingDto dto = new JournalforingDto();
         dto.setJournalpostID("Journal_1234");
