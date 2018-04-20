@@ -11,6 +11,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periodetype;
 import org.junit.Test;
 
+import static no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter.medlemsperiodeKomparator;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SaksopplysningerTilDtoConverterTest {
@@ -38,7 +39,7 @@ public class SaksopplysningerTilDtoConverterTest {
     }
 
     @Test
-    public void testMedlemskapPerioderKronolgisk(){
+    public void testMedlemsperioderKronologisk(){
         List<Medlemsperiode> medlemsperioder = new ArrayList<>() ;
         Medlemsperiode medlemsperiode1 = new Medlemsperiode();
         medlemsperiode1.type = Periodetype.PMMEDSKP;
@@ -61,7 +62,7 @@ public class SaksopplysningerTilDtoConverterTest {
         medlemsperioder.add(medlemsperiode3);
         medlemsperioder.add(medlemsperiode4);
 
-        medlemsperioder.sort(Comparator.comparing(Medlemsperiode::getType ).thenComparing(SaksopplysningerTilDtoConverter.medlemsperiodeKomparator));
+        medlemsperioder.sort(Comparator.comparing(Medlemsperiode::getType).thenComparing(medlemsperiodeKomparator));
 
         assertThat(medlemsperioder.get(0)).isEqualTo(medlemsperiode4);
         assertThat(medlemsperioder.get(1)).isEqualTo(medlemsperiode1);

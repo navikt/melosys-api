@@ -24,8 +24,8 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
 
 
     //Medlemsperioder sorteres fra nyest til eldst.
-    public static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
-            ((o1, o2) -> {return o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());});
+     static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
+            (o1, o2) -> o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());
 
     @Override
     public SaksopplysningerDto convert(MappingContext<Set<Saksopplysning>, SaksopplysningerDto> context) {
