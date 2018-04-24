@@ -78,7 +78,7 @@ public class FagsakTjeneste extends RestTjeneste {
         return nyFagsak(fnr);
     }
 
-    @Deprecated // Nye saker kommer gjennom journalføring
+    @Deprecated // FIXME Nye saker kommer gjennom journalføring
     public Response nyFagsak(String fnr) {
         try {
             Fagsak fagsak = fagsakService.nyFagsak(fnr);

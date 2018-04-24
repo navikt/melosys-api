@@ -20,7 +20,8 @@ public class SaksopplysningerUtil {
         if (behandling == null) {
             return Optional.empty();
         }
-        return behandling.getSaksopplysninger().stream().filter(
-                saksopplysning -> saksopplysning.getType().equals(saksopplysningType)).findFirst().map(Saksopplysning::getDokument);
+        return behandling.getSaksopplysninger().stream()
+            .filter(saksopplysning -> saksopplysning.getType().equals(saksopplysningType))
+            .findFirst().map(Saksopplysning::getDokument);
     }
 }

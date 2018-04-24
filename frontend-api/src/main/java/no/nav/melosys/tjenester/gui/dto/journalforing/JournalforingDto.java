@@ -7,6 +7,7 @@ import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
 public class JournalforingDto {
     private String journalpostID;
     private String oppgaveID;
+    // Melosys saksnummer
     private String saksnummer;
     private AktoerDto bruker;
     private AktoerDto avsender;

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
@@ -24,10 +23,12 @@ public class SoeknadUtil {
      */
     public static List<String> hentLand(SoeknadDokument soeknad) {
         List<String> landkoder = new ArrayList<>();
-        Optional<List<Land>> landListe = Optional.ofNullable(soeknad.arbeidUtland.arbeidsland);
-        landListe.ifPresent(lands -> landkoder.addAll(soeknad.arbeidUtland.arbeidsland.stream().filter(Objects::nonNull).map(Land::getKode).collect(Collectors.toList())));
-        landListe = Optional.ofNullable(soeknad.oppholdUtland.oppholdsland);
-        landListe.ifPresent(lands -> landkoder.addAll(soeknad.oppholdUtland.oppholdsland.stream().filter(Objects::nonNull).map(Land::getKode).collect(Collectors.toList())));
+        if (soeknad.arbeidUtland.arbeidsland != null) {
+            soeknad.arbeidUtland.arbeidsland.stream().filter(Objects::nonNull).map(Land::getKode).forEach(landkoder::add);
+        }
+        if (soeknad.oppholdUtland.oppholdsland != null) {
+            soeknad.oppholdUtland.oppholdsland.stream().filter(Objects::nonNull).map(Land::getKode).forEach(landkoder::add);
+        }
         return landkoder;
     }
 

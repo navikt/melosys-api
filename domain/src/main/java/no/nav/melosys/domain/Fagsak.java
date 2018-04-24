@@ -113,8 +113,8 @@ public class Fagsak {
      * Returnerer den aktive behandlingen knyttet til saken eller {@code null} hvis den ikke finnes.
      */
     public Behandling getAktivBehandling() {
-        List<Behandling> behandlinger = getBehandlinger().stream().
-            filter(b -> !b.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
+        List<Behandling> behandlinger = getBehandlinger().stream()
+            .filter(b -> !b.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
         if (behandlinger.size() > 1) {
             throw new RuntimeException("Det finnes mer enn en aktive behandlinger");
         } else if (behandlinger.size() == 1) {

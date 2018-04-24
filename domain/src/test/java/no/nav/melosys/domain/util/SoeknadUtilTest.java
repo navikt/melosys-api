@@ -18,7 +18,6 @@ public class SoeknadUtilTest {
     @Test
     public void hentLand_arbeidUtland() {
         SoeknadDokument soeknad = new SoeknadDokument();
-        soeknad.arbeidUtland = new ArbeidUtland();
         soeknad.arbeidUtland.arbeidsland = Arrays.asList(new Land(Land.BELGIA), new Land(Land.BULGARIA));
 
         List<String> strings = SoeknadUtil.hentLand(soeknad);
@@ -28,7 +27,6 @@ public class SoeknadUtilTest {
     @Test
     public void hentLand_oppholdUtland() {
         SoeknadDokument soeknad = new SoeknadDokument();
-        soeknad.oppholdUtland = new OppholdUtland();
         soeknad.oppholdUtland.oppholdsland = Arrays.asList(new Land(Land.BELGIA), new Land(Land.BULGARIA));
 
         List<String> strings = SoeknadUtil.hentLand(soeknad);
@@ -46,7 +44,6 @@ public class SoeknadUtilTest {
         Periode periode_2 = new Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX);
         soeknad.oppholdUtland.oppholdsPeriode = periode_2;
 
-
         Periode res = SoeknadUtil.hentPeriode(soeknad);
         assertThat(res).isEqualTo(periode_1);
     }
@@ -60,7 +57,6 @@ public class SoeknadUtilTest {
         soeknad.arbeidUtland.arbeidsperiode = null;
         Periode periode_2 = new Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX);
         soeknad.oppholdUtland.oppholdsPeriode = periode_2;
-
 
         Periode res = SoeknadUtil.hentPeriode(soeknad);
         assertThat(res).isEqualTo(periode_2);
