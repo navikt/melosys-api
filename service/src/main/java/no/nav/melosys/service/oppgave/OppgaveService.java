@@ -39,12 +39,18 @@ public class OppgaveService {
     }
 
     @Transactional
-    public List<OppgaveDto> hentOppgaver(String ansvarligID) {
-        List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListe(ansvarligID);
-        return oppgaverTilMineSaker(oppgaverFraDomain);
+    public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) {
+        List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
+        return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
-    private List<OppgaveDto> oppgaverTilMineSaker(List<Oppgave> oppgaverFraDomain) {
+    @Transactional
+    public List<OppgaveDto> hentOppgaverMedBruker(String brukerIdent) {
+        List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedBruker(brukerIdent);
+        return oppgaverTilDtoer(oppgaverFraDomain);
+    }
+
+    private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) {
         return oppgaverFraDomain.stream().map(oppgave -> tilOppgaveDto(oppgave)).collect(Collectors.toList());
     }
 

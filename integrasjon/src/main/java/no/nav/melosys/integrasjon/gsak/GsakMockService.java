@@ -43,8 +43,13 @@ public class GsakMockService implements GsakFasade {
     }
 
     @Override
-    public List<Oppgave> finnOppgaveListe(String ansvarligId) throws IntegrasjonException {
+    public List<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws IntegrasjonException {
         return oppgaveRepo.finnOppgaverMedAnsvarligID(ansvarligId);
+    }
+
+    @Override
+    public List<Oppgave> finnOppgaveListeMedBruker(String brukerIdent) throws IntegrasjonException {
+        return oppgaveRepo.finnOppgaverMedBruker(brukerIdent);
     }
 
     @Override

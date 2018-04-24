@@ -18,4 +18,5 @@ public interface OppgaveMockRepository {
 
     List<Oppgave> finnOppgaverMedAnsvarligID(String ansvarligID);
 
+    List<Oppgave> finnOppgaverMedBruker(String brukerIdent);
 }

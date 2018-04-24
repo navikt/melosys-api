@@ -1,9 +1,13 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
@@ -13,10 +17,17 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.RolleType;
+import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
+import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
+import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
 import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
@@ -25,6 +36,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+
+import static no.nav.melosys.domain.util.SaksopplysningerUtil.hentDokument;
+import static no.nav.melosys.domain.util.SoeknadUtil.hentLand;
+import static no.nav.melosys.domain.util.SoeknadUtil.hentPeriode;
 
 @Api(tags = {"fagsak"})
 @Path("/fagsaker")
@@ -94,6 +109,22 @@ public class FagsakTjeneste extends RestTjeneste {
         }
     }
 
+    @GET
+    @Path("/sok")
+    @ApiOperation(value = "Søk etter saker på fødselsnummer eller d-nummer", notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."))
+    public List<FagsakOppsummeringDto> hentFagsaker(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
+        Iterable<Fagsak> saker = null;
+
+        if (fnr == null) {
+            saker = fagsakService.hentAlle();
+        } else {
+            // TODO Oppslag mot TPS for å få aktørID
+            String aktørID = fnr; // test data har aktørID = fnr
+            saker = fagsakService.hentFagsaker(RolleType.BRUKER, aktørID);
+        }
+        return tilDtoer(saker);
+    }
+
     private FagsakDto tilDto(Fagsak fagsak) {
         FagsakDto fagsakDto = new FagsakDto();
         modelMapper.map(fagsak, fagsakDto);
@@ -101,4 +132,34 @@ public class FagsakTjeneste extends RestTjeneste {
         return fagsakDto;
     }
 
+    private List<FagsakOppsummeringDto> tilDtoer(Iterable<Fagsak> saker) {
+        List<FagsakOppsummeringDto> fagsakListe = new ArrayList<>();
+
+        for (Fagsak fagsak : saker) {
+            FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
+            // FIXME saksnummer bruker id fra DB
+            fagsakOppsummeringDto.setSaksnummer("" + fagsak.getId());
+            fagsakOppsummeringDto.setSakstype(fagsak.getType());
+            fagsakOppsummeringDto.setRegistrertDato(fagsak.getRegistrertDato());
+
+            Behandling behandling = fagsak.getAktivBehandling();
+            if (behandling != null) {
+                fagsakOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
+                fagsakOppsummeringDto.setBehandlingstype(behandling.getType());
+
+                Optional<SaksopplysningDokument> opt = hentDokument(behandling, SaksopplysningType.SØKNAD);
+                if (opt.isPresent()) {
+                    SoeknadDokument soeknadDokument = (SoeknadDokument) opt.get();
+                    fagsakOppsummeringDto.setLand(hentLand(soeknadDokument));
+
+                    Periode periode = hentPeriode(soeknadDokument);
+                    fagsakOppsummeringDto.setSøknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                }
+            }
+
+            fagsakListe.add(fagsakOppsummeringDto);
+        }
+
+        return fagsakListe;
+    }
 }

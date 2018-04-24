@@ -45,7 +45,18 @@ public interface GsakFasade {
      * @return List<Oppgave>
      * @throws IntegrasjonException
      */
-    public List<Oppgave> finnOppgaveListe(String ansvarligId)
+    public List<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId)
+            throws IntegrasjonException;
+
+    /**
+     * Finner Oppgaver basert på bruker.
+     * GSAK sorterer oppgavene stigende etter frist.
+     *
+     * @param ident
+     * @return List<Oppgave>
+     * @throws IntegrasjonException
+     */
+    public List<Oppgave> finnOppgaveListeMedBruker(String ident)
             throws IntegrasjonException;
 
     /**

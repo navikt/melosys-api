@@ -106,7 +106,7 @@ public class OppgaveTjenesteTest {
         List<OppgaveDto> oppgaver = new ArrayList<>();
         oppgaver.add(oppgave);
 
-        when(oppgaveService.hentOppgaver(anyString())).thenReturn(oppgaver);
+        when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
         Response response = tjeneste.mineOppgaver();
         assertThat(response.getEntity()).isExactlyInstanceOf(ArrayList.class);
         List<OppgaveDto> entity = (List<OppgaveDto>) response.getEntity();

@@ -297,7 +297,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public List<no.nav.melosys.domain.Oppgave> finnOppgaveListe(String ansvarligId)
+    public List<no.nav.melosys.domain.Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId)
             throws IntegrasjonException {
 
         FinnOppgaveListeSokMal sokMal = FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(Integer.toString(MELOSYS_ENHET_ID)).medAnsvarligId(ansvarligId).build();
@@ -328,8 +328,14 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
+    public List<no.nav.melosys.domain.Oppgave> finnOppgaveListeMedBruker(String ident) throws IntegrasjonException {
+        // FIXME Venter på nye GSAK tjenester
+        return null;
+    }
+
+    @Override
     public void tildelOppgave(String oppgaveId, String saksbehandlerID) {
-        // FIXME Francois venter på kall
+        // FIXME Venter på nye GSAK tjenester
     }
 
     private WSAktor byggWSAktør(String ident, AktorType aktørType) {

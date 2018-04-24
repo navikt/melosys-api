@@ -13,6 +13,7 @@ import no.nav.melosys.domain.gsak.Underkategori;
 public class Oppgave {
     private String oppgaveId;
     private String saksnummer;
+    private String bruker;
     private LocalDate aktivFra;
     private LocalDate aktivTil;
     private Fagomrade fagomrade;
@@ -57,6 +58,14 @@ public class Oppgave {
 
     public void setAnsvarligId(String ansvarligId) {
         this.ansvarligId = ansvarligId;
+    }
+
+    public String getBruker() {
+        return bruker;
+    }
+
+    public void setBruker(String bruker) {
+        this.bruker = bruker;
     }
 
     public String getOppgaveId() {
