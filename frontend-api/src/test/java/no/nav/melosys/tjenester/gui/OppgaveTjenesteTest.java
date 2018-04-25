@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.Oppgave;
@@ -17,13 +18,13 @@ import no.nav.melosys.domain.gsak.Oppgavetype;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.BehandlingDto;
-import no.nav.melosys.service.oppgave.dto.KodeverdiDto;
 import no.nav.melosys.service.oppgave.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
+import no.nav.melosys.tjenester.gui.jackson.JacksonModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,17 +82,17 @@ public class OppgaveTjenesteTest {
     }
 
     @Test
-    public void mineSaker() {
+    public void mineOppgaver() {
         OppgaveDto oppgave = new OppgaveDto();
         oppgave.setOppgaveID("177057928");
-        oppgave.setOppgavetype(new KodeverdiDto("JFR", "Journalføring"));
+        oppgave.setOppgavetype(no.nav.melosys.domain.Oppgavetype.JFR);
         oppgave.setSammensattNavn("GLITRENDE HATT");
         oppgave.setSaksnummer("4");
 
         BehandlingDto behandlingDto =new BehandlingDto();
-        KodeverdiDto sakstype= new KodeverdiDto("EU_EOS","EU/EØS");
-        KodeverdiDto type= new KodeverdiDto("todo0003","Påstand fra utenlandsk myndighet");
-        KodeverdiDto status = new KodeverdiDto("A","Oversett Kode til Display text");
+        FagsakType sakstype= FagsakType.EU_EØS;
+        BehandlingType type= BehandlingType.PÅSTAND_UTL;
+        BehandlingStatus status = BehandlingStatus.FORELØPIG;
         oppgave.setSakstype(sakstype);
         behandlingDto.setType(type);
         behandlingDto.setStatus(status);
@@ -110,12 +111,16 @@ public class OppgaveTjenesteTest {
         assertThat(response.getEntity()).isExactlyInstanceOf(ArrayList.class);
         List<OppgaveDto> entity = (List<OppgaveDto>) response.getEntity();
         assertThat(entity.get(0).getOppgaveID()).isEqualTo("177057928");
+
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        objectMapper.registerModule(new JacksonModule(null));
+
         try {
-            assertThat(objectMapper.writeValueAsString(entity)).contains("GLITRENDE HATT");
-            assertThat(objectMapper.writeValueAsString(entity)).contains("todo0003");
+            String json = objectMapper.writeValueAsString(entity);
+            assertThat(json).contains("GLITRENDE HATT");
+            assertThat(json).contains("PS_U");
         } catch (IOException e) {
             e.printStackTrace();
         }

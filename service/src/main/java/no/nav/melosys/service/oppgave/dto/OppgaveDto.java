@@ -4,23 +4,26 @@ package no.nav.melosys.service.oppgave.dto;
 import java.time.LocalDate;
 import java.util.List;
 
+import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.Oppgavetype;
+
 public class OppgaveDto {
 
     private String oppgaveID;
-    private KodeverdiDto oppgavetype;
+    private Oppgavetype oppgavetype;
     private String sammensattNavn;
     private String saksnummer;
     private String journalpostID;
     private LocalDate aktivTil;
     private PeriodeDto soknadsperiode;
-    private KodeverdiDto sakstype;
+    private FagsakType sakstype;
     private BehandlingDto behandling;
 
-    public KodeverdiDto getSakstype() {
+    public FagsakType getSakstype() {
         return sakstype;
     }
 
-    public void setSakstype(KodeverdiDto sakstype) {
+    public void setSakstype(FagsakType sakstype) {
         this.sakstype = sakstype;
     }
 
@@ -50,11 +53,11 @@ public class OppgaveDto {
         this.oppgaveID = oppgaveID;
     }
 
-    public KodeverdiDto getOppgavetype() {
+    public Oppgavetype getOppgavetype() {
         return oppgavetype;
     }
 
-    public void setOppgavetype(KodeverdiDto oppgavetype) {
+    public void setOppgavetype(Oppgavetype oppgavetype) {
         this.oppgavetype = oppgavetype;
     }
 

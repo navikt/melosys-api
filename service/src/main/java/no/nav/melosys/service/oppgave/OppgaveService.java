@@ -1,33 +1,29 @@
 package no.nav.melosys.service.oppgave;
 
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.Oppgavetype;
-import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.oppgave.dto.BehandlingDto;
-import no.nav.melosys.service.oppgave.dto.KodeverdiDto;
-import no.nav.melosys.service.oppgave.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
+import no.nav.melosys.service.oppgave.dto.PeriodeDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static no.nav.melosys.domain.util.SaksopplysningerUtil.hentDokument;
+import static no.nav.melosys.domain.util.SoeknadUtil.hentLand;
+import static no.nav.melosys.domain.util.SoeknadUtil.hentPeriode;
 
 @Service
 public class OppgaveService {
@@ -58,35 +54,34 @@ public class OppgaveService {
         dest.setAktivTil(oppgave.getAktivTil());
 
         if (oppgave.erJournalFøring()) {
-            Oppgavetype type = Oppgavetype.JFR;
-            dest.setOppgavetype(new KodeverdiDto(type.getKode(), type.getBeskrivelse()));
+            dest.setOppgavetype(Oppgavetype.JFR);
             dest.setJournalpostID(oppgave.getDokumentId());
         } else if (oppgave.erBehandling()) {
-            Oppgavetype type = Oppgavetype.BEH_SAK;
-            dest.setOppgavetype(new KodeverdiDto(type.getKode(), type.getBeskrivelse()));
+            dest.setOppgavetype(Oppgavetype.BEH_SAK);
 
             Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
             if (fagsak == null) {
                 throw new RuntimeException("Fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer() + " ikke funnet!");
             }
-            List<Behandling> behandlinger = fagsak.getBehandlinger();
             // FIXME MELOSYS-1119 logisk ID for Fagsak
             dest.setSaksnummer(""+fagsak.getId());
+            dest.setSakstype(fagsak.getType());
 
-            ekstraktSokenadDokument(behandlinger, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
+            Behandling behandling = fagsak.getAktivBehandling();
+            dest.setBehandling(mapBehandling(behandling));
+
+            hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
                 SoeknadDokument søknadDokument = (SoeknadDokument) saksopplysningDokument;
-                dest.setLand(mapLand(søknadDokument));
-                dest.setSoknadsperiode(mapDato(søknadDokument));
+                dest.setLand(hentLand(søknadDokument));
+                dest.setSoknadsperiode(mapPeriode(søknadDokument));
             });
-            ekstraktSokenadDokument(behandlinger, SaksopplysningType.PERSONOPPLYSNING).ifPresent(
+            hentDokument(behandling, SaksopplysningType.PERSONOPPLYSNING).ifPresent(
                     saksopplysningDokument -> {
                         PersonDokument personDokument = (PersonDokument) saksopplysningDokument;
                         dest.setSammensattNavn(personDokument.sammensattNavn);
                     }
             );
 
-            dest.setBehandling(mapSaksTypeOgBehandling(fagsak));
-            dest.setSakstype(new KodeverdiDto(fagsak.getType().getKode(), fagsak.getType().getBeskrivelse()));
         } else {
             throw new RuntimeException("Oppgavetype " + oppgave.getOppgavetype() + " støttes ikke");
         }
@@ -94,43 +89,19 @@ public class OppgaveService {
         return dest;
     }
 
-    private Optional<SaksopplysningDokument> ekstraktSokenadDokument(List<Behandling> behandlinger, SaksopplysningType saksopplysningType) {
-        return behandlinger.stream().flatMap(behandling -> behandling.getSaksopplysninger().stream()).filter(
-                saksopplysning -> saksopplysning.getType().equals(saksopplysningType)).findFirst().map(Saksopplysning::getDokument);
-    }
-
-    private static BehandlingDto mapSaksTypeOgBehandling(Fagsak fagsak) {
-        BehandlingDto behandling = new BehandlingDto();
-        behandling.setStatus(new KodeverdiDto(fagsak.getStatus().getKode(), fagsak.getStatus().getBeskrivelse()));
-        List<Behandling> aktivBehandlinger = fagsak.getBehandlinger().stream().
-                filter(varBehandling -> !varBehandling.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
-        if (aktivBehandlinger.size() > 1) {
-            throw new RuntimeException("Det finnes mer enn en aktive behandlinger");
-        } else if (aktivBehandlinger.size() == 1) {
-            behandling.setType((new KodeverdiDto(aktivBehandlinger.get(0).getStatus().getKode(), aktivBehandlinger.get(0).getStatus().getBeskrivelse())));
-        } else{
+    private static BehandlingDto mapBehandling(Behandling behandling) {
+        BehandlingDto behandlingDto = new BehandlingDto();
+        if (behandling == null) {
             throw new RuntimeException("Det finnes ingen aktive behandlinger");
+        } else {
+            behandlingDto.setStatus(behandling.getStatus());
+            behandlingDto.setType(behandling.getType());
         }
-        return behandling;
+        return behandlingDto;
     }
 
-    private static PeriodeDto mapDato(SoeknadDokument soeknadDokument) {
-        Optional<Periode> arbeidsperiode = Optional.ofNullable(soeknadDokument.arbeidUtland.arbeidsperiode);
-        Optional<Periode> oppholdsPeriode = Optional.ofNullable(soeknadDokument.oppholdUtland.oppholdsPeriode);
-        if (arbeidsperiode.isPresent()) {
-            return new PeriodeDto(arbeidsperiode.get().getFom(), arbeidsperiode.get().getTom());
-        } else if (oppholdsPeriode.isPresent()) {
-            return new PeriodeDto(oppholdsPeriode.get().getFom(), oppholdsPeriode.get().getTom());
-        }
-        throw new RuntimeException("Det finnes ikke noen arbeidsperiode eller oppholdsPeriode");
-    }
-
-    private static List<String> mapLand(SoeknadDokument soeknadDokument) {
-        List<String> landkoder = new ArrayList<>();
-        Optional<List<Land>> landListe = Optional.ofNullable(soeknadDokument.arbeidUtland.arbeidsland);
-        landListe.ifPresent(lands -> landkoder.addAll(soeknadDokument.arbeidUtland.arbeidsland.stream().filter(Objects::nonNull).map(Land::getKode).collect(Collectors.toList())));
-        landListe = Optional.ofNullable(soeknadDokument.oppholdUtland.oppholdsland);
-        landListe.ifPresent(lands -> landkoder.addAll(soeknadDokument.oppholdUtland.oppholdsland.stream().filter(Objects::nonNull).map(Land::getKode).collect(Collectors.toList())));
-        return landkoder;
+    private static PeriodeDto mapPeriode(SoeknadDokument soeknadDokument) {
+        Periode periode = hentPeriode(soeknadDokument);
+        return new PeriodeDto(periode.getFom(), periode.getTom());
     }
 }

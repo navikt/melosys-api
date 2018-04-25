@@ -47,14 +47,14 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     /**
      * Henter alle gyldige verdier for et kodeverk på et gitt tidspunkt.
      */
-    public List<String> gyldigeVerdier(Kodeverk kodeverk, LocalDate dato) {
+    public List<KodeDto> gyldigeVerdier(FellesKodeverk kodeverk, LocalDate dato) {
         Map<String, List<Kode>> koder = hentKodeverk(kodeverk.getNavn()).getKoder();
-        List<String> res = new ArrayList<>(koder.size());
+        List<KodeDto> res = new ArrayList<>(koder.size());
         for (List<Kode> kodeperioder : koder.values()) {
             // Kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
             for (Kode kandidat : kodeperioder) {
                 if (!kandidat.getGyldigFom().isAfter(dato) && !kandidat.getGyldigTom().isBefore(dato)) {
-                    res.add(kandidat.getKode());
+                    res.add(new KodeDto(kandidat.getKode(), kandidat.getNavn()));
                     break; // Inner
                 }
             }
@@ -65,7 +65,7 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     /**
      * Henter verdien for en kode i et kodeverk ved mapping til DTO i frontend-API.
      */
-    public KodeDto getKodeverdi(Kodeverk kodeverk, String kode) {
+    public KodeDto getKodeverdi(FellesKodeverk kodeverk, String kode) {
         if (kode == null) {
             return null;
         }
@@ -75,7 +75,7 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     /**
      * Henter verdien for en kode i et kodeverk på en gitt dato, eller null hvis koden ikke er omfattet av kodeverket på angitt dato.
      */
-    public String dekod(Kodeverk kodeverk, String kode, LocalDate dato) {
+    public String dekod(FellesKodeverk kodeverk, String kode, LocalDate dato) {
         List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
         if (kodeperioder == null) {
             log.error("Fant ikke term for kode '{}' kodeverk '{}'", kode, kodeverk.getNavn());
@@ -112,7 +112,7 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     private synchronized void henteAlleKodeVerkData() {
         log.info("Tømmer cache og henter Kodeverk på nytt");
         kodeverkCache.clear();
-        for (Kodeverk kodeverk : Kodeverk.values()) {
+        for (FellesKodeverk kodeverk : FellesKodeverk.values()) {
             hentKodeverk(kodeverk.getNavn());
         }
     }
@@ -120,7 +120,7 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     private class TømCacheScheduler extends Thread {
         @Override
         public void run() {
-            henteAlleKodeVerkData(); // Hente Kodeverk når applikasjon starter
+            henteAlleKodeVerkData(); // Hente FellesKodeverk når applikasjon starter
             for (;;) {
                 if (KLOKKESLETT_FOR_CACHE_REFRESH == LocalTime.now().getHour()) { // Tømme cache og hente Kodeverk på nytt hvertdag kl 06:00
                     henteAlleKodeVerkData();

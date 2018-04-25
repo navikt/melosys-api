@@ -1,69 +1,51 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.melosys.domain.FagsakStatus;
+import no.nav.melosys.domain.BehandlingStatus;
+import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.FagsakType;
 
 public class FagsakOppsummeringDto {
-
-    private Long saksnummer;
-    private String fnr;
-    private String sammensattNavn;
-    @JsonProperty("kjoenn")
-    private String kjønn;
-    private FagsakType type;
-    private FagsakStatus status;
+    private String saksnummer;
+    private FagsakType sakstype;
+    private BehandlingType behandlingstype;
+    private BehandlingStatus behandlingsstatus;
     private LocalDateTime registrertDato;
+    private PeriodeDto søknadsperiode;
+    private List<String> land;
 
-    public Long getSaksnummer() {
+    public String getSaksnummer() {
         return saksnummer;
     }
 
-    public void setSaksnummer(Long saksnummer) {
+    public void setSaksnummer(String saksnummer) {
         this.saksnummer = saksnummer;
     }
 
-    public String getFnr() {
-        return fnr;
+    public FagsakType getSakstype() {
+        return sakstype;
     }
 
-    public void setFnr(String fnr) {
-        this.fnr = fnr;
+    public void setSakstype(FagsakType sakstype) {
+        this.sakstype = sakstype;
     }
 
-    public String getSammensattNavn() {
-        return sammensattNavn;
+    public BehandlingType getBehandlingstype() {
+        return behandlingstype;
     }
 
-    public void setSammensattNavn(String sammensattNavn) {
-        this.sammensattNavn = sammensattNavn;
+    public void setBehandlingstype(BehandlingType behandlingstype) {
+        this.behandlingstype = behandlingstype;
     }
 
-    public String getKjønn() {
-        return kjønn;
+    public BehandlingStatus getBehandlingsstatus() {
+        return behandlingsstatus;
     }
 
-    public void setKjønn(String kjønn) {
-        this.kjønn = kjønn;
-    }
-
-    public FagsakType getType() {
-        return type;
-    }
-
-    public void setType(FagsakType type) {
-        this.type = type;
-    }
-
-    public FagsakStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(FagsakStatus status) {
-        this.status = status;
+    public void setBehandlingsstatus(BehandlingStatus behandlingsstatus) {
+        this.behandlingsstatus = behandlingsstatus;
     }
 
     public LocalDateTime getRegistrertDato() {
@@ -72,5 +54,21 @@ public class FagsakOppsummeringDto {
 
     public void setRegistrertDato(LocalDateTime registrertDato) {
         this.registrertDato = registrertDato;
+    }
+
+    public PeriodeDto getSøknadsperiode() {
+        return søknadsperiode;
+    }
+
+    public void setSøknadsperiode(PeriodeDto søknadsperiode) {
+        this.søknadsperiode = søknadsperiode;
+    }
+
+    public List<String> getLand() {
+        return land;
+    }
+
+    public void setLand(List<String> land) {
+        this.land = land;
     }
 }

@@ -69,7 +69,7 @@ public class FagsakTjeneste extends RestTjeneste {
 
     @GET
     @Path("ny/{fnr}")
-    @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.", notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."))
+    @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.")
     public Response nyFagsakSikret(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
 
         // FIXME Midlertidig tilgangskontroll
@@ -78,6 +78,7 @@ public class FagsakTjeneste extends RestTjeneste {
         return nyFagsak(fnr);
     }
 
+    @Deprecated // FIXME Nye saker kommer gjennom journalføring
     public Response nyFagsak(String fnr) {
         try {
             Fagsak fagsak = fagsakService.nyFagsak(fnr);

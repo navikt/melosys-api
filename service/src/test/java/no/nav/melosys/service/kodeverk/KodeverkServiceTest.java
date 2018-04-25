@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.service.kodeverk.Kodeverk.LANDKODER;
+import static no.nav.melosys.service.kodeverk.FellesKodeverk.LANDKODER;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;

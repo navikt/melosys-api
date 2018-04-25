@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.jackson;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.tjenester.gui.jackson.serialize.KodeverkSerializer;
 import no.nav.melosys.tjenester.gui.jackson.serialize.LandkodeSerializer;
 import no.nav.melosys.tjenester.gui.jackson.serialize.MedlemsperiodeSerializer;
 import no.nav.melosys.tjenester.gui.jackson.serialize.OrganisasjonSerializer;
@@ -15,6 +16,7 @@ public class JacksonModule extends SimpleModule {
     public JacksonModule(KodeverkService kodeverkService) {
         super();
 
+        addSerializer(new KodeverkSerializer());
         addSerializer(new LandkodeSerializer(kodeverkService));
         addSerializer(new MedlemsperiodeSerializer(kodeverkService));
         addSerializer(new OrganisasjonSerializer(kodeverkService));
