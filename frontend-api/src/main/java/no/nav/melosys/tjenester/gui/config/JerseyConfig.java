@@ -15,7 +15,6 @@ import no.nav.melosys.tjenester.gui.OppgaveTjeneste;
 import no.nav.melosys.tjenester.gui.OrganisasjonTjeneste;
 import no.nav.melosys.tjenester.gui.PersonTjeneste;
 import no.nav.melosys.tjenester.gui.SaksbehandlerTjeneste;
-import no.nav.melosys.tjenester.gui.SokTjeneste;
 import no.nav.melosys.tjenester.gui.SoknadTjeneste;
 import no.nav.melosys.tjenester.gui.VurderingTjeneste;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -39,7 +38,6 @@ public class JerseyConfig extends ResourceConfig {
         register(PersonTjeneste.class);
         register(SaksbehandlerTjeneste.class);
         register(SoknadTjeneste.class);
-        register(SokTjeneste.class);
         register(VurderingTjeneste.class);
         configureSwagger();
     }

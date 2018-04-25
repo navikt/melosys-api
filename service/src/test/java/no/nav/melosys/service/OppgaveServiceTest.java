@@ -66,7 +66,7 @@ public class OppgaveServiceTest {
         oppgave1.setAnsvarligId("12345678901");
         oppgaver.add(oppgave1);
 
-        when(gsakFasade.finnOppgaveListe(anyString())).
+        when(gsakFasade.finnOppgaveListeMedAnsvarlig(anyString())).
                 thenAnswer((Answer) invocation -> {
                     String string = invocation.getArgument(0);//AnsvarligID
                     return (string.equals("12345678901")) ? oppgaver : new ArrayList<>();
@@ -79,11 +79,11 @@ public class OppgaveServiceTest {
         fagsak.setBehandlinger(behandlinger);
         when(fagsakRepository.findByGsakSaksnummer(any(String.class))).thenReturn(fagsak);
 
-        List<OppgaveDto> mineSaker = oppgaveService.hentOppgaver("12345678901");
+        List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12345678901");
         assertThat(mineSaker.size()).isEqualTo(1);
         assertThat(mineSaker.get(0).getOppgaveID()).isEqualTo("1");
 
-        mineSaker = oppgaveService.hentOppgaver("12346678902");
+        mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12346678902");
         assertThat(mineSaker.size()).isEqualTo(0);
 
     }

@@ -46,7 +46,8 @@ public class Fagsak {
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Aktoer> aktører;
 
-    @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL)
+    // FIXME Diskutere strategi for eager/lazy loading
+    @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Behandling> behandlinger;
 
     public long getId() {

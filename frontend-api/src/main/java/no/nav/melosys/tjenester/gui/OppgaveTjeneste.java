@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
@@ -84,7 +85,14 @@ public class OppgaveTjeneste extends RestTjeneste {
     @ApiOperation(value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.")
     public Response mineOppgaver() {
         String ident = SubjectHandler.getInstance().getUserID();
-        List<OppgaveDto> oppgaveDtoListe = oppgaveService.hentOppgaver(ident);
+        List<OppgaveDto> oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
         return Response.ok(oppgaveDtoListe).build();
+    }
+
+    @GET
+    @Path("/sok")
+    @ApiOperation(value = "Henter alle oppgaver knyttet til en gitt bruker.")
+    public List<OppgaveDto> hentOppgaver(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
+        return oppgaveService.hentOppgaverMedBruker(fnr);
     }
 }
