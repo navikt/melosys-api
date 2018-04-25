@@ -57,6 +57,7 @@ public class JournalforingTjenesteTest {
         tjeneste = new JournalforingTjeneste(journalføringService);
     }
 
+    @Test
     public void jfrJsonUt() {
         JournalpostDto dto = new JournalpostDto();
         dto.setBruker(new AktoerDto("12345", "Bruker ABC"));
@@ -64,14 +65,8 @@ public class JournalforingTjenesteTest {
         dto.setErBrukerAvsender(false);
         dto.setSakstype(FagsakType.EU_EØS);
         DokumentDto dokumentDto = new DokumentDto();
-        dokumentDto.setNavn("Navn");
         dokumentDto.setMottattDato(LocalDate.now());
         dokumentDto.setTittel(DokumentTittel.SØKNAD_MEDLEMSSKAP);
-        List<VedleggTittel> titler = new ArrayList<>();
-        titler.add(VedleggTittel.TODO_1);
-        titler.add(VedleggTittel.TODO_2);
-        dokumentDto.setVedleggstitler(titler);
-        dokumentDto.setUrl("/dokumenttest.pdf");
         dto.setDokument(dokumentDto);
 
         try {
@@ -82,7 +77,6 @@ public class JournalforingTjenesteTest {
         }
     }
 
-    @Test
     public void fagsakJsonUt() {
         FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
         fagsakOppsummeringDto.setSaksnummer("MEL-1234");
