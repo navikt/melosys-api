@@ -8,18 +8,24 @@ import no.nav.melosys.integrasjon.test.Gen3WsProxyServiceITBase;
 import no.nav.melosys.integrasjon.test.TpsTestData;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning;
+import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonerMedSammeAdresseIkkeFunnet;
+import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonerMedSammeAdresseSikkerhetsbegrensning;
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.AktoerId;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
+import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonerMedSammeAdresseRequest;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 
 @RunWith(SpringRunner.class)
 public class PersonConsumerTestIT extends Gen3WsProxyServiceITBase {
@@ -58,6 +64,17 @@ public class PersonConsumerTestIT extends Gen3WsProxyServiceITBase {
         assertThat(response.getPerson().getPersonnavn().getEtternavn()).isEqualTo(TpsTestData.STD_KVINNE_ETTERNAVN);
     }
 
+    @Test
+    public void hentPersonerMedSammeAdresse() throws HentPersonerMedSammeAdresseSikkerhetsbegrensning, HentPersonerMedSammeAdresseIkkeFunnet {
+        HentPersonerMedSammeAdresseRequest request = new HentPersonerMedSammeAdresseRequest();
+        AktoerId aktør = new AktoerId();
+        aktør.setAktoerId(String.valueOf(TpsTestData.STD_AKTØR_ID));
+
+        assertThat(personConsumer.hentPersonerMedSammeAdresse(request)).isExactlyInstanceOf(Integer.class);
+    }
+
+    @Ignore
+    @Test
     public void xml() throws JAXBException, HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
         JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPerson.class, no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
         Marshaller marshaller = jaxbContext.createMarshaller();

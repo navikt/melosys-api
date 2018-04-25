@@ -12,6 +12,7 @@ import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.integrasjon.felles.exception.IkkeFunnetException;
+import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
@@ -23,11 +24,16 @@ import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentIdentForAktoerIdReques
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentIdentForAktoerIdResponse;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning;
+import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonerMedSammeAdresseIkkeFunnet;
+import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonerMedSammeAdresseSikkerhetsbegrensning;
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.AktoerId;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
+import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonerMedSammeAdresseRequest;
+import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonerMedSammeAdresseResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,4 +159,23 @@ public class TpsService implements TpsFasade {
         return hentPerson(ident, behov);
     }
 
+    @Override
+    public int hentAntallPersonerSomBorPåBostedsadresse(String argAktørId) throws IntegrasjonException {
+        //Hvis adressedato ikke gitt som request paramerter da tjensten antar at adresseDato er dagensdato.
+        HentPersonerMedSammeAdresseRequest request = new HentPersonerMedSammeAdresseRequest();
+        AktoerId aktørId = new AktoerId();
+        aktørId.setAktoerId(argAktørId);
+        try {
+            HentPersonerMedSammeAdresseResponse response = personConsumer.hentPersonerMedSammeAdresse(request);
+            if (response != null) {
+                return response.getPersonBorHerListe().size();
+            } else {
+                throw new IntegrasjonException("Feil ved henting av antall personer bor på bostedsadresse");
+            }
+        } catch (HentPersonerMedSammeAdresseSikkerhetsbegrensning hentPersonerMedSammeAdresseSikkerhetsbegrensning) {
+            throw new IntegrasjonException(hentPersonerMedSammeAdresseSikkerhetsbegrensning.getMessage());
+        } catch (HentPersonerMedSammeAdresseIkkeFunnet hentPersonerMedSammeAdresseIkkeFunnet) {
+            throw new IntegrasjonException(hentPersonerMedSammeAdresseIkkeFunnet.getMessage());
+        }
+    }
 }
