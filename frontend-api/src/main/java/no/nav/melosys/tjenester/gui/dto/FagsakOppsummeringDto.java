@@ -13,7 +13,7 @@ public class FagsakOppsummeringDto {
     private BehandlingType behandlingstype;
     private BehandlingStatus behandlingsstatus;
     private LocalDateTime registrertDato;
-    private PeriodeDto søknadsperiode;
+    private PeriodeDto soknadsperiode;
     private List<String> land;
 
     public String getSaksnummer() {
@@ -56,12 +56,12 @@ public class FagsakOppsummeringDto {
         this.registrertDato = registrertDato;
     }
 
-    public PeriodeDto getSøknadsperiode() {
-        return søknadsperiode;
+    public PeriodeDto getSoknadsperiode() {
+        return soknadsperiode;
     }
 
-    public void setSøknadsperiode(PeriodeDto søknadsperiode) {
-        this.søknadsperiode = søknadsperiode;
+    public void setSoknadsperiode(PeriodeDto søknadsperiode) {
+        this.soknadsperiode = søknadsperiode;
     }
 
     public List<String> getLand() {

@@ -153,7 +153,7 @@ public class FagsakTjeneste extends RestTjeneste {
                     fagsakOppsummeringDto.setLand(hentLand(soeknadDokument));
 
                     Periode periode = hentPeriode(soeknadDokument);
-                    fagsakOppsummeringDto.setSøknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                    fagsakOppsummeringDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
                 }
             }
 

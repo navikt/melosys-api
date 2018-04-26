@@ -80,7 +80,7 @@ public class JournalforingTjenesteTest {
     public void fagsakJsonUt() {
         FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
         fagsakOppsummeringDto.setSaksnummer("MEL-1234");
-        fagsakOppsummeringDto.setSøknadsperiode(new PeriodeDto(LocalDate.now(), LocalDate.MAX));
+        fagsakOppsummeringDto.setSoknadsperiode(new PeriodeDto(LocalDate.now(), LocalDate.MAX));
         fagsakOppsummeringDto.setSakstype(FagsakType.EU_EØS);
         fagsakOppsummeringDto.setBehandlingstype(BehandlingType.SØKNAD);
         fagsakOppsummeringDto.setBehandlingsstatus(BehandlingStatus.UNDER_BEHANDLING);
