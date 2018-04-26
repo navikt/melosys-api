@@ -1,38 +1,31 @@
 package no.nav.melosys.integrasjon.joark.journal;
 
-import no.nav.tjeneste.virksomhet.journal.v2.binding.HentDokumentDokumentIkkeFunnet;
-import no.nav.tjeneste.virksomhet.journal.v2.binding.HentDokumentSikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.journal.v2.binding.HentDokumentURLDokumentIkkeFunnet;
-import no.nav.tjeneste.virksomhet.journal.v2.binding.HentDokumentURLSikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.journal.v2.binding.HentJournalpostListeSikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.journal.v2.binding.JournalV2;
-import no.nav.tjeneste.virksomhet.journal.v2.meldinger.HentDokumentRequest;
-import no.nav.tjeneste.virksomhet.journal.v2.meldinger.HentDokumentResponse;
-import no.nav.tjeneste.virksomhet.journal.v2.meldinger.HentDokumentURLRequest;
-import no.nav.tjeneste.virksomhet.journal.v2.meldinger.HentDokumentURLResponse;
-import no.nav.tjeneste.virksomhet.journal.v2.meldinger.HentJournalpostListeRequest;
-import no.nav.tjeneste.virksomhet.journal.v2.meldinger.HentJournalpostListeResponse;
+
+import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentDokumentIkkeFunnet;
+import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentJournalpostIkkeFunnet;
+import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentSikkerhetsbegrensning;
+import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentURLDokumentIkkeFunnet;
+import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentURLSikkerhetsbegrensning;
+import no.nav.tjeneste.virksomhet.journal.v3.JournalV3;
+import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentRequest;
+import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentResponse;
+import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentURLRequest;
+import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentURLResponse;
 
 public class JournalConsumerImpl implements JournalConsumer {
-    private JournalV2 port;
+    private JournalV3 port;
 
-    public JournalConsumerImpl(JournalV2 port) {
+    public JournalConsumerImpl(JournalV3 port) {
         this.port = port;
     }
 
     @Override
-    public HentDokumentResponse hentDokument(HentDokumentRequest request) throws HentDokumentDokumentIkkeFunnet, HentDokumentSikkerhetsbegrensning {
+    public HentDokumentResponse hentDokument(HentDokumentRequest request) throws HentDokumentDokumentIkkeFunnet, HentDokumentJournalpostIkkeFunnet, HentDokumentSikkerhetsbegrensning  {
         return port.hentDokument(request);
-    }
-
-    @Override
-    public HentJournalpostListeResponse hentJournalpostListe(HentJournalpostListeRequest request) throws HentJournalpostListeSikkerhetsbegrensning {
-        return port.hentJournalpostListe(request);
     }
 
     @Override
     public HentDokumentURLResponse hentDokumentURL(HentDokumentURLRequest request) throws HentDokumentURLDokumentIkkeFunnet, HentDokumentURLSikkerhetsbegrensning {
         return port.hentDokumentURL(request);
     }
-
 }

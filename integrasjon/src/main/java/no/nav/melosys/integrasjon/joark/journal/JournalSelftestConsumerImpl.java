@@ -1,12 +1,12 @@
 package no.nav.melosys.integrasjon.joark.journal;
 
-import no.nav.tjeneste.virksomhet.journal.v2.binding.JournalV2;
+import no.nav.tjeneste.virksomhet.journal.v3.JournalV3;
 
 class JournalSelftestConsumerImpl implements JournalSelftestConsumer {
-    private JournalV2 port;
+    private JournalV3 port;
     private String endpointUrl;
 
-    public JournalSelftestConsumerImpl(JournalV2 port, String endpointUrl) {
+    public JournalSelftestConsumerImpl(JournalV3 port, String endpointUrl) {
         this.port = port;
         this.endpointUrl = endpointUrl;
     }

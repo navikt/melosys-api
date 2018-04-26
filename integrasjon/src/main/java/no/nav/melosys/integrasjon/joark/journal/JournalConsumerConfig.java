@@ -2,29 +2,27 @@ package no.nav.melosys.integrasjon.joark.journal;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.namespace.QName;
 
+import no.nav.melosys.integrasjon.felles.mdc.CallIdOutInterceptor;
+import no.nav.tjeneste.virksomhet.journal.v3.JournalV3;
 import org.apache.cxf.feature.LoggingFeature;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.ws.addressing.WSAddressingFeature;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import no.nav.melosys.integrasjon.felles.mdc.CallIdOutInterceptor;
-import no.nav.tjeneste.virksomhet.journal.v2.binding.JournalV2;
-
 @Component
 public class JournalConsumerConfig {
-    private static final String WSDL = "wsdl/no/nav/tjeneste/virksomhet/journal/v2/Binding.wsdl";
-    private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/journal/v2/Binding";
-    private static final QName SERVICE = new QName(NAMESPACE, "Journal_v2");
-    private static final QName PORT = new QName(NAMESPACE, "Journal_v2Port");
+    private static final String WSDL = "wsdl/no/nav/tjeneste/virksomhet/journal/v3/Binding.wsdl";
+    private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/journal/v3/Binding";
+    private static final QName SERVICE = new QName(NAMESPACE, "Journal_v3");
+    private static final QName PORT = new QName(NAMESPACE, "Journal_v3Port");
 
-    @Value("${Journal_v2.url}")
+    @Value("${Journal_v3.url}")
     private String endpointUrl; // NOSONAR
 
-    JournalV2 getPort() {
+    JournalV3 getPort() {
         Map<String, Object> properties = new HashMap<>();
 
         JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
@@ -32,12 +30,12 @@ public class JournalConsumerConfig {
         factoryBean.setProperties(properties);
         factoryBean.setServiceName(SERVICE);
         factoryBean.setEndpointName(PORT);
-        factoryBean.setServiceClass(JournalV2.class);
+        factoryBean.setServiceClass(JournalV3.class);
         factoryBean.setAddress(endpointUrl);
         factoryBean.getFeatures().add(new WSAddressingFeature());
         factoryBean.getFeatures().add(new LoggingFeature());
         factoryBean.getOutInterceptors().add(new CallIdOutInterceptor());
-        return factoryBean.create(JournalV2.class);
+        return factoryBean.create(JournalV3.class);
     }
 
     public String getEndpointUrl() {
