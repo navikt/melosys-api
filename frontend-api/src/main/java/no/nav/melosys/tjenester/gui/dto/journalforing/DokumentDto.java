@@ -5,8 +5,17 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.DokumentTittel;
 
 public class DokumentDto {
+    private String dokumentID;
     private LocalDate mottattDato;
     private DokumentTittel tittel;
+
+    public String getDokumentID() {
+        return dokumentID;
+    }
+
+    public void setDokumentID(String dokumentID) {
+        this.dokumentID = dokumentID;
+    }
 
     public LocalDate getMottattDato() {
         return mottattDato;

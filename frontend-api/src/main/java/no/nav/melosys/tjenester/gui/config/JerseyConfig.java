@@ -7,6 +7,7 @@ import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
 import no.nav.melosys.tjenester.gui.ArbeidsforholdHistorikkTjeneste;
 import no.nav.melosys.tjenester.gui.BehandlingTjeneste;
+import no.nav.melosys.tjenester.gui.DokumentTjeneste;
 import no.nav.melosys.tjenester.gui.FagsakTjeneste;
 import no.nav.melosys.tjenester.gui.FaktaavklaringTjeneste;
 import no.nav.melosys.tjenester.gui.JournalforingTjeneste;
@@ -29,6 +30,7 @@ public class JerseyConfig extends ResourceConfig {
         // N.B. alfabetisk rekkefølge
         register(ArbeidsforholdHistorikkTjeneste.class);
         register(BehandlingTjeneste.class);
+        register(DokumentTjeneste.class);
         register(FagsakTjeneste.class);
         register(FaktaavklaringTjeneste.class);
         register(JournalforingTjeneste.class);
