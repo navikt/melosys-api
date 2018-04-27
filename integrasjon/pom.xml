@@ -85,7 +85,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.tjenester</groupId>
-            <artifactId>nav-journal-v2-tjenestespesifikasjon</artifactId>
+            <artifactId>nav-journal-v3-tjenestespesifikasjon</artifactId>
             <classifier>jaxws</classifier>
         </dependency>
 

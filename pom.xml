@@ -46,7 +46,7 @@
         <inntekt-v3.version>2.0.0</inntekt-v3.version>
         <joark.behandleinngaaendejournal.version>1.0.1</joark.behandleinngaaendejournal.version>
         <joark.inngaaendejournal.version>1.1.1</joark.inngaaendejournal.version>
-        <joark.journal.version>1.0.3</joark.journal.version>
+        <joark.journal.version>3.1.2</joark.journal.version>
         <modig-testcertificates.version>1.2.0</modig-testcertificates.version>
         <tps.aktoer.version>2.0.1</tps.aktoer.version>
         <tps.person.version>3.0.2</tps.person.version>
@@ -334,7 +334,7 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.tjenester</groupId>
-                <artifactId>nav-journal-v2-tjenestespesifikasjon</artifactId>
+                <artifactId>nav-journal-v3-tjenestespesifikasjon</artifactId>
                 <version>${joark.journal.version}</version>
                 <classifier>jaxws</classifier>
             </dependency>
