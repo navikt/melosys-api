@@ -1,16 +1,18 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.time.LocalDateTime;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.domain.DokumentTittel;
+import no.nav.melosys.domain.Journalpost;
+import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.journalforing.JournalforingService;
+import no.nav.melosys.service.journalforing.dto.JournalforingDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.DokumentDto;
-import no.nav.melosys.tjenester.gui.dto.journalforing.JournalforingDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -32,25 +34,43 @@ public class JournalforingTjeneste extends RestTjeneste {
 
     @GET
     @Path("{journalpostID}")
-    public JournalpostDto hentJournalpostOpplysninger(@PathParam("journalpostID") String journalpostID) {
-        // TODO
-        journalføringService.hentJournalpost(journalpostID);
+    public Response hentJournalpostOpplysninger(@PathParam("journalpostID") String journalpostID) {
+        Journalpost journalpost;
+        try {
+            journalpost = journalføringService.hentJournalpost(journalpostID);
+        } catch (SikkerhetsbegrensningException e) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
 
-        // FIXME Mocking inntil videre
         JournalpostDto dto = new JournalpostDto();
-        dto.setBrukerID("FJERNET");
-        dto.setAvsenderID("FJERNET");
-        dto.setErBrukerAvsender(true);
+        String brukerID = journalpost.getBrukerId();
+        dto.setBrukerID(brukerID);
+        String avsenderID = journalpost.getAvsenderId();
+        dto.setAvsenderID(avsenderID);
+        dto.setErBrukerAvsender(brukerID == null ? false : brukerID.equalsIgnoreCase(avsenderID));
         DokumentDto dokumentDto = new DokumentDto();
-        dokumentDto.setID("Dok_ID");
-        dokumentDto.setMottattDato(LocalDateTime.now());
-        dokumentDto.setTittel(DokumentTittel.SØKNAD_MEDLEMSSKAP.getBeskrivelse());
+        dokumentDto.setID(journalpost.getHoveddokumentId());
+        dokumentDto.setMottattDato(journalpost.getForsendelseMottatt());
+        dokumentDto.setTittel(journalpost.getHoveddokumentTittel());
         dto.setDokument(dokumentDto);
-        return dto;
+        return Response.ok(dto).build();
     }
 
     @POST
-    public void journalfør(JournalforingDto journalforingDto) {
-        // TODO
+    @Path("opprett")
+    public void opprettSakOgJournalfør(JournalforingDto journalforingDto) {
+        if (journalforingDto.getFagsak() == null) {
+            throw new BadRequestException();
+        }
+        journalføringService.opprettSakOgJournalfør(journalforingDto);
+    }
+
+    @POST
+    @Path("tilordne")
+    public void tilordneSakOgJournalfør(JournalforingDto journalforingDto) {
+        if (journalforingDto.getSaksnummer() == null) {
+            throw new BadRequestException();
+        }
+        journalføringService.tilordneSakOgJournalfør(journalforingDto);
     }
 }

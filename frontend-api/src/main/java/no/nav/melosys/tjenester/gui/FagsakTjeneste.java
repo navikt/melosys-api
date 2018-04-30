@@ -140,7 +140,7 @@ public class FagsakTjeneste extends RestTjeneste {
             // FIXME saksnummer bruker id fra DB
             fagsakOppsummeringDto.setSaksnummer("" + fagsak.getId());
             fagsakOppsummeringDto.setSakstype(fagsak.getType());
-            fagsakOppsummeringDto.setRegistrertDato(fagsak.getRegistrertDato());
+            fagsakOppsummeringDto.setOpprettetDato(fagsak.getRegistrertDato());
 
             Behandling behandling = fagsak.getAktivBehandling();
             if (behandling != null) {

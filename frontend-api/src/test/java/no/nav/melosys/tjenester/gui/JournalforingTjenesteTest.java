@@ -18,12 +18,12 @@ import no.nav.melosys.domain.DokumentTittel;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.VedleggTittel;
 import no.nav.melosys.service.journalforing.JournalforingService;
+import no.nav.melosys.service.journalforing.dto.FagsakDto;
+import no.nav.melosys.service.journalforing.dto.JournalforingDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
-import no.nav.melosys.tjenester.gui.dto.journalforing.AktoerDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.DokumentDto;
-import no.nav.melosys.tjenester.gui.dto.journalforing.JournalforingDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import no.nav.melosys.tjenester.gui.jackson.JacksonModule;
 import org.junit.Before;
@@ -64,8 +64,9 @@ public class JournalforingTjenesteTest {
         dto.setAvsenderID("56890");
         dto.setErBrukerAvsender(false);
         DokumentDto dokumentDto = new DokumentDto();
-        dokumentDto.setMottattDato(LocalDateTime.now());
+        dokumentDto.setID("DOK_ID");
         dokumentDto.setTittel(DokumentTittel.SØKNAD_MEDLEMSSKAP.getBeskrivelse());
+        dokumentDto.setMottattDato(LocalDateTime.now());
         dto.setDokument(dokumentDto);
 
         try {
@@ -84,7 +85,7 @@ public class JournalforingTjenesteTest {
         fagsakOppsummeringDto.setBehandlingstype(BehandlingType.SØKNAD);
         fagsakOppsummeringDto.setBehandlingsstatus(BehandlingStatus.UNDER_BEHANDLING);
         fagsakOppsummeringDto.setLand(Arrays.asList("DK","SE"));
-        fagsakOppsummeringDto.setRegistrertDato(LocalDateTime.MIN);
+        fagsakOppsummeringDto.setOpprettetDato(LocalDateTime.MIN);
 
         try {
             System.out.println(mapper.writeValueAsString(fagsakOppsummeringDto));
@@ -93,23 +94,26 @@ public class JournalforingTjenesteTest {
         }
     }
 
-
+    @Test
     public void jfrJsonInn() {
         JournalforingDto dto = new JournalforingDto();
         dto.setJournalpostID("Journal_1234");
         dto.setOppgaveID("Oppgave_ABC");
         dto.setSaksnummer("MEL-1234");
-        dto.setBruker(new AktoerDto("12345", "Bruker ABC"));
-        dto.setAvsender(new AktoerDto("56890", "Avsender XYZ"));
+        dto.setBrukerID("12345");
+        dto.setAvsenderID("56890");
 
-        dto.setDokumenttittel(DokumentTittel.SØKNAD_MEDLEMSSKAP.getKode());
+        dto.setDokumenttittel(DokumentTittel.SØKNAD_MEDLEMSSKAP.getBeskrivelse());
         List<String> titler = new ArrayList<>();
         titler.add(VedleggTittel.TODO_1.getKode());
         titler.add(VedleggTittel.TODO_2.getKode());
         dto.setVedleggstitler(titler);
 
-        dto.setSoknadsperiode(new PeriodeDto(LocalDate.now(), LocalDate.now().plusYears(1)));
-        dto.setLand(Arrays.asList("DK","GB"));
+        FagsakDto fagsak = new FagsakDto();
+        fagsak.setSoknadsperiode(new no.nav.melosys.service.journalforing.dto.PeriodeDto(LocalDate.now(), LocalDate.MAX));
+        fagsak.setType(FagsakType.EU_EØS.getKode());
+        fagsak.setLand(Arrays.asList("DK","GB"));
+        dto.setFagsak(fagsak);
 
         try {
             String json = mapper.writeValueAsString(dto);
@@ -118,6 +122,4 @@ public class JournalforingTjenesteTest {
             e.printStackTrace();
         }
     }
-
-
 }
