@@ -1,20 +1,17 @@
 package no.nav.melosys.tjenester.gui.dto.journalforing;
 
-import no.nav.melosys.domain.FagsakType;
-
 public class JournalpostDto {
-    private AktoerDto bruker;
+    private String brukerID;
+    private String avsenderID;
     private boolean erBrukerAvsender;
-    private AktoerDto avsender;
-    private FagsakType sakstype;
     private DokumentDto dokument;
 
-    public AktoerDto getBruker() {
-        return bruker;
+    public String getBrukerID() {
+        return brukerID;
     }
 
-    public void setBruker(AktoerDto bruker) {
-        this.bruker = bruker;
+    public void setBrukerID(String brukerID) {
+        this.brukerID = brukerID;
     }
 
     public boolean isErBrukerAvsender() {
@@ -25,20 +22,12 @@ public class JournalpostDto {
         this.erBrukerAvsender = erBrukerAvsender;
     }
 
-    public AktoerDto getAvsender() {
-        return avsender;
+    public String getAvsenderID() {
+        return avsenderID;
     }
 
-    public void setAvsender(AktoerDto avsender) {
-        this.avsender = avsender;
-    }
-
-    public FagsakType getSakstype() {
-        return sakstype;
-    }
-
-    public void setSakstype(FagsakType sakstype) {
-        this.sakstype = sakstype;
+    public void setAvsenderID(String avsenderID) {
+        this.avsenderID = avsenderID;
     }
 
     public DokumentDto getDokument() {

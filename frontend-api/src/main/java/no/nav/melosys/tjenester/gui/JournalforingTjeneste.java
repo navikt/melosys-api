@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -8,9 +8,7 @@ import javax.ws.rs.PathParam;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.DokumentTittel;
-import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.service.journalforing.JournalforingService;
-import no.nav.melosys.tjenester.gui.dto.journalforing.AktoerDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.DokumentDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalforingDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
@@ -40,13 +38,12 @@ public class JournalforingTjeneste extends RestTjeneste {
 
         // FIXME Mocking inntil videre
         JournalpostDto dto = new JournalpostDto();
-        dto.setBruker(new AktoerDto("FJERNET", "LILLA HEST"));
-        dto.setAvsender(new AktoerDto("FJERNET", "LILLA HEST"));
+        dto.setBrukerID("FJERNET");
+        dto.setAvsenderID("FJERNET");
         dto.setErBrukerAvsender(true);
-        dto.setSakstype(FagsakType.EU_EØS);
         DokumentDto dokumentDto = new DokumentDto();
-        dokumentDto.setDokumentID("Dok_ID");
-        dokumentDto.setMottattDato(LocalDate.now());
+        dokumentDto.setID("Dok_ID");
+        dokumentDto.setMottattDato(LocalDateTime.now());
         dokumentDto.setTittel(DokumentTittel.SØKNAD_MEDLEMSSKAP.getBeskrivelse());
         dto.setDokument(dokumentDto);
         return dto;

@@ -60,12 +60,11 @@ public class JournalforingTjenesteTest {
     @Test
     public void jfrJsonUt() {
         JournalpostDto dto = new JournalpostDto();
-        dto.setBruker(new AktoerDto("12345", "Bruker ABC"));
-        dto.setAvsender(new AktoerDto("56890", "Avsender XYZ"));
+        dto.setBrukerID("12345");
+        dto.setAvsenderID("56890");
         dto.setErBrukerAvsender(false);
-        dto.setSakstype(FagsakType.EU_EØS);
         DokumentDto dokumentDto = new DokumentDto();
-        dokumentDto.setMottattDato(LocalDate.now());
+        dokumentDto.setMottattDato(LocalDateTime.now());
         dokumentDto.setTittel(DokumentTittel.SØKNAD_MEDLEMSSKAP.getBeskrivelse());
         dto.setDokument(dokumentDto);
 

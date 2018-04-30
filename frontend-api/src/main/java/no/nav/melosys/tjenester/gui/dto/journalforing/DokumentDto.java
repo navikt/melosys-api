@@ -1,25 +1,31 @@
 package no.nav.melosys.tjenester.gui.dto.journalforing;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonPropertyOrder({"ID", "tittel", "mottattDato"})
 public class DokumentDto {
-    private String dokumentID;
+    private String ID;
     private String tittel;
-    private LocalDate mottattDato;
+    private LocalDateTime mottattDato;
 
-    public String getDokumentID() {
-        return dokumentID;
+
+    @JsonProperty("ID")
+    public String getID() {
+        return ID;
     }
 
-    public void setDokumentID(String dokumentID) {
-        this.dokumentID = dokumentID;
+    public void setID(String ID) {
+        this.ID = ID;
     }
 
-    public LocalDate getMottattDato() {
+    public LocalDateTime getMottattDato() {
         return mottattDato;
     }
 
-    public void setMottattDato(LocalDate mottattDato) {
+    public void setMottattDato(LocalDateTime mottattDato) {
         this.mottattDato = mottattDato;
     }
 
