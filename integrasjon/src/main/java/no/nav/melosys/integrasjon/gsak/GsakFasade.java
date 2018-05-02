@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.gsak;
 
 import java.util.List;
 
+import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
@@ -92,12 +93,13 @@ public interface GsakFasade {
     /**
      * Oppretter en sak i GSAK
      *
-     * @param fagsakId fagsakId fra Melosys
-     * @param fnr      Fødselsnummer
+     * @param saksnummer fra Melosys
+     * @param behandlingType brukes til å avgjøre tema
+     * @param aktørId AktørId
      * @return Saksnummer fra GSAK
      * @throws IntegrasjonException
      */
-    String opprettSak(String fagsakId, String fnr) throws IntegrasjonException;
+    String opprettSak(String saksnummer, BehandlingType behandlingType, String aktørId) throws IntegrasjonException;
 
     /**
      * Tildeler en oppgaver til en saksbehandler

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
@@ -89,7 +90,7 @@ public class GsakMockService implements GsakFasade {
     }
 
     @Override
-    public String opprettSak(String saksnummer, String fnr) throws IntegrasjonException {
+    public String opprettSak(String saksnummer, BehandlingType behandlingType, String fnr) throws IntegrasjonException {
         throw new UnsupportedOperationException();
     }
 

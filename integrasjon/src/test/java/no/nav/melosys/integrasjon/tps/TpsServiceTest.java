@@ -1,24 +1,11 @@
 package no.nav.melosys.integrasjon.tps;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.integrasjon.felles.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.test.TpsTestData;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
@@ -26,6 +13,15 @@ import no.nav.melosys.integrasjon.tps.person.PersonMock;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.feil.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentAktoerIdForIdentResponse;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TpsServiceTest {
 
@@ -49,29 +45,22 @@ public class TpsServiceTest {
     }
 
     @Test
-    public void test_hentAktørIdForIdent_normal() {
+    public void test_hentAktørIdForIdent_normal() throws HentAktoerIdForIdentPersonIkkeFunnet, IkkeFunnetException {
         HentAktoerIdForIdentResponse r1 = new no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentAktoerIdForIdentResponse();
         r1.setAktoerId(AKTØRID_1.toString());
 
-        try {
-            when(aktorConsumer.hentAktørIdForIdent(any())).thenReturn(r1);
-        } catch (HentAktoerIdForIdentPersonIkkeFunnet hentAktoerIdForIdentPersonIkkeFunnet) {
-            hentAktoerIdForIdentPersonIkkeFunnet.printStackTrace();
-        }
+        when(aktorConsumer.hentAktørIdForIdent(any())).thenReturn(r1);
 
-        Optional<String> optAktørId = service.hentAktørIdForIdent(FNR_1);
-        assertNotNull(optAktørId);
-        assertTrue(optAktørId.isPresent());
-        assertEquals(AKTØRID_1.toString(), optAktørId.get());
+        String aktørIdForIdent = service.hentAktørIdForIdent(FNR_1);
+        assertNotNull(aktørIdForIdent);
+        assertEquals(AKTØRID_1.toString(), aktørIdForIdent);
     }
 
-    @Test
-    public void test_hentAktørIdForIdent_ikkeFunnet() throws HentAktoerIdForIdentPersonIkkeFunnet {
+    @Test(expected = IkkeFunnetException.class)
+    public void test_hentAktørIdForIdent_ikkeFunnet() throws HentAktoerIdForIdentPersonIkkeFunnet, IkkeFunnetException {
         when(aktorConsumer.hentAktørIdForIdent(any())).thenThrow(new HentAktoerIdForIdentPersonIkkeFunnet("test", new PersonIkkeFunnet()));
 
-        Optional<String> optAktørId = service.hentAktørIdForIdent(FNR_UKJENT);
-        assertNotNull(optAktørId);
-        assertFalse(optAktørId.isPresent());
+        String optAktørId = service.hentAktørIdForIdent(FNR_UKJENT);
     }
 
     @Test

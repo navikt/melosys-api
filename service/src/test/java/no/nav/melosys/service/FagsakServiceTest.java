@@ -2,15 +2,12 @@ package no.nav.melosys.service;
 
 import java.time.LocalDateTime;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakStatus;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.aareg.AaregService;
@@ -32,17 +29,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class FagsakServiceTest {
 
     @Mock
     private FagsakRepository fagsakRepo;
+
+    private SaksopplysningerService saksopplysningerService;
 
     private FagsakService fagsakService;
 
@@ -56,11 +53,12 @@ public class FagsakServiceTest {
         MedlFasade medl = new MedlService(new MedlemskapMock(), dokumentFactory);
         InntektFasade inntekt = new InntektService(new InntektMock(), dokumentFactory);
 
-        fagsakRepo = Mockito.mock(FagsakRepository.class);
-        fagsakService = new FagsakService(fagsakRepo, tps, aareg, ereg, medl, inntekt);
+        saksopplysningerService = new SaksopplysningerService(tps, aareg, ereg, medl, inntekt);
+        ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 12);
+        ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 12);
 
-        ReflectionTestUtils.setField(fagsakService, "arbeidsforholdhistorikkAntallMåneder", 12);
-        ReflectionTestUtils.setField(fagsakService, "inntektshistorikkAntallMåneder", 12);
+        fagsakRepo = Mockito.mock(FagsakRepository.class);
+        fagsakService = new FagsakService(fagsakRepo, saksopplysningerService);
     }
 
     @Test
@@ -78,34 +76,14 @@ public class FagsakServiceTest {
 
     @Test
     public void nyFagsak() throws Exception {
-        // Skru av logging for denne testen siden den skaper mye forventet støy
-        final Logger log = (Logger) LoggerFactory.getLogger(FagsakService.class);
-        Level opprinneligLevel = log.getLevel();
-        log.setLevel(Level.OFF);
-
         final String[] identer = new String[]{"88888888884", "77777777779"};
 
         for (String fnr : identer) {
-            Fagsak fagsak = fagsakService.nyFagsak(fnr);
+            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(fnr, BehandlingType.SØKNAD, false);
 
             assertNotNull(fagsak);
             assertFalse(fagsak.getBehandlinger().isEmpty());
 
-            for (Behandling behandling : fagsak.getBehandlinger()) {
-                assertFalse(behandling.getSaksopplysninger().isEmpty());
-            }
-
         }
-        // Skru på logging igjen
-        log.setLevel(opprinneligLevel);
     }
-
-    @Test
-    public void hentArbeidsforholdHistorikk() throws Exception {
-        final Long arbeidsforholdsID = 12608035L;
-        ArbeidsforholdDokument dokument = fagsakService.hentArbeidsforholdHistorikk(arbeidsforholdsID);
-        assertFalse(dokument.getArbeidsforhold().isEmpty());
-        assertTrue(dokument.getArbeidsforhold().get(0).getArbeidsavtaler().size() > 1);
-    }
-
 }
