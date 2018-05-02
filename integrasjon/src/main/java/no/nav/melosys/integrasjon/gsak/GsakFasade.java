@@ -59,6 +59,9 @@ public interface GsakFasade {
     public List<Oppgave> finnOppgaveListeMedBruker(String ident)
             throws IntegrasjonException;
 
+    // FIXME Setter alle oppgaver i mocken som utildelte for å hjelpe testing av oppgavehåndtering.
+    void fjernTildeling();
+
     /**
      * Hent oppgave fra GSAK på en gitt oppgaveId
      *

@@ -94,6 +94,11 @@ public class Oppgaveplukker {
         }
     }
 
+    // FIXME Dette er for å hjelpe testing av oppgavehåndtering.
+    public void fjernTildeling() {
+        gsakFasade.fjernTildeling();
+    }
+
     private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {
         // Oppgaver med høy prioritet velges først.
         Optional<Oppgave> prioritert = oppgaver.stream().filter(oppgave -> oppgave.harHøyPrioritet()).findFirst();

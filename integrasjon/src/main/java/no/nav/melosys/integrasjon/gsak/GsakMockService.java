@@ -58,6 +58,12 @@ public class GsakMockService implements GsakFasade {
     }
 
     @Override
+    public void leggTilbakeOppgave(Oppgave oppgave) throws IntegrasjonException, TekniskException {
+        oppgave.setAnsvarligId(null);
+        oppgaveRepo.save(oppgave);
+    }
+
+    @Override
     public String opprettOppgave(OpprettOppgaveRequest request) throws SikkerhetsbegrensningException {
         Oppgave oppgave = new Oppgave();
 
@@ -78,14 +84,13 @@ public class GsakMockService implements GsakFasade {
     }
 
     @Override
-    public void leggTilbakeOppgave(Oppgave oppgave) throws IntegrasjonException, SikkerhetsbegrensningException, TekniskException {
-        oppgave.setAnsvarligId(null);
-        oppgaveRepo.save(oppgave);
+    public String opprettSak(Long fagsakId, String fnr) throws IntegrasjonException {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public String opprettSak(Long fagsakId, String fnr) throws IntegrasjonException {
-        throw new UnsupportedOperationException();
+    public void fjernTildeling() {
+        oppgaveRepo.fjernTildeling();
     }
 
     @Override

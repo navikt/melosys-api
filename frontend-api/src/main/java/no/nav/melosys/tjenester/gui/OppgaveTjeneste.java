@@ -71,6 +71,7 @@ public class OppgaveTjeneste extends RestTjeneste {
     }
 
     @POST
+    @Path("/tilbakelegge")
     @ApiOperation(value = "Legger tilbake oppgaven med gitt oppgaveId i GSAK")
     public Response leggTilbakeOppgave(@ApiParam("Tilbakeleggingsinformasjon") TilbakeleggingDto tilbakelegging) {
         String ident = SubjectHandler.getInstance().getUserID();
@@ -87,6 +88,15 @@ public class OppgaveTjeneste extends RestTjeneste {
         String ident = SubjectHandler.getInstance().getUserID();
         List<OppgaveDto> oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
         return Response.ok(oppgaveDtoListe).build();
+    }
+
+    // FIXME Dette er for å hjelpe testing av oppgavehåndtering.
+    @GET
+    @Path("/reset")
+    @ApiOperation(value = "Setter alle oppgaver i mocken som utildelte.")
+    public Response reset() {
+        oppgaveplukker.fjernTildeling();
+        return Response.ok().build();
     }
 
     @GET

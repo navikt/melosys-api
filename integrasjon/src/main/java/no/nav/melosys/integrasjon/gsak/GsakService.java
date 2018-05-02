@@ -334,6 +334,11 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
+    public void fjernTildeling() {
+        // FIXME trenges ikke når integrasjon med GSAK er på plass.
+    }
+
+    @Override
     public void tildelOppgave(String oppgaveId, String saksbehandlerID) {
         // FIXME Venter på nye GSAK tjenester
     }
