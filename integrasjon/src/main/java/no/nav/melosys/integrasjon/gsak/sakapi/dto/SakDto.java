@@ -3,10 +3,8 @@ package no.nav.melosys.integrasjon.gsak.sakapi.dto;
 public class SakDto {
 
     private Long id;
-    // FIXME: no.nav.melosys.domain.gsak.Fagomrade. MED eller UFM
-    private String tema;
-    // FIXME: Fagsystemkode. Venter på Melosys-kode. Ex: AO11 (Grisen), FS22 (GOSYS)
-    private String applikasjon;
+    private String tema; // https://kodeverkviewer.adeo.no/kodeverk/xml/fagomrade.xml
+    private String applikasjon; // Fagsystemkode
     private String fagsakNr;
     private String aktoerId;
     private String orgnr;

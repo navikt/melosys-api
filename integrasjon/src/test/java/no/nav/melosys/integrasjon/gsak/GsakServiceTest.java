@@ -14,15 +14,12 @@ import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumerImpl;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
-import no.nav.melosys.integrasjon.gsak.behandlesak.BehandleSakConsumer;
-import no.nav.melosys.integrasjon.gsak.behandlesak.BehandleSakConsumerImpl;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumerImpl;
 import no.nav.melosys.integrasjon.gsak.sakapi.dto.SakDto;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.BehandleOppgaveV1;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOppgave;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveRequest;
-import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.BehandleSakV1;
 import no.nav.tjeneste.virksomhet.oppgave.v3.binding.OppgaveV3;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,15 +33,13 @@ public class GsakServiceTest {
 
     @Before
     public void setUp() {
-        BehandleSakV1 behandleSakV1port = mock(BehandleSakV1.class);
         OppgaveV3 oppgaveV3port = mock(OppgaveV3.class);
         BehandleOppgaveV1 behandleOppgaveV1port = mock(BehandleOppgaveV1.class);
 
-        BehandleSakConsumer behandleSakConsumer = new BehandleSakConsumerImpl(behandleSakV1port);
         OppgaveConsumer oppgaveConsumer = new OppgaveConsumerImpl(oppgaveV3port);
         BehandleOppgaveConsumer behandleOppgaveConsumer = new BehandleOppgaveConsumerImpl(behandleOppgaveV1port);
 
-        gsakService = new GsakService(behandleSakConsumer, oppgaveConsumer, behandleOppgaveConsumer);
+        gsakService = new GsakService(null, oppgaveConsumer, behandleOppgaveConsumer);
     }
 
     @Test

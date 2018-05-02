@@ -66,12 +66,17 @@ public class SakApiConsumerImpl implements SakApiConsumer {
 
     @Override
     public SakDto opprettSak(SakDto sakDto) {
+        sakDto.setOpprettetAv(getUserID());
         return target
             .request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getFromMDC(MDC_CALL_ID))
             .header(HttpHeaders.AUTHORIZATION, getBearer())
             .post(Entity.entity(sakDto, MediaType.APPLICATION_JSON), SakDto.class);
+    }
+
+    private String getUserID() {
+        return SubjectHandler.getInstance().getUserID();
     }
 
     private String getBearer() {
