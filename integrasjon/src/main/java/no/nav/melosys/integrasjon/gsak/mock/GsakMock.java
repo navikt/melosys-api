@@ -98,6 +98,24 @@ public class GsakMock implements OppgaveMockRepository {
     }
 
     @Override
+    public void delete(Oppgave o) {
+        if (o.getOppgaveId() != null) {
+            oppgaver.remove(o.getOppgaveId());
+        }
+    }
+
+    @Override
+    public List<Oppgave> find(Oppgavetype oppgavetype, List<String> sakstyper, List<String> behandlingstyper) {
+        if (Oppgavetype.BEH_SAK.equals(oppgavetype)) {
+            return oppgaver.values().stream().filter(o -> o.erBehandling()).sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
+        } else if (Oppgavetype.JFR.equals(oppgavetype)) {
+            return oppgaver.values().stream().filter(o -> o.erJournalFøring()).sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
+        } else {
+            throw new IllegalArgumentException(oppgavetype.toString());
+        }
+    }
+
+    @Override
     public List<Oppgave> finnOppgaverMedAnsvarligID(String ansvarligID){
         return oppgaver.values().stream().filter(oppgave -> ansvarligID.equals(oppgave.getAnsvarligId())).collect(Collectors.toList());
     }
@@ -113,10 +131,8 @@ public class GsakMock implements OppgaveMockRepository {
     }
 
     @Override
-    public void delete(Oppgave o) {
-        if (o.getOppgaveId() != null) {
-            oppgaver.remove(o.getOppgaveId());
-        }
+    public void fjernTildeling() {
+        oppgaver.values().forEach(o -> o.setAnsvarligId(null));
     }
 
     @Override
@@ -130,17 +146,6 @@ public class GsakMock implements OppgaveMockRepository {
         } else {
             oppgaver.put(o.getOppgaveId(), o);
             return o.getOppgaveId();
-        }
-    }
-
-    @Override
-    public List<Oppgave> find(Oppgavetype oppgavetype, List<String> sakstyper, List<String> behandlingstyper) {
-        if (Oppgavetype.BEH_SAK.equals(oppgavetype)) {
-            return oppgaver.values().stream().filter(o -> o.erBehandling()).sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
-        } else if (Oppgavetype.JFR.equals(oppgavetype)) {
-            return oppgaver.values().stream().filter(o -> o.erJournalFøring()).sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
-        } else {
-            throw new IllegalArgumentException(oppgavetype.toString());
         }
     }
 }
