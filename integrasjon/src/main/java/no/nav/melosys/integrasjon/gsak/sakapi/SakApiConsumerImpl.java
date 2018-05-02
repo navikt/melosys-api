@@ -4,9 +4,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import javax.net.ssl.SSLContext;
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
@@ -23,24 +24,25 @@ public class SakApiConsumerImpl implements SakApiConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(SakApiConsumerImpl.class);
 
-    private String endpointUrl;
+    private final GenericType<List<SakDto>> sakDtoListType = new GenericType<List<SakDto>>() {};
 
-    private Client client;
+    private final WebTarget target;
 
     public SakApiConsumerImpl(String endpointUrl) {
-        this.endpointUrl = endpointUrl;
         try {
             SSLContext sslContext = SSLContext.getDefault();
-            client = ClientBuilder.newBuilder().sslContext(sslContext).build();
+            target = ClientBuilder.newBuilder().sslContext(sslContext).build().target(endpointUrl);
         } catch (NoSuchAlgorithmException e) {
-            log.error("Kunne ikke opprette client til integrasjon mot Sak API", e);
-            throw new IntegrasjonException("Kunne ikke opprette client til integrasjon mot Sak API");
+            log.error("Feilet under oppsett av integrasjon mot Sak API", e);
+            throw new IntegrasjonException("Feilet under oppsett av integrasjon mot Sak API");
         }
     }
 
     @Override
     public SakDto hentSak(Long id) {
-        return client.target(endpointUrl).path(Long.toString(id)).request()
+        return target
+            .path(Long.toString(id))
+            .request()
             .header("Accept", MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getFromMDC(MDC_CALL_ID))
             .header("Authorization", getBearer())
@@ -49,12 +51,23 @@ public class SakApiConsumerImpl implements SakApiConsumer {
 
     @Override
     public List<SakDto> finnSaker(SakSearchRequest sakSearchRequest) {
-        return null;
+        return target
+            .queryParam("aktoerId", sakSearchRequest.getAktoerId())
+            .queryParam("orgnr", sakSearchRequest.getOrgnr())
+            .queryParam("applikasjon", sakSearchRequest.getApplikasjon())
+            .queryParam("tema", sakSearchRequest.getTema())
+            .queryParam("fagsakNr", sakSearchRequest.getFagsakNr())
+            .request()
+            .header("Accept", MediaType.APPLICATION_JSON)
+            .header("X-Correlation-ID", getFromMDC(MDC_CALL_ID))
+            .header("Authorization", getBearer())
+            .get(sakDtoListType);
     }
 
     @Override
     public SakDto opprettSak(SakDto sakDto) {
-        return client.target(endpointUrl).request()
+        return target
+            .request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getFromMDC(MDC_CALL_ID))
             .header(HttpHeaders.AUTHORIZATION, getBearer())
