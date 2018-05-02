@@ -1,11 +1,11 @@
 CREATE TABLE fagsak (
-    id              NUMBER(19) GENERATED ALWAYS AS IDENTITY,
+    saksnummer       VARCHAR2(99) NOT NULL,
     gsak_saksnummer VARCHAR2(99)  NULL,
     fagsak_type     VARCHAR2(99)  NOT NULL,
     status          VARCHAR2(99)  NOT NULL,
     registrert_dato TIMESTAMP     NOT NULL,
     endret_dato     TIMESTAMP     NOT NULL,
-    CONSTRAINT pk_fagsak PRIMARY KEY (id)
+    CONSTRAINT pk_fagsak PRIMARY KEY (saksnummer)
 );
 
 CREATE TABLE fagsak_type (
@@ -29,3 +29,8 @@ INSERT INTO fagsak_status (kode, navn) VALUES ('AVSLU', 'Avsluttet');
 
 ALTER TABLE fagsak ADD CONSTRAINT fk_fagsak_type FOREIGN KEY (fagsak_type) REFERENCES fagsak_type;
 ALTER TABLE fagsak ADD CONSTRAINT fk_fagsak_satus FOREIGN KEY (status) REFERENCES fagsak_status;
+
+CREATE SEQUENCE saksnummer_seq
+MINVALUE 1
+NOMAXVALUE
+INCREMENT BY 1;

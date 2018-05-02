@@ -10,8 +10,6 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -23,8 +21,8 @@ public class Fagsak {
     // FIXME (farjam): Ikke tatt med fra logisk modell: tema, virkemiddel og registreringsmetainfo
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @Column(name = "saksnummer", nullable = false)
+    private String saksnummer;
 
     @Column(name = "gsak_saksnummer")
     private String gsakSaksnummer;
@@ -49,10 +47,6 @@ public class Fagsak {
     // FIXME Diskutere strategi for eager/lazy loading
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Behandling> behandlinger;
-
-    public long getId() {
-        return id;
-    }
 
     public String getGsakSaksnummer() {
         return gsakSaksnummer;
@@ -115,14 +109,22 @@ public class Fagsak {
      */
     public Behandling getAktivBehandling() {
         List<Behandling> behandlinger = getBehandlinger().stream()
-            .filter(b -> !b.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
+           .filter(b -> !b.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
         if (behandlinger.size() > 1) {
             throw new RuntimeException("Det finnes mer enn en aktive behandlinger");
         } else if (behandlinger.size() == 1) {
             return behandlinger.get(0);
-        } else{
+        } else {
             return null;
         }
+    }
+
+    public String getSaksnummer() {
+        return saksnummer;
+    }
+
+    public void setSaksnummer(String saksnummer) {
+        this.saksnummer = saksnummer;
     }
 
     @Override
@@ -134,15 +136,14 @@ public class Fagsak {
             return false;
         }
         Fagsak that = (Fagsak) o;
-        if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
-            return this.id == that.id;
+        if (this.saksnummer != null && that.saksnummer != null) { // Begge entiteter er persistert. True hvis samme rad i db.
+            return this.saksnummer == that.saksnummer;
         }
-        return Objects.equals(this.gsakSaksnummer, that.gsakSaksnummer);
+        return Objects.equals(this.saksnummer, that.saksnummer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gsakSaksnummer);
+        return Objects.hash(saksnummer);
     }
-
 }

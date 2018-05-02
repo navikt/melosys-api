@@ -1,6 +1,6 @@
 CREATE TABLE behandling (
     id              NUMBER(19) GENERATED ALWAYS AS IDENTITY,
-    fagsak_id       NUMBER(19)   NOT NULL,
+    saksnummer      VARCHAR2(99) NOT NULL,
     status          VARCHAR2(99) NOT NULL,
     beh_type        VARCHAR2(99) NOT NULL,
     registrert_dato TIMESTAMP    NOT NULL,
@@ -32,6 +32,6 @@ INSERT INTO behandling_type (kode, navn) VALUES ('REV', 'Revurdering');
 INSERT INTO behandling_type (kode, navn) VALUES ('ML_U', 'Melding fra utenlandsk myndighet');
 INSERT INTO behandling_type (kode, navn) VALUES ('PS_U', 'Påstand fra utenlandsk myndighet');
 
-ALTER TABLE behandling ADD CONSTRAINT fk_behandling_fagsak FOREIGN KEY (fagsak_id) REFERENCES fagsak;
+ALTER TABLE behandling ADD CONSTRAINT fk_behandling_fagsak FOREIGN KEY (saksnummer) REFERENCES fagsak;
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_status FOREIGN KEY (status) REFERENCES behandling_status;
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_type FOREIGN KEY (beh_type) REFERENCES behandling_type;

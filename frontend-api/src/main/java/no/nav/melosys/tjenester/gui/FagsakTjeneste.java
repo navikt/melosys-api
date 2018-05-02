@@ -70,7 +70,7 @@ public class FagsakTjeneste extends RestTjeneste {
     @GET
     @Path("{saksnr}")
     @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."))
-    public Response hentFagsak(@PathParam("saksnr") @ApiParam("Saksnummer.") Long saksnummer) {
+    public Response hentFagsak(@PathParam("saksnr") @ApiParam("Saksnummer.") String saksnummer) {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
 
         if (sak == null) {
@@ -128,7 +128,7 @@ public class FagsakTjeneste extends RestTjeneste {
     private FagsakDto tilDto(Fagsak fagsak) {
         FagsakDto fagsakDto = new FagsakDto();
         modelMapper.map(fagsak, fagsakDto);
-        fagsakDto.setSaksnummer(fagsak.getId());
+        fagsakDto.setSaksnummer(fagsak.getSaksnummer());
         return fagsakDto;
     }
 
@@ -137,8 +137,7 @@ public class FagsakTjeneste extends RestTjeneste {
 
         for (Fagsak fagsak : saker) {
             FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
-            // FIXME saksnummer bruker id fra DB
-            fagsakOppsummeringDto.setSaksnummer("" + fagsak.getId());
+            fagsakOppsummeringDto.setSaksnummer("" + fagsak.getSaksnummer());
             fagsakOppsummeringDto.setSakstype(fagsak.getType());
             fagsakOppsummeringDto.setRegistrertDato(fagsak.getRegistrertDato());
 

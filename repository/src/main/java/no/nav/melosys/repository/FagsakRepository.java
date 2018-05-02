@@ -10,10 +10,13 @@ import java.util.List;
 
 public interface FagsakRepository extends CrudRepository<Fagsak, Long> {
 
-    Fagsak findById(Long id);
+    Fagsak findBySaksnummer(String saksnummer);
 
     Fagsak findByGsakSaksnummer(String saksnummer);
 
     @Query("select f from Fagsak f, Aktoer a where a.fagsak = f and a.rolle = :rolle  and a.aktørId = :id") //$NON-NLS-1$
     List<Fagsak> findByRolleAndAktør(@Param("rolle") RolleType rolle, @Param("id") String aktørID);
+
+    @Query(value = "SELECT saksnummer_seq.nextval FROM dual", nativeQuery = true)
+    Long hentNesteSekvensVerdi();
 }

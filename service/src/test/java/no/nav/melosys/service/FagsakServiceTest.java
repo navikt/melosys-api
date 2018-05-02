@@ -66,6 +66,7 @@ public class FagsakServiceTest {
     @Test
     public void lagFagsak() throws Exception {
         Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL123");
         fagsak.setGsakSaksnummer("123");
         fagsak.setStatus(FagsakStatus.OPPRETTET);
         fagsak.setType(FagsakType.EU_EØS);

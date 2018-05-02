@@ -84,13 +84,13 @@ public class GsakMockService implements GsakFasade {
     }
 
     @Override
-    public String opprettSak(Long fagsakId, String fnr) throws IntegrasjonException {
-        throw new UnsupportedOperationException();
+    public void fjernTildeling() {
+        oppgaveRepo.fjernTildeling();
     }
 
     @Override
-    public void fjernTildeling() {
-        oppgaveRepo.fjernTildeling();
+    public String opprettSak(String saksnummer, String fnr) throws IntegrasjonException {
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -21,7 +21,7 @@ public class Aktoer {
     private long id;
     
     @ManyToOne(optional = false)
-    @JoinColumn(name="fagsak_id", updatable = false)
+    @JoinColumn(name="saksnummer", updatable = false)
     private Fagsak fagsak;
     
     @Column(name = "aktoer_id", updatable = false)
