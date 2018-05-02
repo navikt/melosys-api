@@ -6,7 +6,6 @@ import javax.xml.namespace.QName;
 
 import no.nav.melosys.integrasjon.felles.mdc.CallIdOutInterceptor;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.BehandleOppgaveV1;
-import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.BehandleSakV1;
 import org.apache.cxf.feature.LoggingFeature;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.ws.addressing.WSAddressingFeature;
@@ -37,7 +36,7 @@ public class BehandleOppgaveConsumerConfig {
         factoryBean.setProperties(properties);
         factoryBean.setServiceName(BEHANDLE_OPPGAVE_V_1_SERVICE);
         factoryBean.setEndpointName(BEHANDLE_OPPGAVE_V_1_PORT);
-        factoryBean.setServiceClass(BehandleSakV1.class);
+        factoryBean.setServiceClass(BehandleOppgaveV1.class);
         factoryBean.setAddress(endpointUrl);
         factoryBean.getFeatures().add(new WSAddressingFeature());
         factoryBean.getFeatures().add(new LoggingFeature());
