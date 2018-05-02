@@ -42,6 +42,8 @@ fasitResources:
     resourceType: webserviceendpoint
   - alias: virksomhet:BehandleSak_v1
     resourceType: webserviceendpoint
+  - alias: sak.saker
+    resourceType: restservice
   - alias: virksomhet:Oppgave_v3
     resourceType: webserviceendpoint
   - alias: virksomhet:BehandleOppgave_v1
