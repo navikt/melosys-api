@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.integrasjon.felles.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.RegisterOppslagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,8 @@ public class OrganisasjonTjeneste extends RestTjeneste {
             organisasjonDokument = registerOppslag.hentOrganisasjon(orgnummer);
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (IkkeFunnetException e) {
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         return Response.ok(organisasjonDokument).build();

@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.tps;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.felles.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 
 public interface TpsFasade {
@@ -12,8 +12,8 @@ public interface TpsFasade {
 
     Optional<String> hentIdentForAktørId(String aktørID);
 
-    Saksopplysning hentPerson(String ident) throws IntegrasjonException, SikkerhetsbegrensningException;
+    Saksopplysning hentPerson(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException;
 
-    Saksopplysning hentPersonMedAdresse(String ident) throws IntegrasjonException, SikkerhetsbegrensningException;
+    Saksopplysning hentPersonMedAdresse(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException;
 
 }

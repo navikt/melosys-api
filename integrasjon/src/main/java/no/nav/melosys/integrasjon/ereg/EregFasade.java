@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.ereg;
 
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.felles.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 
 /**
@@ -10,6 +10,6 @@ import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningExceptio
  */
 public interface EregFasade {
 
-    Saksopplysning hentOrganisasjon(String orgnummer) throws IntegrasjonException, SikkerhetsbegrensningException;
+    Saksopplysning hentOrganisasjon(String orgnummer) throws IkkeFunnetException, SikkerhetsbegrensningException;
 
 }

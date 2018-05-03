@@ -9,6 +9,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import no.nav.melosys.integrasjon.felles.exception.IkkeFunnetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +99,7 @@ public class TpsService implements TpsFasade {
         return optResult;
     }
 
-    private Saksopplysning hentPerson(String ident, Collection<Informasjonsbehov> behov) throws SikkerhetsbegrensningException {
+    private Saksopplysning hentPerson(String ident, Collection<Informasjonsbehov> behov) throws IkkeFunnetException, SikkerhetsbegrensningException {
         HentPersonRequest request = new HentPersonRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -118,7 +119,7 @@ public class TpsService implements TpsFasade {
         } catch (HentPersonSikkerhetsbegrensning hentPersonSikkerhetsbegrensning) {
             throw new SikkerhetsbegrensningException(hentPersonSikkerhetsbegrensning);
         } catch (HentPersonPersonIkkeFunnet hentPersonPersonIkkeFunnet) {
-            throw new IntegrasjonException(hentPersonPersonIkkeFunnet);
+            throw new IkkeFunnetException(hentPersonPersonIkkeFunnet);
         }
 
         // Response -> xml
@@ -145,12 +146,12 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Saksopplysning hentPerson(String ident) throws IntegrasjonException, SikkerhetsbegrensningException {
+    public Saksopplysning hentPerson(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException {
         return hentPerson(ident, null);
     }
 
     @Override
-    public Saksopplysning hentPersonMedAdresse(String ident) throws SikkerhetsbegrensningException {
+    public Saksopplysning hentPersonMedAdresse(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException {
         Collection<Informasjonsbehov> behov = new ArrayList<>();
         behov.add(Informasjonsbehov.ADRESSE);
 

@@ -1,26 +1,25 @@
 package no.nav.melosys.integrasjon.ereg;
 
 import java.io.StringWriter;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonConsumer;
+import no.nav.melosys.integrasjon.felles.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonOrganisasjonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonUgyldigInput;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonRequest;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class EregService implements EregFasade {
@@ -51,7 +50,7 @@ public class EregService implements EregFasade {
     }
     
     @Override
-    public Saksopplysning hentOrganisasjon(String orgnummer) {
+    public Saksopplysning hentOrganisasjon(String orgnummer) throws IkkeFunnetException {
         HentOrganisasjonRequest request = new HentOrganisasjonRequest();
         request.setOrgnummer(orgnummer);
 
@@ -60,7 +59,7 @@ public class EregService implements EregFasade {
         try {
             response = organisasjonConsumer.hentOrganisasjon(request);
         } catch (HentOrganisasjonOrganisasjonIkkeFunnet hentOrganisasjonOrganisasjonIkkeFunnet) {
-            throw new IntegrasjonException(hentOrganisasjonOrganisasjonIkkeFunnet);
+            throw new IkkeFunnetException(hentOrganisasjonOrganisasjonIkkeFunnet);
         } catch (HentOrganisasjonUgyldigInput hentOrganisasjonUgyldigInput) {
             throw new IntegrasjonException(hentOrganisasjonUgyldigInput);
         }

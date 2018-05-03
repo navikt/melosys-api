@@ -29,6 +29,7 @@ import no.nav.melosys.domain.dokument.inntekt.Inntekt;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.integrasjon.felles.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.felles.exception.TekniskException;
@@ -162,6 +163,9 @@ public class FagsakService {
         } catch (IntegrasjonException integrasjonException) {
             log.error("Uventet feil ved oppslag mot TPS", integrasjonException);
             return null;
+        } catch (IkkeFunnetException e) {
+            log.error("Person med id " + fnr + " finnes ikke");
+            return null;
         }
     }
 
@@ -231,6 +235,9 @@ public class FagsakService {
             return eregFasade.hentOrganisasjon(orgnr);
         } catch (IntegrasjonException integrasjonException) {
             log.error("Uventet feil ved oppslag mot EREG", integrasjonException);
+            return null;
+        } catch (IkkeFunnetException e) {
+            log.error("Organisasjon med orgnr " + orgnr + " finnes ikke");
             return null;
         }
     }
