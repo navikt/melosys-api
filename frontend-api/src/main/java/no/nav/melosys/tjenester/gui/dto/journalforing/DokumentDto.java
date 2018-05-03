@@ -2,12 +2,10 @@ package no.nav.melosys.tjenester.gui.dto.journalforing;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.DokumentTittel;
-
 public class DokumentDto {
     private String dokumentID;
+    private String tittel;
     private LocalDate mottattDato;
-    private DokumentTittel tittel;
 
     public String getDokumentID() {
         return dokumentID;
@@ -25,11 +23,11 @@ public class DokumentDto {
         this.mottattDato = mottattDato;
     }
 
-    public DokumentTittel getTittel() {
+    public String getTittel() {
         return tittel;
     }
 
-    public void setTittel(DokumentTittel tittel) {
+    public void setTittel(String tittel) {
         this.tittel = tittel;
     }
 }

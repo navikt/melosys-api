@@ -66,7 +66,7 @@ public class JournalforingTjenesteTest {
         dto.setSakstype(FagsakType.EU_EØS);
         DokumentDto dokumentDto = new DokumentDto();
         dokumentDto.setMottattDato(LocalDate.now());
-        dokumentDto.setTittel(DokumentTittel.SØKNAD_MEDLEMSSKAP);
+        dokumentDto.setTittel(DokumentTittel.SØKNAD_MEDLEMSSKAP.getBeskrivelse());
         dto.setDokument(dokumentDto);
 
         try {

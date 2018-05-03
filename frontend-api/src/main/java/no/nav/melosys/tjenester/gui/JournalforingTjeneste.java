@@ -45,8 +45,9 @@ public class JournalforingTjeneste extends RestTjeneste {
         dto.setErBrukerAvsender(true);
         dto.setSakstype(FagsakType.EU_EØS);
         DokumentDto dokumentDto = new DokumentDto();
+        dokumentDto.setDokumentID("Dok_ID");
         dokumentDto.setMottattDato(LocalDate.now());
-        dokumentDto.setTittel(DokumentTittel.SØKNAD_MEDLEMSSKAP);
+        dokumentDto.setTittel(DokumentTittel.SØKNAD_MEDLEMSSKAP.getBeskrivelse());
         dto.setDokument(dokumentDto);
         return dto;
     }
