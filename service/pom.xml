@@ -8,7 +8,7 @@
     <parent>
         <groupId>no.nav.melosys</groupId>
         <artifactId>melosys-pom</artifactId>
-        <version>0.51.0</version>
+        <version>0.52.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>melosys-service</artifactId>
