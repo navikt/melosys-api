@@ -2,20 +2,13 @@ package no.nav.melosys.integrasjon.inntk;
 
 import java.io.StringWriter;
 import java.time.YearMonth;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.soap.SOAPFaultException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
@@ -34,6 +27,10 @@ import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.PersonIdent;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Uttrekksperiode;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeRequest;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class InntektService implements InntektFasade {
@@ -48,7 +45,7 @@ public class InntektService implements InntektFasade {
 
     private ObjectFactory objectFactory;
 
-    private Marshaller marshaller;
+    private final JAXBContext jaxbContext;
 
     @Autowired
     public InntektService(InntektConsumer consumer, DokumentFactory dokumentFactory) {
@@ -58,8 +55,7 @@ public class InntektService implements InntektFasade {
         this.objectFactory = new ObjectFactory();
 
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeResponse.class);
-            marshaller = jaxbContext.createMarshaller();
+            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeResponse.class);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);
@@ -116,7 +112,7 @@ public class InntektService implements InntektFasade {
         try {
             no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeResponse xmlRoot = new no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeResponse();
             xmlRoot.setResponse(response);
-            marshaller.marshal(xmlRoot, xmlWriter);
+            jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);

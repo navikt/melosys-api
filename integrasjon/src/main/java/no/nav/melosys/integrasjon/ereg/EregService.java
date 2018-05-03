@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.ereg;
 import java.io.StringWriter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
@@ -32,7 +31,7 @@ public class EregService implements EregFasade {
 
     private DokumentFactory dokumentFactory;
 
-    private final Marshaller marshaller;
+    private final JAXBContext jaxbContext;
 
     @Autowired
     public EregService(OrganisasjonConsumer organisasjonConsumer, DokumentFactory dokumentFactory) {
@@ -40,8 +39,7 @@ public class EregService implements EregFasade {
         this.dokumentFactory = dokumentFactory;
 
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse.class);
-            marshaller = jaxbContext.createMarshaller();
+            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse.class);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);
@@ -69,7 +67,7 @@ public class EregService implements EregFasade {
         try {
             no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse xmlRoot = new no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse();
             xmlRoot.setResponse(response);
-            marshaller.marshal(xmlRoot, xmlWriter);
+            jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);

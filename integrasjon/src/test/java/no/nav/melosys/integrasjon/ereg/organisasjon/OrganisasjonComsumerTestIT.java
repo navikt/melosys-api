@@ -1,23 +1,21 @@
 package no.nav.melosys.integrasjon.ereg.organisasjon;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import no.nav.melosys.integrasjon.test.Gen3WsProxyServiceITBase;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonOrganisasjonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonUgyldigInput;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonRequest;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonResponse;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 public class OrganisasjonComsumerTestIT extends Gen3WsProxyServiceITBase {
@@ -48,8 +46,6 @@ public class OrganisasjonComsumerTestIT extends Gen3WsProxyServiceITBase {
         assertThat(navn).isEqualTo("VANN- OG AVLØPSETATEN");
     }
 
-    @Ignore
-    @Test
     public void xml() throws JAXBException, HentOrganisasjonOrganisasjonIkkeFunnet, HentOrganisasjonUgyldigInput {
         JAXBContext  jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse.class);
         Marshaller marshaller = jaxbContext.createMarshaller();
@@ -65,5 +61,4 @@ public class OrganisasjonComsumerTestIT extends Gen3WsProxyServiceITBase {
         marshaller.marshal(xmlRoot, System.out);
 
     }
-
 }

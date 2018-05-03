@@ -1,17 +1,8 @@
 package no.nav.melosys.integrasjon.tps.person;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import no.nav.melosys.integrasjon.test.Gen3WsProxyServiceITBase;
 import no.nav.melosys.integrasjon.test.TpsTestData;
@@ -22,6 +13,13 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 public class PersonConsumerTestIT extends Gen3WsProxyServiceITBase {
@@ -60,8 +58,6 @@ public class PersonConsumerTestIT extends Gen3WsProxyServiceITBase {
         assertThat(response.getPerson().getPersonnavn().getEtternavn()).isEqualTo(TpsTestData.STD_KVINNE_ETTERNAVN);
     }
 
-    @Ignore
-    @Test
     public void xml() throws JAXBException, HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
         JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPerson.class, no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
         Marshaller marshaller = jaxbContext.createMarshaller();
@@ -92,5 +88,4 @@ public class PersonConsumerTestIT extends Gen3WsProxyServiceITBase {
         marshaller.marshal(xmlRootRequest, System.out);
         marshaller.marshal(xmlRootResponse, System.out);
     }
-
 }

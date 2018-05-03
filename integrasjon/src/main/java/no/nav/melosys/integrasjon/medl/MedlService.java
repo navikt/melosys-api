@@ -1,5 +1,10 @@
 package no.nav.melosys.integrasjon.medl;
 
+import java.io.StringWriter;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -19,12 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import java.io.StringWriter;
-
 @Service
 public class MedlService implements MedlFasade {
 
@@ -36,7 +35,7 @@ public class MedlService implements MedlFasade {
 
     private DokumentFactory dokumentFactory;
 
-    private final Marshaller marshaller;
+    private final JAXBContext jaxbContext;
 
     @Autowired
     public MedlService(MedlemskapConsumer medlemskapConsumer, DokumentFactory dokumentFactory) {
@@ -44,8 +43,7 @@ public class MedlService implements MedlFasade {
         this.dokumentFactory = dokumentFactory;
 
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(HentPeriodeListeResponseWrapper.class);
-            marshaller = jaxbContext.createMarshaller();
+            jaxbContext = JAXBContext.newInstance(HentPeriodeListeResponseWrapper.class);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);
@@ -64,7 +62,7 @@ public class MedlService implements MedlFasade {
             JAXBElement<HentPeriodeListeResponseWrapper> xmlRoot
                     = new JAXBElement<>(MedlemskapConsumerConfig.getResponse(), HentPeriodeListeResponseWrapper.class, wrapper);
 
-            marshaller.marshal(xmlRoot, xmlWriter);
+            jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);
