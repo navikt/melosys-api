@@ -52,7 +52,7 @@ public class SakApiConsumerImpl implements SakApiConsumer {
     @Override
     public List<SakDto> finnSaker(SakSearchRequest sakSearchRequest) {
         return target
-            .queryParam("aktoerId", sakSearchRequest.getAktoerId())
+            .queryParam("aktoerId", sakSearchRequest.getAktørId())
             .queryParam("orgnr", sakSearchRequest.getOrgnr())
             .queryParam("applikasjon", sakSearchRequest.getApplikasjon())
             .queryParam("tema", sakSearchRequest.getTema())

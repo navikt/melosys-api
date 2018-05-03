@@ -75,7 +75,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public String opprettSak(Long fagsakId, String fnr) {
+    public String opprettSak(Long fagsakId, String fnr) { // FIXME: Kalles med aktørID når TPS-oppslag er på plass
         SakDto sakDto = new SakDto();
         sakDto.setTema(FAGOMRÅDE_KODE_MEDLEMSKAP);
         sakDto.setAktoerId(fnr);
@@ -88,7 +88,7 @@ public class GsakService implements GsakFasade {
             log.error("Feil ved oppretting av sak i GSAK.");
             throw new IntegrasjonException("Feil ved oppretting av sak i GSAK.");
         }
-        log.debug("Sak opprettet i GSAK med saksnummer: {}", sakDto.getId());
+        log.info("Sak opprettet i GSAK med saksnummer: {}", sakDto.getId());
 
         return sakDto.getId().toString();
     }

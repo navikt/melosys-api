@@ -9,8 +9,7 @@ public class SakDto {
     private String aktoerId;
     private String orgnr;
     private String opprettetAv;
-    // FIXME: Lagres som LocalDateTime i Sak API, men eksponeres som ZonedDateTime
-    private String opprettetTidspunkt;
+    private String opprettetTidspunkt; // Lagres som LocalDateTime i Sak API, men eksponeres som ZonedDateTime
 
     public SakDto() {}
 

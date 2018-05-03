@@ -2,22 +2,18 @@ package no.nav.melosys.integrasjon.gsak.sakapi.dto;
 
 public class SakSearchRequest {
 
-    // Filtrering på saker opprettet for en aktør (person)
-    private String aktoerId;
-    // Filtrering på saker opprettet for en organisasjon
-    private String orgnr;
-    // Filtrering på applikasjon (iht felles kodeverk)
-    private String applikasjon;
-    // Filtrering på tema (iht felles kodeverk)
-    private String tema;
-    // Filtrering på fagsakNr")
-    private String fagsakNr;
-    public String getAktoerId() {
-        return aktoerId;
+    private String aktørId; // Filtrering på saker opprettet for en aktør (person)
+    private String orgnr; // Filtrering på saker opprettet for en organisasjon
+    private String applikasjon; // Filtrering på applikasjon (iht felles kodeverk)
+    private String tema; // Filtrering på tema (iht felles kodeverk)
+    private String fagsakNr; // Filtrering på fagsakNr")
+
+    public String getAktørId() {
+        return aktørId;
     }
 
-    public void setAktoerId(String aktoerId) {
-        this.aktoerId = aktoerId;
+    public void setAktørId(String aktørId) {
+        this.aktørId = aktørId;
     }
 
     public String getOrgnr() {
