@@ -4,22 +4,14 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-
-import no.nav.melosys.integrasjon.felles.exception.IkkeFunnetException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.felles.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
@@ -36,6 +28,10 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class TpsService implements TpsFasade {
@@ -50,7 +46,7 @@ public class TpsService implements TpsFasade {
 
     private DokumentFactory dokumentFactory;
 
-    private final Marshaller marshaller;
+    private final JAXBContext jaxbContext;
 
     @Autowired
     public TpsService(AktorConsumer aktorConsumer, PersonConsumer personConsumer, DokumentFactory dokumentFactory) {
@@ -59,8 +55,7 @@ public class TpsService implements TpsFasade {
         this.dokumentFactory = dokumentFactory;
 
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
-            marshaller = jaxbContext.createMarshaller();
+            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);
@@ -127,7 +122,7 @@ public class TpsService implements TpsFasade {
         try {
             no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse xmlRoot = new no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse();
             xmlRoot.setResponse(response);
-            marshaller.marshal(xmlRoot, xmlWriter);
+            jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);
