@@ -1,14 +1,18 @@
 package no.nav.melosys.integrasjon.gsak.sakapi.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class SakDto {
 
     private Long id;
     private String tema; // https://kodeverkviewer.adeo.no/kodeverk/xml/fagomrade.xml
-    private String applikasjon; // Fagsystemkode
-    private String fagsakNr;
-    private String aktoerId;
-    private String orgnr;
-    private String opprettetAv;
+    private String applikasjon; // Fagsystemkode for applikasjon
+    @JsonProperty("fagsakNr")
+    private String saksnummer; // Fagsaknr for den aktuelle saken
+    @JsonProperty("aktoerId")
+    private String aktørId; // Id til aktøren saken gjelder
+    private String orgnr; // Orgnr til foretaket saken gjelder
+    private String opprettetAv;// Brukerident til den som opprettet saken
     private String opprettetTidspunkt; // Lagres som LocalDateTime i Sak API, men eksponeres som ZonedDateTime
 
     public SakDto() {}
@@ -37,20 +41,20 @@ public class SakDto {
         this.applikasjon = applikasjon;
     }
 
-    public String getFagsakNr() {
-        return fagsakNr;
+    public String getSaksnummer() {
+        return saksnummer;
     }
 
-    public void setFagsakNr(String fagsakNr) {
-        this.fagsakNr = fagsakNr;
+    public void setSaksnummer(String saksnummer) {
+        this.saksnummer = saksnummer;
     }
 
-    public String getAktoerId() {
-        return aktoerId;
+    public String getAktørId() {
+        return aktørId;
     }
 
-    public void setAktoerId(String aktoerId) {
-        this.aktoerId = aktoerId;
+    public void setAktørId(String aktørId) {
+        this.aktørId = aktørId;
     }
 
     public String getOrgnr() {

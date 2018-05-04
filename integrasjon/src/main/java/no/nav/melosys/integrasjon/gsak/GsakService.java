@@ -78,9 +78,9 @@ public class GsakService implements GsakFasade {
     public String opprettSak(Long fagsakId, String fnr) { // FIXME: Kalles med aktørID når TPS-oppslag er på plass
         SakDto sakDto = new SakDto();
         sakDto.setTema(FAGOMRÅDE_KODE_MEDLEMSKAP);
-        sakDto.setAktoerId(fnr);
+        sakDto.setAktørId(fnr);
         sakDto.setApplikasjon(FAGSYSTEM_KODE_MELOSYS);
-        sakDto.setFagsakNr(FAGSYSTEM_KODE_MELOSYS + fagsakId.toString());
+        sakDto.setSaksnummer(fagsakId.toString());
 
         sakDto = sakApiConsumer.opprettSak(sakDto);
 
