@@ -1,5 +1,5 @@
 CREATE TABLE fagsak (
-    saksnummer       VARCHAR2(99) NOT NULL,
+    saksnummer      VARCHAR2(99)  NOT NULL,
     gsak_saksnummer VARCHAR2(99)  NULL,
     fagsak_type     VARCHAR2(99)  NOT NULL,
     status          VARCHAR2(99)  NOT NULL,

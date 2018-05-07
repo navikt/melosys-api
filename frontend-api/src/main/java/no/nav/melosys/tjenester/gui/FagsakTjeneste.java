@@ -137,7 +137,7 @@ public class FagsakTjeneste extends RestTjeneste {
 
         for (Fagsak fagsak : saker) {
             FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
-            fagsakOppsummeringDto.setSaksnummer("" + fagsak.getSaksnummer());
+            fagsakOppsummeringDto.setSaksnummer(fagsak.getSaksnummer());
             fagsakOppsummeringDto.setSakstype(fagsak.getType());
             fagsakOppsummeringDto.setRegistrertDato(fagsak.getRegistrertDato());
 

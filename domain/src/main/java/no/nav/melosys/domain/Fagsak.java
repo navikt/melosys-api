@@ -2,7 +2,6 @@ package no.nav.melosys.domain;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
@@ -17,7 +16,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "fagsak")
 public class Fagsak {
-    
+
     // FIXME (farjam): Ikke tatt med fra logisk modell: tema, virkemiddel og registreringsmetainfo
 
     @Id
@@ -109,7 +108,7 @@ public class Fagsak {
      */
     public Behandling getAktivBehandling() {
         List<Behandling> behandlinger = getBehandlinger().stream()
-           .filter(b -> !b.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
+            .filter(b -> !b.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
         if (behandlinger.size() > 1) {
             throw new RuntimeException("Det finnes mer enn en aktive behandlinger");
         } else if (behandlinger.size() == 1) {
@@ -136,14 +135,17 @@ public class Fagsak {
             return false;
         }
         Fagsak that = (Fagsak) o;
-        if (this.saksnummer != null && that.saksnummer != null) { // Begge entiteter er persistert. True hvis samme rad i db.
-            return this.saksnummer == that.saksnummer;
+        if (this.saksnummer == null) {
+            throw new RuntimeException("Fagsak.equals ble kalt før fagsak har fått saksnummer");
         }
-        return Objects.equals(this.saksnummer, that.saksnummer);
+        return this.saksnummer.equals(that.saksnummer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(saksnummer);
+        if (this.saksnummer == null) {
+            throw new RuntimeException("Fagsak.hashCode ble kalt før fagsak har fått saksnummer");
+        }
+        return saksnummer.hashCode();
     }
 }

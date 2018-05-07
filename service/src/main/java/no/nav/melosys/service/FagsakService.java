@@ -49,7 +49,7 @@ public class FagsakService {
 
     private static final Logger log = LoggerFactory.getLogger(FagsakService.class);
 
-    private static final String FAGSAKID_PREFIX = "MEL";
+    private static final String FAGSAKID_PREFIX = "MEL-";
 
     private FagsakRepository fagsakRepository;
 
@@ -95,12 +95,7 @@ public class FagsakService {
     @Transactional
     public Fagsak lagre(Fagsak sak) {
         if (sak.getSaksnummer() == null) {
-            Long sekvensVerdi = fagsakRepository.hentNesteSekvensVerdi();
-            if (sekvensVerdi == null) {
-                throw new RuntimeException("Henting av neste SekvensVerdi fra sekvensen feilet.");
-            } else {
-                sak.setSaksnummer(FAGSAKID_PREFIX+Long.toString(sekvensVerdi));
-            }
+            sak.setSaksnummer(hentNesteSaksnummer());
         }
         fagsakRepository.save(sak);
         return sak;
@@ -108,6 +103,7 @@ public class FagsakService {
 
     public Fagsak nyFagsak(String fnr) throws SikkerhetsbegrensningException {
         Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(hentNesteSaksnummer());
         Behandling behandling = new Behandling();
 
         // FIXME: Når EESSI2-485 er ferdig må IntegrasjonsExceptions kastes videre
@@ -251,4 +247,12 @@ public class FagsakService {
         }
     }
 
+    private String hentNesteSaksnummer() {
+        Long sekvensVerdi = fagsakRepository.hentNesteSekvensVerdi();
+        if (sekvensVerdi == null) {
+            throw new RuntimeException("Henting av neste SekvensVerdi fra sekvensen feilet.");
+        } else {
+            return FAGSAKID_PREFIX + Long.toString(sekvensVerdi);
+        }
+    }
 }
