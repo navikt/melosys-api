@@ -17,11 +17,12 @@ import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningExceptio
 import no.nav.melosys.integrasjon.felles.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
-import no.nav.melosys.integrasjon.gsak.behandlesak.BehandleSakConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeFilterMal;
 import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeRequestMal;
 import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeSokMal;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
+import no.nav.melosys.integrasjon.gsak.sakapi.SakApiConsumer;
+import no.nav.melosys.integrasjon.gsak.sakapi.dto.SakDto;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSFerdigstillOppgaveException;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOppgaveIkkeFunnetException;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOptimistiskLasingException;
@@ -34,16 +35,6 @@ import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSLagreOppgaveReq
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOppgave;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveRequest;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveResponse;
-import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.OpprettSakSakEksistererAllerede;
-import no.nav.tjeneste.virksomhet.behandlesak.v1.binding.OpprettSakUgyldigInput;
-import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Aktoer;
-import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Fagomraader;
-import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Fagsystemer;
-import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Person;
-import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Sak;
-import no.nav.tjeneste.virksomhet.behandlesak.v1.informasjon.Sakstyper;
-import no.nav.tjeneste.virksomhet.behandlesak.v1.meldinger.OpprettSakRequest;
-import no.nav.tjeneste.virksomhet.behandlesak.v1.meldinger.OpprettSakResponse;
 import no.nav.tjeneste.virksomhet.oppgave.v3.binding.HentOppgaveOppgaveIkkeFunnet;
 import no.nav.tjeneste.virksomhet.oppgave.v3.informasjon.oppgave.Oppgave;
 import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeResponse;
@@ -70,53 +61,36 @@ public class GsakService implements GsakFasade {
     private static final String SORTERING_MED_FRIST = "FRIST_DATO";
     private static final String SORTERING_STIGENDE = "STIGENDE";
 
-    private BehandleSakConsumer behandleSakConsumer;
+    private SakApiConsumer sakApiConsumer;
 
     private OppgaveConsumer oppgaveConsumer;
 
     private BehandleOppgaveConsumer behandleOppgaveConsumer;
 
     @Autowired
-    public GsakService(BehandleSakConsumer behandleSakConsumer, OppgaveConsumer oppgaveConsumer, BehandleOppgaveConsumer behandleOppgaveConsumer) {
-        this.behandleSakConsumer = behandleSakConsumer;
+    public GsakService(SakApiConsumer sakApiConsumer, OppgaveConsumer oppgaveConsumer, BehandleOppgaveConsumer behandleOppgaveConsumer) {
+        this.sakApiConsumer = sakApiConsumer;
         this.oppgaveConsumer = oppgaveConsumer;
         this.behandleOppgaveConsumer = behandleOppgaveConsumer;
     }
 
     @Override
-    public String opprettSak(Long fagsakId, String fnr) throws IntegrasjonException {
-        Sak sak = new Sak();
-        Fagomraader fagområde = new Fagomraader();
-        fagområde.setValue(FAGOMRÅDE_KODE_MEDLEMSKAP);
-        sak.setFagomraade(fagområde);
+    public String opprettSak(Long fagsakId, String fnr) { // FIXME: Kalles med aktørID når TPS-oppslag er på plass
+        SakDto sakDto = new SakDto();
+        sakDto.setTema(FAGOMRÅDE_KODE_MEDLEMSKAP);
+        sakDto.setAktørId(fnr);
+        sakDto.setApplikasjon(FAGSYSTEM_KODE_MELOSYS);
+        sakDto.setSaksnummer(fagsakId.toString());
 
-        Sakstyper sakstype = new Sakstyper();
-        sakstype.setValue(SAK_TYPE_FAGSAK);
-        sak.setSakstype(sakstype);
+        sakDto = sakApiConsumer.opprettSak(sakDto);
 
-        Aktoer aktør = new Person();
-        aktør.setIdent(fnr);
-        sak.getGjelderBrukerListe().add(aktør);
-
-        Fagsystemer fagsystem = new Fagsystemer();
-        fagsystem.setValue(FAGSYSTEM_KODE_MELOSYS);
-        sak.setFagsystem(fagsystem);
-
-        String fagsystemSakId = FAGSYSTEM_KODE_MELOSYS + fagsakId.toString();
-        sak.setFagsystemSakId(fagsystemSakId);
-
-        OpprettSakRequest opprettSakRequest = new OpprettSakRequest();
-        opprettSakRequest.setSak(sak);
-
-        try {
-            OpprettSakResponse response = behandleSakConsumer.opprettSak(opprettSakRequest);
-            log.debug("Sak opprettet i GSAK med saksnummer: {}", response.getSakId());
-            return response.getSakId();
-        } catch (OpprettSakSakEksistererAllerede e) {
-            throw new IntegrasjonException(e);
-        } catch (OpprettSakUgyldigInput e) {// NOSONAR
-            throw new IntegrasjonException(e);
+        if (sakDto.getId() == null) {
+            log.error("Feil ved oppretting av sak i GSAK.");
+            throw new IntegrasjonException("Feil ved oppretting av sak i GSAK.");
         }
+        log.info("Sak opprettet i GSAK med saksnummer: {}", sakDto.getId());
+
+        return sakDto.getId().toString();
     }
 
     @Override
