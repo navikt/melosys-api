@@ -48,7 +48,7 @@
         <joark.journal.version>3.1.2</joark.journal.version>
         <modig-testcertificates.version>1.2.0</modig-testcertificates.version>
         <tps.aktoer.version>2.0.1</tps.aktoer.version>
-        <tps.person.version>3.0.2</tps.person.version>
+        <tps.person.version>3.4.1</tps.person.version>
         <medl2-v2.version>2.0.6</medl2-v2.version>
         <kodeverk-v2.version>2.0.0-alpha004</kodeverk-v2.version>
         
@@ -347,7 +347,6 @@
                 <groupId>no.nav.tjenester</groupId>
                 <artifactId>nav-person-v3-tjenestespesifikasjon</artifactId>
                 <version>${tps.person.version}</version>
-                <classifier>jaxws</classifier>
             </dependency>
             <!--Gsak-->
             <dependency>

@@ -101,7 +101,6 @@
         <dependency>
             <groupId>no.nav.tjenester</groupId>
             <artifactId>nav-person-v3-tjenestespesifikasjon</artifactId>
-            <classifier>jaxws</classifier>
         </dependency>
 
         <!--Kodeverk-->
@@ -130,6 +129,5 @@
             <artifactId>modig-testcertificates</artifactId>
             <scope>compile</scope>
         </dependency>
-
     </dependencies>
 </project>
