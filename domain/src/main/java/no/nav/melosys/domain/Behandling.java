@@ -26,7 +26,7 @@ public class Behandling {
     private long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "fagsak_id", nullable = false, updatable = false)
+    @JoinColumn(name = "saksnummer", nullable = false, updatable = false)
     private Fagsak fagsak;
 
     @Column(name = "status", nullable = false, updatable = true)

@@ -71,9 +71,9 @@ public class FagsakServiceTest {
         fagsak.setType(FagsakType.EU_EØS);
         fagsak.setRegistrertDato(LocalDateTime.now());
 
-        fagsakRepo.save(fagsak);
-
+        fagsakService.lagre(fagsak);
         assertNotNull(fagsak);
+        assertNotNull(fagsak.getSaksnummer());
     }
 
     @Test

@@ -97,7 +97,7 @@ public interface GsakFasade {
      * @return Saksnummer fra GSAK
      * @throws IntegrasjonException
      */
-    String opprettSak(Long fagsakId, String fnr) throws IntegrasjonException;
+    String opprettSak(String fagsakId, String fnr) throws IntegrasjonException;
 
     /**
      * Tildeler en oppgaver til en saksbehandler

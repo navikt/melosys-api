@@ -1,6 +1,6 @@
 CREATE TABLE aktoer (
     id              NUMBER(19) GENERATED ALWAYS AS IDENTITY,
-    fagsak_id       NUMBER(19)   NOT NULL,
+    saksnummer      VARCHAR2(99) NOT NULL,
     aktoer_id       VARCHAR2(99) NOT NULL,
     ekstern_id      VARCHAR2(99) NOT NULL,
     rolle           VARCHAR2(99) NOT NULL,

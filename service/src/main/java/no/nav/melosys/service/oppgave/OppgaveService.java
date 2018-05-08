@@ -69,8 +69,8 @@ public class OppgaveService {
             if (fagsak == null) {
                 throw new RuntimeException("Fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer() + " ikke funnet!");
             }
-            // FIXME MELOSYS-1119 logisk ID for Fagsak
-            dest.setSaksnummer(""+fagsak.getId());
+
+            dest.setSaksnummer(fagsak.getSaksnummer());
             dest.setSakstype(fagsak.getType());
 
             Behandling behandling = fagsak.getAktivBehandling();

@@ -71,8 +71,7 @@ public class MottakService {
         // fagsak.setBruker(bruker);
 
         // Oppretter en sak i GSAK
-        // FIXME Francois koble til eksisterende sak
-        String gsakSaksNummer = gsakFasade.opprettSak(fagsak.getId(), fnr);
+        String gsakSaksNummer = gsakFasade.opprettSak(fagsak.getSaksnummer(), fnr);
 
         // Oppdaterer fagsak med saksnummer fra GSAK
         fagsak.setGsakSaksnummer(gsakSaksNummer);

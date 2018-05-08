@@ -75,7 +75,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public String opprettSak(Long fagsakId, String fnr) { // FIXME: Kalles med aktørID når TPS-oppslag er på plass
+    public String opprettSak(String fagsakId, String fnr) { // FIXME: Kalles med aktørID når TPS-oppslag er på plass
         SakDto sakDto = new SakDto();
         sakDto.setTema(FAGOMRÅDE_KODE_MEDLEMSKAP);
         sakDto.setAktørId(fnr);
