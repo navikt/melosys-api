@@ -114,12 +114,16 @@ public class V1_1_05__SAKSOPPLYSNING_data implements JdbcMigration {
     // https://bugs.openjdk.java.net/browse/JDK-7181278
     private Path uriToPath(URI uri) {
         try {
-            String spec = uri.getRawSchemeSpecificPart();
-            int sep = spec.indexOf("!/");
-            if (sep != -1) {
-                spec = spec.substring(0, sep);
+            if (uri.toString().indexOf("file:") != -1) {
+                return Paths.get(uri).toAbsolutePath();
+            } else {
+                String spec = uri.getRawSchemeSpecificPart();
+                int sep = spec.indexOf("!/");
+                if (sep != -1) {
+                    spec = spec.substring(0, sep);
+                }
+                return Paths.get(new URI(spec)).toAbsolutePath();
             }
-            return Paths.get(new URI(spec)).toAbsolutePath();
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e.getMessage(), e);
         }
