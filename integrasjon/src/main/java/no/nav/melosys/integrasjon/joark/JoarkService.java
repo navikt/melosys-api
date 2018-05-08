@@ -33,14 +33,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class JoarkService implements JoarkFasade {
 
-    private BehandleInngaaendeJournalConsumer behandleInngaaendeJournalConsumer;
-    private InngaaendeJournalConsumer inngaaendeJournalConsumer;
+    private BehandleInngaaendeJournalConsumer behandleInngåendeJournalConsumer;
+    private InngaaendeJournalConsumer inngåendeJournalConsumer;
     private JournalConsumer journalConsumer;
 
     @Autowired
-    public JoarkService(BehandleInngaaendeJournalConsumer behandleInngaaendeJournal, InngaaendeJournalConsumer inngaaendeJournal, JournalConsumer journal) {
-        this.behandleInngaaendeJournalConsumer = behandleInngaaendeJournal;
-        this.inngaaendeJournalConsumer = inngaaendeJournal;
+    public JoarkService(BehandleInngaaendeJournalConsumer behandleInngåendeJournal, InngaaendeJournalConsumer inngåendeJournal, JournalConsumer journal) {
+        this.behandleInngåendeJournalConsumer = behandleInngåendeJournal;
+        this.inngåendeJournalConsumer = inngåendeJournal;
         this.journalConsumer = journal;
     }
 
@@ -51,7 +51,7 @@ public class JoarkService implements JoarkFasade {
 
         HentJournalpostResponse hentJournalpostResponse;
         try {
-            hentJournalpostResponse = inngaaendeJournalConsumer.hentJournalpost(request);
+            hentJournalpostResponse = inngåendeJournalConsumer.hentJournalpost(request);
         } catch (HentJournalpostJournalpostIkkeFunnet hentJournalpostJournalpostIkkeFunnet) {
             throw new IntegrasjonException(hentJournalpostJournalpostIkkeFunnet);
         } catch (HentJournalpostJournalpostIkkeInngaaende hentJournalpostJournalpostIkkeInngaaende) {

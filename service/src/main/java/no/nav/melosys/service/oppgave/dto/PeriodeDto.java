@@ -20,7 +20,6 @@ public class PeriodeDto {
     }
 
     public PeriodeDto(LocalDate fom, LocalDate tom) {
-        super();
         this.fom = fom;
         this.tom = tom;
     }

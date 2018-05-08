@@ -47,7 +47,7 @@ public class JournalforingTjeneste extends RestTjeneste {
         dto.setBrukerID(brukerID);
         String avsenderID = journalpost.getAvsenderId();
         dto.setAvsenderID(avsenderID);
-        dto.setErBrukerAvsender(brukerID == null ? false : brukerID.equalsIgnoreCase(avsenderID));
+        dto.setErBrukerAvsender(brukerID != null && brukerID.equalsIgnoreCase(avsenderID));
         DokumentDto dokumentDto = new DokumentDto();
         dokumentDto.setID(journalpost.getHoveddokumentId());
         dokumentDto.setMottattDato(journalpost.getForsendelseMottatt());

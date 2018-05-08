@@ -3,6 +3,9 @@ package no.nav.melosys.domain;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+/**
+ * Journalpostopplysninger fra Joark. Transient for Melosys.
+ */
 public class Journalpost {
     private final String journalpostId;
     private String arkivSakId;
