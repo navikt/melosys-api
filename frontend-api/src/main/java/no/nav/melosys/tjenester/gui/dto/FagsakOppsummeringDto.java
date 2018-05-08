@@ -12,7 +12,7 @@ public class FagsakOppsummeringDto {
     private FagsakType sakstype;
     private BehandlingType behandlingstype;
     private BehandlingStatus behandlingsstatus;
-    private LocalDateTime registrertDato;
+    private LocalDateTime opprettetDato;
     private PeriodeDto soknadsperiode;
     private List<String> land;
 
@@ -48,12 +48,12 @@ public class FagsakOppsummeringDto {
         this.behandlingsstatus = behandlingsstatus;
     }
 
-    public LocalDateTime getRegistrertDato() {
-        return registrertDato;
+    public LocalDateTime getOpprettetDato() {
+        return opprettetDato;
     }
 
-    public void setRegistrertDato(LocalDateTime registrertDato) {
-        this.registrertDato = registrertDato;
+    public void setOpprettetDato(LocalDateTime opprettetDato) {
+        this.opprettetDato = opprettetDato;
     }
 
     public PeriodeDto getSoknadsperiode() {

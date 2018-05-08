@@ -42,7 +42,7 @@ public class PersonTjeneste extends RestTjeneste {
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (IkkeFunnetException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.ok(RestTjeneste.TOM_JSON).build();
         }
 
         return Response.ok(personDokument).build();

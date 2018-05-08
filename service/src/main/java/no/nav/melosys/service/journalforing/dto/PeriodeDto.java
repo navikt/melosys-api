@@ -1,4 +1,4 @@
-package no.nav.melosys.service.oppgave.dto;
+package no.nav.melosys.service.journalforing.dto;
 
 import java.time.LocalDate;
 

@@ -23,12 +23,18 @@ public class RegisterOppslagService {
         this.tpsFasade = tpsFasade;
     }
 
+    /**
+     * Henter organisasjonsopplysninger.
+     */
     public OrganisasjonDokument hentOrganisasjon(String orgnummer) throws IkkeFunnetException, SikkerhetsbegrensningException {
         Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(orgnummer);
         OrganisasjonDokument organisasjon = (OrganisasjonDokument) saksopplysning.getDokument();
         return organisasjon;
     }
 
+    /**
+     * Henter personopplysninger.
+     */
     public PersonDokument hentPerson(String personnummer) throws IkkeFunnetException, SikkerhetsbegrensningException {
         Saksopplysning saksopplysning = tpsFasade.hentPerson(personnummer);
         PersonDokument personDokument = (PersonDokument) saksopplysning.getDokument();
