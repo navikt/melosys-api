@@ -1,7 +1,7 @@
 CREATE TABLE fagsak (
     saksnummer      VARCHAR2(99)  NOT NULL,
     gsak_saksnummer VARCHAR2(99)  NULL,
-    fagsak_type     VARCHAR2(99)  NOT NULL,
+    fagsak_type     VARCHAR2(99)  NULL,
     status          VARCHAR2(99)  NOT NULL,
     registrert_dato TIMESTAMP     NOT NULL,
     endret_dato     TIMESTAMP     NOT NULL,
