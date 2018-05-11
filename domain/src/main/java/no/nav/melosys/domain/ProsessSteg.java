@@ -4,7 +4,13 @@ import javax.persistence.Converter;
 
 public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
 
-    A1_JOURF("A1_JOURF", "A1 journalføring"),
+    JFR_AKTOER_ID("JFR_AKTOER_ID", "Henter aktørID"),
+    JFR_OPPRETT_SAK("JFR_OPPRETT_SAK", "Oppretter ny sak i Melosys"),
+    JFR_OPPRETT_GSAK_SAK("JFR_OPPRETT_GSAK_SAK", "Oppretter Sak i GSAK"),
+    JFR_OPPDATER_JOURNALPOST("JFR_OPPDATER_JOURNALPOST", "Oppdaterer journalposten i Joark"),
+    JFR_FERDIGSTILL_JOURNALPOST("JFR_FERDIGSTILL_JOURNALPOST", "Ferdigstiller journalposten i Joark"),
+    JFR_AVSLUTT_OPPGAVE("JFR_AVSLUTT_OPPGAVE", "Avslutter journalføringsoppgaven i GSAK"),
+    OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
     A1_HENT_PERS_OPPL("A1_HENT_PERS_OPPL", "A1 hent personopplysninger"),
     A1_HENT_ARBF_OPPL("A1_HENT_ARBF_OPPL", "A1 hent arbeidsforhold"),
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt");

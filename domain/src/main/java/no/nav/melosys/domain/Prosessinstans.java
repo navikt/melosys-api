@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.time.LocalDateTime;
+import java.util.Properties;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -11,6 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import no.nav.melosys.domain.jpa.PropertiesConverter;
 
 /**
  * Arbeidstabell for saksflyt.
@@ -32,7 +35,8 @@ public class Prosessinstans {
     private Behandling behandling;
 
     @Column(name = "data", nullable = true, updatable = true)
-    private String data;
+    @Convert(converter = PropertiesConverter.class)
+    private Properties data = new Properties();
 
     @Column(name = "steg", nullable = false, updatable = true)
     @Convert(converter = ProsessSteg.DbKonverterer.class)
@@ -64,12 +68,20 @@ public class Prosessinstans {
         this.behandling = behandling;
     }
 
-    public String getData() {
+    public Properties getData() {
         return data;
     }
 
-    public void setData(String data) {
-        this.data = data;
+    public String getData(String key) {
+        return data.getProperty(key);
+    }
+
+    public void setData(String key, String value) {
+        this.data.setProperty(key, value);
+    }
+
+    public void setData(Properties data) {
+        this.data.putAll(data);
     }
 
     public ProsessSteg getSteg() {

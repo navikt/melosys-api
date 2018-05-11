@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.impl.binge;
 import java.util.Arrays;
 
 import no.nav.melosys.saksflyt.SaksflytTestApplication;
-import no.nav.melosys.saksflyt.impl.steg.a1.HentPersonopplysningerAgent;
+import no.nav.melosys.saksflyt.impl.agent.HentPersonopplysninger;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +29,7 @@ public class ArbeiderTest {
     private Arbeider arbeider;
 
     @Mock
-    private HentPersonopplysningerAgent klargjøreSteg;
+    private HentPersonopplysninger klargjøreSteg;
 
     @Test
     @Ignore

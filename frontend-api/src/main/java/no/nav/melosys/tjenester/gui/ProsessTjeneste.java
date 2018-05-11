@@ -1,0 +1,68 @@
+package no.nav.melosys.tjenester.gui;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
+
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.tjenester.gui.dto.ProsessinstansDto;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.WebApplicationContext;
+
+@Path("/prosesser")
+@Service
+@Scope(value = WebApplicationContext.SCOPE_APPLICATION)
+public class ProsessTjeneste extends RestTjeneste {
+
+    private ProsessinstansRepository prosessinstansRepo;
+
+    @Autowired
+    public ProsessTjeneste(ProsessinstansRepository prosessinstansRepository) {
+        this.prosessinstansRepo = prosessinstansRepository;
+    }
+
+    @GET
+    public List<ProsessinstansDto> finnAlle() {
+        Iterable<Prosessinstans> alle = prosessinstansRepo.findAll();
+        List<ProsessinstansDto> liste = new ArrayList<>();
+        for (Prosessinstans p : alle) {
+            ProsessinstansDto dto = new ProsessinstansDto();
+            dto.setId(p.getId());
+            dto.setData(p.getData());
+            if (p.getBehandling() != null) {
+                dto.setBehandlingID(p.getBehandling().getId());
+            }
+            dto.setEndretDato(p.getSistEndret());
+            dto.setRegistrertDato(p.getRegistrertDato());
+            dto.setSteg(p.getSteg());
+            dto.setType(p.getType());
+            liste.add(dto);
+        }
+        return liste;
+    }
+
+    @GET
+    @Path("test")
+    public Response test() {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.JFR_NY_SAK);
+        prosessinstans.setSteg(ProsessSteg.JFR_AKTOER_ID);
+        Properties properties = new Properties();
+        prosessinstans.setData(properties);
+        LocalDateTime nå = LocalDateTime.now();
+        prosessinstans.setSistEndret(nå);
+        prosessinstans.setRegistrertDato(nå);
+        prosessinstansRepo.save(prosessinstans);
+
+        return Response.ok().build();
+    }
+}

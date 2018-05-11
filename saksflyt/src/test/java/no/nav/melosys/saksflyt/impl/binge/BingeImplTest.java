@@ -1,16 +1,18 @@
 package no.nav.melosys.saksflyt.impl.binge;
 
-import static no.nav.melosys.domain.ProsessSteg.A1_HENT_ARBF_OPPL;
-import static no.nav.melosys.domain.ProsessSteg.A1_JOURF;
-import static org.junit.Assert.*;
-
 import java.time.LocalDateTime;
-
-import org.junit.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.saksflyt.impl.Utils;
+import org.junit.Test;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import static no.nav.melosys.domain.ProsessSteg.A1_HENT_ARBF_OPPL;
+import static no.nav.melosys.domain.ProsessSteg.JFR_AKTOER_ID;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class BingeImplTest {
 
@@ -25,7 +27,7 @@ public class BingeImplTest {
         ReflectionTestUtils.setField(pi2, "id", 2L);
         pi1.setRegistrertDato(LocalDateTime.of(2017, 1, 2, 0, 0));
         pi2.setRegistrertDato(LocalDateTime.of(2017, 1, 1, 0, 0));
-        pi1.setSteg(A1_JOURF);
+        pi1.setSteg(JFR_AKTOER_ID);
         pi2.setSteg(A1_HENT_ARBF_OPPL);
         assertTrue(binge.leggTil(pi1));
         assertTrue(binge.leggTil(pi2));

@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -63,11 +62,7 @@ public class JournalforingTjeneste extends RestTjeneste {
         if (journalforingDto.getFagsak() == null) {
             throw new BadRequestException();
         }
-        try {
-            journalføringService.opprettSakOgJournalfør(journalforingDto);
-        } catch (SikkerhetsbegrensningException e) {
-            throw new ForbiddenException();
-        }
+        journalføringService.opprettSakOgJournalfør(journalforingDto);
     }
 
     @POST
