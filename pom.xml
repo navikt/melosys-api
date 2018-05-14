@@ -16,6 +16,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>app</module>
         <module>build</module>
         <module>config</module>
         <module>domain</module>
@@ -23,9 +24,9 @@
         <module>integrasjon</module>
         <module>repository</module>
         <module>saksflyt</module>
+        <module>saksflyt-api</module>
         <module>service</module>
         <module>sikkerhet</module>
-        <module>app</module>
     </modules>
 
     <properties>
@@ -121,11 +122,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>melosys-saksflyt</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>melosys-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -133,6 +129,16 @@
                 <groupId>${project.groupId}</groupId>
                 <artifactId>regler-api</artifactId>
                 <version>${melosys.regler.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>saksflyt</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>saksflyt-api</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>

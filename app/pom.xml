@@ -22,7 +22,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-saksflyt</artifactId>
+            <artifactId>saksflyt</artifactId>
         </dependency>
 
         <dependency>

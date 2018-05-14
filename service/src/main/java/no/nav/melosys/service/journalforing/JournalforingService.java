@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.journalforing.dto.JournalforingDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,13 +20,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class JournalforingService {
 
+    Binge binge;
+
     JoarkFasade joarkFasade;
 
     ProsessinstansRepository prosessinstansRepo;
 
     @Autowired
-    public JournalforingService(JoarkFasade joarkFasade) {
+    public JournalforingService(Binge binge, JoarkFasade joarkFasade, ProsessinstansRepository prosessinstansRepo) {
+        this.binge = binge;
         this.joarkFasade = joarkFasade;
+        this.prosessinstansRepo = prosessinstansRepo;
     }
 
     public Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException {
@@ -52,6 +57,7 @@ public class JournalforingService {
         prosessinstans.setSistEndret(nå);
         prosessinstans.setRegistrertDato(nå);
         prosessinstansRepo.save(prosessinstans);
+        binge.leggTil(prosessinstans);
     }
 
     @Transactional
@@ -72,5 +78,6 @@ public class JournalforingService {
         prosessinstans.setSistEndret(nå);
         prosessinstans.setRegistrertDato(nå);
         prosessinstansRepo.save(prosessinstans);
+        binge.leggTil(prosessinstans);
     }
 }

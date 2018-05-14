@@ -12,6 +12,7 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.tjenester.gui.dto.ProsessinstansDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -23,10 +24,13 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_APPLICATION)
 public class ProsessTjeneste extends RestTjeneste {
 
+    private Binge binge;
+
     private ProsessinstansRepository prosessinstansRepo;
 
     @Autowired
-    public ProsessTjeneste(ProsessinstansRepository prosessinstansRepository) {
+    public ProsessTjeneste(Binge binge, ProsessinstansRepository prosessinstansRepository) {
+        this.binge = binge;
         this.prosessinstansRepo = prosessinstansRepository;
     }
 
@@ -62,6 +66,7 @@ public class ProsessTjeneste extends RestTjeneste {
         prosessinstans.setSistEndret(nå);
         prosessinstans.setRegistrertDato(nå);
         prosessinstansRepo.save(prosessinstans);
+        binge.leggTil(prosessinstans);
 
         return Response.ok().build();
     }
