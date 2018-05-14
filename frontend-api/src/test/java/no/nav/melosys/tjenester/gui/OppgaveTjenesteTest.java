@@ -11,10 +11,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.FagsakType;
-import no.nav.melosys.domain.Oppgave;
-import no.nav.melosys.domain.gsak.Oppgavetype;
+import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.BehandlingDto;
@@ -51,7 +53,7 @@ public class OppgaveTjenesteTest {
     }
 
     @Test
-    public void plukkOppgave() throws FunksjonellException, IkkeFunnetException {
+    public void plukkOppgave() throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
         innData.setOppgavetype("BEH_SAK");
@@ -66,7 +68,7 @@ public class OppgaveTjenesteTest {
 
         Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId("1");
-        oppgave.setOppgavetype(Oppgavetype.BEH_SAK_MED);
+        oppgave.setOppgavetype(Oppgavetype.BEH_SAK);
         Optional<Oppgave> plukket = Optional.of(oppgave);
 
         when(oppgaveplukker.plukkOppgave(anyString(), eq(innData))).thenReturn(plukket);
@@ -80,10 +82,10 @@ public class OppgaveTjenesteTest {
     }
 
     @Test
-    public void mineOppgaver() {
+    public void mineOppgaver() throws TekniskException {
         OppgaveDto oppgave = new OppgaveDto();
         oppgave.setOppgaveID("177057928");
-        oppgave.setOppgavetype(no.nav.melosys.domain.Oppgavetype.JFR);
+        oppgave.setOppgavetype(no.nav.melosys.domain.oppgave.Oppgavetype.JFR);
         oppgave.setSammensattNavn("GLITRENDE HATT");
         oppgave.setSaksnummer("4");
 
@@ -105,7 +107,10 @@ public class OppgaveTjenesteTest {
         oppgaver.add(oppgave);
 
         when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
-        List<OppgaveDto> liste = tjeneste.mineOppgaver();
+        Response response = tjeneste.mineOppgaver();
+
+        List<OppgaveDto> liste = (List<OppgaveDto>) response.getEntity();
+
         assertThat(liste.get(0).getOppgaveID()).isEqualTo("177057928");
     }
 
@@ -114,7 +119,7 @@ public class OppgaveTjenesteTest {
 
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
-        innData.setOppgavetype(no.nav.melosys.domain.Oppgavetype.BEH_SAK.getKode()); // eller JFR
+        innData.setOppgavetype(no.nav.melosys.domain.oppgave.Oppgavetype.BEH_SAK.getKode()); // eller JFR
 
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(FagsakType.EU_EØS.getKode());
@@ -139,7 +144,7 @@ public class OppgaveTjenesteTest {
         ObjectMapper mapper = new ObjectMapper();
         PlukketOppgaveDto dto = new PlukketOppgaveDto();
         dto.setOppgaveID("1");
-        dto.setOppgavetype(no.nav.melosys.domain.Oppgavetype.JFR.getKode());
+        dto.setOppgavetype(no.nav.melosys.domain.oppgave.Oppgavetype.JFR.getKode());
         dto.setSaksnummer("123");
         dto.setJournalpostID("JOUR_321");
         try {

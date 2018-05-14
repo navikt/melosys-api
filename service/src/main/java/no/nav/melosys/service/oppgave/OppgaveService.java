@@ -6,13 +6,16 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Oppgave;
-import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.domain.oppgave.Oppgavetype;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.oppgave.dto.BehandlingDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
@@ -28,25 +31,32 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 @Service
 public class OppgaveService {
 
-    private GsakFasade gsakFasade;
-    private FagsakRepository fagsakRepository;
+    private final GsakFasade gsakFasade;
+    private final FagsakRepository fagsakRepository;
+    private final TpsFasade tpsFasade;
 
     @Autowired
     public OppgaveService(GsakFasade gsakFasade,
-                          FagsakRepository fagsakRepository) {
+                          FagsakRepository fagsakRepository,
+                          TpsFasade tpsFasade) {
         this.gsakFasade = gsakFasade;
         this.fagsakRepository = fagsakRepository;
+        this.tpsFasade = tpsFasade;
     }
 
     @Transactional
-    public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) {
+    public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException {
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
     @Transactional
-    public List<OppgaveDto> hentOppgaverMedBruker(String brukerIdent) {
-        List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedBruker(brukerIdent);
+    public List<OppgaveDto> hentOppgaverMedBruker(String brukerIdent) throws IkkeFunnetException, TekniskException {
+        String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
+        if (aktørId == null) {
+            throw new IkkeFunnetException("Finnes ikke aktørId for FNR " + brukerIdent);
+        }
+        List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedBruker(aktørId);
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
@@ -57,7 +67,11 @@ public class OppgaveService {
     private OppgaveDto tilOppgaveDto(Oppgave oppgave) {
         OppgaveDto dest = new OppgaveDto();
         dest.setOppgaveID(oppgave.getOppgaveId());
-        dest.setAktivTil(oppgave.getAktivTil());
+        dest.setAktivTil(oppgave.getFristFerdigstillelse());
+        dest.setOppgavetype(oppgave.getOppgavetype());
+        dest.setPrioritet(oppgave.getPrioritet());
+        dest.setVersjon(oppgave.getVersjon());
+        dest.setAnsvarligId(oppgave.getAnsvarligId());
 
         if (oppgave.erJournalFøring()) {
             dest.setOppgavetype(Oppgavetype.JFR);
@@ -89,7 +103,7 @@ public class OppgaveService {
             );
 
         } else {
-            throw new RuntimeException("Oppgavetype " + oppgave.getOppgavetype() + " støttes ikke");
+            throw new TekniskException("Oppgavetype " + oppgave.getOppgavetype() + " støttes ikke");
         }
 
         return dest;

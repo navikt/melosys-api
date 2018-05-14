@@ -6,7 +6,9 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,16 +35,15 @@ public class OpprettOppgaveTest {
     }
 
     @Test
-    public void utfoerSteg() throws SikkerhetsbegrensningException {
+    public void utfoerSteg() throws SikkerhetsbegrensningException, FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setType(BehandlingType.SØKNAD);
         p.setType(ProsessType.JFR_NY_SAK);
         Properties properties = new Properties();
         p.addData(properties);
-
+        
         agent.utførSteg(p);
-
         verify(gsakFasade, times(1)).opprettOppgave(any());
         assertThat(p.getSteg()).isNull();
     }

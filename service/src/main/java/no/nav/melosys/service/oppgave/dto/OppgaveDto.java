@@ -5,10 +5,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.melosys.domain.FagsakType;
-import no.nav.melosys.domain.Oppgavetype;
+import no.nav.melosys.domain.oppgave.Oppgavetype;
+import no.nav.melosys.domain.oppgave.PrioritetType;
 
 public class OppgaveDto {
-
     private String oppgaveID;
     private Oppgavetype oppgavetype;
     private String sammensattNavn;
@@ -18,6 +18,28 @@ public class OppgaveDto {
     private PeriodeDto soknadsperiode;
     private FagsakType sakstype;
     private BehandlingDto behandling;
+    private PrioritetType prioritet;
+    private List<String> land;
+    private int versjon;
+    private String ansvarligId;
+
+
+    //Getter og setter brukes av Jackson for å serialisere oppgave objekter til frontend i OppgaveTjeneste
+    public String getAnsvarligId() {
+        return ansvarligId;
+    }
+
+    public void setAnsvarligId(String ansvarligId) {
+        this.ansvarligId = ansvarligId;
+    }
+
+    public int getVersjon() {
+        return versjon;
+    }
+
+    public void setVersjon(int versjon) {
+        this.versjon = versjon;
+    }
 
     public FagsakType getSakstype() {
         return sakstype;
@@ -35,10 +57,8 @@ public class OppgaveDto {
         this.behandling = behandling;
     }
 
-    private List<String> land;
-
     public List<String> getLand() {
-        return land;
+        return this.land;
     }
 
     public void setLand(List<String> land) {
@@ -99,5 +119,13 @@ public class OppgaveDto {
 
     public void setSoknadsperiode(PeriodeDto soknadsperiode) {
         this.soknadsperiode = soknadsperiode;
+    }
+
+    public PrioritetType getPrioritet() {
+        return prioritet;
+    }
+
+    public void setPrioritet(PrioritetType prioritet) {
+        this.prioritet = prioritet;
     }
 }

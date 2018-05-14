@@ -1,0 +1,116 @@
+package no.nav.melosys.domain.oppgave;
+
+import java.time.LocalDate;
+
+import no.nav.melosys.domain.Tema;
+
+/**
+ * Denne klassen mapper Oppgaver fra GSAK og er derfor ikke en @Entity
+ */
+public class Oppgave {
+    private String oppgaveId;
+    private String saksnummer;
+    private LocalDate fristFerdigstillelse;
+    private Tema tema;
+    private Oppgavetype oppgavetype;
+    private PrioritetType prioritet;
+    private String gsakSaksnummer;
+    private String dokumentId;
+    private String ansvarligId;
+    private int versjon;
+
+    public Oppgave() {
+    }
+
+    public String getAnsvarligId() {
+        return ansvarligId;
+    }
+
+    public void setAnsvarligId(String ansvarligId) {
+        this.ansvarligId = ansvarligId;
+    }
+
+    public boolean erBehandling() {
+        return oppgavetype == Oppgavetype.BEH_SAK;
+    }
+
+    public boolean erJournalFøring() {
+        return oppgavetype == Oppgavetype.JFR;
+    }
+
+    public boolean harHøyPrioritet() {
+        return PrioritetType.HOY.equals(prioritet);
+    }
+
+    public String getOppgaveId() {
+        return oppgaveId;
+    }
+
+    public void setOppgaveId(String oppgaveId) {
+        this.oppgaveId = oppgaveId;
+    }
+
+    public LocalDate getFristFerdigstillelse() {
+        return fristFerdigstillelse;
+    }
+
+    public void setFristFerdigstillelse(LocalDate fristFerdigstillelse) {
+        this.fristFerdigstillelse = fristFerdigstillelse;
+    }
+
+    public Oppgavetype getOppgavetype() {
+        return oppgavetype;
+    }
+
+    public void setOppgavetype(Oppgavetype oppgavetype) {
+        this.oppgavetype = oppgavetype;
+    }
+
+    public PrioritetType getPrioritet() {
+        return prioritet;
+    }
+
+    public void setPrioritet(PrioritetType prioritet) {
+        this.prioritet = prioritet;
+    }
+
+    public String getGsakSaksnummer() {
+        return gsakSaksnummer;
+    }
+
+    public void setGsakSaksnummer(String gsakSaksnummer) {
+        this.gsakSaksnummer = gsakSaksnummer;
+    }
+
+    public String getDokumentId() {
+        return dokumentId;
+    }
+
+    public void setDokumentId(String dokumentId) {
+        this.dokumentId = dokumentId;
+    }
+
+    public String getSaksnummer() {
+        return saksnummer;
+    }
+
+    public void setSaksnummer(String saksnummer) {
+        this.saksnummer = saksnummer;
+    }
+
+    public Tema getTema() {
+        return tema;
+    }
+
+    public void setTema(Tema tema) {
+        this.tema = tema;
+    }
+
+    public int getVersjon() {
+        return versjon;
+    }
+
+    public void setVersjon(int versjon) {
+        this.versjon = versjon;
+    }
+}

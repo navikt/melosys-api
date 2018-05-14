@@ -6,7 +6,10 @@ import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +35,7 @@ public class AvsluttOppgaveTest {
     }
 
     @Test
-    public void utfoerSteg() throws SikkerhetsbegrensningException {
+    public void utfoerSteg() throws SikkerhetsbegrensningException, FunksjonellException, TekniskException, IkkeFunnetException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
         Properties properties = new Properties();
