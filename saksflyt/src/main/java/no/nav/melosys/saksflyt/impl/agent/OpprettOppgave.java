@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.gsak.AktorType;
 import no.nav.melosys.domain.gsak.Fagomrade;
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.ProsessSteg.FERDIG;
 import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
@@ -45,7 +47,14 @@ public class OpprettOppgave extends StandardAbstraktAgent {
 
     @Override
     public void utfoerSteg(Prosessinstans prosessinstans) {
-        BehandlingType behandlingType = BehandlingType.SØKNAD; //TODO kan variere?
+        ProsessType prosessType = prosessinstans.getType();
+        BehandlingType behandlingType = null;
+        if (ProsessType.JFR_NY_SAK.equals(prosessType) || ProsessType.JFR_KNYTT.equals(prosessType)) {
+            behandlingType = BehandlingType.SØKNAD;
+        } else  {
+            throw new TekniskException("ProsessType " + prosessType + " er ikke støttet");
+        }
+
         String gsakSakID = prosessinstans.getData(GSAK_SAK_ID);
         String brukerID = prosessinstans.getData(BRUKER_ID);
 
@@ -67,7 +76,7 @@ public class OpprettOppgave extends StandardAbstraktAgent {
             throw new TekniskException("BehandlingType " + behandlingType.getBeskrivelse() + " støttes ikke.");
         }
 
-        //builder.medUnderkategori() FIXME Ekisterer det i den nye GSAK tjenesten?
+        //builder.medUnderkategori() FIXME Venter. Ekisterer det i den nye GSAK tjenesten?
         builder.medAktørType(AktorType.PERSON);
         builder.medFnr(brukerID); // FIXME er det ikke aktørID?
         //builder.medBeskrivelse(); FIXME settes til? Are T.
@@ -82,6 +91,6 @@ public class OpprettOppgave extends StandardAbstraktAgent {
             håndterFeil(prosessinstans, false);
         }
 
-        prosessinstans.setSteg(OPPRETT_OPPGAVE);
+        prosessinstans.setSteg(FERDIG);
     }
 }

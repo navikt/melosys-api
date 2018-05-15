@@ -8,6 +8,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
+import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
@@ -59,9 +60,11 @@ public class ProsessTjeneste extends RestTjeneste {
     public Response test() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
-        prosessinstans.setSteg(ProsessSteg.JFR_AKTOER_ID);
+        //prosessinstans.setSteg(ProsessSteg.JFR_AKTOER_ID);
+        prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_SAK);
         Properties properties = new Properties();
-        prosessinstans.setData(properties);
+        properties.setProperty(ProsessDataKey.AKTØR_ID, "FJERNET93");
+        prosessinstans.addData(properties);
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setSistEndret(nå);
         prosessinstans.setRegistrertDato(nå);

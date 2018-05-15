@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML;
+import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SYSTEM_SAML;
 
 
 @Configuration
@@ -22,13 +22,13 @@ public class AktorConsumerProducer {
 
     @Bean
     public AktorConsumer aktorConsumer() {
-        AktoerV2 port = wrapWithSts(consumerConfig.getPort(), SECURITYCONTEXT_TIL_SAML);
+        AktoerV2 port = wrapWithSts(consumerConfig.getPort(), SYSTEM_SAML);
         return new AktorConsumerImpl(port);
     }
 
     @Bean
     public AktorSelftestConsumer aktorSelftestConsumer() {
-        AktoerV2 port = wrapWithSts(consumerConfig.getPort(), SECURITYCONTEXT_TIL_SAML);
+        AktoerV2 port = wrapWithSts(consumerConfig.getPort(), SYSTEM_SAML);
         return new AktorSelftestConsumerImpl(port, consumerConfig.getEndpointUrl());
     }
 

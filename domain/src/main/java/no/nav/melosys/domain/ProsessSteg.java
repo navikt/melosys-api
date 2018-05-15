@@ -13,7 +13,8 @@ public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
     OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
     A1_HENT_PERS_OPPL("A1_HENT_PERS_OPPL", "A1 hent personopplysninger"),
     A1_HENT_ARBF_OPPL("A1_HENT_ARBF_OPPL", "A1 hent arbeidsforhold"),
-    FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt");
+    FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
+    FERDIG("FERDIG", "Ferdig");
 
     private String kode;
     private String beskrivelse;

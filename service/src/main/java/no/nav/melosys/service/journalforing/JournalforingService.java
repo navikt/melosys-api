@@ -52,7 +52,7 @@ public class JournalforingService {
         properties.setProperty(ProsessDataKey.OPPGAVE_ID, journalforingDto.getOppgaveID());
         //TODO journalforingDto.getFagsak().getLand(); til inngangsvilkår
         //TODO journalforingDto.getFagsak().getSoknadsperiode(): for å hente saksopplysninger
-        prosessinstans.setData(properties);
+        prosessinstans.addData(properties);
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setSistEndret(nå);
         prosessinstans.setRegistrertDato(nå);
@@ -73,7 +73,7 @@ public class JournalforingService {
         //FIXME vedlegg
         properties.setProperty(ProsessDataKey.JOURNALPOST_ID, journalforingDto.getJournalpostID());
         properties.setProperty(ProsessDataKey.OPPGAVE_ID, journalforingDto.getOppgaveID());
-        prosessinstans.setData(properties);
+        prosessinstans.addData(properties);
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setSistEndret(nå);
         prosessinstans.setRegistrertDato(nå);

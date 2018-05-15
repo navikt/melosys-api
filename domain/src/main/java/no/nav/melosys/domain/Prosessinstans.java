@@ -80,7 +80,7 @@ public class Prosessinstans {
         this.data.setProperty(key, value);
     }
 
-    public void setData(Properties data) {
+    public void addData(Properties data) {
         this.data.putAll(data);
     }
 
