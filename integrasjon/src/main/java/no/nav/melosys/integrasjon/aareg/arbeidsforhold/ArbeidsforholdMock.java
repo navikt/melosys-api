@@ -25,7 +25,7 @@ public class ArbeidsforholdMock implements ArbeidsforholdConsumer {
     public FinnArbeidsforholdPrArbeidstakerResponse finnArbeidsforholdPrArbeidstaker(FinnArbeidsforholdPrArbeidstakerRequest request) throws FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput {
         String ident = request.getIdent().getIdent();
 
-        List<String> støttet = Arrays.asList("88888888884", "88888888885", "88888888886", "99999999999", "FJERNET");
+        List<String> støttet = Arrays.asList("88888888884", "88888888885", "88888888886", "99999999999", "99999999991");
         if (!støttet.contains(ident)) {
             throw new IntegrasjonException("ident " + ident + " er ikke støttet.");
         }

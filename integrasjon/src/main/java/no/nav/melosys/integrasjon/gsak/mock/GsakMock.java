@@ -32,7 +32,7 @@ public class GsakMock implements OppgaveMockRepository {
     private List<Oppgave> nyOppgaveListe() {
         Oppgave o1 = new Oppgave();
         o1.setOppgaveId("1");
-        o1.setBruker("FJERNET");
+        o1.setBruker("99999999991");
         o1.setFagomrade(Fagomrade.MED);
         o1.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.BEH_SAK_MED);
         o1.setPrioritet(PrioritetType.NORM_MED);
@@ -41,7 +41,7 @@ public class GsakMock implements OppgaveMockRepository {
 
         Oppgave o2 = new Oppgave();
         o2.setOppgaveId("2");
-        o2.setBruker("FJERNET");
+        o2.setBruker("99999999991");
         o2.setFagomrade(Fagomrade.UFM);
         o2.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.BEH_SAK_MK_UFM);
         o2.setPrioritet(PrioritetType.NORM_MED);
@@ -50,7 +50,7 @@ public class GsakMock implements OppgaveMockRepository {
 
         Oppgave o3 = new Oppgave();
         o3.setOppgaveId("3");
-        o3.setBruker("FJERNET");
+        o3.setBruker("99999999991");
         o3.setFagomrade(Fagomrade.MED);
         o3.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.JFR_MED);
         o3.setPrioritet(PrioritetType.HOY_MED);
@@ -59,7 +59,7 @@ public class GsakMock implements OppgaveMockRepository {
 
         Oppgave o4 = new Oppgave();
         o4.setOppgaveId("4");
-        o4.setBruker("FJERNET");
+        o4.setBruker("99999999991");
         o4.setFagomrade(Fagomrade.MED);
         o4.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.JFR_MED);
         o4.setPrioritet(PrioritetType.NORM_MED);
@@ -68,7 +68,7 @@ public class GsakMock implements OppgaveMockRepository {
 
         Oppgave o5 = new Oppgave();
         o5.setOppgaveId("5");
-        o5.setBruker("FJERNET");
+        o5.setBruker("99999999991");
         o5.setFagomrade(Fagomrade.MED);
         o5.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.JFR_MED);
         o5.setPrioritet(PrioritetType.HOY_MED);
@@ -78,7 +78,7 @@ public class GsakMock implements OppgaveMockRepository {
 
         Oppgave o6 = new Oppgave();
         o6.setOppgaveId("6");
-        o6.setBruker("FJERNET");
+        o6.setBruker("99999999991");
         o6.setFagomrade(Fagomrade.MED);
         o6.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.BEH_SAK_MED);
         o6.setPrioritet(PrioritetType.NORM_MED);

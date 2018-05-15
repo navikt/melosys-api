@@ -17,7 +17,7 @@ public class PersonMockTest {
     @Test
     public void hentPerson() throws Exception {
         PersonMock personMock = new PersonMock();
-        List<String> støttet = Arrays.asList("88888888884", "88888888885", "88888888886", "99999999999", "FJERNET");
+        List<String> støttet = Arrays.asList("88888888884", "88888888885", "88888888886", "99999999999", "99999999991");
 
         for (String ident : støttet) {
             HentPersonRequest request = new HentPersonRequest();
