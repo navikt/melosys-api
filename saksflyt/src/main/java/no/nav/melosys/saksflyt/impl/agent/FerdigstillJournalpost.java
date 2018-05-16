@@ -39,7 +39,7 @@ public class FerdigstillJournalpost extends StandardAbstraktAgent {
         try {
             joarkFasade.ferdigstillJournalføring(journalpostID);
         } catch (SikkerhetsbegrensningException e) {
-            log.error("Feil i steg " + inngangsSteg(), e);
+            log.error("Feil i steg {}", inngangsSteg(), e);
             håndterFeil(prosessinstans, false);
         }
 

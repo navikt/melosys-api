@@ -68,21 +68,16 @@ public class JoarkService implements JoarkFasade {
         request.setEnhetId(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
         try {
             behandleInngåendeJournalConsumer.ferdigstillJournalfoering(request);
-        } catch (FerdigstillJournalfoeringFerdigstillingIkkeMulig ferdigstillJournalfoeringFerdigstillingIkkeMulig) {
-            throw new IntegrasjonException(ferdigstillJournalfoeringFerdigstillingIkkeMulig);
-        } catch (FerdigstillJournalfoeringJournalpostIkkeInngaaende ferdigstillJournalfoeringJournalpostIkkeInngaaende) {
-            throw new IntegrasjonException(ferdigstillJournalfoeringJournalpostIkkeInngaaende);
-        } catch (FerdigstillJournalfoeringUgyldigInput ferdigstillJournalfoeringUgyldigInput) {
-            throw new IntegrasjonException(ferdigstillJournalfoeringUgyldigInput);
+        } catch (FerdigstillJournalfoeringFerdigstillingIkkeMulig | FerdigstillJournalfoeringJournalpostIkkeInngaaende
+            | FerdigstillJournalfoeringUgyldigInput | FerdigstillJournalfoeringObjektIkkeFunnet e) {
+            throw new IntegrasjonException(e);
         } catch (FerdigstillJournalfoeringSikkerhetsbegrensning ferdigstillJournalfoeringSikkerhetsbegrensning) {
             throw new SikkerhetsbegrensningException(ferdigstillJournalfoeringSikkerhetsbegrensning);
-        } catch (FerdigstillJournalfoeringObjektIkkeFunnet ferdigstillJournalfoeringObjektIkkeFunnet) {
-            throw new IntegrasjonException(ferdigstillJournalfoeringObjektIkkeFunnet);
         }
     }
 
     @Override
-    public byte[] hentDokument(String journalPostID, String dokumentID) throws SikkerhetsbegrensningException {
+    public byte[] hentDokument(String journalPostID, String dokumentID) {
         HentDokumentRequest request = new HentDokumentRequest();
         request.setDokumentId(dokumentID);
         request.setJournalpostId(journalPostID);
@@ -94,12 +89,8 @@ public class JoarkService implements JoarkFasade {
         HentDokumentResponse hentDokumentResponse;
         try {
             hentDokumentResponse = journalConsumer.hentDokument(request);
-        } catch (HentDokumentDokumentIkkeFunnet hentDokumentDokumentIkkeFunnet) {
-            throw new IntegrasjonException(hentDokumentDokumentIkkeFunnet);
-        } catch (HentDokumentSikkerhetsbegrensning hentDokumentSikkerhetsbegrensning) {
-            throw new SikkerhetsbegrensningException(hentDokumentSikkerhetsbegrensning);
-        } catch (HentDokumentJournalpostIkkeFunnet hentDokumentJournalpostIkkeFunnet) {
-            throw new IntegrasjonException(hentDokumentJournalpostIkkeFunnet);
+        } catch (HentDokumentDokumentIkkeFunnet | HentDokumentJournalpostIkkeFunnet | HentDokumentSikkerhetsbegrensning e) {
+            throw new IntegrasjonException(e);
         }
         return hentDokumentResponse.getDokument();
     }
@@ -112,14 +103,10 @@ public class JoarkService implements JoarkFasade {
         HentJournalpostResponse hentJournalpostResponse;
         try {
             hentJournalpostResponse = inngåendeJournalConsumer.hentJournalpost(request);
-        } catch (HentJournalpostJournalpostIkkeFunnet hentJournalpostJournalpostIkkeFunnet) {
-            throw new IntegrasjonException(hentJournalpostJournalpostIkkeFunnet);
-        } catch (HentJournalpostJournalpostIkkeInngaaende hentJournalpostJournalpostIkkeInngaaende) {
-            throw new IntegrasjonException(hentJournalpostJournalpostIkkeInngaaende);
+        } catch (HentJournalpostJournalpostIkkeFunnet | HentJournalpostJournalpostIkkeInngaaende | HentJournalpostUgyldigInput e) {
+            throw new IntegrasjonException(e);
         } catch (HentJournalpostSikkerhetsbegrensning hentJournalpostSikkerhetsbegrensning) {
             throw new SikkerhetsbegrensningException(hentJournalpostSikkerhetsbegrensning);
-        } catch (HentJournalpostUgyldigInput hentJournalpostUgyldigInput) {
-            throw new IntegrasjonException(hentJournalpostUgyldigInput);
         }
 
         InngaaendeJournalpost inngaaendeJournalpost = hentJournalpostResponse.getInngaaendeJournalpost();
@@ -177,7 +164,7 @@ public class JoarkService implements JoarkFasade {
         no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Dokumentinformasjon dokumentinfo =
             new no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Dokumentinformasjon();
         Dokumentkategori dokumentkategori = new Dokumentkategori();
-        dokumentkategori.setValue(DokumentKategoriKode.IS.getKode()); //FIXME bare hvis det ikke er satt allerede
+        dokumentkategori.setValue(DokumentKategoriKode.IS.getKode()); //FIXME MELOSYS-1164 bare hvis det ikke er satt allerede
         dokumentinfo.setDokumentkategori(dokumentkategori);
         dokumentinfo.setTittel(tittel);
         journalpost.setHoveddokument(dokumentinfo);
@@ -186,16 +173,11 @@ public class JoarkService implements JoarkFasade {
         request.setInngaaendeJournalpost(journalpost);
         try {
             behandleInngåendeJournalConsumer.oppdaterJournalpost(request);
-        } catch (OppdaterJournalpostSikkerhetsbegrensning oppdaterJournalpostSikkerhetsbegrensning) {
-            throw new SikkerhetsbegrensningException(oppdaterJournalpostSikkerhetsbegrensning);
-        } catch (OppdaterJournalpostOppdateringIkkeMulig oppdaterJournalpostOppdateringIkkeMulig) {
-            throw new IntegrasjonException(oppdaterJournalpostOppdateringIkkeMulig);
-        } catch (OppdaterJournalpostUgyldigInput oppdaterJournalpostUgyldigInput) {
-            throw new IntegrasjonException(oppdaterJournalpostUgyldigInput);
-        } catch (OppdaterJournalpostJournalpostIkkeInngaaende oppdaterJournalpostJournalpostIkkeInngaaende) {
-            throw new IntegrasjonException(oppdaterJournalpostJournalpostIkkeInngaaende);
-        } catch (OppdaterJournalpostObjektIkkeFunnet oppdaterJournalpostObjektIkkeFunnet) {
-            throw new IntegrasjonException(oppdaterJournalpostObjektIkkeFunnet);
+        } catch (OppdaterJournalpostSikkerhetsbegrensning e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (OppdaterJournalpostOppdateringIkkeMulig | OppdaterJournalpostUgyldigInput | OppdaterJournalpostJournalpostIkkeInngaaende
+            | OppdaterJournalpostObjektIkkeFunnet e) {
+            throw new IntegrasjonException(e);
         }
     }
 }

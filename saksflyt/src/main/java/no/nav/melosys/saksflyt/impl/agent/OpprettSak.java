@@ -53,7 +53,7 @@ public class OpprettSak extends StandardAbstraktAgent {
         try {
             fagsak = fagsakService.nyFagsakOgBehandling(aktørId, behandlingType, false);
         } catch (SikkerhetsbegrensningException e) {
-            log.error("Feil i steg " + inngangsSteg(), e);
+            log.error("Feil i steg {}", inngangsSteg(), e);
             håndterFeil(prosessinstans, false);
         }
 

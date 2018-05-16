@@ -41,7 +41,7 @@ public class HentAktoerId extends StandardAbstraktAgent {
         try {
             aktørId = tpsFasade.hentAktørIdForIdent(brukerId);
         } catch (IkkeFunnetException e) {
-            log.error("Feil i steg " + inngangsSteg(), e);
+            log.error("Feil i steg {}", inngangsSteg(), e);
             håndterFeil(prosessinstans, false);
         }
 

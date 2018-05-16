@@ -50,7 +50,7 @@ public class OppdaterJournalpost extends StandardAbstraktAgent {
         try {
             joarkFasade.oppdaterJounalpost(journalpostID, gsakSakID, brukerID, avsenderID, avsenderNavn, tittel);
         } catch (SikkerhetsbegrensningException e) {
-            log.error("Feil i steg " + inngangsSteg(), e);
+            log.error("Feil i steg {}", inngangsSteg(), e);
             håndterFeil(prosessinstans, false);
         }
 

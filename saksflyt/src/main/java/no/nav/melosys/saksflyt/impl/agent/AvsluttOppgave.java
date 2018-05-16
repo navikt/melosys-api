@@ -39,7 +39,7 @@ public class AvsluttOppgave extends StandardAbstraktAgent {
         try {
             gsakFasade.ferdigstillOppgave(oppgaveID);
         } catch (SikkerhetsbegrensningException e) {
-            log.error("Feil i steg " + inngangsSteg(), e);
+            log.error("Feil i steg {}", inngangsSteg(), e);
             håndterFeil(prosessinstans, false);
         }
 

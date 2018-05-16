@@ -87,7 +87,7 @@ public class OpprettOppgave extends StandardAbstraktAgent {
         try {
             gsakFasade.opprettOppgave(builder.build());
         } catch (SikkerhetsbegrensningException e) {
-            log.error("Feil i steg " + inngangsSteg(), e);
+            log.error("Feil i steg {}", inngangsSteg(), e);
             håndterFeil(prosessinstans, false);
         }
 

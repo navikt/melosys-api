@@ -9,7 +9,6 @@ import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Agent;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.saksflyt.impl.Utils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 
 public abstract class StandardAbstraktAgent implements Agent {
@@ -18,20 +17,22 @@ public abstract class StandardAbstraktAgent implements Agent {
 
     private ProsessinstansRepository prosessinstansRepo;
 
-    @Autowired
     public StandardAbstraktAgent(Binge binge, ProsessinstansRepository prosessinstansRepo) {
         this.binge = binge;
         this.prosessinstansRepo = prosessinstansRepo;
     }
 
     @Override
+    /***
+     * Metoden tar seg også av lagring i db og bingen.
+     */
     public void finnProsessinstansOgUtfoerSteg() {
         Optional<Prosessinstans> opt = hentInstansMedSteg(inngangsSteg());
-        if(opt.isPresent()) {
+        if (opt.isPresent()) {
             Prosessinstans prosessinstans = opt.get();
             try {
                 utfoerSteg(prosessinstans);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 håndterFeil(prosessinstans, true);
             }
             prosessinstans.setSistEndret(LocalDateTime.now());
@@ -50,12 +51,12 @@ public abstract class StandardAbstraktAgent implements Agent {
     /**
      * Returnerer inngangssteget
      */
-    abstract ProsessSteg inngangsSteg();
+    public abstract ProsessSteg inngangsSteg();
 
     /**
      * Arbeidet som utføres av agenten. Metoden skal kunne kalles parallelt.
      */
-    abstract void utfoerSteg(Prosessinstans prosessinstans);
+    public abstract void utfoerSteg(Prosessinstans prosessinstans);
 
     private Optional<Prosessinstans> hentInstansMedSteg(ProsessSteg steg) {
         Prosessinstans prosessinstans = binge.fjernFørsteProsessinstans(Utils.medSteg(steg));

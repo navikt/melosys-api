@@ -7,7 +7,6 @@ import no.nav.melosys.service.kodeverk.KodeDto;
 public class KodeverkDto {
     private List<KodeDto> behandlingstyper;
     private List<KodeDto> behandlingsstatus;
-    private List<KodeDto> dokumentkategorier;
     private List<KodeDto> dokumenttitler;
     private List<KodeDto> landkoder;
     private List<KodeDto> oppgavetyper;
@@ -28,14 +27,6 @@ public class KodeverkDto {
 
     public void setBehandlingsstatus(List<KodeDto> behandlingsstatus) {
         this.behandlingsstatus = behandlingsstatus;
-    }
-
-    public List<KodeDto> getDokumentkategorier() {
-        return dokumentkategorier;
-    }
-
-    public void setDokumentkategorier(List<KodeDto> dokumentkategorier) {
-        this.dokumentkategorier = dokumentkategorier;
     }
 
     public List<KodeDto> getDokumenttitler() {

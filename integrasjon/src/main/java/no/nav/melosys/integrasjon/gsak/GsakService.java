@@ -49,8 +49,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.integrasjon.Konstanter.FAGOMRÅDE_KODE_MEDLEMSKAP;
-import static no.nav.melosys.integrasjon.Konstanter.FAGOMRÅDE_KODE_UNNTAK;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
@@ -59,7 +57,8 @@ public class GsakService implements GsakFasade {
 
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
 
-    private static final String SAK_TYPE_FAGSAK = "MFS"; // -> Med fagsak
+    private static final String FAGOMRÅDE_KODE_MEDLEMSKAP = "MED";
+    private static final String FAGOMRÅDE_KODE_UNNTAK = "UFM";
     private static final String SORTERING_MED_FRIST = "FRIST_DATO";
     private static final String SORTERING_STIGENDE = "STIGENDE";
 
