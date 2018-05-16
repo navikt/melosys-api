@@ -1,5 +1,12 @@
 package no.nav.melosys.service.dokumentmottak;
 
+import java.io.StringReader;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+
 import com.mockrunner.mock.jms.MockTextMessage;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,14 +16,11 @@ import static org.mockito.Mockito.*;
 
 public class DokumentmottakConsumerImplTest {
 
-    private Meldingsfordeler meldingsfordeler;
-
     private DokumentmottakConsumerImpl consumer;
 
     @Before
     public void setUp() {
-        meldingsfordeler = mock(ProsessinstansMeldingsfordeler.class);
-        consumer = new DokumentmottakConsumerImpl(meldingsfordeler);
+        consumer = spy(new DokumentmottakConsumerImpl());
     }
 
     @Test
@@ -30,10 +34,15 @@ public class DokumentmottakConsumerImplTest {
 
         doAnswer(invocation -> {
             Object argument = invocation.getArgument(0);
+
             assertThat(argument).isNotNull();
             assertThat(argument).isInstanceOf(ForsendelsesinformasjonDto.class);
+
+            ForsendelsesinformasjonDto forsendelsesinformasjonDto = (ForsendelsesinformasjonDto) argument;
+            assertThat(forsendelsesinformasjonDto.arkivId).isNotNull();
+
             return null;
-        }).when(meldingsfordeler).execute(any());
+        }).when(consumer).execute(any());
 
         consumer.mottaDokument(new MockTextMessage(xml));
     }

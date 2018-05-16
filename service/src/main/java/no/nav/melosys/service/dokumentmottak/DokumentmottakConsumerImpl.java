@@ -11,6 +11,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,17 +26,14 @@ public class DokumentmottakConsumerImpl {
 
     private final JAXBContext jaxbContext;
 
-    private final Meldingsfordeler meldingsfordeler;
-
     @Autowired
-    public DokumentmottakConsumerImpl(Meldingsfordeler meldingsfordeler) {
+    public DokumentmottakConsumerImpl() {
         try {
             jaxbContext = JAXBContext.newInstance(ForsendelsesinformasjonDto.class);
         } catch (JAXBException e) {
             log.error("", e);
             throw new IntegrasjonException(e);
         }
-        this.meldingsfordeler = meldingsfordeler;
     }
 
     @JmsListener(destination = "${dokumentmottak.queueName}")
@@ -43,7 +41,7 @@ public class DokumentmottakConsumerImpl {
         if (message instanceof TextMessage) {
             String xml = ((TextMessage) message).getText();
             ForsendelsesinformasjonDto forsendelsesinfo = parseXml(xml);
-            meldingsfordeler.execute(forsendelsesinfo);
+            execute(forsendelsesinfo);
         } else {
             log.error("Kunne ikke lese melding fra dokumentmottak");
             throw new IntegrasjonException("Kunne ikke lese melding fra dokumentmottak");
@@ -61,6 +59,15 @@ public class DokumentmottakConsumerImpl {
             log.error("Kunne ikke lese melding fra dokumentmottak", e);
             throw new IntegrasjonException("Kunne ikke lese melding fra dokumentmottak", e);
         }
+    }
+
+    // FIXME: Kun public for testing av saksflyt
+    public void execute(ForsendelsesinformasjonDto forsendelsesinfo) {
+        log.info("info", forsendelsesinfo);
+        Prosessinstans prosessinstans = new Prosessinstans();
+        String arkivsystem = forsendelsesinfo.arkivsystem;
+        String arkivId = forsendelsesinfo.arkivId;
+        // FIXME Legg på nødvendig informasjon
     }
 
 }
