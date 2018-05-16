@@ -45,7 +45,7 @@ public class InngangTjeneste extends RestTjeneste {
 
     @GET
     @Path("{saksnr}")
-    @ApiOperation(value = "Henter en inngangsvurdering med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."))
+    @ApiOperation(value = "Henter en inngangsvurdering med et gitt saksnummer")
     public Response hentInngang(@PathParam("saksnr") @ApiParam("Saksnummer.") String saksnummer) {
         return Response.ok().entity(jsonInngang).build();
     }
