@@ -36,7 +36,7 @@ public class DokumentmottakConsumerImpl {
         }
     }
 
-    @JmsListener(destination = "${dokumentmottak.queueName}")
+    @JmsListener(destination = "${DokMot.queueName}")
     public void mottaDokument(Message message) throws JMSException {
         if (message instanceof TextMessage) {
             String xml = ((TextMessage) message).getText();
