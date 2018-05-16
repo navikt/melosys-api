@@ -65,6 +65,7 @@
         <logstash.version>4.10</logstash.version>
         <hibernate.version>5.2.10.Final</hibernate.version>
         <hikaricp.version>2.6.1</hikaricp.version>
+        <ibmmq.version>9.0.5.0</ibmmq.version>
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
         <jose4j.version>0.6.2</jose4j.version>
         <json-patch.version>1.9</json-patch.version>
@@ -305,6 +306,11 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-activemq</artifactId>
                 <version>1.5.8.RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ibm.mq</groupId>
+                <artifactId>com.ibm.mq.allclient</artifactId>
+                <version>${ibmmq.version}</version>
             </dependency>
 
             <!-- NAV felleskomponenter -->

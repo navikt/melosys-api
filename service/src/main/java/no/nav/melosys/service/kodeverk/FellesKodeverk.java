@@ -4,6 +4,7 @@ public enum FellesKodeverk {
     
     ARBEIDSTIDSORDNINGER("Arbeidstidsordninger"),
     ARBEIDSFORHOLDSTYPER("Arbeidsforholdstyper"),
+    BEHANDLINGSTEMA("Behandlingstema"),
     DEKNING_MEDL("DekningMedl"),
     DISKRESJONSKODER("Diskresjonskoder"),
     DOKUMENTKATEGORIER("Dokumentkategorier"),
@@ -16,7 +17,8 @@ public enum FellesKodeverk {
     LOVVALG_MEDL("LovvalgMedl"),
     PERIODESTATUS_MEDL("PeriodestatusMedl"),
     POSTNUMMER("Postnummer"),
-    SIVILSTANDER("Sivilstander");
+    SIVILSTANDER("Sivilstander"),
+    TEMA("Tema");
 
     private FellesKodeverk(String navn) {
         this.navn = navn;

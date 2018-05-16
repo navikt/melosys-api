@@ -24,8 +24,6 @@ public class DokumentmottakConsumerImpl {
 
     private static final Logger log = LoggerFactory.getLogger(DokumentmottakConsumerImpl.class);
 
-    private final String DESTINASJON = "mottak"; // FIXME: Sjekk om destinasjon/tema er riktig
-
     private final JAXBContext jaxbContext;
 
     private final Meldingsfordeler meldingsfordeler;
@@ -41,8 +39,7 @@ public class DokumentmottakConsumerImpl {
         this.meldingsfordeler = meldingsfordeler;
     }
 
-    // FIXME Sett riktig config med spring.jms-properties
-    @JmsListener(destination = DESTINASJON, containerFactory = "dokumentmottakContainerFactory")
+    @JmsListener(destination = "${dokumentmottak.queueName}")
     public void mottaDokument(Message message) throws JMSException {
         if (message instanceof TextMessage) {
             String xml = ((TextMessage) message).getText();

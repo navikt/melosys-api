@@ -10,7 +10,8 @@ public class ProsessinstansMeldingsfordeler implements Meldingsfordeler {
     @Override
     public void execute(Forsendelsesinformasjon forsendelsesinfo) {
         Prosessinstans prosessinstans = new Prosessinstans();
+        String arkivsystem = forsendelsesinfo.getArkivsystem();
+        String arkivId = forsendelsesinfo.getArkivId();
         // FIXME Legg på nødvendig informasjon
-        //binge.leggTil(prosessinstans);
     }
 }

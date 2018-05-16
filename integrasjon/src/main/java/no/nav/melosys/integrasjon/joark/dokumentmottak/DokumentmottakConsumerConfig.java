@@ -1,32 +1,78 @@
 package no.nav.melosys.integrasjon.joark.dokumentmottak;
 
-import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
+import com.ibm.mq.jms.MQQueueConnectionFactory;
+import com.ibm.msg.client.wmq.compat.jms.internal.JMSC;
+import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
+import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.core.JmsTemplate;
 
+/**
+ * Konfigurasjon er tatt fra Foreldrepengers integrasjon mot IBM MQ:
+ * http://stash.devillo.no/projects/VEDFP/repos/vl-fordel/browse/web/server/src/main/java/no/nav/foreldrepenger/fordel/web/server/JmsKonfig.java
+*/
 @Configuration
 @EnableJms
 public class DokumentmottakConsumerConfig extends JmsTemplate {
 
-    private String username;
-    private String password;
-    private String brokerUrl;
+    private static final Logger log = LoggerFactory.getLogger(DokumentmottakConsumerConfig.class);
 
-    public DokumentmottakConsumerConfig(@Value("${dokumentmottak.jms.username}") String username,
-                                        @Value("${dokumentmottak.jms.password}") String password,
-                                        @Value("${dokumentmottak.jms.brokerUrl}") String brokerUrl) {
-        this.username = username;
-        this.password = password;
-        this.brokerUrl = brokerUrl;
+    @Value("${mqGateway.hostName}")
+    private String hostName;
+
+    @Value("${mqGateway.port}")
+    private int port;
+
+    @Value("${mqGateway.channel}")
+    private String channel;
+
+    @Value("${mqGateway.useSsl}")
+    private boolean useSsl;
+
+    @Value("${DokMot.queueManager}")
+    private String queueManager;
+
+    @Bean
+    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
+        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        try {
+            factory.setConnectionFactory(mqQueueConnectionFactory());
+        } catch (JMSException e) {
+            log.error("Konfigurasjon av DokMot-kø feilet", e);
+            throw new IntegrasjonException("Konfigurasjon av DokMot-kø feilet", e);
+        }
+        return factory;
     }
 
     @Bean
-    public ConnectionFactory dokumentmottakContainerFactory() {
-        return new ActiveMQConnectionFactory(username, password, brokerUrl);
+    public MQQueueConnectionFactory mqQueueConnectionFactory() throws JMSException {
+
+        final MQQueueConnectionFactory factory = new MQQueueConnectionFactory();
+
+        factory.setHostName(hostName);
+        factory.setPort(port);
+        if (channel != null) {
+            factory.setChannel(channel);
+        }
+        factory.setQueueManager(queueManager);
+        factory.setTransportType(JMSC.MQJMS_TP_CLIENT_MQ_TCPIP);
+
+        if (useSsl) {
+            // Denne trengs for at IBM MQ libs skal bruke/gjenkjenne samme ciphersuite navn
+            // som Oracle JRE:
+            // (Uten denne vil ikke IBM MQ libs gjenkjenne "TLS_RSA_WITH_AES_128_CBC_SHA")
+            System.setProperty("com.ibm.mq.cfg.useIBMCipherMappings", "false");
+
+            factory.setSSLCipherSuite("TLS_RSA_WITH_AES_128_CBC_SHA");
+        }
+
+        return factory;
     }
 }
