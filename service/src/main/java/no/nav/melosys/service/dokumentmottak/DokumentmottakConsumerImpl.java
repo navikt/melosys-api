@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.joark.dokumentmottak;
+package no.nav.melosys.service.dokumentmottak;
 
 import java.io.StringReader;
 import javax.jms.JMSException;
@@ -11,7 +11,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
-import no.nav.melding.virksomhet.dokumentnotifikasjon.v1.Forsendelsesinformasjon;
 import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,7 @@ public class DokumentmottakConsumerImpl {
     @Autowired
     public DokumentmottakConsumerImpl(Meldingsfordeler meldingsfordeler) {
         try {
-            jaxbContext = JAXBContext.newInstance(Forsendelsesinformasjon.class);
+            jaxbContext = JAXBContext.newInstance(ForsendelsesinformasjonDto.class);
         } catch (JAXBException e) {
             log.error("", e);
             throw new IntegrasjonException(e);
@@ -43,7 +42,7 @@ public class DokumentmottakConsumerImpl {
     public void mottaDokument(Message message) throws JMSException {
         if (message instanceof TextMessage) {
             String xml = ((TextMessage) message).getText();
-            Forsendelsesinformasjon forsendelsesinfo = parseXml(xml);
+            ForsendelsesinformasjonDto forsendelsesinfo = parseXml(xml);
             meldingsfordeler.execute(forsendelsesinfo);
         } else {
             log.error("Kunne ikke lese melding fra dokumentmottak");
@@ -51,11 +50,11 @@ public class DokumentmottakConsumerImpl {
         }
     }
 
-    private Forsendelsesinformasjon parseXml(String xml) throws JMSException {
+    private ForsendelsesinformasjonDto parseXml(String xml) throws JMSException {
         Source source = new StreamSource(new StringReader(xml));
         try {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            JAXBElement<Forsendelsesinformasjon> element = unmarshaller.unmarshal(source, Forsendelsesinformasjon.class);
+            JAXBElement<ForsendelsesinformasjonDto> element = unmarshaller.unmarshal(source, ForsendelsesinformasjonDto.class);
             log.info("Mottatt melding fra dokumentmottak", element.getValue());
             return element.getValue();
         } catch (JAXBException e) {

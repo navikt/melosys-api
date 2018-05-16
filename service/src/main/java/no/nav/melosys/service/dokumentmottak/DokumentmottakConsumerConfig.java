@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.joark.dokumentmottak;
+package no.nav.melosys.service.dokumentmottak;
 
 import javax.jms.JMSException;
 

@@ -48,7 +48,6 @@
         <joark.behandleinngaaendejournal.version>1.0.1</joark.behandleinngaaendejournal.version>
         <joark.inngaaendejournal.version>1.1.1</joark.inngaaendejournal.version>
         <joark.journal.version>3.1.2</joark.journal.version>
-        <joark.dokumentnotifikasjon.version>1.0.2</joark.dokumentnotifikasjon.version>
         <modig-testcertificates.version>1.2.0</modig-testcertificates.version>
         <tps.aktoer.version>2.0.1</tps.aktoer.version>
         <tps.person.version>3.4.1</tps.person.version>
@@ -330,12 +329,6 @@
                 <artifactId>nav-behandleInngaaendeJournal-v1-tjenestespesifikasjon</artifactId>
                 <version>${joark.behandleinngaaendejournal.version}</version>
                 <classifier>jaxws</classifier>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.meldinger.virksomhet</groupId>
-                <artifactId>nav-virksomhet-dokumentnotifikasjon-v1-meldingsdefinisjon</artifactId>
-                <version>${joark.dokumentnotifikasjon.version}</version>
-                <classifier>jaxb</classifier>
             </dependency>
             <dependency>
                 <groupId>no.nav.tjenester.fim</groupId>

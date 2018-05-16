@@ -1,7 +1,6 @@
-package no.nav.melosys.integrasjon.joark.dokumentmottak;
+package no.nav.melosys.service.dokumentmottak;
 
 import com.mockrunner.mock.jms.MockTextMessage;
-import no.nav.melding.virksomhet.dokumentnotifikasjon.v1.Forsendelsesinformasjon;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,7 +31,7 @@ public class DokumentmottakConsumerImplTest {
         doAnswer(invocation -> {
             Object argument = invocation.getArgument(0);
             assertThat(argument).isNotNull();
-            assertThat(argument).isInstanceOf(Forsendelsesinformasjon.class);
+            assertThat(argument).isInstanceOf(ForsendelsesinformasjonDto.class);
             return null;
         }).when(meldingsfordeler).execute(any());
 
