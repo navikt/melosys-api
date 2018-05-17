@@ -114,7 +114,7 @@ public class V1_1_05__SAKSOPPLYSNING_data implements JdbcMigration {
     // https://bugs.openjdk.java.net/browse/JDK-7181278
     private Path uriToPath(URI uri) {
         try {
-            if (uri.toString().indexOf("file:") != -1) {
+            if (uri.getScheme().startsWith("file")) {
                 return Paths.get(uri).toAbsolutePath();
             } else {
                 String spec = uri.getRawSchemeSpecificPart();
