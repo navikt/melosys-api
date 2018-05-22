@@ -18,6 +18,10 @@
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
+            <artifactId>feil</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-repository</artifactId>
         </dependency>
         <dependency>

@@ -1,9 +1,9 @@
 package no.nav.melosys.integrasjon.aareg;
 
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
-import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.felles.exception.TekniskException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 
 import java.time.LocalDate;
 

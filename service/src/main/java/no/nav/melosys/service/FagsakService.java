@@ -15,7 +15,7 @@ import no.nav.melosys.domain.FagsakStatus;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.FagsakRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

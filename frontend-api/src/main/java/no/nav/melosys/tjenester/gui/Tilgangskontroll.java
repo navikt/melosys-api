@@ -3,8 +3,8 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Collection;
 import javax.ws.rs.ForbiddenException;
 
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
-import no.nav.melosys.integrasjon.felles.exception.TekniskException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ldap.LdapBruker;
 import no.nav.melosys.integrasjon.ldap.LdapBrukeroppslag;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;

@@ -20,6 +20,7 @@
         <module>build</module>
         <module>config</module>
         <module>domain</module>
+        <module>feil</module>
         <module>frontend-api</module>
         <module>integrasjon</module>
         <module>repository</module>
@@ -108,6 +109,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>melosys-domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>feil</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

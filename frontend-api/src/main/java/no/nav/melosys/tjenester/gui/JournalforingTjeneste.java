@@ -9,7 +9,7 @@ import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.Journalpost;
-import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.journalforing.JournalforingService;
 import no.nav.melosys.service.journalforing.dto.JournalforingDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.DokumentDto;
