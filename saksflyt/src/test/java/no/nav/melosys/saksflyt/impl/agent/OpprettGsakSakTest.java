@@ -52,7 +52,7 @@ public class OpprettGsakSakTest {
         p.addData(properties);
         when(gsakFasade.opprettSak(anyString(), eq(BehandlingType.SØKNAD), anyString())).thenReturn("GSAK-123");
 
-        agent.utfoerSteg(p);
+        agent.utførSteg(p);
 
         verify(gsakFasade, times(1)).opprettSak(saksnummer, BehandlingType.SØKNAD, aktørID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPDATER_JOURNALPOST);

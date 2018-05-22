@@ -43,8 +43,8 @@ public class ArbeiderTest {
         Thread.sleep(20);
         arbeider.stopp();
         medgåttTid = System.currentTimeMillis() - medgåttTid + 1;
-        Mockito.verify(klargjøreSteg, atLeast(21)).finnProsessinstansOgUtfoerSteg();
-        Mockito.verify(klargjøreSteg, atMost(15 * (int) medgåttTid)).finnProsessinstansOgUtfoerSteg();
+        Mockito.verify(klargjøreSteg, atLeast(21)).finnProsessinstansOgUtførSteg();
+        Mockito.verify(klargjøreSteg, atMost(15 * (int) medgåttTid)).finnProsessinstansOgUtførSteg();
     }
 
     @Test

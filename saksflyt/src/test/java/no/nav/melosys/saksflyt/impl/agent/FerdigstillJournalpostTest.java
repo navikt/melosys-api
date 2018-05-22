@@ -46,7 +46,7 @@ public class FerdigstillJournalpostTest {
         properties.setProperty(ProsessDataKey.JOURNALPOST_ID.getKode(), journalpostID);
         p.addData(properties);
 
-        agent.utfoerSteg(p);
+        agent.utførSteg(p);
 
         verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AVSLUTT_OPPGAVE);

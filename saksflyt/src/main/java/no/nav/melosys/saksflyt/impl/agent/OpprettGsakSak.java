@@ -36,7 +36,7 @@ public class OpprettGsakSak extends StandardAbstraktAgent {
     }
 
     @Override
-    public void utfoerSteg(Prosessinstans prosessinstans) {
+    public void utførSteg(Prosessinstans prosessinstans) {
         String aktørId = prosessinstans.getData(AKTØR_ID);
         String saksnummer = prosessinstans.getData(SAKSNUMMER);
 

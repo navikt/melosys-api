@@ -34,7 +34,7 @@ public class HentAktoerId extends StandardAbstraktAgent {
     }
 
     @Override
-    public void utfoerSteg(Prosessinstans prosessinstans) {
+    public void utførSteg(Prosessinstans prosessinstans) {
         String brukerId = prosessinstans.getData(BRUKER_ID);
 
         String aktørId = null;

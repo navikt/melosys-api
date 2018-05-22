@@ -46,7 +46,7 @@ public class OpprettOppgaveTest {
         Properties properties = new Properties();
         p.addData(properties);
 
-        agent.utfoerSteg(p);
+        agent.utførSteg(p);
 
         verify(gsakFasade, times(1)).opprettOppgave(any());
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);

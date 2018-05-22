@@ -56,7 +56,7 @@ public class OpprettSakTest {
         fagsak.setSaksnummer("MELTEST-333");
         when(fagsakService.nyFagsakOgBehandling(anyString(), eq(BehandlingType.SØKNAD), eq(false))).thenReturn(fagsak);
 
-        agent.utfoerSteg(p);
+        agent.utførSteg(p);
 
         verify(fagsakService, times(1)).nyFagsakOgBehandling(aktørId, BehandlingType.SØKNAD, false);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_GSAK_SAK);

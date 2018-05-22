@@ -34,7 +34,7 @@ public class AvsluttOppgave extends StandardAbstraktAgent {
     }
 
     @Override
-    public void utfoerSteg(Prosessinstans prosessinstans) {
+    public void utførSteg(Prosessinstans prosessinstans) {
         String oppgaveID = prosessinstans.getData(OPPGAVE_ID);
         try {
             gsakFasade.ferdigstillOppgave(oppgaveID);

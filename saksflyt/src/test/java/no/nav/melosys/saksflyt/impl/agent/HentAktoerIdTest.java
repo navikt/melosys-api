@@ -49,7 +49,7 @@ public class HentAktoerIdTest {
         p.addData(properties);
         when(tpsFasade.hentAktørIdForIdent(any())).thenReturn("FJERNET93");
 
-        agent.utfoerSteg(p);
+        agent.utførSteg(p);
 
         verify(tpsFasade, times(1)).hentAktørIdForIdent(brukerID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SAK);

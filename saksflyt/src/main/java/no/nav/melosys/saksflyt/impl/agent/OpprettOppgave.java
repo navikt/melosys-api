@@ -46,7 +46,7 @@ public class OpprettOppgave extends StandardAbstraktAgent {
     }
 
     @Override
-    public void utfoerSteg(Prosessinstans prosessinstans) {
+    public void utførSteg(Prosessinstans prosessinstans) {
         ProsessType prosessType = prosessinstans.getType();
         BehandlingType behandlingType = null;
         if (ProsessType.JFR_NY_SAK.equals(prosessType) || ProsessType.JFR_KNYTT.equals(prosessType)) {

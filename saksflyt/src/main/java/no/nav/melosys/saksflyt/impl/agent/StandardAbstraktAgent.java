@@ -26,12 +26,12 @@ public abstract class StandardAbstraktAgent implements Agent {
     /***
      * Metoden tar seg også av lagring i db og bingen.
      */
-    public void finnProsessinstansOgUtfoerSteg() {
+    public void finnProsessinstansOgUtførSteg() {
         Optional<Prosessinstans> opt = hentInstansMedSteg(inngangsSteg());
         if (opt.isPresent()) {
             Prosessinstans prosessinstans = opt.get();
             try {
-                utfoerSteg(prosessinstans);
+                utførSteg(prosessinstans);
             } catch (RuntimeException e) {
                 håndterFeil(prosessinstans, true);
             }
@@ -56,7 +56,7 @@ public abstract class StandardAbstraktAgent implements Agent {
     /**
      * Arbeidet som utføres av agenten. Metoden skal kunne kalles parallelt.
      */
-    public abstract void utfoerSteg(Prosessinstans prosessinstans);
+    public abstract void utførSteg(Prosessinstans prosessinstans);
 
     private Optional<Prosessinstans> hentInstansMedSteg(ProsessSteg steg) {
         Prosessinstans prosessinstans = binge.fjernFørsteProsessinstans(Utils.medSteg(steg));

@@ -40,7 +40,7 @@ public class OppdaterJournalpostTest {
     public void utfoerSteg() throws SikkerhetsbegrensningException {
         Prosessinstans p = new Prosessinstans();
 
-        agent.utfoerSteg(p);
+        agent.utførSteg(p);
 
         verify(joarkFasade, times(1)).oppdaterJounalpost(any(), any(), any(), any(), any(), any());
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST);

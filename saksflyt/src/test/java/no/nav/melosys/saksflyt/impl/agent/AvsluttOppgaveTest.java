@@ -46,7 +46,7 @@ public class AvsluttOppgaveTest {
         properties.setProperty(ProsessDataKey.OPPGAVE_ID.getKode(), oppgaveID);
         p.addData(properties);
 
-        agent.utfoerSteg(p);
+        agent.utførSteg(p);
 
         verify(gsakFasade, times(1)).ferdigstillOppgave(oppgaveID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.OPPRETT_OPPGAVE);

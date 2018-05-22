@@ -12,6 +12,6 @@ public interface Agent {
      * Implementasjonen må sørge for at et kall ikke tar for lang tid (i alle fall ikke mer enn 1 minutt).
      * TODO Få agenter til å kjøre i egen tråd
      */
-    void finnProsessinstansOgUtfoerSteg();
+    void finnProsessinstansOgUtførSteg();
 
 }

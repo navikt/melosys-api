@@ -34,7 +34,7 @@ public class FerdigstillJournalpost extends StandardAbstraktAgent {
     }
 
     @Override
-    public void utfoerSteg(Prosessinstans prosessinstans) {
+    public void utførSteg(Prosessinstans prosessinstans) {
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
         try {
             joarkFasade.ferdigstillJournalføring(journalpostID);

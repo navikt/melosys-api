@@ -39,7 +39,7 @@ public class OppdaterJournalpost extends StandardAbstraktAgent {
     }
 
     @Override
-    public void utfoerSteg(Prosessinstans prosessinstans) {
+    public void utførSteg(Prosessinstans prosessinstans) {
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
         String gsakSakID = prosessinstans.getData(GSAK_SAK_ID);
         String brukerID = prosessinstans.getData(BRUKER_ID);
