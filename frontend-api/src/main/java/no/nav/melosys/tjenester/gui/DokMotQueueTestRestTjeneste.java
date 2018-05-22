@@ -7,8 +7,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.service.dokumentmottak.DokumentmottakConsumerImpl;
 import no.nav.melosys.service.dokumentmottak.ForsendelsesinformasjonDto;
+import no.nav.melosys.service.dokumentmottak.ProsessinstansMeldingsfordeler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -20,11 +20,11 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class DokMotQueueTestRestTjeneste extends RestTjeneste {
 
-    private DokumentmottakConsumerImpl dokumentmottakConsumer;
+    private ProsessinstansMeldingsfordeler meldingsfordeler;
 
     @Autowired
-    public DokMotQueueTestRestTjeneste(DokumentmottakConsumerImpl dokumentmottakConsumer) {
-        this.dokumentmottakConsumer = dokumentmottakConsumer;
+    public DokMotQueueTestRestTjeneste(ProsessinstansMeldingsfordeler meldingsfordeler) {
+        this.meldingsfordeler = meldingsfordeler;
     }
 
     @POST
@@ -32,7 +32,7 @@ public class DokMotQueueTestRestTjeneste extends RestTjeneste {
     @Consumes(MediaType.APPLICATION_XML)
     @Deprecated
     public Response mottaTynnmeldingFraTestHub(ForsendelsesinformasjonDto forsendelsesinformasjonDto) {
-        dokumentmottakConsumer.execute(forsendelsesinformasjonDto);
+        meldingsfordeler.execute(forsendelsesinformasjonDto);
         return Response.ok().build();
     }
 }

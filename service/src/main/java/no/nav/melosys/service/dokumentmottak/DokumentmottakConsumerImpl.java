@@ -16,9 +16,11 @@ import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
+@Profile("!local")
 @Component
 public class DokumentmottakConsumerImpl {
 
@@ -26,14 +28,17 @@ public class DokumentmottakConsumerImpl {
 
     private final JAXBContext jaxbContext;
 
+    private final ProsessinstansMeldingsfordeler meldingsfordeler;
+
     @Autowired
-    public DokumentmottakConsumerImpl() {
+    public DokumentmottakConsumerImpl(ProsessinstansMeldingsfordeler meldingsfordeler) {
         try {
             jaxbContext = JAXBContext.newInstance(ForsendelsesinformasjonDto.class);
         } catch (JAXBException e) {
             log.error("", e);
             throw new IntegrasjonException(e);
         }
+        this.meldingsfordeler = meldingsfordeler;
     }
 
     @JmsListener(destination = "${DokMot.queueName}")
@@ -41,7 +46,7 @@ public class DokumentmottakConsumerImpl {
         if (message instanceof TextMessage) {
             String xml = ((TextMessage) message).getText();
             ForsendelsesinformasjonDto forsendelsesinfo = parseXml(xml);
-            execute(forsendelsesinfo);
+            meldingsfordeler.execute(forsendelsesinfo);
         } else {
             log.error("Kunne ikke lese melding fra dokumentmottak");
             throw new IntegrasjonException("Kunne ikke lese melding fra dokumentmottak");
@@ -59,15 +64,6 @@ public class DokumentmottakConsumerImpl {
             log.error("Kunne ikke lese melding fra dokumentmottak", e);
             throw new IntegrasjonException("Kunne ikke lese melding fra dokumentmottak", e);
         }
-    }
-
-    // FIXME: Kun public for testing av saksflyt
-    public void execute(ForsendelsesinformasjonDto forsendelsesinfo) {
-        log.info("info", forsendelsesinfo);
-        Prosessinstans prosessinstans = new Prosessinstans();
-        String arkivsystem = forsendelsesinfo.arkivsystem;
-        String arkivId = forsendelsesinfo.arkivId;
-        // FIXME Legg på nødvendig informasjon
     }
 
 }
