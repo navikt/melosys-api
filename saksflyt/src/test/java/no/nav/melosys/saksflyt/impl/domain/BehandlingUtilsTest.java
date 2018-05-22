@@ -1,24 +1,23 @@
 package no.nav.melosys.saksflyt.impl.domain;
 
-import static no.nav.melosys.domain.ProsessSteg.A1_HENT_PERS_OPPL;
-import static no.nav.melosys.domain.ProsessSteg.A1_JOURF;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.time.LocalDateTime;
-
-import org.junit.Test;
 
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.saksflyt.impl.Utils;
+import org.junit.Test;
+
+import static no.nav.melosys.domain.ProsessSteg.A1_HENT_PERS_OPPL;
+import static no.nav.melosys.domain.ProsessSteg.JFR_AKTOER_ID;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class BehandlingUtilsTest {
 
     @Test
     public void testPredicateMedStatus() {
         Prosessinstans pi = new Prosessinstans();
-        pi.setSteg(A1_JOURF);
+        pi.setSteg(JFR_AKTOER_ID);
         assertFalse(Utils.medSteg(A1_HENT_PERS_OPPL).test(pi));
         pi.setSteg(ProsessSteg.A1_HENT_PERS_OPPL);
         assertTrue(Utils.medSteg(A1_HENT_PERS_OPPL).test(pi));

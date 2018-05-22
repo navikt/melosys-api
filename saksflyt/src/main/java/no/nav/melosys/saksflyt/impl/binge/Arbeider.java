@@ -149,7 +149,7 @@ public class Arbeider {
                         return;
                     }
                     aktivAgent = agent;
-                    agent.finnProsessinstansOgUtfoerSteg();
+                    agent.finnProsessinstansOgUtførSteg();
                     try {
                         sleep(oppholdMellomSteg);
                     } catch (InterruptedException e) {

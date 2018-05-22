@@ -29,6 +29,7 @@ import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.integrasjon.tps.person.PersonMock;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,11 +59,11 @@ public class FagsakTjenesteTest {
         InntektFasade inntekt = new InntektService(new InntektMock(), dokumentFactory);
 
         fagsakRepo = Mockito.mock(FagsakRepository.class);
-        FagsakService fagsakService = new FagsakService(fagsakRepo, tps, aareg, ereg, medl, inntekt);
+        SaksopplysningerService saksopplysningerService = new SaksopplysningerService(tps, aareg, ereg, medl, inntekt);
+        ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 12);
+        ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 12);
+        FagsakService fagsakService = new FagsakService(fagsakRepo, saksopplysningerService);
         tjeneste = new FagsakTjeneste(fagsakService);
-
-        ReflectionTestUtils.setField(fagsakService, "arbeidsforholdhistorikkAntallMåneder", 12);
-        ReflectionTestUtils.setField(fagsakService, "inntektshistorikkAntallMåneder", 12);
     }
 
     @Test
@@ -89,7 +90,7 @@ public class FagsakTjenesteTest {
     @Test
     public void nyFagsak() {
         // Skru av logging for denne testen siden den skaper mye forventet støy
-        final Logger log = (Logger) LoggerFactory.getLogger(FagsakService.class);
+        final Logger log = (Logger) LoggerFactory.getLogger(SaksopplysningerService.class);
         Level opprinneligLevel = log.getLevel();
         log.setLevel(Level.OFF);
 

@@ -12,7 +12,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import no.nav.melosys.integrasjon.felles.RestConsumer;
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.gsak.sakapi.dto.SakDto;
 import no.nav.melosys.integrasjon.gsak.sakapi.dto.SakSearchRequest;
 import org.slf4j.Logger;

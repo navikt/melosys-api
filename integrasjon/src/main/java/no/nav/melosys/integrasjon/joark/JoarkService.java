@@ -4,12 +4,29 @@ import java.util.List;
 
 import no.nav.melosys.domain.DokumentTittel;
 import no.nav.melosys.domain.Journalpost;
+import no.nav.melosys.integrasjon.Fagsystem;
+import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
-import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.behandleinngaaendejournal.BehandleInngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.binding.FerdigstillJournalfoeringFerdigstillingIkkeMulig;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.binding.FerdigstillJournalfoeringJournalpostIkkeInngaaende;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.binding.FerdigstillJournalfoeringObjektIkkeFunnet;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.binding.FerdigstillJournalfoeringSikkerhetsbegrensning;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.binding.FerdigstillJournalfoeringUgyldigInput;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.binding.OppdaterJournalpostJournalpostIkkeInngaaende;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.binding.OppdaterJournalpostObjektIkkeFunnet;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.binding.OppdaterJournalpostOppdateringIkkeMulig;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.binding.OppdaterJournalpostSikkerhetsbegrensning;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.binding.OppdaterJournalpostUgyldigInput;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.ArkivSak;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Avsender;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Dokumentkategori;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.meldinger.FerdigstillJournalfoeringRequest;
+import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.meldinger.OppdaterJournalpostRequest;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.HentJournalpostJournalpostIkkeFunnet;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.HentJournalpostJournalpostIkkeInngaaende;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.HentJournalpostSikkerhetsbegrensning;
@@ -45,6 +62,40 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
+    public void ferdigstillJournalføring(String journalpostId) throws SikkerhetsbegrensningException {
+        FerdigstillJournalfoeringRequest request = new FerdigstillJournalfoeringRequest();
+        request.setJournalpostId(journalpostId);
+        request.setEnhetId(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
+        try {
+            behandleInngåendeJournalConsumer.ferdigstillJournalfoering(request);
+        } catch (FerdigstillJournalfoeringFerdigstillingIkkeMulig | FerdigstillJournalfoeringJournalpostIkkeInngaaende
+            | FerdigstillJournalfoeringUgyldigInput | FerdigstillJournalfoeringObjektIkkeFunnet e) {
+            throw new IntegrasjonException(e);
+        } catch (FerdigstillJournalfoeringSikkerhetsbegrensning ferdigstillJournalfoeringSikkerhetsbegrensning) {
+            throw new SikkerhetsbegrensningException(ferdigstillJournalfoeringSikkerhetsbegrensning);
+        }
+    }
+
+    @Override
+    public byte[] hentDokument(String journalPostID, String dokumentID) {
+        HentDokumentRequest request = new HentDokumentRequest();
+        request.setDokumentId(dokumentID);
+        request.setJournalpostId(journalPostID);
+
+        Variantformater variantformat = new Variantformater();
+        variantformat.setValue(Variantformat.ARKIV.toString());
+        request.setVariantformat(variantformat);
+
+        HentDokumentResponse hentDokumentResponse;
+        try {
+            hentDokumentResponse = journalConsumer.hentDokument(request);
+        } catch (HentDokumentDokumentIkkeFunnet | HentDokumentJournalpostIkkeFunnet | HentDokumentSikkerhetsbegrensning e) {
+            throw new IntegrasjonException(e);
+        }
+        return hentDokumentResponse.getDokument();
+    }
+
+    @Override
     public Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException {
         HentJournalpostRequest request = new HentJournalpostRequest();
         request.setJournalpostId(journalpostID);
@@ -52,14 +103,10 @@ public class JoarkService implements JoarkFasade {
         HentJournalpostResponse hentJournalpostResponse;
         try {
             hentJournalpostResponse = inngåendeJournalConsumer.hentJournalpost(request);
-        } catch (HentJournalpostJournalpostIkkeFunnet hentJournalpostJournalpostIkkeFunnet) {
-            throw new IntegrasjonException(hentJournalpostJournalpostIkkeFunnet);
-        } catch (HentJournalpostJournalpostIkkeInngaaende hentJournalpostJournalpostIkkeInngaaende) {
-            throw new IntegrasjonException(hentJournalpostJournalpostIkkeInngaaende);
+        } catch (HentJournalpostJournalpostIkkeFunnet | HentJournalpostJournalpostIkkeInngaaende | HentJournalpostUgyldigInput e) {
+            throw new IntegrasjonException(e);
         } catch (HentJournalpostSikkerhetsbegrensning hentJournalpostSikkerhetsbegrensning) {
             throw new SikkerhetsbegrensningException(hentJournalpostSikkerhetsbegrensning);
-        } catch (HentJournalpostUgyldigInput hentJournalpostUgyldigInput) {
-            throw new IntegrasjonException(hentJournalpostUgyldigInput);
         }
 
         InngaaendeJournalpost inngaaendeJournalpost = hentJournalpostResponse.getInngaaendeJournalpost();
@@ -82,10 +129,6 @@ public class JoarkService implements JoarkFasade {
             }
         }
         journalpost.setAvsenderId(inngaaendeJournalpost.getAvsenderId());
-        if (inngaaendeJournalpost.getArkivSak() != null) {
-            journalpost.setArkivSakId(inngaaendeJournalpost.getArkivSak().getArkivSakId());
-            journalpost.setArkivSakSystem(inngaaendeJournalpost.getArkivSak().getArkivSakSystem());
-        }
         if (inngaaendeJournalpost.getForsendelseMottatt() != null) {
             journalpost.setForsendelseMottatt(KonverteringsUtils.xmlGregorianCalendarToLocalDateTime(inngaaendeJournalpost.getForsendelseMottatt()));
         }
@@ -98,25 +141,43 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public byte[] hentDokument(String journalPostID, String dokumentID) throws SikkerhetsbegrensningException {
-        HentDokumentRequest request = new HentDokumentRequest();
-        request.setDokumentId(dokumentID);
-        request.setJournalpostId(journalPostID);
+    public void oppdaterJounalpost(String journalpostId, String gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel) throws SikkerhetsbegrensningException {
+        OppdaterJournalpostRequest request = new OppdaterJournalpostRequest();
+        no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.InngaaendeJournalpost journalpost =
+                new no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.InngaaendeJournalpost();
+        journalpost.setJournalpostId(journalpostId);
 
-        Variantformater variantformat = new Variantformater();
-        variantformat.setValue(Variantformat.ARKIV.toString());
-        request.setVariantformat(variantformat);
+        ArkivSak arkivSak = new ArkivSak();
+        arkivSak.setArkivSakId(gsakSaksnummer);
+        arkivSak.setArkivSakSystem(Fagsystem.GSAK.getKode());
+        journalpost.setArkivSak(arkivSak);
 
-        HentDokumentResponse hentDokumentResponse;
+        no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Person bruker = new no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Person();
+        bruker.setIdent(brukerID);
+        journalpost.setBruker(bruker);
+
+        Avsender avsender = new Avsender();
+        avsender.setAvsenderId(avsenderID);
+        avsender.setAvsenderNavn(avsenderNavn);
+        journalpost.setAvsender(avsender);
+
+        no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Dokumentinformasjon dokumentinfo =
+            new no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Dokumentinformasjon();
+        Dokumentkategori dokumentkategori = new Dokumentkategori();
+        dokumentkategori.setValue(DokumentKategoriKode.IS.getKode()); //FIXME MELOSYS-1164 bare hvis det ikke er satt allerede
+        dokumentinfo.setDokumentkategori(dokumentkategori);
+        dokumentinfo.setTittel(tittel);
+        journalpost.setHoveddokument(dokumentinfo);
+        journalpost.setInnhold(tittel); // Innhold bruker titlen siden det ikke finnes andre grunnlag for det.
+
+        request.setInngaaendeJournalpost(journalpost);
         try {
-            hentDokumentResponse = journalConsumer.hentDokument(request);
-        } catch (HentDokumentDokumentIkkeFunnet hentDokumentDokumentIkkeFunnet) {
-            throw new IntegrasjonException(hentDokumentDokumentIkkeFunnet);
-        } catch (HentDokumentSikkerhetsbegrensning hentDokumentSikkerhetsbegrensning) {
-            throw new SikkerhetsbegrensningException(hentDokumentSikkerhetsbegrensning);
-        } catch (HentDokumentJournalpostIkkeFunnet hentDokumentJournalpostIkkeFunnet) {
-            throw new IntegrasjonException(hentDokumentJournalpostIkkeFunnet);
+            behandleInngåendeJournalConsumer.oppdaterJournalpost(request);
+        } catch (OppdaterJournalpostSikkerhetsbegrensning e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (OppdaterJournalpostOppdateringIkkeMulig | OppdaterJournalpostUgyldigInput | OppdaterJournalpostJournalpostIkkeInngaaende
+            | OppdaterJournalpostObjektIkkeFunnet e) {
+            throw new IntegrasjonException(e);
         }
-        return hentDokumentResponse.getDokument();
     }
 }

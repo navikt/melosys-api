@@ -22,7 +22,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-saksflyt</artifactId>
+            <artifactId>saksflyt</artifactId>
         </dependency>
 
         <dependency>
@@ -101,8 +101,8 @@
                 <configuration>
                     <driver>oracle.jdbc.driver.OracleDriver</driver>
                     <encoding>ISO-8859-1</encoding>
-                    <initOnMigrate>true</initOnMigrate>
-                    <location>db/migration/melosysDB</location>
+                    <baselineOnMigrate>true</baselineOnMigrate>
+                    <locations>db/migration/melosysDB</locations>
                 </configuration>
             </plugin>
         </plugins>

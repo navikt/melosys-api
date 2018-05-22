@@ -6,15 +6,17 @@ import java.util.List;
 import java.util.Optional;
 import javax.xml.datatype.DatatypeConfigurationException;
 
+import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.domain.gsak.AktorType;
 import no.nav.melosys.domain.gsak.Fagomrade;
-import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.domain.gsak.PrioritetType;
 import no.nav.melosys.domain.gsak.Underkategori;
+import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
-import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.felles.exception.TekniskException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
 import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeFilterMal;
@@ -47,6 +49,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
+
 @Service
 @Profile("!mocking")
 public class GsakService implements GsakFasade {
@@ -55,9 +59,6 @@ public class GsakService implements GsakFasade {
 
     private static final String FAGOMRÅDE_KODE_MEDLEMSKAP = "MED";
     private static final String FAGOMRÅDE_KODE_UNNTAK = "UFM";
-    private static final String FAGSYSTEM_KODE_MELOSYS = "FS22";// TODO (FA) endre når koden er opprettet i GSAK
-    private static final int MELOSYS_ENHET_ID = 4530;
-    private static final String SAK_TYPE_FAGSAK = "MFS"; // -> Med fagsak
     private static final String SORTERING_MED_FRIST = "FRIST_DATO";
     private static final String SORTERING_STIGENDE = "STIGENDE";
 
@@ -75,12 +76,18 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public String opprettSak(String fagsakId, String fnr) { // FIXME: Kalles med aktørID når TPS-oppslag er på plass
+    public String opprettSak(String saksnummer, BehandlingType behandlingType, String aktørId) {
         SakDto sakDto = new SakDto();
-        sakDto.setTema(FAGOMRÅDE_KODE_MEDLEMSKAP);
-        sakDto.setAktørId(fnr);
-        sakDto.setApplikasjon(FAGSYSTEM_KODE_MELOSYS);
-        sakDto.setSaksnummer(fagsakId.toString());
+        if (behandlingType.equals(BehandlingType.SØKNAD)) {
+            sakDto.setTema(FAGOMRÅDE_KODE_MEDLEMSKAP);
+        } else if (behandlingType.equals(BehandlingType.UNNTAK_MEDL)) {
+            sakDto.setTema(FAGOMRÅDE_KODE_UNNTAK);
+        } else {
+            throw new TekniskException("Behandlingtype " + behandlingType.getBeskrivelse() + " er ikke støttet.");
+        }
+        sakDto.setAktørId(aktørId);
+        sakDto.setApplikasjon(Fagsystem.MELOSYS.getKode());
+        sakDto.setSaksnummer(saksnummer);
 
         sakDto = sakApiConsumer.opprettSak(sakDto);
 

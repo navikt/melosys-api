@@ -10,7 +10,8 @@ public interface Agent {
     /**
      * Kalles av arbeidertråder for å gi agenten mulighet til å utføre arbeid. Metoden skal kunne kalles parallelt.
      * Implementasjonen må sørge for at et kall ikke tar for lang tid (i alle fall ikke mer enn 1 minutt).
+     * TODO Få agenter til å kjøre i egen tråd
      */
-    public void finnProsessinstansOgUtfoerSteg();
+    void finnProsessinstansOgUtførSteg();
 
 }

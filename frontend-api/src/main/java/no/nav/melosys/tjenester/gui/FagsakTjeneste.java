@@ -22,7 +22,7 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
@@ -96,7 +96,7 @@ public class FagsakTjeneste extends RestTjeneste {
     @Deprecated // FIXME Nye saker kommer gjennom journalføring
     public Response nyFagsak(String fnr) {
         try {
-            Fagsak fagsak = fagsakService.nyFagsak(fnr);
+            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(fnr, BehandlingType.SØKNAD, true);
 
             if (fagsak == null) {
                 return Response.status(Response.Status.NOT_FOUND).build();

@@ -1,8 +1,8 @@
 package no.nav.melosys.integrasjon.ereg;
 
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.integrasjon.felles.exception.IkkeFunnetException;
-import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 
 /**
  * Fasade mot Enhetsregisteret (EREG)

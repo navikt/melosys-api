@@ -4,11 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.Oppgavetype;
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
-import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.felles.exception.TekniskException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
 import no.nav.melosys.integrasjon.gsak.mock.OppgaveMockRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +90,7 @@ public class GsakMockService implements GsakFasade {
     }
 
     @Override
-    public String opprettSak(String saksnummer, String fnr) throws IntegrasjonException {
+    public String opprettSak(String saksnummer, BehandlingType behandlingType, String fnr) throws IntegrasjonException {
         throw new UnsupportedOperationException();
     }
 

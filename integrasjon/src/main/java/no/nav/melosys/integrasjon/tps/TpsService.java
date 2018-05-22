@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.tps;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
@@ -11,9 +10,9 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.integrasjon.felles.exception.IkkeFunnetException;
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
-import no.nav.melosys.integrasjon.felles.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
@@ -69,35 +68,29 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Optional<String> hentAktørIdForIdent(String fnr) {
+    public String hentAktørIdForIdent(String fnr) throws IkkeFunnetException {
         HentAktoerIdForIdentRequest request = new HentAktoerIdForIdentRequest();
         request.setIdent(fnr);
 
-        Optional<String> optResult = null;
         try {
             HentAktoerIdForIdentResponse response = aktorConsumer.hentAktørIdForIdent(request);
-            String aktørId = response.getAktoerId();
-            optResult = Optional.of(aktørId);
+            return response.getAktoerId();
         } catch (HentAktoerIdForIdentPersonIkkeFunnet e) { // NOSONAR
-            optResult = Optional.empty();
+            throw new IkkeFunnetException(e);
         }
-        return optResult;
     }
 
     @Override
-    public Optional<String> hentIdentForAktørId(String aktørID) {
+    public String hentIdentForAktørId(String aktørID) throws IkkeFunnetException {
         HentIdentForAktoerIdRequest request = new HentIdentForAktoerIdRequest();
         request.setAktoerId(aktørID);
-        
-        Optional<String> optResult = null;
+
         try {
             HentIdentForAktoerIdResponse response = aktorConsumer.hentIdentForAktoerId(request);
-            optResult = Optional.of(response.getIdent());
-        } catch (HentIdentForAktoerIdPersonIkkeFunnet hentIdentForAktoerIdPersonIkkeFunnet) { // NOSONAR
-            optResult = Optional.empty();
+            return response.getIdent();
+        } catch (HentIdentForAktoerIdPersonIkkeFunnet e) { // NOSONAR
+            throw new IkkeFunnetException(e);
         }
-
-        return optResult;
     }
 
     private Saksopplysning hentPerson(String ident, Collection<Informasjonsbehov> behov) throws IkkeFunnetException, SikkerhetsbegrensningException {

@@ -4,6 +4,8 @@ import javax.persistence.Converter;
 
 public enum ProsessType implements KodeverkTabell<ProsessType> {
 
+    JFR_KNYTT("JFR_KNYTT", "Journalføring på eksisterende sak"),
+    JFR_NY_SAK("JFR_NY_SAK", "Journalføring med ny sak og søknad"),
     SØKNAD_A1("SØKNAD_A1", "Søknad A1");
 
     private String kode;

@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.impl.binge;
 import java.util.Arrays;
 
 import no.nav.melosys.saksflyt.SaksflytTestApplication;
-import no.nav.melosys.saksflyt.impl.steg.a1.HentPersonopplysningerAgent;
+import no.nav.melosys.saksflyt.impl.agent.HentPersonopplysninger;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +29,7 @@ public class ArbeiderTest {
     private Arbeider arbeider;
 
     @Mock
-    private HentPersonopplysningerAgent klargjøreSteg;
+    private HentPersonopplysninger klargjøreSteg;
 
     @Test
     @Ignore
@@ -43,8 +43,8 @@ public class ArbeiderTest {
         Thread.sleep(20);
         arbeider.stopp();
         medgåttTid = System.currentTimeMillis() - medgåttTid + 1;
-        Mockito.verify(klargjøreSteg, atLeast(21)).finnProsessinstansOgUtfoerSteg();
-        Mockito.verify(klargjøreSteg, atMost(15 * (int) medgåttTid)).finnProsessinstansOgUtfoerSteg();
+        Mockito.verify(klargjøreSteg, atLeast(21)).finnProsessinstansOgUtførSteg();
+        Mockito.verify(klargjøreSteg, atMost(15 * (int) medgåttTid)).finnProsessinstansOgUtførSteg();
     }
 
     @Test

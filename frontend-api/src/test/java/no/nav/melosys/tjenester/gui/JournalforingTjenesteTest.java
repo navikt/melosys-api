@@ -102,6 +102,7 @@ public class JournalforingTjenesteTest {
         dto.setSaksnummer("MEL-1234");
         dto.setBrukerID("12345");
         dto.setAvsenderID("56890");
+        dto.setAvsenderNavn("AvsenderNavn");
 
         dto.setDokumenttittel(DokumentTittel.SØKNAD_MEDLEMSSKAP.getBeskrivelse());
         List<String> titler = new ArrayList<>();

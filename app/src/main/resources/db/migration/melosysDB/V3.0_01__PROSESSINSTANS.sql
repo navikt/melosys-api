@@ -16,6 +16,8 @@ CREATE TABLE prosess_type (
     CONSTRAINT pk_prosess_type PRIMARY KEY (kode)
 );
 
+INSERT INTO prosess_type (kode, navn) VALUES ('JFR_KNYTT', 'Journalføring på eksisterende sak');
+INSERT INTO prosess_type (kode, navn) VALUES ('JFR_NY_SAK', 'Journalføring med ny sak og søknad');
 INSERT INTO prosess_type (kode, navn) VALUES ('SØKNAD_A1', 'Søknad A1');
 
 CREATE TABLE prosess_steg (
@@ -24,7 +26,13 @@ CREATE TABLE prosess_steg (
     CONSTRAINT pk_behandling_steg PRIMARY KEY (kode)
 );
 
-INSERT INTO prosess_steg (kode, navn) VALUES ('A1_JOURF', 'A1 journalføring');
+INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_AKTOER_ID', 'Henter aktørID');
+INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPRETT_SAK', 'Oppretter ny sak i Melosys');
+INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPRETT_GSAK_SAK', 'Oppretter Sak i GSAK');
+INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPDATER_JOURNALPOST', 'Oppdaterer journalposten i Joark');
+INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_FERDIGSTILL_JOURNALPOST', 'Ferdigstiller journalposten i Joark');
+INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_AVSLUTT_OPPGAVE', 'Avslutter journalføringsoppgaven i GSAK');
+INSERT INTO prosess_steg (kode, navn) VALUES ('OPPRETT_OPPGAVE', 'Oppretter oppgave i GSAK');
 INSERT INTO prosess_steg (kode, navn) VALUES ('A1_HENT_PERS_OPPL', 'A1 hent personopplysninger');
 INSERT INTO prosess_steg (kode, navn) VALUES ('A1_HENT_ARBF_OPPL', 'A1 hent arbeidsforhold');
 INSERT INTO prosess_steg (kode, navn) VALUES ('FEILET_MASKINELT', 'Feilet maskinelt');
