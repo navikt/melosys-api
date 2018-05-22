@@ -15,6 +15,12 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_AVSLUTT_OPPGAVE;
 import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
 import static no.nav.melosys.domain.ProsessDataKey.OPPGAVE_ID;
 
+/**
+ * Avslutter en oppgave i GSAK.
+ *
+ * Transisjoner:
+ * JFR_AVSLUTT_OPPGAVE -> OPPRETT_OPPGAVE eller FEILET_MASKINELT hvis feil
+ */
 @Component
 public class AvsluttOppgave extends StandardAbstraktAgent {
 

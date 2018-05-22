@@ -15,6 +15,12 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_AVSLUTT_OPPGAVE;
 import static no.nav.melosys.domain.ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST;
 import static no.nav.melosys.domain.ProsessDataKey.JOURNALPOST_ID;
 
+/**
+ * Ferdigstiller en journalpost i Joark.
+ *
+ * Transisjoner:
+ * JFR_FERDIGSTILL_JOURNALPOST -> JFR_AVSLUTT_OPPGAVE eller FEILET_MASKINELT hvis feil
+ */
 @Component
 public class FerdigstillJournalpost extends StandardAbstraktAgent {
 

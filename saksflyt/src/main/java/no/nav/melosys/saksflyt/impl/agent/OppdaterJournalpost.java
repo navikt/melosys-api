@@ -20,6 +20,12 @@ import static no.nav.melosys.domain.ProsessDataKey.GSAK_SAK_ID;
 import static no.nav.melosys.domain.ProsessDataKey.HOVEDDOKUMENT_TITTEL;
 import static no.nav.melosys.domain.ProsessDataKey.JOURNALPOST_ID;
 
+/**
+ * Oppdaterer en journalpost i Joark.
+ *
+ * Transisjoner:
+ * JFR_OPPDATER_JOURNALPOST -> JFR_FERDIGSTILL_JOURNALPOST eller FEILET_MASKINELT hvis feil
+ */
 @Component
 public class OppdaterJournalpost extends StandardAbstraktAgent {
 

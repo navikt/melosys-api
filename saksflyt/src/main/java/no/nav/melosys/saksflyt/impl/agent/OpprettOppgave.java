@@ -27,6 +27,12 @@ import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
 import static no.nav.melosys.domain.ProsessDataKey.GSAK_SAK_ID;
 
+/**
+ * Oppretter en oppgave i GSAK.
+ *
+ * Transisjoner:
+ * OPPRETT_OPPGAVE -> FERDIG eller FEILET_MASKINELT hvis feil
+ */
 @Component
 public class OpprettOppgave extends StandardAbstraktAgent {
 

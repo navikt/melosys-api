@@ -20,6 +20,12 @@ import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
 import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_GSAK_SAK;
 import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_SAK;
 
+/**
+ * Oppretter en oppgave i GSAK.
+ *
+ * Transisjoner:
+ * JFR_OPPRETT_SAK -> JFR_OPPRETT_GSAK_SAK eller FEILET_MASKINELT hvis feil
+ */
 @Component
 public class OpprettSak extends StandardAbstraktAgent {
 

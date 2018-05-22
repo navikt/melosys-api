@@ -15,6 +15,12 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_AKTOER_ID;
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
 
+/**
+ * Henter en aktørID
+ *
+ * Transisjoner:
+ * JFR_AKTOER_ID -> JFR_OPPRETT_SAK eller FEILET_MASKINELT hvis feil
+ */
 @Component
 public class HentAktoerId extends StandardAbstraktAgent {
 

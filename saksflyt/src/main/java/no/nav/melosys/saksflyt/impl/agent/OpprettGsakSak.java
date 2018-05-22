@@ -17,6 +17,12 @@ import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.GSAK_SAK_ID;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
 
+/**
+ * Oppretter en sak i GSAK.
+ *
+ * Transisjoner:
+ * JFR_OPPRETT_GSAK_SAK -> JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
+ */
 @Component
 public class OpprettGsakSak extends StandardAbstraktAgent {
 
