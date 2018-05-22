@@ -46,9 +46,9 @@ public class OpprettGsakSakTest {
         Prosessinstans p = new Prosessinstans();
         Properties properties = new Properties();
         String saksnummer = "MEL-009";
-        properties.setProperty(ProsessDataKey.SAKSNUMMER, saksnummer);
+        properties.setProperty(ProsessDataKey.SAKSNUMMER.getKode(), saksnummer);
         String aktørID = "FJERNET93";
-        properties.setProperty(ProsessDataKey.AKTØR_ID, aktørID);
+        properties.setProperty(ProsessDataKey.AKTØR_ID.getKode(), aktørID);
         p.addData(properties);
         when(gsakFasade.opprettSak(anyString(), eq(BehandlingType.SØKNAD), anyString())).thenReturn("GSAK-123");
 

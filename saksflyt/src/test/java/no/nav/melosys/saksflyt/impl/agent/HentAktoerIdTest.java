@@ -45,7 +45,7 @@ public class HentAktoerIdTest {
         Prosessinstans p = new Prosessinstans();
         Properties properties = new Properties();
         String brukerID = "99999999991";
-        properties.setProperty(ProsessDataKey.BRUKER_ID, brukerID);
+        properties.setProperty(ProsessDataKey.BRUKER_ID.getKode(), brukerID);
         p.addData(properties);
         when(tpsFasade.hentAktørIdForIdent(any())).thenReturn("FJERNET93");
 

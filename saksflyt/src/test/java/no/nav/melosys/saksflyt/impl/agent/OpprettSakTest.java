@@ -50,7 +50,7 @@ public class OpprettSakTest {
         p.setType(ProsessType.JFR_NY_SAK);
         Properties properties = new Properties();
         String aktørId = "FJERNET93";
-        properties.setProperty(ProsessDataKey.AKTØR_ID, "FJERNET93");
+        properties.setProperty(ProsessDataKey.AKTØR_ID.getKode(), "FJERNET93");
         p.addData(properties);
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");

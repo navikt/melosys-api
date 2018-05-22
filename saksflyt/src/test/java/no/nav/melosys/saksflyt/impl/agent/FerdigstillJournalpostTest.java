@@ -43,7 +43,7 @@ public class FerdigstillJournalpostTest {
         Prosessinstans p = new Prosessinstans();
         Properties properties = new Properties();
         String journalpostID = "Journal_ID";
-        properties.setProperty(ProsessDataKey.JOURNALPOST_ID, journalpostID);
+        properties.setProperty(ProsessDataKey.JOURNALPOST_ID.getKode(), journalpostID);
         p.addData(properties);
 
         agent.utfoerSteg(p);

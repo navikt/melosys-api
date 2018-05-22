@@ -43,7 +43,7 @@ public class AvsluttOppgaveTest {
         Prosessinstans p = new Prosessinstans();
         Properties properties = new Properties();
         String oppgaveID = "123";
-        properties.setProperty(ProsessDataKey.OPPGAVE_ID, oppgaveID);
+        properties.setProperty(ProsessDataKey.OPPGAVE_ID.getKode(), oppgaveID);
         p.addData(properties);
 
         agent.utfoerSteg(p);

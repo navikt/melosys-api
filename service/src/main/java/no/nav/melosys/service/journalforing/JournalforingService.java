@@ -1,7 +1,6 @@
 package no.nav.melosys.service.journalforing;
 
 import java.time.LocalDateTime;
-import java.util.Properties;
 
 import no.nav.melosys.domain.Journalpost;
 import no.nav.melosys.domain.ProsessDataKey;
@@ -42,17 +41,15 @@ public class JournalforingService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         prosessinstans.setSteg(ProsessSteg.JFR_AKTOER_ID);
-        Properties properties = new Properties();
-        properties.setProperty(ProsessDataKey.BRUKER_ID, journalforingDto.getBrukerID());
-        properties.setProperty(ProsessDataKey.AVSENDER_ID, journalforingDto.getAvsenderID());
-        properties.setProperty(ProsessDataKey.AVSENDER_NAVN, journalforingDto.getAvsenderNavn());
-        properties.setProperty(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalforingDto.getDokumenttittel());
+        prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalforingDto.getBrukerID());
+        prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalforingDto.getAvsenderID());
+        prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalforingDto.getAvsenderNavn());
+        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalforingDto.getDokumenttittel());
         //FIXME vedlegg
-        properties.setProperty(ProsessDataKey.JOURNALPOST_ID, journalforingDto.getJournalpostID());
-        properties.setProperty(ProsessDataKey.OPPGAVE_ID, journalforingDto.getOppgaveID());
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalforingDto.getJournalpostID());
+        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalforingDto.getOppgaveID());
         //TODO journalforingDto.getFagsak().getLand(); til inngangsvilkår
         //TODO journalforingDto.getFagsak().getSoknadsperiode(): for å hente saksopplysninger
-        prosessinstans.addData(properties);
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setSistEndret(nå);
         prosessinstans.setRegistrertDato(nå);
@@ -65,15 +62,13 @@ public class JournalforingService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
-        Properties properties = new Properties();
-        properties.setProperty(ProsessDataKey.BRUKER_ID, journalforingDto.getBrukerID());
-        properties.setProperty(ProsessDataKey.AVSENDER_ID, journalforingDto.getAvsenderID());
-        properties.setProperty(ProsessDataKey.AVSENDER_NAVN, journalforingDto.getAvsenderNavn());
-        properties.setProperty(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalforingDto.getDokumenttittel());
+        prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalforingDto.getBrukerID());
+        prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalforingDto.getAvsenderID());
+        prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalforingDto.getAvsenderNavn());
+        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalforingDto.getDokumenttittel());
         //FIXME vedlegg
-        properties.setProperty(ProsessDataKey.JOURNALPOST_ID, journalforingDto.getJournalpostID());
-        properties.setProperty(ProsessDataKey.OPPGAVE_ID, journalforingDto.getOppgaveID());
-        prosessinstans.addData(properties);
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalforingDto.getJournalpostID());
+        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalforingDto.getOppgaveID());
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setSistEndret(nå);
         prosessinstans.setRegistrertDato(nå);

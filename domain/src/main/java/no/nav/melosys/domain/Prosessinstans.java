@@ -72,12 +72,12 @@ public class Prosessinstans {
         return data;
     }
 
-    public String getData(String key) {
-        return data.getProperty(key);
+    public String getData(ProsessDataKey key) {
+        return data.getProperty(key.getKode());
     }
 
-    public void setData(String key, String value) {
-        this.data.setProperty(key, value);
+    public void setData(ProsessDataKey key, String value) {
+        this.data.setProperty(key.getKode(), value);
     }
 
     public void addData(Properties data) {

@@ -40,7 +40,7 @@ public class OpprettSak extends StandardAbstraktAgent {
 
     @Override
     public void utfoerSteg(Prosessinstans prosessinstans) {
-        String aktørId = prosessinstans.getData().getProperty(AKTØR_ID);
+        String aktørId = prosessinstans.getData(AKTØR_ID);
         ProsessType prosessType = prosessinstans.getType();
         BehandlingType behandlingType = null;
         if (ProsessType.JFR_NY_SAK.equals(prosessType)) {

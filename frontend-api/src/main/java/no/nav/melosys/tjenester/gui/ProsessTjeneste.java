@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
@@ -62,9 +61,7 @@ public class ProsessTjeneste extends RestTjeneste {
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         //prosessinstans.setSteg(ProsessSteg.JFR_AKTOER_ID);
         prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_SAK);
-        Properties properties = new Properties();
-        properties.setProperty(ProsessDataKey.AKTØR_ID, "FJERNET93");
-        prosessinstans.addData(properties);
+        prosessinstans.setData(ProsessDataKey.AKTØR_ID, "FJERNET93");
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setSistEndret(nå);
         prosessinstans.setRegistrertDato(nå);
