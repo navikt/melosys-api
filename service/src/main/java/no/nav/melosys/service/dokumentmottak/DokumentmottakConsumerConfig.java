@@ -4,7 +4,7 @@ import javax.jms.JMSException;
 
 import com.ibm.mq.jms.MQQueueConnectionFactory;
 import com.ibm.msg.client.wmq.compat.jms.internal.JMSC;
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.exception.IntegrasjonException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
-import org.springframework.jms.core.JmsTemplate;
 
 /**
  * Konfigurasjon er tatt fra Foreldrepengers integrasjon mot IBM MQ:

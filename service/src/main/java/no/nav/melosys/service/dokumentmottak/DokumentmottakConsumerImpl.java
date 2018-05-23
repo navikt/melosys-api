@@ -11,8 +11,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
-import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.integrasjon.felles.exception.IntegrasjonException;
+import no.nav.melosys.exception.IntegrasjonException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
