@@ -62,10 +62,11 @@ public class JournalforingService {
         prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalforingDto.getAvsenderID());
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalforingDto.getAvsenderNavn());
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalforingDto.getDokumenttittel());
-        //FIXME vedlegg
-
-        //TODO journalforingDto.getFagsak().getLand(); til inngangsvilkår
-        //TODO journalforingDto.getFagsak().getSoknadsperiode(): for å hente saksopplysninger
+        //FIXME MELOSYS-1283 vedlegg
+        // Land trenges av regelmodulen får å vurdere inngangsvilkår
+        // FIXME prosessinstans.setData(ProsessDataKey.LAND, journalforingDto.getFagsak().getLand());
+        // Perioden trenges for å hente saksopplysninger
+        // FIXME prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalforingDto.getFagsak().getSoknadsperiode());
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setSistEndret(nå);
         prosessinstans.setRegistrertDato(nå);
@@ -89,7 +90,7 @@ public class JournalforingService {
         prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalforingDto.getAvsenderID());
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalforingDto.getAvsenderNavn());
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalforingDto.getDokumenttittel());
-        //FIXME vedlegg
+        //FIXME MELOSYS-1283 vedlegg
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, journalforingDto.getSaksnummer());
 
         LocalDateTime nå = LocalDateTime.now();
