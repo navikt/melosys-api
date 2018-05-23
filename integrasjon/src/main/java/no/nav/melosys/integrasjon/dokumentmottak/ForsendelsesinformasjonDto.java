@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokumentmottak;
+package no.nav.melosys.integrasjon.dokumentmottak;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

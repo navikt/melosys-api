@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokumentmottak;
+package no.nav.melosys.integrasjon.dokumentmottak;
 
 import java.time.LocalDateTime;
 
@@ -27,7 +27,7 @@ public class ProsessinstansMeldingsfordeler {
         Prosessinstans prosessinstans = new Prosessinstans();
 
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
-        prosessinstans.setSteg(ProsessSteg.JFR_VURDER_SAKSFLYT);
+        prosessinstans.setSteg(ProsessSteg.VURDER_AUTOMATISK_JFR);
         prosessinstans.setRegistrertDato(LocalDateTime.now());
 
         prosessinstans.setData(ProsessDataKey.ARKIVSYSTEM, forsendelsesinfo.arkivsystem);

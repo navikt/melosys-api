@@ -4,7 +4,7 @@ import javax.persistence.Converter;
 
 public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
 
-    JFR_VURDER_SAKSFLYT("JFR_VURDER_SAKSFLYT", "Vurder om journalføring kan skje automatisk"),
+    VURDER_AUTOMATISK_JFR("VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"),
     JFR_AKTOER_ID("JFR_AKTOER_ID", "Henter aktørID"),
     JFR_OPPRETT_SAK("JFR_OPPRETT_SAK", "Oppretter ny sak i Melosys"),
     JFR_OPPRETT_GSAK_SAK("JFR_OPPRETT_GSAK_SAK", "Oppretter Sak i GSAK"),

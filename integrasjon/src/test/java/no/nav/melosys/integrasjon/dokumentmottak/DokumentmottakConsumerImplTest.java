@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokumentmottak;
+package no.nav.melosys.integrasjon.dokumentmottak;
 
 import com.mockrunner.mock.jms.MockTextMessage;
 import org.junit.Before;
