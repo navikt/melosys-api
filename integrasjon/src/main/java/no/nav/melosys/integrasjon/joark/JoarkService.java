@@ -1,14 +1,16 @@
 package no.nav.melosys.integrasjon.joark;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.DokumentTittel;
 import no.nav.melosys.domain.Journalpost;
+import no.nav.melosys.domain.joark.JournalfoeringMangel;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.behandleinngaaendejournal.BehandleInngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
@@ -31,13 +33,22 @@ import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.HentJournalpostJournalpos
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.HentJournalpostJournalpostIkkeInngaaende;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.HentJournalpostSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.HentJournalpostUgyldigInput;
+import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.UtledJournalfoeringsbehovJournalpostIkkeFunnet;
+import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.UtledJournalfoeringsbehovJournalpostIkkeInngaaende;
+import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.UtledJournalfoeringsbehovJournalpostKanIkkeBehandles;
+import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.UtledJournalfoeringsbehovSikkerhetsbegrensning;
+import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.UtledJournalfoeringsbehovUgyldigInput;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Aktoer;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Dokumentinformasjon;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.InngaaendeJournalpost;
+import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Journalfoeringsbehov;
+import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.JournalpostMangler;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Organisasjon;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Person;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.meldinger.HentJournalpostRequest;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.meldinger.HentJournalpostResponse;
+import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.meldinger.UtledJournalfoeringsbehovRequest;
+import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.meldinger.UtledJournalfoeringsbehovResponse;
 import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentDokumentIkkeFunnet;
 import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentJournalpostIkkeFunnet;
 import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentSikkerhetsbegrensning;
@@ -141,7 +152,8 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void oppdaterJounalpost(String journalpostId, String gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel) throws SikkerhetsbegrensningException {
+    public void oppdaterJounalpost(String journalpostId, String gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, boolean medDokumentkategori)
+        throws SikkerhetsbegrensningException {
         OppdaterJournalpostRequest request = new OppdaterJournalpostRequest();
         no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.InngaaendeJournalpost journalpost =
                 new no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.InngaaendeJournalpost();
@@ -163,9 +175,11 @@ public class JoarkService implements JoarkFasade {
 
         no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Dokumentinformasjon dokumentinfo =
             new no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Dokumentinformasjon();
-        Dokumentkategori dokumentkategori = new Dokumentkategori();
-        dokumentkategori.setValue(DokumentKategoriKode.IS.getKode()); //FIXME MELOSYS-1164 bare hvis det ikke er satt allerede
-        dokumentinfo.setDokumentkategori(dokumentkategori);
+        if (medDokumentkategori) {
+            Dokumentkategori dokumentkategori = new Dokumentkategori();
+            dokumentkategori.setValue(DokumentKategoriKode.IS.getKode());
+            dokumentinfo.setDokumentkategori(dokumentkategori);
+        }
         dokumentinfo.setTittel(tittel);
         journalpost.setHoveddokument(dokumentinfo);
         journalpost.setInnhold(tittel); // Innhold bruker titlen siden det ikke finnes andre grunnlag for det.
@@ -179,5 +193,60 @@ public class JoarkService implements JoarkFasade {
             | OppdaterJournalpostObjektIkkeFunnet e) {
             throw new IntegrasjonException(e);
         }
+    }
+
+    @Override
+    public List<JournalfoeringMangel> utledJournalfoeringsbehov(String journalpostID) throws SikkerhetsbegrensningException {
+        UtledJournalfoeringsbehovRequest request = new UtledJournalfoeringsbehovRequest();
+        request.setJournalpostId(journalpostID);
+
+        try {
+            UtledJournalfoeringsbehovResponse utledJournalfoeringsbehovResponse = inngåendeJournalConsumer.utledJournalfoeringsbehov(request);
+            JournalpostMangler journalfoeringsbehov = utledJournalfoeringsbehovResponse.getJournalfoeringsbehov();
+            return konverterTilJournalfoeringmangler(journalfoeringsbehov);
+        } catch (UtledJournalfoeringsbehovSikkerhetsbegrensning s) {
+            throw new SikkerhetsbegrensningException(s);
+        } catch (UtledJournalfoeringsbehovUgyldigInput | UtledJournalfoeringsbehovJournalpostKanIkkeBehandles | UtledJournalfoeringsbehovJournalpostIkkeFunnet
+            | UtledJournalfoeringsbehovJournalpostIkkeInngaaende  e) {
+            throw new IntegrasjonException(e);
+        }
+
+    }
+
+    List<JournalfoeringMangel> konverterTilJournalfoeringmangler(JournalpostMangler input) {
+        List<JournalfoeringMangel> mangler = new ArrayList<>();
+
+        if (input.getArkivSak() == Journalfoeringsbehov.MANGLER) {
+            mangler.add(JournalfoeringMangel.ARKIVSAK);
+        }
+        if (input.getAvsenderId() == Journalfoeringsbehov.MANGLER) {
+            mangler.add(JournalfoeringMangel.AVSENDERID);
+        }
+        if (input.getAvsenderNavn() == Journalfoeringsbehov.MANGLER) {
+            mangler.add(JournalfoeringMangel.AVSENDERNAVN);
+        }
+        if (input.getBruker() == Journalfoeringsbehov.MANGLER) {
+            mangler.add(JournalfoeringMangel.BRUKER);
+        }
+        if (input.getForsendelseInnsendt() == Journalfoeringsbehov.MANGLER) {
+            mangler.add(JournalfoeringMangel.FORSENDELSEINNSENDT);
+        }
+        if (input.getHoveddokument().getDokumentkategori() == Journalfoeringsbehov.MANGLER) {
+            mangler.add(JournalfoeringMangel.HOVEDDOKUMENT_KATEGORI);
+        }
+        if (input.getHoveddokument().getTittel() == Journalfoeringsbehov.MANGLER) {
+            mangler.add(JournalfoeringMangel.HOVEDDOKUMENT_TITTEL);
+        }
+        if (input.getInnhold() == Journalfoeringsbehov.MANGLER) {
+            mangler.add(JournalfoeringMangel.INNHOLD);
+        }
+        if (input.getVedleggListe() != null && !input.getVedleggListe().isEmpty()) {
+            mangler.add(JournalfoeringMangel.VEDLEGG);
+        }
+        if (input.getTema() == Journalfoeringsbehov.MANGLER) {
+            mangler.add(JournalfoeringMangel.TEMA);
+        }
+
+        return mangler;
     }
 }

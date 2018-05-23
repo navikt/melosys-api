@@ -14,6 +14,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -42,7 +43,7 @@ public class OppdaterJournalpostTest {
 
         agent.utførSteg(p);
 
-        verify(joarkFasade, times(1)).oppdaterJounalpost(any(), any(), any(), any(), any(), any());
+        verify(joarkFasade, times(1)).oppdaterJounalpost(any(), any(), any(), any(), any(), any(), anyBoolean());
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST);
     }
 }

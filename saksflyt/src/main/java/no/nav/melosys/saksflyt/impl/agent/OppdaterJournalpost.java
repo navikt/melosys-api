@@ -54,7 +54,7 @@ public class OppdaterJournalpost extends StandardAbstraktAgent {
         String tittel = prosessinstans.getData(HOVEDDOKUMENT_TITTEL);
 
         try {
-            joarkFasade.oppdaterJounalpost(journalpostID, gsakSakID, brukerID, avsenderID, avsenderNavn, tittel);
+            joarkFasade.oppdaterJounalpost(journalpostID, gsakSakID, brukerID, avsenderID, avsenderNavn, tittel, false);
         } catch (SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
             håndterFeil(prosessinstans, false);
