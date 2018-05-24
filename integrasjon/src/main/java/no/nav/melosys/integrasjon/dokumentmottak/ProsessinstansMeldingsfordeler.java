@@ -26,7 +26,7 @@ public class ProsessinstansMeldingsfordeler {
     public void execute(ForsendelsesinformasjonDto forsendelsesinfo) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
-        prosessinstans.setType(ProsessType.JFR_NY_SAK);
+        prosessinstans.setType(ProsessType.MOTTAK);
         prosessinstans.setSteg(ProsessSteg.VURDER_AUTOMATISK_JFR);
         prosessinstans.setRegistrertDato(LocalDateTime.now());
 
@@ -36,7 +36,7 @@ public class ProsessinstansMeldingsfordeler {
         prosessinstans.setData(ProsessDataKey.TEMA, forsendelsesinfo.tema);
 
         if (binge.leggTil(prosessinstans)) {
-            log.info("Opprettet prosessinstans av forsendelsesinfo fra DokMot", prosessinstans);
+            log.info("Opprettet prosessinstans med ID {} av forsendelsesinfo fra DokMot", prosessinstans.getId());
         }
     }
 

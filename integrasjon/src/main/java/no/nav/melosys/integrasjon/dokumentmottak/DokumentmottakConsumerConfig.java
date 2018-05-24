@@ -1,7 +1,9 @@
 package no.nav.melosys.integrasjon.dokumentmottak;
 
 import javax.jms.JMSException;
+import javax.jms.Queue;
 
+import com.ibm.mq.jms.MQQueue;
 import com.ibm.mq.jms.MQQueueConnectionFactory;
 import com.ibm.msg.client.wmq.compat.jms.internal.JMSC;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -39,6 +41,11 @@ public class DokumentmottakConsumerConfig {
 
     @Value("${DokMot.queueManager}")
     private String queueManager;
+
+    @Bean
+    public Queue dokmotQueue(@Value("${DokMot.queueName}") String queueName) throws JMSException {
+        return new MQQueue(queueName);
+    }
 
     @Bean
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
