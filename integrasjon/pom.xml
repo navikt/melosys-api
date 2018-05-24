@@ -24,6 +24,10 @@
             <groupId>no.nav.melosys</groupId>
             <artifactId>sikkerhet</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>saksflyt-api</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -45,6 +49,14 @@
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-activemq</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.mq</groupId>
+            <artifactId>com.ibm.mq.allclient</artifactId>
         </dependency>
 
         <!--AAREG-->
@@ -133,5 +145,18 @@
             <artifactId>modig-testcertificates</artifactId>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.mockrunner</groupId>
+            <artifactId>mockrunner-jms</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+            </exclusions>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 </project>

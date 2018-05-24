@@ -5,21 +5,7 @@ import javax.ws.rs.ApplicationPath;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
-import no.nav.melosys.tjenester.gui.ArbeidsforholdHistorikkTjeneste;
-import no.nav.melosys.tjenester.gui.BehandlingTjeneste;
-import no.nav.melosys.tjenester.gui.DokumentTjeneste;
-import no.nav.melosys.tjenester.gui.FagsakTjeneste;
-import no.nav.melosys.tjenester.gui.FaktaavklaringTjeneste;
-import no.nav.melosys.tjenester.gui.InngangTjeneste;
-import no.nav.melosys.tjenester.gui.JournalforingTjeneste;
-import no.nav.melosys.tjenester.gui.KodeverkTjeneste;
-import no.nav.melosys.tjenester.gui.OppgaveTjeneste;
-import no.nav.melosys.tjenester.gui.OrganisasjonTjeneste;
-import no.nav.melosys.tjenester.gui.PersonTjeneste;
-import no.nav.melosys.tjenester.gui.ProsessTjeneste;
-import no.nav.melosys.tjenester.gui.SaksbehandlerTjeneste;
-import no.nav.melosys.tjenester.gui.SoknadTjeneste;
-import no.nav.melosys.tjenester.gui.VurderingTjeneste;
+import no.nav.melosys.tjenester.gui.*;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,6 +18,7 @@ public class JerseyConfig extends ResourceConfig {
         // N.B. alfabetisk rekkefølge
         register(ArbeidsforholdHistorikkTjeneste.class);
         register(BehandlingTjeneste.class);
+        register(DokMotQueueTestRestTjeneste.class);
         register(DokumentTjeneste.class);
         register(FagsakTjeneste.class);
         register(FaktaavklaringTjeneste.class);
