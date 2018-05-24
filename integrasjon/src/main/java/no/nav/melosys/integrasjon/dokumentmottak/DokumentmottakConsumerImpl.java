@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
-@Profile("!local")
+@Profile("!mocking") //FIXME MELOSYS-1284
 @Component
 public class DokumentmottakConsumerImpl {
 

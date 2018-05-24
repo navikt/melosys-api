@@ -20,7 +20,7 @@ import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
  * Konfigurasjon er tatt fra Foreldrepengers integrasjon mot IBM MQ:
  * http://stash.devillo.no/projects/VEDFP/repos/vl-fordel/browse/web/server/src/main/java/no/nav/foreldrepenger/fordel/web/server/JmsKonfig.java
 */
-@Profile("!local")
+@Profile("!mocking") //FIXME MELOSYS-1284
 @Configuration
 @EnableJms
 public class DokumentmottakConsumerConfig {
