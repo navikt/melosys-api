@@ -38,10 +38,10 @@ fasitResources:
     resourceType: webserviceendpoint
   - alias: Journal_v3
     resourceType: webserviceendpoint
+  - alias: virksomhet:Aktoer_v2
+    resourceType: webserviceendpoint
   - alias: virksomhet:Arbeidsforhold_v3
     resourceType: webserviceendpoint
-  - alias: sak.saker
-    resourceType: restservice
   - alias: virksomhet:Oppgave_v3
     resourceType: webserviceendpoint
   - alias: virksomhet:BehandleOppgave_v1
@@ -56,6 +56,8 @@ fasitResources:
     resourceType: webserviceendpoint
   - alias: virksomhet:Person_v3
     resourceType: webserviceendpoint
+  - alias: sak.saker
+    resourceType: restservice
   - alias: securityTokenService
     resourceType: baseurl
   - alias: OpenIdConnectAgent
