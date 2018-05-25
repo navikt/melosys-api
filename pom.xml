@@ -66,6 +66,7 @@
         <hikaricp.version>2.6.1</hikaricp.version>
         <ibmmq.version>9.0.5.0</ibmmq.version>
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
+        <jms-api.version>2.0.1</jms-api.version>
         <jose4j.version>0.6.2</jose4j.version>
         <json-patch.version>1.9</json-patch.version>
         <junit.version>4.12</junit.version>
@@ -190,16 +191,6 @@
                 <version>${hikaricp.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>${servlet-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.ws.rs</groupId>
-                <artifactId>javax.ws.rs-api</artifactId>
-                <version>${javax.ws.rs-api.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>io.micrometer</groupId>
                 <artifactId>micrometer-spring-legacy</artifactId>
                 <version>${micrometer.version}</version>
@@ -208,6 +199,21 @@
                 <groupId>io.micrometer</groupId>
                 <artifactId>micrometer-registry-prometheus</artifactId>
                 <version>${micrometer.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.jms</groupId>
+                <artifactId>javax.jms-api</artifactId>
+                <version>${jms-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>${servlet-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.ws.rs</groupId>
+                <artifactId>javax.ws.rs-api</artifactId>
+                <version>${javax.ws.rs-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>net.logstash.logback</groupId>
