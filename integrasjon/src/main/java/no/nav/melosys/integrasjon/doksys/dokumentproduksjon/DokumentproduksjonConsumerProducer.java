@@ -1,4 +1,35 @@
 package no.nav.melosys.integrasjon.doksys.dokumentproduksjon;
 
+import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
+import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
+import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.DokumentproduksjonV3;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
 public class DokumentproduksjonConsumerProducer {
+
+    private DokumentproduksjonConsumerConfig config;
+
+    @Autowired
+    public void setConfig(DokumentproduksjonConsumerConfig config) {
+        this.config = config;
+    }
+
+    @Bean
+    public DokumentproduksjonConsumer dokumentproduksjonConsumer() {
+        DokumentproduksjonV3 port = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML);
+        return new DokumentproduksjonConsumerImpl(port);
+    }
+
+    @Bean
+    public DokumentproduksjonSelftestConsumer dokumentproduksjonSelftestConsumer() {
+        DokumentproduksjonV3 port = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SYSTEM_SAML);
+        return new DokumentproduksjonSelftestConsumerImpl(port, config.getEndpointUrl());
+    }
+
+    private DokumentproduksjonV3 wrapWithSts(DokumentproduksjonV3 port, NAVSTSClient.StsClientType oidcTilSaml) {
+        return StsConfigurationUtil.wrapWithSts(port, oidcTilSaml);
+    }
 }
