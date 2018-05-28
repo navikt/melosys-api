@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 public class JsonResourceLoader {
     public static String load(ResourceLoader resourceLoader, String filename) throws IOException {
 
-        Resource resource = resourceLoader.getResource("classpath:"+filename);
+        Resource resource = resourceLoader.getResource("classpath:" + filename);
 
         InputStream inputStream = resource.getInputStream();
 
