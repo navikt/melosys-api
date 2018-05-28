@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 
 public class JsonResourceLoader {
     public static String load(ResourceLoader resourceLoader, String filename) throws IOException {
-        String json;
 
         Resource resource = resourceLoader.getResource("classpath:"+filename);
 
@@ -27,7 +26,6 @@ public class JsonResourceLoader {
                 stringBuilder.append((char) c);
             }
         }
-        json = stringBuilder.toString();
-        return json;
+        return stringBuilder.toString();
     }
 }

@@ -14,7 +14,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.*;
+import java.io.IOException;
 
 import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
 
