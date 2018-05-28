@@ -112,7 +112,6 @@ public class JournalforingTjenesteTest {
 
         FagsakDto fagsak = new FagsakDto();
         fagsak.setSoknadsperiode(new no.nav.melosys.service.journalforing.dto.PeriodeDto(LocalDate.now(), LocalDate.MAX));
-        fagsak.setType(FagsakType.EU_EØS.getKode());
         fagsak.setLand(Arrays.asList("DK","GB"));
         dto.setFagsak(fagsak);
 

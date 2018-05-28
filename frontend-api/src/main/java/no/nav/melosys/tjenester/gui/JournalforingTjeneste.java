@@ -9,6 +9,7 @@ import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.Journalpost;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.journalforing.JournalforingService;
 import no.nav.melosys.service.journalforing.dto.JournalforingDto;
@@ -59,18 +60,20 @@ public class JournalforingTjeneste extends RestTjeneste {
     @POST
     @Path("opprett")
     public void opprettSakOgJournalfør(JournalforingDto journalforingDto) {
-        if (journalforingDto.getFagsak() == null) {
-            throw new BadRequestException();
+        try {
+            journalføringService.opprettSakOgJournalfør(journalforingDto);
+        } catch (FunksjonellException e) {
+            throw new BadRequestException(e.getMessage());
         }
-        journalføringService.opprettSakOgJournalfør(journalforingDto);
     }
 
     @POST
     @Path("tilordne")
     public void tilordneSakOgJournalfør(JournalforingDto journalforingDto) {
-        if (journalforingDto.getSaksnummer() == null) {
-            throw new BadRequestException();
+        try {
+            journalføringService.tilordneSakOgJournalfør(journalforingDto);
+        } catch (FunksjonellException e) {
+            throw new BadRequestException(e.getMessage());
         }
-        journalføringService.tilordneSakOgJournalfør(journalforingDto);
     }
 }

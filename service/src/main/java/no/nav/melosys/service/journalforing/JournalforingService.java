@@ -2,16 +2,14 @@ package no.nav.melosys.service.journalforing;
 
 import java.time.LocalDateTime;
 
-import no.nav.melosys.domain.Journalpost;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.journalforing.dto.JournalforingDto;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,17 +35,35 @@ public class JournalforingService {
     }
 
     @Transactional
-    public void opprettSakOgJournalfør(JournalforingDto journalforingDto) {
+    public void opprettSakOgJournalfør(JournalforingDto journalforingDto) throws FunksjonellException {
+        valider(journalforingDto);
+        if (journalforingDto.getFagsak() == null) {
+            throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
+        }
+        if (journalforingDto.getFagsak().getSoknadsperiode() == null) {
+            throw new FunksjonellException("Søknadsperiode mangler");
+        }
+        if (journalforingDto.getFagsak().getSoknadsperiode().getFom() == null) {
+            throw new FunksjonellException("Søknadsperiodes fra og med dato mangler");
+        }
+        if (journalforingDto.getFagsak().getSoknadsperiode().getFom() == null) {
+            throw new FunksjonellException("Søknadsperiodes til og med dato mangler");
+        }
+        if (journalforingDto.getFagsak().getLand() == null || journalforingDto.getFagsak().getLand().isEmpty()) {
+            throw new FunksjonellException("Land mangler");
+        }
+        
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         prosessinstans.setSteg(ProsessSteg.JFR_AKTOER_ID);
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalforingDto.getJournalpostID());
+        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalforingDto.getOppgaveID());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalforingDto.getBrukerID());
         prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalforingDto.getAvsenderID());
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalforingDto.getAvsenderNavn());
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalforingDto.getDokumenttittel());
         //FIXME vedlegg
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalforingDto.getJournalpostID());
-        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalforingDto.getOppgaveID());
+
         //TODO journalforingDto.getFagsak().getLand(); til inngangsvilkår
         //TODO journalforingDto.getFagsak().getSoknadsperiode(): for å hente saksopplysninger
         LocalDateTime nå = LocalDateTime.now();
@@ -58,21 +74,49 @@ public class JournalforingService {
     }
 
     @Transactional
-    public void tilordneSakOgJournalfør(JournalforingDto journalforingDto) {
+    public void tilordneSakOgJournalfør(JournalforingDto journalforingDto) throws FunksjonellException {
+        valider(journalforingDto);
+        if (StringUtils.isEmpty(journalforingDto.getSaksnummer())) {
+            throw new FunksjonellException("Saksnummer mangler");
+        }
+
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalforingDto.getJournalpostID());
+        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalforingDto.getOppgaveID());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalforingDto.getBrukerID());
         prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalforingDto.getAvsenderID());
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalforingDto.getAvsenderNavn());
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalforingDto.getDokumenttittel());
         //FIXME vedlegg
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalforingDto.getJournalpostID());
-        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalforingDto.getOppgaveID());
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, journalforingDto.getSaksnummer());
+
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setSistEndret(nå);
         prosessinstans.setRegistrertDato(nå);
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);
+    }
+
+    void valider(JournalforingDto journalforingDto) throws FunksjonellException {
+        if (StringUtils.isEmpty(journalforingDto.getJournalpostID())) {
+            throw new FunksjonellException("JournalpostID mangler");
+        }
+        if (StringUtils.isEmpty(journalforingDto.getOppgaveID())) {
+            throw new FunksjonellException("OppgaveID mangler");
+        }
+        if (StringUtils.isEmpty(journalforingDto.getAvsenderID())) {
+            throw new FunksjonellException("AvsenderID mangler");
+        }
+        if (StringUtils.isEmpty(journalforingDto.getAvsenderNavn())) {
+            throw new FunksjonellException("AvsenderNavn mangler");
+        }
+        if (StringUtils.isEmpty(journalforingDto.getBrukerID())) {
+            throw new FunksjonellException("BrukerID mangler");
+        }
+        if (StringUtils.isEmpty(journalforingDto.getDokumenttittel())) {
+            throw new FunksjonellException("Dokumenttittel mangler");
+        }
     }
 }
