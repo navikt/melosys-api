@@ -34,10 +34,14 @@ public abstract class StandardAbstraktAgent implements Agent {
                 utførSteg(prosessinstans);
             } catch (RuntimeException e) {
                 håndterFeil(prosessinstans, true);
+                return;
             }
+            // FIXME (farjam 2018-05-28): Vi havner også her selv om håndterFeil er kalt (enten i catch over eller av agentene). Fikses når vi fikser feilhåndtering generelt.
             prosessinstans.setSistEndret(LocalDateTime.now());
             prosessinstansRepo.save(prosessinstans);
-            binge.leggTil(prosessinstans);
+            if (prosessinstans.getSteg() != null) {
+                binge.leggTil(prosessinstans);
+            }
         }
     }
 

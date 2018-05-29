@@ -1,25 +1,26 @@
 package no.nav.melosys.saksflyt.impl.agent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.JFR_AVSLUTT_OPPGAVE;
-import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
 import static no.nav.melosys.domain.ProsessDataKey.OPPGAVE_ID;
+import static no.nav.melosys.domain.ProsessSteg.JFR_AVSLUTT_OPPGAVE;
+import static no.nav.melosys.domain.ProsessSteg.VURDER_INNGANGSVILKÅR;
 
 /**
  * Avslutter en oppgave i GSAK.
  *
  * Transisjoner:
- * JFR_AVSLUTT_OPPGAVE -> OPPRETT_OPPGAVE eller FEILET_MASKINELT hvis feil
+ * JFR_AVSLUTT_OPPGAVE -> VURDER_INNGANGSVILKÅR eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class AvsluttOppgave extends StandardAbstraktAgent {
@@ -49,6 +50,6 @@ public class AvsluttOppgave extends StandardAbstraktAgent {
             håndterFeil(prosessinstans, false);
         }
 
-        prosessinstans.setSteg(OPPRETT_OPPGAVE);
+        prosessinstans.setSteg(VURDER_INNGANGSVILKÅR);
     }
 }

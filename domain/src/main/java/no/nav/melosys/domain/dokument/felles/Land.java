@@ -1,7 +1,5 @@
 package no.nav.melosys.domain.dokument.felles;
 
-import java.util.*;
-
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public class Land {
@@ -43,15 +41,6 @@ public class Land {
     public static final String ØSTERRIKE = "AUT";
     public static final String ÅLAND = "ALA";
 
-    // FIXME: Sjekk om/hvordan vi skal håndtere Sveits og Svalbard
-    private static final Set<String> EØS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            BELGIA, BULGARIA, DANMARK, ESTLAND, FINLAND, FRANKRIKE, HELLAS, IRLAND, ISLAND, ITALIA, KROATIA, KYPROS,
-            LATVIA, LIECHTENSTEIN, LITAUEN, LUXEMBOURG, MALTA, NEDERLAND, NORGE, POLEN, PORTUGAL, ROMANIA, SLOVAKIA,
-            SLOVENIA, SPANIA, STORBRITANNIA, SVERIGE, TSJEKKIA, TYSKLAND, UNGARN, ØSTERRIKE)));
-    // FIXME: Sjekk om Åland skal være med
-    private static final Set<String> NORDEN = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            DANMARK, FINLAND, FÆRØYENE, GRØNLAND, ISLAND, NORGE, SVALBARD_OG_JAN_MAYEN, SVERIGE, ÅLAND)));
-
     private String kode;
 
     // Brukes av JAXB
@@ -70,10 +59,6 @@ public class Land {
         this.kode = kode;
     }
 
-    public boolean erEØS() {
-        return EØS.contains(kode);
-    }
-
     public boolean erSveits() {
         return SVEITS.equals(kode);
     }
@@ -82,7 +67,4 @@ public class Land {
         return STATSLØS.equals(kode);
     }
 
-    public boolean erNorden() {
-        return NORDEN.contains(kode);
-    }
 }

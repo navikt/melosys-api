@@ -37,7 +37,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!--NAV-->
-        <melosys.regler.version>0.42.0-SNAPSHOT</melosys.regler.version>
+        <melosys.regler.version>0.42.0-SNAPSHOT</melosys.regler.version> <!-- FIXME: skal ikke være SNAPSHOT avhengighet her -->
         <aareg.arbeidsforhold.version>3.0.0</aareg.arbeidsforhold.version>
         <doksys.dokumentproduksjon.version>3.3.0</doksys.dokumentproduksjon.version>
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>

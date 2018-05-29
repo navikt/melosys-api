@@ -15,10 +15,9 @@ public enum ProsessDataKey {
     GSAK_SAK_ID("gsakSakID"),
     HOVEDDOKUMENT_TITTEL("hoveddokumentTittel"),
     JOURNALPOST_ID("journalpostID"),
-    LAND("land"),
     OPPGAVE_ID("oppgaveID"),
     SAKSNUMMER("saksnummer"),
-    SØKNADSPERIODE("søknadsperiode"),
+    FAGSAK_DTO("fagsakDto"),
     TEMA("tema");
 
     private String kode;
