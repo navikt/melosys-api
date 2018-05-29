@@ -2,12 +2,19 @@ package no.nav.melosys.saksflyt.impl.agent;
 
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
+import static no.nav.melosys.domain.ProsessSteg.A1_HENT_ARBF_OPPL;
 import static no.nav.melosys.domain.ProsessSteg.A1_HENT_PERS_OPPL;
 
 /**
@@ -22,8 +29,12 @@ public class HentPersonopplysninger extends StandardAbstraktAgent {
 
     private static final Logger log = LoggerFactory.getLogger(HentPersonopplysninger.class);
 
-    public HentPersonopplysninger(Binge binge, ProsessinstansRepository prosessinstansRepo) {
+    private TpsFasade tpsFasade;
+
+    @Autowired
+    public HentPersonopplysninger(Binge binge, ProsessinstansRepository prosessinstansRepo, TpsFasade tpsFasade) {
         super(binge, prosessinstansRepo);
+        this.tpsFasade = tpsFasade;
     }
 
     @Override
@@ -33,6 +44,17 @@ public class HentPersonopplysninger extends StandardAbstraktAgent {
 
     @Override
     public void utførSteg(Prosessinstans prosessinstans) {
-        // TODO: MELOSYS-46
+        String brukerId = prosessinstans.getData(BRUKER_ID);
+
+        try {
+            Saksopplysning saksopplysning = tpsFasade.hentPerson(brukerId);
+            prosessinstans.getBehandling().getSaksopplysninger().add(saksopplysning);
+        } catch (IkkeFunnetException | SikkerhetsbegrensningException e) {
+            log.error("Feil i steg {}", inngangsSteg(), e);
+            håndterFeil(prosessinstans, false);
+            return;
+        }
+
+        prosessinstans.setSteg(A1_HENT_ARBF_OPPL);
     }
 }
