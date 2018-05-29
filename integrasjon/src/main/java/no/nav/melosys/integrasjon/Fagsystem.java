@@ -5,7 +5,7 @@ import no.nav.melosys.domain.Kodeverk;
 public enum Fagsystem implements Kodeverk {
 
     GSAK("FS19", "GSAK"),
-    MELOSYS("TODO", "Melosys"); //FIXME Hvem definerer koden for Melosys?
+    MELOSYS("FS38", "Melosys"); // "https://confluence.adeo.no/display/APPKAT/Applikasjons-ID"
 
     private String kode;
     private String beskrivelse;

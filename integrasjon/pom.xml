@@ -66,6 +66,13 @@
             <classifier>jaxws</classifier>
         </dependency>
 
+        <!-- DokSys -->
+        <dependency>
+            <groupId>no.nav.tjenester</groupId>
+            <artifactId>nav-dokumentproduksjon-v3-tjenestespesifikasjon</artifactId>
+            <classifier>jaxws</classifier>
+        </dependency>
+
         <!--EREG-->
         <dependency>
             <groupId>no.nav.tjenester.fim</groupId>
