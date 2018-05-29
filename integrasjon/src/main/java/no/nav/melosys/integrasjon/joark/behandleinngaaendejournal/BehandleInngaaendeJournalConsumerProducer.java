@@ -6,7 +6,6 @@ import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.binding.BehandleI
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML;
 import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SYSTEM_SAML;
 
 @Configuration
@@ -20,7 +19,7 @@ public class BehandleInngaaendeJournalConsumerProducer {
 
     @Bean
     public BehandleInngaaendeJournalConsumer behandleInngaaendeJournalConsumer() {
-        BehandleInngaaendeJournalV1 port = wrapWithSts(consumerConfig.getPort(), SECURITYCONTEXT_TIL_SAML);
+        BehandleInngaaendeJournalV1 port = wrapWithSts(consumerConfig.getPort(), SYSTEM_SAML);
         return new BehandleInngaaendeJournalConsumerImpl(port);
     }
 

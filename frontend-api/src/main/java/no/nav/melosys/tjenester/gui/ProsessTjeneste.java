@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
@@ -15,10 +16,14 @@ import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.tjenester.gui.dto.ProsessinstansDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
+import static no.nav.melosys.domain.ProsessDataKey.*;
+
+@Profile("local")
 @Path("/prosesser")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_APPLICATION)
@@ -59,6 +64,27 @@ public class ProsessTjeneste extends RestTjeneste {
     public Response test() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
+        prosessinstans.setSteg(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
+        Properties properties = new Properties();
+        prosessinstans.setData(JOURNALPOST_ID, "journal_ID");
+        prosessinstans.setData(GSAK_SAK_ID, "gsak_ID");
+        prosessinstans.setData(BRUKER_ID, "FJERNET93");
+        prosessinstans.setData(AVSENDER_ID, "Avsender");
+        prosessinstans.setData(AVSENDER_NAVN, "Avsernder navn");
+        prosessinstans.setData(HOVEDDOKUMENT_TITTEL, "tittel");
+        prosessinstans.addData(properties);
+        LocalDateTime nå = LocalDateTime.now();
+        prosessinstans.setSistEndret(nå);
+        prosessinstans.setRegistrertDato(nå);
+        prosessinstansRepo.save(prosessinstans);
+        binge.leggTil(prosessinstans);
+
+        return Response.ok().build();
+    }
+
+    private void testOpprett() {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.JFR_NY_SAK);
         //prosessinstans.setSteg(ProsessSteg.JFR_AKTOER_ID);
         prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_SAK);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, "FJERNET93");
@@ -67,7 +93,5 @@ public class ProsessTjeneste extends RestTjeneste {
         prosessinstans.setRegistrertDato(nå);
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);
-
-        return Response.ok().build();
     }
 }
