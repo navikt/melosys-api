@@ -49,6 +49,6 @@ public class AvsluttOppgaveTest {
         agent.utførSteg(p);
 
         verify(gsakFasade, times(1)).ferdigstillOppgave(oppgaveID);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.OPPRETT_OPPGAVE);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.VURDER_INNGANGSVILKÅR);
     }
 }

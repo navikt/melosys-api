@@ -11,8 +11,10 @@ public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
     JFR_OPPDATER_JOURNALPOST("JFR_OPPDATER_JOURNALPOST", "Oppdaterer journalposten i Joark"),
     JFR_FERDIGSTILL_JOURNALPOST("JFR_FERDIGSTILL_JOURNALPOST", "Ferdigstiller journalposten i Joark"),
     JFR_AVSLUTT_OPPGAVE("JFR_AVSLUTT_OPPGAVE", "Avslutter journalføringsoppgaven i GSAK"),
+    HENT_PERS_OPPL("HENT_PERS_OPPL", "Hent personopplysninger fra TPS"),
+    VURDER_INNGANGSVILKÅR("VURDER_INNGANGSVILKÅR", "Vurderer inngangsvilkår"),
     OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
-    A1_HENT_PERS_OPPL("A1_HENT_PERS_OPPL", "A1 hent personopplysninger"),
+
     A1_HENT_ARBF_OPPL("A1_HENT_ARBF_OPPL", "A1 hent arbeidsforhold"),
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
     FERDIG("FERDIG", "Ferdig");

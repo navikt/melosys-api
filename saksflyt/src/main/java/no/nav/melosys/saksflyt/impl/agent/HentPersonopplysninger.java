@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.A1_HENT_PERS_OPPL;
+import static no.nav.melosys.domain.ProsessSteg.HENT_PERS_OPPL;
 
 /**
  * Steget sørger for å hente personinfo fra TPS
@@ -28,7 +28,7 @@ public class HentPersonopplysninger extends StandardAbstraktAgent {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return A1_HENT_PERS_OPPL;
+        return HENT_PERS_OPPL;
     }
 
     @Override
