@@ -36,7 +36,7 @@ public class Land {
     public static final String STATSLØS = "XXX";
     public static final String STORBRITANNIA = "GBR";
     public static final String SVALBARD_OG_JAN_MAYEN = "SJM";
-    public static final String SVEITS = "SWZ";
+    public static final String SVEITS = "CHE";
     public static final String SVERIGE = "SWE";
     public static final String TYSKLAND = "DEU";
     public static final String UNGARN = "HUN";
