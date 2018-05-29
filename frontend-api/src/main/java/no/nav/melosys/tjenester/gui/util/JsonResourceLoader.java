@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
 
 public class JsonResourceLoader {
     public static String load(ResourceLoader resourceLoader, String filename) throws IOException {
@@ -27,5 +28,15 @@ public class JsonResourceLoader {
             }
         }
         return stringBuilder.toString();
+    }
+
+    public static int getRandomNumberInRange(int min, int max) {
+
+        if (min >= max) {
+            throw new IllegalArgumentException("max must be greater than min");
+        }
+
+        Random r = new Random();
+        return r.nextInt((max - min) + 1) + min;
     }
 }

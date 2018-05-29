@@ -1,24 +1,21 @@
 package no.nav.melosys.tjenester.gui;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import java.time.LocalDateTime;
+
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
-import io.swagger.annotations.Api;
-import no.nav.melosys.domain.Journalpost;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.service.journalforing.JournalforingService;
-import no.nav.melosys.service.journalforing.dto.JournalforingDto;
-import no.nav.melosys.tjenester.gui.dto.journalforing.DokumentDto;
-import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
+
+import io.swagger.annotations.Api;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.journalforing.JournalforingService;
+import no.nav.melosys.service.journalforing.dto.JournalforingDto;
+import no.nav.melosys.tjenester.gui.dto.journalforing.DokumentDto;
+import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 
 @Api(tags = {"journalforing"})
 @Path("/journalforing")
@@ -36,6 +33,17 @@ public class JournalforingTjeneste extends RestTjeneste {
     @GET
     @Path("{journalpostID}")
     public Response hentJournalpostOpplysninger(@PathParam("journalpostID") String journalpostID) {
+        JournalpostDto dto = new JournalpostDto();
+        dto.setBrukerID("99999999991");
+        dto.setAvsenderID("99999999991");
+        dto.setErBrukerAvsender(true);
+        DokumentDto dokumentDto = new DokumentDto();
+        dokumentDto.setID("DOK_8379");
+        dokumentDto.setMottattDato(LocalDateTime.now());
+        dokumentDto.setTittel("Søknad om medlemskap");
+        dto.setDokument(dokumentDto);
+        return Response.ok(dto).build();
+        /*
         Journalpost journalpost;
         try {
             journalpost = journalføringService.hentJournalpost(journalpostID);
@@ -55,6 +63,7 @@ public class JournalforingTjeneste extends RestTjeneste {
         dokumentDto.setTittel(journalpost.getHoveddokumentTittel());
         dto.setDokument(dokumentDto);
         return Response.ok(dto).build();
+        */
     }
 
     @POST

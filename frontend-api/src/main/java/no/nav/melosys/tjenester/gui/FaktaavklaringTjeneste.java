@@ -30,7 +30,9 @@ public class FaktaavklaringTjeneste extends RestTjeneste {
     @Autowired
     public FaktaavklaringTjeneste(ResourceLoader resourceLoader) throws IOException {
         jsonFaktaAvklaring = JsonResourceLoader.load(resourceLoader, "faktaavklaring.json");
-        jsonBostedAvklaring = JsonResourceLoader.load(resourceLoader, "bostedavklaring.json");
+        int i = JsonResourceLoader.getRandomNumberInRange(0, 1);
+        String filename = (i == 0) ? "bostedavklaring_feilmelding.json" : "bostedavklaring.json";
+        jsonBostedAvklaring = JsonResourceLoader.load(resourceLoader, filename);
     }
 
     @GET
