@@ -10,14 +10,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+
+import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
 
 @Api(tags = {"faktaavklaring"})
 @Path("/faktaavklaring")
@@ -26,23 +25,12 @@ import java.nio.charset.StandardCharsets;
 public class FaktaavklaringTjeneste extends RestTjeneste {
 
     private String jsonFaktaAvklaring;
+    private String jsonBostedAvklaring;
 
     @Autowired
     public FaktaavklaringTjeneste(ResourceLoader resourceLoader) throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:faktaavklaring.json");
-
-        InputStream inputStream = resource.getInputStream();
-
-        StringBuilder stringBuilder = new StringBuilder();
-        try (Reader reader = new BufferedReader(new InputStreamReader
-                (inputStream, Charset.forName(StandardCharsets.UTF_8.name())))) {
-            int c = 0;
-            while ((c = reader.read()) != -1) {
-                stringBuilder.append((char) c);
-            }
-        }
-
-        jsonFaktaAvklaring = stringBuilder.toString();
+        jsonFaktaAvklaring = JsonResourceLoader.load(resourceLoader, "faktaavklaring.json");
+        jsonBostedAvklaring = JsonResourceLoader.load(resourceLoader, "bostedavklaring.json");
     }
 
     @GET
@@ -59,5 +47,13 @@ public class FaktaavklaringTjeneste extends RestTjeneste {
     public Response utførFaktaavklaring(@PathParam("behandlingID") long behandlingID, String body) {
         // TODO Mock. Venter på avklaringer
         return Response.ok().entity(jsonFaktaAvklaring).build();
+    }
+
+    @GET
+    @Path("bosted/{behandlingID}")
+    @ApiOperation(value = "Henter bostedavklaring for et gitt bosted")
+    public Response hentBostedAvklaring(@PathParam("behandlingID") long behandlingID) {
+        // TODO Mock. Venter på avklaringer
+        return Response.ok().entity(jsonBostedAvklaring).build();
     }
 }

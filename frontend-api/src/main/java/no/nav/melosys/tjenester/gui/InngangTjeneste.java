@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
@@ -14,9 +13,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+
+import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
 
 @Api(tags = {"inngang"})
 @Path("/inngang")
@@ -27,20 +26,7 @@ public class InngangTjeneste extends RestTjeneste {
 
     @Autowired
     public InngangTjeneste(ResourceLoader resourceLoader) throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:inngang.json");
-
-        InputStream inputStream = resource.getInputStream();
-
-        StringBuilder stringBuilder = new StringBuilder();
-        try (Reader reader = new BufferedReader(new InputStreamReader
-                (inputStream, Charset.forName(StandardCharsets.UTF_8.name())))) {
-            int c = 0;
-            while ((c = reader.read()) != -1) {
-                stringBuilder.append((char) c);
-            }
-        }
-
-        jsonInngang = stringBuilder.toString();
+        jsonInngang = JsonResourceLoader.load(resourceLoader, "inngang.json");
     }
 
     @GET
