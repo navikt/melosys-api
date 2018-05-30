@@ -1,20 +1,14 @@
 package no.nav.melosys.tjenester.gui.util;
 
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Random;
-
 public class JsonResourceLoader {
     public static String load(ResourceLoader resourceLoader, String filename) throws IOException {
-
         Resource resource = resourceLoader.getResource("classpath:" + filename);
 
         InputStream inputStream = resource.getInputStream();
@@ -27,16 +21,7 @@ public class JsonResourceLoader {
                 stringBuilder.append((char) c);
             }
         }
+
         return stringBuilder.toString();
-    }
-
-    public static int getRandomNumberInRange(int min, int max) {
-
-        if (min >= max) {
-            throw new IllegalArgumentException("max must be greater than min");
-        }
-
-        Random r = new Random();
-        return r.nextInt((max - min) + 1) + min;
     }
 }

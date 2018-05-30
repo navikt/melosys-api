@@ -43,6 +43,8 @@ public class JournalforingTjeneste extends RestTjeneste {
         dokumentDto.setTittel("Søknad om medlemskap");
         dto.setDokument(dokumentDto);
         return Response.ok(dto).build();
+        // FIXME Vi mocker svaret fra /journalforing fordi systembrukeren har ikke riktig rettigheter for å kalle JOARK.
+        // FIXME Se REQ000001719505 i pilar
         /*
         Journalpost journalpost;
         try {
