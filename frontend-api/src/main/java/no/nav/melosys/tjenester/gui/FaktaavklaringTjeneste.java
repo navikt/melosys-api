@@ -1,5 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.io.IOException;
+import java.util.Random;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -8,15 +10,12 @@ import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.io.IOException;
-
-import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
 
 @Api(tags = {"faktaavklaring"})
 @Path("/faktaavklaring")
@@ -30,7 +29,9 @@ public class FaktaavklaringTjeneste extends RestTjeneste {
     @Autowired
     public FaktaavklaringTjeneste(ResourceLoader resourceLoader) throws IOException {
         jsonFaktaAvklaring = JsonResourceLoader.load(resourceLoader, "faktaavklaring.json");
-        jsonBostedAvklaring = JsonResourceLoader.load(resourceLoader, "bostedavklaring.json");
+        boolean feilet = new Random().nextBoolean();
+        String filename = feilet ? "bostedavklaring_feilmelding.json" : "bostedavklaring.json";
+        jsonBostedAvklaring = JsonResourceLoader.load(resourceLoader, filename);
     }
 
     @GET
