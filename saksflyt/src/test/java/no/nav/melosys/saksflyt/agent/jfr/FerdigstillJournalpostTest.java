@@ -1,13 +1,14 @@
-package no.nav.melosys.saksflyt.impl.agent;
+package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.Properties;
 
+import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.agent.jfr.FerdigstillJournalpost;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,12 +17,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OpprettOppgaveTest {
+public class FerdigstillJournalpostTest {
 
     @Mock
     private Binge binge;
@@ -30,25 +30,26 @@ public class OpprettOppgaveTest {
     private ProsessinstansRepository repo;
 
     @Mock
-    private GsakFasade gsakFasade;
+    private JoarkFasade joarkFasade;
 
-    private OpprettOppgave agent;
+    private FerdigstillJournalpost agent;
 
     @Before
     public void setUp() {
-        agent = new OpprettOppgave(binge, repo, gsakFasade);
+        agent = new FerdigstillJournalpost(binge, repo, joarkFasade);
     }
 
     @Test
     public void utfoerSteg() throws SikkerhetsbegrensningException {
         Prosessinstans p = new Prosessinstans();
-        p.setType(ProsessType.JFR_NY_SAK);
         Properties properties = new Properties();
+        String journalpostID = "Journal_ID";
+        properties.setProperty(ProsessDataKey.JOURNALPOST_ID.getKode(), journalpostID);
         p.addData(properties);
 
         agent.utførSteg(p);
 
-        verify(gsakFasade, times(1)).opprettOppgave(any());
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
+        verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AVSLUTT_OPPGAVE);
     }
 }

@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl.agent;
+package no.nav.melosys.saksflyt.agent;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -36,7 +36,7 @@ public abstract class StandardAbstraktAgent implements Agent {
                 håndterFeil(prosessinstans, true);
                 return;
             }
-            // FIXME (farjam 2018-05-28): Vi havner også her selv om håndterFeil er kalt (enten i catch over eller av agentene). Fikses når vi fikser feilhåndtering generelt.
+            // FIXME (farjam 2018-05-28): Vi havner også her selv om håndterFeil er kalt av agentene. Fikses når vi fikser feilhåndtering generelt.
             prosessinstans.setSistEndret(LocalDateTime.now());
             prosessinstansRepo.save(prosessinstans);
             if (prosessinstans.getSteg() != null) {
@@ -45,7 +45,7 @@ public abstract class StandardAbstraktAgent implements Agent {
         }
     }
 
-    void håndterFeil(Prosessinstans prosessinstans, boolean retry) {
+    protected void håndterFeil(Prosessinstans prosessinstans, boolean retry) {
         prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
         prosessinstans.setSistEndret(LocalDateTime.now());
         prosessinstansRepo.save(prosessinstans);

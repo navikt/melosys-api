@@ -1,7 +1,6 @@
-package no.nav.melosys.saksflyt.impl.agent;
+package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,16 +14,16 @@ import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.RegelmodulService;
-import no.nav.melosys.service.journalforing.dto.FagsakDto;
 
 /**
  * Kaller regelmodulen for å vurdere inngangsvilkår. Setter type på fagsak basert på resultatet.
  *
  * Transisjoner:
- * VURDER_INNGANGSVILKÅR → OPPRETT_OPPGAVE (eller til FEILET_MASKINELT hvis feil)
+ * JFR_VURDER_INNGANGSVILKÅR → JFR_OPPRETT_OPPGAVE (eller til FEILET_MASKINELT hvis feil)
  */
 public class VurderInngangsvilkaar extends StandardAbstraktAgent {
     
@@ -43,10 +42,11 @@ public class VurderInngangsvilkaar extends StandardAbstraktAgent {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.VURDER_INNGANGSVILKÅR;
+        return ProsessSteg.JFR_VURDER_INNGANGSVILKÅR;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void utførSteg(Prosessinstans prosessinstans) {
         log.debug("Starter behandling av {}", prosessinstans.getId());
         
@@ -67,14 +67,13 @@ public class VurderInngangsvilkaar extends StandardAbstraktAgent {
 
         // Kjør inngangsvilkår...
         log.debug("Kaller regelmodul for prosessinstans {}...", prosessinstans.getId());
-        FagsakDto fagsakDto = prosessinstans.getData(ProsessDataKey.FAGSAK_DTO, FagsakDto.class);
-        List<Land> land = fagsakDto.getLand().stream().map(Land::new).collect(Collectors.toList());
-        if (fagsakDto.getSoknadsperiode() == null || fagsakDto.getSoknadsperiode().getFom() == null) {
+        List<String> land = prosessinstans.getData(ProsessDataKey.LAND, List.class);
+        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+        if (periode == null || periode.getFom() == null) {
             log.error("Søknadsperioden er ikke oppgitt eller mangler fom");
             håndterFeil(prosessinstans, false);
             return;
         }
-        Periode periode = new Periode(fagsakDto.getSoknadsperiode().getFom(), fagsakDto.getSoknadsperiode().getTom());
         VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(statsborgerskap, land, periode);
         
         // Legg på evt. feil og varsler...
@@ -106,7 +105,7 @@ public class VurderInngangsvilkaar extends StandardAbstraktAgent {
         fagsak.setType(nyFagsakType);
         fagsakService.lagre(fagsak);
         
-        prosessinstans.setSteg(ProsessSteg.OPPRETT_OPPGAVE);
+        prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_OPPGAVE);
         log.debug("Ferdig med behandling av {}", prosessinstans.getId());
     }
     

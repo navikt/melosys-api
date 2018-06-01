@@ -161,7 +161,7 @@ public class RegelmodulService {
      * @throws ProcessingException Hvis request- eller reply-prosessering feiler, eller hvis IO-feil ved kommunikasjon med regelmodulen
      * @throws WebApplicationException Hvis regelmodulen returnerer noe annet enn HTTP 2xx
      */
-    public VurderInngangsvilkaarReply vurderInngangsvilkår(Land brukersStatsborgerskap, List<Land> oppholdsland, Periode oppholdsPeriode) {
+    public VurderInngangsvilkaarReply vurderInngangsvilkår(Land brukersStatsborgerskap, List<String> oppholdsland, Periode oppholdsPeriode) {
         Assert.notNull(brukersStatsborgerskap, "Tjenesten krever at brukersStatsborgerskap ikke er null");
         Assert.notEmpty(oppholdsland, "Tjenesten krever at oppholdsland ikke er null eller tom");
         Assert.notNull(oppholdsPeriode, "Tjenesten krever at oppholdsPeriode ikke er null");

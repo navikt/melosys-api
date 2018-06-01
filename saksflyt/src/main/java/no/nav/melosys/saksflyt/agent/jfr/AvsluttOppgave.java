@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl.agent;
+package no.nav.melosys.saksflyt.agent.jfr;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,16 +11,17 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
 
 import static no.nav.melosys.domain.ProsessDataKey.OPPGAVE_ID;
+import static no.nav.melosys.domain.ProsessSteg.JFR_AKTOER_ID;
 import static no.nav.melosys.domain.ProsessSteg.JFR_AVSLUTT_OPPGAVE;
-import static no.nav.melosys.domain.ProsessSteg.VURDER_INNGANGSVILKÅR;
 
 /**
  * Avslutter en oppgave i GSAK.
  *
  * Transisjoner:
- * JFR_AVSLUTT_OPPGAVE -> VURDER_INNGANGSVILKÅR eller FEILET_MASKINELT hvis feil
+ * JFR_AVSLUTT_OPPGAVE -> JFR_AKTOER_ID eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class AvsluttOppgave extends StandardAbstraktAgent {
@@ -50,6 +51,6 @@ public class AvsluttOppgave extends StandardAbstraktAgent {
             håndterFeil(prosessinstans, false);
         }
 
-        prosessinstans.setSteg(VURDER_INNGANGSVILKÅR);
+        prosessinstans.setSteg(JFR_AKTOER_ID);
     }
 }

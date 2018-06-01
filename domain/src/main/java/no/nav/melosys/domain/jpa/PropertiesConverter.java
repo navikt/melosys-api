@@ -14,8 +14,12 @@ public class PropertiesConverter implements AttributeConverter<Properties, Strin
             return null;
         }
         StringWriter writer = new StringWriter(512);
-        // FIXME (farjam): Her tror jeg vi må sjekke alle values og escape bl.a. '\n' og '\r'
-        properties.forEach((k, v) -> {writer.append((String) k).append('=').append((String) v).append('\n');});
+        try {
+            properties.store(writer, null);
+        } catch (IOException e) {
+            // Dette skal ikke skje, siden StringWriter
+            throw new RuntimeException(e);
+        }
         return writer.toString();
     }
 
@@ -26,6 +30,7 @@ public class PropertiesConverter implements AttributeConverter<Properties, Strin
             try {
                 properties.load(new StringReader(dbData));
             } catch (IOException e) {
+                // Dette skal ikke skje, siden StringReader
                 throw new IllegalArgumentException("Kan ikke lese properties til string: " + properties, e);
             }
         }

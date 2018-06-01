@@ -184,5 +184,4 @@ public class Prosessinstans {
         return this.id == that.id;
     }
 
-
 }

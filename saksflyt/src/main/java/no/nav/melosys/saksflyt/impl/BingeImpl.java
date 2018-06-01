@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl.binge;
+package no.nav.melosys.saksflyt.impl;
 
 import java.util.Collection;
 import java.util.Comparator;

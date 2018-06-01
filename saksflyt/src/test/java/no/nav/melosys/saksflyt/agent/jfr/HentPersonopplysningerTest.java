@@ -1,13 +1,13 @@
-package no.nav.melosys.saksflyt.impl.agent;
+package no.nav.melosys.saksflyt.agent.jfr;
 
-import java.util.Properties;
+import java.util.HashSet;
 
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.agent.jfr.HentPersonopplysninger;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class HentAktoerIdTest {
+public class HentPersonopplysningerTest {
 
     @Mock
     private Binge binge;
@@ -33,25 +33,26 @@ public class HentAktoerIdTest {
     @Mock
     private TpsFasade tpsFasade;
 
-    private HentAktoerId agent;
+    private HentPersonopplysninger agent;
 
     @Before
     public void setUp() {
-        agent = new HentAktoerId(binge, repo, tpsFasade);
+        agent = new HentPersonopplysninger(binge, repo, tpsFasade);
     }
 
     @Test
-    public void utfoerSteg() throws IkkeFunnetException {
+    public void utfoerSteg() throws IkkeFunnetException, SikkerhetsbegrensningException {
         Prosessinstans p = new Prosessinstans();
-        Properties properties = new Properties();
+        p.setBehandling(new Behandling());
+        p.getBehandling().setSaksopplysninger(new HashSet<>());
+
         String brukerID = "99999999991";
-        properties.setProperty(ProsessDataKey.BRUKER_ID.getKode(), brukerID);
-        p.addData(properties);
-        when(tpsFasade.hentAktørIdForIdent(any())).thenReturn("FJERNET93");
+        p.setData(ProsessDataKey.BRUKER_ID, brukerID);
+        when(tpsFasade.hentPerson(any())).thenReturn(new Saksopplysning());
 
         agent.utførSteg(p);
 
-        verify(tpsFasade, times(1)).hentAktørIdForIdent(brukerID);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SAK);
+        verify(tpsFasade, times(1)).hentPerson(brukerID);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_VURDER_INNGANGSVILKÅR);
     }
 }

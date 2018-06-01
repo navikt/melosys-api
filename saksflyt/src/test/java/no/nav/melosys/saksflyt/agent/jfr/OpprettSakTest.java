@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl.agent;
+package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.Collections;
 import java.util.Properties;
@@ -6,6 +6,7 @@ import java.util.Properties;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.agent.jfr.OpprettSak;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.FagsakService;
 import org.junit.Before;

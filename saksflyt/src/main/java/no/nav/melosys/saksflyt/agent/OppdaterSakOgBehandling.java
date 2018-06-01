@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl.agent;
+package no.nav.melosys.saksflyt.agent;
 
 public class OppdaterSakOgBehandling {
     //FIXME
