@@ -1,13 +1,9 @@
 package no.nav.melosys.saksflyt.impl.agent;
 
+import java.util.Collections;
 import java.util.Properties;
 
-import no.nav.melosys.domain.BehandlingType;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
@@ -54,6 +50,7 @@ public class OpprettSakTest {
         p.addData(properties);
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
+        fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
         when(fagsakService.nyFagsakOgBehandling(anyString(), eq(BehandlingType.SØKNAD), eq(false))).thenReturn(fagsak);
 
         agent.utførSteg(p);
