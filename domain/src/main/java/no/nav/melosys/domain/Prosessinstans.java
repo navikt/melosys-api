@@ -50,6 +50,8 @@ public class Prosessinstans {
 
     @OneToMany(mappedBy = "prosessinstans", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProsessinstansHendelse> hendelser;
+    
+    private static ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     public long getId() {
         return id;
@@ -90,7 +92,7 @@ public class Prosessinstans {
             return null;
         }
         try {
-            return new ObjectMapper().registerModule(new JavaTimeModule()).readValue(dataString, type);
+            return dataMapper.readValue(dataString, type);
         } catch (IOException e) {
             throw new TekniskException("Feil ved deserialiserigng", e);
         }
@@ -106,7 +108,7 @@ public class Prosessinstans {
      */
     public void setData(ProsessDataKey key, Object value) throws TekniskException {
         try {
-            String dataString = new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(value);
+            String dataString = dataMapper.writeValueAsString(value);
             setData(key, dataString);
         } catch (JsonProcessingException e) {
             throw new TekniskException("Feil ved serialiserigng", e);

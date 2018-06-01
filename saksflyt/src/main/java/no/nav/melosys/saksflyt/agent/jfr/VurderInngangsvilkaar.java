@@ -2,10 +2,6 @@ package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -18,6 +14,10 @@ import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.RegelmodulService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Kaller regelmodulen for å vurdere inngangsvilkår. Setter type på fagsak basert på resultatet.
@@ -25,6 +25,7 @@ import no.nav.melosys.service.RegelmodulService;
  * Transisjoner:
  * JFR_VURDER_INNGANGSVILKÅR → JFR_OPPRETT_OPPGAVE (eller til FEILET_MASKINELT hvis feil)
  */
+@Component
 public class VurderInngangsvilkaar extends StandardAbstraktAgent {
     
     private static final Logger log = LoggerFactory.getLogger(VurderInngangsvilkaar.class);

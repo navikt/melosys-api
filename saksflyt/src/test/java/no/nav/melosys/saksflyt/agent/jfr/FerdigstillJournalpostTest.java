@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.agent.jfr.FerdigstillJournalpost;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +49,6 @@ public class FerdigstillJournalpostTest {
         agent.utførSteg(p);
 
         verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AVSLUTT_OPPGAVE);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_PERS_OPPL);
     }
 }
