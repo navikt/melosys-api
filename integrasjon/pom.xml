@@ -66,6 +66,13 @@
             <classifier>jaxws</classifier>
         </dependency>
 
+        <!-- Behandlingstatus -->
+        <dependency>
+            <groupId>no.nav.meldinger.virksomhet</groupId>
+            <artifactId>nav-virksomhet-hendelsehandterer-behandlingstatus-v1-meldingsdefinisjon</artifactId>
+            <classifier>jaxb</classifier>
+        </dependency>
+
         <!-- DokSys -->
         <dependency>
             <groupId>no.nav.tjenester</groupId>
