@@ -17,11 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class JournalforingService {
 
-    Binge binge;
+    private Binge binge;
 
-    JoarkFasade joarkFasade;
+    private JoarkFasade joarkFasade;
 
-    ProsessinstansRepository prosessinstansRepo;
+    private ProsessinstansRepository prosessinstansRepo;
 
     @Autowired
     public JournalforingService(Binge binge, JoarkFasade joarkFasade, ProsessinstansRepository prosessinstansRepo) {

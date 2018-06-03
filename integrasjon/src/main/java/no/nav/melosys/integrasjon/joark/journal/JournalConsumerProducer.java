@@ -18,7 +18,7 @@ public class JournalConsumerProducer {
 
     @Bean
     public JournalConsumer journalConsumer() {
-        JournalV3 port = wrapWithSts(consumerConfig.getPort(), NAVSTSClient.StsClientType.SYSTEM_SAML);
+        JournalV3 port = wrapWithSts(consumerConfig.getPort(), NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML);
         return new JournalConsumerImpl(port);
     }
 
