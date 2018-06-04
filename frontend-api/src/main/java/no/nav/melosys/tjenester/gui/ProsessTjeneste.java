@@ -86,7 +86,7 @@ public class ProsessTjeneste extends RestTjeneste {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         //prosessinstans.setSteg(ProsessSteg.JFR_AKTOER_ID);
-        prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_SAK);
+        prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_SAK_OG_BEH);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, "FJERNET93");
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setSistEndret(nå);

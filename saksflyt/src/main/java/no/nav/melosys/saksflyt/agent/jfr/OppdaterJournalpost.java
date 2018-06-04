@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl.agent;
+package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.List;
 
@@ -8,6 +8,7 @@ import no.nav.melosys.domain.joark.JournalfoeringMangel;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

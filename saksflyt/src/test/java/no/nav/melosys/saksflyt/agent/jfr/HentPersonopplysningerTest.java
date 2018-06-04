@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl.agent;
+package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.HashSet;
 
@@ -16,9 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HentPersonopplysningerTest {
@@ -52,6 +50,6 @@ public class HentPersonopplysningerTest {
         agent.utførSteg(p);
 
         verify(tpsFasade, times(1)).hentPerson(brukerID);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.A1_HENT_ARBF_OPPL);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_VURDER_INNGANGSVILKÅR);
     }
 }

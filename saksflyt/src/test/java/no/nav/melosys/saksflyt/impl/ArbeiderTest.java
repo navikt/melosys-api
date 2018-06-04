@@ -1,9 +1,11 @@
-package no.nav.melosys.saksflyt.impl.binge;
+package no.nav.melosys.saksflyt.impl;
 
 import java.util.Arrays;
 
 import no.nav.melosys.saksflyt.SaksflytTestApplication;
-import no.nav.melosys.saksflyt.impl.agent.HentPersonopplysninger;
+import no.nav.melosys.saksflyt.agent.jfr.HentPersonopplysninger;
+import no.nav.melosys.saksflyt.impl.Arbeider;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;

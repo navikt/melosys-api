@@ -27,7 +27,7 @@ public class ProsessinstansMeldingsfordeler {
         Prosessinstans prosessinstans = new Prosessinstans();
 
         prosessinstans.setType(ProsessType.MOTTAK);
-        prosessinstans.setSteg(ProsessSteg.VURDER_AUTOMATISK_JFR);
+        prosessinstans.setSteg(ProsessSteg.MOT_VURDER_AUTOMATISK_JFR);
         prosessinstans.setRegistrertDato(LocalDateTime.now());
 
         prosessinstans.setData(ProsessDataKey.ARKIVSYSTEM, forsendelsesinfo.arkivsystem);

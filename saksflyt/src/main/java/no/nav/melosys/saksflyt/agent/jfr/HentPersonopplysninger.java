@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl.agent;
+package no.nav.melosys.saksflyt.agent.jfr;
 
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
@@ -7,6 +7,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,15 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
-import static no.nav.melosys.domain.ProsessSteg.A1_HENT_ARBF_OPPL;
-import static no.nav.melosys.domain.ProsessSteg.A1_HENT_PERS_OPPL;
+import static no.nav.melosys.domain.ProsessSteg.JFR_HENT_PERS_OPPL;
+import static no.nav.melosys.domain.ProsessSteg.JFR_VURDER_INNGANGSVILKÅR;
 
 /**
  * Steget sørger for å hente personinfo fra TPS
  * 
  * Transisjoner: 
- * A1_HENT_PERS_OPPL → A1_HENT_ARBF_OPPL hvis alt ok
- * A1_HENT_PERS_OPPL → FEILET_MASKINELT hvis personen ikke finnes i TPS
+ * JFR_HENT_PERS_OPPL → JFR_VURDER_INNGANGSVILKÅR hvis alt ok
+ * JFR_HENT_PERS_OPPL → FEILET_MASKINELT hvis personen ikke finnes i TPS
  */
 @Component
 public class HentPersonopplysninger extends StandardAbstraktAgent {
@@ -39,7 +40,7 @@ public class HentPersonopplysninger extends StandardAbstraktAgent {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return A1_HENT_PERS_OPPL;
+        return JFR_HENT_PERS_OPPL;
     }
 
     @Override
@@ -55,6 +56,6 @@ public class HentPersonopplysninger extends StandardAbstraktAgent {
             return;
         }
 
-        prosessinstans.setSteg(A1_HENT_ARBF_OPPL);
+        prosessinstans.setSteg(JFR_VURDER_INNGANGSVILKÅR);
     }
 }

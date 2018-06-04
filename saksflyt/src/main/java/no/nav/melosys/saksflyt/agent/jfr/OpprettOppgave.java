@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.impl.agent;
+package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.time.LocalDate;
 
@@ -15,23 +15,24 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.FERDIG;
-import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
-import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
 import static no.nav.melosys.domain.ProsessDataKey.GSAK_SAK_ID;
+import static no.nav.melosys.domain.ProsessSteg.FERDIG;
+import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_OPPGAVE;
+import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 /**
  * Oppretter en oppgave i GSAK.
  *
  * Transisjoner:
- * OPPRETT_OPPGAVE -> FERDIG eller FEILET_MASKINELT hvis feil
+ * JFR_OPPRETT_OPPGAVE -> FERDIG eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class OpprettOppgave extends StandardAbstraktAgent {
@@ -48,7 +49,7 @@ public class OpprettOppgave extends StandardAbstraktAgent {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return OPPRETT_OPPGAVE;
+        return JFR_OPPRETT_OPPGAVE;
     }
 
     @Override

@@ -1,25 +1,26 @@
-package no.nav.melosys.saksflyt.impl.agent;
+package no.nav.melosys.saksflyt.agent.jfr;
 
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.JFR_AKTOER_ID;
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
+import static no.nav.melosys.domain.ProsessSteg.JFR_AKTOER_ID;
 
 /**
  * Henter en aktørID
  *
  * Transisjoner:
- * JFR_AKTOER_ID -> JFR_OPPRETT_SAK eller FEILET_MASKINELT hvis feil
+ * JFR_AKTOER_ID -> JFR_OPPRETT_SAK_OG_BEH eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class HentAktoerId extends StandardAbstraktAgent {
@@ -52,6 +53,6 @@ public class HentAktoerId extends StandardAbstraktAgent {
         }
 
         prosessinstans.setData(AKTØR_ID, aktørId);
-        prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_SAK);
+        prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_SAK_OG_BEH);
     }
 }
