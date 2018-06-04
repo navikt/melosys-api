@@ -8,6 +8,7 @@ public class JournalforingDto {
     private String brukerID;
     private String avsenderID;
     private String avsenderNavn;
+    private String dokumentID;
     private String dokumenttittel;
     private List<String> vedleggstitler;
     private String saksnummer; // Melosys saksnummer
@@ -51,6 +52,14 @@ public class JournalforingDto {
 
     public void setAvsenderNavn(String avsenderNavn) {
         this.avsenderNavn = avsenderNavn;
+    }
+
+    public String getDokumentID() {
+        return dokumentID;
+    }
+
+    public void setDokumentID(String dokumentID) {
+        this.dokumentID = dokumentID;
     }
 
     public String getDokumenttittel() {

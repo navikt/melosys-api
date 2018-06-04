@@ -47,7 +47,7 @@ public class OppdaterJournalpostTest {
         agent.utførSteg(p);
 
         verify(joarkFasade, times(1)).utledJournalfoeringsbehov(any());
-        verify(joarkFasade, times(1)).oppdaterJounalpost(any(), any(), any(), any(), any(), any(), eq(false));
+        verify(joarkFasade, times(1)).oppdaterJounalpost(any(), any(), any(), any(), any(), any(), any(), eq(false));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST);
     }
 
@@ -61,7 +61,7 @@ public class OppdaterJournalpostTest {
         agent.utførSteg(p);
 
         verify(joarkFasade, times(1)).utledJournalfoeringsbehov(any());
-        verify(joarkFasade, times(1)).oppdaterJounalpost(any(), any(), any(), any(), any(), any(), eq(true));
+        verify(joarkFasade, times(1)).oppdaterJounalpost(any(), any(), any(), any(), any(), any(), any(), eq(true));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST);
     }
 }

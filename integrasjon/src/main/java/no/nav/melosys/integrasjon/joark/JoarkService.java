@@ -152,7 +152,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void oppdaterJounalpost(String journalpostId, String gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, boolean medDokumentkategori)
+    public void oppdaterJounalpost(String journalpostId, String dokumentID, String gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, boolean medDokumentkategori)
         throws SikkerhetsbegrensningException {
         OppdaterJournalpostRequest request = new OppdaterJournalpostRequest();
         no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.InngaaendeJournalpost journalpost =
@@ -180,6 +180,7 @@ public class JoarkService implements JoarkFasade {
             dokumentkategori.setValue(DokumentKategoriKode.IS.getKode());
             dokumentinfo.setDokumentkategori(dokumentkategori);
         }
+        dokumentinfo.setDokumentId(dokumentID);
         dokumentinfo.setTittel(tittel);
         journalpost.setHoveddokument(dokumentinfo);
         journalpost.setInnhold(tittel); // Innhold bruker titlen siden det ikke finnes andre grunnlag for det.

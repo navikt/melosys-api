@@ -37,6 +37,7 @@ public class JournalforingServiceTest {
         this.journalforingService = new JournalforingService(binge, joarkFasade, prosessinstansRepo);
         JournalforingDto dto = new JournalforingDto();
         dto.setJournalpostID("setJournalpostID");
+        dto.setDokumentID("setDokumentID");
         dto.setOppgaveID("setOppgaveID");
         dto.setAvsenderNavn("setAvsenderNavn");
         dto.setAvsenderID("setAvsenderID");

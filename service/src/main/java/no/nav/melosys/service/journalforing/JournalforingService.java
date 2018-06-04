@@ -57,6 +57,7 @@ public class JournalforingService {
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         prosessinstans.setSteg(ProsessSteg.JFR_AKTOER_ID);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalforingDto.getJournalpostID());
+        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalforingDto.getDokumentID());
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalforingDto.getOppgaveID());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalforingDto.getBrukerID());
         prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalforingDto.getAvsenderID());
@@ -85,6 +86,7 @@ public class JournalforingService {
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalforingDto.getJournalpostID());
+        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalforingDto.getDokumentID());
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalforingDto.getOppgaveID());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalforingDto.getBrukerID());
         prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalforingDto.getAvsenderID());
