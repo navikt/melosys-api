@@ -100,7 +100,7 @@ public class Oppgaveplukker {
 
     private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {
         // Oppgaver med høy prioritet velges først.
-        Optional<Oppgave> prioritert = oppgaver.stream().filter(oppgave -> oppgave.harHøyPrioritet()).findFirst();
+        Optional<Oppgave> prioritert = oppgaver.stream().filter(Oppgave::harHøyPrioritet).findFirst();
 
         Optional<Oppgave> valg;
         if (prioritert.isPresent()) {

@@ -107,9 +107,9 @@ public class GsakMock implements OppgaveMockRepository {
     @Override
     public List<Oppgave> find(Oppgavetype oppgavetype, List<String> sakstyper, List<String> behandlingstyper) {
         if (Oppgavetype.BEH_SAK.equals(oppgavetype)) {
-            return oppgaver.values().stream().filter(o -> o.erBehandling()).sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
+            return oppgaver.values().stream().filter(Oppgave::erBehandling).sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
         } else if (Oppgavetype.JFR.equals(oppgavetype)) {
-            return oppgaver.values().stream().filter(o -> o.erJournalFøring()).sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
+            return oppgaver.values().stream().filter(Oppgave::erJournalFøring).sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
         } else {
             throw new IllegalArgumentException(oppgavetype.toString());
         }

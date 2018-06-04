@@ -96,15 +96,10 @@ public class InntektService implements InntektFasade {
         HentInntektListeResponse response = null;
         try {
             response = inntektConsumer.hentInntektListe(request);
-        } catch (HentInntektListeSikkerhetsbegrensning hentInntektListeSikkerhetsbegrensning) {
-            throw new SikkerhetsbegrensningException(hentInntektListeSikkerhetsbegrensning);
-        } catch (HentInntektListeUgyldigInput hentInntektListeUgyldigInput) {
-            throw new IntegrasjonException(hentInntektListeUgyldigInput);
-        } catch (HentInntektListeHarIkkeTilgangTilOensketAInntektsfilter hentInntektListeHarIkkeTilgangTilOensketAInntektsfilter) {
-            throw new SikkerhetsbegrensningException(hentInntektListeHarIkkeTilgangTilOensketAInntektsfilter);
-        } catch (SOAPFaultException soapFaultException) {
-            // Det er ingen integrasjon mot SKATT i testmiljø, så det er forventet at oppslag på reelle brukere feiler
-            throw new IntegrasjonException(soapFaultException);
+        } catch (HentInntektListeSikkerhetsbegrensning | HentInntektListeHarIkkeTilgangTilOensketAInntektsfilter e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (HentInntektListeUgyldigInput | SOAPFaultException e) {
+            throw new IntegrasjonException(e);
         }
 
         // Response -> xml

@@ -47,8 +47,7 @@ public class KodeverkRegisterImpl implements KodeverkRegister {
                     }
                     koder.put(k.getNavn(), termer);
                 }
-                Kodeverk kodeverk = new Kodeverk(res.getKodeverk().getNavn(), koder);
-                return kodeverk;
+                return new Kodeverk(res.getKodeverk().getNavn(), koder);
             } else {
                 throw new RuntimeException("Støtter ikke kodeverk av type " + res.getKodeverk().getClass().getName());
             }

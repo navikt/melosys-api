@@ -47,11 +47,11 @@ public class BehandlingTjeneste extends RestTjeneste {
         this.modelMapper = new ModelMapper();
 
         TypeMap<Behandling, BehandlingDto> typeMapBehandlingUt = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
-        typeMapBehandlingUt.<Long>addMapping(src -> src.getId(), (dest, id) -> dest.getOppsummering().setBehandlingID(id));
-        typeMapBehandlingUt.<BehandlingStatus>addMapping(src -> src.getStatus(), (dest, status) -> dest.getOppsummering().setStatus(status));
-        typeMapBehandlingUt.<BehandlingType>addMapping(src -> src.getType(), (dest, type) -> dest.getOppsummering().setType(type));
-        typeMapBehandlingUt.<LocalDateTime>addMapping(src -> src.getRegistrertDato(), (dest, dato) -> dest.getOppsummering().setRegistrertDato(dato));
-        typeMapBehandlingUt.<LocalDateTime>addMapping(src -> src.getEndretDato(), (dest, dato) -> dest.getOppsummering().setEndretDato(dato));
+        typeMapBehandlingUt.<Long>addMapping(Behandling::getId, (dest, id) -> dest.getOppsummering().setBehandlingID(id));
+        typeMapBehandlingUt.<BehandlingStatus>addMapping(Behandling::getStatus, (dest, status) -> dest.getOppsummering().setStatus(status));
+        typeMapBehandlingUt.<BehandlingType>addMapping(Behandling::getType, (dest, type) -> dest.getOppsummering().setType(type));
+        typeMapBehandlingUt.<LocalDateTime>addMapping(Behandling::getRegistrertDato, (dest, dato) -> dest.getOppsummering().setRegistrertDato(dato));
+        typeMapBehandlingUt.<LocalDateTime>addMapping(Behandling::getEndretDato, (dest, dato) -> dest.getOppsummering().setEndretDato(dato));
         typeMapBehandlingUt.addMappings(mapper -> mapper.using(new SaksopplysningerTilDtoConverter()).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
     }
 

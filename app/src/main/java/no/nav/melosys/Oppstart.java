@@ -23,7 +23,7 @@ public interface Oppstart {
         list.add("ldap.password");
         list.add("ldap.user.basedn");
 
-        list.forEach(key -> loadProperty(key));
+        list.forEach(this::loadProperty);
     }
 
     void loadProperty(String key);

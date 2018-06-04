@@ -12,7 +12,7 @@ public abstract class Utils {
      * Kvalifiserer kun prosessinstanser som har en gitt steg
      */
     public static Predicate<Prosessinstans> medSteg(ProsessSteg steg) {
-        return (pi) -> {return pi.getSteg() == steg;};
+        return (pi) -> pi.getSteg() == steg;
     }
 
     /**

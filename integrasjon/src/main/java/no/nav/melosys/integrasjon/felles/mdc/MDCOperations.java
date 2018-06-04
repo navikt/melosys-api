@@ -37,8 +37,7 @@ public final class MDCOperations {
     }
 
     public static String getFromMDC(String key) {
-        String value = MDC.get(key);
-        return value;
+        return MDC.get(key);
     }
 
     public static void putToMDC(String key, String value) {
@@ -50,8 +49,7 @@ public final class MDCOperations {
     }
 
     private static int getRandomNumber() {
-        int value = RANDOM.nextInt(Integer.MAX_VALUE);
-        return value;
+        return RANDOM.nextInt(Integer.MAX_VALUE);
     }
 
     private static long getSystemTime() {

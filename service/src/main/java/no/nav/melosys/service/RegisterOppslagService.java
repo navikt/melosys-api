@@ -28,8 +28,7 @@ public class RegisterOppslagService {
      */
     public OrganisasjonDokument hentOrganisasjon(String orgnummer) throws IkkeFunnetException, SikkerhetsbegrensningException {
         Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(orgnummer);
-        OrganisasjonDokument organisasjon = (OrganisasjonDokument) saksopplysning.getDokument();
-        return organisasjon;
+        return (OrganisasjonDokument) saksopplysning.getDokument();
     }
 
     /**
@@ -37,7 +36,6 @@ public class RegisterOppslagService {
      */
     public PersonDokument hentPerson(String personnummer) throws IkkeFunnetException, SikkerhetsbegrensningException {
         Saksopplysning saksopplysning = tpsFasade.hentPerson(personnummer);
-        PersonDokument personDokument = (PersonDokument) saksopplysning.getDokument();
-        return personDokument;
+        return (PersonDokument) saksopplysning.getDokument();
     }
 }

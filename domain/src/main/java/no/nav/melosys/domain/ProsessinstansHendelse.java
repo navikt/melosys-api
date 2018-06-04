@@ -17,7 +17,7 @@ public class ProsessinstansHendelse {
     @JoinColumn(name = "prosessinstans_id", nullable = false, updatable = false)
     private Prosessinstans prosessinstans;
 
-    @Column(name = "dato", nullable = false, updatable = false)
+    @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime dato;
 
     @Column(name = "steg", nullable = false, updatable = false)

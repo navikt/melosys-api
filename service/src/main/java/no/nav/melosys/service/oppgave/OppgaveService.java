@@ -51,7 +51,7 @@ public class OppgaveService {
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) {
-        return oppgaverFraDomain.stream().map(oppgave -> tilOppgaveDto(oppgave)).collect(Collectors.toList());
+        return oppgaverFraDomain.stream().map(this::tilOppgaveDto).collect(Collectors.toList());
     }
 
     private OppgaveDto tilOppgaveDto(Oppgave oppgave) {

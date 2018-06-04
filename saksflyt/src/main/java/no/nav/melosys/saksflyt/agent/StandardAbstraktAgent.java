@@ -22,10 +22,11 @@ public abstract class StandardAbstraktAgent implements Agent {
         this.prosessinstansRepo = prosessinstansRepo;
     }
 
-    @Override
-    /***
+
+    /**
      * Metoden tar seg også av lagring i db og bingen.
      */
+    @Override
     public void finnProsessinstansOgUtførSteg() {
         Optional<Prosessinstans> opt = hentInstansMedSteg(inngangsSteg());
         if (opt.isPresent()) {

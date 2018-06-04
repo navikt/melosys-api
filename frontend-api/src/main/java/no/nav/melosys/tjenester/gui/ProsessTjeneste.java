@@ -66,7 +66,7 @@ public class ProsessTjeneste extends RestTjeneste {
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         prosessinstans.setSteg(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
         Properties properties = new Properties();
-        prosessinstans.setData(JOURNALPOST_ID, "journal_ID");
+        prosessinstans.setData(JOURNALPOST_ID, "415782364");
         prosessinstans.setData(GSAK_SAK_ID, "gsak_ID");
         prosessinstans.setData(BRUKER_ID, "FJERNET93");
         prosessinstans.setData(AVSENDER_ID, "Avsender");

@@ -41,8 +41,7 @@ public class SoeknadUtilTest {
 
         Periode periode_1 = new Periode(LocalDate.MIN, LocalDate.MAX);
         soeknad.arbeidUtland.arbeidsperiode = periode_1;
-        Periode periode_2 = new Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX);
-        soeknad.oppholdUtland.oppholdsPeriode = periode_2;
+        soeknad.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX);
 
         Periode res = SoeknadUtil.hentPeriode(soeknad);
         assertThat(res).isEqualTo(periode_1);
