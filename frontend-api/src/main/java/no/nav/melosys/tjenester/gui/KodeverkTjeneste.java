@@ -6,14 +6,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.domain.BehandlingStatus;
-import no.nav.melosys.domain.BehandlingType;
-import no.nav.melosys.domain.DokumentTittel;
-import no.nav.melosys.domain.FagsakType;
-import no.nav.melosys.domain.Kodeverk;
-import no.nav.melosys.domain.Landkoder;
-import no.nav.melosys.domain.Oppgavetype;
-import no.nav.melosys.domain.VedleggTittel;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
@@ -41,6 +34,7 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.setBehandlingsstatus(tilKoder(BehandlingStatus.values()));
         kodeverk.setBehandlingstyper(tilKoder(BehandlingType.values()));
         kodeverk.setDokumenttitler(tilKoder(DokumentTittel.values()));
+        kodeverk.setDokumenttyper(tilKoder(DokumentType.values()));
         kodeverk.setLandkoder(tilKoder(Landkoder.values()));
         kodeverk.setOppgavetyper(tilKoder(Oppgavetype.values()));
         kodeverk.setSakstyper(tilKoder(FagsakType.values()));
