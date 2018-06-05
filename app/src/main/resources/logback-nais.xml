@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<included>
+
     <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <fieldNames><version>[ignore]</version></fieldNames>
@@ -21,4 +22,4 @@
     <logger name="org.apache.cxf.services" level="WARN" additivity="false"/>
     <logger name="org.springframework.oxm.jaxb.Jaxb2Marshaller" level="WARN" additivity="false"/>
 
-</configuration>
+</included>
