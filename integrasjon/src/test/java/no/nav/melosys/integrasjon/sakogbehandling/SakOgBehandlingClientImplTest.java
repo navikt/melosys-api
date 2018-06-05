@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.sakogbehandling;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.jms.Queue;
 import javax.jms.TextMessage;

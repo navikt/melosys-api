@@ -27,16 +27,16 @@ public class DokumentmottakConsumerConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DokumentmottakConsumerConfig.class);
 
-    @Value("${mqGateway.hostName}")
+    @Value("${mqGateway02.hostName}")
     private String hostName;
 
-    @Value("${mqGateway.port}")
+    @Value("${mqGateway02.port}")
     private int port;
 
-    @Value("${mqGateway.channel}")
+    @Value("${mqGateway02.channel}")
     private String channel;
 
-    @Value("${mqGateway.useSsl}")
+    @Value("${mqGateway02.useSsl}")
     private boolean useSsl;
 
     @Value("${DokMot.queueManager}")
