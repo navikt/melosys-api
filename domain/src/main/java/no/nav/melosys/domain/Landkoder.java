@@ -9,6 +9,7 @@ public enum Landkoder implements KodeverkTabell<Landkoder> {
 
     BE("BE", "Belgia"),
     BG("BG", "Bulgaria"),
+    CZ("CZ", "Tsjekkia"),
     DK("DK", "Danmark"),
     EE("EE", "Estland"),
     FI("FI", "Finland"),
