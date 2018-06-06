@@ -42,7 +42,7 @@ fasitResources:
     resourceType: webserviceendpoint
   - alias: Journal_v3
     resourceType: webserviceendpoint
-  - alias: mqgateway
+  - alias: mqgateway02
     resourceType: queuemanager
   - alias: sbeh_saksbehandling
     resourceType: queue

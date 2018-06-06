@@ -1,8 +1,8 @@
 package no.nav.melosys.integrasjon.sakogbehandling;
 
+import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Queue;
-import javax.naming.*;
 
 import com.ibm.mq.jms.MQQueue;
 import com.ibm.mq.jms.MQQueueConnectionFactory;
@@ -13,24 +13,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.jms.core.JmsMessagingTemplate;
+import org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapter;
 import org.springframework.jms.core.JmsTemplate;
 
-@Profile("!mocking") //FIXME MELOSYS-1034
 @Configuration
 public class SakOgBehandlingClientConfig {
 
     private static final Logger log = LoggerFactory.getLogger(SakOgBehandlingClientConfig.class);
 
-    @Value("${mqGateway.hostName}")
+    @Value("${mqGateway02.hostName}")
     private String hostName;
 
-    @Value("${mqGateway.port}")
+    @Value("${mqGateway02.port}")
     private int port;
 
-    @Value("${mqGateway.name}")
+    @Value("${mqGateway02.name}")
     private String queueManager;
+
+    @Value("${mqGateway02.channel}")
+    private String channel;
 
     @Value("${SBEH.queueManager}")
     private String queueName;
@@ -47,9 +48,9 @@ public class SakOgBehandlingClientConfig {
 
     @Bean
     public JmsTemplate jmsTemplate() throws JMSException {
-        JmsMessagingTemplate template = new JmsMessagingTemplate();
+        JmsTemplate template = new JmsTemplate();
         template.setConnectionFactory(mqQueueConnectionFactory());
-        return template.getJmsTemplate();
+        return template;
     }
 
     @Bean
@@ -58,14 +59,20 @@ public class SakOgBehandlingClientConfig {
     }
 
     @Bean
-    public MQQueueConnectionFactory mqQueueConnectionFactory() throws JMSException {
-        final MQQueueConnectionFactory factory = new MQQueueConnectionFactory();
+    public ConnectionFactory mqQueueConnectionFactory() throws JMSException {
+        MQQueueConnectionFactory connectionFactory = new MQQueueConnectionFactory();
 
-        factory.setHostName(hostName);
-        factory.setPort(port);
-        factory.setQueueManager(queueManager);
-        factory.setTransportType(JMSC.MQJMS_TP_CLIENT_MQ_TCPIP);
+        connectionFactory.setHostName(hostName);
+        connectionFactory.setPort(port);
+        connectionFactory.setQueueManager(queueManager);
+        connectionFactory.setChannel(channel);
+        connectionFactory.setTransportType(JMSC.MQJMS_TP_CLIENT_MQ_TCPIP);
 
-        return factory;
+        UserCredentialsConnectionFactoryAdapter credentialQueueConnectionFactory = new UserCredentialsConnectionFactoryAdapter();
+        credentialQueueConnectionFactory.setUsername("srvappserver");
+        credentialQueueConnectionFactory.setPassword("");
+        credentialQueueConnectionFactory.setTargetConnectionFactory(connectionFactory);
+
+        return credentialQueueConnectionFactory;
     }
 }

@@ -16,11 +16,9 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessagePostProcessor;
 
-@Profile("!mocking") //FIXME MELOSYS-1034
 public class SakOgBehandlingClientImpl implements SakOgBehandlingClient {
 
     private static final Logger log = LoggerFactory.getLogger(SakOgBehandlingClientImpl.class);
