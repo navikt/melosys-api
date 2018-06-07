@@ -2,11 +2,9 @@ package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.Properties;
 
-import no.nav.melosys.domain.BehandlingType;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Before;
@@ -32,11 +30,14 @@ public class OpprettGsakSakTest {
     @Mock
     private GsakFasade gsakFasade;
 
+    @Mock
+    FagsakRepository fagsakRepository;
+
     private OpprettGsakSak agent;
 
     @Before
     public void setUp() {
-        agent = new OpprettGsakSak(binge, repo, gsakFasade);
+        agent = new OpprettGsakSak(binge, repo, fagsakRepository, gsakFasade);
     }
 
     @Test
@@ -49,6 +50,10 @@ public class OpprettGsakSakTest {
         properties.setProperty(ProsessDataKey.AKTØR_ID.getKode(), aktørID);
         p.addData(properties);
         when(gsakFasade.opprettSak(anyString(), eq(BehandlingType.SØKNAD), anyString())).thenReturn("GSAK-123");
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer("GSAK-123");
+        when(fagsakRepository.findBySaksnummer(any())).thenReturn(fagsak);
 
         agent.utførSteg(p);
 

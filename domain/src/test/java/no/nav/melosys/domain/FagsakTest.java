@@ -1,8 +1,10 @@
 package no.nav.melosys.domain;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
+import no.nav.melosys.exception.TekniskException;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,7 +53,7 @@ public class FagsakTest {
         assertThat(aktivBehandling).isNull();
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = TekniskException.class)
     public void getAktivBehandling_feilTilstand() {
         Fagsak fagsak = new Fagsak();
         Behandling b1 = new Behandling();
@@ -66,5 +68,55 @@ public class FagsakTest {
         fagsak.setBehandlinger(behandlinger);
 
         fagsak.getAktivBehandling();
+    }
+
+    @Test
+    public void getBruker() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(new HashSet<>());
+        Aktoer a1 = new Aktoer();
+        a1.setRolle(RolleType.BRUKER);
+        a1.setAktørId("123");
+        fagsak.getAktører().add(a1);
+        Aktoer a2 = new Aktoer();
+        a2.setRolle(RolleType.ARBEIDSGIVER);
+        a2.setAktørId("456");
+        fagsak.getAktører().add(a2);
+
+        Aktoer bruker = fagsak.getBruker();
+
+        assertThat(bruker).isEqualTo(a1);
+    }
+
+    @Test
+    public void getBruker_ingen() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(new HashSet<>());
+        Aktoer a2 = new Aktoer();
+        a2.setRolle(RolleType.ARBEIDSGIVER);
+        a2.setAktørId("456");
+        fagsak.getAktører().add(a2);
+
+        Aktoer bruker = fagsak.getBruker();
+
+        assertThat(bruker).isNull();
+    }
+
+    @Test(expected = TekniskException.class)
+    public void getBruker_flere() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(new HashSet<>());
+        Aktoer a1 = new Aktoer();
+        a1.setRolle(RolleType.BRUKER);
+        a1.setAktørId("123");
+        fagsak.getAktører().add(a1);
+        Aktoer a2 = new Aktoer();
+        a2.setRolle(RolleType.BRUKER);
+        a2.setAktørId("456");
+        fagsak.getAktører().add(a2);
+
+        Aktoer bruker = fagsak.getBruker();
+
+        assertThat(bruker).isEqualTo(a1);
     }
 }

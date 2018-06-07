@@ -35,11 +35,11 @@ public class DokSysService implements DokSysFasade {
     }
 
     @Override
-    public byte[] produserDokumentutkast(DokumentbestillingRequest request, Object brevdata) throws IntegrasjonException {
+    public byte[] produserDokumentutkast(DokumentbestillingMetadata metadata, Object brevdata) throws IntegrasjonException {
         ProduserDokumentutkastRequest wsRequest = new ProduserDokumentutkastRequest();
 
-        wsRequest.setUtledRegisterInfo(request.utledRegisterInfo);
-        wsRequest.setDokumenttypeId(request.dokumenttypeID);
+        wsRequest.setUtledRegisterInfo(metadata.utledRegisterInfo);
+        wsRequest.setDokumenttypeId(metadata.dokumenttypeID);
         wsRequest.setBrevdata(brevdata);
 
         try {
@@ -52,12 +52,12 @@ public class DokSysService implements DokSysFasade {
     }
 
     @Override
-    public DokumentbestillingResponse produserIkkeredigerbartDokument(DokumentbestillingRequest request, Object brevdata) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public DokumentbestillingResponse produserIkkeredigerbartDokument(DokumentbestillingMetadata metadata, Object brevdata) throws SikkerhetsbegrensningException, IntegrasjonException {
         ProduserIkkeredigerbartDokumentRequest wsRequest = new ProduserIkkeredigerbartDokumentRequest();
         Dokumentbestillingsinformasjon info = new Dokumentbestillingsinformasjon();
 
-        info.setDokumenttypeId(request.dokumenttypeID);
-        info.setUtledRegisterInfo(request.utledRegisterInfo);
+        info.setDokumenttypeId(metadata.dokumenttypeID);
+        info.setUtledRegisterInfo(metadata.utledRegisterInfo);
 
         Fagsystemer fagsystem = objectFactory.createFagsystemer();
         fagsystem.setKodeRef(MELOSYS.getKode());
@@ -66,18 +66,18 @@ public class DokSysService implements DokSysFasade {
         info.setSakstilhoerendeFagsystem(fagsystem);
 
         Person bruker = objectFactory.createPerson();
-        bruker.setIdent(request.bruker);
+        bruker.setIdent(metadata.bruker);
         info.setBruker(bruker);
 
         Person mottaker = objectFactory.createPerson();
-        mottaker.setIdent(request.mottaker);
+        mottaker.setIdent(metadata.mottaker);
         info.setMottaker(mottaker);
 
-        info.setJournalsakId(request.journalsakID);
+        info.setJournalsakId(metadata.journalsakID);
 
         Fagomraader fagområde = objectFactory.createFagomraader();
-        fagområde.setKodeRef(request.fagområde);
-        fagområde.setValue(request.fagområde);
+        fagområde.setKodeRef(metadata.fagområde);
+        fagområde.setValue(metadata.fagområde);
         info.setDokumenttilhoerendeFagomraade(fagområde);
 
         info.setJournalfoerendeEnhet(Integer.toString(MELOSYS_ENHET_ID));

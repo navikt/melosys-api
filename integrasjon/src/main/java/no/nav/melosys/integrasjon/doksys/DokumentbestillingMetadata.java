@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.doksys;
 
-public class DokumentbestillingRequest {
+public class DokumentbestillingMetadata {
 
     // DokumenttypeID identifiserer hvilket dokument som skal produseres.
     public String dokumenttypeID;
