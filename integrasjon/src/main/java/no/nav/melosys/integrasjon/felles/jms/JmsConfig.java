@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.felles;
+package no.nav.melosys.integrasjon.felles.jms;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -26,39 +26,43 @@ import org.springframework.jms.core.JmsTemplate;
 @Profile("!mocking") //FIXME MELOSYS-1284
 @Configuration
 @EnableJms
-public class QueueConfig {
+public class JmsConfig {
 
-    private static final Logger log = LoggerFactory.getLogger(QueueConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(JmsConfig.class);
 
-    @Value("${fellesKoehaandterer.hostName}")
+    public static final String HENDELSESKØ = "hendelseskø";
+
+    public static final String DOKUMENTKØ = "dokumentkø";
+
+    @Value("${queueManager.hostName}")
     private String hostName;
 
-    @Value("${fellesKoehaandterer.port}")
+    @Value("${queueManager.port}")
     private int port;
 
-    @Value("${fellesKoehaandterer.name}")
+    @Value("${queueManager.name}")
     private String queueManager;
 
-    @Value("${fellesKoehaandterer.channel}")
+    @Value("${queueManager.channel}")
     private String channel;
 
-    @Value("${fellesKoehaandterer.useSsl}")
+    @Value("${queueManager.useSsl}")
     private boolean useSsl;
 
     @Value("${SBEH.queueName}")
-    private String sakBehKø;
+    private String sakBehKøNavn;
 
     @Value("${DokMot.queueName}")
-    private String dokMotKø;
+    private String dokMotKøNavn;
 
-    @Bean
+    @Bean(name = HENDELSESKØ)
     public Queue hendelseshåndterer() throws JMSException {
-        return new MQQueue(sakBehKø);
+        return new MQQueue(sakBehKøNavn);
     }
 
-    @Bean
+    @Bean(name = DOKUMENTKØ)
     public Queue dokumentmottak() throws JMSException {
-        return new MQQueue(dokMotKø);
+        return new MQQueue(dokMotKøNavn);
     }
 
     @Bean

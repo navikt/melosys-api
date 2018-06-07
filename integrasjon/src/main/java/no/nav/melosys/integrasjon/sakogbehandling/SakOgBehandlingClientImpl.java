@@ -17,9 +17,12 @@ import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessagePostProcessor;
 import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.integrasjon.felles.jms.JmsConfig.HENDELSESKØ;
 
 @Component
 public class SakOgBehandlingClientImpl implements SakOgBehandlingClient {
@@ -30,13 +33,12 @@ public class SakOgBehandlingClientImpl implements SakOgBehandlingClient {
 
     private final ObjectFactory objectFactory;
 
-    @Autowired
     private JmsTemplate jmsTemplate;
 
-    @Autowired
     private Queue hendelseshåndterer;
 
-    public SakOgBehandlingClientImpl() {
+    @Autowired
+    public SakOgBehandlingClientImpl(JmsTemplate jmsTemplate, @Qualifier(HENDELSESKØ) Queue hendelseshåndterer) {
         try {
             jaxbContext = JAXBContext.newInstance(BehandlingStatus.class);
         } catch (JAXBException e) {
@@ -44,6 +46,8 @@ public class SakOgBehandlingClientImpl implements SakOgBehandlingClient {
             throw new IntegrasjonException(e);
         }
         this.objectFactory = new ObjectFactory();
+        this.jmsTemplate = jmsTemplate;
+        this.hendelseshåndterer = hendelseshåndterer;
     }
 
     @Override

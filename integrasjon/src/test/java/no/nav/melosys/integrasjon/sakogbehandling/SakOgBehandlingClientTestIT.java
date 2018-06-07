@@ -5,7 +5,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.melding.virksomhet.behandlingsstatus.hendelsehandterer.v1.hendelseshandtererbehandlingsstatus.BehandlingOpprettet;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.felles.QueueConfig;
+import no.nav.melosys.integrasjon.felles.jms.JmsConfig;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +34,7 @@ public class SakOgBehandlingClientTestIT {
     }
 
     @Configuration
-    @ComponentScan(basePackageClasses = {QueueConfig.class, SakOgBehandlingClientImpl.class})
+    @ComponentScan(basePackageClasses = {JmsConfig.class, SakOgBehandlingClientImpl.class})
     @PropertySource("classpath:test.properties")
     public static class SakOgBehandlingClientConfigTest {}
 }
