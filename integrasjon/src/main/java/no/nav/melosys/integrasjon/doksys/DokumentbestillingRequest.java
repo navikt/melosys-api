@@ -2,16 +2,22 @@ package no.nav.melosys.integrasjon.doksys;
 
 public class DokumentbestillingRequest {
 
-    public String dokumenttypeId;
+    // DokumenttypeID identifiserer hvilket dokument som skal produseres.
+    public String dokumenttypeID;
 
-    public Boolean utledRegisterInfo;
+    // Parameter som settes for å angi om registerInfo skal utledes for dokumentet som bestilles. Default false.
+    public boolean utledRegisterInfo;
 
+    // Fødselsnummer/tss id/ org.nr. til personen/organisasjonen som er sakspart.
     public String bruker;
 
+    // Fødselsnummer/tss id/ org.nr. til personen/ organisasjonen som er mottaker av dokumentet.
     public String mottaker;
 
-    public String journalsakId;
+    // SakID som dokument skal journalføres mot  (forskjellig fra fagsaksnummer)
+    public String journalsakID;
 
+    // Fagområdet som dokumentet tilhører.
     public String fagområde;
 
 }

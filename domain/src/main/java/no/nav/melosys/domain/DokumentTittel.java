@@ -14,7 +14,7 @@ public enum DokumentTittel implements Kodeverk {
     private String kode;
     private String beskrivelse;
 
-    private DokumentTittel(String kode, String beskrivelse) {
+    DokumentTittel(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }

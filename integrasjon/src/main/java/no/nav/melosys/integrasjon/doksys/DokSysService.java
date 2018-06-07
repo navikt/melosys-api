@@ -39,7 +39,7 @@ public class DokSysService implements DokSysFasade {
         ProduserDokumentutkastRequest wsRequest = new ProduserDokumentutkastRequest();
 
         wsRequest.setUtledRegisterInfo(request.utledRegisterInfo);
-        wsRequest.setDokumenttypeId(request.dokumenttypeId);
+        wsRequest.setDokumenttypeId(request.dokumenttypeID);
         wsRequest.setBrevdata(brevdata);
 
         try {
@@ -56,7 +56,7 @@ public class DokSysService implements DokSysFasade {
         ProduserIkkeredigerbartDokumentRequest wsRequest = new ProduserIkkeredigerbartDokumentRequest();
         Dokumentbestillingsinformasjon info = new Dokumentbestillingsinformasjon();
 
-        info.setDokumenttypeId(request.dokumenttypeId);
+        info.setDokumenttypeId(request.dokumenttypeID);
         info.setUtledRegisterInfo(request.utledRegisterInfo);
 
         Fagsystemer fagsystem = objectFactory.createFagsystemer();
@@ -73,7 +73,7 @@ public class DokSysService implements DokSysFasade {
         mottaker.setIdent(request.mottaker);
         info.setMottaker(mottaker);
 
-        info.setJournalsakId(request.journalsakId);
+        info.setJournalsakId(request.journalsakID);
 
         Fagomraader fagområde = objectFactory.createFagomraader();
         fagområde.setKodeRef(request.fagområde);
