@@ -7,6 +7,9 @@ CREATE TABLE prosessinstans (
     steg            VARCHAR2(99)   NULL,
     registrert_dato TIMESTAMP      NOT NULL,
     endret_dato     TIMESTAMP      NOT NULL,
+    antall_retry    INTEGER        DEFAULT 0 NOT NULL,
+    sist_forsoekt   TIMESTAMP      NULL,
+    sover_til       TIMESTAMP      NULL,
     CONSTRAINT pk_prosessinstans PRIMARY KEY (id)
 );
 
