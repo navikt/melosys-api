@@ -40,7 +40,7 @@ public class DokumentmottakConsumerImpl {
         this.meldingsfordeler = meldingsfordeler;
     }
 
-    @JmsListener(destination = "dokmotQueue")
+    @JmsListener(destination = "dokumentmottak")
     public void mottaDokument(Message message) {
         if (message instanceof TextMessage) {
             try {

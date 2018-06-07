@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -32,7 +33,9 @@ public class SakOgBehandlingClientImplTest {
 
     @Before
     public void setUp() {
-        sakOgBehandlingClient = new SakOgBehandlingClientImpl(jmsTemplate, hendelseshåndterer);
+        sakOgBehandlingClient = new SakOgBehandlingClientImpl();
+        ReflectionTestUtils.setField(sakOgBehandlingClient, "jmsTemplate", jmsTemplate);
+        ReflectionTestUtils.setField(sakOgBehandlingClient, "hendelseshåndterer", hendelseshåndterer);
     }
 
     @Test
