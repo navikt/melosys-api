@@ -45,6 +45,15 @@ public class Prosessinstans {
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
 
+    @Column(name = "antall_retry", nullable = false, updatable = true)
+    private int antallRetry;
+   
+    @Column(name = "sist_forsoekt", nullable = true, updatable = true)
+    private LocalDateTime sistForsøkt;
+
+    @Column(name = "sover_til", nullable = true, updatable = true)
+    private LocalDateTime soverTil;
+    
     @Column(name = "endret_dato", nullable = false, updatable = true)
     private LocalDateTime endretDato;
 
