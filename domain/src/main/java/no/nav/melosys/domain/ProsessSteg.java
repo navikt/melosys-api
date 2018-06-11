@@ -18,6 +18,9 @@ public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
     JFR_VURDER_INNGANGSVILKÅR("JFR_VURDER_INNGANGSVILKÅR", "Vurderer inngangsvilkår"),
     JFR_OPPRETT_OPPGAVE("JFR_OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
 
+    HENT_ARBF_OPPL("HENT_ARBF_OPPL", "Hent arbeidsforholdopplysninger fra AAREG"),
+    HENT_INNT_OPPL("HENT_INNT_OPPL", "Hent inntektopplysninger fra INNTK"),
+
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
     FERDIG("FERDIG", "Ferdig");
 
