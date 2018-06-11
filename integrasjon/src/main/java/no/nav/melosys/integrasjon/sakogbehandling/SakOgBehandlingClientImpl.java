@@ -18,12 +18,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessagePostProcessor;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.integrasjon.felles.jms.JmsConfig.HENDELSESKØ;
 
+@Profile("!mocking") //FIXME MELOSYS-1284 (Bruker samme konfig og vil derfor ikke ha JmsTemplate + Queue med "mocking")
 @Component
 public class SakOgBehandlingClientImpl implements SakOgBehandlingClient {
 
