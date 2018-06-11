@@ -9,10 +9,11 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.test.TpsTestData;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
-import no.nav.melosys.integrasjon.tps.person.PersonMock;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.feil.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentAktoerIdForIdentResponse;
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
+import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,7 +39,7 @@ public class TpsServiceTest {
     @Before
     public void setUp() {
         aktorConsumer = mock(AktorConsumer.class);
-        personConsumer = new PersonMock();
+        personConsumer = mock(PersonConsumer.class);
 
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
         service = new TpsService(aktorConsumer, personConsumer, dokumentFactory);
@@ -65,8 +66,15 @@ public class TpsServiceTest {
 
     @Test
     public void hentPerson() throws Exception {
-        Saksopplysning saksopplysning = service.hentPerson("99999999999");
+        HentPersonResponse r1 = new HentPersonResponse();
+        Person person = new Person().withAktoer(new PersonIdent().withIdent(new NorskIdent().withIdent(AKTØRID_1.toString())));
+        r1.setPerson(person);
+
+        when(personConsumer.hentPerson(any())).thenReturn(r1);
+
+        Saksopplysning saksopplysning = service.hentPerson(AKTØRID_1.toString());
+
         PersonDokument dokument = (PersonDokument) saksopplysning.getDokument();
-        assertThat(dokument.fnr).isEqualTo("99999999999");
+        assertThat(dokument.fnr).isEqualTo(AKTØRID_1.toString());
     }
 }

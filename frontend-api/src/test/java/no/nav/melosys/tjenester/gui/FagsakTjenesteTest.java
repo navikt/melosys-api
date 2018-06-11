@@ -25,15 +25,12 @@ import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.integrasjon.tps.TpsService;
-import no.nav.melosys.integrasjon.tps.person.PersonMock;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -41,6 +38,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 public class FagsakTjenesteTest {
 
@@ -52,13 +50,13 @@ public class FagsakTjenesteTest {
     public void setUp() throws JAXBException {
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
 
-        TpsFasade tps = new TpsService(null, new PersonMock(), dokumentFactory);
+        TpsFasade tps = mock(TpsFasade.class);
         AaregFasade aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
         EregFasade ereg = new EregService(new OrganisasjonMock(), dokumentFactory);
         MedlFasade medl = new MedlService(new MedlemskapMock(), dokumentFactory);
         InntektFasade inntekt = new InntektService(new InntektMock(), dokumentFactory);
 
-        fagsakRepo = Mockito.mock(FagsakRepository.class);
+        fagsakRepo = mock(FagsakRepository.class);
         SaksopplysningerService saksopplysningerService = new SaksopplysningerService(tps, aareg, ereg, medl, inntekt);
         ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 12);
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 12);

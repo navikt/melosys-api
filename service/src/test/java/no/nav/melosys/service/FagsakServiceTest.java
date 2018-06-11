@@ -23,16 +23,15 @@ import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
-import no.nav.melosys.integrasjon.tps.person.PersonMock;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 public class FagsakServiceTest {
 
@@ -47,7 +46,7 @@ public class FagsakServiceTest {
     public void setUp() {
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
 
-        TpsFasade tps = new TpsService(null, new PersonMock(), dokumentFactory);
+        TpsFasade tps = new TpsService(null, null, dokumentFactory);
         AaregFasade aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
         EregFasade ereg = new EregService(new OrganisasjonMock(), dokumentFactory);
         MedlFasade medl = new MedlService(new MedlemskapMock(), dokumentFactory);
@@ -57,7 +56,7 @@ public class FagsakServiceTest {
         ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 12);
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 12);
 
-        fagsakRepo = Mockito.mock(FagsakRepository.class);
+        fagsakRepo = mock(FagsakRepository.class);
         fagsakService = new FagsakService(fagsakRepo, saksopplysningerService);
     }
 
