@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.integrasjon.felles.jms.JmsConfig.DOKUMENTKØ;
+
 @Profile("!mocking") //FIXME MELOSYS-1284
 @Component
 public class DokumentmottakConsumerImpl {
@@ -40,7 +42,7 @@ public class DokumentmottakConsumerImpl {
         this.meldingsfordeler = meldingsfordeler;
     }
 
-    @JmsListener(destination = "dokmotQueue")
+    @JmsListener(destination = DOKUMENTKØ)
     public void mottaDokument(Message message) {
         if (message instanceof TextMessage) {
             try {
