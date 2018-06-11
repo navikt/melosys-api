@@ -23,13 +23,6 @@ public class PersonConsumerProducer {
     }
 
     @Bean
-    @Profile("utvikling")
-    PersonConsumer personMock() {
-        return new PersonMock();
-    }
-
-    @Bean
-    @Profile("!utvikling")
     public PersonConsumer personConsumer() {
         PersonV3 port = wrapWithSts(consumerConfig.getPort(), SECURITYCONTEXT_TIL_SAML);
         return new PersonConsumerImpl(port);
