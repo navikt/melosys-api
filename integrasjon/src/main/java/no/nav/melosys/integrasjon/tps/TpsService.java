@@ -1,10 +1,12 @@
 package no.nav.melosys.integrasjon.tps;
 
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.time.LocalDate;
+import java.util.*;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
@@ -13,6 +15,7 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
@@ -21,18 +24,9 @@ import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentAktoerIdForIdentReques
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentAktoerIdForIdentResponse;
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentIdentForAktoerIdRequest;
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentIdentForAktoerIdResponse;
-import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonerMedSammeAdresseIkkeFunnet;
-import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonerMedSammeAdresseSikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.AktoerId;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent;
-import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest;
-import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
-import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonerMedSammeAdresseRequest;
-import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonerMedSammeAdresseResponse;
+import no.nav.tjeneste.virksomhet.person.v3.binding.*;
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
+import no.nav.tjeneste.virksomhet.person.v3.meldinger.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +46,10 @@ public class TpsService implements TpsFasade {
     private DokumentFactory dokumentFactory;
 
     private final JAXBContext jaxbContext;
+
+    // Endringstidspunkt sorteres fra nyest til eldst.
+    static final Comparator<StatsborgerskapPeriode> endringstidspunktKomparator =
+        (sp1, sp2) -> sp2.getEndringstidspunkt().compare(sp1.getEndringstidspunkt());
 
     @Autowired
     public TpsService(AktorConsumer aktorConsumer, PersonConsumer personConsumer, DokumentFactory dokumentFactory) {
@@ -169,6 +167,48 @@ public class TpsService implements TpsFasade {
             throw new IntegrasjonException(hentPersonerMedSammeAdresseSikkerhetsbegrensning.getMessage());
         } catch (HentPersonerMedSammeAdresseIkkeFunnet hentPersonerMedSammeAdresseIkkeFunnet) {
             throw new IntegrasjonException(hentPersonerMedSammeAdresseIkkeFunnet.getMessage());
+        }
+    }
+
+    @Override
+    public String hentStatsborgerskapPåGittDato(String ident, LocalDate dato) throws IkkeFunnetException, SikkerhetsbegrensningException {
+        if (dato == null) {
+            throw new IntegrasjonException("Dato kan ikke være null");
+        }
+
+        HentPersonhistorikkRequest request = new HentPersonhistorikkRequest();
+        NorskIdent norskIdent = new NorskIdent();
+        norskIdent.setIdent(ident);
+
+        PersonIdent personIdent = new PersonIdent();
+        personIdent.setIdent(norskIdent);
+
+        request.setAktoer(personIdent);
+
+        try {
+            XMLGregorianCalendar xmlDato = KonverteringsUtils.localDateToXMLGregorianCalendar(dato);
+            Periode periode = new Periode();
+            periode.setTom(xmlDato);
+            periode.setFom(xmlDato);
+            request.setPeriode(periode);
+
+            HentPersonhistorikkResponse response = personConsumer.hentPersonhistorikk(request);
+            List<StatsborgerskapPeriode> liste = response.getStatsborgerskapListe();
+
+            if (liste.isEmpty()) {
+                throw new IkkeFunnetException("Fant ikke statsborgerskap for dato " + dato);
+            }
+
+            liste.sort(endringstidspunktKomparator);
+
+            Statsborgerskap statsborgerskap = liste.get(0).getStatsborgerskap();
+            return statsborgerskap.getLand().getValue();
+        } catch (DatatypeConfigurationException e) {
+            throw new IntegrasjonException("Kunne ikke konvertere dato");
+        } catch (HentPersonhistorikkPersonIkkeFunnet e) {
+            throw new IkkeFunnetException(e);
+        } catch (HentPersonhistorikkSikkerhetsbegrensning e) {
+            throw new SikkerhetsbegrensningException(e);
         }
     }
 }
