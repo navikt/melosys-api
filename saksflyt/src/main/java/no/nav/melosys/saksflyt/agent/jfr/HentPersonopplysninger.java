@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.Saksopplysning;
@@ -9,6 +10,7 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
 import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +34,13 @@ public class HentPersonopplysninger extends StandardAbstraktAgent {
 
     private TpsFasade tpsFasade;
 
+    private FagsakService fagsakService;
+
     @Autowired
-    public HentPersonopplysninger(Binge binge, ProsessinstansRepository prosessinstansRepo, TpsFasade tpsFasade) {
+    public HentPersonopplysninger(Binge binge, ProsessinstansRepository prosessinstansRepo, TpsFasade tpsFasade, FagsakService fagsakService) {
         super(binge, prosessinstansRepo);
         this.tpsFasade = tpsFasade;
+        this.fagsakService = fagsakService;
     }
 
     @Override
@@ -50,6 +55,9 @@ public class HentPersonopplysninger extends StandardAbstraktAgent {
         try {
             Saksopplysning saksopplysning = tpsFasade.hentPerson(brukerId);
             prosessinstans.getBehandling().getSaksopplysninger().add(saksopplysning);
+
+            Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
+            fagsakService.lagre(fagsak);
         } catch (IkkeFunnetException | SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
             håndterFeil(prosessinstans, false);

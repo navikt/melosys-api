@@ -11,6 +11,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.service.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,9 +21,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HentArbeidsforholdopplysningerTest {
@@ -39,11 +38,12 @@ public class HentArbeidsforholdopplysningerTest {
     private HentArbeidsforholdopplysninger agent;
 
     // Antall måneder tilbake i tid vi henter arbeidsforholdhistorikk for
-    int ARBEIDSFORHOLDHISTORIKK_ANTALL_MÅNEDER = 12;
+    private final int ARBEIDSFORHOLDHISTORIKK_ANTALL_MÅNEDER = 12;
 
     @Before
     public void setUp() {
-        agent = new HentArbeidsforholdopplysninger(binge, repo, aaregFasade);
+        FagsakService fagsakService = mock(FagsakService.class);
+        agent = new HentArbeidsforholdopplysninger(binge, repo, aaregFasade, fagsakService);
         ReflectionTestUtils.setField(agent, "arbeidsforholdhistorikkAntallMåneder", ARBEIDSFORHOLDHISTORIKK_ANTALL_MÅNEDER);
     }
 

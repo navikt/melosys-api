@@ -2,10 +2,7 @@ package no.nav.melosys.saksflyt.agent.reg;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -14,6 +11,7 @@ import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
 import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +37,13 @@ public class HentArbeidsforholdopplysninger extends StandardAbstraktAgent {
 
     private AaregFasade aaregFasade;
 
+    private FagsakService fagsakService;
+
     @Autowired
-    public HentArbeidsforholdopplysninger(Binge binge, ProsessinstansRepository prosessinstansRepo, AaregFasade aaregFasade) {
+    public HentArbeidsforholdopplysninger(Binge binge, ProsessinstansRepository prosessinstansRepo, AaregFasade aaregFasade, FagsakService fagsakService) {
         super(binge, prosessinstansRepo);
         this.aaregFasade = aaregFasade;
+        this.fagsakService = fagsakService;
     }
 
     @Override
@@ -61,6 +62,9 @@ public class HentArbeidsforholdopplysninger extends StandardAbstraktAgent {
         try {
             Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(brukerId, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
             prosessinstans.getBehandling().getSaksopplysninger().add(saksopplysning);
+
+            Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
+            fagsakService.lagre(fagsak);
         } catch (IntegrasjonException | TekniskException | SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
             håndterFeil(prosessinstans, false);

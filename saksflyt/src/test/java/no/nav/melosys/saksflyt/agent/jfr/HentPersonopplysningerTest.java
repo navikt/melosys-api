@@ -8,6 +8,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.service.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +35,8 @@ public class HentPersonopplysningerTest {
 
     @Before
     public void setUp() {
-        agent = new HentPersonopplysninger(binge, repo, tpsFasade);
+        FagsakService fagsakService = mock(FagsakService.class);
+        agent = new HentPersonopplysninger(binge, repo, tpsFasade, fagsakService);
     }
 
     @Test
