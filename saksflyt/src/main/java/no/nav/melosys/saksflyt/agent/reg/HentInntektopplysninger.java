@@ -55,8 +55,8 @@ public class HentInntektopplysninger extends StandardAbstraktAgent {
         String brukerId = prosessinstans.getData(BRUKER_ID);
 
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-        YearMonth tom = YearMonth.from(periode.getFom());
-        YearMonth fom = tom.minusMonths(inntektshistorikkAntallMåneder);
+        YearMonth fom = YearMonth.from(periode.getFom()).minusMonths(inntektshistorikkAntallMåneder);
+        YearMonth tom = YearMonth.now();
 
         try {
             Saksopplysning saksopplysning = inntektFasade.hentInntektListe(brukerId, fom, tom);

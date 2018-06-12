@@ -62,8 +62,8 @@ public class HentInntektopplysningerTest {
 
         agent.utførSteg(p);
 
-        YearMonth tom = YearMonth.from(periode.getFom());
-        YearMonth fom = tom.minusMonths(INNTEKTSHISTORIKK_ANTALL_MÅNEDER);
+        YearMonth fom = YearMonth.from(periode.getFom()).minusMonths(INNTEKTSHISTORIKK_ANTALL_MÅNEDER);
+        YearMonth tom = YearMonth.now();
 
         verify(inntektFasade, times(1)).hentInntektListe(brukerID, fom, tom);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_ORG_OPPL);
