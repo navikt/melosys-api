@@ -38,13 +38,13 @@ public class HentArbeidsforholdopplysningerTest {
     private HentArbeidsforholdopplysninger agent;
 
     // Antall måneder tilbake i tid vi henter arbeidsforholdhistorikk for
-    private final int ARBEIDSFORHOLDHISTORIKK_ANTALL_MÅNEDER = 12;
+    private final int ARBEIDSFORHOLDHISTORIKK_ANTALL_ÅR = 5;
 
     @Before
     public void setUp() {
         FagsakService fagsakService = mock(FagsakService.class);
         agent = new HentArbeidsforholdopplysninger(binge, repo, aaregFasade, fagsakService);
-        ReflectionTestUtils.setField(agent, "arbeidsforholdhistorikkAntallMåneder", ARBEIDSFORHOLDHISTORIKK_ANTALL_MÅNEDER);
+        ReflectionTestUtils.setField(agent, "arbeidsforholdhistorikkAntallÅr", ARBEIDSFORHOLDHISTORIKK_ANTALL_ÅR);
     }
 
     @Test
@@ -62,7 +62,10 @@ public class HentArbeidsforholdopplysningerTest {
 
         agent.utførSteg(p);
 
-        verify(aaregFasade, times(1)).finnArbeidsforholdPrArbeidstaker(brukerID, AaregFasade.REGELVERK_A_ORDNINGEN, periode.getFom().minusMonths(ARBEIDSFORHOLDHISTORIKK_ANTALL_MÅNEDER), periode.getFom());
+        LocalDate fom = periode.getFom().minusYears(ARBEIDSFORHOLDHISTORIKK_ANTALL_ÅR);
+        LocalDate tom = LocalDate.now();
+
+        verify(aaregFasade, times(1)).finnArbeidsforholdPrArbeidstaker(brukerID, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_INNT_OPPL);
     }
 

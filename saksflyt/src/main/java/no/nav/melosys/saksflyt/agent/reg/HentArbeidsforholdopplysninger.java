@@ -32,8 +32,8 @@ public class HentArbeidsforholdopplysninger extends StandardAbstraktAgent {
 
     private static final Logger log = LoggerFactory.getLogger(HentArbeidsforholdopplysninger.class);
 
-    @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallMåneder}")
-    private Integer arbeidsforholdhistorikkAntallMåneder;
+    @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallÅr}")
+    private Integer arbeidsforholdhistorikkAntallÅr;
 
     private AaregFasade aaregFasade;
 
@@ -56,8 +56,8 @@ public class HentArbeidsforholdopplysninger extends StandardAbstraktAgent {
         String brukerId = prosessinstans.getData(BRUKER_ID);
 
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-        LocalDate tom  = periode.getFom();
-        LocalDate fom = tom.minusMonths(arbeidsforholdhistorikkAntallMåneder);
+        LocalDate fom = periode.getFom().minusYears(arbeidsforholdhistorikkAntallÅr);
+        LocalDate tom = LocalDate.now();
 
         try {
             Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(brukerId, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);

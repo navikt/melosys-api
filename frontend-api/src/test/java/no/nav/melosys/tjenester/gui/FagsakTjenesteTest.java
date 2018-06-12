@@ -58,7 +58,7 @@ public class FagsakTjenesteTest {
 
         fagsakRepo = mock(FagsakRepository.class);
         SaksopplysningerService saksopplysningerService = new SaksopplysningerService(tps, aareg, ereg, medl, inntekt);
-        ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 12);
+        ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallÅr", 5);
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 12);
         FagsakService fagsakService = new FagsakService(fagsakRepo, saksopplysningerService);
         tjeneste = new FagsakTjeneste(fagsakService);
