@@ -19,7 +19,9 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * En arbeidertråd som schedulerer arbeid som utføres av de maskinelle stegene.
+ * Komponent med arbeidertråder som schedulerer arbeid som utføres av de maskinelle stegene.
+ * 
+ * Dette er en passe dum implementasjon, der x tråder hver for seg looper gjennom alle agenter og aktiverer dem. Dette gjentas i det uendelige.
  * 
  * Konfigurasjon:
  *     melosys.saksflyt.arbeider.oppholdMellomSteg – Hvor mange millisekunder trådene skal sove mellom hvert steg som aktiveres (default 47)
