@@ -8,8 +8,6 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.joark.JournalfoeringMangel;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,19 +23,13 @@ import static org.mockito.Mockito.*;
 public class OppdaterJournalpostTest {
 
     @Mock
-    private Binge binge;
-
-    @Mock
-    private ProsessinstansRepository repo;
-
-    @Mock
     private JoarkFasade joarkFasade;
 
     private OppdaterJournalpost agent;
 
     @Before
     public void setUp() throws Exception {
-        agent = new OppdaterJournalpost(binge, repo, joarkFasade);
+        agent = new OppdaterJournalpost(joarkFasade);
     }
 
     @Test

@@ -7,9 +7,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.joark.JournalfoeringMangel;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
-import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,15 +24,14 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
  * JFR_OPPDATER_JOURNALPOST -> JFR_FERDIGSTILL_JOURNALPOST eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class OppdaterJournalpost extends StandardAbstraktAgent {
+public class OppdaterJournalpost extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterJournalpost.class);
 
     JoarkFasade joarkFasade;
 
     @Autowired
-    public OppdaterJournalpost(Binge binge, ProsessinstansRepository prosessinstansRepo, JoarkFasade joarkFasade) {
-        super(binge, prosessinstansRepo);
+    public OppdaterJournalpost(JoarkFasade joarkFasade) {
         this.joarkFasade = joarkFasade;
     }
 
@@ -55,7 +52,7 @@ public class OppdaterJournalpost extends StandardAbstraktAgent {
             }
         } catch (SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
-            håndterFeil(prosessinstans, false);
+            // FIXME: MELOSYS-1316
         }
 
         String gsakSakID = prosessinstans.getData(GSAK_SAK_ID);
@@ -69,7 +66,7 @@ public class OppdaterJournalpost extends StandardAbstraktAgent {
             joarkFasade.oppdaterJounalpost(journalpostID, dokumentID, gsakSakID, brukerID, avsenderID, avsenderNavn, tittel, medDokumentkategori);
         } catch (SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
-            håndterFeil(prosessinstans, false);
+            // FIXME: MELOSYS-1316
         }
 
         prosessinstans.setSteg(JFR_FERDIGSTILL_JOURNALPOST);

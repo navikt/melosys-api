@@ -9,8 +9,6 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.inntk.InntektFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,12 +25,6 @@ import static org.mockito.Mockito.*;
 public class HentInntektopplysningerTest {
 
     @Mock
-    private Binge binge;
-
-    @Mock
-    private ProsessinstansRepository repo;
-
-    @Mock
     InntektFasade inntektFasade;
 
     private HentInntektopplysninger agent;
@@ -43,7 +35,7 @@ public class HentInntektopplysningerTest {
     @Before
     public void setUp() {
         FagsakService fagsakService = mock(FagsakService.class);
-        agent = new HentInntektopplysninger(binge, repo, inntektFasade, fagsakService);
+        agent = new HentInntektopplysninger(inntektFasade, fagsakService);
         ReflectionTestUtils.setField(agent, "inntektshistorikkAntallMåneder", INNTEKTSHISTORIKK_ANTALL_MÅNEDER);
     }
 

@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.impl;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.function.Predicate;
 
@@ -14,7 +15,12 @@ public abstract class Utils {
     public static Predicate<Prosessinstans> medSteg(ProsessSteg steg) {
         return (pi) -> pi.getSteg() == steg;
     }
-
+    
+    /**
+     * Kvalifiserer prosessinstanser som ikke sover
+     */
+    public static final Predicate<Prosessinstans> somIkkeSover = pi -> pi.getSoverTil() == null || pi.getSoverTil().isBefore(LocalDateTime.now());
+    
     /**
      * Sorterer prosessinstanser etter alder, eldste først
      */

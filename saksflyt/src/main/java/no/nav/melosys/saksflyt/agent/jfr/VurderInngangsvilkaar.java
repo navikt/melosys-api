@@ -9,9 +9,7 @@ import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
-import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.RegelmodulService;
 import org.slf4j.Logger;
@@ -26,7 +24,7 @@ import org.springframework.stereotype.Component;
  * JFR_VURDER_INNGANGSVILKÅR → JFR_OPPRETT_OPPGAVE (eller til FEILET_MASKINELT hvis feil)
  */
 @Component
-public class VurderInngangsvilkaar extends StandardAbstraktAgent {
+public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     
     private static final Logger log = LoggerFactory.getLogger(VurderInngangsvilkaar.class);
 
@@ -34,15 +32,14 @@ public class VurderInngangsvilkaar extends StandardAbstraktAgent {
     private FagsakService fagsakService;
 
     @Autowired
-    public VurderInngangsvilkaar(Binge binge, ProsessinstansRepository prosessinstansRepo, RegelmodulService regelmodulService, FagsakService fagsakService) {
-        super(binge, prosessinstansRepo);
+    public VurderInngangsvilkaar(RegelmodulService regelmodulService, FagsakService fagsakService) {
         this.regelmodulService = regelmodulService;
         this.fagsakService = fagsakService;
         log.debug("InngangsvilkaarAgent initialisert");
     }
 
     @Override
-    public ProsessSteg inngangsSteg() {
+    protected ProsessSteg inngangsSteg() {
         return ProsessSteg.JFR_VURDER_INNGANGSVILKÅR;
     }
 
@@ -62,7 +59,7 @@ public class VurderInngangsvilkaar extends StandardAbstraktAgent {
         }
         if (statsborgerskap == null) {
             log.error("Kunne ikke hente brukers statsborgerskap fra saksopplysningene.");
-            håndterFeil(prosessinstans, false);
+            // FIXME: MELOSYS-1316
             return;
         }
 
@@ -72,7 +69,7 @@ public class VurderInngangsvilkaar extends StandardAbstraktAgent {
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
         if (periode == null || periode.getFom() == null) {
             log.error("Søknadsperioden er ikke oppgitt eller mangler fom");
-            håndterFeil(prosessinstans, false);
+            // FIXME: MELOSYS-1316
             return;
         }
         VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(statsborgerskap, land, periode);
@@ -90,7 +87,8 @@ public class VurderInngangsvilkaar extends StandardAbstraktAgent {
         // Håndter ev. feil...
         if (detErMeldtFeil) {
             log.info("Avbryter behandling av {} pga. feil", prosessinstans.getId());
-            håndterFeil(prosessinstans, false);
+            prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
+            // FIXME: MELOSYS-1316
             return;
         }
         
@@ -99,7 +97,7 @@ public class VurderInngangsvilkaar extends StandardAbstraktAgent {
         FagsakType nyFagsakType = res.kvalifisererForEf883_2004 ? FagsakType.EU_EØS : FagsakType.FOLKETRYGD; // Fikses når inngangsvilkårsvurdering også kvalifiserer for avtaler.
         if (fagsak.getType() != null && fagsak.getType() != nyFagsakType) {
             log.error("Avbryter behandling av {}: Forsøk på å endre fagsakType fra {} til {}", prosessinstans.getId(), fagsak.getType(), nyFagsakType);
-            håndterFeil(prosessinstans, false);
+            // FIXME: MELOSYS-1316
             return;
         }
         log.info("Setter type på fagsak {} til {}", fagsak.getSaksnummer(), nyFagsakType); 

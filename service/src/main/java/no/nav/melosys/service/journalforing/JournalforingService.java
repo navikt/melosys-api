@@ -69,7 +69,7 @@ public class JournalforingService {
         // Perioden trenges for å hente saksopplysninger
         // FIXME prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalforingDto.getFagsak().getSoknadsperiode());
         LocalDateTime nå = LocalDateTime.now();
-        prosessinstans.setSistEndret(nå);
+        prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);
@@ -96,7 +96,7 @@ public class JournalforingService {
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, journalforingDto.getSaksnummer());
 
         LocalDateTime nå = LocalDateTime.now();
-        prosessinstans.setSistEndret(nå);
+        prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);

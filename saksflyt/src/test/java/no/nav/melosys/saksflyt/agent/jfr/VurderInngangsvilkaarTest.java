@@ -9,8 +9,6 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.RegelmodulService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
@@ -28,12 +26,6 @@ import static org.mockito.Mockito.*;
 public class VurderInngangsvilkaarTest {
 
     @Mock
-    private Binge binge;
-
-    @Mock
-    private ProsessinstansRepository repo;
-
-    @Mock
     private RegelmodulService regelmodulService;
     
     @Mock
@@ -43,7 +35,7 @@ public class VurderInngangsvilkaarTest {
 
     @Before
     public void setUp() {
-        agent = new VurderInngangsvilkaar(binge, repo, regelmodulService, fagsakService);
+        agent = new VurderInngangsvilkaar(regelmodulService, fagsakService);
     }
 
     @Test
@@ -81,7 +73,6 @@ public class VurderInngangsvilkaarTest {
         
         agent.utførSteg(p);
 
-        verify(repo, times(1)).save(any(Prosessinstans.class));
         verify(fagsakService, times(0)).lagre(any());
         
         assertEquals(1, p.getHendelser().size());
