@@ -38,8 +38,8 @@ public class SaksopplysningerService {
 
     private static final Logger log = LoggerFactory.getLogger(SaksopplysningerService.class);
 
-    @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallMåneder}")
-    private Integer arbeidsforholdhistorikkAntallMåneder;
+    @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallÅr}")
+    private Integer arbeidsforholdhistorikkAntallÅr;
 
     @Value("${melosys.service.fagsak.inntektshistorikk.antallMåneder}")
     private Integer inntektshistorikkAntallMåneder;
@@ -120,7 +120,7 @@ public class SaksopplysningerService {
 
     private Saksopplysning hentArbeidsforhold(String fnr) throws SikkerhetsbegrensningException {
         final LocalDate tom  = LocalDate.now();
-        final LocalDate fom = tom.minusMonths(arbeidsforholdhistorikkAntallMåneder);
+        final LocalDate fom = tom.minusYears(arbeidsforholdhistorikkAntallÅr);
         try {
             return aaregFasade.finnArbeidsforholdPrArbeidstaker(fnr, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
         } catch (IntegrasjonException | TekniskException exception) {
