@@ -111,7 +111,7 @@ public class SaksopplysningerService {
 
     private Saksopplysning hentMedlemskap(String fnr) throws SikkerhetsbegrensningException {
         try {
-            return medlFasade.getPeriodeListe(fnr);
+            return medlFasade.hentPeriodeListe(fnr);
         } catch (IntegrasjonException integrasjonException) {
             log.error("Uventet feil ved oppslag mot MEDL", integrasjonException);
             return null;
