@@ -7,7 +7,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
+import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_GSAK_SAK;
  * JFR_OPPRETT_GSAK_SAK -> JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class OpprettGsakSak extends StandardAbstraktAgent {
+public class OpprettGsakSak extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettGsakSak.class);
 
@@ -35,7 +35,6 @@ public class OpprettGsakSak extends StandardAbstraktAgent {
 
     @Autowired
     public OpprettGsakSak(Binge binge, ProsessinstansRepository prosessinstansRepo, FagsakRepository fagsakRepository, GsakFasade gsakFasade) {
-        super(binge, prosessinstansRepo);
         this.fagsakRepository = fagsakRepository;
         this.gsakFasade = gsakFasade;
     }

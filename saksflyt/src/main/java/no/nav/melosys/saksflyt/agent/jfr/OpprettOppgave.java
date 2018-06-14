@@ -14,9 +14,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
-import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +33,14 @@ import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
  * JFR_OPPRETT_OPPGAVE -> FERDIG eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class OpprettOppgave extends StandardAbstraktAgent {
+public class OpprettOppgave extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettOppgave.class);
 
     GsakFasade gsakFasade;
 
     @Autowired
-    public OpprettOppgave(Binge binge, ProsessinstansRepository prosessinstansRepo, GsakFasade gsakFasade) {
-        super(binge, prosessinstansRepo);
+    public OpprettOppgave(GsakFasade gsakFasade) {
         this.gsakFasade = gsakFasade;
     }
 
@@ -59,6 +56,7 @@ public class OpprettOppgave extends StandardAbstraktAgent {
         if (ProsessType.JFR_NY_SAK.equals(prosessType) || ProsessType.JFR_KNYTT.equals(prosessType)) {
             behandlingType = BehandlingType.SØKNAD;
         } else  {
+            // FIXME: MELOSYS-1316
             throw new TekniskException("ProsessType " + prosessType + " er ikke støttet");
         }
 
@@ -80,6 +78,7 @@ public class OpprettOppgave extends StandardAbstraktAgent {
             builder.medOppgaveType(Oppgavetype.BEH_SAK_MK_UFM);
             builder.medPrioritetType(PrioritetType.NORM_UFM);
         } else {
+            // FIXME: MELOSYS-1316
             throw new TekniskException("BehandlingType " + behandlingType.getBeskrivelse() + " støttes ikke.");
         }
 
@@ -95,7 +94,7 @@ public class OpprettOppgave extends StandardAbstraktAgent {
             gsakFasade.opprettOppgave(builder.build());
         } catch (SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
-            håndterFeil(prosessinstans, false);
+            // FIXME: MELOSYS-1316
         }
 
         prosessinstans.setSteg(FERDIG);

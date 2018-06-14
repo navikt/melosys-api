@@ -8,9 +8,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
-import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +26,7 @@ import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
  * HENT_ARBF_OPPL → FEILET_MASKINELT hvis oppslag mot AAREG feilet
  */
 @Component
-public class HentArbeidsforholdopplysninger extends StandardAbstraktAgent {
+public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentArbeidsforholdopplysninger.class);
 
@@ -40,8 +38,7 @@ public class HentArbeidsforholdopplysninger extends StandardAbstraktAgent {
     private FagsakService fagsakService;
 
     @Autowired
-    public HentArbeidsforholdopplysninger(Binge binge, ProsessinstansRepository prosessinstansRepo, AaregFasade aaregFasade, FagsakService fagsakService) {
-        super(binge, prosessinstansRepo);
+    public HentArbeidsforholdopplysninger(AaregFasade aaregFasade, FagsakService fagsakService) {
         this.aaregFasade = aaregFasade;
         this.fagsakService = fagsakService;
     }
@@ -67,7 +64,7 @@ public class HentArbeidsforholdopplysninger extends StandardAbstraktAgent {
             fagsakService.lagre(fagsak);
         } catch (IntegrasjonException | TekniskException | SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
-            håndterFeil(prosessinstans, false);
+            // FIXME: MELOSYS-1316
             return;
         }
 

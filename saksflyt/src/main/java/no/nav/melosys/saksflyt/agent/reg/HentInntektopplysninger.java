@@ -7,9 +7,7 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.inntk.InntektFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
-import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +25,7 @@ import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
  * HENT_INNT_OPPL → FEILET_MASKINELT hvis oppslag mot INNTK feilet
  */
 @Component
-public class HentInntektopplysninger extends StandardAbstraktAgent {
+public class HentInntektopplysninger extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentInntektopplysninger.class);
 
@@ -39,8 +37,7 @@ public class HentInntektopplysninger extends StandardAbstraktAgent {
     private Integer inntektshistorikkAntallMåneder;
 
     @Autowired
-    public HentInntektopplysninger(Binge binge, ProsessinstansRepository prosessinstansRepo, InntektFasade inntektFasade, FagsakService fagsakService) {
-        super(binge, prosessinstansRepo);
+    public HentInntektopplysninger(InntektFasade inntektFasade, FagsakService fagsakService) {
         this.inntektFasade = inntektFasade;
         this.fagsakService = fagsakService;
     }
@@ -66,7 +63,7 @@ public class HentInntektopplysninger extends StandardAbstraktAgent {
             fagsakService.lagre(fagsak);
         } catch (IntegrasjonException | SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
-            håndterFeil(prosessinstans, false);
+            // FIXME: MELOSYS-1316
             return;
         }
 

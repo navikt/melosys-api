@@ -5,8 +5,6 @@ import java.util.Properties;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,19 +21,13 @@ import static org.mockito.Mockito.*;
 public class OpprettSakTest {
 
     @Mock
-    private Binge binge;
-
-    @Mock
-    private ProsessinstansRepository repo;
-
-    @Mock
     FagsakService fagsakService;
 
     private OpprettSak agent;
 
     @Before
     public void setUp() {
-        agent = new OpprettSak(binge, repo, fagsakService);
+        agent = new OpprettSak(fagsakService);
     }
 
     @Test

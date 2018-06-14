@@ -7,8 +7,6 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,19 +21,13 @@ import static org.mockito.Mockito.*;
 public class HentAktoerIdTest {
 
     @Mock
-    private Binge binge;
-
-    @Mock
-    private ProsessinstansRepository repo;
-
-    @Mock
     private TpsFasade tpsFasade;
 
     private HentAktoerId agent;
 
     @Before
     public void setUp() {
-        agent = new HentAktoerId(binge, repo, tpsFasade);
+        agent = new HentAktoerId(tpsFasade);
     }
 
     @Test

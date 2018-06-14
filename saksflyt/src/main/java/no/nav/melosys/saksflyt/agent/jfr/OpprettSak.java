@@ -3,9 +3,7 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
-import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,15 +22,14 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_SAK_OG_BEH;
  * JFR_OPPRETT_SAK_OG_BEH -> JFR_OPPRETT_GSAK_SAK eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class OpprettSak extends StandardAbstraktAgent {
+public class OpprettSak extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettSak.class);
 
     FagsakService fagsakService;
 
     @Autowired
-    public OpprettSak(Binge binge, ProsessinstansRepository prosessinstansRepo, FagsakService fagsakService) {
-        super(binge, prosessinstansRepo);
+    public OpprettSak(FagsakService fagsakService) {
         this.fagsakService = fagsakService;
     }
 
@@ -49,6 +46,7 @@ public class OpprettSak extends StandardAbstraktAgent {
         if (ProsessType.JFR_NY_SAK.equals(prosessType)) {
             behandlingType = BehandlingType.SØKNAD;
         } else  {
+            // FIXME: MELOSYS-1316
             throw new TekniskException("ProsessType " + prosessType + " er ikke støttet");
         }
 
@@ -58,7 +56,7 @@ public class OpprettSak extends StandardAbstraktAgent {
             prosessinstans.setBehandling(fagsak.getBehandlinger().get(0));
         } catch (SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
-            håndterFeil(prosessinstans, false);
+            // FIXME: MELOSYS-1316
             return;
         }
 

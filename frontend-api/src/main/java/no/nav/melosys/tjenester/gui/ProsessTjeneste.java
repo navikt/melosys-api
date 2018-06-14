@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
@@ -50,7 +51,7 @@ public class ProsessTjeneste extends RestTjeneste {
             if (p.getBehandling() != null) {
                 dto.setBehandlingID(p.getBehandling().getId());
             }
-            dto.setEndretDato(p.getSistEndret());
+            dto.setEndretDato(p.getEndretDato());
             dto.setRegistrertDato(p.getRegistrertDato());
             dto.setSteg(p.getSteg());
             dto.setType(p.getType());
@@ -75,7 +76,7 @@ public class ProsessTjeneste extends RestTjeneste {
         prosessinstans.setData(HOVEDDOKUMENT_TITTEL, "tittel");
         prosessinstans.addData(properties);
         LocalDateTime nå = LocalDateTime.now();
-        prosessinstans.setSistEndret(nå);
+        prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);
@@ -90,7 +91,7 @@ public class ProsessTjeneste extends RestTjeneste {
         prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_SAK_OG_BEH);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, "FJERNET93");
         LocalDateTime nå = LocalDateTime.now();
-        prosessinstans.setSistEndret(nå);
+        prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);

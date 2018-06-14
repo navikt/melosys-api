@@ -144,11 +144,35 @@ public class Prosessinstans {
         this.registrertDato = registrertDato;
     }
 
-    public LocalDateTime getSistEndret() {
+    public int getAntallRetry() {
+        return antallRetry;
+    }
+
+    public void setAntallRetry(int antallRetry) {
+        this.antallRetry = antallRetry;
+    }
+
+    public LocalDateTime getSistForsøkt() {
+        return sistForsøkt;
+    }
+
+    public void setSistForsøkt(LocalDateTime sistForsøkt) {
+        this.sistForsøkt = sistForsøkt;
+    }
+
+    public LocalDateTime getSoverTil() {
+        return soverTil;
+    }
+
+    public void setSoverTil(LocalDateTime soverTil) {
+        this.soverTil = soverTil;
+    }
+
+    public LocalDateTime getEndretDato() {
         return endretDato;
     }
 
-    public void setSistEndret(LocalDateTime endretDato) {
+    public void setEndretDato(LocalDateTime endretDato) {
         this.endretDato = endretDato;
     }
 
@@ -174,7 +198,7 @@ public class Prosessinstans {
         ProsessinstansHendelse pih = new ProsessinstansHendelse(this, LocalDateTime.now(), steg, type, melding);
         leggTilHendelse(pih);
     }
-        
+    
     @Override
     public int hashCode() {
         return Long.hashCode(id);

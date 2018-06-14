@@ -4,9 +4,7 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
-import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,18 +21,18 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_AVSLUTT_OPPGAVE;
  * JFR_AVSLUTT_OPPGAVE -> JFR_AKTOER_ID eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class AvsluttOppgave extends StandardAbstraktAgent {
+public class AvsluttOppgave extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(AvsluttOppgave.class);
 
     GsakFasade gsakFasade;
 
+
     @Autowired
-    public AvsluttOppgave(Binge binge, ProsessinstansRepository prosessinstansRepo, GsakFasade gsakFasade) {
-        super(binge, prosessinstansRepo);
+    public AvsluttOppgave(GsakFasade gsakFasade) {
         this.gsakFasade = gsakFasade;
     }
-
+    
     @Override
     public ProsessSteg inngangsSteg() {
         return JFR_AVSLUTT_OPPGAVE;
@@ -46,10 +44,11 @@ public class AvsluttOppgave extends StandardAbstraktAgent {
         try {
             gsakFasade.ferdigstillOppgave(oppgaveID);
         } catch (SikkerhetsbegrensningException e) {
-            log.error("Feil i steg {}", inngangsSteg(), e);
-            håndterFeil(prosessinstans, false);
+            log.error("...");
+            // FIXME: MELOSYS-1316
         }
 
         prosessinstans.setSteg(JFR_AKTOER_ID);
     }
+
 }

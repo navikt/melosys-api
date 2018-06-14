@@ -9,8 +9,6 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,12 +25,6 @@ import static org.mockito.Mockito.*;
 public class HentArbeidsforholdopplysningerTest {
 
     @Mock
-    private Binge binge;
-
-    @Mock
-    private ProsessinstansRepository repo;
-
-    @Mock
     private AaregFasade aaregFasade;
 
     private HentArbeidsforholdopplysninger agent;
@@ -43,7 +35,7 @@ public class HentArbeidsforholdopplysningerTest {
     @Before
     public void setUp() {
         FagsakService fagsakService = mock(FagsakService.class);
-        agent = new HentArbeidsforholdopplysninger(binge, repo, aaregFasade, fagsakService);
+        agent = new HentArbeidsforholdopplysninger(aaregFasade, fagsakService);
         ReflectionTestUtils.setField(agent, "arbeidsforholdhistorikkAntallÅr", ARBEIDSFORHOLDHISTORIKK_ANTALL_ÅR);
     }
 

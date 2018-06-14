@@ -7,8 +7,6 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,19 +21,13 @@ import static org.mockito.Mockito.verify;
 public class FerdigstillJournalpostTest {
 
     @Mock
-    private Binge binge;
-
-    @Mock
-    private ProsessinstansRepository repo;
-
-    @Mock
     private JoarkFasade joarkFasade;
 
     private FerdigstillJournalpost agent;
 
     @Before
     public void setUp() {
-        agent = new FerdigstillJournalpost(binge, repo, joarkFasade);
+        agent = new FerdigstillJournalpost(joarkFasade);
     }
 
     @Test

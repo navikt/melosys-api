@@ -7,8 +7,6 @@ import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,19 +22,13 @@ import static org.mockito.Mockito.verify;
 public class OpprettOppgaveTest {
 
     @Mock
-    private Binge binge;
-
-    @Mock
-    private ProsessinstansRepository repo;
-
-    @Mock
     private GsakFasade gsakFasade;
 
     private OpprettOppgave agent;
 
     @Before
     public void setUp() {
-        agent = new OpprettOppgave(binge, repo, gsakFasade);
+        agent = new OpprettOppgave(gsakFasade);
     }
 
     @Test

@@ -4,9 +4,7 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
-import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,15 +21,14 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_AKTOER_ID;
  * JFR_AKTOER_ID -> JFR_OPPRETT_SAK_OG_BEH eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class HentAktoerId extends StandardAbstraktAgent {
+public class HentAktoerId extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentAktoerId.class);
 
     private TpsFasade tpsFasade;
 
     @Autowired
-    public HentAktoerId(Binge binge, ProsessinstansRepository prosessinstansRepo, TpsFasade tpsFasade) {
-        super(binge, prosessinstansRepo);
+    public HentAktoerId(TpsFasade tpsFasade) {
         this.tpsFasade = tpsFasade;
     }
 
@@ -49,7 +46,7 @@ public class HentAktoerId extends StandardAbstraktAgent {
             aktørId = tpsFasade.hentAktørIdForIdent(brukerId);
         } catch (IkkeFunnetException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
-            håndterFeil(prosessinstans, false);
+            // FIXME: MELOSYS-1316
         }
 
         prosessinstans.setData(AKTØR_ID, aktørId);
