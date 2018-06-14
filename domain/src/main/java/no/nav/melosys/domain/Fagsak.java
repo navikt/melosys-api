@@ -13,6 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import no.nav.melosys.exception.TekniskException;
+
 @Entity
 @Table(name = "fagsak")
 public class Fagsak {
@@ -110,9 +112,27 @@ public class Fagsak {
         List<Behandling> behandlinger = getBehandlinger().stream()
             .filter(b -> !b.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
         if (behandlinger.size() > 1) {
-            throw new RuntimeException("Det finnes mer enn en aktive behandlinger");
+            throw new TekniskException("Det finnes mer enn en aktive behandlinger for sak " + saksnummer);
         } else if (behandlinger.size() == 1) {
             return behandlinger.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Returnerer brukeren knyttet til saken eller {@code null} hvis den ikke finnes.
+     */
+    public Aktoer getBruker() {
+        if (aktører == null || aktører.isEmpty()) {
+            return null;
+        }
+
+        List<Aktoer> brukere = aktører.stream().filter(a -> RolleType.BRUKER.equals(a.getRolle())).collect(Collectors.toList());
+        if (brukere.size() > 1) {
+            throw new TekniskException("Det finnes mer enn en bruker for sak " + saksnummer);
+        } else if (brukere.size() == 1) {
+            return brukere.get(0);
         } else {
             return null;
         }

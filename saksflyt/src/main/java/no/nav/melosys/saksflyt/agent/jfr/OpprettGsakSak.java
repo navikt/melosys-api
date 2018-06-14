@@ -1,9 +1,11 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
 import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.agent.StandardAbstraktAgent;
 import no.nav.melosys.saksflyt.api.Binge;
@@ -27,11 +29,14 @@ public class OpprettGsakSak extends StandardAbstraktAgent {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettGsakSak.class);
 
+    FagsakRepository fagsakRepository;
+
     GsakFasade gsakFasade;
 
     @Autowired
-    public OpprettGsakSak(Binge binge, ProsessinstansRepository prosessinstansRepo, GsakFasade gsakFasade) {
+    public OpprettGsakSak(Binge binge, ProsessinstansRepository prosessinstansRepo, FagsakRepository fagsakRepository, GsakFasade gsakFasade) {
         super(binge, prosessinstansRepo);
+        this.fagsakRepository = fagsakRepository;
         this.gsakFasade = gsakFasade;
     }
 
@@ -46,6 +51,10 @@ public class OpprettGsakSak extends StandardAbstraktAgent {
         String saksnummer = prosessinstans.getData(SAKSNUMMER);
 
         String gsakSakId = gsakFasade.opprettSak(saksnummer, BehandlingType.SØKNAD, aktørId);
+
+        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+        fagsak.setGsakSaksnummer(gsakSakId);
+        fagsakRepository.save(fagsak);
 
         prosessinstans.setData(GSAK_SAK_ID, gsakSakId);
         prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);

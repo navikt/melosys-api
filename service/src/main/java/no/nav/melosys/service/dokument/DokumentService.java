@@ -5,9 +5,10 @@ import no.nav.melosys.domain.DokumentType;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.doksys.DokSysFasade;
-import no.nav.melosys.integrasjon.doksys.DokumentbestillingRequest;
+import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.dokument.brev.BrevDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,16 +17,16 @@ public class DokumentService {
 
     private BehandlingRepository behandlingRepository;
 
-    private BrevService brevService;
+    private BrevDataService brevDataService;
 
     private DokSysFasade dokSysFasade;
 
     private JoarkFasade joarkFasade;
 
     @Autowired
-    DokumentService(BehandlingRepository behandlingRepository, BrevService brevService, DokSysFasade dokSysFasade, JoarkFasade joarkFasade) {
+    DokumentService(BehandlingRepository behandlingRepository, BrevDataService brevDataService, DokSysFasade dokSysFasade, JoarkFasade joarkFasade) {
         this.behandlingRepository = behandlingRepository;
-        this.brevService = brevService;
+        this.brevDataService = brevDataService;
         this.joarkFasade = joarkFasade;
         this.dokSysFasade = dokSysFasade;
     }
@@ -40,26 +41,26 @@ public class DokumentService {
     /**
      * Kaller Doksys for å produsere et dokumentutkast
      */
-    public byte[] produserUtkast(long behandlingID, String typeID) throws FunksjonellException, SikkerhetsbegrensningException {
-        return produserDokument(behandlingID, typeID, true);
+    public byte[] produserUtkast(long behandlingID, String dokumenttypeID) throws FunksjonellException, SikkerhetsbegrensningException {
+        return produserDokument(behandlingID, dokumenttypeID, true);
     }
 
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(long behandlingID, String typeID) throws FunksjonellException, SikkerhetsbegrensningException {
-        produserDokument(behandlingID, typeID, false);
+    public void produserDokument(long behandlingID, String dokumenttypeID) throws FunksjonellException, SikkerhetsbegrensningException {
+        produserDokument(behandlingID, dokumenttypeID, false);
     }
 
-    private byte[] produserDokument(long behandlingID, String typeID, boolean erUtkast) throws FunksjonellException, SikkerhetsbegrensningException {
-        DokumentType dokumentType = DokumentType.forKode(typeID);
+    private byte[] produserDokument(long behandlingID, String dokumenttypeID, boolean erUtkast) throws FunksjonellException, SikkerhetsbegrensningException {
+        DokumentType dokumentType = DokumentType.forKode(dokumenttypeID);
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
             throw new FunksjonellException("Behandling med ID " + behandlingID + " finnes ikke");
         }
 
-        DokumentbestillingRequest request = lagDokumentRequest(dokumentType, behandling);
-        Object brevData = brevService.lagBrevData(dokumentType, behandling);
+        DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(dokumentType, behandling);
+        Object brevData = brevDataService.lagBrevXML(dokumentType, behandling);
 
         if (erUtkast) {
             return dokSysFasade.produserDokumentutkast(request, brevData);
@@ -67,11 +68,5 @@ public class DokumentService {
             dokSysFasade.produserIkkeredigerbartDokument(request, brevData);
             return null;
         }
-    }
-
-    private DokumentbestillingRequest lagDokumentRequest(DokumentType dokumentType, Behandling behandling) {
-        DokumentbestillingRequest dokumentbestillingRequest = new DokumentbestillingRequest();
-        // FIXME MELOSYS-1011
-        return dokumentbestillingRequest;
     }
 }
