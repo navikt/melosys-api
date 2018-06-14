@@ -10,31 +10,19 @@ import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.saksflyt.api.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Component;
 
 
 /**
  * En arbeidertråd som schedulerer arbeid som utføres av de maskinelle stegene.
- * 
- * Konfigurasjon:
- *     melosys.saksflyt.arbeider.oppholdMellomSteg – Hvor mange millisekunder trådene skal sove mellom hvert steg som aktiveres (default 47)
- *
+ * Klassen er ikke en bønne håndtert av Spring, og får allse sine bønne-avhengigheter i konstruktøren.
  */
-@Component
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ArbeiderTraad extends Thread {
 
     private static final long TIMEOUT_FOR_Å_STOPPE_EN_TRÅD = 60000;
 
     private static final Logger logger = LoggerFactory.getLogger(ArbeiderTraad.class);
 
-    /** Opphold mellom hvert steg */
-    @Value("${melosys.saksflyt.arbeider.oppholdMellomSteg:47}")
     private long oppholdMellomSteg;
 
     private Binge binge;
@@ -47,11 +35,14 @@ public class ArbeiderTraad extends Thread {
 
     private volatile long aktivProsessinstans; // Brukes kun for loggeing
 
-    @Autowired
-    public ArbeiderTraad(Binge binge, ProsessinstansRepository prosessinstansRepo, List<StegBehandler> stegBehandlere) {
+    @SuppressWarnings("unused")
+    private ArbeiderTraad() {} // Skal ikke håndteres av Spring
+    
+    public ArbeiderTraad(Binge binge, ProsessinstansRepository prosessinstansRepo, List<StegBehandler> stegBehandlere, long oppholdMellomSteg) {
         this.binge = binge;
         this.prosessinstansRepo = prosessinstansRepo;
         this.stegBehandlere = stegBehandlere;
+        this.oppholdMellomSteg = oppholdMellomSteg;
     }
 
     // Kalles av Arbeider når konteksten tas ned

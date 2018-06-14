@@ -2,64 +2,58 @@ package no.nav.melosys.saksflyt.impl;
 
 import java.util.Arrays;
 
-import no.nav.melosys.saksflyt.SaksflytTestApplication;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.agent.jfr.HentPersonopplysninger;
-import no.nav.melosys.saksflyt.impl.Arbeider;
-
-import org.junit.Ignore;
+import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.atMost;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 
 @RunWith(MockitoJUnitRunner.class)
-@ContextConfiguration(classes = { SaksflytTestApplication.class })
 public class ArbeiderTest {
-
-    @InjectMocks
-    private Arbeider arbeider;
 
     @Mock
     private HentPersonopplysninger klargjøreSteg;
 
+    @Mock
+    private Binge binge;
+    
+    @Mock
+    private ProsessinstansRepository prosessinstansRepo;
+    
     @Test
-    @Ignore // FIXME
     public void testAtStegeneBlirKalt() throws Exception {
         MockitoAnnotations.initMocks(this);
-        ReflectionTestUtils.setField(arbeider, "antallTråder", 15);
-        ReflectionTestUtils.setField(arbeider, "oppholdMellomSteg", 1);
-        ReflectionTestUtils.setField(arbeider, "agenter", Arrays.asList(klargjøreSteg));
+        Arbeider arbeider = new Arbeider(binge, prosessinstansRepo, Arrays.asList(klargjøreSteg), 1, 15);
+        when(binge.fjernFørsteProsessinstans(any())).thenReturn(new Prosessinstans());
+        
         long medgåttTid = System.currentTimeMillis();
         arbeider.start();
         Thread.sleep(20);
         arbeider.stopp();
         medgåttTid = System.currentTimeMillis() - medgåttTid + 1;
-        Mockito.verify(klargjøreSteg, atLeast(21)).utførSteg(any());
-        Mockito.verify(klargjøreSteg, atMost(15 * (int) medgåttTid)).utførSteg(any());
+        
+        verify(klargjøreSteg, atLeast(21)).utførSteg(any());
+        verify(klargjøreSteg, atMost(15 * (int) medgåttTid)).utførSteg(any());
     }
 
     @Test
-    @Ignore // FIXME
     public void testLivssyklus() throws Exception {
         MockitoAnnotations.initMocks(this);
-        ReflectionTestUtils.setField(arbeider, "antallTråder", 100);
+        Arbeider arbeider = new Arbeider(binge, prosessinstansRepo, Arrays.asList(klargjøreSteg), 1, 100);
+        when(binge.fjernFørsteProsessinstans(any())).thenReturn(new Prosessinstans());
         ArbeiderTraad[] tråder = (ArbeiderTraad[]) ReflectionTestUtils.getField(arbeider, "tråder");
-        for (ArbeiderTraad tråd : tråder) {
-            ReflectionTestUtils.setField(tråd, "oppholdMellomSteg", 1);
-            ReflectionTestUtils.setField(tråd, "agenter", Arrays.asList(klargjøreSteg));
-        }
+
         arbeider.start();
         for (ArbeiderTraad tråd : tråder) {
             assertTrue(((Thread) tråd).isAlive());

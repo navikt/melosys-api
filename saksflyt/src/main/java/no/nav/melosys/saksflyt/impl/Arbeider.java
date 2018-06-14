@@ -1,14 +1,18 @@
 package no.nav.melosys.saksflyt.impl;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.saksflyt.api.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +24,7 @@ import org.springframework.stereotype.Component;
  * 
  * Konfigurasjon:
  *     melosys.saksflyt.arbeider.antallTråder – Antall tråder (default 1)
+ *     melosys.saksflyt.arbeider.oppholdMellomSteg – Hvor mange millisekunder trådene skal sove mellom hvert steg som aktiveres (default 47)
  *
  */
 @Component
@@ -31,24 +36,32 @@ public class Arbeider {
 
     private static final Logger logger = LoggerFactory.getLogger(Arbeider.class);
 
-    /** Antall arbeidstråder */
-    @Value("${melosys.saksflyt.arbeider.antallTråder:1}")
     private int antallTråder;
 
-    @Autowired
-    private ApplicationContext springAppCtx;
-    
     // Liste med arbeidstråder. Disse er prototype bønner med tilstand og tråd.
     private ArbeiderTraad[] tråder;
 
+    @Autowired
+    public Arbeider(
+        Binge binge, 
+        ProsessinstansRepository prosessinstansRepo, 
+        List<StegBehandler> stegBehandlere,
+        @Value("${melosys.saksflyt.arbeider.oppholdMellomSteg:47}") long oppholdMellomSteg,
+        @Value("${melosys.saksflyt.arbeider.antallTråder:1}") int antallTråder
+    ) {
+        this.antallTråder = antallTråder;
+        tråder = new ArbeiderTraad[antallTråder];
+        for (int i = 0; i < antallTråder; i++) {
+            tråder[i] = new ArbeiderTraad(binge, prosessinstansRepo, stegBehandlere, oppholdMellomSteg);
+        }
+    }
+    
     /**
      * Starter prosessering. Skal kun kalles av spring etter at alt er injisert.
      */
     @PostConstruct
     public void start() {
-        tråder = new ArbeiderTraad[antallTråder];
         for (int i = 0; i < antallTråder; i++) {
-            tråder[i] = springAppCtx.getBean(ArbeiderTraad.class);
             tråder[i].start();
         }
         logger.info("Startet {} arbeidertråder", antallTråder);
