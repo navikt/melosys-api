@@ -29,7 +29,7 @@ public class MedlServiceTest {
     @SuppressWarnings("Duplicates")
     public void getPeriodeListe() throws IntegrasjonException, SikkerhetsbegrensningException {
         final String fnr = "77777777773";
-        Saksopplysning saksopplysning = medlService.hentPeriodeListe(fnr);
+        Saksopplysning saksopplysning = medlService.hentPeriodeListe(fnr, null, null);
         assertNotNull(saksopplysning);
         assertNotNull(saksopplysning.getDokumentXml());
 

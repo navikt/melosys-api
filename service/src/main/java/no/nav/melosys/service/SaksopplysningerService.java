@@ -44,6 +44,9 @@ public class SaksopplysningerService {
     @Value("${melosys.service.fagsak.inntektshistorikk.antallMåneder}")
     private Integer inntektshistorikkAntallMåneder;
 
+    @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}")
+    private Integer medlemskaphistorikkAntallÅr;
+
     private TpsFasade tpsFasade;
 
     private AaregFasade aaregFasade;
@@ -110,8 +113,10 @@ public class SaksopplysningerService {
     }
 
     private Saksopplysning hentMedlemskap(String fnr) throws SikkerhetsbegrensningException {
+        final LocalDate tom  = LocalDate.now();
+        final LocalDate fom = tom.minusYears(medlemskaphistorikkAntallÅr);
         try {
-            return medlFasade.hentPeriodeListe(fnr);
+            return medlFasade.hentPeriodeListe(fnr, fom, tom);
         } catch (IntegrasjonException integrasjonException) {
             log.error("Uventet feil ved oppslag mot MEDL", integrasjonException);
             return null;

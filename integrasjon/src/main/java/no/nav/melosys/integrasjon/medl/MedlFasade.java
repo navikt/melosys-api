@@ -8,7 +8,5 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 
 public interface MedlFasade {
 
-    Saksopplysning hentPeriodeListe(String fnr) throws IntegrasjonException, SikkerhetsbegrensningException;
-
     Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws IntegrasjonException, SikkerhetsbegrensningException;
 }

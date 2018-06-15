@@ -53,11 +53,6 @@ public class MedlService implements MedlFasade {
     }
 
     @Override
-    public Saksopplysning hentPeriodeListe(String fnr) throws IntegrasjonException, SikkerhetsbegrensningException {
-        return hentPeriodeListe(fnr, null, null);
-    }
-
-    @Override
     public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws IntegrasjonException, SikkerhetsbegrensningException {
         HentPeriodeListeResponse response = hentPeriodeListeResponse(fnr, fom, tom);
 
