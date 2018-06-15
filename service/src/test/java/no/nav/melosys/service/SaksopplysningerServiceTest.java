@@ -61,6 +61,7 @@ public class SaksopplysningerServiceTest {
 
         ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallÅr", 5);
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 12);
+        ReflectionTestUtils.setField(saksopplysningerService, "medlemskaphistorikkAntallÅr", 5);
     }
 
     @Test

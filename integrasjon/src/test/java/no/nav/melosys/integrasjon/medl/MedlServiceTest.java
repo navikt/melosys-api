@@ -14,22 +14,22 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class Medl2ServiceTest {
+public class MedlServiceTest {
 
-    private MedlService medl2Service;
+    private MedlService medlService;
 
     @Before
     public void setUp() {
         MedlemskapMock medlemskapMock = new MedlemskapMock();
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
-        medl2Service = new MedlService(medlemskapMock, dokumentFactory);
+        medlService = new MedlService(medlemskapMock, dokumentFactory);
     }
 
     @Test
     @SuppressWarnings("Duplicates")
     public void getPeriodeListe() throws IntegrasjonException, SikkerhetsbegrensningException {
         final String fnr = "77777777773";
-        Saksopplysning saksopplysning = medl2Service.getPeriodeListe(fnr);
+        Saksopplysning saksopplysning = medlService.hentPeriodeListe(fnr, null, null);
         assertNotNull(saksopplysning);
         assertNotNull(saksopplysning.getDokumentXml());
 

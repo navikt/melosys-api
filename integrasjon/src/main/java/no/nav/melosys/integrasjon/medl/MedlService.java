@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.medl;
 
 import java.io.StringWriter;
+import java.time.LocalDate;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -11,6 +12,7 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.medl.medlemskap.HentPeriodeListeResponseWrapper;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumer;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumerConfig;
@@ -51,16 +53,16 @@ public class MedlService implements MedlFasade {
     }
 
     @Override
-    public Saksopplysning getPeriodeListe(String fnr) throws IntegrasjonException, SikkerhetsbegrensningException {
-        HentPeriodeListeResponse response = hentPeriodeListeResponse(fnr);
+    public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws IntegrasjonException, SikkerhetsbegrensningException {
+        HentPeriodeListeResponse response = hentPeriodeListeResponse(fnr, fom, tom);
 
         // Response -> xml
         StringWriter xmlWriter = new StringWriter();
         try {
             HentPeriodeListeResponseWrapper wrapper
-                    = new HentPeriodeListeResponseWrapper().withPeriodeListe(response.getPeriodeListe());
+                = new HentPeriodeListeResponseWrapper().withPeriodeListe(response.getPeriodeListe());
             JAXBElement<HentPeriodeListeResponseWrapper> xmlRoot
-                    = new JAXBElement<>(MedlemskapConsumerConfig.getResponse(), HentPeriodeListeResponseWrapper.class, wrapper);
+                = new JAXBElement<>(MedlemskapConsumerConfig.getResponse(), HentPeriodeListeResponseWrapper.class, wrapper);
 
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
@@ -80,12 +82,15 @@ public class MedlService implements MedlFasade {
         return saksopplysning;
     }
 
-    private HentPeriodeListeResponse hentPeriodeListeResponse(String fnr) throws SikkerhetsbegrensningException {
+    private HentPeriodeListeResponse hentPeriodeListeResponse(String fnr, LocalDate fom, LocalDate tom) throws SikkerhetsbegrensningException {
         Foedselsnummer ident = new Foedselsnummer();
         ident.setValue(fnr);
 
         HentPeriodeListeRequest req = new HentPeriodeListeRequest();
         req.setIdent(ident);
+
+        req.setInkluderPerioderFraOgMed(KonverteringsUtils.javaLocalDateToJodaLocalDate(fom));
+        req.setInkluderPerioderTilOgMed(KonverteringsUtils.javaLocalDateToJodaLocalDate(tom));
 
         try {
             return medlemskapConsumer.hentPeriodeListe(req);

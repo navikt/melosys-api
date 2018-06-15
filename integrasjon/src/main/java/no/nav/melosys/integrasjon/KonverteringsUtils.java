@@ -39,4 +39,26 @@ public final class KonverteringsUtils {
         }
         return calendar.toGregorianCalendar().toZonedDateTime().toLocalDate();
     }
+
+    /*
+        Default datoformat er definert som:
+        - "uuuu-MM-dd" for java.util.LocalDate.toString()/.parse()
+        - "yyyy-MM-dd" for org.joda.time.LocalDate.toString()/.parse()
+        Håndteres likt fordi:
+        - Java definerer "u" som "year" og "y" som "year of era" (https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html),
+        - Joda-Time definerer "y" som "year" og "Y" som "year of era" (http://www.joda.org/joda-time/key_format.html),
+    */
+    public static org.joda.time.LocalDate javaLocalDateToJodaLocalDate(LocalDate date) {
+        if (date == null) {
+            return null;
+        }
+        return org.joda.time.LocalDate.parse(date.toString());
+    }
+
+    public static LocalDate jodaLocalDateToJavaLocalDate(org.joda.time.LocalDate date) {
+        if (date == null) {
+            return null;
+        }
+        return LocalDate.parse(date.toString());
+    }
 }
