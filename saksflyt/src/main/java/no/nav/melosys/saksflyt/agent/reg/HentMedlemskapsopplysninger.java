@@ -30,16 +30,17 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentMedlemskapsopplysninger.class);
 
-    private MedlFasade medlFasade;
+    private final MedlFasade medlFasade;
 
-    private FagsakService fagsakService;
+    private final FagsakService fagsakService;
 
-    @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}")
-    private Integer medlemskaphistorikkAntallÅr;
+    private final Integer medlemskaphistorikkAntallÅr;
 
-    public HentMedlemskapsopplysninger(MedlFasade medlFasade, FagsakService fagsakService) {
+    public HentMedlemskapsopplysninger(MedlFasade medlFasade, FagsakService fagsakService,
+                                       @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr) {
         this.medlFasade = medlFasade;
         this.fagsakService = fagsakService;
+        this.medlemskaphistorikkAntallÅr = medlemskaphistorikkAntallÅr;
     }
 
     @Override

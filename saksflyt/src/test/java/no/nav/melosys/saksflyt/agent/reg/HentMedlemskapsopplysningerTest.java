@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,8 +34,7 @@ public class HentMedlemskapsopplysningerTest {
     @Before
     public void setUp() {
         FagsakService fagsakService = mock(FagsakService.class);
-        agent = new HentMedlemskapsopplysninger(medlFasade, fagsakService);
-        ReflectionTestUtils.setField(agent, "medlemskaphistorikkAntallÅr", MEDLEMSKAPHISTORIKK_ANTALL_ÅR);
+        agent = new HentMedlemskapsopplysninger(medlFasade, fagsakService, MEDLEMSKAPHISTORIKK_ANTALL_ÅR);
     }
 
     @Test
