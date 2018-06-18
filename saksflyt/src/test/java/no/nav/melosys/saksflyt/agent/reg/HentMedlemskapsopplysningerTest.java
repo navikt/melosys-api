@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.ProsessSteg.MANUELL_VURD;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -56,7 +57,7 @@ public class HentMedlemskapsopplysningerTest {
         LocalDate tom = LocalDate.now();
 
         verify(medlFasade, times(1)).hentPeriodeListe(brukerID, fom, tom);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.VURD_VILK);
+        assertThat(p.getSteg()).isEqualTo(MANUELL_VURD);
     }
 
 }

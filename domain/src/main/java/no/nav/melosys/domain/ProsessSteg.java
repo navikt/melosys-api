@@ -23,7 +23,7 @@ public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
     HENT_ORG_OPPL("HENT_ORG_OPPL", "Hent organisasjoner fra EREG"),
     HENT_MEDL_OPPL("HENT_MEDL_OPPL", "Hent medlemskapsopplysninger fra MEDL"),
 
-    VURD_VILK("VURD_VILK", "Vurderer vilkår"),
+    MANUELL_VURD("MANUELL_VURD", "Manuell vurdering"), // FIXME: Fjernes av MELOSYS-1338
 
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
     FERDIG("FERDIG", "Ferdig");
