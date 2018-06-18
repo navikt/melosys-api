@@ -44,8 +44,6 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_ARBF_OPPL', 'Hent arbeidsfor
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_INNT_OPPL', 'Hent inntektopplysninger fra INNTK');
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_ORG_OPPL', 'Hent organisasjoner fra EREG');
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_MEDL_OPPL', 'Hent medlemskapsopplysninger fra MEDL');
--- FIXME: MELOSYS-1338 - HENT_MEDL_OPPL -> JFR_OPPRETT_OPPGAVE
-INSERT INTO prosess_steg (kode, navn) VALUES ('MANUELL_VURD', 'Manuell vurdering');
 INSERT INTO prosess_steg (kode, navn) VALUES ('FEILET_MASKINELT', 'Feilet maskinelt');
 INSERT INTO prosess_steg (kode, navn) VALUES ('FERDIG', 'Ferdig');
 

@@ -55,7 +55,7 @@ public class VurderInngangsvilkaarTest {
         
         assertEquals(null, p.getHendelser());
         assertEquals(FagsakType.EU_EØS, p.getBehandling().getFagsak().getType());
-        assertEquals(ProsessSteg.JFR_OPPRETT_OPPGAVE, p.getSteg());
+        assertEquals(ProsessSteg.HENT_ARBF_OPPL, p.getSteg());
     }
 
     @Test
