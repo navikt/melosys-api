@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,6 @@ import javax.persistence.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import no.nav.melosys.domain.jpa.PropertiesConverter;
 import no.nav.melosys.exception.TekniskException;
 
@@ -52,7 +52,7 @@ public class Prosessinstans {
     private LocalDateTime sistForsøkt;
 
     @Column(name = "sover_til", nullable = true, updatable = true)
-    private LocalDateTime soverTil;
+    private Instant soverTil;
     
     @Column(name = "endret_dato", nullable = false, updatable = true)
     private LocalDateTime endretDato;
@@ -160,11 +160,11 @@ public class Prosessinstans {
         this.sistForsøkt = sistForsøkt;
     }
 
-    public LocalDateTime getSoverTil() {
+    public Instant getSoverTil() {
         return soverTil;
     }
 
-    public void setSoverTil(LocalDateTime soverTil) {
+    public void setSoverTil(Instant soverTil) {
         this.soverTil = soverTil;
     }
 
@@ -194,7 +194,7 @@ public class Prosessinstans {
         hendelser.add(piHend);
     }
         
-    public void leggTilHendelse(ProsessSteg steg, String type, String melding) {
+    public void leggTilHendelse(String type, String melding) {
         ProsessinstansHendelse pih = new ProsessinstansHendelse(this, LocalDateTime.now(), steg, type, melding);
         leggTilHendelse(pih);
     }

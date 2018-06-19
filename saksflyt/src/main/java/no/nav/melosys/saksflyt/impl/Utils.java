@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.impl;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.function.Predicate;
 
@@ -19,7 +19,7 @@ public abstract class Utils {
     /**
      * Kvalifiserer prosessinstanser som ikke sover
      */
-    public static final Predicate<Prosessinstans> somIkkeSover = pi -> pi.getSoverTil() == null || pi.getSoverTil().isBefore(LocalDateTime.now());
+    public static final Predicate<Prosessinstans> somIkkeSover = pi -> pi.getSoverTil() == null || pi.getSoverTil().isBefore(Instant.now());
     
     /**
      * Sorterer prosessinstanser etter alder, eldste først
