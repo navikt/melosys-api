@@ -53,12 +53,14 @@ public class SakOgBehandlingClientImpl implements SakOgBehandlingClient {
     }
 
     @Override
-    public void sendBehandlingOpprettet(BehandlingOpprettet behandlingOpprettet) {
+    public void sendBehandlingOpprettet(BehandlingStatusMapper mapper) {
+        BehandlingOpprettet behandlingOpprettet = mapper.tilBehandlingOpprettet();
         jmsTemplate.convertAndSend(hendelseshåndterer, behandlingStatusTilXml(behandlingOpprettet), behandleMelding);
     }
 
     @Override
-    public void sendBehandlingAvsluttet(BehandlingAvsluttet behandlingAvsluttet) {
+    public void sendBehandlingAvsluttet(BehandlingStatusMapper mapper) {
+        BehandlingAvsluttet behandlingAvsluttet = mapper.tilBehandlingAvsluttet();
         jmsTemplate.convertAndSend(hendelseshåndterer, behandlingStatusTilXml(behandlingAvsluttet), behandleMelding);
     }
 

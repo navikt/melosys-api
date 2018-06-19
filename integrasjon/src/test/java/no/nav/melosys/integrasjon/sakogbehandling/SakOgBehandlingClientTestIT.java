@@ -1,10 +1,7 @@
 package no.nav.melosys.integrasjon.sakogbehandling;
 
 import java.time.LocalDateTime;
-import javax.xml.datatype.XMLGregorianCalendar;
 
-import no.nav.melding.virksomhet.behandlingsstatus.hendelsehandterer.v1.hendelseshandtererbehandlingsstatus.BehandlingOpprettet;
-import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.felles.jms.JmsConfig;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -25,12 +22,11 @@ public class SakOgBehandlingClientTestIT {
 
     @Test
     public void notPing() throws Exception {
-        XMLGregorianCalendar hendelsesTidspunkt = KonverteringsUtils.localDateTimeToXMLGregorianCalendar(LocalDateTime.now());
-        BehandlingOpprettet behandlingOpprettet = new BehandlingOpprettet();
-        behandlingOpprettet.setAnsvarligEnhetREF("MELOSYS");
-        behandlingOpprettet.setHendelsesTidspunkt(hendelsesTidspunkt);
+        BehandlingStatusMapper.Builder builder = new BehandlingStatusMapper.Builder();
+        builder.medAnsvarligEnhet("MELOSYS");
+        builder.medHendelsestidspunkt(LocalDateTime.now());
 
-        client.sendBehandlingOpprettet(behandlingOpprettet);
+        client.sendBehandlingOpprettet(builder.build());
     }
 
     @Configuration
