@@ -68,11 +68,11 @@ public class GsakMock implements OppgaveMockRepository {
 
         Oppgave o5 = new Oppgave();
         o5.setOppgaveId("5");
-        o5.setBruker("99999999991");
+        o5.setBruker("FJERNET");
         o5.setFagomrade(Fagomrade.MED);
         o5.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.JFR_MED);
         o5.setPrioritet(PrioritetType.HOY_MED);
-        o5.setDokumentId("DOK_5678");
+        o5.setDokumentId("415782379");
         o5.setAktivTil(LocalDate.now().plusYears(1));
         o5.setAnsvarligId("Z990749");
 
