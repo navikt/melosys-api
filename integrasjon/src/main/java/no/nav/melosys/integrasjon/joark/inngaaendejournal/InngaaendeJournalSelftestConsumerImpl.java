@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.joark.inngaaendejournal;
 
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.InngaaendeJournalV1;
+import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.binding.InngaaendeJournalV1;
 
 class InngaaendeJournalSelftestConsumerImpl implements InngaaendeJournalSelftestConsumer {
 

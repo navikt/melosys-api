@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.joark.inngaaendejournal;
 
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
 import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.InngaaendeJournalV1;
+import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.binding.InngaaendeJournalV1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

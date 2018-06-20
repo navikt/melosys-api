@@ -48,7 +48,7 @@
         <gsak.behandleoppgave.version>1.0.7</gsak.behandleoppgave.version>
         <inntekt-v3.version>2.0.0</inntekt-v3.version>
         <joark.behandleinngaaendejournal.version>1.0.1</joark.behandleinngaaendejournal.version>
-        <joark.inngaaendejournal.version>1.1.1</joark.inngaaendejournal.version>
+        <joark.inngaaendejournal.version>1.1.3</joark.inngaaendejournal.version>
         <joark.journal.version>3.1.2</joark.journal.version>
         <modig-testcertificates.version>1.2.5-vedfp-SNAPSHOT</modig-testcertificates.version>
         <tps.aktoer.version>2.0.1</tps.aktoer.version>
