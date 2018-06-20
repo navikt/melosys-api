@@ -110,4 +110,9 @@ public class OppgaveService {
         Periode periode = hentPeriode(soeknadDokument);
         return new PeriodeDto(periode.getFom(), periode.getTom());
     }
+
+    // FIXME For å teste journalføring. Må fjernes.
+    public String opprettOppgave(String ident, String oppgavetype, String brukerID, String dokumentID, String saksnummer) {
+        return gsakFasade.opprettOppgave(ident, oppgavetype, brukerID, dokumentID, saksnummer);
+    }
 }

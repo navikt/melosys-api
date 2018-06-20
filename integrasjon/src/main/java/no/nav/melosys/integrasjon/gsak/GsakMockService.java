@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.Oppgavetype;
+import no.nav.melosys.domain.gsak.Fagomrade;
+import no.nav.melosys.domain.gsak.PrioritetType;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -80,6 +82,26 @@ public class GsakMockService implements GsakFasade {
         oppgave.setPrioritet(request.getPrioritetType());
         oppgave.setGsakSaksnummer(request.getSaksnummer());
         oppgave.setUnderkategori(request.getUnderkategoriKode());
+
+        return oppgaveRepo.save(oppgave);
+    }
+
+    @Override
+    public String opprettOppgave(String ident, String oppgavetype, String brukerID, String dokumentID, String saksnummer) {
+        Oppgave oppgave = new Oppgave();
+        oppgave.setAktivTil(LocalDate.now().plusYears(1));
+        oppgave.setBruker(brukerID);
+        oppgave.setDokumentId(dokumentID);
+        oppgave.setFagomrade(Fagomrade.MED);
+        if (Oppgavetype.JFR.equals(oppgavetype)) {
+            oppgave.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.JFR_MED);
+        } else if (Oppgavetype.BEH_SAK.equals(oppgavetype)) {
+            oppgave.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.BEH_SAK_MED);
+        } else {
+            throw new TekniskException(oppgavetype + " støttes ikke.");
+        }
+        oppgave.setPrioritet(PrioritetType.NORM_MED);
+        oppgave.setGsakSaksnummer(saksnummer);
 
         return oppgaveRepo.save(oppgave);
     }

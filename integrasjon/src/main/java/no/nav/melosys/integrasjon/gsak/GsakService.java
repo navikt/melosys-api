@@ -324,6 +324,11 @@ public class GsakService implements GsakFasade {
         // FIXME Venter på nye GSAK tjenester
     }
 
+    @Override
+    public String opprettOppgave(String ident, String oppgavetype, String brukerID, String dokumentID, String saksnummer) {
+        return null;
+    }
+
     private WSAktor byggWSAktør(String ident, AktorType aktørType) {
         WSAktor wsAktor = new WSAktor();
         wsAktor.setIdent(ident);

@@ -17,6 +17,7 @@ import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.tjenester.gui.dto.MockOppgaveDto;
 import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
 import no.nav.melosys.tjenester.gui.dto.TilbakeleggingDto;
@@ -90,6 +91,16 @@ public class OppgaveTjeneste extends RestTjeneste {
     }
 
     // FIXME Dette er for å hjelpe testing av oppgavehåndtering.
+    @POST
+    @Path("/opprett")
+    @ApiOperation(value = "Oppretter en mock oppgave")
+    public Response opprett(MockOppgaveDto oppgaveDto) {
+        String ident = SubjectHandler.getInstance().getUserID();
+        oppgaveService.opprettOppgave(ident, oppgaveDto.getOppgavetype(), oppgaveDto.getFnr(), oppgaveDto.getDokumentID(), oppgaveDto.getSaksnummer());
+
+        return Response.ok().build();
+    }
+
     @GET
     @Path("/reset")
     @ApiOperation(value = "Setter alle oppgaver i mocken som utildelte.")

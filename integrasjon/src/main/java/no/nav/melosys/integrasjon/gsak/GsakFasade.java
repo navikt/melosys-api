@@ -79,6 +79,8 @@ public interface GsakFasade {
      * @throws SikkerhetsbegrensningException
      */
     String opprettOppgave(OpprettOppgaveRequest request) throws SikkerhetsbegrensningException;
+    
+    
 
     /**
      * Legger tilbake en oppgave i GSAK
@@ -109,4 +111,7 @@ public interface GsakFasade {
      */
     void tildelOppgave(String oppgaveId,
                        String saksbehandlerID);
+
+    // FIXME For å teste jfr
+    String opprettOppgave(String ident, String oppgavetype, String brukerID, String dokumentID, String saksnummer);
 }
