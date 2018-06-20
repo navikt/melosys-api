@@ -93,9 +93,9 @@ public class GsakMockService implements GsakFasade {
         oppgave.setBruker(brukerID);
         oppgave.setDokumentId(dokumentID);
         oppgave.setFagomrade(Fagomrade.MED);
-        if (Oppgavetype.JFR.equals(oppgavetype)) {
+        if (Oppgavetype.JFR.getKode().equals(oppgavetype)) {
             oppgave.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.JFR_MED);
-        } else if (Oppgavetype.BEH_SAK.equals(oppgavetype)) {
+        } else if (Oppgavetype.BEH_SAK.getKode().equals(oppgavetype)) {
             oppgave.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.BEH_SAK_MED);
         } else {
             throw new TekniskException(oppgavetype + " støttes ikke.");

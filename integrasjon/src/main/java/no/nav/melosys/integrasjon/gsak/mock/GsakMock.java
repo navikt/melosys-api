@@ -48,24 +48,6 @@ public class GsakMock implements OppgaveMockRepository {
         o2.setGsakSaksnummer("123");
         o2.setAktivTil(LocalDate.now().plusYears(1));
 
-        Oppgave o3 = new Oppgave();
-        o3.setOppgaveId("3");
-        o3.setBruker("99999999991");
-        o3.setFagomrade(Fagomrade.MED);
-        o3.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.JFR_MED);
-        o3.setPrioritet(PrioritetType.HOY_MED);
-        o3.setDokumentId("DOK_3789");
-        o3.setAktivTil(LocalDate.now().plusYears(1));
-
-        Oppgave o4 = new Oppgave();
-        o4.setOppgaveId("4");
-        o4.setBruker("99999999991");
-        o4.setFagomrade(Fagomrade.MED);
-        o4.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.JFR_MED);
-        o4.setPrioritet(PrioritetType.NORM_MED);
-        o4.setDokumentId("DOK_4987");
-        o4.setAktivTil(LocalDate.now().plusYears(1));
-
         Oppgave o5 = new Oppgave();
         o5.setOppgaveId("5");
         o5.setBruker("FJERNET");
@@ -89,8 +71,6 @@ public class GsakMock implements OppgaveMockRepository {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(o1);
         oppgaver.add(o2);
-        oppgaver.add(o3);
-        oppgaver.add(o4);
         oppgaver.add(o5);
         oppgaver.add(o6);
 
