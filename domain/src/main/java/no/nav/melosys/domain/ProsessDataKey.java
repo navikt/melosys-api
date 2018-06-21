@@ -19,6 +19,7 @@ public enum ProsessDataKey {
     LAND("land"),
     OPPGAVE_ID("oppgaveID"),
     SAKSNUMMER("saksnummer"),
+    SOB_BEHANDLING_ID("sobBehandlingId"),
     SØKNADSPERIODE("søknadsperiode"),
     TEMA("tema");
 

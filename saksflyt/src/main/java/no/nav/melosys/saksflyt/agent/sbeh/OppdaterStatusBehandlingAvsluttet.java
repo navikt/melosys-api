@@ -18,8 +18,10 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.BehandlingType.SØKNAD;
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
+import static no.nav.melosys.domain.ProsessDataKey.SOB_BEHANDLING_ID;
 import static no.nav.melosys.domain.ProsessSteg.FATTET_VEDTAK;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.generateCallId;
 
 /**
  * Steget sørger for å skrive til Sak og Behandling når behandling opprettes
@@ -58,9 +60,11 @@ public class OppdaterStatusBehandlingAvsluttet extends AbstraktStegBehandler {
         String saksnummer = prosessinstans.getData(SAKSNUMMER, String.class);
         Behandling behandling = prosessinstans.getBehandling();
 
-        // FIXME: Legg til hendelsesId-løpenummer og behandlingsId fra prosessinstansen (fra oppretting av behandling)
+        String behandlingsId = prosessinstans.getData(SOB_BEHANDLING_ID, String.class);
 
         BehandlingStatusMapper.Builder builder = new BehandlingStatusMapper.Builder();
+        builder.medBehandlingsId(behandlingsId);
+        builder.medHendelsesId(generateCallId());
         builder.medSaksnummer(saksnummer);
         builder.medHendelsesprodusent(Fagsystem.MELOSYS.getKode());
         builder.medHendelsestidspunkt(LocalDateTime.now());

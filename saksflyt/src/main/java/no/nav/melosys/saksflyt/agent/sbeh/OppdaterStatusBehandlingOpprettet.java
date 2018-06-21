@@ -10,6 +10,7 @@ import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.sakogbehandling.BehandlingStatusMapper;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingClient;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
@@ -21,8 +22,10 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.BehandlingType.SØKNAD;
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
+import static no.nav.melosys.domain.ProsessDataKey.SOB_BEHANDLING_ID;
 import static no.nav.melosys.domain.ProsessSteg.FERDIG;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.generateCallId;
 
 /**
  * Steget sørger for å skrive til Sak og Behandling når behandling opprettes
@@ -39,10 +42,13 @@ public class OppdaterStatusBehandlingOpprettet extends AbstraktStegBehandler {
     private static String ARKIVTEMA_MED = "MED";
     private static String ARKIVTEMA_UFM = "UFM";
 
+    private final BehandlingRepository behandlingRepository;
+
     private final SakOgBehandlingClient sakOgBehandlingClient;
 
     @Autowired
-    public OppdaterStatusBehandlingOpprettet(SakOgBehandlingClient sakOgBehandlingClient) {
+    public OppdaterStatusBehandlingOpprettet(BehandlingRepository behandlingRepository, SakOgBehandlingClient sakOgBehandlingClient) {
+        this.behandlingRepository = behandlingRepository;
         this.sakOgBehandlingClient = sakOgBehandlingClient;
     }
 
@@ -62,12 +68,15 @@ public class OppdaterStatusBehandlingOpprettet extends AbstraktStegBehandler {
         String saksnummer = prosessinstans.getData(SAKSNUMMER, String.class);
         Behandling behandling = prosessinstans.getBehandling();
 
-        // FIXME: Legg til hendelsesId- og behandlingsId-løpenummer. BehandlingsId lagres i prosessinstansen og gjenbrukes når behandling avsluttes
-        // behandlingsId skal være unik. Foreldrepenger prefikser med applikasjonsId.
+        String fagsystemkode = Fagsystem.MELOSYS.getKode();
+        String behandlingsId = String.format("%s-%d", fagsystemkode, behandlingRepository.hentNesteSakOgBehandlingSekvensVerdi());
+        prosessinstans.setData(SOB_BEHANDLING_ID, behandlingsId);
 
         BehandlingStatusMapper.Builder builder = new BehandlingStatusMapper.Builder();
+        builder.medBehandlingsId(behandlingsId);
+        builder.medHendelsesId(generateCallId());
         builder.medSaksnummer(saksnummer);
-        builder.medHendelsesprodusent(Fagsystem.MELOSYS.getKode());
+        builder.medHendelsesprodusent(fagsystemkode);
         builder.medHendelsestidspunkt(LocalDateTime.now());
         if (SØKNAD.equals(behandling.getType())) {
             builder.medArkivtema(ARKIVTEMA_MED);
