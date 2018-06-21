@@ -27,6 +27,7 @@ public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
     FERDIG("FERDIG", "Ferdig"),
 
     STATUS_BEH_OPPR("STATUS_BEH_OPPR", "Oppdater Sak og Behandling ved oppretting av behandling"),
+    // FIXME: Prosessinstansen må få steg FATTET_VEDTAK når vedtak er fattet slik at status oppdateres i Sak og Behandling.
     FATTET_VEDTAK("FATTET_VEDTAK", "Saksbehandler har fattet vedtak i Melosys"),
     STATUS_BEH_AVSL("STATUS_BEH_AVSL", "Oppdater Sak og Behandling ved lukking av behandling");
 

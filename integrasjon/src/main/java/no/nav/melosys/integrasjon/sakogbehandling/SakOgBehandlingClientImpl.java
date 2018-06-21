@@ -53,24 +53,26 @@ public class SakOgBehandlingClientImpl implements SakOgBehandlingClient {
     }
 
     @Override
-    public void sendBehandlingOpprettet(BehandlingStatusMapper mapper) {
+    public void sendBehandlingOpprettet(BehandlingStatusMapper mapper) throws IntegrasjonException {
         BehandlingOpprettet behandlingOpprettet = mapper.tilBehandlingOpprettet();
         jmsTemplate.convertAndSend(hendelseshåndterer, behandlingStatusTilXml(behandlingOpprettet), behandleMelding);
     }
 
     @Override
-    public void sendBehandlingAvsluttet(BehandlingStatusMapper mapper) {
+    public void sendBehandlingAvsluttet(BehandlingStatusMapper mapper) throws IntegrasjonException {
         BehandlingAvsluttet behandlingAvsluttet = mapper.tilBehandlingAvsluttet();
         jmsTemplate.convertAndSend(hendelseshåndterer, behandlingStatusTilXml(behandlingAvsluttet), behandleMelding);
     }
 
-    public String behandlingStatusTilXml(BehandlingStatus behandlingStatus) {
+    public String behandlingStatusTilXml(BehandlingStatus behandlingStatus) throws IntegrasjonException {
         try {
-            JAXBElement xmlElement = null;
+            JAXBElement<?> xmlElement;
             if (behandlingStatus instanceof BehandlingOpprettet) {
                 xmlElement = objectFactory.createBehandlingOpprettet((BehandlingOpprettet) behandlingStatus);
             } else if (behandlingStatus instanceof BehandlingAvsluttet) {
                 xmlElement = objectFactory.createBehandlingAvsluttet((BehandlingAvsluttet) behandlingStatus);
+            } else {
+                throw new IntegrasjonException("Ukjent BehandlingStatus i kø til Sak og Behandling");
             }
             Marshaller marshaller = jaxbContext.createMarshaller();
             StringWriter writer = new StringWriter();

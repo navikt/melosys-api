@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.BehandlingType.SØKNAD;
+import static no.nav.melosys.domain.BehandlingType.UNNTAK_MEDL;
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
 import static no.nav.melosys.domain.ProsessDataKey.SOB_BEHANDLING_ID;
@@ -62,6 +63,7 @@ public class OppdaterStatusBehandlingOpprettet extends AbstraktStegBehandler {
         return FeilStrategi.standardFeilHåndtering();
     }
 
+    @SuppressWarnings("Duplicates")
     @Override
     public void utførSteg(Prosessinstans prosessinstans) {
         String aktørID = prosessinstans.getData(AKTØR_ID, String.class);
@@ -80,12 +82,17 @@ public class OppdaterStatusBehandlingOpprettet extends AbstraktStegBehandler {
         builder.medHendelsestidspunkt(LocalDateTime.now());
         if (SØKNAD.equals(behandling.getType())) {
             builder.medArkivtema(ARKIVTEMA_MED);
-        } else {
+        } else if (UNNTAK_MEDL.equals(behandling.getType())) {
             builder.medArkivtema(ARKIVTEMA_UFM);
+        } else {
+            log.error("BehandlingType {} støttes ikke.", behandling.getType().getBeskrivelse());
+            prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
+            return;
         }
         builder.medAktørID(aktørID);
         builder.medAnsvarligEnhet(Integer.toString(MELOSYS_ENHET_ID));
 
+        // FIXME: MELOSYS-1316 (kaster IntegrasjonException)
         sakOgBehandlingClient.sendBehandlingOpprettet(builder.build());
 
         prosessinstans.setSteg(null);
