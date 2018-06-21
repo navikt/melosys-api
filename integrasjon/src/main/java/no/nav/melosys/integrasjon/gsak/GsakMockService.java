@@ -87,8 +87,10 @@ public class GsakMockService implements GsakFasade {
     }
 
     @Override
-    public String opprettOppgave(String ident, String oppgavetype, String brukerID, String dokumentID, String saksnummer) {
+    public String opprettOppgave(String ansvarligID, String oppgavetype, String brukerID, String dokumentID, String saksnummer) {
         Oppgave oppgave = new Oppgave();
+        oppgave.setAnsvarligId(ansvarligID);
+
         oppgave.setAktivTil(LocalDate.now().plusYears(1));
         oppgave.setBruker(brukerID);
         oppgave.setDokumentId(dokumentID);

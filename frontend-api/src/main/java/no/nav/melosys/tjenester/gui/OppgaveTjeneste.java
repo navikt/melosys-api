@@ -95,8 +95,7 @@ public class OppgaveTjeneste extends RestTjeneste {
     @Path("/opprett")
     @ApiOperation(value = "Oppretter en mock oppgave")
     public Response opprett(MockOppgaveDto oppgaveDto) {
-        String ident = SubjectHandler.getInstance().getUserID();
-        String oppgaveID = oppgaveService.opprettOppgave(ident, oppgaveDto.getOppgavetype(), oppgaveDto.getFnr(), oppgaveDto.getDokumentID(), oppgaveDto.getSaksnummer());
+        String oppgaveID = oppgaveService.opprettOppgave(oppgaveDto.getAnsvarligID(), oppgaveDto.getOppgavetype(), oppgaveDto.getFnr(), oppgaveDto.getDokumentID(), oppgaveDto.getSaksnummer());
 
         return Response.ok(oppgaveID).build();
     }

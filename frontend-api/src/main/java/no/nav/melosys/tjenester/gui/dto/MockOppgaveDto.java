@@ -1,10 +1,19 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 public class MockOppgaveDto {
+    private String ansvarligID;
     private String fnr;
     private String dokumentID;
     private String oppgavetype;
     private String saksnummer;
+
+    public String getAnsvarligID() {
+        return ansvarligID;
+    }
+
+    public void setAnsvarligID(String ansvarligID) {
+        this.ansvarligID = ansvarligID;
+    }
 
     public String getFnr() {
         return fnr;
