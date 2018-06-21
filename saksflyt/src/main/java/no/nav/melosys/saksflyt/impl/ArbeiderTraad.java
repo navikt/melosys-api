@@ -33,7 +33,7 @@ public class ArbeiderTraad extends Thread {
 
     private volatile StegBehandler aktivStegBehandler; // Brukes kun for logging
 
-    private volatile long aktivProsessinstans; // Brukes kun for loggeing
+    private volatile long aktivProsessinstans; // Brukes kun for logging
 
     @SuppressWarnings("unused")
     private ArbeiderTraad() {} // Skal ikke håndteres av Spring

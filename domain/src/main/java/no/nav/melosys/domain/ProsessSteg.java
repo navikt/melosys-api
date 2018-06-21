@@ -10,7 +10,7 @@ public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
 
     JFR_AVSLUTT_OPPGAVE("JFR_AVSLUTT_OPPGAVE", "Avslutter journalføringsoppgaven i GSAK"),
     JFR_AKTOER_ID("JFR_AKTOER_ID", "Henter aktørID"),
-    JFR_OPPRETT_SAK_OG_BEH("JFR_OPPRETT_SAK_BEH", "Oppretter ny sak og behandling i Melosys"),
+    JFR_OPPRETT_SAK_OG_BEH("JFR_OPPRETT_SAK_OG_BEH", "Oppretter ny sak og behandling i Melosys"),
     JFR_OPPRETT_GSAK_SAK("JFR_OPPRETT_GSAK_SAK", "Oppretter Sak i GSAK"),
     JFR_OPPDATER_JOURNALPOST("JFR_OPPDATER_JOURNALPOST", "Oppdaterer journalposten i Joark"),
     JFR_FERDIGSTILL_JOURNALPOST("JFR_FERDIGSTILL_JOURNALPOST", "Ferdigstiller journalposten i Joark"),
