@@ -23,10 +23,8 @@
       "arbeidKnyttetTilVirksomhetUtlandet": null,
       "sammeTypeVirksomhet": null
     },
-    "bostedsland": {
-      "bekrefterFamiliebosted": null,
-      "bekrefterDisponering": null,
-      "bostedsland": []
+    "bosted": {
+      "land": []
     },
     "sektor": {
       "ansattISektor": "INGEN_AV_DISSE"
