@@ -15,7 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_OPPGAVE;
+import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -57,7 +57,7 @@ public class HentMedlemskapsopplysningerTest {
         LocalDate tom = LocalDate.now();
 
         verify(medlFasade, times(1)).hentPeriodeListe(brukerID, fom, tom);
-        assertThat(p.getSteg()).isEqualTo(JFR_OPPRETT_OPPGAVE);
+        assertThat(p.getSteg()).isEqualTo(OPPRETT_OPPGAVE);
     }
 
 }

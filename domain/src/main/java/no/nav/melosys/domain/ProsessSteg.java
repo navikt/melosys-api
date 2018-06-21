@@ -21,8 +21,7 @@ public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
     HENT_INNT_OPPL("HENT_INNT_OPPL", "Hent inntektopplysninger fra INNTK"),
     HENT_ORG_OPPL("HENT_ORG_OPPL", "Hent organisasjoner fra EREG"),
     HENT_MEDL_OPPL("HENT_MEDL_OPPL", "Hent medlemskapsopplysninger fra MEDL"),
-
-    JFR_OPPRETT_OPPGAVE("JFR_OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
+    OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
 
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
     FERDIG("FERDIG", "Ferdig");

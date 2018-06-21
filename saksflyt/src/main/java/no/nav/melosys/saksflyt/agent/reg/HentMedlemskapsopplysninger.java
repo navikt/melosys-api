@@ -16,13 +16,13 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
 import static no.nav.melosys.domain.ProsessSteg.HENT_MEDL_OPPL;
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_OPPGAVE;
+import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
 
 /**
  * Steget sørger for å hente medlemskapsinfo fra MEDL
  *
  * Transisjoner:
- * HENT_MEDL_OPPL → JFR_OPPRETT_OPPGAVE hvis alt ok
+ * HENT_MEDL_OPPL → OPPRETT_OPPGAVE hvis alt ok
  * HENT_MEDL_OPPL → FEILET_MASKINELT hvis oppslag mot MEDL feilet
  */
 @Component
@@ -68,6 +68,6 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
             return;
         }
 
-        prosessinstans.setSteg(JFR_OPPRETT_OPPGAVE);
+        prosessinstans.setSteg(OPPRETT_OPPGAVE);
     }
 }
