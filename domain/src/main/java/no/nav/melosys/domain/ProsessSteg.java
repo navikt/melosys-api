@@ -24,7 +24,11 @@ public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
     OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
 
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
-    FERDIG("FERDIG", "Ferdig");
+    FERDIG("FERDIG", "Ferdig"),
+
+    STATUS_BEH_OPPR("STATUS_BEH_OPPR", "Oppdater Sak og Behandling ved oppretting av behandling"),
+    FATTET_VEDTAK("FATTET_VEDTAK", "Saksbehandler har fattet vedtak i Melosys"),
+    STATUS_BEH_AVSL("STATUS_BEH_AVSL", "Oppdater Sak og Behandling ved lukking av behandling");
 
     private String kode;
     private String beskrivelse;

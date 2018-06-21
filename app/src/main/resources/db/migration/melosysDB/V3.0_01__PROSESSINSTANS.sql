@@ -46,6 +46,9 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_MEDL_OPPL', 'Hent medlemskap
 INSERT INTO prosess_steg (kode, navn) VALUES ('OPPRETT_OPPGAVE', 'Oppretter oppgave i GSAK');
 INSERT INTO prosess_steg (kode, navn) VALUES ('FEILET_MASKINELT', 'Feilet maskinelt');
 INSERT INTO prosess_steg (kode, navn) VALUES ('FERDIG', 'Ferdig');
+INSERT INTO prosess_steg (kode, navn) VALUES ('STATUS_BEH_OPPR', 'Oppdater Sak og Behandling ved oppretting av behandling'),
+INSERT INTO prosess_steg (kode, navn) VALUES ('FATTET_VEDTAK', 'Saksbehandler har fattet vedtak i Melosys'),
+INSERT INTO prosess_steg (kode, navn) VALUES ('STATUS_BEH_AVSL', 'Oppdater Sak og Behandling ved lukking av behandling'),
 
 CREATE TABLE prosessinstans_hendelser (
     id                  NUMBER(19) GENERATED ALWAYS AS IDENTITY,
