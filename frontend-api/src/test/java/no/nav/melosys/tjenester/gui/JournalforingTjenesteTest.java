@@ -3,9 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,9 +14,7 @@ import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.DokumentTittel;
 import no.nav.melosys.domain.FagsakType;
-import no.nav.melosys.domain.VedleggTittel;
 import no.nav.melosys.service.journalforing.JournalforingService;
-import no.nav.melosys.service.journalforing.dto.FagsakDto;
 import no.nav.melosys.service.journalforing.dto.JournalforingDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
@@ -96,27 +92,11 @@ public class JournalforingTjenesteTest {
 
     @Test
     public void jfrJsonInn() {
-        JournalforingDto dto = new JournalforingDto();
-        dto.setJournalpostID("Journal_1234");
-        dto.setOppgaveID("Oppgave_ABC");
-        dto.setSaksnummer("MEL-1234");
-        dto.setBrukerID("12345");
-        dto.setAvsenderID("56890");
-        dto.setAvsenderNavn("AvsenderNavn");
 
-        dto.setDokumenttittel(DokumentTittel.SØKNAD_MEDLEMSSKAP.getBeskrivelse());
-        List<String> titler = new ArrayList<>();
-        titler.add(VedleggTittel.TODO_1.getKode());
-        titler.add(VedleggTittel.TODO_2.getKode());
-        dto.setVedleggstitler(titler);
-
-        FagsakDto fagsak = new FagsakDto();
-        fagsak.setSoknadsperiode(new no.nav.melosys.service.journalforing.dto.PeriodeDto(LocalDate.now(), LocalDate.MAX));
-        fagsak.setLand(Arrays.asList("DK","GB"));
-        dto.setFagsak(fagsak);
+        String json = "{\"journalpostID\":\"415782379\",\"oppgaveID\":\"5\",\"brukerID\":\"FJERNET\",\"avsenderID\":\"FJERNET\",\"dokumentID\":\"425226004\",\"dokumenttittel\":\"Søknad om medlemskap\",\"vedleggstitler\":[],\"fagsak\":{\"soknadsperiode\":{\"fom\":\"2018-02-01\",\"tom\":\"2018-12-03\"},\"land\":[\"HU\"]}}";
 
         try {
-            String json = mapper.writeValueAsString(dto);
+            mapper.readValue(json, JournalforingDto.class);
             System.out.println(json);
         } catch (IOException e) {
             e.printStackTrace();
