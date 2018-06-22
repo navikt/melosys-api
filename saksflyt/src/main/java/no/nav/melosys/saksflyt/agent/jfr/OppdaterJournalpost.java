@@ -59,6 +59,12 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         String brukerID = prosessinstans.getData(BRUKER_ID);
         String avsenderID = prosessinstans.getData(AVSENDER_ID);
         String avsenderNavn = prosessinstans.getData(AVSENDER_NAVN);
+        if (avsenderID == null) {
+            avsenderID = avsenderNavn; //FIXME trenger en avklaring MELOSYS-1353
+        }
+        if (avsenderNavn == null) {
+            avsenderNavn = avsenderID; //FIXME trenger en avklaring MELOSYS-1353
+        }
         String tittel = prosessinstans.getData(HOVEDDOKUMENT_TITTEL);
         String dokumentID = prosessinstans.getData(DOKUMENT_ID);
 
