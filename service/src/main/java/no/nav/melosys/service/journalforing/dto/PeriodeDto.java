@@ -4,12 +4,13 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import no.nav.melosys.domain.ErPeriode;
 
 @JsonPropertyOrder({
         "fom",
         "tom"
 })
-public class PeriodeDto {
+public class PeriodeDto implements ErPeriode {
 
     @JsonProperty("fom")
     private LocalDate fom;
