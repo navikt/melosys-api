@@ -38,7 +38,7 @@ public class ArbeiderTest {
         when(binge.fjernFørsteProsessinstans(any())).thenReturn(new Prosessinstans());
         
         long medgåttTid = System.currentTimeMillis();
-        arbeider.start();
+        arbeider.start(null);
         Thread.sleep(20);
         arbeider.stopp();
         medgåttTid = System.currentTimeMillis() - medgåttTid + 1;
@@ -54,7 +54,7 @@ public class ArbeiderTest {
         when(binge.fjernFørsteProsessinstans(any())).thenReturn(new Prosessinstans());
         ArbeiderTraad[] tråder = (ArbeiderTraad[]) ReflectionTestUtils.getField(arbeider, "tråder");
 
-        arbeider.start();
+        arbeider.start(null);
         for (ArbeiderTraad tråd : tråder) {
             assertTrue(((Thread) tråd).isAlive());
         }

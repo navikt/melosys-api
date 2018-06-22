@@ -1,8 +1,6 @@
 package no.nav.melosys.saksflyt.impl;
 
 import java.util.List;
-
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import no.nav.melosys.repository.ProsessinstansRepository;
@@ -14,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 
@@ -57,10 +57,10 @@ public class Arbeider {
     }
     
     /**
-     * Starter prosessering. Skal kun kalles av spring etter at alt er injisert.
+     * Starter prosessering. Skal kun kalles av spring etter at contexten er initialisert.
      */
-    @PostConstruct
-    public void start() {
+    @EventListener
+    public void start(ContextRefreshedEvent event) {
         for (int i = 0; i < antallTråder; i++) {
             tråder[i].start();
         }
