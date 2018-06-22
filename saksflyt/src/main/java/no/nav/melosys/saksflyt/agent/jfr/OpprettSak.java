@@ -16,7 +16,7 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_GSAK_SAK;
 import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_SAK_OG_BEH;
 
 /**
- * Oppretter en oppgave i GSAK.
+ * Oppretter en sak og en behandling i Melosys.
  *
  * Transisjoner:
  * JFR_OPPRETT_SAK_OG_BEH -> JFR_OPPRETT_GSAK_SAK eller FEILET_MASKINELT hvis feil

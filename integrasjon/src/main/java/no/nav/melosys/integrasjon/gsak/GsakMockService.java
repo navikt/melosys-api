@@ -115,7 +115,7 @@ public class GsakMockService implements GsakFasade {
 
     @Override
     public String opprettSak(String saksnummer, BehandlingType behandlingType, String fnr) throws IntegrasjonException {
-        throw new UnsupportedOperationException();
+        return "SAK_MOCKES_IKKE";
     }
 
     @Override
