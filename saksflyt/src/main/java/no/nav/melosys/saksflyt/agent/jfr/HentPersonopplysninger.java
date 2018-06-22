@@ -45,7 +45,7 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
         String brukerId = prosessinstans.getData(BRUKER_ID);
 
         try {
-            Saksopplysning saksopplysning = tpsFasade.hentPerson(brukerId);
+            Saksopplysning saksopplysning = tpsFasade.hentPersonMedAdresse(brukerId);
             prosessinstans.getBehandling().getSaksopplysninger().add(saksopplysning);
         } catch (IkkeFunnetException | SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
