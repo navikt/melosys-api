@@ -45,8 +45,11 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
         String brukerId = prosessinstans.getData(BRUKER_ID);
 
         try {
+            Behandling behandling = prosessinstans.getBehandling();
             Saksopplysning saksopplysning = tpsFasade.hentPersonMedAdresse(brukerId);
-            prosessinstans.getBehandling().getSaksopplysninger().add(saksopplysning);
+            saksopplysning.setBehandling(behandling);
+            saksopplysning.setRegistrertDato(LocalDateTime.now());
+            behandling.getSaksopplysninger().add(saksopplysning);
         } catch (IkkeFunnetException | SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
             // FIXME: MELOSYS-1316
