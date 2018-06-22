@@ -1,28 +1,22 @@
 package no.nav.melosys.integrasjon.kodeverk.impl;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import no.nav.tjeneste.virksomhet.kodeverk.v2.HentKodeverkHentKodeverkKodeverkIkkeFunnet;
 import no.nav.tjeneste.virksomhet.kodeverk.v2.KodeverkPortType;
 import no.nav.tjeneste.virksomhet.kodeverk.v2.meldinger.HentKodeverkRequest;
 import no.nav.tjeneste.virksomhet.kodeverk.v2.meldinger.HentKodeverkResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class KodeverkConsumerImpl implements KodeverkConsumer {
 
-    @Autowired
     private KodeverkConsumerConfig config;
     
     private KodeverkPortType port;
 
-    public KodeverkConsumerImpl() {
-    }
-
-    @PostConstruct
-    private void configure() {
+    @Autowired
+    public KodeverkConsumerImpl(KodeverkConsumerConfig config) {
+        this.config = config;
         this.port = config.getPort();
     }
     
