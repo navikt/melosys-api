@@ -65,9 +65,10 @@ public class JournalforingService {
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalforingDto.getDokumenttittel());
         //FIXME MELOSYS-1283 vedlegg
         // Land trenges av regelmodulen får å vurdere inngangsvilkår
-        // FIXME prosessinstans.setData(ProsessDataKey.LAND, journalforingDto.getFagsak().getLand());
+        prosessinstans.setData(ProsessDataKey.LAND, journalforingDto.getFagsak().getLand());
         // Perioden trenges for å hente saksopplysninger
-        // FIXME prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalforingDto.getFagsak().getSoknadsperiode());
+        prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalforingDto.getFagsak().getSoknadsperiode());
+
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
