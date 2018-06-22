@@ -30,7 +30,7 @@ public class Prosessinstans {
     @Convert(converter = ProsessType.DbKonverterer.class)
     private ProsessType type;
 
-    @ManyToOne(optional = true)
+    @ManyToOne(optional = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinColumn(name = "behandling_id", nullable = true, updatable = true)
     private Behandling behandling;
 
