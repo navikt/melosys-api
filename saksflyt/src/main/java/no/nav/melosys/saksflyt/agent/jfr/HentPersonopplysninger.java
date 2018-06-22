@@ -1,5 +1,8 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
+import java.time.LocalDateTime;
+
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.Saksopplysning;
@@ -10,6 +13,7 @@ import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
@@ -31,7 +35,7 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
     private TpsFasade tpsFasade;
 
     @Autowired
-    public HentPersonopplysninger(TpsFasade tpsFasade) {
+    public HentPersonopplysninger(@Qualifier("system")TpsFasade tpsFasade) {
         this.tpsFasade = tpsFasade;
     }
 

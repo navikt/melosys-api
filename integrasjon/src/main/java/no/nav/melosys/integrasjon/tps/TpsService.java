@@ -30,9 +30,11 @@ import no.nav.tjeneste.virksomhet.person.v3.meldinger.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service
+@Primary
 public class TpsService implements TpsFasade {
 
     private static final Logger log = LoggerFactory.getLogger(TpsService.class);
