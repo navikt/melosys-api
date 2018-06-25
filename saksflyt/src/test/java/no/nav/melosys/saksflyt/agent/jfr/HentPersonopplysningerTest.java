@@ -37,11 +37,11 @@ public class HentPersonopplysningerTest {
 
         String brukerID = "99999999991";
         p.setData(ProsessDataKey.BRUKER_ID, brukerID);
-        when(tpsFasade.hentPerson(any())).thenReturn(new Saksopplysning());
+        when(tpsFasade.hentPersonMedAdresse(any())).thenReturn(new Saksopplysning());
 
         agent.utførSteg(p);
 
-        verify(tpsFasade, times(1)).hentPerson(brukerID);
+        verify(tpsFasade, times(1)).hentPersonMedAdresse(brukerID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_VURDER_INNGANGSVILKÅR);
     }
 }
