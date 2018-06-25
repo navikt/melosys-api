@@ -1,21 +1,10 @@
 package no.nav.melosys.domain;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "behandling")
@@ -44,10 +33,10 @@ public class Behandling {
     private LocalDateTime endretDato;
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<Saksopplysning> saksopplysninger;
+    private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<BehandlingHistorikk> behandlingshistorikk;
+    private Set<BehandlingHistorikk> behandlingshistorikk = new HashSet<>(1);
 
     public long getId() {
         return id;
