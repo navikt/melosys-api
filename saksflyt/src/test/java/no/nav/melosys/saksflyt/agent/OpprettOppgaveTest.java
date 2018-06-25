@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.jfr;
+package no.nav.melosys.saksflyt.agent;
 
 import java.util.Properties;
 
