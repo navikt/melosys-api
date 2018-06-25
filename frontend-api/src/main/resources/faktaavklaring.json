@@ -2,24 +2,24 @@
   "behandlingID": 123456789,
   "avklaring": {
     "opphold": {
-      "land": ["GB"],
+      "land": [],
       "periode": {
-        "fom": "2018-01-01",
-        "tom": "2019-01-01"
+        "fom": "",
+        "tom": ""
       }
     },
     "aktivitet": {
-      "aktivitetLand": ["GB"]
+      "aktivitetLand": []
     },
     "sysselsetting": {
-      "sysselsettingType": "ARBEIDSTAKER"
+      "sysselsettingType": ""
     },
     "utsending": {
-      "ansattINorskSelskap": true,
-      "erstatterTidligereUtsendt": true,
+      "ansattINorskSelskap": null,
+      "erstatterTidligereUtsendt": null,
       "utsendingMindreEnn24Mnd": null,
-      "foretakDriverINorge": true,
-      "harForutgaendeMedlemskap": true,
+      "foretakDriverINorge": null,
+      "harForutgaendeMedlemskap": null,
       "arbeidKnyttetTilVirksomhetUtlandet": null,
       "sammeTypeVirksomhet": null
     },
@@ -27,19 +27,19 @@
       "land": []
     },
     "sektor": {
-      "ansattISektor": "INGEN_AV_DISSE"
+      "ansattISektor": ""
     },
     "tjenestemann": {
-      "tjenestemann": "ETT_LAND_YRKESAKTIVITET_ANDRE_LAND"
+      "tjenestemann": ""
     },
     "valgteArbeidsforhold": [],
     "yrkesaktivitetFordeling": {
-      "antallLand": "ETT_LAND_IKKE_NORGE"
+      "antallLand": ""
     },
     "virksomhet": {
-      "aktivitetINorge": "OVER_25_PROSENT",
-      "marginaltArbeid": "MARGINALT_JA",
-      "vekslingMellomLand": "EN_ELLER_BEGGE"
+      "aktivitetINorge": "",
+      "marginaltArbeid": "",
+      "vekslingMellomLand": ""
     }
   }
 }
