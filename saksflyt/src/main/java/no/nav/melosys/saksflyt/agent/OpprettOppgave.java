@@ -16,12 +16,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
-<<<<<<< HEAD:saksflyt/src/main/java/no/nav/melosys/saksflyt/agent/OpprettOppgave.java
-=======
-import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
->>>>>>> MELOSYS-1315: Div forbedringer etter kodegjennomgang.:saksflyt/src/main/java/no/nav/melosys/saksflyt/agent/jfr/OpprettOppgave.java
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

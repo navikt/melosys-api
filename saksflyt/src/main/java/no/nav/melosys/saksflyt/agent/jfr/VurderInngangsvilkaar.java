@@ -27,7 +27,7 @@ import static no.nav.melosys.feil.Feilkategori.*;
  * Kaller regelmodulen for å vurdere inngangsvilkår. Setter type på fagsak basert på resultatet.
  *
  * Transisjoner:
- * JFR_VURDER_INNGANGSVILKÅR → JFR_OPPRETT_OPPGAVE (eller til FEILET_MASKINELT hvis feil)
+ * JFR_VURDER_INNGANGSVILKÅR → HENT_ARBF_OPPL (eller til FEILET_MASKINELT hvis feil)
  */
 @Component
 public class VurderInngangsvilkaar extends AbstraktStegBehandler {
@@ -116,7 +116,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
             fagsak.setType(nyFagsakType);
             fagsakService.lagre(fagsak);
 
-            prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_OPPGAVE);
+            prosessinstans.setSteg(ProsessSteg.HENT_ARBF_OPPL);
         } catch (RuntimeException e) {
             håndterUnntak(UVENTET_EXCEPTION, prosessinstans, "Uventet RuntimeException", e);
         }

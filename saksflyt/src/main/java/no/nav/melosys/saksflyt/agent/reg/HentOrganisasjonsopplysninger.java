@@ -12,8 +12,11 @@ import no.nav.melosys.domain.dokument.inntekt.Inntekt;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.agent.UnntakBehandler;
+import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +49,11 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
         return ProsessSteg.HENT_ORG_OPPL;
     }
 
+    @Override
+    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
+        return FeilStrategi.standardFeilHåndtering();
+    }
+    
     @Override
     public void utførSteg(Prosessinstans prosessinstans) {
 

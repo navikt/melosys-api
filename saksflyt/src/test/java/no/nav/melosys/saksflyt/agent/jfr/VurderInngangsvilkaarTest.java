@@ -75,7 +75,7 @@ public class VurderInngangsvilkaarTest {
 
         verify(fagsakService, times(0)).lagre(any());
         
-        assertEquals(1, p.getHendelser().size());
+        assertEquals(2, p.getHendelser().size());
         assertEquals(null, p.getBehandling().getFagsak().getType());
         assertEquals(ProsessSteg.FEILET_MASKINELT, p.getSteg());
     }

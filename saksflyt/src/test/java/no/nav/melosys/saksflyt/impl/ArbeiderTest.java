@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.agent.jfr.HentPersonopplysninger;
 import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.saksflyt.impl.Arbeider;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;

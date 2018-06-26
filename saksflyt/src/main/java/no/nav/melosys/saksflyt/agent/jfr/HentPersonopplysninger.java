@@ -1,7 +1,9 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.Saksopplysning;
@@ -15,6 +17,7 @@ import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
@@ -36,7 +39,7 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
     private TpsFasade tpsFasade;
 
     @Autowired
-    public HentPersonopplysninger(TpsFasade tpsFasade) {
+    public HentPersonopplysninger(@Qualifier("system") TpsFasade tpsFasade) {
         this.tpsFasade = tpsFasade;
     }
 
@@ -55,8 +58,11 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
         String brukerId = prosessinstans.getData(BRUKER_ID);
 
         try {
-            Saksopplysning saksopplysning = tpsFasade.hentPerson(brukerId);
-            prosessinstans.getBehandling().getSaksopplysninger().add(saksopplysning);
+            Behandling behandling = prosessinstans.getBehandling();
+            Saksopplysning saksopplysning = tpsFasade.hentPersonMedAdresse(brukerId);
+            saksopplysning.setBehandling(behandling);
+            saksopplysning.setRegistrertDato(LocalDateTime.now());
+            behandling.getSaksopplysninger().add(saksopplysning);
         } catch (IkkeFunnetException | SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
             // FIXME: MELOSYS-1316
