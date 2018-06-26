@@ -1,16 +1,19 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.List;
+import java.util.Map;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.agent.unntak.StandardFeilStrategi;
+import no.nav.melosys.saksflyt.agent.UnntakBehandler;
+import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.RegelmodulService;
 import org.slf4j.Logger;
@@ -18,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.saksflyt.agent.unntak.StandardFeilStrategi.Feilkategori.*;
+import static no.nav.melosys.feil.Feilkategori.*;
 
 /**
  * Kaller regelmodulen for å vurdere inngangsvilkår. Setter type på fagsak basert på resultatet.
@@ -39,9 +42,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         this.regelmodulService = regelmodulService;
         this.fagsakService = fagsakService;
 
-        registrerUnntaksHåndtering(StandardFeilStrategi.standardFeilHåndtering());
-
-        log.info("InngangsvilkaarAgent initialisert");
+        log.info("VurderInngangsvilkaar initialisert");
     }
 
     @Override
@@ -49,6 +50,11 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         return ProsessSteg.JFR_VURDER_INNGANGSVILKÅR;
     }
 
+    @Override
+    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
+        return FeilStrategi.standardFeilHåndtering();
+    }
+    
     @Override
     @SuppressWarnings("unchecked")
     public void utførSteg(Prosessinstans prosessinstans) {
@@ -66,7 +72,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
             }
             if (statsborgerskap == null) {
                 log.error("Funksjonell feil for {}: Kunne ikke hente brukers statsborgerskap fra saksopplysningene.", prosessinstans.getId());
-                håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, null);
+                håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Ingen informasjon om statsborgerskap", null);
                 return;
             }
 
@@ -76,7 +82,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
             Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
             if (periode == null || periode.getFom() == null) {
                 log.error("Funksjonell feil for {}: Søknadsperioden er ikke oppgitt eller mangler fom.", prosessinstans.getId());
-                håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, null);
+                håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Søknadsperioden er ikke oppgitt eller mangler fom.", null);
                 return;
             }
             VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(statsborgerskap, land, periode);
@@ -94,7 +100,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
             // Håndter ev. feil...
             if (detErMeldtFeil) {
                 log.info("Avbryter behandling av {} pga. feil", prosessinstans.getId());
-                håndterUnntak(REGELMODULEN_RETURNETE_FEIL, prosessinstans, null);
+                håndterUnntak(TEKNISK_FEIL, prosessinstans, "Uventet feil fra regelmodulen", null);
                 return;
             }
 
@@ -103,7 +109,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
             FagsakType nyFagsakType = res.kvalifisererForEf883_2004 ? FagsakType.EU_EØS : FagsakType.FOLKETRYGD; // Fikses når inngangsvilkårsvurdering også kvalifiserer for avtaler.
             if (fagsak.getType() != null && fagsak.getType() != nyFagsakType) {
                 log.error("Avbryter behandling av {}: Forsøk på å endre fagsakType fra {} til {}", prosessinstans.getId(), fagsak.getType(), nyFagsakType);
-                håndterUnntak(REGELMODULEN_RETURNETE_FEIL, prosessinstans, null);
+                håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Forsøk på å endre fagsakType fra " + fagsak.getType() + " til " + nyFagsakType, null);
                 return;
             }
             log.info("Setter type på fagsak {} til {}", fagsak.getSaksnummer(), nyFagsakType); 
@@ -112,9 +118,9 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
 
             prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_OPPGAVE);
         } catch (RuntimeException e) {
-            håndterUnntak(EXCEPTION, prosessinstans, e);
+            håndterUnntak(UVENTET_EXCEPTION, prosessinstans, "Uventet RuntimeException", e);
         }
         log.debug("Ferdig med behandling av {}", prosessinstans.getId());
     }
-    
+
 }

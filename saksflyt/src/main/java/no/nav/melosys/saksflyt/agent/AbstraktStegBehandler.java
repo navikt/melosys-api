@@ -1,11 +1,11 @@
 package no.nav.melosys.saksflyt.agent;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.api.StegBehandler;
 import no.nav.melosys.saksflyt.impl.Utils;
 
@@ -14,28 +14,26 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
     
     private Predicate<Prosessinstans> inngangsvilkår;
     
-    private Map<Object, UnntakBehandler> unntakBehandlere = new HashMap<>();
+    private Map<Feilkategori, UnntakBehandler> unntakBehandlere;
+    
+    protected abstract ProsessSteg inngangsSteg();
+    
+    /**
+     * Returnerer en Map som definerer unntakshåndtering for steget. 
+     */
+    protected abstract Map<Feilkategori, UnntakBehandler> unntaksHåndtering();
     
     public AbstraktStegBehandler() {
         inngangsvilkår = Utils.medSteg(inngangsSteg()).and(Utils.somIkkeSover);
-    }
-
-    protected abstract ProsessSteg inngangsSteg();
-    
-    protected void registrerUnntaksHåndterer(Object unntakGruppe, UnntakBehandler ub) {
-        unntakBehandlere.put(unntakGruppe, ub);
-    }
-
-    protected void registrerUnntaksHåndtering(Map<Object, UnntakBehandler> ubMap) {
-        unntakBehandlere.entrySet().stream().forEach(k -> this.unntakBehandlere.put(k, ubMap.get(k)));
+        unntakBehandlere = unntaksHåndtering();
     }
 
     /**
-     * Kalles av arbeidertråder når utførSteg kaster Exception
+     * Kalles av subklasser for å håndtere evt. feilsituasjoner.
      */
-    protected void håndterUnntak(Object unntak, Prosessinstans prosessinstans, Throwable e) {
-        UnntakBehandler ub = unntakBehandlere.get(unntak);
-        ub.behandleUnntak(prosessinstans, e); // OK med NPE hvis ub er null
+    protected void håndterUnntak(Feilkategori kategori, Prosessinstans prosessinstans, String melding, Throwable e) {
+        UnntakBehandler ub = unntakBehandlere.get(kategori);
+        ub.behandleUnntak(prosessinstans, melding, e); // OK med NPE hvis ub er null
     }
     
     @Override

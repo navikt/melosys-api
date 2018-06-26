@@ -1,13 +1,17 @@
 package no.nav.melosys.saksflyt.agent.reg;
 
 import java.time.YearMonth;
+import java.util.Map;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.inntk.InntektFasade;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.agent.UnntakBehandler;
+import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +51,11 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
         return ProsessSteg.HENT_INNT_OPPL;
     }
 
+    @Override
+    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
+        return FeilStrategi.standardFeilHåndtering();
+    }
+    
     @Override
     public void utførSteg(Prosessinstans prosessinstans) {
         String brukerId = prosessinstans.getData(BRUKER_ID);

@@ -10,21 +10,19 @@ public class OpprettHendelse implements UnntakBehandler {
     private static Logger logger = LoggerFactory.getLogger(OpprettHendelse.class);
 
     private String type;
-    private String melding;
     
     private OpprettHendelse() {
     }
     
-    public static OpprettHendelse opprettHendelse(String type, String melding) {
+    public static OpprettHendelse opprettHendelse(String type) {
         OpprettHendelse res = new OpprettHendelse();
         res.type = type;
-        res.melding = melding;
         return res;
     }
     
     @Override
-    public void behandleUnntak(Prosessinstans prosessinstans, Throwable t) {
-        logger.info("Legger på hendelse på {}: {}", prosessinstans.getId(), melding);
+    public void behandleUnntak(Prosessinstans prosessinstans, String melding, Throwable t) {
+        logger.info("Legger på hendelse på {}: {}", prosessinstans.getId(), melding, t);
         prosessinstans.leggTilHendelse(type, melding);
     }
 

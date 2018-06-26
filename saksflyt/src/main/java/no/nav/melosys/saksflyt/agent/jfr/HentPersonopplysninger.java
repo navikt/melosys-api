@@ -1,19 +1,20 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
-import java.time.LocalDateTime;
+import java.util.Map;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.agent.UnntakBehandler;
+import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
@@ -35,7 +36,7 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
     private TpsFasade tpsFasade;
 
     @Autowired
-    public HentPersonopplysninger(@Qualifier("system")TpsFasade tpsFasade) {
+    public HentPersonopplysninger(TpsFasade tpsFasade) {
         this.tpsFasade = tpsFasade;
     }
 
@@ -45,15 +46,17 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
     }
 
     @Override
+    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
+        return FeilStrategi.standardFeilHåndtering();
+    }
+    
+    @Override
     public void utførSteg(Prosessinstans prosessinstans) {
         String brukerId = prosessinstans.getData(BRUKER_ID);
 
         try {
-            Behandling behandling = prosessinstans.getBehandling();
-            Saksopplysning saksopplysning = tpsFasade.hentPersonMedAdresse(brukerId);
-            saksopplysning.setBehandling(behandling);
-            saksopplysning.setRegistrertDato(LocalDateTime.now());
-            behandling.getSaksopplysninger().add(saksopplysning);
+            Saksopplysning saksopplysning = tpsFasade.hentPerson(brukerId);
+            prosessinstans.getBehandling().getSaksopplysninger().add(saksopplysning);
         } catch (IkkeFunnetException | SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
             // FIXME: MELOSYS-1316

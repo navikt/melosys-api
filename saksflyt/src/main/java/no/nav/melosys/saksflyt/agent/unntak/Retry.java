@@ -8,8 +8,6 @@ import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static no.nav.melosys.saksflyt.agent.unntak.SettTilFeilet.settTilFeilet;
-
 public class Retry implements UnntakBehandler {
     
     private static Logger logger = LoggerFactory.getLogger(Retry.class);
@@ -18,6 +16,8 @@ public class Retry implements UnntakBehandler {
     
     private long millisMellomForsøk;
     
+    UnntakBehandler feiletBehandler; // Brukes når retry-taket er nådd
+    
     private Retry() {
     }
     
@@ -25,16 +25,17 @@ public class Retry implements UnntakBehandler {
         Retry res = new Retry();
         res.maxAntallForsøk = maxAntallForsøk;
         res.millisMellomForsøk = millisMellomForsøk;
+        res.feiletBehandler = SettTilFeilet.settTilFeilet();
         return res;
     }
     
     @Override
-    public void behandleUnntak(Prosessinstans prosessinstans, Throwable t) {
+    public void behandleUnntak(Prosessinstans prosessinstans, String melding, Throwable t) {
         int antForsøk = prosessinstans.getAntallRetry() + 1;
-        logger.debug("Prosessinstans {} feilet for {}de gang", prosessinstans.getId(), antForsøk);
+        logger.debug("Prosessinstans {} feilet for {}-te gang: {}", prosessinstans.getId(), antForsøk, melding, t);
         prosessinstans.setAntallRetry(antForsøk);
         if (antForsøk >= maxAntallForsøk) {
-            settTilFeilet().behandleUnntak(prosessinstans, t);
+            feiletBehandler.behandleUnntak(prosessinstans, melding, t);
             return;
         }
         Instant skalSoveTil = Instant.now().plus(Duration.ofMillis(millisMellomForsøk));

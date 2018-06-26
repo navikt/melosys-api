@@ -7,6 +7,6 @@ import no.nav.melosys.domain.Prosessinstans;
  */
 public interface UnntakBehandler {
     
-    void behandleUnntak(Prosessinstans prosessinstans, Throwable t);
+    void behandleUnntak(Prosessinstans prosessinstans, String melding, Throwable t);
 
 }

@@ -15,8 +15,7 @@ public class KjedetUnntakBehandler implements UnntakBehandler {
 
     public static KjedetUnntakBehandler først(UnntakBehandler ub) {
         KjedetUnntakBehandler res = new KjedetUnntakBehandler();
-        res.så(ub);
-        return res;
+        return res.så(ub);
     }
     
     public KjedetUnntakBehandler så(UnntakBehandler ub) {
@@ -25,9 +24,9 @@ public class KjedetUnntakBehandler implements UnntakBehandler {
     }
 
     @Override
-    public void behandleUnntak(Prosessinstans prosessinstans, Throwable t) {
+    public void behandleUnntak(Prosessinstans prosessinstans, String melding, Throwable t) {
         for (UnntakBehandler ub : kjede) {
-            ub.behandleUnntak(prosessinstans, t);
+            ub.behandleUnntak(prosessinstans, melding, t);
         }
     }
 
