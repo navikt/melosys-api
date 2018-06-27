@@ -41,38 +41,28 @@ public class GsakMock implements OppgaveMockRepository {
 
         Oppgave o2 = new Oppgave();
         o2.setOppgaveId("2");
-        o2.setBruker("99999999991");
-        o2.setFagomrade(Fagomrade.UFM);
-        o2.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.BEH_SAK_MK_UFM);
-        o2.setPrioritet(PrioritetType.NORM_MED);
-        o2.setGsakSaksnummer("123");
+        o2.setBruker("FJERNET");
+        o2.setFagomrade(Fagomrade.MED);
+        o2.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.JFR_MED);
+        o2.setPrioritet(PrioritetType.HOY_MED);
+        o2.setDokumentId("415826177");
         o2.setAktivTil(LocalDate.now().plusYears(1));
+        o2.setAnsvarligId("Z990749");
 
         Oppgave o3 = new Oppgave();
-        o3.setOppgaveId("5");
-        o3.setBruker("FJERNET");
+        o3.setOppgaveId("3");
+        o3.setBruker("99999999991");
         o3.setFagomrade(Fagomrade.MED);
-        o3.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.JFR_MED);
-        o3.setPrioritet(PrioritetType.HOY_MED);
-        o3.setDokumentId("415489874");
+        o3.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.BEH_SAK_MED);
+        o3.setPrioritet(PrioritetType.NORM_MED);
+        o3.setGsakSaksnummer("123");
         o3.setAktivTil(LocalDate.now().plusYears(1));
         o3.setAnsvarligId("Z990749");
-
-        Oppgave o4 = new Oppgave();
-        o4.setOppgaveId("6");
-        o4.setBruker("99999999991");
-        o4.setFagomrade(Fagomrade.MED);
-        o4.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.BEH_SAK_MED);
-        o4.setPrioritet(PrioritetType.NORM_MED);
-        o4.setGsakSaksnummer("123");
-        o4.setAktivTil(LocalDate.now().plusYears(1));
-        o4.setAnsvarligId("Z990749");
 
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(o1);
         oppgaver.add(o2);
         oppgaver.add(o3);
-        oppgaver.add(o4);
 
         return oppgaver;
     }
