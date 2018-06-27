@@ -7,9 +7,7 @@ import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.ArbeidsforholdV3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
-import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML;
 import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SYSTEM_SAML;
 
 
@@ -23,15 +21,8 @@ public class ArbeidsforholdConsumerProducer {
     }
 
     @Bean
-    @Profile("utvikling")
-    ArbeidsforholdConsumer arbeidsforholdMock() {
-        return new ArbeidsforholdMock();
-    }
-
-    @Bean
-    @Profile("!utvikling")
     ArbeidsforholdConsumer arbeidsforholdConsumer() {
-        ArbeidsforholdV3 port = wrapWithSts(config.getPort(), SECURITYCONTEXT_TIL_SAML);
+        ArbeidsforholdV3 port = wrapWithSts(config.getPort(), SYSTEM_SAML);
         return new ArbeidsforholdConsumerImpl(port);
     }
 
