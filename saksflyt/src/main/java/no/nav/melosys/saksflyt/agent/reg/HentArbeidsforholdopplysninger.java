@@ -9,8 +9,8 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
-import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,14 +34,14 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
     @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallÅr}")
     private Integer arbeidsforholdhistorikkAntallÅr;
 
-    private AaregFasade aaregFasade;
+    private final AaregFasade aaregFasade;
 
-    private FagsakService fagsakService;
+    private final SaksopplysningRepository saksopplysningRepo;
 
     @Autowired
-    public HentArbeidsforholdopplysninger(AaregFasade aaregFasade, FagsakService fagsakService) {
+    public HentArbeidsforholdopplysninger(AaregFasade aaregFasade, SaksopplysningRepository saksopplysningRepo) {
         this.aaregFasade = aaregFasade;
-        this.fagsakService = fagsakService;
+        this.saksopplysningRepo = saksopplysningRepo;
     }
 
     @Override
@@ -62,10 +62,8 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
             Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(brukerId, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
             saksopplysning.setBehandling(behandling);
             saksopplysning.setRegistrertDato(LocalDateTime.now());
-            behandling.getSaksopplysninger().add(saksopplysning);
+            saksopplysningRepo.save(saksopplysning);
 
-            Fagsak fagsak = behandling.getFagsak();
-            fagsakService.lagre(fagsak);
         } catch (IntegrasjonException | TekniskException | SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
             // FIXME: MELOSYS-1316

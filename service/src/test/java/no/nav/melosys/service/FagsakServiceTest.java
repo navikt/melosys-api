@@ -23,6 +23,7 @@ import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,7 +58,8 @@ public class FagsakServiceTest {
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 12);
 
         fagsakRepo = mock(FagsakRepository.class);
-        fagsakService = new FagsakService(fagsakRepo, saksopplysningerService);
+        BehandlingRepository behandlingRepo = mock(BehandlingRepository.class);
+        fagsakService = new FagsakService(fagsakRepo, behandlingRepo, saksopplysningerService);
     }
 
     @Test

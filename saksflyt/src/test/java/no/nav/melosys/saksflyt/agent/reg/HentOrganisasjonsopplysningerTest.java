@@ -8,8 +8,9 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -28,8 +29,7 @@ public class HentOrganisasjonsopplysningerTest {
 
     @Before
     public void setUp() {
-        FagsakService fagsakService = mock(FagsakService.class);
-        agent = new HentOrganisasjonsopplysninger(fagsakService, eregFasade);
+        agent = new HentOrganisasjonsopplysninger(mock(SaksopplysningRepository.class), eregFasade);
     }
 
     @Test

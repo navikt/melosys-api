@@ -6,16 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingStatus;
-import no.nav.melosys.domain.BehandlingType;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakStatus;
-import no.nav.melosys.domain.FagsakType;
-import no.nav.melosys.domain.RolleType;
-import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,11 +25,14 @@ public class FagsakService {
 
     private FagsakRepository fagsakRepository;
 
+    private BehandlingRepository behandlingRepository;
+
     private SaksopplysningerService saksopplysningerService;
 
     @Autowired
-    public FagsakService(FagsakRepository fagsakRepository, SaksopplysningerService saksopplysningerService) {
+    public FagsakService(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository, SaksopplysningerService saksopplysningerService) {
         this.fagsakRepository = fagsakRepository;
+        this.behandlingRepository = behandlingRepository;
         this.saksopplysningerService = saksopplysningerService;
     }
 
@@ -54,21 +50,20 @@ public class FagsakService {
     }
 
     @Transactional
-    public Fagsak lagre(Fagsak sak) {
+    public void lagre(Fagsak sak) {
         if (sak.getSaksnummer() == null) {
             sak.setSaksnummer(hentNesteSaksnummer());
         }
         fagsakRepository.save(sak);
-        return sak;
     }
 
     /**
      * Oppretter en fagsak og en behandling ut fra et fødselsnummer.
      */
+    @Transactional
     public Fagsak nyFagsakOgBehandling(String fnr, BehandlingType behandlingType, boolean erTestData) throws SikkerhetsbegrensningException {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(hentNesteSaksnummer());
-        Behandling behandling = new Behandling();
 
         Aktoer aktoer = new Aktoer();
         aktoer.setAktørId(fnr);
@@ -78,6 +73,15 @@ public class FagsakService {
 
         LocalDateTime dato = LocalDateTime.now();
 
+        fagsak.setAktører(new HashSet<>(Collections.singletonList(aktoer)));
+        fagsak.setRegistrertDato(dato);
+        fagsak.setEndretDato(dato);
+        fagsak.setStatus(FagsakStatus.OPPRETTET);
+
+        lagre(fagsak);
+
+        Behandling behandling = new Behandling();
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(dato);
         behandling.setEndretDato(dato);
@@ -90,14 +94,8 @@ public class FagsakService {
         }
         behandling.setStatus(BehandlingStatus.OPPRETTET);
         behandling.setType(behandlingType);
-
-        fagsak.setAktører(new HashSet<>(Collections.singletonList(aktoer)));
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-        fagsak.setRegistrertDato(dato);
-        fagsak.setEndretDato(dato);
-        fagsak.setStatus(FagsakStatus.OPPRETTET);
-
-        return lagre(fagsak);
+        behandlingRepository.save(behandling);
+        return fagsak;
     }
 
     private String hentNesteSaksnummer() {

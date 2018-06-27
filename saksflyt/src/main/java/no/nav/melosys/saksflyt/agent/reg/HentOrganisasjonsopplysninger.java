@@ -14,8 +14,8 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
-import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +33,13 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentOrganisasjonsopplysninger.class);
 
-    private final FagsakService fagsakService;
+    private final SaksopplysningRepository saksopplysningRepo;
 
     private final EregFasade eregFasade;
 
     @Autowired
-    public HentOrganisasjonsopplysninger(FagsakService fagsakService, @Qualifier("system")EregFasade eregFasade) {
-        this.fagsakService = fagsakService;
+    public HentOrganisasjonsopplysninger(SaksopplysningRepository saksopplysningRepo, @Qualifier("system")EregFasade eregFasade) {
+        this.saksopplysningRepo = saksopplysningRepo;
         this.eregFasade = eregFasade;
     }
 
@@ -62,10 +62,7 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
             arbeidsforholdSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraArbeidsforhold(saksopplysning)));
             inntektSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraInntekt(saksopplysning)));
 
-            behandling.getSaksopplysninger().addAll(hentOrganisasjoner(orgnumre, behandling));
-
-            Fagsak fagsak = behandling.getFagsak();
-            fagsakService.lagre(fagsak);
+            hentOrganisasjoner(orgnumre, behandling).forEach(o -> saksopplysningRepo.save(o));
 
         } catch (SikkerhetsbegrensningException | IkkeFunnetException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);

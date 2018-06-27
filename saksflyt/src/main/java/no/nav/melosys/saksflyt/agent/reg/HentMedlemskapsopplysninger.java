@@ -8,8 +8,8 @@ import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
-import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,14 +33,14 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
 
     private final MedlFasade medlFasade;
 
-    private final FagsakService fagsakService;
+    private final SaksopplysningRepository saksopplysningRepo;
 
     private final Integer medlemskaphistorikkAntallÅr;
 
-    public HentMedlemskapsopplysninger(MedlFasade medlFasade, FagsakService fagsakService,
+    public HentMedlemskapsopplysninger(MedlFasade medlFasade, SaksopplysningRepository saksopplysningRepo,
                                        @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr) {
         this.medlFasade = medlFasade;
-        this.fagsakService = fagsakService;
+        this.saksopplysningRepo = saksopplysningRepo;
         this.medlemskaphistorikkAntallÅr = medlemskaphistorikkAntallÅr;
     }
 
@@ -62,10 +62,8 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
             Saksopplysning saksopplysning = medlFasade.hentPeriodeListe(brukerId, fom, tom);
             saksopplysning.setBehandling(behandling);
             saksopplysning.setRegistrertDato(LocalDateTime.now());
-            behandling.getSaksopplysninger().add(saksopplysning);
+            saksopplysningRepo.save(saksopplysning);
 
-            Fagsak fagsak = behandling.getFagsak();
-            fagsakService.lagre(fagsak);
         } catch (IntegrasjonException | SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
             // FIXME: MELOSYS-1316
