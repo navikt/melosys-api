@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientBuilder;
@@ -25,10 +24,13 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.integrasjon.felles.RestClientLoggingFilter;
 import no.nav.melosys.regler.api.lovvalg.LovvalgTjeneste;
 import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
 import no.nav.melosys.repository.BehandlingRepository;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.logging.LoggingFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,15 +47,15 @@ import org.xml.sax.SAXException;
 @Service
 public class RegelmodulService {
 
-    private String regelmodulUrl;
+    private static final Logger log = LoggerFactory.getLogger(RegelmodulService.class);
 
-    private BehandlingRepository behandlingRepo;
+    private final String regelmodulUrl;
 
-    private DocumentBuilderFactory documentBuilderFactory;
+    private final BehandlingRepository behandlingRepo;
 
-    private TransformerFactory transformerFactory;
+    private final DocumentBuilderFactory documentBuilderFactory;
 
-    private static Logger log = LoggerFactory.getLogger(RegelmodulService.class);
+    private final TransformerFactory transformerFactory;
 
     @Autowired
     public RegelmodulService(@Value("${melosys.service.regelmodul.url}") String regelmodulUrl, BehandlingRepository repository) {
@@ -78,6 +80,7 @@ public class RegelmodulService {
             String fastsettLovvalgRequest = lagRequest(behandling);
 
             return ClientBuilder.newClient().target(regelmodulUrl)
+                    .path("/fastsettLovvalg") // FIXME property eller verdi i LovvalgTjeneste?
                     .request(LovvalgTjeneste.MEDIA_TYPE_CONSUMED)
                     .post(Entity.entity(fastsettLovvalgRequest, LovvalgTjeneste.MEDIA_TYPE_CONSUMED), FastsettLovvalgReply.class);
 
@@ -173,8 +176,14 @@ public class RegelmodulService {
             "%s</tom></oppholdsPeriode>" +
             "<oppholdsland><kode>%s</kode></oppholdsland></oppholdUtland></soeknadDokument></dokumenter>";
         String req = String.format(format, brukersStatsborgerskap, oppholdsPeriode.getFom(), oppholdsPeriode.getTom(), oppholdsland);
+
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, LoggingFeature.Verbosity.PAYLOAD_ANY);
+        clientConfig.register(new RestClientLoggingFilter());
         
-        return ClientBuilder.newClient().target(regelmodulUrl)
+        return ClientBuilder.newClient(clientConfig)
+            .target(regelmodulUrl)
+            .path("/inngangsvilkaar") // FIXME property eller verdi i LovvalgTjeneste?
             .request(LovvalgTjeneste.MEDIA_TYPE_CONSUMED)
             .post(Entity.entity(req, LovvalgTjeneste.MEDIA_TYPE_CONSUMED), VurderInngangsvilkaarReply.class);
     }
