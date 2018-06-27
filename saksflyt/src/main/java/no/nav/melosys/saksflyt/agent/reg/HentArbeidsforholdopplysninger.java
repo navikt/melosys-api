@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.agent.reg;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
@@ -57,10 +58,13 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
         LocalDate tom = LocalDate.now();
 
         try {
+            Behandling behandling = prosessinstans.getBehandling();
             Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(brukerId, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
-            prosessinstans.getBehandling().getSaksopplysninger().add(saksopplysning);
+            saksopplysning.setBehandling(behandling);
+            saksopplysning.setRegistrertDato(LocalDateTime.now());
+            behandling.getSaksopplysninger().add(saksopplysning);
 
-            Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
+            Fagsak fagsak = behandling.getFagsak();
             fagsakService.lagre(fagsak);
         } catch (IntegrasjonException | TekniskException | SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);

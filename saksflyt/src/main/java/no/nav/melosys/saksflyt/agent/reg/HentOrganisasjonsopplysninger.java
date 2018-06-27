@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.agent.reg;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,6 +19,7 @@ import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,7 +38,7 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
     private final EregFasade eregFasade;
 
     @Autowired
-    public HentOrganisasjonsopplysninger(FagsakService fagsakService, EregFasade eregFasade) {
+    public HentOrganisasjonsopplysninger(FagsakService fagsakService, @Qualifier("system")EregFasade eregFasade) {
         this.fagsakService = fagsakService;
         this.eregFasade = eregFasade;
     }
@@ -50,8 +52,9 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
     public void utførSteg(Prosessinstans prosessinstans) {
 
         try {
+            Behandling behandling = prosessinstans.getBehandling();
             Set<String> orgnumre = new HashSet<>();
-            Set<Saksopplysning> alleSaksopplysninger = prosessinstans.getBehandling().getSaksopplysninger();
+            Set<Saksopplysning> alleSaksopplysninger = behandling.getSaksopplysninger();
 
             Optional<Saksopplysning> arbeidsforholdSaksopplysning = hentSaksOpplysning(alleSaksopplysninger, SaksopplysningType.ARBEIDSFORHOLD);
             Optional<Saksopplysning> inntektSaksopplysning = hentSaksOpplysning(alleSaksopplysninger, SaksopplysningType.INNTEKT);
@@ -59,9 +62,9 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
             arbeidsforholdSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraArbeidsforhold(saksopplysning)));
             inntektSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraInntekt(saksopplysning)));
 
-            prosessinstans.getBehandling().getSaksopplysninger().addAll(hentOrganisasjoner(orgnumre));
+            behandling.getSaksopplysninger().addAll(hentOrganisasjoner(orgnumre, behandling));
 
-            Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
+            Fagsak fagsak = behandling.getFagsak();
             fagsakService.lagre(fagsak);
 
         } catch (SikkerhetsbegrensningException | IkkeFunnetException e) {
@@ -95,10 +98,13 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
             filter(saksopplysning -> saksopplysning.getType().equals(saksopplysningType)).findFirst();
     }
 
-    private List<Saksopplysning> hentOrganisasjoner(Set<String> orgnumre) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    private List<Saksopplysning> hentOrganisasjoner(Set<String> orgnumre, Behandling behandling) throws SikkerhetsbegrensningException, IkkeFunnetException {
         List<Saksopplysning> saksopplysninger = new ArrayList<>();
         for (String orgnr : orgnumre) {
-            saksopplysninger.add(eregFasade.hentOrganisasjon(orgnr));
+            Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(orgnr);
+            saksopplysning.setBehandling(behandling);
+            saksopplysning.setRegistrertDato(LocalDateTime.now());
+            saksopplysninger.add(saksopplysning);
         }
         return saksopplysninger;
     }
