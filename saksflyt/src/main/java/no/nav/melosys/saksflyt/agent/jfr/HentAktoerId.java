@@ -1,10 +1,15 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
+import java.util.Map;
+
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.agent.UnntakBehandler;
+import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +42,11 @@ public class HentAktoerId extends AbstraktStegBehandler {
         return JFR_AKTOER_ID;
     }
 
+    @Override
+    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
+        return FeilStrategi.standardFeilHåndtering();
+    }
+    
     @Override
     public void utførSteg(Prosessinstans prosessinstans) {
         String brukerId = prosessinstans.getData(BRUKER_ID);

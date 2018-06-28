@@ -1,13 +1,17 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.List;
+import java.util.Map;
 
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.joark.JournalfoeringMangel;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.agent.UnntakBehandler;
+import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +44,11 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         return JFR_OPPDATER_JOURNALPOST;
     }
 
+    @Override
+    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
+        return FeilStrategi.standardFeilHåndtering();
+    }
+    
     @Override
     public void utførSteg(Prosessinstans prosessinstans) {
         boolean medDokumentkategori = false;

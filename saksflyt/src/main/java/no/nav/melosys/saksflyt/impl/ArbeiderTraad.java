@@ -83,8 +83,8 @@ public class ArbeiderTraad extends Thread {
                         return;
                     }
                 } catch (Exception e) {
-                    // Dette skal ikke skje. Vi logger og stopper tråden. 
-                    logger.error("Ubehandlet Exception", e);
+                    // Vi er her hvis en StegBehandler kastet en Exception 
+                    logger.error("Stanser prosessering pga. ubehandlet Exception", e);
                     logger.error("Aktiv stegBehandler: {}", aktivStegBehandler.getClass().getName());
                     logger.error("Prosessinstans som kanskje må ryddes opp i: {}", aktivProsessinstans);
                     return;
@@ -108,7 +108,7 @@ public class ArbeiderTraad extends Thread {
             pi.setAntallRetry(0);
             pi.setSistForsøkt(LocalDateTime.now());
         }
-         pi.setEndretDato(LocalDateTime.now());
+        pi.setEndretDato(LocalDateTime.now());
         prosessinstansRepo.save(pi); // Kan resultere i DataAccessException, som kastes videre og merfører at tråden stoppes.
 
         if (pi.getSteg() != null) {

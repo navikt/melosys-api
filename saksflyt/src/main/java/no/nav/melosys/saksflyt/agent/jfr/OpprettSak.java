@@ -1,9 +1,14 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
+import java.util.Map;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.agent.UnntakBehandler;
+import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +43,11 @@ public class OpprettSak extends AbstraktStegBehandler {
         return JFR_OPPRETT_SAK_OG_BEH;
     }
 
+    @Override
+    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
+        return FeilStrategi.standardFeilHåndtering();
+    }
+    
     @Override
     public void utførSteg(Prosessinstans prosessinstans) {
         String aktørId = prosessinstans.getData(AKTØR_ID);

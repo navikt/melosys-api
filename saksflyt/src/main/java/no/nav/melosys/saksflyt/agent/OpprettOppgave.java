@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.agent;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.ProsessSteg;
@@ -12,8 +13,10 @@ import no.nav.melosys.domain.gsak.Oppgavetype;
 import no.nav.melosys.domain.gsak.PrioritetType;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
+import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +51,11 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         return OPPRETT_OPPGAVE;
     }
 
+    @Override
+    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
+        return FeilStrategi.standardFeilHåndtering();
+    }
+    
     @Override
     public void utførSteg(Prosessinstans prosessinstans) {
         ProsessType prosessType = prosessinstans.getType();
