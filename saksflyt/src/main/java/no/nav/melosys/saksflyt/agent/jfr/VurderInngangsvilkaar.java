@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.*;
@@ -9,8 +10,9 @@ import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
+import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
-import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.RegelmodulService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +30,15 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     
     private static final Logger log = LoggerFactory.getLogger(VurderInngangsvilkaar.class);
 
-    private RegelmodulService regelmodulService;
-    private FagsakService fagsakService;
+    private final RegelmodulService regelmodulService;
+    private final FagsakRepository fagsakRepository;
+    private final BehandlingRepository behandlingRepository;
 
     @Autowired
-    public VurderInngangsvilkaar(RegelmodulService regelmodulService, FagsakService fagsakService) {
+    public VurderInngangsvilkaar(RegelmodulService regelmodulService, FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository) {
         this.regelmodulService = regelmodulService;
-        this.fagsakService = fagsakService;
+        this.fagsakRepository = fagsakRepository;
+        this.behandlingRepository = behandlingRepository;
         log.debug("InngangsvilkaarAgent initialisert");
     }
 
@@ -47,11 +51,12 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     @SuppressWarnings("unchecked")
     public void utførSteg(Prosessinstans prosessinstans) {
         log.debug("Starter behandling av {}", prosessinstans.getId());
+        Behandling behandling = behandlingRepository.findOne(prosessinstans.getBehandling().getId());
         
         // Hent statsborgerskap fra saksopplysningene...
         // TODO (MELOSYS-1255): Statsborgerskap skal ikke hentes fra PersonopplysningsDokument, siden dette ikke nødvendigvis er riktig for søknadstidspunktet.
         Land statsborgerskap = null;
-        for (Saksopplysning kandidat : prosessinstans.getBehandling().getSaksopplysninger()) {
+        for (Saksopplysning kandidat : behandling.getSaksopplysninger()) {
             if (kandidat.getDokument() instanceof PersonDokument) {
                 statsborgerskap = ((PersonDokument) kandidat.getDokument()).statsborgerskap;
                 break; // Forutsetter at vi har kun 1 av disse
@@ -93,7 +98,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         }
         
         // Sett sakstype...
-        Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
+        Fagsak fagsak = behandling.getFagsak();
         FagsakType nyFagsakType = res.kvalifisererForEf883_2004 ? FagsakType.EU_EØS : FagsakType.FOLKETRYGD; // Fikses når inngangsvilkårsvurdering også kvalifiserer for avtaler.
         if (fagsak.getType() != null && fagsak.getType() != nyFagsakType) {
             log.error("Avbryter behandling av {}: Forsøk på å endre fagsakType fra {} til {}", prosessinstans.getId(), fagsak.getType(), nyFagsakType);
@@ -102,7 +107,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         }
         log.info("Setter type på fagsak {} til {}", fagsak.getSaksnummer(), nyFagsakType); 
         fagsak.setType(nyFagsakType);
-        fagsakService.lagre(fagsak);
+        fagsakRepository.save(fagsak);
         
         prosessinstans.setSteg(ProsessSteg.HENT_ARBF_OPPL);
         log.debug("Ferdig med behandling av {}", prosessinstans.getId());

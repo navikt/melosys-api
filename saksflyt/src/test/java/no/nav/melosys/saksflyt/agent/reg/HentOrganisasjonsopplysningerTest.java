@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -29,7 +30,7 @@ public class HentOrganisasjonsopplysningerTest {
 
     @Before
     public void setUp() {
-        agent = new HentOrganisasjonsopplysninger(mock(SaksopplysningRepository.class), eregFasade);
+        agent = new HentOrganisasjonsopplysninger(mock(BehandlingRepository.class), mock(SaksopplysningRepository.class), eregFasade);
     }
 
     @Test

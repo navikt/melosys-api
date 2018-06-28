@@ -14,6 +14,7 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import org.slf4j.Logger;
@@ -33,12 +34,15 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentOrganisasjonsopplysninger.class);
 
+    private final BehandlingRepository behandlingRepo;
+
     private final SaksopplysningRepository saksopplysningRepo;
 
     private final EregFasade eregFasade;
 
     @Autowired
-    public HentOrganisasjonsopplysninger(SaksopplysningRepository saksopplysningRepo, @Qualifier("system")EregFasade eregFasade) {
+    public HentOrganisasjonsopplysninger(BehandlingRepository behandlingRepo, SaksopplysningRepository saksopplysningRepo, @Qualifier("system")EregFasade eregFasade) {
+        this.behandlingRepo = behandlingRepo;
         this.saksopplysningRepo = saksopplysningRepo;
         this.eregFasade = eregFasade;
     }
@@ -52,7 +56,7 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
     public void utførSteg(Prosessinstans prosessinstans) {
 
         try {
-            Behandling behandling = prosessinstans.getBehandling();
+            Behandling behandling = behandlingRepo.findOne(prosessinstans.getBehandling().getId());
             Set<String> orgnumre = new HashSet<>();
             Set<Saksopplysning> alleSaksopplysninger = behandling.getSaksopplysninger();
 
