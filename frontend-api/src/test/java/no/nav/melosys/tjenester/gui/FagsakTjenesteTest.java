@@ -25,6 +25,7 @@ import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -61,7 +62,7 @@ public class FagsakTjenesteTest {
         ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallÅr", 5);
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 12);
         ReflectionTestUtils.setField(saksopplysningerService, "medlemskaphistorikkAntallÅr", 5);
-        FagsakService fagsakService = new FagsakService(fagsakRepo, saksopplysningerService);
+        FagsakService fagsakService = new FagsakService(fagsakRepo, mock(BehandlingRepository.class), saksopplysningerService);
         tjeneste = new FagsakTjeneste(fagsakService);
     }
 

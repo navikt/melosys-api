@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.agent.reg;
 
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.Map;
 
@@ -9,10 +10,10 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.inntk.InntektFasade;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,17 +34,17 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentInntektopplysninger.class);
 
-    InntektFasade inntektFasade;
+    private final InntektFasade inntektFasade;
 
-    FagsakService fagsakService;
+    private final SaksopplysningRepository saksopplysningRepo;
 
     @Value("${melosys.service.fagsak.inntektshistorikk.antallMåneder}")
     private Integer inntektshistorikkAntallMåneder;
 
     @Autowired
-    public HentInntektopplysninger(InntektFasade inntektFasade, FagsakService fagsakService) {
+    public HentInntektopplysninger(InntektFasade inntektFasade, SaksopplysningRepository saksopplysningRepo) {
         this.inntektFasade = inntektFasade;
-        this.fagsakService = fagsakService;
+        this.saksopplysningRepo = saksopplysningRepo;
     }
 
     @Override
@@ -65,11 +66,12 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
         YearMonth tom = YearMonth.now();
 
         try {
+            Behandling behandling = prosessinstans.getBehandling();
             Saksopplysning saksopplysning = inntektFasade.hentInntektListe(brukerId, fom, tom);
-            prosessinstans.getBehandling().getSaksopplysninger().add(saksopplysning);
+            saksopplysning.setBehandling(behandling);
+            saksopplysning.setRegistrertDato(LocalDateTime.now());
+            saksopplysningRepo.save(saksopplysning);
 
-            Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
-            fagsakService.lagre(fagsak);
         } catch (IntegrasjonException | SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
             // FIXME: MELOSYS-1316

@@ -9,7 +9,8 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
-import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.RegelmodulService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import org.junit.Before;
@@ -29,13 +30,16 @@ public class VurderInngangsvilkaarTest {
     private RegelmodulService regelmodulService;
     
     @Mock
-    private FagsakService fagsakService;
+    private FagsakRepository fagsakRepository;
+    
+    @Mock
+    BehandlingRepository behandlingRepository;
 
     private VurderInngangsvilkaar agent;
 
     @Before
     public void setUp() {
-        agent = new VurderInngangsvilkaar(regelmodulService, fagsakService);
+        agent = new VurderInngangsvilkaar(regelmodulService, fagsakRepository, behandlingRepository);
     }
 
     @Test
@@ -48,10 +52,11 @@ public class VurderInngangsvilkaarTest {
         res.feilmeldinger = Collections.emptyList();
         res.kvalifisererForEf883_2004 = true;
         when(regelmodulService.vurderInngangsvilkår(any(), any(), any())).thenReturn(res);
+        when(behandlingRepository.findOne(any())).thenReturn(p.getBehandling());
         
         agent.utførSteg(p);
 
-        verify(fagsakService, times(1)).lagre(any());
+        verify(fagsakRepository, times(1)).save(any(Fagsak.class));
         
         assertEquals(null, p.getHendelser());
         assertEquals(FagsakType.EU_EØS, p.getBehandling().getFagsak().getType());
@@ -70,10 +75,11 @@ public class VurderInngangsvilkaarTest {
         VurderInngangsvilkaarReply res = new VurderInngangsvilkaarReply();
         res.feilmeldinger = Collections.singletonList(fm);
         when(regelmodulService.vurderInngangsvilkår(any(), any(), any())).thenReturn(res);
+        when(behandlingRepository.findOne(any())).thenReturn(p.getBehandling());
         
         agent.utførSteg(p);
 
-        verify(fagsakService, times(0)).lagre(any());
+        verify(fagsakRepository, times(0)).save(any(Fagsak.class));
         
         assertEquals(2, p.getHendelser().size());
         assertEquals(null, p.getBehandling().getFagsak().getType());

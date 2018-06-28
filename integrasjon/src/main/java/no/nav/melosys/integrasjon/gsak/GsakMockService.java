@@ -115,7 +115,8 @@ public class GsakMockService implements GsakFasade {
 
     @Override
     public String opprettSak(String saksnummer, BehandlingType behandlingType, String fnr) throws IntegrasjonException {
-        return "SAK_MOCKES_IKKE";
+        // Sak mockes ikke
+        return saksnummer;
     }
 
     @Override

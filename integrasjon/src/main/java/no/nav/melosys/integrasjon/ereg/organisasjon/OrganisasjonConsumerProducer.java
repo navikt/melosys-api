@@ -5,9 +5,10 @@ import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
 import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.OrganisasjonV4;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Primary;
 
 import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML;
 import static no.nav.melosys.sikkerhet.sts.NAVSTSClient.StsClientType.SYSTEM_SAML;
@@ -23,15 +24,16 @@ public class OrganisasjonConsumerProducer {
     }
 
     @Bean
-    @Profile("utvikling")
-    OrganisasjonConsumer organisasjonMock() {
-        return new OrganisasjonMock();
+    @Primary
+    OrganisasjonConsumer organisasjonConsumer() {
+        OrganisasjonV4 port = wrapWithSts(config.getPort(), SECURITYCONTEXT_TIL_SAML);
+        return new OrganisasjonConsumerImpl(port);
     }
 
     @Bean
-    @Profile("!utvikling")
-    OrganisasjonConsumer organisasjonConsumer() {
-        OrganisasjonV4 port = wrapWithSts(config.getPort(), SECURITYCONTEXT_TIL_SAML);
+    @Qualifier("system")
+    OrganisasjonConsumer organisasjonSystemConsumer() {
+        OrganisasjonV4 port = wrapWithSts(config.getPort(), SYSTEM_SAML);
         return new OrganisasjonConsumerImpl(port);
     }
 

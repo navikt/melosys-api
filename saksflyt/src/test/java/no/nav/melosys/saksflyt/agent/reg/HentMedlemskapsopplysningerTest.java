@@ -3,12 +3,15 @@ package no.nav.melosys.saksflyt.agent.reg;
 import java.time.LocalDate;
 import java.util.HashSet;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,8 +37,7 @@ public class HentMedlemskapsopplysningerTest {
 
     @Before
     public void setUp() {
-        FagsakService fagsakService = mock(FagsakService.class);
-        agent = new HentMedlemskapsopplysninger(medlFasade, fagsakService, MEDLEMSKAPHISTORIKK_ANTALL_ÅR);
+        agent = new HentMedlemskapsopplysninger(medlFasade, mock(SaksopplysningRepository.class), MEDLEMSKAPHISTORIKK_ANTALL_ÅR);
     }
 
     @Test

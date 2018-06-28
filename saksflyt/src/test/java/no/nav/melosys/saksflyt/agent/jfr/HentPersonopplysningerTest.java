@@ -6,6 +6,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,11 +23,14 @@ public class HentPersonopplysningerTest {
     @Mock
     private TpsFasade tpsFasade;
 
+    @Mock
+    private SaksopplysningRepository saksopplysningRepository;
+
     private HentPersonopplysninger agent;
 
     @Before
     public void setUp() {
-        agent = new HentPersonopplysninger(tpsFasade);
+        agent = new HentPersonopplysninger(saksopplysningRepository, tpsFasade);
     }
 
     @Test

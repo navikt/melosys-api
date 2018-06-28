@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.agent.reg;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
@@ -10,10 +11,10 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,14 +38,14 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
     @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallÅr}")
     private Integer arbeidsforholdhistorikkAntallÅr;
 
-    private AaregFasade aaregFasade;
+    private final AaregFasade aaregFasade;
 
-    private FagsakService fagsakService;
+    private final SaksopplysningRepository saksopplysningRepo;
 
     @Autowired
-    public HentArbeidsforholdopplysninger(AaregFasade aaregFasade, FagsakService fagsakService) {
+    public HentArbeidsforholdopplysninger(AaregFasade aaregFasade, SaksopplysningRepository saksopplysningRepo) {
         this.aaregFasade = aaregFasade;
-        this.fagsakService = fagsakService;
+        this.saksopplysningRepo = saksopplysningRepo;
     }
 
     @Override
@@ -66,11 +67,12 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
         LocalDate tom = LocalDate.now();
 
         try {
+            Behandling behandling = prosessinstans.getBehandling();
             Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(brukerId, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
-            prosessinstans.getBehandling().getSaksopplysninger().add(saksopplysning);
+            saksopplysning.setBehandling(behandling);
+            saksopplysning.setRegistrertDato(LocalDateTime.now());
+            saksopplysningRepo.save(saksopplysning);
 
-            Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
-            fagsakService.lagre(fagsak);
         } catch (IntegrasjonException | TekniskException | SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
             // FIXME: MELOSYS-1316

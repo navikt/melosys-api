@@ -9,7 +9,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
-import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,8 +34,7 @@ public class HentArbeidsforholdopplysningerTest {
 
     @Before
     public void setUp() {
-        FagsakService fagsakService = mock(FagsakService.class);
-        agent = new HentArbeidsforholdopplysninger(aaregFasade, fagsakService);
+        agent = new HentArbeidsforholdopplysninger(aaregFasade, mock(SaksopplysningRepository.class));
         ReflectionTestUtils.setField(agent, "arbeidsforholdhistorikkAntallÅr", ARBEIDSFORHOLDHISTORIKK_ANTALL_ÅR);
     }
 

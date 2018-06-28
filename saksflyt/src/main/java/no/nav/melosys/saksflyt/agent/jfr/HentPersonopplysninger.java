@@ -11,6 +11,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
@@ -36,10 +37,13 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentPersonopplysninger.class);
 
-    private TpsFasade tpsFasade;
+    private final SaksopplysningRepository saksopplysningRepo;
+
+    private final TpsFasade tpsFasade;
 
     @Autowired
-    public HentPersonopplysninger(@Qualifier("system") TpsFasade tpsFasade) {
+    public HentPersonopplysninger(SaksopplysningRepository saksopplysningRepo, @Qualifier("system")TpsFasade tpsFasade) {
+        this.saksopplysningRepo = saksopplysningRepo;
         this.tpsFasade = tpsFasade;
     }
 
@@ -62,7 +66,8 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
             Saksopplysning saksopplysning = tpsFasade.hentPersonMedAdresse(brukerId);
             saksopplysning.setBehandling(behandling);
             saksopplysning.setRegistrertDato(LocalDateTime.now());
-            behandling.getSaksopplysninger().add(saksopplysning);
+            saksopplysningRepo.save(saksopplysning);
+
         } catch (IkkeFunnetException | SikkerhetsbegrensningException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
             // FIXME: MELOSYS-1316

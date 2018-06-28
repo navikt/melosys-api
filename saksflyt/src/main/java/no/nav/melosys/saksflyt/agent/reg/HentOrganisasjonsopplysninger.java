@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.agent.reg;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,13 +15,15 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import no.nav.melosys.service.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -34,13 +37,16 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentOrganisasjonsopplysninger.class);
 
-    private final FagsakService fagsakService;
+    private final BehandlingRepository behandlingRepo;
+
+    private final SaksopplysningRepository saksopplysningRepo;
 
     private final EregFasade eregFasade;
 
     @Autowired
-    public HentOrganisasjonsopplysninger(FagsakService fagsakService, EregFasade eregFasade) {
-        this.fagsakService = fagsakService;
+    public HentOrganisasjonsopplysninger(BehandlingRepository behandlingRepo, SaksopplysningRepository saksopplysningRepo, @Qualifier("system")EregFasade eregFasade) {
+        this.behandlingRepo = behandlingRepo;
+        this.saksopplysningRepo = saksopplysningRepo;
         this.eregFasade = eregFasade;
     }
 
@@ -58,8 +64,9 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
     public void utførSteg(Prosessinstans prosessinstans) {
 
         try {
+            Behandling behandling = behandlingRepo.findOne(prosessinstans.getBehandling().getId());
             Set<String> orgnumre = new HashSet<>();
-            Set<Saksopplysning> alleSaksopplysninger = prosessinstans.getBehandling().getSaksopplysninger();
+            Set<Saksopplysning> alleSaksopplysninger = behandling.getSaksopplysninger();
 
             Optional<Saksopplysning> arbeidsforholdSaksopplysning = hentSaksOpplysning(alleSaksopplysninger, SaksopplysningType.ARBEIDSFORHOLD);
             Optional<Saksopplysning> inntektSaksopplysning = hentSaksOpplysning(alleSaksopplysninger, SaksopplysningType.INNTEKT);
@@ -67,10 +74,7 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
             arbeidsforholdSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraArbeidsforhold(saksopplysning)));
             inntektSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraInntekt(saksopplysning)));
 
-            prosessinstans.getBehandling().getSaksopplysninger().addAll(hentOrganisasjoner(orgnumre));
-
-            Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
-            fagsakService.lagre(fagsak);
+            hentOrganisasjoner(orgnumre, behandling).forEach(o -> saksopplysningRepo.save(o));
 
         } catch (SikkerhetsbegrensningException | IkkeFunnetException e) {
             log.error("Feil i steg {}", inngangsSteg(), e);
@@ -103,10 +107,13 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
             filter(saksopplysning -> saksopplysning.getType().equals(saksopplysningType)).findFirst();
     }
 
-    private List<Saksopplysning> hentOrganisasjoner(Set<String> orgnumre) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    private List<Saksopplysning> hentOrganisasjoner(Set<String> orgnumre, Behandling behandling) throws SikkerhetsbegrensningException, IkkeFunnetException {
         List<Saksopplysning> saksopplysninger = new ArrayList<>();
         for (String orgnr : orgnumre) {
-            saksopplysninger.add(eregFasade.hentOrganisasjon(orgnr));
+            Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(orgnr);
+            saksopplysning.setBehandling(behandling);
+            saksopplysning.setRegistrertDato(LocalDateTime.now());
+            saksopplysninger.add(saksopplysning);
         }
         return saksopplysninger;
     }
