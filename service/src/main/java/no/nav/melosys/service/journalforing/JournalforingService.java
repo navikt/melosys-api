@@ -55,7 +55,7 @@ public class JournalforingService {
         
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
-        prosessinstans.setSteg(ProsessSteg.JFR_AKTOER_ID);
+        prosessinstans.setSteg(ProsessSteg.JFR_AVSLUTT_OPPGAVE);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalforingDto.getJournalpostID());
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalforingDto.getDokumentID());
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalforingDto.getOppgaveID());
