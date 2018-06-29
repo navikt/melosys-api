@@ -175,7 +175,8 @@ public class RegelmodulService {
             "<statsborgerskap><kode>%s</kode></statsborgerskap></personDokument><soeknadDokument><oppholdUtland><oppholdsPeriode><fom>%s</fom><tom>" +
             "%s</tom></oppholdsPeriode>" +
             "<oppholdsland><kode>%s</kode></oppholdsland></oppholdUtland></soeknadDokument></dokumenter>";
-        String req = String.format(format, brukersStatsborgerskap, oppholdsPeriode.getFom(), oppholdsPeriode.getTom(), oppholdsland);
+        // FIXME Vi må visst støtte flere oppholdsland/perioder
+        String req = String.format(format, brukersStatsborgerskap.getKode(), oppholdsPeriode.getFom(), oppholdsPeriode.getTom(), oppholdsland.get(0));
 
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, LoggingFeature.Verbosity.PAYLOAD_ANY);

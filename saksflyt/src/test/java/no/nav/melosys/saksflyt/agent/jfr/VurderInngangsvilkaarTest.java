@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -33,7 +34,7 @@ public class VurderInngangsvilkaarTest {
     private FagsakRepository fagsakRepository;
     
     @Mock
-    BehandlingRepository behandlingRepository;
+    private BehandlingRepository behandlingRepository;
 
     private VurderInngangsvilkaar agent;
 
@@ -58,7 +59,7 @@ public class VurderInngangsvilkaarTest {
 
         verify(fagsakRepository, times(1)).save(any(Fagsak.class));
         
-        assertEquals(null, p.getHendelser());
+        assertNull(p.getHendelser());
         assertEquals(FagsakType.EU_EØS, p.getBehandling().getFagsak().getType());
         assertEquals(ProsessSteg.HENT_ARBF_OPPL, p.getSteg());
     }
@@ -82,7 +83,7 @@ public class VurderInngangsvilkaarTest {
         verify(fagsakRepository, times(0)).save(any(Fagsak.class));
         
         assertEquals(2, p.getHendelser().size());
-        assertEquals(null, p.getBehandling().getFagsak().getType());
+        assertNull(p.getBehandling().getFagsak().getType());
         assertEquals(ProsessSteg.FEILET_MASKINELT, p.getSteg());
     }
 
@@ -95,7 +96,7 @@ public class VurderInngangsvilkaarTest {
         Saksopplysning sopp = new Saksopplysning();
         sopp.setDokument(pDok);
         p.getBehandling().setSaksopplysninger(Collections.singleton(sopp));
-        p.setData(ProsessDataKey.LAND, Collections.singletonList("POL"));
+        p.setData(ProsessDataKey.LAND, Collections.singletonList(Landkoder.PL.getKode()));
         p.setData(ProsessDataKey.SØKNADSPERIODE, new PeriodeDto(LocalDate.now(), null));
         return p;
     }

@@ -3,7 +3,7 @@ package no.nav.melosys.domain;
 import javax.persistence.Converter;
 
 /**
- * Landkoder som vises i frontend.
+ * ISO2 landkoder som vises i frontend.
  */
 public enum Landkoder implements KodeverkTabell<Landkoder> {
 
