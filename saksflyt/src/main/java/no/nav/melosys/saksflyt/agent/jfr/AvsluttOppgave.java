@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.Map;
 
 import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
@@ -16,8 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.OPPGAVE_ID;
-import static no.nav.melosys.domain.ProsessSteg.JFR_AKTOER_ID;
-import static no.nav.melosys.domain.ProsessSteg.JFR_AVSLUTT_OPPGAVE;
+import static no.nav.melosys.domain.ProsessSteg.*;
 
 /**
  * Avslutter en oppgave i GSAK.
@@ -58,7 +58,13 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
             // FIXME: MELOSYS-1316
         }
 
-        prosessinstans.setSteg(JFR_AKTOER_ID);
+        ProsessType type = prosessinstans.getType();
+        if (ProsessType.JFR_NY_SAK.equals(type)) {
+            prosessinstans.setSteg(JFR_AKTOER_ID);
+        } else if (ProsessType.JFR_KNYTT.equals(type)) {
+            prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
+        } else {
+            // FIXME: MELOSYS-1316
+        }
     }
-
 }

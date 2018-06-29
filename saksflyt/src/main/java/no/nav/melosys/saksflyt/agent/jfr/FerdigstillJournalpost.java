@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.Map;
 
 import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
@@ -16,8 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.JOURNALPOST_ID;
-import static no.nav.melosys.domain.ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST;
-import static no.nav.melosys.domain.ProsessSteg.JFR_HENT_PERS_OPPL;
+import static no.nav.melosys.domain.ProsessSteg.*;
 
 /**
  * Ferdigstiller en journalpost i Joark.
@@ -49,6 +49,8 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
     
     @Override
     public void utførSteg(Prosessinstans prosessinstans) {
+        ProsessType type = prosessinstans.getType();
+
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
         try {
             joarkFasade.ferdigstillJournalføring(journalpostID);
@@ -57,6 +59,12 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
             // FIXME: MELOSYS-1316
         }
 
-        prosessinstans.setSteg(JFR_HENT_PERS_OPPL);
+        if (ProsessType.JFR_NY_SAK.equals(type)) {
+            prosessinstans.setSteg(JFR_HENT_PERS_OPPL);
+        } else if (ProsessType.JFR_KNYTT.equals(type)) {
+            prosessinstans.setSteg(FERDIG);
+        } else {
+            // FIXME: MELOSYS-1316
+        }
     }
 }
