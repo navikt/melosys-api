@@ -23,7 +23,10 @@ import static no.nav.melosys.domain.ProsessSteg.*;
  * Ferdigstiller en journalpost i Joark.
  *
  * Transisjoner:
- * JFR_FERDIGSTILL_JOURNALPOST -> JFR_HENT_PERS_OPPL eller FEILET_MASKINELT hvis feil
+ * 1) ProsessType.JFR_NY_SAK:
+ *     JFR_FERDIGSTILL_JOURNALPOST -> JFR_HENT_PERS_OPPL eller FEILET_MASKINELT hvis feil
+ * 2) ProsessType.JFR_KNYTT:
+ *     JFR_FERDIGSTILL_JOURNALPOST -> FERDIG eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class FerdigstillJournalpost extends AbstraktStegBehandler {

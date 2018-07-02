@@ -23,7 +23,10 @@ import static no.nav.melosys.domain.ProsessSteg.*;
  * Avslutter en oppgave i GSAK.
  *
  * Transisjoner:
- * JFR_AVSLUTT_OPPGAVE -> JFR_AKTOER_ID eller FEILET_MASKINELT hvis feil
+ * 1) ProsessType.JFR_NY_SAK:
+ *     JFR_AVSLUTT_OPPGAVE -> JFR_AKTOER_ID eller FEILET_MASKINELT hvis feil
+ * 2) ProsessType.JFR_KNYTT:
+ *     JFR_AVSLUTT_OPPGAVE -> JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class AvsluttOppgave extends AbstraktStegBehandler {
