@@ -29,6 +29,7 @@
         <module>saksflyt-api</module>
         <module>service</module>
         <module>sikkerhet</module>
+        <module>schema</module>
     </modules>
 
     <properties>
@@ -67,9 +68,11 @@
         <hibernate.version>5.2.10.Final</hibernate.version>
         <hikaricp.version>2.6.1</hikaricp.version>
         <ibmmq.version>9.0.5.0</ibmmq.version>
+        <jackson.version>2.9.4</jackson.version>
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
         <jms-api.version>2.0.1</jms-api.version>
         <jose4j.version>0.6.2</jose4j.version>
+        <json.schema.validator.version>2.2.10</json.schema.validator.version>
         <junit.version>4.12</junit.version>
         <micrometer.version>1.0.6</micrometer.version>
         <mitreid-connect-version>1.3.1</mitreid-connect-version>
@@ -79,11 +82,11 @@
         <ojdbc.version>12.2.0.1</ojdbc.version>
         <oxmlparserv2.version>11.2.0.1</oxmlparserv2.version>
         <prometheus.version>0.5.0</prometheus.version>
+        <random-beans.version>3.7.0</random-beans.version>
         <restFixture.version>4.4</restFixture.version>
         <servlet-api.version>3.1.0</servlet-api.version>
         <slf4j.version>1.7.25</slf4j.version>
         <swagger.version>1.5.13</swagger.version>
-        <jackson.version>2.9.4</jackson.version>
 
 		</properties>
 
@@ -420,21 +423,27 @@
 
             <!-- Test -->
             <dependency>
-                <groupId>no.nav.melosys</groupId>
-                <artifactId>sikkerhet</artifactId>
-                <version>${project.version}</version>
-                <type>test-jar</type>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>smartrics.restfixture</groupId>
-                <artifactId>smartrics-RestFixture</artifactId>
-                <version>${restFixture.version}</version>
+                <groupId>com.github.java-json-tools</groupId>
+                <artifactId>json-schema-validator</artifactId>
+                <version>${json.schema.validator.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.mockrunner</groupId>
                 <artifactId>mockrunner-jms</artifactId>
                 <version>${mockrunner.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.benas</groupId>
+                <artifactId>random-beans</artifactId>
+                <version>${random-beans.version}</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>no.nav.melosys</groupId>
+                <artifactId>sikkerhet</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
             </dependency>
         </dependencies>
     </dependencyManagement>
