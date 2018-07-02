@@ -49,10 +49,6 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.fge</groupId>
-            <artifactId>json-patch</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
         </dependency>
