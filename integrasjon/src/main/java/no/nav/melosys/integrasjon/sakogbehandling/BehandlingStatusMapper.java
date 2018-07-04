@@ -52,7 +52,7 @@ public class BehandlingStatusMapper {
         private Applikasjoner hendelsesprodusent;
         private XMLGregorianCalendar hendelsestidspunkt;
         private Sakstemaer sakstema;
-        private Aktoer aktoer;
+        private Aktoer aktør;
         private String ansvarligEnhet;
 
         public Builder medHendelsesId(String hendelsesId) {
@@ -91,8 +91,8 @@ public class BehandlingStatusMapper {
         }
 
         public Builder medAktørID(String aktørID) {
-            this.aktoer = new Aktoer();
-            this.aktoer.setAktoerId(aktørID);
+            this.aktør = new Aktoer();
+            this.aktør.setAktoerId(aktørID);
             return this;
         }
 
@@ -102,7 +102,7 @@ public class BehandlingStatusMapper {
         }
 
         public BehandlingStatusMapper build() {
-            return new BehandlingStatusMapper(hendelsesId, behandlingsId, applikasjonSak, hendelsesprodusent, hendelsestidspunkt, sakstema, aktoer, ansvarligEnhet);
+            return new BehandlingStatusMapper(hendelsesId, behandlingsId, applikasjonSak, hendelsesprodusent, hendelsestidspunkt, sakstema, aktør, ansvarligEnhet);
         }
     }
 

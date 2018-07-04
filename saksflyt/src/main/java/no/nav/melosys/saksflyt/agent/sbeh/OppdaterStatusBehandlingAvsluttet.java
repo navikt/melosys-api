@@ -1,22 +1,15 @@
 package no.nav.melosys.saksflyt.agent.sbeh;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.sakogbehandling.BehandlingStatusMapper;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingClient;
-import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.agent.UnntakBehandler;
-import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.BehandlingType.SØKNAD;
-import static no.nav.melosys.domain.BehandlingType.UNNTAK_MEDL;
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
 import static no.nav.melosys.domain.ProsessDataKey.SOB_BEHANDLING_ID;
@@ -28,16 +21,13 @@ import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.generateCallId
  * Steget sørger for å skrive til Sak og Behandling når behandling opprettes
  *
  * Transisjoner:
- * FATTET_VEDTAK → XXX hvis alt ok
+ * FATTET_VEDTAK → null hvis alt ok
  * FATTET_VEDTAK → FEILET_MASKINELT hvis oppdatering av status feilet
  */
 @Component
-public class OppdaterStatusBehandlingAvsluttet extends AbstraktStegBehandler {
+public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehander {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterStatusBehandlingAvsluttet.class);
-
-    private static String ARKIVTEMA_MED = "MED";
-    private static String ARKIVTEMA_UFM = "UFM";
 
     private final SakOgBehandlingClient sakOgBehandlingClient;
 
@@ -51,16 +41,17 @@ public class OppdaterStatusBehandlingAvsluttet extends AbstraktStegBehandler {
     }
 
     @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
-    }
-
-    @SuppressWarnings("Duplicates")
-    @Override
     public void utførSteg(Prosessinstans prosessinstans) {
         String aktørID = prosessinstans.getData(AKTØR_ID, String.class);
         String saksnummer = prosessinstans.getData(SAKSNUMMER, String.class);
         Behandling behandling = prosessinstans.getBehandling();
+        Tema arkivtema = avgjørArkivtema(behandling.getType());
+
+        if (arkivtema == null) {
+            log.error("BehandlingType {} støttes ikke.", behandling.getType().getBeskrivelse());
+            prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
+            return;
+        }
 
         String behandlingsId = prosessinstans.getData(SOB_BEHANDLING_ID, String.class);
 
@@ -70,15 +61,7 @@ public class OppdaterStatusBehandlingAvsluttet extends AbstraktStegBehandler {
         builder.medSaksnummer(saksnummer);
         builder.medHendelsesprodusent(Fagsystem.MELOSYS.getKode());
         builder.medHendelsestidspunkt(LocalDateTime.now());
-        if (SØKNAD.equals(behandling.getType())) {
-            builder.medArkivtema(ARKIVTEMA_MED);
-        } else if (UNNTAK_MEDL.equals(behandling.getType())) {
-            builder.medArkivtema(ARKIVTEMA_UFM);
-        } else {
-            log.error("BehandlingType {} støttes ikke.", behandling.getType().getBeskrivelse());
-            prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
-            return;
-        }
+        builder.medArkivtema(arkivtema.getKode());
         builder.medAktørID(aktørID);
         builder.medAnsvarligEnhet(Integer.toString(MELOSYS_ENHET_ID));
 
