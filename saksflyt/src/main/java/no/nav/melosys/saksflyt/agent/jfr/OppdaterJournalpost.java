@@ -3,12 +3,15 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.List;
 import java.util.Map;
 
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.joark.JournalfoeringMangel;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
@@ -32,11 +35,14 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterJournalpost.class);
 
-    JoarkFasade joarkFasade;
+    private final JoarkFasade joarkFasade;
+
+    private final FagsakRepository fagsakRepo;
 
     @Autowired
-    public OppdaterJournalpost(JoarkFasade joarkFasade) {
+    public OppdaterJournalpost(JoarkFasade joarkFasade, FagsakRepository fagsakRepo) {
         this.joarkFasade = joarkFasade;
+        this.fagsakRepo = fagsakRepo;
     }
 
     @Override
@@ -65,6 +71,15 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         }
 
         String gsakSakID = prosessinstans.getData(GSAK_SAK_ID);
+        if (ProsessType.JFR_KNYTT.equals(prosessinstans.getType())) {
+            Fagsak sak = fagsakRepo.findBySaksnummer(prosessinstans.getData(SAKSNUMMER));
+            if (sak == null) {
+                // FIXME: MELOSYS-1316
+            } else {
+                gsakSakID = sak.getGsakSaksnummer();
+            }
+        }
+
         String brukerID = prosessinstans.getData(BRUKER_ID);
         String avsenderID = prosessinstans.getData(AVSENDER_ID);
         String avsenderNavn = prosessinstans.getData(AVSENDER_NAVN);
