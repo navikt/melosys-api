@@ -6,7 +6,9 @@ import java.util.function.Predicate;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.api.StegBehandler;
 import no.nav.melosys.saksflyt.impl.Utils;
@@ -52,18 +54,20 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
         try {
             utfør(prosessinstans);
         } catch (SikkerhetsbegrensningException e) {
-            log.error("Uventet SikkerhetsbegrensningException for {}", prosessinstans.getId(), e);
-            håndterUnntak(Feilkategori.INGEN_TILGANG, prosessinstans, "Uventet SikkerhetsbegrensningException", e);
+            String feilmelding = "Uventet SikkerhetsbegrensningException";
+            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            håndterUnntak(Feilkategori.INGEN_TILGANG, prosessinstans, feilmelding, e);
         } catch (IkkeFunnetException e) {
-            String feilmelding = "Fant ikke orginfo for en eller flere organisasjoner";
+            String feilmelding = "Uventet IkkeFunnetException";
             log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.IKKE_FUNNET, prosessinstans, feilmelding, e);
         } catch (RuntimeException e) {
-            log.error("Uventet RuntimeException for {}", prosessinstans.getId(), e);
-            håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, "Uventet RuntimeException", e);
+            String feilmelding = "Uventet RuntimeException";
+            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, e);
         }
     }
     
-    protected abstract void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException;
+    protected abstract void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException, IntegrasjonException;
 
 }

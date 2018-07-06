@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -52,12 +53,13 @@ public class OpprettGsakSakTest {
         when(gsakFasade.opprettSak(anyString(), eq(BehandlingType.SØKNAD), anyString())).thenReturn("GSAK-123");
 
         Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer("GSAK-123");
+        fagsak.setGsakSaksnummer(null);
         when(fagsakRepository.findBySaksnummer(any())).thenReturn(fagsak);
 
         agent.utførSteg(p);
 
         verify(gsakFasade, times(1)).opprettSak(saksnummer, BehandlingType.SØKNAD, aktørID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
+        Assert.notNull(fagsak.getGsakSaksnummer(), "Fagsak skal ha fått Gsak saksnummert");
     }
 }
