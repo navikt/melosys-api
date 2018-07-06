@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -33,6 +34,7 @@ public class FerdigstillJournalpostTest {
     @Test
     public void utfoerSteg() throws SikkerhetsbegrensningException {
         Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.JFR_NY_SAK);
         Properties properties = new Properties();
         String journalpostID = "Journal_ID";
         properties.setProperty(ProsessDataKey.JOURNALPOST_ID.getKode(), journalpostID);

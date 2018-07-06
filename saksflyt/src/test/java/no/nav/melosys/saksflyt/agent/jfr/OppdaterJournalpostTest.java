@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.joark.JournalfoeringMangel;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +30,8 @@ public class OppdaterJournalpostTest {
 
     @Before
     public void setUp() throws Exception {
-        agent = new OppdaterJournalpost(joarkFasade);
+        FagsakRepository fagsakRepository = mock(FagsakRepository.class);
+        agent = new OppdaterJournalpost(joarkFasade, fagsakRepository);
     }
 
     @Test
