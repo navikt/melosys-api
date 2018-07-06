@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
 
@@ -45,6 +46,7 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
     public HentInntektopplysninger(InntektFasade inntektFasade, SaksopplysningRepository saksopplysningRepo) {
         this.inntektFasade = inntektFasade;
         this.saksopplysningRepo = saksopplysningRepo;
+        log.info("HentInntektopplysninger initialisert");
     }
 
     @Override
@@ -57,27 +59,23 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
         return FeilStrategi.standardFeilHåndtering();
     }
     
+    @Transactional
     @Override
-    public void utførSteg(Prosessinstans prosessinstans) {
-        String brukerId = prosessinstans.getData(BRUKER_ID);
+    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, SikkerhetsbegrensningException {
+        log.debug("Starter behandling av {}", prosessinstans.getId());
 
-        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+        String brukerId = prosessinstans.getData(BRUKER_ID);
+        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
         YearMonth fom = YearMonth.from(periode.getFom()).minusMonths(inntektshistorikkAntallMåneder);
         YearMonth tom = YearMonth.now();
 
-        try {
-            Behandling behandling = prosessinstans.getBehandling();
-            Saksopplysning saksopplysning = inntektFasade.hentInntektListe(brukerId, fom, tom);
-            saksopplysning.setBehandling(behandling);
-            saksopplysning.setRegistrertDato(LocalDateTime.now());
-            saksopplysningRepo.save(saksopplysning);
-
-        } catch (IntegrasjonException | SikkerhetsbegrensningException e) {
-            log.error("Feil i steg {}", inngangsSteg(), e);
-            // FIXME: MELOSYS-1316
-            return;
-        }
+        Behandling behandling = prosessinstans.getBehandling();
+        Saksopplysning saksopplysning = inntektFasade.hentInntektListe(brukerId, fom, tom);
+        saksopplysning.setBehandling(behandling);
+        saksopplysning.setRegistrertDato(LocalDateTime.now());
+        saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(ProsessSteg.HENT_ORG_OPPL);
+        log.info("Hentet inntektopplysninger for {}", prosessinstans.getId());
     }
 }

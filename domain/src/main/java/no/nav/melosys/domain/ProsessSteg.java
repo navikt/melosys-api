@@ -9,6 +9,7 @@ public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
     MOT_VURDER_AUTOMATISK_JFR("VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"),
 
     JFR_AVSLUTT_OPPGAVE("JFR_AVSLUTT_OPPGAVE", "Avslutter journalføringsoppgaven i GSAK"),
+    JFR_VALIDERING("JFR_VALIDERING", "Grunnleggende validering"),
     JFR_AKTOER_ID("JFR_AKTOER_ID", "Henter aktørID"),
     JFR_OPPRETT_SAK_OG_BEH("JFR_OPPRETT_SAK_OG_BEH", "Oppretter ny sak og behandling i Melosys"),
 

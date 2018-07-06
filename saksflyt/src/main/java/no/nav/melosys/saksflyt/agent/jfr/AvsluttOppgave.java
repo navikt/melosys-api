@@ -6,6 +6,7 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.OPPGAVE_ID;
 import static no.nav.melosys.domain.ProsessSteg.*;
@@ -33,12 +35,12 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(AvsluttOppgave.class);
 
-    GsakFasade gsakFasade;
-
+    private final GsakFasade gsakFasade;
 
     @Autowired
     public AvsluttOppgave(GsakFasade gsakFasade) {
         this.gsakFasade = gsakFasade;
+        log.info("AvsluttOppgave initialisert");
     }
     
     @Override
@@ -51,23 +53,26 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
         return FeilStrategi.standardFeilHåndtering();
     }
     
+    @Transactional
     @Override
-    public void utførSteg(Prosessinstans prosessinstans) {
-        String oppgaveID = prosessinstans.getData(OPPGAVE_ID);
-        try {
-            gsakFasade.ferdigstillOppgave(oppgaveID);
-        } catch (SikkerhetsbegrensningException e) {
-            log.error("...");
-            // FIXME: MELOSYS-1316
-        }
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, SikkerhetsbegrensningException {
+        log.debug("Starter behandling av {}", prosessinstans.getId());
 
+        String oppgaveID = prosessinstans.getData(OPPGAVE_ID);
+        gsakFasade.ferdigstillOppgave(oppgaveID);
+        
         ProsessType type = prosessinstans.getType();
-        if (ProsessType.JFR_NY_SAK.equals(type)) {
+        if (type == ProsessType.JFR_NY_SAK) {
             prosessinstans.setSteg(JFR_AKTOER_ID);
-        } else if (ProsessType.JFR_KNYTT.equals(type)) {
+        } else if (type == ProsessType.JFR_KNYTT) {
             prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
         } else {
-            // FIXME: MELOSYS-1316
+            String feilmelding = "Ukjent prosess type: " + type;
+            log.error("{}: {}", prosessinstans.getId(), feilmelding);
+            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
+            return;
         }
+
+        log.info("Lukket oppgave {} for {}", oppgaveID, prosessinstans.getId());
     }
 }

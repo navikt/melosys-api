@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
 import static no.nav.melosys.domain.ProsessSteg.JFR_HENT_PERS_OPPL;
@@ -45,6 +46,7 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
     public HentPersonopplysninger(SaksopplysningRepository saksopplysningRepo, @Qualifier("system")TpsFasade tpsFasade) {
         this.saksopplysningRepo = saksopplysningRepo;
         this.tpsFasade = tpsFasade;
+        log.info("HentPersonopplysninger initialisert");
     }
 
     @Override
@@ -57,23 +59,19 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
         return FeilStrategi.standardFeilHåndtering();
     }
     
+    @Transactional
     @Override
-    public void utførSteg(Prosessinstans prosessinstans) {
+    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException {
+        log.debug("Starter behandling av {}", prosessinstans.getId());
+
         String brukerId = prosessinstans.getData(BRUKER_ID);
-
-        try {
-            Behandling behandling = prosessinstans.getBehandling();
-            Saksopplysning saksopplysning = tpsFasade.hentPersonMedAdresse(brukerId);
-            saksopplysning.setBehandling(behandling);
-            saksopplysning.setRegistrertDato(LocalDateTime.now());
-            saksopplysningRepo.save(saksopplysning);
-
-        } catch (IkkeFunnetException | SikkerhetsbegrensningException e) {
-            log.error("Feil i steg {}", inngangsSteg(), e);
-            // FIXME: MELOSYS-1316
-            return;
-        }
+        Behandling behandling = prosessinstans.getBehandling();
+        Saksopplysning saksopplysning = tpsFasade.hentPersonMedAdresse(brukerId);
+        saksopplysning.setBehandling(behandling);
+        saksopplysning.setRegistrertDato(LocalDateTime.now());
+        saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(JFR_VURDER_INNGANGSVILKÅR);
+        log.info("Hentet personopplysninger for {}", prosessinstans.getId());
     }
 }

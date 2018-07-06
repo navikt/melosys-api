@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
 
@@ -46,6 +47,8 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
     public HentArbeidsforholdopplysninger(AaregFasade aaregFasade, SaksopplysningRepository saksopplysningRepo) {
         this.aaregFasade = aaregFasade;
         this.saksopplysningRepo = saksopplysningRepo;
+        log.info("HentArbeidsforholdopplysninger initialisert");
+
     }
 
     @Override
@@ -58,27 +61,24 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
         return FeilStrategi.standardFeilHåndtering();
     }
     
+    @Transactional
     @Override
-    public void utførSteg(Prosessinstans prosessinstans) {
+    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, TekniskException, SikkerhetsbegrensningException {
+        log.debug("Starter behandling av {}", prosessinstans.getId());
+
+        Behandling behandling = prosessinstans.getBehandling();
         String brukerId = prosessinstans.getData(BRUKER_ID);
 
-        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-        LocalDate fom = periode.getFom().minusYears(arbeidsforholdhistorikkAntallÅr);
+        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
+        LocalDate fom = periode.getFom().minusYears(arbeidsforholdhistorikkAntallÅr); 
         LocalDate tom = LocalDate.now();
 
-        try {
-            Behandling behandling = prosessinstans.getBehandling();
-            Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(brukerId, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
-            saksopplysning.setBehandling(behandling);
-            saksopplysning.setRegistrertDato(LocalDateTime.now());
-            saksopplysningRepo.save(saksopplysning);
-
-        } catch (IntegrasjonException | TekniskException | SikkerhetsbegrensningException e) {
-            log.error("Feil i steg {}", inngangsSteg(), e);
-            // FIXME: MELOSYS-1316
-            return;
-        }
+        Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(brukerId, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
+        saksopplysning.setBehandling(behandling);
+        saksopplysning.setRegistrertDato(LocalDateTime.now());
+        saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(ProsessSteg.HENT_INNT_OPPL);
+        log.info("Hentet arbeidsforholdopplysninger for {}", prosessinstans.getId());
     }
 }

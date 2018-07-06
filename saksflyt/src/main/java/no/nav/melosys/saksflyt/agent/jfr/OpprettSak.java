@@ -2,9 +2,11 @@ package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
@@ -14,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
@@ -31,11 +34,12 @@ public class OpprettSak extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettSak.class);
 
-    FagsakService fagsakService;
+    private final FagsakService fagsakService;
 
     @Autowired
     public OpprettSak(FagsakService fagsakService) {
         this.fagsakService = fagsakService;
+        log.info("OpprettSak initialisert");
     }
 
     @Override
@@ -48,29 +52,17 @@ public class OpprettSak extends AbstraktStegBehandler {
         return FeilStrategi.standardFeilHåndtering();
     }
     
+    @Transactional
     @Override
-    public void utførSteg(Prosessinstans prosessinstans) {
+    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException {
+        log.debug("Starter behandling av {}", prosessinstans.getId());
+
         String aktørId = prosessinstans.getData(AKTØR_ID);
-        ProsessType prosessType = prosessinstans.getType();
-        BehandlingType behandlingType = null;
-        if (ProsessType.JFR_NY_SAK.equals(prosessType)) {
-            behandlingType = BehandlingType.SØKNAD;
-        } else  {
-            // FIXME: MELOSYS-1316
-            throw new TekniskException("ProsessType " + prosessType + " er ikke støttet");
-        }
-
-        Fagsak fagsak = null;
-        try {
-            fagsak = fagsakService.nyFagsakOgBehandling(aktørId, behandlingType, false);
-            prosessinstans.setBehandling(fagsak.getBehandlinger().get(0));
-        } catch (SikkerhetsbegrensningException e) {
-            log.error("Feil i steg {}", inngangsSteg(), e);
-            // FIXME: MELOSYS-1316
-            return;
-        }
-
+        Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, BehandlingType.SØKNAD, false);
         prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
+        prosessinstans.setBehandling(fagsak.getBehandlinger().get(0));
+
         prosessinstans.setSteg(STATUS_BEH_OPPR);
+        log.info("Opprettet fagsak {} for prosessinstans {}", fagsak.getSaksnummer(), prosessinstans.getId());
     }
 }

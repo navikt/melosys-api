@@ -21,10 +21,10 @@ public abstract class SakOgBehandlingStegBehander extends AbstraktStegBehandler 
         return FeilStrategi.standardFeilHåndtering();
     }
 
-    Tema avgjørArkivtema(BehandlingType behandlingType) {
-        if (SØKNAD.equals(behandlingType)) {
+    protected Tema avgjørArkivTema(BehandlingType behandlingType) {
+        if (behandlingType == SØKNAD) {
             return MED;
-        } else if (UNNTAK_MEDL.equals(behandlingType)) {
+        } else if (behandlingType == UNNTAK_MEDL) {
             return UFM;
         } else {
             return null;

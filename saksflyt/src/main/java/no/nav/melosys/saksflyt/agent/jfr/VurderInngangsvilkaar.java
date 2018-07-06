@@ -8,6 +8,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
@@ -22,8 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.feil.Feilkategori.*;
+import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
+
 
 /**
  * Kaller regelmodulen for å vurdere inngangsvilkår. Setter type på fagsak basert på resultatet.
@@ -59,86 +62,76 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     }
     
     @Override
+    @Transactional
     @SuppressWarnings("unchecked")
-    public void utførSteg(Prosessinstans prosessinstans) {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException {
         log.debug("Starter behandling av {}", prosessinstans.getId());
         Behandling behandling = behandlingRepository.findOne(prosessinstans.getBehandling().getId());
 
-        try {
-            // Hent statsborgerskap fra saksopplysningene...
-            // TODO (MELOSYS-1255): Statsborgerskap skal ikke hentes fra PersonopplysningsDokument, siden dette ikke nødvendigvis er riktig for søknadstidspunktet.
-            Land statsborgerskap = null;
-            for (Saksopplysning kandidat : behandling.getSaksopplysninger()) {
-                if (kandidat.getDokument() instanceof PersonDokument) {
-                    statsborgerskap = ((PersonDokument) kandidat.getDokument()).statsborgerskap;
-                    break; // Forutsetter at vi har kun 1 av disse
-                }
+        // Hent statsborgerskap fra saksopplysningene...
+        // TODO (MELOSYS-1255): Statsborgerskap skal ikke hentes fra PersonopplysningsDokument, siden dette ikke nødvendigvis er riktig for søknadstidspunktet.
+        Land statsborgerskap = null;
+        for (Saksopplysning kandidat : prosessinstans.getBehandling().getSaksopplysninger()) {
+            if (kandidat.getDokument() instanceof PersonDokument) {
+                statsborgerskap = ((PersonDokument) kandidat.getDokument()).statsborgerskap;
+                break; // Forutsetter at vi har kun 1 av disse
             }
-            if (statsborgerskap == null) {
-                log.error("Funksjonell feil for {}: Kunne ikke hente brukers statsborgerskap fra saksopplysningene.", prosessinstans.getId());
-                håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Ingen informasjon om statsborgerskap", null);
-                return;
-            }
-
-            // Kjør inngangsvilkår...
-            List<String> oppholdsland = prosessinstans.getData(ProsessDataKey.LAND, List.class);
-            // FIXME MELOSYS-1377 Regelmodulen jobber med ISO 3 landkoder (oppholdsland må konverteres)
-            oppholdsland = tilIso3Landkoder(oppholdsland);
-            Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-            if (periode == null || periode.getFom() == null) {
-                log.error("Funksjonell feil for {}: Søknadsperioden er ikke oppgitt eller mangler fom.", prosessinstans.getId());
-                håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Søknadsperioden er ikke oppgitt eller mangler fom.", null);
-                return;
-            }
-            log.debug("Kaller regelmodul for prosessinstans {}...", prosessinstans.getId());
-            VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(statsborgerskap, oppholdsland, periode);
-
-            // Legg på evt. feil og varsler...
-            boolean detErMeldtFeil = false;
-            for (Feilmelding melding : res.feilmeldinger) {
-                if (melding.kategori.alvorlighetsgrad == Alvorlighetsgrad.FEIL) {
-                    detErMeldtFeil = true;
-                }
-                log.info("Kall til regelmodul for prosessinstans {} returnerte {}", prosessinstans.getId(), melding.toString());
-                prosessinstans.leggTilHendelse(melding.kategori.name(), melding.melding);
-            }
-
-            // Håndter ev. feil...
-            if (detErMeldtFeil) {
-                log.info("Avbryter behandling av {} pga. feil", prosessinstans.getId());
-                håndterUnntak(TEKNISK_FEIL, prosessinstans, "Uventet feil fra regelmodulen", null);
-                return;
-            }
-
-            // Sett sakstype...
-            Fagsak fagsak = behandling.getFagsak();
-            FagsakType nyFagsakType = res.kvalifisererForEf883_2004 ? FagsakType.EU_EØS : FagsakType.FOLKETRYGD; // Fikses når inngangsvilkårsvurdering også kvalifiserer for avtaler.
-            if (fagsak.getType() != null && fagsak.getType() != nyFagsakType) {
-                log.error("Avbryter behandling av {}: Forsøk på å endre fagsakType fra {} til {}", prosessinstans.getId(), fagsak.getType(), nyFagsakType);
-                håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Forsøk på å endre fagsakType fra " + fagsak.getType() + " til " + nyFagsakType, null);
-                return;
-            }
-            log.info("Setter type på fagsak {} til {}", fagsak.getSaksnummer(), nyFagsakType); 
-            fagsak.setType(nyFagsakType);
-            fagsakRepository.save(fagsak);
-
-            prosessinstans.setSteg(ProsessSteg.HENT_ARBF_OPPL);
-        } catch (RuntimeException e) {
-            håndterUnntak(UVENTET_EXCEPTION, prosessinstans, "Uventet RuntimeException", e);
+        }
+        if (statsborgerskap == null) {
+            log.error("Funksjonell feil for {}: Kunne ikke hente brukers statsborgerskap fra saksopplysningene.", prosessinstans.getId());
+            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Ingen informasjon om statsborgerskap", null);
+            return;
         }
 
-        log.debug("Ferdig med behandling av {}", prosessinstans.getId());
+        // Kjør inngangsvilkår...
+        log.debug("Kaller regelmodul for prosessinstans {}...", prosessinstans.getId());
+        List<String> oppholdsland = prosessinstans.getData(ProsessDataKey.LAND, List.class);
+        // FIXME MELOSYS-1377 Regelmodulen jobber med ISO 3 landkoder (oppholdsland må konverteres)
+        oppholdsland = tilIso3Landkoder(oppholdsland);
+        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
+        VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(statsborgerskap, oppholdsland, periode);
+
+        // Legg på evt. feil og varsler...
+        boolean detErMeldtFeil = false;
+        for (Feilmelding melding : res.feilmeldinger) {
+            if (melding.kategori.alvorlighetsgrad == Alvorlighetsgrad.FEIL) {
+                detErMeldtFeil = true;
+            }
+            log.info("Kall til regelmodul for prosessinstans {} returnerte {}", prosessinstans.getId(), melding.toString());
+            prosessinstans.leggTilHendelse(melding.kategori.name(), melding.melding);
+        }
+
+        // Håndter ev. feil...
+        if (detErMeldtFeil) {
+            log.info("Avbryter behandling av {} pga. feil", prosessinstans.getId());
+            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Uventet feil fra regelmodulen", null);
+            return;
+        }
+
+        // Sett sakstype...
+        Fagsak fagsak = behandling.getFagsak();
+        FagsakType nyFagsakType = res.kvalifisererForEf883_2004 ? FagsakType.EU_EØS : FagsakType.FOLKETRYGD; // Fikses når inngangsvilkårsvurdering også kvalifiserer for avtaler.
+        if (fagsak.getType() != null && fagsak.getType() != nyFagsakType) {
+            log.error("Avbryter behandling av {}: Forsøk på å endre fagsakType fra {} til {}", prosessinstans.getId(), fagsak.getType(), nyFagsakType);
+            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Forsøk på å endre fagsakType fra " + fagsak.getType() + " til " + nyFagsakType, null);
+            return;
+        }
+        fagsak.setType(nyFagsakType);
+        fagsakRepository.save(fagsak);
+
+        prosessinstans.setSteg(ProsessSteg.HENT_ARBF_OPPL);
+        log.info("Satt type på fagsak {} til {}", fagsak.getSaksnummer(), nyFagsakType); 
     }
 
     // FIXME MELOSYS-1377 Regelmodulen jobber med ISO 3 landkoder.
-    private List<String> tilIso3Landkoder(List<String> oppholdsland) {
+    private static List<String> tilIso3Landkoder(List<String> oppholdsland) throws TekniskException {
         List<String> landkoder = new ArrayList<>();
         oppholdsland.forEach(l -> landkoder.add(tilIso3(l)));
         return landkoder;
     }
 
-    // Midlertidig fiks
-    private String tilIso3(String l) {
+    // FIXME: Midlertidig fiks
+    private static String tilIso3(String l) throws TekniskException {
         Landkoder iso2Kode = Landkoder.valueOf(l);
 
         switch (iso2Kode) {
@@ -173,7 +166,8 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
             case DE: return Land.TYSKLAND;
             case HU: return Land.UNGARN;
             case AT: return Land.ØSTERRIKE;
-            default: throw new IllegalArgumentException(iso2Kode.getKode());
+            default: throw new TekniskException("Støtter ikke land " + iso2Kode.getKode());
         }
     }
+
 }

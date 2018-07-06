@@ -33,11 +33,12 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(FerdigstillJournalpost.class);
 
-    JoarkFasade joarkFasade;
+    private final JoarkFasade joarkFasade;
 
     @Autowired
     public FerdigstillJournalpost(JoarkFasade joarkFasade) {
         this.joarkFasade = joarkFasade;
+        log.info("FerdigstillJournalpost initialisert");
     }
 
     @Override
@@ -51,23 +52,23 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
     }
     
     @Override
-    public void utførSteg(Prosessinstans prosessinstans) {
+    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException {
+        log.debug("Starter behandling av {}", prosessinstans.getId());
+
         ProsessType type = prosessinstans.getType();
-
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
-        try {
-            joarkFasade.ferdigstillJournalføring(journalpostID);
-        } catch (SikkerhetsbegrensningException e) {
-            log.error("Feil i steg", e);
-            // FIXME: MELOSYS-1316
-        }
+        joarkFasade.ferdigstillJournalføring(journalpostID);
 
-        if (ProsessType.JFR_NY_SAK.equals(type)) {
+        if (type == ProsessType.JFR_NY_SAK) {
             prosessinstans.setSteg(JFR_HENT_PERS_OPPL);
-        } else if (ProsessType.JFR_KNYTT.equals(type)) {
+        } else if (type == ProsessType.JFR_KNYTT) {
             prosessinstans.setSteg(FERDIG);
         } else {
-            // FIXME: MELOSYS-1316
+            String feilmelding = "Ukjent prosess type: " + type;
+            log.error("{}: {}", prosessinstans.getId(), feilmelding);
+            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
+            return;
         }
     }
+
 }

@@ -16,8 +16,10 @@ import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
 import static no.nav.melosys.domain.ProsessSteg.HENT_MEDL_OPPL;
@@ -41,11 +43,13 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
 
     private final Integer medlemskaphistorikkAntallÅr;
 
+    @Autowired
     public HentMedlemskapsopplysninger(MedlFasade medlFasade, SaksopplysningRepository saksopplysningRepo,
                                        @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr) {
         this.medlFasade = medlFasade;
         this.saksopplysningRepo = saksopplysningRepo;
         this.medlemskaphistorikkAntallÅr = medlemskaphistorikkAntallÅr;
+        log.info("HentMedlemskapsopplysninger initialisert");
     }
 
     @Override
@@ -58,27 +62,23 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
         return FeilStrategi.standardFeilHåndtering();
     }
     
+    @Transactional
     @Override
-    public void utførSteg(Prosessinstans prosessinstans) {
-        String brukerId = prosessinstans.getData(BRUKER_ID);
+    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, SikkerhetsbegrensningException {
+        log.debug("Starter behandling av {}", prosessinstans.getId());
 
-        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+        String brukerId = prosessinstans.getData(BRUKER_ID);
+        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
         LocalDate fom = periode.getFom().minusYears(medlemskaphistorikkAntallÅr);
         LocalDate tom = LocalDate.now();
 
-        try {
-            Behandling behandling = prosessinstans.getBehandling();
-            Saksopplysning saksopplysning = medlFasade.hentPeriodeListe(brukerId, fom, tom);
-            saksopplysning.setBehandling(behandling);
-            saksopplysning.setRegistrertDato(LocalDateTime.now());
-            saksopplysningRepo.save(saksopplysning);
-
-        } catch (IntegrasjonException | SikkerhetsbegrensningException e) {
-            log.error("Feil i steg {}", inngangsSteg(), e);
-            // FIXME: MELOSYS-1316
-            return;
-        }
+        Behandling behandling = prosessinstans.getBehandling();
+        Saksopplysning saksopplysning = medlFasade.hentPeriodeListe(brukerId, fom, tom);
+        saksopplysning.setBehandling(behandling);
+        saksopplysning.setRegistrertDato(LocalDateTime.now());
+        saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(OPPRETT_OPPGAVE);
+        log.info("Hentet medlemskapsopplysninger for {}", prosessinstans.getId());
     }
 }

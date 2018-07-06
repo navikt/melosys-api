@@ -2,15 +2,17 @@ package no.nav.melosys.saksflyt.agent.unntak;
 
 import java.io.IOException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.NestedCheckedException;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.DataAccessException;
+
+import static no.nav.melosys.saksflyt.agent.unntak.KjedetUnntakBehandler.først;
 
 public class ExceptionBehandler implements UnntakBehandler {
     
@@ -19,7 +21,11 @@ public class ExceptionBehandler implements UnntakBehandler {
     private static ExceptionBehandler instanse = new ExceptionBehandler();
     
     private static Retry retryIoFeil = Retry.prøvIgjen(100, 300000);
-    private static SettTilFeilet settTilFeilet = SettTilFeilet.settTilFeilet();
+    private static UnntakBehandler settTilFeilet = SettTilFeilet.settTilFeilet();
+    private static UnntakBehandler funksjonellFeilBehandler = først(OpprettHendelse.opprettHendelse("Funksjonell feil")).så(settTilFeilet);
+    private static UnntakBehandler ikkeFunnetBehandler = først(OpprettHendelse.opprettHendelse("Ikke funnet")).så(settTilFeilet);
+    private static UnntakBehandler sikkerhetsbegrensningBehandler = først(OpprettHendelse.opprettHendelse("Ingen tilgang")).så(settTilFeilet);
+    private static UnntakBehandler tekniskFeilBehandler = først(OpprettHendelse.opprettHendelse("Teknisk feil")).så(settTilFeilet);
     
     private ExceptionBehandler() {
     }
@@ -34,6 +40,11 @@ public class ExceptionBehandler implements UnntakBehandler {
             settTilFeilet.behandleUnntak(prosessinstans, "Kritisk feil i jvm", t);
             throw new RuntimeException("Kritisk feil i jvm", t);
         }
+        if (erForårsaketAv(t, JsonProcessingException.class)) {
+            // Disse er subklasser av IOException, men kastes også ved desirialisering internt også. Ønsker ikke retry for disse.  
+            tekniskFeilBehandler.behandleUnntak(prosessinstans, melding, t);
+            return;
+        }
         if (erForårsaketAv(t, IOException.class)) {
             retryIoFeil.behandleUnntak(prosessinstans, melding, t);
             return;
@@ -42,12 +53,24 @@ public class ExceptionBehandler implements UnntakBehandler {
             settTilFeilet.behandleUnntak(prosessinstans, melding, t);
             throw new RuntimeException("Kritisk feil ved dataaksess", t);
         }
-        if (erForårsaketAv(t, TekniskException.class)) {
-            settTilFeilet.behandleUnntak(prosessinstans, melding, t);
+        if (erForårsaketAv(t, SikkerhetsbegrensningException.class)) {
+            sikkerhetsbegrensningBehandler.behandleUnntak(prosessinstans, melding, t);
+            return;
+        }
+        if (erForårsaketAv(t, IkkeFunnetException.class)) {
+            ikkeFunnetBehandler.behandleUnntak(prosessinstans, melding, t);
+            return;
+        }
+        if (erForårsaketAv(t, IntegrasjonException.class)) {
+            tekniskFeilBehandler.behandleUnntak(prosessinstans, melding, t);
             return;
         }
         if (erForårsaketAv(t, FunksjonellException.class)) {
-            settTilFeilet.behandleUnntak(prosessinstans, melding, t);
+            funksjonellFeilBehandler.behandleUnntak(prosessinstans, melding, t);
+            return;
+        }
+        if (erForårsaketAv(t, TekniskException.class)) {
+            tekniskFeilBehandler.behandleUnntak(prosessinstans, melding, t);
             return;
         }
         logger.info("Fikk unntak av type {}. Kastes som RTE og topper prosessering i denne tråden", t.getClass().getName());

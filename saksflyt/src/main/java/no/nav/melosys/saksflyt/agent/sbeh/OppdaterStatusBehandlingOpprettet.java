@@ -6,6 +6,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.Tema;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.sakogbehandling.BehandlingStatusMapper;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingClient;
@@ -43,6 +45,7 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
     public OppdaterStatusBehandlingOpprettet(BehandlingRepository behandlingRepository, SakOgBehandlingClient sakOgBehandlingClient) {
         this.behandlingRepository = behandlingRepository;
         this.sakOgBehandlingClient = sakOgBehandlingClient;
+        log.info("OppdaterStatusBehandlingOpprettet initialisert");
     }
 
     @Override
@@ -51,21 +54,26 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
     }
 
     @Override
-    public void utførSteg(Prosessinstans prosessinstans) {
-        String aktørID = prosessinstans.getData(AKTØR_ID, String.class);
-        String saksnummer = prosessinstans.getData(SAKSNUMMER, String.class);
+    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException {
+        log.debug("Starter behandling av {}", prosessinstans.getId());
+
+        String aktørID = prosessinstans.getData(AKTØR_ID);
+        String saksnummer = prosessinstans.getData(SAKSNUMMER);
         Behandling behandling = prosessinstans.getBehandling();
-        Tema arkivtema = avgjørArkivtema(behandling.getType());
+        Tema arkivtema = avgjørArkivTema(behandling.getType());
 
         if (arkivtema == null) {
-            log.error("BehandlingType {} støttes ikke.", behandling.getType().getBeskrivelse());
-            prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
+            String feilmelding = "BehandlingType " + behandling.getType().getBeskrivelse() + " støttes ikke.";
+            log.error("{}: {}", prosessinstans.getId(), feilmelding);
+            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
             return;
         }
 
         String fagsystemkode = Fagsystem.MELOSYS.getKode();
         String behandlingsId = String.format("%s-%d", fagsystemkode, behandlingRepository.hentNesteSakOgBehandlingSekvensVerdi());
         prosessinstans.setData(SOB_BEHANDLING_ID, behandlingsId);
+
+        // FIXME: Nullsjekk på noe her?
 
         BehandlingStatusMapper.Builder builder = new BehandlingStatusMapper.Builder();
         builder.medBehandlingsId(behandlingsId);
@@ -77,9 +85,9 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
         builder.medAktørID(aktørID);
         builder.medAnsvarligEnhet(Integer.toString(MELOSYS_ENHET_ID));
 
-        // FIXME: MELOSYS-1316 (kaster IntegrasjonException)
         sakOgBehandlingClient.sendBehandlingOpprettet(builder.build());
 
         prosessinstans.setSteg(JFR_OPPRETT_GSAK_SAK);
+        log.info("Oppdatert sob-status til opprettet for {}", prosessinstans.getId());
     }
 }
