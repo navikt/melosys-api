@@ -26,7 +26,7 @@ import static no.nav.melosys.domain.ProsessSteg.*;
  *
  * Transisjoner:
  * 1) ProsessType.JFR_NY_SAK:
- *     JFR_AVSLUTT_OPPGAVE -> JFR_AKTOER_ID eller FEILET_MASKINELT hvis feil
+ *     JFR_AVSLUTT_OPPGAVE -> JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
  * 2) ProsessType.JFR_KNYTT:
  *     JFR_AVSLUTT_OPPGAVE -> JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
  */
@@ -63,7 +63,7 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
         
         ProsessType type = prosessinstans.getType();
         if (type == ProsessType.JFR_NY_SAK) {
-            prosessinstans.setSteg(JFR_AKTOER_ID);
+            prosessinstans.setSteg(JFR_AKTØR_ID);
         } else if (type == ProsessType.JFR_KNYTT) {
             prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
         } else {

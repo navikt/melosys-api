@@ -20,14 +20,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
+import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_GSAK_SAK;
 import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_SAK_OG_BEH;
-import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_OPPR;
 
 /**
  * Oppretter en sak og en behandling i Melosys.
  *
  * Transisjoner:
- * JFR_OPPRETT_SAK_OG_BEH -> STATUS_BEH_OPPR eller FEILET_MASKINELT hvis feil
+ * JFR_OPPRETT_SAK_OG_BEH -> JFR_OPPRETT_GSAK_SAK eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class OpprettSak extends AbstraktStegBehandler {
@@ -62,7 +62,7 @@ public class OpprettSak extends AbstraktStegBehandler {
         prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
         prosessinstans.setBehandling(fagsak.getBehandlinger().get(0));
 
-        prosessinstans.setSteg(STATUS_BEH_OPPR);
+        prosessinstans.setSteg(JFR_OPPRETT_GSAK_SAK);
         log.info("Opprettet fagsak {} for prosessinstans {}", fagsak.getSaksnummer(), prosessinstans.getId());
     }
 }

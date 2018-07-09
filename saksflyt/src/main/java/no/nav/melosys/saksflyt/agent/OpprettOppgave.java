@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
 import static no.nav.melosys.domain.ProsessDataKey.GSAK_SAK_ID;
-import static no.nav.melosys.domain.ProsessSteg.FERDIG;
 import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
@@ -33,7 +32,7 @@ import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
  * Oppretter en oppgave i GSAK.
  *
  * Transisjoner:
- * OPPRETT_OPPGAVE -> FERDIG eller FEILET_MASKINELT hvis feil
+ * OPPRETT_OPPGAVE -> null eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class OpprettOppgave extends AbstraktStegBehandler {
@@ -107,7 +106,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
         gsakFasade.opprettOppgave(builder.build());
 
-        prosessinstans.setSteg(FERDIG);
+        prosessinstans.setSteg(null);
         log.info("Opprettet oppgave for {}", prosessinstans.getId());
     }
 }

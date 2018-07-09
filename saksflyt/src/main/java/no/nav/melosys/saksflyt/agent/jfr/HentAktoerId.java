@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
-import static no.nav.melosys.domain.ProsessSteg.JFR_AKTOER_ID;
+import static no.nav.melosys.domain.ProsessSteg.JFR_AKTØR_ID;
 
 /**
  * Henter en aktørID
@@ -41,7 +41,7 @@ public class HentAktoerId extends AbstraktStegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return JFR_AKTOER_ID;
+        return JFR_AKTØR_ID;
     }
 
     @Override

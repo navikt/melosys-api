@@ -22,14 +22,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
 import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_GSAK_SAK;
+import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_OPPR;
 
 /**
  * Oppretter en sak i GSAK.
  *
  * Transisjoner:
- * JFR_OPPRETT_GSAK_SAK -> JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
+ * JFR_OPPRETT_GSAK_SAK -> STATUS_BEH_OPPR eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class OpprettGsakSak extends AbstraktStegBehandler {
@@ -76,7 +76,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
         fagsakRepository.save(fagsak);
         prosessinstans.setData(GSAK_SAK_ID, gsakSakId);
 
-        prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
+        prosessinstans.setSteg(STATUS_BEH_OPPR);
         log.info("Opprettet gsak for {}", prosessinstans.getId());
     }
 }

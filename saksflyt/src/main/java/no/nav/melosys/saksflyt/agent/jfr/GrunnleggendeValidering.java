@@ -24,7 +24,7 @@ import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
  * Utfører grunnleggende validering
  *
  * Transisjoner:
- * JFR_VALIDERING → JFR_AKTOER_ID (eller til FEILET_MASKINELT hvis det blir oppdaget feil eller mangler)
+ * JFR_VALIDERING → JFR_AVSLUTT_OPPGAVE (eller til FEILET_MASKINELT hvis det blir oppdaget feil eller mangler)
  */
 @Component
 public class GrunnleggendeValidering extends AbstraktStegBehandler {
@@ -74,14 +74,14 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
 
         // FIXME: Flyttet fra OpprettSak. Ok?
         ProsessType prosessType = prosessinstans.getType();
-        if (!ProsessType.JFR_NY_SAK.equals(prosessType)) {
+        if (prosessType != ProsessType.JFR_NY_SAK) {
             String feilmelding = "ProsessType " + prosessType + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
             return;
         }
 
-        prosessinstans.setSteg(ProsessSteg.JFR_AKTOER_ID);
+        prosessinstans.setSteg(ProsessSteg.JFR_AVSLUTT_OPPGAVE);
         log.info("Ferdig med grunnleggende validering av {}", prosessinstans.getId());
     }
 

@@ -2,9 +2,12 @@ package no.nav.melosys.saksflyt.agent.sbeh;
 
 import java.time.LocalDateTime;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.Tema;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.feil.Feilkategori;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.sakogbehandling.BehandlingStatusMapper;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingClient;
@@ -12,9 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
-import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
-import static no.nav.melosys.domain.ProsessDataKey.SOB_BEHANDLING_ID;
+import static no.nav.melosys.domain.ProsessDataKey.*;
 import static no.nav.melosys.domain.ProsessSteg.FATTET_VEDTAK;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.generateCallId;
@@ -44,20 +45,13 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException {
+    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, TekniskException {
         log.debug("Starter behandling av {}", prosessinstans.getId());
 
         String aktørID = prosessinstans.getData(AKTØR_ID);
         String saksnummer = prosessinstans.getData(SAKSNUMMER);
         Behandling behandling = prosessinstans.getBehandling();
         Tema arkivtema = avgjørArkivTema(behandling.getType());
-
-        if (arkivtema == null) {
-            String feilmelding = "BehandlingType " + behandling.getType().getBeskrivelse() + " støttes ikke.";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding);
-            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
-            return;
-        }
 
         String behandlingsId = prosessinstans.getData(SOB_BEHANDLING_ID);
         

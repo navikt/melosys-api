@@ -59,7 +59,7 @@ public class OpprettGsakSakTest {
         agent.utførSteg(p);
 
         verify(gsakFasade, times(1)).opprettSak(saksnummer, BehandlingType.SØKNAD, aktørID);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
         Assert.notNull(fagsak.getGsakSaksnummer(), "Fagsak skal ha fått Gsak saksnummert");
     }
 }

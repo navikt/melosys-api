@@ -46,6 +46,6 @@ public class OpprettSakTest {
         agent.utførSteg(p);
 
         verify(fagsakService, times(1)).nyFagsakOgBehandling(aktørId, BehandlingType.SØKNAD, false);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_GSAK_SAK);
     }
 }
