@@ -6,6 +6,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.Tema;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.sakogbehandling.BehandlingStatusMapper;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingClient;
@@ -15,11 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
-import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
-import static no.nav.melosys.domain.ProsessDataKey.SOB_BEHANDLING_ID;
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_GSAK_SAK;
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_SAK_OG_BEH;
+import static no.nav.melosys.domain.ProsessDataKey.*;
+import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
+import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_OPPR;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.generateCallId;
 
@@ -27,8 +27,8 @@ import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.generateCallId
  * Steget sørger for å skrive til Sak og Behandling når behandling opprettes
  *
  * Transisjoner:
- * JFR_OPPRETT_SAK_OG_BEH → JFR_OPPRETT_GSAK_SAK hvis alt ok
- * JFR_OPPRETT_SAK_OG_BEH → FEILET_MASKINELT hvis oppdatering av status feilet
+ * STATUS_BEH_OPPR → JFR_OPPDATER_JOURNALPOST hvis alt ok
+ * STATUS_BEH_OPPR → FEILET_MASKINELT hvis oppdatering av status feilet
  */
 @Component
 public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehander {
@@ -43,29 +43,28 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
     public OppdaterStatusBehandlingOpprettet(BehandlingRepository behandlingRepository, SakOgBehandlingClient sakOgBehandlingClient) {
         this.behandlingRepository = behandlingRepository;
         this.sakOgBehandlingClient = sakOgBehandlingClient;
+        log.info("OppdaterStatusBehandlingOpprettet initialisert");
     }
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return JFR_OPPRETT_SAK_OG_BEH;
+        return STATUS_BEH_OPPR;
     }
 
     @Override
-    public void utførSteg(Prosessinstans prosessinstans) {
-        String aktørID = prosessinstans.getData(AKTØR_ID, String.class);
-        String saksnummer = prosessinstans.getData(SAKSNUMMER, String.class);
-        Behandling behandling = prosessinstans.getBehandling();
-        Tema arkivtema = avgjørArkivtema(behandling.getType());
+    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, TekniskException {
+        log.debug("Starter behandling av {}", prosessinstans.getId());
 
-        if (arkivtema == null) {
-            log.error("BehandlingType {} støttes ikke.", behandling.getType().getBeskrivelse());
-            prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
-            return;
-        }
+        String aktørID = prosessinstans.getData(AKTØR_ID);
+        String saksnummer = prosessinstans.getData(SAKSNUMMER);
+        Behandling behandling = prosessinstans.getBehandling();
+        Tema arkivtema = avgjørArkivTema(behandling.getType());
 
         String fagsystemkode = Fagsystem.MELOSYS.getKode();
         String behandlingsId = String.format("%s-%d", fagsystemkode, behandlingRepository.hentNesteSakOgBehandlingSekvensVerdi());
         prosessinstans.setData(SOB_BEHANDLING_ID, behandlingsId);
+
+        // FIXME: Nullsjekk på noe her?
 
         BehandlingStatusMapper.Builder builder = new BehandlingStatusMapper.Builder();
         builder.medBehandlingsId(behandlingsId);
@@ -77,9 +76,9 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
         builder.medAktørID(aktørID);
         builder.medAnsvarligEnhet(Integer.toString(MELOSYS_ENHET_ID));
 
-        // FIXME: MELOSYS-1316 (kaster IntegrasjonException)
         sakOgBehandlingClient.sendBehandlingOpprettet(builder.build());
 
-        prosessinstans.setSteg(JFR_OPPRETT_GSAK_SAK);
+        prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
+        log.info("Oppdatert sob-status til opprettet for {}", prosessinstans.getId());
     }
 }

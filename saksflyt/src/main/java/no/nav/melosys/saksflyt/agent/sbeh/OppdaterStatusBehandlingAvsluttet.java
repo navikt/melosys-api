@@ -2,7 +2,12 @@ package no.nav.melosys.saksflyt.agent.sbeh;
 
 import java.time.LocalDateTime;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.Tema;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.sakogbehandling.BehandlingStatusMapper;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingClient;
@@ -10,9 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
-import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
-import static no.nav.melosys.domain.ProsessDataKey.SOB_BEHANDLING_ID;
+import static no.nav.melosys.domain.ProsessDataKey.*;
 import static no.nav.melosys.domain.ProsessSteg.FATTET_VEDTAK;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.generateCallId;
@@ -33,6 +36,7 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
 
     public OppdaterStatusBehandlingAvsluttet(SakOgBehandlingClient sakOgBehandlingClient) {
         this.sakOgBehandlingClient = sakOgBehandlingClient;
+        log.info("OppdaterStatusBehandlingAvsluttet initialisert");
     }
 
     @Override
@@ -41,19 +45,17 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
     }
 
     @Override
-    public void utførSteg(Prosessinstans prosessinstans) {
-        String aktørID = prosessinstans.getData(AKTØR_ID, String.class);
-        String saksnummer = prosessinstans.getData(SAKSNUMMER, String.class);
+    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, TekniskException {
+        log.debug("Starter behandling av {}", prosessinstans.getId());
+
+        String aktørID = prosessinstans.getData(AKTØR_ID);
+        String saksnummer = prosessinstans.getData(SAKSNUMMER);
         Behandling behandling = prosessinstans.getBehandling();
-        Tema arkivtema = avgjørArkivtema(behandling.getType());
+        Tema arkivtema = avgjørArkivTema(behandling.getType());
 
-        if (arkivtema == null) {
-            log.error("BehandlingType {} støttes ikke.", behandling.getType().getBeskrivelse());
-            prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
-            return;
-        }
-
-        String behandlingsId = prosessinstans.getData(SOB_BEHANDLING_ID, String.class);
+        String behandlingsId = prosessinstans.getData(SOB_BEHANDLING_ID);
+        
+        // FIXME: Nullsjekk på noe her?
 
         BehandlingStatusMapper.Builder builder = new BehandlingStatusMapper.Builder();
         builder.medBehandlingsId(behandlingsId);
@@ -65,9 +67,9 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
         builder.medAktørID(aktørID);
         builder.medAnsvarligEnhet(Integer.toString(MELOSYS_ENHET_ID));
 
-        // FIXME: MELOSYS-1316 (kaster IntegrasjonException)
         sakOgBehandlingClient.sendBehandlingAvsluttet(builder.build());
 
         prosessinstans.setSteg(null);
+        log.info("Oppdatert sob-status til avsluttet for {}", prosessinstans.getId());
     }
 }

@@ -5,12 +5,20 @@ import java.util.function.Predicate;
 
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.api.StegBehandler;
 import no.nav.melosys.saksflyt.impl.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public abstract class AbstraktStegBehandler implements StegBehandler {
+    
+    private static final Logger log = LoggerFactory.getLogger(AbstraktStegBehandler.class);
     
     private Predicate<Prosessinstans> inngangsvilkår;
     
@@ -40,5 +48,26 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
     public Predicate<Prosessinstans> inngangsvilkår() {
         return inngangsvilkår;
     }
+
+    @Override
+    public final void utførSteg(Prosessinstans prosessinstans) {
+        try {
+            utfør(prosessinstans);
+        } catch (SikkerhetsbegrensningException e) {
+            String feilmelding = "Uventet SikkerhetsbegrensningException";
+            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            håndterUnntak(Feilkategori.INGEN_TILGANG, prosessinstans, feilmelding, e);
+        } catch (IkkeFunnetException e) {
+            String feilmelding = "Uventet IkkeFunnetException";
+            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            håndterUnntak(Feilkategori.IKKE_FUNNET, prosessinstans, feilmelding, e);
+        } catch (RuntimeException e) {
+            String feilmelding = "Uventet RuntimeException";
+            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, e);
+        }
+    }
+    
+    protected abstract void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException, IntegrasjonException;
 
 }

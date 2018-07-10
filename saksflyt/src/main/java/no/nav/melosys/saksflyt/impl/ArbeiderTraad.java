@@ -111,7 +111,7 @@ public class ArbeiderTraad extends Thread {
         pi.setEndretDato(LocalDateTime.now());
         prosessinstansRepo.save(pi); // Kan resultere i DataAccessException, som kastes videre og merfører at tråden stoppes.
 
-        if (pi.getSteg() != null) {
+        if (pi.getSteg() != null && pi.getSteg() != ProsessSteg.FEILET_MASKINELT) {
             binge.leggTil(pi);
         }
     }

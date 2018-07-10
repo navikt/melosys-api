@@ -43,6 +43,6 @@ public class AvsluttOppgaveTest {
         agent.utførSteg(p);
 
         verify(gsakFasade, times(1)).ferdigstillOppgave(oppgaveID);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AKTOER_ID);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
     }
 }

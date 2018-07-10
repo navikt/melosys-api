@@ -31,22 +31,23 @@ CREATE TABLE prosess_steg (
 
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('MOT_VURDER_AUTOMATISK_JFR', 'Vurder om journalføring kan skje automatisk');
+INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_VALIDERING', 'Grunnleggende validering');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_AVSLUTT_OPPGAVE', 'Avslutter journalføringsoppgaven i GSAK');
-INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_AKTOER_ID', 'Henter aktørID');
+INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_AKTØR_ID', 'Henter aktørID');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPRETT_SAK_OG_BEH', 'Oppretter ny sak og behandling i Melosys');
-INSERT INTO prosess_steg (kode, navn) VALUES ('STATUS_BEH_OPPR', 'Oppdater Sak og Behandling ved oppretting av behandling'),
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPRETT_GSAK_SAK', 'Oppretter Sak i GSAK');
+INSERT INTO prosess_steg (kode, navn) VALUES ('STATUS_BEH_OPPR', 'Oppdater Sak og Behandling ved oppretting av behandling'),
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPDATER_JOURNALPOST', 'Oppdaterer journalposten i Joark');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_FERDIGSTILL_JOURNALPOST', 'Ferdigstiller journalposten i Joark');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_HENT_PERS_OPPL', 'Hent personopplysninger fra TPS');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_VURDER_INNGANGSVILKÅR', 'Vurderer inngangsvilkår');
+
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_ARBF_OPPL', 'Hent arbeidsforholdopplysninger fra AAREG');
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_INNT_OPPL', 'Hent inntektopplysninger fra INNTK');
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_ORG_OPPL', 'Hent organisasjoner fra EREG');
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_MEDL_OPPL', 'Hent medlemskapsopplysninger fra MEDL');
 INSERT INTO prosess_steg (kode, navn) VALUES ('OPPRETT_OPPGAVE', 'Oppretter oppgave i GSAK');
 INSERT INTO prosess_steg (kode, navn) VALUES ('FEILET_MASKINELT', 'Feilet maskinelt');
-INSERT INTO prosess_steg (kode, navn) VALUES ('FERDIG', 'Ferdig');
 INSERT INTO prosess_steg (kode, navn) VALUES ('FATTET_VEDTAK', 'Saksbehandler har fattet vedtak i Melosys'),
 INSERT INTO prosess_steg (kode, navn) VALUES ('STATUS_BEH_AVSL', 'Oppdater Sak og Behandling ved lukking av behandling'),
 

@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.agent;
 
 import java.util.Properties;
 
-import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -41,6 +40,6 @@ public class OpprettOppgaveTest {
         agent.utførSteg(p);
 
         verify(gsakFasade, times(1)).opprettOppgave(any());
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
+        assertThat(p.getSteg()).isNull();
     }
 }

@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
 import static no.nav.melosys.domain.ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST;
@@ -36,13 +37,13 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterJournalpost.class);
 
     private final JoarkFasade joarkFasade;
-
     private final FagsakRepository fagsakRepo;
 
     @Autowired
     public OppdaterJournalpost(JoarkFasade joarkFasade, FagsakRepository fagsakRepo) {
         this.joarkFasade = joarkFasade;
         this.fagsakRepo = fagsakRepo;
+        log.info("OppdaterJournalpost initialisert");
     }
 
     @Override
@@ -55,29 +56,30 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         return FeilStrategi.standardFeilHåndtering();
     }
     
+    @Transactional
     @Override
-    public void utførSteg(Prosessinstans prosessinstans) {
-        boolean medDokumentkategori = false;
+    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException {
+        log.debug("Starter behandling av {}", prosessinstans.getId());
 
+        boolean medDokumentkategori = false;
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
-        try {
-            List<JournalfoeringMangel> mangler = joarkFasade.utledJournalfoeringsbehov(journalpostID);
-            if (mangler.contains(JournalfoeringMangel.HOVEDDOKUMENT_KATEGORI)) {
-                medDokumentkategori = true;
-            }
-        } catch (SikkerhetsbegrensningException e) {
-            log.error("Feil i steg {}", inngangsSteg(), e);
-            // FIXME: MELOSYS-1316
+        List<JournalfoeringMangel> mangler = joarkFasade.utledJournalfoeringsbehov(journalpostID);
+        if (mangler.contains(JournalfoeringMangel.HOVEDDOKUMENT_KATEGORI)) {
+            medDokumentkategori = true;
         }
 
-        String gsakSakID = prosessinstans.getData(GSAK_SAK_ID);
-        if (ProsessType.JFR_KNYTT.equals(prosessinstans.getType())) {
+        String gsakSakID;
+        if (prosessinstans.getType() == ProsessType.JFR_KNYTT) {
             Fagsak sak = fagsakRepo.findBySaksnummer(prosessinstans.getData(SAKSNUMMER));
             if (sak == null) {
-                // FIXME: MELOSYS-1316
-            } else {
-                gsakSakID = sak.getGsakSaksnummer();
+                String feilmelding = "Prosessinstansen er ikke knyttet til en eksisterende fagsak";
+                log.error("{}: {}", prosessinstans.getId(), feilmelding);
+                håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
+                return;
             }
+            gsakSakID = sak.getGsakSaksnummer();
+        } else {
+            gsakSakID = prosessinstans.getData(GSAK_SAK_ID);
         }
 
         String brukerID = prosessinstans.getData(BRUKER_ID);
@@ -91,15 +93,12 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         }
         String tittel = prosessinstans.getData(HOVEDDOKUMENT_TITTEL);
         String dokumentID = prosessinstans.getData(DOKUMENT_ID);
+        // FIXME: Nullsjekk på noe?
 
-        try {
-            joarkFasade.oppdaterJounalpost(journalpostID, dokumentID, gsakSakID, brukerID, avsenderID, avsenderNavn, tittel, medDokumentkategori);
-        } catch (SikkerhetsbegrensningException e) {
-            log.error("Feil i steg {}", inngangsSteg(), e);
-            // FIXME: MELOSYS-1316
-        }
+        joarkFasade.oppdaterJounalpost(journalpostID, dokumentID, gsakSakID, brukerID, avsenderID, avsenderNavn, tittel, medDokumentkategori);
 
         prosessinstans.setSteg(JFR_FERDIGSTILL_JOURNALPOST);
+        log.info("Oppdatert journalpost for {}", prosessinstans.getId());
     }
 }
 

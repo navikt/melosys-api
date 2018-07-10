@@ -14,10 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
-import static no.nav.melosys.domain.ProsessSteg.JFR_AKTOER_ID;
+import static no.nav.melosys.domain.ProsessSteg.JFR_AKTØR_ID;
 
 /**
  * Henter en aktørID
@@ -30,16 +31,17 @@ public class HentAktoerId extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentAktoerId.class);
 
-    private TpsFasade tpsFasade;
+    private final TpsFasade tpsFasade;
 
     @Autowired
     public HentAktoerId(TpsFasade tpsFasade) {
         this.tpsFasade = tpsFasade;
+        log.info("HentAktoerId initialisert");
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return JFR_AKTOER_ID;
+        return JFR_AKTØR_ID;
     }
 
     @Override
@@ -47,19 +49,16 @@ public class HentAktoerId extends AbstraktStegBehandler {
         return FeilStrategi.standardFeilHåndtering();
     }
     
+    @Transactional
     @Override
-    public void utførSteg(Prosessinstans prosessinstans) {
+    public void utfør(Prosessinstans prosessinstans) throws IkkeFunnetException {
+        log.debug("Starter behandling av {}", prosessinstans.getId());
+
         String brukerId = prosessinstans.getData(BRUKER_ID);
-
-        String aktørId = null;
-        try {
-            aktørId = tpsFasade.hentAktørIdForIdent(brukerId);
-        } catch (IkkeFunnetException e) {
-            log.error("Feil i steg {}", inngangsSteg(), e);
-            // FIXME: MELOSYS-1316
-        }
-
+        String aktørId = tpsFasade.hentAktørIdForIdent(brukerId);
         prosessinstans.setData(AKTØR_ID, aktørId);
+
         prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_SAK_OG_BEH);
+        log.info("Hentet aktørId for {}", prosessinstans.getId());
     }
 }

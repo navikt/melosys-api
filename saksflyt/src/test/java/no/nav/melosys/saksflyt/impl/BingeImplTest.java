@@ -27,7 +27,7 @@ public class BingeImplTest {
         ReflectionTestUtils.setField(pi2, "id", 2L);
         pi1.setRegistrertDato(LocalDateTime.of(2017, 1, 2, 0, 0));
         pi2.setRegistrertDato(LocalDateTime.of(2017, 1, 1, 0, 0));
-        pi1.setSteg(JFR_AKTOER_ID);
+        pi1.setSteg(JFR_AKTØR_ID);
         pi2.setSteg(JFR_HENT_PERS_OPPL);
         assertTrue(binge.leggTil(pi1));
         assertTrue(binge.leggTil(pi2));

@@ -1,3 +1,4 @@
+// FIXME: Må flyttes ned til relevant pakke
 package no.nav.melosys.saksflyt.agent;
 
 import java.time.LocalDate;
@@ -12,7 +13,6 @@ import no.nav.melosys.domain.gsak.Fagomrade;
 import no.nav.melosys.domain.gsak.Oppgavetype;
 import no.nav.melosys.domain.gsak.PrioritetType;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
@@ -21,10 +21,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
 import static no.nav.melosys.domain.ProsessDataKey.GSAK_SAK_ID;
-import static no.nav.melosys.domain.ProsessSteg.FERDIG;
 import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
@@ -32,18 +32,19 @@ import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
  * Oppretter en oppgave i GSAK.
  *
  * Transisjoner:
- * OPPRETT_OPPGAVE -> FERDIG eller FEILET_MASKINELT hvis feil
+ * OPPRETT_OPPGAVE -> null eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class OpprettOppgave extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettOppgave.class);
 
-    GsakFasade gsakFasade;
+    private final GsakFasade gsakFasade;
 
     @Autowired
     public OpprettOppgave(GsakFasade gsakFasade) {
         this.gsakFasade = gsakFasade;
+        log.info("OpprettOppgave initialisert");
     }
 
     @Override
@@ -56,15 +57,20 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         return FeilStrategi.standardFeilHåndtering();
     }
     
+    @Transactional
     @Override
-    public void utførSteg(Prosessinstans prosessinstans) {
+    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException {
+        log.debug("Starter behandling av {}", prosessinstans.getId());
+
         ProsessType prosessType = prosessinstans.getType();
         BehandlingType behandlingType = null;
-        if (ProsessType.JFR_NY_SAK.equals(prosessType) || ProsessType.JFR_KNYTT.equals(prosessType)) {
+        if (prosessType == ProsessType.JFR_NY_SAK || prosessType == ProsessType.JFR_KNYTT) {
             behandlingType = BehandlingType.SØKNAD;
         } else  {
-            // FIXME: MELOSYS-1316
-            throw new TekniskException("ProsessType " + prosessType + " er ikke støttet");
+            String feilmelding = "ProsessType " + prosessType + " er ikke støttet";
+            log.error("{}: {}", prosessinstans.getId(), feilmelding);
+            håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
+            return;
         }
 
         String gsakSakID = prosessinstans.getData(GSAK_SAK_ID);
@@ -76,17 +82,18 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         builder.medAnsvarligEnhetId(String.valueOf(MELOSYS_ENHET_ID));
         builder.medOpprettetAvEnhetId(MELOSYS_ENHET_ID);
 
-        if (BehandlingType.SØKNAD.equals(behandlingType)) {
+        // FIXME (farjam 2018-07-06): Logisk brist i koden. behandlingType er alltid SØKNAD her
+        if (behandlingType == BehandlingType.SØKNAD) {
             builder.medFagområde(Fagomrade.MED);
             builder.medOppgaveType(Oppgavetype.BEH_SAK_MED);
             builder.medPrioritetType(PrioritetType.NORM_MED);
-        } else if (BehandlingType.UNNTAK_MEDL.equals(behandlingType)) {
+        } else if (behandlingType == BehandlingType.UNNTAK_MEDL) {
             builder.medFagområde(Fagomrade.UFM);
             builder.medOppgaveType(Oppgavetype.BEH_SAK_MK_UFM);
             builder.medPrioritetType(PrioritetType.NORM_UFM);
         } else {
-            // FIXME: MELOSYS-1316
-            throw new TekniskException("BehandlingType " + behandlingType.getBeskrivelse() + " støttes ikke.");
+            // Skal ikke kunne skje
+            throw new RuntimeException("OpprettOppgave.utfør(...) har klart å sette behandlingType til noe den selv ikke støtter");
         }
 
         //builder.medUnderkategori() FIXME Venter. Ekisterer det i den nye GSAK tjenesten?
@@ -97,13 +104,9 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         //builder.medNormertBehandlingsTidInnen(); FIXME settes?
         builder.medLest(false);
 
-        try {
-            gsakFasade.opprettOppgave(builder.build());
-        } catch (SikkerhetsbegrensningException e) {
-            log.error("Feil i steg {}", inngangsSteg(), e);
-            // FIXME: MELOSYS-1316
-        }
+        gsakFasade.opprettOppgave(builder.build());
 
-        prosessinstans.setSteg(FERDIG);
+        prosessinstans.setSteg(null);
+        log.info("Opprettet oppgave for {}", prosessinstans.getId());
     }
 }

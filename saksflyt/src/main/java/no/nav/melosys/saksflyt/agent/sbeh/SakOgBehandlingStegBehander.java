@@ -4,6 +4,7 @@ import java.util.Map;
 
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.Tema;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
@@ -21,13 +22,13 @@ public abstract class SakOgBehandlingStegBehander extends AbstraktStegBehandler 
         return FeilStrategi.standardFeilHåndtering();
     }
 
-    Tema avgjørArkivtema(BehandlingType behandlingType) {
-        if (SØKNAD.equals(behandlingType)) {
+    protected static Tema avgjørArkivTema(BehandlingType behandlingType) throws TekniskException {
+        if (behandlingType == SØKNAD) {
             return MED;
-        } else if (UNNTAK_MEDL.equals(behandlingType)) {
+        } else if (behandlingType == UNNTAK_MEDL) {
             return UFM;
         } else {
-            return null;
+            throw new TekniskException("Støtter ikke behandlingstype " + behandlingType);
         }
     }
 }
