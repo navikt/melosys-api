@@ -6,6 +6,8 @@ public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
 
     // Disse skal være i logisk rekkefølge
     
+    // TODO (MELOSYS-13909: Rekkefølgen må revideres. JFR_AVSLUTT_OPPGAVE bør kanskje komme før JFR_VALIDERING. 
+    
     MOT_VURDER_AUTOMATISK_JFR("VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"), // FIXMWE: Ikke i bruk
 
     // Journalføring

@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 
-
+@SuppressWarnings("resource")
 public class V1_1_05__SAKSOPPLYSNING_data implements JdbcMigration {
 
     private static final Logger log = LoggerFactory.getLogger(V1_1_05__SAKSOPPLYSNING_data.class);

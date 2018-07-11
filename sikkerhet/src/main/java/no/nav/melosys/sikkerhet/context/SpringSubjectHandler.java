@@ -5,6 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class SpringSubjectHandler extends SubjectHandler {
 
+    @Override
     public String getOidcTokenString() {
         OIDCAuthenticationToken auth = (OIDCAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
@@ -15,6 +16,7 @@ public class SpringSubjectHandler extends SubjectHandler {
         }
     }
 
+    @Override
     public String getUserID() {
         OIDCAuthenticationToken auth = (OIDCAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 

@@ -6,8 +6,6 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.agent.jfr.HentPersonopplysninger;
 import no.nav.melosys.saksflyt.api.Binge;
-import no.nav.melosys.saksflyt.impl.Arbeider;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -34,7 +32,6 @@ public class ArbeiderTest {
     private ProsessinstansRepository prosessinstansRepo;
     
     @Test
-    @Ignore //FIXME Feiler noen ganger
     public void testAtStegeneBlirKalt() throws Exception {
         MockitoAnnotations.initMocks(this);
         Arbeider arbeider = new Arbeider(binge, prosessinstansRepo, Arrays.asList(klargjøreSteg), 1, 15);
