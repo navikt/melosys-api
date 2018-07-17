@@ -64,7 +64,7 @@ public class SakOgBehandlingClientImpl implements SakOgBehandlingClient {
         jmsTemplate.convertAndSend(hendelseshåndterer, behandlingStatusTilXml(behandlingAvsluttet), behandleMelding);
     }
 
-    public String behandlingStatusTilXml(BehandlingStatus behandlingStatus) throws IntegrasjonException {
+    String behandlingStatusTilXml(BehandlingStatus behandlingStatus) throws IntegrasjonException {
         try {
             JAXBElement<?> xmlElement;
             if (behandlingStatus instanceof BehandlingOpprettet) {

@@ -16,16 +16,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
-import static no.nav.melosys.domain.ProsessSteg.FATTET_VEDTAK;
+import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_AVSL;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.generateCallId;
 
 /**
- * Steget sørger for å skrive til Sak og Behandling når behandling opprettes
+ * Steget sørger for å skrive til Sak og Behandling når en behandling avsluttes
  *
  * Transisjoner:
- * FATTET_VEDTAK → null hvis alt ok
- * FATTET_VEDTAK → FEILET_MASKINELT hvis oppdatering av status feilet
+ * STATUS_BEH_AVSL → null hvis alt ok
+ * STATUS_BEH_AVSL → FEILET_MASKINELT hvis oppdatering av status feilet
  */
 @Component
 public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehander {
@@ -41,7 +41,7 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return FATTET_VEDTAK;
+        return STATUS_BEH_AVSL;
     }
 
     @Override
