@@ -70,6 +70,8 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
             return;
         }
+
+        log.info("Prosessinstans {} har ferdigstillt journalpost {}", prosessinstans.getId(), journalpostID);
     }
 
 }
