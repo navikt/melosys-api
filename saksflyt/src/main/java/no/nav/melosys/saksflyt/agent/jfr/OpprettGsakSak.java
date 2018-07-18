@@ -10,11 +10,9 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import no.nav.melosys.saksflyt.api.Binge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +38,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
     private final GsakFasade gsakFasade;
 
     @Autowired
-    public OpprettGsakSak(Binge binge, ProsessinstansRepository prosessinstansRepo, FagsakRepository fagsakRepository, GsakFasade gsakFasade) {
+    public OpprettGsakSak(GsakFasade gsakFasade, FagsakRepository fagsakRepository) {
         this.fagsakRepository = fagsakRepository;
         this.gsakFasade = gsakFasade;
         log.info("OpprettGsakSak initialisert");
@@ -65,7 +63,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
         String saksnummer = prosessinstans.getData(SAKSNUMMER);
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
         if (fagsak.getGsakSaksnummer() != null) {
-            String feilmelding = "Kan ikke knytte fagsak " + fagsak.getSaksnummer() + " til ny gsak: allerede knyttet til gsak " + fagsak.getGsakSaksnummer();
+            String feilmelding = "Kan ikke knytte fagsak " + fagsak.getSaksnummer() + " til ny GSAK sak: allerede knyttet til " + fagsak.getGsakSaksnummer();
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
             return;
@@ -77,6 +75,6 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
         prosessinstans.setData(GSAK_SAK_ID, gsakSakId);
 
         prosessinstans.setSteg(STATUS_BEH_OPPR);
-        log.info("Opprettet gsak for {}", prosessinstans.getId());
+        log.info("Prosessinstans {} opprettet GSAK sak {} for fagsak {}", prosessinstans.getId(), gsakSakId, saksnummer);
     }
 }

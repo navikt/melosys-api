@@ -5,8 +5,6 @@ import java.util.Properties;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,12 +21,6 @@ import static org.mockito.Mockito.*;
 public class OpprettGsakSakTest {
 
     @Mock
-    private Binge binge;
-
-    @Mock
-    private ProsessinstansRepository repo;
-
-    @Mock
     private GsakFasade gsakFasade;
 
     @Mock
@@ -38,7 +30,7 @@ public class OpprettGsakSakTest {
 
     @Before
     public void setUp() {
-        agent = new OpprettGsakSak(binge, repo, fagsakRepository, gsakFasade);
+        agent = new OpprettGsakSak(gsakFasade, fagsakRepository);
     }
 
     @Test
