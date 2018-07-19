@@ -4,13 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.BehandlingType;
-import no.nav.melosys.domain.Oppgave;
-import no.nav.melosys.domain.Oppgavetype;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.gsak.Fagomrade;
 import no.nav.melosys.domain.gsak.PrioritetType;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
 import no.nav.melosys.integrasjon.gsak.mock.OppgaveMockRepository;
@@ -31,15 +28,15 @@ public class GsakMockService implements GsakFasade {
     }
 
     @Override
-    public void ferdigstillOppgave(String oppgaveId) throws SikkerhetsbegrensningException, TekniskException {
+    public void ferdigstillOppgave(String oppgaveId) throws TekniskException {
         Oppgave oppgave = hentOppgave(oppgaveId);
         oppgaveRepo.delete(oppgave);
     }
 
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, List<String> fagområdeKodeListe, List<String> sakstyper, List<String> behandlingstyper) throws IntegrasjonException {
-        if (Oppgavetype.BEH_SAK.equals(oppgavetype) || Oppgavetype.JFR.equals(oppgavetype)) {
-            return oppgaveRepo.find(oppgavetype, sakstyper, behandlingstyper).stream().filter(o -> o.getAnsvarligId() == null).collect(Collectors.toList());
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema fagområde, List<FagsakType> sakstyper, List<BehandlingType> behandlingstyper) throws IntegrasjonException {
+        if (oppgavetype == Oppgavetype.BEH_SAK || oppgavetype == Oppgavetype.JFR) {
+            return oppgaveRepo.find(oppgavetype, fagområde, sakstyper, behandlingstyper).stream().filter(o -> o.getAnsvarligId() == null).collect(Collectors.toList());
         } else {
             throw new  IllegalArgumentException(oppgavetype.toString());
         }
@@ -67,7 +64,7 @@ public class GsakMockService implements GsakFasade {
     }
 
     @Override
-    public String opprettOppgave(OpprettOppgaveRequest request) throws SikkerhetsbegrensningException {
+    public String opprettOppgave(OpprettOppgaveRequest request) {
         Oppgave oppgave = new Oppgave();
 
         if (request.getAktivTil().isPresent()) {

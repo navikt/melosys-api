@@ -2,12 +2,15 @@ package no.nav.melosys.integrasjon.gsak;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.Oppgavetype;
+import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.gsak.AktorType;
 import no.nav.melosys.domain.gsak.Fagomrade;
 import no.nav.melosys.domain.gsak.PrioritetType;
@@ -118,7 +121,8 @@ public class GsakService implements GsakFasade {
 
     // FIXME GSAK oppretter et nytt API med REST tjenester. Den metoden må endres når disse kommer.
     @Override
-    public List<no.nav.melosys.domain.Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppavetype, List<String> fagområdeKodeListe, List<String> sakstyper, List<String> behandlingstyper) throws IntegrasjonException {
+    public List<no.nav.melosys.domain.Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema fagområde, List<FagsakType> sakstyper, List<BehandlingType> behandlingstyper) throws IntegrasjonException {
+        List<String> fagområdeKodeListe = Collections.singletonList(fagområde.getKode());
         FinnOppgaveListeSokMal sokMal = FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(Integer.toString(MELOSYS_ENHET_ID)).medFagområdeKodeListe(fagområdeKodeListe).build();
 
         FinnOppgaveListeFilterMal.Builder filterMalBuilder = FinnOppgaveListeFilterMal.builder();

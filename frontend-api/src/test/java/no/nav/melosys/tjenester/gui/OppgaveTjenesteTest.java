@@ -8,23 +8,22 @@ import java.util.Optional;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.gsak.Oppgavetype;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.BehandlingDto;
-import no.nav.melosys.service.oppgave.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
+import no.nav.melosys.service.oppgave.dto.PeriodeDto;
+import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
-import no.nav.melosys.tjenester.gui.jackson.JacksonModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,9 +31,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -53,7 +51,7 @@ public class OppgaveTjenesteTest {
     }
 
     @Test
-    public void plukkOppgave() {
+    public void plukkOppgave() throws FunksjonellException, IkkeFunnetException {
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
         innData.setOppgavetype("BEH_SAK");
@@ -71,7 +69,7 @@ public class OppgaveTjenesteTest {
         oppgave.setOppgavetype(Oppgavetype.BEH_SAK_MED);
         Optional<Oppgave> plukket = Optional.of(oppgave);
 
-        when(oppgaveplukker.plukkOppgave(anyString(), any(), anyList(), anyList())).thenReturn(plukket);
+        when(oppgaveplukker.plukkOppgave(anyString(), eq(innData))).thenReturn(plukket);
 
         Response response = tjeneste.plukkOppgave(innData);
 
@@ -99,31 +97,16 @@ public class OppgaveTjenesteTest {
         oppgave.setBehandling(behandlingDto);
         oppgave.setSakstype(sakstype);
 
-        oppgave.setAktivTil(LocalDate.of(2016,03,30));
+        oppgave.setAktivTil(LocalDate.of(2016,3,30));
 
-        oppgave.setSoknadsperiode(new PeriodeDto(LocalDate.of(2016,01,01),LocalDate.of(2020,01,01)));
+        oppgave.setSoknadsperiode(new PeriodeDto(LocalDate.of(2016,1,1),LocalDate.of(2020,1,1)));
 
         List<OppgaveDto> oppgaver = new ArrayList<>();
         oppgaver.add(oppgave);
 
         when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
-        Response response = tjeneste.mineOppgaver();
-        assertThat(response.getEntity()).isExactlyInstanceOf(ArrayList.class);
-        List<OppgaveDto> entity = (List<OppgaveDto>) response.getEntity();
-        assertThat(entity.get(0).getOppgaveID()).isEqualTo("177057928");
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        objectMapper.registerModule(new JacksonModule(null));
-
-        try {
-            String json = objectMapper.writeValueAsString(entity);
-            assertThat(json).contains("GLITRENDE HATT");
-            assertThat(json).contains("PS_U");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        List<OppgaveDto> liste = tjeneste.mineOppgaver();
+        assertThat(liste.get(0).getOppgaveID()).isEqualTo("177057928");
     }
 
     public void jsonInn() {

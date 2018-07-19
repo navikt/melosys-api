@@ -8,7 +8,7 @@ public enum Oppgavetype implements Kodeverk {
     private String kode;
     private String beskrivelse;
 
-    private Oppgavetype(String kode, String beskrivelse) {
+    Oppgavetype(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }

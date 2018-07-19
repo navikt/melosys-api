@@ -2,9 +2,7 @@ package no.nav.melosys.integrasjon.gsak;
 
 import java.util.List;
 
-import no.nav.melosys.domain.BehandlingType;
-import no.nav.melosys.domain.Oppgave;
-import no.nav.melosys.domain.Oppgavetype;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -26,16 +24,16 @@ public interface GsakFasade {
      * GSAK sorterer oppgavene stigende etter frist.
      *
      * @param oppgavetype
-     * @param fagområdeKodeListe
+     * @param fagområde
      * @param sakstyper
      * @param behandlingstyper
      * @return
      * @throws IntegrasjonException
      */
     List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype,
-                                                  List<String> fagområdeKodeListe,
-                                                  List<String> sakstyper,
-                                                  List<String> behandlingstyper
+                                                  Tema fagområde,
+                                                  List<FagsakType> sakstyper,
+                                                  List<BehandlingType> behandlingstyper
     ) throws IntegrasjonException;
 
     /**

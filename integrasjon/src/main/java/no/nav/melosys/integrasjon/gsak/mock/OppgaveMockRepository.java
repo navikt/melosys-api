@@ -2,8 +2,7 @@ package no.nav.melosys.integrasjon.gsak.mock;
 
 import java.util.List;
 
-import no.nav.melosys.domain.Oppgave;
-import no.nav.melosys.domain.Oppgavetype;
+import no.nav.melosys.domain.*;
 
 //FIXME Fjernes når GSAK leverer nye REST tjenester
 public interface OppgaveMockRepository {
@@ -14,7 +13,7 @@ public interface OppgaveMockRepository {
 
     String save(Oppgave o);
 
-    List<Oppgave> find(Oppgavetype oppavetype, List<String> sakstyper, List<String> behandlingstyper);
+    List<Oppgave> find(Oppgavetype oppavetype, Tema fagområde, List<FagsakType> sakstyper, List<BehandlingType> behandlingstyper);
 
     List<Oppgave> finnOppgaverMedAnsvarligID(String ansvarligID);
 

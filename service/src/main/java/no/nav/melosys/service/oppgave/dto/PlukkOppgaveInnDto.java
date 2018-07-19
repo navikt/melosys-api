@@ -1,10 +1,11 @@
-package no.nav.melosys.tjenester.gui.dto;
+package no.nav.melosys.service.oppgave.dto;
 
-        import java.util.List;
+import java.util.List;
 
 public class PlukkOppgaveInnDto {
 
     private String oppgavetype;
+    private String fagomrade;
     private List<String> sakstyper;
     private List<String> behandlingstyper;
 
@@ -14,6 +15,14 @@ public class PlukkOppgaveInnDto {
 
     public void setOppgavetype(String oppgavetype) {
         this.oppgavetype = oppgavetype;
+    }
+
+    public String getFagomrade() {
+        return fagomrade;
+    }
+
+    public void setFagomrade(String fagomrade) {
+        this.fagomrade = fagomrade;
     }
 
     public List<String> getSakstyper() {
