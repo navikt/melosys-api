@@ -3,8 +3,7 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.joark.JournalfoeringMangel;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -37,7 +36,8 @@ public class OppdaterJournalpostTest {
     @Test
     public void utfoerSteg() throws SikkerhetsbegrensningException {
         Prosessinstans p = new Prosessinstans();
-
+        p.setType(ProsessType.JFR_NY_SAK);
+        p.setData(ProsessDataKey.GSAK_SAK_ID, "Grønnsak id");
         agent.utførSteg(p);
 
         verify(joarkFasade, times(1)).utledJournalfoeringsbehov(any());
@@ -51,6 +51,8 @@ public class OppdaterJournalpostTest {
         mangler.add(JournalfoeringMangel.HOVEDDOKUMENT_KATEGORI);
         when(joarkFasade.utledJournalfoeringsbehov(any())).thenReturn(mangler);
         Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.JFR_NY_SAK);
+        p.setData(ProsessDataKey.GSAK_SAK_ID, "Grønnsak id");
 
         agent.utførSteg(p);
 

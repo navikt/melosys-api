@@ -2,6 +2,8 @@ package no.nav.melosys.saksflyt.agent;
 
 import java.util.Properties;
 
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -33,6 +35,8 @@ public class OpprettOppgaveTest {
     @Test
     public void utfoerSteg() throws SikkerhetsbegrensningException {
         Prosessinstans p = new Prosessinstans();
+        p.setBehandling(new Behandling());
+        p.getBehandling().setType(BehandlingType.SØKNAD);
         p.setType(ProsessType.JFR_NY_SAK);
         Properties properties = new Properties();
         p.addData(properties);

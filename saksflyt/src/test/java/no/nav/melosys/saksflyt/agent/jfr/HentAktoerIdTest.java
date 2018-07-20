@@ -1,9 +1,8 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
-import java.util.Properties;
-
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -33,10 +32,9 @@ public class HentAktoerIdTest {
     @Test
     public void utfoerSteg() throws IkkeFunnetException {
         Prosessinstans p = new Prosessinstans();
-        Properties properties = new Properties();
+        p.setType(ProsessType.JFR_NY_SAK);
         String brukerID = "99999999991";
-        properties.setProperty(ProsessDataKey.BRUKER_ID.getKode(), brukerID);
-        p.addData(properties);
+        p.setData(ProsessDataKey.BRUKER_ID, brukerID);
         when(tpsFasade.hentAktørIdForIdent(any())).thenReturn("FJERNET93");
 
         agent.utførSteg(p);
