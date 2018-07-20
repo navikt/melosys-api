@@ -14,7 +14,7 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class SaksopplysningerUtilTest {
+public class SaksopplysningerUtilsTest {
 
     @Test
     public void hentDokument() {
@@ -34,7 +34,7 @@ public class SaksopplysningerUtilTest {
 
         behandling.setSaksopplysninger(saksopplysninger);
 
-        Optional<SaksopplysningDokument> saksopplysningDokument = SaksopplysningerUtil.hentDokument(behandling, SaksopplysningType.SØKNAD);
+        Optional<SaksopplysningDokument> saksopplysningDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.SØKNAD);
         assertThat(saksopplysningDokument).isNotEmpty();
         assertThat(saksopplysningDokument.get()).isEqualTo(soeknadDokument);
     }

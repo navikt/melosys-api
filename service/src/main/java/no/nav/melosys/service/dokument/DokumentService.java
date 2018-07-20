@@ -2,7 +2,7 @@ package no.nav.melosys.service.dokument;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.DokumentType;
-import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.doksys.DokSysFasade;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
@@ -41,22 +41,22 @@ public class DokumentService {
     /**
      * Kaller Doksys for å produsere et dokumentutkast
      */
-    public byte[] produserUtkast(long behandlingID, String dokumenttypeID) throws FunksjonellException, SikkerhetsbegrensningException {
+    public byte[] produserUtkast(long behandlingID, String dokumenttypeID) throws IkkeFunnetException, SikkerhetsbegrensningException {
         return produserDokument(behandlingID, dokumenttypeID, true);
     }
 
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(long behandlingID, String dokumenttypeID) throws FunksjonellException, SikkerhetsbegrensningException {
+    public void produserDokument(long behandlingID, String dokumenttypeID) throws IkkeFunnetException, SikkerhetsbegrensningException {
         produserDokument(behandlingID, dokumenttypeID, false);
     }
 
-    private byte[] produserDokument(long behandlingID, String dokumenttypeID, boolean erUtkast) throws FunksjonellException, SikkerhetsbegrensningException {
+    private byte[] produserDokument(long behandlingID, String dokumenttypeID, boolean erUtkast) throws IkkeFunnetException, SikkerhetsbegrensningException {
         DokumentType dokumentType = DokumentType.forKode(dokumenttypeID);
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
-            throw new FunksjonellException("Behandling med ID " + behandlingID + " finnes ikke");
+            throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
         }
 
         DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(dokumentType, behandling);

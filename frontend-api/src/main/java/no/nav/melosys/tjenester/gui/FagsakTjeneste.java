@@ -37,9 +37,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import static no.nav.melosys.domain.util.SaksopplysningerUtil.hentDokument;
-import static no.nav.melosys.domain.util.SoeknadUtil.hentLand;
-import static no.nav.melosys.domain.util.SoeknadUtil.hentPeriode;
+import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
+import static no.nav.melosys.domain.util.SoeknadUtils.hentLand;
+import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 
 @Api(tags = {"fagsak"})
 @Path("/fagsaker")

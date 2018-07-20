@@ -12,10 +12,10 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 /**
  * Metoder for å trekke ut opplysninger fra et {@code SoeknadDokument}.
  */
-public class SoeknadUtil {
+public final class SoeknadUtils {
 
-    private SoeknadUtil() {
-        throw new IllegalStateException();
+    private SoeknadUtils() {
+        throw new UnsupportedOperationException();
     }
 
     /**

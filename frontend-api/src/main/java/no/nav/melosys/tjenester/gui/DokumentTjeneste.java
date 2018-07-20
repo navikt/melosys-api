@@ -5,7 +5,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.dokument.DokumentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +52,7 @@ public class DokumentTjeneste extends RestTjeneste {
 
         try {
             dokument = dokumentService.produserUtkast(behandlingID, typeID);
-        } catch (FunksjonellException e) {
+        } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
@@ -69,7 +69,7 @@ public class DokumentTjeneste extends RestTjeneste {
     public Response produserDokument(@PathParam("behandlingID") long behandlingID, @PathParam("typeID") String typeID) {
         try {
             dokumentService.produserDokument(behandlingID, typeID);
-        } catch (FunksjonellException e) {
+        } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
