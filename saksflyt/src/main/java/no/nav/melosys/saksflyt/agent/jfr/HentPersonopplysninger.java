@@ -62,7 +62,7 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
     @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException {
-        log.debug("Starter behandling av {}", prosessinstans.getId());
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String brukerId = prosessinstans.getData(BRUKER_ID);
         Behandling behandling = prosessinstans.getBehandling();
@@ -72,6 +72,6 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
         saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(JFR_VURDER_INNGANGSVILKÅR);
-        log.info("Hentet personopplysninger for {}", prosessinstans.getId());
+        log.info("Hentet personopplysninger for prosessinstans {}", prosessinstans.getId());
     }
 }

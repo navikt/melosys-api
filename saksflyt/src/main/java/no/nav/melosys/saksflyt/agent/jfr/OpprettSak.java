@@ -55,7 +55,7 @@ public class OpprettSak extends AbstraktStegBehandler {
     @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException {
-        log.debug("Starter behandling av {}", prosessinstans.getId());
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String aktørId = prosessinstans.getData(AKTØR_ID);
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, BehandlingType.SØKNAD, false);

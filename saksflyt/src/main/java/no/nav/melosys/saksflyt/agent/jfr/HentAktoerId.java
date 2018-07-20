@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.Map;
 
 import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.feil.Feilkategori;
@@ -52,13 +53,20 @@ public class HentAktoerId extends AbstraktStegBehandler {
     @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws IkkeFunnetException {
-        log.debug("Starter behandling av {}", prosessinstans.getId());
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
+
+        if (prosessinstans.getType() != ProsessType.JFR_NY_SAK) {
+            String feilmelding = "Prosess med ProsessType " + prosessinstans.getType() + " skal ikke behandles av HentAktoerId";
+            log.error("{}: {}", prosessinstans.getId(), feilmelding);
+            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
+            return;
+        }
 
         String brukerId = prosessinstans.getData(BRUKER_ID);
         String aktørId = tpsFasade.hentAktørIdForIdent(brukerId);
         prosessinstans.setData(AKTØR_ID, aktørId);
 
         prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_SAK_OG_BEH);
-        log.info("Hentet aktørId for {}", prosessinstans.getId());
+        log.info("Hentet aktørId for prosessinstans {}", prosessinstans.getId());
     }
 }

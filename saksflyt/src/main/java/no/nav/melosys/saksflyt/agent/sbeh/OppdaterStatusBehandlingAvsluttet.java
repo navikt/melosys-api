@@ -46,7 +46,7 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, TekniskException {
-        log.debug("Starter behandling av {}", prosessinstans.getId());
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String aktørID = prosessinstans.getData(AKTØR_ID);
         String saksnummer = prosessinstans.getData(SAKSNUMMER);
@@ -70,6 +70,6 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
         sakOgBehandlingClient.sendBehandlingAvsluttet(builder.build());
 
         prosessinstans.setSteg(null);
-        log.info("Oppdatert sob-status til avsluttet for {}", prosessinstans.getId());
+        log.info("Oppdatert sob-status til avsluttet for prosessinstans {}", prosessinstans.getId());
     }
 }

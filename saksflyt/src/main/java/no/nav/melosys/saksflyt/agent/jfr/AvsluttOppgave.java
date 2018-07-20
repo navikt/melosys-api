@@ -56,7 +56,7 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
     @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, SikkerhetsbegrensningException {
-        log.debug("Starter behandling av {}", prosessinstans.getId());
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String oppgaveID = prosessinstans.getData(OPPGAVE_ID);
         gsakFasade.ferdigstillOppgave(oppgaveID);
@@ -73,6 +73,6 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
             return;
         }
 
-        log.info("Lukket oppgave {} for {}", oppgaveID, prosessinstans.getId());
+        log.info("Lukket oppgave {} for prosessinstans {}", oppgaveID, prosessinstans.getId());
     }
 }

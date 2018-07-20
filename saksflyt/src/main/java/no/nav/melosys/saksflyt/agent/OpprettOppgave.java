@@ -6,7 +6,6 @@ import java.util.Map;
 
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.gsak.AktorType;
 import no.nav.melosys.domain.gsak.Fagomrade;
@@ -60,19 +59,9 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException {
-        log.debug("Starter behandling av {}", prosessinstans.getId());
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        ProsessType prosessType = prosessinstans.getType();
-        BehandlingType behandlingType = null;
-        if (prosessType == ProsessType.JFR_NY_SAK || prosessType == ProsessType.JFR_KNYTT) {
-            behandlingType = BehandlingType.SØKNAD;
-        } else  {
-            String feilmelding = "ProsessType " + prosessType + " er ikke støttet";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding);
-            håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
-            return;
-        }
-
+        BehandlingType behandlingType = prosessinstans.getBehandling().getType(); // Forutsetter at ingen tidligere steg har endret denne
         String gsakSakID = prosessinstans.getData(GSAK_SAK_ID);
         String brukerID = prosessinstans.getData(BRUKER_ID);
 
@@ -82,7 +71,6 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         builder.medAnsvarligEnhetId(String.valueOf(MELOSYS_ENHET_ID));
         builder.medOpprettetAvEnhetId(MELOSYS_ENHET_ID);
 
-        // FIXME (farjam 2018-07-06): Logisk brist i koden. behandlingType er alltid SØKNAD her
         if (behandlingType == BehandlingType.SØKNAD) {
             builder.medFagområde(Fagomrade.MED);
             builder.medOppgaveType(Oppgavetype.BEH_SAK_MED);
@@ -92,8 +80,10 @@ public class OpprettOppgave extends AbstraktStegBehandler {
             builder.medOppgaveType(Oppgavetype.BEH_SAK_MK_UFM);
             builder.medPrioritetType(PrioritetType.NORM_UFM);
         } else {
-            // Skal ikke kunne skje
-            throw new RuntimeException("OpprettOppgave.utfør(...) har klart å sette behandlingType til noe den selv ikke støtter");
+            String feilmelding = "behandlingType " + behandlingType + " er ikke støttet";
+            log.error("{}: {}", prosessinstans.getId(), feilmelding);
+            håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
+            return;
         }
 
         //builder.medUnderkategori() FIXME Venter. Ekisterer det i den nye GSAK tjenesten?
@@ -104,9 +94,9 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         //builder.medNormertBehandlingsTidInnen(); FIXME settes?
         builder.medLest(false);
 
-        gsakFasade.opprettOppgave(builder.build());
+        String oppgaveId = gsakFasade.opprettOppgave(builder.build());
 
         prosessinstans.setSteg(null);
-        log.info("Opprettet oppgave for {}", prosessinstans.getId());
+        log.info("Opprettet oppgave {} for prosessinstans {}", oppgaveId, prosessinstans.getId());
     }
 }

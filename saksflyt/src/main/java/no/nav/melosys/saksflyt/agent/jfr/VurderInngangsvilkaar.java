@@ -65,7 +65,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     @Transactional
     @SuppressWarnings("unchecked")
     public void utfør(Prosessinstans prosessinstans) throws TekniskException {
-        log.debug("Starter behandling av {}", prosessinstans.getId());
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Behandling behandling = behandlingRepository.findOne(prosessinstans.getBehandling().getId());
 
         // Hent statsborgerskap fra saksopplysningene...
@@ -78,7 +78,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
             }
         }
         if (statsborgerskap == null) {
-            log.error("Funksjonell feil for {}: Kunne ikke hente brukers statsborgerskap fra saksopplysningene.", prosessinstans.getId());
+            log.error("Funksjonell feil for prosessinstans {}: Kunne ikke hente brukers statsborgerskap fra saksopplysningene.", prosessinstans.getId());
             håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Ingen informasjon om statsborgerskap", null);
             return;
         }
@@ -103,7 +103,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
 
         // Håndter ev. feil...
         if (detErMeldtFeil) {
-            log.info("Avbryter behandling av {} pga. feil", prosessinstans.getId());
+            log.info("Avbryter behandling av prosessinstans {} pga. feil", prosessinstans.getId());
             håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Uventet feil fra regelmodulen", null);
             return;
         }
@@ -112,7 +112,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         Fagsak fagsak = behandling.getFagsak();
         FagsakType nyFagsakType = res.kvalifisererForEf883_2004 ? FagsakType.EU_EØS : FagsakType.FOLKETRYGD; // Fikses når inngangsvilkårsvurdering også kvalifiserer for avtaler.
         if (fagsak.getType() != null && fagsak.getType() != nyFagsakType) {
-            log.error("Avbryter behandling av {}: Forsøk på å endre fagsakType fra {} til {}", prosessinstans.getId(), fagsak.getType(), nyFagsakType);
+            log.error("Avbryter behandling av prosessinstans {}: Forsøk på å endre fagsakType fra {} til {}", prosessinstans.getId(), fagsak.getType(), nyFagsakType);
             håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Forsøk på å endre fagsakType fra " + fagsak.getType() + " til " + nyFagsakType, null);
             return;
         }
@@ -120,7 +120,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         fagsakRepository.save(fagsak);
 
         prosessinstans.setSteg(ProsessSteg.HENT_ARBF_OPPL);
-        log.info("Satt type på fagsak {} til {}", fagsak.getSaksnummer(), nyFagsakType); 
+        log.info("Satt type på fagsak {} til {} for prosessinstans {}", fagsak.getSaksnummer(), nyFagsakType, prosessinstans.getId()); 
     }
 
     // FIXME MELOSYS-1377 Regelmodulen jobber med ISO 3 landkoder.

@@ -62,7 +62,7 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
     @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, SikkerhetsbegrensningException {
-        log.debug("Starter behandling av {}", prosessinstans.getId());
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String brukerId = prosessinstans.getData(BRUKER_ID);
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
@@ -76,6 +76,6 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
         saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(ProsessSteg.HENT_ORG_OPPL);
-        log.info("Hentet inntektopplysninger for {}", prosessinstans.getId());
+        log.info("Hentet inntektopplysninger for prosessinstans {}", prosessinstans.getId());
     }
 }

@@ -64,7 +64,7 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
     @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, TekniskException, SikkerhetsbegrensningException {
-        log.debug("Starter behandling av {}", prosessinstans.getId());
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
         String brukerId = prosessinstans.getData(BRUKER_ID);
@@ -79,6 +79,6 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
         saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(ProsessSteg.HENT_INNT_OPPL);
-        log.info("Hentet arbeidsforholdopplysninger for {}", prosessinstans.getId());
+        log.info("Hentet arbeidsforholdopplysninger for prosessinstans {}", prosessinstans.getId());
     }
 }

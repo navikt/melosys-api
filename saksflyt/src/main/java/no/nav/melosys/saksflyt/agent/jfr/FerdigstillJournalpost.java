@@ -54,7 +54,7 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
     
     @Override
     public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException {
-        log.debug("Starter behandling av {}", prosessinstans.getId());
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         ProsessType type = prosessinstans.getType();
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);

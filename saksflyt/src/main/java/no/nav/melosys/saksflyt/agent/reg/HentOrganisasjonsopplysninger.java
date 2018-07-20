@@ -63,7 +63,7 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
     @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException {
-        log.debug("Starter behandling av {}", prosessinstans.getId());
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = behandlingRepo.findOne(prosessinstans.getBehandling().getId());
         Set<String> orgnumre = new HashSet<>();
@@ -78,7 +78,7 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
         hentOrganisasjoner(orgnumre, behandling);
 
         prosessinstans.setSteg(ProsessSteg.HENT_MEDL_OPPL);
-        log.info("hentet organisasjonsopplysninger for {}", prosessinstans.getId());
+        log.info("hentet organisasjonsopplysninger for prosessinstans {}", prosessinstans.getId());
     }
 
     private static Set<String> hentOrgnumreFraArbeidsforhold(Saksopplysning saksopplysning) {

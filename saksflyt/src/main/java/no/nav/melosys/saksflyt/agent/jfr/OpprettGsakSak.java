@@ -57,7 +57,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
     @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException {
-        log.debug("Starter behandling av {}", prosessinstans.getId());
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String aktørId = prosessinstans.getData(AKTØR_ID);
         String saksnummer = prosessinstans.getData(SAKSNUMMER);

@@ -103,6 +103,7 @@ public class JournalforingService {
         binge.leggTil(prosessinstans);
     }
 
+    // Denne er package-visible kun for at det skal være lettere å teste den isolert
     void valider(JournalforingDto journalforingDto) throws FunksjonellException {
         if (StringUtils.isEmpty(journalforingDto.getJournalpostID())) {
             throw new FunksjonellException("JournalpostID mangler");

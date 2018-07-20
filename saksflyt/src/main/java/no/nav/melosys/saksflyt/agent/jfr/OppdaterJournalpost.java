@@ -59,7 +59,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
     @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException {
-        log.debug("Starter behandling av {}", prosessinstans.getId());
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         boolean medDokumentkategori = false;
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
@@ -68,18 +68,20 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
             medDokumentkategori = true;
         }
 
-        String gsakSakID;
+        String gsakSakID = null;
         if (prosessinstans.getType() == ProsessType.JFR_KNYTT) {
             Fagsak sak = fagsakRepo.findBySaksnummer(prosessinstans.getData(SAKSNUMMER));
-            if (sak == null) {
-                String feilmelding = "Prosessinstansen er ikke knyttet til en eksisterende fagsak";
-                log.error("{}: {}", prosessinstans.getId(), feilmelding);
-                håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
-                return;
+            if (sak != null) {
+                gsakSakID = sak.getGsakSaksnummer();
             }
-            gsakSakID = sak.getGsakSaksnummer();
         } else {
             gsakSakID = prosessinstans.getData(GSAK_SAK_ID);
+        }
+        if (gsakSakID == null) {
+            String feilmelding = "Prosessinstansen er ikke knyttet til en fagsak";
+            log.error("{}: {}", prosessinstans.getId(), feilmelding);
+            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
+            return;
         }
 
         String brukerID = prosessinstans.getData(BRUKER_ID);
@@ -93,12 +95,11 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         }
         String tittel = prosessinstans.getData(HOVEDDOKUMENT_TITTEL);
         String dokumentID = prosessinstans.getData(DOKUMENT_ID);
-        // FIXME: Nullsjekk på noe?
 
         joarkFasade.oppdaterJounalpost(journalpostID, dokumentID, gsakSakID, brukerID, avsenderID, avsenderNavn, tittel, medDokumentkategori);
 
         prosessinstans.setSteg(JFR_FERDIGSTILL_JOURNALPOST);
-        log.info("Oppdatert journalpost for {}", prosessinstans.getId());
+        log.info("Oppdatert journalpost for prosessinstans {}", prosessinstans.getId());
     }
 }
 
