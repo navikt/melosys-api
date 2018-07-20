@@ -1,6 +1,6 @@
 package no.nav.melosys.domain;
 
-import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 
 /**
  * Dokumenttyper som kan produseres.
@@ -39,12 +39,12 @@ public enum DokumentType implements Kodeverk {
         return beskrivelse;
     }
 
-    public static DokumentType forKode(String kode) throws FunksjonellException {
+    public static DokumentType forKode(String kode) throws IkkeFunnetException {
         for (DokumentType type: VALUES) {
             if (type.getKode().equals(kode)) {
                 return type;
             }
         }
-        throw new FunksjonellException("DokumentType med kode " + kode + " finnes ikke");
+        throw new IkkeFunnetException("DokumentType med kode " + kode + " finnes ikke");
     }
 }

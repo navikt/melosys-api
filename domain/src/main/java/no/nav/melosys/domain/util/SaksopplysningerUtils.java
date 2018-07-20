@@ -7,10 +7,10 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 
-public class SaksopplysningerUtil {
+public final class SaksopplysningerUtils {
 
-    private SaksopplysningerUtil() {
-        throw new IllegalStateException();
+    private SaksopplysningerUtils() {
+        throw new UnsupportedOperationException();
     }
 
     /**

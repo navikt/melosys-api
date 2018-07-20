@@ -24,7 +24,7 @@ public class OpprettGsakSakTest {
     private GsakFasade gsakFasade;
 
     @Mock
-    FagsakRepository fagsakRepository;
+    private FagsakRepository fagsakRepository;
 
     private OpprettGsakSak agent;
 
@@ -45,7 +45,6 @@ public class OpprettGsakSakTest {
         when(gsakFasade.opprettSak(anyString(), eq(BehandlingType.SØKNAD), anyString())).thenReturn("GSAK-123");
 
         Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(null);
         when(fagsakRepository.findBySaksnummer(any())).thenReturn(fagsak);
 
         agent.utførSteg(p);

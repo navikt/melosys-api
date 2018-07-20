@@ -13,14 +13,14 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SoeknadUtilTest {
+public class SoeknadUtilsTest {
 
     @Test
     public void hentLand_arbeidUtland() {
         SoeknadDokument soeknad = new SoeknadDokument();
         soeknad.arbeidUtland.arbeidsland = Arrays.asList(new Land(Land.BELGIA), new Land(Land.BULGARIA));
 
-        List<String> strings = SoeknadUtil.hentLand(soeknad);
+        List<String> strings = SoeknadUtils.hentLand(soeknad);
         assertThat(strings).contains(Land.BELGIA, Land.BULGARIA);
     }
 
@@ -29,7 +29,7 @@ public class SoeknadUtilTest {
         SoeknadDokument soeknad = new SoeknadDokument();
         soeknad.oppholdUtland.oppholdsland = Arrays.asList(new Land(Land.BELGIA), new Land(Land.BULGARIA));
 
-        List<String> strings = SoeknadUtil.hentLand(soeknad);
+        List<String> strings = SoeknadUtils.hentLand(soeknad);
         assertThat(strings).contains(Land.BELGIA, Land.BULGARIA);
     }
 
@@ -43,7 +43,7 @@ public class SoeknadUtilTest {
         soeknad.arbeidUtland.arbeidsperiode = periode_1;
         soeknad.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX);
 
-        Periode res = SoeknadUtil.hentPeriode(soeknad);
+        Periode res = SoeknadUtils.hentPeriode(soeknad);
         assertThat(res).isEqualTo(periode_1);
     }
 
@@ -57,7 +57,7 @@ public class SoeknadUtilTest {
         Periode periode_2 = new Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX);
         soeknad.oppholdUtland.oppholdsPeriode = periode_2;
 
-        Periode res = SoeknadUtil.hentPeriode(soeknad);
+        Periode res = SoeknadUtils.hentPeriode(soeknad);
         assertThat(res).isEqualTo(periode_2);
     }
 
@@ -67,6 +67,6 @@ public class SoeknadUtilTest {
         soeknad.arbeidUtland = new ArbeidUtland();
         soeknad.oppholdUtland = new OppholdUtland();
 
-        SoeknadUtil.hentPeriode(soeknad);
+        SoeknadUtils.hentPeriode(soeknad);
     }
 }

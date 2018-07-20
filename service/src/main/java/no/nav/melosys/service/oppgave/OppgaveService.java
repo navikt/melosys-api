@@ -21,9 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.util.SaksopplysningerUtil.hentDokument;
-import static no.nav.melosys.domain.util.SoeknadUtil.hentLand;
-import static no.nav.melosys.domain.util.SoeknadUtil.hentPeriode;
+import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
+import static no.nav.melosys.domain.util.SoeknadUtils.hentLand;
+import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 
 @Service
 public class OppgaveService {
