@@ -83,12 +83,16 @@
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>schema</artifactId>
-            <version>0.53.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.java-json-tools</groupId>
             <artifactId>json-schema-validator</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.benas</groupId>
+            <artifactId>random-beans</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

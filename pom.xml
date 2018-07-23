@@ -27,9 +27,9 @@
         <module>repository</module>
         <module>saksflyt</module>
         <module>saksflyt-api</module>
+        <module>schema</module>
         <module>service</module>
         <module>sikkerhet</module>
-        <module>schema</module>
     </modules>
 
     <properties>
@@ -422,6 +422,11 @@
             </dependency>
 
             <!-- Test -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>schema</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.github.java-json-tools</groupId>
                 <artifactId>json-schema-validator</artifactId>
