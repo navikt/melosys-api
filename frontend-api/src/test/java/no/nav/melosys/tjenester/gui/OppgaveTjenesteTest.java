@@ -97,9 +97,9 @@ public class OppgaveTjenesteTest {
         oppgave.setBehandling(behandlingDto);
         oppgave.setSakstype(sakstype);
 
-        oppgave.setAktivTil(LocalDate.of(2016,3,30));
+        oppgave.setAktivTil(LocalDate.of(2016, 3, 30));
 
-        oppgave.setSoknadsperiode(new PeriodeDto(LocalDate.of(2016,1,1),LocalDate.of(2020,1,1)));
+        oppgave.setSoknadsperiode(new PeriodeDto(LocalDate.of(2016, 1, 1),LocalDate.of(2020, 1, 1)));
 
         List<OppgaveDto> oppgaver = new ArrayList<>();
         oppgaver.add(oppgave);

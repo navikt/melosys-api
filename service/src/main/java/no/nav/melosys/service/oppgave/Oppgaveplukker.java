@@ -40,23 +40,14 @@ public class Oppgaveplukker {
      * 4) Oppgaven tildeles til saksbehandleren.
      * 5) Saksnummer knyttes til oppgaven hvis oppgaven er en behandlingsoppgave.
      */
-    public Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws FunksjonellException, IkkeFunnetException {
-        Oppgavetype oppgavetype;
+    public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws IkkeFunnetException {
         String type = plukkDto.getOppgavetype();
-        if (KodeverkUtils.erGyldigKode(Oppgavetype.class, type)) {
-            oppgavetype = KodeverkUtils.hentKodeverk(Oppgavetype.class, type);
-        } else {
-            throw new FunksjonellException("Oppgavetype " + type + " støttes ikke.");
-        }
+        Oppgavetype oppgavetype = KodeverkUtils.dekod(Oppgavetype.class, type);
 
         Tema fagområde = null;
         if (oppgavetype == Oppgavetype.JFR) {
             String fagområdeKode = plukkDto.getFagomrade();
-            if (KodeverkUtils.erGyldigKode(Tema.class, fagområdeKode)) {
-                fagområde = KodeverkUtils.hentKodeverk(Tema.class, fagområdeKode);
-            } else {
-                throw new FunksjonellException("Fagområde " + fagområdeKode + " støttes ikke.");
-            }
+            fagområde = KodeverkUtils.dekod(Tema.class, fagområdeKode);
         }
 
         List<FagsakType> fagsakTypeListe = new ArrayList<>();
@@ -65,20 +56,12 @@ public class Oppgaveplukker {
 
             List<String> sakstyper = plukkDto.getSakstyper();
             for (String s : sakstyper) {
-                if (KodeverkUtils.erGyldigKode(FagsakType.class, s)) {
-                    fagsakTypeListe.add(KodeverkUtils.hentKodeverk(FagsakType.class, s));
-                } else {
-                    throw new FunksjonellException("FagsakType " + s + " støttes ikke.");
-                }
+                fagsakTypeListe.add(KodeverkUtils.dekod(FagsakType.class, s));
             }
 
             List<String> behandlingstyper = plukkDto.getBehandlingstyper();
             for (String b : behandlingstyper) {
-                if (KodeverkUtils.erGyldigKode(BehandlingType.class, b)) {
-                    behandlingTypeListe.add(KodeverkUtils.hentKodeverk(BehandlingType.class, b));
-                } else {
-                    throw new FunksjonellException("BehandlingType " + b + " støttes ikke.");
-                }
+                behandlingTypeListe.add(KodeverkUtils.dekod(BehandlingType.class, b));
             }
         }
 
@@ -104,7 +87,7 @@ public class Oppgaveplukker {
         return valg;
     }
 
-    public void leggTilbakeOppgave(String oppgaveId, String saksbehandlerID, String begrunnelse) {
+    public synchronized void leggTilbakeOppgave(String oppgaveId, String saksbehandlerID, String begrunnelse) {
         Oppgave oppgave = gsakFasade.hentOppgave(oppgaveId);
 
         if (oppgave == null) {
