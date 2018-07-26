@@ -1,16 +1,11 @@
 package no.nav.melosys.integrasjon.gsak.mock;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Oppgave;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.gsak.Fagomrade;
-import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.domain.gsak.PrioritetType;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -75,11 +70,12 @@ public class GsakMock implements OppgaveMockRepository {
     }
 
     @Override
-    public List<Oppgave> find(Oppgavetype oppgavetype, List<String> sakstyper, List<String> behandlingstyper) {
+    public List<Oppgave> find(Oppgavetype oppgavetype, Tema fagområde, List<FagsakType> sakstyper, List<BehandlingType> behandlingstyper) {
         if (Oppgavetype.BEH_SAK.equals(oppgavetype)) {
             return oppgaver.values().stream().filter(Oppgave::erBehandling).sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
         } else if (Oppgavetype.JFR.equals(oppgavetype)) {
-            return oppgaver.values().stream().filter(Oppgave::erJournalFøring).sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
+            return oppgaver.values().stream().filter(Oppgave::erJournalFøring).filter(o -> o.getFagomrade().toString().equalsIgnoreCase(fagområde.getKode()))
+                .sorted(Comparator.comparing(Oppgave::getAktivTil)).collect(Collectors.toList());
         } else {
             throw new IllegalArgumentException(oppgavetype.toString());
         }

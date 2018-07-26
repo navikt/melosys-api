@@ -13,12 +13,14 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.Oppgavetype;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.MockOppgaveDto;
-import no.nav.melosys.tjenester.gui.dto.PlukkOppgaveInnDto;
+import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
 import no.nav.melosys.tjenester.gui.dto.TilbakeleggingDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,12 +45,10 @@ public class OppgaveTjeneste extends RestTjeneste {
     @POST
     @Path("/plukk")
     @ApiOperation(value = "Plukker fra GSAK neste oppgave som saksbehandler skal arbeide med.")
-    public Response plukkOppgave(PlukkOppgaveInnDto plukkDto) {
+    public Response plukkOppgave(PlukkOppgaveInnDto plukkDto) throws FunksjonellException, IkkeFunnetException {
         String ident = SubjectHandler.getInstance().getUserID();
 
-        Oppgavetype oppgavetype = Oppgavetype.valueOf(plukkDto.getOppgavetype());
-
-        Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, oppgavetype, plukkDto.getSakstyper(), plukkDto.getBehandlingstyper());
+        Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto);
 
         if (plukket.isPresent()) {
             Oppgave oppgave = plukket.get();
@@ -84,10 +84,9 @@ public class OppgaveTjeneste extends RestTjeneste {
     @GET
     @Path("/oversikt")
     @ApiOperation(value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.")
-    public Response mineOppgaver() {
+    public List<OppgaveDto> mineOppgaver() {
         String ident = SubjectHandler.getInstance().getUserID();
-        List<OppgaveDto> oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
-        return Response.ok(oppgaveDtoListe).build();
+        return oppgaveService.hentOppgaverMedAnsvarlig(ident);
     }
 
     // FIXME Dette er for å hjelpe testing av oppgavehåndtering.

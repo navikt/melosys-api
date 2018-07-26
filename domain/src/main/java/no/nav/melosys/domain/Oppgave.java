@@ -88,6 +88,10 @@ public class Oppgave {
         this.aktivTil = aktivTil;
     }
 
+    public Fagomrade getFagomrade() {
+        return fagomrade;
+    }
+
     public void setFagomrade(Fagomrade fagomrade) {
         this.fagomrade = fagomrade;
     }

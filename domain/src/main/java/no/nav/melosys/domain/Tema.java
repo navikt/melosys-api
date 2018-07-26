@@ -1,5 +1,6 @@
 package no.nav.melosys.domain;
 
+//TODO: Tema bør endres til Fagområde hvis det er det foretrukne fagbegrepet.
 public enum Tema implements Kodeverk {
     //FIXME: MELOSYS-1336: Skulle hente term(beskrivlse) fra felles kodeverk
     MED("MED", "Medlemskap"),

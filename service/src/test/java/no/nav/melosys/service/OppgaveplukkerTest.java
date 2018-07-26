@@ -8,13 +8,14 @@ import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.Oppgave;
 import no.nav.melosys.domain.OppgaveTilbakelegging;
-import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.domain.gsak.PrioritetType;
-import no.nav.melosys.domain.gsak.Underkategori;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
+import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,10 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -53,7 +51,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_høy_prio() {
+    public void plukkOppgave_høy_prio() throws FunksjonellException, IkkeFunnetException {
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave();
         oppgave1.setOppgaveId("1");
@@ -68,7 +66,7 @@ public class OppgaveplukkerTest {
         oppgave3.setPrioritet(PrioritetType.NORM_MED);
         oppgaver.add(oppgave3);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(FagsakType.EU_EØS.getKode());
@@ -76,14 +74,20 @@ public class OppgaveplukkerTest {
         List<String> behandlingstyper = new ArrayList<>();
         behandlingstyper.add(BehandlingType.SØKNAD.getKode());
 
-        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", Oppgavetype.JFR, sakstyper, behandlingstyper);
+        PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
+        plukkOppgaveInnDto.setOppgavetype("BEH_SAK");
+        plukkOppgaveInnDto.setFagomrade("MED");
+        plukkOppgaveInnDto.setSakstyper(sakstyper);
+        plukkOppgaveInnDto.setBehandlingstyper(behandlingstyper);
+
+        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
         assertThat(oppgave.isPresent()).isTrue();
-        assertThat(oppgave.get().getOppgaveId()).isEqualTo("2");
+        oppgave.ifPresent(o -> assertThat(o.getOppgaveId()).isEqualTo("2"));
     }
 
     @Test
-    public void plukkOppgave_1_tilbakelagt() {
+    public void plukkOppgave_1_tilbakelagt() throws FunksjonellException, IkkeFunnetException {
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave();
         oppgave1.setOppgaveId("1");
@@ -98,7 +102,7 @@ public class OppgaveplukkerTest {
         oppgave3.setPrioritet(PrioritetType.NORM_MED);
         oppgaver.add(oppgave3);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
         tilbakelagt.add(new OppgaveTilbakelegging());
@@ -110,14 +114,19 @@ public class OppgaveplukkerTest {
         List<String> behandlingstyper = new ArrayList<>();
         behandlingstyper.add(BehandlingType.REVURDERING.getKode());
 
-        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", Oppgavetype.BEH_SAK, sakstyper, behandlingstyper);
+        PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
+        plukkOppgaveInnDto.setOppgavetype("BEH_SAK");
+        plukkOppgaveInnDto.setSakstyper(sakstyper);
+        plukkOppgaveInnDto.setBehandlingstyper(behandlingstyper);
+
+        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
         assertThat(oppgave.isPresent()).isTrue();
-        assertThat(oppgave.get().getOppgaveId()).isEqualTo("2");
+        oppgave.ifPresent(o -> assertThat(o.getOppgaveId()).isEqualTo("2"));
     }
 
     @Test
-    public void plukkOppgave_alle_tilbakelagt() {
+    public void plukkOppgave_alle_tilbakelagt() throws FunksjonellException, IkkeFunnetException {
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave();
         oppgave1.setOppgaveId("1");
@@ -132,19 +141,24 @@ public class OppgaveplukkerTest {
         oppgave3.setPrioritet(PrioritetType.NORM_MED);
         oppgaver.add(oppgave3);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
         tilbakelagt.add(new OppgaveTilbakelegging());
         when(oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(anyString(), anyString())).thenReturn(tilbakelagt);
 
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(Underkategori.MIDL_LOVVALG_MED.toString());
+        sakstyper.add(FagsakType.FOLKETRYGD.getKode());
 
         List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(FagsakType.TRYGDEAVTALE.getKode());
+        behandlingstyper.add(BehandlingType.SØKNAD.getKode());
 
-        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", Oppgavetype.BEH_SAK, sakstyper, behandlingstyper);
+        PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
+        plukkOppgaveInnDto.setOppgavetype("BEH_SAK");
+        plukkOppgaveInnDto.setSakstyper(sakstyper);
+        plukkOppgaveInnDto.setBehandlingstyper(behandlingstyper);
+
+        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
         assertThat(oppgave.isPresent()).isFalse();
     }

@@ -5,16 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Oppgave;
-import no.nav.melosys.domain.OppgaveTilbakelegging;
-import no.nav.melosys.domain.Oppgavetype;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.util.KodeverkUtils;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
+import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +20,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class Oppgaveplukker {
 
-    Logger log =  LoggerFactory.getLogger(Oppgaveplukker.class);
+    private static final Logger log =  LoggerFactory.getLogger(Oppgaveplukker.class);
 
-    private GsakFasade gsakFasade;
-    private FagsakRepository fagsakRepository;
-    private OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
+    private final GsakFasade gsakFasade;
+    private final FagsakRepository fagsakRepository;
+    private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
 
     @Autowired
     public Oppgaveplukker(GsakFasade gsakFasade, FagsakRepository fagsakRepository, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo) {
@@ -37,19 +34,38 @@ public class Oppgaveplukker {
     }
 
     /**
-     * 1) Oppgaveplukker henter i GSAK en liste over alle aktive, ikke tildelte oppgaver med oppgitt parametre.
-     * 2) Oppgaveplukker velger neste oppgave basert på prioritet (først) og frist.
-     * 3) Oppgaveplukker tildeler oppgaven til saksbehandleren.
-     * 4) Melosys saksnummer knyttes til oppgaven hvis oppgaven er en behandlingsoppgave.
+     * 1) Input valideres
+     * 2) Oppgaveplukker henter i GSAK en liste over alle aktive, ikke tildelte oppgaver med oppgitt parametre.
+     * 3) Neste oppgave velges basert på prioritet (først) og frist.
+     * 4) Oppgaven tildeles til saksbehandleren.
+     * 5) Saksnummer knyttes til oppgaven hvis oppgaven er en behandlingsoppgave.
      */
-    public Optional<Oppgave> plukkOppgave(String saksbehandlerID, Oppgavetype oppgavetype, List<String> sakstyper, List<String> behandlingstyper) {
+    public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws IkkeFunnetException {
+        String type = plukkDto.getOppgavetype();
+        Oppgavetype oppgavetype = KodeverkUtils.dekod(Oppgavetype.class, type);
 
-        // TODO Vi må håndtere tema for journalføringsoppgaver
-        List<String> fagområdeKodeListe = new ArrayList<>();
-        fagområdeKodeListe.add("MED");
-        fagområdeKodeListe.add("UFM");
+        Tema fagområde = null;
+        if (oppgavetype == Oppgavetype.JFR) {
+            String fagområdeKode = plukkDto.getFagomrade();
+            fagområde = KodeverkUtils.dekod(Tema.class, fagområdeKode);
+        }
 
-        List<Oppgave> oppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområdeKodeListe, sakstyper, behandlingstyper);
+        List<FagsakType> fagsakTypeListe = new ArrayList<>();
+        List<BehandlingType> behandlingTypeListe = new ArrayList<>();
+        if (oppgavetype == Oppgavetype.BEH_SAK) {
+
+            List<String> sakstyper = plukkDto.getSakstyper();
+            for (String s : sakstyper) {
+                fagsakTypeListe.add(KodeverkUtils.dekod(FagsakType.class, s));
+            }
+
+            List<String> behandlingstyper = plukkDto.getBehandlingstyper();
+            for (String b : behandlingstyper) {
+                behandlingTypeListe.add(KodeverkUtils.dekod(BehandlingType.class, b));
+            }
+        }
+
+        List<Oppgave> oppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakTypeListe, behandlingTypeListe);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, oppgaver);
 
@@ -59,9 +75,10 @@ public class Oppgaveplukker {
             gsakFasade.tildelOppgave(oppgave.getOppgaveId(), saksbehandlerID);
 
             if (oppgave.erBehandling()) {
+                // Finner fagsak og saksnummer som svarer til behandlingsoppgaven.
                 Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
                 if (fagsak == null) {
-                    throw new RuntimeException("Fant ikke fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer());
+                    throw new IkkeFunnetException("Fant ikke fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer());
                 }
                 oppgave.setSaksnummer(fagsak.getSaksnummer());
             }
@@ -70,7 +87,7 @@ public class Oppgaveplukker {
         return valg;
     }
 
-    public void leggTilbakeOppgave(String oppgaveId, String saksbehandlerID, String begrunnelse) {
+    public synchronized void leggTilbakeOppgave(String oppgaveId, String saksbehandlerID, String begrunnelse) {
         Oppgave oppgave = gsakFasade.hentOppgave(oppgaveId);
 
         if (oppgave == null) {
