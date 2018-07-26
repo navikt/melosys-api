@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.gsak.PrioritetType;
 import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
@@ -117,7 +118,7 @@ public class Oppgaveplukker {
 
     private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {
         // Oppgaver med høy prioritet velges først.
-        Optional<Oppgave> prioritert = oppgaver.stream().filter(Oppgave::harHøyPrioritet).findFirst();
+        Optional<Oppgave> prioritert = oppgaver.stream().filter(o -> o.getPrioritet() == PrioritetType.HOY_MED).findFirst();
 
         Optional<Oppgave> valg;
         if (prioritert.isPresent()) {

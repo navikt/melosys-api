@@ -48,10 +48,6 @@ public class Oppgave {
         }
     }
 
-    public boolean harHøyPrioritet() {
-        return ((PrioritetType.HOY_MED.equals(prioritet)) || PrioritetType.HOY_UFM.equals(prioritet));
-    }
-
     public String getAnsvarligId() {
         return ansvarligId;
     }
@@ -106,6 +102,10 @@ public class Oppgave {
 
     public void setOppgavetype(Oppgavetype oppgavetype) {
         this.oppgavetype = oppgavetype;
+    }
+
+    public PrioritetType getPrioritet() {
+        return prioritet;
     }
 
     public void setPrioritet(PrioritetType prioritet) {
