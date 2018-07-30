@@ -24,17 +24,23 @@ import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSvar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import static javax.ws.rs.core.Response.Status.Family.CLIENT_ERROR;
 import static javax.ws.rs.core.Response.Status.Family.SERVER_ERROR;
 
+@Component
 public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(OppgaveConsumerImpl.class);
 
     private final WebTarget target;
 
-    public OppgaveConsumerImpl(String endpointUrl) {
+    @Value("${OppgaveAPI_v1.url}")
+    private String endpointUrl;
+
+    public OppgaveConsumerImpl() {
         try {
             SSLContext sslContext = SSLContext.getDefault();
             Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();

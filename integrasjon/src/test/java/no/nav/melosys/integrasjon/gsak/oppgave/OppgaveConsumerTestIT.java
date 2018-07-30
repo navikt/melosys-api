@@ -1,11 +1,13 @@
 package no.nav.melosys.integrasjon.gsak.oppgave;
 
+import java.security.NoSuchAlgorithmException;
+import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,15 +16,20 @@ import static org.junit.Assert.assertNotNull;
 @RunWith(SpringRunner.class)
 public class OppgaveConsumerTestIT {
 
-    @Autowired
-    private OppgaveConsumerConfig config;
+    @Value("${OppgaveAPI_v1.url}")
+    private String endpointUrl;
 
     @Test
-    public void isAlive() {
-        Response response = ClientBuilder.newClient()
-                .target(config.getEndpointUrl())
-                .path("internal/alive")
-                .request().get();
+    public void isAlive() throws NoSuchAlgorithmException {
+        SSLContext sslContext = SSLContext.getDefault();
+        Response response = ClientBuilder
+            .newBuilder()
+            .sslContext(sslContext)
+            .build()
+            .target(endpointUrl)
+            .path("internal/alive")
+            .request()
+            .get();
 
         assertNotNull(response);
         assertThat(response.getStatus()).isEqualTo(200);

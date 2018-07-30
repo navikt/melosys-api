@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 
 public interface GsakFasade {
 
@@ -77,7 +76,7 @@ public interface GsakFasade {
      * @throws SikkerhetsbegrensningException
      * @throws FunksjonellException
      */
-    void opprettOppgave(OppgaveDto request) throws SikkerhetsbegrensningException, FunksjonellException;
+    void opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, FunksjonellException;
     /**
      * Legger tilbake en oppgave i GSAK
      *

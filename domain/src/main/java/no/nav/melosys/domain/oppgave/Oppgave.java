@@ -18,8 +18,17 @@ public class Oppgave {
     private String dokumentId;
     private String ansvarligId;
     private int versjon;
+    private String aktørId;
 
     public Oppgave() {
+    }
+
+    public String getAktørId() {
+        return aktørId;
+    }
+
+    public void setAktørId(String aktørId) {
+        this.aktørId = aktørId;
     }
 
     public String getAnsvarligId() {
@@ -36,10 +45,6 @@ public class Oppgave {
 
     public boolean erJournalFøring() {
         return oppgavetype == Oppgavetype.JFR;
-    }
-
-    public boolean harHøyPrioritet() {
-        return PrioritetType.HOY.equals(prioritet);
     }
 
     public String getOppgaveId() {

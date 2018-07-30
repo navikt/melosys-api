@@ -4,13 +4,13 @@ package no.nav.melosys.saksflyt.agent;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
-import static no.nav.melosys.domain.ProsessDataKey.GSAK_SAK_ID;
-import static no.nav.melosys.domain.ProsessDataKey.JOURNALPOST_ID;
+import static no.nav.melosys.domain.ProsessDataKey.*;
 import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
 
 /**
@@ -72,28 +70,27 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         String aktørID = prosessinstans.getData(AKTØR_ID);
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
 
-
-        OppgaveDto oppgaveDto = new OppgaveDto();
-        oppgaveDto.setSakreferanse(gsakSakID);
+        Oppgave oppgave = new Oppgave();
+        oppgave.setGsakSaksnummer(gsakSakID);
         if (BehandlingType.SØKNAD.equals(behandlingType)) {
-            oppgaveDto.setTema(Tema.MED.name());
-            oppgaveDto.setOppgavetype(Oppgavetype.BEH_SAK.name());
-            oppgaveDto.setPrioritet(PrioritetType.NORM.name());
+            oppgave.setTema(Tema.MED);
+            oppgave.setOppgavetype(Oppgavetype.BEH_SAK);
+            oppgave.setPrioritet(PrioritetType.NORM);
         } else if (BehandlingType.UNNTAK_MEDL.equals(behandlingType)) {
-            oppgaveDto.setTema(Tema.UFM.name());
-            oppgaveDto.setOppgavetype(Oppgavetype.BEH_SAK.name());
-            oppgaveDto.setPrioritet(PrioritetType.NORM.name());
+            oppgave.setTema(Tema.UFM);
+            oppgave.setOppgavetype(Oppgavetype.BEH_SAK);
+            oppgave.setPrioritet(PrioritetType.NORM);
         } else {
             // Skal ikke kunne skje
             throw new FunksjonellException("OpprettOppgave.utfør(...) har klart å sette behandlingType til noe den selv ikke støtter");
         }
         //builder.medUnderkategori() FIXME Venter. Ekisterer det i den nye GSAK tjenesten?
-        oppgaveDto.setAktørId(aktørID);
-        oppgaveDto.setJournalpostId(journalpostID);
+        oppgave.setAktørId(aktørID);
+        oppgave.setDokumentId(journalpostID);
         //builder.medBeskrivelse(); FIXME settes til? Are T.
         //builder.medMottattDato(); FIXME settes? Are T.
         //builder.medNormertBehandlingsTidInnen(); FIXME settes? Are T
-        gsakFasade.opprettOppgave(oppgaveDto);
+        gsakFasade.opprettOppgave(oppgave);
         prosessinstans.setSteg(null);
     }
 }

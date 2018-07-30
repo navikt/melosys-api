@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
@@ -108,8 +109,19 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public void opprettOppgave(OppgaveDto request) throws SikkerhetsbegrensningException, TekniskException, FunksjonellException {
-        oppgaveConsumer.opprettOppgave(request);
+    public void opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, TekniskException, FunksjonellException {
+        OppgaveDto oppgaveDto = new OppgaveDto();
+        oppgaveDto.setJournalpostId(request.getDokumentId());
+        oppgaveDto.setSakreferanse(request.getGsakSaksnummer());
+        oppgaveDto.setAktørId(request.getAktørId());
+        oppgaveDto.setTilordnetRessurs(request.getAnsvarligId());
+        //oppgaveDto.setTemagruppe() skal ta i bruke i fremtiden
+        oppgaveDto.setTema(request.getTema().getKode());
+        //oppgaveDto.setBehandlingstema(request.getBehandlingsTema()); skal ta i bruke i fremtiden
+        oppgaveDto.setOppgavetype(request.getOppgavetype().getKode());
+        oppgaveDto.setFristFerdigstillelse(request.getFristFerdigstillelse());
+        //oppgaveDto.setBehandlingstype(request.geBehandlingsType) skal ta i bruke i fremtiden
+        oppgaveConsumer.opprettOppgave(oppgaveDto);
     }
 
     @Override
