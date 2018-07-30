@@ -1,7 +1,7 @@
 package no.nav.melosys.service.aktoer;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -9,23 +9,29 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Service;
 
-public class AktoerService implements ApplicationListener<ContextRefreshedEvent> {
+@Service
+public class AktoerIdService implements ApplicationListener<ContextRefreshedEvent> {
 
-    private static final long MILLIS_MELLOM_VÅKNE_OPP = 3600000; // 1 time
-    private static final long MILLIS_LEVETID_I_CACHE = 28800000; // 8 timer
-
-    private static final Logger log = LoggerFactory.getLogger(AktoerService.class);
+    private static final Logger log = LoggerFactory.getLogger(AktoerIdService.class);
 
     private final TpsFasade tpsFasade;
 
-    private final Map<String, String> identCache = new HashMap<>();
+    private final Map<String, String> identCache = new ConcurrentHashMap<>();
     private final DelayQueue<CacheElement> utløpskø = new DelayQueue<>();
 
+    @Value("${melosys.service.aktørid.millisMellomVåkneOpp}")
+    private long millisMellomVåkneOpp;
+
+    @Value("${melosys.service.millisLevetidICache}")
+    private long millisLevetidICache;
+
     @Autowired
-    public AktoerService(TpsFasade tpsFasade) {
+    public AktoerIdService(TpsFasade tpsFasade) {
         this.tpsFasade = tpsFasade;
     }
 
@@ -40,7 +46,7 @@ public class AktoerService implements ApplicationListener<ContextRefreshedEvent>
         }
         String aktørId = tpsFasade.hentAktørIdForIdent(ident);
         identCache.put(ident, aktørId);
-        utløpskø.put(new CacheElement(ident, MILLIS_LEVETID_I_CACHE));
+        utløpskø.put(new CacheElement(ident, millisLevetidICache));
         return aktørId;
     }
 
@@ -55,7 +61,7 @@ public class AktoerService implements ApplicationListener<ContextRefreshedEvent>
                     element = utløpskø.poll();
                 }
                 try {
-                    sleep(MILLIS_MELLOM_VÅKNE_OPP);
+                    sleep(millisMellomVåkneOpp);
                 } catch (InterruptedException e) {
                     return;
                 }
