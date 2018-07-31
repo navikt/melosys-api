@@ -76,8 +76,9 @@ public class Oppgaveplukker {
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, oppgaver);
 
-        if(valg.isPresent()) {
-            Oppgave  oppgave = valg.get();
+        if (valg.isPresent()) {
+            Oppgave oppgave = valg.get();
+            // Tildeler oppgaven
             gsakFasade.tildelOppgave(oppgave.getOppgaveId(), saksbehandlerID);
             if (oppgave.erBehandling()) {
                 // Finner fagsak og saksnummer som svarer til behandlingsoppgaven.

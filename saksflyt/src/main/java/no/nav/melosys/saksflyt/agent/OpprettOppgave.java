@@ -87,9 +87,9 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         //builder.medUnderkategori() FIXME Venter. Ekisterer det i den nye GSAK tjenesten?
         oppgave.setAktørId(aktørID);
         oppgave.setDokumentId(journalpostID);
-        //builder.medBeskrivelse(); FIXME settes til? Are T.
         //builder.medMottattDato(); FIXME settes? Are T.
         //builder.medNormertBehandlingsTidInnen(); FIXME settes? Are T
+        // FIXME: MELOSYS-1401 skal støtte behandlingstype,behandlingstema,temagruppe
         gsakFasade.opprettOppgave(oppgave);
         prosessinstans.setSteg(null);
     }

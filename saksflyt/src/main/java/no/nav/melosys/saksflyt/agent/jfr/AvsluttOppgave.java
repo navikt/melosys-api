@@ -25,7 +25,7 @@ import static no.nav.melosys.domain.ProsessSteg.*;
 
 /**
  * Avslutter en oppgave i GSAK.
- * <p>
+ *
  * Transisjoner:
  * 1) ProsessType.JFR_NY_SAK:
  *     JFR_AVSLUTT_OPPGAVE -> JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil

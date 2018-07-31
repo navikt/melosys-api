@@ -44,6 +44,7 @@ public class OpprettOppgaveTest {
         p.addData(properties);
         
         agent.utførSteg(p);
+
         verify(gsakFasade, times(1)).opprettOppgave(any());
         assertThat(p.getSteg()).isNull();
     }

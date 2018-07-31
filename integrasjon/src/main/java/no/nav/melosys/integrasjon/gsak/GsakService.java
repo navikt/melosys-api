@@ -115,12 +115,14 @@ public class GsakService implements GsakFasade {
         oppgaveDto.setSakreferanse(request.getGsakSaksnummer());
         oppgaveDto.setAktørId(request.getAktørId());
         oppgaveDto.setTilordnetRessurs(request.getAnsvarligId());
-        //oppgaveDto.setTemagruppe() skal ta i bruke i fremtiden
         oppgaveDto.setTema(request.getTema().getKode());
-        //oppgaveDto.setBehandlingstema(request.getBehandlingsTema()); skal ta i bruke i fremtiden
         oppgaveDto.setOppgavetype(request.getOppgavetype().getKode());
         oppgaveDto.setFristFerdigstillelse(request.getFristFerdigstillelse());
-        //oppgaveDto.setBehandlingstype(request.geBehandlingsType) skal ta i bruke i fremtiden
+        // FIXME: MELOSYS-1401 : skal implementere disse
+        //oppgaveDto.setBehandlingstema(request.getBehandlingsTema());
+        //oppgaveDto.setBehandlingstype(request.geBehandlingsType);
+        //oppgaveDto.setTemagruppe();
+
         oppgaveConsumer.opprettOppgave(oppgaveDto);
     }
 

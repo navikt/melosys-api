@@ -105,11 +105,7 @@ public class OppgaveTjeneste extends RestTjeneste {
         String ident = SubjectHandler.getInstance().getUserID();
         try {
             List<OppgaveDto> oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
-            if (oppgaveDtoListe.size() > 0) {
-                return Response.ok(oppgaveDtoListe).build();
-            } else {
-                return Response.ok().build();
-            }
+            return oppgaveDtoListe.size() > 0 ? Response.ok(oppgaveDtoListe).build() : Response.ok().build();
         } catch (TekniskException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
@@ -132,12 +128,7 @@ public class OppgaveTjeneste extends RestTjeneste {
     public Response hentOppgaver(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
         try {
             List<OppgaveDto> oppgaver = oppgaveService.hentOppgaverMedBruker(fnr);
-            if (oppgaver.size() > 0) {
-                return Response.ok(oppgaver).build();
-            } else {
-                return Response.ok().build();
-            }
-
+            return oppgaver.size() > 0 ? Response.ok(oppgaver).build() : Response.ok().build();
         } catch (IkkeFunnetException e) {
             log.error(String.format("Ingen oppgaver funnet for ident %s. Feilmelding: %s", fnr, e.getMessage()));
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();

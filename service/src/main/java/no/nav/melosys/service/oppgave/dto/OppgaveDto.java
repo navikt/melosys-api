@@ -22,6 +22,8 @@ public class OppgaveDto {
     private List<String> land;
     private int versjon;
     private String ansvarligId;
+    // FIXME: MELOSYS-1401 trenger frontend behandlingstype,behandlingstema,temagruppe ?
+
 
 
     //Getter og setter brukes av Jackson for å serialisere oppgave objekter til frontend i OppgaveTjeneste

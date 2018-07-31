@@ -15,10 +15,6 @@ public interface GsakFasade {
      * Ferdigstiller en opprettet oppgave i GSAK
      *
      * @param oppgaveId GSAK-oppgave som skal ferdigstilles
-     * @throws IkkeFunnetException
-     * @throws SikkerhetsbegrensningException
-     * @throws TekniskException
-     * @throws FunksjonellException
      */
     void ferdigstillOppgave(String oppgaveId) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException;
 
@@ -31,7 +27,6 @@ public interface GsakFasade {
      * @param sakstyper
      * @param behandlingstyper
      * @return List<Oppgave>
-     * @throws TekniskException
      */
     List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype,
                                                   Tema tema,
@@ -45,7 +40,6 @@ public interface GsakFasade {
      *
      * @param ansvarligId
      * @return List<Oppgave>
-     * @throws TekniskException
      */
     List<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws TekniskException;
 
@@ -55,7 +49,6 @@ public interface GsakFasade {
      *
      * @param aktørId
      * @return List<Oppgave>
-     * @throws TekniskException
      */
     List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws TekniskException;
 
@@ -64,8 +57,6 @@ public interface GsakFasade {
      *
      * @param oppgaveId
      * @return oppgave informasjon
-     * @throws IkkeFunnetException
-     * @throws TekniskException
      */
     Oppgave hentOppgave(String oppgaveId) throws IkkeFunnetException, TekniskException;
 
@@ -73,18 +64,12 @@ public interface GsakFasade {
      * Oppretter en oppgave i GSAK for å få en unik oppgaveId
      *
      * @param request Intern representasjon av oppgaven som skal opprettes i GSAK
-     * @throws SikkerhetsbegrensningException
-     * @throws FunksjonellException
      */
     void opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, FunksjonellException;
     /**
      * Legger tilbake en oppgave i GSAK
      *
      * @param oppgaveId
-     * @throws IkkeFunnetException
-     * @throws SikkerhetsbegrensningException
-     * @throws TekniskException
-     * @throws FunksjonellException
      */
     void leggTilbakeOppgave(String oppgaveId) throws SikkerhetsbegrensningException, FunksjonellException, TekniskException, IkkeFunnetException;
 

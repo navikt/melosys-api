@@ -2,6 +2,7 @@ package no.nav.melosys.domain.oppgave;
 
 import java.time.LocalDate;
 
+import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.Tema;
 
 /**
@@ -19,6 +20,34 @@ public class Oppgave {
     private String ansvarligId;
     private int versjon;
     private String aktørId;
+    // FIXME: MELOSYS-1401 : skal implementere logikk rundt disse
+    private BehandlingType behandlingstype;
+    private Behandlingtema behandlingstema;
+    private Temagruppe temagruppe;
+
+    public BehandlingType getBehandlingstype() {
+        return behandlingstype;
+    }
+
+    public void setBehandlingstype(BehandlingType behandlingstype) {
+        this.behandlingstype = behandlingstype;
+    }
+
+    public Behandlingtema getBehandlingstema() {
+        return behandlingstema;
+    }
+
+    public void setBehandlingstema(Behandlingtema behandlingstema) {
+        this.behandlingstema = behandlingstema;
+    }
+
+    public Temagruppe getTemagruppe() {
+        return temagruppe;
+    }
+
+    public void setTemagruppe(Temagruppe temagruppe) {
+        this.temagruppe = temagruppe;
+    }
 
     public Oppgave() {
     }
