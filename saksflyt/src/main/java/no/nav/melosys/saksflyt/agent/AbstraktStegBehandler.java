@@ -50,7 +50,7 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
     }
 
     @Override
-    public final void utførSteg(Prosessinstans prosessinstans) {
+    public void utførSteg(Prosessinstans prosessinstans) {
         try {
             utfør(prosessinstans);
         } catch (SikkerhetsbegrensningException e) {
