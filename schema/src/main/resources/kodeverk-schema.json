@@ -1,0 +1,232 @@
+{
+  "$id": "http://example.com/example.json",
+  "type": "object",
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "behandlingstyper": {
+      "$id": "/properties/behandlingstyper",
+      "type": "array",
+      "items": {
+        "$id": "/properties/behandlingstyper/items",
+        "type": "object",
+        "properties": {
+          "kode": {
+            "$id": "/properties/behandlingstyper/items/properties/kode",
+            "type": "string",
+            "title": "The Kode Schema ",
+            "default": "",
+            "examples": [
+              "SKND"
+            ]
+          },
+          "term": {
+            "$id": "/properties/behandlingstyper/items/properties/term",
+            "type": "string",
+            "title": "The Term Schema ",
+            "default": "",
+            "examples": [
+              "Søknad"
+            ]
+          }
+        }
+      }
+    },
+    "behandlingsstatus": {
+      "$id": "/properties/behandlingsstatus",
+      "type": "array",
+      "items": {
+        "$id": "/properties/behandlingsstatus/items",
+        "type": "object",
+        "properties": {
+          "kode": {
+            "$id": "/properties/behandlingsstatus/items/properties/kode",
+            "type": "string",
+            "title": "The Kode Schema ",
+            "default": "",
+            "examples": [
+              "OPPR"
+            ]
+          },
+          "term": {
+            "$id": "/properties/behandlingsstatus/items/properties/term",
+            "type": "string",
+            "title": "The Term Schema ",
+            "default": "",
+            "examples": [
+              "Opprettet"
+            ]
+          }
+        }
+      }
+    },
+    "dokumentkategorier": {
+      "$id": "/properties/dokumentkategorier",
+      "type": "array",
+      "items": {
+        "$id": "/properties/dokumentkategorier/items",
+        "type": "object",
+        "properties": {
+          "kode": {
+            "$id": "/properties/dokumentkategorier/items/properties/kode",
+            "type": "string",
+            "title": "The Kode Schema ",
+            "default": "",
+            "examples": [
+              "B"
+            ]
+          },
+          "term": {
+            "$id": "/properties/dokumentkategorier/items/properties/term",
+            "type": "string",
+            "title": "The Term Schema ",
+            "default": "",
+            "examples": [
+              "Brev"
+            ]
+          }
+        }
+      }
+    },
+    "dokumenttitler": {
+      "$id": "/properties/dokumenttitler",
+      "type": "array",
+      "items": {
+        "$id": "/properties/dokumenttitler/items",
+        "type": "object",
+        "properties": {
+          "kode": {
+            "$id": "/properties/dokumenttitler/items/properties/kode",
+            "type": "string",
+            "title": "The Kode Schema ",
+            "default": "",
+            "examples": [
+              "ARBF"
+            ]
+          },
+          "term": {
+            "$id": "/properties/dokumenttitler/items/properties/term",
+            "type": "string",
+            "title": "The Term Schema ",
+            "default": "",
+            "examples": [
+              "Arbeidsforhold"
+            ]
+          }
+        }
+      }
+    },
+    "landkoder": {
+      "$id": "/properties/landkoder",
+      "type": "array",
+      "items": {
+        "$id": "/properties/landkoder/items",
+        "type": "object",
+        "properties": {
+          "kode": {
+            "$id": "/properties/landkoder/items/properties/kode",
+            "type": "string",
+            "title": "The Kode Schema ",
+            "default": "",
+            "examples": [
+              "BE"
+            ]
+          },
+          "term": {
+            "$id": "/properties/landkoder/items/properties/term",
+            "type": "string",
+            "title": "The Term Schema ",
+            "default": "",
+            "examples": [
+              "Belgia"
+            ]
+          }
+        }
+      }
+    },
+    "oppgavetyper": {
+      "$id": "/properties/oppgavetyper",
+      "type": "array",
+      "items": {
+        "$id": "/properties/oppgavetyper/items",
+        "type": "object",
+        "properties": {
+          "kode": {
+            "$id": "/properties/oppgavetyper/items/properties/kode",
+            "type": "string",
+            "title": "The Kode Schema ",
+            "default": "",
+            "examples": [
+              "BEH_SAK"
+            ]
+          },
+          "term": {
+            "$id": "/properties/oppgavetyper/items/properties/term",
+            "type": "string",
+            "title": "The Term Schema ",
+            "default": "",
+            "examples": [
+              "Behandling"
+            ]
+          }
+        }
+      }
+    },
+    "sakstyper": {
+      "$id": "/properties/sakstyper",
+      "type": "array",
+      "items": {
+        "$id": "/properties/sakstyper/items",
+        "type": "object",
+        "properties": {
+          "kode": {
+            "$id": "/properties/sakstyper/items/properties/kode",
+            "type": "string",
+            "title": "The Kode Schema ",
+            "default": "",
+            "examples": [
+              "EU_EOS"
+            ]
+          },
+          "term": {
+            "$id": "/properties/sakstyper/items/properties/term",
+            "type": "string",
+            "title": "The Term Schema ",
+            "default": "",
+            "examples": [
+              "EU/EØS"
+            ]
+          }
+        }
+      }
+    },
+    "vedleggstitler": {
+      "$id": "/properties/vedleggstitler",
+      "type": "array",
+      "items": {
+        "$id": "/properties/vedleggstitler/items",
+        "type": "object",
+        "properties": {
+          "kode": {
+            "$id": "/properties/vedleggstitler/items/properties/kode",
+            "type": "string",
+            "title": "The Kode Schema ",
+            "default": "",
+            "examples": [
+              "TITTEL_1"
+            ]
+          },
+          "term": {
+            "$id": "/properties/vedleggstitler/items/properties/term",
+            "type": "string",
+            "title": "The Term Schema ",
+            "default": "",
+            "examples": [
+              "Vedleggstittel 1"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
