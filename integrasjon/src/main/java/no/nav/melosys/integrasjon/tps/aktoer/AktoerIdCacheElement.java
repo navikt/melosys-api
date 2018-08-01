@@ -1,15 +1,15 @@
-package no.nav.melosys.service.aktoer;
+package no.nav.melosys.integrasjon.tps.aktoer;
 
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
-public class CacheElement implements Delayed {
+public class AktoerIdCacheElement implements Delayed {
 
     private final String nøkkel;
     private final long levetid;
     private final long starttid = System.currentTimeMillis();
 
-    public CacheElement(String nøkkel, long levetid) {
+    public AktoerIdCacheElement(String nøkkel, long levetid) {
         this.nøkkel = nøkkel;
         this.levetid = levetid;
     }
@@ -25,7 +25,7 @@ public class CacheElement implements Delayed {
 
     @Override
     public int compareTo(Delayed that) {
-        return Long.compare(this.gjenværendeLevetid(), ((CacheElement) that).gjenværendeLevetid());
+        return Long.compare(this.gjenværendeLevetid(), ((AktoerIdCacheElement) that).gjenværendeLevetid());
     }
 
     public String hentNøkkel() {

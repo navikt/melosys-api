@@ -10,19 +10,22 @@ import no.nav.melosys.integrasjon.test.TpsTestData;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
+import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentIdentForAktoerIdPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.feil.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentAktoerIdForIdentResponse;
+import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentIdentForAktoerIdResponse;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import static java.lang.Thread.sleep;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class TpsServiceTest {
 
@@ -37,12 +40,24 @@ public class TpsServiceTest {
     private TpsService service;
 
     @Before
-    public void setUp() {
+    public void setUp() throws HentAktoerIdForIdentPersonIkkeFunnet, HentIdentForAktoerIdPersonIkkeFunnet {
         aktorConsumer = mock(AktorConsumer.class);
         personConsumer = mock(PersonConsumer.class);
 
+        HentAktoerIdForIdentResponse aktørIdResponse = new HentAktoerIdForIdentResponse();
+        aktørIdResponse.setAktoerId(Long.toString(AKTØRID_1));
+        when(aktorConsumer.hentAktørIdForIdent(any())).thenReturn(aktørIdResponse);
+
+        HentIdentForAktoerIdResponse identResponse = new HentIdentForAktoerIdResponse();
+        identResponse.setIdent(FNR_1);
+        when(aktorConsumer.hentIdentForAktoerId(any())).thenReturn(identResponse);
+
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
         service = new TpsService(aktorConsumer, personConsumer, dokumentFactory);
+
+        service.onApplicationEvent(null);
+        ReflectionTestUtils.setField(service, "millisMellomVåkneOpp", 1000);
+        ReflectionTestUtils.setField(service, "millisLevetidICache", 1000);
     }
 
     @Test
@@ -76,5 +91,31 @@ public class TpsServiceTest {
 
         PersonDokument dokument = (PersonDokument) saksopplysning.getDokument();
         assertThat(dokument.fnr).isEqualTo(AKTØRID_1.toString());
+    }
+
+    @Test
+    public void aktørIdFinnesICache() throws IkkeFunnetException, HentAktoerIdForIdentPersonIkkeFunnet, HentIdentForAktoerIdPersonIkkeFunnet {
+        String aktørId = service.hentAktørIdForIdent(FNR_1);
+        assertEquals(Long.toString(AKTØRID_1), aktørId);
+
+        String fnr = service.hentIdentForAktørId(aktørId);
+        assertEquals(fnr, FNR_1);
+
+        verify(aktorConsumer, times(1)).hentAktørIdForIdent(any());
+        verify(aktorConsumer, times(0)).hentIdentForAktoerId(any());
+    }
+
+    @Test
+    public void aktørIdTømtFraCache() throws IkkeFunnetException, InterruptedException, HentAktoerIdForIdentPersonIkkeFunnet, HentIdentForAktoerIdPersonIkkeFunnet {
+        String aktørId = service.hentAktørIdForIdent(FNR_1);
+        assertEquals(Long.toString(AKTØRID_1), aktørId);
+
+        sleep(1500);
+
+        String fnr = service.hentIdentForAktørId(aktørId);
+        assertEquals(fnr, FNR_1);
+
+        verify(aktorConsumer, times(1)).hentAktørIdForIdent(any());
+        verify(aktorConsumer, times(1)).hentIdentForAktoerId(any());
     }
 }
