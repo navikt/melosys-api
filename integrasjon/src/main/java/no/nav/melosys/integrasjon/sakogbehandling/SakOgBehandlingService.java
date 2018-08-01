@@ -7,7 +7,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingskjede.BehandlingskjedeConsumer;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingskjede.SakDto;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
-import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.SakOgBehandlingClient;
+import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingstatusClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +16,12 @@ public class SakOgBehandlingService implements SakOgBehandlingFasade {
 
     private final BehandlingskjedeConsumer behandlingskjedeConsumer;
 
-    private final SakOgBehandlingClient sakOgBehandlingClient;
+    private final BehandlingstatusClient behandlingstatusClient;
 
     @Autowired
-    public SakOgBehandlingService(BehandlingskjedeConsumer behandlingskjedeConsumer, SakOgBehandlingClient sakOgBehandlingClient) {
+    public SakOgBehandlingService(BehandlingskjedeConsumer behandlingskjedeConsumer, BehandlingstatusClient behandlingstatusClient) {
         this.behandlingskjedeConsumer = behandlingskjedeConsumer;
-        this.sakOgBehandlingClient = sakOgBehandlingClient;
+        this.behandlingstatusClient = behandlingstatusClient;
     }
 
     @Override
@@ -31,11 +31,11 @@ public class SakOgBehandlingService implements SakOgBehandlingFasade {
 
     @Override
     public void sendBehandlingOpprettet(BehandlingStatusMapper mapper) throws IntegrasjonException {
-        sakOgBehandlingClient.sendBehandlingOpprettet(mapper);
+        behandlingstatusClient.sendBehandlingOpprettet(mapper);
     }
 
     @Override
     public void sendBehandlingAvsluttet(BehandlingStatusMapper mapper) throws IntegrasjonException {
-        sakOgBehandlingClient.sendBehandlingAvsluttet(mapper);
+        behandlingstatusClient.sendBehandlingAvsluttet(mapper);
     }
 }

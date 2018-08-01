@@ -3,9 +3,6 @@ package no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus;
 import java.time.LocalDateTime;
 
 import no.nav.melosys.integrasjon.felles.jms.JmsConfig;
-import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
-import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.SakOgBehandlingClient;
-import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.SakOgBehandlingClientImpl;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,13 +12,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-// FIXME: Ad-hoc integrasjonstesting av kø (ekskluder SakOgBehandlingClientConfigTest fra component scan)
+// FIXME: Ad-hoc integrasjonstesting av kø (ekskluder BehandlingstatusClientConfigTest fra component scan)
 @Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
-public class SakOgBehandlingClientTestIT {
+public class BehandlingstatusClientTestIT {
 
     @Autowired
-    private SakOgBehandlingClient client;
+    private BehandlingstatusClient client;
 
     @Test
     public void notPing() throws Exception {
@@ -33,7 +30,7 @@ public class SakOgBehandlingClientTestIT {
     }
 
     @Configuration
-    @ComponentScan(basePackageClasses = {JmsConfig.class, SakOgBehandlingClientImpl.class})
+    @ComponentScan(basePackageClasses = {JmsConfig.class, BehandlingstatusClientImpl.class})
     @PropertySource("classpath:test.properties")
-    public static class SakOgBehandlingClientConfigTest {}
+    public static class BehandlingstatusClientConfigTest {}
 }
