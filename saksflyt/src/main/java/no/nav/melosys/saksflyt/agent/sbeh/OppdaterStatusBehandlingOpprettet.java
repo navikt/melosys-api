@@ -9,8 +9,8 @@ import no.nav.melosys.domain.Tema;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Fagsystem;
-import no.nav.melosys.integrasjon.sakogbehandling.BehandlingStatusMapper;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingClient;
+import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
+import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
 import no.nav.melosys.repository.BehandlingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +37,12 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
 
     private final BehandlingRepository behandlingRepository;
 
-    private final SakOgBehandlingClient sakOgBehandlingClient;
+    private final SakOgBehandlingFasade sakOgBehandlingFasade;
 
     @Autowired
-    public OppdaterStatusBehandlingOpprettet(BehandlingRepository behandlingRepository, SakOgBehandlingClient sakOgBehandlingClient) {
+    public OppdaterStatusBehandlingOpprettet(BehandlingRepository behandlingRepository, SakOgBehandlingFasade sakOgBehandlingFasade) {
         this.behandlingRepository = behandlingRepository;
-        this.sakOgBehandlingClient = sakOgBehandlingClient;
+        this.sakOgBehandlingFasade = sakOgBehandlingFasade;
         log.info("OppdaterStatusBehandlingOpprettet initialisert");
     }
 
@@ -76,7 +76,7 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
         builder.medAktørID(aktørID);
         builder.medAnsvarligEnhet(Integer.toString(MELOSYS_ENHET_ID));
 
-        sakOgBehandlingClient.sendBehandlingOpprettet(builder.build());
+        sakOgBehandlingFasade.sendBehandlingOpprettet(builder.build());
 
         prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
         log.info("Oppdatert sob-status til opprettet for prosessinstans {}", prosessinstans.getId());

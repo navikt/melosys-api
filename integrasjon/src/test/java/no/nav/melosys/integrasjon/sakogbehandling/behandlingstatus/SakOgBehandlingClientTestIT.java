@@ -1,8 +1,11 @@
-package no.nav.melosys.integrasjon.sakogbehandling;
+package no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus;
 
 import java.time.LocalDateTime;
 
 import no.nav.melosys.integrasjon.felles.jms.JmsConfig;
+import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
+import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.SakOgBehandlingClient;
+import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.SakOgBehandlingClientImpl;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;

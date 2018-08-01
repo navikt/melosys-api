@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.sakogbehandling;
+package no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus;
 
 import javax.jms.Queue;
 

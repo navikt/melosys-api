@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.sakogbehandling;
+package no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus;
 
 import no.nav.melding.virksomhet.behandlingsstatus.hendelsehandterer.v1.hendelseshandtererbehandlingsstatus.BehandlingAvsluttet;
 import no.nav.melding.virksomhet.behandlingsstatus.hendelsehandterer.v1.hendelseshandtererbehandlingsstatus.BehandlingOpprettet;
