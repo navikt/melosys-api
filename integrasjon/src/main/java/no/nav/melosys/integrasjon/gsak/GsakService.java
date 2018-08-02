@@ -329,7 +329,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public String opprettOppgave(String ident, String oppgavetype, String brukerID, String dokumentID, String saksnummer) {
+    public String opprettOppgave(String ident, String oppgavetype, String brukerID, String journalpostID, String saksnummer) {
         return null;
     }
 

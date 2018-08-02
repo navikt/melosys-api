@@ -111,5 +111,5 @@ public interface GsakFasade {
                        String saksbehandlerID);
 
     // FIXME For å teste jfr
-    String opprettOppgave(String ansvarligID, String oppgavetype, String brukerID, String dokumentID, String saksnummer);
+    String opprettOppgave(String ansvarligID, String oppgavetype, String brukerID, String journalpostID, String saksnummer);
 }

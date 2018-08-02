@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.dto;
 public class MockOppgaveDto {
     private String ansvarligID;
     private String fnr;
-    private String dokumentID;
+    private String journalpostID;
     private String oppgavetype;
     private String saksnummer;
 
@@ -23,12 +23,12 @@ public class MockOppgaveDto {
         this.fnr = fnr;
     }
 
-    public String getDokumentID() {
-        return dokumentID;
+    public String getJournalpostID() {
+        return journalpostID;
     }
 
-    public void setDokumentID(String dokumentID) {
-        this.dokumentID = dokumentID;
+    public void setJournalpostID(String journalpostID) {
+        this.journalpostID = journalpostID;
     }
 
     public String getOppgavetype() {

@@ -84,13 +84,13 @@ public class GsakMockService implements GsakFasade {
     }
 
     @Override
-    public String opprettOppgave(String ansvarligID, String oppgavetype, String brukerID, String dokumentID, String saksnummer) {
+    public String opprettOppgave(String ansvarligID, String oppgavetype, String brukerID, String journalpostID, String saksnummer) {
         Oppgave oppgave = new Oppgave();
         oppgave.setAnsvarligId(ansvarligID);
 
         oppgave.setAktivTil(LocalDate.now().plusYears(1));
         oppgave.setBruker(brukerID);
-        oppgave.setDokumentId(dokumentID);
+        oppgave.setDokumentId(journalpostID);
         oppgave.setFagomrade(Fagomrade.MED);
         if (Oppgavetype.JFR.getKode().equals(oppgavetype)) {
             oppgave.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.JFR_MED);
