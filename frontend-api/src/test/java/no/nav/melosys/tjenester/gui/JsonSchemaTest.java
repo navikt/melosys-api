@@ -12,12 +12,14 @@ import org.springframework.core.io.DefaultResourceLoader;
 
 public abstract class JsonSchemaTest {
 
+    private static final String ROOT = "scripts/schema/";
+
     private static final JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
 
     public abstract String schemaNavn();
 
     public JsonSchema hentSchema() throws IOException, ProcessingException {
-        String schemaString = JsonResourceLoader.load(new DefaultResourceLoader(), schemaNavn());
+        String schemaString = JsonResourceLoader.load(new DefaultResourceLoader(), ROOT + schemaNavn());
         JsonNode schemaNode = JsonLoader.fromString(schemaString);
         return factory.getJsonSchema(schemaNode);
     }

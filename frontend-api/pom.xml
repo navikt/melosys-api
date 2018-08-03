@@ -82,7 +82,7 @@
         <!-- Test -->
         <dependency>
             <groupId>no.nav.melosys</groupId>
-            <artifactId>schema</artifactId>
+            <artifactId>melosys-web-mock</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

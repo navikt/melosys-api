@@ -37,7 +37,7 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
 
     @Override
     public String schemaNavn() {
-        return "fagsak-schema.json";
+        return "fagsaker-schema.json";
     }
 
     @Test
