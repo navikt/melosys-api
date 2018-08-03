@@ -1,0 +1,25 @@
+<ns2:finnSakOgBehandlingskjedeListeResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/sakOgBehandling/v1">
+    <response>
+        <sak>
+            <saksId>sak1</saksId>
+            <sakstema kodeRef="Barnetrygd"/>
+            <opprettet>2018-01-01T12:00:00.000+02:00</opprettet>
+            <behandlingskjede>
+                <behandlingskjedeId>kjede1</behandlingskjedeId>
+                <behandlingskjedetype kodeRef="ad0003"/>
+                <behandlingstema kodeRef="ab0058"/>
+                <start>2018-01-01T12:00:00.000+02:00</start>
+                <sisteBehandlingREF>ref1</sisteBehandlingREF>
+                <sisteBehandlingstype kodeRef="ae0002"/>
+            </behandlingskjede>
+            <behandlingskjede>
+                <behandlingskjedeId>kjede2</behandlingskjedeId>
+                <behandlingskjedetype kodeRef="ad0003"/>
+                <behandlingstema kodeRef="ab0180"/>
+                <start>2018-02-01T12:00:00.000+02:00</start>
+                <sisteBehandlingREF>ref2</sisteBehandlingREF>
+                <sisteBehandlingstype kodeRef="ae0002"/>
+            </behandlingskjede>
+        </sak>
+    </response>
+</ns2:finnSakOgBehandlingskjedeListeResponse>

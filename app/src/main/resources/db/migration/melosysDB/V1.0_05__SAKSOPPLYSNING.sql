@@ -18,10 +18,11 @@ CREATE TABLE saksopplysning_type (
 
 INSERT INTO saksopplysning_type (kode, navn) VALUES ('ARBFORH', 'Arbeidsforhold');
 INSERT INTO saksopplysning_type (kode, navn) VALUES ('INNTK', 'Inntekt');
+INSERT INTO saksopplysning_type (kode, navn) VALUES ('MEDL', 'Medlemskap');
 INSERT INTO saksopplysning_type (kode, navn) VALUES ('ORG', 'Arbeidsgiver');
 INSERT INTO saksopplysning_type (kode, navn) VALUES ('PERSOPL', 'Personopplysninger');
+INSERT INTO saksopplysning_type (kode, navn) VALUES ('SOB_SAK", "Sak og behandling-sak');
 INSERT INTO saksopplysning_type (kode, navn) VALUES ('SØKNAD', 'Søknad');
-INSERT INTO saksopplysning_type (kode, navn) VALUES ('MEDL', 'Medlemskap');
 
 
 CREATE TABLE saksopplysning_kilde (
