@@ -71,7 +71,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         // Hent statsborgerskap fra saksopplysningene...
         // TODO (MELOSYS-1255): Statsborgerskap skal ikke hentes fra PersonopplysningsDokument, siden dette ikke nødvendigvis er riktig for søknadstidspunktet.
         Land statsborgerskap = null;
-        for (Saksopplysning kandidat : prosessinstans.getBehandling().getSaksopplysninger()) {
+        for (Saksopplysning kandidat : behandling.getSaksopplysninger()) {
             if (kandidat.getDokument() instanceof PersonDokument) {
                 statsborgerskap = ((PersonDokument) kandidat.getDokument()).statsborgerskap;
                 break; // Forutsetter at vi har kun 1 av disse
