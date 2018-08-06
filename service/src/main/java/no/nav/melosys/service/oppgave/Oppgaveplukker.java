@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class Oppgaveplukker {
@@ -41,6 +42,7 @@ public class Oppgaveplukker {
      * 4) Oppgaven tildeles til saksbehandleren.
      * 5) Saksnummer knyttes til oppgaven hvis oppgaven er en behandlingsoppgave.
      */
+    @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws IkkeFunnetException {
         String type = plukkDto.getOppgavetype();
         Oppgavetype oppgavetype = KodeverkUtils.dekod(Oppgavetype.class, type);
@@ -88,6 +90,7 @@ public class Oppgaveplukker {
         return valg;
     }
 
+    @Transactional
     public synchronized void leggTilbakeOppgave(String oppgaveId, String saksbehandlerID, String begrunnelse) {
         Oppgave oppgave = gsakFasade.hentOppgave(oppgaveId);
 
