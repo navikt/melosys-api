@@ -6,10 +6,11 @@ public enum SaksopplysningType implements KodeverkTabell<SaksopplysningType> {
     
     ARBEIDSFORHOLD("ARBFORH", "Arbeidsforhold"),
     INNTEKT("INNTK", "Inntekt"),
+    MEDLEMSKAP("MEDL", "Medlemskap"),
     ORGANISASJON("ORG", "Arbeidsgiver"),
     PERSONOPPLYSNING("PERSOPL", "Personopplysning"),
-    SØKNAD("SØKNAD", "Søknad"),
-    MEDLEMSKAP("MEDL", "Medlemskap");
+    SOB_SAK("SOB_SAK", "Sak og behandling-sak"),
+    SØKNAD("SØKNAD", "Søknad");
 
     private String kode;
     private String beskrivelse;

@@ -17,20 +17,24 @@ public class XsltConfig {
 
     public static final String INNTK_MAPPE= "inntk";
 
-    public static final String TPS_MAPPE = "tps";
-
     public static final String MEDL_MAPPE = "medl";
+
+    public static final String SOB_MAPPE = "sob";
+
+    public static final String TPS_MAPPE = "tps";
 
     /* Tjenester */
     public static final String ARBEIDSFORHOLD_TJENESTE = "arbeidsforhold";
 
     public static final String INNTEKT_TJENESTE = "inntekt";
 
+    public static final String MEDLEMSKAP_TJENESTE = "medlemskap";
+
     public static final String ORGANISASJON_TJENESTE = "organisasjon";
 
     public static final String PERSON_TJENESTE = "person";
 
-    public static final String MEDLEMSKAP_TJENESTE = "medlemskap";
+    private static final String SAKOGBEHANDLING_TJENESTE = "sakogbehandling";
 
     /**
      * Returnerer en sti til xslt filen som brukes for å konvertere mot det felles domene.
@@ -53,6 +57,7 @@ public class XsltConfig {
             case ARBEIDSFORHOLD: return XsltConfig.ARBEIDSFORHOLD_TJENESTE;
             case INNTEKT: return XsltConfig.INNTEKT_TJENESTE;
             case MEDLEMSKAP: return XsltConfig.MEDLEMSKAP_TJENESTE;
+            case SOB_SAK: return XsltConfig.SAKOGBEHANDLING_TJENESTE;
             default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
         }
     }
@@ -64,6 +69,7 @@ public class XsltConfig {
             case ARBEIDSFORHOLD: return XsltConfig.AAREG_MAPPE;
             case INNTEKT: return XsltConfig.INNTK_MAPPE;
             case MEDLEMSKAP: return XsltConfig.MEDL_MAPPE;
+            case SOB_SAK: return XsltConfig.SOB_MAPPE;
             default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
         }
     }
