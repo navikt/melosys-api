@@ -16,8 +16,8 @@ public class Oppgave {
     private Oppgavetype oppgavetype;
     private PrioritetType prioritet;
     private String gsakSaksnummer;
-    private String dokumentId;
-    private String ansvarligId;
+    private String journalpostId;
+    private String tilordnetRessurs;
     private int versjon;
     private String aktørId;
     // FIXME: MELOSYS-1401 : skal implementere logikk rundt disse
@@ -60,12 +60,12 @@ public class Oppgave {
         this.aktørId = aktørId;
     }
 
-    public String getAnsvarligId() {
-        return ansvarligId;
+    public String getTilordnetRessurs() {
+        return tilordnetRessurs;
     }
 
-    public void setAnsvarligId(String ansvarligId) {
-        this.ansvarligId = ansvarligId;
+    public void setTilordnetRessurs(String tilordnetRessurs) {
+        this.tilordnetRessurs = tilordnetRessurs;
     }
 
     public boolean erBehandling() {
@@ -116,12 +116,12 @@ public class Oppgave {
         this.gsakSaksnummer = gsakSaksnummer;
     }
 
-    public String getDokumentId() {
-        return dokumentId;
+    public String getJournalpostId() {
+        return journalpostId;
     }
 
-    public void setDokumentId(String dokumentId) {
-        this.dokumentId = dokumentId;
+    public void setJournalpostId(String journalpostId) {
+        this.journalpostId = journalpostId;
     }
 
     public String getSaksnummer() {

@@ -67,7 +67,7 @@ public class OppgaveServiceTest {
         oppgave1.setPrioritet(PrioritetType.HOY);
         oppgave1.setOppgavetype(Oppgavetype.BEH_SAK);
         oppgave1.setGsakSaksnummer("11");
-        oppgave1.setAnsvarligId("12345678901");
+        oppgave1.setTilordnetRessurs("12345678901");
         oppgaver.add(oppgave1);
 
         when(gsakFasade.finnOppgaveListeMedAnsvarlig(anyString())).

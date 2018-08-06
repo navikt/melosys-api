@@ -111,10 +111,10 @@ public class GsakService implements GsakFasade {
     @Override
     public void opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, TekniskException, FunksjonellException {
         OppgaveDto oppgaveDto = new OppgaveDto();
-        oppgaveDto.setJournalpostId(request.getDokumentId());
+        oppgaveDto.setJournalpostId(request.getJournalpostId());
         oppgaveDto.setSakreferanse(request.getGsakSaksnummer());
         oppgaveDto.setAktørId(request.getAktørId());
-        oppgaveDto.setTilordnetRessurs(request.getAnsvarligId());
+        oppgaveDto.setTilordnetRessurs(request.getTilordnetRessurs());
         oppgaveDto.setTema(request.getTema().getKode());
         oppgaveDto.setOppgavetype(request.getOppgavetype().getKode());
         oppgaveDto.setFristFerdigstillelse(request.getFristFerdigstillelse());
@@ -161,7 +161,7 @@ public class GsakService implements GsakFasade {
             domainOppgave.setPrioritet(PrioritetType.valueOf(oppgave.getPrioritet()));
         }
         domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
-        domainOppgave.setDokumentId(oppgave.getJournalpostId());
+        domainOppgave.setJournalpostId(oppgave.getJournalpostId());
 
         if (oppgave.getOppgavetype() != null) {
             domainOppgave.setOppgavetype(no.nav.melosys.domain.oppgave.Oppgavetype.valueOf(oppgave.getOppgavetype()));
@@ -176,8 +176,8 @@ public class GsakService implements GsakFasade {
         if (oppgave.getOppgavetype() != null) {
             domainOppgave.setOppgavetype(no.nav.melosys.domain.oppgave.Oppgavetype.valueOf(oppgave.getOppgavetype()));
         }
-        domainOppgave.setDokumentId(oppgave.getJournalpostId());
-        domainOppgave.setAnsvarligId(oppgave.getTilordnetRessurs());
+        domainOppgave.setJournalpostId(oppgave.getJournalpostId());
+        domainOppgave.setTilordnetRessurs(oppgave.getTilordnetRessurs());
 
         return domainOppgave;
     }

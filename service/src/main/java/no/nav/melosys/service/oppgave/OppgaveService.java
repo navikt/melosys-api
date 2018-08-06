@@ -71,11 +71,11 @@ public class OppgaveService {
         dest.setOppgavetype(oppgave.getOppgavetype());
         dest.setPrioritet(oppgave.getPrioritet());
         dest.setVersjon(oppgave.getVersjon());
-        dest.setAnsvarligId(oppgave.getAnsvarligId());
+        dest.setAnsvarligId(oppgave.getTilordnetRessurs());
 
         if (oppgave.erJournalFøring()) {
             dest.setOppgavetype(Oppgavetype.JFR);
-            dest.setJournalpostID(oppgave.getDokumentId());
+            dest.setJournalpostID(oppgave.getJournalpostId());
         } else if (oppgave.erBehandling()) {
             dest.setOppgavetype(Oppgavetype.BEH_SAK);
 
