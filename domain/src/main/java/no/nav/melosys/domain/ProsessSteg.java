@@ -13,7 +13,7 @@ public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
     // Journalføring
     JFR_VALIDERING("JFR_VALIDERING", "Grunnleggende validering"),
     JFR_AVSLUTT_OPPGAVE("JFR_AVSLUTT_OPPGAVE", "Avslutter journalføringsoppgaven i GSAK"),
-    JFR_AKTØR_ID("JFR_AKTOER_ID", "Henter aktørID"),
+    JFR_AKTØR_ID("JFR_AKTØR_ID", "Henter aktørID"),
     JFR_OPPRETT_SAK_OG_BEH("JFR_OPPRETT_SAK_OG_BEH", "Oppretter ny sak og behandling i Melosys"),
     JFR_OPPRETT_GSAK_SAK("JFR_OPPRETT_GSAK_SAK", "Oppretter Sak i GSAK"),
     STATUS_BEH_OPPR("STATUS_BEH_OPPR", "Oppdater Sak og Behandling ved oppretting av behandling"),
