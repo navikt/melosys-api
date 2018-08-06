@@ -9,9 +9,7 @@ import io.swagger.annotations.Api;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.service.kodeverk.KodeDto;
-import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
@@ -21,13 +19,6 @@ import org.springframework.web.context.WebApplicationContext;
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 public class KodeverkTjeneste extends RestTjeneste {
-
-    private KodeverkService kodeverkService;
-
-    @Autowired
-    public KodeverkTjeneste(KodeverkService kodeverkService) {
-        this.kodeverkService = kodeverkService;
-    }
 
     @GET
     public KodeverkDto getKodeverk() {
