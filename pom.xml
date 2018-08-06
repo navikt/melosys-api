@@ -390,7 +390,7 @@
                 <artifactId>nav-person-v3-tjenestespesifikasjon</artifactId>
                 <version>${tps.person.version}</version>
             </dependency>
-            <!-- SBEH -->
+            <!-- SOB -->
             <dependency>
                 <groupId>no.nav.meldinger.virksomhet</groupId>
                 <artifactId>nav-virksomhet-hendelsehandterer-behandlingstatus-v1-meldingsdefinisjon</artifactId>
