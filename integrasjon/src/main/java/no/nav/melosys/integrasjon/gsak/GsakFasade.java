@@ -64,8 +64,9 @@ public interface GsakFasade {
      * Oppretter en oppgave i GSAK for å få en unik oppgaveId
      *
      * @param request Intern representasjon av oppgaven som skal opprettes i GSAK
+     * @return OppgaveId
      */
-    void opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, FunksjonellException;
+    String opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, FunksjonellException;
     /**
      * Legger tilbake en oppgave i GSAK
      *

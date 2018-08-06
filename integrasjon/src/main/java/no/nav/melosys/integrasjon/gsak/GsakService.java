@@ -109,7 +109,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public void opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, TekniskException, FunksjonellException {
+    public String opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, TekniskException, FunksjonellException {
         OppgaveDto oppgaveDto = new OppgaveDto();
         oppgaveDto.setJournalpostId(request.getJournalpostId());
         oppgaveDto.setSakreferanse(request.getGsakSaksnummer());
@@ -123,7 +123,7 @@ public class GsakService implements GsakFasade {
         //oppgaveDto.setBehandlingstype(request.geBehandlingsType);
         //oppgaveDto.setTemagruppe();
 
-        oppgaveConsumer.opprettOppgave(oppgaveDto);
+        return oppgaveConsumer.opprettOppgave(oppgaveDto);
     }
 
     @Override

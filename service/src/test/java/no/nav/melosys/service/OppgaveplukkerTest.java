@@ -1,5 +1,6 @@
 package no.nav.melosys.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -53,15 +54,23 @@ public class OppgaveplukkerTest {
         Oppgave oppgave1 = new Oppgave();
         oppgave1.setOppgaveId("1");
         oppgave1.setPrioritet(PrioritetType.LAV);
+        oppgave1.setFristFerdigstillelse(LocalDate.of(2017, 8, 7));
         oppgaver.add(oppgave1);
         Oppgave oppgave2 = new Oppgave();
         oppgave2.setOppgaveId("2");
         oppgave2.setPrioritet(PrioritetType.HOY);
+        oppgave2.setFristFerdigstillelse(LocalDate.of(2018, 8, 7));
         oppgaver.add(oppgave2);
         Oppgave oppgave3 = new Oppgave();
         oppgave3.setOppgaveId("3");
+        oppgave3.setFristFerdigstillelse(LocalDate.of(2018, 8, 10));
         oppgave3.setPrioritet(PrioritetType.NORM);
         oppgaver.add(oppgave3);
+        Oppgave oppgave4 = new Oppgave();
+        oppgave4.setOppgaveId("4");
+        oppgave4.setFristFerdigstillelse(LocalDate.of(2018, 8, 5));
+        oppgave4.setPrioritet(PrioritetType.HOY);
+        oppgaver.add(oppgave4);
 
         when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList())).thenReturn(oppgaver);
 
@@ -80,7 +89,7 @@ public class OppgaveplukkerTest {
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
         assertThat(oppgave.isPresent()).isTrue();
-        oppgave.ifPresent(o -> assertThat(o.getOppgaveId()).isEqualTo("2"));
+        oppgave.ifPresent(o -> assertThat(o.getOppgaveId()).isEqualTo("4"));
     }
 
     @Test

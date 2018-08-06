@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.oppgave;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.Tema;
@@ -25,6 +26,9 @@ public class Oppgave {
     private Behandlingtema behandlingstema;
     private Temagruppe temagruppe;
 
+    public Oppgave() {
+    }
+
     public BehandlingType getBehandlingstype() {
         return behandlingstype;
     }
@@ -47,9 +51,6 @@ public class Oppgave {
 
     public void setTemagruppe(Temagruppe temagruppe) {
         this.temagruppe = temagruppe;
-    }
-
-    public Oppgave() {
     }
 
     public String getAktørId() {
@@ -147,4 +148,5 @@ public class Oppgave {
     public void setVersjon(int versjon) {
         this.versjon = versjon;
     }
+
 }

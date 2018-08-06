@@ -31,7 +31,7 @@ import static no.nav.melosys.domain.ProsessSteg.*;
  *     JFR_AVSLUTT_OPPGAVE -> JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
  * 2) ProsessType.JFR_KNYTT:
  *     JFR_AVSLUTT_OPPGAVE -> JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
- * */
+ */
 @Component
 public class AvsluttOppgave extends AbstraktStegBehandler {
 
@@ -58,7 +58,7 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
     @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException, IkkeFunnetException {
-        log.debug("Starter behandling av {}", prosessinstans.getId());
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String oppgaveID = prosessinstans.getData(OPPGAVE_ID);
         gsakFasade.ferdigstillOppgave(oppgaveID);

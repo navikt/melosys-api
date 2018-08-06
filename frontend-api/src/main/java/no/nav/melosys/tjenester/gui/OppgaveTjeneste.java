@@ -72,8 +72,11 @@ public class OppgaveTjeneste extends RestTjeneste {
 
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (FunksjonellException | IkkeFunnetException e) {
+        } catch (IkkeFunnetException e) {
+            log.error(String.format("Ingen oppgaver funnet for ident %s. Feilmelding: %s", ident, e.getMessage()));
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        } catch (FunksjonellException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (TekniskException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
@@ -91,8 +94,11 @@ public class OppgaveTjeneste extends RestTjeneste {
 
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (FunksjonellException | IkkeFunnetException e) {
+        } catch (IkkeFunnetException e) {
+            log.error(String.format("Ingen oppgaver funnet for ident %s. Feilmelding: %s", ident, e.getMessage()));
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        } catch (FunksjonellException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (TekniskException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
@@ -130,7 +136,7 @@ public class OppgaveTjeneste extends RestTjeneste {
             List<OppgaveDto> oppgaver = oppgaveService.hentOppgaverMedBruker(fnr);
             return oppgaver.size() > 0 ? Response.ok(oppgaver).build() : Response.ok().build();
         } catch (IkkeFunnetException e) {
-            log.error(String.format("Ingen oppgaver funnet for ident %s. Feilmelding: %s", fnr, e.getMessage()));
+            log.error("Finner ingen aktørId for ident {}: {}", fnr, e.getMessage(), e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         } catch (TekniskException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();

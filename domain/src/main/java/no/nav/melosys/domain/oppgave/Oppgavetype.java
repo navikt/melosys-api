@@ -3,7 +3,7 @@ package no.nav.melosys.domain.oppgave;
 import no.nav.melosys.domain.Kodeverk;
 
 public enum Oppgavetype implements Kodeverk {
-    //FIXME: MELOSYS-1336: Skulle hente term(beskrivlse) fra felles kodeverk
+    //TODO: MELOSYS-1336: Skulle hente term(beskrivlse) fra felles kodeverk
     BEH_SAK("BEH_SAK", "Behandling"),
     JFR("JFR", "Journalføring");
 

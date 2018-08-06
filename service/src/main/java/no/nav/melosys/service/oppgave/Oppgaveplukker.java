@@ -2,6 +2,7 @@ package no.nav.melosys.service.oppgave;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class Oppgaveplukker {
 
     private static final Logger log =  LoggerFactory.getLogger(Oppgaveplukker.class);
+
     private final GsakFasade gsakFasade;
     private final FagsakRepository fagsakRepository;
     private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
@@ -47,6 +49,7 @@ public class Oppgaveplukker {
      * 4) Oppgaven tildeles til saksbehandleren.
      * 5) Saksnummer knyttes til oppgaven hvis oppgaven er en behandlingsoppgave.
      */
+    @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
         String type = plukkDto.getOppgavetype();
         Oppgavetype oppgavetype = KodeverkUtils.dekod(Oppgavetype.class, type);
@@ -118,17 +121,8 @@ public class Oppgaveplukker {
     }
 
     private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {
-        // Oppgaver med høy prioritet velges først.
-        Optional<Oppgave> prioritert = oppgaver.stream().filter(o -> o.getPrioritet() == PrioritetType.HOY).findFirst();
 
-        Optional<Oppgave> valg;
-        if (prioritert.isPresent()) {
-            valg = prioritert;
-        } else {
-            // Oppgaver er sortert stigende etter frist.
-            valg = oppgaver.stream().findFirst();
-        }
-
+        Optional<Oppgave> valg = oppgaver.stream().sorted(høyestTilLavestPrioritet).findFirst();
         // Vi må ikke tildele en oppgave som var tilbakelagt.
         if (valg.isPresent()) {
             String oppgaveId = valg.get().getOppgaveId();
@@ -146,4 +140,26 @@ public class Oppgaveplukker {
         List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(saksbehandlerID, oppgaveId);
         return !tilbakelegging.isEmpty();
     }
+
+    public static final Comparator<Oppgave> høyestTilLavestPrioritet = (a, b) -> {
+        // Merk: Bryter med konvensjonen (a == b og b == c → a == c), men dette er ok.
+        int res = 0;
+        if (a.getPrioritet() == b.getPrioritet())
+            res = 0;
+        else if (a.getPrioritet() == PrioritetType.HOY)
+            res = -1;
+        else if (b.getPrioritet() == PrioritetType.HOY)
+            res = 1;
+        else if (a.getPrioritet() == PrioritetType.NORM)
+            res = -1;
+        else if (b.getPrioritet() == PrioritetType.NORM)
+            res = 1;
+        if (res == 0) {
+            if (a.getFristFerdigstillelse() == null || b.getFristFerdigstillelse() == null)
+                return 0;
+            return a.getFristFerdigstillelse().compareTo(b.getFristFerdigstillelse());
+        }
+        return res;
+    };
+
 }

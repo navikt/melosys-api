@@ -101,15 +101,20 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
     }
 
     @Override
-    public void opprettOppgave(OppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
+    public String opprettOppgave(OppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
         try (Response response = target
             .path(request.getId())
             .request(MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getCallID())
             .header(HttpHeaders.AUTHORIZATION, getBearer())
             .post(Entity.json(request))) {
+            if( response.getStatus() == 201 ) { // Oppgaven opprettet
+                OppgaveDto oppgaveDto = response.readEntity(OppgaveDto.class);
+                return oppgaveDto.getId();
+            }
             håndterFeil(response);
         }
+        throw new TekniskException("Uventet feil har oppstått i OpprettOppgave");
     }
 
     private void håndterFeil(Response response) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
