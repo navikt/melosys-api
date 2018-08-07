@@ -7,6 +7,7 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.test.TpsTestData;
+import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
@@ -37,6 +38,8 @@ public class TpsServiceTest {
 
     private PersonConsumer personConsumer;
 
+    private AktoerIdCache aktørIdCache;
+
     private TpsService service;
 
     @Before
@@ -53,11 +56,12 @@ public class TpsServiceTest {
         when(aktorConsumer.hentIdentForAktoerId(any())).thenReturn(identResponse);
 
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
-        service = new TpsService(aktorConsumer, personConsumer, dokumentFactory);
 
-        service.onApplicationEvent(null);
-        ReflectionTestUtils.setField(service, "millisMellomVåkneOpp", 1000);
-        ReflectionTestUtils.setField(service, "millisLevetidICache", 1000);
+        aktørIdCache = new AktoerIdCache();
+        ReflectionTestUtils.setField(aktørIdCache, "millisMellomVåkneOpp", 1000);
+        ReflectionTestUtils.setField(aktørIdCache, "millisLevetidICache", 1000);
+
+        service = new TpsService(aktorConsumer, personConsumer, dokumentFactory, aktørIdCache);
     }
 
     @Test
@@ -95,6 +99,8 @@ public class TpsServiceTest {
 
     @Test
     public void aktørIdFinnesICache() throws IkkeFunnetException, HentAktoerIdForIdentPersonIkkeFunnet, HentIdentForAktoerIdPersonIkkeFunnet {
+        aktørIdCache.onApplicationEvent(null);
+
         String aktørId = service.hentAktørIdForIdent(FNR_1);
         assertEquals(Long.toString(AKTØRID_1), aktørId);
 
@@ -107,6 +113,8 @@ public class TpsServiceTest {
 
     @Test
     public void aktørIdTømtFraCache() throws IkkeFunnetException, InterruptedException, HentAktoerIdForIdentPersonIkkeFunnet, HentIdentForAktoerIdPersonIkkeFunnet {
+        aktørIdCache.onApplicationEvent(null);
+
         String aktørId = service.hentAktørIdForIdent(FNR_1);
         assertEquals(Long.toString(AKTØRID_1), aktørId);
 

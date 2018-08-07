@@ -3,8 +3,6 @@ package no.nav.melosys.integrasjon.tps;
 import java.io.StringWriter;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.DelayQueue;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -18,7 +16,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCacheElement;
+import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
@@ -33,10 +31,7 @@ import no.nav.tjeneste.virksomhet.person.v3.meldinger.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -47,32 +42,26 @@ public class TpsService implements TpsFasade {
 
     private static final String PERSON_VERSJON = "3.0";
 
-    private AktorConsumer aktorConsumer;
+    private final AktorConsumer aktorConsumer;
 
-    private PersonConsumer personConsumer;
+    private final PersonConsumer personConsumer;
 
-    private DokumentFactory dokumentFactory;
+    private final DokumentFactory dokumentFactory;
+
+    private final AktoerIdCache aktørIdCache;
 
     private final JAXBContext jaxbContext;
-
-    private final Map<String, String> identCache = new ConcurrentHashMap<>();
-    private final DelayQueue<AktoerIdCacheElement> utløpskø = new DelayQueue<>();
-
-    @Value("${melosys.service.aktørid.millisMellomVåkneOpp}")
-    private long millisMellomVåkneOpp;
-
-    @Value("${melosys.service.millisLevetidICache}")
-    private long millisLevetidICache;
 
     // Endringstidspunkt sorteres fra nyest til eldst.
     static final Comparator<StatsborgerskapPeriode> endringstidspunktKomparator =
         (sp1, sp2) -> sp2.getEndringstidspunkt().compare(sp1.getEndringstidspunkt());
 
     @Autowired
-    public TpsService(AktorConsumer aktorConsumer, PersonConsumer personConsumer, DokumentFactory dokumentFactory) {
+    public TpsService(AktorConsumer aktorConsumer, PersonConsumer personConsumer, DokumentFactory dokumentFactory, AktoerIdCache aktørIdCache) {
         this.aktorConsumer = aktorConsumer;
         this.personConsumer = personConsumer;
         this.dokumentFactory = dokumentFactory;
+        this.aktørIdCache = aktørIdCache;
 
         try {
             jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
@@ -84,8 +73,8 @@ public class TpsService implements TpsFasade {
 
     @Override
     public String hentAktørIdForIdent(String fnr) throws IkkeFunnetException {
-        if (identCache.containsKey(fnr)) {
-            return identCache.get(fnr);
+        if (aktørIdCache.hentAktørIdFraCache(fnr) != null) {
+            return aktørIdCache.hentAktørIdFraCache(fnr);
         }
 
         HentAktoerIdForIdentRequest request = new HentAktoerIdForIdentRequest();
@@ -93,9 +82,7 @@ public class TpsService implements TpsFasade {
 
         try {
             HentAktoerIdForIdentResponse response = aktorConsumer.hentAktørIdForIdent(request);
-            identCache.put(fnr, response.getAktoerId());
-            identCache.put(response.getAktoerId(), fnr);
-            utløpskø.put(new AktoerIdCacheElement(fnr, millisLevetidICache));
+            aktørIdCache.leggTilCache(fnr, response.getAktoerId());
             return response.getAktoerId();
         } catch (HentAktoerIdForIdentPersonIkkeFunnet e) { // NOSONAR
             throw new IkkeFunnetException(e);
@@ -104,8 +91,8 @@ public class TpsService implements TpsFasade {
 
     @Override
     public String hentIdentForAktørId(String aktørID) throws IkkeFunnetException {
-        if (identCache.containsKey(aktørID)) {
-            return identCache.get(aktørID);
+        if (aktørIdCache.hentIdentFraCache(aktørID) != null) {
+            return aktørIdCache.hentIdentFraCache(aktørID);
         }
 
         HentIdentForAktoerIdRequest request = new HentIdentForAktoerIdRequest();
@@ -113,9 +100,7 @@ public class TpsService implements TpsFasade {
 
         try {
             HentIdentForAktoerIdResponse response = aktorConsumer.hentIdentForAktoerId(request);
-            identCache.put(aktørID, response.getIdent());
-            identCache.put(response.getIdent(), aktørID);
-            utløpskø.put(new AktoerIdCacheElement(aktørID, millisLevetidICache));
+            aktørIdCache.leggTilCache(response.getIdent(), aktørID);
             return response.getIdent();
         } catch (HentIdentForAktoerIdPersonIkkeFunnet e) { // NOSONAR
             throw new IkkeFunnetException(e);
@@ -240,32 +225,6 @@ public class TpsService implements TpsFasade {
             throw new IkkeFunnetException(e);
         } catch (HentPersonhistorikkSikkerhetsbegrensning e) {
             throw new SikkerhetsbegrensningException(e);
-        }
-    }
-
-    @EventListener
-    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        new TømCacheScheduler().start();
-    }
-
-    private class TømCacheScheduler extends Thread {
-        @Override
-        public void run() {
-            for (;;) {
-                AktoerIdCacheElement element = utløpskø.poll();
-                while (element != null) {
-                    String verdi = identCache.get(element.hentNøkkel());
-                    log.debug("Fjerner nøklene " + element.hentNøkkel() + " og " + verdi + " fra cache");
-                    identCache.remove(element.hentNøkkel());
-                    identCache.remove(verdi);
-                    element = utløpskø.poll();
-                }
-                try {
-                    sleep(millisMellomVåkneOpp);
-                } catch (InterruptedException e) {
-                    return;
-                }
-            }
         }
     }
 }

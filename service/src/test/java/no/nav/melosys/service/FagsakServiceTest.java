@@ -47,7 +47,7 @@ public class FagsakServiceTest {
     public void setUp() {
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
 
-        TpsFasade tps = new TpsService(null, null, dokumentFactory);
+        TpsFasade tps = new TpsService(null, null, dokumentFactory, null);
         AaregFasade aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
         EregFasade ereg = new EregService(new OrganisasjonMock(), dokumentFactory);
         MedlFasade medl = new MedlService(new MedlemskapMock(), dokumentFactory);
