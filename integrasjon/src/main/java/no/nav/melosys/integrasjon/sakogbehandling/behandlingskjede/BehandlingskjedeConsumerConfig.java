@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class BehandlingskjedeConsumerConfig {
     private static final String WSDL = "wsdl/no/nav/tjeneste/virksomhet/sakOgBehandling/v1/Binding.wsdl";
-    private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/sakOgBehandling/v1";
+    private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/sakOgBehandling/v1/Binding";
     private static final QName SERVICE = new QName(NAMESPACE, "SakOgBehandling_v1");
     private static final QName PORT = new QName(NAMESPACE, "SakOgBehandling_v1Port");
 
