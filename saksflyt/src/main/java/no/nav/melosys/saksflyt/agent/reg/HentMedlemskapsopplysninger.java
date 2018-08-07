@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
 import static no.nav.melosys.domain.ProsessSteg.HENT_MEDL_OPPL;
-import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
+import static no.nav.melosys.domain.ProsessSteg.HENT_SOB_SAKER;
 
 /**
  * Steget sørger for å hente medlemskapsinfo fra MEDL
@@ -78,7 +78,7 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
         saksopplysning.setRegistrertDato(LocalDateTime.now());
         saksopplysningRepo.save(saksopplysning);
 
-        prosessinstans.setSteg(OPPRETT_OPPGAVE);
+        prosessinstans.setSteg(HENT_SOB_SAKER);
         log.info("Hentet medlemskapsopplysninger for prosessinstans {}", prosessinstans.getId());
     }
 }
