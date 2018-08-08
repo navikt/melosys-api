@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.slf4j.Logger;
@@ -23,30 +25,33 @@ public class FagsakService {
 
     private static final String FAGSAKID_PREFIX = "MEL-";
 
-    private FagsakRepository fagsakRepository;
+    private final FagsakRepository fagsakRepository;
 
-    private BehandlingRepository behandlingRepository;
+    private final BehandlingRepository behandlingRepository;
 
-    private SaksopplysningerService saksopplysningerService;
+    private final SaksopplysningerService saksopplysningerService;
+
+    private final TpsFasade tpsFasade;
 
     @Autowired
-    public FagsakService(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository, SaksopplysningerService saksopplysningerService) {
+    public FagsakService(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository, SaksopplysningerService saksopplysningerService, TpsFasade tpsFasade) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.saksopplysningerService = saksopplysningerService;
+        this.tpsFasade = tpsFasade;
     }
 
-    public List<Fagsak> hentFagsaker(RolleType rolleType, String aktørID) {
-        return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
-    }
-
-    // FIXME: Den metoden er bare for å hjelpe frontend midlertidig. Må slettes.
     public Iterable<Fagsak> hentAlle() {
         return fagsakRepository.findAll();
     }
 
     public Fagsak hentFagsak(String saksnummer) {
         return fagsakRepository.findBySaksnummer(saksnummer);
+    }
+
+    public List<Fagsak> hentFagsakerMedAktør(RolleType rolleType, String ident) throws IkkeFunnetException {
+        String aktørID = tpsFasade.hentAktørIdForIdent(ident);
+        return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
     }
 
     @Transactional
@@ -61,13 +66,12 @@ public class FagsakService {
      * Oppretter en fagsak og en behandling ut fra et fødselsnummer.
      */
     @Transactional
-    public Fagsak nyFagsakOgBehandling(String fnr, BehandlingType behandlingType, boolean erTestData) throws SikkerhetsbegrensningException {
+    public Fagsak nyFagsakOgBehandling(String aktørID, BehandlingType behandlingType) {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(hentNesteSaksnummer());
 
         Aktoer aktoer = new Aktoer();
-        aktoer.setAktørId(fnr);
-        aktoer.setEksternId(fnr);
+        aktoer.setAktørId(aktørID);
         aktoer.setFagsak(fagsak);
         aktoer.setRolle(RolleType.BRUKER);
 
@@ -85,17 +89,27 @@ public class FagsakService {
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(dato);
         behandling.setEndretDato(dato);
-        // FIXME Saksopplysninger hentes separat når saksflyt tar seg av det. hentOpplysninger fjernes
-        if (erTestData) {
-            fagsak.setType(FagsakType.EU_EØS);
-            Set<Saksopplysning> saksopplysninger = saksopplysningerService.hentSaksopplysninger(fnr);
-            saksopplysninger.forEach(x -> x.setBehandling(behandling));
-            behandling.setSaksopplysninger(saksopplysninger);
-        }
+
         behandling.setStatus(BehandlingStatus.OPPRETTET);
         behandling.setType(behandlingType);
         behandlingRepository.save(behandling);
         return fagsak;
+    }
+
+    // FIXME Trenger test en metode for å opprette fagsaker utenom saksflyt?
+    @Deprecated
+    @Transactional
+    public Fagsak testFagsakOgBehandling(String ident, BehandlingType behandlingType) throws SikkerhetsbegrensningException, IkkeFunnetException {
+        String aktørID = tpsFasade.hentAktørIdForIdent(ident);
+
+        Fagsak fagsak = nyFagsakOgBehandling(aktørID, behandlingType);
+        fagsak.setType(FagsakType.EU_EØS);
+        Set<Saksopplysning> saksopplysninger = saksopplysningerService.hentSaksopplysninger(aktørID);
+        Behandling behandling = fagsak.getAktivBehandling();
+        saksopplysninger.forEach(x -> x.setBehandling(behandling));
+        behandling.setSaksopplysninger(saksopplysninger);
+
+        return fagsakRepository.save(fagsak);
     }
 
     private String hentNesteSaksnummer() {

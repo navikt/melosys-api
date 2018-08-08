@@ -71,7 +71,9 @@ public class SaksopplysningerService {
         return (ArbeidsforholdDokument) saksopplysning.getDokument();
     }
 
-    public Set<Saksopplysning> hentSaksopplysninger(String fnr) throws SikkerhetsbegrensningException {
+    public Set<Saksopplysning> hentSaksopplysninger(String aktørID) throws SikkerhetsbegrensningException, IkkeFunnetException {
+        String fnr = tpsFasade.hentIdentForAktørId(aktørID);
+
         // FIXME: Når EESSI2-485 er ferdig må IntegrasjonsExceptions kastes videre
         Optional<Saksopplysning> personSaksopplysning = Optional.ofNullable(hentPerson(fnr));
         Optional<Saksopplysning> medlemskapSaksopplysning = Optional.ofNullable(hentMedlemskap(fnr));

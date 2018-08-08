@@ -59,7 +59,7 @@ public class FagsakServiceTest {
 
         fagsakRepo = mock(FagsakRepository.class);
         BehandlingRepository behandlingRepo = mock(BehandlingRepository.class);
-        fagsakService = new FagsakService(fagsakRepo, behandlingRepo, saksopplysningerService);
+        fagsakService = new FagsakService(fagsakRepo, behandlingRepo, saksopplysningerService, tps);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class FagsakServiceTest {
         final String[] identer = new String[]{"88888888884", "77777777779"};
 
         for (String fnr : identer) {
-            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(fnr, BehandlingType.SØKNAD, false);
+            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(fnr, BehandlingType.SØKNAD);
 
             assertNotNull(fagsak);
             assertFalse(fagsak.getBehandlinger().isEmpty());

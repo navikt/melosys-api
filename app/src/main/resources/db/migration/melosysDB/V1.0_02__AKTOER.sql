@@ -1,8 +1,8 @@
 CREATE TABLE aktoer (
     id              NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     saksnummer      VARCHAR2(99) NOT NULL,
-    aktoer_id       VARCHAR2(99) NOT NULL,
-    ekstern_id      VARCHAR2(99) NOT NULL,
+    aktoer_id       VARCHAR2(99) NULL,
+    orgnr           VARCHAR2(99) NULL,
     rolle           VARCHAR2(99) NOT NULL,
     CONSTRAINT pk_bruker PRIMARY KEY (id)
 );

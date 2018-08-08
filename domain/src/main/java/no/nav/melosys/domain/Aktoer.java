@@ -27,9 +27,8 @@ public class Aktoer {
     @Column(name = "aktoer_id", updatable = false)
     private String aktørId;
 
-    /** Kan være orgnr. eller personnr. */
-    @Column(name = "ekstern_id")
-    private String eksternId;
+    @Column(name = "orgnr")
+    private String orgnr;
     
     @Column(name = "rolle", nullable = false, updatable = false)
     @Convert(converter = RolleType.DbKonverterer.class)
@@ -55,12 +54,12 @@ public class Aktoer {
         this.aktørId = aktørId;
     }
 
-    public String getEksternId() {
-        return eksternId;
+    public String getOrgnr() {
+        return orgnr;
     }
 
-    public void setEksternId(String eksternId) {
-        this.eksternId = eksternId;
+    public void setOrgnr(String orgnr) {
+        this.orgnr = orgnr;
     }
 
     public RolleType getRolle() {

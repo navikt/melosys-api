@@ -41,11 +41,11 @@ public class OpprettSakTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
         fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
-        when(fagsakService.nyFagsakOgBehandling(anyString(), eq(BehandlingType.SØKNAD), eq(false))).thenReturn(fagsak);
+        when(fagsakService.nyFagsakOgBehandling(anyString(), eq(BehandlingType.SØKNAD))).thenReturn(fagsak);
 
         agent.utførSteg(p);
 
-        verify(fagsakService, times(1)).nyFagsakOgBehandling(aktørId, BehandlingType.SØKNAD, false);
+        verify(fagsakService, times(1)).nyFagsakOgBehandling(aktørId, BehandlingType.SØKNAD);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_GSAK_SAK);
     }
 }

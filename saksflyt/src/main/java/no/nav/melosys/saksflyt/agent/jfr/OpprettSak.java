@@ -58,7 +58,7 @@ public class OpprettSak extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String aktørId = prosessinstans.getData(AKTØR_ID);
-        Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, BehandlingType.SØKNAD, false);
+        Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, BehandlingType.SØKNAD);
         prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
         prosessinstans.setBehandling(fagsak.getBehandlinger().get(0));
 
