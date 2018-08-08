@@ -1,5 +1,8 @@
 package no.nav.melosys.integrasjon.tps;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
@@ -15,6 +18,7 @@ import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentIdentForAktoerIdPersonIk
 import no.nav.tjeneste.virksomhet.aktoer.v2.feil.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentAktoerIdForIdentResponse;
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentIdentForAktoerIdResponse;
+import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.IdentDetaljer;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import org.junit.Before;
@@ -47,9 +51,7 @@ public class TpsServiceTest {
         aktorConsumer = mock(AktorConsumer.class);
         personConsumer = mock(PersonConsumer.class);
 
-        HentAktoerIdForIdentResponse aktørIdResponse = new HentAktoerIdForIdentResponse();
-        aktørIdResponse.setAktoerId(Long.toString(AKTØRID_1));
-        when(aktorConsumer.hentAktørIdForIdent(any())).thenReturn(aktørIdResponse);
+        when(aktorConsumer.hentAktørIdForIdent(any())).thenReturn(hentAktørIdResponse());
 
         HentIdentForAktoerIdResponse identResponse = new HentIdentForAktoerIdResponse();
         identResponse.setIdent(FNR_1);
@@ -125,5 +127,25 @@ public class TpsServiceTest {
 
         verify(aktorConsumer, times(1)).hentAktørIdForIdent(any());
         verify(aktorConsumer, times(1)).hentIdentForAktoerId(any());
+    }
+
+    private HentAktoerIdForIdentResponse hentAktørIdResponse() {
+
+        // Feltet identHistorikk er protected, så vi utvider klassen med en setter for mocking
+        class AktoerIdResponse extends HentAktoerIdForIdentResponse {
+            private void setIdentHistorikk(List<IdentDetaljer> identHistorikk) {
+                super.identHistorikk = identHistorikk;
+            }
+        }
+
+        AktoerIdResponse aktørIdResponse = new AktoerIdResponse();
+        aktørIdResponse.setAktoerId(Long.toString(AKTØRID_1));
+
+        IdentDetaljer identDetaljer = new IdentDetaljer();
+        identDetaljer.setTpsId(FNR_1);
+        aktørIdResponse.setIdentHistorikk(new ArrayList<>());
+        aktørIdResponse.getIdentHistorikk().add(identDetaljer);
+
+        return aktørIdResponse;
     }
 }
