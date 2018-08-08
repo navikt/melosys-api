@@ -16,17 +16,22 @@ public class AktoerIdCache {
 
     private static final Logger log = LoggerFactory.getLogger(AktoerIdCache.class);
 
-    private final int INITIELL_KAPASITET = 100;
-    private final Map<String, String> identTilAktørIdCache = new ConcurrentHashMap<>(INITIELL_KAPASITET);
-    private final Map<String, String> aktørIdTilIdentCache = new ConcurrentHashMap<>(INITIELL_KAPASITET);
+    private final Map<String, String> identTilAktørIdCache;
+    private final Map<String, String> aktørIdTilIdentCache;
     private final DelayQueue<AktoerIdCacheElement> utløpskø = new DelayQueue<>();
 
-    @Value("${melosys.service.aktørid.millisMellomVåkneOpp}")
-    private long millisMellomVåkneOpp;
+    private final long millisMellomVåkneOpp;
+    private final long millisLevetidICache;
 
-    @Value("${melosys.service.millisLevetidICache}")
-    private long millisLevetidICache;
+    public AktoerIdCache(@Value("${melosys.service.aktørid.millisMellomVåkneOpp}") long millisMellomVåkneOpp,
+                         @Value("${melosys.service.aktørid.millisLevetidICache}") long millisLevetidICache,
+                         @Value("${melosys.service.aktørid.initiellKapasitetICache}") int initiellKapasitet) {
+        this.millisMellomVåkneOpp = millisMellomVåkneOpp;
+        this.millisLevetidICache = millisLevetidICache;
 
+        identTilAktørIdCache = new ConcurrentHashMap<>(initiellKapasitet);
+        aktørIdTilIdentCache = new ConcurrentHashMap<>(initiellKapasitet);
+    }
 
     public void leggTilCache(String ident, String aktørId) {
         identTilAktørIdCache.put(ident, aktørId);
