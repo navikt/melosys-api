@@ -6,16 +6,15 @@ import java.util.concurrent.TimeUnit;
 public class AktoerIdCacheElement implements Delayed {
 
     private final String nøkkel;
-    private final long levetid;
-    private final long starttid = System.currentTimeMillis();
+    private final long utløpstidspunkt;
 
     public AktoerIdCacheElement(String nøkkel, long levetid) {
         this.nøkkel = nøkkel;
-        this.levetid = levetid;
+        this.utløpstidspunkt = System.currentTimeMillis() + levetid;
     }
 
     private long gjenværendeLevetid() {
-        return (starttid + levetid) - System.currentTimeMillis();
+        return utløpstidspunkt - System.currentTimeMillis();
     }
 
     @Override

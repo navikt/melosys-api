@@ -16,8 +16,9 @@ public class AktoerIdCache {
 
     private static final Logger log = LoggerFactory.getLogger(AktoerIdCache.class);
 
-    private final Map<String, String> identTilAktørIdCache = new ConcurrentHashMap<>();
-    private final Map<String, String> aktørIdTilIdentCache = new ConcurrentHashMap<>();
+    private final int INITIELL_KAPASITET = 100;
+    private final Map<String, String> identTilAktørIdCache = new ConcurrentHashMap<>(INITIELL_KAPASITET);
+    private final Map<String, String> aktørIdTilIdentCache = new ConcurrentHashMap<>(INITIELL_KAPASITET);
     private final DelayQueue<AktoerIdCacheElement> utløpskø = new DelayQueue<>();
 
     @Value("${melosys.service.aktørid.millisMellomVåkneOpp}")
@@ -52,6 +53,9 @@ public class AktoerIdCache {
             for (;;) {
                 AktoerIdCacheElement element = utløpskø.poll();
                 while (element != null) {
+                    if (isInterrupted()) {
+                        return;
+                    }
                     String ident = element.hentNøkkel();
                     String aktørId = identTilAktørIdCache.get(ident);
                     log.debug("Fjerner ident " + ident + " og aktørId " + aktørId + " fra cache");

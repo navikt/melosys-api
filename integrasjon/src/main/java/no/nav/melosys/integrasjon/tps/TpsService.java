@@ -82,7 +82,8 @@ public class TpsService implements TpsFasade {
 
         try {
             HentAktoerIdForIdentResponse response = aktorConsumer.hentAktørIdForIdent(request);
-            aktørIdCache.leggTilCache(fnr, response.getAktoerId());
+            String gjeldendeFnr = response.getIdentHistorikk().get(0).getTpsId();
+            aktørIdCache.leggTilCache(gjeldendeFnr, response.getAktoerId());
             return response.getAktoerId();
         } catch (HentAktoerIdForIdentPersonIkkeFunnet e) { // NOSONAR
             throw new IkkeFunnetException(e);
