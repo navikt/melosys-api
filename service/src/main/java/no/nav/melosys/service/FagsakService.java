@@ -41,10 +41,6 @@ public class FagsakService {
         this.tpsFasade = tpsFasade;
     }
 
-    public Iterable<Fagsak> hentAlle() {
-        return fagsakRepository.findAll();
-    }
-
     public Fagsak hentFagsak(String saksnummer) {
         return fagsakRepository.findBySaksnummer(saksnummer);
     }

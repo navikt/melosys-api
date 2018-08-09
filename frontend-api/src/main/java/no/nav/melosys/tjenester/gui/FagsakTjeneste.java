@@ -97,7 +97,7 @@ public class FagsakTjeneste extends RestTjeneste {
             Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, BehandlingType.SØKNAD);
 
             if (fagsak == null) {
-                return Response.status(Response.Status.NOT_FOUND).build();
+                return Response.status(Response.Status.BAD_REQUEST).build();
             } else {
                 FagsakDto fagsakDto = tilDto(fagsak);
                 return Response.ok(fagsakDto).build();
@@ -116,7 +116,7 @@ public class FagsakTjeneste extends RestTjeneste {
         Iterable<Fagsak> saker;
 
         if (fnr == null) {
-            saker = fagsakService.hentAlle();
+            throw new BadRequestException();
         } else {
             try {
                 saker = fagsakService.hentFagsakerMedAktør(RolleType.BRUKER, fnr);
