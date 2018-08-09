@@ -4,10 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
@@ -22,6 +19,7 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
@@ -93,17 +91,19 @@ public class FagsakTjeneste extends RestTjeneste {
         return nyFagsak(fnr);
     }
 
-    @Deprecated // FIXME Nye saker kommer gjennom journalføring
+    @Deprecated // FIXME Trenger test en metode for å opprette fagsaker utenom saksflyt?
     public Response nyFagsak(String fnr) {
         try {
-            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(fnr, BehandlingType.SØKNAD, true);
+            Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, BehandlingType.SØKNAD);
 
             if (fagsak == null) {
-                return Response.status(Response.Status.NOT_FOUND).build();
+                return Response.status(Response.Status.BAD_REQUEST).build();
             } else {
                 FagsakDto fagsakDto = tilDto(fagsak);
                 return Response.ok(fagsakDto).build();
             }
+        } catch (IkkeFunnetException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Ident " + fnr + " ikke funnet").build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
@@ -113,14 +113,16 @@ public class FagsakTjeneste extends RestTjeneste {
     @Path("/sok")
     @ApiOperation(value = "Søk etter saker på fødselsnummer eller d-nummer", notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."))
     public List<FagsakOppsummeringDto> hentFagsaker(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
-        Iterable<Fagsak> saker = null;
+        Iterable<Fagsak> saker;
 
         if (fnr == null) {
-            saker = fagsakService.hentAlle();
+            throw new BadRequestException();
         } else {
-            // TODO Oppslag mot TPS for å få aktørID
-            String aktørID = fnr; // test data har aktørID = fnr
-            saker = fagsakService.hentFagsaker(RolleType.BRUKER, aktørID);
+            try {
+                saker = fagsakService.hentFagsakerMedAktør(RolleType.BRUKER, fnr);
+            } catch (IkkeFunnetException e) {
+                throw new NotFoundException(e.getMessage());
+            }
         }
         return tilDtoer(saker);
     }
