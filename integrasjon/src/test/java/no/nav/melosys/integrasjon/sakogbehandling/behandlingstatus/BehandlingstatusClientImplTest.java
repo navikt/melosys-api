@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.sakogbehandling;
+package no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus;
 
 import java.time.LocalDateTime;
 import javax.jms.Queue;
@@ -15,10 +15,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = SakOgBehandlingClientConfigTest.class)
-public class SakOgBehandlingClientImplTest {
+@ContextConfiguration(classes = BehandlingstatusClientConfigTest.class)
+public class BehandlingstatusClientImplTest {
 
-    private SakOgBehandlingClientImpl sakOgBehandlingClient;
+    private BehandlingstatusClientImpl behandlingstatusClient;
 
     @Autowired
     private JmsTemplate jmsTemplate;
@@ -28,7 +28,7 @@ public class SakOgBehandlingClientImplTest {
 
     @Before
     public void setUp() {
-        sakOgBehandlingClient = new SakOgBehandlingClientImpl(jmsTemplate, hendelseshåndterer);
+        behandlingstatusClient = new BehandlingstatusClientImpl(jmsTemplate, hendelseshåndterer);
     }
 
     @Test
@@ -37,7 +37,7 @@ public class SakOgBehandlingClientImplTest {
         builder.medAnsvarligEnhet("MELOSYS");
         builder.medHendelsestidspunkt(LocalDateTime.now());
 
-        sakOgBehandlingClient.sendBehandlingOpprettet(builder.build());
+        behandlingstatusClient.sendBehandlingOpprettet(builder.build());
 
         TextMessage message = (TextMessage) jmsTemplate.receive(hendelseshåndterer);
         assertNotNull(message);
@@ -50,7 +50,7 @@ public class SakOgBehandlingClientImplTest {
         builder.medAnsvarligEnhet("MELOSYS");
         builder.medHendelsestidspunkt(LocalDateTime.now());
 
-        sakOgBehandlingClient.sendBehandlingAvsluttet(builder.build());
+        behandlingstatusClient.sendBehandlingAvsluttet(builder.build());
 
         TextMessage message = (TextMessage) jmsTemplate.receive(hendelseshåndterer);
         assertNotNull(message);

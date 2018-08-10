@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.sakogbehandling;
+package no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus;
 
 import no.nav.melding.virksomhet.behandlingsstatus.hendelsehandterer.v1.hendelseshandtererbehandlingsstatus.BehandlingAvsluttet;
 import no.nav.melding.virksomhet.behandlingsstatus.hendelsehandterer.v1.hendelseshandtererbehandlingsstatus.BehandlingOpprettet;
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 
 @Profile("mocking") //FIXME MELOSYS-1284
 @Component
-public class SakOgBehandlingClientMock extends SakOgBehandlingClientImpl implements SakOgBehandlingClient {
-    private static final Logger log = LoggerFactory.getLogger(SakOgBehandlingClientMock.class);
+public class BehandlingstatusClientMock extends BehandlingstatusClientImpl implements BehandlingstatusClient {
+    private static final Logger log = LoggerFactory.getLogger(BehandlingstatusClientMock.class);
 
-    public SakOgBehandlingClientMock() {
+    public BehandlingstatusClientMock() {
         super(null, null);
     }
 

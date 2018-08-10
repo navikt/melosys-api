@@ -9,6 +9,7 @@ public enum SaksopplysningKilde implements KodeverkTabell<SaksopplysningKilde> {
     INNTK("INNTK", "Inntektskomponenten"),
     MEDL("MEDL", "Medlemskapsunntak"),
     SBH("SBH", "Saksbehandler"),
+    SOB("SOB", "Sak og behandling"),
     TPS("TPS", "Folkeregisteret");
 
 

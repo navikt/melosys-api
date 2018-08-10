@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.sakogbehandling;
+package no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus;
 
 import java.io.StringWriter;
 import javax.jms.Message;
@@ -27,9 +27,9 @@ import static no.nav.melosys.integrasjon.felles.jms.JmsConfig.HENDELSESKØ;
 
 @Profile("!mocking") //FIXME MELOSYS-1284 (Bruker samme konfig og vil derfor ikke ha JmsTemplate + Queue med "mocking")
 @Component
-public class SakOgBehandlingClientImpl implements SakOgBehandlingClient {
+public class BehandlingstatusClientImpl implements BehandlingstatusClient {
 
-    private static final Logger log = LoggerFactory.getLogger(SakOgBehandlingClientImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(BehandlingstatusClientImpl.class);
 
     private final JAXBContext jaxbContext;
 
@@ -40,7 +40,7 @@ public class SakOgBehandlingClientImpl implements SakOgBehandlingClient {
     private Queue hendelseshåndterer;
 
     @Autowired
-    public SakOgBehandlingClientImpl(JmsTemplate jmsTemplate, @Qualifier(HENDELSESKØ) Queue hendelseshåndterer) {
+    public BehandlingstatusClientImpl(JmsTemplate jmsTemplate, @Qualifier(HENDELSESKØ) Queue hendelseshåndterer) {
         try {
             jaxbContext = JAXBContext.newInstance(BehandlingStatus.class);
         } catch (JAXBException e) {

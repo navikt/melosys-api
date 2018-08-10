@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.sakogbehandling;
+package no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus;
 
 import javax.jms.Queue;
 
@@ -10,11 +10,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.core.JmsTemplate;
 
 @Configuration
-public class SakOgBehandlingClientConfigTest {
+public class BehandlingstatusClientConfigTest {
 
     private DestinationManager destinationManager;
 
-    public SakOgBehandlingClientConfigTest() {
+    public BehandlingstatusClientConfigTest() {
         destinationManager = new DestinationManager();
     }
 

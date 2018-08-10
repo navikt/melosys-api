@@ -9,8 +9,8 @@ import no.nav.melosys.domain.Tema;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Fagsystem;
-import no.nav.melosys.integrasjon.sakogbehandling.BehandlingStatusMapper;
-import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingClient;
+import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
+import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -32,10 +32,10 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterStatusBehandlingAvsluttet.class);
 
-    private final SakOgBehandlingClient sakOgBehandlingClient;
+    private final SakOgBehandlingFasade sakOgBehandlingFasade;
 
-    public OppdaterStatusBehandlingAvsluttet(SakOgBehandlingClient sakOgBehandlingClient) {
-        this.sakOgBehandlingClient = sakOgBehandlingClient;
+    public OppdaterStatusBehandlingAvsluttet(SakOgBehandlingFasade sakOgBehandlingFasade) {
+        this.sakOgBehandlingFasade = sakOgBehandlingFasade;
         log.info("OppdaterStatusBehandlingAvsluttet initialisert");
     }
 
@@ -67,7 +67,7 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
         builder.medAktørID(aktørID);
         builder.medAnsvarligEnhet(Integer.toString(MELOSYS_ENHET_ID));
 
-        sakOgBehandlingClient.sendBehandlingAvsluttet(builder.build());
+        sakOgBehandlingFasade.sendBehandlingAvsluttet(builder.build());
 
         prosessinstans.setSteg(null);
         log.info("Oppdatert sob-status til avsluttet for prosessinstans {}", prosessinstans.getId());

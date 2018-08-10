@@ -62,6 +62,8 @@ fasitResources:
     resourceType: webserviceendpoint
   - alias: virksomhet:Person_v3
     resourceType: webserviceendpoint
+  - alias: SakOgBehandling
+    resourceType: webserviceendpoint
 # TODO sak.saker eksisterer ikke i T5
 #  - alias: sak.saker
 #    resourceType: restservice
