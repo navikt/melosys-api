@@ -29,6 +29,7 @@
         <module>saksflyt-api</module>
         <module>service</module>
         <module>sikkerhet</module>
+        <module>frontend</module>
     </modules>
 
     <properties>
@@ -473,6 +474,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>2.20</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.1.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
