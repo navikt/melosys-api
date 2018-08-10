@@ -16,6 +16,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
+import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
@@ -41,11 +42,13 @@ public class TpsService implements TpsFasade {
 
     private static final String PERSON_VERSJON = "3.0";
 
-    private AktorConsumer aktorConsumer;
+    private final AktorConsumer aktorConsumer;
 
-    private PersonConsumer personConsumer;
+    private final PersonConsumer personConsumer;
 
-    private DokumentFactory dokumentFactory;
+    private final DokumentFactory dokumentFactory;
+
+    private final AktoerIdCache aktørIdCache;
 
     private final JAXBContext jaxbContext;
 
@@ -54,10 +57,11 @@ public class TpsService implements TpsFasade {
         (sp1, sp2) -> sp2.getEndringstidspunkt().compare(sp1.getEndringstidspunkt());
 
     @Autowired
-    public TpsService(AktorConsumer aktorConsumer, PersonConsumer personConsumer, DokumentFactory dokumentFactory) {
+    public TpsService(AktorConsumer aktorConsumer, PersonConsumer personConsumer, DokumentFactory dokumentFactory, AktoerIdCache aktørIdCache) {
         this.aktorConsumer = aktorConsumer;
         this.personConsumer = personConsumer;
         this.dokumentFactory = dokumentFactory;
+        this.aktørIdCache = aktørIdCache;
 
         try {
             jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
@@ -69,11 +73,22 @@ public class TpsService implements TpsFasade {
 
     @Override
     public String hentAktørIdForIdent(String fnr) throws IkkeFunnetException {
+        if (aktørIdCache.hentAktørIdFraCache(fnr) != null) {
+            return aktørIdCache.hentAktørIdFraCache(fnr);
+        }
+
         HentAktoerIdForIdentRequest request = new HentAktoerIdForIdentRequest();
         request.setIdent(fnr);
 
         try {
             HentAktoerIdForIdentResponse response = aktorConsumer.hentAktørIdForIdent(request);
+
+            // I følge kontrakten kan ident-historikken være tom
+            if (response.getIdentHistorikk() != null && !response.getIdentHistorikk().isEmpty()) {
+                String gjeldendeFnr = response.getIdentHistorikk().get(0).getTpsId();
+                aktørIdCache.leggTilCache(gjeldendeFnr, response.getAktoerId());
+            }
+
             return response.getAktoerId();
         } catch (HentAktoerIdForIdentPersonIkkeFunnet e) { // NOSONAR
             throw new IkkeFunnetException(e);
@@ -82,11 +97,16 @@ public class TpsService implements TpsFasade {
 
     @Override
     public String hentIdentForAktørId(String aktørID) throws IkkeFunnetException {
+        if (aktørIdCache.hentIdentFraCache(aktørID) != null) {
+            return aktørIdCache.hentIdentFraCache(aktørID);
+        }
+
         HentIdentForAktoerIdRequest request = new HentIdentForAktoerIdRequest();
         request.setAktoerId(aktørID);
 
         try {
             HentIdentForAktoerIdResponse response = aktorConsumer.hentIdentForAktoerId(request);
+            aktørIdCache.leggTilCache(response.getIdent(), aktørID);
             return response.getIdent();
         } catch (HentIdentForAktoerIdPersonIkkeFunnet e) { // NOSONAR
             throw new IkkeFunnetException(e);
