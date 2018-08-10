@@ -29,7 +29,7 @@ import static no.nav.melosys.domain.ProsessSteg.HENT_SOB_SAKER;
  * Steget sørger for å hente medlemskapsinfo fra MEDL
  *
  * Transisjoner:
- * HENT_MEDL_OPPL → OPPRETT_OPPGAVE hvis alt ok
+ * HENT_MEDL_OPPL → HENT_SOB_SAKER hvis alt ok
  * HENT_MEDL_OPPL → FEILET_MASKINELT hvis oppslag mot MEDL feilet
  */
 @Component

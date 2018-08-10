@@ -23,6 +23,13 @@ import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessSteg.HENT_SOB_SAKER;
 import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
 
+/**
+ * Steget sørger for å hente saker fra SOB
+ *
+ * Transisjoner:
+ * HENT_SOB_SAKER → OPPRETT_OPPGAVE hvis alt ok
+ * HENT_SOB_SAKER → FEILET_MASKINELT hvis oppslag mot SOB feilet
+ */
 @Component
 public class HentSakOgBehandlingSaker extends AbstraktStegBehandler {
 
