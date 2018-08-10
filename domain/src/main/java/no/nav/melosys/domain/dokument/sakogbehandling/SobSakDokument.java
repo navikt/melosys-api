@@ -11,9 +11,20 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SobSakDokument extends SaksopplysningDokument {
 
+    // Blir utledet av saksopplysningene
+    private boolean eøsBarnetrygd;
+
     private String sakstema; // http://nav.no/kodeverk/Kodeverk/Sakstemaer
 
     private List<Behandlingskjede> behandlingskjede;
+
+    public boolean harEøsBarnetrygd() {
+        return eøsBarnetrygd;
+    }
+
+    public void setEøsBarnetrygd(boolean eøsBarnetrygd) {
+        this.eøsBarnetrygd = eøsBarnetrygd;
+    }
 
     public String getSakstema() {
         return sakstema;
