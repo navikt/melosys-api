@@ -23,7 +23,6 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import static java.lang.Thread.sleep;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -59,10 +58,7 @@ public class TpsServiceTest {
 
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
 
-        aktørIdCache = new AktoerIdCache();
-        ReflectionTestUtils.setField(aktørIdCache, "millisMellomVåkneOpp", 1000);
-        ReflectionTestUtils.setField(aktørIdCache, "millisLevetidICache", 1000);
-
+        aktørIdCache = new AktoerIdCache(1000, 1000, 16);
         service = new TpsService(aktorConsumer, personConsumer, dokumentFactory, aktørIdCache);
     }
 
