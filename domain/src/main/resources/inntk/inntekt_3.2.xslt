@@ -4,11 +4,11 @@
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <xsl:output method="xml" indent="no"/>
 
-    <xsl:template match="/|ns2:hentInntektListeResponse|response">
+    <xsl:template match="/|ns2:hentInntektListeResponse|ns2:hentInntektListeBolkResponse|response">
         <xsl:apply-templates/>
     </xsl:template>
 
-    <xsl:template match="/ns2:hentInntektListeResponse/response/arbeidsInntektIdent">
+    <xsl:template match="arbeidsInntektIdent|arbeidsInntektIdentListe">
         <inntektDokument>
             <arbeidsInntektMaanedListe>
                 <xsl:apply-templates/>

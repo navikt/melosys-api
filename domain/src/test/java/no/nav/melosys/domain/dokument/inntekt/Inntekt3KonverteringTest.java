@@ -24,7 +24,7 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 public class Inntekt3KonverteringTest {
 
     public static final String INNTEKT_3_2_MOCK = "inntekt/99999999992.xml";
-    private static final String INNTEKT_3_2_MOCK_FRILANS = "inntekt/99999999992_mock_frilans.xml";
+    private static final String INNTEKT_3_2_MOCK_BOLK = "inntekt/99999999992_mock_bolk.xml";
     private static final String INNTEKT_3_2_MOCK_TILLEGGSINFO = "inntekt/99999999992_mock_tilleggsinformasjon.xml";
 
     DokumentFactory factory;
@@ -61,7 +61,7 @@ public class Inntekt3KonverteringTest {
 
     @Test
     public void testKonverteringFrilans() throws Exception {
-        final InputStream kilde = getClass().getClassLoader().getResourceAsStream(INNTEKT_3_2_MOCK_FRILANS);
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream(INNTEKT_3_2_MOCK_BOLK);
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
             Saksopplysning saksopplysning = new Saksopplysning();
