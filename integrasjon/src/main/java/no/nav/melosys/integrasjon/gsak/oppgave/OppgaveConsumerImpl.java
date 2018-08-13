@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.gsak.oppgave;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.List;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
@@ -24,6 +23,7 @@ import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSvar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -35,12 +35,10 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(OppgaveConsumerImpl.class);
 
-    private final WebTarget target;
+    private WebTarget target;
 
-    @Value("${OppgaveAPI_v1.url}")
-    private String endpointUrl;
-
-    public OppgaveConsumerImpl() {
+    @Autowired
+    public OppgaveConsumerImpl(@Value("${OppgaveAPI_v1.url}") final String endpointUrl) {
         try {
             SSLContext sslContext = SSLContext.getDefault();
             Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();
@@ -64,19 +62,20 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
 
     @Override
     public List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) {
+        WebTarget lokalTarget = target;
         if (oppgaveSearchRequest.getAktørId() != null) {
-            target.queryParam("aktoerId", oppgaveSearchRequest.getAktørId());
+            lokalTarget = lokalTarget.queryParam("aktoerId", oppgaveSearchRequest.getAktørId());
         }
 
-        target.queryParam("enhetId", oppgaveSearchRequest.getEnhetId())
+        lokalTarget = lokalTarget.queryParam("tildeltEnhetsnr", oppgaveSearchRequest.getTildeltEnhetsnr())
             .queryParam("sorteringsfelt", oppgaveSearchRequest.getSorteringsfelt())
             .queryParam("tilordnetRessurs", oppgaveSearchRequest.getTilordnetRessurs());
 
-        leggTilQueryParamSomArray("team", oppgaveSearchRequest.getTema());
-        leggTilQueryParamSomArray("oppgavetype", oppgaveSearchRequest.getOppgavetype());
-        leggTilQueryParamSomArray("behandlingstype", oppgaveSearchRequest.getBehandlingstype());
+        lokalTarget = leggTilQueryParamSomArray(lokalTarget,"tema", oppgaveSearchRequest.getTema());
+        lokalTarget = leggTilQueryParamSomArray(lokalTarget,"oppgavetype", oppgaveSearchRequest.getOppgavetype());
+        lokalTarget = leggTilQueryParamSomArray(lokalTarget,"behandlingstype", oppgaveSearchRequest.getBehandlingstype());
 
-        OppgaveSvar oppgaveSvar = target.request()
+        OppgaveSvar oppgaveSvar = lokalTarget.request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getCallID())
             .header(HttpHeaders.AUTHORIZATION, getBearer())
@@ -85,8 +84,15 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
     }
 
     // Eksempel: https://oppgave.nais.preprod.local/api/v1/oppgaver?tema=MED&tema=MEL
-    private void leggTilQueryParamSomArray(String key, String[] param) {
-        Arrays.stream(param).forEach(s -> target.queryParam(key, s));
+    private WebTarget leggTilQueryParamSomArray(WebTarget tempTarget, String key, String[] param) {
+        if (param != null) {
+            for (String s : param) {
+                if (s != null) {
+                    tempTarget = tempTarget.queryParam(key, s);
+                }
+            }
+        }
+    return tempTarget;
     }
 
     @Override

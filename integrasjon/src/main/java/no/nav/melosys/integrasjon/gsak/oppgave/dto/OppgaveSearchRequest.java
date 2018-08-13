@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.gsak.oppgave.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class OppgaveSearchRequest {
-    private String enhetId;
+    private String tildeltEnhetsnr;
     @JsonProperty("aktoerId")
     private String aktørId;
     private String[] oppgavetype;
@@ -13,7 +13,7 @@ public class OppgaveSearchRequest {
     private String sorteringsfelt;
 
     private OppgaveSearchRequest(Builder builder) {
-        this.enhetId = builder.enhetId;
+        this.tildeltEnhetsnr = builder.enhetId;
         this.aktørId = builder.aktørId;
         this.oppgavetype = builder.oppgavetype;
         this.behandlingstype = builder.behandlingstype;
@@ -23,23 +23,23 @@ public class OppgaveSearchRequest {
     }
 
     public String[] getOppgavetype() {
-        return oppgavetype.clone();
+        return oppgavetype;
     }
 
     public String[] getBehandlingstype() {
-        return behandlingstype.clone();
+        return behandlingstype;
     }
 
     public String[] getTema() {
-        return tema.clone();
+        return tema;
     }
 
     public String getSorteringsfelt() {
         return sorteringsfelt;
     }
 
-    public String getEnhetId() {
-        return enhetId;
+    public String getTildeltEnhetsnr() {
+        return tildeltEnhetsnr;
     }
 
     public String getAktørId() {
@@ -60,22 +60,17 @@ public class OppgaveSearchRequest {
         private String[] tema;
         private String sorteringsfelt;
 
-        public Builder(String enhetId) {
+        public Builder(String enhetId ) {
             this.enhetId = enhetId;
         }
 
         public Builder medOppgaveTyper(String[] oppgavetyper) {
-            this.oppgavetype = oppgavetyper.clone();
+            this.oppgavetype = oppgavetyper;
             return this;
         }
 
         public Builder medBehandlingsTyper(String[] behandlingstyper) {
-            this.behandlingstype = behandlingstyper.clone();
-            return this;
-        }
-
-        public Builder medSorteringsfelt(String sorteringsfelt) {
-            this.sorteringsfelt = sorteringsfelt;
+            this.behandlingstype = behandlingstyper;
             return this;
         }
 
@@ -90,7 +85,12 @@ public class OppgaveSearchRequest {
         }
 
         public Builder medTema(String[] tema) {
-            this.tema = tema.clone();
+            this.tema = tema;
+            return this;
+        }
+
+        public Builder medSorteringsfelt(String sorteringsfelt) {
+            this.sorteringsfelt = sorteringsfelt;
             return this;
         }
 

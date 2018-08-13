@@ -82,7 +82,6 @@ public interface GsakFasade {
      * @param aktørId AktørId
      * @return Saksnummer fra GSAK
      */
-    //Fixme: Anbefaler å bruke TekniskException isteden av IntegrasjonException
     String opprettSak(String saksnummer, BehandlingType behandlingType, String aktørId) throws TekniskException, IntegrasjonException;
 
     /**

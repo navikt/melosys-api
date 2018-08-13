@@ -4,6 +4,10 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OppgaveDto {
@@ -13,6 +17,8 @@ public class OppgaveDto {
     private String tilordnetRessurs;
     private String tema;
     private String oppgavetype;
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate fristFerdigstillelse;
     private String prioritet;
     private String journalpostId;
@@ -24,6 +30,16 @@ public class OppgaveDto {
     private String behandlingstype;
     private String behandlingstema;
     private String temagruppe;
+    private String tildeltEnhetsnr;
+
+
+    public String getTildeltEnhetsnr() {
+        return tildeltEnhetsnr;
+    }
+
+    public void setTildeltEnhetsnr(String tildeltEnhetsnr) {
+        this.tildeltEnhetsnr = tildeltEnhetsnr;
+    }
 
     public String getStatus() {
         return status;

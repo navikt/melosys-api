@@ -54,21 +54,23 @@ public class OppgaveTjeneste extends RestTjeneste {
         String ident = SubjectHandler.getInstance().getUserID();
 
         try {
-        Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto);
+            Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto);
 
-        if (plukket.isPresent()) {
-            Oppgave oppgave = plukket.get();
-            PlukketOppgaveDto dto = new PlukketOppgaveDto();
-            dto.setOppgaveID(oppgave.getOppgaveId());
-            if (oppgave.erBehandling()) {
-                dto.setOppgavetype(Oppgavetype.BEH_SAK.getKode());
-                dto.setSaksnummer(oppgave.getSaksnummer());
-            } else if (oppgave.erJournalFøring()) {
-                dto.setOppgavetype(Oppgavetype.JFR.getKode());
-            }
-            return Response.ok(dto).build();
-        } else
-            return Response.ok().build();
+            if (plukket.isPresent()) {
+                Oppgave oppgave = plukket.get();
+
+                PlukketOppgaveDto dto = new PlukketOppgaveDto();
+                dto.setOppgaveID(oppgave.getOppgaveId());
+                if (oppgave.erBehandling()) {
+                    dto.setOppgavetype(Oppgavetype.BEH_SAK.getKode());
+                    dto.setSaksnummer(oppgave.getSaksnummer());
+                } else if (oppgave.erJournalFøring()) {
+                    dto.setOppgavetype(Oppgavetype.JFR.getKode());
+                }
+                dto.setJournalpostID(oppgave.getJournalpostId());
+                return Response.ok(dto).build();
+            } else
+                return Response.ok().build();
 
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();

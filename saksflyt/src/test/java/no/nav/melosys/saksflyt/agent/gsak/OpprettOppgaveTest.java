@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent;
+package no.nav.melosys.saksflyt.agent.gsak;
 
 import java.util.Properties;
 
@@ -10,6 +10,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.saksflyt.agent.OpprettOppgave;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,10 +43,11 @@ public class OpprettOppgaveTest {
         p.setType(ProsessType.JFR_NY_SAK);
         Properties properties = new Properties();
         p.addData(properties);
-        
+
         agent.utførSteg(p);
 
         verify(gsakFasade, times(1)).opprettOppgave(any());
+
         assertThat(p.getSteg()).isNull();
     }
 }

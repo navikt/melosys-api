@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -81,13 +82,14 @@ public class GsakService implements GsakFasade {
 
     //FIXME: Mangler implementasjon for sakstyper
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppavetype, Tema tema, List<FagsakType> sakstyper, List<BehandlingType> behandlingstyper) throws TekniskException {
-        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID)).
-            medTema( new String[]{tema.getKode()}).
-            medOppgaveTyper(new String[]{oppavetype.getKode()}).
-            medBehandlingsTyper((String[])behandlingstyper.toArray()).
-            medSorteringsfelt(SORTERINGSFELT).
-            build();
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<FagsakType> sakstyper, List<BehandlingType> behandlingstyper) throws TekniskException {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medTema( new String[]{tema.getKode()})
+            .medOppgaveTyper(new String[]{oppgavetype.getKode()})
+            .medBehandlingsTyper((String[])behandlingstyper.toArray())
+            .medSorteringsfelt(SORTERINGSFELT)
+            .build();
+
         List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
         List<Oppgave> funnet = new ArrayList<>();
 
@@ -118,11 +120,7 @@ public class GsakService implements GsakFasade {
         oppgaveDto.setTema(request.getTema().getKode());
         oppgaveDto.setOppgavetype(request.getOppgavetype().getKode());
         oppgaveDto.setFristFerdigstillelse(request.getFristFerdigstillelse());
-        // FIXME: MELOSYS-1401 : skal implementere disse
-        //oppgaveDto.setBehandlingstema(request.getBehandlingsTema());
-        //oppgaveDto.setBehandlingstype(request.geBehandlingsType);
-        //oppgaveDto.setTemagruppe();
-
+        // FIXME: MELOSYS-1401 : skal implementere Behandlingstema,Behandlingstype,Temagruppe
         return oppgaveConsumer.opprettOppgave(oppgaveDto);
     }
 
@@ -140,6 +138,8 @@ public class GsakService implements GsakFasade {
     public List<Oppgave> finnOppgaveListeMedAnsvarlig(String tilordnetRessurs) throws TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .tilordnetRessurs(tilordnetRessurs)
+            .medOppgaveTyper(getNames(Oppgavetype.class))
+            .medSorteringsfelt(SORTERINGSFELT)
             .build();
 
         List<Oppgave> localDomainObjects = new ArrayList<>();
@@ -163,18 +163,19 @@ public class GsakService implements GsakFasade {
         domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
         domainOppgave.setJournalpostId(oppgave.getJournalpostId());
 
-        if (oppgave.getOppgavetype() != null) {
-            domainOppgave.setOppgavetype(no.nav.melosys.domain.oppgave.Oppgavetype.valueOf(oppgave.getOppgavetype()));
-        }
         domainOppgave.setGsakSaksnummer(oppgave.getSakreferanse());
         domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
 
-        if (oppgave.getTema() != null) {
+        if (oppgave.getTema() != null && Arrays.asList(getNames(Tema.class)).contains(oppgave.getTema())) {
             domainOppgave.setTema(Tema.valueOf(oppgave.getTema()));
+        }  else {
+            log.info("Fikk uventet Tema: {} for OppgaveID: {}", oppgave.getTema(), oppgave.getId());
         }
 
-        if (oppgave.getOppgavetype() != null) {
+        if (oppgave.getOppgavetype() != null && Arrays.asList(getNames(Oppgavetype.class)).contains(oppgave.getOppgavetype())) {
             domainOppgave.setOppgavetype(no.nav.melosys.domain.oppgave.Oppgavetype.valueOf(oppgave.getOppgavetype()));
+        } else {
+            log.info("Fikk uventet oppgaveType: {} for OppgaveID: {}", oppgave.getOppgavetype(), oppgave.getId());
         }
         domainOppgave.setJournalpostId(oppgave.getJournalpostId());
         domainOppgave.setTilordnetRessurs(oppgave.getTilordnetRessurs());
@@ -186,6 +187,8 @@ public class GsakService implements GsakFasade {
     public List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .aktørId(aktørId)
+            .medOppgaveTyper(getNames(Oppgavetype.class))
+            .medSorteringsfelt(SORTERINGSFELT)
             .build();
         List<Oppgave> localDomainObjects = new ArrayList<>();
 
@@ -211,5 +214,9 @@ public class GsakService implements GsakFasade {
     @Override
     public String opprettOppgave(String ident, String oppgavetype, String brukerID, String journalpostID, String saksnummer) {
         return null;
+    }
+
+    private static String[] getNames(Class<? extends Enum<?>> e) {
+        return Arrays.stream(e.getEnumConstants()).map(Enum::name).toArray(String[]::new);
     }
 }
