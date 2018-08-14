@@ -1,9 +1,8 @@
 package no.nav.melosys.integrasjon.inntk.inntekt;
 
-import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeHarIkkeTilgangTilOensketAInntektsfilter;
-import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeSikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeUgyldigInput;
-import no.nav.tjeneste.virksomhet.inntekt.v3.binding.InntektV3;
+import no.nav.tjeneste.virksomhet.inntekt.v3.binding.*;
+import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkRequest;
+import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkResponse;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeRequest;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeResponse;
 
@@ -20,4 +19,8 @@ public class InntektConsumerImpl implements InntektConsumer {
         return port.hentInntektListe(request);
     }
 
+    @Override
+    public HentInntektListeBolkResponse hentInntektListeBolk(HentInntektListeBolkRequest request) throws HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter, HentInntektListeBolkUgyldigInput {
+        return port.hentInntektListeBolk(request);
+    }
 }
