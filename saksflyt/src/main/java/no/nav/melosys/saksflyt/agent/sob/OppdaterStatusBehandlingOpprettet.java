@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.sbeh;
+package no.nav.melosys.saksflyt.agent.sob;
 
 import java.time.LocalDateTime;
 

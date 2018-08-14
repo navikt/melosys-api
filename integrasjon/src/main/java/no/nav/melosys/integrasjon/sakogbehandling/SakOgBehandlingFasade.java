@@ -1,7 +1,5 @@
 package no.nav.melosys.integrasjon.sakogbehandling;
 
-import java.time.LocalDate;
-
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;

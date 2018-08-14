@@ -48,6 +48,7 @@ public class SobSakKonverteringTest {
             SobSakDokument dokument = (SobSakDokument) saksopplysning.getDokument();
 
             assertThat(dokument).isNotNull();
+            assertThat(dokument.harEøsBarnetrygd()).isTrue();
             assertThat(dokument.getSakstema()).isNotEmpty();
             assertThat(dokument.getBehandlingskjede()).isNotEmpty();
 
