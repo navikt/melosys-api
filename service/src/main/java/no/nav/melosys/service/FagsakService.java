@@ -12,6 +12,8 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.api.Binge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +35,23 @@ public class FagsakService {
 
     private final TpsFasade tpsFasade;
 
+    private final ProsessinstansRepository prosessinstansRepository;
+
+    private final Binge binge;
+
     @Autowired
-    public FagsakService(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository, SaksopplysningerService saksopplysningerService, TpsFasade tpsFasade) {
+    public FagsakService(FagsakRepository fagsakRepository,
+                         BehandlingRepository behandlingRepository,
+                         SaksopplysningerService saksopplysningerService,
+                         TpsFasade tpsFasade,
+                         ProsessinstansRepository prosessinstansRepository,
+                         Binge binge) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.saksopplysningerService = saksopplysningerService;
         this.tpsFasade = tpsFasade;
+        this.prosessinstansRepository = prosessinstansRepository;
+        this.binge = binge;
     }
 
     public Fagsak hentFagsak(String saksnummer) {
@@ -106,6 +119,34 @@ public class FagsakService {
         behandling.setSaksopplysninger(saksopplysninger);
 
         return fagsakRepository.save(fagsak);
+    }
+
+    public void oppfriskSaksopplysning(long id) {
+        log.debug("Starter oppfrisking av behandlingsid {}", id);
+
+        Prosessinstans prosessinstans = prosessinstansRepository.findByBehandling_Id(id);
+        LocalDateTime nå = LocalDateTime.now();
+
+        if (prosessinstans != null || prosessinstans.getSteg() != null) {
+            Behandling aktivBehandling = prosessinstans.getBehandling();
+            aktivBehandling.getSaksopplysninger().removeIf(saksopplysning -> saksopplysning.getType() != SaksopplysningType.SØKNAD);
+            prosessinstans.setData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, true);
+            prosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
+            prosessinstans.setEndretDato(nå);
+
+            prosessinstansRepository.save(prosessinstans);
+            binge.leggTil(prosessinstans);
+        } else {
+            Prosessinstans nyprosessinstans = new Prosessinstans();
+            nyprosessinstans.setType(prosessinstans.getType());
+            nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
+            nyprosessinstans.setData(prosessinstans.getData());
+            nyprosessinstans.setData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, true);
+            nyprosessinstans.setRegistrertDato(nå);
+
+            prosessinstansRepository.save(nyprosessinstans);
+            binge.leggTil(nyprosessinstans);
+        }
     }
 
     private String hentNesteSaksnummer() {

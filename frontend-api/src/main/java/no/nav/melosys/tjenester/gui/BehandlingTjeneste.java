@@ -1,11 +1,14 @@
 package no.nav.melosys.tjenester.gui;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
 import org.modelmapper.ModelMapper;
@@ -21,6 +24,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,13 +40,16 @@ import java.util.List;
 @Transactional
 public class BehandlingTjeneste extends RestTjeneste {
 
-    private BehandlingRepository behandlingrepo;
+    private final BehandlingRepository behandlingrepo;
 
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
+
+    private final FagsakService fagsakService;
 
     @Autowired
-    public BehandlingTjeneste(BehandlingRepository behandlingrepo, DokumentFactory dokumentFactory) {
+    public BehandlingTjeneste(BehandlingRepository behandlingrepo, DokumentFactory dokumentFactory, FagsakService fagsakService) {
         this.behandlingrepo = behandlingrepo;
+        this.fagsakService = fagsakService;
 
         this.modelMapper = new ModelMapper();
 
@@ -63,6 +70,19 @@ public class BehandlingTjeneste extends RestTjeneste {
         BehandlingDto behandlingDto = new BehandlingDto();
         modelMapper.map(behandling, behandlingDto);
         return behandlingDto;
+    }
+
+    @GET
+    @Path("oppfrisk/{id}")
+    @ApiOperation(value = "Oppfrisker saksopplysing basert på behandlingsid", notes = ("Oppfrisker saksopplysing basert på behandlingsid."))
+    public Response oppfriskSaksopplysning(@PathParam("id") @ApiParam("behandlingsid.") long id ) {
+        Behandling behandling = behandlingrepo.findOne(id);
+        if (behandling == null){
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        fagsakService.oppfriskSaksopplysning(id);
+        return Response.ok().build();
     }
 
     @GET

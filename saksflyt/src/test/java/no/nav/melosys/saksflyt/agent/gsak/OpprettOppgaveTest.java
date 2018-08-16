@@ -2,10 +2,7 @@ package no.nav.melosys.saksflyt.agent.gsak;
 
 import java.util.Properties;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingType;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -48,6 +45,18 @@ public class OpprettOppgaveTest {
 
         verify(gsakFasade, times(1)).opprettOppgave(any());
 
+        assertThat(p.getSteg()).isNull();
+    }
+
+    @Test
+    public void oppfriskSaksopplysningSteg() throws SikkerhetsbegrensningException, FunksjonellException {
+        Prosessinstans p = new Prosessinstans();
+        p.addData(new Properties());
+        p.setData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, true);
+
+        agent.utførSteg(p);
+
+        verify(gsakFasade, times(0)).opprettOppgave(any());
         assertThat(p.getSteg()).isNull();
     }
 }

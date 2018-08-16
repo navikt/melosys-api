@@ -1,11 +1,9 @@
 package no.nav.melosys.service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 
-import no.nav.melosys.domain.BehandlingType;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakStatus;
-import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
@@ -25,14 +23,19 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class FagsakServiceTest {
 
@@ -43,6 +46,8 @@ public class FagsakServiceTest {
 
     private FagsakService fagsakService;
 
+    private ProsessinstansRepository prosessinstansRepository;
+
     @Before
     public void setUp() {
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
@@ -52,6 +57,9 @@ public class FagsakServiceTest {
         EregFasade ereg = new EregService(new OrganisasjonMock(), dokumentFactory);
         MedlFasade medl = new MedlService(new MedlemskapMock(), dokumentFactory);
         InntektFasade inntekt = new InntektService(new InntektMock(), dokumentFactory);
+        prosessinstansRepository = mock(ProsessinstansRepository.class );
+        Binge binge = mock(Binge.class);
+
 
         saksopplysningerService = new SaksopplysningerService(tps, aareg, ereg, medl, inntekt);
         ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallÅr", 5);
@@ -59,7 +67,7 @@ public class FagsakServiceTest {
 
         fagsakRepo = mock(FagsakRepository.class);
         BehandlingRepository behandlingRepo = mock(BehandlingRepository.class);
-        fagsakService = new FagsakService(fagsakRepo, behandlingRepo, saksopplysningerService, tps);
+        fagsakService = new FagsakService(fagsakRepo, behandlingRepo, saksopplysningerService, tps, prosessinstansRepository, binge);
     }
 
     @Test
@@ -73,6 +81,36 @@ public class FagsakServiceTest {
         fagsakService.lagre(fagsak);
         assertNotNull(fagsak);
         assertNotNull(fagsak.getSaksnummer());
+    }
+
+
+    @Test
+    public void oppfriskSaksopplysning() {
+
+        Behandling behandling = new Behandling();
+
+        HashSet<Saksopplysning> saksopplysnings = new HashSet<>();
+
+        Saksopplysning saksopplysningPerson = new Saksopplysning();
+        saksopplysningPerson.setType(SaksopplysningType.PERSONOPPLYSNING);
+        saksopplysnings.add(saksopplysningPerson);
+
+        Saksopplysning saksopplysningSøknad = new Saksopplysning();
+        saksopplysningPerson.setType(SaksopplysningType.SØKNAD);
+        saksopplysnings.add(saksopplysningSøknad);
+
+        behandling.setSaksopplysninger(saksopplysnings);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        when(prosessinstansRepository.findByBehandling_Id(anyLong())).thenReturn(prosessinstans);
+
+        fagsakService.oppfriskSaksopplysning(anyLong());
+
+        assertThat(prosessinstans.getBehandling().getSaksopplysninger().size()).isEqualTo(1);
+        assertThat(prosessinstans.getBehandling().getSaksopplysninger().stream().findFirst().get().getType()).isEqualTo(SaksopplysningType.SØKNAD);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_PERS_OPPL);
     }
 
     @Test
