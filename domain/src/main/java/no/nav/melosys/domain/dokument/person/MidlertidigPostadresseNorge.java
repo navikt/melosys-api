@@ -10,8 +10,6 @@ import no.nav.melosys.domain.dokument.felles.Land;
 @XmlType(name = "MidlertidigPostadresseNorge")
 public class MidlertidigPostadresseNorge extends MidlertidigPostadresse {
 
-    public Land land;
-
     public String tilleggsadresse;
 
     public String tilleggsadresseType;
