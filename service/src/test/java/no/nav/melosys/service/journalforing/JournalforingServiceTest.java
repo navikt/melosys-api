@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
@@ -48,7 +49,7 @@ public class JournalforingServiceTest {
     }
 
     @Test
-    public void opprettSakOgJournalfør() throws FunksjonellException {
+    public void opprettSakOgJournalfør() throws MelosysException {
         FagsakDto fagsakDto = new FagsakDto();
         PeriodeDto periode = new PeriodeDto();
         periode.setFom(LocalDate.MIN);
@@ -60,7 +61,7 @@ public class JournalforingServiceTest {
     }
 
     @Test(expected = FunksjonellException.class)
-    public void opprettSakOgJournalfør_oppgaveID_mangler() throws FunksjonellException {
+    public void opprettSakOgJournalfør_oppgaveID_mangler() throws MelosysException {
         dto.setOppgaveID(null);
         journalforingService.opprettSakOgJournalfør(dto);
     }

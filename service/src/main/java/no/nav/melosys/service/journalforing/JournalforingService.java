@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
@@ -30,12 +32,12 @@ public class JournalforingService {
         this.prosessinstansRepo = prosessinstansRepo;
     }
 
-    public Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException {
+    public Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
         return joarkFasade.hentJournalpost(journalpostID);
     }
 
     @Transactional
-    public void opprettSakOgJournalfør(JournalforingDto journalforingDto) throws FunksjonellException {
+    public void opprettSakOgJournalfør(JournalforingDto journalforingDto) throws FunksjonellException, TekniskException {
         valider(journalforingDto);
         if (journalforingDto.getFagsak() == null) {
             throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");

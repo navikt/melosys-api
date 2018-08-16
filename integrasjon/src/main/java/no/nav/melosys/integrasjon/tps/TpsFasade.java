@@ -23,5 +23,5 @@ public interface TpsFasade {
      */
     int hentAntallPersonerSomBorPåBostedsadresse(String aktørId) throws IntegrasjonException;
 
-    String hentStatsborgerskapPåGittDato(String ident, LocalDate dato) throws IkkeFunnetException, SikkerhetsbegrensningException;
+    String hentStatsborgerskapPåGittDato(String ident, LocalDate dato) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
 }

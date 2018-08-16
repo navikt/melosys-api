@@ -28,7 +28,7 @@ public class SakApiConsumerImpl implements RestConsumer, SakApiConsumer {
 
     private final WebTarget target;
 
-    public SakApiConsumerImpl(String endpointUrl) {
+    public SakApiConsumerImpl(String endpointUrl) throws IntegrasjonException {
         try {
             SSLContext sslContext = SSLContext.getDefault();
             Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();

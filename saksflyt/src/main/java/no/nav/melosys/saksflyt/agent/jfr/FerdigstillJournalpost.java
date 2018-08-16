@@ -5,6 +5,7 @@ import java.util.Map;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -53,7 +54,7 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
     }
     
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException {
+    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IntegrasjonException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         ProsessType type = prosessinstans.getType();

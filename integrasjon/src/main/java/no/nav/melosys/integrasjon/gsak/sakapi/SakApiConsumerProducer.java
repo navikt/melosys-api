@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.gsak.sakapi;
 
+import no.nav.melosys.exception.IntegrasjonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +16,7 @@ public class SakApiConsumerProducer {
     }
 
     @Bean
-    public SakApiConsumer sakApiConsumer() {
+    public SakApiConsumer sakApiConsumer() throws IntegrasjonException {
         return new SakApiConsumerImpl(config.getEndpointUrl());
     }
 

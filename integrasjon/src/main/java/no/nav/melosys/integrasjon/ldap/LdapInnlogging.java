@@ -14,7 +14,7 @@ public class LdapInnlogging {
     private LdapInnlogging() {
     }
 
-    public static LdapContext lagLdapContext() {
+    public static LdapContext lagLdapContext() throws TekniskException {
         String url = getRequiredProperty("ldap.url");
         String user = getRequiredProperty("ldap.username") + "@" + getRequiredProperty("ldap.domain");
 
@@ -31,7 +31,7 @@ public class LdapInnlogging {
         }
     }
 
-    static String getRequiredProperty(String navn) {
+    static String getRequiredProperty(String navn) throws TekniskException {
         String verdi = System.getProperty(navn);
         if (verdi == null || verdi.isEmpty()) {
             throw new TekniskException("Klarte ikke koble til LDAP da påkrevd system property " + navn + " ikke er satt");

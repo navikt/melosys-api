@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,9 +14,6 @@ import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
@@ -53,7 +51,7 @@ public class OppgaveTjenesteTest {
     }
 
     @Test
-    public void plukkOppgave() throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+    public void plukkOppgave() throws MelosysException {
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
         innData.setOppgavetype("BEH_SAK");

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 
+import no.nav.melosys.exception.IntegrasjonException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +28,7 @@ public class BehandlingstatusClientImplTest {
     private Queue hendelseshåndterer;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IntegrasjonException {
         behandlingstatusClient = new BehandlingstatusClientImpl(jmsTemplate, hendelseshåndterer);
     }
 

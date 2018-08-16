@@ -40,7 +40,7 @@ public class BehandlingstatusClientImpl implements BehandlingstatusClient {
     private Queue hendelseshåndterer;
 
     @Autowired
-    public BehandlingstatusClientImpl(JmsTemplate jmsTemplate, @Qualifier(HENDELSESKØ) Queue hendelseshåndterer) {
+    public BehandlingstatusClientImpl(JmsTemplate jmsTemplate, @Qualifier(HENDELSESKØ) Queue hendelseshåndterer) throws IntegrasjonException {
         try {
             jaxbContext = JAXBContext.newInstance(BehandlingStatus.class);
         } catch (JAXBException e) {

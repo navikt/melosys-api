@@ -22,7 +22,7 @@ import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforhold
 public class ArbeidsforholdMock implements ArbeidsforholdConsumer {
     @SuppressWarnings("resource")
     @Override
-    public FinnArbeidsforholdPrArbeidstakerResponse finnArbeidsforholdPrArbeidstaker(FinnArbeidsforholdPrArbeidstakerRequest request) throws FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput {
+    public FinnArbeidsforholdPrArbeidstakerResponse finnArbeidsforholdPrArbeidstaker(FinnArbeidsforholdPrArbeidstakerRequest request) throws FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput, IntegrasjonException {
         String ident = request.getIdent().getIdent();
 
         List<String> støttet = Arrays.asList("88888888884", "88888888885", "88888888886", "99999999999", "99999999991");
@@ -39,9 +39,8 @@ public class ArbeidsforholdMock implements ArbeidsforholdConsumer {
             response = (no.nav.tjeneste.virksomhet.arbeidsforhold.v3.FinnArbeidsforholdPrArbeidstakerResponse) xmlBean;
             return response.getParameters();
         } catch (JAXBException e) {
-            throw new RuntimeException(e);
+            throw new IntegrasjonException(e);
         }
-
     }
 
     @Override
@@ -49,7 +48,7 @@ public class ArbeidsforholdMock implements ArbeidsforholdConsumer {
         String arbeidsforholdId = String.valueOf(request.getArbeidsforholdId());
 
         if (!arbeidsforholdId.equals("12608035")) {
-            throw new IntegrasjonException("arbeidsforholdsID " + arbeidsforholdId + " er ikke støttet.");
+            throw new RuntimeException("arbeidsforholdsID " + arbeidsforholdId + " er ikke støttet.");
         }
 
         no.nav.tjeneste.virksomhet.arbeidsforhold.v3.HentArbeidsforholdHistorikkResponse response = null;

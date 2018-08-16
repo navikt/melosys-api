@@ -1,7 +1,17 @@
 package no.nav.melosys.exception;
 
-public class FunksjonellException extends Exception {
+public class FunksjonellException extends MelosysException {
+
     public FunksjonellException(String s) {
         super(s);
     }
+
+    public FunksjonellException(Throwable t) {
+        super(t);
+    }
+
+    public FunksjonellException(String message, Throwable throwable) {
+        super(message, throwable);
+    }
+
 }

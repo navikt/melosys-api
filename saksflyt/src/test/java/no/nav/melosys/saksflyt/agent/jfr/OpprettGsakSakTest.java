@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.Properties;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
@@ -13,8 +15,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -34,7 +35,7 @@ public class OpprettGsakSakTest {
     }
 
     @Test
-    public void utfoerSteg() {
+    public void utfoerSteg() throws IntegrasjonException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         Properties properties = new Properties();
         String saksnummer = "MEL-009";

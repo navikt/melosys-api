@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev;
 import java.io.IOException;
 import java.io.StringReader;
 import java.time.LocalDate;
+
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -46,7 +47,7 @@ public class BrevDataService {
     /**
      * Genererer metada til doksys angående dokumentbestillingen.
      */
-    public DokumentbestillingMetadata lagBestillingMetadata(DokumentType dokumentType, Behandling behandling) {
+    public DokumentbestillingMetadata lagBestillingMetadata(DokumentType dokumentType, Behandling behandling) throws TekniskException {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
 
         Fagsak fagsak = behandling.getFagsak();
@@ -74,7 +75,7 @@ public class BrevDataService {
     /**
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
-    public Element lagBrevXML(DokumentType dokumentType, Behandling behandling) {
+    public Element lagBrevXML(DokumentType dokumentType, Behandling behandling) throws TekniskException {
         Element brevXmlElement;
         try {
             FellesType fellesType = mapFellesType(behandling);
@@ -89,14 +90,12 @@ public class BrevDataService {
             brevXmlElement = doc.getDocumentElement();
         } catch (JAXBException | SAXException | ParserConfigurationException | IOException e) {
             throw new TekniskException("XML genereringsfeil " + behandling.getFagsak().getSaksnummer(), e);
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new TekniskException("Annen teknisk feil", e);
         }
         return brevXmlElement;
     }
 
     // FIXME Venter på riktig XSD
-    public FellesType mapFellesType(Behandling behandling) {
+    public FellesType mapFellesType(Behandling behandling) throws TekniskException {
         final FellesType fellesType = new FellesType();
         fellesType.setSpraakkode(SpraakkodeType.fromValue(SpraakkodeType.NB.value()));
         fellesType.setFagsaksnummer(behandling.getFagsak().getSaksnummer());

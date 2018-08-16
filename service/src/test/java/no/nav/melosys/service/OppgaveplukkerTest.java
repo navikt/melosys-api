@@ -1,33 +1,16 @@
 package no.nav.melosys.service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import no.nav.melosys.domain.BehandlingType;
-import no.nav.melosys.domain.FagsakType;
-import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
-import no.nav.melosys.domain.oppgave.PrioritetType;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
-import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppgaveplukkerTest {
@@ -49,7 +32,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_høy_prio() throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+    public void plukkOppgave_høy_prio() throws MelosysException {
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave();
         oppgave1.setOppgaveId("1");
@@ -93,7 +76,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_1_tilbakelagt() throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+    public void plukkOppgave_1_tilbakelagt() throws MelosysException {
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave();
         oppgave1.setOppgaveId("1");
@@ -132,7 +115,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_alle_tilbakelagt() throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+    public void plukkOppgave_alle_tilbakelagt() throws MelosysException{
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave();
         oppgave1.setOppgaveId("1");
@@ -170,7 +153,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void leggTilbakeOppgave() throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+    public void leggTilbakeOppgave() throws IntegrasjonException {
         final String oppgaveId = "42";
         final Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId(oppgaveId);

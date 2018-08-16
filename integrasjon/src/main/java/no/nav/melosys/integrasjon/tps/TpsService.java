@@ -193,7 +193,7 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public String hentStatsborgerskapPåGittDato(String ident, LocalDate dato) throws IkkeFunnetException, SikkerhetsbegrensningException {
+    public String hentStatsborgerskapPåGittDato(String ident, LocalDate dato) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         if (dato == null) {
             throw new IntegrasjonException("Dato kan ikke være null");
         }

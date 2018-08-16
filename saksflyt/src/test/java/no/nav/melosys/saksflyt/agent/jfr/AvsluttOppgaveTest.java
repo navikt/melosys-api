@@ -35,7 +35,7 @@ public class AvsluttOppgaveTest {
     }
 
     @Test
-    public void utfoerSteg() throws SikkerhetsbegrensningException, FunksjonellException, TekniskException, IkkeFunnetException {
+    public void utfoerSteg() throws MelosysException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
         Properties properties = new Properties();

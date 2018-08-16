@@ -2,10 +2,8 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.List;
 import java.util.Optional;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
@@ -22,6 +20,7 @@ import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.tjenester.gui.dto.MockOppgaveDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
 import no.nav.melosys.tjenester.gui.dto.TilbakeleggingDto;
 import org.slf4j.Logger;
@@ -36,7 +35,9 @@ import org.springframework.web.context.WebApplicationContext;
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class OppgaveTjeneste extends RestTjeneste {
+
     private static final Logger log = LoggerFactory.getLogger(OppgaveTjeneste.class);
+
     private final Oppgaveplukker oppgaveplukker;
     private final OppgaveService oppgaveService;
 
@@ -81,7 +82,7 @@ public class OppgaveTjeneste extends RestTjeneste {
         } catch (FunksjonellException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (TekniskException e) {
-            log.error("Uventet teknisk Feil ", e);
+            log.error("Uventet teknisk Feil", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
@@ -94,8 +95,9 @@ public class OppgaveTjeneste extends RestTjeneste {
 
         try {
             oppgaveplukker.leggTilbakeOppgave(tilbakelegging.getOppgaveId(), ident, tilbakelegging.getBegrunnelse());
-            return Response.ok().build();
-
+        } catch (TekniskException e) {
+            log.error("TekniskException", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (IkkeFunnetException e) {
@@ -104,7 +106,7 @@ public class OppgaveTjeneste extends RestTjeneste {
         } catch (FunksjonellException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (TekniskException e) {
-            log.error("Uventet teknisk Feil {} ", e);
+            log.error("Uventet teknisk Feil", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
@@ -118,7 +120,7 @@ public class OppgaveTjeneste extends RestTjeneste {
         try {
             oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
         } catch (TekniskException e) {
-            log.error("Uventet teknisk Feil {} ", e);
+            log.error("Uventet teknisk Feil", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
         return Response.ok(oppgaveDtoListe).build();
@@ -135,7 +137,7 @@ public class OppgaveTjeneste extends RestTjeneste {
             log.error("Finner ingen aktørId for ident {}: ", fnr, e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         } catch (TekniskException e) {
-            log.error("Uventet teknisk Feil {} ", e);
+            log.error("Uventet teknisk Feil", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
         return Response.ok(oppgaver).build();

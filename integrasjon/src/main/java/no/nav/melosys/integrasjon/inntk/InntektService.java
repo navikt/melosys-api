@@ -62,8 +62,8 @@ public class InntektService implements InntektFasade {
 
     // Henter inntekter for én ident fra hentInntektListeBolk for å få opplysninger om frilansforhold (se MELOSYS-1453).
     @Override
-    public Saksopplysning hentInntektListe(String personID, YearMonth fom, YearMonth tom) throws SikkerhetsbegrensningException {
-        HentInntektListeBolkRequest request = new HentInntektListeBolkRequest();
+    public Saksopplysning hentInntektListe(String personID, YearMonth fom, YearMonth tom) throws SikkerhetsbegrensningException, IntegrasjonException {
+        HentInntektListeRequest request = new HentInntektListeRequest();
 
         PersonIdent personIdent = objectFactory.createPersonIdent();
         personIdent.setPersonIdent(personID);

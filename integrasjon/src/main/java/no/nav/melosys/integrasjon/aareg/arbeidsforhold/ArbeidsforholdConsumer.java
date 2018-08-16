@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerUgyldigInput;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkArbeidsforholdIkkeFunnet;
@@ -12,7 +13,7 @@ import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforhold
 public interface ArbeidsforholdConsumer {
 
     FinnArbeidsforholdPrArbeidstakerResponse finnArbeidsforholdPrArbeidstaker(FinnArbeidsforholdPrArbeidstakerRequest request)
-            throws FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput;
+            throws FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput, IntegrasjonException;
 
     HentArbeidsforholdHistorikkResponse hentArbeidsforholdHistorikk(HentArbeidsforholdHistorikkRequest request)
             throws HentArbeidsforholdHistorikkSikkerhetsbegrensning, HentArbeidsforholdHistorikkArbeidsforholdIkkeFunnet;

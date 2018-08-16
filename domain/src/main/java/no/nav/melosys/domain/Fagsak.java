@@ -4,14 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+
+import javax.persistence.*;
 
 import no.nav.melosys.exception.TekniskException;
 
@@ -108,7 +102,7 @@ public class Fagsak {
     /**
      * Returnerer den aktive behandlingen knyttet til saken eller {@code null} hvis den ikke finnes.
      */
-    public Behandling getAktivBehandling() {
+    public Behandling getAktivBehandling() throws TekniskException {
         List<Behandling> behandlinger = getBehandlinger().stream()
             .filter(b -> !b.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
         if (behandlinger.size() > 1) {
@@ -123,7 +117,7 @@ public class Fagsak {
     /**
      * Returnerer brukeren knyttet til saken eller {@code null} hvis den ikke finnes.
      */
-    public Aktoer getBruker() {
+    public Aktoer getBruker() throws TekniskException {
         if (aktører == null || aktører.isEmpty()) {
             return null;
         }

@@ -3,22 +3,16 @@ package no.nav.melosys.service;
 import java.time.LocalDate;
 import java.util.*;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingStatus;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakStatus;
-import no.nav.melosys.domain.FagsakType;
-import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
@@ -30,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -59,7 +54,7 @@ public class OppgaveServiceTest {
     }
 
     @Test
-    public void hentMineSaker() throws TekniskException {
+    public void henteMineSaker() throws MelosysException {
 
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave();

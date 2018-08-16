@@ -3,12 +3,7 @@ package no.nav.melosys.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,12 +13,12 @@ import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
 import no.nav.melosys.domain.dokument.inntekt.Inntekt;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
-import no.nav.melosys.integrasjon.aareg.AaregFasade;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.aareg.AaregFasade;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektFasade;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -66,12 +61,12 @@ public class SaksopplysningerService {
         this.inntektFasade = inntektFasade;
     }
 
-    public ArbeidsforholdDokument hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws SikkerhetsbegrensningException {
+    public ArbeidsforholdDokument hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws SikkerhetsbegrensningException, IntegrasjonException {
         Saksopplysning saksopplysning = aaregFasade.hentArbeidsforholdHistorikk(arbeidsforholdsID);
         return (ArbeidsforholdDokument) saksopplysning.getDokument();
     }
 
-    public Set<Saksopplysning> hentSaksopplysninger(String aktørID) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public Set<Saksopplysning> hentSaksopplysninger(String aktørID) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         String fnr = tpsFasade.hentIdentForAktørId(aktørID);
 
         // FIXME: Når EESSI2-485 er ferdig må IntegrasjonsExceptions kastes videre
@@ -101,17 +96,9 @@ public class SaksopplysningerService {
         return saksopplysninger;
     }
 
-    private Saksopplysning hentPerson(String fnr) throws SikkerhetsbegrensningException {
+    private Saksopplysning hentPerson(String fnr) throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
         // TODO: Informasjonsbehov.FAMILIERELASJONER kommer i runde 2
-        try {
-            return tpsFasade.hentPersonMedAdresse(fnr);
-        } catch (IntegrasjonException integrasjonException) {
-            log.error("Uventet feil ved oppslag mot TPS", integrasjonException);
-            return null;
-        } catch (IkkeFunnetException e) {
-            log.error("Person med id " + fnr + " finnes ikke");
-            return null;
-        }
+        return tpsFasade.hentPersonMedAdresse(fnr);
     }
 
     private Saksopplysning hentMedlemskap(String fnr) throws SikkerhetsbegrensningException {
@@ -125,15 +112,10 @@ public class SaksopplysningerService {
         }
     }
 
-    private Saksopplysning hentArbeidsforhold(String fnr) throws SikkerhetsbegrensningException {
+    private Saksopplysning hentArbeidsforhold(String fnr) throws SikkerhetsbegrensningException, TekniskException {
         final LocalDate tom  = LocalDate.now();
         final LocalDate fom = tom.minusYears(arbeidsforholdhistorikkAntallÅr);
-        try {
-            return aaregFasade.finnArbeidsforholdPrArbeidstaker(fnr, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
-        } catch (IntegrasjonException | TekniskException exception) {
-            log.error("Uventet feil ved oppslag mot AAREG", exception);
-            return null;
-        }
+        return aaregFasade.finnArbeidsforholdPrArbeidstaker(fnr, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
     }
 
     private Saksopplysning hentInntekt(String fnr) throws SikkerhetsbegrensningException {

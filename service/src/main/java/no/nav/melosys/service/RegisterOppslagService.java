@@ -3,9 +3,10 @@ package no.nav.melosys.service;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class RegisterOppslagService {
     /**
      * Henter organisasjonsopplysninger.
      */
-    public OrganisasjonDokument hentOrganisasjon(String orgnummer) throws IkkeFunnetException, SikkerhetsbegrensningException {
+    public OrganisasjonDokument hentOrganisasjon(String orgnummer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(orgnummer);
         return (OrganisasjonDokument) saksopplysning.getDokument();
     }

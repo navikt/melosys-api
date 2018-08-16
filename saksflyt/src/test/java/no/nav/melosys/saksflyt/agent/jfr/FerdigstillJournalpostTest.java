@@ -6,6 +6,7 @@ import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import org.junit.Before;
@@ -32,7 +33,7 @@ public class FerdigstillJournalpostTest {
     }
 
     @Test
-    public void utfoerSteg() throws SikkerhetsbegrensningException {
+    public void utfoerSteg() throws SikkerhetsbegrensningException, IntegrasjonException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
         Properties properties = new Properties();

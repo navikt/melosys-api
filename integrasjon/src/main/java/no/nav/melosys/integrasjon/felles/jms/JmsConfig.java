@@ -73,7 +73,7 @@ public class JmsConfig {
     }
 
     @Bean
-    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
+    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() throws IntegrasjonException {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         try {
             factory.setConnectionFactory(mqQueueConnectionFactory());

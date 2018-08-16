@@ -1,8 +1,8 @@
 package no.nav.melosys.service.oppgave;
 
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -13,6 +13,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -45,7 +46,7 @@ public class OppgaveService {
     }
 
     @Transactional
-    public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException {
+    public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws IntegrasjonException, TekniskException {
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
@@ -60,11 +61,15 @@ public class OppgaveService {
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
-    private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) {
-        return oppgaverFraDomain.stream().map(this::tilOppgaveDto).collect(Collectors.toList());
+    private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) throws TekniskException {
+        List<OppgaveDto> res = new ArrayList<>();
+        for (Oppgave o : oppgaverFraDomain) {
+            res.add(tilOppgaveDto(o));
+        }
+        return res;
     }
 
-    private OppgaveDto tilOppgaveDto(Oppgave oppgave) {
+    private OppgaveDto tilOppgaveDto(Oppgave oppgave) throws TekniskException {
         OppgaveDto dest = new OppgaveDto();
         dest.setOppgaveID(oppgave.getOppgaveId());
         dest.setAktivTil(oppgave.getFristFerdigstillelse());
@@ -126,4 +131,5 @@ public class OppgaveService {
         Periode periode = hentPeriode(soeknadDokument);
         return new PeriodeDto(periode.getFom(), periode.getTom());
     }
+
 }

@@ -9,7 +9,7 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.aareg.AaregService;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
@@ -24,6 +24,7 @@ import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -62,21 +63,22 @@ public class SaksopplysningerServiceTest {
     }
 
     @Test
-    public void hentArbeidsforholdHistorikk() throws SikkerhetsbegrensningException {
+    public void hentArbeidsforholdHistorikk() throws MelosysException {
         final Long arbeidsforholdsID = 12608035L;
         ArbeidsforholdDokument dokument = saksopplysningerService.hentArbeidsforholdHistorikk(arbeidsforholdsID);
         assertFalse(dokument.getArbeidsforhold().isEmpty());
         assertTrue(dokument.getArbeidsforhold().get(0).getArbeidsavtaler().size() > 1);
     }
 
+    @Ignore
     @Test
     public void hentSaksopplysninger() throws Exception {
         // Skru av logging for denne testen siden den skaper mye forventet støy
         final Logger log = (Logger) LoggerFactory.getLogger(SaksopplysningerService.class);
         Level opprinneligLevel = log.getLevel();
-        log.setLevel(Level.OFF);
+        // log.setLevel(Level.OFF);
 
-        final String[] identer = new String[]{"88888888884", "77777777779"};
+        final String[] identer = new String[]{"88888888884", "88888888885"};
 
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn(String.valueOf(returnsFirstArg()));
         when(tpsFasade.hentPersonMedAdresse(anyString())).thenReturn(new Saksopplysning());

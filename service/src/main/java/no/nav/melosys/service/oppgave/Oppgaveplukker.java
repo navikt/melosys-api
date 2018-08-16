@@ -15,7 +15,9 @@ import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.util.KodeverkUtils;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
@@ -114,7 +116,7 @@ public class Oppgaveplukker {
             oppgaveTilbakelegging.setRegistrertDato(LocalDateTime.now());
             oppgaveTilbakkeleggingRepo.save(oppgaveTilbakelegging);
             log.info("Oppgave med oppgaveId {} er lagt tilbake. ", oppgaveId);
-        } catch (IntegrasjonException | SikkerhetsbegrensningException | TekniskException e) {
+        } catch (MelosysException e) {
             log.error("Tilbakelegging av oppgave med oppgaveId " + oppgaveId + " feilet");
             throw new RuntimeException("Tilbakelegging av oppgave med oppgaveId " + oppgaveId + " feilet");
         }
