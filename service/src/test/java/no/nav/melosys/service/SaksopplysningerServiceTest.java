@@ -70,13 +70,13 @@ public class SaksopplysningerServiceTest {
         assertTrue(dokument.getArbeidsforhold().get(0).getArbeidsavtaler().size() > 1);
     }
 
-    @Ignore
+    @Ignore // FIXME: Denne testen må fikses
     @Test
     public void hentSaksopplysninger() throws Exception {
         // Skru av logging for denne testen siden den skaper mye forventet støy
         final Logger log = (Logger) LoggerFactory.getLogger(SaksopplysningerService.class);
         Level opprinneligLevel = log.getLevel();
-        // log.setLevel(Level.OFF);
+        log.setLevel(Level.OFF);
 
         final String[] identer = new String[]{"88888888884", "88888888885"};
 

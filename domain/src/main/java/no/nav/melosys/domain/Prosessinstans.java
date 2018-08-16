@@ -103,7 +103,8 @@ public class Prosessinstans {
         try {
             return dataMapper.readValue(dataString, type);
         } catch (IOException e) {
-            throw new RuntimeException("Feil ved deserialiserigng", e);
+            // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
+            throw new RuntimeException("Feil ved deserialisering", e);
         }
     }
 
@@ -120,7 +121,8 @@ public class Prosessinstans {
             String dataString = dataMapper.writeValueAsString(value);
             setData(key, dataString);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Feil ved serialiserigng", e);
+            // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
+            throw new RuntimeException("Feil ved serialisering", e);
         }
     }
 
@@ -186,6 +188,7 @@ public class Prosessinstans {
     
     public void leggTilHendelse(ProsessinstansHendelse piHend) {
         if (!this.equals(piHend.getProsessinstans())) {
+            // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
             throw new RuntimeException("Forsøk på å legge til ProsessinstansHendelse på feil Prosessinstans");
         }
         if (hendelser == null) {
@@ -214,6 +217,7 @@ public class Prosessinstans {
         }
         Prosessinstans that = (Prosessinstans) o;
         if (this.id == 0) {
+            // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
             throw new RuntimeException("Prosessinstans.equals ble kalt før prosessinstans har fått saksnummer");
         }
         return this.id == that.id;

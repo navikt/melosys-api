@@ -120,8 +120,8 @@ public class OppgaveTjeneste extends RestTjeneste {
         try {
             oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
         } catch (TekniskException e) {
-            log.error("Uventet teknisk Feil", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+            log.error("TekniskException", e);
+            throw new InternalServerErrorException("Intern feil");
         }
         return Response.ok(oppgaveDtoListe).build();
     }
@@ -137,8 +137,8 @@ public class OppgaveTjeneste extends RestTjeneste {
             log.error("Finner ingen aktørId for ident {}: ", fnr, e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         } catch (TekniskException e) {
-            log.error("Uventet teknisk Feil", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+            log.error("TekniskException", e);
+            throw new InternalServerErrorException("Intern feil");
         }
         return Response.ok(oppgaver).build();
     }

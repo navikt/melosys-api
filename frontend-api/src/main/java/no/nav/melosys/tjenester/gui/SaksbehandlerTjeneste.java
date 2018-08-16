@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.Path;
@@ -40,7 +41,8 @@ public class SaksbehandlerTjeneste extends RestTjeneste {
             Tilgangskontroll.sjekk(ldapBruker);
 
         } catch (SikkerhetsbegrensningException e) {
-            log.warn("Det oppstod en feil under henting av LDAP-profil for bruker {}", ident, e);
+            log.error("Det oppstod en feil under henting av LDAP-profil for bruker {}", ident, e);
+            throw new ForbiddenException();
         } catch (TekniskException e) {
             log.error("TekniskException", e);
             throw new InternalServerErrorException("Intern feil");
