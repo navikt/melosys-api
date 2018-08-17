@@ -73,12 +73,12 @@ public class OppgaveTjeneste extends RestTjeneste {
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (IkkeFunnetException e) {
-            log.error("Ingen oppgaver funnet for ident {}. Feilmelding: {}", ident, e.getMessage());
+            log.error("Ingen oppgaver funnet for ident {}. Feilmelding: ", ident, e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         } catch (FunksjonellException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (TekniskException e) {
-            log.error("Uventet teknisk Feil {} ", e.getMessage());
+            log.error("Uventet teknisk Feil ", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
         return Response.ok(dto).build();
@@ -97,12 +97,12 @@ public class OppgaveTjeneste extends RestTjeneste {
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (IkkeFunnetException e) {
-            log.error("Ingen oppgaver funnet for ident {}. Feilmelding: {}", ident, e.getMessage());
+            log.error("Ingen oppgaver funnet for ident {}. Feilmelding: ", ident, e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         } catch (FunksjonellException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (TekniskException e) {
-            log.error("Uventet teknisk Feil {} ", e.getMessage());
+            log.error("Uventet teknisk Feil {} ", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
@@ -116,7 +116,7 @@ public class OppgaveTjeneste extends RestTjeneste {
         try {
             oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
         } catch (TekniskException e) {
-            log.error("Uventet teknisk Feil {} ", e.getMessage());
+            log.error("Uventet teknisk Feil {} ", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
         return Response.ok(oppgaveDtoListe).build();
@@ -141,10 +141,10 @@ public class OppgaveTjeneste extends RestTjeneste {
         try {
             oppgaver = oppgaveService.hentOppgaverMedBruker(fnr);
         } catch (IkkeFunnetException e) {
-            log.error("Finner ingen aktørId for ident {}: {}", fnr, e.getMessage(), e);
+            log.error("Finner ingen aktørId for ident {}: ", fnr, e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         } catch (TekniskException e) {
-            log.error("Uventet teknisk Feil {} ", e.getMessage());
+            log.error("Uventet teknisk Feil {} ", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
         return Response.ok(oppgaver).build();
