@@ -52,6 +52,7 @@ public class OppgaveTjeneste extends RestTjeneste {
     @ApiOperation(value = "Plukker fra GSAK neste oppgave som saksbehandler skal arbeide med.")
     public Response plukkOppgave(PlukkOppgaveInnDto plukkDto) {
         String ident = SubjectHandler.getInstance().getUserID();
+        PlukketOppgaveDto dto = new PlukketOppgaveDto();
 
         try {
             Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto);
@@ -59,7 +60,6 @@ public class OppgaveTjeneste extends RestTjeneste {
             if (plukket.isPresent()) {
                 Oppgave oppgave = plukket.get();
 
-                PlukketOppgaveDto dto = new PlukketOppgaveDto();
                 dto.setOppgaveID(oppgave.getOppgaveId());
                 if (oppgave.erBehandling()) {
                     dto.setOppgavetype(Oppgavetype.BEH_SAK.getKode());
@@ -68,20 +68,20 @@ public class OppgaveTjeneste extends RestTjeneste {
                     dto.setOppgavetype(Oppgavetype.JFR.getKode());
                 }
                 dto.setJournalpostID(oppgave.getJournalpostId());
-                return Response.ok(dto).build();
-            } else
-                return Response.ok().build();
+            }
 
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (IkkeFunnetException e) {
-            log.error(String.format("Ingen oppgaver funnet for ident %s. Feilmelding: %s", ident, e.getMessage()));
+            log.error("Ingen oppgaver funnet for ident {}. Feilmelding: {}", ident, e.getMessage());
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         } catch (FunksjonellException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (TekniskException e) {
+            log.error("Uventet teknisk Feil {} ", e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
+        return Response.ok(dto).build();
     }
 
     @POST
@@ -97,11 +97,12 @@ public class OppgaveTjeneste extends RestTjeneste {
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (IkkeFunnetException e) {
-            log.error(String.format("Ingen oppgaver funnet for ident %s. Feilmelding: %s", ident, e.getMessage()));
+            log.error("Ingen oppgaver funnet for ident {}. Feilmelding: {}", ident, e.getMessage());
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         } catch (FunksjonellException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (TekniskException e) {
+            log.error("Uventet teknisk Feil {} ", e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
@@ -111,12 +112,14 @@ public class OppgaveTjeneste extends RestTjeneste {
     @ApiOperation(value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.")
     public Response mineOppgaver() {
         String ident = SubjectHandler.getInstance().getUserID();
+        List<OppgaveDto> oppgaveDtoListe;
         try {
-            List<OppgaveDto> oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
-            return oppgaveDtoListe.size() > 0 ? Response.ok(oppgaveDtoListe).build() : Response.ok().build();
+            oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
         } catch (TekniskException e) {
+            log.error("Uventet teknisk Feil {} ", e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
+        return Response.ok(oppgaveDtoListe).build();
     }
 
     // FIXME Dette er for å hjelpe testing av oppgavehåndtering.
@@ -134,14 +137,16 @@ public class OppgaveTjeneste extends RestTjeneste {
     @Path("/sok")
     @ApiOperation(value = "Henter alle oppgaver knyttet til en gitt bruker.")
     public Response hentOppgaver(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
+        List<OppgaveDto> oppgaver;
         try {
-            List<OppgaveDto> oppgaver = oppgaveService.hentOppgaverMedBruker(fnr);
-            return oppgaver.size() > 0 ? Response.ok(oppgaver).build() : Response.ok().build();
+            oppgaver = oppgaveService.hentOppgaverMedBruker(fnr);
         } catch (IkkeFunnetException e) {
             log.error("Finner ingen aktørId for ident {}: {}", fnr, e.getMessage(), e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         } catch (TekniskException e) {
+            log.error("Uventet teknisk Feil {} ", e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
+        return Response.ok(oppgaver).build();
     }
 }

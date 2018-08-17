@@ -30,9 +30,9 @@ public class GsakService implements GsakFasade {
 
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
 
-    private final String SORTERINGSFELT = "FRIST";
+    private static final String SORTERINGSFELT = "FRIST";
 
-    private final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
+    private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
 
     private final SakApiConsumer sakApiConsumer;
 

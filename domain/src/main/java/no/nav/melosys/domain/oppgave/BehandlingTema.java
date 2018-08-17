@@ -1,5 +1,5 @@
 package no.nav.melosys.domain.oppgave;
 
-public enum Behandlingtema {
+public enum BehandlingTema {
     // FIXME: MELOSYS-1401 : skal implementers
 }

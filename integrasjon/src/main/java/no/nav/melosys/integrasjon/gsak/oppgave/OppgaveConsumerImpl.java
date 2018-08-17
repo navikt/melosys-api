@@ -128,7 +128,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
             throw new TekniskException("Ingen response fra GSAK Oppgave REST Tjeneste");
         }
         FeilResponseDto feilResponseDto = response.readEntity(FeilResponseDto.class);
-        log.error("Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());
+        log.error("Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());
         if (response.getStatus() == 401 || response.getStatus() == 403) {
             throw new SikkerhetsbegrensningException(feilResponseDto.getFeilmelding());
         } else if (Response.Status.Family.familyOf(response.getStatus()) == CLIENT_ERROR) {
