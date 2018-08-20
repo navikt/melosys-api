@@ -9,7 +9,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerUgyldigInput;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkArbeidsforholdIkkeFunnet;
@@ -22,12 +21,12 @@ import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforhold
 public class ArbeidsforholdMock implements ArbeidsforholdConsumer {
     @SuppressWarnings("resource")
     @Override
-    public FinnArbeidsforholdPrArbeidstakerResponse finnArbeidsforholdPrArbeidstaker(FinnArbeidsforholdPrArbeidstakerRequest request) throws FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput, IntegrasjonException {
+    public FinnArbeidsforholdPrArbeidstakerResponse finnArbeidsforholdPrArbeidstaker(FinnArbeidsforholdPrArbeidstakerRequest request) throws FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput {
         String ident = request.getIdent().getIdent();
 
         List<String> støttet = Arrays.asList("88888888884", "88888888885", "88888888886", "99999999999", "99999999991");
         if (!støttet.contains(ident)) {
-            throw new IntegrasjonException("ident " + ident + " er ikke støttet.");
+            throw new RuntimeException("ident " + ident + " er ikke støttet.");
         }
 
         no.nav.tjeneste.virksomhet.arbeidsforhold.v3.FinnArbeidsforholdPrArbeidstakerResponse response = null;
@@ -39,7 +38,7 @@ public class ArbeidsforholdMock implements ArbeidsforholdConsumer {
             response = (no.nav.tjeneste.virksomhet.arbeidsforhold.v3.FinnArbeidsforholdPrArbeidstakerResponse) xmlBean;
             return response.getParameters();
         } catch (JAXBException e) {
-            throw new IntegrasjonException(e);
+            throw new RuntimeException(e);
         }
     }
 

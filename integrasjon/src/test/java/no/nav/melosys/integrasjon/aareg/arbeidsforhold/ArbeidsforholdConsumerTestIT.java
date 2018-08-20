@@ -4,7 +4,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.test.Gen3WsProxyServiceITBase;
 import no.nav.melosys.integrasjon.test.TpsTestData;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning;
@@ -54,7 +53,7 @@ public class ArbeidsforholdConsumerTestIT extends Gen3WsProxyServiceITBase {
         assertThat(response.getArbeidsforhold().size()).isGreaterThan(0);
     }
 
-    public void xml() throws JAXBException, FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput, IntegrasjonException {
+    public void xml() throws JAXBException, FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning, FinnArbeidsforholdPrArbeidstakerUgyldigInput {
         JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.arbeidsforhold.v3.FinnArbeidsforholdPrArbeidstakerResponse.class);
         Marshaller marshaller = jaxbContext.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
