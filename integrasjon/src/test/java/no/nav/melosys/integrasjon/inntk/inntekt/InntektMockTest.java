@@ -15,19 +15,19 @@ import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Formaal;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.ObjectFactory;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.PersonIdent;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Uttrekksperiode;
-import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeRequest;
-import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeResponse;
+import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkRequest;
+import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkResponse;
 
 public class InntektMockTest {
     @Test
     public void hentInntektListe() throws Exception {
         InntektMock mock = new InntektMock();
-        HentInntektListeRequest request = new HentInntektListeRequest();
+        HentInntektListeBolkRequest request = new HentInntektListeBolkRequest();
 
         ObjectFactory objectFactory = new ObjectFactory();
         PersonIdent personIdent = objectFactory.createPersonIdent();
         personIdent.setPersonIdent("99999999992");
-        request.setIdent(personIdent);
+        request.getIdentListe().add(personIdent);
 
         Ainntektsfilter ainntektsfilter = objectFactory.createAinntektsfilter();
         ainntektsfilter.setValue(FILTER);
@@ -46,8 +46,8 @@ public class InntektMockTest {
         formaal.setKodeverksRef(FORMAALSKODE_URI);
         request.setFormaal(formaal);
 
-        HentInntektListeResponse response = mock.hentInntektListe(request);
-        assertThat(response.getArbeidsInntektIdent().getArbeidsInntektMaaned().size()).isGreaterThan(0);
+        HentInntektListeBolkResponse response = mock.hentInntektListeBolk(request);
+        assertThat(response.getArbeidsInntektIdentListe().get(0).getArbeidsInntektMaaned().size()).isGreaterThan(0);
     }
 
 }

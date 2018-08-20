@@ -14,14 +14,14 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import no.nav.melosys.integrasjon.test.Gen3WsProxyServiceITBase;
-import no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListe;
+import no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolk;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Ainntektsfilter;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Formaal;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.ObjectFactory;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.PersonIdent;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Uttrekksperiode;
-import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeRequest;
-import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeResponse;
+import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkResponse;
+import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkRequest;
 
 
 @RunWith(SpringRunner.class)
@@ -50,11 +50,11 @@ public class InntektConsumerTestIT extends Gen3WsProxyServiceITBase {
 
     @Test
     public void hentInntektsopplysninger() throws Exception {
-        HentInntektListeRequest request = new HentInntektListeRequest();
+        HentInntektListeBolkRequest request = new HentInntektListeBolkRequest();
 
         PersonIdent personIdent = objectFactory.createPersonIdent();
         personIdent.setPersonIdent(FNR);
-        request.setIdent(personIdent);
+        request.getIdentListe().add(personIdent);
 
         Ainntektsfilter ainntektsfilter = objectFactory.createAinntektsfilter();
         ainntektsfilter.setValue(FILTER);
@@ -73,16 +73,16 @@ public class InntektConsumerTestIT extends Gen3WsProxyServiceITBase {
         formaal.setKodeverksRef(FORMAALSKODE_URI);
         request.setFormaal(formaal);
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListe.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolk.class);
         Marshaller marshaller = jaxbContext.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        HentInntektListe hentInntektListe = new HentInntektListe();
+        HentInntektListeBolk hentInntektListe = new HentInntektListeBolk();
         hentInntektListe.setRequest(request);
         marshaller.marshal(hentInntektListe, System.out);
 
-        HentInntektListeResponse response = consumer.hentInntektListe(request);
+        HentInntektListeBolkResponse response = consumer.hentInntektListeBolk(request);
 
-        assertThat(response.getArbeidsInntektIdent().getArbeidsInntektMaaned().size()).isGreaterThan(0);
+        assertThat(response.getArbeidsInntektIdentListe().get(0).getArbeidsInntektMaaned().size()).isGreaterThan(0);
     }
 
 
