@@ -1,12 +1,19 @@
 package no.nav.melosys.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.aareg.AaregService;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
@@ -21,6 +28,7 @@ import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
@@ -33,6 +41,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,31 +51,34 @@ public class FagsakServiceTest {
     @Mock
     private FagsakRepository fagsakRepo;
 
-    private SaksopplysningerService saksopplysningerService;
-
     private FagsakService fagsakService;
 
     private ProsessinstansRepository prosessinstansRepository;
 
+    private BehandlingRepository behandlingRepo;
+
+    private AktoerIdCache aktoerIdCache;
+
+    private Binge binge;
+
     @Before
     public void setUp() {
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
-
-        TpsFasade tps = new TpsService(null, null, dokumentFactory, null);
+        aktoerIdCache = mock(AktoerIdCache.class);
+        TpsFasade tps = new TpsService(null, null, dokumentFactory, aktoerIdCache);
         AaregFasade aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
         EregFasade ereg = new EregService(new OrganisasjonMock(), dokumentFactory);
         MedlFasade medl = new MedlService(new MedlemskapMock(), dokumentFactory);
         InntektFasade inntekt = new InntektService(new InntektMock(), dokumentFactory);
         prosessinstansRepository = mock(ProsessinstansRepository.class );
-        Binge binge = mock(Binge.class);
 
-
-        saksopplysningerService = new SaksopplysningerService(tps, aareg, ereg, medl, inntekt);
+        SaksopplysningerService saksopplysningerService = new SaksopplysningerService(tps, aareg, ereg, medl, inntekt);
         ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallÅr", 5);
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 12);
 
         fagsakRepo = mock(FagsakRepository.class);
-        BehandlingRepository behandlingRepo = mock(BehandlingRepository.class);
+        behandlingRepo = mock(BehandlingRepository.class);
+        binge = new BingeTestImpl();
         fagsakService = new FagsakService(fagsakRepo, behandlingRepo, saksopplysningerService, tps, prosessinstansRepository, binge);
     }
 
@@ -85,9 +97,17 @@ public class FagsakServiceTest {
 
 
     @Test
-    public void oppfriskSaksopplysning() {
+    public void oppfriskSaksopplysning() throws IkkeFunnetException {
 
         Behandling behandling = new Behandling();
+        Fagsak fagsak = new Fagsak();
+        Aktoer aktoer = new Aktoer();
+        aktoer.setAktørId("123");
+        aktoer.setRolle(RolleType.BRUKER);
+        HashSet<Aktoer> aktoers = new HashSet<>();
+        aktoers.add(aktoer);
+        fagsak.setAktører(aktoers);
+        behandling.setFagsak(fagsak);
 
         HashSet<Saksopplysning> saksopplysnings = new HashSet<>();
 
@@ -95,8 +115,17 @@ public class FagsakServiceTest {
         saksopplysningPerson.setType(SaksopplysningType.PERSONOPPLYSNING);
         saksopplysnings.add(saksopplysningPerson);
 
+        SoeknadDokument soeknadDokument = new SoeknadDokument();
+
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+        arbeidUtland.arbeidsland = new ArrayList<>();
+        arbeidUtland.arbeidsland.add(new Land(Land.NORGE));
+        arbeidUtland.arbeidsperiode = new Periode(LocalDate.now(),LocalDate.of(2018,9,18));
+        soeknadDokument.arbeidUtland = arbeidUtland;
+
         Saksopplysning saksopplysningSøknad = new Saksopplysning();
-        saksopplysningPerson.setType(SaksopplysningType.SØKNAD);
+        saksopplysningSøknad.setType(SaksopplysningType.SØKNAD);
+        saksopplysningSøknad.setDokument(soeknadDokument);
         saksopplysnings.add(saksopplysningSøknad);
 
         behandling.setSaksopplysninger(saksopplysnings);
@@ -104,13 +133,18 @@ public class FagsakServiceTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        when(prosessinstansRepository.findByBehandling_Id(anyLong())).thenReturn(prosessinstans);
+        ArrayList<Prosessinstans> prosessinstansArrayList = new ArrayList<>();
+        prosessinstansArrayList.add(prosessinstans);
+
+         when(prosessinstansRepository.findByBehandling_Id(anyLong())).thenReturn(prosessinstansArrayList);
+         when(behandlingRepo.findOne(anyLong())).thenReturn(behandling);
+         when(aktoerIdCache.hentIdentFraCache(any())).thenReturn("123456");
 
         fagsakService.oppfriskSaksopplysning(anyLong());
 
         assertThat(prosessinstans.getBehandling().getSaksopplysninger().size()).isEqualTo(1);
         assertThat(prosessinstans.getBehandling().getSaksopplysninger().stream().findFirst().get().getType()).isEqualTo(SaksopplysningType.SØKNAD);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_PERS_OPPL);
+        assertThat(binge.hentProsessinstans(prosessinstans.getId()).getSteg()).isEqualTo(ProsessSteg.JFR_HENT_PERS_OPPL);
     }
 
     @Test

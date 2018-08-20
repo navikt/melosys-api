@@ -1,14 +1,14 @@
 package no.nav.melosys.service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
@@ -19,6 +19,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
+import static no.nav.melosys.domain.util.SoeknadUtils.hentLand;
+import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 
 @Service
 public class FagsakService {
@@ -121,31 +125,44 @@ public class FagsakService {
         return fagsakRepository.save(fagsak);
     }
 
-    public void oppfriskSaksopplysning(long id) {
-        log.debug("Starter oppfrisking av behandlingsid {}", id);
+    public void oppfriskSaksopplysning(long behandlingsid) throws IkkeFunnetException, TekniskException {
+        log.debug("Starter oppfrisking av behandlingsid {}", behandlingsid);
 
-        Prosessinstans prosessinstans = prosessinstansRepository.findByBehandling_Id(id);
+        List<Prosessinstans> prosessinstans = prosessinstansRepository.findByBehandling_Id(behandlingsid);
+        Behandling behandling = behandlingRepository.findOne(behandlingsid);
+        String aktør_Id = behandling.getFagsak().getBruker().getAktørId();
+
+        SoeknadDokument soeknadDokument;
+        Optional<SaksopplysningDokument> opt = hentDokument(behandling, SaksopplysningType.SØKNAD);
+        if (opt.isPresent()) {
+            soeknadDokument = (SoeknadDokument) opt.get();
+        } else
+            throw new TekniskException("Uventet feilsituasjon har oppstått");
+
         LocalDateTime nå = LocalDateTime.now();
 
-        if (prosessinstans != null || prosessinstans.getSteg() != null) {
-            Behandling aktivBehandling = prosessinstans.getBehandling();
-            aktivBehandling.getSaksopplysninger().removeIf(saksopplysning -> saksopplysning.getType() != SaksopplysningType.SØKNAD);
-            prosessinstans.setData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, true);
-            prosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
-            prosessinstans.setEndretDato(nå);
+        Optional<Prosessinstans> aktivProsessinstans = prosessinstans.stream().filter(prosessinstans1 -> prosessinstans1.getSteg() != null).findAny();
 
-            prosessinstansRepository.save(prosessinstans);
-            binge.leggTil(prosessinstans);
-        } else {
+        if (!aktivProsessinstans.isPresent()) {
+            behandling.getSaksopplysninger().removeIf(saksopplysning -> saksopplysning.getType() != SaksopplysningType.SØKNAD);
+
             Prosessinstans nyprosessinstans = new Prosessinstans();
-            nyprosessinstans.setType(prosessinstans.getType());
+            nyprosessinstans.setBehandling(behandling);
+            nyprosessinstans.setType(ProsessType.SØKNAD_A1);
+            nyprosessinstans.setData(ProsessDataKey.AKTØR_ID, aktør_Id);
+            nyprosessinstans.setData(ProsessDataKey.BRUKER_ID, tpsFasade.hentIdentForAktørId(aktør_Id));
+
+            nyprosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, hentPeriode(soeknadDokument));
+            nyprosessinstans.setData(ProsessDataKey.LAND, hentLand(soeknadDokument));
+
             nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
-            nyprosessinstans.setData(prosessinstans.getData());
             nyprosessinstans.setData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, true);
             nyprosessinstans.setRegistrertDato(nå);
 
             prosessinstansRepository.save(nyprosessinstans);
             binge.leggTil(nyprosessinstans);
+        } else {
+            log.info("Aktiv prosessinstans finnes allerede. Ikke mulig å oppfriske saksopplysning.");
         }
     }
 
