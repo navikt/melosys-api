@@ -8,8 +8,8 @@ public enum SaksopplysningType implements KodeverkTabell<SaksopplysningType> {
     INNTEKT("INNTK", "Inntekt"),
     MEDLEMSKAP("MEDL", "Medlemskap"),
     ORGANISASJON("ORG", "Arbeidsgiver"),
-    PERSONOPPLYSNING("PERSOPL", "Personopplysning"),
     PERSONHISTORIKK("PERSHIST", "Personhistorikk"),
+    PERSONOPPLYSNING("PERSOPL", "Personopplysning"),
     SOB_SAK("SOB_SAK", "Sak og behandling-sak"),
     SØKNAD("SØKNAD", "Søknad");
 
