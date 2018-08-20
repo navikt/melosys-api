@@ -24,10 +24,9 @@
 
         <dependency>
             <groupId>no.nav.melosys</groupId>
-            <artifactId>frontend</artifactId>
-            <version>0.54.0-SNAPSHOT</version>
+            <artifactId>melosys-web</artifactId>
             <type>zip</type>
-            <scope>provided</scope>
+            <scope>runtime</scope>
         </dependency>
 
     </dependencies>
@@ -45,7 +44,7 @@
                         </goals>
                         <configuration>
                             <includeGroupIds>no.nav.melosys</includeGroupIds>
-                            <includeArtifactIds>frontend</includeArtifactIds>
+                            <includeArtifactIds>melosys-web</includeArtifactIds>
                             <outputDirectory>${project.basedir}/src/main/resources/public</outputDirectory>
                         </configuration>
                     </execution>
@@ -59,7 +58,7 @@
                     <excludes>
                         <exclude>
                             <groupId>no.nav.melosys</groupId>
-                            <artifactId>frontend</artifactId>
+                            <artifactId>melosys-web</artifactId>
                         </exclude>
                     </excludes>
                     <finalName>melosys</finalName>
