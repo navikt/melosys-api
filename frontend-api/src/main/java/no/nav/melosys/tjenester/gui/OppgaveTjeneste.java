@@ -52,13 +52,13 @@ public class OppgaveTjeneste extends RestTjeneste {
     @ApiOperation(value = "Plukker fra GSAK neste oppgave som saksbehandler skal arbeide med.")
     public Response plukkOppgave(PlukkOppgaveInnDto plukkDto) {
         String ident = SubjectHandler.getInstance().getUserID();
-        PlukketOppgaveDto dto = new PlukketOppgaveDto();
 
         try {
             Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto);
 
             if (plukket.isPresent()) {
                 Oppgave oppgave = plukket.get();
+                PlukketOppgaveDto dto = new PlukketOppgaveDto();
 
                 dto.setOppgaveID(oppgave.getOppgaveId());
                 if (oppgave.erBehandling()) {
@@ -68,6 +68,10 @@ public class OppgaveTjeneste extends RestTjeneste {
                     dto.setOppgavetype(Oppgavetype.JFR.getKode());
                 }
                 dto.setJournalpostID(oppgave.getJournalpostId());
+
+                return Response.ok(dto).build();
+            } else {
+                return Response.ok().build();
             }
 
         } catch (SikkerhetsbegrensningException e) {
@@ -81,7 +85,6 @@ public class OppgaveTjeneste extends RestTjeneste {
             log.error("Uventet teknisk Feil ", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
-        return Response.ok(dto).build();
     }
 
     @POST

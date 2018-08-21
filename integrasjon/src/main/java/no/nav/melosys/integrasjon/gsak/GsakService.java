@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,6 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.util.KodeverkUtils.erGyldigKode;
+import static no.nav.melosys.domain.util.KodeverkUtils.hentAlleKoder;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
@@ -95,7 +96,7 @@ public class GsakService implements GsakFasade {
 
         oppgaver.stream()
             .filter(Objects::isNull)
-            .map(this::oppgaveMappingDtoTilDomain)
+            .map(GsakService::oppgaveMappingDtoTilDomain)
             .forEach(funnet::add);
         return funnet;
     }
@@ -138,7 +139,7 @@ public class GsakService implements GsakFasade {
     public List<Oppgave> finnOppgaveListeMedAnsvarlig(String tilordnetRessurs) throws TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .tilordnetRessurs(tilordnetRessurs)
-            .medOppgaveTyper(getNames(Oppgavetype.class))
+            .medOppgaveTyper(hentAlleKoder(Oppgavetype.class))
             .medSorteringsfelt(SORTERINGSFELT)
             .build();
 
@@ -147,13 +148,13 @@ public class GsakService implements GsakFasade {
 
         finnOppgaveListeResponse.stream()
             .filter(Objects::nonNull)
-            .map(this::oppgaveMappingDtoTilDomain)
+            .map(GsakService::oppgaveMappingDtoTilDomain)
             .forEach(localDomainObjects::add);
 
         return localDomainObjects;
     }
 
-    private Oppgave oppgaveMappingDtoTilDomain(OppgaveDto oppgave) {
+    private static Oppgave oppgaveMappingDtoTilDomain(OppgaveDto oppgave) {
         Oppgave domainOppgave = new Oppgave();
         domainOppgave.setOppgaveId(oppgave.getId());
         domainOppgave.setVersjon(oppgave.getVersjon());
@@ -166,16 +167,16 @@ public class GsakService implements GsakFasade {
         domainOppgave.setGsakSaksnummer(oppgave.getSakreferanse());
         domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
 
-        if (oppgave.getTema() != null && Arrays.asList(getNames(Tema.class)).contains(oppgave.getTema())) {
+        if (oppgave.getTema() != null && erGyldigKode(Tema.class, oppgave.getTema())) {
             domainOppgave.setTema(Tema.valueOf(oppgave.getTema()));
         }  else {
-            log.info("Fikk uventet Tema: {} for OppgaveID: {}", oppgave.getTema(), oppgave.getId());
+            log.error("Fikk uventet Tema: {} for OppgaveID: {}", oppgave.getTema(), oppgave.getId());
         }
 
-        if (oppgave.getOppgavetype() != null && Arrays.asList(getNames(Oppgavetype.class)).contains(oppgave.getOppgavetype())) {
+        if (oppgave.getOppgavetype() != null && erGyldigKode(Oppgavetype.class, oppgave.getOppgavetype())) {
             domainOppgave.setOppgavetype(no.nav.melosys.domain.oppgave.Oppgavetype.valueOf(oppgave.getOppgavetype()));
         } else {
-            log.info("Fikk uventet oppgaveType: {} for OppgaveID: {}", oppgave.getOppgavetype(), oppgave.getId());
+            log.error("Fikk uventet oppgaveType: {} for OppgaveID: {}", oppgave.getOppgavetype(), oppgave.getId());
         }
         domainOppgave.setJournalpostId(oppgave.getJournalpostId());
         domainOppgave.setTilordnetRessurs(oppgave.getTilordnetRessurs());
@@ -187,7 +188,7 @@ public class GsakService implements GsakFasade {
     public List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .aktørId(aktørId)
-            .medOppgaveTyper(getNames(Oppgavetype.class))
+            .medOppgaveTyper(hentAlleKoder(Oppgavetype.class))
             .medSorteringsfelt(SORTERINGSFELT)
             .build();
         List<Oppgave> localDomainObjects = new ArrayList<>();
@@ -195,7 +196,7 @@ public class GsakService implements GsakFasade {
         List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
         finnOppgaveListeResponse.stream()
             .filter(Objects::nonNull)
-            .map(this::oppgaveMappingDtoTilDomain)
+            .map(GsakService::oppgaveMappingDtoTilDomain)
             .forEach(localDomainObjects::add);
 
         return localDomainObjects;
@@ -216,7 +217,4 @@ public class GsakService implements GsakFasade {
         return null;
     }
 
-    private static String[] getNames(Class<? extends Enum<?>> e) {
-        return Arrays.stream(e.getEnumConstants()).map(Enum::name).toArray(String[]::new);
-    }
 }
