@@ -18,5 +18,9 @@ public class UstrukturertAdresse {
 
     public String adresselinje4;
 
+    public String postnr;
+
+    public String poststed;
+
     public Land land;
 }

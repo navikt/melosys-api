@@ -34,6 +34,8 @@ public class XsltConfig {
 
     public static final String PERSON_TJENESTE = "person";
 
+    public static final String PERSONHISTORIKK_TJENESTE = "personhistorikk";
+
     private static final String SAKOGBEHANDLING_TJENESTE = "sakogbehandling";
 
     /**
@@ -53,6 +55,7 @@ public class XsltConfig {
     private static String getTjenesteNavn(SaksopplysningType type) {
         switch (type){
             case PERSONOPPLYSNING: return XsltConfig.PERSON_TJENESTE;
+            case PERSONHISTORIKK: return XsltConfig.PERSONHISTORIKK_TJENESTE;
             case ORGANISASJON: return XsltConfig.ORGANISASJON_TJENESTE;
             case ARBEIDSFORHOLD: return XsltConfig.ARBEIDSFORHOLD_TJENESTE;
             case INNTEKT: return XsltConfig.INNTEKT_TJENESTE;
@@ -64,7 +67,7 @@ public class XsltConfig {
 
     private static String getXsltMappe(SaksopplysningType type) {
         switch (type){
-            case PERSONOPPLYSNING: return XsltConfig.TPS_MAPPE;
+            case PERSONOPPLYSNING: case PERSONHISTORIKK: return XsltConfig.TPS_MAPPE;
             case ORGANISASJON: return XsltConfig.EREG_MAPPE;
             case ARBEIDSFORHOLD: return XsltConfig.AAREG_MAPPE;
             case INNTEKT: return XsltConfig.INNTK_MAPPE;

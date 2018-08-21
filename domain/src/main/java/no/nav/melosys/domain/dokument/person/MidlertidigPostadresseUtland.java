@@ -18,5 +18,4 @@ public class MidlertidigPostadresseUtland extends MidlertidigPostadresse {
 
     public String adresselinje4;
 
-    public Land land;
 }
