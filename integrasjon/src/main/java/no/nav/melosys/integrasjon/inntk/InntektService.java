@@ -17,16 +17,14 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektConsumer;
-import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeHarIkkeTilgangTilOensketAInntektsfilter;
-import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeSikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeUgyldigInput;
+import no.nav.tjeneste.virksomhet.inntekt.v3.binding.*;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Ainntektsfilter;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Formaal;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.ObjectFactory;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.PersonIdent;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Uttrekksperiode;
-import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeRequest;
-import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeResponse;
+import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkRequest;
+import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,20 +53,21 @@ public class InntektService implements InntektFasade {
         this.objectFactory = new ObjectFactory();
 
         try {
-            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeResponse.class);
+            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolkResponse.class);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);
         }
     }
 
+    // Henter inntekter for én ident fra hentInntektListeBolk for å få opplysninger om frilansforhold (se MELOSYS-1453).
     @Override
     public Saksopplysning hentInntektListe(String personID, YearMonth fom, YearMonth tom) throws SikkerhetsbegrensningException {
-        HentInntektListeRequest request = new HentInntektListeRequest();
+        HentInntektListeBolkRequest request = new HentInntektListeBolkRequest();
 
         PersonIdent personIdent = objectFactory.createPersonIdent();
         personIdent.setPersonIdent(personID);
-        request.setIdent(personIdent);
+        request.getIdentListe().add(personIdent);
 
         Uttrekksperiode uttrekksperiode = objectFactory.createUttrekksperiode();
         try {
@@ -93,19 +92,19 @@ public class InntektService implements InntektFasade {
         request.setFormaal(formaal);
 
         // Kall til Inntektskomponenten
-        HentInntektListeResponse response = null;
+        HentInntektListeBolkResponse response = null;
         try {
-            response = inntektConsumer.hentInntektListe(request);
-        } catch (HentInntektListeSikkerhetsbegrensning | HentInntektListeHarIkkeTilgangTilOensketAInntektsfilter e) {
+            response = inntektConsumer.hentInntektListeBolk(request);
+        } catch (HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter e) {
             throw new SikkerhetsbegrensningException(e);
-        } catch (HentInntektListeUgyldigInput | SOAPFaultException e) {
+        } catch (HentInntektListeBolkUgyldigInput | SOAPFaultException e) {
             throw new IntegrasjonException(e);
         }
 
         // Response -> xml
         StringWriter xmlWriter = new StringWriter();
         try {
-            no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeResponse xmlRoot = new no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeResponse();
+            no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolkResponse xmlRoot = new no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolkResponse();
             xmlRoot.setResponse(response);
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
