@@ -1,4 +1,4 @@
 applicationPipeline {
     applicationName = "melosys"
-    copyFrontendInBackend = true
+    copyFrontendInBackend = false
 }
