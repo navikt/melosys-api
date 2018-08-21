@@ -22,15 +22,45 @@
             <artifactId>spring-boot-starter-jetty</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-web</artifactId>
+            <type>zip</type>
+            <scope>runtime</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-frontend</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>no.nav.melosys</includeGroupIds>
+                            <includeArtifactIds>melosys-web</includeArtifactIds>
+                            <outputDirectory>${project.basedir}/src/main/resources/public</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>no.nav.melosys.Application</mainClass>
+                    <excludes>
+                        <exclude>
+                            <groupId>no.nav.melosys</groupId>
+                            <artifactId>melosys-web</artifactId>
+                        </exclude>
+                    </excludes>
                     <finalName>melosys</finalName>
                 </configuration>
             </plugin>
