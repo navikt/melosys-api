@@ -211,10 +211,4 @@ public class GsakService implements GsakFasade {
         oppgave.setTilordnetRessurs(saksbehandlerID);
         oppgaveConsumer.oppdaterOppgave(oppgave);
     }
-
-    @Override
-    public String opprettOppgave(String ident, String oppgavetype, String brukerID, String journalpostID, String saksnummer) {
-        return null;
-    }
-
 }

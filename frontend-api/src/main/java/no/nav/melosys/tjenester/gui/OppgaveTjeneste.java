@@ -22,7 +22,6 @@ import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.MockOppgaveDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
 import no.nav.melosys.tjenester.gui.dto.TilbakeleggingDto;
 import org.slf4j.Logger;
@@ -124,17 +123,6 @@ public class OppgaveTjeneste extends RestTjeneste {
         }
         return Response.ok(oppgaveDtoListe).build();
     }
-
-    // FIXME Dette er for å hjelpe testing av oppgavehåndtering.
-    @POST
-    @Path("/opprett")
-    @ApiOperation(value = "Oppretter en mock oppgave")
-    public Response opprett(MockOppgaveDto oppgaveDto) {
-        String oppgaveID = oppgaveService.opprettOppgave(oppgaveDto.getAnsvarligID(), oppgaveDto.getOppgavetype(), oppgaveDto.getFnr(), oppgaveDto.getJournalpostID(), oppgaveDto.getSaksnummer());
-
-        return Response.ok(oppgaveID).build();
-    }
-
 
     @GET
     @Path("/sok")
