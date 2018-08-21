@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
@@ -30,6 +31,7 @@ public class OrganisasjonDokument extends SaksopplysningDokument {
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
     public LocalDate oppstartsdato;
 
+    @JsonProperty("organisasjonsform")
     public String enhetstype; //"http://nav.no/kodeverk/Kodeverk/EnhetstyperJuridiskEnhet"
 
     public String getOrgnummer() {

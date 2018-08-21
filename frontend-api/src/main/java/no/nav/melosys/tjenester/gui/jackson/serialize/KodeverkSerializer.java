@@ -11,6 +11,7 @@ import no.nav.melosys.service.kodeverk.KodeDto;
 /**
  * Alle klasser som implementerer {@code Kodeverk} serialiseres med kode og term.
  */
+// Fixme : Hent Term fra kodeverktjeneste jira ?
 public class KodeverkSerializer extends StdSerializer<Kodeverk> {
 
     public KodeverkSerializer() {

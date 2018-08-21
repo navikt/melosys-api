@@ -2,14 +2,12 @@ package no.nav.melosys.domain.dokument.arbeidsforhold;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -18,11 +16,11 @@ import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Arbeidsavtale implements HarPeriode {
 
-    public String arbeidstidsordning; //"http://nav.no/kodeverk/Kodeverk/Arbeidstidsordninger"
+    public Arbeidstidsordning arbeidstidsordning; //"http://nav.no/kodeverk/Kodeverk/Arbeidstidsordninger"
 
     public String avloenningstype; //"http://nav.no/kodeverk/Kodeverk/Avl_c3_b8nningstyper"
 
-    public String yrke; //"http://nav.no/kodeverk/Kodeverk/Yrker"
+    public Yrke yrke; //"http://nav.no/kodeverk/Kodeverk/Yrker"
 
     public Periode gyldighetsperiode;
 
@@ -51,7 +49,7 @@ public class Arbeidsavtale implements HarPeriode {
 
     public BigDecimal antallTimerGammeltAa;
 
-    public String getArbeidstidsordning() {
+    public Arbeidstidsordning getArbeidstidsordning() {
         return arbeidstidsordning;
     }
 
@@ -59,7 +57,7 @@ public class Arbeidsavtale implements HarPeriode {
         return avloenningstype;
     }
 
-    public String getYrke() {
+    public Yrke getYrke() {
         return yrke;
     }
 

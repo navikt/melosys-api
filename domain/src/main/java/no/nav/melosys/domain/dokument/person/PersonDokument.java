@@ -31,11 +31,11 @@ public class PersonDokument extends SaksopplysningDokument {
 
     /** Kodeverk: Kjønnstyper */
     @JsonProperty("kjoenn")
-    public String kjønn;
+    public KjønnsType kjønn;
 
     public String sammensattNavn;
 
-    public List<Familiemedlem> familiemedlemmer;
+    public List<Familiemedlem> familiemedlemmer; // Fixme : Hent bare barn ?
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
     @JsonProperty("foedselsdato")
@@ -54,5 +54,8 @@ public class PersonDokument extends SaksopplysningDokument {
     public UstrukturertAdresse postadresse;
 
     public MidlertidigPostadresse midlertidigPostadresse;
+
+    @JsonProperty(required = true)
+    public boolean erEgenAnsatt; // Fixme : hvordan hente den informasjon ?
 
 }

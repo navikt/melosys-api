@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import no.nav.melosys.domain.util.FellesKodeverk;
 import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import org.slf4j.Logger;

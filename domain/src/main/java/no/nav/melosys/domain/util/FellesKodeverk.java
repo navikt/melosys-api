@@ -1,4 +1,4 @@
-package no.nav.melosys.service.kodeverk;
+package no.nav.melosys.domain.util;
 
 public enum FellesKodeverk {
     

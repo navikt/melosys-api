@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.dokument.organisasjon;
 
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -20,7 +19,7 @@ public class OrganisasjonsDetaljer {
 
     public List<GeografiskAdresse> forretningsadresse;
 
-    public List<GeografiskAdresse> postadresse;
+    private List<GeografiskAdresse> postadresse;
 
     public List<Telefonnummer> telefon;
 
