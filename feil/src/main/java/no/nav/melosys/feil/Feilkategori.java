@@ -13,6 +13,6 @@ public enum Feilkategori {
     // Funksjonelle feil:
     FUNKSJONELL_FEIL,
     INGEN_TILGANG,
-    IKKE_FUNNET;
+    IKKE_FUNNET
     
-};
+}

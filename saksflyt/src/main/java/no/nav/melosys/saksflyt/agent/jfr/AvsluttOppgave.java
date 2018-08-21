@@ -5,6 +5,8 @@ import java.util.Map;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -42,7 +44,7 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
         this.gsakFasade = gsakFasade;
         log.info("AvsluttOppgave initialisert");
     }
-    
+
     @Override
     public ProsessSteg inngangsSteg() {
         return JFR_AVSLUTT_OPPGAVE;
@@ -55,12 +57,12 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
     
     @Transactional
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws TekniskException, SikkerhetsbegrensningException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException, IkkeFunnetException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String oppgaveID = prosessinstans.getData(OPPGAVE_ID);
         gsakFasade.ferdigstillOppgave(oppgaveID);
-        
+
         ProsessType type = prosessinstans.getType();
         if (type == ProsessType.JFR_NY_SAK) {
             prosessinstans.setSteg(JFR_AKTØR_ID);

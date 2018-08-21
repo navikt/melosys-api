@@ -4,6 +4,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import javax.net.ssl.SSLContext;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
@@ -11,6 +12,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.gsak.sakapi.dto.SakDto;
@@ -29,7 +31,8 @@ public class SakApiConsumerImpl implements RestConsumer, SakApiConsumer {
     public SakApiConsumerImpl(String endpointUrl) {
         try {
             SSLContext sslContext = SSLContext.getDefault();
-            target = ClientBuilder.newBuilder().sslContext(sslContext).build().target(endpointUrl);
+            Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();
+            target = client.register(JacksonJsonProvider.class).target(endpointUrl);
         } catch (NoSuchAlgorithmException e) {
             log.error("Feilet under oppsett av integrasjon mot Sak API", e);
             throw new IntegrasjonException("Feilet under oppsett av integrasjon mot Sak API");

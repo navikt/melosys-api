@@ -1,12 +1,21 @@
 package no.nav.melosys.integrasjon.gsak.oppgave;
 
-import no.nav.tjeneste.virksomhet.oppgave.v3.binding.HentOppgaveOppgaveIkkeFunnet;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeResponse;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.HentOppgaveRequest;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.HentOppgaveResponse;
+import java.util.List;
+
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
+import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 
 public interface OppgaveConsumer {
-    FinnOppgaveListeResponse finnOppgaveListe(FinnOppgaveListeRequestMal request);
 
-    HentOppgaveResponse hentOppgave(HentOppgaveRequest request) throws HentOppgaveOppgaveIkkeFunnet;
+    OppgaveDto hentOppgave(String oppgaveId);
+
+    List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) throws TekniskException;
+
+    void oppdaterOppgave(OppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException;
+
+    String opprettOppgave(OppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException;
 }
+

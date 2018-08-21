@@ -6,6 +6,7 @@ import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
 import no.nav.melosys.tjenester.gui.*;
+import org.glassfish.jersey.CommonProperties;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,6 +16,9 @@ public class JerseyConfig extends ResourceConfig {
 
     public JerseyConfig() {
         setApplicationName("melosys-api");
+        property(CommonProperties.FEATURE_AUTO_DISCOVERY_DISABLE, true);
+        property(CommonProperties.METAINF_SERVICES_LOOKUP_DISABLE, true);
+
         // N.B. alfabetisk rekkefølge
         register(ArbeidsforholdHistorikkTjeneste.class);
         register(BehandlingTjeneste.class);

@@ -5,10 +5,7 @@ import java.util.function.Predicate;
 
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.api.StegBehandler;
 import no.nav.melosys.saksflyt.impl.Utils;
@@ -61,6 +58,10 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
             String feilmelding = "Uventet IkkeFunnetException";
             log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.IKKE_FUNNET, prosessinstans, feilmelding, e);
+        } catch (FunksjonellException e) {
+            String feilmelding = "Uventet FunksjonellException";
+            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, e);
         } catch (RuntimeException e) {
             String feilmelding = "Uventet RuntimeException";
             log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
@@ -68,6 +69,6 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
         }
     }
     
-    protected abstract void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException, IntegrasjonException;
+    protected abstract void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException, IntegrasjonException, FunksjonellException;
 
 }

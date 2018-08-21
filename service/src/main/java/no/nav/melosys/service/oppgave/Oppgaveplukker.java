@@ -2,11 +2,18 @@ package no.nav.melosys.service.oppgave;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.gsak.PrioritetType;
+import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.Tema;
+import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
+import no.nav.melosys.domain.oppgave.Oppgavetype;
+import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
@@ -43,7 +50,7 @@ public class Oppgaveplukker {
      * 5) Saksnummer knyttes til oppgaven hvis oppgaven er en behandlingsoppgave.
      */
     @Transactional
-    public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws IkkeFunnetException {
+    public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
         String type = plukkDto.getOppgavetype();
         Oppgavetype oppgavetype = KodeverkUtils.dekod(Oppgavetype.class, type);
 
@@ -76,7 +83,6 @@ public class Oppgaveplukker {
             Oppgave oppgave = valg.get();
             // Tildeler oppgaven
             gsakFasade.tildelOppgave(oppgave.getOppgaveId(), saksbehandlerID);
-
             if (oppgave.erBehandling()) {
                 // Finner fagsak og saksnummer som svarer til behandlingsoppgaven.
                 Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
@@ -91,46 +97,32 @@ public class Oppgaveplukker {
     }
 
     @Transactional
-    public synchronized void leggTilbakeOppgave(String oppgaveId, String saksbehandlerID, String begrunnelse) {
+    public synchronized void leggTilbakeOppgave(String oppgaveId, String saksbehandlerID, String begrunnelse) throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
         Oppgave oppgave = gsakFasade.hentOppgave(oppgaveId);
 
         if (oppgave == null) {
             log.error("Fant ikke oppgave med oppgaveId " + oppgaveId);
             throw new RuntimeException("Fant ikke oppgave med oppgaveId " + oppgaveId);
         }
-
         try {
-            gsakFasade.leggTilbakeOppgave(oppgave);
+            gsakFasade.leggTilbakeOppgave(oppgaveId);
 
             OppgaveTilbakelegging oppgaveTilbakelegging = new OppgaveTilbakelegging();
-            oppgaveTilbakelegging.setOppgaveId(oppgave.getOppgaveId());
+            oppgaveTilbakelegging.setOppgaveId(oppgaveId);
             oppgaveTilbakelegging.setSaksbehandlerId(saksbehandlerID);
             oppgaveTilbakelegging.setBegrunnelse(begrunnelse);
             oppgaveTilbakelegging.setRegistrertDato(LocalDateTime.now());
             oppgaveTilbakkeleggingRepo.save(oppgaveTilbakelegging);
+            log.info("Oppgave med oppgaveId {} er lagt tilbake. ", oppgaveId);
         } catch (IntegrasjonException | SikkerhetsbegrensningException | TekniskException e) {
             log.error("Tilbakelegging av oppgave med oppgaveId " + oppgaveId + " feilet");
             throw new RuntimeException("Tilbakelegging av oppgave med oppgaveId " + oppgaveId + " feilet");
         }
     }
 
-    // FIXME Dette er for å hjelpe testing av oppgavehåndtering.
-    public void fjernTildeling() {
-        gsakFasade.fjernTildeling();
-    }
-
     private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {
-        // Oppgaver med høy prioritet velges først.
-        Optional<Oppgave> prioritert = oppgaver.stream().filter(o -> o.getPrioritet() == PrioritetType.HOY_MED).findFirst();
 
-        Optional<Oppgave> valg;
-        if (prioritert.isPresent()) {
-            valg = prioritert;
-        } else {
-            // Oppgaver er sortert stigende etter frist.
-            valg = oppgaver.stream().findFirst();
-        }
-
+        Optional<Oppgave> valg = oppgaver.stream().sorted(høyestTilLavestPrioritet).findFirst();
         // Vi må ikke tildele en oppgave som var tilbakelagt.
         if (valg.isPresent()) {
             String oppgaveId = valg.get().getOppgaveId();
@@ -148,5 +140,26 @@ public class Oppgaveplukker {
         List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(saksbehandlerID, oppgaveId);
         return !tilbakelegging.isEmpty();
     }
+
+    public static final Comparator<Oppgave> høyestTilLavestPrioritet = (a, b) -> {
+        // Merk: Bryter med konvensjonen (a == b og b == c → a == c), men dette er ok.
+        int res = 0;
+        if (a.getPrioritet() == b.getPrioritet())
+            res = 0;
+        else if (a.getPrioritet() == PrioritetType.HOY)
+            res = -1;
+        else if (b.getPrioritet() == PrioritetType.HOY)
+            res = 1;
+        else if (a.getPrioritet() == PrioritetType.NORM)
+            res = -1;
+        else if (b.getPrioritet() == PrioritetType.NORM)
+            res = 1;
+        if (res == 0) {
+            if (a.getFristFerdigstillelse() == null || b.getFristFerdigstillelse() == null)
+                return 0;
+            return a.getFristFerdigstillelse().compareTo(b.getFristFerdigstillelse());
+        }
+        return res;
+    };
 
 }

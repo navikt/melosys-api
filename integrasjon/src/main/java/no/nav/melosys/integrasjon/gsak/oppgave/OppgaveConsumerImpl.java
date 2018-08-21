@@ -1,81 +1,140 @@
 package no.nav.melosys.integrasjon.gsak.oppgave;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import javax.net.ssl.SSLContext;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-import no.nav.tjeneste.virksomhet.oppgave.v3.binding.HentOppgaveOppgaveIkkeFunnet;
-import no.nav.tjeneste.virksomhet.oppgave.v3.binding.OppgaveV3;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.*;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.felles.RestConsumer;
+import no.nav.melosys.integrasjon.gsak.oppgave.dto.FeilResponseDto;
+import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
+import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
+import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSvar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-public class OppgaveConsumerImpl implements OppgaveConsumer {
-    private OppgaveV3 port;
+import static javax.ws.rs.core.Response.Status.Family.CLIENT_ERROR;
+import static javax.ws.rs.core.Response.Status.Family.SERVER_ERROR;
 
-    public OppgaveConsumerImpl(OppgaveV3 port) {
-        this.port = port;
+@Component
+public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
+
+    private static final Logger log = LoggerFactory.getLogger(OppgaveConsumerImpl.class);
+
+    private WebTarget target;
+
+    @Autowired
+    public OppgaveConsumerImpl(@Value("${OppgaveAPI_v1.url}") final String endpointUrl) {
+        try {
+            SSLContext sslContext = SSLContext.getDefault();
+            Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();
+            target = client.register(JacksonJsonProvider.class).target(endpointUrl);
+        } catch (NoSuchAlgorithmException e) {
+            log.error("Feilet under oppsett av integrasjon mot Sak API", e);
+            throw new IntegrasjonException("Feilet under oppsett av integrasjon mot Oppgave API");
+        }
     }
 
     @Override
-    public FinnOppgaveListeResponse finnOppgaveListe(FinnOppgaveListeRequestMal request) {
-        return port.finnOppgaveListe(convertToWSRequest(request));
+    public OppgaveDto hentOppgave(String oppgaveId) {
+        return target
+            .path(oppgaveId)
+            .request()
+            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+            .header("X-Correlation-ID", getCallID())
+            .header(HttpHeaders.AUTHORIZATION, getBearer())
+            .get(OppgaveDto.class);
     }
 
     @Override
-    public HentOppgaveResponse hentOppgave(HentOppgaveRequest request) throws HentOppgaveOppgaveIkkeFunnet {
-        return port.hentOppgave(request);
+    public List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) {
+        WebTarget lokalTarget = target;
+        if (oppgaveSearchRequest.getAktørId() != null) {
+            lokalTarget = lokalTarget.queryParam("aktoerId", oppgaveSearchRequest.getAktørId());
+        }
+
+        lokalTarget = lokalTarget.queryParam("tildeltEnhetsnr", oppgaveSearchRequest.getTildeltEnhetsnr())
+            .queryParam("sorteringsfelt", oppgaveSearchRequest.getSorteringsfelt())
+            .queryParam("tilordnetRessurs", oppgaveSearchRequest.getTilordnetRessurs());
+
+        lokalTarget = leggTilQueryParamSomArray(lokalTarget,"tema", oppgaveSearchRequest.getTema());
+        lokalTarget = leggTilQueryParamSomArray(lokalTarget,"oppgavetype", oppgaveSearchRequest.getOppgavetype());
+        lokalTarget = leggTilQueryParamSomArray(lokalTarget,"behandlingstype", oppgaveSearchRequest.getBehandlingstype());
+
+        OppgaveSvar oppgaveSvar = lokalTarget.request()
+            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+            .header("X-Correlation-ID", getCallID())
+            .header(HttpHeaders.AUTHORIZATION, getBearer())
+            .get(OppgaveSvar.class);
+        return oppgaveSvar.getOppgaver();
     }
 
-    private FinnOppgaveListeRequest convertToWSRequest(FinnOppgaveListeRequestMal request) {
-        FinnOppgaveListeRequest result = new FinnOppgaveListeRequest();
-
-        result.setSok(mapSok(request.getSok()));
-
-        if (request.getFilter() != null) {
-            result.setFilter(mapFilter(request.getFilter()));
+    // Eksempel: https://oppgave.nais.preprod.local/api/v1/oppgaver?tema=MED&tema=MEL
+    private WebTarget leggTilQueryParamSomArray(WebTarget tempTarget, String key, String[] param) {
+        if (param != null) {
+            for (String s : param) {
+                if (s != null) {
+                    tempTarget = tempTarget.queryParam(key, s);
+                }
+            }
         }
-
-        if (request.getSortering() != null) {
-            result.setSorteringKode(request.getSortering());
-        }
-
-        if (request.getIkkeTidligereFordeltTil() != null) {
-            result.setIkkeTidligereFordeltTil(request.getIkkeTidligereFordeltTil());
-        }
-        return result;
+    return tempTarget;
     }
 
-    private FinnOppgaveListeSok mapSok(FinnOppgaveListeSokMal sokMal) {
-        FinnOppgaveListeSok oppgaveListeSok = new FinnOppgaveListeSok();
-
-        if (sokMal.getFagområdeKodeListe() != null) {
-            oppgaveListeSok.getFagomradeKodeListe().addAll(sokMal.getFagområdeKodeListe());
+    @Override
+    public void oppdaterOppgave(OppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
+        try (Response response = target.path(request.getId())
+            .request(MediaType.APPLICATION_JSON)
+            .header("X-Correlation-ID", getCallID())
+            .header(HttpHeaders.AUTHORIZATION, getBearer())
+            .put(Entity.json(request))) {
+            håndterFeil(response);
         }
-
-        oppgaveListeSok.setAnsvarligEnhetId(sokMal.getAnsvarligEnhetId());
-        oppgaveListeSok.setBrukerId(sokMal.getBrukerId());
-        oppgaveListeSok.setSakId(sokMal.getSakId());
-
-        return oppgaveListeSok;
     }
 
-    private FinnOppgaveListeFilter mapFilter(FinnOppgaveListeFilterMal filterMal) {
-        FinnOppgaveListeFilter oppgaveListeFilter = new FinnOppgaveListeFilter();
-
-        if (filterMal.getAktiv() != null) {
-            oppgaveListeFilter.setAktiv(filterMal.getAktiv());
+    @Override
+    public String opprettOppgave(OppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
+        try (Response response = target
+            .path(request.getId())
+            .request(MediaType.APPLICATION_JSON)
+            .header("X-Correlation-ID", getCallID())
+            .header(HttpHeaders.AUTHORIZATION, getBearer())
+            .post(Entity.json(request))) {
+            if( response.getStatus() == 201 ) { // Oppgaven opprettet
+                OppgaveDto oppgaveDto = response.readEntity(OppgaveDto.class);
+                return oppgaveDto.getId();
+            }
+            håndterFeil(response);
         }
+        throw new TekniskException("Uventet feil har oppstått i OpprettOppgave");
+    }
 
-        if (filterMal.getUfordelte() != null) {
-            oppgaveListeFilter.setUfordelte(filterMal.getUfordelte());
+    private void håndterFeil(Response response) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
+        if (response == null) {
+            throw new TekniskException("Ingen response fra GSAK Oppgave REST Tjeneste");
         }
-
-        if (filterMal.getUnderkategoriKode() != null) {
-            oppgaveListeFilter.setUnderkategoriKode(filterMal.getUnderkategoriKode());
+        FeilResponseDto feilResponseDto = response.readEntity(FeilResponseDto.class);
+        log.error("Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());
+        if (response.getStatus() == 401 || response.getStatus() == 403) {
+            throw new SikkerhetsbegrensningException(feilResponseDto.getFeilmelding());
+        } else if (Response.Status.Family.familyOf(response.getStatus()) == CLIENT_ERROR) {
+            throw new FunksjonellException(feilResponseDto.getFeilmelding());
+        } else if (Response.Status.Family.familyOf(response.getStatus()) == SERVER_ERROR) {
+            throw new TekniskException(feilResponseDto.getFeilmelding());
         }
-
-        if (filterMal.getOppgavetypeKodeListe() != null) {
-            List<String> oppgavetypeKodeListe = oppgaveListeFilter.getOppgavetypeKodeListe();
-            oppgavetypeKodeListe.addAll(filterMal.getOppgavetypeKodeListe());
-        }
-
-        return oppgaveListeFilter;
     }
 }

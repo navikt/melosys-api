@@ -1,97 +1,65 @@
 package no.nav.melosys.integrasjon.gsak;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import javax.xml.datatype.DatatypeConfigurationException;
+import java.util.Objects;
 
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.FagsakType;
-import no.nav.melosys.domain.Oppgavetype;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.gsak.AktorType;
-import no.nav.melosys.domain.gsak.Fagomrade;
-import no.nav.melosys.domain.gsak.PrioritetType;
-import no.nav.melosys.domain.gsak.Underkategori;
+import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.domain.oppgave.Oppgavetype;
+import no.nav.melosys.domain.oppgave.PrioritetType;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.Fagsystem;
-import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.gsak.behandleoppgave.BehandleOppgaveConsumer;
-import no.nav.melosys.integrasjon.gsak.behandleoppgave.oppgave.OpprettOppgaveRequest;
-import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeFilterMal;
-import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeRequestMal;
-import no.nav.melosys.integrasjon.gsak.oppgave.FinnOppgaveListeSokMal;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
+import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
+import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.gsak.sakapi.SakApiConsumer;
 import no.nav.melosys.integrasjon.gsak.sakapi.dto.SakDto;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSFerdigstillOppgaveException;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOppgaveIkkeFunnetException;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSOptimistiskLasingException;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.WSSikkerhetsbegrensningException;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSAktor;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSAktorType;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSFerdigstillOppgaveRequest;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSLagreOppgave;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSLagreOppgaveRequest;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOppgave;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveRequest;
-import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveResponse;
-import no.nav.tjeneste.virksomhet.oppgave.v3.binding.HentOppgaveOppgaveIkkeFunnet;
-import no.nav.tjeneste.virksomhet.oppgave.v3.informasjon.oppgave.Oppgave;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeResponse;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.FinnOppgaveListeSortering;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.HentOppgaveRequest;
-import no.nav.tjeneste.virksomhet.oppgave.v3.meldinger.HentOppgaveResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.util.KodeverkUtils.erGyldigKode;
+import static no.nav.melosys.domain.util.KodeverkUtils.hentAlleKoder;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
-@Profile("!mocking")
 public class GsakService implements GsakFasade {
 
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
 
-    private static final String FAGOMRÅDE_KODE_MEDLEMSKAP = "MED";
-    private static final String FAGOMRÅDE_KODE_UNNTAK = "UFM";
-    private static final String SORTERING_MED_FRIST = "FRIST_DATO";
-    private static final String SORTERING_STIGENDE = "STIGENDE";
+    private static final String SORTERINGSFELT = "FRIST";
 
-    private SakApiConsumer sakApiConsumer;
+    private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
 
-    private OppgaveConsumer oppgaveConsumer;
+    private final SakApiConsumer sakApiConsumer;
 
-    private BehandleOppgaveConsumer behandleOppgaveConsumer;
+    private final OppgaveConsumer oppgaveConsumer;
 
     @Autowired
-    public GsakService(SakApiConsumer sakApiConsumer, OppgaveConsumer oppgaveConsumer, BehandleOppgaveConsumer behandleOppgaveConsumer) {
+    public GsakService(SakApiConsumer sakApiConsumer, OppgaveConsumer oppgaveConsumer) {
         this.sakApiConsumer = sakApiConsumer;
         this.oppgaveConsumer = oppgaveConsumer;
-        this.behandleOppgaveConsumer = behandleOppgaveConsumer;
     }
 
     @Override
-    public String opprettSak(String saksnummer, BehandlingType behandlingType, String aktørId) {
+    public String opprettSak(String saksnummer, BehandlingType behandlingType, String aktørId) throws TekniskException, IntegrasjonException {
         SakDto sakDto = new SakDto();
+
         if (behandlingType.equals(BehandlingType.SØKNAD)) {
-            sakDto.setTema(FAGOMRÅDE_KODE_MEDLEMSKAP);
+            sakDto.setTema(Tema.MED.getKode());
         } else if (behandlingType.equals(BehandlingType.UNNTAK_MEDL)) {
-            sakDto.setTema(FAGOMRÅDE_KODE_UNNTAK);
+            sakDto.setTema(Tema.UFM.getKode());
         } else {
             throw new TekniskException("Behandlingtype " + behandlingType.getBeskrivelse() + " er ikke støttet.");
         }
+
         sakDto.setAktørId(aktørId);
         sakDto.setApplikasjon(Fagsystem.MELOSYS.getKode());
         sakDto.setSaksnummer(saksnummer);
-
         sakDto = sakApiConsumer.opprettSak(sakDto);
 
         if (sakDto.getId() == null) {
@@ -99,233 +67,149 @@ public class GsakService implements GsakFasade {
             throw new IntegrasjonException("Feil ved oppretting av sak i GSAK.");
         }
         log.info("Sak opprettet i GSAK med saksnummer: {}", sakDto.getId());
-
         return sakDto.getId().toString();
     }
 
     @Override
-    public void ferdigstillOppgave(String oppgaveId) throws SikkerhetsbegrensningException, TekniskException {
-        WSFerdigstillOppgaveRequest request = new WSFerdigstillOppgaveRequest();
-
-        request.setOppgaveId(oppgaveId);
-        request.setFerdigstiltAvEnhetId(MELOSYS_ENHET_ID);
-
-        try {
-            behandleOppgaveConsumer.ferdigstillOppgave(request);
-        } catch (WSSikkerhetsbegrensningException e) {
-            throw new SikkerhetsbegrensningException(e);
-        } catch (WSFerdigstillOppgaveException e) {
-            throw new TekniskException(e);
+    public void ferdigstillOppgave(String oppgaveID) throws IkkeFunnetException, FunksjonellException, SikkerhetsbegrensningException, TekniskException {
+        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveID);
+        if (oppgave == null) {
+            throw new IkkeFunnetException("Oppgave med ID " + oppgaveID + " er ikke funnet");
+        } else {
+            oppgave.setStatus(OPPGAVE_STATUS_FERDIGSTILT);
+            oppgaveConsumer.oppdaterOppgave(oppgave);
         }
     }
 
-    // FIXME GSAK oppretter et nytt API med REST tjenester. Den metoden må endres når disse kommer.
+    //FIXME: Mangler implementasjon for sakstyper
     @Override
-    public List<no.nav.melosys.domain.Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema fagområde, List<FagsakType> sakstyper, List<BehandlingType> behandlingstyper) throws IntegrasjonException {
-        List<String> fagområdeKodeListe = Collections.singletonList(fagområde.getKode());
-        FinnOppgaveListeSokMal sokMal = FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(Integer.toString(MELOSYS_ENHET_ID)).medFagområdeKodeListe(fagområdeKodeListe).build();
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<FagsakType> sakstyper, List<BehandlingType> behandlingstyper) throws TekniskException {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medTema( new String[]{tema.getKode()})
+            .medOppgaveTyper(new String[]{oppgavetype.getKode()})
+            .medBehandlingsTyper((String[])behandlingstyper.toArray())
+            .medSorteringsfelt(SORTERINGSFELT)
+            .build();
 
-        FinnOppgaveListeFilterMal.Builder filterMalBuilder = FinnOppgaveListeFilterMal.builder();
-        FinnOppgaveListeFilterMal filterMal = filterMalBuilder.medAktiv(true).medUfordelte(true).build();
-        // TODO mapping med behandlingstyper og sakstyper
+        List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
+        List<Oppgave> funnet = new ArrayList<>();
 
-        FinnOppgaveListeSortering sortering = new FinnOppgaveListeSortering();
-        sortering.setSorteringselementKode(SORTERING_MED_FRIST);
-        sortering.setSorteringKode(SORTERING_STIGENDE);
-
-        FinnOppgaveListeRequestMal requestMal = FinnOppgaveListeRequestMal.builder().medSok(sokMal).medFilter(filterMal).medSortering(sortering).build();
-        FinnOppgaveListeResponse finnOppgaveListeResponse = oppgaveConsumer.finnOppgaveListe(requestMal);
-
-        List<Oppgave> oppgaver = finnOppgaveListeResponse.getOppgaveListe();
-        List<no.nav.melosys.domain.Oppgave> funnet = new ArrayList<>();
-        for (Oppgave o : oppgaver) {
-            no.nav.melosys.domain.Oppgave oppgave = new no.nav.melosys.domain.Oppgave();
-            oppgave.setOppgaveId(o.getOppgaveId());
-            oppgave.setAktivFra(KonverteringsUtils.xmlGregorianCalendarToLocalDate(o.getAktivFra()));
-            oppgave.setAktivTil(KonverteringsUtils.xmlGregorianCalendarToLocalDate(o.getAktivTil()));
-            if (o.getFagomrade() != null) {
-                oppgave.setFagomrade(Fagomrade.valueOf(o.getFagomrade().getKode()));
-            }
-            if (o.getUnderkategori() != null) {
-                oppgave.setUnderkategori(Underkategori.valueOf(o.getUnderkategori().getKode()));
-            }
-            if (o.getOppgavetype() != null) {
-                oppgave.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.valueOf(o.getOppgavetype().getKode()));
-            }
-            oppgave.setGsakSaksnummer(o.getSaksnummer());
-            oppgave.setDokumentId(o.getDokumentId());
-
-            funnet.add(oppgave);
-        }
-
+        oppgaver.stream()
+            .filter(Objects::isNull)
+            .map(GsakService::oppgaveMappingDtoTilDomain)
+            .forEach(funnet::add);
         return funnet;
     }
 
     @Override
-    public no.nav.melosys.domain.Oppgave hentOppgave(String oppgaveId) {
-        HentOppgaveRequest request = new HentOppgaveRequest();
-        request.setOppgaveId(oppgaveId);
+    public Oppgave hentOppgave(String oppgaveId) throws IkkeFunnetException, TekniskException {
+        OppgaveDto gsakOppgave = oppgaveConsumer.hentOppgave(oppgaveId);
 
-        try {
-            HentOppgaveResponse response = oppgaveConsumer.hentOppgave(request);
-            Oppgave gsakOppgave = response.getOppgave();
-
-            if (gsakOppgave == null) {
-                return null;
-            }
-            no.nav.melosys.domain.Oppgave oppgave = new no.nav.melosys.domain.Oppgave();
-            oppgave.setOppgaveId(gsakOppgave.getOppgaveId());
-            if (gsakOppgave.getPrioritet() != null) {
-                oppgave.setPrioritet(PrioritetType.valueOf(gsakOppgave.getPrioritet().getKode()));
-            }
-            return oppgave;
-        } catch (HentOppgaveOppgaveIkkeFunnet hentOppgaveOppgaveIkkeFunnet) {
-            throw new IntegrasjonException(hentOppgaveOppgaveIkkeFunnet);
+        if (gsakOppgave == null) {
+            throw new IkkeFunnetException("Oppgave med oppgaveID " + oppgaveId + " finnes ikke");
         }
+        return oppgaveMappingDtoTilDomain(gsakOppgave);
     }
 
     @Override
-    public String opprettOppgave(OpprettOppgaveRequest request) throws SikkerhetsbegrensningException {
-        WSOpprettOppgaveRequest wsRequest = convertToWSRequest(request);
-
-        try {
-            WSOpprettOppgaveResponse response = behandleOppgaveConsumer.opprettOppgave(wsRequest);
-            return response.getOppgaveId();
-        } catch (WSSikkerhetsbegrensningException e) {
-            throw new SikkerhetsbegrensningException(e);
-        }
+    public String opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, TekniskException, FunksjonellException {
+        OppgaveDto oppgaveDto = new OppgaveDto();
+        oppgaveDto.setJournalpostId(request.getJournalpostId());
+        oppgaveDto.setSakreferanse(request.getGsakSaksnummer());
+        oppgaveDto.setAktørId(request.getAktørId());
+        oppgaveDto.setTilordnetRessurs(request.getTilordnetRessurs());
+        oppgaveDto.setTema(request.getTema().getKode());
+        oppgaveDto.setOppgavetype(request.getOppgavetype().getKode());
+        oppgaveDto.setFristFerdigstillelse(request.getFristFerdigstillelse());
+        // FIXME: MELOSYS-1401 : skal implementere Behandlingstema,Behandlingstype,Temagruppe
+        return oppgaveConsumer.opprettOppgave(oppgaveDto);
     }
 
     @Override
-    public void leggTilbakeOppgave(no.nav.melosys.domain.Oppgave oppgave) throws IntegrasjonException, SikkerhetsbegrensningException, TekniskException {
-        WSLagreOppgaveRequest wsRequest = new WSLagreOppgaveRequest();
-        WSLagreOppgave wsOppgave = new WSLagreOppgave();
-
-        try {
-            // oppgaveId er String i request til BehandleOppgave_v1.opprettOppgave og i respons fra
-            // Oppgave_v3.finnUtildelteOppgaverEtterFrist, men int i request til BehandleOppgave_v1.lagreOppgave
-            int oppgaveId = Integer.parseInt(oppgave.getOppgaveId());
-            wsOppgave.setOppgaveId(oppgaveId);
-        } catch (NumberFormatException e) {
-            throw new IntegrasjonException("'" + oppgave.getOppgaveId() + "' er ikke en gyldig oppgaveId");
+    public void leggTilbakeOppgave(String oppgaveId) throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
+        if (oppgave == null) {
+            throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveId);
         }
-        wsOppgave.setGjelderBruker(null);
-        wsRequest.setEndretAvEnhetId(MELOSYS_ENHET_ID);
-        wsRequest.setWsLagreOppgave(wsOppgave);
-
-        try {
-            behandleOppgaveConsumer.lagreOppgave(wsRequest);
-        } catch (WSOppgaveIkkeFunnetException e) {
-            throw new IntegrasjonException(e);
-        } catch (WSSikkerhetsbegrensningException e) {
-            throw new SikkerhetsbegrensningException(e);
-        } catch (WSOptimistiskLasingException e) {
-            throw new TekniskException(e);
-        }
-    }
-
-    WSOpprettOppgaveRequest convertToWSRequest(OpprettOppgaveRequest request) {
-        WSOppgave oppgave = new WSOppgave();
-        oppgave.setSaksnummer(request.getSaksnummer());
-        oppgave.setAnsvarligEnhetId(request.getAnsvarligEnhetId());
-        if (request.getFagområde() != null) {
-            oppgave.setFagomradeKode(request.getFagområde().name());
-        }
-        oppgave.setGjelderBruker(byggWSAktør(request.getFnr(), request.getAktørType()));
-
-        try {
-            Optional<LocalDate> aktivFra = request.getAktivFra();
-            if (aktivFra.isPresent()) {
-                oppgave.setAktivFra(KonverteringsUtils.localDateTimeToXMLGregorianCalendar(aktivFra.get().atStartOfDay()));
-            }
-        } catch (DatatypeConfigurationException e) {
-            throw new IllegalArgumentException("Kan ikke sette aktiv fradato", e);
-        }
-
-        try {
-            Optional<LocalDate> aktivTil = request.getAktivTil();
-            if (aktivTil.isPresent()) {
-                oppgave.setAktivTil(KonverteringsUtils.localDateTimeToXMLGregorianCalendar(aktivTil.get().atStartOfDay()));
-            }
-        } catch (DatatypeConfigurationException e) {
-            throw new IllegalArgumentException("Kan ikke sette aktiv tildato", e);
-        }
-
-        if (request.getOppgaveType() != null) {
-            oppgave.setOppgavetypeKode(request.getOppgaveType().name());
-        }
-        if (request.getUnderkategoriKode() != null) {
-            oppgave.setUnderkategoriKode(request.getUnderkategoriKode().name());
-        }
-        if (request.getPrioritetType() != null) {
-            oppgave.setPrioritetKode(request.getPrioritetType().name());
-        }
-        oppgave.setBeskrivelse(request.getBeskrivelse());
-        oppgave.setLest(request.isLest());
-        oppgave.setDokumentId(request.getDokumentId());
-
-        try {
-            oppgave.setNormDato(KonverteringsUtils.localDateToXMLGregorianCalendar(request.getNormertBehandlingsTidInnen()));
-        } catch (DatatypeConfigurationException e) {
-            throw new IllegalArgumentException("Kan ikke sette NormDato", e);
-        }
-        try {
-            oppgave.setMottattDato(KonverteringsUtils.localDateToXMLGregorianCalendar(request.getMottattDato()));
-        } catch (DatatypeConfigurationException e) {
-            throw new IllegalArgumentException("Kan ikke sette MottattDato", e);
-        }
-
-        WSOpprettOppgaveRequest wsRequest = new WSOpprettOppgaveRequest();
-        wsRequest.setOpprettetAvEnhetId(request.getOpprettetAvEnhetId());
-        wsRequest.setWsOppgave(oppgave);
-        return wsRequest;
+        oppgave.setTilordnetRessurs(null);
+        oppgaveConsumer.oppdaterOppgave(oppgave);
     }
 
     @Override
-    public List<no.nav.melosys.domain.Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId)
-            throws IntegrasjonException {
+    public List<Oppgave> finnOppgaveListeMedAnsvarlig(String tilordnetRessurs) throws TekniskException {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .tilordnetRessurs(tilordnetRessurs)
+            .medOppgaveTyper(hentAlleKoder(Oppgavetype.class))
+            .medSorteringsfelt(SORTERINGSFELT)
+            .build();
 
-        FinnOppgaveListeSokMal sokMal = FinnOppgaveListeSokMal.builder().medAnsvarligEnhetId(Integer.toString(MELOSYS_ENHET_ID)).medAnsvarligId(ansvarligId).build();
+        List<Oppgave> localDomainObjects = new ArrayList<>();
+        List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
 
-        FinnOppgaveListeFilterMal.Builder filterMalBuilder = FinnOppgaveListeFilterMal.builder();
-        FinnOppgaveListeFilterMal filterMal = filterMalBuilder.medAktiv(true).build();
+        finnOppgaveListeResponse.stream()
+            .filter(Objects::nonNull)
+            .map(GsakService::oppgaveMappingDtoTilDomain)
+            .forEach(localDomainObjects::add);
 
-        FinnOppgaveListeSortering sortering = new FinnOppgaveListeSortering();
-        sortering.setSorteringselementKode(SORTERING_MED_FRIST);
-        sortering.setSorteringKode(SORTERING_STIGENDE);
+        return localDomainObjects;
+    }
 
-        FinnOppgaveListeRequestMal requestMal = FinnOppgaveListeRequestMal.builder().medSok(sokMal).medFilter(filterMal).medSortering(sortering).build();
+    private static Oppgave oppgaveMappingDtoTilDomain(OppgaveDto oppgave) {
+        Oppgave domainOppgave = new Oppgave();
+        domainOppgave.setOppgaveId(oppgave.getId());
+        domainOppgave.setVersjon(oppgave.getVersjon());
+        if (oppgave.getPrioritet() != null ) {
+            domainOppgave.setPrioritet(PrioritetType.valueOf(oppgave.getPrioritet()));
+        }
+        domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
+        domainOppgave.setJournalpostId(oppgave.getJournalpostId());
 
-        List<no.nav.melosys.domain.Oppgave> localDomainObjects = new ArrayList<>();
-        FinnOppgaveListeResponse finnOppgaveListeResponse = oppgaveConsumer.finnOppgaveListe(requestMal);
-        finnOppgaveListeResponse.getOppgaveListe().forEach(oppgave -> {
-            //FIXME: Sjekk for NPE
-            no.nav.melosys.domain.Oppgave domainOppave = new no.nav.melosys.domain.Oppgave();
-            domainOppave.setOppgaveId(oppgave.getOppgaveId());
-            domainOppave.setPrioritet(PrioritetType.valueOf(oppgave.getPrioritet().getKode()));
-            domainOppave.setAktivTil(oppgave.getAktivTil().toGregorianCalendar().toZonedDateTime().toLocalDate());
-            domainOppave.setDokumentId(oppgave.getDokumentId());
-            domainOppave.setOppgavetype(no.nav.melosys.domain.gsak.Oppgavetype.valueOf(oppgave.getOppgavetype().getKode()));
-            domainOppave.setGsakSaksnummer(oppgave.getSaksnummer());
-            localDomainObjects.add(domainOppave);
-        });
+        domainOppgave.setGsakSaksnummer(oppgave.getSakreferanse());
+        domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
+
+        if (oppgave.getTema() != null && erGyldigKode(Tema.class, oppgave.getTema())) {
+            domainOppgave.setTema(Tema.valueOf(oppgave.getTema()));
+        }  else {
+            log.error("Fikk uventet Tema: {} for OppgaveID: {}", oppgave.getTema(), oppgave.getId());
+        }
+
+        if (oppgave.getOppgavetype() != null && erGyldigKode(Oppgavetype.class, oppgave.getOppgavetype())) {
+            domainOppgave.setOppgavetype(no.nav.melosys.domain.oppgave.Oppgavetype.valueOf(oppgave.getOppgavetype()));
+        } else {
+            log.error("Fikk uventet oppgaveType: {} for OppgaveID: {}", oppgave.getOppgavetype(), oppgave.getId());
+        }
+        domainOppgave.setJournalpostId(oppgave.getJournalpostId());
+        domainOppgave.setTilordnetRessurs(oppgave.getTilordnetRessurs());
+
+        return domainOppgave;
+    }
+
+    @Override
+    public List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws TekniskException {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .aktørId(aktørId)
+            .medOppgaveTyper(hentAlleKoder(Oppgavetype.class))
+            .medSorteringsfelt(SORTERINGSFELT)
+            .build();
+        List<Oppgave> localDomainObjects = new ArrayList<>();
+
+        List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
+        finnOppgaveListeResponse.stream()
+            .filter(Objects::nonNull)
+            .map(GsakService::oppgaveMappingDtoTilDomain)
+            .forEach(localDomainObjects::add);
+
         return localDomainObjects;
     }
 
     @Override
-    public List<no.nav.melosys.domain.Oppgave> finnOppgaveListeMedBruker(String ident) throws IntegrasjonException {
-        // FIXME Venter på nye GSAK tjenester
-        return null;
-    }
-
-    @Override
-    public void fjernTildeling() {
-        // FIXME trenges ikke når integrasjon med GSAK er på plass.
-    }
-
-    @Override
-    public void tildelOppgave(String oppgaveId, String saksbehandlerID) {
-        // FIXME Venter på nye GSAK tjenester
+    public void tildelOppgave(String oppgaveId, String saksbehandlerID) throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+        OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
+        if (oppgave == null ) {
+            throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveId);
+        }
+        oppgave.setTilordnetRessurs(saksbehandlerID);
+        oppgaveConsumer.oppdaterOppgave(oppgave);
     }
 
     @Override
@@ -333,18 +217,4 @@ public class GsakService implements GsakFasade {
         return null;
     }
 
-    private WSAktor byggWSAktør(String ident, AktorType aktørType) {
-        WSAktor wsAktor = new WSAktor();
-        wsAktor.setIdent(ident);
-        if (aktørType == null || AktorType.BLANK == aktørType) {
-            return wsAktor;
-        } else if (AktorType.ORGANISASJON == aktørType) {
-            wsAktor.setAktorType(WSAktorType.ORGANISASJON);
-        } else if (AktorType.PERSON == aktørType) {
-            wsAktor.setAktorType(WSAktorType.PERSON);
-        } else {
-            wsAktor.setAktorType(WSAktorType.UKJENT);
-        }
-        return wsAktor;
-    }
 }

@@ -7,6 +7,7 @@ import javax.ws.rs.Path;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
 import org.springframework.context.annotation.Scope;

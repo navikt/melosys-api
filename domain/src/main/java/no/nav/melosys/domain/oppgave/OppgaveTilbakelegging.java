@@ -1,4 +1,4 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.oppgave;
 
 import java.time.LocalDateTime;
 import javax.persistence.Column;

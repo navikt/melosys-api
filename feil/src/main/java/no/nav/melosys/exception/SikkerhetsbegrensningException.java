@@ -5,4 +5,8 @@ public class SikkerhetsbegrensningException extends Exception {
     public SikkerhetsbegrensningException(Throwable t) {
         super(t);
     }
+
+    public SikkerhetsbegrensningException(String m) {
+        super(m);
+    }
 }

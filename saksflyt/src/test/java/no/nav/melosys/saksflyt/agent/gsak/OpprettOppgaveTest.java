@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent;
+package no.nav.melosys.saksflyt.agent.gsak;
 
 import java.util.Properties;
 
@@ -6,8 +6,11 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.saksflyt.agent.OpprettOppgave;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +36,7 @@ public class OpprettOppgaveTest {
     }
 
     @Test
-    public void utfoerSteg() throws SikkerhetsbegrensningException {
+    public void utfoerSteg() throws SikkerhetsbegrensningException, FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setType(BehandlingType.SØKNAD);
@@ -44,6 +47,7 @@ public class OpprettOppgaveTest {
         agent.utførSteg(p);
 
         verify(gsakFasade, times(1)).opprettOppgave(any());
+
         assertThat(p.getSteg()).isNull();
     }
 }
