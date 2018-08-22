@@ -37,9 +37,12 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
-        <!--NAV-->
-        <melosys.jsonschema.version>0.3.0</melosys.jsonschema.version>
+        <!-- Melosys -->
+        <melosys.frontend.version>0.10.0-214</melosys.frontend.version>
+        <melosys.jsonschema.version>0.2.9</melosys.jsonschema.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
+
+        <!-- NAV -->
         <aareg.arbeidsforhold.version>3.0.0</aareg.arbeidsforhold.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>3.3.0</doksys.dokumentproduksjon.version>
