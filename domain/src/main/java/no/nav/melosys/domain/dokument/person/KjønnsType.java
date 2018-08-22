@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.dokument.person;
 
 import no.nav.melosys.domain.dokument.felles.KodeverkHjelper;
-import no.nav.melosys.domain.util.FellesKodeverk;
+import no.nav.melosys.domain.FellesKodeverk;
 
 public class KjønnsType implements KodeverkHjelper{
 

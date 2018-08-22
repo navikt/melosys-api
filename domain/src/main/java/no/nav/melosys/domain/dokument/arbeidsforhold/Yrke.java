@@ -1,8 +1,5 @@
 package no.nav.melosys.domain.dokument.arbeidsforhold;
 
-import no.nav.melosys.domain.dokument.felles.KodeverkHjelper;
-import no.nav.melosys.domain.util.FellesKodeverk;
-
 public class Yrke {
 
     private String kode;

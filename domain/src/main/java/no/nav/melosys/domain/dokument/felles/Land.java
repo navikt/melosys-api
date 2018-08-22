@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.dokument.felles;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-import no.nav.melosys.domain.util.FellesKodeverk;
+import no.nav.melosys.domain.FellesKodeverk;
 
 public class Land implements KodeverkHjelper{
     public static final String BELGIA = "BEL";

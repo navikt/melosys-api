@@ -7,8 +7,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.dokument.felles.KodeverkHjelper;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.util.FellesKodeverk;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class FellesKodeverkSerializer extends StdSerializer<KodeverkHjelper> {
