@@ -17,12 +17,12 @@ public enum ProsessDataKey {
     HOVEDDOKUMENT_TITTEL("hoveddokumentTittel"),
     JOURNALPOST_ID("journalpostID"),
     LAND("land"),
+    OPPFRISK_SAKSOPPLYSNING("Oppfrisk_saksopplysning"),
     OPPGAVE_ID("oppgaveID"),
     SAKSNUMMER("saksnummer"),
     SOB_BEHANDLING_ID("sobBehandlingId"),
     SØKNADSPERIODE("søknadsperiode"),
-    TEMA("tema"),
-    OPPFRISK_SAKSOPPLYSNING("Oppfrisk_saksopplysning");
+    TEMA("tema");
 
     private String kode;
 

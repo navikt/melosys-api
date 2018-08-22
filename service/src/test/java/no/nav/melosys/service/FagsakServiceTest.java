@@ -136,9 +136,9 @@ public class FagsakServiceTest {
         ArrayList<Prosessinstans> prosessinstansArrayList = new ArrayList<>();
         prosessinstansArrayList.add(prosessinstans);
 
-         when(prosessinstansRepository.findByBehandling_Id(anyLong())).thenReturn(prosessinstansArrayList);
-         when(behandlingRepo.findOne(anyLong())).thenReturn(behandling);
-         when(aktoerIdCache.hentIdentFraCache(any())).thenReturn("123456");
+        when(prosessinstansRepository.findByBehandling_Id(anyLong())).thenReturn(prosessinstansArrayList);
+        when(behandlingRepo.findOne(anyLong())).thenReturn(behandling);
+        when(aktoerIdCache.hentIdentFraCache(any())).thenReturn("123456");
 
         fagsakService.oppfriskSaksopplysning(anyLong());
 
