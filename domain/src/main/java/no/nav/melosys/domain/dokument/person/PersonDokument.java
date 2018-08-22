@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,7 +36,7 @@ public class PersonDokument extends SaksopplysningDokument {
 
     public String sammensattNavn;
 
-    public List<Familiemedlem> familiemedlemmer; // Fixme : Hent bare barn ?
+    public List<Familiemedlem> familiemedlemmer;
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
     @JsonProperty("foedselsdato")
@@ -47,6 +48,7 @@ public class PersonDokument extends SaksopplysningDokument {
 
     public Diskresjonskode diskresjonskode;
 
+    @JsonProperty("personStatus")
     public Personstatus personstatus;
 
     public Bostedsadresse bostedsadresse;
@@ -55,7 +57,8 @@ public class PersonDokument extends SaksopplysningDokument {
 
     public MidlertidigPostadresse midlertidigPostadresse;
 
-    @JsonProperty(required = true)
-    public boolean erEgenAnsatt; // Fixme : hvordan hente den informasjon ?
+    @XmlTransient
+    @JsonProperty(defaultValue = "false" )
+    public boolean erEgenAnsatt; // FIXME : MELOSYS-1580
 
 }

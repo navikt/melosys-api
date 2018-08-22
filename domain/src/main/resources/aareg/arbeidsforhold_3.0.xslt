@@ -24,9 +24,14 @@
                                     <fom><xsl:value-of select="@fomGyldighetsperiode"/></fom>
                                     <tom><xsl:value-of select="@tomGyldighetsperiode"/></tom>
                                 </gyldighetsperiode>
-                                <arbeidstidsordning><xsl:value-of select="arbeidstidsordning" /></arbeidstidsordning>
+                                <arbeidstidsordning>
+                                    <kode><xsl:value-of select="arbeidstidsordning/@kodeRef" /></kode>
+                                </arbeidstidsordning>
                                 <avloenningstype><xsl:value-of select="avloenningstype" /></avloenningstype>
-                                <yrke><xsl:value-of select="yrke" /></yrke>
+                                <yrke>
+                                    <kode><xsl:value-of select="yrke/@kodeRef" /></kode>
+                                    <term><xsl:value-of select="yrke" /></term>
+                                </yrke>
                                 <avtaltArbeidstimerPerUke><xsl:value-of select="avtaltArbeidstimerPerUke" /></avtaltArbeidstimerPerUke>
                                 <stillingsprosent><xsl:value-of select="stillingsprosent" /></stillingsprosent>
                                 <sisteLoennsendringsdato><xsl:value-of select="sisteLoennsendringsdato" /></sisteLoennsendringsdato>

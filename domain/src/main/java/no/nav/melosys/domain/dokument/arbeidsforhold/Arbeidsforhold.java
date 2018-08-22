@@ -56,7 +56,7 @@ public class Arbeidsforhold implements HarPeriode {
     @XmlJavaTypeAdapter(XMLDateTimeToOffsetDateTime.class)
     public OffsetDateTime sistBekreftet;
 
-    @JsonProperty(value = "timerTimelonnet")
+    @JsonProperty("timerTimelonnet")
     public List<AntallTimerIPerioden> antallTimerForTimeloennet;
 
     // FIXME: Endre brukenb av gjenværende metoder til direkteaksess
