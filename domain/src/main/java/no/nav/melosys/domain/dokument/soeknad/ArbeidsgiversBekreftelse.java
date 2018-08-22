@@ -13,6 +13,5 @@ public class ArbeidsgiversBekreftelse {
     public boolean arbeidstakerTidligereUtsendt24Mnd;
     public boolean arbeidsgiverBetalerArbeidsgiveravgift;
     public boolean trygdeavgiftTrukketGjennomSkatt;
-    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    public LocalDate trygdeavgiftTrukketGjennomSkattDato;
+    public String trygdeavgiftTrukketGjennomSkattDato;
 }

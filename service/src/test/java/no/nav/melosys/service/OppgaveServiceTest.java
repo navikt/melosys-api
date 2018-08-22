@@ -8,14 +8,12 @@ import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakStatus;
 import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.dokument.soeknad.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.TekniskException;
@@ -103,10 +101,13 @@ public class OppgaveServiceTest {
         saksopplysninger.add(personOpplysning);
 
         SoeknadDokument soeknadDokument = new SoeknadDokument();
-        soeknadDokument.fnr = "111111111111";
         soeknadDokument.arbeidUtland = new ArbeidUtland();
-        soeknadDokument.arbeidUtland.arbeidsland = Collections.singletonList(new Land(Land.NORGE));
-        soeknadDokument.arbeidUtland.arbeidsperiode = new Periode(LocalDate.of(2018, 1, 21), LocalDate.of(2018, 5, 21));
+        soeknadDokument.arbeidUtland.adresse = new StandardAdress();
+        soeknadDokument.arbeidUtland.adresse.land = Collections.singletonList(new Land(Land.NORGE).getKode());
+
+        soeknadDokument.oppholdUtland = new OppholdUtland();
+        soeknadDokument.oppholdUtland.oppholdsland = Collections.singletonList(new Land(Land.NORGE).getKode());
+        soeknadDokument.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.of(2018,12, 12));
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SØKNAD);

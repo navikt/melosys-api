@@ -448,6 +448,11 @@
                 <version>${melosys.jsonschema.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>20180813</version>
+            </dependency>
+            <dependency>
                 <groupId>com.github.everit-org.json-schema</groupId>
                 <artifactId>org.everit.json.schema</artifactId>
                 <version>${everit.jsonschema.validator.version}</version>
