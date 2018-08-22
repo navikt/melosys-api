@@ -13,6 +13,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
@@ -63,6 +64,9 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     break;
                 case INNTEKT:
                     dto.setInntekt((InntektDokument)dokument);
+                    break;
+                case SOB_SAK:
+                    dto.setSakOgBehandling((SobSakDokument) dokument);
                     break;
                 case SØKNAD:
                     // N.B. Frontend ønsker ikke å få søknaden på /fagsaker slik at opplysninger fra registrene er adskilt
