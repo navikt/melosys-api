@@ -3,10 +3,9 @@ package no.nav.melosys.domain;
 public enum FellesKodeverk {
     
     ARBEIDSTIDSORDNINGER("Arbeidstidsordninger"),
-    ARBEIDSFORHOLDSTYPER("Arbeidsforholdstyper"),
     DEKNING_MEDL("DekningMedl"),
-    DISKRESJONSKODER("Diskresjonskoder"),
     DOKUMENTKATEGORIER("Dokumentkategorier"),
+    ENHETSTYPER_JURIDISK_ENHET("EnhetstyperJuridiskEnhet"),
     GRUNNLAG_MEDL("GrunnlagMedl"),
     KILDEDOKUMENT_MEDL("KildedokumentMedl"),
     KILDESYSTEM_MEDL("KildesystemMedl"),
@@ -15,10 +14,9 @@ public enum FellesKodeverk {
     LANDKODERISO2("LandkoderISO2"),
     LOVVALG_MEDL("LovvalgMedl"),
     PERIODESTATUS_MEDL("PeriodestatusMedl"),
-    POSTNUMMER("Postnummer"),
-    SIVILSTANDER("Sivilstander");
+    POSTNUMMER("Postnummer");
 
-    private FellesKodeverk(String navn) {
+    FellesKodeverk(String navn) {
         this.navn = navn;
     }
     
