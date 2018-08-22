@@ -114,8 +114,10 @@ public class OppgaveService {
         if (behandling == null) {
             throw new RuntimeException("Det finnes ingen aktive behandlinger");
         } else {
+            behandlingDto.setBehandlingID(behandling.getId());
             behandlingDto.setStatus(behandling.getStatus());
             behandlingDto.setType(behandling.getType());
+            behandlingDto.setEndretDato(behandling.getEndretDato());
         }
         return behandlingDto;
     }
