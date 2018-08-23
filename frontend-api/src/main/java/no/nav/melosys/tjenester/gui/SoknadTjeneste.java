@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -43,7 +42,7 @@ public class SoknadTjeneste extends RestTjeneste  {
     @Path("{behandlingID}")
     @ApiOperation(value = "Henter en søknad som hører til en gitt behandling", notes = ("Spesifikke saker kan hentes via saksnummer."))
     public Response hentSøknad(@PathParam("behandlingID") long behandlingID) {
-        SoeknadDokument soeknad = null;
+        SoeknadDokument soeknad;
 
         try {
             soeknad = soeknadService.hentSoeknad(behandlingID);
