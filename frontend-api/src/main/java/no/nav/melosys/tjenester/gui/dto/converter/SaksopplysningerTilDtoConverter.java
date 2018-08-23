@@ -46,7 +46,9 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     break;
                 case ARBEIDSFORHOLD:
                     ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) dokument;
-                    arbeidsforholdDokument.getArbeidsforhold().sort(new ArbeidsforholdComparator());
+                    if (arbeidsforholdDokument != null && arbeidsforholdDokument.getArbeidsforhold() != null) {
+                        arbeidsforholdDokument.getArbeidsforhold().sort(new ArbeidsforholdComparator());
+                    }
                     dto.setArbeidsforhold(arbeidsforholdDokument);
                     break;
                 case ORGANISASJON:
@@ -54,7 +56,9 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     break;
                 case MEDLEMSKAP:
                     MedlemskapDokument medlemskapDokument = (MedlemskapDokument) dokument;
-                    medlemskapDokument.getMedlemsperiode().sort(Comparator.comparing(Medlemsperiode::getType).thenComparing(medlemsperiodeKomparator));
+                    if (medlemskapDokument != null && medlemskapDokument.getMedlemsperiode() != null) {
+                        medlemskapDokument.getMedlemsperiode().sort(Comparator.comparing(Medlemsperiode::getType).thenComparing(medlemsperiodeKomparator));
+                    }
                     dto.setMedlemskap(medlemskapDokument);
                     break;
                 case INNTEKT:
