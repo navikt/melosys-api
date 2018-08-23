@@ -32,7 +32,7 @@ public class PersonDokument extends SaksopplysningDokument {
 
     /** Kodeverk: Kjønnstyper */
     @JsonProperty("kjoenn")
-    public KjønnsType kjønn;
+    public KjoennsType kjønn;
 
     public String sammensattNavn;
 

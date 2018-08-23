@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.dokument.felles.KodeverkHjelper;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import org.springframework.util.StringUtils;
 
 public class FellesKodeverkSerializer extends StdSerializer<KodeverkHjelper> {
 
@@ -20,11 +21,18 @@ public class FellesKodeverkSerializer extends StdSerializer<KodeverkHjelper> {
 
     @Override
     public void serialize(KodeverkHjelper kodeverkHjelper, JsonGenerator generator, SerializerProvider serializerProvider) throws IOException {
-        String landTerm = kodeverkService.dekod(kodeverkHjelper.hentKodeverkNavn(), kodeverkHjelper.getKode(), LocalDate.now());
-        String landKode = kodeverkHjelper.getKode();
+        String kode = kodeverkHjelper.getKode();
+        String term = null;
+
+        if (StringUtils.isEmpty(kode)) {
+            kode = null;
+        } else {
+            term = kodeverkService.dekod(kodeverkHjelper.hentKodeverkNavn(), kodeverkHjelper.getKode(), LocalDate.now());
+        }
+
         generator.writeStartObject();
-        generator.writeStringField("kode", landKode);
-        generator.writeStringField("term", landTerm);
+        generator.writeStringField("kode", kode);
+        generator.writeStringField("term", term);
         generator.writeEndObject();
     }
 }

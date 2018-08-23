@@ -16,6 +16,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.AdresseDto;
 import no.nav.melosys.tjenester.gui.dto.GateadresseDto;
 import no.nav.melosys.tjenester.gui.dto.OrganisasjonDto;
+import org.springframework.util.StringUtils;
 
 public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> {
 
@@ -33,21 +34,21 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         organisasjonDto.setOrgnr(organisasjon.getOrgnummer());
         organisasjonDto.setNavn(getNavn(organisasjon));
         organisasjonDto.setOppstartdato(organisasjon.getOppstartsdato());
-        organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype(), LocalDate.now()));
-
-        if (organisasjon.getOrganisasjonDetaljer() == null) {
-            return;
+        if (!StringUtils.isEmpty(organisasjon.getEnhetstype())) {
+            organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype(), LocalDate.now()));
         }
 
         // OrganisasjonDetaljer
-        List<GeografiskAdresse> forretningsadresser = organisasjon.getOrganisasjonDetaljer().getForretningsadresse();
-        if (forretningsadresser != null) {
-            organisasjonDto.setForretningsadresse(tilAdresseDto(forretningsadresser));
-        }
+        if (organisasjon.getOrganisasjonDetaljer() != null) {
+            List<GeografiskAdresse> forretningsadresser = organisasjon.getOrganisasjonDetaljer().getForretningsadresse();
+            if (forretningsadresser != null) {
+                organisasjonDto.setForretningsadresse(tilAdresseDto(forretningsadresser));
+            }
 
-        List<GeografiskAdresse> postadresser = organisasjon.getOrganisasjonDetaljer().getPostadresse();
-        if (postadresser != null) {
-            organisasjonDto.setPostadresse(tilAdresseDto(postadresser));
+            List<GeografiskAdresse> postadresser = organisasjon.getOrganisasjonDetaljer().getPostadresse();
+            if (postadresser != null) {
+                organisasjonDto.setPostadresse(tilAdresseDto(postadresser));
+            }
         }
 
         generator.writeObject(organisasjonDto);

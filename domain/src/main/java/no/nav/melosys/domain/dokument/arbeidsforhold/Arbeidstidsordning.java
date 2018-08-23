@@ -4,11 +4,6 @@ import no.nav.melosys.domain.dokument.felles.KodeverkHjelper;
 import no.nav.melosys.domain.FellesKodeverk;
 
 public class Arbeidstidsordning implements KodeverkHjelper {
-    public static final String doegnkontinuerligSkiftOgTurnus355 = "doegnkontinuerligSkiftOgTurnus355";
-    public static final String helkontinuerligSkiftOgAndreOrdninger336 = "helkontinuerligSkiftOgAndreOrdninger336";
-    public static final String ikkeSkift = "ikkeSkift";
-    public static final String offshore336 = "offshore336";
-    public static final String skift365 = "skift365";
 
     private String kode;
 

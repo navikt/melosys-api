@@ -3,20 +3,12 @@ package no.nav.melosys.domain.dokument.person;
 import no.nav.melosys.domain.dokument.felles.KodeverkHjelper;
 import no.nav.melosys.domain.FellesKodeverk;
 
-public class KjønnsType implements KodeverkHjelper{
-
-    public static final String K = "K";
-    public static final String M = "M";
-    public static final String U = "U";
+public class KjoennsType implements KodeverkHjelper {
 
     private String kode;
 
     // Brukes av JAXB
-    public KjønnsType() {}
-
-    public KjønnsType(String kjønnstypeKode) {
-        this.kode = kjønnstypeKode;
-    }
+    public KjoennsType() {}
 
     public String getKode() {
         return kode;
