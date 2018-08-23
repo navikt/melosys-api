@@ -1,6 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -8,31 +10,48 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import io.github.benas.randombeans.EnhancedRandomBuilder;
+import io.github.benas.randombeans.FieldDefinitionBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
+import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
+import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
+import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class FagsakTjenesteTest extends JsonSchemaTest {
+
+    private EnhancedRandom random;
 
     private FagsakTjeneste tjeneste;
 
+    @Mock
+    private FagsakService fagsakService;
+
     @Before
     public void setUp() {
-        FagsakService fagsakService = mock(FagsakService.class);
         tjeneste = new FagsakTjeneste(fagsakService);
 
-        EnhancedRandom random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
-            .collectionSizeRange(1, 10).build();
-        Fagsak fagsak = random.nextObject(Fagsak.class);
-        when(fagsakService.hentFagsak(any())).thenReturn(fagsak);
+        random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
+            .collectionSizeRange(1, 4)
+            .exclude(FieldDefinitionBuilder.field().named("tilleggsinformasjonDetaljer").ofType(TilleggsinformasjonDetaljer.class).inClass(Tilleggsinformasjon.class).get())
+            .build();
     }
 
     @Override
@@ -42,10 +61,26 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
 
     @Test
     public void hentFagsak() throws IOException, ProcessingException {
+        Fagsak fagsak = random.nextObject(Fagsak.class);
+        when(fagsakService.hentFagsak(any())).thenReturn(fagsak);
+
         Response response = tjeneste.hentFagsak("TEST");
         FagsakDto fagsakDto = (FagsakDto) response.getEntity();
-        JsonNode testNode = new ObjectMapper().valueToTree(fagsakDto);
+        // Saksopplysninger må genereres separat
+        for (BehandlingDto b : fagsakDto.getBehandlinger()) {
+            SaksopplysningerDto saksopplysninger = b.getSaksopplysninger();
+            saksopplysninger.setArbeidsforhold(random.nextObject(ArbeidsforholdDokument.class));
+            saksopplysninger.setInntekt(random.nextObject(InntektDokument.class, "tilleggsinformasjonDetaljer"));
+            saksopplysninger.setMedlemskap(random.nextObject(MedlemskapDokument.class));
+            List<OrganisasjonDokument> organisasjoner = new ArrayList<>();
+            for (int i = 0; i < random.nextInt(4); i++) {
+                organisasjoner.add(random.nextObject(OrganisasjonDokument.class));
+            }
+            saksopplysninger.setOrganisasjoner(organisasjoner);
+            saksopplysninger.setPerson(random.nextObject(PersonDokument.class));
+        }
 
+        JsonNode testNode = new ObjectMapper().valueToTree(fagsakDto);
         ProcessingReport report = hentSchema().validate(testNode);
         assertThat(report.isSuccess());
     }

@@ -11,10 +11,12 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.service.kodeverk.FellesKodeverk;
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.AdresseDto;
 import no.nav.melosys.tjenester.gui.dto.GateadresseDto;
+import no.nav.melosys.tjenester.gui.dto.OrganisasjonDto;
+import org.springframework.util.StringUtils;
 
 public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> {
 
@@ -27,28 +29,29 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
 
     @Override
     public void serialize(OrganisasjonDokument organisasjon, JsonGenerator generator, SerializerProvider provider) throws IOException {
-        generator.writeStartObject();
+        OrganisasjonDto organisasjonDto = new OrganisasjonDto();
 
-        generator.writeObjectField("orgnr", organisasjon.getOrgnummer());
-        generator.writeObjectField("navn", getNavn(organisasjon));
-
-        if (organisasjon.getOrganisasjonDetaljer() == null) {
-            generator.writeEndObject();
-            return;
+        organisasjonDto.setOrgnr(organisasjon.getOrgnummer());
+        organisasjonDto.setNavn(getNavn(organisasjon));
+        organisasjonDto.setOppstartdato(organisasjon.getOppstartsdato());
+        if (!StringUtils.isEmpty(organisasjon.getEnhetstype())) {
+            organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype(), LocalDate.now()));
         }
 
         // OrganisasjonDetaljer
-        List<GeografiskAdresse> forretningsadresser = organisasjon.getOrganisasjonDetaljer().getForretningsadresse();
-        if (forretningsadresser != null) {
-            generator.writeObjectField("forretningsadresse", tilAdresseDto(forretningsadresser));
+        if (organisasjon.getOrganisasjonDetaljer() != null) {
+            List<GeografiskAdresse> forretningsadresser = organisasjon.getOrganisasjonDetaljer().getForretningsadresse();
+            if (forretningsadresser != null) {
+                organisasjonDto.setForretningsadresse(tilAdresseDto(forretningsadresser));
+            }
+
+            List<GeografiskAdresse> postadresser = organisasjon.getOrganisasjonDetaljer().getPostadresse();
+            if (postadresser != null) {
+                organisasjonDto.setPostadresse(tilAdresseDto(postadresser));
+            }
         }
 
-        List<GeografiskAdresse> postadresser = organisasjon.getOrganisasjonDetaljer().getPostadresse();
-        if (postadresser != null) {
-            generator.writeObjectField("postadresse", tilAdresseDto(postadresser));
-        }
-
-        generator.writeEndObject();
+        generator.writeObject(organisasjonDto);
     }
 
     private AdresseDto tilAdresseDto(List<GeografiskAdresse> adresser) {

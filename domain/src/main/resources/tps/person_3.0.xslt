@@ -12,7 +12,9 @@
             <statsborgerskap>
                 <kode><xsl:value-of select="statsborgerskap/land"/></kode>
             </statsborgerskap>
-            <kjønn><xsl:value-of select="kjoenn/kjoenn"/></kjønn>
+            <kjønn>
+                <kode><xsl:value-of select="kjoenn/kjoenn"/></kode>
+            </kjønn>
             <sammensattNavn><xsl:value-of select="personnavn/sammensattNavn"/></sammensattNavn>
             <fødselsdato><xsl:value-of select="foedselsdato/foedselsdato"/></fødselsdato>
             <dødsdato><xsl:value-of select="doedsdato/doedsdato"/></dødsdato>

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -31,7 +32,7 @@ public class PersonDokument extends SaksopplysningDokument {
 
     /** Kodeverk: Kjønnstyper */
     @JsonProperty("kjoenn")
-    public String kjønn;
+    public KjoennsType kjønn;
 
     public String sammensattNavn;
 
@@ -47,6 +48,7 @@ public class PersonDokument extends SaksopplysningDokument {
 
     public Diskresjonskode diskresjonskode;
 
+    @JsonProperty("personStatus")
     public Personstatus personstatus;
 
     public Bostedsadresse bostedsadresse;
@@ -54,5 +56,9 @@ public class PersonDokument extends SaksopplysningDokument {
     public UstrukturertAdresse postadresse;
 
     public MidlertidigPostadresse midlertidigPostadresse;
+
+    @XmlTransient
+    @JsonProperty(defaultValue = "false" )
+    public boolean erEgenAnsatt; // FIXME : MELOSYS-1580
 
 }

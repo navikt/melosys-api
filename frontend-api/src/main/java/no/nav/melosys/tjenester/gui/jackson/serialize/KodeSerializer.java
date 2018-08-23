@@ -11,9 +11,9 @@ import no.nav.melosys.service.kodeverk.KodeDto;
 /**
  * Alle klasser som implementerer {@code Kodeverk} serialiseres med kode og term.
  */
-public class KodeverkSerializer extends StdSerializer<Kodeverk> {
+public class KodeSerializer extends StdSerializer<Kodeverk> {
 
-    public KodeverkSerializer() {
+    public KodeSerializer() {
         super(Kodeverk.class);
     }
 

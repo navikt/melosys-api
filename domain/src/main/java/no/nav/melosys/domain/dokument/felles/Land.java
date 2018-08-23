@@ -1,8 +1,8 @@
 package no.nav.melosys.domain.dokument.felles;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.melosys.domain.FellesKodeverk;
 
-public class Land {
+public class Land implements KodeverkHjelper{
     public static final String BELGIA = "BEL";
     public static final String BULGARIA = "BGR";
     public static final String DANMARK = "DNK";
@@ -50,9 +50,13 @@ public class Land {
         this.kode = landkode;
     }
 
-    @JsonValue
     public String getKode() {
         return kode;
+    }
+
+    @Override
+    public FellesKodeverk hentKodeverkNavn() {
+        return FellesKodeverk.LANDKODER;
     }
 
     public void setKode(String kode) {

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * Klassen tilbyr tjenester for å slå opp kodeverk.
@@ -76,6 +78,11 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
      * Henter verdien for en kode i et kodeverk på en gitt dato, eller null hvis koden ikke er omfattet av kodeverket på angitt dato.
      */
     public String dekod(FellesKodeverk kodeverk, String kode, LocalDate dato) {
+        if (StringUtils.isEmpty(kode)) {
+            log.error("Metode dekod kalt med kode " + kode);
+            throw new RuntimeException("Kode må ikke være null eller tom");
+        }
+
         List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
         if (kodeperioder == null) {
             log.error("Fant ikke term for kode '{}' kodeverk '{}'", kode, kodeverk.getNavn());
