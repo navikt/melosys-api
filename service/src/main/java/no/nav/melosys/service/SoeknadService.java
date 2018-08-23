@@ -1,19 +1,19 @@
 package no.nav.melosys.service;
 
+import java.util.Comparator;
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.ws.rs.NotFoundException;
-import java.util.Comparator;
-import java.util.Optional;
 
 @Service
 public class SoeknadService {
@@ -31,10 +31,10 @@ public class SoeknadService {
         this.dokumentFactory = dokumentFactory;
     }
 
-    public SoeknadDokument hentSoeknad(long behandlingID) {
+    public SoeknadDokument hentSoeknad(long behandlingID) throws IkkeFunnetException {
         Behandling behandling = behandlingRepo.findOne(behandlingID);
         if (behandling == null) {
-            throw new NotFoundException("Behandling ikke funnet"); // Behandling ikke funnet
+            throw new IkkeFunnetException("Behandling ikke funnet");
         }
 
         Comparator<? super Saksopplysning> comparator = Comparator.comparing(Saksopplysning::getRegistrertDato);
