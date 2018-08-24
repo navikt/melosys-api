@@ -1,36 +1,37 @@
 package no.nav.melosys.domain.dokument.person;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-import no.nav.melosys.domain.dokument.KodeverkEnum;
+import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.dokument.felles.KodeverkHjelper;
 
-/**
- * Denne enumen er en hardkoding av kodeverket Personstatuser.
- */
-public enum Personstatus implements KodeverkEnum<Personstatus> {
+public enum Personstatus implements KodeverkHjelper {
 
-    ADNR("Aktivt"),
-    UTPE("Utgått person"),
-    BOSA("Bosatt"),
-    UREG("Uregistrert person"),
-    ABNR("Aktivt BOSTNR"),
-    UFUL("Ufullstendig fødselsnr"),
-    UTVA("Utvandret"),
-    FOSV("Forsvunnet/savnet"),
-    DØDD("Død"),
-    DØD("Død"),
-    UTAN("Utgått person annullert tilgang Fnr"),
-    FØDR("Fødselregistrert");
+    ADNR("ADNR"),
+    UTPE("UTPE"),
+    BOSA("BOSA"),
+    UREG("UREG"),
+    ABNR("ABNR"),
+    UFUL("UFUL"),
+    UTVA("UTVA"),
+    FOSV("FOSV"),
+    DØDD("DØDD"),
+    DØD("DØD"),
+    UTAN("UTAN"),
+    FØDR("FØDR");
     
-    private String navn;
+    private String kode;
     
-    private Personstatus(String navn) {
-        this.navn = navn;
+    Personstatus(String kode) {
+        this.kode = kode;
     }
 
-    @JsonValue
     @Override
-    public String getNavn() {
-        return navn;
+    public String getKode() {
+        return kode;
+    }
+
+    @Override
+    public FellesKodeverk hentKodeverkNavn() {
+        return FellesKodeverk.PERSONSTATUSER;
     }
 
 }

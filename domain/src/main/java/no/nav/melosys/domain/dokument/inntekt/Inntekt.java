@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.Loennsinntekt;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.Naeringsinntekt;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.PensjonEllerTrygd;
@@ -49,6 +50,7 @@ import no.nav.melosys.domain.dokument.jaxb.YearMonthXmlAdapter;
 })
 public class Inntekt {
 
+    @JsonIgnore
     public String arbeidsforholdREF;
 
     @XmlElement(required = true)
@@ -73,6 +75,7 @@ public class Inntekt {
 
     public Periode opptjeningsperiode;
 
+    @JsonIgnore
     public String skattemessigBosattLand;
 
     @XmlJavaTypeAdapter(YearMonthXmlAdapter.class)
@@ -81,6 +84,7 @@ public class Inntekt {
 
     public String opplysningspliktigID;
 
+    @JsonIgnore
     public String inntektsinnsenderID;
 
     public String virksomhetID;

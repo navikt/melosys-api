@@ -1,32 +1,34 @@
 package no.nav.melosys.domain.dokument.person;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import no.nav.melosys.domain.dokument.KodeverkEnum;
+import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.dokument.felles.KodeverkHjelper;
 
-/**
- * Denne enumen er en hardkoding av kodeverket Diskresjonskoder.
- */
-public enum Diskresjonskode implements KodeverkEnum<Diskresjonskode> {
+public enum Diskresjonskode implements KodeverkHjelper {
 
-    MILI("Militær"),
-    UFB("Uten fast bopel"),
-    URIK("I utenrikstjeneste"),
-    SPSF("Sperret adresse, strengt fortrolig"),
-    SVAL("Svalbard"),
-    SPFO("Sperret adresse, fortrolig"),
-    PEND("Pendler"),
-    KLIE("Klientadresse");
+    MILI("MILI"),
+    UFB("UFB"),
+    URIK("URIK"),
+    SPSF("SPSF"),
+    SVAL("SVAL"),
+    SPFO("SPFO"),
+    PEND("PEND"),
+    KLIE("KLIE");
     
-    private String navn;
+    private String kode;
     
-    private Diskresjonskode(String navn) {
-        this.navn = navn;
+    Diskresjonskode(String kode) {
+        this.kode = kode;
     }
 
     @JsonValue
     @Override
-    public String getNavn() {
-        return navn;
+    public String getKode() {
+        return kode;
     }
 
+    @Override
+    public FellesKodeverk hentKodeverkNavn() {
+        return FellesKodeverk.DISKRESJONSKODER;
+    }
 }

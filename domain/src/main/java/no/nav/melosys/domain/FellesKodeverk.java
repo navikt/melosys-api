@@ -4,6 +4,7 @@ public enum FellesKodeverk {
     
     ARBEIDSTIDSORDNINGER("Arbeidstidsordninger"),
     DEKNING_MEDL("DekningMedl"),
+    DISKRESJONSKODER("Diskresjonskoder"),
     DOKUMENTKATEGORIER("Dokumentkategorier"),
     ENHETSTYPER_JURIDISK_ENHET("EnhetstyperJuridiskEnhet"),
     GRUNNLAG_MEDL("GrunnlagMedl"),
@@ -14,6 +15,7 @@ public enum FellesKodeverk {
     LANDKODERISO2("LandkoderISO2"),
     LOVVALG_MEDL("LovvalgMedl"),
     PERIODESTATUS_MEDL("PeriodestatusMedl"),
+    PERSONSTATUSER("Personstatuser"),
     POSTNUMMER("Postnummer");
 
     FellesKodeverk(String navn) {

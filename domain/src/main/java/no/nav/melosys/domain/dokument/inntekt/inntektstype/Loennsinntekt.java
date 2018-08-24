@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.dokument.inntekt.Inntekt;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -16,7 +17,8 @@ public class Loennsinntekt
 
     @XmlElement(required = true)
     protected String beskrivelse; //"http://nav.no/kodeverk/Kodeverk/Loennsbeskrivelse"s
-    
+
+    @JsonIgnore
     protected Integer antall;
 
     public String getBeskrivelse() {

@@ -28,6 +28,7 @@ public class Arbeidsavtale implements HarPeriode {
 
     public BigDecimal stillingsprosent;
 
+    @JsonIgnore
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
     public LocalDate sisteLoennsendringsdato;
 
