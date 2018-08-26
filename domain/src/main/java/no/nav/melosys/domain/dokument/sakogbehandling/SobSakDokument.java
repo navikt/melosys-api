@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.sakogbehandling;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -16,7 +17,7 @@ public class SobSakDokument extends SaksopplysningDokument {
 
     private String sakstema; // http://nav.no/kodeverk/Kodeverk/Sakstemaer
 
-    private List<Behandlingskjede> behandlingskjede;
+    private List<Behandlingskjede> behandlingskjede = new ArrayList<>();
 
     public boolean harEøsBarnetrygd() {
         return eøsBarnetrygd;

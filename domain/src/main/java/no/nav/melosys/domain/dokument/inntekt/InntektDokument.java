@@ -1,12 +1,8 @@
 package no.nav.melosys.domain.dokument.inntekt;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 
@@ -16,7 +12,7 @@ public class InntektDokument extends SaksopplysningDokument {
 
     @XmlElementWrapper(name="arbeidsInntektMaanedListe")
     @XmlElement(name="arbeidsInntektMaaned")
-    public List<ArbeidsInntektMaaned> arbeidsInntektMaanedListe;
+    public List<ArbeidsInntektMaaned> arbeidsInntektMaanedListe = new ArrayList<>();
 
     public List<ArbeidsInntektMaaned> getArbeidsInntektMaanedListe() {
         return arbeidsInntektMaanedListe;

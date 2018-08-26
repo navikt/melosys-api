@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Opplysninger om arbeid i Norge
  */
 public class ArbeidNorge {
-    public List<String> valgteArbeidsforhold;
+    public List<String> valgteArbeidsforhold = new ArrayList<>();
     public Boolean arbeidsforholdOpprettholdIHelePerioden;
     @JsonProperty("brukerErSelvstendigNaeringsdrivende")
     public Boolean brukerErSelvstendigNæringsdrivende;

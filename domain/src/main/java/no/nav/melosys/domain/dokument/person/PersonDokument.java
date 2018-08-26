@@ -1,15 +1,14 @@
 package no.nav.melosys.domain.dokument.person;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
@@ -36,7 +35,7 @@ public class PersonDokument extends SaksopplysningDokument {
 
     public String sammensattNavn;
 
-    public List<Familiemedlem> familiemedlemmer;
+    public List<Familiemedlem> familiemedlemmer = new ArrayList<>();
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
     @JsonProperty("foedselsdato")

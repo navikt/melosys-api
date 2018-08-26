@@ -57,12 +57,10 @@ public class Arbeidsforhold implements HarPeriode {
     public OffsetDateTime sistBekreftet;
 
     @JsonProperty("timerTimelonnet")
-    public List<AntallTimerIPerioden> antallTimerForTimeloennet;
+    public List<AntallTimerIPerioden> antallTimerForTimeloennet = new ArrayList<>();
 
     // FIXME: Endre brukenb av gjenværende metoder til direkteaksess
-    
-    // FIXME: Sjekk om dette påvirker JAX.
-    // Hvis det gjør det, gjør nødvendige endringer slik at det ikke gjør det. Gjør samme endringer også i andre relevante klasser som implementerer HarPeriode
+
     @Override
     @JsonIgnore
     public ErPeriode getPeriode() {

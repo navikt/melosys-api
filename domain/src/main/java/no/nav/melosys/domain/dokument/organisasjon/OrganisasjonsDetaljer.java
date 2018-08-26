@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.organisasjon;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -15,17 +16,17 @@ public class OrganisasjonsDetaljer {
     public String orgnummer;
 
     @XmlElement(name="organisasjonsnavn")
-    public List<Organisasjonsnavn> navn;
+    public List<Organisasjonsnavn> navn = new ArrayList<>();
 
-    public List<GeografiskAdresse> forretningsadresse;
+    public List<GeografiskAdresse> forretningsadresse = new ArrayList<>();
 
-    private List<GeografiskAdresse> postadresse;
+    private List<GeografiskAdresse> postadresse = new ArrayList<>();
 
-    public List<Telefonnummer> telefon;
+    public List<Telefonnummer> telefon = new ArrayList<>();
 
-    public List<Epost> epostadresse;
+    public List<Epost> epostadresse = new ArrayList<>();
 
-    public List<String> naering; //"http://nav.no/kodeverk/Kodeverk/Næringskoder"
+    public List<String> naering = new ArrayList<>(); //"http://nav.no/kodeverk/Kodeverk/Næringskoder"
 
     public String getOrgnummer() {
         return orgnummer;

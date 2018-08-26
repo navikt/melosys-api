@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.arbeidsforhold;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.*;
 
@@ -13,7 +14,7 @@ public class ArbeidsforholdDokument extends SaksopplysningDokument {
 
     @XmlElementWrapper(name="arbeidsforhold")
     @XmlElement(name="arbeidsforhold")
-    public List<Arbeidsforhold> arbeidsforhold;
+    public List<Arbeidsforhold> arbeidsforhold = new ArrayList<>();
 
     public ArbeidsforholdDokument() {}
 

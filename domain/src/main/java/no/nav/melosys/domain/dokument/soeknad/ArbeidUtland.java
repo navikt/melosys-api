@@ -1,16 +1,17 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.Gateadresse;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * Opplysninger om arbeid i utlandet
  */
 public class ArbeidUtland {
-    public List<Land> arbeidsland;
+    public List<Land> arbeidsland = new ArrayList<>();
     public Periode arbeidsperiode;
     public BigDecimal arbeidsandelNorge;
     public BigDecimal arbeidsandelUtland;

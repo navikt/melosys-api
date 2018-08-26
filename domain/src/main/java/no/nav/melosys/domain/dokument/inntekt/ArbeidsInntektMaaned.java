@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.dokument.inntekt;
 
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -17,7 +18,7 @@ public class ArbeidsInntektMaaned {
     public YearMonth aarMaaned;
 
     @JsonIgnore
-    public List<Avvik> avvikListe;
+    public List<Avvik> avvikListe = new ArrayList<>();
 
     public ArbeidsInntektInformasjon arbeidsInntektInformasjon;
 
