@@ -66,7 +66,13 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
 
         String brukerId = prosessinstans.getData(BRUKER_ID);
         Behandling behandling = prosessinstans.getBehandling();
+
         Saksopplysning saksopplysning = tpsFasade.hentPersonMedAdresse(brukerId);
+        saksopplysning.setBehandling(behandling);
+        saksopplysning.setRegistrertDato(LocalDateTime.now());
+        saksopplysningRepo.save(saksopplysning);
+
+        saksopplysning = tpsFasade.hentPersonhistorikk(brukerId);
         saksopplysning.setBehandling(behandling);
         saksopplysning.setRegistrertDato(LocalDateTime.now());
         saksopplysningRepo.save(saksopplysning);

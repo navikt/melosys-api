@@ -17,6 +17,8 @@ public interface TpsFasade {
 
     Saksopplysning hentPersonMedAdresse(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException;
 
+    Saksopplysning hentPersonhistorikk(String ident) throws SikkerhetsbegrensningException, IkkeFunnetException;
+
     /**
      * @param aktørId tilsvarende til FNR
      * @return Antall personer som bor på samme bostedsadresse inkludert ident det spørres på.

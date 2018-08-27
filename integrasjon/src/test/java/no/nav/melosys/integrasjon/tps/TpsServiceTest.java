@@ -8,6 +8,7 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.test.TpsTestData;
 import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
@@ -20,6 +21,7 @@ import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentAktoerIdForIdentRespon
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentIdentForAktoerIdResponse;
 import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.IdentDetaljer;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
+import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonhistorikkResponse;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import org.junit.Before;
 import org.junit.Test;
@@ -93,6 +95,23 @@ public class TpsServiceTest {
 
         PersonDokument dokument = (PersonDokument) saksopplysning.getDokument();
         assertThat(dokument.fnr).isEqualTo(AKTØRID_1.toString());
+    }
+
+    @Test
+    public void hentPersonhistorikk() throws Exception {
+        HentPersonhistorikkResponse r1 = new HentPersonhistorikkResponse();
+        StatsborgerskapPeriode sp = new StatsborgerskapPeriode();
+        sp.setStatsborgerskap(new Statsborgerskap());
+        r1.getStatsborgerskapListe().add(sp);
+
+        when(personConsumer.hentPersonhistorikk(any())).thenReturn(r1);
+
+        Saksopplysning saksopplysning = service.hentPersonhistorikk(AKTØRID_1.toString());
+
+        PersonhistorikkDokument dokument = (PersonhistorikkDokument) saksopplysning.getDokument();
+
+        assertThat(dokument).isNotNull();
+        assertThat(dokument.statsborgerskapListe).isNotNull();
     }
 
     @Test

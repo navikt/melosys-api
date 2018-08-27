@@ -41,6 +41,7 @@ public class TpsService implements TpsFasade {
     private static final Logger log = LoggerFactory.getLogger(TpsService.class);
 
     private static final String PERSON_VERSJON = "3.0";
+    private static final String PERSONHISTORIKK_VERSJON = "3.4";
 
     private final AktorConsumer aktorConsumer;
 
@@ -64,7 +65,8 @@ public class TpsService implements TpsFasade {
         this.aktørIdCache = aktørIdCache;
 
         try {
-            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
+            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class,
+                no.nav.tjeneste.virksomhet.person.v3.HentPersonhistorikkResponse.class);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);
@@ -170,6 +172,49 @@ public class TpsService implements TpsFasade {
         behov.add(Informasjonsbehov.ADRESSE);
 
         return hentPerson(ident, behov);
+    }
+
+    @Override
+    public Saksopplysning hentPersonhistorikk(String ident) throws SikkerhetsbegrensningException, IkkeFunnetException {
+        HentPersonhistorikkRequest request = new HentPersonhistorikkRequest();
+        NorskIdent norskIdent = new NorskIdent();
+        norskIdent.setIdent(ident);
+
+        PersonIdent personIdent = new PersonIdent();
+        personIdent.setIdent(norskIdent);
+
+        request.setAktoer(personIdent);
+
+        // Kall til TPS
+        HentPersonhistorikkResponse response = null;
+        try {
+            response = personConsumer.hentPersonhistorikk(request);
+        } catch (HentPersonhistorikkSikkerhetsbegrensning hentPersonhistorikkSikkerhetsbegrensning) {
+            throw new SikkerhetsbegrensningException(hentPersonhistorikkSikkerhetsbegrensning);
+        } catch (HentPersonhistorikkPersonIkkeFunnet hentPersonhistorikkPersonIkkeFunnet) {
+            throw new IkkeFunnetException(hentPersonhistorikkPersonIkkeFunnet);
+        }
+
+        StringWriter xmlWriter = new StringWriter();
+        try {
+            no.nav.tjeneste.virksomhet.person.v3.HentPersonhistorikkResponse xmlRoot = new no.nav.tjeneste.virksomhet.person.v3.HentPersonhistorikkResponse();
+            xmlRoot.setResponse(response);
+            jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
+        } catch (JAXBException e) {
+            log.error("", e);
+            throw new IntegrasjonException(e);
+        }
+
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokumentXml(xmlWriter.toString());
+        saksopplysning.setKilde(SaksopplysningKilde.TPS);
+        saksopplysning.setType(SaksopplysningType.PERSONHISTORIKK);
+        saksopplysning.setVersjon(PERSONHISTORIKK_VERSJON);
+
+        // xml -> java objekter
+        dokumentFactory.lagDokument(saksopplysning);
+
+        return saksopplysning;
     }
 
     @Override
