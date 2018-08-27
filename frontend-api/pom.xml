@@ -82,17 +82,22 @@
         <!-- Test -->
         <dependency>
             <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-web-mock</artifactId>
+            <artifactId>melosys-schema</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.java-json-tools</groupId>
-            <artifactId>json-schema-validator</artifactId>
+            <groupId>com.github.everit-org.json-schema</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.benas</groupId>
             <artifactId>random-beans</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
