@@ -34,7 +34,7 @@ public class OppgaveMappingMellomDTOogDomainTest {
     public void testMappingMellomDTOogDomainForOppgave() throws IkkeFunnetException {
         OppgaveDto oppgaveDto = new OppgaveDto();
         oppgaveDto.setId("1234");
-        oppgaveDto.setSakreferanse("456");
+        oppgaveDto.setSaksreferanse("456");
         oppgaveDto.setOppgavetype("JFR");
         oppgaveDto.setTema("MED");
         when(oppgaveConsumerMock.hentOppgave("1234")).thenReturn(oppgaveDto);

@@ -115,7 +115,7 @@ public class GsakService implements GsakFasade {
     public String opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, TekniskException, FunksjonellException {
         OppgaveDto oppgaveDto = new OppgaveDto();
         oppgaveDto.setJournalpostId(request.getJournalpostId());
-        oppgaveDto.setSakreferanse(request.getGsakSaksnummer());
+        oppgaveDto.setSaksreferanse(request.getGsakSaksnummer());
         oppgaveDto.setAktørId(request.getAktørId());
         oppgaveDto.setTilordnetRessurs(request.getTilordnetRessurs());
         oppgaveDto.setTema(request.getTema().getKode());
@@ -164,7 +164,7 @@ public class GsakService implements GsakFasade {
         domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
         domainOppgave.setJournalpostId(oppgave.getJournalpostId());
 
-        domainOppgave.setGsakSaksnummer(oppgave.getSakreferanse());
+        domainOppgave.setGsakSaksnummer(oppgave.getSaksreferanse());
         domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
 
         if (oppgave.getTema() != null && erGyldigKode(Tema.class, oppgave.getTema())) {

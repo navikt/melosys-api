@@ -22,7 +22,7 @@ public class OppgaveDto {
     private LocalDate fristFerdigstillelse;
     private String prioritet;
     private String journalpostId;
-    private String sakreferanse;
+    private String saksreferanse;
     private String status;
     private int versjon;
 
@@ -57,12 +57,12 @@ public class OppgaveDto {
         this.journalpostId = journalpostId;
     }
 
-    public String getSakreferanse() {
-        return sakreferanse;
+    public String getSaksreferanse() {
+        return saksreferanse;
     }
 
-    public void setSakreferanse(String sakreferanse) {
-        this.sakreferanse = sakreferanse;
+    public void setSaksreferanse(String saksreferanse) {
+        this.saksreferanse = saksreferanse;
     }
 
     public String getId() {
