@@ -24,6 +24,11 @@ public class OppgaveDto {
     private String ansvarligId;
     // FIXME: MELOSYS-1401 trenger frontend behandlingstype,behandlingstema,temagruppe ?
 
+    public OppgaveDto() {
+        this.soknadsperiode = new PeriodeDto();
+        this.behandling = new BehandlingDto();
+    }
+
     //Getter og setter brukes av Jackson for å serialisere oppgave objekter til frontend i OppgaveTjeneste
     public String getAnsvarligId() {
         return ansvarligId;

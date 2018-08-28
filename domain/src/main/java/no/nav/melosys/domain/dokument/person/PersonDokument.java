@@ -50,11 +50,11 @@ public class PersonDokument extends SaksopplysningDokument {
     @JsonProperty("personStatus")
     public Personstatus personstatus;
 
-    public Bostedsadresse bostedsadresse;
+    public Bostedsadresse bostedsadresse = new Bostedsadresse();
 
-    public UstrukturertAdresse postadresse;
+    public UstrukturertAdresse postadresse = new UstrukturertAdresse();
 
-    public MidlertidigPostadresse midlertidigPostadresse;
+    public MidlertidigPostadresse midlertidigPostadresse = new MidlertidigPostadresse();
 
     @XmlTransient
     @JsonProperty(defaultValue = "false" )

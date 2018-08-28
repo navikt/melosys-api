@@ -73,7 +73,7 @@ public class Inntekt {
 
     public String opptjeningsland;
 
-    public Periode opptjeningsperiode;
+    public Periode opptjeningsperiode = new Periode();
 
     @JsonIgnore
     public String skattemessigBosattLand;
