@@ -10,7 +10,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 
 public abstract class JsonSchemaTest {
 
-    private static final String ROOT = "schema/";
+    private static final String ROOT = "scripts/schema/";
 
     public abstract String schemaNavn();
 
