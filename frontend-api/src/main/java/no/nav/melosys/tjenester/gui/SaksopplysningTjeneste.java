@@ -49,7 +49,7 @@ public class SaksopplysningTjeneste extends RestTjeneste {
     @ApiOperation(value = "Oppfrisker saksopplysing basert på behandlingsid", notes = ("Oppfrisker saksopplysing basert på behandlingsid."))
     public Response oppfriskSaksopplysning(@PathParam("id") @ApiParam("behandlingsid.") long id) {
         Behandling behandling = behandlingrepo.findOne(id);
-        if (behandling == null){
+        if (behandling == null) {
             log.error("Behandling ikke funnet med behandlingsid {}", id);
             return Response.status(Response.Status.NOT_FOUND).build();
         }

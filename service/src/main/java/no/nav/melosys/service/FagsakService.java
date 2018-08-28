@@ -33,12 +33,8 @@ public class FagsakService {
 
     private final TpsFasade tpsFasade;
 
-
     @Autowired
-    public FagsakService(FagsakRepository fagsakRepository,
-                         BehandlingRepository behandlingRepository,
-                         SaksopplysningerService saksopplysningerService,
-                         TpsFasade tpsFasade) {
+    public FagsakService(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository, SaksopplysningerService saksopplysningerService, TpsFasade tpsFasade) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.saksopplysningerService = saksopplysningerService;
