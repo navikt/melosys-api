@@ -38,11 +38,11 @@ public class Arbeidsavtale implements HarPeriode {
     public LocalDate endringsdatoStillingsprosent;
 
     @JsonProperty("fartsomraade")
-    public String fartsområde; //"http://nav.no/kodeverk/Kodeverk/Fartsomr_c3_a5der"
+    public Fartsomraade fartsområde;
 
-    public String skipsregister; //"http://nav.no/kodeverk/Kodeverk/Skipsregistre"
+    public Skipsregister skipsregister;
 
-    public String skipstype; //"http://nav.no/kodeverk/Kodeverk/Skipstyper"
+    public Skipstype skipstype;
 
     public Boolean maritimArbeidsavtale;
 
@@ -88,15 +88,15 @@ public class Arbeidsavtale implements HarPeriode {
         return endringsdatoStillingsprosent;
     }
 
-    public String getFartsområde() {
+    public Fartsomraade getFartsområde() {
         return fartsområde;
     }
 
-    public String getSkipsregister() {
+    public Skipsregister getSkipsregister() {
         return skipsregister;
     }
 
-    public String getSkipstype() {
+    public Skipstype getSkipstype() {
         return skipstype;
     }
 
