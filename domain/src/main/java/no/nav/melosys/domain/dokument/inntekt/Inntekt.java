@@ -89,6 +89,7 @@ public class Inntekt {
 
     public String virksomhetID;
 
+    @JsonIgnore
     public Tilleggsinformasjon tilleggsinformasjon;
 
     public String inntektsmottakerID;
