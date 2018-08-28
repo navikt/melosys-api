@@ -86,10 +86,6 @@ public class Prosessinstans {
         return data;
     }
 
-    public void setData(Properties data) {
-        this.data = data;
-    }
-
     /** Returnerer et dataelement som String */
     public String getData(ProsessDataKey key) {
         return data.getProperty(key.getKode());

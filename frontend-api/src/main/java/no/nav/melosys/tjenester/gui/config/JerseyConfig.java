@@ -33,6 +33,7 @@ public class JerseyConfig extends ResourceConfig {
         register(OrganisasjonTjeneste.class);
         register(PersonTjeneste.class);
         register(SaksbehandlerTjeneste.class);
+        register(SaksopplysningTjeneste.class);
         register(SoknadTjeneste.class);
         register(VurderingTjeneste.class);
         configureSwagger();

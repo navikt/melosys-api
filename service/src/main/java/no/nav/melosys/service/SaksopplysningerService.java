@@ -3,35 +3,39 @@ package no.nav.melosys.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
 import no.nav.melosys.domain.dokument.inntekt.Inntekt;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
-import no.nav.melosys.integrasjon.aareg.AaregFasade;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.aareg.AaregFasade;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektFasade;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.api.Binge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
+import static no.nav.melosys.domain.util.SoeknadUtils.hentLand;
+import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 
 @Service
 public class SaksopplysningerService {
@@ -47,23 +51,39 @@ public class SaksopplysningerService {
     @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}")
     private Integer medlemskaphistorikkAntallÅr;
 
-    private TpsFasade tpsFasade;
+    private final TpsFasade tpsFasade;
 
-    private AaregFasade aaregFasade;
+    private final AaregFasade aaregFasade;
 
-    private EregFasade eregFasade;
+    private final EregFasade eregFasade;
 
-    private MedlFasade medlFasade;
+    private final MedlFasade medlFasade;
 
-    private InntektFasade inntektFasade;
+    private final InntektFasade inntektFasade;
+
+    private final ProsessinstansRepository prosessinstansRepository;
+
+    private final Binge binge;
+
+    private final BehandlingRepository behandlingRepository;
 
     @Autowired
-    public SaksopplysningerService(TpsFasade tpsFasade, AaregFasade aaregFasade, EregFasade eregFasade, MedlFasade medlFasade, InntektFasade inntektFasade) {
+    public SaksopplysningerService(TpsFasade tpsFasade,
+                                   AaregFasade aaregFasade,
+                                   EregFasade eregFasade,
+                                   MedlFasade medlFasade,
+                                   InntektFasade inntektFasade,
+                                   ProsessinstansRepository prosessinstansRepository,
+                                   Binge binge,
+                                   BehandlingRepository behandlingRepository) {
         this.tpsFasade = tpsFasade;
         this.aaregFasade = aaregFasade;
         this.eregFasade = eregFasade;
         this.medlFasade = medlFasade;
         this.inntektFasade = inntektFasade;
+        this.prosessinstansRepository = prosessinstansRepository;
+        this.binge = binge;
+        this.behandlingRepository = behandlingRepository;
     }
 
     public ArbeidsforholdDokument hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws SikkerhetsbegrensningException {
@@ -189,5 +209,45 @@ public class SaksopplysningerService {
         }
     }
 
+    public void oppfriskSaksopplysning(long behandlingsid) throws IkkeFunnetException, TekniskException {
+        log.debug("Starter oppfrisking av behandlingsid {}", behandlingsid);
 
+        List<Prosessinstans> prosessinstans = prosessinstansRepository.findByBehandling_Id(behandlingsid);
+        Behandling behandling = behandlingRepository.findOne(behandlingsid);
+        String aktør_Id = behandling.getFagsak().getBruker().getAktørId();
+
+        SoeknadDokument søknadDokument;
+        Optional<SaksopplysningDokument> opt = hentDokument(behandling, SaksopplysningType.SØKNAD);
+        if (opt.isPresent()) {
+            søknadDokument = (SoeknadDokument) opt.get();
+        } else {
+            throw new TekniskException("Oppfrisking feilet på grunn av manglende søknad opplysning");
+        }
+
+        LocalDateTime nå = LocalDateTime.now();
+
+        Optional<Prosessinstans> aktivProsessinstans = prosessinstans.stream().filter(prosessinstans1 -> prosessinstans1.getSteg() != null).findAny();
+
+        if (!aktivProsessinstans.isPresent()) {
+            behandling.getSaksopplysninger().removeIf(saksopplysning -> saksopplysning.getType() != SaksopplysningType.SØKNAD);
+
+            Prosessinstans nyprosessinstans = new Prosessinstans();
+            nyprosessinstans.setBehandling(behandling);
+            nyprosessinstans.setType(ProsessType.SØKNAD_A1);
+            nyprosessinstans.setData(ProsessDataKey.AKTØR_ID, aktør_Id);
+            nyprosessinstans.setData(ProsessDataKey.BRUKER_ID, tpsFasade.hentIdentForAktørId(aktør_Id));
+
+            nyprosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, hentPeriode(søknadDokument));
+            nyprosessinstans.setData(ProsessDataKey.LAND, hentLand(søknadDokument));
+
+            nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
+            nyprosessinstans.setData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, true);
+            nyprosessinstans.setRegistrertDato(nå);
+
+            prosessinstansRepository.save(nyprosessinstans);
+            binge.leggTil(nyprosessinstans);
+        } else {
+            log.info("Aktiv prosessinstans finnes allerede. Ikke mulig å oppfriske saksopplysning.");
+        }
+    }
 }
