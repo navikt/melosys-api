@@ -175,15 +175,24 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Saksopplysning hentPersonhistorikk(String ident) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) throws SikkerhetsbegrensningException, IkkeFunnetException {
         HentPersonhistorikkRequest request = new HentPersonhistorikkRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
 
         PersonIdent personIdent = new PersonIdent();
         personIdent.setIdent(norskIdent);
-
         request.setAktoer(personIdent);
+
+        Periode periode = new Periode();
+        try {
+            XMLGregorianCalendar xmlDato = KonverteringsUtils.localDateToXMLGregorianCalendar(dato);
+            periode.setFom(xmlDato);
+            periode.setTom(xmlDato);
+        } catch (DatatypeConfigurationException e) {
+            throw new IntegrasjonException(e);
+        }
+        request.setPeriode(periode);
 
         // Kall til TPS
         HentPersonhistorikkResponse response = null;
@@ -234,48 +243,6 @@ public class TpsService implements TpsFasade {
             throw new IntegrasjonException(hentPersonerMedSammeAdresseSikkerhetsbegrensning.getMessage());
         } catch (HentPersonerMedSammeAdresseIkkeFunnet hentPersonerMedSammeAdresseIkkeFunnet) {
             throw new IntegrasjonException(hentPersonerMedSammeAdresseIkkeFunnet.getMessage());
-        }
-    }
-
-    @Override
-    public String hentStatsborgerskapPåGittDato(String ident, LocalDate dato) throws IkkeFunnetException, SikkerhetsbegrensningException {
-        if (dato == null) {
-            throw new IntegrasjonException("Dato kan ikke være null");
-        }
-
-        HentPersonhistorikkRequest request = new HentPersonhistorikkRequest();
-        NorskIdent norskIdent = new NorskIdent();
-        norskIdent.setIdent(ident);
-
-        PersonIdent personIdent = new PersonIdent();
-        personIdent.setIdent(norskIdent);
-
-        request.setAktoer(personIdent);
-
-        try {
-            XMLGregorianCalendar xmlDato = KonverteringsUtils.localDateToXMLGregorianCalendar(dato);
-            Periode periode = new Periode();
-            periode.setTom(xmlDato);
-            periode.setFom(xmlDato);
-            request.setPeriode(periode);
-
-            HentPersonhistorikkResponse response = personConsumer.hentPersonhistorikk(request);
-            List<StatsborgerskapPeriode> liste = response.getStatsborgerskapListe();
-
-            if (liste.isEmpty()) {
-                throw new IkkeFunnetException("Fant ikke statsborgerskap for dato " + dato);
-            }
-
-            liste.sort(endringstidspunktKomparator);
-
-            Statsborgerskap statsborgerskap = liste.get(0).getStatsborgerskap();
-            return statsborgerskap.getLand().getValue();
-        } catch (DatatypeConfigurationException e) {
-            throw new IntegrasjonException("Kunne ikke konvertere dato");
-        } catch (HentPersonhistorikkPersonIkkeFunnet e) {
-            throw new IkkeFunnetException(e);
-        } catch (HentPersonhistorikkSikkerhetsbegrensning e) {
-            throw new SikkerhetsbegrensningException(e);
         }
     }
 }

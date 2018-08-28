@@ -9,15 +9,27 @@
         <xsl:apply-templates/>
     </xsl:template>
 
+    <xsl:variable name="SKATTEDIREKTORATET">SKD</xsl:variable>
+
     <xsl:template match="response">
         <personhistorikkDokument>
-            <xsl:apply-templates/>
+            <xsl:apply-templates>
+                <xsl:sort select="@endringstidspunkt" order="descending"/>
+            </xsl:apply-templates>
         </personhistorikkDokument>
     </xsl:template>
 
     <xsl:template match="aktoer|personstatusListe"/>
 
-    <xsl:template match="statsborgerskapListe|bostedsadressePeriodeListe|postadressePeriodeListe">
+    <xsl:template match="statsborgerskapListe">
+        <xsl:if test="@endretAv = $SKATTEDIREKTORATET">
+            <xsl:element name="{local-name(.)}">
+                <xsl:apply-templates select="*|@endringstidspunkt"/>
+            </xsl:element>
+        </xsl:if>
+    </xsl:template>
+
+    <xsl:template match="bostedsadressePeriodeListe|postadressePeriodeListe">
         <xsl:element name="{local-name(.)}">
             <xsl:apply-templates select="*|@endringstidspunkt"/>
         </xsl:element>
