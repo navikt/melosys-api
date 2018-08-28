@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.Kodeverk;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
@@ -87,7 +88,7 @@ public class GsakService implements GsakFasade {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medTema( new String[]{tema.getKode()})
             .medOppgaveTyper(new String[]{oppgavetype.getKode()})
-            .medBehandlingsTyper((String[])behandlingstyper.toArray())
+            .medBehandlingsTyper(behandlingstyper.stream().map(Kodeverk::getKode).toArray(String[]::new))
             .medSorteringsfelt(SORTERINGSFELT)
             .build();
 
