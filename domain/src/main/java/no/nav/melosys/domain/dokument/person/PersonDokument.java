@@ -52,8 +52,10 @@ public class PersonDokument extends SaksopplysningDokument {
 
     public Bostedsadresse bostedsadresse = new Bostedsadresse();
 
+    @JsonIgnore
     public UstrukturertAdresse postadresse = new UstrukturertAdresse();
 
+    @JsonIgnore
     public MidlertidigPostadresse midlertidigPostadresse = new MidlertidigPostadresse();
 
     @XmlTransient
