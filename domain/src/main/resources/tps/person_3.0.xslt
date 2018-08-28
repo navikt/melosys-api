@@ -18,7 +18,9 @@
             <sammensattNavn><xsl:value-of select="personnavn/sammensattNavn"/></sammensattNavn>
             <fødselsdato><xsl:value-of select="foedselsdato/foedselsdato"/></fødselsdato>
             <dødsdato><xsl:value-of select="doedsdato/doedsdato"/></dødsdato>
-            <diskresjonskode><xsl:value-of select="diskresjonskode/diskresjonskode"/></diskresjonskode>
+            <diskresjonskode>
+                <kode><xsl:value-of select="diskresjonskode/diskresjonskode"/></kode>
+            </diskresjonskode>
             <personstatus><xsl:value-of select="personstatus/personstatus"/></personstatus>
             <xsl:apply-templates />
         </personDokument>

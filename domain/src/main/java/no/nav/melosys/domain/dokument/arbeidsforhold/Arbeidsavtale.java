@@ -38,11 +38,11 @@ public class Arbeidsavtale implements HarPeriode {
     public LocalDate endringsdatoStillingsprosent;
 
     @JsonProperty("fartsomraade")
-    public Fartsomraade fartsområde;
+    public Fartsomraade fartsområde = new Fartsomraade();
 
-    public Skipsregister skipsregister;
+    public Skipsregister skipsregister = new Skipsregister();
 
-    public Skipstype skipstype;
+    public Skipstype skipstype = new Skipstype();
 
     public Boolean maritimArbeidsavtale;
 
