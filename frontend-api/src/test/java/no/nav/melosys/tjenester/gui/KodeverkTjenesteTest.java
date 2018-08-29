@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public class KodeverkTjenesteTest extends JsonSchemaTest {
 
-    private Logger logger = LoggerFactory.getLogger(KodeverkTjenesteTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(KodeverkTjenesteTest.class);
 
     private KodeverkTjeneste tjeneste;
 

@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class FagsakTjenesteTest extends JsonSchemaTest {
 
-    private Logger logger = LoggerFactory.getLogger(FagsakTjenesteTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(FagsakTjenesteTest.class);
 
     private EnhancedRandom random;
 

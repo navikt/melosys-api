@@ -1,14 +1,11 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.Response;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -19,18 +16,20 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
-import no.nav.melosys.service.oppgave.dto.BehandlingDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
-import no.nav.melosys.service.oppgave.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
+import org.everit.json.schema.ValidationException;
+import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -38,7 +37,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OppgaveTjenesteTest {
+public class OppgaveTjenesteTest extends JsonSchemaTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(FagsakTjenesteTest.class);
 
     private OppgaveTjeneste tjeneste;
     @Mock
@@ -46,10 +47,39 @@ public class OppgaveTjenesteTest {
     @Mock
     private OppgaveService oppgaveService;
 
+    @Override
+    public String schemaNavn() {
+        return "sok-oppgaver-schema.json";
+    }
+
     @Before
     public void setUp() {
         tjeneste = new OppgaveTjeneste(oppgaveplukker, oppgaveService);
         SpringSubjectHandler.set(new TestSubjectHandler());
+    }
+
+    @Test
+    public void mineOppgaver() throws TekniskException, IOException {
+        List<OppgaveDto> oppgaver = new ArrayList<>();
+        int oppgaveNr = 1 + defaultEnhancedRandom().nextInt(3);
+        for (int i = 0; i < oppgaveNr; i++) {
+            OppgaveDto oppgaveDto = defaultEnhancedRandom().nextObject(OppgaveDto.class);
+            oppgaver.add(oppgaveDto);
+        }
+
+        when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
+        Response response = tjeneste.mineOppgaver();
+
+        List<OppgaveDto> liste = (List<OppgaveDto>) response.getEntity();
+
+        String jsonString = objectMapper().writeValueAsString(liste);
+
+        try {
+            hentSchema().validate(new JSONArray(jsonString));
+        } catch (ValidationException e) {
+            logger.error(e.toJSON().toString());
+            throw e;
+        }
     }
 
     @Test
@@ -79,79 +109,5 @@ public class OppgaveTjenesteTest {
 
         PlukketOppgaveDto entity = (PlukketOppgaveDto) response.getEntity();
         assertThat(entity.getOppgaveID()).isEqualTo("1");
-    }
-
-    @Test
-    public void mineOppgaver() throws TekniskException {
-        OppgaveDto oppgave = new OppgaveDto();
-        oppgave.setOppgaveID("177057928");
-        oppgave.setOppgavetype(no.nav.melosys.domain.oppgave.Oppgavetype.JFR);
-        oppgave.setSammensattNavn("GLITRENDE HATT");
-        oppgave.setSaksnummer("4");
-
-        BehandlingDto behandlingDto =new BehandlingDto();
-        FagsakType sakstype= FagsakType.EU_EØS;
-        BehandlingType type= BehandlingType.PÅSTAND_UTL;
-        BehandlingStatus status = BehandlingStatus.FORELØPIG;
-        oppgave.setSakstype(sakstype);
-        behandlingDto.setBehandlingType(type);
-        behandlingDto.setBehandlingStatus(status);
-        oppgave.setBehandling(behandlingDto);
-        oppgave.setSakstype(sakstype);
-
-        oppgave.setAktivTil(LocalDate.of(2016, 3, 30));
-
-        oppgave.setSoknadsperiode(new PeriodeDto(LocalDate.of(2016, 1, 1),LocalDate.of(2020, 1, 1)));
-
-        List<OppgaveDto> oppgaver = new ArrayList<>();
-        oppgaver.add(oppgave);
-
-        when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
-        Response response = tjeneste.mineOppgaver();
-
-        List<OppgaveDto> liste = (List<OppgaveDto>) response.getEntity();
-
-        assertThat(liste.get(0).getOppgaveID()).isEqualTo("177057928");
-    }
-
-    public void jsonInn() {
-        ObjectMapper mapper = new ObjectMapper();
-
-        PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
-
-        innData.setOppgavetype(no.nav.melosys.domain.oppgave.Oppgavetype.BEH_SAK.getKode()); // eller JFR
-
-        List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(FagsakType.EU_EØS.getKode());
-        sakstyper.add(FagsakType.TRYGDEAVTALE.getKode());
-        sakstyper.add(FagsakType.FOLKETRYGD.getKode());
-        innData.setSakstyper(sakstyper);
-
-        List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(BehandlingType.SØKNAD.getKode()); // Felleskodeverk finnes
-        behandlingstyper.add(BehandlingType.KLAGE.getKode());
-        innData.setBehandlingstyper(behandlingstyper);
-
-        try {
-            String json = mapper.writeValueAsString(innData);
-            System.out.println(json);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void jsonUt() {
-        ObjectMapper mapper = new ObjectMapper();
-        PlukketOppgaveDto dto = new PlukketOppgaveDto();
-        dto.setOppgaveID("1");
-        dto.setOppgavetype(no.nav.melosys.domain.oppgave.Oppgavetype.JFR.getKode());
-        dto.setSaksnummer("123");
-        dto.setJournalpostID("JOUR_321");
-        try {
-            String json = mapper.writeValueAsString(dto);
-            System.out.println(json);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

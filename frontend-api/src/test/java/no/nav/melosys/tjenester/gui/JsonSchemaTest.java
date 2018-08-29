@@ -5,6 +5,8 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.github.benas.randombeans.EnhancedRandomBuilder;
+import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.jackson.JacksonModule;
 import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
@@ -23,7 +25,18 @@ public abstract class JsonSchemaTest {
 
     private static ObjectMapper objectMapper;
 
+    private static EnhancedRandom enhancedRandom;
+
     public abstract String schemaNavn();
+
+    protected static EnhancedRandom defaultEnhancedRandom() {
+        if (enhancedRandom == null) {
+            enhancedRandom =  EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
+                .collectionSizeRange(1, 4)
+                .build();
+        }
+        return enhancedRandom;
+    }
 
     protected Schema hentSchema() throws IOException {
         return hentSchema(schemaNavn());
