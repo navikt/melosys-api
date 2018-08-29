@@ -8,8 +8,8 @@ import no.nav.melosys.domain.BehandlingType;
 public class BehandlingDto {
 
     private Long behandlingID;
-    private BehandlingType type;
-    private BehandlingStatus status;
+    private BehandlingType behandlingType;
+    private BehandlingStatus behandlingStatus;
     private LocalDateTime endretDato;
 
     public Long getBehandlingID() {
@@ -20,20 +20,20 @@ public class BehandlingDto {
         this.behandlingID = behandlingID;
     }
 
-    public BehandlingType getType() {
-        return type;
+    public BehandlingType getBehandlingType() {
+        return behandlingType;
     }
 
-    public void setType(BehandlingType type) {
-        this.type = type;
+    public void setBehandlingType(BehandlingType behandlingType) {
+        this.behandlingType = behandlingType;
     }
 
-    public BehandlingStatus getStatus() {
-        return status;
+    public BehandlingStatus getBehandlingStatus() {
+        return behandlingStatus;
     }
 
-    public void setStatus(BehandlingStatus status) {
-        this.status = status;
+    public void setBehandlingStatus(BehandlingStatus behandlingStatus) {
+        this.behandlingStatus = behandlingStatus;
     }
 
     public LocalDateTime getEndretDato() {

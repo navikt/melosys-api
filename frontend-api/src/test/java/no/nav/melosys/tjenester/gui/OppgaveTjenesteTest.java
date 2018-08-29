@@ -94,8 +94,8 @@ public class OppgaveTjenesteTest {
         BehandlingType type= BehandlingType.PÅSTAND_UTL;
         BehandlingStatus status = BehandlingStatus.FORELØPIG;
         oppgave.setSakstype(sakstype);
-        behandlingDto.setType(type);
-        behandlingDto.setStatus(status);
+        behandlingDto.setBehandlingType(type);
+        behandlingDto.setBehandlingStatus(status);
         oppgave.setBehandling(behandlingDto);
         oppgave.setSakstype(sakstype);
 

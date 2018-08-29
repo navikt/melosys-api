@@ -71,7 +71,7 @@ public class OppgaveService {
         dest.setOppgavetype(oppgave.getOppgavetype());
         dest.setPrioritet(oppgave.getPrioritet());
         dest.setVersjon(oppgave.getVersjon());
-        dest.setAnsvarligId(oppgave.getTilordnetRessurs());
+        dest.setAnsvarligID(oppgave.getTilordnetRessurs());
 
         if (oppgave.erJournalFøring()) {
             dest.setOppgavetype(Oppgavetype.JFR);
@@ -115,8 +115,8 @@ public class OppgaveService {
             throw new RuntimeException("Det finnes ingen aktive behandlinger");
         } else {
             behandlingDto.setBehandlingID(behandling.getId());
-            behandlingDto.setStatus(behandling.getStatus());
-            behandlingDto.setType(behandling.getType());
+            behandlingDto.setBehandlingStatus(behandling.getStatus());
+            behandlingDto.setBehandlingType(behandling.getType());
             behandlingDto.setEndretDato(behandling.getEndretDato());
         }
         return behandlingDto;

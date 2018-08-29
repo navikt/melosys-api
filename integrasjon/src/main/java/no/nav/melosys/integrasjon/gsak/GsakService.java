@@ -139,7 +139,7 @@ public class GsakService implements GsakFasade {
     @Override
     public List<Oppgave> finnOppgaveListeMedAnsvarlig(String tilordnetRessurs) throws TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
-            .tilordnetRessurs(tilordnetRessurs)
+            .medTilordnetRessurs(tilordnetRessurs)
             .medOppgaveTyper(hentAlleKoder(Oppgavetype.class))
             .medSorteringsfelt(SORTERINGSFELT)
             .build();
@@ -188,7 +188,7 @@ public class GsakService implements GsakFasade {
     @Override
     public List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
-            .aktørId(aktørId)
+            .medAktørId(aktørId)
             .medOppgaveTyper(hentAlleKoder(Oppgavetype.class))
             .medSorteringsfelt(SORTERINGSFELT)
             .build();
