@@ -21,25 +21,35 @@ public abstract class JsonSchemaTest {
 
     private static final String ROOT = "schema/";
 
+    private static ObjectMapper objectMapper;
+
     public abstract String schemaNavn();
 
     protected Schema hentSchema() throws IOException {
-        String schemaString = JsonResourceLoader.load(new DefaultResourceLoader(), ROOT + schemaNavn());
+        return hentSchema(schemaNavn());
+    }
+
+    protected Schema hentSchema(String schemaNavn) throws IOException {
+        String schemaString = JsonResourceLoader.load(new DefaultResourceLoader(), ROOT + schemaNavn);
+        return lastSchema(schemaString);
+    }
+
+    protected Schema lastSchema(String schemaString) {
         JSONObject rawSchema = new JSONObject(schemaString);
-
         SchemaLoader loader = SchemaLoader.builder().schemaJson(rawSchema).draftV7Support().useDefaults(true).build();
-
         return loader.load().build();
     }
 
     protected ObjectMapper objectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-        mapper.registerModule(new JavaTimeModule());
-        KodeverkService kodeverkService = mock(KodeverkService.class);
-        when(kodeverkService.dekod(any(),any(),any())).thenReturn("DUMMY");
-        mapper.registerModule(new JacksonModule(kodeverkService));
-        return mapper;
+        if (objectMapper == null) {
+            objectMapper = new ObjectMapper();
+            objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+            objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+            objectMapper.registerModule(new JavaTimeModule());
+            KodeverkService kodeverkService = mock(KodeverkService.class);
+            when(kodeverkService.dekod(any(),any(),any())).thenReturn("DUMMY");
+            objectMapper.registerModule(new JacksonModule(kodeverkService));
+        }
+        return objectMapper;
     }
 }
