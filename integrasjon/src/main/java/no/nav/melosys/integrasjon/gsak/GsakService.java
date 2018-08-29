@@ -85,14 +85,16 @@ public class GsakService implements GsakFasade {
     //FIXME: Mangler implementasjon for sakstyper
     @Override
     public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<FagsakType> sakstyper, List<BehandlingType> behandlingstyper) throws TekniskException {
-        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
-            .medTema( new String[]{tema.getKode()})
+        OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(new String[]{oppgavetype.getKode()})
             .medBehandlingsTyper(behandlingstyper.stream().map(Kodeverk::getKode).toArray(String[]::new))
-            .medSorteringsfelt(SORTERINGSFELT)
-            .build();
+            .medSorteringsfelt(SORTERINGSFELT);
 
-        List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
+        if (tema != null) {
+            searchRequestBuilder = searchRequestBuilder.medTema( new String[]{tema.getKode()});
+        }
+
+        List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(searchRequestBuilder.build());
         List<Oppgave> funnet = new ArrayList<>();
 
         oppgaver.stream()
