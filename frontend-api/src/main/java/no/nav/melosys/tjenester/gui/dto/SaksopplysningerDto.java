@@ -3,24 +3,17 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 
 @JsonPropertyOrder({"person", "arbeidsforhold", "organisasjoner", "medlemskap", "inntekt", "sakOgBehandling"})
 public class SaksopplysningerDto {
 
-    private PersonDokument person;
-
-    // Brukes kun av PersonSerializer
-    @JsonIgnore
-    private PersonhistorikkDokument personhistorikk;
+    private PersonDto person;
 
     private ArbeidsforholdDokument arbeidsforhold;
 
@@ -34,7 +27,7 @@ public class SaksopplysningerDto {
 
     public SaksopplysningerDto() {
         // Frontend ønsker å motta et objekt, selv når saksopplysninger ikke finnes.
-        this.person = new PersonDokument();
+        this.person = new PersonDto();
         this.arbeidsforhold = new ArbeidsforholdDokument();
         this.organisasjoner = new ArrayList<>();
         this.medlemskap = new MedlemskapDokument();
@@ -42,20 +35,12 @@ public class SaksopplysningerDto {
         this.sakOgBehandling = new SobSakDokument();
     }
 
-    public PersonDokument getPerson() {
+    public PersonDto getPerson() {
         return person;
     }
 
-    public void setPerson(PersonDokument person) {
+    public void setPerson(PersonDto person) {
         this.person = person;
-    }
-
-    public PersonhistorikkDokument getPersonhistorikk() {
-        return personhistorikk;
-    }
-
-    public void setPersonhistorikk(PersonhistorikkDokument personhistorikk) {
-        this.personhistorikk = personhistorikk;
     }
 
     public ArbeidsforholdDokument getArbeidsforhold() {

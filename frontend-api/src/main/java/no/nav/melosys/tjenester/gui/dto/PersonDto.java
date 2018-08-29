@@ -37,6 +37,8 @@ public class PersonDto {
     @JsonProperty("personStatus")
     public Personstatus personstatus;
 
+    public LocalDate statsborgerskapDato;
+
     public Bostedsadresse bostedsadresse = new Bostedsadresse();
 
     @JsonIgnore
@@ -50,6 +52,6 @@ public class PersonDto {
 
     // FIXME: Validerer ikke mot JSON-schema
     @JsonIgnore
-    public PersonhistorikkDokument historikk;
+    public PersonhistorikkDto historikk;
 
 }
