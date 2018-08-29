@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
@@ -30,13 +29,13 @@ public class KodeverkTjenesteTest extends JsonSchemaTest {
     @Test
     public void getKodeverk() throws IOException {
         KodeverkDto kodeverkDto = tjeneste.getKodeverk();
-        String jsonString = new ObjectMapper().writeValueAsString(kodeverkDto);
+        String jsonString = objectMapper().writeValueAsString(kodeverkDto);
 
         try {
             hentSchema().validate(new JSONObject(jsonString));
         } catch (ValidationException e) {
             logger.error(e.toJSON().toString());
-            //throw e; FIXME venter på nytt skjema
+            throw e;
         }
     }
 }

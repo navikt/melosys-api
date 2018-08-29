@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.core.Response;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.FieldDefinitionBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
@@ -82,13 +81,13 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
             saksopplysninger.setPerson(random.nextObject(PersonDokument.class));
         }
 
-        String jsonString = new ObjectMapper().writeValueAsString(fagsakDto);
+        String jsonString = objectMapper().writeValueAsString(fagsakDto);
 
         try {
             hentSchema().validate(new JSONObject(jsonString));
         } catch (ValidationException e) {
             logger.error(e.toJSON().toString());
-            //throw e; FIXME venter på nytt skjema
+            throw e;
         }
     }
 }
