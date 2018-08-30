@@ -22,7 +22,8 @@
     <xsl:template match="aktoer|personstatusListe"/>
 
     <xsl:template match="statsborgerskapListe">
-        <xsl:if test="@endretAv = $SKATTEDIREKTORATET">
+        <!-- Attributtet er på formen "KODE_SYSTEM_KILDE" eller "ENDRET_AV, KODE_SYSTEM_KILDE" -->
+        <xsl:if test="@endretAv = $SKATTEDIREKTORATET or substring-after(@endretAv, ', ') = $SKATTEDIREKTORATET">
             <xsl:element name="{local-name(.)}">
                 <xsl:apply-templates select="*|@endringstidspunkt"/>
             </xsl:element>
