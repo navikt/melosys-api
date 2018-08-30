@@ -4,19 +4,17 @@ package no.nav.melosys.service.oppgave.dto;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.nav.melosys.domain.FagsakType;
-import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 
 public class OppgaveDto {
     private String oppgaveID;
-    private Oppgavetype oppgavetype;
+    private String oppgavetypeKode;
     private String sammensattNavn;
     private String saksnummer;
     private String journalpostID;
     private LocalDate aktivTil;
     private PeriodeDto soknadsperiode;
-    private FagsakType sakstype;
+    private String sakstypeKode;
     private BehandlingDto behandling;
     private PrioritetType prioritet;
     private List<String> land;
@@ -46,14 +44,6 @@ public class OppgaveDto {
         this.versjon = versjon;
     }
 
-    public FagsakType getSakstype() {
-        return sakstype;
-    }
-
-    public void setSakstype(FagsakType sakstype) {
-        this.sakstype = sakstype;
-    }
-
     public BehandlingDto getBehandling() {
         return behandling;
     }
@@ -78,12 +68,20 @@ public class OppgaveDto {
         this.oppgaveID = oppgaveID;
     }
 
-    public Oppgavetype getOppgavetype() {
-        return oppgavetype;
+    public String getOppgavetypeKode() {
+        return oppgavetypeKode;
     }
 
-    public void setOppgavetype(Oppgavetype oppgavetype) {
-        this.oppgavetype = oppgavetype;
+    public void setOppgavetypeKode(String oppgavetypeKode) {
+        this.oppgavetypeKode = oppgavetypeKode;
+    }
+
+    public String getSakstypeKode() {
+        return sakstypeKode;
+    }
+
+    public void setSakstypeKode(String sakstypeKode) {
+        this.sakstypeKode = sakstypeKode;
     }
 
     public String getSammensattNavn() {

@@ -49,7 +49,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
 
     @Override
     public String schemaNavn() {
-        return "sok-oppgaver-schema.json";
+        return "oppgaver-schema.json";
     }
 
     @Before

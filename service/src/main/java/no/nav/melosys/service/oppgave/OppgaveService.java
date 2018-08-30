@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
@@ -68,24 +67,21 @@ public class OppgaveService {
         OppgaveDto dest = new OppgaveDto();
         dest.setOppgaveID(oppgave.getOppgaveId());
         dest.setAktivTil(oppgave.getFristFerdigstillelse());
-        dest.setOppgavetype(oppgave.getOppgavetype());
+        dest.setOppgavetypeKode(oppgave.getOppgavetype().getKode());
         dest.setPrioritet(oppgave.getPrioritet());
         dest.setVersjon(oppgave.getVersjon());
         dest.setAnsvarligID(oppgave.getTilordnetRessurs());
 
         if (oppgave.erJournalFøring()) {
-            dest.setOppgavetype(Oppgavetype.JFR);
             dest.setJournalpostID(oppgave.getJournalpostId());
         } else if (oppgave.erBehandling()) {
-            dest.setOppgavetype(Oppgavetype.BEH_SAK);
-
             Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
             if (fagsak == null) {
                 throw new RuntimeException("Fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer() + " ikke funnet!");
             }
 
             dest.setSaksnummer(fagsak.getSaksnummer());
-            dest.setSakstype(fagsak.getType());
+            dest.setSakstypeKode(fagsak.getType().getKode());
 
             Behandling behandling = fagsak.getAktivBehandling();
             dest.setBehandling(mapBehandling(behandling));
