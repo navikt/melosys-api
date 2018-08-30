@@ -6,7 +6,11 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 public interface RestConsumer {
 
     default String getCallID() {
-      return MDCOperations.getFromMDC(MDCOperations.MDC_CALL_ID);
+        String callID = MDCOperations.getFromMDC(MDCOperations.MDC_CALL_ID);
+        if (callID == null) {
+            callID = MDCOperations.generateCallId();
+        }
+      return callID;
     }
 
     default String getUserID() {
