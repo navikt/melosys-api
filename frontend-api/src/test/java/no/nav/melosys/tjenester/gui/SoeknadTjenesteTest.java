@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,15 +19,17 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class SøknadSchemaTest extends JsonSchemaTest {
+public class SoeknadTjenesteTest extends JsonSchemaTest {
 
-    private static final Logger log = LoggerFactory.getLogger(SøknadSchemaTest.class);
+    private static final Logger log = LoggerFactory.getLogger(SoeknadTjenesteTest.class);
 
-    private String jsonInString;
+
+    private SoknadTjeneste soknadTjeneste;
 
     @Override
     public String schemaNavn() {
@@ -38,20 +41,26 @@ public class SøknadSchemaTest extends JsonSchemaTest {
 
         SoeknadService soeknadService = mock(SoeknadService.class);
 
+        soknadTjeneste = new SoknadTjeneste(soeknadService, null);
+
         EnhancedRandom random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
             .collectionSizeRange(1, 4).build();
 
         SoeknadDokument soeknadDokument = random.nextObject(SoeknadDokument.class);
         when(soeknadService.hentSoeknad(anyLong())).thenReturn(soeknadDokument);
 
-        SoeknadDto søknadDto = new SoeknadDto(1222L, soeknadDokument);
-
-        ObjectMapper mapper = objectMapper();
-        jsonInString = mapper.writeValueAsString(søknadDto);
     }
 
     @Test
     public void soeknadDokumentSchemaValidering() throws IOException {
+
+        Response response = soknadTjeneste.hentSøknad(1222L);
+        SoeknadDto søknadDto = (SoeknadDto)response.getEntity();
+
+        assertThat(søknadDto).isNotNull();
+
+        ObjectMapper mapper = objectMapper();
+        String jsonInString = mapper.writeValueAsString(søknadDto);
 
         try {
             Schema schema = hentSchema();
@@ -59,8 +68,10 @@ public class SøknadSchemaTest extends JsonSchemaTest {
 
         } catch (ValidationException e) {
             log.error("Feil ved validering schema for Søknad dokument");
-            log.error(e.toJSON().toString());
-            //throw e;
+            e.getCausingExceptions().stream()
+                .map(ValidationException::toJSON)
+                .forEach(jsonObject -> log.error(jsonObject.toString()));
+            throw e;
         }
     }
 }

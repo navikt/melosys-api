@@ -1,44 +1,53 @@
 {
   "personOpplysninger": {
-    "utenlandskID": [{"ID": "123456789", "land": ["DK"]}]
+    "utenlandskID": [
+      {
+        "ID": "123456789",
+        "landKode": "DK"
+      }
+    ]
   },
   "arbeidUtland": {
     "adresse": {
       "gatenavn": "Adresseveien 123",
       "postnummer": "1234",
       "poststed": "Poststedet",
-      "land": ["DE"]
+      "landKode": "DE"
     },
     "arbeidsandelNorge": 33.3,
     "arbeidsandelUtland": 66.6,
     "arbeidUtlandErstatning": false,
     "arbeidUtlandHjemmekontor": false
   },
-  "foretakUtland": [{
-    "navn": "Volkswagen AG",
-    "orgnr": "1122334444",
-    "adresse": {
-      "gatenavn": "Deutschlandstrasse 123",
-      "postnummer": "3388",
-      "poststed": "Berlin",
-      "land": ["DE"]
+  "foretakUtland": [
+    {
+      "navn": "Volkswagen AG",
+      "orgnr": "1122334444",
+      "adresse": {
+        "gatenavn": "Deutschlandstrasse 123",
+        "postnummer": "3388",
+        "poststed": "Berlin",
+        "landKode": "DE"
+      }
     }
-  }],
+  ],
   "oppholdUtland": {
-    "oppholdsland": ["DE" ],
+    "oppholdslandKoder": [
+      "DE"
+    ],
     "oppholdsPeriode": {
       "fom": "2018-01-01",
       "tom": "2018-06-01"
     },
     "ektefelleEllerBarnINorge": true,
     "sammeAdresseSomArbeidsgiver": true,
-    "studentFinansiering": "LAANEKASSEN",
+    "studentFinansieringKode": "LAANEKASSEN",
     "studentSemester": "2018/2019"
   },
   "bosted": {
     "intensjonOmRetur": true,
     "bostedUtenforNorge": true,
-    "familiesBosted": ["SE"],
+    "familiesBostedLandKode": "SE",
     "antallMaanederINorge": 8,
     "EOSBarnetrygdFraNAV": true,
     "adresseIUtlandet": true,
@@ -46,7 +55,7 @@
       "gatenavn": "Gateadressen",
       "postnummer": "12345",
       "poststed": "Poststeder",
-      "land": ["DE"]
+      "landKode": "DE"
     }
   },
   "arbeidNorge": {
@@ -61,7 +70,7 @@
     "fullmektigPostnr": "1234",
     "fullmektigPoststed": "Byensvik",
     "fullmektigRegion": "Østlandsregionen",
-    "fullmektigLand": ["NO"]
+    "fullmektigLandKode": "NO"
   },
   "juridiskArbeidsgiverNorge": {
     "erBemanningsbyra": false,
@@ -78,7 +87,10 @@
     "inntektNorskIPerioden": 5500,
     "inntektUtenlandskIPerioden": 2000,
     "inntektNaeringIPerioden": 0,
-    "inntektNaturalYtelser": ["Fri bolig", "Fri bil"],
+    "inntektNaturalYtelser": [
+      "Fri bolig",
+      "Fri bil"
+    ],
     "inntektErInnrapporteringspliktig": true,
     "inntektTrygdeavgiftBlirTrukket": true
   },
@@ -92,11 +104,11 @@
     "trygdeavgiftTrukketGjennomSkattDato": "2018-01-01"
   },
   "maritimtArbeid": {
-    "maritimType": "SKIP",
+    "maritimTypeKode": "SKIP",
     "skipsNavn": "Navn på skipet",
-    "fartsomrade": "INNENRIKS",
-    "flaggLand": ["GB"],
-    "installasjonsLand": ["GB"]
+    "fartsomradeKode": "INNENRIKS",
+    "flaggLandKode": "GB",
+    "installasjonsLandKode": "GB"
   }
 }
 

@@ -23,10 +23,10 @@ public final class SoeknadUtils {
     public static List<String> hentLand(SoeknadDokument soeknad) {
         List<String> landkoder = new ArrayList<>();
         if (soeknad.arbeidUtland != null) {
-            soeknad.arbeidUtland.adresse.land.stream().filter(Objects::nonNull).forEach(landkoder::add);
+            landkoder.add(soeknad.arbeidUtland.adresse.landKode);
         }
         if (soeknad.oppholdUtland != null) {
-            soeknad.oppholdUtland.oppholdsland.stream().filter(Objects::nonNull).forEach(landkoder::add);
+            soeknad.oppholdUtland.oppholdslandKoder.stream().filter(Objects::nonNull).forEach(landkoder::add);
         }
         return landkoder;
     }

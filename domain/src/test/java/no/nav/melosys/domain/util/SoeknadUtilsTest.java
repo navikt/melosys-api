@@ -16,18 +16,18 @@ public class SoeknadUtilsTest {
     public void hentLand_arbeidUtland() {
         SoeknadDokument soeknad = new SoeknadDokument();
         soeknad.arbeidUtland = new ArbeidUtland();
-        soeknad.arbeidUtland.adresse = new StandardAdress();
-        soeknad.arbeidUtland.adresse.land = Arrays.asList(new Land(Land.BELGIA).getKode(), new Land(Land.BULGARIA).getKode());
+        soeknad.arbeidUtland.adresse = new StandardAdresse();
+        soeknad.arbeidUtland.adresse.landKode = new Land(Land.BELGIA).getKode();
 
         List<String> strings = SoeknadUtils.hentLand(soeknad);
-        assertThat(strings).contains(Land.BELGIA, Land.BULGARIA);
+        assertThat(strings).contains(Land.BELGIA);
     }
 
     @Test
     public void hentLand_oppholdUtland() {
         SoeknadDokument soeknad = new SoeknadDokument();
         soeknad.oppholdUtland = new OppholdUtland();
-        soeknad.oppholdUtland.oppholdsland = Arrays.asList(new Land(Land.BELGIA).getKode(), new Land(Land.BULGARIA).getKode());
+        soeknad.oppholdUtland.oppholdslandKoder = Arrays.asList(new Land(Land.BELGIA).getKode(), new Land(Land.BULGARIA).getKode());
 
         List<String> strings = SoeknadUtils.hentLand(soeknad);
         assertThat(strings).contains(Land.BELGIA, Land.BULGARIA);

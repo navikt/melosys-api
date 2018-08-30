@@ -1,13 +1,14 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Bosted {
     public boolean intensjonOmRetur;
     public boolean bostedUtenforNorge;
-    public List<String> familiesBosted;
+    public String familiesBostedLandKode;
     public int antallMaanederINorge;
-    public boolean EOSBarnetrygdFraNAV;
+    @JsonProperty("EOSBarnetrygdFraNAV")
+    public boolean EØSBarnetrygdFraNAV;
     public boolean adresseIUtlandet;
-    public StandardAdress oppgittAdresse;
+    public StandardAdresse oppgittAdresse;
 }

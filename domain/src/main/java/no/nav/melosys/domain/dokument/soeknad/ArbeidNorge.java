@@ -1,10 +1,5 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Opplysninger om arbeid i Norge
  */
@@ -20,5 +15,5 @@ public class ArbeidNorge {
     public String fullmektigPostnr;
     public String fullmektigPoststed;
     public String fullmektigRegion;
-    public List<String> fullmektigLand;
+    public String fullmektigLandKode;
 }

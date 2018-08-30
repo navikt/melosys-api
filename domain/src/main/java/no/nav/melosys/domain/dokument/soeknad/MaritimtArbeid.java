@@ -1,13 +1,9 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
-import java.util.List;
-
-import no.nav.melosys.domain.dokument.felles.Land;
-
 public class MaritimtArbeid {
-    public String maritimType;
+    public String maritimTypeKode;
     public String skipsNavn;
-    public String fartsomrade;
-    public List<String> flaggLand;
-    public List<String> installasjonsLand;
+    public String fartsomradeKode;
+    public String flaggLandKode;
+    public String installasjonsLandKode;
 }
