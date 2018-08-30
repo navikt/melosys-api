@@ -9,7 +9,6 @@ public enum Landkoder implements KodeverkTabell<Landkoder> {
 
     BE("BE", "Belgia"),
     BG("BG", "Bulgaria"),
-    CZ("CZ", "Tsjekkia"),
     DK("DK", "Danmark"),
     EE("EE", "Estland"),
     FI("FI", "Finland"),
@@ -34,7 +33,9 @@ public enum Landkoder implements KodeverkTabell<Landkoder> {
     SI("SI", "Slovenia"),
     ES("ES", "Spania"),
     GB("GB", "Storbritannia"),
+    CH("CH", "Sveits"),
     SE("SE", "Sverige"),
+    CZ("CZ", "Tsjekkia"),
     DE("DE", "Tyskland"),
     HU("HU", "Ungarn"),
     AT("AT", "Østerrike");
@@ -42,7 +43,7 @@ public enum Landkoder implements KodeverkTabell<Landkoder> {
     private String kode;
     private String beskrivelse;
 
-    private Landkoder(String kode, String beskrivelse) {
+    Landkoder(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
