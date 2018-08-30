@@ -97,6 +97,7 @@ public class SaksopplysningerService {
 
         // FIXME: Når EESSI2-485 er ferdig må IntegrasjonsExceptions kastes videre
         Optional<Saksopplysning> personSaksopplysning = Optional.ofNullable(hentPerson(fnr));
+        Optional<Saksopplysning> personhistorikkSaksopplysning = Optional.ofNullable(hentPersonhistorikk(fnr));
         Optional<Saksopplysning> medlemskapSaksopplysning = Optional.ofNullable(hentMedlemskap(fnr));
         Optional<Saksopplysning> arbeidsforholdSaksopplysning = Optional.ofNullable(hentArbeidsforhold(fnr));
         Optional<Saksopplysning> inntektSaksopplysning = Optional.ofNullable(hentInntekt(fnr));
@@ -104,6 +105,7 @@ public class SaksopplysningerService {
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
 
         personSaksopplysning.ifPresent(saksopplysninger::add);
+        personhistorikkSaksopplysning.ifPresent(saksopplysninger::add);
         medlemskapSaksopplysning.ifPresent(saksopplysninger::add);
         arbeidsforholdSaksopplysning.ifPresent(saksopplysninger::add);
         inntektSaksopplysning.ifPresent(saksopplysninger::add);
@@ -126,6 +128,18 @@ public class SaksopplysningerService {
         // TODO: Informasjonsbehov.FAMILIERELASJONER kommer i runde 2
         try {
             return tpsFasade.hentPersonMedAdresse(fnr);
+        } catch (IntegrasjonException integrasjonException) {
+            log.error("Uventet feil ved oppslag mot TPS", integrasjonException);
+            return null;
+        } catch (IkkeFunnetException e) {
+            log.error("Person med id " + fnr + " finnes ikke");
+            return null;
+        }
+    }
+
+    private Saksopplysning hentPersonhistorikk(String fnr) throws SikkerhetsbegrensningException {
+        try {
+            return tpsFasade.hentPersonhistorikk(fnr, LocalDate.now());
         } catch (IntegrasjonException integrasjonException) {
             log.error("Uventet feil ved oppslag mot TPS", integrasjonException);
             return null;
