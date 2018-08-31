@@ -17,6 +17,7 @@ import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +41,7 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
     private final GsakFasade gsakFasade;
 
     @Autowired
-    public AvsluttOppgave(GsakFasade gsakFasade) {
+    public AvsluttOppgave(@Qualifier("system")GsakFasade gsakFasade) {
         this.gsakFasade = gsakFasade;
         log.info("AvsluttOppgave initialisert");
     }

@@ -23,22 +23,20 @@ import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSvar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import static javax.ws.rs.core.Response.Status.Family.CLIENT_ERROR;
 import static javax.ws.rs.core.Response.Status.Family.SERVER_ERROR;
 
-@Component
 public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(OppgaveConsumerImpl.class);
 
+    private final boolean erSystem;
+
     private WebTarget target;
 
-    @Autowired
-    public OppgaveConsumerImpl(@Value("${OppgaveAPI_v1.url}") final String endpointUrl) {
+    public OppgaveConsumerImpl(String endpointUrl, boolean erSystem) {
+        this.erSystem = erSystem;
         try {
             SSLContext sslContext = SSLContext.getDefault();
             Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();
@@ -50,13 +48,18 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
     }
 
     @Override
+    public boolean isSystem() {
+        return erSystem;
+    }
+
+    @Override
     public OppgaveDto hentOppgave(String oppgaveId) {
         return target
             .path(oppgaveId)
             .request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getCallID())
-            .header(HttpHeaders.AUTHORIZATION, getBearer())
+            .header(HttpHeaders.AUTHORIZATION, getAuth())
             .get(OppgaveDto.class);
     }
 
@@ -78,7 +81,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
         OppgaveSvar oppgaveSvar = lokalTarget.request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getCallID())
-            .header(HttpHeaders.AUTHORIZATION, getBearer())
+            .header(HttpHeaders.AUTHORIZATION, getAuth())
             .get(OppgaveSvar.class);
         return oppgaveSvar.getOppgaver();
     }
@@ -100,7 +103,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
         try (Response response = target.path(request.getId())
             .request(MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getCallID())
-            .header(HttpHeaders.AUTHORIZATION, getBearer())
+            .header(HttpHeaders.AUTHORIZATION, getAuth())
             .put(Entity.json(request))) {
             håndterFeil(response);
         }
@@ -112,7 +115,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
             .path(request.getId())
             .request(MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getCallID())
-            .header(HttpHeaders.AUTHORIZATION, getBearer())
+            .header(HttpHeaders.AUTHORIZATION, getAuth())
             .post(Entity.json(request))) {
             if( response.getStatus() == 201 ) { // Oppgaven opprettet
                 OppgaveDto oppgaveDto = response.readEntity(OppgaveDto.class);
