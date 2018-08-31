@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.gsak.sakapi;
+package no.nav.melosys.integrasjon.gsak.oppgave;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -8,25 +8,24 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
-public class SakApiConsumerProducer {
+public class OppgaveConsumerProducer {
 
     private final String endpointUrl;
 
     @Autowired
-    public SakApiConsumerProducer(@Value("${SakAPI_v1.url}") String endpointUrl) {
+    public OppgaveConsumerProducer(@Value("${OppgaveAPI_v1.url}") String endpointUrl) {
         this.endpointUrl = endpointUrl;
     }
 
     @Bean
     @Primary
-    public SakApiConsumer sakConsumer() {
-        return new SakApiConsumerImpl(endpointUrl, false);
+    public OppgaveConsumer oppgaveConsumer() {
+        return new OppgaveConsumerImpl(endpointUrl, false);
     }
 
     @Bean
     @Qualifier("system")
-    public SakApiConsumer sakSystemConsumer() {
-        return new SakApiConsumerImpl(endpointUrl, true);
+    public OppgaveConsumer oppgaveSystemConsumer() {
+        return new OppgaveConsumerImpl(endpointUrl, true);
     }
-
 }

@@ -5,22 +5,22 @@ import javax.ws.rs.core.Response;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringRunner.class)
 public class SakApiConsumerTestIT {
 
-    @Autowired
-    SakApiConsumerConfig config;
+    @Value("${SakAPI_v1.url}")
+    String endpointUrl;
 
     @Test
     public void isAlive() {
         Response response = ClientBuilder.newClient()
-                .target(config.getEndpointUrl())
+                .target(endpointUrl)
                 .path("internal/alive")
                 .request().get();
 

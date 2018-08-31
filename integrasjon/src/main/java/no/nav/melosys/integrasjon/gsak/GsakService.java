@@ -21,6 +21,7 @@ import no.nav.melosys.integrasjon.gsak.sakapi.dto.SakDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.util.KodeverkUtils.erGyldigKode;
@@ -28,6 +29,7 @@ import static no.nav.melosys.domain.util.KodeverkUtils.hentAlleKoder;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
+@Primary
 public class GsakService implements GsakFasade {
 
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
