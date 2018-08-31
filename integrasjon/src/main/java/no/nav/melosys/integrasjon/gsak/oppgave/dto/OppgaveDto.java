@@ -17,11 +17,14 @@ public class OppgaveDto {
     private String tilordnetRessurs;
     private String tema;
     private String oppgavetype;
+    private String journalpostId;
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate aktivDato;
     @JsonSerialize(using = ToStringSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate fristFerdigstillelse;
     private String prioritet;
-    private String journalpostId;
     private String saksreferanse;
     private String status;
     private int versjon;
@@ -32,6 +35,14 @@ public class OppgaveDto {
     private String temagruppe;
     private String tildeltEnhetsnr;
 
+
+    public LocalDate getAktivDato() {
+        return aktivDato;
+    }
+
+    public void setAktivDato(LocalDate aktivDato) {
+        this.aktivDato = aktivDato;
+    }
 
     public String getTildeltEnhetsnr() {
         return tildeltEnhetsnr;
