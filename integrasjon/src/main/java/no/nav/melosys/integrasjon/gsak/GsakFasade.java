@@ -55,7 +55,7 @@ public interface GsakFasade {
     /**
      * Oppretter en sak i GSAK
      */
-    String opprettSak(String saksnummer, BehandlingType behandlingType, String aktørId) throws TekniskException, IntegrasjonException;
+    String opprettSak(String saksnummer, BehandlingType behandlingType, String aktørId) throws TekniskException, IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException;
 
     /**
      * Tildeler en oppgaver til en saksbehandler

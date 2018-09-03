@@ -5,10 +5,11 @@ import java.util.List;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.gsak.felles.GsakConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 
-public interface OppgaveConsumer {
+public interface OppgaveConsumer extends GsakConsumer {
 
     OppgaveDto hentOppgave(String oppgaveId);
 

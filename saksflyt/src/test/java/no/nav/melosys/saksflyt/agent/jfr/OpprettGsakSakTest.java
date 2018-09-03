@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.Properties;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
@@ -34,7 +36,7 @@ public class OpprettGsakSakTest {
     }
 
     @Test
-    public void utfoerSteg() {
+    public void utfoerSteg() throws SikkerhetsbegrensningException, FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         Properties properties = new Properties();
         String saksnummer = "MEL-009";

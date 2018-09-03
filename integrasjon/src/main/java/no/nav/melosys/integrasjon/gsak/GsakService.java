@@ -49,7 +49,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public String opprettSak(String saksnummer, BehandlingType behandlingType, String aktørId) throws TekniskException, IntegrasjonException {
+    public String opprettSak(String saksnummer, BehandlingType behandlingType, String aktørId) throws TekniskException, IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException {
         SakDto sakDto = new SakDto();
 
         if (behandlingType.equals(BehandlingType.SØKNAD)) {

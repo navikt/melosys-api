@@ -17,15 +17,12 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
-import no.nav.melosys.integrasjon.gsak.oppgave.dto.FeilResponseDto;
+import no.nav.melosys.integrasjon.gsak.felles.dto.FeilResponseDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSvar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static javax.ws.rs.core.Response.Status.Family.CLIENT_ERROR;
-import static javax.ws.rs.core.Response.Status.Family.SERVER_ERROR;
 
 public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
 
@@ -35,7 +32,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
 
     private WebTarget target;
 
-    public OppgaveConsumerImpl(String endpointUrl, boolean erSystem) {
+    OppgaveConsumerImpl(String endpointUrl, boolean erSystem) {
         this.erSystem = erSystem;
         try {
             SSLContext sslContext = SSLContext.getDefault();
@@ -125,21 +122,13 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
             }
             håndterFeil(response);
         }
-        throw new TekniskException("Uventet feil har oppstått i OpprettOppgave");
+        throw new TekniskException("Uventet feil har oppstått i opprettOppgave");
     }
 
-    private void håndterFeil(Response response) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
-        if (response == null) {
-            throw new TekniskException("Ingen response fra GSAK Oppgave REST Tjeneste");
-        }
+    @Override
+    public void håndterFeil(Response response) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
         FeilResponseDto feilResponseDto = response.readEntity(FeilResponseDto.class);
         log.error("Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());
-        if (response.getStatus() == 401 || response.getStatus() == 403) {
-            throw new SikkerhetsbegrensningException(feilResponseDto.getFeilmelding());
-        } else if (Response.Status.Family.familyOf(response.getStatus()) == CLIENT_ERROR) {
-            throw new FunksjonellException(feilResponseDto.getFeilmelding());
-        } else if (Response.Status.Family.familyOf(response.getStatus()) == SERVER_ERROR) {
-            throw new TekniskException(feilResponseDto.getFeilmelding());
-        }
+        statusTilException(response.getStatus(), feilResponseDto.getFeilmelding());
     }
 }

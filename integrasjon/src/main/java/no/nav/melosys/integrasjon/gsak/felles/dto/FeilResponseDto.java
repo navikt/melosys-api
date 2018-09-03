@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.gsak.oppgave.dto;
+package no.nav.melosys.integrasjon.gsak.felles.dto;
 
 public class FeilResponseDto {
 

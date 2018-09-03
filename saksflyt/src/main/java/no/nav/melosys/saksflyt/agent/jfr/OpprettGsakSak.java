@@ -6,7 +6,9 @@ import no.nav.melosys.domain.BehandlingType;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
@@ -57,7 +59,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
     
     @Transactional
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException {
+    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String aktørId = prosessinstans.getData(AKTØR_ID);
