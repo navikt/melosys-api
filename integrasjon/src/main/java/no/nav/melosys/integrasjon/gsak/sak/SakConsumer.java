@@ -5,7 +5,7 @@ import java.util.List;
 import no.nav.melosys.integrasjon.gsak.sak.dto.SakDto;
 import no.nav.melosys.integrasjon.gsak.sak.dto.SakSearchRequest;
 
-public interface SakApiConsumer {
+public interface SakConsumer {
 
     SakDto hentSak(Long id);
 

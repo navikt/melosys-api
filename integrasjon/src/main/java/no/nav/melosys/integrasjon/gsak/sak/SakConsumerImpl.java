@@ -19,9 +19,9 @@ import no.nav.melosys.integrasjon.gsak.sak.dto.SakSearchRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SakApiConsumerImpl implements RestConsumer, SakApiConsumer {
+public class SakConsumerImpl implements RestConsumer, SakConsumer {
 
-    private static final Logger log = LoggerFactory.getLogger(SakApiConsumerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SakConsumerImpl.class);
 
     private static final GenericType<List<SakDto>> sakDtoListType = new GenericType<List<SakDto>>() {};
 
@@ -29,7 +29,7 @@ public class SakApiConsumerImpl implements RestConsumer, SakApiConsumer {
 
     private final WebTarget target;
 
-    SakApiConsumerImpl(String endpointUrl, boolean erSystem) {
+    SakConsumerImpl(String endpointUrl, boolean erSystem) {
         this.erSystem = erSystem;
         try {
             SSLContext sslContext = SSLContext.getDefault();

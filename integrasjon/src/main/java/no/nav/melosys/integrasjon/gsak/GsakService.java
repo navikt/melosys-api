@@ -16,7 +16,7 @@ import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
-import no.nav.melosys.integrasjon.gsak.sak.SakApiConsumer;
+import no.nav.melosys.integrasjon.gsak.sak.SakConsumer;
 import no.nav.melosys.integrasjon.gsak.sak.dto.SakDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,13 +38,13 @@ public class GsakService implements GsakFasade {
 
     private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
 
-    private final SakApiConsumer sakApiConsumer;
+    private final SakConsumer sakConsumer;
 
     private final OppgaveConsumer oppgaveConsumer;
 
     @Autowired
-    public GsakService(SakApiConsumer sakApiConsumer, OppgaveConsumer oppgaveConsumer) {
-        this.sakApiConsumer = sakApiConsumer;
+    public GsakService(SakConsumer sakConsumer, OppgaveConsumer oppgaveConsumer) {
+        this.sakConsumer = sakConsumer;
         this.oppgaveConsumer = oppgaveConsumer;
     }
 
@@ -63,7 +63,7 @@ public class GsakService implements GsakFasade {
         sakDto.setAktørId(aktørId);
         sakDto.setApplikasjon(Fagsystem.MELOSYS.getKode());
         sakDto.setSaksnummer(saksnummer);
-        sakDto = sakApiConsumer.opprettSak(sakDto);
+        sakDto = sakConsumer.opprettSak(sakDto);
 
         if (sakDto.getId() == null) {
             log.error("Feil ved oppretting av sak i GSAK.");

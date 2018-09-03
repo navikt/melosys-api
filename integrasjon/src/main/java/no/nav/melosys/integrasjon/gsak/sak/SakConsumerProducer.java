@@ -8,25 +8,25 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
-public class SakApiConsumerProducer {
+public class SakConsumerProducer {
 
     private final String endpointUrl;
 
     @Autowired
-    public SakApiConsumerProducer(@Value("${SakAPI_v1.url}") String endpointUrl) {
+    public SakConsumerProducer(@Value("${SakAPI_v1.url}") String endpointUrl) {
         this.endpointUrl = endpointUrl;
     }
 
     @Bean
     @Primary
-    public SakApiConsumer sakConsumer() {
-        return new SakApiConsumerImpl(endpointUrl, false);
+    public SakConsumer sakConsumer() {
+        return new SakConsumerImpl(endpointUrl, false);
     }
 
     @Bean
     @Qualifier("system")
-    public SakApiConsumer sakSystemConsumer() {
-        return new SakApiConsumerImpl(endpointUrl, true);
+    public SakConsumer sakSystemConsumer() {
+        return new SakConsumerImpl(endpointUrl, true);
     }
 
 }

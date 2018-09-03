@@ -7,7 +7,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.GsakService;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
-import no.nav.melosys.integrasjon.gsak.sak.SakApiConsumer;
+import no.nav.melosys.integrasjon.gsak.sak.SakConsumer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 
 public class OppgaveMappingMellomDTOogDomainTest {
 
-    private SakApiConsumer sakApiConsumerMock;
+    private SakConsumer sakConsumerMock;
 
     private OppgaveConsumer oppgaveConsumerMock;
 
@@ -25,9 +25,9 @@ public class OppgaveMappingMellomDTOogDomainTest {
 
     @Before
     public void setUp() {
-        sakApiConsumerMock = mock(SakApiConsumer.class);
+        sakConsumerMock = mock(SakConsumer.class);
         oppgaveConsumerMock = mock(OppgaveConsumer.class);
-        gsakFasade = new GsakService(sakApiConsumerMock,oppgaveConsumerMock);
+        gsakFasade = new GsakService(sakConsumerMock,oppgaveConsumerMock);
     }
 
     @Test

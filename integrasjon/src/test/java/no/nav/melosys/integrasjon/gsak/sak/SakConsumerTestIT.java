@@ -12,7 +12,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringRunner.class)
-public class SakApiConsumerTestIT {
+public class SakConsumerTestIT {
 
     @Value("${SakAPI_v1.url}")
     String endpointUrl;
