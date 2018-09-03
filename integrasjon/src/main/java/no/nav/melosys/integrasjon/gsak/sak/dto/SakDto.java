@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.gsak.sakapi.dto;
+package no.nav.melosys.integrasjon.gsak.sak.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

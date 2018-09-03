@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.gsak.sakapi;
+package no.nav.melosys.integrasjon.gsak.sak;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

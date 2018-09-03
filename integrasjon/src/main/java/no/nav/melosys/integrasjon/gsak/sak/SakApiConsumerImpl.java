@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.gsak.sakapi;
+package no.nav.melosys.integrasjon.gsak.sak;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -14,8 +14,8 @@ import javax.ws.rs.core.MediaType;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
-import no.nav.melosys.integrasjon.gsak.sakapi.dto.SakDto;
-import no.nav.melosys.integrasjon.gsak.sakapi.dto.SakSearchRequest;
+import no.nav.melosys.integrasjon.gsak.sak.dto.SakDto;
+import no.nav.melosys.integrasjon.gsak.sak.dto.SakSearchRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

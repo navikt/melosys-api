@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.gsak.sakapi;
+package no.nav.melosys.integrasjon.gsak.sak;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;

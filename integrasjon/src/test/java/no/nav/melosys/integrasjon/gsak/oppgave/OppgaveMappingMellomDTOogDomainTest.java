@@ -7,7 +7,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.GsakService;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
-import no.nav.melosys.integrasjon.gsak.sakapi.SakApiConsumer;
+import no.nav.melosys.integrasjon.gsak.sak.SakApiConsumer;
 import org.junit.Before;
 import org.junit.Test;
 
