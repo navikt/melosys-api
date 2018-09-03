@@ -15,6 +15,7 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
@@ -175,7 +176,7 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         HentPersonhistorikkRequest request = new HentPersonhistorikkRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -190,7 +191,7 @@ public class TpsService implements TpsFasade {
             periode.setFom(xmlDato);
             periode.setTom(xmlDato);
         } catch (DatatypeConfigurationException e) {
-            throw new IntegrasjonException(e);
+            throw new TekniskException(e);
         }
         request.setPeriode(periode);
 

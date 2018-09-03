@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 
 public interface TpsFasade {
 
@@ -17,7 +18,7 @@ public interface TpsFasade {
 
     Saksopplysning hentPersonMedAdresse(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException;
 
-    Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) throws SikkerhetsbegrensningException, IkkeFunnetException;
+    Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException;
 
     /**
      * @param aktørId tilsvarende til FNR
