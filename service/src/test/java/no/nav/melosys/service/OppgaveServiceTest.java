@@ -101,13 +101,14 @@ public class OppgaveServiceTest {
         saksopplysninger.add(personOpplysning);
 
         SoeknadDokument soeknadDokument = new SoeknadDokument();
-        soeknadDokument.arbeidUtland = new ArbeidUtland();
-        soeknadDokument.arbeidUtland.adresse = new StandardAdresse();
-        soeknadDokument.arbeidUtland.adresse.landKode = new Land(Land.NORGE).getKode();
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+        arbeidUtland.adresse = new StandardAdresse();
+        arbeidUtland.adresse.landKode = new Land(Land.NORGE).getKode();
+        soeknadDokument.arbeidUtland = Collections.singletonList(arbeidUtland);
 
         soeknadDokument.oppholdUtland = new OppholdUtland();
         soeknadDokument.oppholdUtland.oppholdslandKoder = Collections.singletonList(new Land(Land.NORGE).getKode());
-        soeknadDokument.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.of(2018,12, 12));
+        soeknadDokument.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.of(2018, 12, 12));
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SØKNAD);

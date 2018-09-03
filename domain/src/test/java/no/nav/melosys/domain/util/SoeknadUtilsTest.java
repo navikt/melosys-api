@@ -2,6 +2,7 @@ package no.nav.melosys.domain.util;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -15,12 +16,17 @@ public class SoeknadUtilsTest {
     @Test
     public void hentLand_arbeidUtland() {
         SoeknadDokument soeknad = new SoeknadDokument();
-        soeknad.arbeidUtland = new ArbeidUtland();
-        soeknad.arbeidUtland.adresse = new StandardAdresse();
-        soeknad.arbeidUtland.adresse.landKode = new Land(Land.BELGIA).getKode();
+        leggTilArbeidUtland(soeknad);
 
         List<String> strings = SoeknadUtils.hentLand(soeknad);
         assertThat(strings).contains(Land.BELGIA);
+    }
+
+    private void leggTilArbeidUtland(SoeknadDokument soeknad) {
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+        arbeidUtland.adresse = new StandardAdresse();
+        arbeidUtland.adresse.landKode = new Land(Land.BELGIA).getKode();
+        soeknad.arbeidUtland = Collections.singletonList(arbeidUtland);
     }
 
     @Test
@@ -36,9 +42,9 @@ public class SoeknadUtilsTest {
     @Test
     public void hentPeriode_opphold() {
         SoeknadDokument soeknad = new SoeknadDokument();
-        soeknad.arbeidUtland = new ArbeidUtland();
-        soeknad.oppholdUtland = new OppholdUtland();
+        leggTilArbeidUtland(soeknad);
 
+        soeknad.oppholdUtland = new OppholdUtland();
         Periode periode_2 = new Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX);
         soeknad.oppholdUtland.oppholdsPeriode = periode_2;
 
@@ -49,9 +55,9 @@ public class SoeknadUtilsTest {
     @Test(expected = RuntimeException.class)
     public void hentPeriode_ingen() {
         SoeknadDokument soeknad = new SoeknadDokument();
-        soeknad.arbeidUtland = new ArbeidUtland();
-        soeknad.oppholdUtland = new OppholdUtland();
+        leggTilArbeidUtland(soeknad);
 
+        soeknad.oppholdUtland = new OppholdUtland();
         SoeknadUtils.hentPeriode(soeknad);
     }
 }

@@ -11,7 +11,7 @@ public class SoeknadDokument extends SaksopplysningDokument {
     public OpplysningerOmBrukeren personOpplysninger;
 
     // Opplysninger om arbeid i utlandet
-    public ArbeidUtland arbeidUtland;
+    public List<ArbeidUtland> arbeidUtland;
 
     // Opplysninger om foretak i utlandet
     public List<ForetakUtland> foretakUtland;

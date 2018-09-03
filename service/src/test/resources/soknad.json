@@ -7,7 +7,7 @@
       }
     ]
   },
-  "arbeidUtland": {
+  "arbeidUtland": [{
     "adresse": {
       "gatenavn": "Adresseveien 123",
       "postnummer": "1234",
@@ -18,7 +18,7 @@
     "arbeidsandelUtland": 66.6,
     "arbeidUtlandErstatning": false,
     "arbeidUtlandHjemmekontor": false
-  },
+  }],
   "foretakUtland": [
     {
       "navn": "Volkswagen AG",
