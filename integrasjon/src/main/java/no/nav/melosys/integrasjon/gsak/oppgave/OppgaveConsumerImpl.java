@@ -74,9 +74,9 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
             .queryParam("sorteringsfelt", oppgaveSearchRequest.getSorteringsfelt())
             .queryParam("tilordnetRessurs", oppgaveSearchRequest.getTilordnetRessurs());
 
-        lokalTarget = leggTilQueryParamSomArray(lokalTarget,"tema", oppgaveSearchRequest.getTema());
-        lokalTarget = leggTilQueryParamSomArray(lokalTarget,"oppgavetype", oppgaveSearchRequest.getOppgavetype());
-        lokalTarget = leggTilQueryParamSomArray(lokalTarget,"behandlingstype", oppgaveSearchRequest.getBehandlingstype());
+        lokalTarget = leggTilQueryParamSomArray(lokalTarget, "tema", oppgaveSearchRequest.getTema());
+        lokalTarget = leggTilQueryParamSomArray(lokalTarget, "oppgavetype", oppgaveSearchRequest.getOppgavetype());
+        lokalTarget = leggTilQueryParamSomArray(lokalTarget, "behandlingstype", oppgaveSearchRequest.getBehandlingstype());
 
         OppgaveSvar oppgaveSvar = lokalTarget.request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
@@ -95,7 +95,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
                 }
             }
         }
-    return tempTarget;
+        return tempTarget;
     }
 
     @Override
@@ -105,7 +105,9 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
             .header("X-Correlation-ID", getCallID())
             .header(HttpHeaders.AUTHORIZATION, getAuth())
             .put(Entity.json(request))) {
-            håndterFeil(response);
+            if (response.getStatus() != 200) {
+                håndterFeil(response);
+            }
         }
     }
 
@@ -117,7 +119,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
             .header("X-Correlation-ID", getCallID())
             .header(HttpHeaders.AUTHORIZATION, getAuth())
             .post(Entity.json(request))) {
-            if( response.getStatus() == 201 ) { // Oppgaven opprettet
+            if (response.getStatus() == 201) { // Oppgaven opprettet
                 OppgaveDto oppgaveDto = response.readEntity(OppgaveDto.class);
                 return oppgaveDto.getId();
             }
