@@ -84,7 +84,6 @@ public class FagsakService {
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(dato);
-        behandling.setEndretDato(dato);
 
         behandling.setStatus(BehandlingStatus.OPPRETTET);
         behandling.setType(behandlingType);

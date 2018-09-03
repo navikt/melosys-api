@@ -3,7 +3,10 @@ package no.nav.melosys.saksflyt.agent;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
@@ -56,13 +59,6 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-
-        Boolean oppfriskSaksopplysning = prosessinstans.getData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, Boolean.class);
-        if (oppfriskSaksopplysning != null && oppfriskSaksopplysning) {
-            prosessinstans.setSteg(null);
-            log.info("Oppfrisking av saksopplysning er ferdig for prosessinstans {}", prosessinstans.getId());
-            return;
-        }
 
         BehandlingType behandlingType = prosessinstans.getBehandling().getType(); // Forutsetter at ingen tidligere steg har endret denne
         String gsakSakID = prosessinstans.getData(GSAK_SAK_ID);

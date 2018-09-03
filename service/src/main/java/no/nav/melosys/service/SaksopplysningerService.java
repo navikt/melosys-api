@@ -232,6 +232,7 @@ public class SaksopplysningerService {
             behandling.getSaksopplysninger().removeIf(saksopplysning -> saksopplysning.getType() != SaksopplysningType.SØKNAD);
 
             Prosessinstans nyprosessinstans = new Prosessinstans();
+            behandling.setEndretDato(null);
             nyprosessinstans.setBehandling(behandling);
             nyprosessinstans.setType(ProsessType.SØKNAD_A1);
             nyprosessinstans.setData(ProsessDataKey.AKTØR_ID, aktør_Id);

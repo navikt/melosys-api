@@ -48,15 +48,4 @@ public class OpprettOppgaveTest {
         assertThat(p.getSteg()).isNull();
     }
 
-    @Test
-    public void oppfriskSaksopplysningSteg() throws SikkerhetsbegrensningException, FunksjonellException {
-        Prosessinstans p = new Prosessinstans();
-        p.addData(new Properties());
-        p.setData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, true);
-
-        agent.utførSteg(p);
-
-        verify(gsakFasade, times(0)).opprettOppgave(any());
-        assertThat(p.getSteg()).isNull();
-    }
 }

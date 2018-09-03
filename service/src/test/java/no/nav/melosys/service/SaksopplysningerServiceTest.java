@@ -37,7 +37,6 @@ import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -121,34 +120,34 @@ public class SaksopplysningerServiceTest {
 
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
-        Aktoer aktoer = new Aktoer();
-        aktoer.setAktørId("123");
-        aktoer.setRolle(RolleType.BRUKER);
-        HashSet<Aktoer> aktoers = new HashSet<>();
-        aktoers.add(aktoer);
-        fagsak.setAktører(aktoers);
+        Aktoer aktør = new Aktoer();
+        aktør.setAktørId("123");
+        aktør.setRolle(RolleType.BRUKER);
+        HashSet<Aktoer> aktører = new HashSet<>();
+        aktører.add(aktør);
+        fagsak.setAktører(aktører);
         behandling.setFagsak(fagsak);
 
-        HashSet<Saksopplysning> saksopplysnings = new HashSet<>();
+        HashSet<Saksopplysning> saksopplysninger = new HashSet<>();
 
         Saksopplysning saksopplysningPerson = new Saksopplysning();
         saksopplysningPerson.setType(SaksopplysningType.PERSONOPPLYSNING);
-        saksopplysnings.add(saksopplysningPerson);
+        saksopplysninger.add(saksopplysningPerson);
 
         SoeknadDokument soeknadDokument = new SoeknadDokument();
 
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.arbeidsland = new ArrayList<>();
         arbeidUtland.arbeidsland.add(new Land(Land.NORGE));
-        arbeidUtland.arbeidsperiode = new Periode(LocalDate.now(),LocalDate.of(2018,9,18));
+        arbeidUtland.arbeidsperiode = new Periode(LocalDate.now(),LocalDate.of(2018, 9, 18));
         soeknadDokument.arbeidUtland = arbeidUtland;
 
         Saksopplysning saksopplysningSøknad = new Saksopplysning();
         saksopplysningSøknad.setType(SaksopplysningType.SØKNAD);
         saksopplysningSøknad.setDokument(soeknadDokument);
-        saksopplysnings.add(saksopplysningSøknad);
+        saksopplysninger.add(saksopplysningSøknad);
 
-        behandling.setSaksopplysninger(saksopplysnings);
+        behandling.setSaksopplysninger(saksopplysninger);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
