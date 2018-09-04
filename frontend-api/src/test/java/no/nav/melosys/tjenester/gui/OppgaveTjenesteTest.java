@@ -20,9 +20,10 @@ import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
+import no.nav.melosys.tjenester.gui.dto.OppgaveOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
 import org.everit.json.schema.ValidationException;
-import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,12 +71,12 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
         when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
         Response response = tjeneste.mineOppgaver();
 
-        List<OppgaveDto> liste = (List<OppgaveDto>) response.getEntity();
+        OppgaveOversiktDto oppgaveOversikt = (OppgaveOversiktDto) response.getEntity();
 
-        String jsonString = objectMapper().writeValueAsString(liste);
+        String jsonString = objectMapper().writeValueAsString(oppgaveOversikt);
 
         try {
-            hentSchema().validate(new JSONArray(jsonString));
+            hentSchema().validate(new JSONObject(jsonString));
         } catch (ValidationException e) {
             logger.error(e.toJSON().toString());
             throw e;

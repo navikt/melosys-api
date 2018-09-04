@@ -16,9 +16,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.service.oppgave.dto.BehandlingDto;
-import no.nav.melosys.service.oppgave.dto.OppgaveDto;
-import no.nav.melosys.service.oppgave.dto.PeriodeDto;
+import no.nav.melosys.service.oppgave.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,43 +62,48 @@ public class OppgaveService {
     }
 
     private OppgaveDto tilOppgaveDto(Oppgave oppgave) {
-        OppgaveDto dest = new OppgaveDto();
-        dest.setOppgaveID(oppgave.getOppgaveId());
-        dest.setAktivTil(oppgave.getFristFerdigstillelse());
-        dest.setOppgavetypeKode(oppgave.getOppgavetype().getKode());
-        dest.setPrioritet(oppgave.getPrioritet());
-        dest.setVersjon(oppgave.getVersjon());
-        dest.setAnsvarligID(oppgave.getTilordnetRessurs());
+        OppgaveDto dest;
 
         if (oppgave.erJournalFøring()) {
-            dest.setJournalpostID(oppgave.getJournalpostId());
+            JournalfoeringsoppgaveDto jfrOppgaveDto = new JournalfoeringsoppgaveDto();
+            jfrOppgaveDto.setJournalpostID(oppgave.getJournalpostId());
+            dest = jfrOppgaveDto;
         } else if (oppgave.erBehandling()) {
+            BehandlingsoppgaveDto behOppgaveDto = new BehandlingsoppgaveDto();
             Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
             if (fagsak == null) {
                 throw new RuntimeException("Fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer() + " ikke funnet!");
             }
 
-            dest.setSaksnummer(fagsak.getSaksnummer());
-            dest.setSakstypeKode(fagsak.getType().getKode());
+            behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
+            behOppgaveDto.setSakstypeKode(fagsak.getType().getKode());
 
             Behandling behandling = fagsak.getAktivBehandling();
-            dest.setBehandling(mapBehandling(behandling));
+            behOppgaveDto.setBehandling(mapBehandling(behandling));
 
             hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
                 SoeknadDokument søknadDokument = (SoeknadDokument) saksopplysningDokument;
-                dest.setLand(hentLand(søknadDokument));
-                dest.setSoknadsperiode(mapPeriode(søknadDokument));
+                behOppgaveDto.setLand(hentLand(søknadDokument));
+                behOppgaveDto.setSoknadsperiode(mapPeriode(søknadDokument));
             });
             hentDokument(behandling, SaksopplysningType.PERSONOPPLYSNING).ifPresent(
-                    saksopplysningDokument -> {
-                        PersonDokument personDokument = (PersonDokument) saksopplysningDokument;
-                        dest.setSammensattNavn(personDokument.sammensattNavn);
-                    }
+                saksopplysningDokument -> {
+                    PersonDokument personDokument = (PersonDokument) saksopplysningDokument;
+                    behOppgaveDto.setSammensattNavn(personDokument.sammensattNavn);
+                }
             );
 
+            dest = behOppgaveDto;
         } else {
             throw new TekniskException("Oppgavetype " + oppgave.getOppgavetype() + " støttes ikke");
         }
+
+        dest.setAktivTil(oppgave.getFristFerdigstillelse());
+        dest.setAnsvarligID(oppgave.getTilordnetRessurs());
+        dest.setOppgaveID(oppgave.getOppgaveId());
+        dest.setOppgavetypeKode(oppgave.getOppgavetype().getKode());
+        dest.setPrioritet(oppgave.getPrioritet());
+        dest.setVersjon(oppgave.getVersjon());
 
         return dest;
     }
