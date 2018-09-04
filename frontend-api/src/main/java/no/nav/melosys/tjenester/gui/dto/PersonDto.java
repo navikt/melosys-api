@@ -50,8 +50,23 @@ public class PersonDto {
     @JsonProperty(defaultValue = "false" )
     public boolean erEgenAnsatt; // FIXME : MELOSYS-1580
 
-    // FIXME: Validerer ikke mot JSON-schema
-    @JsonIgnore
-    public PersonhistorikkDto historikk;
+    public PersonDto() {}
+
+    public PersonDto(PersonDokument personDokument) {
+        this.fnr = personDokument.fnr;
+        this.sivilstand = personDokument.sivilstand;
+        this.statsborgerskap = personDokument.statsborgerskap;
+        this.kjønn = personDokument.kjønn;
+        this.sammensattNavn = personDokument.sammensattNavn;
+        this.familiemedlemmer = personDokument.familiemedlemmer;
+        this.fødselsdato = personDokument.fødselsdato;
+        this.dødsdato = personDokument.dødsdato;
+        this.diskresjonskode = personDokument.diskresjonskode;
+        this.personstatus = personDokument.personstatus;
+        this.bostedsadresse = personDokument.bostedsadresse;
+        this.postadresse = personDokument.postadresse;
+        this.midlertidigPostadresse = personDokument.midlertidigPostadresse;
+        this.erEgenAnsatt = personDokument.erEgenAnsatt;
+    }
 
 }

@@ -3,11 +3,13 @@ package no.nav.melosys.tjenester.gui.dto.converter;
 import java.util.Comparator;
 import java.util.Set;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
@@ -15,11 +17,14 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
+import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
-import no.nav.melosys.tjenester.gui.dto.PersonhistorikkDto;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
+
+import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 
 /**
  * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
@@ -33,6 +38,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
 
     @Override
     public SaksopplysningerDto convert(MappingContext<Set<Saksopplysning>, SaksopplysningerDto> context) {
+        Behandling behandling = (Behandling) context.getParent().getSource();
         SaksopplysningerDto dto = new SaksopplysningerDto();
 
         if (context.getSource() == null) {
@@ -40,7 +46,8 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
             return dto;
         }
 
-        PersonhistorikkDto personhistorikk = null;
+        Periode søknadsperiode = null;
+        Land historiskStatsborgerskap = null;
 
         for (Saksopplysning saksopplysning : context.getSource()) {
             SaksopplysningType type = saksopplysning.getType();
@@ -48,10 +55,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
 
             switch (type) {
                 case PERSONOPPLYSNING:
-                    dto.setPerson(tilPersonDto((PersonDokument) dokument));
-                    if (personhistorikk != null) {
-                        dto.getPerson().historikk = personhistorikk;
-                    }
+                    dto.setPerson(new PersonDto((PersonDokument) dokument));
                     break;
                 case ARBEIDSFORHOLD:
                     ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) dokument;
@@ -77,15 +81,29 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     dto.setSakOgBehandling((SobSakDokument) dokument);
                     break;
                 case PERSONHISTORIKK:
-                    personhistorikk = tilPersonhistorikkDto((PersonhistorikkDokument) dokument);
-                    dto.getPerson().historikk = personhistorikk;
+                    PersonhistorikkDokument personhistorikk = (PersonhistorikkDokument) dokument;
+                    if (!personhistorikk.statsborgerskapListe.isEmpty()) {
+                        historiskStatsborgerskap = personhistorikk.statsborgerskapListe.get(0).statsborgerskap;
+                    }
                     break;
                 case SØKNAD:
+                    søknadsperiode = hentPeriode((SoeknadDokument) dokument);
                     // N.B. Frontend ønsker ikke å få søknaden på /fagsaker slik at opplysninger fra registrene er adskilt
                     break;
                 default:
                     throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");
             }
+        }
+
+        /*
+        - Ved søknad tilbake i tid, brukes historisk statsborgerskap med fom-dato for søknad som dato
+        - Ved søknad framover i tid, brukes statsborgerskap fra TPS med endretDato fra behandling som dato
+        */
+        if (søknadsperiode != null && søknadsperiode.getFom().isBefore(behandling.getSistOpplysningerHentetDato().toLocalDate())) {
+            dto.getPerson().statsborgerskap = historiskStatsborgerskap;
+            dto.getPerson().statsborgerskapDato = søknadsperiode.getFom();
+        } else {
+            dto.getPerson().statsborgerskapDato = behandling.getSistOpplysningerHentetDato().toLocalDate();
         }
 
         return dto;
@@ -113,42 +131,4 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
         }
     }
 
-    private PersonDto tilPersonDto(PersonDokument personDokument) {
-        PersonDto dto = new PersonDto();
-
-        dto.fnr = personDokument.fnr;
-        dto.sivilstand = personDokument.sivilstand;
-        dto.statsborgerskap = personDokument.statsborgerskap;
-        dto.kjønn = personDokument.kjønn;
-        dto.sammensattNavn = personDokument.sammensattNavn;
-        dto.familiemedlemmer = personDokument.familiemedlemmer;
-        dto.fødselsdato = personDokument.fødselsdato;
-        dto.dødsdato = personDokument.dødsdato;
-        dto.diskresjonskode = personDokument.diskresjonskode;
-        dto.personstatus = personDokument.personstatus;
-        dto.bostedsadresse = personDokument.bostedsadresse;
-        dto.postadresse = personDokument.postadresse;
-        dto.midlertidigPostadresse = personDokument.midlertidigPostadresse;
-        dto.erEgenAnsatt = personDokument.erEgenAnsatt;
-
-        return dto;
-    }
-
-    private PersonhistorikkDto tilPersonhistorikkDto(PersonhistorikkDokument personhistorikkDokument) {
-        PersonhistorikkDto dto = new PersonhistorikkDto();
-
-        if (!personhistorikkDokument.statsborgerskapListe.isEmpty()) {
-            dto.statsborgerskap = personhistorikkDokument.statsborgerskapListe.get(0);
-        }
-        if (!personhistorikkDokument.bostedsadressePeriodeListe.isEmpty()) {
-            dto.bostedsadresse = personhistorikkDokument.bostedsadressePeriodeListe.get(0);
-        }
-        if (!personhistorikkDokument.postadressePeriodeListe.isEmpty()) {
-            dto.postadresse = personhistorikkDokument.postadressePeriodeListe.get(0);
-        }
-        if (!personhistorikkDokument.midlertidigAdressePeriodeListe.isEmpty()) {
-            dto.midlertidigPostadresse = personhistorikkDokument.midlertidigAdressePeriodeListe.get(0);
-        }
-        return dto;
-    }
 }

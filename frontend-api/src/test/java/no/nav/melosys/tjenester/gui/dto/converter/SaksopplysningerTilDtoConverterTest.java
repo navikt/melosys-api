@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,7 +19,9 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periodetype;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.PersonDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.modelmapper.ModelMapper;
@@ -102,7 +105,7 @@ public class SaksopplysningerTilDtoConverterTest {
     }
 
     @Test
-    public void testKonverteringPersonMedHistorikk() throws Exception {
+    public void testKonverteringPersonMedStatsborgerskap() throws Exception {
 
         Saksopplysning personDokument = lagDokument("88888888882.xml", PERSONOPPLYSNING, "3.0");
         Saksopplysning personhistorikkDokument = lagDokument("88888888882_historikk.xml", PERSONHISTORIKK, "3.4");
@@ -115,14 +118,19 @@ public class SaksopplysningerTilDtoConverterTest {
         saksopplysninger.add(personhistorikkDokument);
 
         Behandling behandling = new Behandling();
+        behandling.setSisteOpplysningerHentetDato(LocalDate.of(2018, 1, 1).atStartOfDay());
         behandling.setSaksopplysninger(saksopplysninger);
 
         BehandlingDto behandlingDto = modelMapper.map(behandling, BehandlingDto.class);
 
         assertThat(behandlingDto).isNotNull();
         assertThat(behandlingDto.getSaksopplysninger()).isNotNull();
-        assertThat(behandlingDto.getSaksopplysninger().getPerson()).isNotNull();
-        assertThat(behandlingDto.getSaksopplysninger().getPerson().historikk).isNotNull();
+
+        PersonDto personDto = behandlingDto.getSaksopplysninger().getPerson();
+
+        assertThat(personDto).isNotNull();
+        assertThat(personDto.statsborgerskap).isNotNull();
+        assertThat(personDto.statsborgerskapDato).isNotNull();
     }
 
     private Saksopplysning lagDokument(String ressurs, SaksopplysningType type, String versjon) {
