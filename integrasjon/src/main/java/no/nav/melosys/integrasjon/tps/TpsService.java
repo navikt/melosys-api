@@ -188,6 +188,11 @@ public class TpsService implements TpsFasade {
         Periode periode = new Periode();
         try {
             XMLGregorianCalendar xmlDato = KonverteringsUtils.localDateToXMLGregorianCalendar(dato);
+            /*
+            Når fom == tom leverer TPS all foregående historikk, mens fom < tom gir historikk med gyldighetsdato
+            innenfor perioden det søkes på. Vi filtrerer på opplysninger registrert av SKD og sorterer på endringsdato
+            for å finne prefererte opplysninger, og ønsker derfor all historikk fram til start av søknadsperioden.
+            */
             periode.setFom(xmlDato);
             periode.setTom(xmlDato);
         } catch (DatatypeConfigurationException e) {
