@@ -78,7 +78,7 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
         hentOrganisasjoner(orgnumre, behandling);
 
         prosessinstans.setSteg(ProsessSteg.HENT_MEDL_OPPL);
-        log.info("hentet organisasjonsopplysninger for prosessinstans {}", prosessinstans.getId());
+        log.info("Hentet organisasjonsopplysninger for prosessinstans {}", prosessinstans.getId());
     }
 
     private static Set<String> hentOrgnumreFraArbeidsforhold(Saksopplysning saksopplysning) {
