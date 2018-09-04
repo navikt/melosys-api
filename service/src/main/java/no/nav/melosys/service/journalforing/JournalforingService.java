@@ -46,7 +46,7 @@ public class JournalforingService {
         if (journalforingDto.getFagsak().getSoknadsperiode().getFom() == null) {
             throw new FunksjonellException("Søknadsperiodes fra og med dato mangler");
         }
-        if (journalforingDto.getFagsak().getSoknadsperiode().getFom() == null) {
+        if (journalforingDto.getFagsak().getSoknadsperiode().getTom() == null) {
             throw new FunksjonellException("Søknadsperiodes til og med dato mangler");
         }
         if (journalforingDto.getFagsak().getLand() == null || journalforingDto.getFagsak().getLand().isEmpty()) {
