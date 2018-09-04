@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.tps;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,7 +107,7 @@ public class TpsServiceTest {
 
         when(personConsumer.hentPersonhistorikk(any())).thenReturn(r1);
 
-        Saksopplysning saksopplysning = service.hentPersonhistorikk(AKTØRID_1.toString());
+        Saksopplysning saksopplysning = service.hentPersonhistorikk(AKTØRID_1.toString(), LocalDate.now());
 
         PersonhistorikkDokument dokument = (PersonhistorikkDokument) saksopplysning.getDokument();
 

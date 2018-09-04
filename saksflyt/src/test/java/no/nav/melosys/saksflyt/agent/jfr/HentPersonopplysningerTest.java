@@ -1,8 +1,10 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -40,14 +42,16 @@ public class HentPersonopplysningerTest {
         p.getBehandling().setSaksopplysninger(new HashSet<>());
 
         String brukerID = "99999999991";
+        LocalDate fom = LocalDate.now();
         p.setData(ProsessDataKey.BRUKER_ID, brukerID);
+        p.setData(ProsessDataKey.SØKNADSPERIODE, new Periode(fom, fom));
         when(tpsFasade.hentPersonMedAdresse(any())).thenReturn(new Saksopplysning());
-        when(tpsFasade.hentPersonhistorikk(any())).thenReturn(new Saksopplysning());
+        when(tpsFasade.hentPersonhistorikk(any(), any())).thenReturn(new Saksopplysning());
 
         agent.utførSteg(p);
 
         verify(tpsFasade, times(1)).hentPersonMedAdresse(brukerID);
-        verify(tpsFasade, times(1)).hentPersonhistorikk(brukerID);
+        verify(tpsFasade, times(1)).hentPersonhistorikk(brukerID, fom);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_VURDER_INNGANGSVILKÅR);
     }
 }
