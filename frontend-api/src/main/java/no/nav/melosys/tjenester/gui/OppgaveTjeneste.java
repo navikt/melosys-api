@@ -135,6 +135,8 @@ public class OppgaveTjeneste extends RestTjeneste {
                 journalføring.add((JournalfoeringsoppgaveDto) oppgaveDto);
             } else if (oppgaveDto instanceof BehandlingsoppgaveDto) {
                 saksbehandling.add((BehandlingsoppgaveDto) oppgaveDto);
+            } else {
+                log.warn("Ukjent oppgavetype {}: ", oppgaveDto.getClass().getSimpleName());
             }
         }
         oversiktDto.setJournalforing(journalføring);
