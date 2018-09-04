@@ -81,7 +81,7 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
             saksopplysninger.setPerson(random.nextObject(PersonDokument.class));
         }
 
-        String jsonString = objectMapper().writeValueAsString(fagsakDto);
+        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
 
         try {
             hentSchema().validate(new JSONObject(jsonString));

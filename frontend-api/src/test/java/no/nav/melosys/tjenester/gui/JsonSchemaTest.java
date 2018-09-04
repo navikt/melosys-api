@@ -25,6 +25,8 @@ public abstract class JsonSchemaTest {
 
     private static ObjectMapper objectMapper;
 
+    private static ObjectMapper objectMapperMedKodeverkServiceStub;
+
     private static EnhancedRandom enhancedRandom;
 
     public abstract String schemaNavn();
@@ -59,10 +61,20 @@ public abstract class JsonSchemaTest {
             objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
             objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
             objectMapper.registerModule(new JavaTimeModule());
-            KodeverkService kodeverkService = mock(KodeverkService.class);
-            when(kodeverkService.dekod(any(),any(),any())).thenReturn("DUMMY");
-            objectMapper.registerModule(new JacksonModule(kodeverkService));
         }
         return objectMapper;
+    }
+
+    protected ObjectMapper objectMapperMedKodeverkServiceStub() {
+        if (objectMapperMedKodeverkServiceStub == null) {
+            objectMapperMedKodeverkServiceStub = new ObjectMapper();
+            objectMapperMedKodeverkServiceStub.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+            objectMapperMedKodeverkServiceStub.configure(SerializationFeature.INDENT_OUTPUT, true);
+            objectMapperMedKodeverkServiceStub.registerModule(new JavaTimeModule());
+            KodeverkService kodeverkService = mock(KodeverkService.class);
+            when(kodeverkService.dekod(any(),any(),any())).thenReturn("DUMMY");
+            objectMapperMedKodeverkServiceStub.registerModule(new JacksonModule(kodeverkService));
+        }
+        return objectMapperMedKodeverkServiceStub;
     }
 }
