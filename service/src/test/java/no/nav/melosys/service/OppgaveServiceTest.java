@@ -18,6 +18,7 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -64,6 +65,7 @@ public class OppgaveServiceTest {
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave();
         oppgave1.setOppgaveId("1");
+        oppgave1.setOppgavetype(Oppgavetype.BEH_SAK);
         oppgave1.setPrioritet(PrioritetType.HOY);
         oppgave1.setOppgavetype(Oppgavetype.BEH_SAK);
         oppgave1.setGsakSaksnummer("11");
@@ -93,7 +95,7 @@ public class OppgaveServiceTest {
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12345678901");
         assertThat(mineSaker.size()).isEqualTo(1);
         assertThat(mineSaker.get(0).getOppgaveID()).isEqualTo("1");
-        assertThat(mineSaker.get(0).getBehandling().erUnderOppdatering()).isEqualTo(true);
+        assertThat(((BehandlingsoppgaveDto)mineSaker.get(0)).getBehandling().erUnderOppdatering()).isEqualTo(true);
 
         mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12346678902");
         assertThat(mineSaker.size()).isEqualTo(0);
