@@ -26,7 +26,6 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.setBehandlingsstatus(tilKoder(BehandlingStatus.values()));
         kodeverk.setBehandlingstyper(tilKoder(BehandlingType.values()));
         kodeverk.setDokumenttitler(tilKoder(DokumentTittel.values()));
-        kodeverk.setDokumenttyper(tilKoder(DokumentType.values()));
         kodeverk.setLandkoder(tilKoder(Landkoder.values()));
         kodeverk.setOppgavetyper(tilKoder(Oppgavetype.values()));
         kodeverk.setSakstyper(tilKoder(FagsakType.values()));
