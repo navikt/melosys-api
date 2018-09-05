@@ -47,5 +47,4 @@ public class OpprettOppgaveTest {
 
         assertThat(p.getSteg()).isNull();
     }
-
 }

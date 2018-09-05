@@ -213,7 +213,7 @@ public class SaksopplysningerService {
     public void oppfriskSaksopplysning(long behandlingsid) throws IkkeFunnetException, TekniskException {
         log.info("Starter oppfrisking av behandlingsid: {} ", behandlingsid);
 
-        Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByBehandling_Id_And_StegIsNotNull(behandlingsid);
+        Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByStegIsNotNullANDBehandling_Id(behandlingsid);
         Behandling behandling = behandlingRepository.findOne(behandlingsid);
         if (behandling == null) {
             log.error("Behandling ikke funnet med behandlingsid {}", behandlingsid);

@@ -47,6 +47,7 @@ public class OppfriskSaksopplysningerTest {
     @Test
     public void oppfriskSaksopplysningSteg() throws SikkerhetsbegrensningException, FunksjonellException {
         Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.OPPFRISKNING);
         Behandling behandling = new Behandling();
         p.setBehandling(behandling);
         p.addData(new Properties());

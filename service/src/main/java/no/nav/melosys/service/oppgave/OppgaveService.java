@@ -120,7 +120,7 @@ public class OppgaveService {
             behandlingDto.setBehandlingStatus(behandling.getStatus());
             behandlingDto.setBehandlingType(behandling.getType());
             behandlingDto.setEndretDato(behandling.getEndretDato());
-            Optional<Prosessinstans> prosessinstans = prosessinstansRepository.findByBehandling_Id_And_Type(behandling.getId(), ProsessType.OPPFRISKNING);
+            Optional<Prosessinstans> prosessinstans = prosessinstansRepository.findByTypeAndBehandling_Id(ProsessType.OPPFRISKNING, behandling.getId());
             if (prosessinstans.isPresent()) {
                 behandlingDto.setErUnderOppdatering(prosessinstans.get().getData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, Boolean.class));
             } else {

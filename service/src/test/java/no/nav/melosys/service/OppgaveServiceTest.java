@@ -48,8 +48,6 @@ public class OppgaveServiceTest {
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
 
-
-
     @Before
     public void setUp() {
         this.oppgaveService = new OppgaveService(
@@ -83,7 +81,7 @@ public class OppgaveServiceTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, true);
-        when(prosessinstansRepository.findByBehandling_Id_And_Type(anyLong(),any())).thenReturn(Optional.ofNullable(prosessinstans));
+        when(prosessinstansRepository.findByTypeAndBehandling_Id(any(), anyLong())).thenReturn(Optional.ofNullable(prosessinstans));
 
         Fagsak fagsak = new Fagsak();
         fagsak.setType(FagsakType.EU_EØS);
@@ -99,6 +97,7 @@ public class OppgaveServiceTest {
 
         mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12346678902");
         assertThat(mineSaker.size()).isEqualTo(0);
+
     }
 
     private List<Behandling> hentBehandlinger() {
