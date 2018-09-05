@@ -42,6 +42,7 @@ public class SaksopplysningerService {
 
     private static final Logger log = LoggerFactory.getLogger(SaksopplysningerService.class);
 
+    // FIXME : Injektere feltene i constructor MELOSYS-1635
     @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallÅr}")
     private Integer arbeidsforholdhistorikkAntallÅr;
 
