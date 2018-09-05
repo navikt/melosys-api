@@ -4,19 +4,19 @@
 
     <xsl:output method="xml" indent="no"/>
 
-    <xsl:template match="/|ns2:finnSakOgBehandlingskjedeListeResponse|response">
+    <xsl:template match="/ns2:finnSakOgBehandlingskjedeListeResponse">
         <xsl:apply-templates/>
+    </xsl:template>
+
+    <xsl:template match="response">
+        <sobSakDokument>
+            <xsl:apply-templates/>
+        </sobSakDokument>
     </xsl:template>
 
     <xsl:variable name="SAKSTEMA_BARNETRYGD">Barnetrygd</xsl:variable>
     <xsl:variable name="BEHANDLINGSKJEDETYPE_BEHANDLE_SAK">ad0003</xsl:variable>
     <xsl:variable name="BEHANDLINGSTEMA_BARNETRYGD_EØS">ab0058</xsl:variable>
-
-    <xsl:template match="sak">
-        <sobSakDokument>
-            <xsl:apply-templates/>
-        </sobSakDokument>
-    </xsl:template>
 
     <xsl:template match="behandlingskjede">
         <behandlingskjede>
