@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.GET;
@@ -19,9 +20,12 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
+import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
+import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.tjenester.gui.dto.OppgaveOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
 import no.nav.melosys.tjenester.gui.dto.TilbakeleggingDto;
 import org.slf4j.Logger;
@@ -121,7 +125,23 @@ public class OppgaveTjeneste extends RestTjeneste {
             log.error("Uventet teknisk Feil {} ", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
-        return Response.ok(oppgaveDtoListe).build();
+
+        OppgaveOversiktDto oversiktDto = new OppgaveOversiktDto();
+        List<JournalfoeringsoppgaveDto> journalføring = new ArrayList<>();
+        List<BehandlingsoppgaveDto> saksbehandling = new ArrayList<>();
+
+        for (OppgaveDto oppgaveDto : oppgaveDtoListe) {
+            if (oppgaveDto instanceof JournalfoeringsoppgaveDto) {
+                journalføring.add((JournalfoeringsoppgaveDto) oppgaveDto);
+            } else if (oppgaveDto instanceof BehandlingsoppgaveDto) {
+                saksbehandling.add((BehandlingsoppgaveDto) oppgaveDto);
+            } else {
+                log.warn("Ukjent oppgavetype {}: ", oppgaveDto.getClass().getSimpleName());
+            }
+        }
+        oversiktDto.setJournalforing(journalføring);
+        oversiktDto.setSaksbehandling(saksbehandling);
+        return Response.ok(oversiktDto).build();
     }
 
     @GET
