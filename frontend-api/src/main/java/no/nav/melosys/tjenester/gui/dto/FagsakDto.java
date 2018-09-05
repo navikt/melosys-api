@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import no.nav.melosys.domain.FagsakStatus;
@@ -12,8 +12,8 @@ public class FagsakDto {
     private String gsakSaksnummer; // Denne blir sendt til front-end, men er stadig ikke i bruk
     private FagsakType type;
     private FagsakStatus status;
-    private LocalDateTime registrertDato;
-    private LocalDateTime endretDato;
+    private Instant registrertDato;
+    private Instant endretDato;
     private List<BehandlingDto> behandlinger;
 
     public String getSaksnummer() {
@@ -48,19 +48,19 @@ public class FagsakDto {
         this.status = status;
     }
 
-    public LocalDateTime getRegistrertDato() {
+    public Instant getRegistrertDato() {
         return registrertDato;
     }
 
-    public void setRegistrertDato(LocalDateTime registrertDato) {
+    public void setRegistrertDato(Instant registrertDato) {
         this.registrertDato = registrertDato;
     }
 
-    public LocalDateTime getEndretDato() {
+    public Instant getEndretDato() {
         return endretDato;
     }
 
-    public void setEndretDato(LocalDateTime endretDato) {
+    public void setEndretDato(Instant endretDato) {
         this.endretDato = endretDato;
     }
 
