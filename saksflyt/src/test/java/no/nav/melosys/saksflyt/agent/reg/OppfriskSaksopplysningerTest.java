@@ -7,7 +7,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.saksflyt.agent.FerdigstillBehandling;
+import no.nav.melosys.saksflyt.agent.OppfriskSaksopplysninger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,16 +19,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FerdigstillBehandlingTest {
+public class OppfriskSaksopplysningerTest {
 
     @Mock
     private BehandlingRepository behandlingRepository;
 
-    private FerdigstillBehandling agent;
+    private OppfriskSaksopplysninger agent;
 
     @Before
     public void setUp() {
-        agent = new FerdigstillBehandling(behandlingRepository);
+        agent = new OppfriskSaksopplysninger(behandlingRepository);
     }
 
     @Test

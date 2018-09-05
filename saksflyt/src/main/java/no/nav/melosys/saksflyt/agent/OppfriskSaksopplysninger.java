@@ -20,31 +20,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.ProsessSteg.FERDIGSTILL_BEHANDLING;
+import static no.nav.melosys.domain.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
 import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
 
 /**
  * Ferdigstille behandling med oppdatere endringsdato på behandling og oppdatere prosessinstans steg ved oppfrisking
  *
  * Transisjoner:
- * FERDIGSTILL_BEHANDLING -> null eller OPPRETT_OPPGAVE eller FEILET_MASKINELT hvis feil
+ * OPPFRISK_SAKSOPPLYSNINGER -> null eller OPPRETT_OPPGAVE eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class FerdigstillBehandling extends AbstraktStegBehandler {
+public class OppfriskSaksopplysninger extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(FerdigstillBehandling.class);
+    private static final Logger log = LoggerFactory.getLogger(OppfriskSaksopplysninger.class);
 
     private final BehandlingRepository behandlingRepository;
 
     @Autowired
-    public FerdigstillBehandling(BehandlingRepository behandlingRepository) {
-        log.info("FerdigstillBehandling initialisert");
+    public OppfriskSaksopplysninger(BehandlingRepository behandlingRepository) {
+        log.info("OppfriskSaksopplysninger initialisert");
         this.behandlingRepository = behandlingRepository;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return FERDIGSTILL_BEHANDLING;
+        return OPPFRISK_SAKSOPPLYSNINGER;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class FerdigstillBehandling extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
-        behandling.setEndretDato(LocalDateTime.now());
+        behandling.setSisteOpplysningerHentetDato(LocalDateTime.now());
         behandlingRepository.save(behandling);
 
         Boolean oppfriskSaksopplysning = prosessinstans.getData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, Boolean.class);

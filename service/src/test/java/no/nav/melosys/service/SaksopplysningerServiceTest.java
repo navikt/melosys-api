@@ -3,6 +3,7 @@ package no.nav.melosys.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import ch.qos.logback.classic.Level;
@@ -149,20 +150,16 @@ public class SaksopplysningerServiceTest {
 
         behandling.setSaksopplysninger(saksopplysninger);
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
 
-        ArrayList<Prosessinstans> prosessinstansArrayList = new ArrayList<>();
-        prosessinstansArrayList.add(prosessinstans);
 
-        when(prosessinstansRepository.findByBehandling_Id(anyLong())).thenReturn(prosessinstansArrayList);
+        when(prosessinstansRepository.findByBehandling_Id_And_StegIsNotNull(anyLong())).thenReturn(Optional.empty());
         when(behandlingRepo.findOne(anyLong())).thenReturn(behandling);
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("12345");
 
         saksopplysningerService.oppfriskSaksopplysning(anyLong());
 
-        assertThat(prosessinstans.getBehandling().getSaksopplysninger().size()).isEqualTo(1);
-        assertThat(prosessinstans.getBehandling().getSaksopplysninger().stream().findFirst().get().getType()).isEqualTo(SaksopplysningType.SØKNAD);
+        assertThat(behandling.getSaksopplysninger().size()).isEqualTo(1);
+        assertThat(behandling.getSaksopplysninger().stream().findFirst().get().getType()).isEqualTo(SaksopplysningType.SØKNAD);
         verify(binge, times(1)).leggTil(any());
     }
 }

@@ -10,7 +10,6 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -48,14 +47,10 @@ public class SaksopplysningTjeneste extends RestTjeneste {
     @Path("oppfrisk/{id}")
     @ApiOperation(value = "Oppfrisker saksopplysing basert på behandlingsid", notes = ("Oppfrisker saksopplysing basert på behandlingsid."))
     public Response oppfriskSaksopplysning(@PathParam("id") @ApiParam("behandlingsid.") long id) {
-        Behandling behandling = behandlingrepo.findOne(id);
-        if (behandling == null) {
-            log.error("Behandling ikke funnet med behandlingsid {}", id);
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
 
         try {
             saksopplysningerService.oppfriskSaksopplysning(id);
+            return Response.status(Response.Status.NO_CONTENT).build();
         } catch (IkkeFunnetException e) {
             log.error("Behandling ikke funnet", e);
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -63,6 +58,5 @@ public class SaksopplysningTjeneste extends RestTjeneste {
             log.error("Uventet teknisk Feil", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
-        return Response.ok().build();
     }
 }

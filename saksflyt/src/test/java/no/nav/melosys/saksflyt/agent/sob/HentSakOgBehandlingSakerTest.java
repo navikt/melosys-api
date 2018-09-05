@@ -14,8 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
-import static no.nav.melosys.domain.ProsessSteg.FERDIGSTILL_BEHANDLING;
-import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
+import static no.nav.melosys.domain.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -47,6 +46,6 @@ public class HentSakOgBehandlingSakerTest {
         agent.utførSteg(p);
 
         verify(sakOgBehandlingFasade, times(1)).finnSakOgBehandlingskjedeListe(aktørId);
-        assertThat(p.getSteg()).isEqualTo(FERDIGSTILL_BEHANDLING);
+        assertThat(p.getSteg()).isEqualTo(OPPFRISK_SAKSOPPLYSNINGER);
     }
 }

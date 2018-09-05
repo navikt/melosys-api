@@ -20,14 +20,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
-import static no.nav.melosys.domain.ProsessSteg.FERDIGSTILL_BEHANDLING;
+import static no.nav.melosys.domain.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
 import static no.nav.melosys.domain.ProsessSteg.HENT_SOB_SAKER;
 
 /**
  * Steget sørger for å hente saker fra SOB
  *
  * Transisjoner:
- * HENT_SOB_SAKER → FERDIGSTILL_BEHANDLING hvis alt ok
+ * HENT_SOB_SAKER → OPPFRISK_SAKSOPPLYSNINGER hvis alt ok
  * HENT_SOB_SAKER → FEILET_MASKINELT hvis oppslag mot SOB feilet
  */
 @Component
@@ -68,7 +68,7 @@ public class HentSakOgBehandlingSaker extends AbstraktStegBehandler {
         saksopplysning.setRegistrertDato(LocalDateTime.now());
         saksopplysningRepo.save(saksopplysning);
 
-        prosessinstans.setSteg(FERDIGSTILL_BEHANDLING);
+        prosessinstans.setSteg(OPPFRISK_SAKSOPPLYSNINGER);
         log.info("Hentet saker fra Sak og behandling for prosessinstans {}", prosessinstans.getId());
     }
 }

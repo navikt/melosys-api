@@ -2,11 +2,10 @@ package no.nav.melosys.service.oppgave;
 
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -17,6 +16,7 @@ import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.oppgave.dto.*;
+import no.nav.melosys.repository.ProsessinstansRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,14 +31,17 @@ public class OppgaveService {
     private final GsakFasade gsakFasade;
     private final FagsakRepository fagsakRepository;
     private final TpsFasade tpsFasade;
+    private final ProsessinstansRepository prosessinstansRepository;
 
     @Autowired
     public OppgaveService(GsakFasade gsakFasade,
                           FagsakRepository fagsakRepository,
-                          TpsFasade tpsFasade) {
+                          TpsFasade tpsFasade,
+                          ProsessinstansRepository prosessinstansRepository) {
         this.gsakFasade = gsakFasade;
         this.fagsakRepository = fagsakRepository;
         this.tpsFasade = tpsFasade;
+        this.prosessinstansRepository = prosessinstansRepository;
     }
 
     @Transactional
@@ -108,7 +111,7 @@ public class OppgaveService {
         return dest;
     }
 
-    private static BehandlingDto mapBehandling(Behandling behandling) {
+    private BehandlingDto mapBehandling(Behandling behandling) {
         BehandlingDto behandlingDto = new BehandlingDto();
         if (behandling == null) {
             throw new RuntimeException("Det finnes ingen aktive behandlinger");
@@ -117,11 +120,17 @@ public class OppgaveService {
             behandlingDto.setBehandlingStatus(behandling.getStatus());
             behandlingDto.setBehandlingType(behandling.getType());
             behandlingDto.setEndretDato(behandling.getEndretDato());
+            Optional<Prosessinstans> prosessinstans = prosessinstansRepository.findByBehandling_Id_And_Type(behandling.getId(), ProsessType.OPPFRISKNING);
+            if (prosessinstans.isPresent()) {
+                behandlingDto.setErUnderOppdatering(prosessinstans.get().getData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, Boolean.class));
+            } else {
+                behandlingDto.setErUnderOppdatering(false);
+            }
         }
         return behandlingDto;
     }
 
-    private static PeriodeDto mapPeriode(SoeknadDokument soeknadDokument) {
+    private PeriodeDto mapPeriode(SoeknadDokument soeknadDokument) {
         Periode periode = hentPeriode(soeknadDokument);
         return new PeriodeDto(periode.getFom(), periode.getTom());
     }

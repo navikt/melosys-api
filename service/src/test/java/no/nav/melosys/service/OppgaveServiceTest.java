@@ -3,25 +3,20 @@ package no.nav.melosys.service;
 import java.time.LocalDate;
 import java.util.*;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingStatus;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakStatus;
-import no.nav.melosys.domain.FagsakType;
-import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import org.junit.Before;
@@ -30,9 +25,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,13 +44,18 @@ public class OppgaveServiceTest {
     @Mock
     private TpsFasade tpsFasade;
 
+    @Mock
+    private ProsessinstansRepository prosessinstansRepository;
+
+
 
     @Before
     public void setUp() {
         this.oppgaveService = new OppgaveService(
                 gsakFasade,
                 fagsakRepository,
-                tpsFasade);
+                tpsFasade,
+                prosessinstansRepository);
     }
 
     @Test
@@ -76,6 +76,13 @@ public class OppgaveServiceTest {
                     return (string.equals("12345678901")) ? oppgaver : new ArrayList<>();
                 });
 
+        Behandling behandling = new Behandling();
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, true);
+        when(prosessinstansRepository.findByBehandling_Id_And_Type(anyLong(),any())).thenReturn(Optional.ofNullable(prosessinstans));
+
         Fagsak fagsak = new Fagsak();
         fagsak.setType(FagsakType.EU_EØS);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
@@ -86,10 +93,10 @@ public class OppgaveServiceTest {
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12345678901");
         assertThat(mineSaker.size()).isEqualTo(1);
         assertThat(mineSaker.get(0).getOppgaveID()).isEqualTo("1");
+        assertThat(mineSaker.get(0).getBehandling().erUnderOppdatering()).isEqualTo(true);
 
         mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12346678902");
         assertThat(mineSaker.size()).isEqualTo(0);
-
     }
 
     private List<Behandling> hentBehandlinger() {
