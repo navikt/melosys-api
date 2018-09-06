@@ -23,9 +23,7 @@ public final class SoeknadUtils {
     public static List<String> hentLand(SoeknadDokument soeknad) {
         List<String> landkoder = new ArrayList<>();
         if (soeknad.arbeidUtland != null) {
-            soeknad.arbeidUtland.stream().
-                filter(Objects::nonNull).
-                forEach(arbeidUtland -> landkoder.add(arbeidUtland.adresse.landKode));
+            soeknad.arbeidUtland.stream().filter(Objects::nonNull).forEach(arbeidUtland -> landkoder.add(arbeidUtland.adresse.landKode));
         }
         if (soeknad.oppholdUtland != null) {
             soeknad.oppholdUtland.oppholdslandKoder.stream().filter(Objects::nonNull).forEach(landkoder::add);

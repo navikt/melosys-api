@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -11,10 +12,10 @@ public class SoeknadDokument extends SaksopplysningDokument {
     public OpplysningerOmBrukeren personOpplysninger;
 
     // Opplysninger om arbeid i utlandet
-    public List<ArbeidUtland> arbeidUtland;
+    public List<ArbeidUtland> arbeidUtland = new ArrayList<>();
 
     // Opplysninger om foretak i utlandet
-    public List<ForetakUtland> foretakUtland;
+    public List<ForetakUtland> foretakUtland = new ArrayList<>();
 
     // Opplysninger om opphold i utland
     public OppholdUtland oppholdUtland;

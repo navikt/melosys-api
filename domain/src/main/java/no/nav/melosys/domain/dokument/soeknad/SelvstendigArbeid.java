@@ -5,5 +5,5 @@ import java.util.List;
 
 public class SelvstendigArbeid {
     public boolean erSelvstendig;
-    public List<SelvstendigForetak> selvstendigForetak;
+    public List<SelvstendigForetak> selvstendigForetak = new ArrayList<>();
 }

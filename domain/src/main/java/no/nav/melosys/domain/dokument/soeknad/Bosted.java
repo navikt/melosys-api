@@ -8,7 +8,7 @@ public class Bosted {
     public String familiesBostedLandKode;
     public int antallMaanederINorge;
     @JsonProperty("EOSBarnetrygdFraNAV")
-    public boolean EØSBarnetrygdFraNAV;
+    public boolean eøsBarnetrygdFraNAV;
     public boolean adresseIUtlandet;
     public StandardAdresse oppgittAdresse;
 }
