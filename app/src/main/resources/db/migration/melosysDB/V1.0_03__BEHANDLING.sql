@@ -5,7 +5,7 @@ CREATE TABLE behandling (
     beh_type        VARCHAR2(99) NOT NULL,
     registrert_dato TIMESTAMP    NOT NULL,
     endret_dato     TIMESTAMP    NOT NULL,
-    siste_opplysninger_hentet_dato  TIMESTAMP    NOT NULL,
+    siste_opplysninger_hentet_dato  TIMESTAMP    NULL,
     CONSTRAINT pk_behandling PRIMARY KEY (id)
 );
 

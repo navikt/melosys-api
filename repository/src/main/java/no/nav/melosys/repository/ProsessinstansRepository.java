@@ -7,6 +7,6 @@ import no.nav.melosys.domain.Prosessinstans;
 import org.springframework.data.repository.CrudRepository;
 
 public interface ProsessinstansRepository extends CrudRepository<Prosessinstans, Long> {
-    Optional<Prosessinstans> findByStegIsNotNullANDBehandling_Id(long id);
+    Optional<Prosessinstans> findByStegIsNotNullAndBehandling_Id(long id);
     Optional<Prosessinstans> findByTypeAndBehandling_Id(ProsessType prosessType, long id);
 }

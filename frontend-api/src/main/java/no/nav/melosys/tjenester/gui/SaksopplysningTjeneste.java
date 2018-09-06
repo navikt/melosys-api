@@ -12,7 +12,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.SaksopplysningerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,15 +31,11 @@ public class SaksopplysningTjeneste extends RestTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(SaksopplysningTjeneste.class);
 
-    private final BehandlingRepository behandlingrepo;
-
     private final SaksopplysningerService saksopplysningerService;
 
-
     @Autowired
-    public SaksopplysningTjeneste(SaksopplysningerService saksopplysningerService, BehandlingRepository behandlingrepo) {
+    public SaksopplysningTjeneste(SaksopplysningerService saksopplysningerService) {
         this.saksopplysningerService = saksopplysningerService;
-        this.behandlingrepo = behandlingrepo;
     }
 
     @GET
