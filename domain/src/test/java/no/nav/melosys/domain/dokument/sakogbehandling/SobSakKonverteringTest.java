@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SobSakKonverteringTest {
 
     private static final String EØS_BARNETRYGD = "sakogbehandling/eos_barnetrygd.xml";
+    private static final String INGEN_SAKER = "sakogbehandling/ingen_saker.xml";
 
     DokumentFactory factory;
 
@@ -59,4 +60,27 @@ public class SobSakKonverteringTest {
 
         }
     }
+
+    @Test
+    public void testKonverteringIngenSaker() throws Exception {
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream(INGEN_SAKER);
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
+            Saksopplysning saksopplysning = new Saksopplysning();
+
+            String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+
+            saksopplysning.setDokumentXml(xmlStr);
+            saksopplysning.setType(SaksopplysningType.SOB_SAK);
+            saksopplysning.setVersjon("1.0");
+
+            factory.lagDokument(saksopplysning);
+
+            SobSakDokument dokument = (SobSakDokument) saksopplysning.getDokument();
+
+            assertThat(dokument).isNotNull();
+            assertThat(dokument.harEøsBarnetrygd()).isFalse();
+        }
+    }
+
 }
