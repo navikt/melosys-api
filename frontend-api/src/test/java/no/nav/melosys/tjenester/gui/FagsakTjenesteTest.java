@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.core.Response;
@@ -10,11 +11,13 @@ import io.github.benas.randombeans.FieldDefinitionBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
@@ -51,6 +54,8 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
 
         random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
             .collectionSizeRange(1, 4)
+            .objectPoolSize(100)
+            .dateRange(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
             .exclude(FieldDefinitionBuilder.field().named("tilleggsinformasjonDetaljer").ofType(TilleggsinformasjonDetaljer.class).inClass(Tilleggsinformasjon.class).get())
             .build();
     }
@@ -74,8 +79,14 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
             saksopplysninger.setInntekt(random.nextObject(InntektDokument.class, "tilleggsinformasjonDetaljer"));
             saksopplysninger.setMedlemskap(random.nextObject(MedlemskapDokument.class));
             List<OrganisasjonDokument> organisasjoner = new ArrayList<>();
-            for (int i = 0; i < random.nextInt(4); i++) {
-                organisasjoner.add(random.nextObject(OrganisasjonDokument.class));
+            for (int i = 0; i < (random.nextInt(3) + 1); i++) {
+                OrganisasjonDokument organisasjonDokument = random.nextObject(OrganisasjonDokument.class);
+                // Gyldige adresser
+                SemistrukturertAdresse adresse = random.nextObject(SemistrukturertAdresse.class);
+                adresse.setGyldighetsperiode(new Periode(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1)));
+                organisasjonDokument.getOrganisasjonDetaljer().getForretningsadresse().add(adresse);
+                organisasjonDokument.getOrganisasjonDetaljer().getPostadresse().add(adresse);
+                organisasjoner.add(organisasjonDokument);
             }
             saksopplysninger.setOrganisasjoner(organisasjoner);
             saksopplysninger.setPerson(random.nextObject(PersonDokument.class));
@@ -86,7 +97,12 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
         try {
             hentSchema().validate(new JSONObject(jsonString));
         } catch (ValidationException e) {
-            logger.error(e.toJSON().toString());
+            e.getCausingExceptions().stream()
+                .map(ValidationException::toJSON)
+                .forEach(jsonObject -> {
+                    logger.error(jsonObject.toString());
+                    System.out.println("----------------------------");
+                });
             throw e;
         }
     }

@@ -1,5 +1,6 @@
 package no.nav.melosys.service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 import no.nav.melosys.domain.BehandlingType;
@@ -62,10 +63,10 @@ public class FagsakServiceTest {
     @Test
     public void lagFagsak() throws Exception {
         Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer("123");
+        fagsak.setGsakSaksnummer(123);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
         fagsak.setType(FagsakType.EU_EØS);
-        fagsak.setRegistrertDato(LocalDateTime.now());
+        fagsak.setRegistrertDato(Instant.now());
 
         fagsakService.lagre(fagsak);
         assertNotNull(fagsak);

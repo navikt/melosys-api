@@ -50,6 +50,8 @@ public class PersonDokument extends SaksopplysningDokument {
     @JsonProperty("personStatus")
     public Personstatus personstatus;
 
+    public LocalDate statsborgerskapDato;
+
     public Bostedsadresse bostedsadresse = new Bostedsadresse();
 
     @JsonIgnore

@@ -9,7 +9,7 @@ import no.nav.melosys.domain.FagsakType;
 public class FagsakDto {
 
     private String saksnummer;
-    private String gsakSaksnummer; // Denne blir sendt til front-end, men er stadig ikke i bruk
+    private Integer gsakSaksnummer; // Denne blir sendt til front-end, men er stadig ikke i bruk
     private FagsakType type;
     private FagsakStatus status;
     private Instant registrertDato;
@@ -24,11 +24,11 @@ public class FagsakDto {
         this.saksnummer = saksnummer;
     }
 
-    public String getGsakSaksnummer() {
+    public Integer getGsakSaksnummer() {
         return gsakSaksnummer;
     }
 
-    public void setGsakSaksnummer(String gsakSaksnummer) {
+    public void setGsakSaksnummer(Integer gsakSaksnummer) {
         this.gsakSaksnummer = gsakSaksnummer;
     }
 

@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import no.nav.melosys.domain.BehandlingStatus;
@@ -12,7 +12,7 @@ public class FagsakOppsummeringDto {
     private FagsakType sakstype;
     private BehandlingType behandlingstype;
     private BehandlingStatus behandlingsstatus;
-    private LocalDateTime opprettetDato;
+    private Instant opprettetDato;
     private PeriodeDto soknadsperiode;
     private List<String> land;
 
@@ -48,11 +48,11 @@ public class FagsakOppsummeringDto {
         this.behandlingsstatus = behandlingsstatus;
     }
 
-    public LocalDateTime getOpprettetDato() {
+    public Instant getOpprettetDato() {
         return opprettetDato;
     }
 
-    public void setOpprettetDato(LocalDateTime opprettetDato) {
+    public void setOpprettetDato(Instant opprettetDato) {
         this.opprettetDato = opprettetDato;
     }
 

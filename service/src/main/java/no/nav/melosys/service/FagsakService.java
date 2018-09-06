@@ -1,6 +1,6 @@
 package no.nav.melosys.service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -71,11 +71,11 @@ public class FagsakService {
         aktoer.setFagsak(fagsak);
         aktoer.setRolle(RolleType.BRUKER);
 
-        LocalDateTime dato = LocalDateTime.now();
+        Instant nå = Instant.now();
 
         fagsak.setAktører(new HashSet<>(Collections.singletonList(aktoer)));
-        fagsak.setRegistrertDato(dato);
-        fagsak.setEndretDato(dato);
+        fagsak.setRegistrertDato(nå);
+        fagsak.setEndretDato(nå);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
 
         lagre(fagsak);
@@ -83,8 +83,8 @@ public class FagsakService {
         Behandling behandling = new Behandling();
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         behandling.setFagsak(fagsak);
-        behandling.setRegistrertDato(dato);
-        behandling.setEndretDato(dato);
+        behandling.setRegistrertDato(nå);
+        behandling.setEndretDato(nå);
 
         behandling.setStatus(BehandlingStatus.OPPRETTET);
         behandling.setType(behandlingType);

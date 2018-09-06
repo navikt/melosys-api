@@ -98,6 +98,9 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
             dto.setLand(kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, sAdresse.getLandkode(), LocalDate.now()));
 
             return  dto;
+        } else if (adresse == null) {
+            // Ingen gyldige adresser
+            return dto;
         } else {
             // Enhetsregistret har bare SemistrukturertAdresser
             throw new RuntimeException("GeografiskAdresse ikke støttet " + (adresse == null ? null : adresse.getClass().getSimpleName()));

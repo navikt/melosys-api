@@ -1,5 +1,6 @@
 package no.nav.melosys.domain;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
@@ -27,10 +28,10 @@ public class Behandling {
     private BehandlingType type;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
-    private LocalDateTime registrertDato;
+    private Instant registrertDato;
 
     @Column(name = "endret_dato", nullable = false, updatable = true)
-    private LocalDateTime endretDato;
+    private Instant endretDato;
 
     @Column(name = "siste_opplysninger_hentet_dato", updatable = true)
     private LocalDateTime sisteOpplysningerHentetDato;
@@ -69,19 +70,19 @@ public class Behandling {
         this.type = type;
     }
     
-    public LocalDateTime getRegistrertDato() {
+    public Instant getRegistrertDato() {
         return registrertDato;
     }
 
-    public void setRegistrertDato(LocalDateTime registrertDato) {
+    public void setRegistrertDato(Instant registrertDato) {
         this.registrertDato = registrertDato;
     }
 
-    public LocalDateTime getEndretDato() {
+    public Instant getEndretDato() {
         return endretDato;
     }
 
-    public void setEndretDato(LocalDateTime endretDato) {
+    public void setEndretDato(Instant endretDato) {
         this.endretDato = endretDato;
     }
 

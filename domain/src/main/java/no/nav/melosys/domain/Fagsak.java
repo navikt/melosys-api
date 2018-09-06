@@ -1,5 +1,6 @@
 package no.nav.melosys.domain;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +27,7 @@ public class Fagsak {
     private String saksnummer;
 
     @Column(name = "gsak_saksnummer")
-    private String gsakSaksnummer;
+    private Integer gsakSaksnummer;
 
     @Column(name = "fagsak_type")
     @Convert(converter = FagsakType.DbKonverterer.class)
@@ -37,10 +38,10 @@ public class Fagsak {
     private FagsakStatus status;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
-    private LocalDateTime registrertDato;
+    private Instant registrertDato;
 
     @Column(name = "endret_dato", nullable = false, updatable = false)
-    private LocalDateTime endretDato;
+    private Instant endretDato; // FIXME: skulle vi bruke Instant her også ?
 
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Aktoer> aktører;
@@ -49,11 +50,11 @@ public class Fagsak {
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Behandling> behandlinger;
 
-    public String getGsakSaksnummer() {
+    public Integer getGsakSaksnummer() {
         return gsakSaksnummer;
     }
 
-    public void setGsakSaksnummer(String gsakSaksnummer) {
+    public void setGsakSaksnummer(Integer gsakSaksnummer) {
         this.gsakSaksnummer = gsakSaksnummer;
     }
 
@@ -73,19 +74,19 @@ public class Fagsak {
         this.status = status;
     }
 
-    public LocalDateTime getRegistrertDato() {
+    public Instant getRegistrertDato() {
         return registrertDato;
     }
 
-    public void setRegistrertDato(LocalDateTime registrertDato) {
+    public void setRegistrertDato(Instant registrertDato) {
         this.registrertDato = registrertDato;
     }
 
-    public LocalDateTime getEndretDato() {
+    public Instant getEndretDato() {
         return endretDato;
     }
 
-    public void setEndretDato(LocalDateTime endretDato) {
+    public void setEndretDato(Instant endretDato) {
         this.endretDato = endretDato;
     }
 
