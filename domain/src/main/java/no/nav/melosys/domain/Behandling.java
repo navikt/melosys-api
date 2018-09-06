@@ -32,7 +32,7 @@ public class Behandling {
     @Column(name = "endret_dato", nullable = false, updatable = true)
     private LocalDateTime endretDato;
 
-    @Column(name = "sisteopplysningerhentet_dato", nullable = false, updatable = true)
+    @Column(name = "siste_opplysninger_hentet_dato", nullable = false, updatable = true)
     private LocalDateTime sisteOpplysningerHentetDato;
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)

@@ -79,7 +79,7 @@ public class SaksopplysningerServiceTest {
         prosessinstansRepository = mock(ProsessinstansRepository.class);
         tpsFasade = mock(TpsFasade.class);
 
-        saksopplysningerService = new SaksopplysningerService(tpsFasade, aareg, ereg, medl, inntekt, prosessinstansRepository , binge , behandlingRepo);
+        saksopplysningerService = new SaksopplysningerService(tpsFasade, aareg, ereg, medl, inntekt, prosessinstansRepository, binge, behandlingRepo);
 
         ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallÅr", 5);
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 12);
