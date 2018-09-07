@@ -1,0 +1,26 @@
+package no.nav.melosys.domain;
+
+public enum Finansering implements Kodeverk {
+
+    LAANEKASSEN("LAANEKASSEN", "Lånekassen"),
+    UTENLANDSK_INSTITUSJON("BKR_MEDL", "Utenlandsk institusjon"),
+    EGNE_MIDLER("EGNE_MIDLER", "Egne midler / arv / etc");
+
+    private String kode;
+    private String beskrivelse;
+
+    Finansering(String kode, String beskrivelse) {
+        this.kode = kode;
+        this.beskrivelse = beskrivelse;
+    }
+
+    @Override
+    public String getKode() {
+        return kode;
+    }
+
+    @Override
+    public String getBeskrivelse() {
+        return beskrivelse;
+    }
+}

@@ -3,15 +3,26 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.util.List;
 
 import no.nav.melosys.service.kodeverk.KodeDto;
+import no.nav.melosys.tjenester.gui.dto.BegrunnelserDto;
 
 public class KodeverkDto {
+    private BegrunnelserDto begrunnelser = new BegrunnelserDto();
     private List<KodeDto> behandlingstyper;
     private List<KodeDto> behandlingsstatus;
     private List<KodeDto> dokumenttitler;
+    private List<KodeDto> finansiering;
     private List<KodeDto> landkoder;
     private List<KodeDto> oppgavetyper;
     private List<KodeDto> sakstyper;
     private List<KodeDto> vedleggstitler;
+
+    public BegrunnelserDto getBegrunnelser() {
+        return begrunnelser;
+    }
+
+    public void setBegrunnelser(BegrunnelserDto begrunnelser) {
+        this.begrunnelser = begrunnelser;
+    }
 
     public List<KodeDto> getBehandlingstyper() {
         return behandlingstyper;
@@ -36,6 +47,10 @@ public class KodeverkDto {
     public void setDokumenttitler(List<KodeDto> dokumenttitler) {
         this.dokumenttitler = dokumenttitler;
     }
+
+    public List<KodeDto> getFinansiering() { return finansiering; }
+
+    public void setFinansiering(List<KodeDto> finansiering) { this.finansiering = finansiering; }
 
     public List<KodeDto> getLandkoder() {
         return landkoder;
