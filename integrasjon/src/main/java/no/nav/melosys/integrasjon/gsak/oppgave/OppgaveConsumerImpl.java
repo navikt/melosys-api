@@ -21,6 +21,7 @@ import no.nav.melosys.integrasjon.gsak.felles.dto.FeilResponseDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSvar;
+import no.nav.melosys.integrasjon.gsak.oppgave.dto.OpprettOppgaveDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,9 +110,8 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
     }
 
     @Override
-    public String opprettOppgave(OppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
+    public String opprettOppgave(OpprettOppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
         try (Response response = target
-            .path(request.getId())
             .request(MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getCallID())
             .header(HttpHeaders.AUTHORIZATION, getAuth())
