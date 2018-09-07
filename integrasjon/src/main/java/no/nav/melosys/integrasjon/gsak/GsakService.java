@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.gsak;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,6 +17,7 @@ import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
+import no.nav.melosys.integrasjon.gsak.oppgave.dto.OpprettOppgaveDto;
 import no.nav.melosys.integrasjon.gsak.sak.SakConsumer;
 import no.nav.melosys.integrasjon.gsak.sak.dto.SakDto;
 import org.slf4j.Logger;
@@ -34,9 +36,10 @@ public class GsakService implements GsakFasade {
 
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
 
-    private static final String SORTERINGSFELT = "FRIST";
-
+    private static final int FRIST_JFR_DAGER = 1;
+    private static final int FRIST_BEH_UKER = 12;
     private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
+    private static final String SORTERINGSFELT = "FRIST";
 
     private final SakConsumer sakConsumer;
 
@@ -77,7 +80,7 @@ public class GsakService implements GsakFasade {
     public void ferdigstillOppgave(String oppgaveID) throws IkkeFunnetException, FunksjonellException, SikkerhetsbegrensningException, TekniskException {
         OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveID);
         if (oppgave == null) {
-            throw new IkkeFunnetException("Oppgave med ID " + oppgaveID + " er ikke funnet");
+            throw new IkkeFunnetException("Oppgave med ID " + oppgaveID + " er ikke funnet.");
         } else {
             oppgave.setStatus(OPPGAVE_STATUS_FERDIGSTILT);
             oppgaveConsumer.oppdaterOppgave(oppgave);
@@ -111,21 +114,32 @@ public class GsakService implements GsakFasade {
         OppgaveDto gsakOppgave = oppgaveConsumer.hentOppgave(oppgaveId);
 
         if (gsakOppgave == null) {
-            throw new IkkeFunnetException("Oppgave med oppgaveID " + oppgaveId + " finnes ikke");
+            throw new IkkeFunnetException("Oppgave med oppgaveID " + oppgaveId + " finnes ikke.");
         }
         return oppgaveMappingDtoTilDomain(gsakOppgave);
     }
 
     @Override
-    public String opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, TekniskException, FunksjonellException {
-        OppgaveDto oppgaveDto = new OppgaveDto();
-        oppgaveDto.setJournalpostId(request.getJournalpostId());
-        oppgaveDto.setSaksreferanse(request.getGsakSaksnummer());
-        oppgaveDto.setAktørId(request.getAktørId());
-        oppgaveDto.setTilordnetRessurs(request.getTilordnetRessurs());
-        oppgaveDto.setTema(request.getTema().getKode());
-        oppgaveDto.setOppgavetype(request.getOppgavetype().getKode());
-        oppgaveDto.setFristFerdigstillelse(request.getFristFerdigstillelse());
+    public String opprettOppgave(Oppgave oppgave) throws SikkerhetsbegrensningException, TekniskException, FunksjonellException {
+        LocalDate idag = LocalDate.now();
+        OpprettOppgaveDto oppgaveDto = new OpprettOppgaveDto();
+        oppgaveDto.setAktivDato(LocalDate.now());
+        oppgaveDto.setAktørId(oppgave.getAktørId());
+        if (oppgave.erJournalFøring()) {
+            oppgaveDto.setFristFerdigstillelse(idag.plusDays(FRIST_JFR_DAGER));
+        } else if (oppgave.erBehandling()) {
+            oppgaveDto.setFristFerdigstillelse(idag.plusWeeks(FRIST_BEH_UKER));
+        } else {
+            // FristFerdigstillelse er påkrevd, opprettelsen vil feile.
+            log.warn("Type " + oppgave.getOppgavetype().getKode() + " er ikke støttet.");
+        }
+        oppgaveDto.setJournalpostId(oppgave.getJournalpostId());
+        oppgaveDto.setOppgavetype(oppgave.getOppgavetype().getKode());
+        oppgaveDto.setPrioritet(PrioritetType.NORM.toString());
+        oppgaveDto.setSaksreferanse(oppgave.getGsakSaksnummer());
+        oppgaveDto.setTema(oppgave.getTema().getKode());
+        oppgaveDto.setTildeltEnhetsnr(Integer.toString(MELOSYS_ENHET_ID));
+        oppgaveDto.setTilordnetRessurs(oppgave.getTilordnetRessurs());
         // FIXME: MELOSYS-1401 : skal implementere Behandlingstema,Behandlingstype,Temagruppe
         return oppgaveConsumer.opprettOppgave(oppgaveDto);
     }
