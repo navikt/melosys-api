@@ -32,6 +32,9 @@ public class Behandling {
     @Column(name = "endret_dato", nullable = false, updatable = true)
     private LocalDateTime endretDato;
 
+    @Column(name = "siste_opplysninger_hentet_dato", updatable = true)
+    private LocalDateTime sisteOpplysningerHentetDato;
+
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
 
@@ -80,6 +83,14 @@ public class Behandling {
 
     public void setEndretDato(LocalDateTime endretDato) {
         this.endretDato = endretDato;
+    }
+
+    public LocalDateTime getSistOpplysningerHentetDato() {
+        return sisteOpplysningerHentetDato;
+    }
+
+    public void setSisteOpplysningerHentetDato(LocalDateTime sisteOpplysningerHentetDato) {
+        this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
     }
 
     public Set<Saksopplysning> getSaksopplysninger() {

@@ -10,7 +10,17 @@ public class BehandlingDto {
     private Long behandlingID;
     private BehandlingType behandlingType;
     private BehandlingStatus behandlingStatus;
+    private LocalDateTime sisteOpplysningerHentetDato;
     private LocalDateTime endretDato;
+    private boolean erUnderOppdatering;
+
+    public boolean erUnderOppdatering() {
+        return erUnderOppdatering;
+    }
+
+    public void setErUnderOppdatering(boolean erUnderOppdatering) {
+        this.erUnderOppdatering = erUnderOppdatering;
+    }
 
     public Long getBehandlingID() {
         return behandlingID;
@@ -43,4 +53,13 @@ public class BehandlingDto {
     public void setEndretDato(LocalDateTime endretDato) {
         this.endretDato = endretDato;
     }
+
+    public LocalDateTime getSisteOpplysningerHentetDato() {
+        return sisteOpplysningerHentetDato;
+    }
+
+    public void setSisteOpplysningerHentetDato(LocalDateTime sisteOpplysningerHentetDato) {
+        this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
+    }
+
 }

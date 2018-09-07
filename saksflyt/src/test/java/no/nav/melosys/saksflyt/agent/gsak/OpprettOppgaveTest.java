@@ -2,10 +2,7 @@ package no.nav.melosys.saksflyt.agent.gsak;
 
 import java.util.Properties;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingType;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;

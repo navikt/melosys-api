@@ -21,7 +21,6 @@ public class JerseyConfig extends ResourceConfig {
 
         // N.B. alfabetisk rekkefølge
         register(ArbeidsforholdHistorikkTjeneste.class);
-        register(BehandlingTjeneste.class);
         register(DokMotQueueTestRestTjeneste.class);
         register(DokumentTjeneste.class);
         register(FagsakTjeneste.class);
@@ -33,6 +32,7 @@ public class JerseyConfig extends ResourceConfig {
         register(OrganisasjonTjeneste.class);
         register(PersonTjeneste.class);
         register(SaksbehandlerTjeneste.class);
+        register(SaksopplysningTjeneste.class);
         register(SoknadTjeneste.class);
         register(VurderingTjeneste.class);
         configureSwagger();
