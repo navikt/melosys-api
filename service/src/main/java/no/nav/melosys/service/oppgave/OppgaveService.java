@@ -120,9 +120,9 @@ public class OppgaveService {
             behandlingDto.setBehandlingStatus(behandling.getStatus());
             behandlingDto.setBehandlingType(behandling.getType());
             behandlingDto.setEndretDato(behandling.getEndretDato());
-            Optional<Prosessinstans> prosessinstans = prosessinstansRepository.findByTypeAndBehandling_Id(ProsessType.OPPFRISKNING, behandling.getId());
+            Optional<Prosessinstans> prosessinstans = prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(ProsessType.OPPFRISKNING, behandling.getId());
             if (prosessinstans.isPresent()) {
-                behandlingDto.setErUnderOppdatering(prosessinstans.get().getData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, Boolean.class));
+                behandlingDto.setErUnderOppdatering(true);
             } else {
                 behandlingDto.setErUnderOppdatering(false);
             }
@@ -130,7 +130,7 @@ public class OppgaveService {
         return behandlingDto;
     }
 
-    private PeriodeDto mapPeriode(SoeknadDokument soeknadDokument) {
+    private static PeriodeDto mapPeriode(SoeknadDokument soeknadDokument) {
         Periode periode = hentPeriode(soeknadDokument);
         return new PeriodeDto(periode.getFom(), periode.getTom());
     }

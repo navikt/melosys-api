@@ -80,8 +80,7 @@ public class OppgaveServiceTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, true);
-        when(prosessinstansRepository.findByTypeAndBehandling_Id(any(), anyLong())).thenReturn(Optional.ofNullable(prosessinstans));
+        when(prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(any(), anyLong())).thenReturn(Optional.of(prosessinstans));
 
         Fagsak fagsak = new Fagsak();
         fagsak.setType(FagsakType.EU_EØS);

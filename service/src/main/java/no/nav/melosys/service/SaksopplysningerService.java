@@ -245,7 +245,6 @@ public class SaksopplysningerService {
             nyprosessinstans.setData(ProsessDataKey.LAND, hentLand(søknadDokument));
 
             nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
-            nyprosessinstans.setData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, true);
             nyprosessinstans.setRegistrertDato(nå);
 
             prosessinstansRepository.save(nyprosessinstans);

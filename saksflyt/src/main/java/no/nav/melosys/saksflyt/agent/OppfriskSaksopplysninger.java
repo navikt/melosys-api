@@ -5,8 +5,8 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -24,10 +24,15 @@ import static no.nav.melosys.domain.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
 import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
 
 /**
- * Ferdigstille behandling med oppdatere endringsdato på behandling og oppdatere prosessinstans steg ved oppfrisking
+ * Oppdatere behandling med siste opplysninger hentet dato
  *
  * Transisjoner:
- * OPPFRISK_SAKSOPPLYSNINGER -> null eller OPPRETT_OPPGAVE eller FEILET_MASKINELT hvis feil
+ * 1) ProsessType.OPPFRISKNING :
+ * OPPFRISK_SAKSOPPLYSNINGER -> null siden oppfrisking av saksopplysning er ferdig og trenger ikke å opprette oppgaven
+ * 2) Andre prosess typer
+ * OPPFRISK_SAKSOPPLYSNINGER -> OPPRETT_OPPGAVE
+ * 3) Ved exception ellers teknisk feil
+ * OPPFRISK_SAKSOPPLYSNINGER -> FEILET_MASKINELT
  */
 @Component
 public class OppfriskSaksopplysninger extends AbstraktStegBehandler {
@@ -61,10 +66,9 @@ public class OppfriskSaksopplysninger extends AbstraktStegBehandler {
         behandling.setSisteOpplysningerHentetDato(LocalDateTime.now());
         behandlingRepository.save(behandling);
 
-        Boolean oppfriskSaksopplysning = prosessinstans.getData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, Boolean.class);
-        if (oppfriskSaksopplysning != null && oppfriskSaksopplysning) {
+        if (prosessinstans.getType() == ProsessType.OPPFRISKNING) {
             prosessinstans.setSteg(null);
-            log.info("Oppfrisking av saksopplysning er ferdig for prosessinstans {}", prosessinstans.getId());
+            log.info("Oppfrisking av saksopplysning er ferdig for prosessinstans {} for behandlingId {}", prosessinstans.getId(), behandling.getId());
             return;
         } else {
             prosessinstans.setSteg(OPPRETT_OPPGAVE);

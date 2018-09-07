@@ -17,7 +17,6 @@ public enum ProsessDataKey {
     HOVEDDOKUMENT_TITTEL("hoveddokumentTittel"),
     JOURNALPOST_ID("journalpostID"),
     LAND("land"),
-    OPPFRISK_SAKSOPPLYSNING("oppfrisk_saksopplysning"),
     OPPGAVE_ID("oppgaveID"),
     SAKSNUMMER("saksnummer"),
     SOB_BEHANDLING_ID("sobBehandlingId"),

@@ -51,7 +51,6 @@ public class OppfriskSaksopplysningerTest {
         Behandling behandling = new Behandling();
         p.setBehandling(behandling);
         p.addData(new Properties());
-        p.setData(ProsessDataKey.OPPFRISK_SAKSOPPLYSNING, true);
         agent.utførSteg(p);
 
         assertThat(p.getSteg()).isNull();
