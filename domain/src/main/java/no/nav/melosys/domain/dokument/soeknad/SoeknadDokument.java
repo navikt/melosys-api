@@ -9,7 +9,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 @XmlRootElement
 public class SoeknadDokument extends SaksopplysningDokument {
 
-    public OpplysningerOmBrukeren personOpplysninger;
+    public OpplysningerOmBrukeren personOpplysninger = new OpplysningerOmBrukeren();
 
     // Opplysninger om arbeid i utlandet
     public List<ArbeidUtland> arbeidUtland = new ArrayList<>();
@@ -18,24 +18,24 @@ public class SoeknadDokument extends SaksopplysningDokument {
     public List<ForetakUtland> foretakUtland = new ArrayList<>();
 
     // Opplysninger om opphold i utland
-    public OppholdUtland oppholdUtland;
+    public OppholdUtland oppholdUtland = new OppholdUtland();
 
     // Opplysninger om arbeid i Norge
-    public ArbeidNorge arbeidNorge;
+    public ArbeidNorge arbeidNorge = new ArbeidNorge();
 
-    public SelvstendigArbeid selvstendigArbeid;
+    public SelvstendigArbeid selvstendigArbeid = new SelvstendigArbeid();
 
     // Opplysninger om juridiske arbeidsgiver i Norge
-    public JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge;
+    public JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
 
     // Opplysninger om arbeidsinntekt
-    public Arbeidsinntekt arbeidsinntekt;
+    public Arbeidsinntekt arbeidsinntekt = new Arbeidsinntekt();
 
     // Bekreftelser fra arbeidsgiveren
-    public ArbeidsgiversBekreftelse arbeidsgiversBekreftelse;
+    public ArbeidsgiversBekreftelse arbeidsgiversBekreftelse = new ArbeidsgiversBekreftelse();
 
-    public MaritimtArbeid maritimtArbeid;
+    public MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
 
-    public Bosted bosted;
+    public Bosted bosted = new Bosted();
 
 }

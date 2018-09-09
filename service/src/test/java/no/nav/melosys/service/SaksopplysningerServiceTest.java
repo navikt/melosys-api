@@ -12,7 +12,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
@@ -138,10 +137,10 @@ public class SaksopplysningerServiceTest {
         SoeknadDokument soeknadDokument = new SoeknadDokument();
 
         ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.arbeidsland = new ArrayList<>();
-        arbeidUtland.arbeidsland.add(new Land(Land.NORGE));
-        arbeidUtland.arbeidsperiode = new Periode(LocalDate.now(),LocalDate.of(2018, 9, 18));
-        soeknadDokument.arbeidUtland = arbeidUtland;
+        soeknadDokument.arbeidUtland = new ArrayList<>();
+        soeknadDokument.arbeidUtland.add(arbeidUtland);
+
+        soeknadDokument.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
 
         Saksopplysning saksopplysningSøknad = new Saksopplysning();
         saksopplysningSøknad.setType(SaksopplysningType.SØKNAD);

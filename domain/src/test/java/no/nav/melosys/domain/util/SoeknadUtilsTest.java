@@ -22,13 +22,6 @@ public class SoeknadUtilsTest {
         assertThat(strings).contains(Land.BELGIA);
     }
 
-    private void leggTilArbeidUtland(SoeknadDokument soeknad) {
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse = new StandardAdresse();
-        arbeidUtland.adresse.landKode = new Land(Land.BELGIA).getKode();
-        soeknad.arbeidUtland = Collections.singletonList(arbeidUtland);
-    }
-
     @Test
     public void hentLand_oppholdUtland() {
         SoeknadDokument soeknad = new SoeknadDokument();
@@ -59,5 +52,12 @@ public class SoeknadUtilsTest {
 
         soeknad.oppholdUtland = new OppholdUtland();
         SoeknadUtils.hentPeriode(soeknad);
+    }
+
+    private void leggTilArbeidUtland(SoeknadDokument soeknad) {
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+        arbeidUtland.adresse = new StandardAdresse();
+        arbeidUtland.adresse.landKode = new Land(Land.BELGIA).getKode();
+        soeknad.arbeidUtland = Collections.singletonList(arbeidUtland);
     }
 }

@@ -10,5 +10,5 @@ public class Bosted {
     @JsonProperty("EOSBarnetrygdFraNAV")
     public boolean eøsBarnetrygdFraNAV;
     public boolean adresseIUtlandet;
-    public StandardAdresse oppgittAdresse;
+    public StandardAdresse oppgittAdresse = new StandardAdresse();
 }

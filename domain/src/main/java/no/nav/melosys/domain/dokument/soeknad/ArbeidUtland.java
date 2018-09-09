@@ -12,5 +12,5 @@ public class ArbeidUtland {
     public BigDecimal arbeidsandelUtland;
     public boolean arbeidUtlandHjemmekontor;
     public boolean arbeidUtlandErstatning;
-    public StandardAdresse adresse;
+    public StandardAdresse adresse = new StandardAdresse();
 }

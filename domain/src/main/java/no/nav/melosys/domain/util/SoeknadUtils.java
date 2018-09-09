@@ -3,7 +3,6 @@ package no.nav.melosys.domain.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -32,10 +31,11 @@ public final class SoeknadUtils {
     }
 
     public static Periode hentPeriode(SoeknadDokument soeknadDokument) {
-        Optional<Periode> oppholdsPeriode = Optional.ofNullable(soeknadDokument.oppholdUtland.oppholdsPeriode);
-        if (oppholdsPeriode.isPresent()) {
-            return oppholdsPeriode.get();
+        Periode oppholdsPeriode = soeknadDokument.oppholdUtland.oppholdsPeriode;
+        if (oppholdsPeriode.getTom() == null || oppholdsPeriode.getFom() == null) {
+            throw new RuntimeException("OppholdsPerioden har null tom eller fom.");
+        } else {
+            return oppholdsPeriode;
         }
-        throw new RuntimeException("Det finnes ikke noen arbeidsperiode eller oppholdsPeriode");
     }
 }
