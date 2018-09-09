@@ -4,14 +4,14 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 
 public class SoeknadInnDto {
 
-    private SoeknadDokument soknadDokument;
+    private SoeknadDokument soeknadDokument;
 
     public SoeknadDokument getSoknadDokument() {
-        return soknadDokument;
+        return soeknadDokument;
     }
 
-    public void setSoknadDokument(SoeknadDokument soknadDokument) {
-        this.soknadDokument = soknadDokument;
+    public void setSoknadDokument(SoeknadDokument soeknadDokument) {
+        this.soeknadDokument = soeknadDokument;
     }
 }
 

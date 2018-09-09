@@ -6,9 +6,7 @@ import java.util.*;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.dokument.soeknad.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
@@ -110,10 +108,14 @@ public class OppgaveServiceTest {
         saksopplysninger.add(personOpplysning);
 
         SoeknadDokument soeknadDokument = new SoeknadDokument();
-        soeknadDokument.fnr = "111111111111";
-        soeknadDokument.arbeidUtland = new ArbeidUtland();
-        soeknadDokument.arbeidUtland.arbeidsland = Collections.singletonList(new Land(Land.NORGE));
-        soeknadDokument.arbeidUtland.arbeidsperiode = new Periode(LocalDate.of(2018, 1, 21), LocalDate.of(2018, 5, 21));
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+        arbeidUtland.adresse = new StandardAdresse();
+        arbeidUtland.adresse.landKode = new Land(Land.NORGE).getKode();
+        soeknadDokument.arbeidUtland = Collections.singletonList(arbeidUtland);
+
+        soeknadDokument.oppholdUtland = new OppholdUtland();
+        soeknadDokument.oppholdUtland.oppholdslandKoder = Collections.singletonList(new Land(Land.NORGE).getKode());
+        soeknadDokument.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.of(2018, 12, 12));
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SØKNAD);

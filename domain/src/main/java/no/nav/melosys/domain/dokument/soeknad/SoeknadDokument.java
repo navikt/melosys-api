@@ -1,36 +1,21 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.Familiemedlem;
-import no.nav.melosys.domain.dokument.person.Sivilstand;
 
 @XmlRootElement
 public class SoeknadDokument extends SaksopplysningDokument {
 
-    // Personopplysninger(FIXME er det en del av søknaden?)
-    public String sammensattNavn;
-    public String fnr;
-    public LocalDate fødselsdato;
-    public Bostedsadresse bostedsadresseNorge;
-    public Bostedsadresse bostedsadresseUtland;
-    public Land statsborgerskap;
-    public String utenlandskId;
-    // Barn sendes med i søknaden, da det ikke er gitt av TPS hvilke som er medfølgende.
-    public List<Familiemedlem> familiemedlemmer = new ArrayList<>();
-    public Sivilstand sivilstand;
+    public OpplysningerOmBrukeren personOpplysninger;
 
     // Opplysninger om arbeid i utlandet
-    public ArbeidUtland arbeidUtland;
+    public List<ArbeidUtland> arbeidUtland = new ArrayList<>();
 
     // Opplysninger om foretak i utlandet
-    public ForetakUtland foretakUtland;
+    public List<ForetakUtland> foretakUtland = new ArrayList<>();
 
     // Opplysninger om opphold i utland
     public OppholdUtland oppholdUtland;
@@ -38,27 +23,19 @@ public class SoeknadDokument extends SaksopplysningDokument {
     // Opplysninger om arbeid i Norge
     public ArbeidNorge arbeidNorge;
 
+    public SelvstendigArbeid selvstendigArbeid;
+
     // Opplysninger om juridiske arbeidsgiver i Norge
     public JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge;
-
-    // Bekreftelser fra arbeidsgiveren
-    public ArbeidsgiversBekreftelse arbeidsgiversBekreftelse;
 
     // Opplysninger om arbeidsinntekt
     public Arbeidsinntekt arbeidsinntekt;
 
-    // Øvrige
-    public String tilleggsopplysninger;
+    // Bekreftelser fra arbeidsgiveren
+    public ArbeidsgiversBekreftelse arbeidsgiversBekreftelse;
 
-    public OpplysningerOmBrukeren opplysningerOmBrukeren;
+    public MaritimtArbeid maritimtArbeid;
 
-    public SoeknadDokument() {
-        arbeidUtland = new ArbeidUtland();
-        foretakUtland = new ForetakUtland();
-        oppholdUtland = new OppholdUtland();
-        arbeidNorge = new ArbeidNorge();
-        juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-        arbeidsinntekt = new Arbeidsinntekt();
-        opplysningerOmBrukeren = new OpplysningerOmBrukeren();
-    }
+    public Bosted bosted;
+
 }

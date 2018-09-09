@@ -10,13 +10,14 @@ import java.math.BigDecimal;
  * De er bare relevant når det gjelder utsendt arbeidstaker og pre-utfyllingen fra informasjon innsendt tidligere (fra samme arbeidsgiver) er eldre enn 12 måneder.
  */
 public class JuridiskArbeidsgiverNorge {
-    public Integer antallAnsatte;
-    public Integer antallAdminAnsatte;
+    public boolean erBemanningsbyra;
+    public int utsendteNeste12Mnd;
+    public int antallAdmAnsatte;
     @JsonProperty("antallAdminAnsatteEOS")
-    public Integer antallAdminAnsatteEØS;
+    public int antallAdminAnsatteEØS;
     public BigDecimal andelOmsetningINorge;
     public BigDecimal andelKontrakterINorge;
-    public Boolean erBemanningsbyra;
-    public Boolean hattDriftSiste12Mnd;
-    public Integer antallUtsendte;
+    public boolean utsendtFortsetterArbeidsforholdIUtlandet;
+    public boolean utsendtArbeiderArbeiderMedKlienter;
+    public boolean utsendtArbeiderArbeiderMedKontrakter;
 }

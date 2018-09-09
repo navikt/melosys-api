@@ -84,7 +84,7 @@
         <mockrunner.version>1.0.3</mockrunner.version>
         <modelmapper.version>1.1.0</modelmapper.version>
         <ojdbc.version>12.2.0.1</ojdbc.version>
-        <org.json.version>20180130</org.json.version>
+        <org.json.version>20180813</org.json.version>
         <oxmlparserv2.version>11.2.0.1</oxmlparserv2.version>
         <prometheus.version>0.5.0</prometheus.version>
         <random-beans.version>3.7.0</random-beans.version>
