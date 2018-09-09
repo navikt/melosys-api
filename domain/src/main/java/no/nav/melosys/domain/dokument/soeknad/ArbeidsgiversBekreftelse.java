@@ -1,5 +1,10 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
+import java.time.LocalDate;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
+
 public class ArbeidsgiversBekreftelse {
 
     public boolean arbeidsgiverBekrefterUtsendelse;
@@ -8,5 +13,6 @@ public class ArbeidsgiversBekreftelse {
     public boolean arbeidstakerTidligereUtsendt24Mnd;
     public boolean arbeidsgiverBetalerArbeidsgiveravgift;
     public boolean trygdeavgiftTrukketGjennomSkatt;
-    public String trygdeavgiftTrukketGjennomSkattDato;
+    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
+    public LocalDate trygdeavgiftTrukketGjennomSkattDato;
 }
