@@ -1,18 +1,10 @@
 package no.nav.melosys.domain;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import no.nav.melosys.exception.TekniskException;
 
@@ -27,7 +19,7 @@ public class Fagsak {
     private String saksnummer;
 
     @Column(name = "gsak_saksnummer")
-    private Integer gsakSaksnummer;
+    private Long gsakSaksnummer;
 
     @Column(name = "fagsak_type")
     @Convert(converter = FagsakType.DbKonverterer.class)
@@ -50,11 +42,11 @@ public class Fagsak {
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Behandling> behandlinger;
 
-    public Integer getGsakSaksnummer() {
+    public Long getGsakSaksnummer() {
         return gsakSaksnummer;
     }
 
-    public void setGsakSaksnummer(Integer gsakSaksnummer) {
+    public void setGsakSaksnummer(Long gsakSaksnummer) {
         this.gsakSaksnummer = gsakSaksnummer;
     }
 

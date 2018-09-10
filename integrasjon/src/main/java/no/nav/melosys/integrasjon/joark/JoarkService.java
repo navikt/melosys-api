@@ -129,7 +129,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void oppdaterJounalpost(String journalpostId, String dokumentID, String gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, boolean medDokumentkategori)
+    public void oppdaterJounalpost(String journalpostId, String dokumentID, Long gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, boolean medDokumentkategori)
         throws SikkerhetsbegrensningException {
         OppdaterJournalpostRequest request = new OppdaterJournalpostRequest();
         no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.InngaaendeJournalpost journalpost =
@@ -137,7 +137,7 @@ public class JoarkService implements JoarkFasade {
         journalpost.setJournalpostId(journalpostId);
 
         ArkivSak arkivSak = new ArkivSak();
-        arkivSak.setArkivSakId(gsakSaksnummer);
+        arkivSak.setArkivSakId(Long.toString(gsakSaksnummer));
         arkivSak.setArkivSakSystem(Fagsystem.GSAK.getKode());
         journalpost.setArkivSak(arkivSak);
 

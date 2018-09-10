@@ -62,7 +62,7 @@ public class BrevDataService {
         }
 
         metadata.dokumenttypeID = dokumentType.getKode();
-        metadata.journalsakID = Integer.toString(fagsak.getGsakSaksnummer());
+        metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
         // FIXME Mottaker er avhengig av dokumentTypen men kan også sendes som parameter
         metadata.mottaker = null;
         // FIXME Fagområde er avhengig av dokumentTypen men kan også sendes som parameter.

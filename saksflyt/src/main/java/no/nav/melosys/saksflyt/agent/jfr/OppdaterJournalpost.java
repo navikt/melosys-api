@@ -68,14 +68,14 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
             medDokumentkategori = true;
         }
 
-        String gsakSakID = null;
+        Long gsakSakID = null;
         if (prosessinstans.getType() == ProsessType.JFR_KNYTT) {
             Fagsak sak = fagsakRepo.findBySaksnummer(prosessinstans.getData(SAKSNUMMER));
             if (sak != null) {
                 gsakSakID = sak.getGsakSaksnummer();
             }
         } else {
-            gsakSakID = prosessinstans.getData(GSAK_SAK_ID);
+            gsakSakID = prosessinstans.getData(GSAK_SAK_ID, Long.class);
         }
         if (gsakSakID == null) {
             String feilmelding = "Prosessinstansen er ikke knyttet til en gsak sak";

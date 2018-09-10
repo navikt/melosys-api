@@ -72,7 +72,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
             return;
         }
 
-        String gsakSakId = gsakFasade.opprettSak(saksnummer, BehandlingType.SØKNAD, aktørId);
+        Long gsakSakId = gsakFasade.opprettSak(saksnummer, BehandlingType.SØKNAD, aktørId);
         fagsak.setGsakSaksnummer(gsakSakId);
         fagsakRepository.save(fagsak);
         prosessinstans.setData(GSAK_SAK_ID, gsakSakId);
