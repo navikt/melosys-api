@@ -52,7 +52,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public String opprettSak(String saksnummer, BehandlingType behandlingType, String aktørId) throws TekniskException, IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException {
+    public Long opprettSak(String saksnummer, BehandlingType behandlingType, String aktørId) throws TekniskException, IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException {
         SakDto sakDto = new SakDto();
 
         if (behandlingType.equals(BehandlingType.SØKNAD)) {
@@ -73,7 +73,7 @@ public class GsakService implements GsakFasade {
             throw new IntegrasjonException("Feil ved oppretting av sak i GSAK.");
         }
         log.info("Sak opprettet i GSAK med saksnummer: {}", sakDto.getId());
-        return sakDto.getId().toString();
+        return sakDto.getId();
     }
 
     @Override

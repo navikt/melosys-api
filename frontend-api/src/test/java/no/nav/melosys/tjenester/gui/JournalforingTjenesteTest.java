@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -81,7 +82,7 @@ public class JournalforingTjenesteTest {
         fagsakOppsummeringDto.setBehandlingstype(BehandlingType.SØKNAD);
         fagsakOppsummeringDto.setBehandlingsstatus(BehandlingStatus.UNDER_BEHANDLING);
         fagsakOppsummeringDto.setLand(Arrays.asList("DK","SE"));
-        fagsakOppsummeringDto.setOpprettetDato(LocalDateTime.MIN);
+        fagsakOppsummeringDto.setOpprettetDato(Instant.MIN);
 
         try {
             System.out.println(mapper.writeValueAsString(fagsakOppsummeringDto));

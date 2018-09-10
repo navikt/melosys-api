@@ -44,7 +44,7 @@ public class OpprettGsakSakTest {
         String aktørID = "FJERNET93";
         properties.setProperty(ProsessDataKey.AKTØR_ID.getKode(), aktørID);
         p.addData(properties);
-        when(gsakFasade.opprettSak(anyString(), eq(BehandlingType.SØKNAD), anyString())).thenReturn("GSAK-123");
+        when(gsakFasade.opprettSak(anyString(), eq(BehandlingType.SØKNAD), anyString())).thenReturn(123L);
 
         Fagsak fagsak = new Fagsak();
         when(fagsakRepository.findBySaksnummer(any())).thenReturn(fagsak);
