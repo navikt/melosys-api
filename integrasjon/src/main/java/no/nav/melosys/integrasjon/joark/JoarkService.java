@@ -118,7 +118,7 @@ public class JoarkService implements JoarkFasade {
         }
         journalpost.setAvsenderId(inngaaendeJournalpost.getAvsenderId());
         if (inngaaendeJournalpost.getForsendelseMottatt() != null) {
-            journalpost.setForsendelseMottatt(KonverteringsUtils.xmlGregorianCalendarToLocalDateTime(inngaaendeJournalpost.getForsendelseMottatt()));
+            journalpost.setForsendelseMottatt(KonverteringsUtils.xmlGregorianCalendarToInstant(inngaaendeJournalpost.getForsendelseMottatt()));
         }
         Dokumentinformasjon hoveddokument = inngaaendeJournalpost.getHoveddokument();
         journalpost.setHoveddokumentId(hoveddokument.getDokumentId());

@@ -7,8 +7,9 @@ import io.swagger.annotations.Api;
 import no.nav.melosys.domain.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.service.journalforing.JournalforingService;
-import no.nav.melosys.service.journalforing.dto.JournalforingDto;
+import no.nav.melosys.service.journalforing.JournalfoeringService;
+import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
+import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.DokumentDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +21,12 @@ import org.springframework.web.context.WebApplicationContext;
 @Path("/journalforing")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class JournalforingTjeneste extends RestTjeneste {
+public class JournalfoeringTjeneste extends RestTjeneste {
 
-    private JournalforingService journalføringService;
+    private JournalfoeringService journalføringService;
 
     @Autowired
-    public JournalforingTjeneste(JournalforingService journalføringService) {
+    public JournalfoeringTjeneste(JournalfoeringService journalføringService) {
         this.journalføringService = journalføringService;
     }
 
@@ -55,9 +56,9 @@ public class JournalforingTjeneste extends RestTjeneste {
 
     @POST
     @Path("opprett")
-    public void opprettSakOgJournalfør(JournalforingDto journalforingDto) {
+    public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) {
         try {
-            journalføringService.opprettSakOgJournalfør(journalforingDto);
+            journalføringService.opprettSakOgJournalfør(journalfoeringDto);
         } catch (FunksjonellException e) {
             throw new BadRequestException(e.getMessage());
         }
@@ -65,9 +66,9 @@ public class JournalforingTjeneste extends RestTjeneste {
 
     @POST
     @Path("tilordne")
-    public void tilordneSakOgJournalfør(JournalforingDto journalforingDto) {
+    public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) {
         try {
-            journalføringService.tilordneSakOgJournalfør(journalforingDto);
+            journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
         } catch (FunksjonellException e) {
             throw new BadRequestException(e.getMessage());
         }
