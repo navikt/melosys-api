@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema	attributeFormDefault="unqualified"
+			  elementFormDefault="qualified"
+			  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+			  targetNamespace="http://nav.no/dok/brevdata/felles/v1/SimpleTypes"
+			  xmlns="http://nav.no/dok/brevdata/felles/v1/SimpleTypes">
+
+	<xs:simpleType name="AktoerType">
+		<xs:annotation>
+			<xs:documentation>Identifiserer hva slags id det er snakk om - person, organisasjon, institusjon eller samhandler.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="PERSON"/>
+			<xs:enumeration value="ORGANISASJON"/>
+			<xs:enumeration value="INSTITUSJON"/>
+			<xs:enumeration value="SAMHANDLER"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="EmptyBoolean">
+		<xs:annotation>
+			<xs:documentation>Ikke obligatorisk boolsk variabel</xs:documentation>
+		</xs:annotation>
+		<xs:union memberTypes="xs:boolean OnlyEmptyString"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="EmptyFormatertDato">
+		<xs:annotation>
+			<xs:documentation>Ikke obligatorisk formatert dato</xs:documentation>
+		</xs:annotation>
+		<xs:union memberTypes="FormatertDato OnlyEmptyString"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="EmptyPostNr">
+		<xs:annotation>
+			<xs:documentation>Ikke obligatorisk postnummer</xs:documentation>
+		</xs:annotation>
+		<xs:union memberTypes="PostNr OnlyEmptyString"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="EmptyInteger">
+		<xs:annotation>
+			<xs:documentation>Ikke obligatorisk heltall (xs:int)</xs:documentation>
+		</xs:annotation>
+		<xs:union memberTypes="xs:int OnlyEmptyString"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="EmptySivilstandTypeKode">
+		<xs:annotation>
+			<xs:documentation>Ikke obligatorisk sivilstandTypeKode</xs:documentation>
+		</xs:annotation>
+		<xs:union memberTypes="SivilstandTypeKode OnlyEmptyString"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="FormatertDato">
+		<xs:annotation>
+			<xs:documentation>Dato på formatet YYYY-MM-DD</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:date">
+			<xs:pattern value="(\d{4}-\d{2}-\d{2})"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Identifikator">
+		<xs:annotation>
+			<xs:documentation>Streng som identifiserer et objekt</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="NonEmptyString"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="NonEmptyString">
+		<xs:annotation>
+			<xs:documentation>Obligatorisk streng</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="OnlyEmptyString">
+		<xs:annotation>
+			<xs:documentation>En gyldig tom streng som referes til ved oppbygging av andre simpleTypes</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:length value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="PostNr">
+		<xs:annotation>
+			<xs:documentation>Obligatorisk postnummer</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base='xs:string'>
+			<xs:pattern value="([0-9]{4})"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="SivilstandTypeKode">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="EKTEFELLE">
+				<xs:annotation>
+					<xs:documentation>Ektefelle</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="ENKE">
+				<xs:annotation>
+					<xs:documentation>Enke</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="ENSLIG">
+				<xs:annotation>
+					<xs:documentation>Enslig</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="FELLES-BARN">
+				<xs:annotation>
+					<xs:documentation>Felles barn</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="FORELDER">
+				<xs:annotation>
+					<xs:documentation>Forelder</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="GIFT">
+				<xs:annotation>
+					<xs:documentation>Gift</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="PARTNER">
+				<xs:annotation>
+					<xs:documentation>Partner</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="SAMBOER1-5">
+				<xs:annotation>
+					<xs:documentation>Samboer</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="SAMBOER3-2">
+				<xs:annotation>
+					<xs:documentation>Samboer</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Spraakkode">
+		<xs:annotation>
+			<xs:documentation>Kode som angir hvilket språk dokumentet skal produserer på. Mulige verdier: NB, NN, EN</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="NB"/>
+			<xs:enumeration value="NN"/>
+			<xs:enumeration value="EN"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ToDesimaler">
+		<xs:annotation>
+			<xs:documentation>Et tall med maksimalt to desimaler</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:decimal">
+			<xs:fractionDigits value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+
+</xs:schema>

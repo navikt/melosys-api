@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema	attributeFormDefault="unqualified"
+			  elementFormDefault="qualified"
+			  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+			  targetNamespace="http://nav.no/dok/melosysbrev/felles/melosys_felles"
+			  xmlns="http://nav.no/dok/melosysbrev/felles/melosys_felles"
+			  xmlns:felles="http://nav.no/dok/brevdata/felles/v1/NAVFelles"
+			  xmlns:st="http://nav.no/dok/brevdata/felles/v1/SimpleTypes">
+
+	<xs:import namespace="http://nav.no/dok/brevdata/felles/v1/NAVFelles" schemaLocation="navfelles/v1.NAVFelles.xsd" />
+	<xs:import namespace="http://nav.no/dok/brevdata/felles/v1/SimpleTypes" schemaLocation="navfelles/v1.SimpleTypes.xsd"/>
+	
+	<xs:complexType name="MelosysNAVFelles">
+		<xs:annotation>
+			<xs:documentation>Gyldig versjon av felles informasjonsmodell</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="sakspart" type="felles:Sakspart">
+				<xs:annotation>
+					<xs:documentation>Sakspart viser til personen vedtaket gjelder</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="mottaker" type="felles:Mottaker">
+				<xs:annotation>
+					<xs:documentation>Mottaker viser til personen/organisasjonen som vedtaket skal sendes til. Trenger ikke å være lik sakspart. Eks. advokat, verge.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="behandlendeEnhet" type="felles:NavEnhet">
+				<xs:annotation>
+					<xs:documentation>Navn på kontor som behandler saken</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="signerendeSaksbehandler" type="felles:Saksbehandler">
+				<xs:annotation>
+					<xs:documentation>Navn og enhet til signerende saksbehandler</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="signerendeBeslutter" type="felles:Saksbehandler">
+				<xs:annotation>
+					<xs:documentation>Navn og enhet til signerende beslutter</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kontaktinformasjon" type="felles:Kontaktinformasjon">
+				<xs:annotation>
+					<xs:documentation>Informasjon om hvordan bruker kan kontakte NAV før å følge opp saken</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="FellesType">
+		<xs:all>
+			<xs:element type="xs:string" name="kontaktPerson" minOccurs="0"/>
+			<xs:element type="st:Identifikator" name="fagsaksnummer"/>
+		</xs:all>
+	</xs:complexType>
+
+</xs:schema>

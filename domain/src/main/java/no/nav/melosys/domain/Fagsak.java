@@ -117,18 +117,37 @@ public class Fagsak {
      * Returnerer brukeren knyttet til saken eller {@code null} hvis den ikke finnes.
      */
     public Aktoer getBruker() {
+        List<Aktoer> brukere = getAktørerMedRolleType(RolleType.BRUKER);
+
+        if (brukere == null || brukere.isEmpty()) {
+            return null;
+        } else if (brukere.size() > 1) {
+            throw new TekniskException("Det finnes mer enn en bruker for sak " + saksnummer);
+        } else {
+            return brukere.get(0);
+        }
+    }
+
+    /**
+     * Returnerer en representant knyttet til saken eller {@code null} hvis den ikke finnes.
+     */
+    public Aktoer getRepresentant() {
+        List<Aktoer> representanter = getAktørerMedRolleType(RolleType.REPRESENTANT);
+
+        if (representanter == null || representanter.isEmpty()) {
+            return null;
+        } else if (representanter.size() > 1) {
+            throw new TekniskException("Det finnes mer enn en representant for sak " + saksnummer);
+        } else {
+            return representanter.get(0);
+        }
+    }
+
+    private List<Aktoer> getAktørerMedRolleType(RolleType rolleType) {
         if (aktører == null || aktører.isEmpty()) {
             return null;
         }
-
-        List<Aktoer> brukere = aktører.stream().filter(a -> RolleType.BRUKER.equals(a.getRolle())).collect(Collectors.toList());
-        if (brukere.size() > 1) {
-            throw new TekniskException("Det finnes mer enn en bruker for sak " + saksnummer);
-        } else if (brukere.size() == 1) {
-            return brukere.get(0);
-        } else {
-            return null;
-        }
+        return aktører.stream().filter(a -> rolleType.equals(a.getRolle())).collect(Collectors.toList());
     }
 
     public String getSaksnummer() {
