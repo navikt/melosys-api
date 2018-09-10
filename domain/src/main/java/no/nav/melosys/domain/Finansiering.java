@@ -1,6 +1,6 @@
 package no.nav.melosys.domain;
 
-public enum Finansering implements Kodeverk {
+public enum Finansiering implements Kodeverk {
 
     LAANEKASSEN("LAANEKASSEN", "Lånekassen"),
     UTENLANDSK_INSTITUSJON("UTENLANDSK_INSTITUSJON", "Utenlandsk institusjon"),
@@ -9,7 +9,7 @@ public enum Finansering implements Kodeverk {
     private String kode;
     private String beskrivelse;
 
-    Finansering(String kode, String beskrivelse) {
+    Finansiering(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
