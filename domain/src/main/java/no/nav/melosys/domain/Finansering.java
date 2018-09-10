@@ -3,7 +3,7 @@ package no.nav.melosys.domain;
 public enum Finansering implements Kodeverk {
 
     LAANEKASSEN("LAANEKASSEN", "Lånekassen"),
-    UTENLANDSK_INSTITUSJON("BKR_MEDL", "Utenlandsk institusjon"),
+    UTENLANDSK_INSTITUSJON("UTENLANDSK_INSTITUSJON", "Utenlandsk institusjon"),
     EGNE_MIDLER("EGNE_MIDLER", "Egne midler / arv / etc");
 
     private String kode;
