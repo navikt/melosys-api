@@ -20,7 +20,7 @@ public class OrganisasjonsDetaljer {
 
     public List<GeografiskAdresse> forretningsadresse = new ArrayList<>();
 
-    private List<GeografiskAdresse> postadresse = new ArrayList<>();
+    public List<GeografiskAdresse> postadresse = new ArrayList<>();
 
     public List<Telefonnummer> telefon = new ArrayList<>();
 
