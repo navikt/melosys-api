@@ -19,6 +19,7 @@ public class AntallTimerIPerioden {
     private BigDecimal antallTimer;
 
     @XmlJavaTypeAdapter(YearMonthTimeZoneXmlAdapter.class)
+    @JsonProperty("rapporteringsAarMaaned")
     private YearMonth rapporteringsperiode;
 
     public Periode getPeriode() {
