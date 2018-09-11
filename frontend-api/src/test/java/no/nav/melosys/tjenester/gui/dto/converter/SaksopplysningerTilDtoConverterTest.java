@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,9 +18,8 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periodetype;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
-import no.nav.melosys.tjenester.gui.dto.PersonDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.modelmapper.ModelMapper;
@@ -126,11 +124,11 @@ public class SaksopplysningerTilDtoConverterTest {
         assertThat(behandlingDto).isNotNull();
         assertThat(behandlingDto.getSaksopplysninger()).isNotNull();
 
-        PersonDto personDto = behandlingDto.getSaksopplysninger().getPerson();
+        PersonDokument person = behandlingDto.getSaksopplysninger().getPerson();
 
-        assertThat(personDto).isNotNull();
-        assertThat(personDto.statsborgerskap).isNotNull();
-        assertThat(personDto.statsborgerskapDato).isNotNull();
+        assertThat(person).isNotNull();
+        assertThat(person.statsborgerskap).isNotNull();
+        assertThat(person.statsborgerskapDato).isNotNull();
     }
 
     private Saksopplysning lagDokument(String ressurs, SaksopplysningType type, String versjon) {

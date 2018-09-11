@@ -7,6 +7,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
@@ -28,6 +30,7 @@ public class PersonDokument extends SaksopplysningDokument {
     public Land statsborgerskap;
 
     /** Kodeverk: Kjønnstyper */
+    @JsonProperty("kjoenn")
     public KjoennsType kjønn;
 
     public String sammensattNavn;
@@ -35,24 +38,30 @@ public class PersonDokument extends SaksopplysningDokument {
     public List<Familiemedlem> familiemedlemmer = new ArrayList<>();
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
+    @JsonProperty("foedselsdato")
     public LocalDate fødselsdato;
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
+    @JsonIgnore // TODO må avklares
     public LocalDate dødsdato;
 
     public Diskresjonskode diskresjonskode;
 
+    @JsonProperty("personStatus")
     public Personstatus personstatus;
 
     public LocalDate statsborgerskapDato;
 
     public Bostedsadresse bostedsadresse = new Bostedsadresse();
 
+    @JsonIgnore
     public UstrukturertAdresse postadresse = new UstrukturertAdresse();
 
+    @JsonIgnore
     public MidlertidigPostadresse midlertidigPostadresse = new MidlertidigPostadresse();
 
     @XmlTransient
+    @JsonProperty(defaultValue = "false" )
     public boolean erEgenAnsatt; // FIXME : MELOSYS-1580
 
 }

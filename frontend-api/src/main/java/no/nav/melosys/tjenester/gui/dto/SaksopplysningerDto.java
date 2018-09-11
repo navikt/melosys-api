@@ -8,12 +8,13 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 
 @JsonPropertyOrder({"person", "arbeidsforhold", "organisasjoner", "medlemskap", "inntekt", "sakOgBehandling"})
 public class SaksopplysningerDto {
 
-    private PersonDto person;
+    private PersonDokument person;
 
     private ArbeidsforholdDokument arbeidsforhold;
 
@@ -27,7 +28,7 @@ public class SaksopplysningerDto {
 
     public SaksopplysningerDto() {
         // Frontend ønsker å motta et objekt, selv når saksopplysninger ikke finnes.
-        this.person = new PersonDto();
+        this.person = new PersonDokument();
         this.arbeidsforhold = new ArbeidsforholdDokument();
         this.organisasjoner = new ArrayList<>();
         this.medlemskap = new MedlemskapDokument();
@@ -35,11 +36,11 @@ public class SaksopplysningerDto {
         this.sakOgBehandling = new SobSakDokument();
     }
 
-    public PersonDto getPerson() {
+    public PersonDokument getPerson() {
         return person;
     }
 
-    public void setPerson(PersonDto person) {
+    public void setPerson(PersonDokument person) {
         this.person = person;
     }
 

@@ -19,7 +19,6 @@ import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.tjenester.gui.dto.PersonDto;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
@@ -55,7 +54,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
 
             switch (type) {
                 case PERSONOPPLYSNING:
-                    dto.setPerson(new PersonDto((PersonDokument) dokument));
+                    dto.setPerson((PersonDokument)dokument);
                     break;
                 case ARBEIDSFORHOLD:
                     ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) dokument;
