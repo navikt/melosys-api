@@ -71,9 +71,7 @@
                         <id>dokumentbestiller</id>
                         <configuration>
                             <sources>
-                                <source>${basedir}/src/main/resources/xsd/foreldrepenger_000048.xsd</source>
-                                <source>${basedir}/src/main/resources/xsd/foreldrepenger_000061.xsd</source>
-                                <source>${basedir}/src/main/resources/xsd/melosysbrev/melosys_000082.xsd</source>
+                                <source>${basedir}/src/main/resources/xsd/melosys_000082.xsd</source>
                             </sources>
                             <addGeneratedAnnotation>true</addGeneratedAnnotation>
                             <clearOutputDir>false</clearOutputDir>

@@ -17,7 +17,7 @@ import static no.nav.melosys.service.dokument.brev.BrevDataUtils.convertToXMLGre
 
 public class ForvaltningsmeldingMapper implements BrevDataMapper {
 
-    private static String XSD_LOCATION = "xsd/melosysbrev/melosys_000082.xsd";
+    private static final String XSD_LOCATION = "xsd/melosys_000082.xsd";
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling) throws JAXBException, SAXException {
