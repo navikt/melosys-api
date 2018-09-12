@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto.journalforing;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class DokumentDto {
     private String ID;
     private String tittel;
-    private LocalDateTime mottattDato;
+    private Instant mottattDato;
 
 
     @JsonProperty("ID")
@@ -21,11 +21,11 @@ public class DokumentDto {
         this.ID = ID;
     }
 
-    public LocalDateTime getMottattDato() {
+    public Instant getMottattDato() {
         return mottattDato;
     }
 
-    public void setMottattDato(LocalDateTime mottattDato) {
+    public void setMottattDato(Instant mottattDato) {
         this.mottattDato = mottattDato;
     }
 

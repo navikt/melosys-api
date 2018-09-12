@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -26,18 +27,11 @@ public final class KonverteringsUtils {
         return factory.newXMLGregorianCalendar(dateTime.format(DateTimeFormatter.ISO_DATE));
     }
 
-    public static LocalDateTime xmlGregorianCalendarToLocalDateTime(XMLGregorianCalendar xmlGregorianCalendar) {
+    public static Instant xmlGregorianCalendarToInstant(XMLGregorianCalendar xmlGregorianCalendar) {
         if (xmlGregorianCalendar == null) {
             return null;
         }
-        return LocalDateTime.ofInstant(xmlGregorianCalendar.toGregorianCalendar().getTime().toInstant(), ZoneId.systemDefault());
-    }
-
-    public static LocalDate xmlGregorianCalendarToLocalDate(XMLGregorianCalendar calendar) {
-        if (calendar == null) {
-            return null;
-        }
-        return calendar.toGregorianCalendar().toZonedDateTime().toLocalDate();
+        return xmlGregorianCalendar.toGregorianCalendar().toZonedDateTime().withZoneSameLocal(ZoneId.systemDefault()).toInstant();
     }
 
     /*

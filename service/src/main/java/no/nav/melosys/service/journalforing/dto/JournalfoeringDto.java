@@ -2,7 +2,7 @@ package no.nav.melosys.service.journalforing.dto;
 
 import java.util.List;
 
-public class JournalforingDto {
+public class JournalfoeringDto {
     private String journalpostID;
     private String oppgaveID;
     private String brukerID;
@@ -11,8 +11,6 @@ public class JournalforingDto {
     private String dokumentID;
     private String dokumenttittel;
     private List<String> vedleggstitler;
-    private String saksnummer; // Melosys saksnummer
-    private FagsakDto fagsak;
 
     public String getJournalpostID() {
         return journalpostID;
@@ -78,19 +76,4 @@ public class JournalforingDto {
         this.vedleggstitler = vedleggstitler;
     }
 
-    public String getSaksnummer() {
-        return saksnummer;
-    }
-
-    public void setSaksnummer(String saksnummer) {
-        this.saksnummer = saksnummer;
-    }
-
-    public FagsakDto getFagsak() {
-        return fagsak;
-    }
-
-    public void setFagsak(FagsakDto fagsak) {
-        this.fagsak = fagsak;
-    }
 }
