@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -11,12 +10,7 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingStatus;
-import no.nav.melosys.domain.BehandlingType;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.RolleType;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -100,8 +94,7 @@ public class FagsakTjeneste extends RestTjeneste {
             if (fagsak == null) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             } else {
-                FagsakDto fagsakDto = tilDto(fagsak);
-                return Response.ok(fagsakDto).build();
+                return Response.ok(fagsak.getSaksnummer()).build();
             }
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.NOT_FOUND).entity("Ident " + fnr + " ikke funnet").build();
