@@ -7,6 +7,7 @@ public enum FellesKodeverk {
     DISKRESJONSKODER("Diskresjonskoder"),
     DOKUMENTKATEGORIER("Dokumentkategorier"),
     ENHETSTYPER_JURIDISK_ENHET("EnhetstyperJuridiskEnhet"),
+    FAMILIERELASJONER("Familierelasjoner"),
     FARTSOMRAADE("Fartsområder"),
     GRUNNLAG_MEDL("GrunnlagMedl"),
     KILDEDOKUMENT_MEDL("KildedokumentMedl"),

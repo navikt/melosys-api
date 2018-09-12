@@ -13,11 +13,10 @@ public enum FagsakType implements KodeverkTabell<FagsakType> {
     TRYGDEAVTALE("TRG_AVT", "Trygdeavtale"),
     FOLKETRYGD("FLK_TRG", "Folketrygd");
 
-
     private String kode;
     private String beskrivelse;
 
-    private FagsakType(String kode, String beskrivelse) {
+    FagsakType(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
