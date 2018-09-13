@@ -6,7 +6,7 @@ import javax.persistence.Converter;
  * Dette kodeverket angir hvilket felter fra en saksopplysning som er lagt til grunn for behandlingen.
  * FIXME: Dette enumet slettes hvis SaksopplysningType gir oss det vi trenger
  */
-public enum FaktagrunnlagType implements KodeverkTabell<FaktagrunnlagType> {
+public enum FaktagrunnlagType implements InterntKodeverkTabell<FaktagrunnlagType> {
 
     PERSONOPPLYSNING("PERSONOPPLYSNING", "Personopplysning");
 
@@ -29,7 +29,7 @@ public enum FaktagrunnlagType implements KodeverkTabell<FaktagrunnlagType> {
     }
 
     @Converter
-    public static class DbKonverterer extends KodeverkTabell.DbKonverterer<FaktagrunnlagType> {
+    public static class DbKonverterer extends InterntKodeverkTabell.DbKonverterer<FaktagrunnlagType> {
         @Override
         protected FaktagrunnlagType[] getLovligeVerdier() {
             return FaktagrunnlagType.values();

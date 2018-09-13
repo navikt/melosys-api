@@ -36,7 +36,7 @@ public class OppfriskSaksopplysningerTest {
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
         p.setBehandling(behandling);
-        p.getBehandling().setType(BehandlingType.SØKNAD);
+        p.getBehandling().setType(Behandlingstype.SØKNAD);
 
         agent.utførSteg(p);
 

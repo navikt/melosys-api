@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 import javax.persistence.Converter;
 
-public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
+public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
 
     // Disse skal være i logisk rekkefølge
     
@@ -56,7 +56,7 @@ public enum ProsessSteg implements KodeverkTabell<ProsessSteg> {
     }
 
     @Converter
-    public static class DbKonverterer extends KodeverkTabell.DbKonverterer<ProsessSteg> {
+    public static class DbKonverterer extends InterntKodeverkTabell.DbKonverterer<ProsessSteg> {
         @Override
         protected ProsessSteg[] getLovligeVerdier() {
             return ProsessSteg.values();

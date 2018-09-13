@@ -62,7 +62,7 @@ public class FagsakService {
      * Oppretter en fagsak og en behandling ut fra et fødselsnummer.
      */
     @Transactional
-    public Fagsak nyFagsakOgBehandling(String aktørID, BehandlingType behandlingType) {
+    public Fagsak nyFagsakOgBehandling(String aktørID, Behandlingstype behandlingstype) {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(hentNesteSaksnummer());
 
@@ -87,7 +87,7 @@ public class FagsakService {
         behandling.setEndretDato(nå);
 
         behandling.setStatus(BehandlingStatus.OPPRETTET);
-        behandling.setType(behandlingType);
+        behandling.setType(behandlingstype);
         behandlingRepository.save(behandling);
         return fagsak;
     }
@@ -95,10 +95,10 @@ public class FagsakService {
     // FIXME Trenger test en metode for å opprette fagsaker utenom saksflyt?
     @Deprecated
     @Transactional
-    public Fagsak testFagsakOgBehandling(String ident, BehandlingType behandlingType) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public Fagsak testFagsakOgBehandling(String ident, Behandlingstype behandlingstype) throws SikkerhetsbegrensningException, IkkeFunnetException {
         String aktørID = tpsFasade.hentAktørIdForIdent(ident);
 
-        Fagsak fagsak = nyFagsakOgBehandling(aktørID, behandlingType);
+        Fagsak fagsak = nyFagsakOgBehandling(aktørID, behandlingstype);
         fagsak.setType(FagsakType.EU_EØS);
         Set<Saksopplysning> saksopplysninger = saksopplysningerService.hentSaksopplysninger(aktørID);
         Behandling behandling = fagsak.getAktivBehandling();

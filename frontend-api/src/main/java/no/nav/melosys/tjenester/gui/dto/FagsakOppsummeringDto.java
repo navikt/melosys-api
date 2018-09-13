@@ -4,13 +4,13 @@ import java.time.Instant;
 import java.util.List;
 
 import no.nav.melosys.domain.BehandlingStatus;
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.FagsakType;
 
 public class FagsakOppsummeringDto {
     private String saksnummer;
     private FagsakType sakstype;
-    private BehandlingType behandlingstype;
+    private Behandlingstype behandlingstype;
     private BehandlingStatus behandlingsstatus;
     private Instant opprettetDato;
     private PeriodeDto soknadsperiode;
@@ -32,11 +32,11 @@ public class FagsakOppsummeringDto {
         this.sakstype = sakstype;
     }
 
-    public BehandlingType getBehandlingstype() {
+    public Behandlingstype getBehandlingstype() {
         return behandlingstype;
     }
 
-    public void setBehandlingstype(BehandlingType behandlingstype) {
+    public void setBehandlingstype(Behandlingstype behandlingstype) {
         this.behandlingstype = behandlingstype;
     }
 

@@ -5,9 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.FagsakType;
-import no.nav.melosys.domain.Kodeverk;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
@@ -52,15 +51,13 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public Long opprettSak(String saksnummer, BehandlingType behandlingType, String aktørId) throws TekniskException, IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException {
+    public Long opprettSak(String saksnummer, Behandlingstype behandlingstype, String aktørId) throws TekniskException, IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException {
         SakDto sakDto = new SakDto();
 
-        if (behandlingType.equals(BehandlingType.SØKNAD)) {
+        if (behandlingstype.equals(Behandlingstype.SØKNAD)) {
             sakDto.setTema(Tema.MED.getKode());
-        } else if (behandlingType.equals(BehandlingType.UNNTAK_MEDL)) {
-            sakDto.setTema(Tema.UFM.getKode());
         } else {
-            throw new TekniskException("Behandlingtype " + behandlingType.getBeskrivelse() + " er ikke støttet.");
+            throw new TekniskException("Behandlingtype " + behandlingstype.getBeskrivelse() + " er ikke støttet.");
         }
 
         sakDto.setAktørId(aktørId);
@@ -89,10 +86,10 @@ public class GsakService implements GsakFasade {
 
     //FIXME: Mangler implementasjon for sakstyper
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<FagsakType> sakstyper, List<BehandlingType> behandlingstyper) throws TekniskException {
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<FagsakType> sakstyper, List<Behandlingstype> behandlingstyper) throws TekniskException {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(new String[]{oppgavetype.getKode()})
-            .medBehandlingsTyper(behandlingstyper.stream().map(Kodeverk::getKode).toArray(String[]::new))
+            .medBehandlingsTyper(behandlingstyper.stream().map(Behandlingstype::hentFellesKode).toArray(String[]::new))
             .medSorteringsfelt(SORTERINGSFELT);
 
         if (tema != null) {
@@ -123,8 +120,9 @@ public class GsakService implements GsakFasade {
     public String opprettOppgave(Oppgave oppgave) throws SikkerhetsbegrensningException, TekniskException, FunksjonellException {
         LocalDate idag = LocalDate.now();
         OpprettOppgaveDto oppgaveDto = new OpprettOppgaveDto();
-        oppgaveDto.setAktivDato(LocalDate.now());
+        oppgaveDto.setAktivDato(idag);
         oppgaveDto.setAktørId(oppgave.getAktørId());
+        oppgaveDto.setBehandlingstype(oppgave.getBehandlingstype().hentFellesKode());
         if (oppgave.erJournalFøring()) {
             oppgaveDto.setFristFerdigstillelse(idag.plusDays(FRIST_JFR_DAGER));
         } else if (oppgave.erBehandling()) {
@@ -140,7 +138,7 @@ public class GsakService implements GsakFasade {
         oppgaveDto.setTema(oppgave.getTema().getKode());
         oppgaveDto.setTildeltEnhetsnr(Integer.toString(MELOSYS_ENHET_ID));
         oppgaveDto.setTilordnetRessurs(oppgave.getTilordnetRessurs());
-        // FIXME: MELOSYS-1401 : skal implementere Behandlingstema,Behandlingstype,Temagruppe
+
         return oppgaveConsumer.opprettOppgave(oppgaveDto);
     }
 

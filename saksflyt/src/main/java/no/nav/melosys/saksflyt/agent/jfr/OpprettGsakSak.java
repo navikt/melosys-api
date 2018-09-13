@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
@@ -72,7 +72,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
             return;
         }
 
-        Long gsakSakId = gsakFasade.opprettSak(saksnummer, BehandlingType.SØKNAD, aktørId);
+        Long gsakSakId = gsakFasade.opprettSak(saksnummer, Behandlingstype.SØKNAD, aktørId);
         fagsak.setGsakSaksnummer(gsakSakId);
         fagsakRepository.save(fagsak);
         prosessinstans.setData(GSAK_SAK_ID, gsakSakId);

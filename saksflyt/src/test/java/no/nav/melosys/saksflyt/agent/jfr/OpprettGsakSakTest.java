@@ -44,14 +44,14 @@ public class OpprettGsakSakTest {
         String aktørID = "FJERNET93";
         properties.setProperty(ProsessDataKey.AKTØR_ID.getKode(), aktørID);
         p.addData(properties);
-        when(gsakFasade.opprettSak(anyString(), eq(BehandlingType.SØKNAD), anyString())).thenReturn(123L);
+        when(gsakFasade.opprettSak(anyString(), eq(Behandlingstype.SØKNAD), anyString())).thenReturn(123L);
 
         Fagsak fagsak = new Fagsak();
         when(fagsakRepository.findBySaksnummer(any())).thenReturn(fagsak);
 
         agent.utførSteg(p);
 
-        verify(gsakFasade, times(1)).opprettSak(saksnummer, BehandlingType.SØKNAD, aktørID);
+        verify(gsakFasade, times(1)).opprettSak(saksnummer, Behandlingstype.SØKNAD, aktørID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
         Assert.notNull(fagsak.getGsakSaksnummer(), "Fagsak skal ha fått Gsak saksnummert");
     }

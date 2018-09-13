@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
@@ -78,7 +78,7 @@ public class OppgaveplukkerTest {
         sakstyper.add(FagsakType.EU_EØS.getKode());
 
         List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(BehandlingType.SØKNAD.getKode());
+        behandlingstyper.add(Behandlingstype.SØKNAD.getKode());
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
         plukkOppgaveInnDto.setOppgavetype("BEH_SAK");
@@ -118,7 +118,7 @@ public class OppgaveplukkerTest {
         sakstyper.add(FagsakType.FOLKETRYGD.getKode());
 
         List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(BehandlingType.REVURDERING.getKode());
+        behandlingstyper.add(Behandlingstype.REVURDERING.getKode());
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
         plukkOppgaveInnDto.setOppgavetype("BEH_SAK");
@@ -157,7 +157,7 @@ public class OppgaveplukkerTest {
         sakstyper.add(FagsakType.FOLKETRYGD.getKode());
 
         List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(BehandlingType.SØKNAD.getKode());
+        behandlingstyper.add(Behandlingstype.SØKNAD.getKode());
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
         plukkOppgaveInnDto.setOppgavetype("BEH_SAK");

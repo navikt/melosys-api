@@ -1,16 +1,15 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 import no.nav.melosys.domain.BehandlingStatus;
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 public class BehandlingOppsummeringDto {
 
     private Long behandlingID;
     private BehandlingStatus status;
-    private BehandlingType type;
+    private Behandlingstype type;
     private Instant registrertDato;
     private Instant endretDato;
 
@@ -30,11 +29,11 @@ public class BehandlingOppsummeringDto {
         this.status = status;
     }
 
-    public BehandlingType getType() {
+    public Behandlingstype getType() {
         return type;
     }
 
-    public void setType(BehandlingType type) {
+    public void setType(Behandlingstype type) {
         this.type = type;
     }
 

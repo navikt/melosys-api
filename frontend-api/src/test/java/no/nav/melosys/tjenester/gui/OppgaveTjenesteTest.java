@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.Response;
 
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
@@ -94,7 +94,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
         innData.setSakstyper(sakstyper);
 
         List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(BehandlingType.SØKNAD.getKode());
+        behandlingstyper.add(Behandlingstype.SØKNAD.getKode());
         innData.setBehandlingstyper(behandlingstyper);
 
         Oppgave oppgave = new Oppgave();
