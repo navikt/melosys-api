@@ -23,6 +23,7 @@ import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
+import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
 
@@ -77,7 +78,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     dto.setMedlemskap(medlemskapDokument);
                     break;
                 case INNTEKT:
-                    dto.setInntekt((InntektDokument)dokument);
+                    dto.setInntekt(new InntektDto((InntektDokument) dokument));
                     break;
                 case SOB_SAK:
                     dto.setSakOgBehandling((SobSakDokument) dokument);
