@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.FagsakType;
@@ -97,13 +98,8 @@ public class GsakService implements GsakFasade {
         }
 
         List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(searchRequestBuilder.build());
-        List<Oppgave> funnet = new ArrayList<>();
 
-        oppgaver.stream()
-            .filter(Objects::isNull)
-            .map(GsakService::oppgaveMappingDtoTilDomain)
-            .forEach(funnet::add);
-        return funnet;
+        return oppgaver.stream().map(GsakService::oppgaveMappingDtoTilDomain).collect(Collectors.toList());
     }
 
     @Override
@@ -160,15 +156,9 @@ public class GsakService implements GsakFasade {
             .medSorteringsfelt(SORTERINGSFELT)
             .build();
 
-        List<Oppgave> localDomainObjects = new ArrayList<>();
         List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
 
-        finnOppgaveListeResponse.stream()
-            .filter(Objects::nonNull)
-            .map(GsakService::oppgaveMappingDtoTilDomain)
-            .forEach(localDomainObjects::add);
-
-        return localDomainObjects;
+        return finnOppgaveListeResponse.stream().map(GsakService::oppgaveMappingDtoTilDomain).collect(Collectors.toList());
     }
 
     private static Oppgave oppgaveMappingDtoTilDomain(OppgaveDto oppgave) {
