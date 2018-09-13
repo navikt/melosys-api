@@ -62,7 +62,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
         Behandlingstype behandlingstype = prosessinstans.getBehandling().getType(); // Forutsetter at ingen tidligere steg har endret denne
         String aktørID = prosessinstans.getData(AKTØR_ID);
-        String gsakSakID = prosessinstans.getData(GSAK_SAK_ID);
+        Long gsakSakID = prosessinstans.getData(GSAK_SAK_ID, Long.class);
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
 
         Oppgave oppgave = new Oppgave();

@@ -40,7 +40,7 @@ public class OppgaveMappingMellomDTOogDomainTest {
         when(oppgaveConsumerMock.hentOppgave("1234")).thenReturn(oppgaveDto);
         Oppgave oppgave = gsakFasade.hentOppgave("1234");
         assertThat(oppgave.getOppgaveId()).isEqualTo("1234");
-        assertThat(oppgave.getGsakSaksnummer()).isEqualTo("456");
+        assertThat(oppgave.getGsakSaksnummer()).isEqualTo(456L);
         assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetype.valueOf("JFR"));
         assertThat(oppgave.getTema()).isEqualTo(Tema.valueOf("MED"));
     }

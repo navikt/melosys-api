@@ -134,7 +134,7 @@ public class GsakService implements GsakFasade {
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());
         oppgaveDto.setOppgavetype(oppgave.getOppgavetype().getKode());
         oppgaveDto.setPrioritet(PrioritetType.NORM.toString());
-        oppgaveDto.setSaksreferanse(oppgave.getGsakSaksnummer());
+        oppgaveDto.setSaksreferanse(oppgave.getGsakSaksnummer().toString()); //TODO Bør vi bruke eget saksnummer?
         oppgaveDto.setTema(oppgave.getTema().getKode());
         oppgaveDto.setTildeltEnhetsnr(Integer.toString(MELOSYS_ENHET_ID));
         oppgaveDto.setTilordnetRessurs(oppgave.getTilordnetRessurs());
@@ -181,7 +181,8 @@ public class GsakService implements GsakFasade {
         domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
         domainOppgave.setJournalpostId(oppgave.getJournalpostId());
 
-        domainOppgave.setGsakSaksnummer(oppgave.getSaksreferanse());
+        //TODO Bør vi bruke eget saksnummer?
+        domainOppgave.setGsakSaksnummer(oppgave.getSaksreferanse() != null ? Long.parseLong(oppgave.getSaksreferanse()) : null);
         domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
 
         if (oppgave.getTema() != null && erGyldigKode(Tema.class, oppgave.getTema())) {
