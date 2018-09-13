@@ -1,5 +1,8 @@
 package no.nav.melosys.tjenester.gui.dto.converter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.Set;
 
@@ -96,13 +99,21 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
 
         /*
         - Ved søknad tilbake i tid, brukes historisk statsborgerskap med fom-dato for søknad som dato
-        - Ved søknad framover i tid, brukes statsborgerskap fra TPS med endretDato fra behandling som dato
+        - Ved søknad framover i tid, brukes statsborgerskap fra TPS med gjeldende dato, avgrenset
+            av dato for henting av opplysninger (hvis tilstede) eller endring av behandling
         */
-        if (søknadsperiode != null && søknadsperiode.getFom().isBefore(behandling.getSistOpplysningerHentetDato().toLocalDate())) {
+        LocalDate gjeldendeDato = null;
+        if (behandling.getSistOpplysningerHentetDato() != null) {
+            gjeldendeDato = behandling.getSistOpplysningerHentetDato().toLocalDate();
+        } else {
+            gjeldendeDato = LocalDateTime.ofInstant(behandling.getEndretDato(), ZoneOffset.UTC).toLocalDate();
+        }
+
+        if (søknadsperiode != null && søknadsperiode.getFom().isBefore(gjeldendeDato)) {
             dto.getPerson().statsborgerskap = historiskStatsborgerskap;
             dto.getPerson().statsborgerskapDato = søknadsperiode.getFom();
         } else {
-            dto.getPerson().statsborgerskapDato = behandling.getSistOpplysningerHentetDato().toLocalDate();
+            dto.getPerson().statsborgerskapDato = gjeldendeDato;
         }
 
         return dto;
