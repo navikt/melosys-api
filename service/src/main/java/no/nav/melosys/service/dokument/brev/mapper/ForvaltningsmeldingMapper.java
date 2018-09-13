@@ -36,6 +36,7 @@ public class ForvaltningsmeldingMapper implements BrevDataMapper {
         } catch (DatatypeConfigurationException e) {
             throw new TekniskException("Konverteringsfeil", e);
         }
+        // FIXME Avhenger av Hendelse, som ikke er modellert ennå
         AvsenderType avsenderType = new AvsenderType();
         avsenderType.setRolle(RolleKode.BRUKER);
         fag.setAvsender(avsenderType);

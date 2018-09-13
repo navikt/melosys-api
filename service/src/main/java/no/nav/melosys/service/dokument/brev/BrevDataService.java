@@ -123,8 +123,15 @@ public class BrevDataService {
         Sakspart sakspart = new Sakspart();
         Aktoer aktør = behandling.getFagsak().getBruker();
 
-        // FIXME Doksys bruker fnr for Person
-        sakspart.setId(aktør.getAktørId());
+        if (aktør == null || aktør.getAktørId() == null) {
+            throw new TekniskException("Det finnes ingen bruker på sak " + behandling.getFagsak().getSaksnummer());
+        }
+        try {
+            sakspart.setId(tpsFasade.hentIdentForAktørId(aktør.getAktørId()));
+        } catch (IkkeFunnetException e) {
+            throw new TekniskException("Det finnes ingen ident for aktørID " + aktør.getAktørId());
+        }
+
         sakspart.setTypeKode(AktoerType.PERSON);
         sakspart.setBerik(true);
         sakspart.setNavn("Sakspart-Navn");
@@ -138,8 +145,15 @@ public class BrevDataService {
             aktør = behandling.getFagsak().getBruker();
         }
 
-        // FIXME Doksys bruker fnr for Person
-        mottaker.setId(aktør.getAktørId());
+        if (aktør == null || aktør.getAktørId() == null) {
+            throw new TekniskException("Det finnes ingen representant/bruker på sak " + behandling.getFagsak().getSaksnummer());
+        }
+        try {
+            mottaker.setId(tpsFasade.hentIdentForAktørId(aktør.getAktørId()));
+        } catch (IkkeFunnetException e) {
+            throw new TekniskException("Det finnes ingen ident for aktørID " + aktør.getAktørId());
+        }
+
         mottaker.setTypeKode(AktoerType.PERSON);
         mottaker.setBerik(true); // Gjør oppslag mot EREG/TPS
 

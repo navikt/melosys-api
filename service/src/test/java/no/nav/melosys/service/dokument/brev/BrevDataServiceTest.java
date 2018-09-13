@@ -7,6 +7,7 @@ import java.util.HashSet;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.Saksbehandler;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,9 +26,11 @@ public class BrevDataServiceTest {
     BrevDataService service;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IkkeFunnetException {
         TpsFasade tpsFasade = mock(TpsFasade.class);
         service = spy(new BrevDataService(tpsFasade));
+
+        when(tpsFasade.hentIdentForAktørId(any())).thenReturn("Fnr");
 
         Saksbehandler saksbehandler = new Saksbehandler();
         saksbehandler.setNavEnhet(lagNavEnhet());
