@@ -5,7 +5,7 @@ import javax.persistence.Converter;
 /**
  * ISO2 landkoder som vises i frontend.
  */
-public enum Landkoder implements KodeverkTabell<Landkoder> {
+public enum Landkoder implements InterntKodeverkTabell<Landkoder> {
 
     BE("BE", "Belgia"),
     BG("BG", "Bulgaria"),
@@ -59,7 +59,7 @@ public enum Landkoder implements KodeverkTabell<Landkoder> {
     }
 
     @Converter
-    public static class DbKonverterer extends KodeverkTabell.DbKonverterer<Landkoder> {
+    public static class DbKonverterer extends InterntKodeverkTabell.DbKonverterer<Landkoder> {
         @Override
         protected Landkoder[] getLovligeVerdier() {
             return Landkoder.values();

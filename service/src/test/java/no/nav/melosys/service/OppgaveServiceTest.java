@@ -64,7 +64,7 @@ public class OppgaveServiceTest {
         oppgave1.setOppgavetype(Oppgavetype.BEH_SAK);
         oppgave1.setPrioritet(PrioritetType.HOY);
         oppgave1.setOppgavetype(Oppgavetype.BEH_SAK);
-        oppgave1.setGsakSaksnummer("11");
+        oppgave1.setGsakSaksnummer(11L);
         oppgave1.setTilordnetRessurs("12345678901");
         oppgaver.add(oppgave1);
 
@@ -85,7 +85,7 @@ public class OppgaveServiceTest {
         fagsak.setStatus(FagsakStatus.OPPRETTET);
         List<Behandling> behandlinger = hentBehandlinger();
         fagsak.setBehandlinger(behandlinger);
-        when(fagsakRepository.findByGsakSaksnummer(any(String.class))).thenReturn(fagsak);
+        when(fagsakRepository.findByGsakSaksnummer(any(Long.class))).thenReturn(fagsak);
 
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12345678901");
         assertThat(mineSaker.size()).isEqualTo(1);

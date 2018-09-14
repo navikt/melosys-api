@@ -2,21 +2,12 @@ package no.nav.melosys.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-
 import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingStatus;
-import no.nav.melosys.domain.BehandlingType;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakStatus;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -41,7 +32,7 @@ public class BehandlingRepositoryTest {
         Behandling behandling = new Behandling();
         behandling.setBehandlingsId(777L);
         behandling.setStatus(BehandlingStatus.OPPRETTET);
-        behandling.setType(BehandlingType.FØRSTEGANGSSØKNAD);
+        behandling.setType(Behandlingstype.FØRSTEGANGSSØKNAD);
         behandling.setFagsak(fagsak);
 
         entityManager.persist(behandling);
@@ -60,7 +51,7 @@ public class BehandlingRepositoryTest {
         Behandling behandling = new Behandling();
         behandling.setBehandlingsId(777L);
         behandling.setStatus(BehandlingStatus.OPPRETTET);
-        behandling.setType(BehandlingType.FØRSTEGANGSSØKNAD);
+        behandling.setType(Behandlingstype.FØRSTEGANGSSØKNAD);
         behandling.setFagsak(fagsak);
 
         entityManager.persist(behandling);

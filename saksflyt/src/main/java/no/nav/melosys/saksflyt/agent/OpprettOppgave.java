@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.agent;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.Tema;
@@ -60,36 +60,30 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        BehandlingType behandlingType = prosessinstans.getBehandling().getType(); // Forutsetter at ingen tidligere steg har endret denne
-        String gsakSakID = prosessinstans.getData(GSAK_SAK_ID);
+        Behandlingstype behandlingstype = prosessinstans.getBehandling().getType(); // Forutsetter at ingen tidligere steg har endret denne
         String aktørID = prosessinstans.getData(AKTØR_ID);
+        Long gsakSakID = prosessinstans.getData(GSAK_SAK_ID, Long.class);
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
 
         Oppgave oppgave = new Oppgave();
 
-        oppgave.setGsakSaksnummer(gsakSakID);
-
-        if (behandlingType == BehandlingType.SØKNAD) {
+        if (behandlingstype == Behandlingstype.SØKNAD) {
             oppgave.setTema(Tema.MED);
+            oppgave.setBehandlingstype(Behandlingstype.SØKNAD);
             oppgave.setOppgavetype(Oppgavetype.BEH_SAK);
-            oppgave.setPrioritet(PrioritetType.NORM);
-        } else if (behandlingType == BehandlingType.UNNTAK_MEDL) {
-            oppgave.setTema(Tema.UFM);
-            oppgave.setOppgavetype(Oppgavetype.BEH_SAK);
-            oppgave.setPrioritet(PrioritetType.NORM);
         } else {
-            String feilmelding = "behandlingType " + behandlingType + " er ikke støttet";
+            String feilmelding = "behandlingstype " + behandlingstype + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
             return;
         }
 
-        //builder.medUnderkategori() FIXME Venter. Ekisterer det i den nye GSAK tjenesten?
+        // FIXME: MELOSYS-1401 behandlingstema,temagruppe
         oppgave.setAktørId(aktørID);
+        oppgave.setGsakSaksnummer(gsakSakID);
         oppgave.setJournalpostId(journalpostID);
-        //builder.medMottattDato(); FIXME settes? Are T.
-        //builder.medNormertBehandlingsTidInnen(); FIXME settes?
-        // FIXME: MELOSYS-1401 skal støtte behandlingstype,behandlingstema,temagruppe
+        oppgave.setPrioritet(PrioritetType.NORM);
+
         String oppgaveId = gsakFasade.opprettOppgave(oppgave);
 
         prosessinstans.setSteg(null);

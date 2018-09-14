@@ -28,7 +28,7 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.getBegrunnelser().vesentligVirksomhet = tilKoder(VesentligVirksomhet.values());
         kodeverk.getBegrunnelser().ikkeSkip = tilKoder(IkkeSkip.values());
         kodeverk.setBehandlingsstatus(tilKoder(BehandlingStatus.values()));
-        kodeverk.setBehandlingstyper(tilKoder(BehandlingType.values()));
+        kodeverk.setBehandlingstyper(tilKoder(Behandlingstype.values()));
         kodeverk.setDokumenttitler(tilKoder(DokumentTittel.values()));
         kodeverk.setFinansiering(tilKoder(Finansiering.values()));
         kodeverk.setLandkoder(tilKoder(Landkoder.values()));

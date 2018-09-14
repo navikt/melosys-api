@@ -2,7 +2,7 @@ package no.nav.melosys.service;
 
 import java.time.Instant;
 
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakStatus;
 import no.nav.melosys.domain.FagsakType;
@@ -77,7 +77,7 @@ public class FagsakServiceTest {
         final String[] identer = new String[]{"88888888884", "77777777779"};
 
         for (String fnr : identer) {
-            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(fnr, BehandlingType.SØKNAD);
+            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(fnr, Behandlingstype.SØKNAD);
 
             assertNotNull(fagsak);
             assertFalse(fagsak.getBehandlinger().isEmpty());

@@ -36,7 +36,7 @@ public class OpprettOppgaveTest {
     public void utfoerSteg() throws SikkerhetsbegrensningException, FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
-        p.getBehandling().setType(BehandlingType.SØKNAD);
+        p.getBehandling().setType(Behandlingstype.SØKNAD);
         p.setType(ProsessType.JFR_NY_SAK);
         Properties properties = new Properties();
         p.addData(properties);

@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 import javax.persistence.Converter;
 
-public enum FagsakStatus implements KodeverkTabell<FagsakStatus> {
+public enum FagsakStatus implements InterntKodeverkTabell<FagsakStatus> {
 
     // FIXME (farjam): kodene må fikses. Mismatch mellom logisk modell og hva som kan lagres i gsak (husk også å rette i DB).
     OPPRETTET("OPPR", "Opprettet"),
@@ -29,7 +29,7 @@ public enum FagsakStatus implements KodeverkTabell<FagsakStatus> {
     }
 
     @Converter
-    public static class DbKonverterer extends KodeverkTabell.DbKonverterer<FagsakStatus> {
+    public static class DbKonverterer extends InterntKodeverkTabell.DbKonverterer<FagsakStatus> {
         @Override
         protected FagsakStatus[] getLovligeVerdier() {
             return FagsakStatus.values();

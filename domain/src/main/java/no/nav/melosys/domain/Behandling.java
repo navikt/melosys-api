@@ -24,8 +24,8 @@ public class Behandling {
     private BehandlingStatus status;
 
     @Column(name = "beh_type", nullable = false, updatable = false)
-    @Convert(converter = BehandlingType.DbKonverterer.class)
-    private BehandlingType type;
+    @Convert(converter = Behandlingstype.DbKonverterer.class)
+    private Behandlingstype type;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private Instant registrertDato;
@@ -62,11 +62,11 @@ public class Behandling {
         this.status = status;
     }
 
-    public BehandlingType getType() {
+    public Behandlingstype getType() {
         return type;
     }
 
-    public void setType(BehandlingType type) {
+    public void setType(Behandlingstype type) {
         this.type = type;
     }
     

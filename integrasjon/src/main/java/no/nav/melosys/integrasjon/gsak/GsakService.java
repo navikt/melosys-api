@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.FagsakType;
-import no.nav.melosys.domain.Kodeverk;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
@@ -52,15 +52,13 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public Long opprettSak(String saksnummer, BehandlingType behandlingType, String aktørId) throws TekniskException, IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException {
+    public Long opprettSak(String saksnummer, Behandlingstype behandlingstype, String aktørId) throws TekniskException, IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException {
         SakDto sakDto = new SakDto();
 
-        if (behandlingType.equals(BehandlingType.SØKNAD)) {
+        if (behandlingstype.equals(Behandlingstype.SØKNAD)) {
             sakDto.setTema(Tema.MED.getKode());
-        } else if (behandlingType.equals(BehandlingType.UNNTAK_MEDL)) {
-            sakDto.setTema(Tema.UFM.getKode());
         } else {
-            throw new TekniskException("Behandlingtype " + behandlingType.getBeskrivelse() + " er ikke støttet.");
+            throw new TekniskException("Behandlingtype " + behandlingstype.getBeskrivelse() + " er ikke støttet.");
         }
 
         sakDto.setAktørId(aktørId);
@@ -89,10 +87,10 @@ public class GsakService implements GsakFasade {
 
     //FIXME: Mangler implementasjon for sakstyper
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<FagsakType> sakstyper, List<BehandlingType> behandlingstyper) throws TekniskException {
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<FagsakType> sakstyper, List<Behandlingstype> behandlingstyper) throws TekniskException {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(new String[]{oppgavetype.getKode()})
-            .medBehandlingsTyper(behandlingstyper.stream().map(Kodeverk::getKode).toArray(String[]::new))
+            .medBehandlingsTyper(behandlingstyper.stream().map(Behandlingstype::hentFellesKode).toArray(String[]::new))
             .medSorteringsfelt(SORTERINGSFELT);
 
         if (tema != null) {
@@ -100,13 +98,8 @@ public class GsakService implements GsakFasade {
         }
 
         List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(searchRequestBuilder.build());
-        List<Oppgave> funnet = new ArrayList<>();
 
-        oppgaver.stream()
-            .filter(Objects::isNull)
-            .map(GsakService::oppgaveMappingDtoTilDomain)
-            .forEach(funnet::add);
-        return funnet;
+        return oppgaver.stream().map(GsakService::oppgaveMappingDtoTilDomain).collect(Collectors.toList());
     }
 
     @Override
@@ -123,8 +116,9 @@ public class GsakService implements GsakFasade {
     public String opprettOppgave(Oppgave oppgave) throws SikkerhetsbegrensningException, TekniskException, FunksjonellException {
         LocalDate idag = LocalDate.now();
         OpprettOppgaveDto oppgaveDto = new OpprettOppgaveDto();
-        oppgaveDto.setAktivDato(LocalDate.now());
+        oppgaveDto.setAktivDato(idag);
         oppgaveDto.setAktørId(oppgave.getAktørId());
+        oppgaveDto.setBehandlingstype(oppgave.getBehandlingstype().hentFellesKode());
         if (oppgave.erJournalFøring()) {
             oppgaveDto.setFristFerdigstillelse(idag.plusDays(FRIST_JFR_DAGER));
         } else if (oppgave.erBehandling()) {
@@ -136,11 +130,11 @@ public class GsakService implements GsakFasade {
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());
         oppgaveDto.setOppgavetype(oppgave.getOppgavetype().getKode());
         oppgaveDto.setPrioritet(PrioritetType.NORM.toString());
-        oppgaveDto.setSaksreferanse(oppgave.getGsakSaksnummer());
+        oppgaveDto.setSaksreferanse(oppgave.getGsakSaksnummer().toString()); //TODO Bør vi bruke eget saksnummer?
         oppgaveDto.setTema(oppgave.getTema().getKode());
         oppgaveDto.setTildeltEnhetsnr(Integer.toString(MELOSYS_ENHET_ID));
         oppgaveDto.setTilordnetRessurs(oppgave.getTilordnetRessurs());
-        // FIXME: MELOSYS-1401 : skal implementere Behandlingstema,Behandlingstype,Temagruppe
+
         return oppgaveConsumer.opprettOppgave(oppgaveDto);
     }
 
@@ -162,15 +156,9 @@ public class GsakService implements GsakFasade {
             .medSorteringsfelt(SORTERINGSFELT)
             .build();
 
-        List<Oppgave> localDomainObjects = new ArrayList<>();
         List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
 
-        finnOppgaveListeResponse.stream()
-            .filter(Objects::nonNull)
-            .map(GsakService::oppgaveMappingDtoTilDomain)
-            .forEach(localDomainObjects::add);
-
-        return localDomainObjects;
+        return finnOppgaveListeResponse.stream().map(GsakService::oppgaveMappingDtoTilDomain).collect(Collectors.toList());
     }
 
     private static Oppgave oppgaveMappingDtoTilDomain(OppgaveDto oppgave) {
@@ -183,7 +171,8 @@ public class GsakService implements GsakFasade {
         domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
         domainOppgave.setJournalpostId(oppgave.getJournalpostId());
 
-        domainOppgave.setGsakSaksnummer(oppgave.getSaksreferanse());
+        //TODO Bør vi bruke eget saksnummer?
+        domainOppgave.setGsakSaksnummer(oppgave.getSaksreferanse() != null ? Long.parseLong(oppgave.getSaksreferanse()) : null);
         domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
 
         if (oppgave.getTema() != null && erGyldigKode(Tema.class, oppgave.getTema())) {
