@@ -1,20 +1,52 @@
 package no.nav.melosys.tjenester.gui.dto.converter;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periodetype;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
+import org.junit.Before;
 import org.junit.Test;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
+import static no.nav.melosys.domain.SaksopplysningType.PERSONHISTORIKK;
+import static no.nav.melosys.domain.SaksopplysningType.PERSONOPPLYSNING;
 import static no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter.medlemsperiodeKomparator;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SaksopplysningerTilDtoConverterTest {
+
+    private DokumentFactory dokumentFactory;
+
+    private ModelMapper modelMapper;
+
+    @Before
+    public void setUp() {
+        Jaxb2Marshaller marshaller = new JaxbConfig().jaxb2Marshaller();
+        XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
+        dokumentFactory = new DokumentFactory(marshaller, xsltTemplatesFactory);
+
+        modelMapper = new ModelMapper();
+        TypeMap<Behandling, BehandlingDto> typeMapBehandlingUt = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
+        typeMapBehandlingUt.addMappings(mapper -> mapper.using(new SaksopplysningerTilDtoConverter()).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
+    }
 
     @Test
     public void testArbeidsforholdSortering() {
@@ -68,5 +100,55 @@ public class SaksopplysningerTilDtoConverterTest {
         assertThat(medlemsperioder.get(1)).isEqualTo(medlemsperiode1);
         assertThat(medlemsperioder.get(2)).isEqualTo(medlemsperiode3);
         assertThat(medlemsperioder.get(3)).isEqualTo(medlemsperiode2);
+    }
+
+    @Test
+    public void testKonverteringPersonMedStatsborgerskap() throws Exception {
+
+        Saksopplysning personDokument = lagDokument("88888888882.xml", PERSONOPPLYSNING, "3.0");
+        Saksopplysning personhistorikkDokument = lagDokument("88888888882_historikk.xml", PERSONHISTORIKK, "3.4");
+
+        assertThat(personDokument).isNotNull();
+        assertThat(personhistorikkDokument).isNotNull();
+
+        Set<Saksopplysning> saksopplysninger = new HashSet<>();
+        saksopplysninger.add(personDokument);
+        saksopplysninger.add(personhistorikkDokument);
+
+        Behandling behandling = new Behandling();
+        behandling.setSisteOpplysningerHentetDato(LocalDate.of(2018, 1, 1).atStartOfDay());
+        behandling.setSaksopplysninger(saksopplysninger);
+
+        BehandlingDto behandlingDto = modelMapper.map(behandling, BehandlingDto.class);
+
+        assertThat(behandlingDto).isNotNull();
+        assertThat(behandlingDto.getSaksopplysninger()).isNotNull();
+
+        PersonDokument person = behandlingDto.getSaksopplysninger().getPerson();
+
+        assertThat(person).isNotNull();
+        assertThat(person.statsborgerskap).isNotNull();
+        assertThat(person.statsborgerskapDato).isNotNull();
+    }
+
+    private Saksopplysning lagDokument(String ressurs, SaksopplysningType type, String versjon) {
+        final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
+            Saksopplysning saksopplysning = new Saksopplysning();
+
+            String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+
+            saksopplysning.setDokumentXml(xmlStr);
+            saksopplysning.setType(type);
+            saksopplysning.setVersjon(versjon);
+
+            dokumentFactory.lagDokument(saksopplysning);
+
+            return saksopplysning;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
