@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.datavarehus.BehandlingLagretEvent;
+import no.nav.melosys.domain.datavarehus.FagsakLagretEvent;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;

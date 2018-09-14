@@ -3,6 +3,7 @@ package no.nav.melosys.service;
 import java.time.Instant;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.datavarehus.FagsakLagretEvent;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;

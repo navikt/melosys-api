@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.datavarehus.BehandlingLagretEvent;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;

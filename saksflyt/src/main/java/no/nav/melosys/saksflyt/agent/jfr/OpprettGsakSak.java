@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.datavarehus.FagsakLagretEvent;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;

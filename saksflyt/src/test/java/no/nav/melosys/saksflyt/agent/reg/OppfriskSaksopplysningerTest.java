@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.agent.reg;
 import java.util.Properties;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.datavarehus.BehandlingLagretEvent;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;

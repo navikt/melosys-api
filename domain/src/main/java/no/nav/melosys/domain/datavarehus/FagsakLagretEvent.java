@@ -1,4 +1,6 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.datavarehus;
+
+import no.nav.melosys.domain.Fagsak;
 
 public class FagsakLagretEvent {
 

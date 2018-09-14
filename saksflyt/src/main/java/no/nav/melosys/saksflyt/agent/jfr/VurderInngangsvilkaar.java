@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.datavarehus.FagsakLagretEvent;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
