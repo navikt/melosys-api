@@ -14,6 +14,7 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,12 +31,17 @@ public class FagsakService {
 
     private final TpsFasade tpsFasade;
 
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     @Autowired
-    public FagsakService(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository, SaksopplysningerService saksopplysningerService, TpsFasade tpsFasade) {
+    public FagsakService(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository,
+                         SaksopplysningerService saksopplysningerService, TpsFasade tpsFasade,
+                         ApplicationEventPublisher applicationEventPublisher) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.saksopplysningerService = saksopplysningerService;
         this.tpsFasade = tpsFasade;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public Fagsak hentFagsak(String saksnummer) {
@@ -53,6 +59,7 @@ public class FagsakService {
             sak.setSaksnummer(hentNesteSaksnummer());
         }
         fagsakRepository.save(sak);
+        applicationEventPublisher.publishEvent(new FagsakLagretEvent(sak));
     }
 
     /**
@@ -103,6 +110,7 @@ public class FagsakService {
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setType(behandlingstype);
         behandlingRepository.save(behandling);
+        applicationEventPublisher.publishEvent(new BehandlingLagretEvent(behandling));
         return fagsak;
     }
 
@@ -119,7 +127,9 @@ public class FagsakService {
         saksopplysninger.forEach(x -> x.setBehandling(behandling));
         behandling.setSaksopplysninger(saksopplysninger);
 
-        return fagsakRepository.save(fagsak);
+        fagsak = fagsakRepository.save(fagsak);
+        applicationEventPublisher.publishEvent(new FagsakLagretEvent(fagsak));
+        return fagsak;
     }
 
     private String hentNesteSaksnummer() {

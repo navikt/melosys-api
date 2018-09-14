@@ -2,10 +2,7 @@ package no.nav.melosys.service;
 
 import java.time.Instant;
 
-import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Fagsaksstatus;
-import no.nav.melosys.domain.Fagsakstype;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
@@ -28,11 +25,14 @@ import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class FagsakServiceTest {
 
@@ -40,6 +40,8 @@ public class FagsakServiceTest {
     private FagsakRepository fagsakRepo;
 
     private FagsakService fagsakService;
+
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Before
     public void setUp() {
@@ -56,7 +58,8 @@ public class FagsakServiceTest {
 
         fagsakRepo = mock(FagsakRepository.class);
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
-        fagsakService = new FagsakService(fagsakRepo, behandlingRepository, saksopplysningerService, tps);
+        applicationEventPublisher = mock(ApplicationEventPublisher.class);
+        fagsakService = new FagsakService(fagsakRepo, behandlingRepository, saksopplysningerService, tps, applicationEventPublisher);
     }
 
     @Test
@@ -70,6 +73,7 @@ public class FagsakServiceTest {
         fagsakService.lagre(fagsak);
         assertNotNull(fagsak);
         assertNotNull(fagsak.getSaksnummer());
+        verify(applicationEventPublisher).publishEvent(any(FagsakLagretEvent.class));
     }
 
     @Test
