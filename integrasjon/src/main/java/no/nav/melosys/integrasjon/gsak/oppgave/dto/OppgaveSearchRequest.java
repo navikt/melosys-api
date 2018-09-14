@@ -11,6 +11,7 @@ public class OppgaveSearchRequest {
     private String tilordnetRessurs;
     private String[] tema;
     private String sorteringsfelt;
+    private String statusKategori;
 
     private OppgaveSearchRequest(Builder builder) {
         this.tildeltEnhetsnr = builder.enhetId;
@@ -20,6 +21,7 @@ public class OppgaveSearchRequest {
         this.tilordnetRessurs = builder.tilordnetRessurs;
         this.tema = builder.tema;
         this.sorteringsfelt = builder.sorteringsfelt;
+        this.statusKategori = builder.statusKategori;
     }
 
     public String[] getOppgavetype() {
@@ -50,6 +52,10 @@ public class OppgaveSearchRequest {
         return tilordnetRessurs;
     }
 
+    public String getStatusKategori() {
+        return statusKategori;
+    }
+
     public static class Builder {
 
         private String enhetId;
@@ -59,6 +65,7 @@ public class OppgaveSearchRequest {
         private String tilordnetRessurs;
         private String[] tema;
         private String sorteringsfelt;
+        private String statusKategori;
 
         public Builder(String enhetId ) {
             this.enhetId = enhetId;
@@ -91,6 +98,11 @@ public class OppgaveSearchRequest {
 
         public Builder medTilordnetRessurs(String tilordnetRessurs) {
             this.tilordnetRessurs = tilordnetRessurs;
+            return this;
+        }
+
+        public Builder medStatusKategori(String statusKategori) {
+            this.statusKategori = statusKategori;
             return this;
         }
 

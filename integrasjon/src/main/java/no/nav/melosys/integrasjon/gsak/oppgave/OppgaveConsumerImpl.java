@@ -70,7 +70,8 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
 
         lokalTarget = lokalTarget.queryParam("tildeltEnhetsnr", oppgaveSearchRequest.getTildeltEnhetsnr())
             .queryParam("sorteringsfelt", oppgaveSearchRequest.getSorteringsfelt())
-            .queryParam("tilordnetRessurs", oppgaveSearchRequest.getTilordnetRessurs());
+            .queryParam("tilordnetRessurs", oppgaveSearchRequest.getTilordnetRessurs())
+            .queryParam("statuskategori", oppgaveSearchRequest.getStatusKategori());
 
         lokalTarget = leggTilQueryParamSomArray(lokalTarget, "tema", oppgaveSearchRequest.getTema());
         lokalTarget = leggTilQueryParamSomArray(lokalTarget, "oppgavetype", oppgaveSearchRequest.getOppgavetype());

@@ -40,6 +40,7 @@ public class GsakService implements GsakFasade {
     private static final int FRIST_BEH_UKER = 12;
     private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
     private static final String SORTERINGSFELT = "FRIST";
+    private static final String OPPGAVE_STATUSKATEGORI_AAPEN = "AAPEN";
 
     private final SakConsumer sakConsumer;
 
@@ -91,7 +92,8 @@ public class GsakService implements GsakFasade {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(new String[]{oppgavetype.getKode()})
             .medBehandlingsTyper(behandlingstyper.stream().map(Behandlingstype::hentFellesKode).toArray(String[]::new))
-            .medSorteringsfelt(SORTERINGSFELT);
+            .medSorteringsfelt(SORTERINGSFELT)
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN);
 
         if (tema != null) {
             searchRequestBuilder = searchRequestBuilder.medTema( new String[]{tema.getKode()});
@@ -154,6 +156,7 @@ public class GsakService implements GsakFasade {
             .medTilordnetRessurs(tilordnetRessurs)
             .medOppgaveTyper(hentAlleKoder(Oppgavetype.class))
             .medSorteringsfelt(SORTERINGSFELT)
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
         List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
@@ -198,6 +201,7 @@ public class GsakService implements GsakFasade {
             .medAktørId(aktørId)
             .medOppgaveTyper(hentAlleKoder(Oppgavetype.class))
             .medSorteringsfelt(SORTERINGSFELT)
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
         List<Oppgave> localDomainObjects = new ArrayList<>();
 
