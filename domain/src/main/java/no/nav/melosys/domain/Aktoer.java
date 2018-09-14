@@ -29,6 +29,9 @@ public class Aktoer {
 
     @Column(name = "orgnr")
     private String orgnr;
+
+    @Column(name = "utenlandsk_id")
+    private String utenlandskId;
     
     @Column(name = "rolle", nullable = false, updatable = false)
     @Convert(converter = RolleType.DbKonverterer.class)
@@ -69,7 +72,15 @@ public class Aktoer {
     public void setRolle(RolleType rolle) {
         this.rolle = rolle;
     }
-    
+
+    public String getUtenlandskId() {
+        return utenlandskId;
+    }
+
+    public void setUtenlandskId(String utenlandskId) {
+        this.utenlandskId = utenlandskId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -84,12 +95,14 @@ public class Aktoer {
         }
         return Objects.equals(this.fagsak, that.fagsak)
             && Objects.equals(this.aktørId, that.aktørId)
+            && Objects.equals(this.orgnr, that.orgnr)
+            && Objects.equals(this.utenlandskId, that.utenlandskId)
             && Objects.equals(this.rolle, that.rolle);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fagsak, aktørId, rolle);
+        return Objects.hash(fagsak, aktørId, orgnr, utenlandskId, rolle);
     }
     
 }
