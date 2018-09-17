@@ -82,7 +82,7 @@ public class OppgaveServiceTest {
 
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Fagsakstype.EU_EØS);
-        fagsak.setStatus(FagsakStatus.OPPRETTET);
+        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
         List<Behandling> behandlinger = hentBehandlinger();
         fagsak.setBehandlinger(behandlinger);
         when(fagsakRepository.findByGsakSaksnummer(any(Long.class))).thenReturn(fagsak);

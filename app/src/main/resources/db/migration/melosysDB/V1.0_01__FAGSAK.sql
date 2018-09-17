@@ -22,10 +22,12 @@ CREATE TABLE fagsak_status (
     navn        VARCHAR2(99)  NOT NULL,
     CONSTRAINT pk_fagsak_status PRIMARY KEY (kode)
 );
-INSERT INTO fagsak_status (kode, navn) VALUES ('OPPR', 'Opprettet');
-INSERT INTO fagsak_status (kode, navn) VALUES ('UBEH', 'Under behandling');
-INSERT INTO fagsak_status (kode, navn) VALUES ('LOP', 'Løpende');
-INSERT INTO fagsak_status (kode, navn) VALUES ('AVSLU', 'Avsluttet');
+INSERT INTO fagsak_status (kode, navn) VALUES ('OPPRETTET', 'Saken har blitt opprettet men behandlingen har ikke startet eller er ikke ferdigstilt ennå.');
+INSERT INTO fagsak_status (kode, navn) VALUES ('LOVVALG AVKLART', '	Avklart hvilket landstrygdeloving bruker skal omfattes av.');
+INSERT INTO fagsak_status (kode, navn) VALUES ('FORELOEPIG_LOVVALG', 'Norge har foreløpig fastsatt hvilket landstrygdeloving bruker skal omfattes av.');
+INSERT INTO fagsak_status (kode, navn) VALUES ('OPPHOERT', 'Saken er opphørt');
+INSERT INTO fagsak_status (kode, navn) VALUES ('AVSLUTTET', 'Saken er avsluttet');
+INSERT INTO fagsak_status (kode, navn) VALUES ('HENLAGT', 'Saken har blitt henlagt');
 
 ALTER TABLE fagsak ADD CONSTRAINT fk_fagsak_type FOREIGN KEY (fagsak_type) REFERENCES fagsak_type;
 ALTER TABLE fagsak ADD CONSTRAINT fk_fagsak_satus FOREIGN KEY (status) REFERENCES fagsak_status;

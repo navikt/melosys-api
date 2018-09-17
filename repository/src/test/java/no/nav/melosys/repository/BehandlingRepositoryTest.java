@@ -26,7 +26,7 @@ public class BehandlingRepositoryTest {
     public void testFindBySaksnummerIkkeFunnet() throws Exception {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(123L);
-        fagsak.setStatus(FagsakStatus.OPPRETTET);
+        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
         entityManager.persist(fagsak);
 
         Behandling behandling = new Behandling();
@@ -45,7 +45,7 @@ public class BehandlingRepositoryTest {
     public void testFindBySaksnummer() throws Exception {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(123L);
-        fagsak.setStatus(FagsakStatus.OPPRETTET);
+        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
         entityManager.persist(fagsak);
 
         Behandling behandling = new Behandling();

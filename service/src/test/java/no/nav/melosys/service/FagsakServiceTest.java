@@ -4,7 +4,7 @@ import java.time.Instant;
 
 import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakStatus;
+import no.nav.melosys.domain.Fagsaksstatus;
 import no.nav.melosys.domain.Fagsakstype;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
@@ -63,7 +63,7 @@ public class FagsakServiceTest {
     public void lagFagsak() throws Exception {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(123L);
-        fagsak.setStatus(FagsakStatus.OPPRETTET);
+        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
         fagsak.setType(Fagsakstype.EU_EØS);
         fagsak.setRegistrertDato(Instant.now());
 

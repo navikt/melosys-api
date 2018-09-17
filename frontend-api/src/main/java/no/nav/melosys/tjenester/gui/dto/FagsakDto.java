@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.time.Instant;
 import java.util.List;
 
-import no.nav.melosys.domain.FagsakStatus;
+import no.nav.melosys.domain.Fagsaksstatus;
 import no.nav.melosys.domain.Fagsakstype;
 
 public class FagsakDto {
@@ -11,7 +11,7 @@ public class FagsakDto {
     private String saksnummer;
     private Long gsakSaksnummer;
     private Fagsakstype type;
-    private FagsakStatus status;
+    private Fagsaksstatus status;
     private Instant registrertDato;
     private Instant endretDato;
     private List<BehandlingDto> behandlinger;
@@ -40,11 +40,11 @@ public class FagsakDto {
         this.type = type;
     }
 
-    public FagsakStatus getStatus() {
+    public Fagsaksstatus getStatus() {
         return status;
     }
 
-    public void setStatus(FagsakStatus status) {
+    public void setStatus(Fagsaksstatus status) {
         this.status = status;
     }
 

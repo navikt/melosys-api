@@ -27,8 +27,8 @@ public class Fagsak {
     private Fagsakstype type;
 
     @Column(name = "status", nullable = false)
-    @Convert(converter = FagsakStatus.DbKonverterer.class)
-    private FagsakStatus status;
+    @Convert(converter = Fagsaksstatus.DbKonverterer.class)
+    private Fagsaksstatus status;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private Instant registrertDato;
@@ -59,11 +59,11 @@ public class Fagsak {
         this.type = type;
     }
 
-    public FagsakStatus getStatus() {
+    public Fagsaksstatus getStatus() {
         return status;
     }
 
-    public void setStatus(FagsakStatus status) {
+    public void setStatus(Fagsaksstatus status) {
         this.status = status;
     }
 

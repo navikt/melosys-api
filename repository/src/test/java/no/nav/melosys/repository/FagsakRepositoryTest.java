@@ -2,18 +2,12 @@ package no.nav.melosys.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-
 import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakStatus;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -40,7 +34,7 @@ public class FagsakRepositoryTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setBruker(bruker);
         fagsak.setGsakSaksnummer(123L);
-        fagsak.setStatus(FagsakStatus.OPPRETTET);
+        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
         entityManager.persist(fagsak);
 
         List<Fagsak> byFnr = fagsakRepository.findByFnr("FJERNET4");
@@ -62,7 +56,7 @@ public class FagsakRepositoryTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setBruker(bruker);
         fagsak.setGsakSaksnummer(123L);
-        fagsak.setStatus(FagsakStatus.OPPRETTET);
+        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
         entityManager.persist(fagsak);
 
         List<Fagsak> byFnr = fagsakRepository.findByFnr("12345678901");
