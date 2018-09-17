@@ -4,7 +4,7 @@ import no.nav.melosys.domain.Kodeverk;
 
 public enum Opphold implements Kodeverk {
 
-    FEIL_LAND_JOURNALFORING("FEIL_LAND_JOURNALFORING", "Feil land oppgitt i journalføringen."),
+    FEIL_LAND_JOURNALFOERING("FEIL_LAND_JOURNALFOERING", "Feil land oppgitt i journalføringen."),
     UGYLDIG_TERRITORIE("UGYLDIG_TERRITORIE", "Søker skal til et territorium som ikke er en del av forordningen."),
     NYE_OPPLYSNINGER("NYE_OPPLYSNINGER", "Nye opplysninger om arbeids/oppholdsland.");
 
