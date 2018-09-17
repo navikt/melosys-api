@@ -81,7 +81,7 @@ public class OppgaveServiceTest {
         when(prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(any(), anyLong())).thenReturn(Optional.of(prosessinstans));
 
         Fagsak fagsak = new Fagsak();
-        fagsak.setType(FagsakType.EU_EØS);
+        fagsak.setType(Fagsakstype.EU_EØS);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
         List<Behandling> behandlinger = hentBehandlinger();
         fagsak.setBehandlinger(behandlinger);

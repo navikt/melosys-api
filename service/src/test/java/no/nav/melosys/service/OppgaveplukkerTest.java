@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.Fagsakstype;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.oppgave.PrioritetType;
@@ -72,7 +72,7 @@ public class OppgaveplukkerTest {
         when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(FagsakType.EU_EØS.getKode());
+        sakstyper.add(Fagsakstype.EU_EØS.getKode());
 
         List<String> behandlingstyper = new ArrayList<>();
         behandlingstyper.add(Behandlingstype.SØKNAD.getKode());
@@ -112,7 +112,7 @@ public class OppgaveplukkerTest {
         when(oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(anyString(), eq("1"))).thenReturn(tilbakelagt);
 
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(FagsakType.FOLKETRYGD.getKode());
+        sakstyper.add(Fagsakstype.FOLKETRYGD.getKode());
 
         List<String> behandlingstyper = new ArrayList<>();
         behandlingstyper.add(Behandlingstype.REVURDERING.getKode());
@@ -151,7 +151,7 @@ public class OppgaveplukkerTest {
         when(oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(anyString(), anyString())).thenReturn(tilbakelagt);
 
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(FagsakType.FOLKETRYGD.getKode());
+        sakstyper.add(Fagsakstype.FOLKETRYGD.getKode());
 
         List<String> behandlingstyper = new ArrayList<>();
         behandlingstyper.add(Behandlingstype.SØKNAD.getKode());

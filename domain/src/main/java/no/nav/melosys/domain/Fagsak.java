@@ -23,8 +23,8 @@ public class Fagsak {
     private Long gsakSaksnummer;
 
     @Column(name = "fagsak_type")
-    @Convert(converter = FagsakType.DbKonverterer.class)
-    private FagsakType type;
+    @Convert(converter = Fagsakstype.DbKonverterer.class)
+    private Fagsakstype type;
 
     @Column(name = "status", nullable = false)
     @Convert(converter = FagsakStatus.DbKonverterer.class)
@@ -51,11 +51,11 @@ public class Fagsak {
         this.gsakSaksnummer = gsakSaksnummer;
     }
 
-    public FagsakType getType() {
+    public Fagsakstype getType() {
         return type;
     }
 
-    public void setType(FagsakType type) {
+    public void setType(Fagsakstype type) {
         this.type = type;
     }
 

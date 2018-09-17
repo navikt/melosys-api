@@ -113,7 +113,7 @@ public class FagsakService {
         String aktørID = tpsFasade.hentAktørIdForIdent(ident);
 
         Fagsak fagsak = nyFagsakOgBehandling(aktørID, null, null, behandlingstype);
-        fagsak.setType(FagsakType.EU_EØS);
+        fagsak.setType(Fagsakstype.EU_EØS);
         Set<Saksopplysning> saksopplysninger = saksopplysningerService.hentSaksopplysninger(aktørID);
         Behandling behandling = fagsak.getAktivBehandling();
         saksopplysninger.forEach(x -> x.setBehandling(behandling));

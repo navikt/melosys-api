@@ -43,7 +43,7 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.setFinansiering(tilKoder(Finansiering.values()));
         kodeverk.setLandkoder(tilKoder(Landkoder.values()));
         kodeverk.setOppgavetyper(tilKoder(Oppgavetype.values()));
-        kodeverk.setSakstyper(tilKoder(FagsakType.values()));
+        kodeverk.setSakstyper(tilKoder(Fagsakstype.values()));
         kodeverk.setVedleggstitler(tilKoder(VedleggTittel.values()));
         return kodeverk;
     }

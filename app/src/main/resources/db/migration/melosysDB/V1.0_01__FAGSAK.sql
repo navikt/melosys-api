@@ -13,9 +13,9 @@ CREATE TABLE fagsak_type (
     navn        VARCHAR2(99)  NOT NULL,
     CONSTRAINT pk_fagsak_type PRIMARY KEY (kode)
 );
-INSERT INTO fagsak_type (kode, navn) VALUES ('EU_EOS', 'EU/EØS');
-INSERT INTO fagsak_type (kode, navn) VALUES ('TRG_AVT', 'Trygdeavtale');
-INSERT INTO fagsak_type (kode, navn) VALUES ('FLK_TRG', 'Folketrygd');
+INSERT INTO fagsak_type (kode, navn) VALUES ('EU_EOS', 'Saken skal behandles etter trygdeforordningene i EØS-avtalen');
+INSERT INTO fagsak_type (kode, navn) VALUES ('TRYGDEAVTALE', 'Saken skal behandles etter en trygdeavtale');
+INSERT INTO fagsak_type (kode, navn) VALUES ('FTRL', '	Saken skal behandles etter folketrygdloven');
 
 CREATE TABLE fagsak_status (
     kode        VARCHAR2(99)  NOT NULL,

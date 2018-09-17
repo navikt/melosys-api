@@ -4,13 +4,13 @@ import java.time.Instant;
 import java.util.List;
 
 import no.nav.melosys.domain.FagsakStatus;
-import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.Fagsakstype;
 
 public class FagsakDto {
 
     private String saksnummer;
     private Long gsakSaksnummer;
-    private FagsakType type;
+    private Fagsakstype type;
     private FagsakStatus status;
     private Instant registrertDato;
     private Instant endretDato;
@@ -32,11 +32,11 @@ public class FagsakDto {
         this.gsakSaksnummer = gsakSaksnummer;
     }
 
-    public FagsakType getType() {
+    public Fagsakstype getType() {
         return type;
     }
 
-    public void setType(FagsakType type) {
+    public void setType(Fagsakstype type) {
         this.type = type;
     }
 

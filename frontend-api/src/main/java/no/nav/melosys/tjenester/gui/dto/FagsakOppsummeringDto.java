@@ -5,11 +5,11 @@ import java.util.List;
 
 import no.nav.melosys.domain.BehandlingStatus;
 import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.Fagsakstype;
 
 public class FagsakOppsummeringDto {
     private String saksnummer;
-    private FagsakType sakstype;
+    private Fagsakstype sakstype;
     private Behandlingstype behandlingstype;
     private BehandlingStatus behandlingsstatus;
     private Instant opprettetDato;
@@ -24,11 +24,11 @@ public class FagsakOppsummeringDto {
         this.saksnummer = saksnummer;
     }
 
-    public FagsakType getSakstype() {
+    public Fagsakstype getSakstype() {
         return sakstype;
     }
 
-    public void setSakstype(FagsakType sakstype) {
+    public void setSakstype(Fagsakstype sakstype) {
         this.sakstype = sakstype;
     }
 
