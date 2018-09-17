@@ -3,6 +3,7 @@ package no.nav.melosys.service.datavarehus;
 import java.time.LocalDateTime;
 
 import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.domain.datavarehus.BehandlingDvh;
@@ -65,10 +66,18 @@ public class DatavarehusEventObserver {
 
     @EventListener(BehandlingLagretEvent.class)
     public void håndterBehandlingLagretEvent(BehandlingLagretEvent behandlingLagretEvent) {
-        BehandlingDvh behandlingDvh = new BehandlingDvh();
-        behandlingDvh.setBehandlingId(behandlingLagretEvent.behandling.getId());
-        behandlingDvhRepository.save(behandlingDvh);
-        log.info("Behandling med behandlingId " + behandlingLagretEvent.behandling.getId() + " lagret");
+        Behandling behandling = behandlingLagretEvent.behandling;
+        BehandlingDvh.Builder builder = new BehandlingDvh.Builder()
+            .behandlingId(behandling.getId())
+            .saksnummer(behandling.getFagsak().getSaksnummer())
+            .funksjonellTid(LocalDateTime.now())
+            .endretAv(SpringSubjectHandler.getInstance().getUserID())
+            .behandlingStatus(behandling.getStatus())
+            .behandlingstype(behandling.getType())
+            .registrertDato(behandling.getRegistrertDato())
+            .endretDato(behandling.getEndretDato());
+        behandlingDvhRepository.save(builder.build());
+        log.info("Behandling med behandlingId " + behandling.getId() + " lagret");
     }
 
 }
