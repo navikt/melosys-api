@@ -25,6 +25,9 @@ public class PersonTjeneste extends RestTjeneste {
     private RegisterOppslagService registerOppslag;
 
     @Autowired
+    private Pep pep;
+
+    @Autowired
     public PersonTjeneste(RegisterOppslagService registerOppslag) {
         this.registerOppslag = registerOppslag;
     }
@@ -34,6 +37,12 @@ public class PersonTjeneste extends RestTjeneste {
     public Response getPerson(@QueryParam("fnr") String personnummer) {
         if (personnummer == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        try {
+            pep.sjekkTilgangTil(personnummer);
+        } catch(SikkerhetsbegrensningException e) {
+            return Response.status(Response.Status.FORBIDDEN).build();
         }
 
         PersonDokument personDokument;

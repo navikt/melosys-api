@@ -16,6 +16,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>no.nav.freg</groupId>
+            <artifactId>abac-spring</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jdk8</artifactId>
         </dependency>

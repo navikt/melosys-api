@@ -49,6 +49,10 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>no.nav.freg</groupId>
+            <artifactId>abac-spring</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
