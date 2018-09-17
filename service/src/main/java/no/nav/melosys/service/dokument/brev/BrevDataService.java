@@ -13,10 +13,8 @@ import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
 import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.DokumentType;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
@@ -39,7 +37,10 @@ public class BrevDataService {
 
     private TpsFasade tpsFasade;
 
-    static String MELOSYS_ENHET_ID = "4530";
+    static final String MELOSYS_ENHET_ID = "4530";
+
+    static final String PLASSHOLDER_TEKST = "-";
+    static final String PLASSHOLDER_POSTNUMMER = "0000";
 
     @Autowired
     public BrevDataService(TpsFasade tpsFasade) {
@@ -53,7 +54,7 @@ public class BrevDataService {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
 
         Fagsak fagsak = behandling.getFagsak();
-        Aktoer bruker = fagsak.getBruker();
+        Aktoer bruker = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
         if (bruker != null) {
             try {
                 metadata.bruker = tpsFasade.hentIdentForAktørId(bruker.getAktørId());
@@ -121,7 +122,7 @@ public class BrevDataService {
 
     private Sakspart lagSakspart(Behandling behandling) {
         Sakspart sakspart = new Sakspart();
-        Aktoer aktør = behandling.getFagsak().getBruker();
+        Aktoer aktør = behandling.getFagsak().hentAktørMedRolleType(RolleType.BRUKER);
 
         if (aktør == null || aktør.getAktørId() == null) {
             throw new TekniskException("Det finnes ingen bruker på sak " + behandling.getFagsak().getSaksnummer());
@@ -134,15 +135,15 @@ public class BrevDataService {
 
         sakspart.setTypeKode(AktoerType.PERSON);
         sakspart.setBerik(true);
-        sakspart.setNavn("Sakspart-Navn");
+        sakspart.setNavn(PLASSHOLDER_TEKST);
         return sakspart;
     }
 
     private Mottaker lagMottaker(Behandling behandling) {
         Mottaker mottaker = new Person(); // FIXME mottaker kan være Organisasjon
-        Aktoer aktør = behandling.getFagsak().getRepresentant();
+        Aktoer aktør = behandling.getFagsak().hentAktørMedRolleType(RolleType.REPRESENTANT);
         if (aktør == null) {
-            aktør = behandling.getFagsak().getBruker();
+            aktør = behandling.getFagsak().hentAktørMedRolleType(RolleType.BRUKER);
         }
 
         if (aktør == null || aktør.getAktørId() == null) {
@@ -157,8 +158,8 @@ public class BrevDataService {
         mottaker.setTypeKode(AktoerType.PERSON);
         mottaker.setBerik(true); // Gjør oppslag mot EREG/TPS
 
-        mottaker.setNavn("Mottaker-Navn");
-        mottaker.setKortNavn("Mottaker-Kortnavn");
+        mottaker.setNavn(PLASSHOLDER_TEKST);
+        mottaker.setKortNavn(PLASSHOLDER_TEKST);
         mottaker.setSpraakkode(Spraakkode.NB);
         mottaker.setMottakeradresse(lagNorskPostadresse());
 

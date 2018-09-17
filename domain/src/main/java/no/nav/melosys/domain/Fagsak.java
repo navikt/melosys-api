@@ -114,40 +114,21 @@ public class Fagsak {
     }
 
     /**
-     * Returnerer brukeren knyttet til saken eller {@code null} hvis den ikke finnes.
+     * Returnerer en aktør med angitt {@link RolleType} knyttet til saken eller {@code null} hvis ingen finnes.
      */
-    public Aktoer getBruker() {
-        List<Aktoer> brukere = getAktørerMedRolleType(RolleType.BRUKER);
-
-        if (brukere == null || brukere.isEmpty()) {
-            return null;
-        } else if (brukere.size() > 1) {
-            throw new TekniskException("Det finnes mer enn en bruker for sak " + saksnummer);
-        } else {
-            return brukere.get(0);
-        }
-    }
-
-    /**
-     * Returnerer en representant knyttet til saken eller {@code null} hvis den ikke finnes.
-     */
-    public Aktoer getRepresentant() {
-        List<Aktoer> representanter = getAktørerMedRolleType(RolleType.REPRESENTANT);
-
-        if (representanter == null || representanter.isEmpty()) {
-            return null;
-        } else if (representanter.size() > 1) {
-            throw new TekniskException("Det finnes mer enn en representant for sak " + saksnummer);
-        } else {
-            return representanter.get(0);
-        }
-    }
-
-    private List<Aktoer> getAktørerMedRolleType(RolleType rolleType) {
+    public Aktoer hentAktørMedRolleType(RolleType rolleType) {
         if (aktører == null || aktører.isEmpty()) {
             return null;
         }
-        return aktører.stream().filter(a -> rolleType.equals(a.getRolle())).collect(Collectors.toList());
+        List<Aktoer> kandidater = aktører.stream().filter(a -> rolleType.equals(a.getRolle())).collect(Collectors.toList());
+
+        if (kandidater == null || kandidater.isEmpty()) {
+            return null;
+        } else if (kandidater.size() > 1) {
+            throw new TekniskException("Det finnes mer enn en aktør med rollen " + rolleType.getBeskrivelse() + " for sak " + saksnummer);
+        } else {
+            return kandidater.get(0);
+        }
     }
 
     public String getSaksnummer() {

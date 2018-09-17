@@ -4,17 +4,16 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalField;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
-import org.springframework.cglib.core.Local;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataService.MELOSYS_ENHET_ID;
+import static no.nav.melosys.service.dokument.brev.BrevDataService.PLASSHOLDER_POSTNUMMER;
+import static no.nav.melosys.service.dokument.brev.BrevDataService.PLASSHOLDER_TEKST;
 
 public final class BrevDataUtils {
 
@@ -26,7 +25,7 @@ public final class BrevDataUtils {
         NavAnsatt navAnsatt = new NavAnsatt();
         navAnsatt.setAnsattId(ansattId);
         navAnsatt.setBerik(true); // Gjør oppslag mot AD
-        navAnsatt.setNavn("Navn");
+        navAnsatt.setNavn(PLASSHOLDER_TEKST);
         return navAnsatt;
     }
 
@@ -34,7 +33,7 @@ public final class BrevDataUtils {
         NavEnhet navEnhet = new NavEnhet();
         navEnhet.setEnhetsId(MELOSYS_ENHET_ID);
         navEnhet.setBerik(true); // Gjør oppslag mot NORG
-        navEnhet.setEnhetsNavn("EnhetsNavn");
+        navEnhet.setEnhetsNavn(PLASSHOLDER_TEKST);
         return navEnhet;
     }
 
@@ -82,20 +81,18 @@ public final class BrevDataUtils {
 
     static NorskPostadresse lagNorskPostadresse() {
         NorskPostadresse adresse = new NorskPostadresse();
-        adresse.setAdresselinje1("Adresselinje1");
-        adresse.setAdresselinje2("Adresselinje2");
-        adresse.setAdresselinje3("Adresselinje3");
-        adresse.setPostnummer("7777");
-        adresse.setPoststed("Poststed");
-        adresse.setLand("Land");
+        adresse.setAdresselinje1(PLASSHOLDER_TEKST);
+        adresse.setPostnummer(PLASSHOLDER_POSTNUMMER);
+        adresse.setPoststed(PLASSHOLDER_TEKST);
+        adresse.setLand(PLASSHOLDER_TEKST);
         return adresse;
     }
 
     private static <T extends AdresseEnhet> T lagAdresse(T adresse, NorskPostadresse postadresse) {
         adresse.setEnhetsId(MELOSYS_ENHET_ID);
         adresse.setBerik(true); // Gjør oppslag mot EREG/TPS
-        adresse.setEnhetsNavn("EnhetsNavn");
-        adresse.setKontaktTelefonnummer("KontaktTelefonnummer");
+        adresse.setEnhetsNavn(PLASSHOLDER_TEKST);
+        adresse.setKontaktTelefonnummer(PLASSHOLDER_TEKST);
         adresse.setAdresse(postadresse);
         return adresse;
     }

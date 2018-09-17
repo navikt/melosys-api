@@ -234,7 +234,7 @@ public class SaksopplysningerService {
             throw new IkkeFunnetException("Behandling ikke funnet med behandlingsid: " + behandlingsid);
         }
 
-        String aktør_Id = behandling.getFagsak().getBruker().getAktørId();
+        String aktør_Id = behandling.getFagsak().hentAktørMedRolleType(RolleType.BRUKER).getAktørId();
 
         SoeknadDokument søknadDokument;
         Optional<SaksopplysningDokument> opt = hentDokument(behandling, SaksopplysningType.SØKNAD);
