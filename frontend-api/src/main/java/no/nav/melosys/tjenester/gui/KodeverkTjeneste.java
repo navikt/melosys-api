@@ -8,6 +8,7 @@ import javax.ws.rs.Path;
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.begrunnelser.IkkeSkip;
+import no.nav.melosys.domain.begrunnelser.Opphold;
 import no.nav.melosys.domain.begrunnelser.VesentligVirksomhet;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.service.kodeverk.KodeDto;
@@ -27,6 +28,7 @@ public class KodeverkTjeneste extends RestTjeneste {
         KodeverkDto kodeverk = new KodeverkDto();
         kodeverk.getBegrunnelser().vesentligVirksomhet = tilKoder(VesentligVirksomhet.values());
         kodeverk.getBegrunnelser().ikkeSkip = tilKoder(IkkeSkip.values());
+        kodeverk.getBegrunnelser().opphold = tilKoder(Opphold.values());
         kodeverk.setBehandlingsstatus(tilKoder(BehandlingStatus.values()));
         kodeverk.setBehandlingstyper(tilKoder(Behandlingstype.values()));
         kodeverk.setDokumenttitler(tilKoder(DokumentTittel.values()));
