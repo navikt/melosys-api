@@ -13,7 +13,7 @@ public class PepStub implements Pep{
     }
 
     @Override
-    public void sjekkTilgangTil(Aktoer bruker) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void sjekkTilgangTilAktoer(String aktorId) throws SikkerhetsbegrensningException, IkkeFunnetException {
 
     }
 }

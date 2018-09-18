@@ -107,8 +107,8 @@ public class Oppgaveplukker {
 
     private boolean harIkkeTilgangTil(Oppgave oppgave) {
         try {
-            pep.sjekkTilgangTil(oppgave.getAktørId());
-        } catch (SikkerhetsbegrensningException e) {
+            pep.sjekkTilgangTilAktoer(oppgave.getAktørId());
+        } catch (SikkerhetsbegrensningException | IkkeFunnetException e) {
             return true;
         }
         return false;
@@ -124,7 +124,7 @@ public class Oppgaveplukker {
             throw new RuntimeException("Fant ikke oppgave med oppgaveId " + oppgaveId);
         }
         try {
-            pep.sjekkTilgangTil(oppgave.getAktørId());
+            pep.sjekkTilgangTilAktoer(oppgave.getAktørId());
             gsakFasade.leggTilbakeOppgave(oppgaveId);
 
             OppgaveTilbakelegging oppgaveTilbakelegging = new OppgaveTilbakelegging();

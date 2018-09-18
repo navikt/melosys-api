@@ -74,7 +74,7 @@ public class FagsakTjeneste extends RestTjeneste {
         }
 
         try {
-            pep.sjekkTilgangTil(sak.getBruker());
+            pep.sjekkTilgangTilAktoer(sak.hentAktørMedRolleType(RolleType.BRUKER).getAktørId());
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (IkkeFunnetException e) {

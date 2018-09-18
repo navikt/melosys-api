@@ -58,8 +58,8 @@ public class OppgaveService {
 
     public boolean harIkkeTilgangTil(Oppgave oppgave) {
         try {
-            pep.sjekkTilgangTil(oppgave.getAktørId());
-        } catch (SikkerhetsbegrensningException e) {
+            pep.sjekkTilgangTilAktoer(oppgave.getAktørId());
+        } catch (SikkerhetsbegrensningException | IkkeFunnetException e) {
             return true;
         }
         return false;
