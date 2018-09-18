@@ -114,20 +114,20 @@ public class Fagsak {
     }
 
     /**
-     * Returnerer brukeren knyttet til saken eller {@code null} hvis den ikke finnes.
+     * Returnerer en aktør med angitt {@link RolleType} knyttet til saken eller {@code null} hvis ingen finnes.
      */
-    public Aktoer getBruker() {
+    public Aktoer hentAktørMedRolleType(RolleType rolleType) {
         if (aktører == null || aktører.isEmpty()) {
             return null;
         }
+        List<Aktoer> kandidater = aktører.stream().filter(a -> rolleType.equals(a.getRolle())).collect(Collectors.toList());
 
-        List<Aktoer> brukere = aktører.stream().filter(a -> RolleType.BRUKER.equals(a.getRolle())).collect(Collectors.toList());
-        if (brukere.size() > 1) {
-            throw new TekniskException("Det finnes mer enn en bruker for sak " + saksnummer);
-        } else if (brukere.size() == 1) {
-            return brukere.get(0);
-        } else {
+        if (kandidater == null || kandidater.isEmpty()) {
             return null;
+        } else if (kandidater.size() > 1) {
+            throw new TekniskException("Det finnes mer enn en aktør med rollen " + rolleType.getBeskrivelse() + " for sak " + saksnummer);
+        } else {
+            return kandidater.get(0);
         }
     }
 

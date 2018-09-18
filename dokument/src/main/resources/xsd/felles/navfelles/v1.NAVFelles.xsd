@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema	attributeFormDefault="unqualified"
+              elementFormDefault="qualified"
+              targetNamespace="http://nav.no/dok/brevdata/felles/v1/NAVFelles"
+              xmlns="http://nav.no/dok/brevdata/felles/v1/NAVFelles"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema"
+              xmlns:st="http://nav.no/dok/brevdata/felles/v1/SimpleTypes">
+
+    <xs:import namespace="http://nav.no/dok/brevdata/felles/v1/SimpleTypes" schemaLocation="v1.SimpleTypes.xsd"/>
+
+
+    <xs:complexType name="Sakspart">
+        <xs:annotation>
+            <xs:documentation>Sakspart viser til personen vedtaket gjelder</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="Aktoer">
+                <xs:attribute ref="berik" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType abstract="true" name="Aktoer">
+        <xs:annotation>
+            <xs:documentation>Abstrakt type for sakspartType og mottakerType</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="id" type="st:Identifikator">
+                <xs:annotation>
+                    <xs:documentation>Identifikasjon av bruker. Kan være fnr, TSS id, org nr.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="typeKode" type="st:AktoerType">
+                <xs:annotation>
+                    <xs:documentation>Kodeverdi. Identifiserer hva slags id det er snakk om - person, organisasjon, institusjon eller samhandler</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="navn" type="st:NonEmptyString">
+                <xs:annotation>
+                    <xs:documentation>Hele navnet på aktør</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType abstract="true" name="Mottaker">
+        <xs:annotation>
+            <xs:documentation>Gyldige mottakere er Person eller Organisasjon</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="Aktoer">
+                <xs:sequence>
+                    <xs:element name="kortNavn" type="st:NonEmptyString"> <!-- Tror at denne finnes denne i TPS? -->
+                        <xs:annotation>
+                            <xs:documentation>Navn på mottaker som garantert skal få plass i adressefeltet</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="spraakkode" type="st:Spraakkode">
+                        <xs:annotation>
+                            <xs:documentation>Kode som angir hvilket språk dokumentet skal produserer på. Hvis ikke innsendt i malen skal verdien utledes fra TPS basert på mottaker-id.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="mottakeradresse" type="Adresse">
+                        <xs:annotation>
+                            <xs:documentation>Gyldig adressefelt</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attribute ref="berik" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Person">
+        <xs:annotation>
+            <xs:documentation>Gydig mottaker type</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="Mottaker"/>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Organisasjon">
+        <xs:annotation>
+            <xs:documentation>Gydig mottaker type</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="Mottaker"/>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType abstract="true" name="Adresse" />
+
+    <xs:complexType name="NorskPostadresse">
+        <xs:annotation>
+            <xs:documentation>Gyldig adressefelt som representerer en norsk adresse</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="Adresse">
+                <xs:sequence>
+                    <xs:element name="adresselinje1" type="xs:string" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Inneholder del av adresse som skal presenteres på egen linje</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="adresselinje2" type="xs:string" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Inneholder del av adresse som skal presenteres på egen linje</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="adresselinje3" type="xs:string" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Inneholder del av adresse som skal presenteres på egen linje</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="postnummer" type="st:PostNr">
+                        <xs:annotation>
+                            <xs:documentation>Gyldig norsk postnummer</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="poststed" type="st:NonEmptyString">
+                        <xs:annotation>
+                            <xs:documentation>Gyldig norsk poststed</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="land" type="st:NonEmptyString" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Gyldig land</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="UtenlandskPostadresse">
+        <xs:annotation>
+            <xs:documentation>Gyldig adressefelt som representerer en utenlandsk adresse</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="Adresse">
+                <xs:sequence>
+                    <xs:element name="adresselinje1" type="st:NonEmptyString">
+                        <xs:annotation>
+                            <xs:documentation>Inneholder del av adresse som skal presenteres på egen linje</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="adresselinje2" type="xs:string" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Inneholder del av adresse som skal presenteres på egen linje</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="adresselinje3" type="xs:string" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Inneholder del av adresse som skal presenteres på egen linje</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="land" type="st:NonEmptyString"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Saksbehandler">
+        <xs:all>
+            <xs:element name="navAnsatt" type="NavAnsatt"/>
+            <xs:element name="navEnhet" type="NavEnhet"/>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="NavAnsatt">
+        <xs:annotation>
+            <xs:documentation>Navn på ansatt i NAV</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="ansattId" type="st:Identifikator"/>
+            <xs:element name="navn" type="st:NonEmptyString"/>
+        </xs:all>
+        <xs:attribute ref="berik" />
+    </xs:complexType>
+
+    <xs:complexType name="NavEnhet">
+        <xs:annotation>
+            <xs:documentation>Navn på enhet i NAV</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="enhetsId" type="st:Identifikator"/>
+            <xs:element name="enhetsNavn" type="st:NonEmptyString"/>
+        </xs:sequence>
+        <xs:attribute ref="berik" />
+    </xs:complexType>
+
+    <xs:complexType name="Kontaktinformasjon">
+        <xs:annotation>
+            <xs:documentation>Informasjon om hvordan bruker kan kontakte NAV før å følge opp saken</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="returadresse" type="Returadresse"/>
+            <xs:element name="postadresse" type="Postadresse"/>
+            <xs:element name="besoksadresse" type="Besoksadresse"/>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType abstract="true" name="AdresseEnhet">
+        <xs:annotation>
+            <xs:documentation>En NAV-enhet med telefonnummer og adresse</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="NavEnhet">
+                <xs:sequence>
+                    <xs:element name="kontaktTelefonnummer" type="st:NonEmptyString"/>
+                    <xs:element name="adresse" type="NorskPostadresse"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Returadresse">
+        <xs:annotation>
+            <xs:documentation>Gydig mottaker type</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="AdresseEnhet"/>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Postadresse">
+        <xs:annotation>
+            <xs:documentation>Gydig mottaker type</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="AdresseEnhet"/>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Besoksadresse">
+        <xs:annotation>
+            <xs:documentation>Gydig mottaker type</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="AdresseEnhet"/>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:attribute name="berik" type="xs:boolean" default="true" />
+
+</xs:schema>

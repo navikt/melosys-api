@@ -11,6 +11,7 @@ public enum DokumentType implements Kodeverk {
     AVSLAG_ARBEIDSTAGER("TODO-12", "Vedtaksbrev avslag til arbeidstager"),
     AVSLAG_ARBEIDSGIVER("TODO-13", "Vedtaksbrev avslag til arbeidstager"),
     BEHANDLINGSTID("TODO-14", "Orienteringsbrev om forventet saksbehandlingstid"),
+    FORVALTNINGSMELDING("FORVALTNINGSMELDING", "Melding om forventet saksbehandlingstid"),
     HENLEGGELSE("TODO-15", "Henleggelse"),
     INNVILGELSE("000048", "Vedtaksbrev om bekreftelse på trygderettigheter "),
     KLAGE("TODO-17", "Klageoversendelse"),
