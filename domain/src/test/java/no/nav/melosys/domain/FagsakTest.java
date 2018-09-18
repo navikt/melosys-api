@@ -15,13 +15,13 @@ public class FagsakTest {
     public void getAktivBehandling() throws TekniskException {
         Fagsak fagsak = new Fagsak();
         Behandling b1 = new Behandling();
-        b1.setStatus(BehandlingStatus.AVSLUTTET);
+        b1.setStatus(Behandlingsstatus.AVSLUTTET);
 
         Behandling b2 = new Behandling();
-        b2.setStatus(BehandlingStatus.FORELØPIG);
+        b2.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
 
         Behandling b3 = new Behandling();
-        b3.setStatus(BehandlingStatus.AVSLUTTET);
+        b3.setStatus(Behandlingsstatus.AVSLUTTET);
 
         List<Behandling> behandlinger = new ArrayList<>();
         behandlinger.add(b1);
@@ -38,10 +38,10 @@ public class FagsakTest {
     public void getAktivBehandling_ingenAktive() throws TekniskException {
         Fagsak fagsak = new Fagsak();
         Behandling b1 = new Behandling();
-        b1.setStatus(BehandlingStatus.AVSLUTTET);
+        b1.setStatus(Behandlingsstatus.AVSLUTTET);
 
         Behandling b2 = new Behandling();
-        b2.setStatus(BehandlingStatus.AVSLUTTET);
+        b2.setStatus(Behandlingsstatus.AVSLUTTET);
 
         List<Behandling> behandlinger = new ArrayList<>();
         behandlinger.add(b1);
@@ -57,10 +57,10 @@ public class FagsakTest {
     public void getAktivBehandling_feilTilstand() throws TekniskException {
         Fagsak fagsak = new Fagsak();
         Behandling b1 = new Behandling();
-        b1.setStatus(BehandlingStatus.FORELØPIG);
+        b1.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
 
         Behandling b2 = new Behandling();
-        b2.setStatus(BehandlingStatus.UNDER_BEHANDLING);
+        b2.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
 
         List<Behandling> behandlinger = new ArrayList<>();
         behandlinger.add(b1);

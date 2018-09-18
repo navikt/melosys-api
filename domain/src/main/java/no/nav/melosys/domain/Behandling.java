@@ -20,8 +20,8 @@ public class Behandling {
     private Fagsak fagsak;
 
     @Column(name = "status", nullable = false, updatable = true)
-    @Convert(converter = BehandlingStatus.DbKonverterer.class)
-    private BehandlingStatus status;
+    @Convert(converter = Behandlingsstatus.DbKonverterer.class)
+    private Behandlingsstatus status;
 
     @Column(name = "beh_type", nullable = false, updatable = false)
     @Convert(converter = Behandlingstype.DbKonverterer.class)
@@ -54,11 +54,11 @@ public class Behandling {
         this.fagsak = fagsak;
     }
 
-    public BehandlingStatus getStatus() {
+    public Behandlingsstatus getStatus() {
         return status;
     }
 
-    public void setStatus(BehandlingStatus status) {
+    public void setStatus(Behandlingsstatus status) {
         this.status = status;
     }
 

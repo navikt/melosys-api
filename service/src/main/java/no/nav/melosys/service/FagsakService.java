@@ -100,7 +100,7 @@ public class FagsakService {
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);
 
-        behandling.setStatus(BehandlingStatus.OPPRETTET);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setType(behandlingstype);
         behandlingRepository.save(behandling);
         return fagsak;

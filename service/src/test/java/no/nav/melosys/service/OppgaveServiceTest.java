@@ -125,7 +125,7 @@ public class OppgaveServiceTest {
         List<Behandling> behandlinger = new ArrayList<>();
         Behandling behandling = new Behandling();
         behandling.setSaksopplysninger(saksopplysninger);
-        behandling.setStatus(BehandlingStatus.OPPRETTET);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandlinger.add(behandling);
         return behandlinger;
     }

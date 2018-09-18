@@ -104,7 +104,7 @@ public class Fagsak {
      */
     public Behandling getAktivBehandling() throws TekniskException {
         List<Behandling> behandlinger = getBehandlinger().stream()
-            .filter(b -> !b.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
+            .filter(b -> !b.getStatus().equals(Behandlingsstatus.AVSLUTTET)).collect(Collectors.toList());
         if (behandlinger.size() > 1) {
             throw new TekniskException("Det finnes mer enn en aktive behandlinger for sak " + saksnummer);
         } else if (behandlinger.size() == 1) {

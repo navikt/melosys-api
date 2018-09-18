@@ -2,20 +2,22 @@ package no.nav.melosys.domain;
 
 import javax.persistence.Converter;
 
-public enum BehandlingsresultatType implements InterntKodeverkTabell<BehandlingsresultatType> {
+public enum Behandlingsstatus implements InterntKodeverkTabell<Behandlingsstatus> {
 
-    HENLEGGELSE("HENLEGGELSE", "Henleggelsesgrunner"),
-    FASTSATT_LOVVALGSLAND("FASTSATT_LOVVALGSLAND", "Fastsatt lovvalgsland"),
-    FRIVILLIG_MEDLEMSKAP("FRIVILLIG_MEDLEMSKAP", "Frivillig medlemskap");
-
+    OPPRETTET("OPPRETTET", "Opprettet"),
+    UNDER_BEHANDLING("UNDER_BEHANDLING", "Under behandling"),
+    AVVENT_DOK_UTL("AVVENT_DOK_UTL", "Avventer dokumentasjon fra utlandet"),
+    AVVENT_DOK_PART ("AVVENT_DOK_PART", "Avventer dokumentasjon fra en part"),
+    AVSLUTTET("AVSLUTTET", "Avsluttet");
+    
     private String kode;
     private String beskrivelse;
 
-    BehandlingsresultatType(String kode, String beskrivelse) {
+    Behandlingsstatus(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
-
+    
     @Override
     public String getKode() {
         return kode;
@@ -33,4 +35,5 @@ public enum BehandlingsresultatType implements InterntKodeverkTabell<Behandlings
             return Behandlingsstatus.values();
         }
     }
+
 }

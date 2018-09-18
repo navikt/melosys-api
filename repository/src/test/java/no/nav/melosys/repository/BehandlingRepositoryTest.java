@@ -31,7 +31,7 @@ public class BehandlingRepositoryTest {
 
         Behandling behandling = new Behandling();
         behandling.setBehandlingsId(777L);
-        behandling.setStatus(BehandlingStatus.OPPRETTET);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setType(Behandlingstype.FØRSTEGANGSSØKNAD);
         behandling.setFagsak(fagsak);
 
@@ -50,7 +50,7 @@ public class BehandlingRepositoryTest {
 
         Behandling behandling = new Behandling();
         behandling.setBehandlingsId(777L);
-        behandling.setStatus(BehandlingStatus.OPPRETTET);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setType(Behandlingstype.FØRSTEGANGSSØKNAD);
         behandling.setFagsak(fagsak);
 
