@@ -5,6 +5,8 @@ import java.util.List;
 import no.nav.melosys.service.kodeverk.KodeDto;
 
 public class BegrunnelserDto {
+    public List<KodeDto> bosted;
+    public List<KodeDto> forutgaendeMedlemskap;
     public List<KodeDto> vesentligVirksomhet;
     public List<KodeDto> ikkeSkip;
     public List<KodeDto> opphold;
