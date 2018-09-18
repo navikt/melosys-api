@@ -17,6 +17,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.service.Pep;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
@@ -46,6 +47,9 @@ public class FagsakTjeneste extends RestTjeneste {
     private ModelMapper modelMapper;
 
     @Autowired
+    private Pep pep;
+
+    @Autowired
     public FagsakTjeneste(FagsakService fagsakService) {
         this.fagsakService = fagsakService;
 
@@ -65,14 +69,20 @@ public class FagsakTjeneste extends RestTjeneste {
     @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."))
     public Response hentFagsak(@PathParam("saksnr") @ApiParam("Saksnummer.") String saksnummer) {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
-
         if (sak == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
-        } else {
-            FagsakDto fagsakDto = tilDto(sak);
-            return Response.ok(fagsakDto).build();
         }
 
+        try {
+            pep.sjekkTilgangTil(sak.getBruker());
+        } catch (SikkerhetsbegrensningException e) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (IkkeFunnetException e) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        FagsakDto fagsakDto = tilDto(sak);
+        return Response.ok(fagsakDto).build();
     }
 
     @GET
@@ -82,6 +92,12 @@ public class FagsakTjeneste extends RestTjeneste {
 
         // FIXME Midlertidig tilgangskontroll
         Tilgangskontroll.sjekk();
+
+        try {
+            pep.sjekkTilgangTil(fnr);
+        } catch (SikkerhetsbegrensningException e) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
 
         return nyFagsak(fnr);
     }
@@ -113,9 +129,13 @@ public class FagsakTjeneste extends RestTjeneste {
             throw new BadRequestException();
         } else {
             try {
+                pep.sjekkTilgangTil(fnr);
                 saker = fagsakService.hentFagsakerMedAktør(RolleType.BRUKER, fnr);
+
             } catch (IkkeFunnetException e) {
                 throw new NotFoundException(e.getMessage());
+            } catch (SikkerhetsbegrensningException e) {
+                throw new BadRequestException("Ikke tilgang");
             }
         }
         return tilDtoer(saker);

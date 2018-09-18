@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import no.nav.melosys.domain.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.service.Pep;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
@@ -25,9 +26,12 @@ public class JournalfoeringTjeneste extends RestTjeneste {
 
     private JournalfoeringService journalføringService;
 
+    private Pep pep;
+
     @Autowired
-    public JournalfoeringTjeneste(JournalfoeringService journalføringService) {
+    public JournalfoeringTjeneste(JournalfoeringService journalføringService, Pep pep) {
         this.journalføringService = journalføringService;
+        this.pep = pep;
     }
 
     @GET
@@ -36,6 +40,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         Journalpost journalpost;
         try {
             journalpost = journalføringService.hentJournalpost(journalpostID);
+            pep.sjekkTilgangTil(journalpost.getBrukerId());
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
@@ -58,9 +63,12 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @Path("opprett")
     public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) {
         try {
+            pep.sjekkTilgangTil(journalfoeringDto.getBrukerID());
             journalføringService.opprettSakOgJournalfør(journalfoeringDto);
         } catch (FunksjonellException e) {
             throw new BadRequestException(e.getMessage());
+        } catch (SikkerhetsbegrensningException e) {
+            throw new BadRequestException("Ikke tilgang");
         }
     }
 
@@ -68,9 +76,12 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @Path("tilordne")
     public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) {
         try {
+            pep.sjekkTilgangTil(journalfoeringDto.getBrukerID());
             journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
         } catch (FunksjonellException e) {
             throw new BadRequestException(e.getMessage());
+        } catch (SikkerhetsbegrensningException e) {
+            throw new BadRequestException("Ikke tilgang");
         }
     }
 }

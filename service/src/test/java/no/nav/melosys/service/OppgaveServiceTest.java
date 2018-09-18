@@ -52,7 +52,14 @@ public class OppgaveServiceTest {
                 gsakFasade,
                 fagsakRepository,
                 tpsFasade,
-                prosessinstansRepository);
+                prosessinstansRepository,
+                new PepStub());
+    }
+
+    @Test
+    public void tilgangskontrollOverstyrtITest() {
+        Oppgave oppgave1 = new Oppgave();
+        assertThat(oppgaveService.harIkkeTilgangTil(oppgave1)).isFalse();
     }
 
     @Test

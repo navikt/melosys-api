@@ -33,6 +33,9 @@ import static org.mockito.Mockito.when;
 public class OppgaveplukkerTest {
 
     @Mock
+    private Pep pep;
+
+    @Mock
     private GsakFasade gsakFasade;
 
     @Mock
@@ -45,7 +48,10 @@ public class OppgaveplukkerTest {
 
     @Before
     public void setUp() {
-        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, fagsakRepository, oppgaveTilbakkeleggingRepo);
+        this.oppgaveplukker = new Oppgaveplukker(gsakFasade,
+                                                 fagsakRepository,
+                                                 oppgaveTilbakkeleggingRepo,
+                                                 new PepStub());
     }
 
     @Test

@@ -1,4 +1,4 @@
-package no.nav.melosys.sikkerhet.config;
+package no.nav.melosys.sikkerhet.abac;
 
 import no.nav.abac.xacml.NavAttributter;
 import no.nav.freg.abac.core.annotation.attribute.AttributeSupplier;
