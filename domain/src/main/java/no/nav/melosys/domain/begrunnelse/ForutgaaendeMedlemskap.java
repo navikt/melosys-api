@@ -1,8 +1,8 @@
-package no.nav.melosys.domain.begrunnelser;
+package no.nav.melosys.domain.begrunnelse;
 
 import no.nav.melosys.domain.Kodeverk;
 
-public enum ForutgaendeMedlemskap implements Kodeverk {
+public enum ForutgaaendeMedlemskap implements Kodeverk {
     IKKE_LOENNET_UTSEND_AG("IKKE_LOENNET_UTSEND_AG", "Mottok IKKE lønn fra utsendende arbeidsgiver opptjent i Norge forutgående måned."),
     IKKE_LOENNET_NORGE("IKKE_LOENNET_NORGE", "Mottok IKKE lønn fra annen arbeidsgiver opptjent i Norge forutgående måned."),
     UNNTATT_MEDLEMSKAP("UNNTATT_MEDLEMSKAP", "Har direkte forutgående medlemskap i MEDL."),
@@ -13,7 +13,7 @@ public enum ForutgaendeMedlemskap implements Kodeverk {
     private String kode;
     private String beskrivelse;
 
-    ForutgaendeMedlemskap(String kode, String beskrivelse) {
+    ForutgaaendeMedlemskap(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
