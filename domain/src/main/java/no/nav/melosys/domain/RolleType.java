@@ -5,7 +5,7 @@ import javax.persistence.Converter;
 public enum RolleType implements InterntKodeverkTabell<RolleType> {
 
     BRUKER("BRUKER", "Bruker"), // Aka. arbeidstaker
-    ARBEIDSGIVER("ARBGIV", "Arbeudsgiver"),
+    ARBEIDSGIVER("ARBGIV", "Arbeidsgiver"),
     REPRESENTANT("REPRES", "Representant"); // Aka. fullmektig
     
     private String kode;
