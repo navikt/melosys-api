@@ -48,7 +48,7 @@ public class Behandlingsresultat {
     private LocalDate vedtakKlagefrist;
 
     @OneToMany(mappedBy = "behandlingsresultat", fetch = FetchType.EAGER)
-    private Set<LovvalgPeriode> lovvalgsperioder;
+    private Set<Lovvalgsperiode> lovvalgsperioder;
 
     public long getId() {
         return id;
@@ -126,11 +126,11 @@ public class Behandlingsresultat {
         this.vedtakKlagefrist = vedtakKlagefrist;
     }
 
-    public Set<LovvalgPeriode> getLovvalgsperioder() {
+    public Set<Lovvalgsperiode> getLovvalgsperioder() {
         return lovvalgsperioder;
     }
 
-    public void setLovvalgsperioder(Set<LovvalgPeriode> lovvalgsperioder) {
+    public void setLovvalgsperioder(Set<Lovvalgsperiode> lovvalgsperioder) {
         this.lovvalgsperioder = lovvalgsperioder;
     }
 

@@ -1,15 +1,15 @@
 package no.nav.melosys.domain;
 
-public enum Henleggelsesgrunner implements Kodeverk {
+public enum Medlemskapstype implements Kodeverk {
 
-    ANNET("ANNET", "Annet"),
-    OPPHOLD_UTL_AVLYST("OPPHOLD_UTL_AVLYST", "Utlandsopphold avlyst"),
-    SØKNADEN_TRUKKET("SØKNADEN_TRUKKET", "Søknaden trukket");
+    FRIVILLIG("INNVILGET", "Innvilget"),
+    PLIKTIG("AVSLAATT", "Avslått"),
+    UNNTATT("UNNTATT", "Untatt");
 
     private String kode;
     private String beskrivelse;
 
-    Henleggelsesgrunner(String kode, String beskrivelse) {
+    Medlemskapstype(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
