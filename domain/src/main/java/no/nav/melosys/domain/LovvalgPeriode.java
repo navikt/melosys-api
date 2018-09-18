@@ -20,8 +20,8 @@ public class LovvalgPeriode implements ErPeriode {
     private long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "vedtak_id", nullable = false, updatable = false)
-    private Vedtak vedtak;
+    @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
+    private Behandlingsresultat behandlingsresultat;
     
     @Column(name = "fom_dato", nullable = false, updatable = false)
     private LocalDate fom;
@@ -64,12 +64,12 @@ public class LovvalgPeriode implements ErPeriode {
         return id;
     }
 
-    public Vedtak getVedtak() {
-        return vedtak;
+    public Behandlingsresultat getBehandlingsresultat() {
+        return behandlingsresultat;
     }
 
-    public void setVedtak(Vedtak vedtak) {
-        this.vedtak = vedtak;
+    public void setBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
+        this.behandlingsresultat = behandlingsresultat;
     }
 
     @Override
@@ -174,13 +174,13 @@ public class LovvalgPeriode implements ErPeriode {
         if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
             return this.id == that.id;
         }
-        return Objects.equals(this.vedtak, that.vedtak)
+        return Objects.equals(this.behandlingsresultat, that.behandlingsresultat)
             && Objects.equals(this.fom, that.fom);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(vedtak, fom);
+        return Objects.hash(behandlingsresultat, fom);
     }
 
 }

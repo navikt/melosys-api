@@ -1,19 +1,19 @@
 CREATE TABLE lovvalg_periode (
-    id             NUMBER(19) GENERATED ALWAYS AS IDENTITY,
-    vedtak_id      NUMBER(19)     NOT NULL,
-    fom_dato       DATE           NOT NULL,
-    tom_dato       DATE           NOT NULL,
-    bestemmelse    VARCHAR2(99)   NOT NULL,
-    lovvalgsland   VARCHAR2(99)   NOT NULL,
-    dekning        VARCHAR2(99)   NOT NULL,
-    versjon        VARCHAR2(99)   NOT NULL,
-    grunnlag_xml   XMLTYPE        NOT NULL,
-    resultat_xml   XMLTYPE        NOT NULL,
+    id               NUMBER(19) GENERATED ALWAYS AS IDENTITY,
+    beh_resultat_id  NUMBER(19)     NOT NULL,
+    fom_dato         DATE           NOT NULL,
+    tom_dato         DATE           NOT NULL,
+    bestemmelse      VARCHAR2(99)   NOT NULL,
+    lovvalgsland     VARCHAR2(99)   NOT NULL,
+    dekning          VARCHAR2(99)   NOT NULL,
+    versjon          VARCHAR2(99)   NOT NULL,
+    grunnlag_xml     XMLTYPE        NOT NULL,
+    resultat_xml     XMLTYPE        NOT NULL,
     CONSTRAINT pk_fastsatt_rettighet PRIMARY KEY (id)
 );
 
 ALTER TABLE lovvalg_periode
-    ADD CONSTRAINT fk_lovvalg_periode_vedtak FOREIGN KEY (vedtak_id) REFERENCES vedtak;
+    ADD CONSTRAINT fk_periode_beh_resultat FOREIGN KEY (beh_resultat_id) REFERENCES behandlingsresultat;
 
 CREATE TABLE lovvalg_bestemmelse (
     kode        VARCHAR2(99) NOT NULL,
