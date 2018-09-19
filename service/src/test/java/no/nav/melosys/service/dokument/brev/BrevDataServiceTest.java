@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.HashSet;
 
-import no.nav.dok.brevdata.felles.v1.navfelles.Saksbehandler;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -15,8 +14,6 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.w3c.dom.Element;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNavAnsatt;
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNavEnhet;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -29,15 +26,9 @@ public class BrevDataServiceTest {
     @Before
     public void setUp() throws IkkeFunnetException {
         TpsFasade tpsFasade = mock(TpsFasade.class);
-        service = spy(new BrevDataService(tpsFasade));
+        service = new BrevDataService(tpsFasade);
 
         when(tpsFasade.hentIdentForAktørId(any())).thenReturn("Fnr");
-
-        Saksbehandler saksbehandler = new Saksbehandler();
-        saksbehandler.setNavEnhet(lagNavEnhet());
-        saksbehandler.setNavAnsatt(lagNavAnsatt("test"));
-
-        doReturn(saksbehandler).when(service).lagSaksbehandler();
     }
 
     @Test
@@ -55,7 +46,7 @@ public class BrevDataServiceTest {
         behandling.setType(Behandlingstype.SØKNAD);
         behandling.setFagsak(fagsak);
 
-        Element element = service.lagBrevXML(DokumentType.FORVALTNINGSMELDING, behandling);
+        Element element = service.lagBrevXML(DokumentType.FORVALTNINGSMELDING, behandling, "TEST");
 
         assertThat(element).isNotNull();
     }

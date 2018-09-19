@@ -22,7 +22,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
@@ -81,11 +80,11 @@ public class BrevDataService {
     /**
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
-    public Element lagBrevXML(DokumentType dokumentType, Behandling behandling) throws TekniskException {
+    public Element lagBrevXML(DokumentType dokumentType, Behandling behandling, String userId) throws TekniskException {
         Element brevXmlElement;
         try {
             FellesType fellesType = mapFellesType(behandling);
-            MelosysNAVFelles navFelles = mapNAVFelles(behandling);
+            MelosysNAVFelles navFelles = mapNAVFelles(behandling, userId);
             String brevXml = BrevDataMapperRuter.brevDataMapper(dokumentType).mapTilBrevXML(fellesType, navFelles, behandling);
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -108,14 +107,14 @@ public class BrevDataService {
         return fellesType;
     }
 
-    private MelosysNAVFelles mapNAVFelles(Behandling behandling) throws TekniskException {
+    private MelosysNAVFelles mapNAVFelles(Behandling behandling, String userId) throws TekniskException {
         final MelosysNAVFelles navFelles = new MelosysNAVFelles();
 
         navFelles.setSakspart(lagSakspart(behandling));
         navFelles.setMottaker(lagMottaker(behandling));
         navFelles.setBehandlendeEnhet(lagNavEnhet());
-        navFelles.setSignerendeSaksbehandler(lagSaksbehandler());
-        navFelles.setSignerendeBeslutter(lagSaksbehandler());
+        navFelles.setSignerendeSaksbehandler(lagSaksbehandler(userId));
+        navFelles.setSignerendeBeslutter(lagSaksbehandler(userId));
         navFelles.setKontaktinformasjon(BrevDataUtils.lagKontaktInformasjon());
 
         return navFelles;
@@ -167,15 +166,10 @@ public class BrevDataService {
         return mottaker;
     }
 
-    // FIXME Bør være private
-    Saksbehandler lagSaksbehandler() {
+    private Saksbehandler lagSaksbehandler(String userId) {
         Saksbehandler saksbehandler = new Saksbehandler();
         saksbehandler.setNavEnhet(lagNavEnhet());
-
-        String userID = SubjectHandler.getInstance().getUserID();
-        if (userID != null) {
-            saksbehandler.setNavAnsatt(lagNavAnsatt(userID));
-        }
+        saksbehandler.setNavAnsatt(lagNavAnsatt(userId));
         return saksbehandler;
     }
 

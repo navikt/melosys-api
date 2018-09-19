@@ -45,19 +45,19 @@ public class DokumentService {
      * Kaller Doksys for å produsere et dokumentutkast
      * @throws TekniskException 
      */
-    public byte[] produserUtkast(long behandlingID, String dokumenttypeID)
+    public byte[] produserUtkast(long behandlingID, String dokumenttypeID, String userId)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        return produserDokument(behandlingID, dokumenttypeID, true);
+        return produserDokument(behandlingID, dokumenttypeID, userId, true);
     }
 
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(long behandlingID, String dokumenttypeID) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        produserDokument(behandlingID, dokumenttypeID, false);
+    public void produserDokument(long behandlingID, String dokumenttypeID, String userId) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        produserDokument(behandlingID, dokumenttypeID, userId, false);
     }
 
-    private byte[] produserDokument(long behandlingID, String dokumenttypeID, boolean erUtkast) 
+    private byte[] produserDokument(long behandlingID, String dokumenttypeID, String userId , boolean erUtkast)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         DokumentType dokumentType = DokumentType.forKode(dokumenttypeID);
         Behandling behandling = behandlingRepository.findOne(behandlingID);
@@ -66,7 +66,7 @@ public class DokumentService {
         }
 
         DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(dokumentType, behandling);
-        Object brevData = brevDataService.lagBrevXML(dokumentType, behandling);
+        Object brevData = brevDataService.lagBrevXML(dokumentType, behandling, userId);
 
         if (erUtkast) {
             return dokSysFasade.produserDokumentutkast(request, brevData);
