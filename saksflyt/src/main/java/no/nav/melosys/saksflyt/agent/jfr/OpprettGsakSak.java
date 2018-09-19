@@ -2,8 +2,10 @@ package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.datavarehus.FagsakLagretEvent;
+import no.nav.melosys.domain.Behandlingstype;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
@@ -18,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,14 +41,10 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
     private final FagsakRepository fagsakRepository;
     private final GsakFasade gsakFasade;
 
-    private final ApplicationEventPublisher applicationEventPublisher;
-
     @Autowired
-    public OpprettGsakSak(@Qualifier("system")GsakFasade gsakFasade, FagsakRepository fagsakRepository,
-                          ApplicationEventPublisher applicationEventPublisher) {
+    public OpprettGsakSak(@Qualifier("system")GsakFasade gsakFasade, FagsakRepository fagsakRepository) {
         this.fagsakRepository = fagsakRepository;
         this.gsakFasade = gsakFasade;
-        this.applicationEventPublisher = applicationEventPublisher;
         log.info("OpprettGsakSak initialisert");
     }
 
@@ -79,7 +76,6 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
         Long gsakSakId = gsakFasade.opprettSak(saksnummer, Behandlingstype.SØKNAD, aktørId);
         fagsak.setGsakSaksnummer(gsakSakId);
         fagsakRepository.save(fagsak);
-        applicationEventPublisher.publishEvent(new FagsakLagretEvent(fagsak));
         prosessinstans.setData(GSAK_SAK_ID, gsakSakId);
 
         prosessinstans.setSteg(STATUS_BEH_OPPR);

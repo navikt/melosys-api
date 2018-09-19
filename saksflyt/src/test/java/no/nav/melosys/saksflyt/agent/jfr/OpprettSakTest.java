@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -27,7 +28,7 @@ public class OpprettSakTest {
 
     @Before
     public void setUp() {
-        agent = new OpprettSak(fagsakService);
+        agent = new OpprettSak(fagsakService, mock(ApplicationEventPublisher.class));
     }
 
     @Test

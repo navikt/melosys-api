@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.datavarehus.FagsakLagretEvent;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
@@ -25,7 +24,6 @@ import no.nav.melosys.service.RegelmodulService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,15 +45,11 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     private final FagsakRepository fagsakRepository;
     private final BehandlingRepository behandlingRepository;
 
-    private final ApplicationEventPublisher applicationEventPublisher;
-
     @Autowired
-    public VurderInngangsvilkaar(RegelmodulService regelmodulService, FagsakRepository fagsakRepository,
-                                 BehandlingRepository behandlingRepository, ApplicationEventPublisher applicationEventPublisher) {
+    public VurderInngangsvilkaar(RegelmodulService regelmodulService, FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository) {
         this.regelmodulService = regelmodulService;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
-        this.applicationEventPublisher = applicationEventPublisher;
         log.debug("InngangsvilkaarAgent initialisert");
     }
 
@@ -140,7 +134,6 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         }
         fagsak.setType(nyFagsakstype);
         fagsakRepository.save(fagsak);
-        applicationEventPublisher.publishEvent(new FagsakLagretEvent(fagsak));
 
         prosessinstans.setSteg(ProsessSteg.HENT_ARBF_OPPL);
         log.info("Satt type på fagsak {} til {} for prosessinstans {}", fagsak.getSaksnummer(), nyFagsakstype, prosessinstans.getId());

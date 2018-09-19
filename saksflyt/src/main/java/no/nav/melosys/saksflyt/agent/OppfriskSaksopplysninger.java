@@ -4,8 +4,10 @@ package no.nav.melosys.saksflyt.agent;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.datavarehus.BehandlingLagretEvent;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -15,7 +17,6 @@ import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,13 +41,10 @@ public class OppfriskSaksopplysninger extends AbstraktStegBehandler {
 
     private final BehandlingRepository behandlingRepository;
 
-    private final ApplicationEventPublisher applicationEventPublisher;
-
     @Autowired
-    public OppfriskSaksopplysninger(BehandlingRepository behandlingRepository, ApplicationEventPublisher applicationEventPublisher) {
+    public OppfriskSaksopplysninger(BehandlingRepository behandlingRepository) {
         log.info("OppfriskSaksopplysninger initialisert");
         this.behandlingRepository = behandlingRepository;
-        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -67,7 +65,6 @@ public class OppfriskSaksopplysninger extends AbstraktStegBehandler {
         Behandling behandling = prosessinstans.getBehandling();
         behandling.setSisteOpplysningerHentetDato(LocalDateTime.now());
         behandlingRepository.save(behandling);
-        applicationEventPublisher.publishEvent(new BehandlingLagretEvent(behandling));
 
         if (prosessinstans.getType() == ProsessType.OPPFRISKNING) {
             prosessinstans.setSteg(null);

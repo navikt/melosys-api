@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.agent.reg;
 import java.util.Properties;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.datavarehus.BehandlingLagretEvent;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -14,11 +13,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.context.ApplicationEventPublisher;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -30,12 +26,9 @@ public class OppfriskSaksopplysningerTest {
 
     private OppfriskSaksopplysninger agent;
 
-    private ApplicationEventPublisher applicationEventPublisher;
-
     @Before
     public void setUp() {
-        applicationEventPublisher = mock(ApplicationEventPublisher.class);
-        agent = new OppfriskSaksopplysninger(behandlingRepository, applicationEventPublisher);
+        agent = new OppfriskSaksopplysninger(behandlingRepository);
     }
 
     @Test
@@ -48,7 +41,6 @@ public class OppfriskSaksopplysningerTest {
         agent.utførSteg(p);
 
         verify(behandlingRepository, times(1)).save(behandling);
-        verify(applicationEventPublisher).publishEvent(any(BehandlingLagretEvent.class));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.OPPRETT_OPPGAVE);
     }
 

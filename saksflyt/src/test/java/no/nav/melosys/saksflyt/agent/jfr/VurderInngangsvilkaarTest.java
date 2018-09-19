@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.datavarehus.FagsakLagretEvent;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
@@ -23,7 +22,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.context.ApplicationEventPublisher;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -44,12 +42,9 @@ public class VurderInngangsvilkaarTest {
 
     private VurderInngangsvilkaar agent;
 
-    private ApplicationEventPublisher applicationEventPublisher;
-
     @Before
     public void setUp() {
-        applicationEventPublisher = mock(ApplicationEventPublisher.class);
-        agent = new VurderInngangsvilkaar(regelmodulService, fagsakRepository, behandlingRepository, applicationEventPublisher);
+        agent = new VurderInngangsvilkaar(regelmodulService, fagsakRepository, behandlingRepository);
     }
 
     @Test
@@ -67,8 +62,7 @@ public class VurderInngangsvilkaarTest {
         agent.utførSteg(p);
 
         verify(fagsakRepository, times(1)).save(any(Fagsak.class));
-        verify(applicationEventPublisher).publishEvent(any(FagsakLagretEvent.class));
-
+        
         assertNull(p.getHendelser());
         assertEquals(Fagsakstype.EU_EØS, p.getBehandling().getFagsak().getType());
         assertEquals(ProsessSteg.HENT_ARBF_OPPL, p.getSteg());
@@ -91,8 +85,7 @@ public class VurderInngangsvilkaarTest {
         agent.utførSteg(p);
 
         verify(fagsakRepository, times(0)).save(any(Fagsak.class));
-        verify(applicationEventPublisher, times(0)).publishEvent(any(FagsakLagretEvent.class));
-
+        
         assertEquals(2, p.getHendelser().size());
         assertNull(p.getBehandling().getFagsak().getType());
         assertEquals(ProsessSteg.FEILET_MASKINELT, p.getSteg());

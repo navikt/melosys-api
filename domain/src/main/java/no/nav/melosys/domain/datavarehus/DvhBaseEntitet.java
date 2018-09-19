@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.datavarehus;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -11,7 +12,7 @@ import javax.persistence.PrePersist;
 public class DvhBaseEntitet implements Serializable {
 
     @Column(name = "trans_tid", nullable = false)
-    private LocalDateTime transTid;
+    private Instant transTid;
 
     @Column(name = "funksjonell_tid", nullable = false)
     private LocalDateTime funksjonellTid;
@@ -21,7 +22,7 @@ public class DvhBaseEntitet implements Serializable {
 
     @PrePersist
     protected void onCreate() {
-        this.transTid = LocalDateTime.now();
+        this.transTid = Instant.now();
         if (this.funksjonellTid == null) {
             this.funksjonellTid = LocalDateTime.now();
         }

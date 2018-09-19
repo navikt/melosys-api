@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +33,7 @@ public class OpprettGsakSakTest {
 
     @Before
     public void setUp() {
-        agent = new OpprettGsakSak(gsakFasade, fagsakRepository, mock(ApplicationEventPublisher.class));
+        agent = new OpprettGsakSak(gsakFasade, fagsakRepository);
     }
 
     @Test
