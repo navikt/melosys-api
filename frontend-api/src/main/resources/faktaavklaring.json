@@ -1,45 +1,50 @@
 {
-  "behandlingID": 123456789,
+  "behandlingID": 4,
   "avklaring": {
     "opphold": {
       "land": [],
-      "periode": {
-        "fom": "",
-        "tom": ""
-      }
+      "periode": {}
     },
     "aktivitet": {
       "aktivitetLand": []
     },
     "sysselsetting": {
-      "sysselsettingType": ""
+      "sysselsettingType": null
     },
     "utsending": {
       "ansattINorskSelskap": null,
       "erstatterTidligereUtsendt": null,
       "utsendingMindreEnn24Mnd": null,
       "foretakDriverINorge": null,
-      "harForutgaendeMedlemskap": null,
       "arbeidKnyttetTilVirksomhetUtlandet": null,
       "sammeTypeVirksomhet": null
     },
     "bosted": {
-      "land": []
+      "bostedLand": null,
+      "bostedBegrunnelser": []
+    },
+    "forutgaendeMedlemskap": {
+      "harForutgaendeMedlemskap": null,
+      "forutgaendeMedlemskapBegrunnelser": []
     },
     "sektor": {
-      "ansattISektor": ""
+      "ansattISektor": null
     },
     "tjenestemann": {
-      "tjenestemann": ""
+      "tjenestemann": null
     },
-    "valgteArbeidsforhold": [],
+    "valgteArbeidsgivere": [],
     "yrkesaktivitetFordeling": {
-      "antallLand": ""
+      "antallLand": null
     },
     "virksomhet": {
-      "aktivitetINorge": "",
-      "marginaltArbeid": "",
-      "vekslingMellomLand": ""
+      "aktivitetINorge": null,
+      "marginaltArbeid": null,
+      "vekslingMellomLand": null
+    },
+    "vesentligVirksomhet": {
+      "vesentligVirksomhetINorge": null,
+      "vesentligVirksomhetBegrunnelser": []
     }
   }
 }
