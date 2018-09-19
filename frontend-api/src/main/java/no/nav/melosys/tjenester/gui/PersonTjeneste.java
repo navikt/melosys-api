@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.service.Pep;
+import no.nav.melosys.sikkerhet.abac.Pep;
 import no.nav.melosys.service.RegisterOppslagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;

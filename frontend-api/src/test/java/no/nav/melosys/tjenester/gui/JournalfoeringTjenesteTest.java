@@ -7,8 +7,6 @@ import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.domain.Journalpost;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.service.Pep;
-import no.nav.melosys.service.PepImpl;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;

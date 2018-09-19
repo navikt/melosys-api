@@ -5,7 +5,6 @@ import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.service.Pep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +13,10 @@ import java.util.List;
 @Component
 public class BehandlingTilgang {
     private FagsakRepository fagsakRepository;
-    private final Pep pep;
+    private final PepAktoerOversetter pep;
 
     @Autowired
-    public BehandlingTilgang(FagsakRepository fagsakRepository, Pep pep) {
+    public BehandlingTilgang(FagsakRepository fagsakRepository, PepAktoerOversetter pep) {
         this.fagsakRepository = fagsakRepository;
         this.pep = pep;
     }

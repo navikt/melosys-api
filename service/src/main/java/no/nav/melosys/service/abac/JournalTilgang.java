@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Journalpost;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.service.Pep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,10 +11,10 @@ import org.springframework.stereotype.Component;
 public class JournalTilgang {
 
     private JoarkFasade joarkFasade;
-    private Pep pep;
+    private PepAktoerOversetter pep;
 
     @Autowired
-    public JournalTilgang(JoarkFasade joarkFasade, Pep pep) {
+    public JournalTilgang(JoarkFasade joarkFasade, PepAktoerOversetter pep) {
         this.joarkFasade = joarkFasade;
         this.pep = pep;
     }

@@ -8,15 +8,14 @@ import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.service.Pep;
 
 @Component
 public class FagsakTilgang {
     private FagsakRepository fagsakRepository;
-    private final Pep pep;
+    private final PepAktoerOversetter pep;
 
     @Autowired
-    public FagsakTilgang(FagsakRepository fagsakRepository, Pep pep) {
+    public FagsakTilgang(FagsakRepository fagsakRepository, PepAktoerOversetter pep) {
         this.fagsakRepository = fagsakRepository;
         this.pep = pep;
     }

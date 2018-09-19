@@ -17,7 +17,6 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
-import no.nav.melosys.service.Pep;
 import no.nav.melosys.service.abac.FagsakTilgang;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
