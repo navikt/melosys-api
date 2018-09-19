@@ -1,11 +1,7 @@
 package no.nav.melosys.domain.dokument.person;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-
 import java.io.*;
 import java.time.LocalDate;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.helpers.DefaultValidationEventHandler;
@@ -16,6 +12,9 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 public class Tps3PersonKonverteringTest {
 
@@ -45,7 +44,7 @@ public class Tps3PersonKonverteringTest {
         PersonDokument p2 = (PersonDokument) um.unmarshal(bais);
 
         // Verifiser...
-        assertEquals(Diskresjonskode.MILI, p2.diskresjonskode);
+        assertEquals("MILI", p2.diskresjonskode.getKode());
         assertEquals(LocalDate.of(2011, 11, 11), p2.fødselsdato);
     }
 

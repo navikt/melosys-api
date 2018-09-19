@@ -44,22 +44,28 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         }
 
         // OrganisasjonDetaljer
+        List<GeografiskAdresse> forretningsadresser = null;
+        List<GeografiskAdresse> postadresser = null;
         if (organisasjon.getOrganisasjonDetaljer() != null) {
-            List<GeografiskAdresse> forretningsadresser = organisasjon.getOrganisasjonDetaljer().getForretningsadresse();
-            if (forretningsadresser != null) {
-                organisasjonDto.setForretningsadresse(tilAdresseDto(forretningsadresser));
-            }
-
-            List<GeografiskAdresse> postadresser = organisasjon.getOrganisasjonDetaljer().getPostadresse();
-            if (postadresser != null) {
-                organisasjonDto.setPostadresse(tilAdresseDto(postadresser));
-            }
+            forretningsadresser = organisasjon.getOrganisasjonDetaljer().getForretningsadresse();
+            postadresser = organisasjon.getOrganisasjonDetaljer().getPostadresse();
         }
+        organisasjonDto.setForretningsadresse(tilAdresseDto(forretningsadresser));
+        organisasjonDto.setPostadresse(tilAdresseDto(postadresser));
 
         generator.writeObject(organisasjonDto);
     }
 
     private AdresseDto tilAdresseDto(List<GeografiskAdresse> adresser) {
+        AdresseDto dto = new AdresseDto();
+        GateadresseDto gateadresse = new GateadresseDto();
+        dto.setGateadresse(gateadresse);
+
+        if (adresser == null || adresser.size() == 0) {
+            // Tomt objekt til frontend (ikke null)
+            return dto;
+        }
+
         GeografiskAdresse adresse = null;
 
         for (GeografiskAdresse a : adresser) {
@@ -72,10 +78,6 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
 
         if (adresse instanceof SemistrukturertAdresse) {
             SemistrukturertAdresse sAdresse = (SemistrukturertAdresse) adresse;
-
-            AdresseDto dto = new AdresseDto();
-            GateadresseDto gateadresse = new GateadresseDto();
-            dto.setGateadresse(gateadresse);
 
             // FIXME Hvordan formaterer vi adresselinjer?
             StringBuilder stringBuilder = new StringBuilder();
@@ -109,9 +111,13 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
             }
 
             return  dto;
+        } else if (adresse == null) {
+            // Ingen gyldige adresser
+            return dto;
+        } else {
+            // Enhetsregistret har bare SemistrukturertAdresser
+            throw new RuntimeException("GeografiskAdresse ikke støttet " + (adresse == null ? null : adresse.getClass().getSimpleName()));
         }
-
-        return null;
     }
 
     // Hvis man ikke har bruk for historikk på navn så er det best å bruke navn på nivå organisasjon.

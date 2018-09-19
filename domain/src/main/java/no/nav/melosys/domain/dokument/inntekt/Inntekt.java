@@ -4,11 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -73,7 +69,7 @@ public class Inntekt {
 
     public String opptjeningsland;
 
-    public Periode opptjeningsperiode;
+    public Periode opptjeningsperiode = new Periode();
 
     @JsonIgnore
     public String skattemessigBosattLand;
@@ -89,6 +85,7 @@ public class Inntekt {
 
     public String virksomhetID;
 
+    @JsonIgnore
     public Tilleggsinformasjon tilleggsinformasjon;
 
     public String inntektsmottakerID;
@@ -99,6 +96,8 @@ public class Inntekt {
 
     public String informasjonsstatus; //"http://nav.no/kodeverk/Kodeverk/Informasjonsstatuser"
 
+    @XmlTransient
+    private String beskrivelse;
 
     public String getArbeidsforholdREF() {
         return arbeidsforholdREF;
@@ -106,6 +105,10 @@ public class Inntekt {
 
     public BigDecimal getBeloep() {
         return beloep;
+    }
+
+    public String getBeskrivelse() {
+        return beskrivelse;
     }
 
     public String getFordel() {

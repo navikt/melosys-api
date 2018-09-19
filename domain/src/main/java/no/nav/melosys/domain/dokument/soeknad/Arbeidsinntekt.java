@@ -8,10 +8,10 @@ import java.util.List;
  */
 public class Arbeidsinntekt {
 
-    public Integer inntektNorskIPerioden;
-    public Integer inntektUtenlandskIPerioden;
-    public Integer inntektNaeringIPerioden;
+    public int inntektNorskIPerioden;
+    public int inntektUtenlandskIPerioden;
+    public int inntektNaeringIPerioden;
     public List<String> inntektNaturalYtelser = new ArrayList<>();
-    public Boolean inntektErInnrapporteringspliktig;
-    public Boolean inntektTrygdeavgiftBlirTrukket;
+    public boolean inntektErInnrapporteringspliktig;
+    public boolean inntektTrygdeavgiftBlirTrukket;
 }

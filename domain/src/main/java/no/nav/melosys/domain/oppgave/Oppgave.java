@@ -2,7 +2,7 @@ package no.nav.melosys.domain.oppgave;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Tema;
 
 /**
@@ -15,24 +15,24 @@ public class Oppgave {
     private Tema tema;
     private Oppgavetype oppgavetype;
     private PrioritetType prioritet;
-    private String gsakSaksnummer;
+    private Long gsakSaksnummer;
     private String journalpostId;
     private String tilordnetRessurs;
     private int versjon;
     private String aktørId;
     // FIXME: MELOSYS-1401 : skal implementere logikk rundt disse
-    private BehandlingType behandlingstype;
+    private Behandlingstype behandlingstype;
     private BehandlingTema behandlingstema;
     private Temagruppe temagruppe;
 
     public Oppgave() {
     }
 
-    public BehandlingType getBehandlingstype() {
+    public Behandlingstype getBehandlingstype() {
         return behandlingstype;
     }
 
-    public void setBehandlingstype(BehandlingType behandlingstype) {
+    public void setBehandlingstype(Behandlingstype behandlingstype) {
         this.behandlingstype = behandlingstype;
     }
 
@@ -108,11 +108,11 @@ public class Oppgave {
         this.prioritet = prioritet;
     }
 
-    public String getGsakSaksnummer() {
+    public Long getGsakSaksnummer() {
         return gsakSaksnummer;
     }
 
-    public void setGsakSaksnummer(String gsakSaksnummer) {
+    public void setGsakSaksnummer(Long gsakSaksnummer) {
         this.gsakSaksnummer = gsakSaksnummer;
     }
 

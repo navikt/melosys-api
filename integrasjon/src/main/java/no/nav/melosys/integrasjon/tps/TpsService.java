@@ -15,6 +15,7 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
@@ -41,6 +42,7 @@ public class TpsService implements TpsFasade {
     private static final Logger log = LoggerFactory.getLogger(TpsService.class);
 
     private static final String PERSON_VERSJON = "3.0";
+    private static final String PERSONHISTORIKK_VERSJON = "3.4";
 
     private final AktorConsumer aktorConsumer;
 
@@ -64,7 +66,8 @@ public class TpsService implements TpsFasade {
         this.aktørIdCache = aktørIdCache;
 
         try {
-            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
+            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class,
+                no.nav.tjeneste.virksomhet.person.v3.HentPersonhistorikkResponse.class);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);
@@ -173,6 +176,63 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
+    public Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+        HentPersonhistorikkRequest request = new HentPersonhistorikkRequest();
+        NorskIdent norskIdent = new NorskIdent();
+        norskIdent.setIdent(ident);
+
+        PersonIdent personIdent = new PersonIdent();
+        personIdent.setIdent(norskIdent);
+        request.setAktoer(personIdent);
+
+        Periode periode = new Periode();
+        try {
+            XMLGregorianCalendar xmlDato = KonverteringsUtils.localDateToXMLGregorianCalendar(dato);
+            /*
+            Når fom == tom leverer TPS all foregående historikk, mens fom < tom gir historikk med gyldighetsdato
+            innenfor perioden det søkes på. Vi filtrerer på opplysninger registrert av SKD og sorterer på endringsdato
+            for å finne prefererte opplysninger, og ønsker derfor all historikk fram til start av søknadsperioden.
+            */
+            periode.setFom(xmlDato);
+            periode.setTom(xmlDato);
+        } catch (DatatypeConfigurationException e) {
+            throw new TekniskException(e);
+        }
+        request.setPeriode(periode);
+
+        // Kall til TPS
+        HentPersonhistorikkResponse response = null;
+        try {
+            response = personConsumer.hentPersonhistorikk(request);
+        } catch (HentPersonhistorikkSikkerhetsbegrensning hentPersonhistorikkSikkerhetsbegrensning) {
+            throw new SikkerhetsbegrensningException(hentPersonhistorikkSikkerhetsbegrensning);
+        } catch (HentPersonhistorikkPersonIkkeFunnet hentPersonhistorikkPersonIkkeFunnet) {
+            throw new IkkeFunnetException(hentPersonhistorikkPersonIkkeFunnet);
+        }
+
+        StringWriter xmlWriter = new StringWriter();
+        try {
+            no.nav.tjeneste.virksomhet.person.v3.HentPersonhistorikkResponse xmlRoot = new no.nav.tjeneste.virksomhet.person.v3.HentPersonhistorikkResponse();
+            xmlRoot.setResponse(response);
+            jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
+        } catch (JAXBException e) {
+            log.error("", e);
+            throw new IntegrasjonException(e);
+        }
+
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokumentXml(xmlWriter.toString());
+        saksopplysning.setKilde(SaksopplysningKilde.TPS);
+        saksopplysning.setType(SaksopplysningType.PERSONHISTORIKK);
+        saksopplysning.setVersjon(PERSONHISTORIKK_VERSJON);
+
+        // xml -> java objekter
+        dokumentFactory.lagDokument(saksopplysning);
+
+        return saksopplysning;
+    }
+
+    @Override
     public int hentAntallPersonerSomBorPåBostedsadresse(String argAktørId) throws IntegrasjonException {
         //Hvis adressedato ikke gitt som request paramerter da tjensten antar at adresseDato er dagensdato.
         HentPersonerMedSammeAdresseRequest request = new HentPersonerMedSammeAdresseRequest();
@@ -189,48 +249,6 @@ public class TpsService implements TpsFasade {
             throw new IntegrasjonException(hentPersonerMedSammeAdresseSikkerhetsbegrensning.getMessage());
         } catch (HentPersonerMedSammeAdresseIkkeFunnet hentPersonerMedSammeAdresseIkkeFunnet) {
             throw new IntegrasjonException(hentPersonerMedSammeAdresseIkkeFunnet.getMessage());
-        }
-    }
-
-    @Override
-    public String hentStatsborgerskapPåGittDato(String ident, LocalDate dato) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        if (dato == null) {
-            throw new IntegrasjonException("Dato kan ikke være null");
-        }
-
-        HentPersonhistorikkRequest request = new HentPersonhistorikkRequest();
-        NorskIdent norskIdent = new NorskIdent();
-        norskIdent.setIdent(ident);
-
-        PersonIdent personIdent = new PersonIdent();
-        personIdent.setIdent(norskIdent);
-
-        request.setAktoer(personIdent);
-
-        try {
-            XMLGregorianCalendar xmlDato = KonverteringsUtils.localDateToXMLGregorianCalendar(dato);
-            Periode periode = new Periode();
-            periode.setTom(xmlDato);
-            periode.setFom(xmlDato);
-            request.setPeriode(periode);
-
-            HentPersonhistorikkResponse response = personConsumer.hentPersonhistorikk(request);
-            List<StatsborgerskapPeriode> liste = response.getStatsborgerskapListe();
-
-            if (liste.isEmpty()) {
-                throw new IkkeFunnetException("Fant ikke statsborgerskap for dato " + dato);
-            }
-
-            liste.sort(endringstidspunktKomparator);
-
-            Statsborgerskap statsborgerskap = liste.get(0).getStatsborgerskap();
-            return statsborgerskap.getLand().getValue();
-        } catch (DatatypeConfigurationException e) {
-            throw new IntegrasjonException("Kunne ikke konvertere dato");
-        } catch (HentPersonhistorikkPersonIkkeFunnet e) {
-            throw new IkkeFunnetException(e);
-        } catch (HentPersonhistorikkSikkerhetsbegrensning e) {
-            throw new SikkerhetsbegrensningException(e);
         }
     }
 }

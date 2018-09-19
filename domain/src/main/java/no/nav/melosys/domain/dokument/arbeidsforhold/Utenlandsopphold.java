@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.YearMonthTimeZoneXmlAdapter;
 
@@ -17,6 +18,7 @@ public class Utenlandsopphold {
     private String land;
 
     @XmlJavaTypeAdapter(YearMonthTimeZoneXmlAdapter.class)
+    @JsonProperty("rapporteringsAarMaaned")
     private YearMonth rapporteringsperiode;
 
     /** Obs. Ikke kodeverk! */ //TODO FA: tjenesten leverer både kodeverk og verdi skal vi ha kodeverk her?

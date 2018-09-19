@@ -1,13 +1,8 @@
 package no.nav.melosys.domain.dokument.person;
 
-import static no.nav.melosys.domain.dokument.person.Tps3PersonKonverteringTest.TPS_PERSON_3_0_MOCK;
-import static no.nav.melosys.domain.dokument.person.Tps3PersonKonverteringTest.TPS_PERSON_3_0_XSLT;
-import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Result;
@@ -18,6 +13,10 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static no.nav.melosys.domain.dokument.person.Tps3PersonKonverteringTest.TPS_PERSON_3_0_MOCK;
+import static no.nav.melosys.domain.dokument.person.Tps3PersonKonverteringTest.TPS_PERSON_3_0_XSLT;
+import static org.junit.Assert.assertTrue;
 
 
 public class Tps3ManuellTest {
@@ -56,7 +55,7 @@ public class Tps3ManuellTest {
         PersonDokument p2 = (PersonDokument) um.unmarshal(bais);
 
         // Sett breakpoint her for å inspisere p2
-        assertTrue(p2.diskresjonskode == Diskresjonskode.MILI);
+        assertTrue(p2.diskresjonskode.getKode() == "MILI");
         
         assertTrue(false); // Manuell test. Ikke sjekk inn med @Ignore utkommentert.
     }

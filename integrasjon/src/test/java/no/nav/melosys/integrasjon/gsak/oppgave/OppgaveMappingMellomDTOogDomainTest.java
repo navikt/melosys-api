@@ -7,7 +7,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.GsakService;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
-import no.nav.melosys.integrasjon.gsak.sakapi.SakApiConsumer;
+import no.nav.melosys.integrasjon.gsak.sak.SakConsumer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 
 public class OppgaveMappingMellomDTOogDomainTest {
 
-    private SakApiConsumer sakApiConsumerMock;
+    private SakConsumer sakConsumerMock;
 
     private OppgaveConsumer oppgaveConsumerMock;
 
@@ -25,22 +25,22 @@ public class OppgaveMappingMellomDTOogDomainTest {
 
     @Before
     public void setUp() {
-        sakApiConsumerMock = mock(SakApiConsumer.class);
+        sakConsumerMock = mock(SakConsumer.class);
         oppgaveConsumerMock = mock(OppgaveConsumer.class);
-        gsakFasade = new GsakService(sakApiConsumerMock,oppgaveConsumerMock);
+        gsakFasade = new GsakService(sakConsumerMock,oppgaveConsumerMock);
     }
 
     @Test
     public void testMappingMellomDTOogDomainForOppgave() throws MelosysException {
         OppgaveDto oppgaveDto = new OppgaveDto();
         oppgaveDto.setId("1234");
-        oppgaveDto.setSakreferanse("456");
+        oppgaveDto.setSaksreferanse("456");
         oppgaveDto.setOppgavetype("JFR");
         oppgaveDto.setTema("MED");
         when(oppgaveConsumerMock.hentOppgave("1234")).thenReturn(oppgaveDto);
         Oppgave oppgave = gsakFasade.hentOppgave("1234");
         assertThat(oppgave.getOppgaveId()).isEqualTo("1234");
-        assertThat(oppgave.getGsakSaksnummer()).isEqualTo("456");
+        assertThat(oppgave.getGsakSaksnummer()).isEqualTo(456L);
         assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetype.valueOf("JFR"));
         assertThat(oppgave.getTema()).isEqualTo(Tema.valueOf("MED"));
     }

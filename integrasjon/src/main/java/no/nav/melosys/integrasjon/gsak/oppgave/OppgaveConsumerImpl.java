@@ -18,28 +18,24 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
-import no.nav.melosys.integrasjon.gsak.oppgave.dto.FeilResponseDto;
+import no.nav.melosys.integrasjon.gsak.felles.dto.FeilResponseDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSvar;
+import no.nav.melosys.integrasjon.gsak.oppgave.dto.OpprettOppgaveDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-import static javax.ws.rs.core.Response.Status.Family.CLIENT_ERROR;
-import static javax.ws.rs.core.Response.Status.Family.SERVER_ERROR;
-
-@Component
 public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(OppgaveConsumerImpl.class);
 
+    private final boolean erSystem;
+
     private WebTarget target;
 
-    @Autowired
-    public OppgaveConsumerImpl(@Value("${OppgaveAPI_v1.url}") final String endpointUrl) throws IntegrasjonException {
+    OppgaveConsumerImpl(String endpointUrl, boolean erSystem) throws IntegrasjonException {
+        this.erSystem = erSystem;
         try {
             SSLContext sslContext = SSLContext.getDefault();
             Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();
@@ -51,13 +47,18 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
     }
 
     @Override
+    public boolean isSystem() {
+        return erSystem;
+    }
+
+    @Override
     public OppgaveDto hentOppgave(String oppgaveId) {
         return target
             .path(oppgaveId)
             .request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getCallID())
-            .header(HttpHeaders.AUTHORIZATION, getBearer())
+            .header(HttpHeaders.AUTHORIZATION, getAuth())
             .get(OppgaveDto.class);
     }
 
@@ -70,16 +71,17 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
 
         lokalTarget = lokalTarget.queryParam("tildeltEnhetsnr", oppgaveSearchRequest.getTildeltEnhetsnr())
             .queryParam("sorteringsfelt", oppgaveSearchRequest.getSorteringsfelt())
-            .queryParam("tilordnetRessurs", oppgaveSearchRequest.getTilordnetRessurs());
+            .queryParam("tilordnetRessurs", oppgaveSearchRequest.getTilordnetRessurs())
+            .queryParam("statuskategori", oppgaveSearchRequest.getStatusKategori());
 
-        lokalTarget = leggTilQueryParamSomArray(lokalTarget,"tema", oppgaveSearchRequest.getTema());
-        lokalTarget = leggTilQueryParamSomArray(lokalTarget,"oppgavetype", oppgaveSearchRequest.getOppgavetype());
-        lokalTarget = leggTilQueryParamSomArray(lokalTarget,"behandlingstype", oppgaveSearchRequest.getBehandlingstype());
+        lokalTarget = leggTilQueryParamSomArray(lokalTarget, "tema", oppgaveSearchRequest.getTema());
+        lokalTarget = leggTilQueryParamSomArray(lokalTarget, "oppgavetype", oppgaveSearchRequest.getOppgavetype());
+        lokalTarget = leggTilQueryParamSomArray(lokalTarget, "behandlingstype", oppgaveSearchRequest.getBehandlingstype());
 
         OppgaveSvar oppgaveSvar = lokalTarget.request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getCallID())
-            .header(HttpHeaders.AUTHORIZATION, getBearer())
+            .header(HttpHeaders.AUTHORIZATION, getAuth())
             .get(OppgaveSvar.class);
         return oppgaveSvar.getOppgaver();
     }
@@ -93,7 +95,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
                 }
             }
         }
-    return tempTarget;
+        return tempTarget;
     }
 
     @Override
@@ -101,41 +103,34 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
         try (Response response = target.path(request.getId())
             .request(MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getCallID())
-            .header(HttpHeaders.AUTHORIZATION, getBearer())
+            .header(HttpHeaders.AUTHORIZATION, getAuth())
             .put(Entity.json(request))) {
-            håndterFeil(response);
+            if (response.getStatus() != 200) {
+                håndterFeil(response);
+            }
         }
     }
 
     @Override
-    public String opprettOppgave(OppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
+    public String opprettOppgave(OpprettOppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
         try (Response response = target
-            .path(request.getId())
             .request(MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getCallID())
-            .header(HttpHeaders.AUTHORIZATION, getBearer())
+            .header(HttpHeaders.AUTHORIZATION, getAuth())
             .post(Entity.json(request))) {
-            if( response.getStatus() == 201 ) { // Oppgaven opprettet
+            if (response.getStatus() == 201) { // Oppgaven opprettet
                 OppgaveDto oppgaveDto = response.readEntity(OppgaveDto.class);
                 return oppgaveDto.getId();
             }
             håndterFeil(response);
         }
-        throw new TekniskException("Uventet feil har oppstått i OpprettOppgave");
+        throw new TekniskException("Uventet feil har oppstått i opprettOppgave");
     }
 
-    private void håndterFeil(Response response) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
-        if (response == null) {
-            throw new TekniskException("Ingen response fra GSAK Oppgave REST Tjeneste");
-        }
+    @Override
+    public void håndterFeil(Response response) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
         FeilResponseDto feilResponseDto = response.readEntity(FeilResponseDto.class);
         log.error("Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());
-        if (response.getStatus() == 401 || response.getStatus() == 403) {
-            throw new SikkerhetsbegrensningException(feilResponseDto.getFeilmelding());
-        } else if (Response.Status.Family.familyOf(response.getStatus()) == CLIENT_ERROR) {
-            throw new FunksjonellException(feilResponseDto.getFeilmelding());
-        } else if (Response.Status.Family.familyOf(response.getStatus()) == SERVER_ERROR) {
-            throw new TekniskException(feilResponseDto.getFeilmelding());
-        }
+        statusTilException(response.getStatus(), feilResponseDto.getFeilmelding());
     }
 }

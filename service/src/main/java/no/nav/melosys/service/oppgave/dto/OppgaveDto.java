@@ -2,67 +2,32 @@ package no.nav.melosys.service.oppgave.dto;
 
 
 import java.time.LocalDate;
-import java.util.List;
 
-import no.nav.melosys.domain.FagsakType;
-import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 
 public class OppgaveDto {
-    private String oppgaveID;
-    private Oppgavetype oppgavetype;
-    private String sammensattNavn;
-    private String saksnummer;
-    private String journalpostID;
     private LocalDate aktivTil;
-    private PeriodeDto soknadsperiode;
-    private FagsakType sakstype;
-    private BehandlingDto behandling;
+    private String ansvarligID;
+    private String oppgaveID;
+    private String oppgavetypeKode;
     private PrioritetType prioritet;
-    private List<String> land;
     private int versjon;
-    private String ansvarligId;
-    // FIXME: MELOSYS-1401 trenger frontend behandlingstype,behandlingstema,temagruppe ?
 
-    //Getter og setter brukes av Jackson for å serialisere oppgave objekter til frontend i OppgaveTjeneste
-    public String getAnsvarligId() {
-        return ansvarligId;
+    //Getter brukes av Jackson for å serialisere oppgave objekter til frontend i OppgaveTjeneste
+    public LocalDate getAktivTil() {
+        return aktivTil;
     }
 
-    public void setAnsvarligId(String ansvarligId) {
-        this.ansvarligId = ansvarligId;
+    public void setAktivTil(LocalDate aktivTil) {
+        this.aktivTil = aktivTil;
     }
 
-    public int getVersjon() {
-        return versjon;
+    public String getAnsvarligID() {
+        return ansvarligID;
     }
 
-    public void setVersjon(int versjon) {
-        this.versjon = versjon;
-    }
-
-    public FagsakType getSakstype() {
-        return sakstype;
-    }
-
-    public void setSakstype(FagsakType sakstype) {
-        this.sakstype = sakstype;
-    }
-
-    public BehandlingDto getBehandling() {
-        return behandling;
-    }
-
-    public void setBehandling(BehandlingDto behandling) {
-        this.behandling = behandling;
-    }
-
-    public List<String> getLand() {
-        return this.land;
-    }
-
-    public void setLand(List<String> land) {
-        this.land = land;
+    public void setAnsvarligID(String ansvarligID) {
+        this.ansvarligID = ansvarligID;
     }
 
     public String getOppgaveID() {
@@ -73,52 +38,12 @@ public class OppgaveDto {
         this.oppgaveID = oppgaveID;
     }
 
-    public Oppgavetype getOppgavetype() {
-        return oppgavetype;
+    public String getOppgavetypeKode() {
+        return oppgavetypeKode;
     }
 
-    public void setOppgavetype(Oppgavetype oppgavetype) {
-        this.oppgavetype = oppgavetype;
-    }
-
-    public String getSammensattNavn() {
-        return sammensattNavn;
-    }
-
-    public void setSammensattNavn(String sammensattNavn) {
-        this.sammensattNavn = sammensattNavn;
-    }
-
-    public String getSaksnummer() {
-        return saksnummer;
-    }
-
-    public void setSaksnummer(String saksnummer) {
-        this.saksnummer = saksnummer;
-    }
-
-    public String getJournalpostID() {
-        return journalpostID;
-    }
-
-    public void setJournalpostID(String journalpostID) {
-        this.journalpostID = journalpostID;
-    }
-
-    public LocalDate getAktivTil() {
-        return aktivTil;
-    }
-
-    public void setAktivTil(LocalDate aktivTil) {
-        this.aktivTil = aktivTil;
-    }
-
-    public PeriodeDto getSoknadsperiode() {
-        return soknadsperiode;
-    }
-
-    public void setSoknadsperiode(PeriodeDto soknadsperiode) {
-        this.soknadsperiode = soknadsperiode;
+    public void setOppgavetypeKode(String oppgavetypeKode) {
+        this.oppgavetypeKode = oppgavetypeKode;
     }
 
     public PrioritetType getPrioritet() {
@@ -127,5 +52,13 @@ public class OppgaveDto {
 
     public void setPrioritet(PrioritetType prioritet) {
         this.prioritet = prioritet;
+    }
+
+    public int getVersjon() {
+        return versjon;
+    }
+
+    public void setVersjon(int versjon) {
+        this.versjon = versjon;
     }
 }

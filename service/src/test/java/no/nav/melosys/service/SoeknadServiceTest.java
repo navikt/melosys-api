@@ -105,7 +105,6 @@ public class SoeknadServiceTest {
     @Test
     public void registrerSøknad() throws Exception {
 
-        soeknadDokument.arbeidNorge.ansattPaSokkelEllerSkip = "sokkel";
         long behandlingID = 1L;
         Behandling b = new Behandling();
 

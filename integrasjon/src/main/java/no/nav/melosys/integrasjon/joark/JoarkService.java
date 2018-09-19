@@ -118,7 +118,7 @@ public class JoarkService implements JoarkFasade {
         }
         journalpost.setAvsenderId(inngaaendeJournalpost.getAvsenderId());
         if (inngaaendeJournalpost.getForsendelseMottatt() != null) {
-            journalpost.setForsendelseMottatt(KonverteringsUtils.xmlGregorianCalendarToLocalDateTime(inngaaendeJournalpost.getForsendelseMottatt()));
+            journalpost.setForsendelseMottatt(KonverteringsUtils.xmlGregorianCalendarToInstant(inngaaendeJournalpost.getForsendelseMottatt()));
         }
         Dokumentinformasjon hoveddokument = inngaaendeJournalpost.getHoveddokument();
         journalpost.setHoveddokumentId(hoveddokument.getDokumentId());
@@ -129,7 +129,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void oppdaterJounalpost(String journalpostId, String dokumentID, String gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, boolean medDokumentkategori)
+    public void oppdaterJounalpost(String journalpostId, String dokumentID, Long gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, boolean medDokumentkategori)
         throws SikkerhetsbegrensningException, IntegrasjonException {
         OppdaterJournalpostRequest request = new OppdaterJournalpostRequest();
         no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.InngaaendeJournalpost journalpost =
@@ -137,7 +137,7 @@ public class JoarkService implements JoarkFasade {
         journalpost.setJournalpostId(journalpostId);
 
         ArkivSak arkivSak = new ArkivSak();
-        arkivSak.setArkivSakId(gsakSaksnummer);
+        arkivSak.setArkivSakId(Long.toString(gsakSaksnummer));
         arkivSak.setArkivSakSystem(Fagsystem.GSAK.getKode());
         journalpost.setArkivSak(arkivSak);
 

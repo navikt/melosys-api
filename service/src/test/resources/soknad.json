@@ -1,90 +1,117 @@
-{    "opplysningerOmBrukeren": {
-      "personUtenlandskID": "123-12-123456789"
+{
+  "personOpplysninger": {
+    "utenlandskID": [
+      {
+        "ID": "123456789",
+        "landKode": "DK"
+      }
+    ]
+  },
+  "arbeidUtland": [{
+    "adresse": {
+      "gatenavn": "Adresseveien 123",
+      "postnummer": "1234",
+      "poststed": "Poststedet",
+      "landKode": "DE"
     },
-    "arbeidUtland": {
-      "arbeidsland": [
-        "ES",
-        "DK"
-      ],
-      "arbeidsperiode": {
-        "fom": "2018-01-01",
-        "tom": "2018-06-01"
-      },
-      "arbeidsandelNorge": 33.3,
-      "arbeidsandelUtland": 66.6,
-      "arbeidsstedUtland": null,
-      "bostedsland": "SE",
-      "erstatterTidligereUtsendt": false
+    "arbeidsandelNorge": 33.3,
+    "arbeidsandelUtland": 66.6,
+    "arbeidUtlandErstatning": false,
+    "arbeidUtlandHjemmekontor": false
+  }],
+  "foretakUtland": [
+    {
+      "navn": "Volkswagen AG",
+      "orgnr": "1122334444",
+      "adresse": {
+        "gatenavn": "Deutschlandstrasse 123",
+        "postnummer": "3388",
+        "poststed": "Berlin",
+        "landKode": "DE"
+      }
+    }
+  ],
+  "oppholdUtland": {
+    "oppholdslandKoder": [
+      "DE"
+    ],
+    "oppholdsPeriode": {
+      "fom": "2018-01-01",
+      "tom": "2018-06-01"
     },
-    "foretakUtland": {
-      "foretakUtlandNavn": "Volkswagen AG",
-      "foretakUtlandOrgnr": "1122334444",
-      "foretakUtlandAdresse": null
-    },
-    "oppholdUtland": {
-      "oppholdsland": [
-        "DE"
-      ],
-      "oppholdsPeriode": {
-        "fom": "2018-01-01",
-        "tom": "2018-06-01"
-      },
-      "studentIEOS": true,
-      "studentFinansiering": "Har egne midler oppspart, støtte fra familie.",
-      "studentSemester": "2018/2019",
-      "studieLand": "UK"
-    },
-    "arbeidNorge": {
-      "valgteArbeidsforhold": [
-        "44137901"
-      ],
-      "arbeidsforholdOpprettholdIHelePerioden": true,
-      "brukerErSelvstendigNaeringsdrivende": true,
-      "selvstendigFortsetterEtterArbeidIUtlandet": true,
-      "arbeidsforholdVikarNavn": "Vikarbyrået AS",
-      "vikarOrgnr": "22334455",
-      "flyendePersonellHjemmebase": "Flybasen Int. Airport, ....",
-      "ansattPaSokkelEllerSkip": "sokkel | skip",
-      "navnSkipEllerSokkel": "Trym-sokkelen",
-      "sokkelLand": "SE",
-      "skipFartsomrade": "Europeisk fart",
-      "skipFlaggLand": "SE",
-      "kontaktNavn": "Ola Nordmann",
-      "kontaktEpost": "ola.nordmann@fullmektigfirma.no",
-      "fullmektigFirma": "Advokatfullmektig AS",
-      "fullmektigAdresse": "Adresseveien 123, 1234 Byen"
-    },
-    "juridiskArbeidsgiverNorge": {
-      "antallAnsatte": 350,
-      "antallAdminAnsatte": 250,
-      "antallAdminAnsatteEOS": 75,
-      "andelOmsetningINorge": 78.5,
-      "andelKontrakterINorge": 50.5,
-      "erBemanningsbyra": false,
-      "hattDriftSiste12Mnd": true,
-      "antallUtsendte": 30
-    },
-    "arbeidsinntekt": {
-      "inntektNorskIPerioden": 5500,
-      "inntektUtenlandskIPerioden": 2000,
-      "inntektNaeringIPerioden": 0,
-      "inntektNaturalYtelser": [
-        "Fri bolig",
-        "Fri bil"
-      ],
-      "inntektErInnrapporteringspliktig": true,
-      "inntektTrygdeavgiftBlirTrukket": true
-    },
-    "arbeidsgiversBekreftelse": {
-      "arbeidsgiverBekrefterUtsendelse": true,
-      "arbeidstakerAnsattUnderUtsendelsen": true,
-      "erstatterArbeidstakerenUtsendte": false,
-      "arbeidstakerTidligereUtsendt24Mnd": false,
-      "arbeidsgiverBetalerArbeidsgiveravgift": true,
-      "trygdeavgiftTrukketGjennomSkatt": true,
-      "trygdeavgiftTrukketGjennomSkattDato": "2018-01-01"
-    },
-    "tilleggsopplysninger": "Lang utgreiing om utsendelsen som egentlig ikke er relevant for saksbehandlingen..."
+    "ektefelleEllerBarnINorge": true,
+    "sammeAdresseSomArbeidsgiver": true,
+    "studentFinansieringKode": "LAANEKASSEN",
+    "studentSemester": "2018/2019"
+  },
+  "bosted": {
+    "intensjonOmRetur": true,
+    "bostedUtenforNorge": true,
+    "familiesBostedLandKode": "SE",
+    "antallMaanederINorge": 8,
+    "EOSBarnetrygdFraNAV": true,
+    "adresseIUtlandet": true,
+    "oppgittAdresse": {
+      "gatenavn": "Gateadressen",
+      "postnummer": "12345",
+      "poststed": "Poststeder",
+      "landKode": "DE"
+    }
+  },
+  "arbeidNorge": {
+    "arbeidsforholdOpprettholdIHelePerioden": true,
+    "arbeidsforholdVikarNavn": "Vikarbyrået AS",
+    "vikarOrgnr": "22334455",
+    "flyendePersonellHjemmebase": "Flybasen Int. Airport, ....",
+    "kontaktNavn": "Ola Nordmann",
+    "kontaktEpost": "ola.nordmann@fullmektigfirma.no",
+    "fullmektigFirma": "Advokatfullmektig AS",
+    "fullmektigGateadresse": "Adresseveien 123",
+    "fullmektigPostnr": "1234",
+    "fullmektigPoststed": "Byensvik",
+    "fullmektigRegion": "Østlandsregionen",
+    "fullmektigLandKode": "NO"
+  },
+  "juridiskArbeidsgiverNorge": {
+    "erBemanningsbyra": false,
+    "utsendteNeste12Mnd": 10,
+    "antallAdmAnsatte": 350,
+    "antallAdminAnsatteEOS": 75,
+    "andelOmsetningINorge": 78.5,
+    "andelKontrakterINorge": 50.5,
+    "utsendtFortsetterArbeidsforholdIUtlandet": true,
+    "utsendtArbeiderArbeiderMedKlienter": true,
+    "utsendtArbeiderArbeiderMedKontrakter": true
+  },
+  "arbeidsinntekt": {
+    "inntektNorskIPerioden": 5500,
+    "inntektUtenlandskIPerioden": 2000,
+    "inntektNaeringIPerioden": 0,
+    "inntektNaturalYtelser": [
+      "Fri bolig",
+      "Fri bil"
+    ],
+    "inntektErInnrapporteringspliktig": true,
+    "inntektTrygdeavgiftBlirTrukket": true
+  },
+  "arbeidsgiversBekreftelse": {
+    "arbeidsgiverBekrefterUtsendelse": true,
+    "arbeidstakerAnsattUnderUtsendelsen": true,
+    "erstatterArbeidstakerenUtsendte": false,
+    "arbeidstakerTidligereUtsendt24Mnd": false,
+    "arbeidsgiverBetalerArbeidsgiveravgift": true,
+    "trygdeavgiftTrukketGjennomSkatt": true,
+    "trygdeavgiftTrukketGjennomSkattDato": "2018-01-01"
+  },
+  "maritimtArbeid": {
+    "maritimTypeKode": "SKIP",
+    "skipsNavn": "Navn på skipet",
+    "fartsomradeKode": "INNENRIKS",
+    "flaggLandKode": "GB",
+    "installasjonsLandKode": "GB"
   }
+}
+
+
 
 

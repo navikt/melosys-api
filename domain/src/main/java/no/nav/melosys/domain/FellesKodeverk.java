@@ -7,6 +7,8 @@ public enum FellesKodeverk {
     DISKRESJONSKODER("Diskresjonskoder"),
     DOKUMENTKATEGORIER("Dokumentkategorier"),
     ENHETSTYPER_JURIDISK_ENHET("EnhetstyperJuridiskEnhet"),
+    FAMILIERELASJONER("Familierelasjoner"),
+    FARTSOMRAADE("Fartsområder"),
     GRUNNLAG_MEDL("GrunnlagMedl"),
     KILDEDOKUMENT_MEDL("KildedokumentMedl"),
     KILDESYSTEM_MEDL("KildesystemMedl"),
@@ -16,7 +18,9 @@ public enum FellesKodeverk {
     LOVVALG_MEDL("LovvalgMedl"),
     PERIODESTATUS_MEDL("PeriodestatusMedl"),
     PERSONSTATUSER("Personstatuser"),
-    POSTNUMMER("Postnummer");
+    POSTNUMMER("Postnummer"),
+    SKIPSREGISTRE("Skipsregistre"),
+    SKIPSTYPER("Skipstyper");
 
     FellesKodeverk(String navn) {
         this.navn = navn;

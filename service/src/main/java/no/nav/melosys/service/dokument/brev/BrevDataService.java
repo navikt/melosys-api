@@ -2,23 +2,22 @@ package no.nav.melosys.service.dokument.brev;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.time.LocalDate;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import no.nav.foreldrepenger.integrasjon.dokument.felles.*;
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.DokumentType;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
+import no.nav.dok.brevdata.felles.v1.navfelles.Person;
+import no.nav.dok.brevdata.felles.v1.navfelles.Saksbehandler;
+import no.nav.dok.brevdata.felles.v1.navfelles.Sakspart;
+import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
+import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
+import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
@@ -31,6 +30,8 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
+
 /**
  * BrevDataService er ansvarlig for å mappe saksopplysninger i brevmalene.
  */
@@ -38,6 +39,11 @@ import org.xml.sax.SAXException;
 public class BrevDataService {
 
     private TpsFasade tpsFasade;
+
+    static final String MELOSYS_ENHET_ID = "4530";
+
+    static final String PLASSHOLDER_TEKST = "-";
+    static final String PLASSHOLDER_POSTNUMMER = "0000";
 
     @Autowired
     public BrevDataService(TpsFasade tpsFasade) {
@@ -51,7 +57,7 @@ public class BrevDataService {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
 
         Fagsak fagsak = behandling.getFagsak();
-        Aktoer bruker = fagsak.getBruker();
+        Aktoer bruker = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
         if (bruker != null) {
             try {
                 metadata.bruker = tpsFasade.hentIdentForAktørId(bruker.getAktørId());
@@ -63,7 +69,7 @@ public class BrevDataService {
         }
 
         metadata.dokumenttypeID = dokumentType.getKode();
-        metadata.journalsakID = fagsak.getGsakSaksnummer();
+        metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
         // FIXME Mottaker er avhengig av dokumentTypen men kan også sendes som parameter
         metadata.mottaker = null;
         // FIXME Fagområde er avhengig av dokumentTypen men kan også sendes som parameter.
@@ -79,7 +85,8 @@ public class BrevDataService {
         Element brevXmlElement;
         try {
             FellesType fellesType = mapFellesType(behandling);
-            String brevXml = BrevDataMapperRuter.brevDataMapper(dokumentType).mapTilBrevXML(fellesType, behandling);
+            MelosysNAVFelles navFelles = mapNAVFelles(behandling);
+            String brevXml = BrevDataMapperRuter.brevDataMapper(dokumentType).mapTilBrevXML(fellesType, navFelles, behandling);
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -94,69 +101,82 @@ public class BrevDataService {
         return brevXmlElement;
     }
 
-    // FIXME Venter på riktig XSD
-    public FellesType mapFellesType(Behandling behandling) throws TekniskException {
+    private FellesType mapFellesType(Behandling behandling) throws TekniskException {
         final FellesType fellesType = new FellesType();
-        fellesType.setSpraakkode(SpraakkodeType.fromValue(SpraakkodeType.NB.value()));
         fellesType.setFagsaksnummer(behandling.getFagsak().getSaksnummer());
-
-        String userID = SubjectHandler.getInstance().getUserID();
-        if (userID != null) {
-            SignerendeSaksbehandlerType signerendeSaksbehandlerType = new SignerendeSaksbehandlerType();
-            signerendeSaksbehandlerType.setSignerendeSaksbehandlerNavn(userID);
-            fellesType.setSignerendeSaksbehandler(signerendeSaksbehandlerType);
-        }
-        fellesType.setAutomatiskBehandlet(false);
-        SakspartType sakspartType = new SakspartType();
-        sakspartType.setSakspartId("MEL-001");
-        sakspartType.setSakspartTypeKode(IdKodeType.PERSON);
-        sakspartType.setSakspartNavn("Test");
-        fellesType.setSakspart(sakspartType);
-
-        fellesType.setMottaker(lageMottakerType(behandling));
-        fellesType.setNavnAvsenderEnhet("NavnAvsenderEnhet");
-        fellesType.setNummerAvsenderEnhet("NummerAvsenderEnhet");
-        fellesType.setKontaktInformasjon(BrevDataUtils.lageKontaktInformasjonType(behandling));
-
-        try {
-            fellesType.setDokumentDato(convertToXMLGregorianCalendarRemoveTimezone(LocalDate.now()));
-        } catch (DatatypeConfigurationException e) {
-            throw new TekniskException("Konverteringsfeil", e);
-        }
 
         return fellesType;
     }
 
-    private MottakerType lageMottakerType(Behandling behandling) {
-        MottakerType mottakerType = new MottakerType();
-        mottakerType.setMottakerId("Mottaker-ID");
-        mottakerType.setMottakerTypeKode(IdKodeType.PERSON);
-        mottakerType.setMottakerNavn("Mottaker-Navn");
-        MottakerAdresseType mottakerAdresseType = new MottakerAdresseType();
+    private MelosysNAVFelles mapNAVFelles(Behandling behandling) throws TekniskException {
+        final MelosysNAVFelles navFelles = new MelosysNAVFelles();
 
-        mottakerAdresseType.setAdresselinje1("Linje_1");
-        mottakerAdresseType.setAdresselinje2("Linje_2");
-        mottakerAdresseType.setAdresselinje3("Linje_3");
-        mottakerAdresseType.setPostNr("7777");
-        mottakerAdresseType.setPoststed("Poststed");
-        mottakerAdresseType.setLand("NO");
-        mottakerType.setMottakerAdresse(mottakerAdresseType);
-        return mottakerType;
+        navFelles.setSakspart(lagSakspart(behandling));
+        navFelles.setMottaker(lagMottaker(behandling));
+        navFelles.setBehandlendeEnhet(lagNavEnhet());
+        navFelles.setSignerendeSaksbehandler(lagSaksbehandler());
+        navFelles.setSignerendeBeslutter(lagSaksbehandler());
+        navFelles.setKontaktinformasjon(BrevDataUtils.lagKontaktInformasjon());
+
+        return navFelles;
     }
 
-    public static XMLGregorianCalendar convertToXMLGregorianCalendarRemoveTimezone(LocalDate localDate) throws DatatypeConfigurationException {
-        if (localDate == null) {
-            return null;
+    private Sakspart lagSakspart(Behandling behandling) throws TekniskException {
+        Sakspart sakspart = new Sakspart();
+        Aktoer aktør = behandling.getFagsak().hentAktørMedRolleType(RolleType.BRUKER);
+
+        if (aktør == null || aktør.getAktørId() == null) {
+            throw new TekniskException("Det finnes ingen bruker på sak " + behandling.getFagsak().getSaksnummer());
         }
-        return DatatypeFactory.newInstance().newXMLGregorianCalendar(
-            localDate.getYear(),
-            localDate.getMonthValue(),
-            localDate.getDayOfMonth(),
-            DatatypeConstants.FIELD_UNDEFINED,
-            DatatypeConstants.FIELD_UNDEFINED,
-            DatatypeConstants.FIELD_UNDEFINED,
-            DatatypeConstants.FIELD_UNDEFINED,
-            DatatypeConstants.FIELD_UNDEFINED
-        );
+        try {
+            sakspart.setId(tpsFasade.hentIdentForAktørId(aktør.getAktørId()));
+        } catch (IkkeFunnetException e) {
+            throw new TekniskException("Det finnes ingen ident for aktørID " + aktør.getAktørId());
+        }
+
+        sakspart.setTypeKode(AktoerType.PERSON);
+        sakspart.setBerik(true);
+        sakspart.setNavn(PLASSHOLDER_TEKST);
+        return sakspart;
     }
+
+    private Mottaker lagMottaker(Behandling behandling) throws TekniskException {
+        Mottaker mottaker = new Person(); // FIXME mottaker kan være Organisasjon
+        Aktoer aktør = behandling.getFagsak().hentAktørMedRolleType(RolleType.REPRESENTANT);
+        if (aktør == null) {
+            aktør = behandling.getFagsak().hentAktørMedRolleType(RolleType.BRUKER);
+        }
+
+        if (aktør == null || aktør.getAktørId() == null) {
+            throw new TekniskException("Det finnes ingen representant/bruker på sak " + behandling.getFagsak().getSaksnummer());
+        }
+        try {
+            mottaker.setId(tpsFasade.hentIdentForAktørId(aktør.getAktørId()));
+        } catch (IkkeFunnetException e) {
+            throw new TekniskException("Det finnes ingen ident for aktørID " + aktør.getAktørId());
+        }
+
+        mottaker.setTypeKode(AktoerType.PERSON);
+        mottaker.setBerik(true); // Gjør oppslag mot EREG/TPS
+
+        mottaker.setNavn(PLASSHOLDER_TEKST);
+        mottaker.setKortNavn(PLASSHOLDER_TEKST);
+        mottaker.setSpraakkode(Spraakkode.NB);
+        mottaker.setMottakeradresse(lagNorskPostadresse());
+
+        return mottaker;
+    }
+
+    // FIXME Bør være private
+    Saksbehandler lagSaksbehandler() {
+        Saksbehandler saksbehandler = new Saksbehandler();
+        saksbehandler.setNavEnhet(lagNavEnhet());
+
+        String userID = SubjectHandler.getInstance().getUserID();
+        if (userID != null) {
+            saksbehandler.setNavAnsatt(lagNavAnsatt(userID));
+        }
+        return saksbehandler;
+    }
+
 }

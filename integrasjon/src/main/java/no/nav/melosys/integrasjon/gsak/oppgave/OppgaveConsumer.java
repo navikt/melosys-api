@@ -5,10 +5,12 @@ import java.util.List;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.gsak.felles.GsakConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
+import no.nav.melosys.integrasjon.gsak.oppgave.dto.OpprettOppgaveDto;
 
-public interface OppgaveConsumer {
+public interface OppgaveConsumer extends GsakConsumer {
 
     OppgaveDto hentOppgave(String oppgaveId);
 
@@ -16,6 +18,6 @@ public interface OppgaveConsumer {
 
     void oppdaterOppgave(OppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException;
 
-    String opprettOppgave(OppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException;
+    String opprettOppgave(OpprettOppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException;
 }
 

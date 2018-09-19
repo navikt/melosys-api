@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -60,9 +60,9 @@ public class FagsakTjeneste extends RestTjeneste {
         TypeMap<Behandling, BehandlingDto> typeMapBehandlingUt = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
         typeMapBehandlingUt.<Long>addMapping(Behandling::getId, (dest, id) -> dest.getOppsummering().setBehandlingID(id));
         typeMapBehandlingUt.<BehandlingStatus>addMapping(Behandling::getStatus, (dest, status) -> dest.getOppsummering().setStatus(status));
-        typeMapBehandlingUt.<BehandlingType>addMapping(Behandling::getType, (dest, type) -> dest.getOppsummering().setType(type));
-        typeMapBehandlingUt.<LocalDateTime>addMapping(Behandling::getRegistrertDato, (dest, dato) -> dest.getOppsummering().setRegistrertDato(dato));
-        typeMapBehandlingUt.<LocalDateTime>addMapping(Behandling::getEndretDato, (dest, dato) -> dest.getOppsummering().setEndretDato(dato));
+        typeMapBehandlingUt.<Behandlingstype>addMapping(Behandling::getType, (dest, type) -> dest.getOppsummering().setType(type));
+        typeMapBehandlingUt.<Instant>addMapping(Behandling::getRegistrertDato, (dest, dato) -> dest.getOppsummering().setRegistrertDato(dato));
+        typeMapBehandlingUt.<Instant>addMapping(Behandling::getEndretDato, (dest, dato) -> dest.getOppsummering().setEndretDato(dato));
         typeMapBehandlingUt.addMappings(mapper -> mapper.using(new SaksopplysningerTilDtoConverter()).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
     }
 
@@ -102,13 +102,12 @@ public class FagsakTjeneste extends RestTjeneste {
     @Deprecated // FIXME Trenger test en metode for å opprette fagsaker utenom saksflyt?
     public Response nyFagsak(String fnr) {
         try {
-            Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, BehandlingType.SØKNAD);
+            Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, Behandlingstype.SØKNAD);
 
             if (fagsak == null) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             } else {
-                FagsakDto fagsakDto = tilDto(fagsak);
-                return Response.ok(fagsakDto).build();
+                return Response.ok(fagsak.getSaksnummer()).build();
             }
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.NOT_FOUND).entity("Ident " + fnr + " ikke funnet").build();

@@ -6,11 +6,11 @@ public class SoeknadDto {
 
     private long behandlingID;
 
-    private SoeknadDokument soknadDokument;
+    private SoeknadDokument soeknadDokument;
 
     public SoeknadDto(long behandlingID, SoeknadDokument soeknad) {
         this.behandlingID = behandlingID;
-        this.soknadDokument = soeknad;
+        this.soeknadDokument = soeknad;
     }
 
     public long getBehandlingID() {
@@ -21,11 +21,13 @@ public class SoeknadDto {
         this.behandlingID = behandlingID;
     }
 
-    public SoeknadDokument getSoknadDokument() {
-        return soknadDokument;
+    public SoeknadDokument getSoeknadDokument() {
+        return soeknadDokument;
     }
 
-    public void setSoknadDokument(SoeknadDokument soknadDokument) {
-        this.soknadDokument = soknadDokument;
+    public void setSoeknadDokument(SoeknadDokument soeknadDokument) {
+        this.soeknadDokument = soeknadDokument;
     }
+
+
 }

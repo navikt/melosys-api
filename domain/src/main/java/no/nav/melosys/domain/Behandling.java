@@ -1,5 +1,6 @@
 package no.nav.melosys.domain;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
@@ -23,14 +24,17 @@ public class Behandling {
     private BehandlingStatus status;
 
     @Column(name = "beh_type", nullable = false, updatable = false)
-    @Convert(converter = BehandlingType.DbKonverterer.class)
-    private BehandlingType type;
+    @Convert(converter = Behandlingstype.DbKonverterer.class)
+    private Behandlingstype type;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
-    private LocalDateTime registrertDato;
+    private Instant registrertDato;
 
     @Column(name = "endret_dato", nullable = false, updatable = true)
-    private LocalDateTime endretDato;
+    private Instant endretDato;
+
+    @Column(name = "siste_opplysninger_hentet_dato", updatable = true)
+    private LocalDateTime sisteOpplysningerHentetDato;
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
@@ -58,28 +62,36 @@ public class Behandling {
         this.status = status;
     }
 
-    public BehandlingType getType() {
+    public Behandlingstype getType() {
         return type;
     }
 
-    public void setType(BehandlingType type) {
+    public void setType(Behandlingstype type) {
         this.type = type;
     }
     
-    public LocalDateTime getRegistrertDato() {
+    public Instant getRegistrertDato() {
         return registrertDato;
     }
 
-    public void setRegistrertDato(LocalDateTime registrertDato) {
+    public void setRegistrertDato(Instant registrertDato) {
         this.registrertDato = registrertDato;
     }
 
-    public LocalDateTime getEndretDato() {
+    public Instant getEndretDato() {
         return endretDato;
     }
 
-    public void setEndretDato(LocalDateTime endretDato) {
+    public void setEndretDato(Instant endretDato) {
         this.endretDato = endretDato;
+    }
+
+    public LocalDateTime getSistOpplysningerHentetDato() {
+        return sisteOpplysningerHentetDato;
+    }
+
+    public void setSisteOpplysningerHentetDato(LocalDateTime sisteOpplysningerHentetDato) {
+        this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
     }
 
     public Set<Saksopplysning> getSaksopplysninger() {

@@ -1,8 +1,8 @@
 package no.nav.melosys.service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakStatus;
 import no.nav.melosys.domain.FagsakType;
@@ -39,36 +39,33 @@ public class FagsakServiceTest {
     @Mock
     private FagsakRepository fagsakRepo;
 
-    private SaksopplysningerService saksopplysningerService;
-
     private FagsakService fagsakService;
 
     @Before
     public void setUp() {
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
-
         TpsFasade tps = new TpsService(null, null, dokumentFactory, null);
         AaregFasade aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
         EregFasade ereg = new EregService(new OrganisasjonMock(), dokumentFactory);
         MedlFasade medl = new MedlService(new MedlemskapMock(), dokumentFactory);
         InntektFasade inntekt = new InntektService(new InntektMock(), dokumentFactory);
 
-        saksopplysningerService = new SaksopplysningerService(tps, aareg, ereg, medl, inntekt);
+        SaksopplysningerService saksopplysningerService = new SaksopplysningerService(tps, aareg, ereg, medl, inntekt , null, null , null);
         ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallÅr", 5);
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 12);
 
         fagsakRepo = mock(FagsakRepository.class);
-        BehandlingRepository behandlingRepo = mock(BehandlingRepository.class);
-        fagsakService = new FagsakService(fagsakRepo, behandlingRepo, saksopplysningerService, tps);
+        BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
+        fagsakService = new FagsakService(fagsakRepo, behandlingRepository, saksopplysningerService, tps);
     }
 
     @Test
     public void lagFagsak() throws Exception {
         Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer("123");
+        fagsak.setGsakSaksnummer(123L);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
         fagsak.setType(FagsakType.EU_EØS);
-        fagsak.setRegistrertDato(LocalDateTime.now());
+        fagsak.setRegistrertDato(Instant.now());
 
         fagsakService.lagre(fagsak);
         assertNotNull(fagsak);
@@ -80,7 +77,7 @@ public class FagsakServiceTest {
         final String[] identer = new String[]{"88888888884", "77777777779"};
 
         for (String fnr : identer) {
-            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(fnr, BehandlingType.SØKNAD);
+            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(fnr, Behandlingstype.SØKNAD);
 
             assertNotNull(fagsak);
             assertFalse(fagsak.getBehandlinger().isEmpty());

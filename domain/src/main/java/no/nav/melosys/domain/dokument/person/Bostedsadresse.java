@@ -14,6 +14,11 @@ public class Bostedsadresse {
 
     private Land land;
 
+    public Bostedsadresse() {
+        this.gateadresse = new Gateadresse();
+        this.land = new Land();
+    }
+
     public Gateadresse getGateadresse() {
         return gateadresse;
     }

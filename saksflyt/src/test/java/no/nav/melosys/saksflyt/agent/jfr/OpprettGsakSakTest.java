@@ -3,7 +3,9 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.Properties;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
@@ -35,7 +37,7 @@ public class OpprettGsakSakTest {
     }
 
     @Test
-    public void utfoerSteg() throws IntegrasjonException, TekniskException {
+    public void utfoerSteg() throws SikkerhetsbegrensningException, FunksjonellException, IntegrasjonException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         Properties properties = new Properties();
         String saksnummer = "MEL-009";
@@ -43,14 +45,14 @@ public class OpprettGsakSakTest {
         String aktørID = "FJERNET93";
         properties.setProperty(ProsessDataKey.AKTØR_ID.getKode(), aktørID);
         p.addData(properties);
-        when(gsakFasade.opprettSak(anyString(), eq(BehandlingType.SØKNAD), anyString())).thenReturn("GSAK-123");
+        when(gsakFasade.opprettSak(anyString(), eq(Behandlingstype.SØKNAD), anyString())).thenReturn(123L);
 
         Fagsak fagsak = new Fagsak();
         when(fagsakRepository.findBySaksnummer(any())).thenReturn(fagsak);
 
         agent.utførSteg(p);
 
-        verify(gsakFasade, times(1)).opprettSak(saksnummer, BehandlingType.SØKNAD, aktørID);
+        verify(gsakFasade, times(1)).opprettSak(saksnummer, Behandlingstype.SØKNAD, aktørID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
         Assert.notNull(fagsak.getGsakSaksnummer(), "Fagsak skal ha fått Gsak saksnummert");
     }

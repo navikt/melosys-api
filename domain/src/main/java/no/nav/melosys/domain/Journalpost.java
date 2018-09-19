@@ -1,6 +1,6 @@
 package no.nav.melosys.domain;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 /**
@@ -12,7 +12,7 @@ public class Journalpost {
     private String arkivSakSystem;
     private String avsenderId;
     private String brukerId;
-    private LocalDateTime forsendelseMottatt;
+    private Instant forsendelseMottatt;
     private String hoveddokumentId;
     private String hoveddokumentTittel;
 
@@ -48,11 +48,11 @@ public class Journalpost {
         this.avsenderId = avsenderId;
     }
 
-    public LocalDateTime getForsendelseMottatt() {
+    public Instant getForsendelseMottatt() {
         return forsendelseMottatt;
     }
 
-    public void setForsendelseMottatt(LocalDateTime forsendelseMottatt) {
+    public void setForsendelseMottatt(Instant forsendelseMottatt) {
         this.forsendelseMottatt = forsendelseMottatt;
     }
 

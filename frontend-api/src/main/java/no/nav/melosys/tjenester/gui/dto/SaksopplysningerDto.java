@@ -1,5 +1,8 @@
 package no.nav.melosys.tjenester.gui.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
@@ -7,9 +10,6 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @JsonPropertyOrder({"person", "arbeidsforhold", "organisasjoner", "medlemskap", "inntekt", "sakOgBehandling"})
 public class SaksopplysningerDto {
@@ -27,7 +27,13 @@ public class SaksopplysningerDto {
     private SobSakDokument sakOgBehandling;
 
     public SaksopplysningerDto() {
+        // Frontend ønsker å motta et objekt, selv når saksopplysninger ikke finnes.
+        this.person = new PersonDokument();
+        this.arbeidsforhold = new ArbeidsforholdDokument();
         this.organisasjoner = new ArrayList<>();
+        this.medlemskap = new MedlemskapDokument();
+        this.inntekt = new InntektDokument();
+        this.sakOgBehandling = new SobSakDokument();
     }
 
     public PersonDokument getPerson() {

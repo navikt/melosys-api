@@ -2,7 +2,7 @@ package no.nav.melosys.domain.dokument.felles;
 
 import no.nav.melosys.domain.FellesKodeverk;
 
-public class Land implements KodeverkHjelper{
+public class Land extends AbstraktKodeverkHjelper {
     public static final String BELGIA = "BEL";
     public static final String BULGARIA = "BGR";
     public static final String DANMARK = "DNK";
@@ -41,8 +41,6 @@ public class Land implements KodeverkHjelper{
     public static final String ØSTERRIKE = "AUT";
     public static final String ÅLAND = "ALA";
 
-    private String kode;
-
     // Brukes av JAXB
     public Land() {}
 
@@ -50,17 +48,9 @@ public class Land implements KodeverkHjelper{
         this.kode = landkode;
     }
 
-    public String getKode() {
-        return kode;
-    }
-
     @Override
     public FellesKodeverk hentKodeverkNavn() {
         return FellesKodeverk.LANDKODER;
-    }
-
-    public void setKode(String kode) {
-        this.kode = kode;
     }
 
     public boolean erSveits() {

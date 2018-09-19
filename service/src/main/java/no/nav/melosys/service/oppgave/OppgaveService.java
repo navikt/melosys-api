@@ -3,24 +3,22 @@ package no.nav.melosys.service.oppgave;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.service.oppgave.dto.BehandlingDto;
-import no.nav.melosys.service.oppgave.dto.OppgaveDto;
-import no.nav.melosys.service.oppgave.dto.PeriodeDto;
+import no.nav.melosys.service.oppgave.dto.*;
+import no.nav.melosys.repository.ProsessinstansRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,14 +33,17 @@ public class OppgaveService {
     private final GsakFasade gsakFasade;
     private final FagsakRepository fagsakRepository;
     private final TpsFasade tpsFasade;
+    private final ProsessinstansRepository prosessinstansRepository;
 
     @Autowired
     public OppgaveService(GsakFasade gsakFasade,
                           FagsakRepository fagsakRepository,
-                          TpsFasade tpsFasade) {
+                          TpsFasade tpsFasade,
+                          ProsessinstansRepository prosessinstansRepository) {
         this.gsakFasade = gsakFasade;
         this.fagsakRepository = fagsakRepository;
         this.tpsFasade = tpsFasade;
+        this.prosessinstansRepository = prosessinstansRepository;
     }
 
     @Transactional
@@ -70,59 +71,67 @@ public class OppgaveService {
     }
 
     private OppgaveDto tilOppgaveDto(Oppgave oppgave) throws TekniskException {
-        OppgaveDto dest = new OppgaveDto();
-        dest.setOppgaveID(oppgave.getOppgaveId());
-        dest.setAktivTil(oppgave.getFristFerdigstillelse());
-        dest.setOppgavetype(oppgave.getOppgavetype());
-        dest.setPrioritet(oppgave.getPrioritet());
-        dest.setVersjon(oppgave.getVersjon());
-        dest.setAnsvarligId(oppgave.getTilordnetRessurs());
+        OppgaveDto dest;
 
         if (oppgave.erJournalFøring()) {
-            dest.setOppgavetype(Oppgavetype.JFR);
-            dest.setJournalpostID(oppgave.getJournalpostId());
+            JournalfoeringsoppgaveDto jfrOppgaveDto = new JournalfoeringsoppgaveDto();
+            jfrOppgaveDto.setJournalpostID(oppgave.getJournalpostId());
+            dest = jfrOppgaveDto;
         } else if (oppgave.erBehandling()) {
-            dest.setOppgavetype(Oppgavetype.BEH_SAK);
-
+            BehandlingsoppgaveDto behOppgaveDto = new BehandlingsoppgaveDto();
             Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
             if (fagsak == null) {
                 throw new RuntimeException("Fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer() + " ikke funnet!");
             }
 
-            dest.setSaksnummer(fagsak.getSaksnummer());
-            dest.setSakstype(fagsak.getType());
+            behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
+            behOppgaveDto.setSakstypeKode(fagsak.getType().getKode());
 
             Behandling behandling = fagsak.getAktivBehandling();
-            dest.setBehandling(mapBehandling(behandling));
+            behOppgaveDto.setBehandling(mapBehandling(behandling));
 
             hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
                 SoeknadDokument søknadDokument = (SoeknadDokument) saksopplysningDokument;
-                dest.setLand(hentLand(søknadDokument));
-                dest.setSoknadsperiode(mapPeriode(søknadDokument));
+                behOppgaveDto.setLand(hentLand(søknadDokument));
+                behOppgaveDto.setSoknadsperiode(mapPeriode(søknadDokument));
             });
             hentDokument(behandling, SaksopplysningType.PERSONOPPLYSNING).ifPresent(
-                    saksopplysningDokument -> {
-                        PersonDokument personDokument = (PersonDokument) saksopplysningDokument;
-                        dest.setSammensattNavn(personDokument.sammensattNavn);
-                    }
+                saksopplysningDokument -> {
+                    PersonDokument personDokument = (PersonDokument) saksopplysningDokument;
+                    behOppgaveDto.setSammensattNavn(personDokument.sammensattNavn);
+                }
             );
 
+            dest = behOppgaveDto;
         } else {
             throw new TekniskException("Oppgavetype " + oppgave.getOppgavetype() + " støttes ikke");
         }
 
+        dest.setAktivTil(oppgave.getFristFerdigstillelse());
+        dest.setAnsvarligID(oppgave.getTilordnetRessurs());
+        dest.setOppgaveID(oppgave.getOppgaveId());
+        dest.setOppgavetypeKode(oppgave.getOppgavetype().getKode());
+        dest.setPrioritet(oppgave.getPrioritet());
+        dest.setVersjon(oppgave.getVersjon());
+
         return dest;
     }
 
-    private static BehandlingDto mapBehandling(Behandling behandling) {
+    private BehandlingDto mapBehandling(Behandling behandling) {
         BehandlingDto behandlingDto = new BehandlingDto();
         if (behandling == null) {
             throw new RuntimeException("Det finnes ingen aktive behandlinger");
         } else {
             behandlingDto.setBehandlingID(behandling.getId());
-            behandlingDto.setStatus(behandling.getStatus());
-            behandlingDto.setType(behandling.getType());
+            behandlingDto.setBehandlingStatus(behandling.getStatus());
+            behandlingDto.setBehandlingType(behandling.getType());
             behandlingDto.setEndretDato(behandling.getEndretDato());
+            Optional<Prosessinstans> prosessinstans = prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(ProsessType.OPPFRISKNING, behandling.getId());
+            if (prosessinstans.isPresent()) {
+                behandlingDto.setErUnderOppdatering(true);
+            } else {
+                behandlingDto.setErUnderOppdatering(false);
+            }
         }
         return behandlingDto;
     }

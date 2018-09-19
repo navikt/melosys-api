@@ -2,12 +2,14 @@ package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
@@ -17,6 +19,7 @@ import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +42,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
     private final GsakFasade gsakFasade;
 
     @Autowired
-    public OpprettGsakSak(GsakFasade gsakFasade, FagsakRepository fagsakRepository) {
+    public OpprettGsakSak(@Qualifier("system")GsakFasade gsakFasade, FagsakRepository fagsakRepository) {
         this.fagsakRepository = fagsakRepository;
         this.gsakFasade = gsakFasade;
         log.info("OpprettGsakSak initialisert");
@@ -57,7 +60,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
     
     @Transactional
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws TekniskException, IntegrasjonException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String aktørId = prosessinstans.getData(AKTØR_ID);
@@ -70,7 +73,7 @@ public class OpprettGsakSak extends AbstraktStegBehandler {
             return;
         }
 
-        String gsakSakId = gsakFasade.opprettSak(saksnummer, BehandlingType.SØKNAD, aktørId);
+        Long gsakSakId = gsakFasade.opprettSak(saksnummer, Behandlingstype.SØKNAD, aktørId);
         fagsak.setGsakSaksnummer(gsakSakId);
         fagsakRepository.save(fagsak);
         prosessinstans.setData(GSAK_SAK_ID, gsakSakId);

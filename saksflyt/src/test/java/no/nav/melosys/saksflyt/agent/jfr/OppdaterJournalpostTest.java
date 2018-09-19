@@ -41,7 +41,7 @@ public class OppdaterJournalpostTest {
     public void utfoerSteg() throws SikkerhetsbegrensningException, IntegrasjonException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
-        p.setData(ProsessDataKey.GSAK_SAK_ID, "Grønnsak id");
+        p.setData(ProsessDataKey.GSAK_SAK_ID, 123L);
         agent.utførSteg(p);
 
         verify(joarkFasade, times(1)).utledJournalfoeringsbehov(any());
@@ -56,7 +56,7 @@ public class OppdaterJournalpostTest {
         when(joarkFasade.utledJournalfoeringsbehov(any())).thenReturn(mangler);
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
-        p.setData(ProsessDataKey.GSAK_SAK_ID, "Grønnsak id");
+        p.setData(ProsessDataKey.GSAK_SAK_ID, 456L);
 
         agent.utførSteg(p);
 

@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +8,7 @@ import java.util.Map;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -69,12 +71,26 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         Behandling behandling = behandlingRepository.findOne(prosessinstans.getBehandling().getId());
 
         // Hent statsborgerskap fra saksopplysningene...
-        // TODO (MELOSYS-1255): Statsborgerskap skal ikke hentes fra PersonopplysningsDokument, siden dette ikke nødvendigvis er riktig for søknadstidspunktet.
+        // Ved søknad tilbake i tid brukes historisk statsborgerskap
+        boolean brukHistoriskStatsborgerskap = false;
+        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
+
+        if (periode.getFom().isBefore(LocalDate.now())) {
+            brukHistoriskStatsborgerskap = true;
+        }
+
         Land statsborgerskap = null;
         for (Saksopplysning kandidat : behandling.getSaksopplysninger()) {
-            if (kandidat.getDokument() instanceof PersonDokument) {
+            if (!brukHistoriskStatsborgerskap && kandidat.getDokument() instanceof PersonDokument) {
                 statsborgerskap = ((PersonDokument) kandidat.getDokument()).statsborgerskap;
-                break; // Forutsetter at vi har kun 1 av disse
+                break;
+            }
+            if (brukHistoriskStatsborgerskap && kandidat.getDokument() instanceof PersonhistorikkDokument) {
+                PersonhistorikkDokument personhistorikk = (PersonhistorikkDokument) kandidat.getDokument();
+                if (!personhistorikk.statsborgerskapListe.isEmpty()) {
+                    statsborgerskap = personhistorikk.statsborgerskapListe.get(0).statsborgerskap;
+                }
+                break;
             }
         }
         if (statsborgerskap == null) {
@@ -88,7 +104,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         List<String> oppholdsland = prosessinstans.getData(ProsessDataKey.LAND, List.class);
         // FIXME MELOSYS-1377 Regelmodulen jobber med ISO 3 landkoder (oppholdsland må konverteres)
         oppholdsland = tilIso3Landkoder(oppholdsland);
-        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
+
         VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(statsborgerskap, oppholdsland, periode);
 
         // Legg på evt. feil og varsler...
@@ -165,6 +181,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
             case SI: return Land.SLOVENIA;
             case ES: return Land.SPANIA;
             case GB: return Land.STORBRITANNIA;
+            case CH: return Land.SVEITS;
             case SE: return Land.SVERIGE;
             case DE: return Land.TYSKLAND;
             case HU: return Land.UNGARN;

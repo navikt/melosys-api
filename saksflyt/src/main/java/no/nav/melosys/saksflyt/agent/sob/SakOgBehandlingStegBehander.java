@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.agent.sob;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -10,10 +10,8 @@ import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 
-import static no.nav.melosys.domain.BehandlingType.SØKNAD;
-import static no.nav.melosys.domain.BehandlingType.UNNTAK_MEDL;
+import static no.nav.melosys.domain.Behandlingstype.SØKNAD;
 import static no.nav.melosys.domain.Tema.MED;
-import static no.nav.melosys.domain.Tema.UFM;
 
 public abstract class SakOgBehandlingStegBehander extends AbstraktStegBehandler {
 
@@ -22,13 +20,11 @@ public abstract class SakOgBehandlingStegBehander extends AbstraktStegBehandler 
         return FeilStrategi.standardFeilHåndtering();
     }
 
-    protected static Tema avgjørArkivTema(BehandlingType behandlingType) throws TekniskException {
-        if (behandlingType == SØKNAD) {
+    protected static Tema avgjørArkivTema(Behandlingstype behandlingstype) throws TekniskException {
+        if (behandlingstype == SØKNAD) {
             return MED;
-        } else if (behandlingType == UNNTAK_MEDL) {
-            return UFM;
         } else {
-            throw new TekniskException("Støtter ikke behandlingstype " + behandlingType);
+            throw new TekniskException("Støtter ikke behandlingstype " + behandlingstype);
         }
     }
 }

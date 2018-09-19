@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 import javax.persistence.Converter;
 
-public enum BehandlingStatus implements KodeverkTabell<BehandlingStatus> {
+public enum BehandlingStatus implements InterntKodeverkTabell<BehandlingStatus> {
 
     // FIXME (farjam): Hva er riktige koder for disse?
     OPPRETTET("OPPR", "Opprettet"),
@@ -29,7 +29,7 @@ public enum BehandlingStatus implements KodeverkTabell<BehandlingStatus> {
     }
 
     @Converter
-    public static class DbKonverterer extends KodeverkTabell.DbKonverterer<BehandlingStatus> {
+    public static class DbKonverterer extends InterntKodeverkTabell.DbKonverterer<BehandlingStatus> {
         @Override
         protected BehandlingStatus[] getLovligeVerdier() {
             return BehandlingStatus.values();

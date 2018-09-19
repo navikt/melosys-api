@@ -1,16 +1,26 @@
 package no.nav.melosys.service.oppgave.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import no.nav.melosys.domain.BehandlingStatus;
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 
 public class BehandlingDto {
 
     private Long behandlingID;
-    private BehandlingType type;
-    private BehandlingStatus status;
-    private LocalDateTime endretDato;
+    private Behandlingstype behandlingstype;
+    private BehandlingStatus behandlingStatus;
+    private Instant sisteOpplysningerHentetDato;
+    private Instant endretDato;
+    private boolean erUnderOppdatering;
+
+    public boolean erUnderOppdatering() {
+        return erUnderOppdatering;
+    }
+
+    public void setErUnderOppdatering(boolean erUnderOppdatering) {
+        this.erUnderOppdatering = erUnderOppdatering;
+    }
 
     public Long getBehandlingID() {
         return behandlingID;
@@ -20,27 +30,36 @@ public class BehandlingDto {
         this.behandlingID = behandlingID;
     }
 
-    public BehandlingType getType() {
-        return type;
+    public Behandlingstype getBehandlingType() {
+        return behandlingstype;
     }
 
-    public void setType(BehandlingType type) {
-        this.type = type;
+    public void setBehandlingType(Behandlingstype behandlingstype) {
+        this.behandlingstype = behandlingstype;
     }
 
-    public BehandlingStatus getStatus() {
-        return status;
+    public BehandlingStatus getBehandlingStatus() {
+        return behandlingStatus;
     }
 
-    public void setStatus(BehandlingStatus status) {
-        this.status = status;
+    public void setBehandlingStatus(BehandlingStatus behandlingStatus) {
+        this.behandlingStatus = behandlingStatus;
     }
 
-    public LocalDateTime getEndretDato() {
+    public Instant getEndretDato() {
         return endretDato;
     }
 
-    public void setEndretDato(LocalDateTime endretDato) {
+    public void setEndretDato(Instant endretDato) {
         this.endretDato = endretDato;
     }
+
+    public Instant getSisteOpplysningerHentetDato() {
+        return sisteOpplysningerHentetDato;
+    }
+
+    public void setSisteOpplysningerHentetDato(Instant sisteOpplysningerHentetDato) {
+        this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
+    }
+
 }

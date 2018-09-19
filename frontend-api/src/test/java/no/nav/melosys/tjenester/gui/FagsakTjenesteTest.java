@@ -1,55 +1,45 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
-import javax.ws.rs.core.Response;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jsonschema.core.exceptions.ProcessingException;
-import com.github.fge.jsonschema.core.report.ProcessingReport;
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.FieldDefinitionBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
-import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
-import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
+import org.everit.json.schema.ValidationException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FagsakTjenesteTest extends JsonSchemaTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(FagsakTjenesteTest.class);
+
     private EnhancedRandom random;
-
-    private FagsakTjeneste tjeneste;
-
-    @Mock
-    private FagsakService fagsakService;
 
     @Before
     public void setUp() {
-        tjeneste = new FagsakTjeneste(fagsakService);
 
         random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
+            .overrideDefaultInitialization(true)
             .collectionSizeRange(1, 4)
+            .objectPoolSize(100)
+            .dateRange(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
             .exclude(FieldDefinitionBuilder.field().named("tilleggsinformasjonDetaljer").ofType(TilleggsinformasjonDetaljer.class).inClass(Tilleggsinformasjon.class).get())
             .build();
     }
@@ -60,28 +50,34 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void hentFagsak() throws IOException, ProcessingException {
-        Fagsak fagsak = random.nextObject(Fagsak.class);
-        when(fagsakService.hentFagsak(any())).thenReturn(fagsak);
+    public void fagsakSchemaValidering() throws IOException, JSONException, TekniskException {
+        FagsakDto fagsakDto = random.nextObject(FagsakDto.class);
 
-        Response response = tjeneste.hentFagsak("TEST");
-        FagsakDto fagsakDto = (FagsakDto) response.getEntity();
-        // Saksopplysninger må genereres separat
         for (BehandlingDto b : fagsakDto.getBehandlinger()) {
-            SaksopplysningerDto saksopplysninger = b.getSaksopplysninger();
-            saksopplysninger.setArbeidsforhold(random.nextObject(ArbeidsforholdDokument.class));
-            saksopplysninger.setInntekt(random.nextObject(InntektDokument.class, "tilleggsinformasjonDetaljer"));
-            saksopplysninger.setMedlemskap(random.nextObject(MedlemskapDokument.class));
-            List<OrganisasjonDokument> organisasjoner = new ArrayList<>();
-            for (int i = 0; i < random.nextInt(4); i++) {
-                organisasjoner.add(random.nextObject(OrganisasjonDokument.class));
+            // Gyldige adresser
+            for (OrganisasjonDokument org : b.getSaksopplysninger().getOrganisasjoner()) {
+                SemistrukturertAdresse adresse = random.nextObject(SemistrukturertAdresse.class);
+                adresse.setGyldighetsperiode(new Periode(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1)));
+                org.getOrganisasjonDetaljer().forretningsadresse = new ArrayList<>();
+                org.getOrganisasjonDetaljer().forretningsadresse.add(adresse);
+                org.getOrganisasjonDetaljer().postadresse = new ArrayList<>();
+                org.getOrganisasjonDetaljer().postadresse.add(adresse);
             }
-            saksopplysninger.setOrganisasjoner(organisasjoner);
-            saksopplysninger.setPerson(random.nextObject(PersonDokument.class));
+
         }
 
-        JsonNode testNode = new ObjectMapper().valueToTree(fagsakDto);
-        ProcessingReport report = hentSchema().validate(testNode);
-        assertThat(report.isSuccess());
+        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
+
+        try {
+            hentSchema().validate(new JSONObject(jsonString));
+        } catch (ValidationException e) {
+            e.getCausingExceptions().stream()
+                .map(ValidationException::toJSON)
+                .forEach(jsonObject -> {
+                    logger.error(jsonObject.toString());
+                    System.out.println("----------------------------");
+                });
+            throw e;
+        }
     }
 }

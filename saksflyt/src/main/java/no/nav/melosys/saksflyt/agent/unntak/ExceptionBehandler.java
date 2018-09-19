@@ -73,7 +73,7 @@ public class ExceptionBehandler implements UnntakBehandler {
             tekniskFeilBehandler.behandleUnntak(prosessinstans, melding, t);
             return;
         }
-        logger.info("Fikk unntak av type {}. Kastes som RTE og topper prosessering i denne tråden", t.getClass().getName());
+        logger.info("Fikk unntak av type {}. Kastes som RTE og stopper prosessering i denne tråden", t.getClass().getName());
         settTilFeilet.behandleUnntak(prosessinstans, melding, t);
         throw new RuntimeException(t);
     }

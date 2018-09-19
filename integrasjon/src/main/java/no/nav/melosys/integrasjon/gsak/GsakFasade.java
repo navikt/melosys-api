@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.gsak;
 
 import java.util.List;
 
-import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -23,7 +23,7 @@ public interface GsakFasade {
     List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype,
                                                   Tema tema,
                                                   List<FagsakType> sakstyper,
-                                                  List<BehandlingType> behandlingstyper
+                                                  List<Behandlingstype> behandlingstyper
     ) throws TekniskException;
 
     /**
@@ -55,7 +55,7 @@ public interface GsakFasade {
     /**
      * Oppretter en sak i GSAK
      */
-    String opprettSak(String saksnummer, BehandlingType behandlingType, String aktørId) throws IntegrasjonException, TekniskException;
+    Long opprettSak(String saksnummer, Behandlingstype behandlingstype, String aktørId) throws TekniskException, IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException;
 
     /**
      * Tildeler en oppgaver til en saksbehandler

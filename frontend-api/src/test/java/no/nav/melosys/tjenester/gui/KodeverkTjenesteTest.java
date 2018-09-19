@@ -2,18 +2,18 @@ package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jsonschema.core.exceptions.ProcessingException;
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import com.github.fge.jsonschema.main.JsonSchema;
 import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
+import org.everit.json.schema.ValidationException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KodeverkTjenesteTest extends JsonSchemaTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(KodeverkTjenesteTest.class);
 
     private KodeverkTjeneste tjeneste;
 
@@ -28,12 +28,15 @@ public class KodeverkTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void getKodeverk() throws IOException, ProcessingException {
-        JsonSchema schema = hentSchema();
+    public void getKodeverk() throws IOException, JSONException {
         KodeverkDto kodeverkDto = tjeneste.getKodeverk();
-        JsonNode testNode = new ObjectMapper().valueToTree(kodeverkDto);
+        String jsonString = objectMapper().writeValueAsString(kodeverkDto);
 
-        ProcessingReport report = schema.validate(testNode);
-        assertThat(report.isSuccess());
+        try {
+            hentSchema().validate(new JSONObject(jsonString));
+        } catch (ValidationException e) {
+            logger.error(e.toJSON().toString());
+            throw e;
+        }
     }
 }

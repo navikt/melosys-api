@@ -27,7 +27,7 @@ public interface JoarkFasade {
      * Oppdaterer en journalpost i Joark
      * @param medDokumentkategori Om dokumentkategori skal oppdatteres med standardverdi "IS", Ikke tolkbart skjema
      */
-    void oppdaterJounalpost(String journalpostId, String dokumentID, String gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, boolean medDokumentkategori)
+    void oppdaterJounalpost(String journalpostId, String dokumentID, Long gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, boolean medDokumentkategori)
         throws SikkerhetsbegrensningException, IntegrasjonException;
 
     /**

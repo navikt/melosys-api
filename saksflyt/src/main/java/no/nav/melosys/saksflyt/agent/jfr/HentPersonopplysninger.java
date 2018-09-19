@@ -3,12 +3,11 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.SaksopplysningRepository;
@@ -61,12 +60,19 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
     
     @Transactional
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String brukerId = prosessinstans.getData(BRUKER_ID);
+        Periode søknadsperiode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
         Behandling behandling = prosessinstans.getBehandling();
+
         Saksopplysning saksopplysning = tpsFasade.hentPersonMedAdresse(brukerId);
+        saksopplysning.setBehandling(behandling);
+        saksopplysning.setRegistrertDato(LocalDateTime.now());
+        saksopplysningRepo.save(saksopplysning);
+
+        saksopplysning = tpsFasade.hentPersonhistorikk(brukerId, søknadsperiode.getFom());
         saksopplysning.setBehandling(behandling);
         saksopplysning.setRegistrertDato(LocalDateTime.now());
         saksopplysningRepo.save(saksopplysning);
