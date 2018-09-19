@@ -13,6 +13,7 @@ import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,6 +65,9 @@ public class JournalfoeringService {
             prosessinstans.setData(ProsessDataKey.REPRESENTANT, journalfoeringDto.getRepresentantID());
         }
 
+        if (SubjectHandler.getInstance().getUserID() != null) {
+            prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
+        }
 
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
@@ -91,6 +95,10 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getDokumenttittel());
         //FIXME MELOSYS-1283 vedlegg
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, journalfoeringDto.getSaksnummer());
+
+        if (SubjectHandler.getInstance().getUserID() != null) {
+            prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
+        }
 
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);

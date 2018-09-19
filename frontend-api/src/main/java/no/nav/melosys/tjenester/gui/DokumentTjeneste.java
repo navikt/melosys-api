@@ -12,6 +12,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.DokumentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -60,7 +61,7 @@ public class DokumentTjeneste extends RestTjeneste {
         byte[] dokument;
 
         try {
-            dokument = dokumentService.produserUtkast(behandlingID, typeID);
+            dokument = dokumentService.produserUtkast(behandlingID, typeID, SubjectHandler.getInstance().getUserID());
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (SikkerhetsbegrensningException e) {
@@ -80,7 +81,7 @@ public class DokumentTjeneste extends RestTjeneste {
     @Path("opprett/{behandlingID}/{typeID}")
     public Response produserDokument(@PathParam("behandlingID") long behandlingID, @PathParam("typeID") String typeID) {
         try {
-            dokumentService.produserDokument(behandlingID, typeID);
+            dokumentService.produserDokument(behandlingID, typeID, SubjectHandler.getInstance().getUserID());
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (SikkerhetsbegrensningException e) {
