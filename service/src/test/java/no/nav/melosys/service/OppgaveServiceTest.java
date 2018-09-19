@@ -16,11 +16,13 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.oppgave.OppgaveTilgang;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -46,6 +48,12 @@ public class OppgaveServiceTest {
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
 
+    @InjectMocks
+    private OppgaveTilgang oppgaveTilgang;
+
+    @Mock
+    private Pep pep;
+
     @Before
     public void setUp() {
         this.oppgaveService = new OppgaveService(
@@ -53,13 +61,13 @@ public class OppgaveServiceTest {
                 fagsakRepository,
                 tpsFasade,
                 prosessinstansRepository,
-                new PepStub());
+                oppgaveTilgang);
     }
 
     @Test
     public void tilgangskontrollOverstyrtITest() {
         Oppgave oppgave1 = new Oppgave();
-        assertThat(oppgaveService.harIkkeTilgangTil(oppgave1)).isFalse();
+        assertThat(oppgaveTilgang.harIkkeTilgangTil(oppgave1)).isFalse();
     }
 
     @Test

@@ -30,14 +30,18 @@ public class PepImpl implements Pep {
     public final static String READ = "read";
     public final static String IkkeTilgang = "Brukeren har ikke tilgang";
 
-    @Autowired
     private TpsFasade tpsFasade;
-
-    @Autowired
     private AbacService abacService;
+    private AbacContext abacContext;
 
     @Autowired
-    private AbacContext abacContext;
+    public void PepImpl(TpsFasade tpsFasade,
+                        AbacService abacService,
+                        AbacContext abacContext) {
+        this.tpsFasade = tpsFasade;
+        this.abacService = abacService;
+        this.abacContext = abacContext;
+    }
 
     @Override
     @Abac(bias = Decision.DENY, actions = @Abac.Attr(key = ACTION_ID, value = PepImpl.READ))
@@ -48,7 +52,7 @@ public class PepImpl implements Pep {
         logResponse(fnr, accessResponse);
 
         if (accessResponse.getDecision() != Decision.PERMIT) {
-            //throw new SikkerhetsbegrensningException(IkkeTilgang);
+            throw new SikkerhetsbegrensningException(IkkeTilgang);
         }
     }
 
@@ -59,18 +63,18 @@ public class PepImpl implements Pep {
         sjekkTilgangTil(fnr);
     }
 
-    public void logResponse(String fnr, XacmlResponse response) {
+    private void logResponse(String fnr, XacmlResponse response) {
         String userId = SubjectHandler.getInstance().getUserID();
         String advices = getAdvicesAsString(response.getAdvices());
         abacLog.info(String.format("Ident %s spurte om ressurs %s med pdp-svar %s %s", userId, fnr, response.getDecision(), advices));
     }
 
-    public String getAdvicesAsString(List<Advice> advices) {
+    private String getAdvicesAsString(List<Advice> advices) {
         String advicesAsText = "";
         if (!advices.isEmpty()) {
             advicesAsText += " - Advices: ";
             advicesAsText += advices.stream()
-                                .map(a -> a.toString())
+                                .map(Advice::toString)
                                 .collect( Collectors.joining(", ") );
         }
         return advicesAsText;

@@ -19,7 +19,6 @@ import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
-import no.nav.melosys.service.Pep;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,14 +34,14 @@ public class Oppgaveplukker {
     private final GsakFasade gsakFasade;
     private final FagsakRepository fagsakRepository;
     private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
-    private final Pep pep;
+    private final OppgaveTilgang oppgaveTilgang;
 
     @Autowired
-    public Oppgaveplukker(GsakFasade gsakFasade, FagsakRepository fagsakRepository, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo, Pep pep) {
+    public Oppgaveplukker(GsakFasade gsakFasade, FagsakRepository fagsakRepository, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo, OppgaveTilgang oppgaveTilgang) {
         this.gsakFasade = gsakFasade;
         this.fagsakRepository = fagsakRepository;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
-        this.pep = pep;
+        this.oppgaveTilgang = oppgaveTilgang;
     }
 
     /**
@@ -84,7 +83,7 @@ public class Oppgaveplukker {
         }
 
         List<Oppgave> oppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakTypeListe, behandlingstypeListe);
-        oppgaver.removeIf(o -> harIkkeTilgangTil(o));
+        oppgaver.removeIf(o -> oppgaveTilgang.harIkkeTilgangTil(o));
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, oppgaver);
 
@@ -105,16 +104,6 @@ public class Oppgaveplukker {
         return valg;
     }
 
-    private boolean harIkkeTilgangTil(Oppgave oppgave) {
-        try {
-            pep.sjekkTilgangTilAktoer(oppgave.getAktørId());
-        } catch (SikkerhetsbegrensningException | IkkeFunnetException e) {
-            return true;
-        }
-        return false;
-    }
-
-
     @Transactional
     public synchronized void leggTilbakeOppgave(String oppgaveId, String saksbehandlerID, String begrunnelse) throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
         Oppgave oppgave = gsakFasade.hentOppgave(oppgaveId);
@@ -124,7 +113,7 @@ public class Oppgaveplukker {
             throw new RuntimeException("Fant ikke oppgave med oppgaveId " + oppgaveId);
         }
         try {
-            pep.sjekkTilgangTilAktoer(oppgave.getAktørId());
+            oppgaveTilgang.sjekkTilgangTilOppgave(oppgave);
             gsakFasade.leggTilbakeOppgave(oppgaveId);
 
             OppgaveTilbakelegging oppgaveTilbakelegging = new OppgaveTilbakelegging();

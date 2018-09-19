@@ -16,7 +16,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.service.Pep;
 import no.nav.melosys.service.oppgave.dto.*;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,35 +33,26 @@ public class OppgaveService {
     private final FagsakRepository fagsakRepository;
     private final TpsFasade tpsFasade;
     private final ProsessinstansRepository prosessinstansRepository;
-    private final Pep pep;
+    private final OppgaveTilgang oppgaveTilgang;
 
     @Autowired
     public OppgaveService(GsakFasade gsakFasade,
                           FagsakRepository fagsakRepository,
                           TpsFasade tpsFasade,
                           ProsessinstansRepository prosessinstansRepository,
-                          Pep pep) {
+                          OppgaveTilgang oppgaveTilgang) {
         this.gsakFasade = gsakFasade;
         this.fagsakRepository = fagsakRepository;
         this.tpsFasade = tpsFasade;
         this.prosessinstansRepository = prosessinstansRepository;
-        this.pep = pep;
+        this.oppgaveTilgang = oppgaveTilgang;
     }
 
     @Transactional
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException {
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
-        oppgaverFraDomain.removeIf(o -> harIkkeTilgangTil(o));
+        oppgaverFraDomain.removeIf(o -> oppgaveTilgang.harIkkeTilgangTil(o));
         return oppgaverTilDtoer(oppgaverFraDomain);
-    }
-
-    public boolean harIkkeTilgangTil(Oppgave oppgave) {
-        try {
-            pep.sjekkTilgangTilAktoer(oppgave.getAktørId());
-        } catch (SikkerhetsbegrensningException | IkkeFunnetException e) {
-            return true;
-        }
-        return false;
     }
 
     @Transactional
@@ -72,7 +62,7 @@ public class OppgaveService {
             throw new IkkeFunnetException("Finnes ikke aktørId for FNR " + brukerIdent);
         }
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedBruker(aktørId);
-        oppgaverFraDomain.removeIf(o -> harIkkeTilgangTil(o));
+        oppgaverFraDomain.removeIf(o -> oppgaveTilgang.harIkkeTilgangTil(o));
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
