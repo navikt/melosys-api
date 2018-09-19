@@ -14,7 +14,4 @@ public class SikkerhetsbegrensningException extends FunksjonellException {
         super(throwable);
     }
 
-    public SikkerhetsbegrensningException(String m) {
-        super(m);
-    }
 }

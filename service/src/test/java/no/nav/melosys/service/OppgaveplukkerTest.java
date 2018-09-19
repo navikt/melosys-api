@@ -1,16 +1,30 @@
 package no.nav.melosys.service;
 
-import no.nav.melosys.exception.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import no.nav.melosys.domain.BehandlingType;
+import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
+import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
+import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppgaveplukkerTest {
@@ -153,7 +167,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void leggTilbakeOppgave() throws IntegrasjonException {
+    public void leggTilbakeOppgave() throws MelosysException {
         final String oppgaveId = "42";
         final Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId(oppgaveId);

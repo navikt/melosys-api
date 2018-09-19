@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.inntk;
 
 import java.io.StringWriter;
 import java.time.YearMonth;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -17,12 +18,9 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektConsumer;
-import no.nav.tjeneste.virksomhet.inntekt.v3.binding.*;
-import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Ainntektsfilter;
-import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Formaal;
-import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.ObjectFactory;
-import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.PersonIdent;
-import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Uttrekksperiode;
+import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter;
+import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeBolkUgyldigInput;
+import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.*;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkRequest;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkResponse;
 import org.slf4j.Logger;
@@ -63,7 +61,7 @@ public class InntektService implements InntektFasade {
     // Henter inntekter for én ident fra hentInntektListeBolk for å få opplysninger om frilansforhold (se MELOSYS-1453).
     @Override
     public Saksopplysning hentInntektListe(String personID, YearMonth fom, YearMonth tom) throws SikkerhetsbegrensningException, IntegrasjonException {
-        HentInntektListeRequest request = new HentInntektListeRequest();
+        HentInntektListeBolkRequest request = new HentInntektListeBolkRequest();
 
         PersonIdent personIdent = objectFactory.createPersonIdent();
         personIdent.setPersonIdent(personID);

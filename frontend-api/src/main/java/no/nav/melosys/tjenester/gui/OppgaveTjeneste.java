@@ -20,7 +20,6 @@ import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.MockOppgaveDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
 import no.nav.melosys.tjenester.gui.dto.TilbakeleggingDto;
 import org.slf4j.Logger;
@@ -95,9 +94,7 @@ public class OppgaveTjeneste extends RestTjeneste {
 
         try {
             oppgaveplukker.leggTilbakeOppgave(tilbakelegging.getOppgaveId(), ident, tilbakelegging.getBegrunnelse());
-        } catch (TekniskException e) {
-            log.error("TekniskException", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            return Response.ok().build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (IkkeFunnetException e) {
@@ -107,7 +104,7 @@ public class OppgaveTjeneste extends RestTjeneste {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (TekniskException e) {
             log.error("Uventet teknisk Feil", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 

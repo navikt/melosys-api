@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.dokument.felles.KodeverkHjelper;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.springframework.util.StringUtils;
 
@@ -27,7 +28,12 @@ public class FellesKodeverkSerializer extends StdSerializer<KodeverkHjelper> {
         if (StringUtils.isEmpty(kode)) {
             kode = null;
         } else {
-            term = kodeverkService.dekod(kodeverkHjelper.hentKodeverkNavn(), kodeverkHjelper.getKode(), LocalDate.now());
+            try {
+                term = kodeverkService.dekod(kodeverkHjelper.hentKodeverkNavn(), kodeverkHjelper.getKode(), LocalDate.now());
+            } catch (TekniskException e) {
+                // Antar at feilen allerede er logget
+                // term forblir null
+            }
         }
 
         generator.writeStartObject();

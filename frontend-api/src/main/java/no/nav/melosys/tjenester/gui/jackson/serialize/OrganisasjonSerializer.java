@@ -11,6 +11,7 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.AdresseDto;
@@ -35,7 +36,11 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         organisasjonDto.setNavn(getNavn(organisasjon));
         organisasjonDto.setOppstartdato(organisasjon.getOppstartsdato());
         if (!StringUtils.isEmpty(organisasjon.getEnhetstype())) {
-            organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype(), LocalDate.now()));
+            try {
+                organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype(), LocalDate.now()));
+            } catch (TekniskException e) {
+                organisasjonDto.setOrganisasjonsform("TEKNISK FEIL");
+            }
         }
 
         // OrganisasjonDetaljer
@@ -91,9 +96,17 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
             String postNummer = sAdresse.getPostnr();
 
             dto.setPostnr(postNummer);
-            dto.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postNummer, LocalDate.now()));
+            try {
+                dto.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postNummer, LocalDate.now()));
+            } catch (TekniskException e) {
+                dto.setPoststed("TEKNISK FEIL");
+            }
 
-            dto.setLand(kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, sAdresse.getLandkode(), LocalDate.now()));
+            try {
+                dto.setLand(kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, sAdresse.getLandkode(), LocalDate.now()));
+            } catch (TekniskException e) {
+                dto.setLand("TEKNISK FEIL");
+            }
 
             return  dto;
         }

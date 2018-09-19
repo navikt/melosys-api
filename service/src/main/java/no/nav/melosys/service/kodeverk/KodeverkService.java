@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import org.slf4j.Logger;
@@ -67,7 +68,7 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     /**
      * Henter verdien for en kode i et kodeverk ved mapping til DTO i frontend-API.
      */
-    public KodeDto getKodeverdi(FellesKodeverk kodeverk, String kode) {
+    public KodeDto getKodeverdi(FellesKodeverk kodeverk, String kode) throws TekniskException {
         if (kode == null) {
             return null;
         }
@@ -77,16 +78,16 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     /**
      * Henter verdien for en kode i et kodeverk på en gitt dato, eller null hvis koden ikke er omfattet av kodeverket på angitt dato.
      */
-    public String dekod(FellesKodeverk kodeverk, String kode, LocalDate dato) {
+    public String dekod(FellesKodeverk kodeverk, String kode, LocalDate dato) throws TekniskException {
         if (StringUtils.isEmpty(kode)) {
             log.error("Metode dekod kalt med kode " + kode);
-            throw new RuntimeException("Kode må ikke være null eller tom");
+            throw new TekniskException("Kode må ikke være null eller tom");
         }
 
         List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
         if (kodeperioder == null) {
             log.error("Fant ikke term for kode '{}' kodeverk '{}'", kode, kodeverk.getNavn());
-            throw new RuntimeException("Fant ikke term for kode '" + kode + "' kodeverk '" + kodeverk.getNavn() + "'");
+            throw new TekniskException("Fant ikke term for kode '" + kode + "' kodeverk '" + kodeverk.getNavn() + "'");
         }
         // kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
         for (Kode kandidat : kodeperioder) {
