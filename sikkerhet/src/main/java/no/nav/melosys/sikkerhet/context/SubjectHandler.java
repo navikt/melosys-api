@@ -14,8 +14,6 @@ public abstract class SubjectHandler {
         SubjectHandlerHolder.SUBJECT_HANDLER = subjectHandler;
     }
 
-    public abstract String getOidcTokenBody();
-
     public abstract String getOidcTokenString();
 
     public abstract String getUserID();

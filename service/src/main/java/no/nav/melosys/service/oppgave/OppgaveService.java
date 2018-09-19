@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -33,25 +32,21 @@ public class OppgaveService {
     private final FagsakRepository fagsakRepository;
     private final TpsFasade tpsFasade;
     private final ProsessinstansRepository prosessinstansRepository;
-    private final OppgaveTilgang oppgaveTilgang;
 
     @Autowired
     public OppgaveService(GsakFasade gsakFasade,
                           FagsakRepository fagsakRepository,
                           TpsFasade tpsFasade,
-                          ProsessinstansRepository prosessinstansRepository,
-                          OppgaveTilgang oppgaveTilgang) {
+                          ProsessinstansRepository prosessinstansRepository) {
         this.gsakFasade = gsakFasade;
         this.fagsakRepository = fagsakRepository;
         this.tpsFasade = tpsFasade;
         this.prosessinstansRepository = prosessinstansRepository;
-        this.oppgaveTilgang = oppgaveTilgang;
     }
 
     @Transactional
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException {
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
-        oppgaverFraDomain.removeIf(o -> oppgaveTilgang.harIkkeTilgangTil(o));
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
@@ -62,7 +57,6 @@ public class OppgaveService {
             throw new IkkeFunnetException("Finnes ikke aktørId for FNR " + brukerIdent);
         }
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedBruker(aktørId);
-        oppgaverFraDomain.removeIf(o -> oppgaveTilgang.harIkkeTilgangTil(o));
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 

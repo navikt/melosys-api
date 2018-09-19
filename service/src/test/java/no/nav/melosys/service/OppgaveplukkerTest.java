@@ -17,13 +17,11 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
-import no.nav.melosys.service.oppgave.OppgaveTilgang;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -45,18 +43,11 @@ public class OppgaveplukkerTest {
 
     private Oppgaveplukker oppgaveplukker;
 
-    @InjectMocks
-    private OppgaveTilgang oppgaveTilgang;
-
-    @Mock
-    private Pep pep;
-
     @Before
     public void setUp() {
         this.oppgaveplukker = new Oppgaveplukker(gsakFasade,
                                                  fagsakRepository,
-                                                 oppgaveTilbakkeleggingRepo,
-                                                 oppgaveTilgang);
+                                                 oppgaveTilbakkeleggingRepo);
     }
 
     @Test

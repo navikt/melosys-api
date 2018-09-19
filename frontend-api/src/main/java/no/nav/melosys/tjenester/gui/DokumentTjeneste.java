@@ -7,6 +7,8 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.service.abac.BehandlingTilgang;
+import no.nav.melosys.service.abac.JournalTilgang;
 import no.nav.melosys.service.dokument.DokumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -21,9 +23,14 @@ public class DokumentTjeneste extends RestTjeneste {
 
     private DokumentService dokumentService;
 
+    private final BehandlingTilgang behandlingTilgang;
+    private final JournalTilgang journalTilgang;
+
     @Autowired
-    public DokumentTjeneste(DokumentService dokumentService) {
+    public DokumentTjeneste(DokumentService dokumentService, BehandlingTilgang behandlingTilgang, JournalTilgang journalTilgang) {
         this.dokumentService = dokumentService;
+        this.behandlingTilgang = behandlingTilgang;
+        this.journalTilgang = journalTilgang;
     }
 
     @GET
@@ -33,9 +40,12 @@ public class DokumentTjeneste extends RestTjeneste {
         byte[] dokument;
 
         try {
+            journalTilgang.sjekk(journalpostID);
             dokument = dokumentService.hentDokument(journalpostID, dokumentID);
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (IkkeFunnetException e) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
         Response.ResponseBuilder ok = Response.ok(dokument);
@@ -51,6 +61,7 @@ public class DokumentTjeneste extends RestTjeneste {
         byte[] dokument;
 
         try {
+            behandlingTilgang.sjekk(behandlingID);
             dokument = dokumentService.produserUtkast(behandlingID, typeID);
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -68,6 +79,7 @@ public class DokumentTjeneste extends RestTjeneste {
     @Path("opprett/{behandlingID}/{typeID}")
     public Response produserDokument(@PathParam("behandlingID") long behandlingID, @PathParam("typeID") String typeID) {
         try {
+            behandlingTilgang.sjekk(behandlingID);
             dokumentService.produserDokument(behandlingID, typeID);
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();

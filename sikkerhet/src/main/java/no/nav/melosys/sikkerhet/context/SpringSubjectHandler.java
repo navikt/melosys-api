@@ -17,12 +17,6 @@ public class SpringSubjectHandler extends SubjectHandler {
     }
 
     @Override
-    public String getOidcTokenBody() {
-        final String[] tokenParts = getOidcTokenString().split("\\.");
-        return tokenParts.length == 1 ? tokenParts[0] : tokenParts[1];
-    }
-
-    @Override
     public String getUserID() {
         OIDCAuthenticationToken auth = (OIDCAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 

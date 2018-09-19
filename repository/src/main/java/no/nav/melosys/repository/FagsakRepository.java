@@ -19,4 +19,9 @@ public interface FagsakRepository extends CrudRepository<Fagsak, Long> {
 
     @Query(value = "SELECT saksnummer_seq.nextval FROM dual", nativeQuery = true)
     Long hentNesteSekvensVerdi();
+
+
+    @Query("select f from Fagsak f, Behandling b where f.saksnummer = b.saksnummer and b.id = ?1")
+    List<Fagsak> findByBehandlingsId(long behandlingsId);
 }
+

@@ -55,10 +55,15 @@ public class AbacDefaultConfig {
         return new ResolvingAbacAttributeLocator(NavAttributter.ENVIRONMENT_FELLES_OIDC_TOKEN_BODY, new AttributeSupplier() {
             @Override
             public Object get() {
-                String tokenBody = SubjectHandler.getInstance().getOidcTokenBody();
+                String tokenBody = getOidcTokenBody();
                 return tokenBody;
             }
         });
+    }
+
+    private String getOidcTokenBody() {
+        final String[] tokenParts = SubjectHandler.getInstance().getOidcTokenString().split("\\.");
+        return tokenParts.length == 1 ? tokenParts[0] : tokenParts[1];
     }
 
     @Bean

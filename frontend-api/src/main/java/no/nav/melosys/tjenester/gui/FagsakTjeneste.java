@@ -18,6 +18,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.Pep;
+import no.nav.melosys.service.abac.FagsakTilgang;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
@@ -46,12 +47,12 @@ public class FagsakTjeneste extends RestTjeneste {
 
     private ModelMapper modelMapper;
 
-    @Autowired
-    private Pep pep;
+    private final FagsakTilgang fagsakTilgang;
 
     @Autowired
-    public FagsakTjeneste(FagsakService fagsakService) {
+    public FagsakTjeneste(FagsakService fagsakService, FagsakTilgang fagsakTilgang) {
         this.fagsakService = fagsakService;
+        this.fagsakTilgang = fagsakTilgang;
 
         this.modelMapper = new ModelMapper();
 
@@ -74,7 +75,7 @@ public class FagsakTjeneste extends RestTjeneste {
         }
 
         try {
-            pep.sjekkTilgangTilAktoer(sak.hentAktørMedRolleType(RolleType.BRUKER).getAktørId());
+            fagsakTilgang.sjekk(sak);
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (IkkeFunnetException e) {
@@ -90,11 +91,8 @@ public class FagsakTjeneste extends RestTjeneste {
     @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.")
     public Response nyFagsakSikret(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
 
-        // FIXME Midlertidig tilgangskontroll
-        Tilgangskontroll.sjekk();
-
         try {
-            pep.sjekkTilgangTil(fnr);
+            fagsakTilgang.sjekk(fnr);
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
@@ -106,7 +104,7 @@ public class FagsakTjeneste extends RestTjeneste {
     public Response nyFagsak(String fnr) {
         try {
             Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, Behandlingstype.SØKNAD);
-
+            fagsakTilgang.sjekk(fagsak);
             if (fagsak == null) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             } else {
@@ -129,7 +127,7 @@ public class FagsakTjeneste extends RestTjeneste {
             throw new BadRequestException();
         } else {
             try {
-                pep.sjekkTilgangTil(fnr);
+                fagsakTilgang.sjekk(fnr);
                 saker = fagsakService.hentFagsakerMedAktør(RolleType.BRUKER, fnr);
 
             } catch (IkkeFunnetException e) {

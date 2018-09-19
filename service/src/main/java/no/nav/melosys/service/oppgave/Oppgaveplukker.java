@@ -34,14 +34,12 @@ public class Oppgaveplukker {
     private final GsakFasade gsakFasade;
     private final FagsakRepository fagsakRepository;
     private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
-    private final OppgaveTilgang oppgaveTilgang;
 
     @Autowired
-    public Oppgaveplukker(GsakFasade gsakFasade, FagsakRepository fagsakRepository, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo, OppgaveTilgang oppgaveTilgang) {
+    public Oppgaveplukker(GsakFasade gsakFasade, FagsakRepository fagsakRepository, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo) {
         this.gsakFasade = gsakFasade;
         this.fagsakRepository = fagsakRepository;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
-        this.oppgaveTilgang = oppgaveTilgang;
     }
 
     /**
@@ -83,8 +81,6 @@ public class Oppgaveplukker {
         }
 
         List<Oppgave> oppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakTypeListe, behandlingstypeListe);
-        oppgaver.removeIf(o -> oppgaveTilgang.harIkkeTilgangTil(o));
-
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, oppgaver);
 
         if (valg.isPresent()) {
@@ -113,7 +109,6 @@ public class Oppgaveplukker {
             throw new RuntimeException("Fant ikke oppgave med oppgaveId " + oppgaveId);
         }
         try {
-            oppgaveTilgang.sjekkTilgangTilOppgave(oppgave);
             gsakFasade.leggTilbakeOppgave(oppgaveId);
 
             OppgaveTilbakelegging oppgaveTilbakelegging = new OppgaveTilbakelegging();

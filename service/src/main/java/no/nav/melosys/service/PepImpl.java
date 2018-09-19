@@ -7,6 +7,7 @@ import no.nav.freg.abac.core.dto.response.Advice;
 import no.nav.freg.abac.core.dto.response.Decision;
 import no.nav.freg.abac.core.dto.response.XacmlResponse;
 import no.nav.freg.abac.core.service.AbacService;
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -58,8 +59,8 @@ public class PepImpl implements Pep {
 
     @Override
     @Abac(bias = Decision.DENY, actions = @Abac.Attr(key = ACTION_ID, value = PepImpl.READ))
-    public void sjekkTilgangTilAktoer(String aktørId) throws SikkerhetsbegrensningException, IkkeFunnetException {
-        String fnr = tpsFasade.hentIdentForAktørId(aktørId);
+    public void sjekkTilgangTil(Aktoer aktør) throws SikkerhetsbegrensningException, IkkeFunnetException {
+        String fnr = tpsFasade.hentIdentForAktørId(aktør.getAktørId());
         sjekkTilgangTil(fnr);
     }
 

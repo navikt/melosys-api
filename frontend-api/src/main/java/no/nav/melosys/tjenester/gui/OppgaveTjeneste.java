@@ -57,7 +57,6 @@ public class OppgaveTjeneste extends RestTjeneste {
         String ident = SubjectHandler.getInstance().getUserID();
 
         try {
-            //Oppgavene filtreres med abac i oppgavePlukker
             Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto);
 
             if (plukket.isPresent()) {
@@ -98,7 +97,6 @@ public class OppgaveTjeneste extends RestTjeneste {
         String ident = SubjectHandler.getInstance().getUserID();
 
         try {
-            //Tilgangssjekk (abac) utført i oppgaveplukker
             oppgaveplukker.leggTilbakeOppgave(tilbakelegging.getOppgaveId(), ident, tilbakelegging.getBegrunnelse());
             return Response.ok().build();
 
@@ -122,7 +120,6 @@ public class OppgaveTjeneste extends RestTjeneste {
         String ident = SubjectHandler.getInstance().getUserID();
         List<OppgaveDto> oppgaveDtoListe;
         try {
-            //Oppgaver filtreres med abac i oppgaveService
             oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
         } catch (TekniskException e) {
             log.error("Uventet teknisk Feil {} ", e);
@@ -153,7 +150,6 @@ public class OppgaveTjeneste extends RestTjeneste {
     public Response hentOppgaver(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
         List<OppgaveDto> oppgaver;
         try {
-            //Oppgavene filtreres med abac i oppgaveService
             oppgaver = oppgaveService.hentOppgaverMedBruker(fnr);
         } catch (IkkeFunnetException e) {
             log.error("Finner ingen aktørId for ident {}: ", fnr, e);

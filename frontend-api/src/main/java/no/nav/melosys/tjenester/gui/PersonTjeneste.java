@@ -25,12 +25,12 @@ public class PersonTjeneste extends RestTjeneste {
 
     private RegisterOppslagService registerOppslag;
 
-    @Autowired
-    private Pep pep;
+    private final Pep pep;
 
     @Autowired
-    public PersonTjeneste(RegisterOppslagService registerOppslag) {
+    public PersonTjeneste(RegisterOppslagService registerOppslag, Pep pep) {
         this.registerOppslag = registerOppslag;
+        this.pep = pep;
     }
 
     @GET
