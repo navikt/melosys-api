@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import org.slf4j.Logger;
@@ -31,6 +30,8 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     private static final long KLOKKESLETT_FOR_CACHE_REFRESH = 6;
 
     private static final Logger log = LoggerFactory.getLogger(KodeverkService.class);
+
+    private static final String UKJENT = "UKJENT";
 
     private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache; // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
 
@@ -68,7 +69,7 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     /**
      * Henter verdien for en kode i et kodeverk ved mapping til DTO i frontend-API.
      */
-    public KodeDto getKodeverdi(FellesKodeverk kodeverk, String kode) throws TekniskException {
+    public KodeDto getKodeverdi(FellesKodeverk kodeverk, String kode) {
         if (kode == null) {
             return null;
         }
@@ -78,16 +79,16 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     /**
      * Henter verdien for en kode i et kodeverk på en gitt dato, eller null hvis koden ikke er omfattet av kodeverket på angitt dato.
      */
-    public String dekod(FellesKodeverk kodeverk, String kode, LocalDate dato) throws TekniskException {
+    public String dekod(FellesKodeverk kodeverk, String kode, LocalDate dato) {
         if (StringUtils.isEmpty(kode)) {
             log.error("Metode dekod kalt med kode " + kode);
-            throw new TekniskException("Kode må ikke være null eller tom");
+            return UKJENT;
         }
 
         List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
         if (kodeperioder == null) {
             log.error("Fant ikke term for kode '{}' kodeverk '{}'", kode, kodeverk.getNavn());
-            throw new TekniskException("Fant ikke term for kode '" + kode + "' kodeverk '" + kodeverk.getNavn() + "'");
+            return UKJENT;
         }
         // kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
         for (Kode kandidat : kodeperioder) {
@@ -95,7 +96,8 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
                 return kandidat.getNavn();
             }
         }
-        return null;
+        log.error("Finner ingen term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
+        return UKJENT;
     }
 
     /*

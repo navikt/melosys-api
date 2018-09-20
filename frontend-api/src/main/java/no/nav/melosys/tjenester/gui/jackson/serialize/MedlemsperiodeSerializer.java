@@ -8,8 +8,6 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.MedlemsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
@@ -30,13 +28,13 @@ public class MedlemsperiodeSerializer extends StdSerializer<Medlemsperiode> {
 
         medlemsperiodeDto.type = medlemsperiode.type;
         medlemsperiodeDto.periode = getPeriode(periode);
-        medlemsperiodeDto.land = getKodeverdiIgnorerFeil(FellesKodeverk.LANDKODER, medlemsperiode.land);
-        medlemsperiodeDto.grunnlagstype = getKodeverdiIgnorerFeil(FellesKodeverk.GRUNNLAG_MEDL, medlemsperiode.grunnlagstype);
-        medlemsperiodeDto.kilde = getKodeverdiIgnorerFeil(FellesKodeverk.KILDESYSTEM_MEDL, medlemsperiode.kilde);
-        medlemsperiodeDto.kildedokumenttype = getKodeverdiIgnorerFeil(FellesKodeverk.KILDEDOKUMENT_MEDL, medlemsperiode.kildedokumenttype);
-        medlemsperiodeDto.lovvalg = getKodeverdiIgnorerFeil(FellesKodeverk.LOVVALG_MEDL, medlemsperiode.lovvalg);
-        medlemsperiodeDto.status = getKodeverdiIgnorerFeil(FellesKodeverk.PERIODESTATUS_MEDL, medlemsperiode.status);
-        medlemsperiodeDto.trygdedekning = getKodeverdiIgnorerFeil(FellesKodeverk.DEKNING_MEDL, medlemsperiode.trygdedekning);
+        medlemsperiodeDto.land = kodeverkService.getKodeverdi(FellesKodeverk.LANDKODER, medlemsperiode.land);
+        medlemsperiodeDto.grunnlagstype = kodeverkService.getKodeverdi(FellesKodeverk.GRUNNLAG_MEDL, medlemsperiode.grunnlagstype);
+        medlemsperiodeDto.kilde = kodeverkService.getKodeverdi(FellesKodeverk.KILDESYSTEM_MEDL, medlemsperiode.kilde);
+        medlemsperiodeDto.kildedokumenttype = kodeverkService.getKodeverdi(FellesKodeverk.KILDEDOKUMENT_MEDL, medlemsperiode.kildedokumenttype);
+        medlemsperiodeDto.lovvalg = kodeverkService.getKodeverdi(FellesKodeverk.LOVVALG_MEDL, medlemsperiode.lovvalg);
+        medlemsperiodeDto.status = kodeverkService.getKodeverdi(FellesKodeverk.PERIODESTATUS_MEDL, medlemsperiode.status);
+        medlemsperiodeDto.trygdedekning = kodeverkService.getKodeverdi(FellesKodeverk.DEKNING_MEDL, medlemsperiode.trygdedekning);
 
         generator.writeObject(medlemsperiodeDto);
     }
@@ -46,15 +44,6 @@ public class MedlemsperiodeSerializer extends StdSerializer<Medlemsperiode> {
             return null;
         }
         return new PeriodeDto(periode.getFom(), periode.getTom());
-    }
-    
-    
-    private KodeDto getKodeverdiIgnorerFeil(FellesKodeverk kodeverk, String kode) {
-        try {
-            return kodeverkService.getKodeverdi(kodeverk, kode);
-        } catch (TekniskException e) {
-            return new KodeDto(kode, "TEKNISK FEIL");
-        }
     }
     
 }

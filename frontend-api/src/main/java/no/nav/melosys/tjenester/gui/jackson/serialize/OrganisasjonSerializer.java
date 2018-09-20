@@ -7,12 +7,11 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.AdresseDto;
 import no.nav.melosys.tjenester.gui.dto.GateadresseDto;
@@ -36,11 +35,7 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         organisasjonDto.setNavn(getNavn(organisasjon));
         organisasjonDto.setOppstartdato(organisasjon.getOppstartsdato());
         if (!StringUtils.isEmpty(organisasjon.getEnhetstype())) {
-            try {
-                organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype(), LocalDate.now()));
-            } catch (TekniskException e) {
-                organisasjonDto.setOrganisasjonsform("TEKNISK FEIL");
-            }
+            organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype(), LocalDate.now()));
         }
 
         // OrganisasjonDetaljer
@@ -91,24 +86,14 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
 
             String adresseLinje = stringBuilder.toString();
             adresseLinje.replaceAll("\\s+", " ");
-            
-            gateadresse.setGatenavn(adresseLinje);
 
+            gateadresse.setGatenavn(adresseLinje);
 
             String postNummer = sAdresse.getPostnr();
 
             dto.setPostnr(postNummer);
-            try {
-                dto.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postNummer, LocalDate.now()));
-            } catch (TekniskException e) {
-                dto.setPoststed("TEKNISK FEIL");
-            }
-
-            try {
-                dto.setLand(kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, sAdresse.getLandkode(), LocalDate.now()));
-            } catch (TekniskException e) {
-                dto.setLand("TEKNISK FEIL");
-            }
+            dto.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postNummer, LocalDate.now()));
+            dto.setLand(kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, sAdresse.getLandkode(), LocalDate.now()));
 
             return  dto;
         } else if (adresse == null) {
@@ -116,7 +101,7 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
             return dto;
         } else {
             // Enhetsregistret har bare SemistrukturertAdresser
-            throw new RuntimeException("GeografiskAdresse ikke støttet " + (adresse == null ? null : adresse.getClass().getSimpleName()));
+            throw new RuntimeException("GeografiskAdresse ikke støttet " + adresse.getClass().getSimpleName());
         }
     }
 
