@@ -47,9 +47,9 @@ public class FagsakTjeneste extends RestTjeneste {
     
     private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
 
-    private FagsakService fagsakService;
+    private final FagsakService fagsakService;
 
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public FagsakTjeneste(FagsakService fagsakService) {
@@ -82,9 +82,11 @@ public class FagsakTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("ny/{fnr}")
-    @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.")
-    public Response nyFagsakSikret(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
+    @Path("ny/{fnr}/{arbeidsgiver}/{representant}")
+    @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer og arbeidsgiver.")
+    public Response nyFagsakSikret(@PathParam("fnr") @ApiParam(value = "Fødselsnummer.", required = true) String fnr,
+                                   @PathParam("arbeidsgiver") @ApiParam(value = "Arbeidsgiver orgnummer", required = true) String arbeidsgiver,
+                                   @PathParam("representant") @ApiParam(value = "representant  kun orgnummer.") String representant) {
 
         // FIXME Midlertidig tilgangskontroll
         try {
@@ -96,13 +98,13 @@ public class FagsakTjeneste extends RestTjeneste {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
-        return nyFagsak(fnr);
+        return nyFagsak(fnr, arbeidsgiver, representant);
     }
 
     @Deprecated // FIXME Trenger test en metode for å opprette fagsaker utenom saksflyt?
-    public Response nyFagsak(String fnr) {
+    public Response nyFagsak(String fnr, String arbeidsgiver, String representant) {
         try {
-            Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, Behandlingstype.SØKNAD);
+            Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, arbeidsgiver, representant, Behandlingstype.SØKNAD);
 
             if (fagsak == null) {
                 return Response.status(Response.Status.BAD_REQUEST).build();

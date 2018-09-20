@@ -63,18 +63,36 @@ public class FagsakService {
      * Oppretter en fagsak og en behandling ut fra et fødselsnummer.
      */
     @Transactional
-    public Fagsak nyFagsakOgBehandling(String aktørID, Behandlingstype behandlingstype) {
+    public Fagsak nyFagsakOgBehandling(String aktørID, String arbeidsgiver, String representant, Behandlingstype behandlingstype) {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(hentNesteSaksnummer());
 
-        Aktoer aktoer = new Aktoer();
-        aktoer.setAktørId(aktørID);
-        aktoer.setFagsak(fagsak);
-        aktoer.setRolle(RolleType.BRUKER);
+        HashSet<Aktoer> aktører = new HashSet<>();
+
+        Aktoer aktør = new Aktoer();
+        aktør.setAktørId(aktørID);
+        aktør.setFagsak(fagsak);
+        aktør.setRolle(RolleType.BRUKER);
+        aktører.add(aktør);
+
+        Aktoer aktørArbeidsgiver = new Aktoer();
+        aktørArbeidsgiver.setOrgnr(arbeidsgiver);
+        aktørArbeidsgiver.setFagsak(fagsak);
+        aktørArbeidsgiver.setRolle(RolleType.ARBEIDSGIVER);
+        aktører.add(aktørArbeidsgiver);
+
+        // Leveranse 1 : Representant kun Orgno
+        if (representant != null) {
+            Aktoer aktørRepresentant = new Aktoer();
+            aktørRepresentant.setOrgnr(representant);
+            aktørRepresentant.setFagsak(fagsak);
+            aktørRepresentant.setRolle(RolleType.REPRESENTANT);
+            aktører.add(aktørRepresentant);
+        }
 
         Instant nå = Instant.now();
 
-        fagsak.setAktører(new HashSet<>(Collections.singletonList(aktoer)));
+        fagsak.setAktører(aktører);
         fagsak.setRegistrertDato(nå);
         fagsak.setEndretDato(nå);
         fagsak.setStatus(FagsakStatus.OPPRETTET);
@@ -96,10 +114,10 @@ public class FagsakService {
     // FIXME Trenger test en metode for å opprette fagsaker utenom saksflyt?
     @Deprecated
     @Transactional
-    public Fagsak testFagsakOgBehandling(String ident, Behandlingstype behandlingstype) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public Fagsak testFagsakOgBehandling(String ident, String arbeidsgiver, String representant, Behandlingstype behandlingstype) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         String aktørID = tpsFasade.hentAktørIdForIdent(ident);
 
-        Fagsak fagsak = nyFagsakOgBehandling(aktørID, behandlingstype);
+        Fagsak fagsak = nyFagsakOgBehandling(aktørID,arbeidsgiver, representant, behandlingstype);
         fagsak.setType(FagsakType.EU_EØS);
         Set<Saksopplysning> saksopplysninger = saksopplysningerService.hentSaksopplysninger(aktørID);
         Behandling behandling = fagsak.getAktivBehandling();

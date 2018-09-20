@@ -44,6 +44,7 @@ public class JournalfoeringServiceTest {
         opprettDto.setAvsenderID("setAvsenderID");
         opprettDto.setBrukerID("setBrukerID");
         opprettDto.setDokumenttittel("setDokumenttittel");
+        opprettDto.setArbeidsgiverID("123456789");
         this.opprettDto = opprettDto;
 
         JournalfoeringTilordneDto tilordneDto = new JournalfoeringTilordneDto();
