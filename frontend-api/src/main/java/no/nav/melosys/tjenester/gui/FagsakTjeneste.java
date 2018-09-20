@@ -137,6 +137,7 @@ public class FagsakTjeneste extends RestTjeneste {
         try {
             return tilDtoer(saker);
         } catch (TekniskException e) {
+            log.error("TekniskException", e);
             throw new InternalServerErrorException("Intern feil");
         }
     }
