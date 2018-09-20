@@ -50,7 +50,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void ferdigstillJournalføring(String journalpostId) throws SikkerhetsbegrensningException {
+    public void ferdigstillJournalføring(String journalpostId) throws SikkerhetsbegrensningException, IntegrasjonException {
         FerdigstillJournalfoeringRequest request = new FerdigstillJournalfoeringRequest();
         request.setJournalpostId(journalpostId);
         request.setEnhetId(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
@@ -65,7 +65,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public byte[] hentDokument(String journalPostID, String dokumentID) {
+    public byte[] hentDokument(String journalPostID, String dokumentID) throws IntegrasjonException {
         HentDokumentRequest request = new HentDokumentRequest();
         request.setDokumentId(dokumentID);
         request.setJournalpostId(journalPostID);
@@ -84,7 +84,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException {
+    public Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
         HentJournalpostRequest request = new HentJournalpostRequest();
         request.setJournalpostId(journalpostID);
 
@@ -130,7 +130,7 @@ public class JoarkService implements JoarkFasade {
 
     @Override
     public void oppdaterJounalpost(String journalpostId, String dokumentID, Long gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, boolean medDokumentkategori)
-        throws SikkerhetsbegrensningException {
+        throws SikkerhetsbegrensningException, IntegrasjonException {
         OppdaterJournalpostRequest request = new OppdaterJournalpostRequest();
         no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.InngaaendeJournalpost journalpost =
                 new no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.InngaaendeJournalpost();
@@ -174,7 +174,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public List<JournalfoeringMangel> utledJournalfoeringsbehov(String journalpostID) throws SikkerhetsbegrensningException {
+    public List<JournalfoeringMangel> utledJournalfoeringsbehov(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
         UtledJournalfoeringsbehovRequest request = new UtledJournalfoeringsbehovRequest();
         request.setJournalpostId(journalpostID);
 

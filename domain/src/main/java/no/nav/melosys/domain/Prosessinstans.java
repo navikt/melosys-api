@@ -95,7 +95,7 @@ public class Prosessinstans {
      * Returnerer et dataelement som et Object (etter JSON deserialisering)
      * @throws TekniskException hvis feil ved deserialisering
      */
-    public <T> T getData(ProsessDataKey key, Class<T> type) throws TekniskException {
+    public <T> T getData(ProsessDataKey key, Class<T> type) {
         String dataString = getData(key);
         if (dataString == null) {
             return null;
@@ -103,7 +103,8 @@ public class Prosessinstans {
         try {
             return dataMapper.readValue(dataString, type);
         } catch (IOException e) {
-            throw new TekniskException("Feil ved deserialiserigng", e);
+            // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
+            throw new RuntimeException("Feil ved deserialisering", e);
         }
     }
 
@@ -115,12 +116,13 @@ public class Prosessinstans {
      * Setter et dataelement til et objet (ved json serialisering)
      * @throws TekniskException hvis feil ved deserialisering
      */
-    public void setData(ProsessDataKey key, Object value) throws TekniskException {
+    public void setData(ProsessDataKey key, Object value) {
         try {
             String dataString = dataMapper.writeValueAsString(value);
             setData(key, dataString);
         } catch (JsonProcessingException e) {
-            throw new TekniskException("Feil ved serialiserigng", e);
+            // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
+            throw new RuntimeException("Feil ved serialisering", e);
         }
     }
 
@@ -186,7 +188,8 @@ public class Prosessinstans {
     
     public void leggTilHendelse(ProsessinstansHendelse piHend) {
         if (!this.equals(piHend.getProsessinstans())) {
-            throw new TekniskException("Forsøk på å legge til ProsessinstansHendelse på feil Prosessinstans");
+            // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
+            throw new RuntimeException("Forsøk på å legge til ProsessinstansHendelse på feil Prosessinstans");
         }
         if (hendelser == null) {
             hendelser = new ArrayList<>();
@@ -214,7 +217,8 @@ public class Prosessinstans {
         }
         Prosessinstans that = (Prosessinstans) o;
         if (this.id == 0) {
-            throw new TekniskException("Prosessinstans.equals ble kalt før prosessinstans har fått saksnummer");
+            // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
+            throw new RuntimeException("Prosessinstans.equals ble kalt før prosessinstans har fått saksnummer");
         }
         return this.id == that.id;
     }

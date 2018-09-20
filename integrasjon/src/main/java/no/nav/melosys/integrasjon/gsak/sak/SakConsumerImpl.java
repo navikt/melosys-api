@@ -34,7 +34,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
 
     private final WebTarget target;
 
-    SakConsumerImpl(String endpointUrl, boolean erSystem) {
+    SakConsumerImpl(String endpointUrl, boolean erSystem) throws IntegrasjonException {
         this.erSystem = erSystem;
         try {
             SSLContext sslContext = SSLContext.getDefault();
@@ -78,7 +78,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     }
 
     @Override
-    public SakDto opprettSak(SakDto sakDto) throws SikkerhetsbegrensningException, FunksjonellException {
+    public SakDto opprettSak(SakDto sakDto) throws SikkerhetsbegrensningException, FunksjonellException, TekniskException {
         sakDto.setOpprettetAv(getUserID());
         try (Response response = target
             .request()

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
@@ -44,7 +45,7 @@ public class KodeverkServiceTest {
 
     @Test
     @Ignore // FIXME: Må slås på når feilen er fikset
-    public void testKodeverkService() {
+    public void testKodeverkService() throws TekniskException {
         // Sjekk opphenting av kodeverk...
         String res = kodeverkService.dekod(LANDKODER, BAK, LocalDate.now());
         assertEquals(BAKVENDTLAND, res);

@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.gsak.oppgave;
 
+import no.nav.melosys.exception.IntegrasjonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,13 +20,13 @@ public class OppgaveConsumerProducer {
 
     @Bean
     @Primary
-    public OppgaveConsumer oppgaveConsumer() {
+    public OppgaveConsumer oppgaveConsumer() throws IntegrasjonException {
         return new OppgaveConsumerImpl(endpointUrl, false);
     }
 
     @Bean
     @Qualifier("system")
-    public OppgaveConsumer oppgaveSystemConsumer() {
+    public OppgaveConsumer oppgaveSystemConsumer() throws IntegrasjonException {
         return new OppgaveConsumerImpl(endpointUrl, true);
     }
 }

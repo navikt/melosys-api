@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,6 +14,7 @@ import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +54,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void soeknadDokumentSchemaValidering() throws IOException {
+    public void soeknadDokumentSchemaValidering() throws IOException, JSONException {
 
         Response response = soknadTjeneste.hentSøknad(1222L);
         SoeknadDto søknadDto = (SoeknadDto)response.getEntity();

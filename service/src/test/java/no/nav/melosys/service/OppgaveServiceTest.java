@@ -10,7 +10,7 @@ import no.nav.melosys.domain.dokument.soeknad.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
@@ -56,7 +56,7 @@ public class OppgaveServiceTest {
     }
 
     @Test
-    public void hentMineSaker() throws TekniskException {
+    public void henteMineSaker() throws MelosysException {
 
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave();

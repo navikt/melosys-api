@@ -9,6 +9,7 @@ import java.util.Set;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
@@ -95,7 +96,7 @@ public class FagsakService {
     // FIXME Trenger test en metode for å opprette fagsaker utenom saksflyt?
     @Deprecated
     @Transactional
-    public Fagsak testFagsakOgBehandling(String ident, Behandlingstype behandlingstype) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public Fagsak testFagsakOgBehandling(String ident, Behandlingstype behandlingstype) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         String aktørID = tpsFasade.hentAktørIdForIdent(ident);
 
         Fagsak fagsak = nyFagsakOgBehandling(aktørID, behandlingstype);

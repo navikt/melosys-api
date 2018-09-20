@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.dokumentmottak;
 
 import com.mockrunner.mock.jms.MockTextMessage;
+import no.nav.melosys.exception.IntegrasjonException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,7 +15,7 @@ public class DokumentmottakConsumerImplTest {
     private ProsessinstansMeldingsfordeler meldingsfordeler;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IntegrasjonException {
         meldingsfordeler = mock(ProsessinstansMeldingsfordeler.class);
         consumer = new DokumentmottakConsumerImpl(meldingsfordeler);
     }

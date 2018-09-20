@@ -1,6 +1,6 @@
 package no.nav.melosys.exception;
 
-public class IntegrasjonException extends RuntimeException {
+public class IntegrasjonException extends TekniskException {
 
     public IntegrasjonException(String message) {
         super(message);

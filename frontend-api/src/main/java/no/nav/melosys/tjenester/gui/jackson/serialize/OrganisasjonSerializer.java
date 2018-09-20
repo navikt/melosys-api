@@ -7,11 +7,11 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.AdresseDto;
 import no.nav.melosys.tjenester.gui.dto.GateadresseDto;
@@ -86,15 +86,13 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
 
             String adresseLinje = stringBuilder.toString();
             adresseLinje.replaceAll("\\s+", " ");
-            
-            gateadresse.setGatenavn(adresseLinje);
 
+            gateadresse.setGatenavn(adresseLinje);
 
             String postNummer = sAdresse.getPostnr();
 
             dto.setPostnr(postNummer);
             dto.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postNummer, LocalDate.now()));
-
             dto.setLand(kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, sAdresse.getLandkode(), LocalDate.now()));
 
             return  dto;
@@ -103,7 +101,7 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
             return dto;
         } else {
             // Enhetsregistret har bare SemistrukturertAdresser
-            throw new RuntimeException("GeografiskAdresse ikke støttet " + (adresse == null ? null : adresse.getClass().getSimpleName()));
+            throw new RuntimeException("GeografiskAdresse ikke støttet " + adresse.getClass().getSimpleName());
         }
     }
 

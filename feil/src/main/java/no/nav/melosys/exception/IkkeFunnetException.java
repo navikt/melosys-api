@@ -1,6 +1,6 @@
 package no.nav.melosys.exception;
 
-public class IkkeFunnetException extends Exception {
+public class IkkeFunnetException extends FunksjonellException {
 
     public IkkeFunnetException(String message) {
         super(message);
@@ -9,4 +9,5 @@ public class IkkeFunnetException extends Exception {
     public IkkeFunnetException(Throwable t) {
         super(t);
     }
+
 }

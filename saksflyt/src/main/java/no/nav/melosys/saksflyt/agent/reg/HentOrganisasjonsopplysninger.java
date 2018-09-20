@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
 import no.nav.melosys.domain.dokument.inntekt.Inntekt;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -62,7 +63,7 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
     
     @Transactional
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = behandlingRepo.findOne(prosessinstans.getBehandling().getId());
@@ -104,7 +105,7 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
             filter(saksopplysning -> saksopplysning.getType().equals(saksopplysningType)).findFirst();
     }
 
-    private void hentOrganisasjoner(Set<String> orgnumre, Behandling behandling) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    private void hentOrganisasjoner(Set<String> orgnumre, Behandling behandling) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         for (String orgnr : orgnumre) {
             Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(orgnr);
             saksopplysning.setBehandling(behandling);

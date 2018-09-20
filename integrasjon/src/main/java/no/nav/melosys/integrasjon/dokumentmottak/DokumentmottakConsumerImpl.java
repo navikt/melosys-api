@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.dokumentmottak;
 
 import java.io.StringReader;
+
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
@@ -32,7 +33,7 @@ public class DokumentmottakConsumerImpl {
     private final ProsessinstansMeldingsfordeler meldingsfordeler;
 
     @Autowired
-    public DokumentmottakConsumerImpl(ProsessinstansMeldingsfordeler meldingsfordeler) {
+    public DokumentmottakConsumerImpl(ProsessinstansMeldingsfordeler meldingsfordeler) throws IntegrasjonException {
         try {
             jaxbContext = JAXBContext.newInstance(ForsendelsesinformasjonDto.class);
         } catch (JAXBException e) {

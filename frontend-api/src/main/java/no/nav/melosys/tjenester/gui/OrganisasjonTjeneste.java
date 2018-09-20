@@ -10,7 +10,10 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.RegisterOppslagService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,8 @@ import org.springframework.web.context.WebApplicationContext;
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class OrganisasjonTjeneste extends RestTjeneste {
+    
+    private static final Logger log = LoggerFactory.getLogger(OrganisasjonTjeneste.class);
 
     private RegisterOppslagService registerOppslag;
 
@@ -43,6 +48,9 @@ public class OrganisasjonTjeneste extends RestTjeneste {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (IkkeFunnetException e) {
             return Response.ok(RestTjeneste.TOM_JSON).build();
+        } catch (TekniskException e) {
+            log.error("TekniskException", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
         return Response.ok(organisasjonDokument).build();
