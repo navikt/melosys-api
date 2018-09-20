@@ -17,17 +17,8 @@ public class SoeknadDto {
         return behandlingID;
     }
 
-    public void setBehandlingID(long behandlingID) {
-        this.behandlingID = behandlingID;
-    }
-
     public SoeknadDokument getSoeknadDokument() {
         return soeknadDokument;
     }
-
-    public void setSoeknadDokument(SoeknadDokument soeknadDokument) {
-        this.soeknadDokument = soeknadDokument;
-    }
-
 
 }

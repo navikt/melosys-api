@@ -26,14 +26,14 @@ import org.springframework.web.context.WebApplicationContext;
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 @Transactional
-public class SoknadTjeneste extends RestTjeneste  {
+public class SoeknadTjeneste extends RestTjeneste  {
 
     private SoeknadService soeknadService;
 
     private ValideringService valideringService;
 
     @Autowired
-    public SoknadTjeneste(SoeknadService soeknadService, ValideringService valideringService) {
+    public SoeknadTjeneste(SoeknadService soeknadService, ValideringService valideringService) {
         this.soeknadService = soeknadService;
         this.valideringService = valideringService;
     }
@@ -42,15 +42,21 @@ public class SoknadTjeneste extends RestTjeneste  {
     @Path("{behandlingID}")
     @ApiOperation(value = "Henter en søknad som hører til en gitt behandling", notes = ("Spesifikke saker kan hentes via saksnummer."))
     public Response hentSøknad(@PathParam("behandlingID") long behandlingID) {
-        SoeknadDokument soeknad;
+        SoeknadDokument soeknadDokument;
 
         try {
-            soeknad = soeknadService.hentSoeknad(behandlingID);
+            soeknadDokument = soeknadService.hentSoeknad(behandlingID);
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        SoeknadDto soeknadDto = new SoeknadDto(behandlingID, soeknad);
+        SoeknadDto soeknadDto;
+        if (soeknadDokument == null) {
+            soeknadDto = new SoeknadDto(behandlingID, new SoeknadDokument());
+        } else {
+            soeknadDto = new SoeknadDto(behandlingID, soeknadDokument);
+        }
+
         return Response.ok(soeknadDto).build();
     }
 

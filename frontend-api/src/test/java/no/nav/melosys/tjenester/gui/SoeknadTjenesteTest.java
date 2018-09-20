@@ -31,7 +31,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
     private static final Logger log = LoggerFactory.getLogger(SoeknadTjenesteTest.class);
 
 
-    private SoknadTjeneste soknadTjeneste;
+    private SoeknadTjeneste soeknadTjeneste;
 
     @Override
     public String schemaNavn() {
@@ -43,7 +43,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
 
         SoeknadService soeknadService = mock(SoeknadService.class);
 
-        soknadTjeneste = new SoknadTjeneste(soeknadService, null);
+        soeknadTjeneste = new SoeknadTjeneste(soeknadService, null);
 
         EnhancedRandom random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
             .collectionSizeRange(1, 4).build();
@@ -56,7 +56,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
     @Test
     public void soeknadDokumentSchemaValidering() throws IOException, JSONException {
 
-        Response response = soknadTjeneste.hentSøknad(1222L);
+        Response response = soeknadTjeneste.hentSøknad(1222L);
         SoeknadDto søknadDto = (SoeknadDto)response.getEntity();
 
         assertThat(søknadDto).isNotNull();
