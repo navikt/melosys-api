@@ -76,14 +76,14 @@ public class AbacTest {
     }
 
     @Test
-    public void testPepOversetter() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void testPepOversetter() throws SikkerhetsbegrensningException, TekniskException {
         Aktoer aktør = new Aktoer();
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
         pep.sjekkTilgangTil(aktør);
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
-    public void testPepOversetterIkketilgang() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void testPepOversetterIkketilgang() throws SikkerhetsbegrensningException, TekniskException {
         Aktoer aktør = new Aktoer();
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
         pep.sjekkTilgangTil(aktør);
@@ -91,13 +91,13 @@ public class AbacTest {
 
 
 
-    @Test(expected = SikkerhetsbegrensningException.class)
-    public void testBehandlingsIdIkkeKnyttetTilFagsak() throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    @Test(expected = TekniskException.class)
+    public void testBehandlingsIdIkkeKnyttetTilFagsak() throws SikkerhetsbegrensningException, TekniskException {
         behandlingTilgang.sjekk(102323934);
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
-    public void testBehandlingsIdIkketilgang() throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public void testBehandlingsIdIkketilgang() throws SikkerhetsbegrensningException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
 
         List<Fagsak> fagsaker = Arrays.asList(fagsakMocked);
@@ -107,7 +107,7 @@ public class AbacTest {
     }
 
     @Test
-    public void testBehandlingsIdOk() throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public void testBehandlingsIdOk() throws SikkerhetsbegrensningException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
 
         List<Fagsak> fagsaker = Arrays.asList(fagsakMocked);
@@ -117,13 +117,13 @@ public class AbacTest {
     }
 
     @Test
-    public void testFagsakOk() throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public void testFagsakOk() throws SikkerhetsbegrensningException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
         fagsakTilgang.sjekk(fagsakMocked);
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
-    public void testFagsakIkkeTilgang() throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public void testFagsakIkkeTilgang() throws SikkerhetsbegrensningException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
         fagsakTilgang.sjekk(fagsakMocked);
     }

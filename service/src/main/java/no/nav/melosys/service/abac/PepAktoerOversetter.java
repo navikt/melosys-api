@@ -5,6 +5,7 @@ import no.nav.freg.abac.core.service.AbacService;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.sikkerhet.abac.PepImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,14 @@ public class PepAktoerOversetter extends PepImpl {
         this.tpsFasade = tpsFasade;
     }
 
-    public void sjekkTilgangTil(Aktoer aktør) throws SikkerhetsbegrensningException, IkkeFunnetException {
-        String fnr = tpsFasade.hentIdentForAktørId(aktør.getAktørId());
+    public void sjekkTilgangTil(Aktoer aktør) throws SikkerhetsbegrensningException, TekniskException {
+        String fnr = null;
+
+        try {
+            fnr = tpsFasade.hentIdentForAktørId(aktør.getAktørId());
+        } catch (IkkeFunnetException e) {
+            throw new TekniskException(e.getMessage());
+        }
         sjekkTilgangTil(fnr);
     }
 }

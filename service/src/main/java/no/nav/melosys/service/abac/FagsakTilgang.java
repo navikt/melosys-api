@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RolleType;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.FagsakRepository;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,7 @@ public class FagsakTilgang {
         this.pep = pep;
     }
 
-    public void sjekk(Fagsak fagsak) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public void sjekk(Fagsak fagsak) throws SikkerhetsbegrensningException, TekniskException {
         pep.sjekkTilgangTil(fagsak.hentAktørMedRolleType(RolleType.BRUKER));
     }
 

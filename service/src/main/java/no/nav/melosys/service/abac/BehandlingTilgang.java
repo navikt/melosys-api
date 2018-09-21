@@ -2,7 +2,6 @@ package no.nav.melosys.service.abac;
 
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RolleType;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.FagsakRepository;
@@ -22,10 +21,10 @@ public class BehandlingTilgang {
         this.pep = pep;
     }
 
-    public void sjekk(long behandlingsId) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public void sjekk(long behandlingsId) throws SikkerhetsbegrensningException, TekniskException {
         List<Fagsak> fagsaker = fagsakRepository.findByBehandlingsId(behandlingsId);
         if (fagsaker.isEmpty()) {
-            throw new SikkerhetsbegrensningException("Klarte ikke å finne brukerident fra fagsak knyttet til behandlingid");
+            throw new TekniskException("Klarte ikke å finne brukerident fra fagsak knyttet til behandlingid");
         }
 
         for (Fagsak fagsak : fagsaker) {
