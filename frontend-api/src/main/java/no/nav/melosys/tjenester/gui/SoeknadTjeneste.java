@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.BehandlingTilgang;
 import no.nav.melosys.service.validering.ValideringService;
@@ -56,6 +57,8 @@ public class SoeknadTjeneste extends RestTjeneste  {
             return Response.status(Response.Status.NOT_FOUND).build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (TekniskException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
         SoeknadDto soeknadDto;
@@ -80,6 +83,8 @@ public class SoeknadTjeneste extends RestTjeneste  {
             return Response.status(Response.Status.NOT_FOUND).build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (TekniskException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
         valideringService.validerOpplysninger(soeknadDokument);
@@ -88,5 +93,4 @@ public class SoeknadTjeneste extends RestTjeneste  {
         SoeknadDto soeknadDto = new SoeknadDto(behandlingID, soeknad);
         return Response.ok(soeknadDto).build();
     }
-
 }

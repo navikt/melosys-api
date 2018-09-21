@@ -9,7 +9,9 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Journalpost;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
@@ -48,7 +50,7 @@ public class AbacTest {
     private Fagsak fagsakMocked;
 
     @Before
-    public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException {
+    public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         AbacContext abacContext = mock(AbacContext.class);
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
 
@@ -90,12 +92,12 @@ public class AbacTest {
 
 
     @Test(expected = SikkerhetsbegrensningException.class)
-    public void testBehandlingsIdIkkeKnyttetTilFagsak() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void testBehandlingsIdIkkeKnyttetTilFagsak() throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         behandlingTilgang.sjekk(102323934);
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
-    public void testBehandlingsIdIkketilgang() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void testBehandlingsIdIkketilgang() throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
 
         List<Fagsak> fagsaker = Arrays.asList(fagsakMocked);
@@ -105,7 +107,7 @@ public class AbacTest {
     }
 
     @Test
-    public void testBehandlingsIdOk() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void testBehandlingsIdOk() throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
 
         List<Fagsak> fagsaker = Arrays.asList(fagsakMocked);
@@ -115,25 +117,25 @@ public class AbacTest {
     }
 
     @Test
-    public void testFagsakOk() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void testFagsakOk() throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
         fagsakTilgang.sjekk(fagsakMocked);
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
-    public void testFagsakIkkeTilgang() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void testFagsakIkkeTilgang() throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
         fagsakTilgang.sjekk(fagsakMocked);
     }
 
     @Test
-    public void testJournalOk() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void testJournalOk() throws SikkerhetsbegrensningException, IntegrasjonException {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
         journalTilgang.sjekk("1234567");
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
-    public void testJournalIkkeTilgang() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void testJournalIkkeTilgang() throws SikkerhetsbegrensningException, IntegrasjonException {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
         journalTilgang.sjekk("1234567");
     }

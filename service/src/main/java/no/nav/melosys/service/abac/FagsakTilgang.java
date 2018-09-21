@@ -1,5 +1,6 @@
 package no.nav.melosys.service.abac;
 
+import no.nav.melosys.exception.TekniskException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import no.nav.melosys.domain.Fagsak;
@@ -20,7 +21,7 @@ public class FagsakTilgang {
         this.pep = pep;
     }
 
-    public void sjekk(Fagsak fagsak) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void sjekk(Fagsak fagsak) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         pep.sjekkTilgangTil(fagsak.hentAktørMedRolleType(RolleType.BRUKER));
     }
 

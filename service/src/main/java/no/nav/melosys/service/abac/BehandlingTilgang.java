@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.FagsakRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class BehandlingTilgang {
         this.pep = pep;
     }
 
-    public void sjekk(long behandlingsId) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void sjekk(long behandlingsId) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         List<Fagsak> fagsaker = fagsakRepository.findByBehandlingsId(behandlingsId);
         if (fagsaker.isEmpty()) {
             throw new SikkerhetsbegrensningException("Klarte ikke å finne brukerident fra fagsak knyttet til behandlingid");

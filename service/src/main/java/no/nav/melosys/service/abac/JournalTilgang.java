@@ -1,6 +1,7 @@
 package no.nav.melosys.service.abac;
 
 import no.nav.melosys.domain.Journalpost;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
@@ -20,19 +21,19 @@ public class JournalTilgang {
         this.pep = pep;
     }
 
-    public void sjekk(Journalpost journalPost) throws SikkerhetsbegrensningException {
+    public void sjekk(Journalpost journalPost) throws SikkerhetsbegrensningException, IntegrasjonException {
         sjekk(journalPost.getBrukerId());
     }
 
-    public void sjekk(JournalfoeringOpprettDto journalPost) throws SikkerhetsbegrensningException {
+    public void sjekk(JournalfoeringOpprettDto journalPost) throws SikkerhetsbegrensningException, IntegrasjonException {
         sjekk(journalPost.getBrukerID());
     }
 
-    public void sjekk(JournalfoeringTilordneDto journalPost) throws SikkerhetsbegrensningException {
+    public void sjekk(JournalfoeringTilordneDto journalPost) throws SikkerhetsbegrensningException, IntegrasjonException {
         sjekk(journalPost.getBrukerID());
     }
 
-    public void sjekk(String journalId) throws SikkerhetsbegrensningException {
+    public void sjekk(String journalId) throws SikkerhetsbegrensningException, IntegrasjonException {
         Journalpost journalpost = joarkFasade.hentJournalpost(journalId);
         pep.sjekkTilgangTil(journalpost.getBrukerId());
     }

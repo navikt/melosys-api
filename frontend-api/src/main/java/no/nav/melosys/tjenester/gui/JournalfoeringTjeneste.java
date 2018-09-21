@@ -6,6 +6,7 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.JournalTilgang;
@@ -73,10 +74,10 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         try {
             journalTilgang.sjekk(journalfoeringDto);
             journalføringService.opprettSakOgJournalfør(journalfoeringDto);
+        } catch (SikkerhetsbegrensningException e) {
+            throw new ForbiddenException("Ikke tilgang");
         } catch (FunksjonellException e) {
             throw new BadRequestException(e);
-        } catch (SikkerhetsbegrensningException e) {
-            throw new BadRequestException("Ikke tilgang");
         } catch (TekniskException e) {
             log.error("TekniskException", e);
             throw new InternalServerErrorException(e);
@@ -89,10 +90,10 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         try {
             journalTilgang.sjekk(journalfoeringDto);
             journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
-        } catch (FunksjonellException e) {
-            throw new BadRequestException(e.getMessage());
         } catch (SikkerhetsbegrensningException e) {
-            throw new BadRequestException("Ikke tilgang");
+            throw new ForbiddenException("Ikke tilgang");
+        } catch (FunksjonellException | IntegrasjonException e) {
+            throw new BadRequestException(e.getMessage());
         }
     }
 }
