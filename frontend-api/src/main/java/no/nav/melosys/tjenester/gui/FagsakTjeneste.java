@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
@@ -46,9 +47,9 @@ public class FagsakTjeneste extends RestTjeneste {
     
     private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
 
-    private final FagsakService fagsakService;
+    private FagsakService fagsakService;
 
-    private final ModelMapper modelMapper;
+    private ModelMapper modelMapper;
 
     @Autowired
     public FagsakTjeneste(FagsakService fagsakService) {
@@ -101,7 +102,7 @@ public class FagsakTjeneste extends RestTjeneste {
     @Deprecated // FIXME Trenger test en metode for å opprette fagsaker utenom saksflyt?
     public Response nyFagsak(String fnr) {
         try {
-            Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, null, null, Behandlingstype.SØKNAD);
+            Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, Behandlingstype.SØKNAD);
 
             if (fagsak == null) {
                 return Response.status(Response.Status.BAD_REQUEST).build();

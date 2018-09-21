@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+
 import javax.ws.rs.core.Response;
 
 import io.github.benas.randombeans.EnhancedRandomBuilder;

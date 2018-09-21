@@ -113,10 +113,10 @@ public class FagsakService {
     // FIXME Trenger test en metode for å opprette fagsaker utenom saksflyt?
     @Deprecated
     @Transactional
-    public Fagsak testFagsakOgBehandling(String ident, String arbeidsgiver, String representant, Behandlingstype behandlingstype) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public Fagsak testFagsakOgBehandling(String ident, Behandlingstype behandlingstype) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         String aktørID = tpsFasade.hentAktørIdForIdent(ident);
 
-        Fagsak fagsak = nyFagsakOgBehandling(aktørID,arbeidsgiver, representant, behandlingstype);
+        Fagsak fagsak = nyFagsakOgBehandling(aktørID, null, null, behandlingstype);
         fagsak.setType(FagsakType.EU_EØS);
         Set<Saksopplysning> saksopplysninger = saksopplysningerService.hentSaksopplysninger(aktørID);
         Behandling behandling = fagsak.getAktivBehandling();
