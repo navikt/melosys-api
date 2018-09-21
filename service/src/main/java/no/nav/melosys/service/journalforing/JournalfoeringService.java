@@ -41,7 +41,7 @@ public class JournalfoeringService {
     @Transactional
     public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException, TekniskException {
         valider(journalfoeringDto);
-        validerOpprettJournalføringFelter(journalfoeringDto);
+        validerOpprettSakFelter(journalfoeringDto);
         
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
@@ -124,7 +124,7 @@ public class JournalfoeringService {
         }
     }
 
-    private void validerOpprettJournalføringFelter(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
+    private void validerOpprettSakFelter(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
         if (journalfoeringDto.getFagsak() == null) {
             throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
         }

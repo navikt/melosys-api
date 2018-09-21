@@ -81,11 +81,9 @@ public class FagsakTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("/ny")
-    @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer, arbeidsgiver(orgnummer) og representant(valgfri og kun orgnummer)")
-    public Response nyFagsakSikret(@QueryParam("fnr") String fnr,
-                                   @QueryParam("arbeidsgiver") String arbeidsgiver,
-                                   @QueryParam("representant") String representant) {
+    @Path("ny/{fnr}")
+    @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.")
+    public Response nyFagsakSikret(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
 
         // FIXME Midlertidig tilgangskontroll
         try {
@@ -97,13 +95,13 @@ public class FagsakTjeneste extends RestTjeneste {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
-        return nyFagsak(fnr, arbeidsgiver, representant);
+        return nyFagsak(fnr);
     }
 
     @Deprecated // FIXME Trenger test en metode for å opprette fagsaker utenom saksflyt?
-    public Response nyFagsak(String fnr, String arbeidsgiver, String representant) {
+    public Response nyFagsak(String fnr) {
         try {
-            Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, arbeidsgiver, representant, Behandlingstype.SØKNAD);
+            Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, null, null, Behandlingstype.SØKNAD);
 
             if (fagsak == null) {
                 return Response.status(Response.Status.BAD_REQUEST).build();

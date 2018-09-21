@@ -81,7 +81,6 @@ public class FagsakService {
         aktørArbeidsgiver.setRolle(RolleType.ARBEIDSGIVER);
         aktører.add(aktørArbeidsgiver);
 
-        // Leveranse 1 : Representant kun Orgno
         if (representant != null) {
             Aktoer aktørRepresentant = new Aktoer();
             aktørRepresentant.setOrgnr(representant);
