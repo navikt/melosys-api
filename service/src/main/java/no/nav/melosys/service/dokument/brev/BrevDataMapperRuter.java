@@ -19,11 +19,14 @@ public class BrevDataMapperRuter {
     private BrevDataMapperRuter() {
     }
 
-    public static BrevDataMapper brevDataMapper(DokumentType type) throws IllegalAccessException, InstantiationException {
-        if (mappere.containsKey(type)) {
-            return mappere.get(type).newInstance();
-        } else {
+    public static BrevDataMapper brevDataMapper(DokumentType type) throws TekniskException {
+        if (!mappere.containsKey(type)) {
             throw new TekniskException("DokumentType med kode " + type.getKode() + " støttes ikke");
+        }
+        try {
+            return mappere.get(type).newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new TekniskException(e);
         }
     }
 }

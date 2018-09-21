@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +14,7 @@ import no.nav.melosys.service.abac.BehandlingTilgang;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +31,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
     private static final Logger log = LoggerFactory.getLogger(SoeknadTjenesteTest.class);
 
 
-    private SoknadTjeneste soknadTjeneste;
+    private SoeknadTjeneste soeknadTjeneste;
 
     @Override
     public String schemaNavn() {
@@ -41,7 +43,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
 
         SoeknadService soeknadService = mock(SoeknadService.class);
         BehandlingTilgang behandlingTilgang = mock(BehandlingTilgang.class);
-        soknadTjeneste = new SoknadTjeneste(soeknadService, null, behandlingTilgang);
+        soeknadTjeneste = new SoeknadTjeneste(soeknadService, null, behandlingTilgang);
 
         EnhancedRandom random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
             .collectionSizeRange(1, 4).build();
@@ -52,9 +54,9 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void soeknadDokumentSchemaValidering() throws IOException {
+    public void soeknadDokumentSchemaValidering() throws IOException, JSONException {
 
-        Response response = soknadTjeneste.hentSøknad(1222L);
+        Response response = soeknadTjeneste.hentSøknad(1222L);
         SoeknadDto søknadDto = (SoeknadDto)response.getEntity();
 
         assertThat(søknadDto).isNotNull();

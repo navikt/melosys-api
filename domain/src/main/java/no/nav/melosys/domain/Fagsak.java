@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.persistence.*;
 
 import no.nav.melosys.exception.TekniskException;
@@ -101,7 +102,7 @@ public class Fagsak {
     /**
      * Returnerer den aktive behandlingen knyttet til saken eller {@code null} hvis den ikke finnes.
      */
-    public Behandling getAktivBehandling() {
+    public Behandling getAktivBehandling() throws TekniskException {
         List<Behandling> behandlinger = getBehandlinger().stream()
             .filter(b -> !b.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
         if (behandlinger.size() > 1) {
@@ -116,7 +117,7 @@ public class Fagsak {
     /**
      * Returnerer en aktør med angitt {@link RolleType} knyttet til saken eller {@code null} hvis ingen finnes.
      */
-    public Aktoer hentAktørMedRolleType(RolleType rolleType) {
+    public Aktoer hentAktørMedRolleType(RolleType rolleType) throws TekniskException {
         if (aktører == null || aktører.isEmpty()) {
             return null;
         }

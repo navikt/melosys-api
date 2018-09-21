@@ -82,7 +82,7 @@ public class MedlService implements MedlFasade {
         return saksopplysning;
     }
 
-    private HentPeriodeListeResponse hentPeriodeListeResponse(String fnr, LocalDate fom, LocalDate tom) throws SikkerhetsbegrensningException {
+    private HentPeriodeListeResponse hentPeriodeListeResponse(String fnr, LocalDate fom, LocalDate tom) throws SikkerhetsbegrensningException, IntegrasjonException {
         Foedselsnummer ident = new Foedselsnummer();
         ident.setValue(fnr);
 

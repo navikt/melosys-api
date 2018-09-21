@@ -108,20 +108,15 @@ public class Oppgaveplukker {
             log.error("Fant ikke oppgave med oppgaveId " + oppgaveId);
             throw new RuntimeException("Fant ikke oppgave med oppgaveId " + oppgaveId);
         }
-        try {
-            gsakFasade.leggTilbakeOppgave(oppgaveId);
+        gsakFasade.leggTilbakeOppgave(oppgaveId);
 
-            OppgaveTilbakelegging oppgaveTilbakelegging = new OppgaveTilbakelegging();
-            oppgaveTilbakelegging.setOppgaveId(oppgaveId);
-            oppgaveTilbakelegging.setSaksbehandlerId(saksbehandlerID);
-            oppgaveTilbakelegging.setBegrunnelse(begrunnelse);
-            oppgaveTilbakelegging.setRegistrertDato(LocalDateTime.now());
-            oppgaveTilbakkeleggingRepo.save(oppgaveTilbakelegging);
-            log.info("Oppgave med oppgaveId {} er lagt tilbake. ", oppgaveId);
-        } catch (IntegrasjonException | SikkerhetsbegrensningException | TekniskException e) {
-            log.error("Tilbakelegging av oppgave med oppgaveId " + oppgaveId + " feilet");
-            throw new RuntimeException("Tilbakelegging av oppgave med oppgaveId " + oppgaveId + " feilet");
-        }
+        OppgaveTilbakelegging oppgaveTilbakelegging = new OppgaveTilbakelegging();
+        oppgaveTilbakelegging.setOppgaveId(oppgaveId);
+        oppgaveTilbakelegging.setSaksbehandlerId(saksbehandlerID);
+        oppgaveTilbakelegging.setBegrunnelse(begrunnelse);
+        oppgaveTilbakelegging.setRegistrertDato(LocalDateTime.now());
+        oppgaveTilbakkeleggingRepo.save(oppgaveTilbakelegging);
+        log.info("Oppgave med oppgaveId {} er lagt tilbake. ", oppgaveId);
     }
 
     private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {

@@ -1,12 +1,13 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+
 import javax.ws.rs.core.Response;
 
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.domain.Journalpost;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.abac.JournalTilgang;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
@@ -14,6 +15,7 @@ import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,7 +63,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void journalPostSchemaValidering() throws IOException, SikkerhetsbegrensningException {
+    public void journalPostSchemaValidering() throws IOException, MelosysException, JSONException {
         Journalpost journalpost = random.nextObject(Journalpost.class);
         when(journalføringService.hentJournalpost(anyString())).thenReturn(journalpost);
 
@@ -72,18 +74,18 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void journalføringTilordneSchemaValidering() throws IOException {
+    public void journalføringTilordneSchemaValidering() throws IOException, JSONException {
         JournalfoeringTilordneDto journalfoeringDto = random.nextObject(JournalfoeringTilordneDto.class);
         schemaValidering(journalfoeringDto, JOURNALFOERING_TILORDNE_SCHEMA);
     }
 
     @Test
-    public void journalføringOpprettSchemaValidering() throws IOException {
+    public void journalføringOpprettSchemaValidering() throws IOException, JSONException {
         JournalfoeringOpprettDto journalfoeringDto = random.nextObject(JournalfoeringOpprettDto.class);
         schemaValidering(journalfoeringDto, JOURNALFOERING_OPPRETT_SCHEMA);
     }
 
-    private void schemaValidering(Object journalDto, String schemaType) throws IOException {
+    private void schemaValidering(Object journalDto, String schemaType) throws IOException, JSONException {
         String jsonInString = objectMapper().writeValueAsString(journalDto);
 
         try {

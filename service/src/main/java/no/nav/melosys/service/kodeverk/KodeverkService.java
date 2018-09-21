@@ -31,6 +31,8 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
 
     private static final Logger log = LoggerFactory.getLogger(KodeverkService.class);
 
+    private static final String UKJENT = "UKJENT";
+
     private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache; // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
 
     private KodeverkRegister kodeverkRegister;
@@ -80,13 +82,13 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
     public String dekod(FellesKodeverk kodeverk, String kode, LocalDate dato) {
         if (StringUtils.isEmpty(kode)) {
             log.error("Metode dekod kalt med kode " + kode);
-            throw new RuntimeException("Kode må ikke være null eller tom");
+            return UKJENT;
         }
 
         List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
         if (kodeperioder == null) {
             log.error("Fant ikke term for kode '{}' kodeverk '{}'", kode, kodeverk.getNavn());
-            throw new RuntimeException("Fant ikke term for kode '" + kode + "' kodeverk '" + kodeverk.getNavn() + "'");
+            return UKJENT;
         }
         // kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
         for (Kode kandidat : kodeperioder) {
@@ -94,7 +96,8 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
                 return kandidat.getNavn();
             }
         }
-        return null;
+        log.error("Finner ingen term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
+        return UKJENT;
     }
 
     /*

@@ -1,12 +1,17 @@
 package no.nav.melosys.exception;
 
-public class SikkerhetsbegrensningException extends Exception {
+public class SikkerhetsbegrensningException extends FunksjonellException {
 
-    public SikkerhetsbegrensningException(Throwable t) {
-        super(t);
+    public SikkerhetsbegrensningException(String message, Throwable throwable) {
+        super(message, throwable);
     }
 
-    public SikkerhetsbegrensningException(String m) {
-        super(m);
+    public SikkerhetsbegrensningException(String message) {
+        super(message);
     }
+
+    public SikkerhetsbegrensningException(Throwable throwable) {
+        super(throwable);
+    }
+
 }

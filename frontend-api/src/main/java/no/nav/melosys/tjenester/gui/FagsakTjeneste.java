@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
@@ -16,6 +17,7 @@ import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.abac.FagsakTilgang;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
@@ -25,6 +27,8 @@ import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
 import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -41,6 +45,8 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 @Transactional
 public class FagsakTjeneste extends RestTjeneste {
+    
+    private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
 
     private FagsakService fagsakService;
 
@@ -101,6 +107,9 @@ public class FagsakTjeneste extends RestTjeneste {
             return Response.status(Response.Status.NOT_FOUND).entity("Ident " + fnr + " ikke funnet").build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (TekniskException e) {
+            log.error("TekniskException", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -116,14 +125,18 @@ public class FagsakTjeneste extends RestTjeneste {
             try {
                 fagsakTilgang.sjekk(fnr);
                 saker = fagsakService.hentFagsakerMedAktør(RolleType.BRUKER, fnr);
-
             } catch (IkkeFunnetException e) {
                 throw new NotFoundException(e.getMessage());
             } catch (SikkerhetsbegrensningException e) {
                 throw new ForbiddenException("Ikke tilgang");
             }
         }
-        return tilDtoer(saker);
+        try {
+            return tilDtoer(saker);
+        } catch (TekniskException e) {
+            log.error("TekniskException", e);
+            throw new InternalServerErrorException("Intern feil");
+        }
     }
 
     private FagsakDto tilDto(Fagsak fagsak) {
@@ -133,7 +146,7 @@ public class FagsakTjeneste extends RestTjeneste {
         return fagsakDto;
     }
 
-    private List<FagsakOppsummeringDto> tilDtoer(Iterable<Fagsak> saker) {
+    private List<FagsakOppsummeringDto> tilDtoer(Iterable<Fagsak> saker) throws TekniskException {
         List<FagsakOppsummeringDto> fagsakListe = new ArrayList<>();
 
         for (Fagsak fagsak : saker) {

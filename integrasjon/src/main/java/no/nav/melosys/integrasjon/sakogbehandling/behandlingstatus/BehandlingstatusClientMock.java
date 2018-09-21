@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class BehandlingstatusClientMock extends BehandlingstatusClientImpl implements BehandlingstatusClient {
     private static final Logger log = LoggerFactory.getLogger(BehandlingstatusClientMock.class);
 
-    public BehandlingstatusClientMock() {
+    public BehandlingstatusClientMock() throws IntegrasjonException {
         super(null, null);
     }
 

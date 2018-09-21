@@ -7,6 +7,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import org.junit.Before;
@@ -36,7 +37,7 @@ public class HentPersonopplysningerTest {
     }
 
     @Test
-    public void utfoerSteg() throws IkkeFunnetException, SikkerhetsbegrensningException {
+    public void utfoerSteg() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setSaksopplysninger(new HashSet<>());

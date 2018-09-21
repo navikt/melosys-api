@@ -46,7 +46,7 @@ public interface GsakFasade {
     /**
      * Oppretter en oppgave i GSAK for å få en unik oppgaveId
      */
-    String opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, FunksjonellException;
+    String opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, FunksjonellException, TekniskException;
     /**
      * Legger tilbake en oppgave i GSAK
      */

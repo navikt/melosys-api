@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.begrunnelser;
+package no.nav.melosys.domain.begrunnelse;
 
 import no.nav.melosys.domain.Kodeverk;
 

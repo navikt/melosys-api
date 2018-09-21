@@ -1,13 +1,13 @@
 package no.nav.melosys.service.dokument.brev;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.Saksbehandler;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +18,7 @@ import org.w3c.dom.Element;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNavAnsatt;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNavEnhet;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,7 +41,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void mapTilXml() {
+    public void mapTilXml() throws TekniskException {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MOCK-1");
 

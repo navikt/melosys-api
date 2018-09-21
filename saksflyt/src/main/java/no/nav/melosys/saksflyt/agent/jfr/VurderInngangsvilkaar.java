@@ -142,7 +142,10 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     // FIXME MELOSYS-1377 Regelmodulen jobber med ISO 3 landkoder.
     private static List<String> tilIso3Landkoder(List<String> oppholdsland) throws TekniskException {
         List<String> landkoder = new ArrayList<>();
-        oppholdsland.forEach(l -> landkoder.add(tilIso3(l)));
+        
+        for (String l : oppholdsland) {
+            landkoder.add(tilIso3(l));
+        }
         return landkoder;
     }
 

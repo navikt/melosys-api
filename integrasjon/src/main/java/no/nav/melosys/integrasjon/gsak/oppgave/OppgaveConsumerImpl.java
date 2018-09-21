@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.gsak.oppgave;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -33,7 +34,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
 
     private WebTarget target;
 
-    OppgaveConsumerImpl(String endpointUrl, boolean erSystem) {
+    OppgaveConsumerImpl(String endpointUrl, boolean erSystem) throws IntegrasjonException {
         this.erSystem = erSystem;
         try {
             SSLContext sslContext = SSLContext.getDefault();

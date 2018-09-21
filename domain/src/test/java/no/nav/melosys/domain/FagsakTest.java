@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class FagsakTest {
 
     @Test
-    public void getAktivBehandling() {
+    public void getAktivBehandling() throws TekniskException {
         Fagsak fagsak = new Fagsak();
         Behandling b1 = new Behandling();
         b1.setStatus(BehandlingStatus.AVSLUTTET);
@@ -35,7 +35,7 @@ public class FagsakTest {
     }
 
     @Test
-    public void getAktivBehandling_ingenAktive() {
+    public void getAktivBehandling_ingenAktive() throws TekniskException {
         Fagsak fagsak = new Fagsak();
         Behandling b1 = new Behandling();
         b1.setStatus(BehandlingStatus.AVSLUTTET);
@@ -54,7 +54,7 @@ public class FagsakTest {
     }
 
     @Test(expected = TekniskException.class)
-    public void getAktivBehandling_feilTilstand() {
+    public void getAktivBehandling_feilTilstand() throws TekniskException {
         Fagsak fagsak = new Fagsak();
         Behandling b1 = new Behandling();
         b1.setStatus(BehandlingStatus.FORELØPIG);
@@ -71,7 +71,7 @@ public class FagsakTest {
     }
 
     @Test
-    public void getBruker() {
+    public void getBruker() throws TekniskException {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a1 = new Aktoer();
@@ -89,7 +89,7 @@ public class FagsakTest {
     }
 
     @Test
-    public void getBruker_ingen() {
+    public void getBruker_ingen() throws TekniskException {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a2 = new Aktoer();
@@ -103,7 +103,7 @@ public class FagsakTest {
     }
 
     @Test(expected = TekniskException.class)
-    public void getBruker_flere() {
+    public void getBruker_flere() throws TekniskException {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a1 = new Aktoer();

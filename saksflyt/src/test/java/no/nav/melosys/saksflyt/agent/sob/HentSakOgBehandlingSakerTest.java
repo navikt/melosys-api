@@ -5,6 +5,7 @@ import java.util.HashSet;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import org.junit.Before;
@@ -33,7 +34,7 @@ public class HentSakOgBehandlingSakerTest {
     }
 
     @Test
-    public void utfoerSteg() {
+    public void utfoerSteg() throws IntegrasjonException {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setSaksopplysninger(new HashSet<>());

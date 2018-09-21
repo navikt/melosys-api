@@ -2,19 +2,22 @@ package no.nav.melosys.service.dokument.brev;
 
 import java.io.IOException;
 import java.io.StringReader;
+
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import no.nav.dok.brevdata.felles.v1.navfelles.*;
+import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
+import no.nav.dok.brevdata.felles.v1.navfelles.Person;
+import no.nav.dok.brevdata.felles.v1.navfelles.Saksbehandler;
+import no.nav.dok.brevdata.felles.v1.navfelles.Sakspart;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
 import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
@@ -50,7 +53,7 @@ public class BrevDataService {
     /**
      * Genererer metada til doksys angående dokumentbestillingen.
      */
-    public DokumentbestillingMetadata lagBestillingMetadata(DokumentType dokumentType, Behandling behandling) {
+    public DokumentbestillingMetadata lagBestillingMetadata(DokumentType dokumentType, Behandling behandling) throws TekniskException {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
 
         Fagsak fagsak = behandling.getFagsak();
@@ -78,7 +81,7 @@ public class BrevDataService {
     /**
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
-    public Element lagBrevXML(DokumentType dokumentType, Behandling behandling) {
+    public Element lagBrevXML(DokumentType dokumentType, Behandling behandling) throws TekniskException {
         Element brevXmlElement;
         try {
             FellesType fellesType = mapFellesType(behandling);
@@ -94,20 +97,18 @@ public class BrevDataService {
             brevXmlElement = doc.getDocumentElement();
         } catch (JAXBException | SAXException | ParserConfigurationException | IOException e) {
             throw new TekniskException("XML genereringsfeil " + behandling.getFagsak().getSaksnummer(), e);
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new TekniskException("Annen teknisk feil", e);
         }
         return brevXmlElement;
     }
 
-    private FellesType mapFellesType(Behandling behandling) {
+    private FellesType mapFellesType(Behandling behandling) throws TekniskException {
         final FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         return fellesType;
     }
 
-    private MelosysNAVFelles mapNAVFelles(Behandling behandling) {
+    private MelosysNAVFelles mapNAVFelles(Behandling behandling) throws TekniskException {
         final MelosysNAVFelles navFelles = new MelosysNAVFelles();
 
         navFelles.setSakspart(lagSakspart(behandling));
@@ -120,7 +121,7 @@ public class BrevDataService {
         return navFelles;
     }
 
-    private Sakspart lagSakspart(Behandling behandling) {
+    private Sakspart lagSakspart(Behandling behandling) throws TekniskException {
         Sakspart sakspart = new Sakspart();
         Aktoer aktør = behandling.getFagsak().hentAktørMedRolleType(RolleType.BRUKER);
 
@@ -139,7 +140,7 @@ public class BrevDataService {
         return sakspart;
     }
 
-    private Mottaker lagMottaker(Behandling behandling) {
+    private Mottaker lagMottaker(Behandling behandling) throws TekniskException {
         Mottaker mottaker = new Person(); // FIXME mottaker kan være Organisasjon
         Aktoer aktør = behandling.getFagsak().hentAktørMedRolleType(RolleType.REPRESENTANT);
         if (aktør == null) {

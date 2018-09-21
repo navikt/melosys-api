@@ -1,9 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.Collection;
-import javax.ws.rs.ForbiddenException;
 
-import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ldap.LdapBruker;
 import no.nav.melosys.integrasjon.ldap.LdapBrukeroppslag;
@@ -21,24 +20,18 @@ public class Tilgangskontroll {
     private Tilgangskontroll() {
     }
 
-    public static void sjekk() {
+    public static void sjekk() throws SikkerhetsbegrensningException, TekniskException {
         String ident = SubjectHandler.getInstance().getUserID();
 
         LdapBruker ldapBruker;
-        try {
-            ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
-            Tilgangskontroll.sjekk(ldapBruker);
-
-        } catch (IntegrasjonException | TekniskException e) {
-            throw e;
-        }
+        ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
+        Tilgangskontroll.sjekk(ldapBruker);
     }
 
-    public static void sjekk(LdapBruker ldapBruker) {
+    public static void sjekk(LdapBruker ldapBruker) throws SikkerhetsbegrensningException {
         Collection<String> groups = ldapBruker.getGroups();
         if (!(groups.stream().anyMatch(g -> g.equalsIgnoreCase(MELOSYS_GRUPPE)))) {
-            log.warn("Bruker {} er ikke medlem av {}.", ldapBruker.getDisplayName(), MELOSYS_GRUPPE);
-            throw new ForbiddenException();
+            throw new SikkerhetsbegrensningException(String.format("Bruker %1 er ikke medlem av %2.", ldapBruker.getDisplayName(), MELOSYS_GRUPPE));
         }
     }
 

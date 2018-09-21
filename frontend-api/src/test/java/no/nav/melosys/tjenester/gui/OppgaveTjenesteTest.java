@@ -4,16 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.FagsakType;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
@@ -23,6 +21,7 @@ import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.OppgaveOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
 import org.everit.json.schema.ValidationException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +59,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void mineOppgaver() throws TekniskException, IOException {
+    public void mineOppgaver() throws MelosysException, IOException, JSONException {
         List<OppgaveDto> oppgaver = new ArrayList<>();
         int oppgaveNr = 1 + defaultEnhancedRandom().nextInt(3);
         for (int i = 0; i < oppgaveNr; i++) {

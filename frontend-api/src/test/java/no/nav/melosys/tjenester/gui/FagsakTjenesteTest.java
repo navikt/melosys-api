@@ -12,9 +12,11 @@ import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import org.everit.json.schema.ValidationException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +50,7 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void fagsakSchemaValidering() throws IOException {
+    public void fagsakSchemaValidering() throws IOException, JSONException, TekniskException {
         FagsakDto fagsakDto = random.nextObject(FagsakDto.class);
 
         for (BehandlingDto b : fagsakDto.getBehandlinger()) {

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.naming.InvalidNameException;
 import javax.naming.LimitExceededException;
 import javax.naming.NamingEnumeration;
@@ -25,7 +26,7 @@ public class LdapBrukeroppslag {
 
     private static final Pattern IDENT_PATTERN = Pattern.compile("^\\p{LD}+$");
 
-    public LdapBrukeroppslag() {
+    public LdapBrukeroppslag() throws TekniskException {
         context = LdapInnlogging.lagLdapContext();
         searchBase = lagLdapSearchBase();
     }
@@ -35,14 +36,14 @@ public class LdapBrukeroppslag {
         this.searchBase = searcBase;
     }
 
-    public LdapBruker hentBrukerinformasjon(String ident) {
+    public LdapBruker hentBrukerinformasjon(String ident) throws TekniskException {
         SearchResult result = ldapSearch(ident);
         String displayName = getDisplayName(result);
         Collection<String> groups = getMemberOf(result);
         return new LdapBruker(displayName, groups);
     }
 
-    private SearchResult ldapSearch(String ident) {
+    private SearchResult ldapSearch(String ident) throws TekniskException {
         if (ident == null || ident.isEmpty()) {
             throw new TekniskException("Kan ikke slå opp brukernavn uten å ha ident");
         }
@@ -68,7 +69,7 @@ public class LdapBrukeroppslag {
         }
     }
 
-    protected String getDisplayName(SearchResult result) {
+    protected String getDisplayName(SearchResult result) throws TekniskException {
         String attributeName = "displayName";
         Attribute displayName = find(result, attributeName);
         try {
@@ -99,7 +100,7 @@ public class LdapBrukeroppslag {
      *
      * @return CN-value av alle grupper brukere er <strong>direkte</strong> medlem av
      */
-    protected Collection<String> getMemberOf(SearchResult result) {
+    protected Collection<String> getMemberOf(SearchResult result) throws IntegrasjonException {
         String attributeName = "memberOf";
         List<String> groups = new ArrayList<>();
 
@@ -118,7 +119,7 @@ public class LdapBrukeroppslag {
         return groups;
     }
 
-    private Attribute find(SearchResult element, String attributeName) {
+    private Attribute find(SearchResult element, String attributeName) throws IntegrasjonException {
         Attribute attribute = element.getAttributes().get(attributeName);
         if (attribute == null) {
             throw new IntegrasjonException("Resultat fra LDAP manglet påkrevet attributtnavn " + attributeName);
@@ -126,7 +127,7 @@ public class LdapBrukeroppslag {
         return attribute;
     }
 
-    private LdapName lagLdapSearchBase() {
+    private LdapName lagLdapSearchBase() throws TekniskException {
         String userBaseDn = LdapInnlogging.getRequiredProperty("ldap.user.basedn");
         try {
             return new LdapName(userBaseDn);

@@ -7,11 +7,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.jackson.JacksonModule;
 import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.core.io.DefaultResourceLoader;
 
@@ -40,16 +42,16 @@ public abstract class JsonSchemaTest {
         return enhancedRandom;
     }
 
-    protected Schema hentSchema() throws IOException {
+    protected Schema hentSchema() throws IOException, JSONException {
         return hentSchema(schemaNavn());
     }
 
-    protected Schema hentSchema(String schemaNavn) throws IOException {
+    protected Schema hentSchema(String schemaNavn) throws IOException, JSONException {
         String schemaString = JsonResourceLoader.load(new DefaultResourceLoader(), ROOT + schemaNavn);
         return lastSchema(schemaString);
     }
 
-    protected Schema lastSchema(String schemaString) {
+    protected Schema lastSchema(String schemaString) throws JSONException {
         JSONObject rawSchema = new JSONObject(schemaString);
         SchemaLoader loader = SchemaLoader.builder().schemaJson(rawSchema).draftV7Support().useDefaults(true).build();
         return loader.load().build();
@@ -65,7 +67,7 @@ public abstract class JsonSchemaTest {
         return objectMapper;
     }
 
-    protected ObjectMapper objectMapperMedKodeverkServiceStub() {
+    protected ObjectMapper objectMapperMedKodeverkServiceStub() throws TekniskException {
         if (objectMapperMedKodeverkServiceStub == null) {
             objectMapperMedKodeverkServiceStub = new ObjectMapper();
             objectMapperMedKodeverkServiceStub.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);

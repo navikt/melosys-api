@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.gsak.oppgave;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.GsakService;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
@@ -31,7 +31,7 @@ public class OppgaveMappingMellomDTOogDomainTest {
     }
 
     @Test
-    public void testMappingMellomDTOogDomainForOppgave() throws IkkeFunnetException {
+    public void testMappingMellomDTOogDomainForOppgave() throws MelosysException {
         OppgaveDto oppgaveDto = new OppgaveDto();
         oppgaveDto.setId("1234");
         oppgaveDto.setSaksreferanse("456");

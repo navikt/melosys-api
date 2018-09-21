@@ -50,7 +50,7 @@ public class EregService implements EregFasade {
     }
     
     @Override
-    public Saksopplysning hentOrganisasjon(String orgnummer) throws IkkeFunnetException {
+    public Saksopplysning hentOrganisasjon(String orgnummer) throws IkkeFunnetException, IntegrasjonException {
         HentOrganisasjonRequest request = new HentOrganisasjonRequest();
         request.setOrgnummer(orgnummer);
 

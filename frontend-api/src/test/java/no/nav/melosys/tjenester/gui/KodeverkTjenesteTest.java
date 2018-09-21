@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
 import org.everit.json.schema.ValidationException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +28,7 @@ public class KodeverkTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void getKodeverk() throws IOException {
+    public void getKodeverk() throws IOException, JSONException {
         KodeverkDto kodeverkDto = tjeneste.getKodeverk();
         String jsonString = objectMapper().writeValueAsString(kodeverkDto);
 

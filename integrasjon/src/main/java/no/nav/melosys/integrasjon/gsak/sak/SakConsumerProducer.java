@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.gsak.sak;
 
+import no.nav.melosys.exception.IntegrasjonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,13 +20,13 @@ public class SakConsumerProducer {
 
     @Bean
     @Primary
-    public SakConsumer sakConsumer() {
+    public SakConsumer sakConsumer() throws IntegrasjonException {
         return new SakConsumerImpl(endpointUrl, false);
     }
 
     @Bean
     @Qualifier("system")
-    public SakConsumer sakSystemConsumer() {
+    public SakConsumer sakSystemConsumer() throws IntegrasjonException {
         return new SakConsumerImpl(endpointUrl, true);
     }
 
