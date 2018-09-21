@@ -6,6 +6,7 @@ package no.nav.melosys.domain;
 public enum ProsessDataKey {
 
     AKTØR_ID("aktoerID"),
+    ARBEIDSGIVER("arbeidsgiver"),
     ARKIV_ID("arkivId"),
     ARKIVSYSTEM("arkivsystem"),
     AVSENDER_ID("avsenderID"),
@@ -18,12 +19,11 @@ public enum ProsessDataKey {
     JOURNALPOST_ID("journalpostID"),
     LAND("land"),
     OPPGAVE_ID("oppgaveID"),
+    REPRESENTANT("representant"),
     SAKSNUMMER("saksnummer"),
     SOB_BEHANDLING_ID("sobBehandlingId"),
     SØKNADSPERIODE("søknadsperiode"),
-    TEMA("tema"),
-    ARBEIDSGIVER("arbeidsgiver"),
-    REPRESENTANT("representant");
+    TEMA("tema");
 
     private String kode;
 

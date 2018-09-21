@@ -5,6 +5,14 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
     private String arbeidsgiverID;
     private String representantID;
 
+    public FagsakDto getFagsak() {
+        return fagsak;
+    }
+
+    public void setFagsak(FagsakDto fagsak) {
+        this.fagsak = fagsak;
+    }
+
     public String getArbeidsgiverID() {
         return arbeidsgiverID;
     }
@@ -21,11 +29,4 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
         this.representantID = representantID;
     }
 
-    public FagsakDto getFagsak() {
-        return fagsak;
-    }
-
-    public void setFagsak(FagsakDto fagsak) {
-        this.fagsak = fagsak;
-    }
 }

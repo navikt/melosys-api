@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
@@ -82,11 +81,11 @@ public class FagsakTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("ny/{fnr}/{arbeidsgiver}/{representant}")
-    @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer og arbeidsgiver.")
-    public Response nyFagsakSikret(@PathParam("fnr") @ApiParam(value = "Fødselsnummer.", required = true) String fnr,
-                                   @PathParam("arbeidsgiver") @ApiParam(value = "Arbeidsgiver orgnummer", required = true) String arbeidsgiver,
-                                   @PathParam("representant") @ApiParam(value = "representant  kun orgnummer.") String representant) {
+    @Path("/ny")
+    @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer, arbeidsgiver(orgnummer) og representant(valgfri og kun orgnummer)")
+    public Response nyFagsakSikret(@QueryParam("fnr") String fnr,
+                                   @QueryParam("arbeidsgiver") String arbeidsgiver,
+                                   @QueryParam("representant") String representant) {
 
         // FIXME Midlertidig tilgangskontroll
         try {
