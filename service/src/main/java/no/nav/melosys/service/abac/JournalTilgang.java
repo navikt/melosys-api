@@ -1,13 +1,14 @@
 package no.nav.melosys.service.abac;
 
 import no.nav.melosys.domain.Journalpost;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
+import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class JournalTilgang {
 
     private JoarkFasade joarkFasade;
@@ -19,7 +20,19 @@ public class JournalTilgang {
         this.pep = pep;
     }
 
-    public void sjekk(String journalId) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void sjekk(Journalpost journalPost) throws SikkerhetsbegrensningException {
+        sjekk(journalPost.getBrukerId());
+    }
+
+    public void sjekk(JournalfoeringOpprettDto journalPost) throws SikkerhetsbegrensningException {
+        sjekk(journalPost.getBrukerID());
+    }
+
+    public void sjekk(JournalfoeringTilordneDto journalPost) throws SikkerhetsbegrensningException {
+        sjekk(journalPost.getBrukerID());
+    }
+
+    public void sjekk(String journalId) throws SikkerhetsbegrensningException {
         Journalpost journalpost = joarkFasade.hentJournalpost(journalId);
         pep.sjekkTilgangTil(journalpost.getBrukerId());
     }

@@ -6,11 +6,11 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.FagsakRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Component
+@Service
 public class BehandlingTilgang {
     private FagsakRepository fagsakRepository;
     private final PepAktoerOversetter pep;
@@ -23,6 +23,10 @@ public class BehandlingTilgang {
 
     public void sjekk(long behandlingsId) throws SikkerhetsbegrensningException, IkkeFunnetException {
         List<Fagsak> fagsaker = fagsakRepository.findByBehandlingsId(behandlingsId);
+        if (fagsaker.isEmpty()) {
+            throw new SikkerhetsbegrensningException("Klarte ikke å finne brukerident fra fagsak knyttet til behandlingid");
+        }
+
         for (Fagsak fagsak : fagsaker) {
             pep.sjekkTilgangTil(fagsak.hentAktørMedRolleType(RolleType.BRUKER));
         }

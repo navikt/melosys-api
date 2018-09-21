@@ -1,15 +1,15 @@
 package no.nav.melosys.service.abac;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.FagsakRepository;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class FagsakTilgang {
     private FagsakRepository fagsakRepository;
     private final PepAktoerOversetter pep;

@@ -3,13 +3,13 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import javax.ws.rs.core.Response;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.SoeknadService;
+import no.nav.melosys.service.abac.BehandlingTilgang;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -37,11 +37,11 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
     }
 
     @Before
-    public void setUp() throws JsonProcessingException, IkkeFunnetException {
+    public void setUp() throws IkkeFunnetException {
 
         SoeknadService soeknadService = mock(SoeknadService.class);
-
-        soknadTjeneste = new SoknadTjeneste(soeknadService, null);
+        BehandlingTilgang behandlingTilgang = mock(BehandlingTilgang.class);
+        soknadTjeneste = new SoknadTjeneste(soeknadService, null, behandlingTilgang);
 
         EnhancedRandom random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
             .collectionSizeRange(1, 4).build();

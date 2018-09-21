@@ -7,7 +7,7 @@ import io.swagger.annotations.Api;
 import no.nav.melosys.domain.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.sikkerhet.abac.Pep;
+import no.nav.melosys.service.abac.JournalTilgang;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
@@ -26,12 +26,12 @@ public class JournalfoeringTjeneste extends RestTjeneste {
 
     private JournalfoeringService journalføringService;
 
-    private Pep pep;
+    private final JournalTilgang journalTilgang;
 
     @Autowired
-    public JournalfoeringTjeneste(JournalfoeringService journalføringService, Pep pep) {
+    public JournalfoeringTjeneste(JournalfoeringService journalføringService, JournalTilgang journalTilgang) {
         this.journalføringService = journalføringService;
-        this.pep = pep;
+        this.journalTilgang = journalTilgang;
     }
 
     @GET
@@ -40,7 +40,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         Journalpost journalpost;
         try {
             journalpost = journalføringService.hentJournalpost(journalpostID);
-            pep.sjekkTilgangTil(journalpost.getBrukerId());
+            journalTilgang.sjekk(journalpost);
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
@@ -63,7 +63,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @Path("opprett")
     public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) {
         try {
-            pep.sjekkTilgangTil(journalfoeringDto.getBrukerID());
+            journalTilgang.sjekk(journalfoeringDto);
             journalføringService.opprettSakOgJournalfør(journalfoeringDto);
         } catch (FunksjonellException e) {
             throw new BadRequestException(e.getMessage());
@@ -76,7 +76,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @Path("tilordne")
     public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) {
         try {
-            pep.sjekkTilgangTil(journalfoeringDto.getBrukerID());
+            journalTilgang.sjekk(journalfoeringDto);
             journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
         } catch (FunksjonellException e) {
             throw new BadRequestException(e.getMessage());

@@ -39,7 +39,6 @@ public class AbacDefaultConfig {
         return values;
     }
 
-
     @Bean
     Set<String> abacDefaultSubjects() {
           return new HashSet<>();
@@ -61,8 +60,13 @@ public class AbacDefaultConfig {
         });
     }
 
-    private String getOidcTokenBody() {
-        final String[] tokenParts = SubjectHandler.getInstance().getOidcTokenString().split("\\.");
+    public String getOidcTokenBody() {
+        String token = SubjectHandler.getInstance().getOidcTokenString();
+        if (token == null) {
+            return "";
+        }
+
+        final String[] tokenParts = token.split("\\.");
         return tokenParts.length == 1 ? tokenParts[0] : tokenParts[1];
     }
 

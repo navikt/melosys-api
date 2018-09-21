@@ -44,8 +44,6 @@ public class DokumentTjeneste extends RestTjeneste {
             dokument = dokumentService.hentDokument(journalpostID, dokumentID);
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (IkkeFunnetException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
         Response.ResponseBuilder ok = Response.ok(dokument);

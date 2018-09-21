@@ -11,7 +11,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.SoeknadService;
+import no.nav.melosys.service.abac.BehandlingTilgang;
 import no.nav.melosys.service.validering.ValideringService;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import no.nav.melosys.tjenester.gui.dto.SoeknadInnDto;
@@ -32,10 +34,13 @@ public class SoknadTjeneste extends RestTjeneste  {
 
     private ValideringService valideringService;
 
+    private final BehandlingTilgang behandlingTilgang;
+
     @Autowired
-    public SoknadTjeneste(SoeknadService soeknadService, ValideringService valideringService) {
+    public SoknadTjeneste(SoeknadService soeknadService, ValideringService valideringService, BehandlingTilgang behandlingTilgang) {
         this.soeknadService = soeknadService;
         this.valideringService = valideringService;
+        this.behandlingTilgang = behandlingTilgang;
     }
 
     @GET
@@ -45,9 +50,12 @@ public class SoknadTjeneste extends RestTjeneste  {
         SoeknadDokument soeknad;
 
         try {
+            behandlingTilgang.sjekk(behandlingID);
             soeknad = soeknadService.hentSoeknad(behandlingID);
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.NOT_FOUND).build();
+        } catch (SikkerhetsbegrensningException e) {
+            return Response.status(Response.Status.FORBIDDEN).build();
         }
 
         SoeknadDto soeknadDto = new SoeknadDto(behandlingID, soeknad);
@@ -59,6 +67,14 @@ public class SoknadTjeneste extends RestTjeneste  {
     @ApiOperation(value = "Tjeneste for å registrere opplysninger fra papirsøknaden manuelt.")
     public Response registrerSøknad(@PathParam("behandlingID") long behandlingID, @ApiParam("Søknadsdata") SoeknadInnDto soeknadInnDto) {
         SoeknadDokument soeknadDokument = soeknadInnDto.getSoknadDokument();
+
+        try {
+            behandlingTilgang.sjekk(behandlingID);
+        } catch (IkkeFunnetException e) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        } catch (SikkerhetsbegrensningException e) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
 
         valideringService.validerOpplysninger(soeknadDokument);
         SoeknadDokument soeknad = soeknadService.registrerSøknad(behandlingID, soeknadDokument);

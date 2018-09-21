@@ -11,29 +11,24 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static no.nav.abac.xacml.StandardAttributter.ACTION_ID;
 
-
-@Component
 public class PepImpl implements Pep {
 
     private static final Logger abacLog = LoggerFactory.getLogger(PepImpl.class);
 
     public final static String READ = "read";
+    public final static String WRITE = "write";
     public final static String IkkeTilgang = "Brukeren har ikke tilgang";
 
     private AbacService abacService;
     private AbacContext abacContext;
 
-    @Autowired
-    public void PepImpl(AbacService abacService,
-                        AbacContext abacContext) {
+    public PepImpl(AbacService abacService, AbacContext abacContext) {
         this.abacService = abacService;
         this.abacContext = abacContext;
     }

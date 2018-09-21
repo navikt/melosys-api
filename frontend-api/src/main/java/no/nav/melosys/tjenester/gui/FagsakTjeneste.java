@@ -88,19 +88,7 @@ public class FagsakTjeneste extends RestTjeneste {
     @GET
     @Path("ny/{fnr}")
     @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.")
-    public Response nyFagsakSikret(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
-
-        try {
-            fagsakTilgang.sjekk(fnr);
-        } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
-        }
-
-        return nyFagsak(fnr);
-    }
-
-    @Deprecated // FIXME Trenger test en metode for å opprette fagsaker utenom saksflyt?
-    public Response nyFagsak(String fnr) {
+    public Response nyFagsak(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
         try {
             Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, Behandlingstype.SØKNAD);
             fagsakTilgang.sjekk(fagsak);
@@ -132,7 +120,7 @@ public class FagsakTjeneste extends RestTjeneste {
             } catch (IkkeFunnetException e) {
                 throw new NotFoundException(e.getMessage());
             } catch (SikkerhetsbegrensningException e) {
-                throw new BadRequestException("Ikke tilgang");
+                throw new ForbiddenException("Ikke tilgang");
             }
         }
         return tilDtoer(saker);
