@@ -215,13 +215,17 @@ public class SaksopplysningerService {
         log.info("Starter oppfrisking av behandlingsid: {} ", behandlingsid);
 
         Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByStegIsNotNullAndBehandling_Id(behandlingsid);
+        if (aktivProsessinstans.isPresent()) {
+            log.warn("Aktiv prosessinstans finnes allerede. Ikke mulig å oppfriske saksopplysning.");
+            return;
+        }
+
         Behandling behandling = behandlingRepository.findOne(behandlingsid);
         if (behandling == null) {
             log.error("Behandling ikke funnet med behandlingsid {}", behandlingsid);
             throw new IkkeFunnetException("Behandling ikke funnet med behandlingsid: " + behandlingsid);
         }
-
-        String aktør_Id = behandling.getFagsak().hentAktørMedRolleType(RolleType.BRUKER).getAktørId();
+        behandling.getSaksopplysninger().removeIf(saksopplysning -> saksopplysning.getType() != SaksopplysningType.SØKNAD);
 
         SoeknadDokument søknadDokument;
         Optional<SaksopplysningDokument> opt = hentDokument(behandling, SaksopplysningType.SØKNAD);
@@ -231,27 +235,27 @@ public class SaksopplysningerService {
             throw new TekniskException("Oppfrisking feilet på grunn av manglende søknad opplysning");
         }
 
+        opprettNyProsessinstans(behandling, søknadDokument);
+    }
+
+    public void opprettNyProsessinstans(Behandling behandling, SoeknadDokument søknadDokument) throws TekniskException, IkkeFunnetException {
+        Prosessinstans nyprosessinstans = new Prosessinstans();
+        nyprosessinstans.setBehandling(behandling);
+        nyprosessinstans.setType(ProsessType.OPPFRISKNING);
+
+        String aktør_Id = behandling.getFagsak().hentAktørMedRolleType(RolleType.BRUKER).getAktørId();
+        nyprosessinstans.setData(ProsessDataKey.AKTØR_ID, aktør_Id);
+        nyprosessinstans.setData(ProsessDataKey.BRUKER_ID, tpsFasade.hentIdentForAktørId(aktør_Id));
+
+        nyprosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, hentPeriode(søknadDokument));
+        nyprosessinstans.setData(ProsessDataKey.LAND, hentLand(søknadDokument));
+
+        nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
+
         LocalDateTime nå = LocalDateTime.now();
+        nyprosessinstans.setRegistrertDato(nå);
 
-        if (!aktivProsessinstans.isPresent()) {
-            behandling.getSaksopplysninger().removeIf(saksopplysning -> saksopplysning.getType() != SaksopplysningType.SØKNAD);
-
-            Prosessinstans nyprosessinstans = new Prosessinstans();
-            nyprosessinstans.setBehandling(behandling);
-            nyprosessinstans.setType(ProsessType.OPPFRISKNING);
-            nyprosessinstans.setData(ProsessDataKey.AKTØR_ID, aktør_Id);
-            nyprosessinstans.setData(ProsessDataKey.BRUKER_ID, tpsFasade.hentIdentForAktørId(aktør_Id));
-
-            nyprosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, hentPeriode(søknadDokument));
-            nyprosessinstans.setData(ProsessDataKey.LAND, hentLand(søknadDokument));
-
-            nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
-            nyprosessinstans.setRegistrertDato(nå);
-
-            prosessinstansRepository.save(nyprosessinstans);
-            binge.leggTil(nyprosessinstans);
-        } else {
-            log.warn("Aktiv prosessinstans finnes allerede. Ikke mulig å oppfriske saksopplysning.");
-        }
+        prosessinstansRepository.save(nyprosessinstans);
+        binge.leggTil(nyprosessinstans);
     }
 }
