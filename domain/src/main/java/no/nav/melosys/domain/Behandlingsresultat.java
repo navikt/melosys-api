@@ -50,6 +50,9 @@ public class Behandlingsresultat {
     @OneToMany(mappedBy = "behandlingsresultat", fetch = FetchType.EAGER)
     private Set<Lovvalgsperiode> lovvalgsperioder;
 
+    @OneToMany(mappedBy = "behandlingsresultat", fetch = FetchType.EAGER)
+    private Set<Vilkaarsresultat> vilkaarsresultater;
+
     public long getId() {
         return id;
     }

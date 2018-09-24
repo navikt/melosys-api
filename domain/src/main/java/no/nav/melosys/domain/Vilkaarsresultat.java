@@ -1,0 +1,94 @@
+package no.nav.melosys.domain;
+
+import java.util.Objects;
+import javax.persistence.*;
+
+@Entity
+@Table(name = "vilkaarsresultat")
+public class Vilkaarsresultat {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
+    private Behandlingsresultat behandlingsresultat;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "vilkaar")
+    private VilkaarType vilkaar;
+
+    @Column(name = "oppfylt")
+    private boolean oppfylt;
+
+    @Column(name = "begrunnelse")
+    private String begrunnelseKode;
+
+    @Column(name = "begrunnelse_fritekst")
+    private String begrunnelseFritekst;
+
+    public Behandlingsresultat getBehandlingsresultat() {
+        return behandlingsresultat;
+    }
+
+    public void setBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
+        this.behandlingsresultat = behandlingsresultat;
+    }
+
+    public VilkaarType getVilkaar() {
+        return vilkaar;
+    }
+
+    public void setVilkaar(VilkaarType vilkaar) {
+        this.vilkaar = vilkaar;
+    }
+
+    public boolean isOppfylt() {
+        return oppfylt;
+    }
+
+    public void setOppfylt(boolean oppfylt) {
+        this.oppfylt = oppfylt;
+    }
+
+    public String getBegrunnelseKode() {
+        return begrunnelseKode;
+    }
+
+    public void setBegrunnelseKode(String begrunnelseKode) {
+        this.begrunnelseKode = begrunnelseKode;
+    }
+
+    public String getBegrunnelseFritekst() {
+        return begrunnelseFritekst;
+    }
+
+    public void setBegrunnelseFritekst(String begrunnelseFritekst) {
+        this.begrunnelseFritekst = begrunnelseFritekst;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Vilkaarsresultat)) {
+            return false;
+        }
+        Vilkaarsresultat that = (Vilkaarsresultat) o;
+        if (this.id != 0 && that.id != 0) {
+            return this.id == that.id;
+        }
+        return Objects.equals(this.vilkaar, that.vilkaar)
+            && Objects.equals(this.oppfylt, that.oppfylt)
+            && Objects.equals(this.begrunnelseKode, that.begrunnelseKode)
+            && Objects.equals(this.begrunnelseFritekst, that.begrunnelseFritekst);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(vilkaar, oppfylt, begrunnelseKode, begrunnelseFritekst);
+    }
+
+}

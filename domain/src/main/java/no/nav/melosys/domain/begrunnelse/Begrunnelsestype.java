@@ -5,8 +5,8 @@ import no.nav.melosys.domain.Kodeverk;
 // FIXME Ikke definert som kodeverk
 public enum Begrunnelsestype implements Kodeverk {
 
-    IKKE_SKIP("IKKE_SKIP", "Ikke eget fremdrift"),
-    OPPHOALD("IKKE_ORDINAERT_SKIPSFART", "Ikke ordinært skipsfart");
+    IKKE_SKIP("IKKE_SKIP", "Ikke skip"),
+    OPPHOLD("IKKE_ORDINAERT_SKIPSFART", "Ikke ordinært skipsfart");
 
     private String kode;
     private String beskrivelse;
