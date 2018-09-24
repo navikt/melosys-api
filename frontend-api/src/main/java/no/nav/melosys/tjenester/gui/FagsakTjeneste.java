@@ -83,8 +83,6 @@ public class FagsakTjeneste extends RestTjeneste {
             fagsakTilgang.sjekk(sak);
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (IkkeFunnetException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
         } catch (TekniskException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }

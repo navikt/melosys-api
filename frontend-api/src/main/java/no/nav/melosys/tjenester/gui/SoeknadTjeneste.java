@@ -79,8 +79,6 @@ public class SoeknadTjeneste extends RestTjeneste  {
 
         try {
             behandlingTilgang.sjekk(behandlingID);
-        } catch (IkkeFunnetException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (TekniskException e) {
