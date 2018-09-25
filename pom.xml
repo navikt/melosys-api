@@ -39,7 +39,7 @@
 
         <!-- Melosys -->
         <melosys.frontend.version>0.12.6-264</melosys.frontend.version>
-        <melosys.jsonschema.version>0.10.0-63</melosys.jsonschema.version>
+        <melosys.jsonschema.version>0.10.1-64</melosys.jsonschema.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
