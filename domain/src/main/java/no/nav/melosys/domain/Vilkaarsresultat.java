@@ -3,9 +3,12 @@ package no.nav.melosys.domain;
 import java.util.Objects;
 import javax.persistence.*;
 
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 @Entity
 @Table(name = "vilkaarsresultat")
-public class Vilkaarsresultat {
+@EntityListeners(AuditingEntityListener.class)
+public class Vilkaarsresultat extends RegistreringsInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

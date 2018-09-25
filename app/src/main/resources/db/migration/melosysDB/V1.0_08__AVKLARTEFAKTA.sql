@@ -12,3 +12,16 @@ CREATE TABLE avklartefakta (
 
 ALTER TABLE avklartefakta
     ADD CONSTRAINT fk_avklartefakta_beh_resultat FOREIGN KEY (beh_resultat_id) REFERENCES behandlingsresultat;
+
+CREATE TABLE avklartefakta_registrering (
+    id                    NUMBER(19) GENERATED ALWAYS AS IDENTITY,
+    avklartefakta_id      NUMBER(19) NOT NULL,
+    fakta_type            VARCHAR2(99) NULL,
+    begrunnelse           VARCHAR2(99) NULL,
+    begrunnelse_fritekst  VARCHAR2(4000) NULL,
+    registrert_dato       TIMESTAMP NOT NULL,
+    registrert_av         VARCHAR2(99) NULL,
+    endret_dato           TIMESTAMP NOT NULL,
+    endret_av             VARCHAR2(99) NULL,
+    CONSTRAINT pk_avklartefakta_reg PRIMARY KEY (id)
+);

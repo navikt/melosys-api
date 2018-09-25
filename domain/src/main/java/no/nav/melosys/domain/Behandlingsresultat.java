@@ -6,9 +6,12 @@ import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
 
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 @Entity
 @Table(name = "behandlingsresultat")
-public class Behandlingsresultat {
+@EntityListeners(AuditingEntityListener.class)
+public class Behandlingsresultat extends RegistreringsInfo {
 
     // Populeres av Hibernate med behandling.id
     @Id
@@ -135,6 +138,14 @@ public class Behandlingsresultat {
 
     public void setLovvalgsperioder(Set<Lovvalgsperiode> lovvalgsperioder) {
         this.lovvalgsperioder = lovvalgsperioder;
+    }
+
+    public Set<Vilkaarsresultat> getVilkaarsresultater() {
+        return vilkaarsresultater;
+    }
+
+    public void setVilkaarsresultater(Set<Vilkaarsresultat> vilkaarsresultater) {
+        this.vilkaarsresultater = vilkaarsresultater;
     }
 
     @Override

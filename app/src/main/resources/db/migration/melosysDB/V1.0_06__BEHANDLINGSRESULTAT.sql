@@ -8,6 +8,10 @@ CREATE TABLE behandlingsresultat (
     henleggelse_fritekst  VARCHAR2(4000)  NULL,
     vedtak_dato           TIMESTAMP NULL,
     vedtak_klagefrist     DATE NULL,
+    registrert_dato       TIMESTAMP NOT NULL,
+    registrert_av         VARCHAR2(99) NULL,
+    endret_dato           TIMESTAMP NOT NULL,
+    endret_av             VARCHAR2(99) NULL,
     CONSTRAINT pk_resultat PRIMARY KEY (behandling_id)
 );
 

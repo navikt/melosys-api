@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.*;
 
 @Entity
@@ -35,6 +36,9 @@ public class Avklartefakta {
 
     @Column(name = "sokkel_skip")
     private String sokkelEllerSkip;
+
+    @OneToMany(mappedBy = "avklartefakta")
+    private Set<AvklartefaktaRegistrering> registrering;
 
     public Behandlingsresultat getBehandlingsresultat() {
         return behandlingsresultat;
@@ -90,6 +94,10 @@ public class Avklartefakta {
 
     public void setSokkelEllerSkip(String sokkelEllerSkip) {
         this.sokkelEllerSkip = sokkelEllerSkip;
+    }
+
+    public Set<AvklartefaktaRegistrering> getRegistrering() {
+        return registrering;
     }
 
     @Override
