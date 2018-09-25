@@ -11,6 +11,7 @@ public class Naeringsinntekt extends Inntekt {
     @XmlElement(required = true)
     protected String beskrivelse; // http://nav.no/kodeverk/Kodeverk/Naeringsinntektsbeskrivelse
 
+    @Override
     public String getBeskrivelse() {
         return beskrivelse;
     }

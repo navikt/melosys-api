@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 public class MetricsConfig {
 
     @Bean
-    MeterRegistryCustomizer registryCustomizer() {
+    MeterRegistryCustomizer<?> registryCustomizer() {
         return registry -> registry.config().commonTags("team", "melosys");
     }
 

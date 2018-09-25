@@ -10,7 +10,6 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.inntk.InntektFasade;
 import no.nav.melosys.repository.SaksopplysningRepository;
-import no.nav.melosys.service.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +34,6 @@ public class HentInntektopplysningerTest {
 
     @Before
     public void setUp() {
-        FagsakService fagsakService = mock(FagsakService.class);
         agent = new HentInntektopplysninger(inntektFasade, mock(SaksopplysningRepository.class));
         ReflectionTestUtils.setField(agent, "inntektshistorikkAntallMåneder", INNTEKTSHISTORIKK_ANTALL_MÅNEDER);
     }

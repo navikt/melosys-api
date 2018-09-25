@@ -25,6 +25,7 @@ public class PeriodeDto implements ErPeriode {
         this.tom = tom;
     }
 
+    @Override
     public LocalDate getFom() {
         return fom;
     }
@@ -33,6 +34,7 @@ public class PeriodeDto implements ErPeriode {
         this.fom = fom;
     }
 
+    @Override
     public LocalDate getTom() {
         return tom;
     }

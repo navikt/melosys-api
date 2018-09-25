@@ -26,6 +26,7 @@ public class Tilgangskontroll {
         LdapBruker ldapBruker;
         ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
         Tilgangskontroll.sjekk(ldapBruker);
+        log.debug("Sjekket bruker {}", ldapBruker.getDisplayName());
     }
 
     public static void sjekk(LdapBruker ldapBruker) throws SikkerhetsbegrensningException {

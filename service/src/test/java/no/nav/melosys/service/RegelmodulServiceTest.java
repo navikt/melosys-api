@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("resource")
 public class RegelmodulServiceTest {
 
     private BehandlingRepository behandlingRepository;

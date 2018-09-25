@@ -81,7 +81,7 @@ public class TpsServiceTest {
     public void test_hentAktørIdForIdent_ikkeFunnet() throws HentAktoerIdForIdentPersonIkkeFunnet, IkkeFunnetException {
         when(aktorConsumer.hentAktørIdForIdent(any())).thenThrow(new HentAktoerIdForIdentPersonIkkeFunnet("test", new PersonIkkeFunnet()));
 
-        String optAktørId = service.hentAktørIdForIdent(FNR_UKJENT);
+        service.hentAktørIdForIdent(FNR_UKJENT);
     }
 
     @Test

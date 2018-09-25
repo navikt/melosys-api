@@ -21,6 +21,7 @@ public class Loennsinntekt
     @JsonIgnore
     protected Integer antall;
 
+    @Override
     public String getBeskrivelse() {
         return beskrivelse;
     }

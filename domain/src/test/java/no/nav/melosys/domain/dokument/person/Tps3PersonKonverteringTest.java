@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 public class Tps3PersonKonverteringTest {
 
     public static final String TPS_PERSON_3_0_MOCK = "person/tps_person_3.0_mock.xml";
-    public static final String TPS_PERSON_3_0_XSLT = "tps/person_3.0.xslt";  // FIXME (farjam): Denne skal defineres et annet sted.
+    public static final String TPS_PERSON_3_0_XSLT = "tps/person_3.0.xslt"; // FIXME (farjam): Denne skal defineres et annet sted.
     private static final String TPS_PERSON_MED_FAMILIERELASJONER = "person/88888888886.xml";
 
     @Test
