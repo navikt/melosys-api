@@ -212,14 +212,14 @@ public class FagsakDvh extends DvhBaseEntitet {
 
         public Builder arbeidsgiver(Aktoer aktør) {
             if (aktør != null) {
-                this.arbeidsgiverId = aktør.getOrgnr() != null ? aktør.getOrgnr() : aktør.getAktørId();
+                this.arbeidsgiverId = aktør.getOrgnr();
             }
             return this;
         }
 
         public Builder representant(Aktoer aktør) {
             if (aktør != null) {
-                this.representantId = aktør.getOrgnr() != null ? aktør.getOrgnr() : aktør.getAktørId();
+                this.representantId = aktør.getOrgnr();
             }
             return this;
         }

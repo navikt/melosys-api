@@ -29,32 +29,25 @@ public class DatavarehusEventObserver {
     @EventListener(FagsakOpprettetEvent.class)
     public void håndterFagsakLagretEvent(FagsakOpprettetEvent fagsakOpprettetEvent) {
         Fagsak fagsak = fagsakOpprettetEvent.fagsak;
-        Aktoer bruker = null;
-        Aktoer arbeidsgiver = null;
-        Aktoer representant = null;
 
         try {
-            bruker = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
-            arbeidsgiver = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
-            representant = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
+            FagsakDvh.Builder builder = new FagsakDvh.Builder()
+                .saksnummer(fagsak.getSaksnummer())
+                .funksjonellTid(LocalDateTime.now())
+                .endretAv(fagsakOpprettetEvent.endretAv)
+                .gsakSaksnummer(fagsak.getGsakSaksnummer())
+                .fagsakType(fagsak.getType())
+                .fagsakStatus(fagsak.getStatus())
+                .bruker(fagsak.hentAktørMedRolleType(RolleType.BRUKER))
+                .arbeidsgiver(fagsak.hentAktørMedRolleType(RolleType.ARBEIDSGIVER))
+                .representant(fagsak.hentAktørMedRolleType(RolleType.REPRESENTANT))
+                .registrertDato(fagsak.getRegistrertDato())
+                .endretDato(fagsak.getEndretDato());
+            datavarehusRepository.lagre(builder.build());
+            log.info("Fagsak med saksnummer " + fagsak.getSaksnummer() + " lagret");
         } catch (TekniskException e) {
-            log.error("Fagsak med saksnummer " + fagsak.getSaksnummer() + " har ikke unike rolletyper");
+            log.error("Fagsak med saksnummer " + fagsak.getSaksnummer() + " ble ikke lagret");
         }
-
-        FagsakDvh.Builder builder = new FagsakDvh.Builder()
-            .saksnummer(fagsak.getSaksnummer())
-            .funksjonellTid(LocalDateTime.now())
-            .endretAv(fagsakOpprettetEvent.endretAv)
-            .gsakSaksnummer(fagsak.getGsakSaksnummer())
-            .fagsakType(fagsak.getType())
-            .fagsakStatus(fagsak.getStatus())
-            .bruker(bruker)
-            .arbeidsgiver(arbeidsgiver)
-            .representant(representant)
-            .registrertDato(fagsak.getRegistrertDato())
-            .endretDato(fagsak.getEndretDato());
-        datavarehusRepository.lagre(builder.build());
-        log.info("Fagsak med saksnummer " + fagsak.getSaksnummer() + " lagret");
     }
 
     @EventListener(BehandlingOpprettetEvent.class)
