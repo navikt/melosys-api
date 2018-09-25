@@ -3,24 +3,11 @@ package no.nav.melosys.domain;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
-
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import org.hibernate.annotations.ColumnTransformer;
+import javax.persistence.*;
 
 import no.nav.melosys.domain.dokument.vurdering.VurderingGrunnlag;
 import no.nav.melosys.domain.dokument.vurdering.VurderingResultat;
+import org.hibernate.annotations.ColumnTransformer;
 
 @Entity
 @Table(name = "lovvalg_periode")
@@ -43,8 +30,7 @@ public class LovvalgPeriode implements ErPeriode {
     private LocalDate tom;
 
     @Column(name = "bestemmelse", nullable = false, updatable = false)
-    @Convert(converter = LovvalgBestemmelse.DbKonverterer.class)
-    private LovvalgBestemmelse bestemmelse;
+    private String bestemmelse;
     
     /** Kodeverk: no.nav.melosys.service.kodeverk.Kodeverk.LANDKODER */
     @Column(name = "lovvalgsland", nullable = false, updatable = false)
@@ -104,11 +90,11 @@ public class LovvalgPeriode implements ErPeriode {
         this.tom = tom;
     }
 
-    public LovvalgBestemmelse getBestemmelse() {
+    public String getBestemmelse() {
         return bestemmelse;
     }
 
-    public void setBestemmelse(LovvalgBestemmelse bestemmelse) {
+    public void setBestemmelse(String bestemmelse) {
         this.bestemmelse = bestemmelse;
     }
 

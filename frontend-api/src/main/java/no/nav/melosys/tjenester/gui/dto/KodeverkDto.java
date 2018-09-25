@@ -3,10 +3,10 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.util.List;
 
 import no.nav.melosys.service.kodeverk.KodeDto;
-import no.nav.melosys.tjenester.gui.dto.BegrunnelserDto;
 
 public class KodeverkDto {
     private BegrunnelserDto begrunnelser = new BegrunnelserDto();
+    private LovvalgsBestemmelserDto lovvalgsbestemmelser = new LovvalgsBestemmelserDto();
     private List<KodeDto> behandlingstyper;
     private List<KodeDto> behandlingsstatus;
     private List<KodeDto> dokumenttitler;
@@ -20,9 +20,14 @@ public class KodeverkDto {
         return begrunnelser;
     }
 
+    public LovvalgsBestemmelserDto getLovvalgsBestemmelser() {
+        return lovvalgsbestemmelser;
+    }
     public void setBegrunnelser(BegrunnelserDto begrunnelser) {
         this.begrunnelser = begrunnelser;
     }
+
+    public void setLovvalgsBestemmelser(LovvalgsBestemmelserDto lovvalgsbestemmelser) { this.lovvalgsbestemmelser = lovvalgsbestemmelser; }
 
     public List<KodeDto> getBehandlingstyper() {
         return behandlingstyper;
