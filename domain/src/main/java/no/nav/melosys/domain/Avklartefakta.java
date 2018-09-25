@@ -24,8 +24,9 @@ public class Avklartefakta {
     @Column(name = "mottar_kontantytelse")
     private Boolean mottarKontantytelse;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "kontantytelse_type")
-    private String kontantytelsestype;
+    private KontantytelseType kontantytelsestype;
 
     @Column(name = "offentlig_tjenestemann")
     private Boolean erOffentligTjenestemann;
@@ -34,8 +35,9 @@ public class Avklartefakta {
     @Column(name = "bostedsland")
     private Landkoder bostedsland;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "sokkel_skip")
-    private String sokkelEllerSkip;
+    private SokkelEllerSkip sokkelEllerSkip;
 
     @OneToMany(mappedBy = "avklartefakta")
     private Set<AvklartefaktaRegistrering> registrering;
@@ -64,11 +66,11 @@ public class Avklartefakta {
         this.mottarKontantytelse = mottarKontantytelse;
     }
 
-    public String getKontantytelsestype() {
+    public KontantytelseType getKontantytelsestype() {
         return kontantytelsestype;
     }
 
-    public void setKontantytelsestype(String kontantytelsestype) {
+    public void setKontantytelsestype(KontantytelseType kontantytelsestype) {
         this.kontantytelsestype = kontantytelsestype;
     }
 
@@ -88,11 +90,11 @@ public class Avklartefakta {
         this.bostedsland = bostedsland;
     }
 
-    public String getSokkelEllerSkip() {
+    public SokkelEllerSkip getSokkelEllerSkip() {
         return sokkelEllerSkip;
     }
 
-    public void setSokkelEllerSkip(String sokkelEllerSkip) {
+    public void setSokkelEllerSkip(SokkelEllerSkip sokkelEllerSkip) {
         this.sokkelEllerSkip = sokkelEllerSkip;
     }
 
