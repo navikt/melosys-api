@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 public class OpprettSakTest {
 
     @Mock
-    FagsakService fagsakService;
+    private FagsakService fagsakService;
 
     private OpprettSak agent;
 
@@ -37,15 +37,17 @@ public class OpprettSakTest {
         Properties properties = new Properties();
         String aktørId = "FJERNET93";
         properties.setProperty(ProsessDataKey.AKTØR_ID.getKode(), "FJERNET93");
+        properties.setProperty(ProsessDataKey.ARBEIDSGIVER.getKode(), "104568393");
+
         p.addData(properties);
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
         fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
-        when(fagsakService.nyFagsakOgBehandling(anyString(), eq(Behandlingstype.SØKNAD))).thenReturn(fagsak);
+        when(fagsakService.nyFagsakOgBehandling(anyString(), anyString(), any(), eq(Behandlingstype.SØKNAD))).thenReturn(fagsak);
 
         agent.utførSteg(p);
 
-        verify(fagsakService, times(1)).nyFagsakOgBehandling(aktørId, Behandlingstype.SØKNAD);
+        verify(fagsakService, times(1)).nyFagsakOgBehandling(aktørId, "104568393", null, Behandlingstype.SØKNAD);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_GSAK_SAK);
     }
 }

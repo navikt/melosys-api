@@ -18,8 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
-import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
+import static no.nav.melosys.domain.ProsessDataKey.*;
 import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_GSAK_SAK;
 import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_SAK_OG_BEH;
 
@@ -58,7 +57,10 @@ public class OpprettSak extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String aktørId = prosessinstans.getData(AKTØR_ID);
-        Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, Behandlingstype.SØKNAD);
+        String arbeidsgiver = prosessinstans.getData(ARBEIDSGIVER);
+        String representant = prosessinstans.getData(REPRESENTANT);
+
+        Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, arbeidsgiver, representant, Behandlingstype.SØKNAD);
         prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
         prosessinstans.setBehandling(fagsak.getBehandlinger().get(0));
 

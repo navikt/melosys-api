@@ -36,6 +36,8 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTest {
     private static final String JOURNALFOERING_SCHEMA = "journalforing-schema.json";
     private static final String JOURNALFOERING_TILORDNE_SCHEMA = "journalforing-tilordne-schema.json";
     private static final String JOURNALFOERING_OPPRETT_SCHEMA = "journalforing-opprett-schema.json";
+    private static final String SAMPLE_ORGNO = "899655123";
+    private static final String SAMPLE_FNR = "77777777772";
 
     private EnhancedRandom random;
 
@@ -50,7 +52,6 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTest {
         return this.schemaType;
     }
 
-
     @Before
     public void setUp() {
         tjeneste = new JournalfoeringTjeneste(journalføringService);
@@ -62,6 +63,8 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTest {
     @Test
     public void journalPostSchemaValidering() throws IOException, MelosysException, JSONException {
         Journalpost journalpost = random.nextObject(Journalpost.class);
+        journalpost.setBrukerId(SAMPLE_FNR);
+        journalpost.setAvsenderId(SAMPLE_ORGNO);
         when(journalføringService.hentJournalpost(anyString())).thenReturn(journalpost);
 
         Response response = tjeneste.hentJournalpostOpplysninger(anyString());
@@ -79,6 +82,16 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTest {
     @Test
     public void journalføringOpprettSchemaValidering() throws IOException, JSONException {
         JournalfoeringOpprettDto journalfoeringDto = random.nextObject(JournalfoeringOpprettDto.class);
+        journalfoeringDto.setArbeidsgiverID(SAMPLE_ORGNO);
+        journalfoeringDto.setRepresentantID(SAMPLE_ORGNO);
+        schemaValidering(journalfoeringDto, JOURNALFOERING_OPPRETT_SCHEMA);
+    }
+
+    @Test
+    public void journalføringOpprettSchemaValideringMedRepresentantIDNull() throws IOException, JSONException {
+        JournalfoeringOpprettDto journalfoeringDto = random.nextObject(JournalfoeringOpprettDto.class);
+        journalfoeringDto.setArbeidsgiverID(SAMPLE_ORGNO);
+        journalfoeringDto.setRepresentantID(null);
         schemaValidering(journalfoeringDto, JOURNALFOERING_OPPRETT_SCHEMA);
     }
 
