@@ -20,14 +20,14 @@ public class KodeverkDto {
         return begrunnelser;
     }
 
-    public LovvalgsBestemmelserDto getLovvalgsBestemmelser() {
+    public LovvalgsBestemmelserDto getLovvalgsbestemmelser() {
         return lovvalgsbestemmelser;
     }
     public void setBegrunnelser(BegrunnelserDto begrunnelser) {
         this.begrunnelser = begrunnelser;
     }
 
-    public void setLovvalgsBestemmelser(LovvalgsBestemmelserDto lovvalgsbestemmelser) { this.lovvalgsbestemmelser = lovvalgsbestemmelser; }
+    public void setLovvalgsbestemmelser(LovvalgsBestemmelserDto lovvalgsbestemmelser) { this.lovvalgsbestemmelser = lovvalgsbestemmelser; }
 
     public List<KodeDto> getBehandlingstyper() {
         return behandlingstyper;

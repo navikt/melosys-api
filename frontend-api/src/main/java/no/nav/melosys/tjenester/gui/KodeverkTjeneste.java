@@ -34,9 +34,9 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.getBegrunnelser().opphold = tilKoder(Opphold.values());
         kodeverk.setBehandlingsstatus(tilKoder(BehandlingStatus.values()));
         kodeverk.getBegrunnelser().artikkel12_1 = tilKoder(Artikkel12_1.values());
-        kodeverk.getLovvalgsBestemmelser().forordning_883_2004 = tilKoder(LovvalgBestemmelse_883_2004.values());
-        kodeverk.getLovvalgsBestemmelser().forordning_987_2009 = tilKoder(LovvalgBestemmelse_987_2009.values());
-        kodeverk.getLovvalgsBestemmelser().tillegg = tilKoder(TilleggBestemmelse.values());
+        kodeverk.getLovvalgsbestemmelser().forordning_883_2004 = tilKoder(LovvalgBestemmelse_883_2004.values());
+        kodeverk.getLovvalgsbestemmelser().forordning_987_2009 = tilKoder(LovvalgBestemmelse_987_2009.values());
+        kodeverk.getLovvalgsbestemmelser().tillegg = tilKoder(TilleggBestemmelse.values());
         kodeverk.setBehandlingsstatus(tilKoder(BehandlingStatus.values()));
         kodeverk.setBehandlingstyper(tilKoder(Behandlingstype.values()));
         kodeverk.setDokumenttitler(tilKoder(DokumentTittel.values()));
