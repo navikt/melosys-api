@@ -14,7 +14,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.SoeknadService;
-import no.nav.melosys.service.abac.BehandlingTilgang;
+import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.validering.ValideringService;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import no.nav.melosys.tjenester.gui.dto.SoeknadInnDto;
@@ -35,13 +35,13 @@ public class SoeknadTjeneste extends RestTjeneste  {
 
     private ValideringService valideringService;
 
-    private final BehandlingTilgang behandlingTilgang;
+    private final Tilgang tilgang;
 
     @Autowired
-    public SoeknadTjeneste(SoeknadService soeknadService, ValideringService valideringService, BehandlingTilgang behandlingTilgang) {
+    public SoeknadTjeneste(SoeknadService soeknadService, ValideringService valideringService, Tilgang tilgang) {
         this.soeknadService = soeknadService;
         this.valideringService = valideringService;
-        this.behandlingTilgang = behandlingTilgang;
+        this.tilgang = tilgang;
     }
 
     @GET
@@ -51,7 +51,7 @@ public class SoeknadTjeneste extends RestTjeneste  {
         SoeknadDokument soeknadDokument;
 
         try {
-            behandlingTilgang.sjekk(behandlingID);
+            tilgang.sjekk(behandlingID);
             soeknadDokument = soeknadService.hentSoeknad(behandlingID);
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -78,7 +78,7 @@ public class SoeknadTjeneste extends RestTjeneste  {
         SoeknadDokument soeknadDokument = soeknadInnDto.getSoknadDokument();
 
         try {
-            behandlingTilgang.sjekk(behandlingID);
+            tilgang.sjekk(behandlingID);
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (TekniskException e) {

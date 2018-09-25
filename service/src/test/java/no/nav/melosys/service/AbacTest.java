@@ -6,6 +6,7 @@ import no.nav.freg.abac.core.dto.response.Decision;
 import no.nav.freg.abac.core.dto.response.XacmlResponse;
 import no.nav.freg.abac.core.service.AbacService;
 import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Journalpost;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -13,12 +14,10 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.service.abac.BehandlingTilgang;
-import no.nav.melosys.service.abac.FagsakTilgang;
-import no.nav.melosys.service.abac.JournalTilgang;
-import no.nav.melosys.service.abac.PepAktoerOversetter;
+import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.sikkerhet.abac.Pep;
+import no.nav.melosys.sikkerhet.abac.PepImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,108 +34,87 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbacTest {
-    private BehandlingTilgang behandlingTilgang;
-    private FagsakTilgang fagsakTilgang;
-    private JournalTilgang journalTilgang;
+    private Tilgang tilgang;
 
     @Mock
-    private PepAktoerOversetter pep;
+    private Pep pep;
 
     private XacmlResponse abacResponse;
 
     @Mock
-    private FagsakRepository fagsakRepository;
+    private BehandlingRepository behandlingRepository;
 
     private Fagsak fagsakMocked;
+    private Behandling behandlingMocked;
 
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         AbacContext abacContext = mock(AbacContext.class);
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
 
-        TpsFasade tpsFasade = mock(TpsFasade.class);
-        when(tpsFasade.hentIdentForAktørId(any())).thenReturn("12345678910");
-
         abacResponse = mock(XacmlResponse.class);
 
         AbacService abacService = mock(AbacService.class);
         when(abacService.evaluate(any())).thenReturn(abacResponse);
 
-        pep = new PepAktoerOversetter(tpsFasade, abacService, abacContext);
+        pep = new PepImpl(abacService, abacContext);
 
         fagsakMocked = mock(Fagsak.class);
+        behandlingMocked = mock(Behandling.class);
         when(fagsakMocked.hentAktørMedRolleType(any())).thenReturn(new Aktoer());
+        when(behandlingMocked.getFagsak()).thenReturn(fagsakMocked);
 
-        behandlingTilgang = new BehandlingTilgang(fagsakRepository, pep);
-        fagsakTilgang = new FagsakTilgang(fagsakRepository, pep);
 
         JoarkFasade joarkFasade = mock(JoarkFasade.class);
         when(joarkFasade.hentJournalpost(any())).thenReturn(mock(Journalpost.class));
-        journalTilgang = new JournalTilgang(joarkFasade, pep);
+
+        tilgang = new Tilgang(behandlingRepository, joarkFasade, pep);
     }
-
-    @Test
-    public void testPepOversetter() throws SikkerhetsbegrensningException, TekniskException {
-        Aktoer aktør = new Aktoer();
-        when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
-        pep.sjekkTilgangTil(aktør);
-    }
-
-    @Test(expected = SikkerhetsbegrensningException.class)
-    public void testPepOversetterIkketilgang() throws SikkerhetsbegrensningException, TekniskException {
-        Aktoer aktør = new Aktoer();
-        when(abacResponse.getDecision()).thenReturn(Decision.DENY);
-        pep.sjekkTilgangTil(aktør);
-    }
-
-
 
     @Test(expected = TekniskException.class)
     public void testBehandlingsIdIkkeKnyttetTilFagsak() throws SikkerhetsbegrensningException, TekniskException {
-        behandlingTilgang.sjekk(102323934);
+        tilgang.sjekk(102323934);
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
     public void testBehandlingsIdIkketilgang() throws SikkerhetsbegrensningException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
 
-        List<Fagsak> fagsaker = Arrays.asList(fagsakMocked);
-        when(fagsakRepository.findByBehandlingsId(anyLong())).thenReturn(fagsaker);
+        when(behandlingRepository.findOne(anyLong())).thenReturn(behandlingMocked);
 
-        behandlingTilgang.sjekk(102323934);
+        tilgang.sjekk(102323934);
     }
 
     @Test
     public void testBehandlingsIdOk() throws SikkerhetsbegrensningException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
 
-        List<Fagsak> fagsaker = Arrays.asList(fagsakMocked);
-        when(fagsakRepository.findByBehandlingsId(anyLong())).thenReturn(fagsaker);
+        when(behandlingRepository.findOne(anyLong())).thenReturn(behandlingMocked);
 
-        behandlingTilgang.sjekk(102323934);
+        tilgang.sjekk(102323934);
     }
 
     @Test
     public void testFagsakOk() throws SikkerhetsbegrensningException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
-        fagsakTilgang.sjekk(fagsakMocked);
+        tilgang.sjekk(fagsakMocked);
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
     public void testFagsakIkkeTilgang() throws SikkerhetsbegrensningException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
-        fagsakTilgang.sjekk(fagsakMocked);
+        tilgang.sjekk(fagsakMocked);
     }
 
     @Test
     public void testJournalOk() throws SikkerhetsbegrensningException, IntegrasjonException {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
-        journalTilgang.sjekk("1234567");
+        tilgang.sjekkJournalId("JOURNAL-1");
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
     public void testJournalIkkeTilgang() throws SikkerhetsbegrensningException, IntegrasjonException {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
-        journalTilgang.sjekk("1234567");
+        tilgang.sjekkJournalId("JOURNAL-2");
     }
 }

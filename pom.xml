@@ -38,12 +38,12 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.frontend.version>0.12.6-264</melosys.frontend.version>
+        <melosys.frontend.version>0.12.6-16</melosys.frontend.version>
         <melosys.jsonschema.version>0.10.0-63</melosys.jsonschema.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
-        <abac.spring.version>1.3.0</abac.spring.version>
+        <abac.spring.version>1.6.0</abac.spring.version>
         <aareg.arbeidsforhold.version>3.0.0</aareg.arbeidsforhold.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>3.3.0</doksys.dokumentproduksjon.version>
