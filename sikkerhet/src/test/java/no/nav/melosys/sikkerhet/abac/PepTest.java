@@ -19,11 +19,6 @@ public class PepTest {
     @Mock
     SubjectHandler subjectHandler;
 
-    @Before
-    public void setUp() {
-        abacDefaultConfig = new AbacDefaultConfig();
-    }
-
     @Test
     public void testExtractTokenBodyWhenEpmty() {
         assertEquals("", abacDefaultConfig.getOidcTokenBody());
