@@ -37,7 +37,7 @@ public class BehandlingTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("status/{id}")
+    @Path("{id}/status")
     @ApiOperation(value = "Status på saksopplysingoppfriskning basert på behandlingsid", notes = ("Returnerer status på oppfriskning av saksopplysning basert på behandlingsid."))
     public Response statusBehandling(@PathParam("id") @ApiParam("behandlingsid.") long id) {
         String status;
