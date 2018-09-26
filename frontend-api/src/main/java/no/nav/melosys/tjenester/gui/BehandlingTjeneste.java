@@ -22,7 +22,6 @@ import io.swagger.annotations.ApiParam;
 
 @Api(tags = { "behandlinger" })
 @Path("/behandlinger")
-@Produces(MediaType.APPLICATION_JSON)
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 @Transactional
@@ -39,7 +38,7 @@ public class BehandlingTjeneste extends RestTjeneste {
 
     @GET
     @Path("status/{id}")
-    @ApiOperation(value = "Status på saksopplysingoppfriskning basert på behandlingsid", notes = ("Returnerer status på oppfriskning av saksopplysing basert på behandlingsid."))
+    @ApiOperation(value = "Status på saksopplysingoppfriskning basert på behandlingsid", notes = ("Returnerer status på oppfriskning av saksopplysning basert på behandlingsid."))
     public Response statusBehandling(@PathParam("id") @ApiParam("behandlingsid.") long id) {
         String status;
         if (behandlingerService.aktivProsessinstansEksistererFor(id)) {

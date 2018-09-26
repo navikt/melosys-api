@@ -23,7 +23,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Api(tags = { "saksopplysninger" })
 @Path("/saksopplysninger")
-@Produces(MediaType.APPLICATION_JSON)
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 @Transactional
