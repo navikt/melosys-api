@@ -38,7 +38,7 @@ public class BehandlingTjeneste extends RestTjeneste {
 
     @GET
     @Path("{id}/status")
-    @ApiOperation(value = "Status på saksopplysingoppfriskning basert på behandlingsid", notes = ("Returnerer status på oppfriskning av saksopplysning basert på behandlingsid."))
+    @ApiOperation(value = "Status på behandling", notes = ("Returnerer status (Progress/Done) på behandling"))
     public Response statusBehandling(@PathParam("id") @ApiParam("behandlingsid.") long id) {
         String status;
         if (behandlingerService.aktivProsessinstansEksistererFor(id)) {
