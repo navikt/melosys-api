@@ -69,7 +69,7 @@ public class OppgaveServiceTest {
         oppgaver.add(oppgave1);
 
         when(gsakFasade.finnOppgaveListeMedAnsvarlig(anyString())).
-                thenAnswer((Answer) invocation -> {
+                thenAnswer((Answer<List<Oppgave>>) invocation -> {
                     String string = invocation.getArgument(0);//AnsvarligID
                     return (string.equals("12345678901")) ? oppgaver : new ArrayList<>();
                 });

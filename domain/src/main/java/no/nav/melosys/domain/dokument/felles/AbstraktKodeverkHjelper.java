@@ -5,8 +5,10 @@ import no.nav.melosys.domain.FellesKodeverk;
 public abstract class AbstraktKodeverkHjelper implements KodeverkHjelper {
     protected String kode;
 
+    @Override
     public abstract FellesKodeverk hentKodeverkNavn();
 
+    @Override
     public String getKode() {
         return kode;
     }

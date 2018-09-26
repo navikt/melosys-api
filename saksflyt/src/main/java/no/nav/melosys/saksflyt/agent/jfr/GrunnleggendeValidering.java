@@ -95,7 +95,13 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
             return;
         }
 
-        
+        String arbeidsgiver = prosessinstans.getData(ARBEIDSGIVER);
+        if (arbeidsgiver == null) {
+            log.error("Funksjonell feil for prosessinstans {}: Mangler arbeidsgiver.", prosessinstans.getId());
+            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Mangler arbeidsgiver.", null);
+            return;
+        }
+
         prosessinstans.setSteg(ProsessSteg.JFR_AVSLUTT_OPPGAVE);
         log.info("Ferdig med grunnleggende validering av prosessinstans {}", prosessinstans.getId());
     }

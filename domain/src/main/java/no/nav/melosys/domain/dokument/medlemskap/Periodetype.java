@@ -21,7 +21,7 @@ public enum Periodetype implements KodeverkEnum<Periodetype> {
     }
 
     @JsonValue
-    public Map getJson() {
+    public Map<String, String> getJson() {
         Map<String, String> periodetypeMap = new HashMap<>();
         periodetypeMap.put("kode", name());
         periodetypeMap.put("term", navn);

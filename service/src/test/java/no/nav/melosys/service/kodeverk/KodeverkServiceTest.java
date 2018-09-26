@@ -11,7 +11,6 @@ import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -44,7 +43,6 @@ public class KodeverkServiceTest {
     }
 
     @Test
-    @Ignore // FIXME: Må slås på når feilen er fikset
     public void testKodeverkService() throws TekniskException {
         // Sjekk opphenting av kodeverk...
         String res = kodeverkService.dekod(LANDKODER, BAK, LocalDate.now());

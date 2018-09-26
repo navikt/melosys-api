@@ -11,6 +11,7 @@ public class YtelseFraOffentlige extends Inntekt {
     @XmlElement(required = true)
     protected String beskrivelse; // http://nav.no/kodeverk/Kodeverk/YtelseFraOffentligeBeskrivelse
 
+    @Override
     public String getBeskrivelse() {
         return beskrivelse;
     }

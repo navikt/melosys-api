@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("resource")
 public class SoeknadTjenesteTest extends JsonSchemaTest {
 
     private static final Logger log = LoggerFactory.getLogger(SoeknadTjenesteTest.class);

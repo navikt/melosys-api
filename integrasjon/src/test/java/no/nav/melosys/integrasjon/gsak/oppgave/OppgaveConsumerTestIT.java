@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringRunner.class)
+@SuppressWarnings("resource")
 public class OppgaveConsumerTestIT {
 
     @Value("${OppgaveAPI_v1.url}")
