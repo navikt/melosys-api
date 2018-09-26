@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.DokumentType.FORVALTNINGSMELDING;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
 
@@ -27,8 +28,6 @@ import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
 public class SendForvaltningsmelding extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(SendForvaltningsmelding.class);
-
-    private final String DOKUMENTTYPE_ID = "FORVALTNINGSMELDING";
 
     private final DokumentService dokumentService;
 
@@ -54,7 +53,7 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
         String saksbehandlerId = prosessinstans.getData(SAKSBEHANDLER);
         Behandling behandling = prosessinstans.getBehandling();
 
-        dokumentService.produserDokument(behandling.getId(), DOKUMENTTYPE_ID, saksbehandlerId);
+        dokumentService.produserDokument(behandling.getId(), FORVALTNINGSMELDING, saksbehandlerId);
 
         prosessinstans.setSteg(null);
         log.info("Sendt forvaltningsmelding for prosessinstans {}", prosessinstans.getId());
