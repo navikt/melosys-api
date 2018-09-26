@@ -7,11 +7,10 @@ import javax.ws.rs.Path;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.begrunnelse.Bosted;
-import no.nav.melosys.domain.begrunnelse.IkkeSkip;
-import no.nav.melosys.domain.begrunnelse.Opphold;
-import no.nav.melosys.domain.begrunnelse.VesentligVirksomhet;
-import no.nav.melosys.domain.begrunnelse.ForutgaaendeMedlemskap;
+import no.nav.melosys.domain.begrunnelse.*;
+import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_987_2009;
+import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
@@ -33,6 +32,11 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.getBegrunnelser().vesentligVirksomhet = tilKoder(VesentligVirksomhet.values());
         kodeverk.getBegrunnelser().ikkeSkip = tilKoder(IkkeSkip.values());
         kodeverk.getBegrunnelser().opphold = tilKoder(Opphold.values());
+        kodeverk.setBehandlingsstatus(tilKoder(BehandlingStatus.values()));
+        kodeverk.getBegrunnelser().artikkel12_1 = tilKoder(Artikkel12_1.values());
+        kodeverk.getLovvalgsbestemmelser().forordning_883_2004 = tilKoder(LovvalgBestemmelse_883_2004.values());
+        kodeverk.getLovvalgsbestemmelser().forordning_987_2009 = tilKoder(LovvalgBestemmelse_987_2009.values());
+        kodeverk.getLovvalgsbestemmelser().tillegg = tilKoder(TilleggBestemmelse.values());
         kodeverk.setBehandlingsstatus(tilKoder(BehandlingStatus.values()));
         kodeverk.setBehandlingstyper(tilKoder(Behandlingstype.values()));
         kodeverk.setDokumenttitler(tilKoder(DokumentTittel.values()));

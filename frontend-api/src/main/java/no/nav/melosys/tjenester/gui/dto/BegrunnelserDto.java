@@ -10,4 +10,5 @@ public class BegrunnelserDto {
     public List<KodeDto> vesentligVirksomhet;
     public List<KodeDto> ikkeSkip;
     public List<KodeDto> opphold;
+    public List<KodeDto> artikkel12_1;
 }
