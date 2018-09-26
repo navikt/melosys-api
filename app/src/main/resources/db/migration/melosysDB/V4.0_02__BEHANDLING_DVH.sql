@@ -3,7 +3,7 @@ CREATE TABLE behandling_dvh (
   trans_tid       TIMESTAMP(3)  NOT NULL,
   funksjonell_tid TIMESTAMP(3)  NOT NULL,
   endret_av       VARCHAR2(20 CHAR),
-  id              NUMBER(19)    NOT NULL,
+  behandling      NUMBER(19)    NOT NULL,
   saksnummer      VARCHAR2(99)  NOT NULL,
   status          VARCHAR2(99)  NOT NULL,
   beh_type        VARCHAR2(99)  NOT NULL,

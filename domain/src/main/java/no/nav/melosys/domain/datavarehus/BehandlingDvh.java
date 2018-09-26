@@ -15,21 +15,22 @@ public class BehandlingDvh extends DvhBaseEntitet {
     @Id
     @SequenceGenerator(name = "behandling_dvh_sequence", sequenceName = "behandling_dvh_seq")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_dvh_sequence")
-    @Column(name = "trans_id")
+    @Column(name = "trans_id", nullable = false)
     private Long id;
 
-    @Column(name = "id")
-    private Long behandlingId;
+    @Column(nullable = false)
+    private Long behandling;
 
+    @Column(nullable = false)
     private String saksnummer;
 
     @Column(name = "status", nullable = false)
     private String behandlingStatus;
 
-    @Column(name = "beh_type", nullable = false, updatable = false)
+    @Column(name = "beh_type", nullable = false)
     private String behandlingstype;
 
-    @Column(name = "registrert_dato", nullable = false, updatable = false)
+    @Column(name = "registrert_dato", nullable = false)
     private Instant registrertDato;
 
     @Column(name = "endret_dato", nullable = false)
@@ -43,12 +44,12 @@ public class BehandlingDvh extends DvhBaseEntitet {
         this.id = id;
     }
 
-    public Long getBehandlingId() {
-        return behandlingId;
+    public Long getBehandling() {
+        return behandling;
     }
 
-    public void setBehandlingId(Long behandlingId) {
-        this.behandlingId = behandlingId;
+    public void setBehandling(Long behandling) {
+        this.behandling = behandling;
     }
 
     public String getSaksnummer() {
@@ -103,7 +104,7 @@ public class BehandlingDvh extends DvhBaseEntitet {
             return false;
         }
         BehandlingDvh castOther = (BehandlingDvh) other;
-        return Objects.equals(behandlingId, castOther.behandlingId)
+        return Objects.equals(behandling, castOther.behandling)
             && Objects.equals(saksnummer, castOther.saksnummer)
             && Objects.equals(behandlingStatus, castOther.behandlingStatus)
             && Objects.equals(behandlingstype, castOther.behandlingstype)
@@ -113,7 +114,7 @@ public class BehandlingDvh extends DvhBaseEntitet {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), behandlingId, saksnummer, behandlingStatus, behandlingstype, registrertDato, endretDato);
+        return Objects.hash(super.hashCode(), behandling, saksnummer, behandlingStatus, behandlingstype, registrertDato, endretDato);
     }
 
     public static FagsakDvh.Builder builder() {
@@ -121,7 +122,7 @@ public class BehandlingDvh extends DvhBaseEntitet {
     }
 
     public static class Builder {
-        private Long behandlingId;
+        private Long behandling;
         private String saksnummer;
         private LocalDateTime funksjonellTid;
         private String endretAv;
@@ -130,8 +131,8 @@ public class BehandlingDvh extends DvhBaseEntitet {
         private Instant registrertDato;
         private Instant endretDato;
 
-        public Builder behandlingId(Long behandlingId) {
-            this.behandlingId = behandlingId;
+        public Builder behandling(Long behandling) {
+            this.behandling = behandling;
             return this;
         }
 
@@ -176,7 +177,7 @@ public class BehandlingDvh extends DvhBaseEntitet {
 
         public BehandlingDvh build() {
             BehandlingDvh behandlingDvh = new BehandlingDvh();
-            behandlingDvh.setBehandlingId(behandlingId);
+            behandlingDvh.setBehandling(behandling);
             behandlingDvh.setSaksnummer(saksnummer);
             behandlingDvh.setFunksjonellTid(funksjonellTid);
             behandlingDvh.setEndretAv(endretAv);

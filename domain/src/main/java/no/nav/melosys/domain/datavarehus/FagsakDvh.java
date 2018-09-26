@@ -16,9 +16,10 @@ public class FagsakDvh extends DvhBaseEntitet {
     @Id
     @SequenceGenerator(name = "fagsak_dvh_sequence", sequenceName = "fagsak_dvh_seq")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fagsak_dvh_sequence")
-    @Column(name = "trans_id")
+    @Column(name = "trans_id", nullable = false)
     private Long id;
 
+    @Column(nullable = false)
     private String saksnummer;
 
     @Column(name = "gsak_saksnummer")
@@ -30,16 +31,19 @@ public class FagsakDvh extends DvhBaseEntitet {
     @Column(name = "status", nullable = false)
     private String fagsakStatus;
 
+    @Column(name = "bruker_id", nullable = false)
     private String brukerId;
 
+    @Column(name = "arbeidsgiver_id", nullable = false)
     private String arbeidsgiverId;
 
+    @Column(name = "representant_id")
     private String representantId;
 
-    @Column(name = "registrert_dato", nullable = false, updatable = false)
+    @Column(name = "registrert_dato", nullable = false)
     private Instant registrertDato;
 
-    @Column(name = "endret_dato", nullable = false, updatable = false)
+    @Column(name = "endret_dato", nullable = false)
     private Instant endretDato;
 
     public Long getId() {

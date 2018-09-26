@@ -17,7 +17,7 @@ public class DvhBaseEntitet implements Serializable {
     @Column(name = "funksjonell_tid", nullable = false)
     private LocalDateTime funksjonellTid;
 
-    @Column(name = "endret_av", nullable = true)
+    @Column(name = "endret_av")
     private String endretAv;
 
     @PrePersist

@@ -2,7 +2,6 @@ package no.nav.melosys.service.datavarehus;
 
 import java.time.LocalDateTime;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RolleType;
@@ -54,7 +53,7 @@ public class DatavarehusEventObserver {
     public void håndterBehandlingLagretEvent(BehandlingOpprettetEvent behandlingOpprettetEvent) {
         Behandling behandling = behandlingOpprettetEvent.behandling;
         BehandlingDvh.Builder builder = new BehandlingDvh.Builder()
-            .behandlingId(behandling.getId())
+            .behandling(behandling.getId())
             .saksnummer(behandling.getFagsak().getSaksnummer())
             .funksjonellTid(LocalDateTime.now())
             .endretAv(behandlingOpprettetEvent.endretAv)
@@ -63,7 +62,7 @@ public class DatavarehusEventObserver {
             .registrertDato(behandling.getRegistrertDato())
             .endretDato(behandling.getEndretDato());
         datavarehusRepository.lagre(builder.build());
-        log.info("Behandling med behandlingId " + behandling.getId() + " lagret");
+        log.info("Behandling med id " + behandling.getId() + " lagret");
     }
 
 }
