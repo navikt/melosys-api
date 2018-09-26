@@ -45,21 +45,20 @@ public class DokumentService {
      * Kaller Doksys for å produsere et dokumentutkast
      * @throws TekniskException 
      */
-    public byte[] produserUtkast(long behandlingID, String dokumenttypeID, String userId)
+    public byte[] produserUtkast(long behandlingID, DokumentType dokumentType, String userId)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        return produserDokument(behandlingID, dokumenttypeID, userId, true);
+        return produserDokument(behandlingID, dokumentType, userId, true);
     }
 
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(long behandlingID, String dokumenttypeID, String userId) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        produserDokument(behandlingID, dokumenttypeID, userId, false);
+    public void produserDokument(long behandlingID, DokumentType dokumentType, String userId) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        produserDokument(behandlingID, dokumentType, userId, false);
     }
 
-    private byte[] produserDokument(long behandlingID, String dokumenttypeID, String userId , boolean erUtkast)
+    private byte[] produserDokument(long behandlingID, DokumentType dokumentType, String userId , boolean erUtkast)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        DokumentType dokumentType = DokumentType.forKode(dokumenttypeID);
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");

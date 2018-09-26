@@ -5,6 +5,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
+import no.nav.melosys.domain.DokumentType;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
@@ -69,7 +70,8 @@ public class DokumentTjeneste extends RestTjeneste {
 
         try {
             tilgang.sjekk(behandlingID);
-            dokument = dokumentService.produserUtkast(behandlingID, typeID, SubjectHandler.getInstance().getUserID());
+            DokumentType dokumentType = DokumentType.forKode(typeID);
+            dokument = dokumentService.produserUtkast(behandlingID, dokumentType, SubjectHandler.getInstance().getUserID());
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (SikkerhetsbegrensningException e) {
@@ -90,7 +92,8 @@ public class DokumentTjeneste extends RestTjeneste {
     public Response produserDokument(@PathParam("behandlingID") long behandlingID, @PathParam("typeID") String typeID) {
         try {
             tilgang.sjekk(behandlingID);
-            dokumentService.produserDokument(behandlingID, typeID, SubjectHandler.getInstance().getUserID());
+            DokumentType dokumentType = DokumentType.forKode(typeID);
+            dokumentService.produserDokument(behandlingID, dokumentType, SubjectHandler.getInstance().getUserID());
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (SikkerhetsbegrensningException e) {
