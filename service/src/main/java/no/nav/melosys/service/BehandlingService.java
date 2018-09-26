@@ -30,10 +30,10 @@ public class BehandlingService {
     public boolean aktivProsessinstansEksistererFor(long behandlingsid) {
         Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByStegIsNotNullAndBehandling_Id(behandlingsid);
         if (aktivProsessinstans.isPresent()) {
-            log.debug(String.format("Behandling %d%n har aktiv prosessinstans", behandlingsid));
+            log.debug("Behandling {} har aktiv prosessinstans", behandlingsid);
             return true;
         }
-        log.debug(String.format("Behandling %d%n har ingen aktiv prosessinstans", behandlingsid));
+        log.debug("Behandling {} har ingen aktiv prosessinstans", behandlingsid);
         return false;
     }
 }
