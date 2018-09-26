@@ -238,7 +238,7 @@ public class SaksopplysningerService {
         opprettNyProsessinstans(behandling, søknadDokument);
     }
 
-    public void opprettNyProsessinstans(Behandling behandling, SoeknadDokument søknadDokument) throws TekniskException, IkkeFunnetException {
+    private void opprettNyProsessinstans(Behandling behandling, SoeknadDokument søknadDokument) throws TekniskException, IkkeFunnetException {
         Prosessinstans nyprosessinstans = new Prosessinstans();
         nyprosessinstans.setBehandling(behandling);
         nyprosessinstans.setType(ProsessType.OPPFRISKNING);
