@@ -43,8 +43,8 @@
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
-        <abac.spring.version>1.6.0</abac.spring.version>
         <aareg.arbeidsforhold.version>3.0.0</aareg.arbeidsforhold.version>
+        <abac.spring.version>1.6.0</abac.spring.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>3.3.0</doksys.dokumentproduksjon.version>
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>

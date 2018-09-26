@@ -42,9 +42,7 @@ public class OppgaveplukkerTest {
 
     @Before
     public void setUp() {
-        this.oppgaveplukker = new Oppgaveplukker(gsakFasade,
-                                                 fagsakRepository,
-                                                 oppgaveTilbakkeleggingRepo);
+        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, fagsakRepository, oppgaveTilbakkeleggingRepo);
     }
 
     @Test

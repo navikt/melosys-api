@@ -81,6 +81,7 @@ public class Oppgaveplukker {
         }
 
         List<Oppgave> oppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakTypeListe, behandlingstypeListe);
+
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, oppgaver);
 
         if (valg.isPresent()) {
