@@ -34,9 +34,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Column(name = "fastsatt_av_land")
     private Landkoder fastsattAvLand;
 
-    @Column(name = "har_vedtak", nullable = false)
-    private boolean harVedtak;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "henleggelse_grunn")
     private Henleggelsesgrunner henleggelsesgrunn;
@@ -90,14 +87,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setFastsattAvLand(Landkoder fastsattAvLand) {
         this.fastsattAvLand = fastsattAvLand;
-    }
-
-    public boolean isHarVedtak() {
-        return harVedtak;
-    }
-
-    public void setHarVedtak(boolean harVedtak) {
-        this.harVedtak = harVedtak;
     }
 
     public Henleggelsesgrunner getHenleggelsesgrunn() {

@@ -3,7 +3,6 @@ CREATE TABLE behandlingsresultat (
     behandlingsmaate      VARCHAR2(99) NOT NULL,
     resultat_type         VARCHAR2(99) NOT NULL,
     fastsatt_av_land      VARCHAR2(99)  NULL,
-    har_vedtak            NUMBER(1) NOT NULL,
     henleggelse_grunn     VARCHAR2(99)  NULL,
     henleggelse_fritekst  VARCHAR2(4000)  NULL,
     vedtak_dato           TIMESTAMP NULL,
