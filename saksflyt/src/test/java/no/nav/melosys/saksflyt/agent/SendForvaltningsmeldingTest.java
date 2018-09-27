@@ -4,7 +4,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.dokument.DokumentService;
+import no.nav.melosys.service.dokument.DokumentSystemService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,11 +23,11 @@ public class SendForvaltningsmeldingTest {
 
     private SendForvaltningsmelding agent;
 
-    private DokumentService dokumentService;
+    private DokumentSystemService dokumentService;
 
     @Before
     public void setUp() throws Exception {
-        dokumentService = mock(DokumentService.class);
+        dokumentService = mock(DokumentSystemService.class);
         agent = new SendForvaltningsmelding(dokumentService);
     }
 

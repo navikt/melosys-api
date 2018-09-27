@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import no.nav.melosys.service.dokument.DokumentService;
+import no.nav.melosys.service.dokument.DokumentSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +29,10 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(SendForvaltningsmelding.class);
 
-    private final DokumentService dokumentService;
+    private final DokumentSystemService dokumentService;
 
     @Autowired
-    public SendForvaltningsmelding(DokumentService dokumentService) {
+    public SendForvaltningsmelding(DokumentSystemService dokumentService) {
         this.dokumentService = dokumentService;
     }
 

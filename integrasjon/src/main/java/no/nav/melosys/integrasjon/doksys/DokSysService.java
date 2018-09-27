@@ -13,12 +13,14 @@ import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkere
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.integrasjon.Fagsystem.MELOSYS;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
+@Primary
 public class DokSysService implements DokSysFasade {
 
     private static final Logger log = LoggerFactory.getLogger(DokSysService.class);
