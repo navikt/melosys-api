@@ -29,6 +29,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import static no.nav.melosys.domain.DokumentType.FORVALTNINGSMELDING;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 /**
@@ -73,6 +74,12 @@ public class BrevDataService {
         metadata.mottaker = null;
         // FIXME Fagområde er avhengig av dokumentTypen men kan også sendes som parameter.
         metadata.fagområde = null;
+
+        if (dokumentType == FORVALTNINGSMELDING) {
+            metadata.utledRegisterInfo = true;
+            metadata.mottaker = metadata.bruker;
+            metadata.fagområde = Tema.MED.getKode();
+        }
 
         return metadata;
     }

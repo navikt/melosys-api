@@ -19,7 +19,8 @@ public class DokumentproduksjonConsumerProducer {
 
     @Bean
     public DokumentproduksjonConsumer dokumentproduksjonConsumer() {
-        DokumentproduksjonV3 port = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML);
+        // FIXME: Dokprod gjør oppslag på saksbehandler fra sikkerhetskontekst: "Saksbehandlernavn ikke funnet i ldap. SaksbehandlerId=srvmelosys"
+        DokumentproduksjonV3 port = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SYSTEM_SAML);
         return new DokumentproduksjonConsumerImpl(port);
     }
 
