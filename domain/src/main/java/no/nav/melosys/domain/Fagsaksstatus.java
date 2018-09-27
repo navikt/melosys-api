@@ -7,7 +7,6 @@ public enum Fagsaksstatus implements InterntKodeverkTabell<Fagsaksstatus> {
     OPPRETTET("OPPRETTET", "Opprettet"),
     LOVVALG_AVKLART("LOVVALG AVKLART", "Lovvalg avklart"),
     FORELØPIG_LOVVALG("FORELOEPIG_LOVVALG", "Foreløpig lovvalg"),
-    OPPHØRT("OPPHOERT", "Opphørt"),
     AVSLUTTET("AVSLUTTET", "Avsluttet"),
     HENLAGT("HENLAGT", "Henlagt");
 
