@@ -14,7 +14,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -46,6 +45,6 @@ public class OpprettOppgaveTest {
 
         verify(gsakFasade, times(1)).opprettOppgave(any());
 
-        assertThat(p.getSteg()).isEqualTo(SEND_FORVALTNINGSMELDING);
+        assertThat(p.getSteg()).isNull();
     }
 }

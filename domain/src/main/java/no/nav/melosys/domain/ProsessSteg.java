@@ -30,7 +30,6 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     HENT_SOB_SAKER("HENT_SOB_SAKER", "Hent saker fra Sak og behandling"),
     OPPFRISK_SAKSOPPLYSNINGER("OPPFRISK_SAKSOPPLYSNINGER", "oppfrisking av saksopplysninger"),
     OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
-    SEND_FORVALTNINGSMELDING("SEND_FORVALTNINGSMELDING", "Send forvaltningsmelding til søker"),
 
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
 

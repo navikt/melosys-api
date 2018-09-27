@@ -25,13 +25,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
 import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
-import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
 
 /**
  * Oppretter en oppgave i GSAK.
  *
  * Transisjoner:
- * OPPRETT_OPPGAVE -> SEND_FORVALTNINGSMELDING eller FEILET_MASKINELT hvis feil
+ * OPPRETT_OPPGAVE -> null eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class OpprettOppgave extends AbstraktStegBehandler {
@@ -87,7 +86,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
         String oppgaveId = gsakFasade.opprettOppgave(oppgave);
 
-        prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
+        prosessinstans.setSteg(null);
         log.info("Opprettet oppgave {} for prosessinstans {}", oppgaveId, prosessinstans.getId());
     }
 }

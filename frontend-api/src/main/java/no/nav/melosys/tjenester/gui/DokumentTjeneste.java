@@ -5,7 +5,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.domain.DokumentType;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -13,7 +12,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.DokumentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -62,8 +60,7 @@ public class DokumentTjeneste extends RestTjeneste {
         byte[] dokument;
 
         try {
-            DokumentType dokumentType = DokumentType.forKode(typeID);
-            dokument = dokumentService.produserUtkast(behandlingID, dokumentType, SubjectHandler.getInstance().getUserID());
+            dokument = dokumentService.produserUtkast(behandlingID, typeID);
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (SikkerhetsbegrensningException e) {
@@ -83,8 +80,7 @@ public class DokumentTjeneste extends RestTjeneste {
     @Path("opprett/{behandlingID}/{typeID}")
     public Response produserDokument(@PathParam("behandlingID") long behandlingID, @PathParam("typeID") String typeID) {
         try {
-            DokumentType dokumentType = DokumentType.forKode(typeID);
-            dokumentService.produserDokument(behandlingID, dokumentType, SubjectHandler.getInstance().getUserID());
+            dokumentService.produserDokument(behandlingID, typeID);
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (SikkerhetsbegrensningException e) {

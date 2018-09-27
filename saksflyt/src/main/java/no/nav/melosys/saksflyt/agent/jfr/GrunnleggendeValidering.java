@@ -102,13 +102,6 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
             return;
         }
 
-        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-        if (saksbehandler == null) {
-            log.error("Funksjonell feil for prosessinstans {}: Mangler saksbehandler.", prosessinstans.getId());
-            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Mangler saksbehandler.", null);
-            return;
-        }
-
         prosessinstans.setSteg(ProsessSteg.JFR_AVSLUTT_OPPGAVE);
         log.info("Ferdig med grunnleggende validering av prosessinstans {}", prosessinstans.getId());
     }
