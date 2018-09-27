@@ -147,13 +147,12 @@ public class Behandlingsresultat extends RegistreringsInfo {
         }
         Behandlingsresultat that = (Behandlingsresultat) o;
         return Objects.equals(this.type, that.type)
-            && Objects.equals(this.behandlingsmåte, that.behandlingsmåte)
             && Objects.equals(this.behandling, that.behandling);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(type, behandlingsmåte, behandling);
+        return Objects.hash(type, behandling);
     }
     
 }

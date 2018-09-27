@@ -29,13 +29,13 @@ public class Aktoer {
 
     @Column(name = "orgnr")
     private String orgnr;
-
-    @Column(name = "utenlandsk_id")
-    private String utenlandskId;
     
     @Column(name = "rolle", nullable = false, updatable = false)
     @Convert(converter = RolleType.DbKonverterer.class)
     private RolleType rolle;
+
+    @Column(name = "utenlandsk_id")
+    private String utenlandskId;
 
     public long getId() {
         return id;

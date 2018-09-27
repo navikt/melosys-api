@@ -1,5 +1,6 @@
 package no.nav.melosys.domain;
 
+import java.util.Objects;
 import javax.persistence.*;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -53,5 +54,23 @@ public class AvklartefaktaRegistrering extends RegistreringsInfo {
 
     public void setBegrunnelseFritekst(String begrunnelseFritekst) {
         this.begrunnelseFritekst = begrunnelseFritekst;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AvklartefaktaRegistrering)) {
+            return false;
+        }
+        AvklartefaktaRegistrering that = (AvklartefaktaRegistrering) o;
+        return Objects.equals(this.avklartefakta, that.avklartefakta)
+            && Objects.equals(this.type, that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(avklartefakta, type);
     }
 }

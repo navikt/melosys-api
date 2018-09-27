@@ -111,20 +111,11 @@ public class Avklartefakta {
             return false;
         }
         Avklartefakta that = (Avklartefakta) o;
-        if (this.id != 0 && that.id != 0) {
-            return this.id == that.id;
-        }
-        return Objects.equals(this.arbeidsgiversForretningsland, that.arbeidsgiversForretningsland)
-            && Objects.equals(this.mottarKontantytelse, that.mottarKontantytelse)
-            && Objects.equals(this.kontantytelsestype, that.kontantytelsestype)
-            && Objects.equals(this.erOffentligTjenestemann, that.erOffentligTjenestemann)
-            && Objects.equals(this.bostedsland, that.bostedsland)
-            && Objects.equals(this.sokkelEllerSkip, that.sokkelEllerSkip);
+        return Objects.equals(this.behandlingsresultat, that.behandlingsresultat);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(arbeidsgiversForretningsland, mottarKontantytelse, kontantytelsestype,
-            erOffentligTjenestemann, bostedsland, sokkelEllerSkip);
+        return Objects.hash(behandlingsresultat);
     }
 }
