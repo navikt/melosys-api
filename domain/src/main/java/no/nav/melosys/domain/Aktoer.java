@@ -90,9 +90,6 @@ public class Aktoer {
             return false;
         }
         Aktoer that = (Aktoer) o;
-        if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
-            return this.id == that.id;
-        }
         return Objects.equals(this.fagsak, that.fagsak)
             && Objects.equals(this.aktørId, that.aktørId)
             && Objects.equals(this.orgnr, that.orgnr)

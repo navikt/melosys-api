@@ -4,7 +4,7 @@ public enum KontantytelseType implements Kodeverk {
 
     FP("FP", "Foreldrepenger"),
     SP("SP", "Sykepenger"),
-    AAP("AAP", "Arebidsavklaringspenger"),
+    AAP("AAP", "Arbeidsavklaringspenger"),
     DP("DP", "Dagpenger");
 
     private String kode;
