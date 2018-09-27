@@ -80,18 +80,13 @@ public class Vilkaarsresultat extends RegistreringsInfo {
             return false;
         }
         Vilkaarsresultat that = (Vilkaarsresultat) o;
-        if (this.id != 0 && that.id != 0) {
-            return this.id == that.id;
-        }
-        return Objects.equals(this.vilkaar, that.vilkaar)
-            && Objects.equals(this.oppfylt, that.oppfylt)
-            && Objects.equals(this.begrunnelseKode, that.begrunnelseKode)
-            && Objects.equals(this.begrunnelseFritekst, that.begrunnelseFritekst);
+        return Objects.equals(this.behandlingsresultat, that.behandlingsresultat)
+            && Objects.equals(this.vilkaar, that.vilkaar);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(vilkaar, oppfylt, begrunnelseKode, begrunnelseFritekst);
+        return Objects.hash(behandlingsresultat, vilkaar);
     }
 
 }

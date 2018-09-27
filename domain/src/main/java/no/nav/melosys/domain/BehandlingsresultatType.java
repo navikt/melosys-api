@@ -4,7 +4,7 @@ import javax.persistence.Converter;
 
 public enum BehandlingsresultatType implements InterntKodeverkTabell<BehandlingsresultatType> {
 
-    HENLEGGELSE("HENLEGGELSE", "Henleggelsesgrunner"),
+    HENLEGGELSE("HENLEGGELSE", "Henleggelse"),
     FASTSATT_LOVVALGSLAND("FASTSATT_LOVVALGSLAND", "Fastsatt lovvalgsland"),
     FRIVILLIG_MEDLEMSKAP("FRIVILLIG_MEDLEMSKAP", "Frivillig medlemskap");
 

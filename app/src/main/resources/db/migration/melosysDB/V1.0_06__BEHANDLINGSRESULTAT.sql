@@ -38,14 +38,3 @@ INSERT INTO behandlingsresultat_type (kode, navn) VALUES ('FASTSATT_LOVVALGSLAND
 INSERT INTO behandlingsresultat_type (kode, navn) VALUES ('FRIVILLIG_MEDLEMSKAP', 'Frivillig medlemskap');
 
 ALTER TABLE behandlingsresultat ADD CONSTRAINT fk_behandlingsresultat_type FOREIGN KEY (resultat_type) REFERENCES behandlingsresultat_type;
-
-CREATE TABLE henleggelse_grunn (
-    kode        VARCHAR2(99)  NOT NULL,
-    navn        VARCHAR2(99)  NOT NULL,
-    CONSTRAINT pk_henleggelse_grunn PRIMARY KEY (kode)
-);
-INSERT INTO henleggelse_grunn (kode, navn) VALUES ('ANNET', 'Automatisert');
-INSERT INTO henleggelse_grunn (kode, navn) VALUES ('OPPHOLD_UTL_AVLYST', 'Utlandsopphold avlyst');
-INSERT INTO henleggelse_grunn (kode, navn) VALUES ('SØKNADEN_TRUKKET', 'Søknaden trukket');
-
-ALTER TABLE behandlingsresultat ADD CONSTRAINT fk_henleggelse_grunn FOREIGN KEY (henleggelse_grunn) REFERENCES henleggelse_grunn;

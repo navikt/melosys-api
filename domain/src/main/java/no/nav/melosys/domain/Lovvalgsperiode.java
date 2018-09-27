@@ -41,11 +41,11 @@ public class Lovvalgsperiode implements ErPeriode {
     private InnvilgelsesResultat innvilgelsesresultat;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "medlemskapstype")
+    @Column(name = "medlemskapstype", nullable = false, updatable = false)
     private Medlemskapstype medlemskapstype;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "trygde_dekning", nullable = false, updatable = false)
+    @Column(name = "trygde_dekning")
     private TrygdeDekning dekning;
 
     public long getId() {
@@ -135,9 +135,6 @@ public class Lovvalgsperiode implements ErPeriode {
             return false;
         }
         Lovvalgsperiode that = (Lovvalgsperiode) o;
-        if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
-            return this.id == that.id;
-        }
         return Objects.equals(this.behandlingsresultat, that.behandlingsresultat)
             && Objects.equals(this.fom, that.fom);
     }
