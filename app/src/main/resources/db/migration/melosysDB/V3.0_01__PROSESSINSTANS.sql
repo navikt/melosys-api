@@ -49,6 +49,7 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_MEDL_OPPL', 'Hent medlemskap
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_SOB_SAKER', 'Hent sak fra Sak og behandling');
 INSERT INTO prosess_steg (kode, navn) VALUES ('OPPFRISK_SAKSOPPLYSNINGER', 'oppfrisking av saksopplysninger');
 INSERT INTO prosess_steg (kode, navn) VALUES ('OPPRETT_OPPGAVE', 'Oppretter oppgave i GSAK');
+INSERT INTO prosess_steg (kode, navn) VALUES ('SEND_FORVALTNINGSMELDING', 'Send forvaltningsmelding til søker');
 INSERT INTO prosess_steg (kode, navn) VALUES ('FEILET_MASKINELT', 'Feilet maskinelt');
 INSERT INTO prosess_steg (kode, navn) VALUES ('FATTET_VEDTAK', 'Saksbehandler har fattet vedtak i Melosys');
 INSERT INTO prosess_steg (kode, navn) VALUES ('STATUS_BEH_AVSL', 'Oppdater Sak og Behandling ved lukking av behandling');
