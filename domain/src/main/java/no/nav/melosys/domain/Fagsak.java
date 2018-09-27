@@ -23,12 +23,12 @@ public class Fagsak {
     private Long gsakSaksnummer;
 
     @Column(name = "fagsak_type")
-    @Convert(converter = FagsakType.DbKonverterer.class)
-    private FagsakType type;
+    @Convert(converter = Fagsakstype.DbKonverterer.class)
+    private Fagsakstype type;
 
     @Column(name = "status", nullable = false)
-    @Convert(converter = FagsakStatus.DbKonverterer.class)
-    private FagsakStatus status;
+    @Convert(converter = Fagsaksstatus.DbKonverterer.class)
+    private Fagsaksstatus status;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private Instant registrertDato;
@@ -51,19 +51,19 @@ public class Fagsak {
         this.gsakSaksnummer = gsakSaksnummer;
     }
 
-    public FagsakType getType() {
+    public Fagsakstype getType() {
         return type;
     }
 
-    public void setType(FagsakType type) {
+    public void setType(Fagsakstype type) {
         this.type = type;
     }
 
-    public FagsakStatus getStatus() {
+    public Fagsaksstatus getStatus() {
         return status;
     }
 
-    public void setStatus(FagsakStatus status) {
+    public void setStatus(Fagsaksstatus status) {
         this.status = status;
     }
 
@@ -104,7 +104,7 @@ public class Fagsak {
      */
     public Behandling getAktivBehandling() throws TekniskException {
         List<Behandling> behandlinger = getBehandlinger().stream()
-            .filter(b -> !b.getStatus().equals(BehandlingStatus.AVSLUTTET)).collect(Collectors.toList());
+            .filter(b -> !b.getStatus().equals(Behandlingsstatus.AVSLUTTET)).collect(Collectors.toList());
         if (behandlinger.size() > 1) {
             throw new TekniskException("Det finnes mer enn en aktive behandlinger for sak " + saksnummer);
         } else if (behandlinger.size() == 1) {

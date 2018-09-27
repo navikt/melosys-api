@@ -26,12 +26,12 @@ public class BehandlingRepositoryTest {
     public void testFindBySaksnummerIkkeFunnet() throws Exception {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(123L);
-        fagsak.setStatus(FagsakStatus.OPPRETTET);
+        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
         entityManager.persist(fagsak);
 
         Behandling behandling = new Behandling();
         behandling.setBehandlingsId(777L);
-        behandling.setStatus(BehandlingStatus.OPPRETTET);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setType(Behandlingstype.FØRSTEGANGSSØKNAD);
         behandling.setFagsak(fagsak);
 
@@ -45,12 +45,12 @@ public class BehandlingRepositoryTest {
     public void testFindBySaksnummer() throws Exception {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(123L);
-        fagsak.setStatus(FagsakStatus.OPPRETTET);
+        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
         entityManager.persist(fagsak);
 
         Behandling behandling = new Behandling();
         behandling.setBehandlingsId(777L);
-        behandling.setStatus(BehandlingStatus.OPPRETTET);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setType(Behandlingstype.FØRSTEGANGSSØKNAD);
         behandling.setFagsak(fagsak);
 

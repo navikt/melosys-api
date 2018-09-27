@@ -27,23 +27,22 @@ public class KodeverkTjeneste extends RestTjeneste {
     @GET
     public KodeverkDto getKodeverk() {
         KodeverkDto kodeverk = new KodeverkDto();
+        kodeverk.getBegrunnelser().artikkel12_1 = tilKoder(Artikkel12_1.values());
         kodeverk.getBegrunnelser().bosted = tilKoder(Bosted.values());
         kodeverk.getBegrunnelser().forutgaendeMedlemskap = tilKoder(ForutgaaendeMedlemskap.values());
-        kodeverk.getBegrunnelser().vesentligVirksomhet = tilKoder(VesentligVirksomhet.values());
         kodeverk.getBegrunnelser().ikkeSkip = tilKoder(IkkeSkip.values());
         kodeverk.getBegrunnelser().opphold = tilKoder(Opphold.values());
-        kodeverk.setBehandlingsstatus(tilKoder(BehandlingStatus.values()));
-        kodeverk.getBegrunnelser().artikkel12_1 = tilKoder(Artikkel12_1.values());
-        kodeverk.getLovvalgsbestemmelser().forordning_883_2004 = tilKoder(LovvalgBestemmelse_883_2004.values());
-        kodeverk.getLovvalgsbestemmelser().forordning_987_2009 = tilKoder(LovvalgBestemmelse_987_2009.values());
-        kodeverk.getLovvalgsbestemmelser().tillegg = tilKoder(TilleggBestemmelse.values());
-        kodeverk.setBehandlingsstatus(tilKoder(BehandlingStatus.values()));
+        kodeverk.getBegrunnelser().vesentligVirksomhet = tilKoder(VesentligVirksomhet.values());
+        kodeverk.setBehandlingsstatus(tilKoder(Behandlingsstatus.values()));
         kodeverk.setBehandlingstyper(tilKoder(Behandlingstype.values()));
         kodeverk.setDokumenttitler(tilKoder(DokumentTittel.values()));
         kodeverk.setFinansiering(tilKoder(Finansiering.values()));
         kodeverk.setLandkoder(tilKoder(Landkoder.values()));
+        kodeverk.getLovvalgsbestemmelser().forordning_883_2004 = tilKoder(LovvalgBestemmelse_883_2004.values());
+        kodeverk.getLovvalgsbestemmelser().forordning_987_2009 = tilKoder(LovvalgBestemmelse_987_2009.values());
+        kodeverk.getLovvalgsbestemmelser().tillegg = tilKoder(TilleggBestemmelse.values());
         kodeverk.setOppgavetyper(tilKoder(Oppgavetype.values()));
-        kodeverk.setSakstyper(tilKoder(FagsakType.values()));
+        kodeverk.setSakstyper(tilKoder(Fagsakstype.values()));
         kodeverk.setVedleggstitler(tilKoder(VedleggTittel.values()));
         return kodeverk;
     }
