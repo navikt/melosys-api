@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.gsak.sak;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -11,12 +12,11 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
+import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.gsak.felles.dto.FeilResponseDto;
 import no.nav.melosys.integrasjon.gsak.sak.dto.SakDto;
@@ -52,29 +52,40 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     }
 
     @Override
-    public SakDto hentSak(Long id) {
-        return target
-            .path(Long.toString(id))
-            .request()
-            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-            .header("X-Correlation-ID", getCallID())
-            .header(HttpHeaders.AUTHORIZATION, getAuth())
-            .get(SakDto.class);
+    public SakDto hentSak(Long id) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, TekniskException {
+        try {
+            return target
+                .path(Long.toString(id))
+                .request()
+                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+                .header("X-Correlation-ID", getCallID())
+                .header(HttpHeaders.AUTHORIZATION, getAuth())
+                .get(SakDto.class);
+        } catch (RuntimeException e) {
+            ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
+            return null; // Død kode
+        }
     }
 
     @Override
-    public List<SakDto> finnSaker(SakSearchRequest sakSearchRequest) {
-        return target
-            .queryParam("aktoerId", sakSearchRequest.getAktørId())
-            .queryParam("orgnr", sakSearchRequest.getOrgnr())
-            .queryParam("applikasjon", sakSearchRequest.getApplikasjon())
-            .queryParam("tema", sakSearchRequest.getTema())
-            .queryParam("fagsakNr", sakSearchRequest.getFagsakNr())
-            .request()
-            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-            .header("X-Correlation-ID", getCallID())
-            .header(HttpHeaders.AUTHORIZATION, getAuth())
-            .get(sakDtoListType);
+    public List<SakDto> finnSaker(SakSearchRequest sakSearchRequest) 
+        throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, TekniskException {
+        try {
+            return target
+                .queryParam("aktoerId", sakSearchRequest.getAktørId())
+                .queryParam("orgnr", sakSearchRequest.getOrgnr())
+                .queryParam("applikasjon", sakSearchRequest.getApplikasjon())
+                .queryParam("tema", sakSearchRequest.getTema())
+                .queryParam("fagsakNr", sakSearchRequest.getFagsakNr())
+                .request()
+                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+                .header("X-Correlation-ID", getCallID())
+                .header(HttpHeaders.AUTHORIZATION, getAuth())
+                .get(sakDtoListType);
+        } catch (RuntimeException e) {
+            ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
+            return null; // Død kode
+        }
     }
 
     @Override
@@ -86,17 +97,14 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
             .header("X-Correlation-ID", getCallID())
             .header(HttpHeaders.AUTHORIZATION, getAuth())
             .post(Entity.json(sakDto))) {
-            if (response.getStatus() == 201) {
-                return response.readEntity(SakDto.class);
-            } else {
-                håndterFeil(response);
-            }
+            håndterEvFeil(response);
+            return response.readEntity(SakDto.class);
         }
-        throw new TekniskException("Uventet feil har oppstått i opprettSak");
     }
 
     @Override
-    public void håndterFeil(Response response) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
+    public void håndterEvFeil(Response response) throws TekniskException, IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException {
+        if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) return;
         FeilResponseDto feilResponseDto = response.readEntity(FeilResponseDto.class);
         log.error("Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());
         statusTilException(response.getStatus(), feilResponseDto.getFeilmelding());

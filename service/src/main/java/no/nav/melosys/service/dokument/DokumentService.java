@@ -35,8 +35,9 @@ public class DokumentService {
 
     /**
      * Henter et dokument fra Joark
+     * @throws IkkeFunnetException 
      */
-    public byte[] hentDokument(String journalpostID, String dokumentID) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public byte[] hentDokument(String journalpostID, String dokumentID) throws SikkerhetsbegrensningException, IntegrasjonException, IkkeFunnetException {
         return joarkFasade.hentDokument(journalpostID, dokumentID);
     }
 

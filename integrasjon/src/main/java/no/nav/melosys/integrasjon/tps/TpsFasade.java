@@ -14,9 +14,9 @@ public interface TpsFasade {
 
     String hentIdentForAktørId(String aktørID) throws IkkeFunnetException;
 
-    Saksopplysning hentPerson(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException;
+    Saksopplysning hentPerson(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
 
-    Saksopplysning hentPersonMedAdresse(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException;
+    Saksopplysning hentPersonMedAdresse(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
 
     Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException;
 
@@ -24,5 +24,5 @@ public interface TpsFasade {
      * @param aktørId tilsvarende til FNR
      * @return Antall personer som bor på samme bostedsadresse inkludert ident det spørres på.
      */
-    int hentAntallPersonerSomBorPåBostedsadresse(String aktørId) throws IntegrasjonException;
+    int hentAntallPersonerSomBorPåBostedsadresse(String aktørId) throws IntegrasjonException, IkkeFunnetException, SikkerhetsbegrensningException;
 }

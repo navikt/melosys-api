@@ -87,7 +87,7 @@ public class SaksopplysningerService {
         this.behandlingRepository = behandlingRepository;
     }
 
-    public ArbeidsforholdDokument hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public ArbeidsforholdDokument hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws SikkerhetsbegrensningException, IntegrasjonException, IkkeFunnetException {
         Saksopplysning saksopplysning = aaregFasade.hentArbeidsforholdHistorikk(arbeidsforholdsID);
         return (ArbeidsforholdDokument) saksopplysning.getDokument();
     }
@@ -141,7 +141,7 @@ public class SaksopplysningerService {
         }
     }
 
-    private Saksopplysning hentMedlemskap(String fnr) throws SikkerhetsbegrensningException {
+    private Saksopplysning hentMedlemskap(String fnr) throws SikkerhetsbegrensningException, IkkeFunnetException {
         final LocalDate tom  = LocalDate.now();
         final LocalDate fom = tom.minusYears(medlemskaphistorikkAntallÅr);
         try {

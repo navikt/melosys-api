@@ -72,7 +72,7 @@ public class InntektService implements InntektFasade {
             uttrekksperiode.setMaanedFom(convertToXMLGregorianCalendar(fom));
             uttrekksperiode.setMaanedTom(convertToXMLGregorianCalendar(tom));
         } catch (DatatypeConfigurationException e) {
-            log.error("", e);
+            log.error("Fatal feil ved konvertering", e);
             throw new RuntimeException(e);
         }
         request.setUttrekksperiode(uttrekksperiode);
@@ -107,7 +107,7 @@ public class InntektService implements InntektFasade {
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);
-            throw new RuntimeException(e);
+            throw new IntegrasjonException(e);
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();

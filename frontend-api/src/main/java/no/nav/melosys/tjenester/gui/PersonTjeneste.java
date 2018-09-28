@@ -1,16 +1,17 @@
 package no.nav.melosys.tjenester.gui;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.RegisterOppslagService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,8 @@ import org.springframework.web.context.WebApplicationContext;
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class PersonTjeneste extends RestTjeneste {
+    
+    private static final Logger log = LoggerFactory.getLogger(PersonTjeneste.class);
 
     private RegisterOppslagService registerOppslag;
 
@@ -40,9 +43,12 @@ public class PersonTjeneste extends RestTjeneste {
         try {
             personDokument = registerOppslag.hentPerson(personnummer);
         } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
+            throw new ForbiddenException(e.getMessage());
         } catch (IkkeFunnetException e) {
-            return Response.ok(RestTjeneste.TOM_JSON).build();
+            throw new NotFoundException(e.getMessage());
+        } catch (IntegrasjonException e) {
+            log.error("Uventet IntegrasjonException", e);
+            throw new InternalServerErrorException(e.getMessage());
         }
 
         return Response.ok(personDokument).build();

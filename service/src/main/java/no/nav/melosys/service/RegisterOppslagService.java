@@ -35,7 +35,7 @@ public class RegisterOppslagService {
     /**
      * Henter personopplysninger.
      */
-    public PersonDokument hentPerson(String personnummer) throws IkkeFunnetException, SikkerhetsbegrensningException {
+    public PersonDokument hentPerson(String personnummer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         Saksopplysning saksopplysning = tpsFasade.hentPerson(personnummer);
         return (PersonDokument) saksopplysning.getDokument();
     }

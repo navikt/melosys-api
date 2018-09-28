@@ -88,7 +88,8 @@ public class GsakService implements GsakFasade {
 
     //FIXME: Mangler implementasjon for sakstyper
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<FagsakType> sakstyper, List<Behandlingstype> behandlingstyper) throws TekniskException {
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<FagsakType> sakstyper, List<Behandlingstype> behandlingstyper) 
+        throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(new String[]{oppgavetype.getKode()})
             .medBehandlingsTyper(behandlingstyper.stream().map(Behandlingstype::hentFellesKode).toArray(String[]::new))
@@ -105,7 +106,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public Oppgave hentOppgave(String oppgaveId) throws IkkeFunnetException, TekniskException {
+    public Oppgave hentOppgave(String oppgaveId) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, TekniskException  {
         OppgaveDto gsakOppgave = oppgaveConsumer.hentOppgave(oppgaveId);
 
         if (gsakOppgave == null) {
@@ -151,7 +152,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public List<Oppgave> finnOppgaveListeMedAnsvarlig(String tilordnetRessurs) throws TekniskException {
+    public List<Oppgave> finnOppgaveListeMedAnsvarlig(String tilordnetRessurs) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException{
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medTilordnetRessurs(tilordnetRessurs)
             .medOppgaveTyper(hentAlleKoder(Oppgavetype.class))
@@ -196,7 +197,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws TekniskException {
+    public List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medAktørId(aktørId)
             .medOppgaveTyper(hentAlleKoder(Oppgavetype.class))

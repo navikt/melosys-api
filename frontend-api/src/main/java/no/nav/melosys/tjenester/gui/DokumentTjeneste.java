@@ -41,10 +41,12 @@ public class DokumentTjeneste extends RestTjeneste {
         try {
             dokument = dokumentService.hentDokument(journalpostID, dokumentID);
         } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
+            throw new ForbiddenException(e.getMessage());
         } catch (IntegrasjonException e) {
             log.error("IntegrasjonException", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            throw new InternalServerErrorException(e.getMessage());
+        } catch (IkkeFunnetException e) {
+            throw new NotFoundException(e.getMessage());
         }
 
         Response.ResponseBuilder ok = Response.ok(dokument);

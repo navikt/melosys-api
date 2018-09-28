@@ -24,29 +24,30 @@ public interface GsakFasade {
                                                   Tema tema,
                                                   List<FagsakType> sakstyper,
                                                   List<Behandlingstype> behandlingstyper
-    ) throws TekniskException;
+    ) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
 
     /**
      * Finner Oppgaver basert på ansvarlig saksbehandler
      * GSAK sorterer oppgavene stigende etter frist.
      */
-    List<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws TekniskException;
+    List<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
 
     /**
      * Finner Oppgaver basert på bruker.
      * GSAK sorterer oppgavene stigende etter frist.
      */
-    List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws TekniskException;
+    List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
 
     /**
      * Hent oppgave fra GSAK på en gitt oppgaveId
      */
-    Oppgave hentOppgave(String oppgaveId) throws IkkeFunnetException, TekniskException;
+    Oppgave hentOppgave(String oppgaveId) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
 
     /**
      * Oppretter en oppgave i GSAK for å få en unik oppgaveId
      */
     String opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, FunksjonellException, TekniskException;
+
     /**
      * Legger tilbake en oppgave i GSAK
      */
