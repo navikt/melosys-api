@@ -126,17 +126,17 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
 
         // Sett sakstype...
         Fagsak fagsak = behandling.getFagsak();
-        FagsakType nyFagsakType = res.kvalifisererForEf883_2004 ? FagsakType.EU_EØS : FagsakType.FOLKETRYGD; // Fikses når inngangsvilkårsvurdering også kvalifiserer for avtaler.
-        if (fagsak.getType() != null && fagsak.getType() != nyFagsakType) {
-            log.error("Avbryter behandling av prosessinstans {}: Forsøk på å endre fagsakType fra {} til {}", prosessinstans.getId(), fagsak.getType(), nyFagsakType);
-            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Forsøk på å endre fagsakType fra " + fagsak.getType() + " til " + nyFagsakType, null);
+        Fagsakstype nyFagsakstype = res.kvalifisererForEf883_2004 ? Fagsakstype.EU_EØS : Fagsakstype.FOLKETRYGD; // Fikses når inngangsvilkårsvurdering også kvalifiserer for avtaler.
+        if (fagsak.getType() != null && fagsak.getType() != nyFagsakstype) {
+            log.error("Avbryter behandling av prosessinstans {}: Forsøk på å endre fagsakType fra {} til {}", prosessinstans.getId(), fagsak.getType(), nyFagsakstype);
+            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Forsøk på å endre fagsakType fra " + fagsak.getType() + " til " + nyFagsakstype, null);
             return;
         }
-        fagsak.setType(nyFagsakType);
+        fagsak.setType(nyFagsakstype);
         fagsakRepository.save(fagsak);
 
         prosessinstans.setSteg(ProsessSteg.HENT_ARBF_OPPL);
-        log.info("Satt type på fagsak {} til {} for prosessinstans {}", fagsak.getSaksnummer(), nyFagsakType, prosessinstans.getId()); 
+        log.info("Satt type på fagsak {} til {} for prosessinstans {}", fagsak.getSaksnummer(), nyFagsakstype, prosessinstans.getId());
     }
 
     // FIXME MELOSYS-1377 Regelmodulen jobber med ISO 3 landkoder.

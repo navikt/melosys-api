@@ -90,7 +90,7 @@ public class FagsakService {
         fagsak.setAktører(aktører);
         fagsak.setRegistrertDato(nå);
         fagsak.setEndretDato(nå);
-        fagsak.setStatus(FagsakStatus.OPPRETTET);
+        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
 
         lagre(fagsak);
 
@@ -100,7 +100,7 @@ public class FagsakService {
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);
 
-        behandling.setStatus(BehandlingStatus.OPPRETTET);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setType(behandlingstype);
         behandlingRepository.save(behandling);
         return fagsak;
@@ -113,7 +113,7 @@ public class FagsakService {
         String aktørID = tpsFasade.hentAktørIdForIdent(ident);
 
         Fagsak fagsak = nyFagsakOgBehandling(aktørID, null, null, behandlingstype);
-        fagsak.setType(FagsakType.EU_EØS);
+        fagsak.setType(Fagsakstype.EU_EØS);
         Set<Saksopplysning> saksopplysninger = saksopplysningerService.hentSaksopplysninger(aktørID);
         Behandling behandling = fagsak.getAktivBehandling();
         saksopplysninger.forEach(x -> x.setBehandling(behandling));

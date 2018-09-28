@@ -5,7 +5,7 @@
     <parent>
         <groupId>no.nav.melosys</groupId>
         <artifactId>melosys-pom</artifactId>
-        <version>0.57.0-SNAPSHOT</version>
+        <version>0.59.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>melosys-domain</artifactId>
@@ -44,6 +44,14 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

@@ -64,7 +64,7 @@ public class VurderInngangsvilkaarTest {
         verify(fagsakRepository, times(1)).save(any(Fagsak.class));
         
         assertNull(p.getHendelser());
-        assertEquals(FagsakType.EU_EØS, p.getBehandling().getFagsak().getType());
+        assertEquals(Fagsakstype.EU_EØS, p.getBehandling().getFagsak().getType());
         assertEquals(ProsessSteg.HENT_ARBF_OPPL, p.getSteg());
     }
 
@@ -131,7 +131,7 @@ public class VurderInngangsvilkaarTest {
         verify(fagsakRepository, times(1)).save(any(Fagsak.class));
 
         assertNull(p.getHendelser());
-        assertEquals(FagsakType.EU_EØS, p.getBehandling().getFagsak().getType());
+        assertEquals(Fagsakstype.EU_EØS, p.getBehandling().getFagsak().getType());
         assertEquals(ProsessSteg.HENT_ARBF_OPPL, p.getSteg());
     }
 

@@ -37,6 +37,7 @@ public class Land extends AbstraktKodeverkHjelper {
     public static final String SVEITS = "CHE";
     public static final String SVERIGE = "SWE";
     public static final String TYSKLAND = "DEU";
+    public static final String UKJENT = "???";
     public static final String UNGARN = "HUN";
     public static final String ØSTERRIKE = "AUT";
     public static final String ÅLAND = "ALA";
@@ -59,6 +60,10 @@ public class Land extends AbstraktKodeverkHjelper {
 
     public boolean erStatsløs() {
         return STATSLØS.equals(kode);
+    }
+
+    public boolean erUkjent() {
+        return UKJENT.equals(kode);
     }
 
 }
