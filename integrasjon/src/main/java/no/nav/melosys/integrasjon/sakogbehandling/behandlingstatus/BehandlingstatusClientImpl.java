@@ -72,7 +72,7 @@ public class BehandlingstatusClientImpl implements BehandlingstatusClient {
             } else if (behandlingStatus instanceof BehandlingAvsluttet) {
                 xmlElement = objectFactory.createBehandlingAvsluttet((BehandlingAvsluttet) behandlingStatus);
             } else {
-                throw new IntegrasjonException("Ukjent BehandlingStatus i kø til Sak og Behandling");
+                throw new IntegrasjonException("Ukjent Behandlingsstatus i kø til Sak og Behandling");
             }
             Marshaller marshaller = jaxbContext.createMarshaller();
             StringWriter writer = new StringWriter();

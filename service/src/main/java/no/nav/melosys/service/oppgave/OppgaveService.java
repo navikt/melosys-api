@@ -120,7 +120,7 @@ public class OppgaveService {
             throw new RuntimeException("Det finnes ingen aktive behandlinger");
         } else {
             behandlingDto.setBehandlingID(behandling.getId());
-            behandlingDto.setBehandlingStatus(behandling.getStatus());
+            behandlingDto.setBehandlingsstatus(behandling.getStatus());
             behandlingDto.setBehandlingType(behandling.getType());
             behandlingDto.setEndretDato(behandling.getEndretDato());
             Optional<Prosessinstans> prosessinstans = prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(ProsessType.OPPFRISKNING, behandling.getId());

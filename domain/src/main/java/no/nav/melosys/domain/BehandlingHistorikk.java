@@ -29,8 +29,8 @@ public class BehandlingHistorikk {
     private LocalDateTime dato;
 
     @Column(name = "status", nullable = false, updatable = false)
-    @Convert(converter = BehandlingStatus.DbKonverterer.class)
-    private BehandlingStatus status;
+    @Convert(converter = Behandlingsstatus.DbKonverterer.class)
+    private Behandlingsstatus status;
 
     @Column(name = "ident", nullable = false, updatable = false)
     private String ident;
@@ -58,11 +58,11 @@ public class BehandlingHistorikk {
         this.dato = dato;
     }
 
-    public BehandlingStatus getStatus() {
+    public Behandlingsstatus getStatus() {
         return status;
     }
 
-    public void setStatus(BehandlingStatus status) {
+    public void setStatus(Behandlingsstatus status) {
         this.status = status;
     }
 

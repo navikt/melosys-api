@@ -18,9 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class JournalfoeringService {
 
-    private Binge binge;
+    private final Binge binge;
 
-    private JoarkFasade joarkFasade;
+    private final JoarkFasade joarkFasade;
 
     private ProsessinstansRepository prosessinstansRepo;
 
@@ -38,21 +38,7 @@ public class JournalfoeringService {
     @Transactional
     public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException, TekniskException {
         valider(journalfoeringDto);
-        if (journalfoeringDto.getFagsak() == null) {
-            throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
-        }
-        if (journalfoeringDto.getFagsak().getSoknadsperiode() == null) {
-            throw new FunksjonellException("Søknadsperiode mangler");
-        }
-        if (journalfoeringDto.getFagsak().getSoknadsperiode().getFom() == null) {
-            throw new FunksjonellException("Søknadsperiodes fra og med dato mangler");
-        }
-        if (journalfoeringDto.getFagsak().getSoknadsperiode().getTom() == null) {
-            throw new FunksjonellException("Søknadsperiodes til og med dato mangler");
-        }
-        if (journalfoeringDto.getFagsak().getLand() == null || journalfoeringDto.getFagsak().getLand().isEmpty()) {
-            throw new FunksjonellException("Land mangler");
-        }
+        validerOpprettSakFelter(journalfoeringDto);
         
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
@@ -69,6 +55,12 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.LAND, journalfoeringDto.getFagsak().getLand());
         // Perioden trenges for å hente saksopplysninger
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
+        prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER, journalfoeringDto.getArbeidsgiverID());
+
+        if (!(journalfoeringDto.getRepresentantID() == null || journalfoeringDto.getRepresentantID().isEmpty())) {
+            prosessinstans.setData(ProsessDataKey.REPRESENTANT, journalfoeringDto.getRepresentantID());
+        }
+
 
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
@@ -128,4 +120,26 @@ public class JournalfoeringService {
             throw new FunksjonellException("Dokumenttittel mangler");
         }
     }
+
+    private void validerOpprettSakFelter(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
+        if (journalfoeringDto.getFagsak() == null) {
+            throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
+        }
+        if (journalfoeringDto.getFagsak().getSoknadsperiode() == null) {
+            throw new FunksjonellException("Søknadsperiode mangler");
+        }
+        if (journalfoeringDto.getFagsak().getSoknadsperiode().getFom() == null) {
+            throw new FunksjonellException("Søknadsperiodes fra og med dato mangler");
+        }
+        if (journalfoeringDto.getFagsak().getSoknadsperiode().getTom() == null) {
+            throw new FunksjonellException("Søknadsperiodes til og med dato mangler");
+        }
+        if (journalfoeringDto.getFagsak().getLand() == null || journalfoeringDto.getFagsak().getLand().isEmpty()) {
+            throw new FunksjonellException("Land mangler");
+        }
+        if (journalfoeringDto.getArbeidsgiverID() == null || journalfoeringDto.getArbeidsgiverID().isEmpty()) {
+            throw new FunksjonellException("Arbeidsgiver mangler");
+        }
+    }
+
 }

@@ -59,21 +59,38 @@ public class FagsakService {
      * Oppretter en fagsak og en behandling ut fra et fødselsnummer.
      */
     @Transactional
-    public Fagsak nyFagsakOgBehandling(String aktørID, Behandlingstype behandlingstype) {
+    public Fagsak nyFagsakOgBehandling(String aktørID, String arbeidsgiver, String representant, Behandlingstype behandlingstype) {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(hentNesteSaksnummer());
 
-        Aktoer aktoer = new Aktoer();
-        aktoer.setAktørId(aktørID);
-        aktoer.setFagsak(fagsak);
-        aktoer.setRolle(RolleType.BRUKER);
+        HashSet<Aktoer> aktører = new HashSet<>();
+
+        Aktoer aktør = new Aktoer();
+        aktør.setAktørId(aktørID);
+        aktør.setFagsak(fagsak);
+        aktør.setRolle(RolleType.BRUKER);
+        aktører.add(aktør);
+
+        Aktoer aktørArbeidsgiver = new Aktoer();
+        aktørArbeidsgiver.setOrgnr(arbeidsgiver);
+        aktørArbeidsgiver.setFagsak(fagsak);
+        aktørArbeidsgiver.setRolle(RolleType.ARBEIDSGIVER);
+        aktører.add(aktørArbeidsgiver);
+
+        if (representant != null) {
+            Aktoer aktørRepresentant = new Aktoer();
+            aktørRepresentant.setOrgnr(representant);
+            aktørRepresentant.setFagsak(fagsak);
+            aktørRepresentant.setRolle(RolleType.REPRESENTANT);
+            aktører.add(aktørRepresentant);
+        }
 
         Instant nå = Instant.now();
 
-        fagsak.setAktører(new HashSet<>(Collections.singletonList(aktoer)));
+        fagsak.setAktører(aktører);
         fagsak.setRegistrertDato(nå);
         fagsak.setEndretDato(nå);
-        fagsak.setStatus(FagsakStatus.OPPRETTET);
+        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
 
         lagre(fagsak);
 
@@ -83,7 +100,7 @@ public class FagsakService {
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);
 
-        behandling.setStatus(BehandlingStatus.OPPRETTET);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setType(behandlingstype);
         behandlingRepository.save(behandling);
         return fagsak;
@@ -95,8 +112,8 @@ public class FagsakService {
     public Fagsak testFagsakOgBehandling(String ident, Behandlingstype behandlingstype) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         String aktørID = tpsFasade.hentAktørIdForIdent(ident);
 
-        Fagsak fagsak = nyFagsakOgBehandling(aktørID, behandlingstype);
-        fagsak.setType(FagsakType.EU_EØS);
+        Fagsak fagsak = nyFagsakOgBehandling(aktørID, null, null, behandlingstype);
+        fagsak.setType(Fagsakstype.EU_EØS);
         Set<Saksopplysning> saksopplysninger = saksopplysningerService.hentSaksopplysninger(aktørID);
         Behandling behandling = fagsak.getAktivBehandling();
         saksopplysninger.forEach(x -> x.setBehandling(behandling));

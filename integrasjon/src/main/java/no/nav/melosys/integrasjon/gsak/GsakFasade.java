@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.gsak;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.Fagsakstype;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
@@ -22,7 +22,7 @@ public interface GsakFasade {
      */
     List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype,
                                                   Tema tema,
-                                                  List<FagsakType> sakstyper,
+                                                  List<Fagsakstype> sakstyper,
                                                   List<Behandlingstype> behandlingstyper
     ) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
 

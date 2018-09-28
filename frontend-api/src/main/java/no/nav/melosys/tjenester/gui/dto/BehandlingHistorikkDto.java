@@ -2,13 +2,13 @@ package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.LocalDateTime;
 
-import no.nav.melosys.domain.BehandlingStatus;
+import no.nav.melosys.domain.Behandlingsstatus;
 import no.nav.melosys.domain.ProsessSteg;
 
 public class BehandlingHistorikkDto {
 
     private LocalDateTime dato;
-    private BehandlingStatus status;
+    private Behandlingsstatus status;
     private ProsessSteg steg;
     private String ident;
     private String kommentar;
@@ -21,11 +21,11 @@ public class BehandlingHistorikkDto {
         this.dato = dato;
     }
 
-    public BehandlingStatus getStatus() {
+    public Behandlingsstatus getStatus() {
         return status;
     }
 
-    public void setStatus(BehandlingStatus status) {
+    public void setStatus(Behandlingsstatus status) {
         this.status = status;
     }
 

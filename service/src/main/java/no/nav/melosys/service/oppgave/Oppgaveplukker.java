@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.Fagsakstype;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
@@ -60,13 +60,13 @@ public class Oppgaveplukker {
             fagområde = KodeverkUtils.dekod(Tema.class, fagområdeKode);
         }
 
-        List<FagsakType> fagsakTypeListe = new ArrayList<>();
+        List<Fagsakstype> fagsakstypeListe = new ArrayList<>();
         List<Behandlingstype> behandlingstypeListe = new ArrayList<>();
         if (oppgavetype == Oppgavetype.BEH_SAK) {
 
             List<String> sakstyper = plukkDto.getSakstyper();
             for (String s : sakstyper) {
-                fagsakTypeListe.add(KodeverkUtils.dekod(FagsakType.class, s));
+                fagsakstypeListe.add(KodeverkUtils.dekod(Fagsakstype.class, s));
             }
 
             List<String> behandlingstyper = plukkDto.getBehandlingstyper();
@@ -80,7 +80,7 @@ public class Oppgaveplukker {
             }
         }
 
-        List<Oppgave> oppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakTypeListe, behandlingstypeListe);
+        List<Oppgave> oppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakstypeListe, behandlingstypeListe);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, oppgaver);
 

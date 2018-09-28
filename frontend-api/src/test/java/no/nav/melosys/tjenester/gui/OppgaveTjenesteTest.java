@@ -8,7 +8,7 @@ import java.util.Optional;
 import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.Fagsakstype;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.exception.*;
@@ -90,7 +90,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
         innData.setOppgavetype("BEH_SAK");
 
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(FagsakType.EU_EØS.getKode());
+        sakstyper.add(Fagsakstype.EU_EØS.getKode());
         innData.setSakstyper(sakstyper);
 
         List<String> behandlingstyper = new ArrayList<>();

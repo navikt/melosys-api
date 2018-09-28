@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.Fagsakstype;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
@@ -88,7 +88,7 @@ public class GsakService implements GsakFasade {
 
     //FIXME: Mangler implementasjon for sakstyper
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<FagsakType> sakstyper, List<Behandlingstype> behandlingstyper) 
+public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<Fagsakstype> sakstyper, List<Behandlingstype> behandlingstyper) throws TekniskException {
         throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(new String[]{oppgavetype.getKode()})

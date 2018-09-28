@@ -4,8 +4,8 @@ import java.time.Instant;
 
 import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakStatus;
-import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.Fagsaksstatus;
+import no.nav.melosys.domain.Fagsakstype;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
@@ -63,8 +63,8 @@ public class FagsakServiceTest {
     public void lagFagsak() throws Exception {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(123L);
-        fagsak.setStatus(FagsakStatus.OPPRETTET);
-        fagsak.setType(FagsakType.EU_EØS);
+        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
+        fagsak.setType(Fagsakstype.EU_EØS);
         fagsak.setRegistrertDato(Instant.now());
 
         fagsakService.lagre(fagsak);
@@ -77,7 +77,7 @@ public class FagsakServiceTest {
         final String[] identer = new String[]{"88888888884", "77777777779"};
 
         for (String fnr : identer) {
-            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(fnr, Behandlingstype.SØKNAD);
+            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(fnr, "123456789", null, Behandlingstype.SØKNAD);
 
             assertNotNull(fagsak);
             assertFalse(fagsak.getBehandlinger().isEmpty());

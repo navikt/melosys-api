@@ -3,15 +3,15 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.time.Instant;
 import java.util.List;
 
-import no.nav.melosys.domain.BehandlingStatus;
+import no.nav.melosys.domain.Behandlingsstatus;
 import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.FagsakType;
+import no.nav.melosys.domain.Fagsakstype;
 
 public class FagsakOppsummeringDto {
     private String saksnummer;
-    private FagsakType sakstype;
+    private Fagsakstype sakstype;
     private Behandlingstype behandlingstype;
-    private BehandlingStatus behandlingsstatus;
+    private Behandlingsstatus behandlingsstatus;
     private Instant opprettetDato;
     private PeriodeDto soknadsperiode;
     private List<String> land;
@@ -24,11 +24,11 @@ public class FagsakOppsummeringDto {
         this.saksnummer = saksnummer;
     }
 
-    public FagsakType getSakstype() {
+    public Fagsakstype getSakstype() {
         return sakstype;
     }
 
-    public void setSakstype(FagsakType sakstype) {
+    public void setSakstype(Fagsakstype sakstype) {
         this.sakstype = sakstype;
     }
 
@@ -40,11 +40,11 @@ public class FagsakOppsummeringDto {
         this.behandlingstype = behandlingstype;
     }
 
-    public BehandlingStatus getBehandlingsstatus() {
+    public Behandlingsstatus getBehandlingsstatus() {
         return behandlingsstatus;
     }
 
-    public void setBehandlingsstatus(BehandlingStatus behandlingsstatus) {
+    public void setBehandlingsstatus(Behandlingsstatus behandlingsstatus) {
         this.behandlingsstatus = behandlingsstatus;
     }
 

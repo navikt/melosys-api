@@ -7,16 +7,16 @@ import javax.persistence.Converter;
  * 
  * MERK: Dette kodeverket gjenspeiler IKKE "SakstypeMedOgLov" i den logisk modellen
  */
-public enum FagsakType implements InterntKodeverkTabell<FagsakType> {
+public enum Fagsakstype implements InterntKodeverkTabell<Fagsakstype> {
 
     EU_EØS("EU_EOS", "EU/EØS"),
-    TRYGDEAVTALE("TRG_AVT", "Trygdeavtale"),
-    FOLKETRYGD("FLK_TRG", "Folketrygd");
+    TRYGDEAVTALE("TRYGDEAVTALE", "Trygdeavtale"),
+    FOLKETRYGD("FTRL", "Folketrygdloven");
 
     private String kode;
     private String beskrivelse;
 
-    FagsakType(String kode, String beskrivelse) {
+    Fagsakstype(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
@@ -32,10 +32,10 @@ public enum FagsakType implements InterntKodeverkTabell<FagsakType> {
     }
 
     @Converter
-    public static class DbKonverterer extends InterntKodeverkTabell.DbKonverterer<FagsakType> {
+    public static class DbKonverterer extends InterntKodeverkTabell.DbKonverterer<Fagsakstype> {
         @Override
-        protected FagsakType[] getLovligeVerdier() {
-            return FagsakType.values();
+        protected Fagsakstype[] getLovligeVerdier() {
+            return Fagsakstype.values();
         }
     }
 
