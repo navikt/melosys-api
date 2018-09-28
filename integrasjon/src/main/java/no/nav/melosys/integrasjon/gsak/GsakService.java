@@ -88,7 +88,7 @@ public class GsakService implements GsakFasade {
 
     //FIXME: Mangler implementasjon for sakstyper
     @Override
-public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<Fagsakstype> sakstyper, List<Behandlingstype> behandlingstyper) throws TekniskException {
+public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<Fagsakstype> sakstyper, List<Behandlingstype> behandlingstyper)
         throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(new String[]{oppgavetype.getKode()})
