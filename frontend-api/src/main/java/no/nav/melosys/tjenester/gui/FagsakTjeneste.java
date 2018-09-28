@@ -123,7 +123,7 @@ public class FagsakTjeneste extends RestTjeneste {
             throw new BadRequestException();
         } else {
             try {
-                tilgang.sjekk(fnr);
+                tilgang.sjekkFnr(fnr);
                 saker = fagsakService.hentFagsakerMedAktør(RolleType.BRUKER, fnr);
             } catch (IkkeFunnetException e) {
                 throw new NotFoundException(e.getMessage());

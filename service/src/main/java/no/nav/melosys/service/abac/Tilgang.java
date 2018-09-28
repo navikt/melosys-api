@@ -1,9 +1,6 @@
 package no.nav.melosys.service.abac;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Journalpost;
-import no.nav.melosys.domain.RolleType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -36,30 +33,31 @@ public class Tilgang {
         }
 
         Fagsak fagsak  = behandling.getFagsak();
-        pep.sjekkTilgangTil(fagsak.hentAktørMedRolleType(RolleType.BRUKER));
+        Aktoer aktør = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
+        pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
     }
 
     // Fagsak
     public void sjekk(Fagsak fagsak) throws SikkerhetsbegrensningException, TekniskException {
-        pep.sjekkTilgangTil(fagsak.hentAktørMedRolleType(RolleType.BRUKER));
+        Aktoer aktør = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
+        pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
     }
 
-    public void sjekk(String fnr) throws SikkerhetsbegrensningException {
-        pep.sjekkTilgangTil(fnr);
+    public void sjekkFnr(String fnr) throws SikkerhetsbegrensningException {
+        pep.sjekkTilgangTilFnr(fnr);
     }
-
 
     // Journal
-    public void sjekk(Journalpost journalPost) throws SikkerhetsbegrensningException, IntegrasjonException {
-        sjekkJournalId(journalPost.getBrukerId());
+    public void sjekk(Journalpost journalpost) throws SikkerhetsbegrensningException, IntegrasjonException {
+        sjekkJournalId(journalpost.getBrukerId());
     }
 
-    public void sjekk(JournalfoeringDto journalDto) throws SikkerhetsbegrensningException, IntegrasjonException {
-        sjekkJournalId(journalDto.getBrukerID());
+    public void sjekk(JournalfoeringDto journalfoeringDto) throws SikkerhetsbegrensningException, IntegrasjonException {
+        sjekkJournalId(journalfoeringDto.getBrukerID());
     }
 
     public void sjekkJournalId(String journalId) throws SikkerhetsbegrensningException, IntegrasjonException {
         Journalpost journalpost = joarkFasade.hentJournalpost(journalId);
-        pep.sjekkTilgangTil(journalpost.getBrukerId());
+        pep.sjekkTilgangTilFnr(journalpost.getBrukerId());
     }
 }

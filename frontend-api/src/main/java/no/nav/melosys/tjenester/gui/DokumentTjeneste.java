@@ -43,7 +43,7 @@ public class DokumentTjeneste extends RestTjeneste {
         byte[] dokument;
 
         try {
-            tilgang.sjekk(journalpostID);
+            tilgang.sjekkJournalId(journalpostID);
             dokument = dokumentService.hentDokument(journalpostID, dokumentID);
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();

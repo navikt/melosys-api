@@ -21,10 +21,6 @@
             <artifactId>feil</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-domain</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
