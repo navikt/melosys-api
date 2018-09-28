@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.datavarehus.BehandlingOpprettetEvent;
-import no.nav.melosys.domain.datavarehus.FagsakOpprettetEvent;
+import no.nav.melosys.service.datavarehus.BehandlingOpprettetEvent;
+import no.nav.melosys.service.datavarehus.FagsakOpprettetEvent;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;

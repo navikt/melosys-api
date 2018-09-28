@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.datavarehus;
+package no.nav.melosys.service.datavarehus;
 
 import no.nav.melosys.domain.Fagsak;
 

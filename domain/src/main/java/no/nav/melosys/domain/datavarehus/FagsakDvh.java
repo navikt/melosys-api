@@ -1,13 +1,8 @@
 package no.nav.melosys.domain.datavarehus;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.*;
-
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Fagsaksstatus;
-import no.nav.melosys.domain.Fagsakstype;
 
 @Entity
 @Table(name = "fagsak_dvh")
@@ -153,105 +148,5 @@ public class FagsakDvh extends DvhBaseEntitet {
     public int hashCode() {
         return Objects.hash(super.hashCode(), saksnummer, gsakSaksnummer, fagsakType, fagsakStatus, brukerId,
             arbeidsgiverId, representantId, registrertDato, endretDato);
-    }
-
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder {
-        private String saksnummer;
-        private LocalDateTime funksjonellTid;
-        private String endretAv;
-        private Long gsakSaksnummer;
-        private String fagsakType;
-        private String fagsakStatus;
-        private String brukerId;
-        private String arbeidsgiverId;
-        private String representantId;
-        private Instant registrertDato;
-        private Instant endretDato;
-
-        public Builder saksnummer(String saksnummer) {
-            this.saksnummer = saksnummer;
-            return this;
-        }
-
-        public Builder funksjonellTid(LocalDateTime funksjonellTid) {
-            this.funksjonellTid = funksjonellTid;
-            return this;
-        }
-
-        public Builder endretAv(String endretAv) {
-            this.endretAv = endretAv;
-            return this;
-        }
-
-        public Builder gsakSaksnummer(Long gsakSaksnummer) {
-            this.gsakSaksnummer = gsakSaksnummer;
-            return this;
-        }
-
-        public Builder fagsakType(Fagsakstype fagsakType) {
-            if (fagsakType != null) {
-                this.fagsakType = fagsakType.getKode();
-            }
-            return this;
-        }
-
-        public Builder fagsakStatus(Fagsaksstatus fagsakStatus) {
-            if (fagsakStatus != null) {
-                this.fagsakStatus = fagsakStatus.getKode();
-            }
-            return this;
-        }
-
-        public Builder bruker(Aktoer aktør) {
-            if (aktør != null) {
-                this.brukerId = aktør.getAktørId();
-            }
-            return this;
-        }
-
-        public Builder arbeidsgiver(Aktoer aktør) {
-            if (aktør != null) {
-                this.arbeidsgiverId = aktør.getOrgnr();
-            }
-            return this;
-        }
-
-        public Builder representant(Aktoer aktør) {
-            if (aktør != null) {
-                this.representantId = aktør.getOrgnr();
-            }
-            return this;
-        }
-
-        public Builder registrertDato(Instant registrertDato) {
-            this.registrertDato = registrertDato;
-            return this;
-        }
-
-        public Builder endretDato(Instant endretDato) {
-            this.endretDato = endretDato;
-            return this;
-        }
-
-        public FagsakDvh build() {
-            FagsakDvh fagsakDvh = new FagsakDvh();
-            fagsakDvh.setSaksnummer(saksnummer);
-            fagsakDvh.setFunksjonellTid(funksjonellTid);
-            fagsakDvh.setEndretAv(endretAv);
-            fagsakDvh.setGsakSaksnummer(gsakSaksnummer);
-            fagsakDvh.setFagsakType(fagsakType);
-            fagsakDvh.setFagsakStatus(fagsakStatus);
-            fagsakDvh.setBrukerId(brukerId);
-            fagsakDvh.setArbeidsgiverId(arbeidsgiverId);
-            fagsakDvh.setRepresentantId(representantId);
-            fagsakDvh.setRegistrertDato(registrertDato);
-            fagsakDvh.setEndretDato(endretDato);
-            return fagsakDvh;
-        }
     }
 }

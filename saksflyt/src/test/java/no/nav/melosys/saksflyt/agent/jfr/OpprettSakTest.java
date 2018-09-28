@@ -6,6 +6,8 @@ import java.util.Properties;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.service.datavarehus.BehandlingOpprettetEvent;
+import no.nav.melosys.service.datavarehus.FagsakOpprettetEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,9 +28,12 @@ public class OpprettSakTest {
 
     private OpprettSak agent;
 
+    private ApplicationEventPublisher applicationEventPublisher;
+
     @Before
     public void setUp() {
-        agent = new OpprettSak(fagsakService, mock(ApplicationEventPublisher.class));
+        applicationEventPublisher = mock(ApplicationEventPublisher.class);
+        agent = new OpprettSak(fagsakService, applicationEventPublisher);
     }
 
     @Test
@@ -49,6 +54,9 @@ public class OpprettSakTest {
         agent.utførSteg(p);
 
         verify(fagsakService, times(1)).nyFagsakOgBehandling(aktørId, "104568393", null, Behandlingstype.SØKNAD);
+        verify(applicationEventPublisher, times(1)).publishEvent(any(FagsakOpprettetEvent.class));
+        verify(applicationEventPublisher, times(1)).publishEvent(any(BehandlingOpprettetEvent.class));
+
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_GSAK_SAK);
     }
 }

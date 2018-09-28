@@ -1,7 +1,6 @@
 package no.nav.melosys.repository;
 
 import no.nav.melosys.domain.datavarehus.BehandlingDvh;
-import no.nav.melosys.domain.datavarehus.DatavarehusRepository;
 import no.nav.melosys.domain.datavarehus.FagsakDvh;
 import org.springframework.stereotype.Component;
 
