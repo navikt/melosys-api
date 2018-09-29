@@ -45,6 +45,7 @@ public class DokumentmottakConsumerImpl {
 
     @JmsListener(destination = DOKUMENTKØ)
     public void mottaDokument(Message message) {
+        // FIXME: Denne metoden har ikke skikkelig untakshåndtering. Ved ev. Exception må message legges på en dead letter queue, slik at problematiske meldinger kan feilsøkes.
         if (message instanceof TextMessage) {
             try {
                 String xml = ((TextMessage) message).getText();

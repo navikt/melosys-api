@@ -8,8 +8,9 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.joark.JournalfoeringMangel;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.FagsakRepository;
@@ -59,7 +60,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
     
     @Transactional
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, IkkeFunnetException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         boolean medDokumentkategori = false;

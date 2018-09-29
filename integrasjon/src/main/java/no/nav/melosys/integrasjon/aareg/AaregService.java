@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -77,8 +78,8 @@ public class AaregService implements AaregFasade {
             if (tom != null) {
                 periode.setTom(KonverteringsUtils.localDateTimeToXMLGregorianCalendar(tom.atTime(LocalTime.MAX)));
             }
-        } catch (DatatypeConfigurationException DatatypeConfigurationException) {
-            throw new TekniskException(DatatypeConfigurationException);
+        } catch (DatatypeConfigurationException e) {
+            throw new IntegrasjonException(e);
         }
 
         regelverker.setValue(regelverk);
@@ -93,10 +94,10 @@ public class AaregService implements AaregFasade {
         FinnArbeidsforholdPrArbeidstakerResponse response = null;
         try {
             response = arbeidsforholdConsumer.finnArbeidsforholdPrArbeidstaker(request);
-        } catch (FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning finnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning) {
-            throw new SikkerhetsbegrensningException(finnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning);
-        } catch (FinnArbeidsforholdPrArbeidstakerUgyldigInput finnArbeidsforholdPrArbeidstakerUgyldigInput) {
-            throw new IntegrasjonException(finnArbeidsforholdPrArbeidstakerUgyldigInput);
+        } catch (FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (FinnArbeidsforholdPrArbeidstakerUgyldigInput e) {
+            throw new IntegrasjonException(e);
         }
 
         // Response -> xml
@@ -123,7 +124,7 @@ public class AaregService implements AaregFasade {
     }
 
     @Override
-    public Saksopplysning hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws IntegrasjonException, SikkerhetsbegrensningException {
+    public Saksopplysning hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException {
         HentArbeidsforholdHistorikkRequest request = new HentArbeidsforholdHistorikkRequest();
         request.setArbeidsforholdId(arbeidsforholdsID);
 
@@ -131,10 +132,10 @@ public class AaregService implements AaregFasade {
         HentArbeidsforholdHistorikkResponse response = null;
         try {
             response = arbeidsforholdConsumer.hentArbeidsforholdHistorikk(request);
-        } catch (HentArbeidsforholdHistorikkSikkerhetsbegrensning hentArbeidsforholdHistorikkSikkerhetsbegrensning) {
-            throw new SikkerhetsbegrensningException(hentArbeidsforholdHistorikkSikkerhetsbegrensning);
-        } catch (HentArbeidsforholdHistorikkArbeidsforholdIkkeFunnet hentArbeidsforholdHistorikkArbeidsforholdIkkeFunnet) {
-            throw new IntegrasjonException(hentArbeidsforholdHistorikkArbeidsforholdIkkeFunnet);
+        } catch (HentArbeidsforholdHistorikkSikkerhetsbegrensning e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (HentArbeidsforholdHistorikkArbeidsforholdIkkeFunnet e) {
+            throw new IkkeFunnetException(e);
         }
 
         // Response -> xml
@@ -145,7 +146,7 @@ public class AaregService implements AaregFasade {
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);
-            throw new RuntimeException(e);
+            throw new IntegrasjonException(e);
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();

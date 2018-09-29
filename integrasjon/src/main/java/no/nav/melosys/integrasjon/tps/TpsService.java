@@ -2,7 +2,10 @@ package no.nav.melosys.integrasjon.tps;
 
 import java.io.StringWriter;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -15,7 +18,6 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
@@ -116,7 +118,7 @@ public class TpsService implements TpsFasade {
         }
     }
 
-    private Saksopplysning hentPerson(String ident, Collection<Informasjonsbehov> behov) throws IkkeFunnetException, SikkerhetsbegrensningException {
+    private Saksopplysning hentPerson(String ident, Collection<Informasjonsbehov> behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         HentPersonRequest request = new HentPersonRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -147,7 +149,7 @@ public class TpsService implements TpsFasade {
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);
-            throw new RuntimeException(e);
+            throw new IntegrasjonException(e);
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -163,12 +165,12 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Saksopplysning hentPerson(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException {
+    public Saksopplysning hentPerson(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         return hentPerson(ident, null);
     }
 
     @Override
-    public Saksopplysning hentPersonMedAdresse(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException {
+    public Saksopplysning hentPersonMedAdresse(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         Collection<Informasjonsbehov> behov = new ArrayList<>();
         behov.add(Informasjonsbehov.ADRESSE);
 
@@ -176,7 +178,7 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         HentPersonhistorikkRequest request = new HentPersonhistorikkRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -196,7 +198,7 @@ public class TpsService implements TpsFasade {
             periode.setFom(xmlDato);
             periode.setTom(xmlDato);
         } catch (DatatypeConfigurationException e) {
-            throw new TekniskException(e);
+            throw new IntegrasjonException(e);
         }
         request.setPeriode(periode);
 
@@ -233,7 +235,7 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public int hentAntallPersonerSomBorPåBostedsadresse(String argAktørId) throws IntegrasjonException {
+    public int hentAntallPersonerSomBorPåBostedsadresse(String argAktørId) throws IntegrasjonException, IkkeFunnetException, SikkerhetsbegrensningException {
         //Hvis adressedato ikke gitt som request paramerter da tjensten antar at adresseDato er dagensdato.
         HentPersonerMedSammeAdresseRequest request = new HentPersonerMedSammeAdresseRequest();
         AktoerId aktørId = new AktoerId();
@@ -245,10 +247,10 @@ public class TpsService implements TpsFasade {
             } else {
                 throw new IntegrasjonException("Feil ved henting av antall personer bor på bostedsadresse");
             }
-        } catch (HentPersonerMedSammeAdresseSikkerhetsbegrensning hentPersonerMedSammeAdresseSikkerhetsbegrensning) {
-            throw new IntegrasjonException(hentPersonerMedSammeAdresseSikkerhetsbegrensning.getMessage());
-        } catch (HentPersonerMedSammeAdresseIkkeFunnet hentPersonerMedSammeAdresseIkkeFunnet) {
-            throw new IntegrasjonException(hentPersonerMedSammeAdresseIkkeFunnet.getMessage());
+        } catch (HentPersonerMedSammeAdresseSikkerhetsbegrensning e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (HentPersonerMedSammeAdresseIkkeFunnet e) {
+            throw new IkkeFunnetException(e);
         }
     }
 }

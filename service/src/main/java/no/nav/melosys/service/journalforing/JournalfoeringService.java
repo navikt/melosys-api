@@ -3,10 +3,7 @@ package no.nav.melosys.service.journalforing;
 import java.time.LocalDateTime;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
@@ -34,7 +31,7 @@ public class JournalfoeringService {
         this.prosessinstansRepo = prosessinstansRepo;
     }
 
-    public Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, IntegrasjonException {
         return joarkFasade.hentJournalpost(journalpostID);
     }
 

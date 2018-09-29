@@ -6,6 +6,7 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
@@ -42,12 +43,17 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         try {
             journalpost = journalføringService.hentJournalpost(journalpostID);
         } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
+            throw new ForbiddenException(e.getMessage());
+        } catch (IkkeFunnetException e) {
+            log.info("IkkeFunnetException: {}", e.getMessage());
+            throw new NotFoundException(e.getMessage());
         } catch (TekniskException e) {
             log.error("TekniskException", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            throw new InternalServerErrorException("Teknisk feil: " + e.getMessage());
+        } catch (FunksjonellException e) {
+            log.error("FunksjonellException", e);
+            throw new BadRequestException("Funksjonell feil: " + e.getMessage());
         }
-
         JournalpostDto dto = new JournalpostDto();
         String brukerID = journalpost.getBrukerId();
         dto.setBrukerID(brukerID);
@@ -68,6 +74,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         try {
             journalføringService.opprettSakOgJournalfør(journalfoeringDto);
         } catch (FunksjonellException e) {
+            log.info("Funksjonell feil: {}", e.getMessage());
             throw new BadRequestException(e);
         } catch (TekniskException e) {
             log.error("TekniskException", e);
@@ -81,6 +88,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         try {
             journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
         } catch (FunksjonellException e) {
+            log.info("Funksjonell feil: {}", e.getMessage());
             throw new BadRequestException(e.getMessage());
         }
     }

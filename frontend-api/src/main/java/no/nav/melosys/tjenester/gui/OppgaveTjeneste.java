@@ -80,9 +80,10 @@ public class OppgaveTjeneste extends RestTjeneste {
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (IkkeFunnetException e) {
-            log.error("Ingen oppgaver funnet for ident {}. Feilmelding: ", ident, e);
+            log.info("Ingen oppgaver funnet for ident {}. Feilmelding: ", ident, e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         } catch (FunksjonellException e) {
+            log.info("Funksjonell feil: {}", e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (TekniskException e) {
             log.error("Uventet teknisk Feil", e);
@@ -105,6 +106,7 @@ public class OppgaveTjeneste extends RestTjeneste {
             log.error("Ingen oppgaver funnet for ident {}. Feilmelding: ", ident, e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         } catch (FunksjonellException e) {
+            log.info("Funksjonell feil: {}", e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (TekniskException e) {
             log.error("Uventet teknisk Feil", e);
@@ -120,9 +122,17 @@ public class OppgaveTjeneste extends RestTjeneste {
         List<OppgaveDto> oppgaveDtoListe;
         try {
             oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
+        } catch (SikkerhetsbegrensningException e) {
+            throw new ForbiddenException(e.getMessage());
+        } catch (IkkeFunnetException e) {
+            log.info("IkkeFunnetException: {}", e.getMessage());
+            throw new NotFoundException(e.getMessage());
         } catch (TekniskException e) {
             log.error("TekniskException", e);
-            throw new InternalServerErrorException("Intern feil");
+            throw new InternalServerErrorException("Teknisk feil: " + e.getMessage());
+        } catch (FunksjonellException e) {
+            log.error("FunksjonellException", e);
+            throw new BadRequestException("Funksjonell feil: " + e.getMessage());
         }
 
         OppgaveOversiktDto oversiktDto = new OppgaveOversiktDto();
@@ -147,16 +157,20 @@ public class OppgaveTjeneste extends RestTjeneste {
     @Path("/sok")
     @ApiOperation(value = "Henter alle oppgaver knyttet til en gitt bruker.")
     public Response hentOppgaver(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
-        List<OppgaveDto> oppgaver;
         try {
-            oppgaver = oppgaveService.hentOppgaverMedBruker(fnr);
+            List<OppgaveDto> oppgaver = oppgaveService.hentOppgaverMedBruker(fnr);
+            return Response.ok(oppgaver).build();
+        } catch (SikkerhetsbegrensningException e) {
+            throw new ForbiddenException(e.getMessage());
         } catch (IkkeFunnetException e) {
-            log.error("Finner ingen aktørId for ident {}: ", fnr, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+            log.info("IkkeFunnetException: {}", e.getMessage());
+            throw new NotFoundException(e.getMessage());
         } catch (TekniskException e) {
             log.error("TekniskException", e);
-            throw new InternalServerErrorException("Intern feil");
+            throw new InternalServerErrorException("Teknisk feil: " + e.getMessage());
+        } catch (FunksjonellException e) {
+            log.error("FunksjonellException", e);
+            throw new BadRequestException("Funksjonell feil: " + e.getMessage());
         }
-        return Response.ok(oppgaver).build();
     }
 }

@@ -4,34 +4,37 @@ import java.util.List;
 
 import no.nav.melosys.domain.Journalpost;
 import no.nav.melosys.domain.joark.JournalfoeringMangel;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 
 public interface JoarkFasade {
+
     /**
      * Ferdigstiller journalføring
      */
-    void ferdigstillJournalføring(String journalpostId) throws SikkerhetsbegrensningException, IntegrasjonException;
+    void ferdigstillJournalføring(String journalpostId) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
 
     /**
      * Henter et dokument fra Joark
      */
-    byte[] hentDokument(String journalPostID, String dokumentID) throws IntegrasjonException, SikkerhetsbegrensningException;
+    byte[] hentDokument(String journalPostID, String dokumentID) throws SikkerhetsbegrensningException, IkkeFunnetException;
 
     /**
      * Henter en journalpost fra Joark
      */
-    Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException;
+    Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, IntegrasjonException;
 
     /**
      * Oppdaterer en journalpost i Joark
      * @param medDokumentkategori Om dokumentkategori skal oppdatteres med standardverdi "IS", Ikke tolkbart skjema
      */
     void oppdaterJounalpost(String journalpostId, String dokumentID, Long gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, boolean medDokumentkategori)
-        throws SikkerhetsbegrensningException, IntegrasjonException;
+        throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
 
     /**
      * Returnerer en liste av mangler i journalposten med den oppgitte IDen
      */
-    List<JournalfoeringMangel> utledJournalfoeringsbehov(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException;
+    List<JournalfoeringMangel> utledJournalfoeringsbehov(String journalpostID) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
 }
