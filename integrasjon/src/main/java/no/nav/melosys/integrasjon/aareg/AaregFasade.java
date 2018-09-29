@@ -30,7 +30,6 @@ public interface AaregFasade {
      * Etterspør et arbeidsforhold fra AA-registeret med gjeldende og historiske arbeidsavtaler.
      *
      * @param arbeidsforholdsID Unik ID til et arbeidsforhold i NAV
-     * @throws IkkeFunnetException 
      */
     Saksopplysning hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException;
 }
