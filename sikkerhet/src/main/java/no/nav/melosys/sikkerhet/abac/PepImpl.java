@@ -27,7 +27,7 @@ public class PepImpl implements Pep {
 
     public final static String READ = "read";
     public final static String WRITE = "write";
-    public final static String IkkeTilgang = "Brukeren har ikke tilgang";
+    public final static String IKKE_TILGANG = "Brukeren har ikke tilgang";
 
     private AbacService abacService;
     private AbacContext abacContext;
@@ -57,7 +57,7 @@ public class PepImpl implements Pep {
 
         if (accessResponse.getDecision() != Decision.PERMIT) {
             abacLog.warn(createLogString(id, accessResponse));
-            throw new SikkerhetsbegrensningException(IkkeTilgang);
+            throw new SikkerhetsbegrensningException(IKKE_TILGANG);
         }
         abacLog.info(createLogString(id, accessResponse));
     }

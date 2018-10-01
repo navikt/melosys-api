@@ -1,7 +1,6 @@
 package no.nav.melosys.sikkerhet.abac;
 
 import no.nav.abac.xacml.NavAttributter;
-import no.nav.freg.abac.core.annotation.attribute.AttributeSupplier;
 import no.nav.freg.abac.spring.config.AbacConfig;
 import no.nav.freg.abac.spring.config.AbacRestTemplateConfig;
 import no.nav.freg.abac.core.annotation.attribute.AbacAttributeLocator;
@@ -51,13 +50,8 @@ public class AbacDefaultConfig {
 
     @Bean
     AbacAttributeLocator samlTokenLocator() {
-        return new ResolvingAbacAttributeLocator(NavAttributter.ENVIRONMENT_FELLES_OIDC_TOKEN_BODY, new AttributeSupplier() {
-            @Override
-            public Object get() {
-                String tokenBody = getOidcTokenBody();
-                return tokenBody;
-            }
-        });
+        return new ResolvingAbacAttributeLocator(NavAttributter.ENVIRONMENT_FELLES_OIDC_TOKEN_BODY,
+                () -> getOidcTokenBody() );
     }
 
     public String getOidcTokenBody() {
