@@ -1,16 +1,17 @@
 package no.nav.melosys.tjenester.gui;
 
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.Path;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.freg.abac.core.annotation.Abac;
+import no.nav.freg.abac.core.dto.response.Decision;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ldap.LdapBruker;
 import no.nav.melosys.integrasjon.ldap.LdapBrukeroppslag;
+import no.nav.melosys.sikkerhet.abac.PepImpl;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.InnloggetBrukerDto;
 import org.slf4j.Logger;
@@ -18,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
+
+import static no.nav.abac.xacml.StandardAttributter.ACTION_ID;
 
 @Api(tags = {"saksbehandler"})
 @Path("/saksbehandler")
@@ -28,21 +31,15 @@ public class SaksbehandlerTjeneste extends RestTjeneste {
     private static final Logger log = LoggerFactory.getLogger(SaksbehandlerTjeneste.class);
 
     @GET
+    @Abac(bias = Decision.DENY, actions = @Abac.Attr(key = ACTION_ID, value = PepImpl.READ))
     @ApiOperation(value = "Returnerer fullt navn for ident",
-            notes = ("Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging."))
+                  notes = ("Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging."))
     public InnloggetBrukerDto innloggetBruker() {
         String ident = SubjectHandler.getInstance().getUserID();
 
-        LdapBruker ldapBruker = null;
+        LdapBruker ldapBruker;
         try {
             ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
-
-            // FIXME Midlertidig tilgangskontroll
-            Tilgangskontroll.sjekk(ldapBruker);
-
-        } catch (SikkerhetsbegrensningException e) {
-            log.error("Det oppstod en feil under henting av LDAP-profil for bruker {}", ident, e);
-            throw new ForbiddenException();
         } catch (TekniskException e) {
             log.error("TekniskException", e);
             throw new InternalServerErrorException("Intern feil");
@@ -50,7 +47,7 @@ public class SaksbehandlerTjeneste extends RestTjeneste {
 
         String navn = ldapBruker != null ? ldapBruker.getDisplayName() : "FEIL";
 
-       return new InnloggetBrukerDto(ident, navn);
+        return new InnloggetBrukerDto(ident, navn);
     }
 
 }

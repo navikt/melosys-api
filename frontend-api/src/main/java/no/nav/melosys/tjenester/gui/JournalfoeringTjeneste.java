@@ -6,9 +6,10 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
@@ -31,9 +32,12 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     
     private JournalfoeringService journalføringService;
 
+    private final Tilgang tilgang;
+
     @Autowired
-    public JournalfoeringTjeneste(JournalfoeringService journalføringService) {
+    public JournalfoeringTjeneste(JournalfoeringService journalføringService, Tilgang tilgang) {
         this.journalføringService = journalføringService;
+        this.tilgang = tilgang;
     }
 
     @GET
@@ -42,11 +46,9 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         Journalpost journalpost;
         try {
             journalpost = journalføringService.hentJournalpost(journalpostID);
+            tilgang.sjekk(journalpost);
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException(e.getMessage());
-        } catch (IkkeFunnetException e) {
-            log.info("IkkeFunnetException: {}", e.getMessage());
-            throw new NotFoundException(e.getMessage());
         } catch (TekniskException e) {
             log.error("TekniskException", e);
             throw new InternalServerErrorException("Teknisk feil: " + e.getMessage());
@@ -72,7 +74,10 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @Path("opprett")
     public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) {
         try {
+            tilgang.sjekk(journalfoeringDto);
             journalføringService.opprettSakOgJournalfør(journalfoeringDto);
+        } catch (SikkerhetsbegrensningException e) {
+            throw new ForbiddenException("Ikke tilgang");
         } catch (FunksjonellException e) {
             log.info("Funksjonell feil: {}", e.getMessage());
             throw new BadRequestException(e);
@@ -86,9 +91,11 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @Path("tilordne")
     public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) {
         try {
+            tilgang.sjekk(journalfoeringDto);
             journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
-        } catch (FunksjonellException e) {
-            log.info("Funksjonell feil: {}", e.getMessage());
+        } catch (SikkerhetsbegrensningException e) {
+            throw new ForbiddenException("Ikke tilgang");
+        } catch (FunksjonellException | IntegrasjonException e) {
             throw new BadRequestException(e.getMessage());
         }
     }

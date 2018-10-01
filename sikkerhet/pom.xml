@@ -13,6 +13,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>no.nav.freg</groupId>
+            <artifactId>abac-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>feil</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>

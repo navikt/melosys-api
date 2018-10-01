@@ -5,10 +5,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
+import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +25,12 @@ public class DokumentTjeneste extends RestTjeneste {
     
     private DokumentService dokumentService;
 
+    private final Tilgang tilgang;
+
     @Autowired
-    public DokumentTjeneste(DokumentService dokumentService) {
+    public DokumentTjeneste(DokumentService dokumentService, Tilgang tilgang) {
         this.dokumentService = dokumentService;
+        this.tilgang = tilgang;
     }
 
     @GET
@@ -39,6 +40,7 @@ public class DokumentTjeneste extends RestTjeneste {
         byte[] dokument;
 
         try {
+            tilgang.sjekkJournalId(journalpostID);
             dokument = dokumentService.hentDokument(journalpostID, dokumentID);
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException(e.getMessage());
@@ -47,6 +49,9 @@ public class DokumentTjeneste extends RestTjeneste {
             throw new InternalServerErrorException(e.getMessage());
         } catch (IkkeFunnetException e) {
             throw new NotFoundException(e.getMessage());
+        } catch (FunksjonellException e) {
+            log.error("FunksjonellException", e);
+            throw new BadRequestException("Funksjonell feil: " + e.getMessage());
         }
 
         Response.ResponseBuilder ok = Response.ok(dokument);
@@ -62,6 +67,7 @@ public class DokumentTjeneste extends RestTjeneste {
         byte[] dokument;
 
         try {
+            tilgang.sjekk(behandlingID);
             dokument = dokumentService.produserUtkast(behandlingID, typeID);
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -82,6 +88,7 @@ public class DokumentTjeneste extends RestTjeneste {
     @Path("opprett/{behandlingID}/{typeID}")
     public Response produserDokument(@PathParam("behandlingID") long behandlingID, @PathParam("typeID") String typeID) {
         try {
+            tilgang.sjekk(behandlingID);
             dokumentService.produserDokument(behandlingID, typeID);
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();

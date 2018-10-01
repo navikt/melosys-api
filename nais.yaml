@@ -73,3 +73,5 @@ fasitResources:
     resourceType: credential
   - alias: OpenIdConnect
     resourceType: baseurl
+  - alias: abac.pdp.endpoint
+    resourceType: restservice

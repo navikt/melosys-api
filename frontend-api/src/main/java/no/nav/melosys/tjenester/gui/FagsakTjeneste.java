@@ -19,6 +19,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
@@ -51,9 +52,12 @@ public class FagsakTjeneste extends RestTjeneste {
 
     private ModelMapper modelMapper;
 
+    private final Tilgang tilgang;
+
     @Autowired
-    public FagsakTjeneste(FagsakService fagsakService) {
+    public FagsakTjeneste(FagsakService fagsakService, Tilgang tilgang) {
         this.fagsakService = fagsakService;
+        this.tilgang = tilgang;
 
         this.modelMapper = new ModelMapper();
 
@@ -71,39 +75,30 @@ public class FagsakTjeneste extends RestTjeneste {
     @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."))
     public Response hentFagsak(@PathParam("saksnr") @ApiParam("Saksnummer.") String saksnummer) {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
-
         if (sak == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
-        } else {
-            FagsakDto fagsakDto = tilDto(sak);
-            return Response.ok(fagsakDto).build();
         }
 
+        try {
+            tilgang.sjekk(sak);
+        } catch (SikkerhetsbegrensningException e) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (TekniskException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+
+        FagsakDto fagsakDto = tilDto(sak);
+        return Response.ok(fagsakDto).build();
     }
 
+    @Deprecated // FIXME Trengs av test så langt
     @GET
     @Path("ny/{fnr}")
     @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.")
     public Response nyFagsakSikret(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
-
-        // FIXME Midlertidig tilgangskontroll
-        try {
-            Tilgangskontroll.sjekk();
-        } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (TekniskException e) {
-            log.error("TekniskException", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-
-        return nyFagsak(fnr);
-    }
-
-    @Deprecated // FIXME Trenger test en metode for å opprette fagsaker utenom saksflyt?
-    public Response nyFagsak(String fnr) {
         try {
             Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, Behandlingstype.SØKNAD);
-
+            tilgang.sjekk(fagsak);
             if (fagsak == null) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             } else {
@@ -129,9 +124,12 @@ public class FagsakTjeneste extends RestTjeneste {
             throw new BadRequestException();
         } else {
             try {
+                tilgang.sjekkFnr(fnr);
                 saker = fagsakService.hentFagsakerMedAktør(RolleType.BRUKER, fnr);
             } catch (IkkeFunnetException e) {
                 throw new NotFoundException(e.getMessage());
+            } catch (SikkerhetsbegrensningException e) {
+                throw new ForbiddenException("Ikke tilgang");
             }
         }
         try {

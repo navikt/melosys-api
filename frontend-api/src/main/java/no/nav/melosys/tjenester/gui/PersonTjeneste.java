@@ -10,6 +10,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.RegisterOppslagService;
+import no.nav.melosys.service.abac.Tilgang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +28,12 @@ public class PersonTjeneste extends RestTjeneste {
 
     private RegisterOppslagService registerOppslag;
 
+    private final Tilgang tilgang;
+
     @Autowired
-    public PersonTjeneste(RegisterOppslagService registerOppslag) {
+    public PersonTjeneste(RegisterOppslagService registerOppslag, Tilgang tilgang) {
         this.registerOppslag = registerOppslag;
+        this.tilgang = tilgang;
     }
 
     @GET
@@ -42,6 +46,7 @@ public class PersonTjeneste extends RestTjeneste {
         PersonDokument personDokument;
         try {
             personDokument = registerOppslag.hentPerson(personnummer);
+            tilgang.sjekkFnr(personnummer);
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException(e.getMessage());
         } catch (IkkeFunnetException e) {

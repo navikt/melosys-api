@@ -11,7 +11,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.SoeknadService;
+import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.validering.ValideringService;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import no.nav.melosys.tjenester.gui.dto.SoeknadInnDto;
@@ -32,10 +35,13 @@ public class SoeknadTjeneste extends RestTjeneste  {
 
     private ValideringService valideringService;
 
+    private final Tilgang tilgang;
+
     @Autowired
-    public SoeknadTjeneste(SoeknadService soeknadService, ValideringService valideringService) {
+    public SoeknadTjeneste(SoeknadService soeknadService, ValideringService valideringService, Tilgang tilgang) {
         this.soeknadService = soeknadService;
         this.valideringService = valideringService;
+        this.tilgang = tilgang;
     }
 
     @GET
@@ -45,9 +51,14 @@ public class SoeknadTjeneste extends RestTjeneste  {
         SoeknadDokument soeknadDokument;
 
         try {
+            tilgang.sjekk(behandlingID);
             soeknadDokument = soeknadService.hentSoeknad(behandlingID);
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.NOT_FOUND).build();
+        } catch (SikkerhetsbegrensningException e) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (TekniskException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
         SoeknadDto soeknadDto;
@@ -66,11 +77,18 @@ public class SoeknadTjeneste extends RestTjeneste  {
     public Response registrerSøknad(@PathParam("behandlingID") long behandlingID, @ApiParam("Søknadsdata") SoeknadInnDto soeknadInnDto) {
         SoeknadDokument soeknadDokument = soeknadInnDto.getSoknadDokument();
 
+        try {
+            tilgang.sjekk(behandlingID);
+        } catch (SikkerhetsbegrensningException e) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (TekniskException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+
         valideringService.validerOpplysninger(soeknadDokument);
         SoeknadDokument soeknad = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
 
         SoeknadDto soeknadDto = new SoeknadDto(behandlingID, soeknad);
         return Response.ok(soeknadDto).build();
     }
-
 }

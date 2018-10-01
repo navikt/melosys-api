@@ -44,6 +44,7 @@
 
         <!-- NAV -->
         <aareg.arbeidsforhold.version>3.0.0</aareg.arbeidsforhold.version>
+        <abac.spring.version>1.6.0</abac.spring.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>3.3.0</doksys.dokumentproduksjon.version>
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>
@@ -344,6 +345,11 @@
             </dependency>
 
             <!-- NAV felleskomponenter -->
+            <dependency>
+                <groupId>no.nav.freg</groupId>
+                <artifactId>abac-spring</artifactId>
+                <version>${abac.spring.version}</version>
+            </dependency>
             <dependency>
                 <groupId>no.nav.modig</groupId>
                 <artifactId>modig-testcertificates</artifactId>
