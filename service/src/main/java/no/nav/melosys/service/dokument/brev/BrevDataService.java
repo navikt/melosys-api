@@ -141,7 +141,6 @@ public class BrevDataService {
         }
 
         sakspart.setTypeKode(AktoerType.PERSON);
-        sakspart.setBerik(true);
         sakspart.setNavn(PLASSHOLDER_TEKST);
         return sakspart;
     }
@@ -163,8 +162,6 @@ public class BrevDataService {
         }
 
         mottaker.setTypeKode(AktoerType.PERSON);
-        mottaker.setBerik(true); // Gjør oppslag mot EREG/TPS
-
         mottaker.setNavn(PLASSHOLDER_TEKST);
         mottaker.setKortNavn(PLASSHOLDER_TEKST);
         mottaker.setSpraakkode(Spraakkode.NB);

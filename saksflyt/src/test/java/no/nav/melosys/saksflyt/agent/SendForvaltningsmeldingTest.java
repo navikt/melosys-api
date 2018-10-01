@@ -39,7 +39,8 @@ public class SendForvaltningsmeldingTest {
 
         agent.utførSteg(p);
 
-        verify(dokumentService, times(1)).produserDokument(anyLong(), any(DokumentType.class), anyString());
+        // FIXME: dokumentService.produserDokument implementeres av MELOSYS-1720
+        verify(dokumentService, times(1)).produserUtkast(anyLong(), any(DokumentType.class), anyString());
 
         assertThat(p.getSteg()).isNull();
     }

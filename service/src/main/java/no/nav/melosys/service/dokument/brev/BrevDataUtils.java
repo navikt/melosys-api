@@ -24,7 +24,6 @@ public final class BrevDataUtils {
     static NavAnsatt lagNavAnsatt(String ansattId) {
         NavAnsatt navAnsatt = new NavAnsatt();
         navAnsatt.setAnsattId(ansattId);
-        navAnsatt.setBerik(true); // Gjør oppslag mot AD
         navAnsatt.setNavn(PLASSHOLDER_TEKST);
         return navAnsatt;
     }
@@ -32,7 +31,6 @@ public final class BrevDataUtils {
     static NavEnhet lagNavEnhet() {
         NavEnhet navEnhet = new NavEnhet();
         navEnhet.setEnhetsId(MELOSYS_ENHET_ID);
-        navEnhet.setBerik(true); // Gjør oppslag mot NORG
         navEnhet.setEnhetsNavn(PLASSHOLDER_TEKST);
         return navEnhet;
     }
@@ -90,7 +88,6 @@ public final class BrevDataUtils {
 
     private static <T extends AdresseEnhet> T lagAdresse(T adresse, NorskPostadresse postadresse) {
         adresse.setEnhetsId(MELOSYS_ENHET_ID);
-        adresse.setBerik(true); // Gjør oppslag mot EREG/TPS
         adresse.setEnhetsNavn(PLASSHOLDER_TEKST);
         adresse.setKontaktTelefonnummer(PLASSHOLDER_TEKST);
         adresse.setAdresse(postadresse);

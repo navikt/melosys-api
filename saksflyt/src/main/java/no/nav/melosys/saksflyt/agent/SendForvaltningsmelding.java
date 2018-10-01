@@ -53,7 +53,8 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
         String saksbehandlerId = prosessinstans.getData(SAKSBEHANDLER);
         Behandling behandling = prosessinstans.getBehandling();
 
-        dokumentService.produserDokument(behandling.getId(), FORVALTNINGSMELDING, saksbehandlerId);
+        // FIXME: dokumentService.produserDokument implementeres av MELOSYS-1720
+        dokumentService.produserUtkast(behandling.getId(), FORVALTNINGSMELDING, saksbehandlerId);
 
         prosessinstans.setSteg(null);
         log.info("Sendt forvaltningsmelding for prosessinstans {}", prosessinstans.getId());
