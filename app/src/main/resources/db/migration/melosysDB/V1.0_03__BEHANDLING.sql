@@ -15,10 +15,11 @@ CREATE TABLE behandling_status (
     CONSTRAINT pk_behandling_status PRIMARY KEY (kode)
 );
 
-INSERT INTO behandling_status (kode, navn) VALUES ('OPPR', 'Opprettet');
-INSERT INTO behandling_status (kode, navn) VALUES ('UBEH', 'Under behandling');
-INSERT INTO behandling_status (kode, navn) VALUES ('FORL', 'Foreløpig lovvalg');
-INSERT INTO behandling_status (kode, navn) VALUES ('AVSLU', 'Avsluttet');
+INSERT INTO behandling_status (kode, navn) VALUES ('OPPRETTET', 'Opprettet');
+INSERT INTO behandling_status (kode, navn) VALUES ('UNDER_BEHANDLING', 'Under behandling');
+INSERT INTO behandling_status (kode, navn) VALUES ('AVVENT_DOK_UTL', 'Avventer dokumentasjon fra utlandet');
+INSERT INTO behandling_status (kode, navn) VALUES ('AVVENT_DOK_PART', 'Avventer dokumentasjon fra en part');
+INSERT INTO behandling_status (kode, navn) VALUES ('AVSLUTTET', 'Avsluttet');
 
 CREATE TABLE behandling_type (
     kode    VARCHAR2(99)  NOT NULL,

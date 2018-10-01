@@ -11,6 +11,7 @@ import no.nav.tjeneste.virksomhet.inntekt.v3.binding.*;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkRequest;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkResponse;
 
+// FIXME: flyttes til src/test
 public class InntektMock implements InntektConsumer {
 
     private static final String FNR = "99999999992";

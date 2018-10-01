@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
@@ -53,7 +54,7 @@ public class MedlService implements MedlFasade {
     }
 
     @Override
-    public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws IntegrasjonException, SikkerhetsbegrensningException {
+    public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException {
         HentPeriodeListeResponse response = hentPeriodeListeResponse(fnr, fom, tom);
 
         // Response -> xml
@@ -67,7 +68,7 @@ public class MedlService implements MedlFasade {
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);
-            throw new RuntimeException(e);
+            throw new IntegrasjonException(e);
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -82,7 +83,7 @@ public class MedlService implements MedlFasade {
         return saksopplysning;
     }
 
-    private HentPeriodeListeResponse hentPeriodeListeResponse(String fnr, LocalDate fom, LocalDate tom) throws SikkerhetsbegrensningException, IntegrasjonException {
+    private HentPeriodeListeResponse hentPeriodeListeResponse(String fnr, LocalDate fom, LocalDate tom) throws SikkerhetsbegrensningException, IkkeFunnetException {
         Foedselsnummer ident = new Foedselsnummer();
         ident.setValue(fnr);
 
@@ -97,7 +98,7 @@ public class MedlService implements MedlFasade {
         } catch (Sikkerhetsbegrensning sikkerhetsbegrensning) {
             throw new SikkerhetsbegrensningException(sikkerhetsbegrensning);
         } catch (PersonIkkeFunnet personIkkeFunnet) {
-            throw new IntegrasjonException(personIkkeFunnet);
+            throw new IkkeFunnetException(personIkkeFunnet);
         }
     }
 }

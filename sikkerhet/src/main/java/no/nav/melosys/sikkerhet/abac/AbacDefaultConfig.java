@@ -22,7 +22,6 @@ import java.util.Set;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class AbacDefaultConfig {
 
-
     @Bean
     Set<String> abacDefaultEnvironment() {
         Set<String> values = new HashSet<>();
@@ -60,7 +59,7 @@ public class AbacDefaultConfig {
             return "";
         }
 
-        final String[] tokenParts = token.split("\\.");
+        String[] tokenParts = token.split("\\.");
         return tokenParts.length == 1 ? tokenParts[0] : tokenParts[1];
     }
 

@@ -1,12 +1,11 @@
 package no.nav.melosys.tjenester.gui;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -38,12 +37,14 @@ public class ArbeidsforholdHistorikkTjeneste extends RestTjeneste {
         try {
             ArbeidsforholdDokument dokument = saksopplysningerService.hentArbeidsforholdHistorikk(arbeidsforholdsID);
             return Response.ok(dokument).build();
-        } catch (SikkerhetsbegrensningException sikkerhetsbegrensningException) {
-            log.error("SikkerhetsbegrensningException under oppslag av arbeidsforhold: ", sikkerhetsbegrensningException);
-            return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (IntegrasjonException integrasjonException) {
-            log.error("Uventet IntegrasjonException under oppslag av arbeidsforhold: ", integrasjonException);
-            return Response.status(Response.Status.NOT_FOUND).build();
+        } catch (SikkerhetsbegrensningException e) {
+            log.info("SikkerhetsbegrensningException under oppslag av arbeidsforhold", e);
+            throw new ForbiddenException(e.getMessage());
+        } catch (IntegrasjonException e) {
+            log.error("Uventet IntegrasjonException under oppslag av arbeidsforhold", e);
+            throw new InternalServerErrorException(e.getMessage());
+        } catch (IkkeFunnetException e) {
+            throw new NotFoundException(e.getMessage());
         }
     }
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
@@ -64,7 +65,7 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
     
     @Transactional
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, SikkerhetsbegrensningException {
+    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String brukerId = prosessinstans.getData(BRUKER_ID);

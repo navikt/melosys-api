@@ -27,7 +27,7 @@ public class PepImpl implements Pep {
 
     public final static String READ = "read";
     public final static String WRITE = "write";
-    public final static String IKKE_TILGANG = "Brukeren har ikke tilgang";
+    public final static String IKKE_TILGANG = "ABAC: Brukeren har ikke tilgang til ressurs";
 
     private AbacService abacService;
     private AbacContext abacContext;

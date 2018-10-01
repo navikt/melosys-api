@@ -11,12 +11,11 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
+import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.gsak.felles.dto.FeilResponseDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
@@ -52,18 +51,23 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
     }
 
     @Override
-    public OppgaveDto hentOppgave(String oppgaveId) {
-        return target
-            .path(oppgaveId)
-            .request()
-            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-            .header("X-Correlation-ID", getCallID())
-            .header(HttpHeaders.AUTHORIZATION, getAuth())
-            .get(OppgaveDto.class);
+    public OppgaveDto hentOppgave(String oppgaveId) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, TekniskException {
+        try {
+            return target
+                .path(oppgaveId)
+                .request()
+                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+                .header("X-Correlation-ID", getCallID())
+                .header(HttpHeaders.AUTHORIZATION, getAuth())
+                .get(OppgaveDto.class);
+        } catch (RuntimeException e) {
+            ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
+            return null; // Død kode
+        }
     }
 
     @Override
-    public List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) {
+    public List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, TekniskException {
         WebTarget lokalTarget = target;
         if (oppgaveSearchRequest.getAktørId() != null) {
             lokalTarget = lokalTarget.queryParam("aktoerId", oppgaveSearchRequest.getAktørId());
@@ -78,16 +82,22 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
         lokalTarget = leggTilQueryParamSomArray(lokalTarget, "oppgavetype", oppgaveSearchRequest.getOppgavetype());
         lokalTarget = leggTilQueryParamSomArray(lokalTarget, "behandlingstype", oppgaveSearchRequest.getBehandlingstype());
 
-        OppgaveSvar oppgaveSvar = lokalTarget.request()
-            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-            .header("X-Correlation-ID", getCallID())
-            .header(HttpHeaders.AUTHORIZATION, getAuth())
-            .get(OppgaveSvar.class);
-        return oppgaveSvar.getOppgaver();
+        try {
+            OppgaveSvar oppgaveSvar = lokalTarget.request()
+                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+                .header("X-Correlation-ID", getCallID())
+                .header(HttpHeaders.AUTHORIZATION, getAuth())
+                .get(OppgaveSvar.class);
+            return oppgaveSvar.getOppgaver();
+        } catch (RuntimeException e) {
+            ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
+            return null; // Død kode
+        }
     }
 
     // Eksempel: https://oppgave.nais.preprod.local/api/v1/oppgaver?tema=MED&tema=MEL
-    private WebTarget leggTilQueryParamSomArray(WebTarget tempTarget, String key, String[] param) {
+    private WebTarget leggTilQueryParamSomArray(WebTarget target, String key, String[] param) {
+        WebTarget tempTarget = target;
         if (param != null) {
             for (String s : param) {
                 if (s != null) {
@@ -99,36 +109,36 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
     }
 
     @Override
-    public void oppdaterOppgave(OppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
+    public void oppdaterOppgave(OppgaveDto request) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException, FunksjonellException {
         try (Response response = target.path(request.getId())
             .request(MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getCallID())
             .header(HttpHeaders.AUTHORIZATION, getAuth())
             .put(Entity.json(request))) {
-            if (response.getStatus() != 200) {
-                håndterFeil(response);
-            }
+            håndterEvFeil(response);
+        } catch (RuntimeException e) { // Kan være ProcessingException
+            throw new TekniskException(e);
         }
     }
 
     @Override
-    public String opprettOppgave(OpprettOppgaveDto request) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
+    public String opprettOppgave(OpprettOppgaveDto request) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException, FunksjonellException {
         try (Response response = target
             .request(MediaType.APPLICATION_JSON)
             .header("X-Correlation-ID", getCallID())
             .header(HttpHeaders.AUTHORIZATION, getAuth())
             .post(Entity.json(request))) {
-            if (response.getStatus() == 201) { // Oppgaven opprettet
-                OppgaveDto oppgaveDto = response.readEntity(OppgaveDto.class);
-                return oppgaveDto.getId();
-            }
-            håndterFeil(response);
+            håndterEvFeil(response);
+            OppgaveDto oppgaveDto = response.readEntity(OppgaveDto.class);
+            return oppgaveDto.getId();
+        } catch (RuntimeException e) { // Kan være ProcessingException
+            throw new TekniskException(e);
         }
-        throw new TekniskException("Uventet feil har oppstått i opprettOppgave");
     }
 
     @Override
-    public void håndterFeil(Response response) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException {
+    public void håndterEvFeil(Response response) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException, FunksjonellException {
+        if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) return;
         FeilResponseDto feilResponseDto = response.readEntity(FeilResponseDto.class);
         log.error("Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());
         statusTilException(response.getStatus(), feilResponseDto.getFeilmelding());

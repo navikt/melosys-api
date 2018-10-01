@@ -8,8 +8,7 @@ import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import org.junit.Before;
@@ -41,7 +40,7 @@ public class HentMedlemskapsopplysningerTest {
     }
 
     @Test
-    public void utfoerSteg() throws IntegrasjonException, SikkerhetsbegrensningException {
+    public void utfoerSteg() throws MelosysException {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setSaksopplysninger(new HashSet<>());

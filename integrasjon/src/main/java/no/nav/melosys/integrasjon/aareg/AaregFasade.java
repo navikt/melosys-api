@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.aareg;
 
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -30,5 +31,5 @@ public interface AaregFasade {
      *
      * @param arbeidsforholdsID Unik ID til et arbeidsforhold i NAV
      */
-    Saksopplysning hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws IntegrasjonException, SikkerhetsbegrensningException;
+    Saksopplysning hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException;
 }

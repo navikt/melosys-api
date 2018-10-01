@@ -91,6 +91,7 @@ public class FagsakTjeneste extends RestTjeneste {
         return Response.ok(fagsakDto).build();
     }
 
+    @Deprecated // FIXME Trengs av test så langt
     @GET
     @Path("ny/{fnr}")
     @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.")
@@ -98,25 +99,6 @@ public class FagsakTjeneste extends RestTjeneste {
         try {
             Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, Behandlingstype.SØKNAD);
             tilgang.sjekk(fagsak);
-            if (fagsak == null) {
-                return Response.status(Response.Status.BAD_REQUEST).build();
-            } else {
-                return Response.ok(fagsak.getSaksnummer()).build();
-            }
-        } catch (IkkeFunnetException e) {
-            return Response.status(Response.Status.NOT_FOUND).entity("Ident " + fnr + " ikke funnet").build();
-        } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (TekniskException e) {
-            log.error("TekniskException", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    @Deprecated // FIXME Trenger test en metode for å opprette fagsaker utenom saksflyt?
-    public Response nyFagsak(String fnr) {
-        try {
-            Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, Behandlingstype.SØKNAD);
             if (fagsak == null) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             } else {

@@ -1,6 +1,7 @@
 package no.nav.melosys.service.abac;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -48,15 +49,15 @@ public class Tilgang {
     }
 
     // Journal
-    public void sjekk(Journalpost journalpost) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public void sjekk(Journalpost journalpost) throws SikkerhetsbegrensningException, FunksjonellException, IntegrasjonException {
         sjekkJournalId(journalpost.getBrukerId());
     }
 
-    public void sjekk(JournalfoeringDto journalfoeringDto) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public void sjekk(JournalfoeringDto journalfoeringDto) throws SikkerhetsbegrensningException, FunksjonellException, IntegrasjonException {
         sjekkJournalId(journalfoeringDto.getBrukerID());
     }
 
-    public void sjekkJournalId(String journalId) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public void sjekkJournalId(String journalId) throws SikkerhetsbegrensningException, FunksjonellException, IntegrasjonException {
         Journalpost journalpost = joarkFasade.hentJournalpost(journalId);
         pep.sjekkTilgangTilFnr(journalpost.getBrukerId());
     }

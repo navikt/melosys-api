@@ -72,7 +72,7 @@ public class EregService implements EregFasade {
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);
-            throw new RuntimeException(e);
+            throw new IntegrasjonException(e);
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();

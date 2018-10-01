@@ -48,12 +48,14 @@ public class JournalfoeringTjeneste extends RestTjeneste {
             journalpost = journalføringService.hentJournalpost(journalpostID);
             tilgang.sjekk(journalpost);
         } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
+            throw new ForbiddenException(e.getMessage());
         } catch (TekniskException e) {
             log.error("TekniskException", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            throw new InternalServerErrorException("Teknisk feil: " + e.getMessage());
+        } catch (FunksjonellException e) {
+            log.error("FunksjonellException", e);
+            throw new BadRequestException("Funksjonell feil: " + e.getMessage());
         }
-
         JournalpostDto dto = new JournalpostDto();
         String brukerID = journalpost.getBrukerId();
         dto.setBrukerID(brukerID);
@@ -77,6 +79,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException("Ikke tilgang");
         } catch (FunksjonellException e) {
+            log.info("Funksjonell feil: {}", e.getMessage());
             throw new BadRequestException(e);
         } catch (TekniskException e) {
             log.error("TekniskException", e);

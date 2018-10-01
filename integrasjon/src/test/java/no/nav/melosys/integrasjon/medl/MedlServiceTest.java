@@ -6,13 +6,13 @@ import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 public class MedlServiceTest {
 
@@ -27,7 +27,7 @@ public class MedlServiceTest {
 
     @Test
     @SuppressWarnings("Duplicates")
-    public void getPeriodeListe() throws IntegrasjonException, SikkerhetsbegrensningException {
+    public void getPeriodeListe() throws MelosysException {
         final String fnr = "77777777773";
         Saksopplysning saksopplysning = medlService.hentPeriodeListe(fnr, null, null);
         assertNotNull(saksopplysning);

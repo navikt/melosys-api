@@ -10,9 +10,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
@@ -46,13 +44,13 @@ public class OppgaveService {
     }
 
     @Transactional
-    public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws IntegrasjonException, TekniskException {
+    public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
     @Transactional
-    public List<OppgaveDto> hentOppgaverMedBruker(String brukerIdent) throws IkkeFunnetException, TekniskException {
+    public List<OppgaveDto> hentOppgaverMedBruker(String brukerIdent) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
         String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
         if (aktørId == null) {
             throw new IkkeFunnetException("Finnes ikke aktørId for FNR " + brukerIdent);

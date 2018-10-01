@@ -5,10 +5,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
 import org.slf4j.Logger;
@@ -46,10 +43,15 @@ public class DokumentTjeneste extends RestTjeneste {
             tilgang.sjekkJournalId(journalpostID);
             dokument = dokumentService.hentDokument(journalpostID, dokumentID);
         } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
+            throw new ForbiddenException(e.getMessage());
         } catch (IntegrasjonException e) {
             log.error("IntegrasjonException", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            throw new InternalServerErrorException(e.getMessage());
+        } catch (IkkeFunnetException e) {
+            throw new NotFoundException(e.getMessage());
+        } catch (FunksjonellException e) {
+            log.error("FunksjonellException", e);
+            throw new BadRequestException("Funksjonell feil: " + e.getMessage());
         }
 
         Response.ResponseBuilder ok = Response.ok(dokument);

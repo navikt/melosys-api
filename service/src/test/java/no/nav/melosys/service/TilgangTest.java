@@ -9,10 +9,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Journalpost;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.abac.Tilgang;
@@ -23,9 +20,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
@@ -48,7 +42,7 @@ public class TilgangTest {
     private Behandling behandlingMocked;
 
     @Before
-    public void setUp() throws SikkerhetsbegrensningException, TekniskException {
+    public void setUp() throws FunksjonellException, TekniskException {
         AbacContext abacContext = mock(AbacContext.class);
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
 
@@ -107,13 +101,13 @@ public class TilgangTest {
     }
 
     @Test
-    public void testJournalOk() throws SikkerhetsbegrensningException, IntegrasjonException {
+    public void testJournalOk() throws FunksjonellException, IntegrasjonException {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
         tilgang.sjekkJournalId("JOURNAL-1");
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
-    public void testJournalIkkeTilgang() throws SikkerhetsbegrensningException, IntegrasjonException {
+    public void testJournalIkkeTilgang() throws FunksjonellException, IntegrasjonException {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
         tilgang.sjekkJournalId("JOURNAL-2");
     }
