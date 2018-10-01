@@ -5,7 +5,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @ServletComponentScan("no.nav.melosys.integrasjon.felles")
 @SpringBootApplication
@@ -13,7 +16,7 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource(value = "classpath:service.properties", encoding = "utf-8")
 public class Application extends SpringBootServletInitializer {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
 
@@ -22,4 +25,13 @@ public class Application extends SpringBootServletInitializer {
         return builder.sources(Application.class);
     }
 
+    @Bean
+    public WebMvcConfigurerAdapter dispatcherServletConfigurer() {
+        return new WebMvcConfigurerAdapter() {
+            @Override
+            public void addResourceHandlers(ResourceHandlerRegistry registry) {
+                registry.addResourceHandler("/frontendlogger/**").addResourceLocations("classpath:/frontendlogger/");
+            }
+        };
+    }
 }
