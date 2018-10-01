@@ -175,14 +175,7 @@ public class RegelmodulService {
         Assert.notNull(oppholdsPeriode, "Tjenesten krever at oppholdsPeriode ikke er null");
         Assert.notNull(oppholdsPeriode.getFom(), "Tjenesten krever at oppholdsPeriode har fom dato");
         
-        // FIXME: Nille-variant i påvente av hva som skjer med regelmodulen.
-        String format = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
-            "<dokumenter><personDokument xmlns:tps3=\"http://nav.no/tjeneste/virksomhet/person/v3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
-            "<statsborgerskap><kode>%s</kode></statsborgerskap></personDokument><soeknadDokument><oppholdUtland><oppholdsPeriode><fom>%s</fom><tom>" +
-            "%s</tom></oppholdsPeriode>" +
-            "<oppholdsland><kode>%s</kode></oppholdsland></oppholdUtland></soeknadDokument></dokumenter>";
-        // FIXME Vi må visst støtte flere oppholdsland/perioder
-        String req = String.format(format, brukersStatsborgerskap.getKode(), oppholdsPeriode.getFom(), oppholdsPeriode.getTom(), oppholdsland.get(0));
+        String req = lagXMLRequest(brukersStatsborgerskap.getKode(), oppholdsPeriode.getFom().toString(), oppholdsPeriode.getTom().toString(), oppholdsland);
 
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, LoggingFeature.Verbosity.PAYLOAD_ANY);
@@ -195,4 +188,17 @@ public class RegelmodulService {
             .post(Entity.entity(req, LovvalgTjeneste.MEDIA_TYPE_CONSUMED), VurderInngangsvilkaarReply.class);
     }
 
+    // FIXME: Nille-variant i påvente av hva som skjer med regelmodulen.
+    private String lagXMLRequest(String statsborgerskap, String fom, String tom, List<String> oppholdsland) {
+        StringBuilder format = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
+            "<FastsettLovvalgRequest><personDokument xmlns:tps3=\"http://nav.no/tjeneste/virksomhet/person/v3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
+            "<statsborgerskap><kode>%s</kode></statsborgerskap></personDokument><soeknadDokument><oppholdUtland><oppholdsPeriode><fom>%s</fom><tom>%s</tom></oppholdsPeriode>");
+
+        for (String land : oppholdsland) {
+            format.append("<oppholdslandKoder>").append(land).append("</oppholdslandKoder>");
+        }
+
+        format.append("</oppholdUtland></soeknadDokument></FastsettLovvalgRequest>");
+        return String.format(format.toString(), statsborgerskap, fom, tom);
+    }
 }
