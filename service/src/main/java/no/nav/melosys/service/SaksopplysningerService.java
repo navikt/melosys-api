@@ -231,16 +231,16 @@ public class SaksopplysningerService {
         if (opt.isPresent()) {
             søknadDokument = (SoeknadDokument) opt.get();
         } else {
-            throw new TekniskException("Oppfrisking feilet på grunn av manglende søknad opplysning");
+            throw new TekniskException("Oppfriskning feilet på grunn av manglende søknad opplysning");
         }
 
         behandling.getSaksopplysninger().removeIf(saksopplysning -> saksopplysning.getType() != SaksopplysningType.SØKNAD);
         behandlingRepository.save(behandling);
 
-        opprettNyProsessinstans(behandling, søknadDokument);
+        opprettOppfriskningsprosess(behandling, søknadDokument);
     }
 
-    private void opprettNyProsessinstans(Behandling behandling, SoeknadDokument søknadDokument) throws TekniskException, IkkeFunnetException {
+    private void opprettOppfriskningsprosess(Behandling behandling, SoeknadDokument søknadDokument) throws TekniskException, IkkeFunnetException {
         Prosessinstans nyprosessinstans = new Prosessinstans();
         nyprosessinstans.setBehandling(behandling);
         nyprosessinstans.setType(ProsessType.OPPFRISKNING);
