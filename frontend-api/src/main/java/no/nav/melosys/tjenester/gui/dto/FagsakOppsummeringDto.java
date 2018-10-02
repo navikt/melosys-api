@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandlingsstatus;
@@ -15,6 +16,11 @@ public class FagsakOppsummeringDto {
     private Instant opprettetDato;
     private PeriodeDto soknadsperiode;
     private List<String> land;
+
+    public FagsakOppsummeringDto() {
+        this.soknadsperiode = new PeriodeDto();
+        this.land = new ArrayList<>();
+    }
 
     public String getSaksnummer() {
         return saksnummer;
