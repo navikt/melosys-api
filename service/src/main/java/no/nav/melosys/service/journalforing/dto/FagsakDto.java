@@ -3,7 +3,7 @@ package no.nav.melosys.service.journalforing.dto;
 import java.util.List;
 
 public class FagsakDto {
-    private String type;
+    private String sakstype;
     private PeriodeDto soknadsperiode;
     private List<String> land;
 
@@ -23,11 +23,11 @@ public class FagsakDto {
         this.land = land;
     }
 
-    public String getType() {
-        return type;
+    public String getSakstype() {
+        return sakstype;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setSakstype(String sakstype) {
+        this.sakstype = sakstype;
     }
 }
