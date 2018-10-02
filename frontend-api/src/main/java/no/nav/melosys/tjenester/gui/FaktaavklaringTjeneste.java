@@ -47,7 +47,7 @@ public class FaktaavklaringTjeneste extends RestTjeneste {
     @ApiOperation(value = "Lagrer faktaavklaring for en gitt søknad")
     public Response utførFaktaavklaring(@PathParam("behandlingID") long behandlingID, String body) {
         // TODO Mock. Venter på avklaringer
-        return Response.ok().entity(jsonFaktaAvklaring).build();
+        return Response.ok().entity(body).build();
     }
 
     @GET
