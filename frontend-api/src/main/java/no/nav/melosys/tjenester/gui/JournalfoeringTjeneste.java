@@ -5,10 +5,7 @@ import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.Journalpost;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
@@ -49,6 +46,9 @@ public class JournalfoeringTjeneste extends RestTjeneste {
             tilgang.sjekk(journalpost);
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException(e.getMessage());
+        } catch (IkkeFunnetException e) {
+            log.info("IkkeFunnetException: {}", e.getMessage());
+            throw new NotFoundException(e.getMessage());
         } catch (TekniskException e) {
             log.error("TekniskException", e);
             throw new InternalServerErrorException("Teknisk feil: " + e.getMessage());
