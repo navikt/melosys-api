@@ -225,7 +225,6 @@ public class SaksopplysningerService {
             log.error("Behandling ikke funnet med behandlingsid {}", behandlingsid);
             throw new IkkeFunnetException("Behandling ikke funnet med behandlingsid: " + behandlingsid);
         }
-        behandling.getSaksopplysninger().removeIf(saksopplysning -> saksopplysning.getType() != SaksopplysningType.SØKNAD);
 
         SoeknadDokument søknadDokument;
         Optional<SaksopplysningDokument> opt = hentDokument(behandling, SaksopplysningType.SØKNAD);
@@ -234,6 +233,9 @@ public class SaksopplysningerService {
         } else {
             throw new TekniskException("Oppfrisking feilet på grunn av manglende søknad opplysning");
         }
+
+        behandling.getSaksopplysninger().removeIf(saksopplysning -> saksopplysning.getType() != SaksopplysningType.SØKNAD);
+        behandlingRepository.save(behandling);
 
         opprettNyProsessinstans(behandling, søknadDokument);
     }
