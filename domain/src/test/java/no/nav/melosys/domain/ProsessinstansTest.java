@@ -45,11 +45,11 @@ public class ProsessinstansTest {
     public void testDataList() {
         List<String> bareHoppeland = Collections.singletonList("HOP");
         Prosessinstans pi1 = new Prosessinstans(), pi2 = new Prosessinstans();
-        pi1.setData(LAND, bareHoppeland);
+        pi1.setData(OPPHOLDSLAND, bareHoppeland);
         pi2.addData(new PropertiesConverter().convertToEntityAttribute(new PropertiesConverter().convertToDatabaseColumn(pi1.getData())));
 
-        Assert.assertEquals(1, pi2.getData(LAND, List.class).size());
-        Assert.assertEquals(pi1.getData(LAND, List.class).get(0), pi2.getData(LAND, List.class).get(0));
+        Assert.assertEquals(1, pi2.getData(OPPHOLDSLAND, List.class).size());
+        Assert.assertEquals(pi1.getData(OPPHOLDSLAND, List.class).get(0), pi2.getData(OPPHOLDSLAND, List.class).get(0));
     }
 
 }

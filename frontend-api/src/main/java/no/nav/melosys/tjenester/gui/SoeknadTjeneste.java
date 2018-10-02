@@ -6,6 +6,7 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -90,9 +91,9 @@ public class SoeknadTjeneste extends RestTjeneste {
         valideringService.validerOpplysninger(soeknadDokument);
 
         try {
-            soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
+            soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument, SaksopplysningKilde.SBH);
         } catch (IkkeFunnetException e) {
-            throw new NotFoundException(e);
+            throw new NotFoundException(e.getMessage());
         }
 
         return new SoeknadDto(behandlingID, soeknadDokument);

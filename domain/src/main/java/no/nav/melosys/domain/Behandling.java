@@ -18,7 +18,7 @@ public class Behandling {
     @JoinColumn(name = "saksnummer", nullable = false, updatable = false)
     private Fagsak fagsak;
 
-    @Column(name = "status", nullable = false, updatable = true)
+    @Column(name = "status", nullable = false)
     @Convert(converter = Behandlingsstatus.DbKonverterer.class)
     private Behandlingsstatus status;
 
@@ -29,10 +29,10 @@ public class Behandling {
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private Instant registrertDato;
 
-    @Column(name = "endret_dato", nullable = false, updatable = true)
+    @Column(name = "endret_dato", nullable = false)
     private Instant endretDato;
 
-    @Column(name = "siste_opplysninger_hentet_dato", updatable = true)
+    @Column(name = "siste_opplysninger_hentet_dato")
     private Instant sisteOpplysningerHentetDato;
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -43,6 +43,10 @@ public class Behandling {
 
     public long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public Fagsak getFagsak() {

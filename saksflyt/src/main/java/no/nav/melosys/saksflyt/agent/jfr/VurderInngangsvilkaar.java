@@ -101,7 +101,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
 
         // Kjør inngangsvilkår...
         log.debug("Kaller regelmodul for prosessinstans {}...", prosessinstans.getId());
-        List<String> oppholdsland = prosessinstans.getData(ProsessDataKey.LAND, List.class);
+        List<String> oppholdsland = prosessinstans.getData(ProsessDataKey.OPPHOLDSLAND, List.class);
         // FIXME MELOSYS-1377 Regelmodulen jobber med ISO 3 landkoder (oppholdsland må konverteres)
         oppholdsland = tilIso3Landkoder(oppholdsland);
 

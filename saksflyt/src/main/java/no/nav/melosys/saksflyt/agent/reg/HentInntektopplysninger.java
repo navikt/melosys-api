@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.agent.reg;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.Map;
 
@@ -79,7 +79,7 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
         Behandling behandling = prosessinstans.getBehandling();
         Saksopplysning saksopplysning = inntektFasade.hentInntektListe(brukerId, fom, tom);
         saksopplysning.setBehandling(behandling);
-        saksopplysning.setRegistrertDato(LocalDateTime.now());
+        saksopplysning.setRegistrertDato(Instant.now());
         saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(ProsessSteg.HENT_ORG_OPPL);
