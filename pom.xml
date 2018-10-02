@@ -39,6 +39,7 @@
 
         <!-- Melosys -->
         <melosys.frontend.version>0.13.2-271</melosys.frontend.version>
+        <melosys.frontendlogger.version>0.10.1-SNAPSHOT</melosys.frontendlogger.version>
         <melosys.jsonschema.version>0.11.3-74</melosys.jsonschema.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
@@ -168,6 +169,12 @@
             </dependency>
 
             <!-- Melosys javascript frontend -->
+            <dependency>
+                <groupId>no.nav.melosys</groupId>
+                <artifactId>melosys-frontendlogger</artifactId>
+                <version>${melosys.frontendlogger.version}</version>
+                <type>zip</type>
+            </dependency>
             <dependency>
                 <groupId>no.nav.melosys</groupId>
                 <artifactId>melosys-web</artifactId>

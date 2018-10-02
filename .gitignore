@@ -16,4 +16,5 @@ es-local.properties
 *.db
 app/src/main/resources/db/flyway_q1.properties
 app/src/main/resources/db/flyway_p.properties
+build/src/main/resources/frontendlogger/
 build/src/main/resources/public/
