@@ -10,7 +10,6 @@ import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.saksflyt.api.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 
 
 /**
@@ -33,7 +32,7 @@ public class ArbeiderTraad extends Thread {
 
     private volatile StegBehandler aktivStegBehandler; // Brukes kun for logging
 
-    private volatile long aktivProsessinstans; // Brukes kun for logging
+    private volatile Prosessinstans aktivProsessinstans;
 
     @SuppressWarnings("unused")
     private ArbeiderTraad() {} // Skal ikke håndteres av Spring
@@ -63,7 +62,7 @@ public class ArbeiderTraad extends Thread {
         if (isAlive()) {
             logger.error("Klarte ikke å stoppe tråden i løpet av {} millisekunder", TIMEOUT_FOR_Å_STOPPE_EN_TRÅD);
             logger.error("StegBehandler som ikke lot seg stoppe: {}", aktivStegBehandler.getClass().getName());
-            logger.error("Prosessinstans som kanskje må ryddes opp i: {}", aktivProsessinstans);
+            logger.error("Prosessinstans som kanskje må ryddes opp i: {}", aktivProsessinstans.getId());
         }
     }
 
@@ -82,25 +81,35 @@ public class ArbeiderTraad extends Thread {
                     } catch (InterruptedException e) {
                         return;
                     }
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     // Vi er her hvis en StegBehandler kastet en Exception 
-                    logger.error("Stanser prosessering pga. ubehandlet Exception", e);
-                    logger.error("Aktiv stegBehandler: {}", aktivStegBehandler.getClass().getName());
-                    logger.error("Prosessinstans som kanskje må ryddes opp i: {}", aktivProsessinstans);
+                    logger.error("Ubehandlet Exception. Aktiv stegBehandler: {}, Prosessinstans som kanskje må ryddes opp i: {}", aktivStegBehandler.getClass().getName(), aktivProsessinstans.getId(), e);
+                    setAktivPiTilFeilet();
                     return;
                 }
             }
         }
     }
     
-    private void finnProsessinstansOgUtførSteg(StegBehandler stegBehandler) throws DataAccessException {
+    private void setAktivPiTilFeilet() {
+        if (aktivProsessinstans.getSteg() == ProsessSteg.FEILET_MASKINELT) return;
+        try {
+            aktivProsessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
+            prosessinstansRepo.save(aktivProsessinstans); // Kan resultere i DataAccessException, som kastes videre og merfører at tråden stoppes.
+            logger.error("Prosessinstans {} ble satt til feilet", aktivProsessinstans.getId());
+        } catch (RuntimeException e) {
+            logger.error("Kunne ikke sette prosessinstans {} til feilet", aktivProsessinstans.getId(), e);
+        }
+    }
+
+    private void finnProsessinstansOgUtførSteg(StegBehandler stegBehandler) {
         Prosessinstans pi = binge.fjernFørsteProsessinstans(stegBehandler.inngangsvilkår());
         if (pi == null) {
             return;
         }
 
         aktivStegBehandler = stegBehandler;
-        aktivProsessinstans = pi.getId();
+        aktivProsessinstans = pi;
         ProsessSteg gammeltSteg = pi.getSteg();
         stegBehandler.utførSteg(pi);
 
@@ -109,7 +118,7 @@ public class ArbeiderTraad extends Thread {
             pi.setSistForsøkt(LocalDateTime.now());
         }
         pi.setEndretDato(LocalDateTime.now());
-        prosessinstansRepo.save(pi); // Kan resultere i DataAccessException, som kastes videre og merfører at tråden stoppes.
+        prosessinstansRepo.save(pi); // Kan resultere i DataAccessException
 
         if (pi.getSteg() != null && pi.getSteg() != ProsessSteg.FEILET_MASKINELT) {
             binge.leggTil(pi);
