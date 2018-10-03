@@ -29,7 +29,7 @@ public class FagsakDvh extends DvhBaseEntitet {
     @Column(name = "bruker_id", nullable = false)
     private String brukerId;
 
-    @Column(name = "arbeidsgiver_id", nullable = false)
+    @Column(name = "arbeidsgiver_id")
     private String arbeidsgiverId;
 
     @Column(name = "representant_id")

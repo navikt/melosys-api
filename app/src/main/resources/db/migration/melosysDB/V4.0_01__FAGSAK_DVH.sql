@@ -8,7 +8,7 @@ CREATE TABLE fagsak_dvh (
   fagsak_type     VARCHAR2(99)  NULL,
   status          VARCHAR2(99)  NOT NULL,
   bruker_id       VARCHAR2(99)  NOT NULL,
-  arbeidsgiver_id VARCHAR2(99)  NOT NULL,
+  arbeidsgiver_id VARCHAR2(99)  NULL,
   representant_id VARCHAR2(99)  NULL,
   registrert_dato TIMESTAMP     NOT NULL,
   endret_dato     TIMESTAMP     NOT NULL,
