@@ -15,6 +15,7 @@ public class KodeverkDto {
     private List<KodeDto> oppgavetyper;
     private List<KodeDto> sakstyper;
     private List<KodeDto> vedleggstitler;
+    private List<KodeDto> vilkaar;
 
     public BegrunnelserDto getBegrunnelser() {
         return begrunnelser;
@@ -87,5 +88,13 @@ public class KodeverkDto {
 
     public void setVedleggstitler(List<KodeDto> vedleggstitler) {
         this.vedleggstitler = vedleggstitler;
+    }
+
+    public List<KodeDto> getVilkaar() {
+        return vilkaar;
+    }
+
+    public void setVilkaar(List<KodeDto> vilkaar) {
+        this.vilkaar = vilkaar;
     }
 }
