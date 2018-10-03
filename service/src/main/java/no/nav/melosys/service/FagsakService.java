@@ -82,11 +82,13 @@ public class FagsakService {
         aktør.setRolle(RolleType.BRUKER);
         aktører.add(aktør);
 
-        Aktoer aktørArbeidsgiver = new Aktoer();
-        aktørArbeidsgiver.setOrgnr(arbeidsgiver);
-        aktørArbeidsgiver.setFagsak(fagsak);
-        aktørArbeidsgiver.setRolle(RolleType.ARBEIDSGIVER);
-        aktører.add(aktørArbeidsgiver);
+        if (arbeidsgiver != null) {
+            Aktoer aktørArbeidsgiver = new Aktoer();
+            aktørArbeidsgiver.setOrgnr(arbeidsgiver);
+            aktørArbeidsgiver.setFagsak(fagsak);
+            aktørArbeidsgiver.setRolle(RolleType.ARBEIDSGIVER);
+            aktører.add(aktørArbeidsgiver);
+        }
 
         if (representant != null) {
             Aktoer aktørRepresentant = new Aktoer();
