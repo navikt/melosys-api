@@ -18,11 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SoeknadService {
 
-    private BehandlingRepository behandlingRepo;
+    private final BehandlingRepository behandlingRepo;
 
-    private SaksopplysningRepository saksopplysningRepo;
+    private final SaksopplysningRepository saksopplysningRepo;
 
-    private DokumentFactory dokumentFactory;
+    private final DokumentFactory dokumentFactory;
 
     @Autowired
     public SoeknadService(BehandlingRepository behandlingRepo, SaksopplysningRepository saksopplysningRepo, DokumentFactory dokumentFactory) {

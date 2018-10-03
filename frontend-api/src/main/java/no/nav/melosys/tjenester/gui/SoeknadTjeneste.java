@@ -29,11 +29,11 @@ import org.springframework.web.context.WebApplicationContext;
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 @Transactional
-public class SoeknadTjeneste extends RestTjeneste  {
+public class SoeknadTjeneste extends RestTjeneste {
 
-    private SoeknadService soeknadService;
+    private final SoeknadService soeknadService;
 
-    private ValideringService valideringService;
+    private final ValideringService valideringService;
 
     private final Tilgang tilgang;
 
