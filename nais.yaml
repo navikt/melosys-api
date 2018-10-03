@@ -48,15 +48,11 @@ fasitResources:
     resourceType: queue
   - alias: virksomhet:Arbeidsforhold_v3
     resourceType: webserviceendpoint
-  - alias: virksomhet:BehandleOppgave_v1
-    resourceType: webserviceendpoint
   - alias: virksomhet:Inntekt_v3
     resourceType: webserviceendpoint
   - alias: virksomhet:Kodeverk_v2
     resourceType: webserviceendpoint
   - alias: virksomhet:Medlemskap_v2
-    resourceType: webserviceendpoint
-  - alias: virksomhet:Oppgave_v3
     resourceType: webserviceendpoint
   - alias: virksomhet:Organisasjon_v4
     resourceType: webserviceendpoint
