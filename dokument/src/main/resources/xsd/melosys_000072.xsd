@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified"
+		   elementFormDefault="qualified"
+		   targetNamespace="http://nav.no/dok/melosysbrev/000072"
+		   xmlns="http://nav.no/dok/melosysbrev/000072"
+		   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		   xmlns:melosysfelles="http://nav.no/dok/melosysbrev/felles/melosys_felles"
+		   xmlns:st="http://nav.no/dok/brevdata/felles/v1/SimpleTypes">
+
+	<xs:import namespace="http://nav.no/dok/melosysbrev/felles/melosys_felles" schemaLocation="felles/melosys_felles.xsd" />
+	<xs:import namespace="http://nav.no/dok/brevdata/felles/v1/SimpleTypes" schemaLocation="felles/navfelles/v1.SimpleTypes.xsd"/>
+
+	<xs:element name="brevdata" type="brevdataType"/>
+
+	<xs:complexType name="brevdataType">
+		<xs:sequence>
+			<xs:element name="NAVFelles" type="melosysfelles:MelosysNAVFelles"/>
+			<xs:element name="felles" type="melosysfelles:FellesType"/>
+			<xs:element name="fag" type="Fag"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Fag">
+		<xs:sequence>
+			<xs:element name="datoMottatt" type="st:FormatertDato"/>
+			<xs:element name="avsender" type="avsenderType"/>
+			<xs:element name="henleggelseGrunn" type="henleggelseGrunnType"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="avsenderType">
+		<xs:sequence>
+			<xs:element name="rolle" type="rolleKode"/>
+			<xs:element name="trygdemyndighetsLand" type="xs:string" minOccurs="0"/>
+			<xs:element name="navn" type="xs:string" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="henleggelseGrunnType">
+		<xs:sequence>
+			<xs:element name="henleggelseGrunn" type="henleggelseGrunnKode"/>
+			<xs:element name="fritekstBegrunnelse" type="xs:string" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="rolleKode">
+		<xs:annotation>
+			<xs:documentation>Koder som angir hvilken rolle avsender har</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="BRUKER"/>
+			<xs:enumeration value="ARBEIDSGIVER"/>
+			<xs:enumeration value="REPRESENTANT"/>
+			<xs:enumeration value="MYNDIGHET"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="henleggelseGrunnKode">
+		<xs:annotation>
+			<xs:documentation>Koder som angir hva slags grunn som ligger bak henleggelsen</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="SØKNADEN_TRUKKET"/>
+			<xs:enumeration value="OPPHOLD_UTL_AVLYST"/>
+			<xs:enumeration value="ANNET"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>

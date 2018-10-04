@@ -12,11 +12,11 @@ public enum DokumentType implements Kodeverk {
     AVSLAG_ARBEIDSGIVER("TODO-13", "Vedtaksbrev avslag til arbeidstager"),
     BEHANDLINGSTID("TODO-14", "Orienteringsbrev om forventet saksbehandlingstid"),
     FORVALTNINGSMELDING("000082", "Melding om forventet saksbehandlingstid"),
-    HENLEGGELSE("TODO-15", "Henleggelse"),
+    HENLEGGELSE("000072", "Henleggelse"),
     INNVILGELSE("000048", "Vedtaksbrev om bekreftelse på trygderettigheter "),
     KLAGE("TODO-17", "Klageoversendelse"),
     KLAGE_AVVIST("TODO-18", "Avvisning av klage"),
-    MANGLENDE_OPPL("TODO-19", "Innhente manglende opplysninger"),
+    MANGLENDE_OPPL("000074", "Innhente manglende opplysninger"),
     STATUS("TODO-110", "Orienteringsbrev om status i saken"),
     VEDTAK_BARN("TODO-111", "Vedtaksbrev for medfølgende barn");
 

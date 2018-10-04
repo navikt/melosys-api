@@ -50,7 +50,7 @@
 
 	<xs:complexType name="FellesType">
 		<xs:all>
-			<xs:element type="xs:string" name="kontaktPerson" minOccurs="0"/>
+			<xs:element type="xs:string" name="kontaktperson" minOccurs="0"/>
 			<xs:element type="st:Identifikator" name="fagsaksnummer"/>
 		</xs:all>
 	</xs:complexType>

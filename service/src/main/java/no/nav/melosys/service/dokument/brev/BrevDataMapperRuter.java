@@ -7,6 +7,7 @@ import no.nav.melosys.domain.DokumentType;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.mapper.BrevDataMapper;
 import no.nav.melosys.service.dokument.brev.mapper.ForvaltningsmeldingMapper;
+import no.nav.melosys.service.dokument.brev.mapper.MangelbrevMapper;
 
 public class BrevDataMapperRuter {
 
@@ -14,6 +15,7 @@ public class BrevDataMapperRuter {
 
     static {
         mappere.put(DokumentType.FORVALTNINGSMELDING, ForvaltningsmeldingMapper.class);
+        mappere.put(DokumentType.MANGLENDE_OPPL, MangelbrevMapper.class);
     }
 
     private BrevDataMapperRuter() {
