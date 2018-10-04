@@ -10,6 +10,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -19,16 +20,16 @@ public class MangelbrevMapper implements BrevDataMapper {
     private static final String XSD_LOCATION = "xsd/melosys_000074.xsd";
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling) throws JAXBException, SAXException, TekniskException {
-        Fag fag = mapFag(behandling, "Test");
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, BrevDataDto brevDataDto) throws JAXBException, SAXException, TekniskException {
+        Fag fag = mapFag(behandling, brevDataDto);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    public Fag mapFag(Behandling behandling, String fritekst) throws TekniskException {
+    public Fag mapFag(Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
         Fag fag = new Fag();
         ManglendeOpplysningerType manglendeOpplysningerType = new ManglendeOpplysningerType();
-        manglendeOpplysningerType.setManglendeOpplysningerFritekst(fritekst);
+        manglendeOpplysningerType.setManglendeOpplysningerFritekst(brevDataDto.manglendeOpplysningerFritekst);
         try {
             fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(behandling.getRegistrertDato()));
             // Fristdato er 4 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.

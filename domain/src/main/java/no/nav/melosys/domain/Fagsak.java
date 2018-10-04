@@ -118,7 +118,7 @@ public class Fagsak {
      * Returnerer en aktør med angitt {@link RolleType} knyttet til saken eller {@code null} hvis ingen finnes.
      */
     public Aktoer hentAktørMedRolleType(RolleType rolleType) throws TekniskException {
-        if (aktører == null || aktører.isEmpty()) {
+        if (rolleType == null || aktører == null || aktører.isEmpty()) {
             return null;
         }
         List<Aktoer> kandidater = aktører.stream().filter(a -> rolleType.equals(a.getRolle())).collect(Collectors.toList());

@@ -8,6 +8,7 @@ import io.swagger.annotations.Api;
 import no.nav.melosys.domain.DokumentType;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
@@ -19,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
+
+import static no.nav.melosys.domain.DokumentType.MANGLENDE_OPPL;
 
 @Api(tags = {"dokumenter"})
 @Path("/dokumenter")
@@ -69,13 +72,20 @@ public class DokumentTjeneste extends RestTjeneste {
     @Path("utkast/pdf/{behandlingID}/{typeID}")
     @ApiOperation(value = "produserer utkast for dokument", response = byte[].class)
     @Produces("application/pdf")
-    public Response produserUtkast(@ApiParam @PathParam("behandlingID") long behandlingID, @ApiParam @PathParam("typeID") String typeID) {
+    public Response produserUtkast(@PathParam("behandlingID") long behandlingID, @PathParam("typeID") String typeID,
+                                   // FIXME: Parametere må avklares med frontend
+                                   @QueryParam("mottaker") RolleType mottaker,
+                                   @QueryParam("manglendeOpplysningerFritekst") String manglendeOpplysningerFritekst) {
         byte[] dokument;
 
         try {
             DokumentType dokumentType = DokumentType.forKode(typeID);
             BrevDataDto brevDataDto = new BrevDataDto();
             brevDataDto.saksbehandler = SubjectHandler.getInstance().getUserID();
+            if (dokumentType == MANGLENDE_OPPL) {
+                brevDataDto.mottaker = mottaker;
+                brevDataDto.manglendeOpplysningerFritekst = manglendeOpplysningerFritekst;
+            }
             dokument = dokumentService.produserUtkast(behandlingID, dokumentType, brevDataDto);
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();

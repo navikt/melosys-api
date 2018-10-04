@@ -11,6 +11,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -20,7 +21,7 @@ public class ForvaltningsmeldingMapper implements BrevDataMapper {
     private static final String XSD_LOCATION = "xsd/melosys_000082.xsd";
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling) throws JAXBException, SAXException, TekniskException {
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, BrevDataDto brevDataDto) throws JAXBException, SAXException, TekniskException {
         Fag fag = mapFag(behandling);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
