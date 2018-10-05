@@ -21,7 +21,8 @@ public class SpringSubjectHandler extends SubjectHandler {
         OIDCAuthenticationToken auth = (OIDCAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
         if (auth != null) {
-            return auth.getSub();
+            // BrukerID er case sensitive men Gosys bruker store bokstaver.
+            return auth.getSub().toUpperCase();
         } else {
             return null;
         }
