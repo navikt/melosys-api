@@ -47,6 +47,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Column(name = "vedtak_klagefrist")
     private LocalDate vedtakKlagefrist;
 
+    @OneToMany(mappedBy = "behandlingsresultat")
+    private Set<Avklartefakta> avklartefakta;
+
     @OneToMany(mappedBy = "behandlingsresultat", fetch = FetchType.EAGER)
     private Set<Lovvalgsperiode> lovvalgsperioder;
 
@@ -135,6 +138,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setVilkaarsresultater(Set<Vilkaarsresultat> vilkaarsresultater) {
         this.vilkaarsresultater = vilkaarsresultater;
+    }
+
+    public Set<Avklartefakta> getAvklartefakta() {
+        return avklartefakta;
+    }
+
+    public void setAvklartefakta(Set<Avklartefakta> avklartefakta) {
+        this.avklartefakta = avklartefakta;
     }
 
     @Override

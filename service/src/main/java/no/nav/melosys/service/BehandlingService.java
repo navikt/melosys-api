@@ -2,6 +2,8 @@ package no.nav.melosys.service;
 
 import java.util.*;
 
+import no.nav.melosys.repository.AvklarteFaktaRepository;
+import no.nav.melosys.repository.BehandlingResultatRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +22,14 @@ public class BehandlingService {
 
     private final BehandlingRepository behandlingRepository;
 
+    private final BehandlingResultatRepository behandlingResultatRepository;
+
     @Autowired
     public BehandlingService(ProsessinstansRepository prosessinstansRepository,
-                             BehandlingRepository behandlingRepository) {
+                             BehandlingRepository behandlingRepository, BehandlingResultatRepository behandlingResultatRepository) {
         this.prosessinstansRepository = prosessinstansRepository;
         this.behandlingRepository = behandlingRepository;
+        this.behandlingResultatRepository = behandlingResultatRepository;
     }
 
     /***
@@ -39,5 +44,16 @@ public class BehandlingService {
         }
         log.debug("Behandling {} er ikke under oppfrisking", behandlingID);
         return false;
+    }
+
+    public Behandlingsresultat hentBehandlingresultat(long behandlingsid) {
+        Optional<Behandlingsresultat> resultOpt = Optional.ofNullable(behandlingResultatRepository.findOne(behandlingsid));
+        return resultOpt.orElseGet(() -> {
+            Behandlingsresultat resultat = new Behandlingsresultat();
+            Behandling behandling = behandlingRepository.findOne(behandlingsid);
+            resultat.setBehandling(behandling);
+            behandlingResultatRepository.save(resultat);
+            return resultat;
+        });
     }
 }

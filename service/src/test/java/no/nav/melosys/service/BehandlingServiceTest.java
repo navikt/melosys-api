@@ -6,9 +6,12 @@ import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
+import no.nav.melosys.repository.AvklarteFaktaRepository;
+import no.nav.melosys.repository.BehandlingResultatRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -23,12 +26,15 @@ public class BehandlingServiceTest {
 
     private BehandlingService behandlingService;
 
+    @Mock
+    private BehandlingResultatRepository behandlingResultatRepository;
+
     @Before
     public void setUp() {
         behandlingRepo = mock(BehandlingRepository.class);
         prosessinstansRepository = mock(ProsessinstansRepository.class);
 
-        behandlingService = new BehandlingService(prosessinstansRepository, behandlingRepo);
+        behandlingService = new BehandlingService(prosessinstansRepository, behandlingRepo, behandlingResultatRepository);
     }
 
     @Test

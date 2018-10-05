@@ -18,10 +18,6 @@ public class AvklartefaktaRegistrering extends RegistreringsInfo {
     @JoinColumn(name = "avklartefakta_id ", nullable = false, updatable = false)
     private Avklartefakta avklartefakta;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "fakta_type")
-    private AvklartefaktaType type;
-
     @Column(name = "begrunnelse")
     private String begrunnelseKode;
 
@@ -32,17 +28,11 @@ public class AvklartefaktaRegistrering extends RegistreringsInfo {
         return avklartefakta;
     }
 
-    public AvklartefaktaType getType() {
-        return type;
+    public void setAvklartefakta(Avklartefakta avklartefakta) {
+        this.avklartefakta = avklartefakta;
     }
 
-    public void setType(AvklartefaktaType type) {
-        this.type = type;
-    }
-
-    public String getBegrunnelseKode() {
-        return begrunnelseKode;
-    }
+    public String getBegrunnelseKode() { return begrunnelseKode; }
 
     public void setBegrunnelseKode(String begrunnelseKode) {
         this.begrunnelseKode = begrunnelseKode;
@@ -65,12 +55,13 @@ public class AvklartefaktaRegistrering extends RegistreringsInfo {
             return false;
         }
         AvklartefaktaRegistrering that = (AvklartefaktaRegistrering) o;
-        return Objects.equals(this.avklartefakta, that.avklartefakta)
-            && Objects.equals(this.type, that.type);
+        return Objects.equals(this.avklartefakta, that.avklartefakta) &&
+                (Objects.equals(this.begrunnelseKode, that.getBegrunnelseKode()) ||
+                 Objects.equals(this.begrunnelseFritekst, that.getBegrunnelseFritekst()));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(avklartefakta, type);
+        return Objects.hash(avklartefakta, begrunnelseKode, begrunnelseFritekst);
     }
 }
