@@ -1,9 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
@@ -74,21 +71,25 @@ public class SoeknadTjeneste extends RestTjeneste {
     @POST
     @Path("{behandlingID}")
     @ApiOperation(value = "Tjeneste for å registrere opplysninger fra papirsøknaden manuelt.")
-    public Response registrerSøknad(@PathParam("behandlingID") long behandlingID, @ApiParam("Søknadsdata") SoeknadInnDto soeknadInnDto) {
+    public SoeknadDto registrerSøknad(@PathParam("behandlingID") long behandlingID, @ApiParam("Søknadsdata") SoeknadInnDto soeknadInnDto) {
         SoeknadDokument soeknadDokument = soeknadInnDto.getSoknadDokument();
 
         try {
             tilgang.sjekk(behandlingID);
         } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
+            throw new ForbiddenException(e);
         } catch (TekniskException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            throw new InternalServerErrorException(e);
         }
 
         valideringService.validerOpplysninger(soeknadDokument);
-        SoeknadDokument soeknad = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
 
-        SoeknadDto soeknadDto = new SoeknadDto(behandlingID, soeknad);
-        return Response.ok(soeknadDto).build();
+        try {
+            soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
+        } catch (IkkeFunnetException e) {
+            throw new NotFoundException(e);
+        }
+
+        return new SoeknadDto(behandlingID, soeknadDokument);
     }
 }

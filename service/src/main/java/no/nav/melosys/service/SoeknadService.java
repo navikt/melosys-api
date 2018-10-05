@@ -52,12 +52,12 @@ public class SoeknadService {
     }
 
     @Transactional
-    public SoeknadDokument registrerSøknad(long behandlingID, SoeknadDokument soeknadDokument) {
+    public SoeknadDokument registrerSøknad(long behandlingID, SoeknadDokument soeknadDokument) throws IkkeFunnetException {
         // Finner behandlingen som er relatert til søkndaden
         Behandling behandling = behandlingRepo.findOne(behandlingID);
 
         if (behandling == null) {
-            throw new RuntimeException("Registrering av søknad feilet fordi behandling med ID " + behandlingID + " er ikke funnet");
+            throw new IkkeFunnetException("Registrering av søknad feilet fordi behandling med ID " + behandlingID + " er ikke funnet");
         }
 
         Saksopplysning saksopplysning = new Saksopplysning(soeknadDokument);
