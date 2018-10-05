@@ -46,7 +46,10 @@ public class BrevDataServiceTest {
         behandling.setType(Behandlingstype.SØKNAD);
         behandling.setFagsak(fagsak);
 
-        Element element = service.lagBrevXML(DokumentType.FORVALTNINGSMELDING, behandling, "TEST");
+        BrevDataDto brevDataDto = new BrevDataDto();
+        brevDataDto.saksbehandler = "TEST";
+
+        Element element = service.lagBrevXML(DokumentType.FORVALTNINGSMELDING, behandling, brevDataDto);
 
         assertThat(element).isNotNull();
     }

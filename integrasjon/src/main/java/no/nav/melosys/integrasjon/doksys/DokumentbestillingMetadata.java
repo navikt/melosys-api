@@ -20,4 +20,6 @@ public class DokumentbestillingMetadata {
     // Fagområdet som dokumentet tilhører.
     public String fagområde;
 
+    public String saksbehandler;
+
 }

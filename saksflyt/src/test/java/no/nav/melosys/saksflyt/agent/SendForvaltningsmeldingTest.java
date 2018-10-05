@@ -5,6 +5,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.DokumentSystemService;
+import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,8 +40,7 @@ public class SendForvaltningsmeldingTest {
 
         agent.utførSteg(p);
 
-        // FIXME: dokumentService.produserDokument implementeres av MELOSYS-1720
-        verify(dokumentService, times(1)).produserUtkast(anyLong(), any(DokumentType.class), anyString());
+        verify(dokumentService, times(1)).produserDokument(anyLong(), any(DokumentType.class), any(BrevDataDto.class));
 
         assertThat(p.getSteg()).isNull();
     }

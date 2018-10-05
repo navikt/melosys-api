@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.integrasjon.Fagsystem.GOSYS;
 import static no.nav.melosys.integrasjon.Fagsystem.MELOSYS;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
@@ -66,7 +67,12 @@ public class DokSysService implements DokSysFasade {
         fagsystem.setKodeRef(MELOSYS.getKode());
         fagsystem.setValue(MELOSYS.getKode());
         info.setBestillendeFagsystem(fagsystem);
-        info.setSakstilhoerendeFagsystem(fagsystem);
+
+        // FIXME: Gosys midlertidig lagt til som sakstilhørende fagsystem
+        Fagsystemer sakstilhørendeFagsystem = objectFactory.createFagsystemer();
+        sakstilhørendeFagsystem.setKodeRef(GOSYS.getKode());
+        sakstilhørendeFagsystem.setValue(GOSYS.getKode());
+        info.setSakstilhoerendeFagsystem(sakstilhørendeFagsystem);
 
         Person bruker = objectFactory.createPerson();
         bruker.setIdent(metadata.bruker);
@@ -84,6 +90,7 @@ public class DokSysService implements DokSysFasade {
         info.setDokumenttilhoerendeFagomraade(fagområde);
 
         info.setJournalfoerendeEnhet(Integer.toString(MELOSYS_ENHET_ID));
+        info.setSaksbehandlernavn(metadata.saksbehandler);
 
         wsRequest.setDokumentbestillingsinformasjon(info);
         wsRequest.setBrevdata(brevdata);

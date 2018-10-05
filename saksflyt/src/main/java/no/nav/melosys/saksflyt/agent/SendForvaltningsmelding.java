@@ -9,6 +9,7 @@ import no.nav.melosys.exception.*;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.dokument.DokumentSystemService;
+import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,11 +51,11 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        String saksbehandlerId = prosessinstans.getData(SAKSBEHANDLER);
         Behandling behandling = prosessinstans.getBehandling();
+        BrevDataDto brevDataDto = new BrevDataDto();
+        brevDataDto.saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
 
-        // FIXME: dokumentService.produserDokument implementeres av MELOSYS-1720
-        dokumentService.produserUtkast(behandling.getId(), FORVALTNINGSMELDING, saksbehandlerId);
+        dokumentService.produserDokument(behandling.getId(), FORVALTNINGSMELDING, brevDataDto);
 
         prosessinstans.setSteg(null);
         log.info("Sendt forvaltningsmelding for prosessinstans {}", prosessinstans.getId());

@@ -53,7 +53,7 @@ public class BrevDataService {
     /**
      * Genererer metada til doksys angående dokumentbestillingen.
      */
-    public DokumentbestillingMetadata lagBestillingMetadata(DokumentType dokumentType, Behandling behandling) throws TekniskException {
+    public DokumentbestillingMetadata lagBestillingMetadata(DokumentType dokumentType, Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
 
         Fagsak fagsak = behandling.getFagsak();
@@ -72,13 +72,14 @@ public class BrevDataService {
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
         // FIXME Mottaker er avhengig av dokumentTypen men kan også sendes som parameter
         metadata.mottaker = null;
-        // FIXME Fagområde er avhengig av dokumentTypen men kan også sendes som parameter.
-        metadata.fagområde = null;
+        // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
+        metadata.fagområde = Tema.MED.getKode();
+        // Default=true i DOKKAT, men kan settes til false for å ikke utlede, eller berik=false for å overstyre enkeltelementer
+        metadata.utledRegisterInfo = true;
+        metadata.saksbehandler = brevDataDto.saksbehandler;
 
         if (dokumentType == FORVALTNINGSMELDING) {
-            metadata.utledRegisterInfo = true;
             metadata.mottaker = metadata.bruker;
-            metadata.fagområde = Tema.MED.getKode();
         }
 
         return metadata;
@@ -87,11 +88,11 @@ public class BrevDataService {
     /**
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
-    public Element lagBrevXML(DokumentType dokumentType, Behandling behandling, String userId) throws TekniskException {
+    public Element lagBrevXML(DokumentType dokumentType, Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
         Element brevXmlElement;
         try {
             FellesType fellesType = mapFellesType(behandling);
-            MelosysNAVFelles navFelles = mapNAVFelles(behandling, userId);
+            MelosysNAVFelles navFelles = mapNAVFelles(behandling, brevDataDto);
             String brevXml = BrevDataMapperRuter.brevDataMapper(dokumentType).mapTilBrevXML(fellesType, navFelles, behandling);
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -114,14 +115,14 @@ public class BrevDataService {
         return fellesType;
     }
 
-    private MelosysNAVFelles mapNAVFelles(Behandling behandling, String userId) throws TekniskException {
+    private MelosysNAVFelles mapNAVFelles(Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
         final MelosysNAVFelles navFelles = new MelosysNAVFelles();
 
         navFelles.setSakspart(lagSakspart(behandling));
         navFelles.setMottaker(lagMottaker(behandling));
         navFelles.setBehandlendeEnhet(lagNavEnhet());
-        navFelles.setSignerendeSaksbehandler(lagSaksbehandler(userId));
-        navFelles.setSignerendeBeslutter(lagSaksbehandler(userId));
+        navFelles.setSignerendeSaksbehandler(lagSaksbehandler(brevDataDto.saksbehandler));
+        navFelles.setSignerendeBeslutter(lagSaksbehandler(brevDataDto.saksbehandler));
         navFelles.setKontaktinformasjon(BrevDataUtils.lagKontaktInformasjon());
 
         return navFelles;
