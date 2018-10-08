@@ -53,7 +53,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public Long opprettSak(String saksnummer, Behandlingstype behandlingstype, String aktørId) throws TekniskException, IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException {
+    public Long opprettSak(String saksnummer, Behandlingstype behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
         SakDto sakDto = new SakDto();
 
         if (behandlingstype.equals(Behandlingstype.SØKNAD)) {
@@ -76,7 +76,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public void ferdigstillOppgave(String oppgaveID) throws IkkeFunnetException, FunksjonellException, SikkerhetsbegrensningException, TekniskException {
+    public void ferdigstillOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
         OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveID);
         if (oppgave == null) {
             throw new IkkeFunnetException("Oppgave med ID " + oppgaveID + " er ikke funnet.");
@@ -89,7 +89,7 @@ public class GsakService implements GsakFasade {
     //FIXME: Mangler implementasjon for sakstyper
     @Override
 public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<Fagsakstype> sakstyper, List<Behandlingstype> behandlingstyper)
-        throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
+        throws FunksjonellException, TekniskException {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(new String[]{oppgavetype.getKode()})
             .medBehandlingsTyper(behandlingstyper.stream().map(Behandlingstype::hentFellesKode).toArray(String[]::new))
@@ -106,7 +106,7 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
     }
 
     @Override
-    public Oppgave hentOppgave(String oppgaveId) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, TekniskException  {
+    public Oppgave hentOppgave(String oppgaveId) throws FunksjonellException, TekniskException  {
         OppgaveDto gsakOppgave = oppgaveConsumer.hentOppgave(oppgaveId);
 
         if (gsakOppgave == null) {
@@ -116,7 +116,7 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
     }
 
     @Override
-    public String opprettOppgave(Oppgave oppgave) throws SikkerhetsbegrensningException, TekniskException, FunksjonellException {
+    public String opprettOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException {
         LocalDate idag = LocalDate.now();
         OpprettOppgaveDto oppgaveDto = new OpprettOppgaveDto();
         oppgaveDto.setAktivDato(idag);
@@ -142,7 +142,7 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
     }
 
     @Override
-    public void leggTilbakeOppgave(String oppgaveId) throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+    public void leggTilbakeOppgave(String oppgaveId) throws FunksjonellException, TekniskException {
         OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
         if (oppgave == null) {
             throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveId);
@@ -152,7 +152,7 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
     }
 
     @Override
-    public List<Oppgave> finnOppgaveListeMedAnsvarlig(String tilordnetRessurs) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException{
+    public List<Oppgave> finnOppgaveListeMedAnsvarlig(String tilordnetRessurs) throws FunksjonellException, TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medTilordnetRessurs(tilordnetRessurs)
             .medOppgaveTyper(hentAlleKoder(Oppgavetype.class))
@@ -197,7 +197,7 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
     }
 
     @Override
-    public List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
+    public List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws FunksjonellException, TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medAktørId(aktørId)
             .medOppgaveTyper(hentAlleKoder(Oppgavetype.class))
@@ -216,7 +216,7 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
     }
 
     @Override
-    public void tildelOppgave(String oppgaveId, String saksbehandlerID) throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+    public void tildelOppgave(String oppgaveId, String saksbehandlerID) throws FunksjonellException, TekniskException {
         OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
         if (oppgave == null ) {
             throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveId);

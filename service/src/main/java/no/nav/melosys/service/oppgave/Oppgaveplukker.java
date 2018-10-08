@@ -50,7 +50,7 @@ public class Oppgaveplukker {
      * 5) Saksnummer knyttes til oppgaven hvis oppgaven er en behandlingsoppgave.
      */
     @Transactional
-    public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+    public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
         String type = plukkDto.getOppgavetype();
         Oppgavetype oppgavetype = KodeverkUtils.dekod(Oppgavetype.class, type);
 
@@ -102,12 +102,12 @@ public class Oppgaveplukker {
     }
 
     @Transactional
-    public synchronized void leggTilbakeOppgave(String oppgaveId, String saksbehandlerID, String begrunnelse) throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+    public synchronized void leggTilbakeOppgave(String oppgaveId, String saksbehandlerID, String begrunnelse) throws FunksjonellException, TekniskException {
         Oppgave oppgave = gsakFasade.hentOppgave(oppgaveId);
 
         if (oppgave == null) {
             log.error("Fant ikke oppgave med oppgaveId " + oppgaveId);
-            throw new RuntimeException("Fant ikke oppgave med oppgaveId " + oppgaveId);
+            throw new IkkeFunnetException("Fant ikke oppgave med oppgaveId " + oppgaveId);
         }
         gsakFasade.leggTilbakeOppgave(oppgaveId);
 
@@ -122,7 +122,7 @@ public class Oppgaveplukker {
 
     private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {
 
-        Optional<Oppgave> valg = oppgaver.stream().sorted(høyestTilLavestPrioritet).findFirst();
+        Optional<Oppgave> valg = oppgaver.stream().min(høyestTilLavestPrioritet);
         // Vi må ikke tildele en oppgave som var tilbakelagt.
         if (valg.isPresent()) {
             String oppgaveId = valg.get().getOppgaveId();
@@ -141,7 +141,7 @@ public class Oppgaveplukker {
         return !tilbakelegging.isEmpty();
     }
 
-    public static final Comparator<Oppgave> høyestTilLavestPrioritet = (a, b) -> {
+    private static final Comparator<Oppgave> høyestTilLavestPrioritet = (a, b) -> {
         // Merk: Bryter med konvensjonen (a == b og b == c → a == c), men dette er ok.
         int res = 0;
         if (a.getPrioritet() == b.getPrioritet())
