@@ -13,9 +13,11 @@ import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service
+@Primary
 public class DokumentService {
 
     private BehandlingRepository behandlingRepository;

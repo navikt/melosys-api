@@ -70,8 +70,6 @@ public class BrevDataService {
 
         metadata.dokumenttypeID = dokumentType.getKode();
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
-        // FIXME Mottaker er avhengig av dokumentTypen men kan også sendes som parameter
-        metadata.mottaker = null;
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
         metadata.fagområde = Tema.MED.getKode();
         // Default=true i DOKKAT, men kan settes til false for å ikke utlede, eller berik=false for å overstyre enkeltelementer
