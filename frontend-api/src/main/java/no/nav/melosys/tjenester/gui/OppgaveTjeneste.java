@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
@@ -33,7 +32,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
-@Api(tags = {"oppgaver"})
+@Api(value = "/oppgaver", tags = "oppgaver")
 @Path("/oppgaver")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
@@ -52,8 +51,8 @@ public class OppgaveTjeneste extends RestTjeneste {
 
     @POST
     @Path("/plukk")
-    @ApiOperation(value = "Plukker fra GSAK neste oppgave som saksbehandler skal arbeide med.")
-    public Response plukkOppgave(PlukkOppgaveInnDto plukkDto) {
+    @ApiOperation(value = "Plukker fra GSAK neste oppgave som saksbehandler skal arbeide med.", response = PlukketOppgaveDto.class)
+    public Response plukkOppgave(@ApiParam("Plukk Oppgave.") PlukkOppgaveInnDto plukkDto) {
         String ident = SubjectHandler.getInstance().getUserID();
 
         try {
@@ -93,8 +92,8 @@ public class OppgaveTjeneste extends RestTjeneste {
 
     @POST
     @Path("/tilbakelegge")
-    @ApiOperation(value = "Legger tilbake oppgaven med gitt oppgaveId i GSAK")
-    public Response leggTilbakeOppgave(@ApiParam("Tilbakeleggingsinformasjon") TilbakeleggingDto tilbakelegging) {
+    @ApiOperation(value = "Legger tilbake oppgaven med gitt oppgaveId i GSAK.")
+    public Response leggTilbakeOppgave(@ApiParam("Tilbakeleggingsinformasjon.") TilbakeleggingDto tilbakelegging) {
         String ident = SubjectHandler.getInstance().getUserID();
 
         try {
@@ -116,7 +115,10 @@ public class OppgaveTjeneste extends RestTjeneste {
 
     @GET
     @Path("/oversikt")
-    @ApiOperation(value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.")
+    @ApiOperation(
+        value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.",
+        response = OppgaveDto.class,
+        responseContainer = "List")
     public Response mineOppgaver() {
         String ident = SubjectHandler.getInstance().getUserID();
         List<OppgaveDto> oppgaveDtoListe;
@@ -155,7 +157,10 @@ public class OppgaveTjeneste extends RestTjeneste {
 
     @GET
     @Path("/sok")
-    @ApiOperation(value = "Henter alle oppgaver knyttet til en gitt bruker.")
+    @ApiOperation(
+        value = "Henter alle oppgaver knyttet til en gitt bruker.",
+        response = OppgaveDto.class,
+        responseContainer = "List")
     public Response hentOppgaver(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
         try {
             List<OppgaveDto> oppgaver = oppgaveService.hentOppgaverMedBruker(fnr);

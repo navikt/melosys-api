@@ -2,9 +2,6 @@ package no.nav.melosys.tjenester.gui.config;
 
 import javax.ws.rs.ApplicationPath;
 
-import io.swagger.jaxrs.config.BeanConfig;
-import io.swagger.jaxrs.listing.ApiListingResource;
-import io.swagger.jaxrs.listing.SwaggerSerializers;
 import no.nav.melosys.tjenester.gui.*;
 import org.glassfish.jersey.CommonProperties;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -37,24 +34,5 @@ public class JerseyConfig extends ResourceConfig {
         register(SaksopplysningTjeneste.class);
         register(SoeknadTjeneste.class);
         register(VurderingTjeneste.class);
-        configureSwagger();
-    }
-
-    private void configureSwagger() {
-        // Registrere Swagger-Core
-        register(ApiListingResource.class);
-        register(SwaggerSerializers.class);
-
-        // Konfigurasjon til Swagger
-        BeanConfig beanConfig = new BeanConfig();
-        beanConfig.setTitle("Melosys API");
-        beanConfig.setVersion("0");
-        beanConfig.setConfigId("melosys-api");
-        beanConfig.setContact("Team Melosys");
-        beanConfig.setSchemes(new String[] {"http", "https"});
-        beanConfig.setBasePath("/");
-        beanConfig.setResourcePackage("no.nav.melosys.tjenester.gui");
-        beanConfig.setPrettyPrint(true);
-        beanConfig.setScan(true);
     }
 }

@@ -5,6 +5,7 @@ import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -37,8 +38,8 @@ public class PersonTjeneste extends RestTjeneste {
     }
 
     @GET
-    @ApiOperation(value = "Henter en person fra TPS.")
-    public Response getPerson(@QueryParam("fnr") String personnummer) {
+    @ApiOperation(value = "Henter en person fra TPS.", response = PersonDokument.class)
+    public Response getPerson(@QueryParam("fnr") @ApiParam("FNR ellers D-nummer.") String personnummer) {
         if (personnummer == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }

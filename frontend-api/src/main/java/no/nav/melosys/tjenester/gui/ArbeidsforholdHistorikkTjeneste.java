@@ -4,6 +4,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -33,7 +35,8 @@ public class ArbeidsforholdHistorikkTjeneste extends RestTjeneste {
 
     @GET
     @Path("{arbeidsforholdsID}")
-    public Response hentArbeidsforholdHistorikk(@PathParam("arbeidsforholdsID") Long arbeidsforholdsID) {
+    @ApiOperation(value = "Hent historikk arbeidsforhold", response = ArbeidsforholdDokument.class)
+    public Response hentArbeidsforholdHistorikk(@ApiParam @PathParam("arbeidsforholdsID") Long arbeidsforholdsID) {
         try {
             ArbeidsforholdDokument dokument = saksopplysningerService.hentArbeidsforholdHistorikk(arbeidsforholdsID);
             return Response.ok(dokument).build();

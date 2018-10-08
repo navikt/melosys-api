@@ -7,6 +7,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import no.nav.melosys.integrasjon.dokumentmottak.ForsendelsesinformasjonDto;
 import no.nav.melosys.service.DokMotQueueTestService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +34,10 @@ public class DokMotQueueTestRestTjeneste extends RestTjeneste {
 
     @POST
     @Path("/melding")
+    @ApiOperation(value = "motta tynnmelding fra test hub")
     @Consumes(MediaType.APPLICATION_XML)
     @Deprecated
-    public Response mottaTynnmeldingFraTestHub(ForsendelsesinformasjonDto forsendelsesinformasjonDto) {
+    public Response mottaTynnmeldingFraTestHub(@ApiParam("forsendelse informasjon.") ForsendelsesinformasjonDto  forsendelsesinformasjonDto) {
         service.mottaTynnmeldingFraTestHub(forsendelsesinformasjonDto);
         return Response.ok().build();
     }

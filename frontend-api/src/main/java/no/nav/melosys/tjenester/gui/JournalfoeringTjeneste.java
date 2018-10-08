@@ -4,6 +4,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -38,7 +40,8 @@ public class JournalfoeringTjeneste extends RestTjeneste {
 
     @GET
     @Path("{journalpostID}")
-    public Response hentJournalpostOpplysninger(@PathParam("journalpostID") String journalpostID) {
+    @ApiOperation(value = "Hent journalpost opplysninger.", response = JournalpostDto.class)
+    public Response hentJournalpostOpplysninger(@ApiParam @PathParam("journalpostID") String journalpostID) {
         log.debug("Journalpost med ID {} hentes.", journalpostID);
         Journalpost journalpost;
         try {
@@ -71,7 +74,8 @@ public class JournalfoeringTjeneste extends RestTjeneste {
 
     @POST
     @Path("opprett")
-    public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) {
+    @ApiOperation(value = "Opprett sak og journalfør.")
+    public void opprettSakOgJournalfør(@ApiParam("Opprett journalføring.") JournalfoeringOpprettDto journalfoeringDto) {
         try {
             journalføringService.opprettSakOgJournalfør(journalfoeringDto);
         } catch (SikkerhetsbegrensningException e) {
@@ -87,7 +91,8 @@ public class JournalfoeringTjeneste extends RestTjeneste {
 
     @POST
     @Path("tilordne")
-    public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) {
+    @ApiOperation(value = "Tilordne sak og journalfør.")
+    public void tilordneSakOgJournalfør(@ApiParam("Tilordne journalføring.") JournalfoeringTilordneDto journalfoeringDto) {
         try {
             journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
         } catch (SikkerhetsbegrensningException e) {

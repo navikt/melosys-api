@@ -6,6 +6,8 @@ import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.DokumentType;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
@@ -38,8 +40,9 @@ public class DokumentTjeneste extends RestTjeneste {
 
     @GET
     @Path("pdf/{journalpostID}/{dokumentID}")
+    @ApiOperation(value = "hent dokument knyttet til journalpost", response = byte[].class)
     @Produces("application/pdf")
-    public Response hentDokument(@PathParam("journalpostID") String journalpostID, @PathParam("dokumentID") String dokumentID) {
+    public Response hentDokument(@ApiParam @PathParam("journalpostID") String journalpostID, @ApiParam @PathParam("dokumentID") String dokumentID) {
         byte[] dokument;
 
         try {
@@ -64,8 +67,9 @@ public class DokumentTjeneste extends RestTjeneste {
 
     @GET
     @Path("utkast/pdf/{behandlingID}/{typeID}")
+    @ApiOperation(value = "produserer utkast for dokument", response = byte[].class)
     @Produces("application/pdf")
-    public Response produserUtkast(@PathParam("behandlingID") long behandlingID, @PathParam("typeID") String typeID) {
+    public Response produserUtkast(@ApiParam @PathParam("behandlingID") long behandlingID, @ApiParam @PathParam("typeID") String typeID) {
         byte[] dokument;
 
         try {
@@ -90,7 +94,8 @@ public class DokumentTjeneste extends RestTjeneste {
 
     @POST
     @Path("opprett/{behandlingID}/{typeID}")
-    public Response produserDokument(@PathParam("behandlingID") long behandlingID, @PathParam("typeID") String typeID) {
+    @ApiOperation(value = "produserer dokument for behandling og type")
+    public Response produserDokument(@PathParam("behandlingID") @ApiParam("behandlingID.") long behandlingID, @PathParam("typeID") @ApiParam("typeID.") String typeID) {
         try {
             tilgang.sjekk(behandlingID);
             DokumentType dokumentType = DokumentType.forKode(typeID);
