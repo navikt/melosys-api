@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.integrasjon.Fagsystem.GOSYS;
+import static no.nav.melosys.integrasjon.Fagsystem.GSAK_I_JOARK;
 import static no.nav.melosys.integrasjon.Fagsystem.MELOSYS;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
@@ -63,15 +63,14 @@ public class DokSysService implements DokSysFasade {
         info.setDokumenttypeId(metadata.dokumenttypeID);
         info.setUtledRegisterInfo(metadata.utledRegisterInfo);
 
-        Fagsystemer fagsystem = objectFactory.createFagsystemer();
-        fagsystem.setKodeRef(MELOSYS.getKode());
-        fagsystem.setValue(MELOSYS.getKode());
-        info.setBestillendeFagsystem(fagsystem);
+        Fagsystemer bestillendeFagsystem = objectFactory.createFagsystemer();
+        bestillendeFagsystem.setKodeRef(MELOSYS.getKode());
+        bestillendeFagsystem.setValue(MELOSYS.getKode());
+        info.setBestillendeFagsystem(bestillendeFagsystem);
 
-        // FIXME: Gosys midlertidig lagt til som sakstilhørende fagsystem
         Fagsystemer sakstilhørendeFagsystem = objectFactory.createFagsystemer();
-        sakstilhørendeFagsystem.setKodeRef(GOSYS.getKode());
-        sakstilhørendeFagsystem.setValue(GOSYS.getKode());
+        sakstilhørendeFagsystem.setKodeRef(GSAK_I_JOARK.getKode());
+        sakstilhørendeFagsystem.setValue(GSAK_I_JOARK.getKode());
         info.setSakstilhoerendeFagsystem(sakstilhørendeFagsystem);
 
         Person bruker = objectFactory.createPerson();

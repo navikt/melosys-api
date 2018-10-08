@@ -4,9 +4,9 @@ import no.nav.melosys.domain.Kodeverk;
 
 public enum Fagsystem implements Kodeverk {
 
-    // FIXME: Gosys midlertidig lagt til som sakstilhørende fagsystem
-    GOSYS("FS22", "Gosys"),
     GSAK("FS19", "GSAK"),
+    // GSAK er fagsystemet vi skal bruke til dokumentarkivering, men av historiske årsaker har det feil kode i Joark
+    GSAK_I_JOARK("FS22", "GSAK i Joark"),
     MELOSYS("FS38", "Melosys"); // "https://confluence.adeo.no/display/APPKAT/Applikasjons-ID"
 
     private String kode;
