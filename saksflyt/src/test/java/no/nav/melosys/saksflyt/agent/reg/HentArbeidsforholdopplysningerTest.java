@@ -30,22 +30,22 @@ public class HentArbeidsforholdopplysningerTest {
     private HentArbeidsforholdopplysninger agent;
 
     // Antall måneder tilbake i tid vi henter arbeidsforholdhistorikk for
-    private final int ARBEIDSFORHOLDHISTORIKK_ANTALL_ÅR = 5;
+    private final int ARBEIDSFORHOLD_HISTORIKK_ANTALL_MÅNEDER = 6;
 
     @Before
     public void setUp() {
         agent = new HentArbeidsforholdopplysninger(aaregFasade, mock(SaksopplysningRepository.class));
-        ReflectionTestUtils.setField(agent, "arbeidsforholdhistorikkAntallÅr", ARBEIDSFORHOLDHISTORIKK_ANTALL_ÅR);
+        ReflectionTestUtils.setField(agent, "arbeidsforholdhistorikkAntallMåneder", ARBEIDSFORHOLD_HISTORIKK_ANTALL_MÅNEDER);
     }
 
     @Test
-    public void utfoerSteg() throws IntegrasjonException, TekniskException, SikkerhetsbegrensningException {
+    public void utfoerSteg() throws TekniskException, SikkerhetsbegrensningException {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setSaksopplysninger(new HashSet<>());
 
         String brukerID = "99999999991";
-        Periode periode = new Periode(LocalDate.now(), null);
+        Periode periode = new Periode(LocalDate.now().minusMonths(1), LocalDate.now());
 
         p.setData(ProsessDataKey.BRUKER_ID, brukerID);
         p.setData(ProsessDataKey.SØKNADSPERIODE, periode);
@@ -53,7 +53,7 @@ public class HentArbeidsforholdopplysningerTest {
 
         agent.utførSteg(p);
 
-        LocalDate fom = periode.getFom().minusYears(ARBEIDSFORHOLDHISTORIKK_ANTALL_ÅR);
+        LocalDate fom = periode.getFom().minusMonths(ARBEIDSFORHOLD_HISTORIKK_ANTALL_MÅNEDER);
         LocalDate tom = LocalDate.now();
 
         verify(aaregFasade, times(1)).finnArbeidsforholdPrArbeidstaker(brukerID, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);

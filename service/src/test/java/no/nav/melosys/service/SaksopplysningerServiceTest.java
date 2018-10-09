@@ -80,8 +80,8 @@ public class SaksopplysningerServiceTest {
 
         saksopplysningerService = new SaksopplysningerService(tpsFasade, aareg, ereg, medl, inntekt, prosessinstansRepository, binge, behandlingRepo);
 
-        ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallÅr", 5);
-        ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 12);
+        ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 6);
+        ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 6);
         ReflectionTestUtils.setField(saksopplysningerService, "medlemskaphistorikkAntallÅr", 5);
     }
 

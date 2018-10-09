@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.agent.reg;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.Map;
@@ -67,7 +68,13 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
         String brukerId = prosessinstans.getData(BRUKER_ID);
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
         YearMonth fom = YearMonth.from(periode.getFom()).minusMonths(inntektshistorikkAntallMåneder);
-        YearMonth tom = YearMonth.now();
+
+        YearMonth tom;
+        if (periode.getTom().isAfter(LocalDate.now())) {
+            tom = YearMonth.now();
+        } else {
+            tom = YearMonth.from(periode.getTom());
+        }
 
         Behandling behandling = prosessinstans.getBehandling();
         Saksopplysning saksopplysning = inntektFasade.hentInntektListe(brukerId, fom, tom);

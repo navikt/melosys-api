@@ -43,8 +43,8 @@ public class SaksopplysningerService {
     private static final Logger log = LoggerFactory.getLogger(SaksopplysningerService.class);
 
     // FIXME : Injektere feltene i constructor MELOSYS-1635
-    @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallÅr}")
-    private Integer arbeidsforholdhistorikkAntallÅr;
+    @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallMåneder}")
+    private Integer arbeidsforholdhistorikkAntallMåneder;
 
     @Value("${melosys.service.fagsak.inntektshistorikk.antallMåneder}")
     private Integer inntektshistorikkAntallMåneder;
@@ -154,7 +154,7 @@ public class SaksopplysningerService {
 
     private Saksopplysning hentArbeidsforhold(String fnr) throws SikkerhetsbegrensningException, TekniskException {
         final LocalDate tom  = LocalDate.now();
-        final LocalDate fom = tom.minusYears(arbeidsforholdhistorikkAntallÅr);
+        final LocalDate fom = tom.minusMonths(arbeidsforholdhistorikkAntallMåneder);
         return aaregFasade.finnArbeidsforholdPrArbeidstaker(fnr, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
     }
 

@@ -36,8 +36,8 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(HentArbeidsforholdopplysninger.class);
 
-    @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallÅr}")
-    private Integer arbeidsforholdhistorikkAntallÅr;
+    @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallMåneder}")
+    private Integer arbeidsforholdhistorikkAntallMåneder;
 
     private final AaregFasade aaregFasade;
 
@@ -70,8 +70,14 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
         String brukerId = prosessinstans.getData(BRUKER_ID);
 
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class); // Allerede validert
-        LocalDate fom = periode.getFom().minusYears(arbeidsforholdhistorikkAntallÅr); 
-        LocalDate tom = LocalDate.now();
+        LocalDate fom = periode.getFom().minusMonths(arbeidsforholdhistorikkAntallMåneder);
+
+        LocalDate tom;
+        if (periode.getTom().isAfter(LocalDate.now())) {
+            tom = LocalDate.now();
+        } else {
+            tom = periode.getTom();
+        }
 
         Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(brukerId, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
         saksopplysning.setBehandling(behandling);
