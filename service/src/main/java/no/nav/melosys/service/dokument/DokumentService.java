@@ -8,6 +8,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokSysFasade;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
+import no.nav.melosys.integrasjon.doksys.DokumentbestillingResponse;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
@@ -50,17 +51,17 @@ public class DokumentService {
      */
     public byte[] produserUtkast(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        return produserDokument(behandlingID, dokumentType, brevDataDto, true);
+        return (byte[]) produserDokument(behandlingID, dokumentType, brevDataDto, true);
     }
 
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        produserDokument(behandlingID, dokumentType, brevDataDto, false);
+    public DokumentbestillingResponse produserDokument(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        return (DokumentbestillingResponse) produserDokument(behandlingID, dokumentType, brevDataDto, false);
     }
 
-    private byte[] produserDokument(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto, boolean erUtkast)
+    private Object produserDokument(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto, boolean erUtkast)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
@@ -73,8 +74,7 @@ public class DokumentService {
         if (erUtkast) {
             return dokSysFasade.produserDokumentutkast(request, brevData);
         } else {
-            dokSysFasade.produserIkkeredigerbartDokument(request, brevData);
-            return null;
+            return dokSysFasade.produserIkkeredigerbartDokument(request, brevData);
         }
     }
 }

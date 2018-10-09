@@ -28,7 +28,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.DokumentType.FORVALTNINGSMELDING;
+import static no.nav.melosys.domain.DokumentType.MANGLENDE_OPPL;
 import static no.nav.melosys.domain.RolleType.BRUKER;
+import static no.nav.melosys.domain.RolleType.REPRESENTANT;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 /**
@@ -56,29 +58,15 @@ public class BrevDataService {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
 
         Fagsak fagsak = behandling.getFagsak();
-        Aktoer bruker = fagsak.hentAktørMedRolleType(BRUKER);
-        if (bruker != null) {
-            try {
-                metadata.bruker = tpsFasade.hentIdentForAktørId(bruker.getAktørId());
-            } catch (IkkeFunnetException e) {
-                throw new TekniskException("Det finnes ingen ident for aktørID " + bruker.getAktørId());
-            }
-        } else {
-            throw new TekniskException("Det finnes ingen bruker på sak " + fagsak.getSaksnummer());
-        }
 
-        // FIXME Mottaker er avhengig av dokumentTypen men kan også sendes som parameter
-        Aktoer mottaker = fagsak.hentAktørMedRolleType(brevDataDto.mottaker);
-        if (mottaker != null) {
-            if (mottaker.getAktørId() != null) {
-                try {
-                    metadata.mottaker = tpsFasade.hentIdentForAktørId(mottaker.getAktørId());
-                } catch (IkkeFunnetException e) {
-                    throw new TekniskException("Det finnes ingen ident for aktørID " + mottaker.getAktørId());
-                }
-            } else {
-                metadata.mottaker = mottaker.getOrgnr();
-            }
+        metadata.bruker = hentFagsakIdentMedRolleType(fagsak, BRUKER);
+
+        if (dokumentType == FORVALTNINGSMELDING) {
+            metadata.mottaker = metadata.bruker;
+        } else if (dokumentType == MANGLENDE_OPPL &&  brevDataDto.mottaker != null) {
+            metadata.mottaker = hentFagsakIdentMedRolleType(fagsak, brevDataDto.mottaker);
+        } else {
+            throw new TekniskException("Det finnes ingen mottaker på sak " + fagsak.getSaksnummer());
         }
 
         metadata.dokumenttypeID = dokumentType.getKode();
@@ -94,6 +82,26 @@ public class BrevDataService {
         }
 
         return metadata;
+    }
+
+    private String hentFagsakIdentMedRolleType(Fagsak fagsak, RolleType rolleType) throws TekniskException {
+        Aktoer aktør = fagsak.hentAktørMedRolleType(rolleType);
+
+        if (aktør == null) {
+            throw new TekniskException("Det finnes ingen " + rolleType + " på sak " + fagsak.getSaksnummer());
+        }
+
+        if (aktør.getAktørId() != null) {
+            try {
+                return tpsFasade.hentIdentForAktørId(aktør.getAktørId());
+            } catch (IkkeFunnetException e) {
+                throw new TekniskException("Det finnes ingen ident for aktørID " + aktør.getAktørId());
+            }
+        } else if (aktør.getOrgnr() != null) {
+            return aktør.getOrgnr();
+        } else {
+            throw new TekniskException("Det finnes ingen ident for " + rolleType + " på sak " + fagsak.getSaksnummer());
+        }
     }
 
     /**
@@ -159,7 +167,7 @@ public class BrevDataService {
 
     private Mottaker lagMottaker(Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
         Mottaker mottaker;
-        Aktoer aktør = behandling.getFagsak().hentAktørMedRolleType(RolleType.REPRESENTANT);
+        Aktoer aktør = behandling.getFagsak().hentAktørMedRolleType(REPRESENTANT);
         if (brevDataDto.mottaker != null) {
             aktør = behandling.getFagsak().hentAktørMedRolleType(brevDataDto.mottaker);
         } else if (aktør == null) {

@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.net.URI;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -8,20 +9,17 @@ import io.swagger.annotations.Api;
 import no.nav.melosys.domain.DokumentType;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.exception.*;
+import no.nav.melosys.integrasjon.doksys.DokumentbestillingResponse;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
-
-import static no.nav.melosys.domain.DokumentType.MANGLENDE_OPPL;
 
 @Api(tags = {"dokumenter"})
 @Path("/dokumenter")
@@ -68,24 +66,17 @@ public class DokumentTjeneste extends RestTjeneste {
         return ok.build();
     }
 
-    @GET
-    @Path("utkast/pdf/{behandlingID}/{typeID}")
-    @ApiOperation(value = "produserer utkast for dokument", response = byte[].class)
+    @POST
+    @Path("utkast/pdf/{behandlingID}/{dokumentTypeID}")
     @Produces("application/pdf")
-    public Response produserUtkast(@PathParam("behandlingID") long behandlingID, @PathParam("typeID") String typeID,
-                                   // FIXME: Parametere må avklares med frontend
-                                   @QueryParam("mottaker") RolleType mottaker,
-                                   @QueryParam("manglendeOpplysningerFritekst") String manglendeOpplysningerFritekst) {
+    public Response produserUtkast(@PathParam("behandlingID") long behandlingID,
+                                   @PathParam("dokumentTypeID") String dokumentTypeID,
+                                   BrevDataDto brevDataDto) {
         byte[] dokument;
 
         try {
-            DokumentType dokumentType = DokumentType.forKode(typeID);
-            BrevDataDto brevDataDto = new BrevDataDto();
-            brevDataDto.saksbehandler = SubjectHandler.getInstance().getUserID();
-            if (dokumentType == MANGLENDE_OPPL) {
-                brevDataDto.mottaker = mottaker;
-                brevDataDto.manglendeOpplysningerFritekst = manglendeOpplysningerFritekst;
-            }
+            tilgang.sjekk(behandlingID);
+            DokumentType dokumentType = DokumentType.forKode(dokumentTypeID);
             dokument = dokumentService.produserUtkast(behandlingID, dokumentType, brevDataDto);
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -103,15 +94,17 @@ public class DokumentTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("opprett/{behandlingID}/{typeID}")
-    @ApiOperation(value = "produserer dokument for behandling og type")
-    public Response produserDokument(@ApiParam @PathParam("behandlingID") long behandlingID, @ApiParam @PathParam("typeID") String typeID) {
+    @Path("opprett/{behandlingID}/{dokumentTypeID}")
+    public Response produserDokument(@PathParam("behandlingID") long behandlingID,
+                                     @PathParam("dokumentTypeID") String dokumentTypeID,
+                                     BrevDataDto brevDataDto) {
         try {
             tilgang.sjekk(behandlingID);
-            DokumentType dokumentType = DokumentType.forKode(typeID);
-            BrevDataDto brevDataDto = new BrevDataDto();
-            brevDataDto.saksbehandler = SubjectHandler.getInstance().getUserID();
+            DokumentType dokumentType = DokumentType.forKode(dokumentTypeID);
             dokumentService.produserDokument(behandlingID, dokumentType, brevDataDto);
+            DokumentbestillingResponse response = dokumentService.produserDokument(behandlingID, dokumentType, brevDataDto);
+            String location = String.join("/", "dokumenter/pdf/", response.journalpostId, response.dokumentId);
+            return Response.created(URI.create(location)).build();
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (SikkerhetsbegrensningException e) {
@@ -120,7 +113,5 @@ public class DokumentTjeneste extends RestTjeneste {
             log.error("TekniskException", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
-
-        return Response.ok().build();
     }
 }

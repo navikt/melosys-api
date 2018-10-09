@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.RolleType;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 
 public class BrevDataDto {
 
@@ -8,5 +9,9 @@ public class BrevDataDto {
 
     public RolleType mottaker;
 
-    public String manglendeOpplysningerFritekst;
+    public String fritekst;
+
+    public BrevDataDto() {
+        saksbehandler = SubjectHandler.getInstance().getUserID();
+    }
 }

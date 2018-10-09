@@ -46,7 +46,7 @@ public class BrevDataServiceTest {
         behandling.setType(Behandlingstype.SØKNAD);
         behandling.setFagsak(fagsak);
 
-        BrevDataDto brevDataDto = new BrevDataDto();
+        BrevDataDto brevDataDto = mock(BrevDataDto.class);
         brevDataDto.saksbehandler = "TEST";
 
         Element element = service.lagBrevXML(DokumentType.FORVALTNINGSMELDING, behandling, brevDataDto);

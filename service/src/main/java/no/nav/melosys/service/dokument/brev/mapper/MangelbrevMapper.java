@@ -9,6 +9,7 @@ import no.nav.dok.melosysbrev._000074.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import org.xml.sax.SAXException;
@@ -27,9 +28,12 @@ public class MangelbrevMapper implements BrevDataMapper {
     }
 
     public Fag mapFag(Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
+        if (brevDataDto.fritekst == null) {
+            throw new IntegrasjonException("Mangelbrev mangler informasjon om manglende opplysninger.");
+        }
         Fag fag = new Fag();
         ManglendeOpplysningerType manglendeOpplysningerType = new ManglendeOpplysningerType();
-        manglendeOpplysningerType.setManglendeOpplysningerFritekst(brevDataDto.manglendeOpplysningerFritekst);
+        manglendeOpplysningerType.setManglendeOpplysningerFritekst(brevDataDto.fritekst);
         try {
             fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(behandling.getRegistrertDato()));
             // Fristdato er 4 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
