@@ -15,26 +15,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-@Api(tags = { "behandlinger" })
-@Path("/behandlinger")
+@Api(tags = { "saksflyt" })
+@Path("/saksflyt")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 @Transactional
-public class BehandlingTjeneste extends RestTjeneste {
+public class SaksflytTjeneste extends RestTjeneste {
 
     private final BehandlingService behandlingerService;
 
     @Autowired
-    public BehandlingTjeneste(BehandlingService behandlingerService) {
+    public SaksflytTjeneste(BehandlingService behandlingerService) {
         this.behandlingerService = behandlingerService;
     }
 
     @GET
-    @Path("{id}/status")
-    @ApiOperation(value = "Status på behandling", notes = ("Returnerer status (Progress/Done) på behandling"), response = String.class)
-    public Response statusBehandling(@PathParam("id") @ApiParam("behandlingsid.") long id) {
+    @Path("status/{behandlingID}")
+    @ApiOperation(value = "Status på oppfrisking av behandling ", notes = ("Returnerer status (Progress/Done) på oppfrisking av behandling"))
+    public Response hentOppfriskingStatusForBehandling(@ApiParam @PathParam("behandlingID") long behandlingID) {
         String status;
-        if (behandlingerService.aktivProsessinstansEksistererFor(id)) {
+        if (behandlingerService.harAktivOppfrisking(behandlingID)) {
             status = "PROGRESS";
         } else {
             status = "DONE";

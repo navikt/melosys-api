@@ -27,13 +27,17 @@ public class BehandlingService {
         this.behandlingRepository = behandlingRepository;
     }
 
-    public boolean aktivProsessinstansEksistererFor(long behandlingsid) {
-        Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByStegIsNotNullAndBehandling_Id(behandlingsid);
+    /***
+     * Metoden sjekker om en behandling med ID {@code behandlingID} har en oppfrisking i gang.
+     * Oppfrisking betyr å hente saksopplysninger på nytt for en gitt behandling.
+     */
+    public boolean harAktivOppfrisking(long behandlingID) {
+        Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(ProsessType.OPPFRISKNING, behandlingID);
         if (aktivProsessinstans.isPresent()) {
-            log.debug("Behandling {} har aktiv prosessinstans", behandlingsid);
+            log.debug("Behandling {} er under oppfrisking.", behandlingID);
             return true;
         }
-        log.debug("Behandling {} har ingen aktiv prosessinstans", behandlingsid);
+        log.debug("Behandling {} er ikke under oppfrisking", behandlingID);
         return false;
     }
 }
