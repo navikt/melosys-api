@@ -30,7 +30,7 @@ public class HentInntektopplysningerTest {
     private HentInntektopplysninger agent;
 
     // Antall måneder tilbake i tid vi henter inntekthistorikk for
-    private final int INNTEKTSHISTORIKK_ANTALL_MÅNEDER = 12;
+    private final int INNTEKTSHISTORIKK_ANTALL_MÅNEDER = 6;
 
     @Before
     public void setUp() {
@@ -45,7 +45,7 @@ public class HentInntektopplysningerTest {
         p.getBehandling().setSaksopplysninger(new HashSet<>());
 
         String brukerID = "99999999991";
-        Periode periode = new Periode(LocalDate.now(), null);
+        Periode periode = new Periode(LocalDate.now().minusMonths(1), LocalDate.now());
 
         p.setData(ProsessDataKey.BRUKER_ID, brukerID);
         p.setData(ProsessDataKey.SØKNADSPERIODE, periode);
