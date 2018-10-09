@@ -13,12 +13,15 @@ import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkere
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.integrasjon.Fagsystem.GSAK_I_JOARK;
 import static no.nav.melosys.integrasjon.Fagsystem.MELOSYS;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
+@Primary
 public class DokSysService implements DokSysFasade {
 
     private static final Logger log = LoggerFactory.getLogger(DokSysService.class);
@@ -60,11 +63,15 @@ public class DokSysService implements DokSysFasade {
         info.setDokumenttypeId(metadata.dokumenttypeID);
         info.setUtledRegisterInfo(metadata.utledRegisterInfo);
 
-        Fagsystemer fagsystem = objectFactory.createFagsystemer();
-        fagsystem.setKodeRef(MELOSYS.getKode());
-        fagsystem.setValue(MELOSYS.getKode());
-        info.setBestillendeFagsystem(fagsystem);
-        info.setSakstilhoerendeFagsystem(fagsystem);
+        Fagsystemer bestillendeFagsystem = objectFactory.createFagsystemer();
+        bestillendeFagsystem.setKodeRef(MELOSYS.getKode());
+        bestillendeFagsystem.setValue(MELOSYS.getKode());
+        info.setBestillendeFagsystem(bestillendeFagsystem);
+
+        Fagsystemer sakstilhørendeFagsystem = objectFactory.createFagsystemer();
+        sakstilhørendeFagsystem.setKodeRef(GSAK_I_JOARK.getKode());
+        sakstilhørendeFagsystem.setValue(GSAK_I_JOARK.getKode());
+        info.setSakstilhoerendeFagsystem(sakstilhørendeFagsystem);
 
         Person bruker = objectFactory.createPerson();
         bruker.setIdent(metadata.bruker);
@@ -82,6 +89,7 @@ public class DokSysService implements DokSysFasade {
         info.setDokumenttilhoerendeFagomraade(fagområde);
 
         info.setJournalfoerendeEnhet(Integer.toString(MELOSYS_ENHET_ID));
+        info.setSaksbehandlernavn(metadata.saksbehandler);
 
         wsRequest.setDokumentbestillingsinformasjon(info);
         wsRequest.setBrevdata(brevdata);

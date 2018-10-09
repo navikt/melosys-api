@@ -22,7 +22,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
@@ -30,6 +29,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import static no.nav.melosys.domain.DokumentType.FORVALTNINGSMELDING;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 /**
@@ -53,7 +53,7 @@ public class BrevDataService {
     /**
      * Genererer metada til doksys angående dokumentbestillingen.
      */
-    public DokumentbestillingMetadata lagBestillingMetadata(DokumentType dokumentType, Behandling behandling) throws TekniskException {
+    public DokumentbestillingMetadata lagBestillingMetadata(DokumentType dokumentType, Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
 
         Fagsak fagsak = behandling.getFagsak();
@@ -70,10 +70,15 @@ public class BrevDataService {
 
         metadata.dokumenttypeID = dokumentType.getKode();
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
-        // FIXME Mottaker er avhengig av dokumentTypen men kan også sendes som parameter
-        metadata.mottaker = null;
-        // FIXME Fagområde er avhengig av dokumentTypen men kan også sendes som parameter.
-        metadata.fagområde = null;
+        // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
+        metadata.fagområde = Tema.MED.getKode();
+        // Default=true i DOKKAT, men kan settes til false for å ikke utlede, eller berik=false for å overstyre enkeltelementer
+        metadata.utledRegisterInfo = true;
+        metadata.saksbehandler = brevDataDto.saksbehandler;
+
+        if (dokumentType == FORVALTNINGSMELDING) {
+            metadata.mottaker = metadata.bruker;
+        }
 
         return metadata;
     }
@@ -81,11 +86,11 @@ public class BrevDataService {
     /**
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
-    public Element lagBrevXML(DokumentType dokumentType, Behandling behandling) throws TekniskException {
+    public Element lagBrevXML(DokumentType dokumentType, Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
         Element brevXmlElement;
         try {
             FellesType fellesType = mapFellesType(behandling);
-            MelosysNAVFelles navFelles = mapNAVFelles(behandling);
+            MelosysNAVFelles navFelles = mapNAVFelles(behandling, brevDataDto);
             String brevXml = BrevDataMapperRuter.brevDataMapper(dokumentType).mapTilBrevXML(fellesType, navFelles, behandling);
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -108,14 +113,14 @@ public class BrevDataService {
         return fellesType;
     }
 
-    private MelosysNAVFelles mapNAVFelles(Behandling behandling) throws TekniskException {
+    private MelosysNAVFelles mapNAVFelles(Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
         final MelosysNAVFelles navFelles = new MelosysNAVFelles();
 
         navFelles.setSakspart(lagSakspart(behandling));
         navFelles.setMottaker(lagMottaker(behandling));
         navFelles.setBehandlendeEnhet(lagNavEnhet());
-        navFelles.setSignerendeSaksbehandler(lagSaksbehandler());
-        navFelles.setSignerendeBeslutter(lagSaksbehandler());
+        navFelles.setSignerendeSaksbehandler(lagSaksbehandler(brevDataDto.saksbehandler));
+        navFelles.setSignerendeBeslutter(lagSaksbehandler(brevDataDto.saksbehandler));
         navFelles.setKontaktinformasjon(BrevDataUtils.lagKontaktInformasjon());
 
         return navFelles;
@@ -135,7 +140,6 @@ public class BrevDataService {
         }
 
         sakspart.setTypeKode(AktoerType.PERSON);
-        sakspart.setBerik(true);
         sakspart.setNavn(PLASSHOLDER_TEKST);
         return sakspart;
     }
@@ -157,8 +161,6 @@ public class BrevDataService {
         }
 
         mottaker.setTypeKode(AktoerType.PERSON);
-        mottaker.setBerik(true); // Gjør oppslag mot EREG/TPS
-
         mottaker.setNavn(PLASSHOLDER_TEKST);
         mottaker.setKortNavn(PLASSHOLDER_TEKST);
         mottaker.setSpraakkode(Spraakkode.NB);
@@ -167,15 +169,10 @@ public class BrevDataService {
         return mottaker;
     }
 
-    // FIXME Bør være private
-    Saksbehandler lagSaksbehandler() {
+    private Saksbehandler lagSaksbehandler(String userId) {
         Saksbehandler saksbehandler = new Saksbehandler();
         saksbehandler.setNavEnhet(lagNavEnhet());
-
-        String userID = SubjectHandler.getInstance().getUserID();
-        if (userID != null) {
-            saksbehandler.setNavAnsatt(lagNavAnsatt(userID));
-        }
+        saksbehandler.setNavAnsatt(lagNavAnsatt(userId));
         return saksbehandler;
     }
 

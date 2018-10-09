@@ -24,7 +24,7 @@ public class ForvaltningsmeldingMapper implements BrevDataMapper {
         Fag fag = mapFag(behandling);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         String brevXmlMedNamespace = JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
-        return MapperUtils.fjernNamespaceFra(brevXmlMedNamespace);
+        return brevXmlMedNamespace;
     }
 
     public Fag mapFag(Behandling behandling) throws TekniskException {

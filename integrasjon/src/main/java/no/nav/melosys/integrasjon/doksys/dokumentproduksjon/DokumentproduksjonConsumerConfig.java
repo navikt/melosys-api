@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DokumentproduksjonConsumerConfig {
-    private static final String WSDL = "/wsdl/no/nav/tjeneste/virksomhet/dokumentproduksjon/v3/Binding.wsdl";
+    private static final String WSDL = "wsdl/no/nav/tjeneste/virksomhet/dokumentproduksjon/v3/Binding.wsdl";
     private static final String NAMESPACE = "http://nav.no/tjeneste/virksomhet/dokumentproduksjon/v3/Binding";
     private static final QName SERVICE = new QName(NAMESPACE, "Dokumentproduksjon_v3");
     private static final QName PORT = new QName(NAMESPACE, "Dokumentproduksjon_v3Port");

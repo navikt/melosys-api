@@ -11,10 +11,13 @@ import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
+import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service
+@Primary
 public class DokumentService {
 
     private BehandlingRepository behandlingRepository;
@@ -45,28 +48,27 @@ public class DokumentService {
      * Kaller Doksys for å produsere et dokumentutkast
      * @throws TekniskException 
      */
-    public byte[] produserUtkast(long behandlingID, String dokumenttypeID)
+    public byte[] produserUtkast(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        return produserDokument(behandlingID, dokumenttypeID, true);
+        return produserDokument(behandlingID, dokumentType, brevDataDto, true);
     }
 
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(long behandlingID, String dokumenttypeID) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        produserDokument(behandlingID, dokumenttypeID, false);
+    public void produserDokument(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        produserDokument(behandlingID, dokumentType, brevDataDto, false);
     }
 
-    private byte[] produserDokument(long behandlingID, String dokumenttypeID, boolean erUtkast) 
+    private byte[] produserDokument(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto, boolean erUtkast)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        DokumentType dokumentType = DokumentType.forKode(dokumenttypeID);
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
         }
 
-        DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(dokumentType, behandling);
-        Object brevData = brevDataService.lagBrevXML(dokumentType, behandling);
+        DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(dokumentType, behandling, brevDataDto);
+        Object brevData = brevDataService.lagBrevXML(dokumentType, behandling, brevDataDto);
 
         if (erUtkast) {
             return dokSysFasade.produserDokumentutkast(request, brevData);
