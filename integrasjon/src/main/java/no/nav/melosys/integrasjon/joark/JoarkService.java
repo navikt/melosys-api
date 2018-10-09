@@ -52,7 +52,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void ferdigstillJournalføring(String journalpostId) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
+    public void ferdigstillJournalføring(String journalpostId) throws FunksjonellException {
         FerdigstillJournalfoeringRequest request = new FerdigstillJournalfoeringRequest();
         request.setJournalpostId(journalpostId);
         request.setEnhetId(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
@@ -89,7 +89,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, IntegrasjonException {
+    public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
         HentJournalpostRequest request = new HentJournalpostRequest();
         request.setJournalpostId(journalpostID);
 
@@ -97,7 +97,7 @@ public class JoarkService implements JoarkFasade {
         try {
             hentJournalpostResponse = inngåendeJournalConsumer.hentJournalpost(request);
         } catch (HentJournalpostJournalpostIkkeFunnet e) {
-            throw new IkkeFunnetException(e.getMessage());
+            throw new IkkeFunnetException(e);
         } catch (HentJournalpostJournalpostIkkeInngaaende | HentJournalpostUgyldigInput e) {
             throw new FunksjonellException(e);
         } catch (HentJournalpostSikkerhetsbegrensning hentJournalpostSikkerhetsbegrensning) {
@@ -137,7 +137,7 @@ public class JoarkService implements JoarkFasade {
 
     @Override
     public void oppdaterJounalpost(String journalpostId, String dokumentID, Long gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, boolean medDokumentkategori)
-        throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
+        throws FunksjonellException {
         OppdaterJournalpostRequest request = new OppdaterJournalpostRequest();
         no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.InngaaendeJournalpost journalpost =
                 new no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.InngaaendeJournalpost();

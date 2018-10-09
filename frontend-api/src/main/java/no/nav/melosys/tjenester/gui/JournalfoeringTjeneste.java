@@ -40,6 +40,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @GET
     @Path("{journalpostID}")
     public Response hentJournalpostOpplysninger(@PathParam("journalpostID") String journalpostID) {
+        log.debug("Journalpost med ID {} hentes.", journalpostID);
         Journalpost journalpost;
         try {
             journalpost = journalføringService.hentJournalpost(journalpostID);
@@ -47,7 +48,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException(e.getMessage());
         } catch (IkkeFunnetException e) {
-            log.info("IkkeFunnetException: {}", e.getMessage());
+            log.warn("IkkeFunnetException: {}", e.getMessage());
             throw new NotFoundException(e.getMessage());
         } catch (TekniskException e) {
             log.error("TekniskException", e);
