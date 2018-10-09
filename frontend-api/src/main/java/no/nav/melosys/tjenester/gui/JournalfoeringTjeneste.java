@@ -5,8 +5,10 @@ import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.Journalpost;
-import no.nav.melosys.exception.*;
-import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
@@ -29,12 +31,9 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     
     private JournalfoeringService journalføringService;
 
-    private final Tilgang tilgang;
-
     @Autowired
-    public JournalfoeringTjeneste(JournalfoeringService journalføringService, Tilgang tilgang) {
+    public JournalfoeringTjeneste(JournalfoeringService journalføringService) {
         this.journalføringService = journalføringService;
-        this.tilgang = tilgang;
     }
 
     @GET
@@ -44,7 +43,6 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         Journalpost journalpost;
         try {
             journalpost = journalføringService.hentJournalpost(journalpostID);
-            tilgang.sjekk(journalpost);
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException(e.getMessage());
         } catch (IkkeFunnetException e) {
@@ -75,7 +73,6 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @Path("opprett")
     public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) {
         try {
-            tilgang.sjekk(journalfoeringDto);
             journalføringService.opprettSakOgJournalfør(journalfoeringDto);
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException("Ikke tilgang");
@@ -92,11 +89,10 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @Path("tilordne")
     public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) {
         try {
-            tilgang.sjekk(journalfoeringDto);
             journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException("Ikke tilgang");
-        } catch (FunksjonellException | IntegrasjonException e) {
+        } catch (FunksjonellException e) {
             throw new BadRequestException(e.getMessage());
         }
     }

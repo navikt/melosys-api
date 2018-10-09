@@ -43,7 +43,6 @@ public class DokumentTjeneste extends RestTjeneste {
         byte[] dokument;
 
         try {
-            tilgang.sjekkJournalId(journalpostID);
             dokument = dokumentService.hentDokument(journalpostID, dokumentID);
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException(e.getMessage());
@@ -70,7 +69,6 @@ public class DokumentTjeneste extends RestTjeneste {
         byte[] dokument;
 
         try {
-            tilgang.sjekk(behandlingID);
             DokumentType dokumentType = DokumentType.forKode(typeID);
             BrevDataDto brevDataDto = new BrevDataDto();
             brevDataDto.saksbehandler = SubjectHandler.getInstance().getUserID();

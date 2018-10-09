@@ -8,9 +8,9 @@ import no.nav.freg.abac.core.service.AbacService;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Journalpost;
-import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.sikkerhet.abac.Pep;
@@ -21,9 +21,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -58,11 +58,7 @@ public class TilgangTest {
         when(fagsakMocked.hentAktørMedRolleType(any())).thenReturn(new Aktoer());
         when(behandlingMocked.getFagsak()).thenReturn(fagsakMocked);
 
-
-        JoarkFasade joarkFasade = mock(JoarkFasade.class);
-        when(joarkFasade.hentJournalpost(any())).thenReturn(mock(Journalpost.class));
-
-        tilgang = new Tilgang(behandlingRepository, joarkFasade, pep);
+        tilgang = new Tilgang(behandlingRepository, pep);
     }
 
     @Test(expected = TekniskException.class)
@@ -98,17 +94,5 @@ public class TilgangTest {
     public void testFagsakIkkeTilgang() throws SikkerhetsbegrensningException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
         tilgang.sjekk(fagsakMocked);
-    }
-
-    @Test
-    public void testJournalOk() throws FunksjonellException, IntegrasjonException {
-        when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
-        tilgang.sjekkJournalId("JOURNAL-1");
-    }
-
-    @Test(expected = SikkerhetsbegrensningException.class)
-    public void testJournalIkkeTilgang() throws FunksjonellException, IntegrasjonException {
-        when(abacResponse.getDecision()).thenReturn(Decision.DENY);
-        tilgang.sjekkJournalId("JOURNAL-2");
     }
 }

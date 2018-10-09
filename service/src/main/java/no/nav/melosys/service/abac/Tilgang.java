@@ -1,13 +1,12 @@
 package no.nav.melosys.service.abac;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.sikkerhet.abac.Pep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,13 +15,11 @@ import org.springframework.stereotype.Service;
 public class Tilgang {
 
     private BehandlingRepository behandlingRepository;
-    private JoarkFasade joarkFasade;
     private Pep pep;
 
     @Autowired
-    public Tilgang(BehandlingRepository behandlingRepository, JoarkFasade joarkFasade, Pep pep) {
+    public Tilgang(BehandlingRepository behandlingRepository, Pep pep) {
         this.behandlingRepository = behandlingRepository;
-        this.joarkFasade = joarkFasade;
         this.pep = pep;
     }
 
@@ -46,19 +43,5 @@ public class Tilgang {
 
     public void sjekkFnr(String fnr) throws SikkerhetsbegrensningException {
         pep.sjekkTilgangTilFnr(fnr);
-    }
-
-    // Journal
-    public void sjekk(Journalpost journalpost) throws SikkerhetsbegrensningException, FunksjonellException, IntegrasjonException {
-        sjekkJournalId(journalpost.getBrukerId());
-    }
-
-    public void sjekk(JournalfoeringDto journalfoeringDto) throws SikkerhetsbegrensningException, FunksjonellException, IntegrasjonException {
-        sjekkJournalId(journalfoeringDto.getBrukerID());
-    }
-
-    public void sjekkJournalId(String journalId) throws SikkerhetsbegrensningException, FunksjonellException, IntegrasjonException {
-        Journalpost journalpost = joarkFasade.hentJournalpost(journalId);
-        pep.sjekkTilgangTilFnr(journalpost.getBrukerId());
     }
 }

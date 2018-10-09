@@ -1,14 +1,12 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
-
 import javax.ws.rs.core.Response;
 
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.domain.Journalpost;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
@@ -48,9 +46,6 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTest {
     @Mock
     private JournalfoeringService journalføringService;
 
-    @Mock
-    private Tilgang tilgang;
-
     @Override
     public String schemaNavn() {
         return this.schemaType;
@@ -58,7 +53,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTest {
 
     @Before
     public void setUp() {
-        tjeneste = new JournalfoeringTjeneste(journalføringService, tilgang);
+        tjeneste = new JournalfoeringTjeneste(journalføringService);
 
         random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
             .collectionSizeRange(1, 4).build();
