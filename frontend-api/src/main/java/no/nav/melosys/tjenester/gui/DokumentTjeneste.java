@@ -95,7 +95,7 @@ public class DokumentTjeneste extends RestTjeneste {
     @POST
     @Path("opprett/{behandlingID}/{typeID}")
     @ApiOperation(value = "produserer dokument for behandling og type")
-    public Response produserDokument(@PathParam("behandlingID") @ApiParam("behandlingID.") long behandlingID, @PathParam("typeID") @ApiParam("typeID.") String typeID) {
+    public Response produserDokument(@ApiParam @PathParam("behandlingID") long behandlingID, @ApiParam @PathParam("typeID") String typeID) {
         try {
             tilgang.sjekk(behandlingID);
             DokumentType dokumentType = DokumentType.forKode(typeID);

@@ -37,7 +37,7 @@ public class DokMotQueueTestRestTjeneste extends RestTjeneste {
     @ApiOperation(value = "motta tynnmelding fra test hub")
     @Consumes(MediaType.APPLICATION_XML)
     @Deprecated
-    public Response mottaTynnmeldingFraTestHub(@ApiParam("forsendelse informasjon.") ForsendelsesinformasjonDto  forsendelsesinformasjonDto) {
+    public Response mottaTynnmeldingFraTestHub(@ApiParam ForsendelsesinformasjonDto forsendelsesinformasjonDto) {
         service.mottaTynnmeldingFraTestHub(forsendelsesinformasjonDto);
         return Response.ok().build();
     }

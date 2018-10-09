@@ -52,7 +52,7 @@ public class OppgaveTjeneste extends RestTjeneste {
     @POST
     @Path("/plukk")
     @ApiOperation(value = "Plukker fra GSAK neste oppgave som saksbehandler skal arbeide med.", response = PlukketOppgaveDto.class)
-    public Response plukkOppgave(@ApiParam("Plukk Oppgave.") PlukkOppgaveInnDto plukkDto) {
+    public Response plukkOppgave(@ApiParam PlukkOppgaveInnDto plukkDto) {
         String ident = SubjectHandler.getInstance().getUserID();
 
         try {
@@ -93,7 +93,7 @@ public class OppgaveTjeneste extends RestTjeneste {
     @POST
     @Path("/tilbakelegge")
     @ApiOperation(value = "Legger tilbake oppgaven med gitt oppgaveId i GSAK.")
-    public Response leggTilbakeOppgave(@ApiParam("Tilbakeleggingsinformasjon.") TilbakeleggingDto tilbakelegging) {
+    public Response leggTilbakeOppgave(@ApiParam TilbakeleggingDto tilbakelegging) {
         String ident = SubjectHandler.getInstance().getUserID();
 
         try {
@@ -117,8 +117,7 @@ public class OppgaveTjeneste extends RestTjeneste {
     @Path("/oversikt")
     @ApiOperation(
         value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.",
-        response = OppgaveDto.class,
-        responseContainer = "List")
+        response = OppgaveOversiktDto.class)
     public Response mineOppgaver() {
         String ident = SubjectHandler.getInstance().getUserID();
         List<OppgaveDto> oppgaveDtoListe;

@@ -39,7 +39,7 @@ public class PersonTjeneste extends RestTjeneste {
 
     @GET
     @ApiOperation(value = "Henter en person fra TPS.", response = PersonDokument.class)
-    public Response getPerson(@QueryParam("fnr") @ApiParam("FNR ellers D-nummer.") String personnummer) {
+    public Response getPerson(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.") String personnummer) {
         if (personnummer == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }

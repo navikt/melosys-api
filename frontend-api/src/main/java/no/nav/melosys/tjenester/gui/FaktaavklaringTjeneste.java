@@ -37,24 +37,24 @@ public class FaktaavklaringTjeneste extends RestTjeneste {
 
     @GET
     @Path("{behandlingID}")
-    @ApiOperation(value = "Henter faktaavklaring for en gitt søknad")
-    public Response hentFaktaavklaring(@PathParam("behandlingID") @ApiParam("BehandlingID.") long behandlingID) {
+    @ApiOperation(value = "Henter faktaavklaring for en gitt søknad", response = String.class)
+    public Response hentFaktaavklaring(@ApiParam @PathParam("behandlingID") long behandlingID) {
         // TODO Mock. Venter på avklaringer
         return Response.ok().entity(jsonFaktaAvklaring).build();
     }
 
     @POST
     @Path("{behandlingID}")
-    @ApiOperation(value = "Lagrer faktaavklaring for en gitt søknad")
-    public Response utførFaktaavklaring(@PathParam("behandlingID") @ApiParam("BehandlingID.") long behandlingID, @ApiParam("faktaavklarins informasjon.") String body) {
+    @ApiOperation(value = "Lagrer faktaavklaring for en gitt søknad", response = String.class)
+    public Response utførFaktaavklaring(@ApiParam @PathParam("behandlingID") long behandlingID, @ApiParam String body) {
         // TODO Mock. Venter på avklaringer
         return Response.ok().entity(body).build();
     }
 
     @GET
     @Path("bosted/{behandlingID}")
-    @ApiOperation(value = "Henter bostedavklaring for et gitt bosted")
-    public Response hentBostedAvklaring(@PathParam("behandlingID") @ApiParam("BehandlingID.") long behandlingID) {
+    @ApiOperation(value = "Henter bostedavklaring for et gitt bosted", response = String.class)
+    public Response hentBostedAvklaring(@ApiParam @PathParam("behandlingID") long behandlingID) {
         // TODO Mock. Venter på avklaringer
         return Response.ok().entity(jsonBostedAvklaring).build();
     }

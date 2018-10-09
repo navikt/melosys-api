@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
 @Api(tags = { "saksopplysninger" })
@@ -50,10 +52,10 @@ public class SaksopplysningTjeneste extends RestTjeneste {
             return Response.status(NO_CONTENT).build();
         } catch (IkkeFunnetException e) {
             log.error("Behandling ikke funnet", e);
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(NOT_FOUND).build();
         } catch (TekniskException e) {
             log.error("Uventet teknisk Feil", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            return Response.status(INTERNAL_SERVER_ERROR).build();
         }
     }
 }

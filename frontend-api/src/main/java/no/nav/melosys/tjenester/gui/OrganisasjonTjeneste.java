@@ -37,7 +37,7 @@ public class OrganisasjonTjeneste extends RestTjeneste {
 
     @GET
     @ApiOperation(value = "Henter en organisasjon fra Enhetsregisteret.", response = OrganisasjonDokument.class)
-    public Response hentOrganisasjon(@QueryParam("orgnr") @ApiParam("orgnr.") String orgnummer) {
+    public Response hentOrganisasjon(@QueryParam("orgnr") @ApiParam("Organisasjonsnummer.") String orgnummer) {
         if (orgnummer == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }

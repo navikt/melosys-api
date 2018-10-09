@@ -75,7 +75,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @POST
     @Path("opprett")
     @ApiOperation(value = "Opprett sak og journalfør.")
-    public void opprettSakOgJournalfør(@ApiParam("Opprett journalføring.") JournalfoeringOpprettDto journalfoeringDto) {
+    public void opprettSakOgJournalfør(@ApiParam JournalfoeringOpprettDto journalfoeringDto) {
         try {
             journalføringService.opprettSakOgJournalfør(journalfoeringDto);
         } catch (SikkerhetsbegrensningException e) {
@@ -92,7 +92,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @POST
     @Path("tilordne")
     @ApiOperation(value = "Tilordne sak og journalfør.")
-    public void tilordneSakOgJournalfør(@ApiParam("Tilordne journalføring.") JournalfoeringTilordneDto journalfoeringDto) {
+    public void tilordneSakOgJournalfør(@ApiParam JournalfoeringTilordneDto journalfoeringDto) {
         try {
             journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
         } catch (SikkerhetsbegrensningException e) {

@@ -31,8 +31,8 @@ public class VurderingTjeneste extends RestTjeneste {
 
     @GET
     @Path("{behandlingID}")
-    @ApiOperation(value = "kalle regel modul.", response = FastsettLovvalgReply.class)
-    public Response regelModulKall(@PathParam("behandlingID") @ApiParam("behandlingID.") long behandlingID) {
+    @ApiOperation(value = "Kall regelmodul.", response = LovvalgDto.class)
+    public Response regelModulKall(@ApiParam @PathParam("behandlingID") long behandlingID) {
 
         FastsettLovvalgReply fastsettLovvalgReply = regelmodulService.fastsettLovvalg(behandlingID);
 

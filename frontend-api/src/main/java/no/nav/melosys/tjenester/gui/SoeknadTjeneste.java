@@ -46,8 +46,8 @@ public class SoeknadTjeneste extends RestTjeneste {
     @ApiOperation(
         value = "Henter en søknad som hører til en gitt behandling",
         notes = ("Spesifikke saker kan hentes via saksnummer."),
-        response = SoeknadDokument.class)
-    public Response hentSøknad(@PathParam("behandlingID") @ApiParam("behandlingID.") long behandlingID) {
+        response = SoeknadDto.class)
+    public Response hentSøknad(@ApiParam @PathParam("behandlingID") long behandlingID) {
         SoeknadDokument soeknadDokument;
 
         try {
@@ -75,8 +75,8 @@ public class SoeknadTjeneste extends RestTjeneste {
     @Path("{behandlingID}")
     @ApiOperation(
         value = "Tjeneste for å registrere opplysninger fra papirsøknaden manuelt.",
-        response = SoeknadDokument.class)
-    public SoeknadDto registrerSøknad(@PathParam("behandlingID") @ApiParam("behandlingID.") long behandlingID, @ApiParam("Søknadsdata.") SoeknadInnDto soeknadInnDto) {
+        response = SoeknadDto.class)
+    public SoeknadDto registrerSøknad(@ApiParam @PathParam("behandlingID") long behandlingID, @ApiParam SoeknadInnDto soeknadInnDto) {
         SoeknadDokument soeknadDokument = soeknadInnDto.getSoknadDokument();
 
         try {

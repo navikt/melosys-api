@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
-@Api(tags = {"Frontend-logger"})
+@Api(tags = {"frontend-logger"})
 @Path("/logger")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
@@ -24,7 +24,7 @@ public class FrontendLoggingTjeneste extends RestTjeneste {
     @POST
     @Path("/trace")
     @ApiOperation(value = "Logger trace-melding.", notes = ("Logger trace-melding."))
-    public Response frontendTraceLogging(@ApiParam("loggMelding") String loggMelding) {
+    public Response frontendTraceLogging(@ApiParam String loggMelding) {
         log.trace(loggMelding);
         return Response.ok().build();
     }
@@ -32,7 +32,7 @@ public class FrontendLoggingTjeneste extends RestTjeneste {
     @POST
     @Path("/debug")
     @ApiOperation(value = "Logger debug-melding.", notes = ("Logger debug-melding."))
-    public Response frontendDebugLogging(@ApiParam("loggMelding") String loggMelding) {
+    public Response frontendDebugLogging(@ApiParam String loggMelding) {
         log.debug(loggMelding);
         return Response.ok().build();
     }
@@ -40,7 +40,7 @@ public class FrontendLoggingTjeneste extends RestTjeneste {
     @POST
     @Path("/info")
     @ApiOperation(value = "Logger info-melding.", notes = ("Logger info-melding."))
-    public Response frontendInfoLogging(@ApiParam("loggMelding") String loggMelding) {
+    public Response frontendInfoLogging(@ApiParam String loggMelding) {
         log.info(loggMelding);
         return Response.ok().build();
     }
@@ -48,7 +48,7 @@ public class FrontendLoggingTjeneste extends RestTjeneste {
     @POST
     @Path("/warn")
     @ApiOperation(value = "Logger warn-melding.", notes = ("Logger warn-melding."))
-    public Response frontendWarnLogging(@ApiParam("loggMelding") String loggMelding) {
+    public Response frontendWarnLogging(@ApiParam String loggMelding) {
         log.warn(loggMelding);
         return Response.ok().build();
     }
@@ -56,7 +56,7 @@ public class FrontendLoggingTjeneste extends RestTjeneste {
     @POST
     @Path("/error")
     @ApiOperation(value = "Logger error-melding.", notes = ("Logger error-melding."))
-    public Response frontendErrorLogging(@ApiParam("loggMelding") String loggMelding) {
+    public Response frontendErrorLogging(@ApiParam String loggMelding) {
         log.error(loggMelding);
         return Response.ok().build();
     }
