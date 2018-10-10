@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avklartefakta;
 
 import no.nav.melosys.domain.Avklartefakta;
+import no.nav.melosys.domain.AvklartefaktaRegistrering;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,9 +9,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -32,7 +32,6 @@ public class AvklartefaktaDtoKonvertererTest {
         avklartefaktaDtoKonverterer = new AvklartefaktaDtoKonverterer(avklarteFaktaRepository);
 
         avklartefakta = new Avklartefakta();
-        avklartefakta.setRegistreringer(new HashSet<>());
 
         avklartefaktaDto = new AvklartefaktaDto(new ArrayList<>(Arrays.asList("Bosted")),"yrkestypevalgliste");
         avklartefaktaDto.setSubjektID("123456789");
@@ -51,7 +50,7 @@ public class AvklartefaktaDtoKonvertererTest {
     public void testOppdaterAvklartefaktaUtenBegrunnelse() {
         avklartefaktaDtoKonverterer.oppdaterAvklartefaktaFraDto(avklartefakta, avklartefaktaDto);
 
-      //  assertTrue(avklartefakta.getRegistreringer().size() == 0);
+        assertTrue(avklartefakta.getRegistreringer().size() == 0);
     }
 
     @Test
@@ -59,9 +58,9 @@ public class AvklartefaktaDtoKonvertererTest {
         avklartefaktaDto.setBegrunnelsekoder(new ArrayList<>(Arrays.asList("Opphold", "Familie")));
         avklartefaktaDtoKonverterer.oppdaterAvklartefaktaFraDto(avklartefakta, avklartefaktaDto);
 
-//        assertTrue(avklartefakta.getRegistreringer().size() == 2);
-//        avklartefakta.getRegistreringer().forEach(r -> assertFalse(r.getBegrunnelseKode().isEmpty()));
-//        avklartefakta.getRegistreringer().forEach(r -> assertNull(r.getBegrunnelseFritekst()));
+        assertTrue(avklartefakta.getRegistreringer().size() == 2);
+        avklartefakta.getRegistreringer().forEach(r -> assertFalse(r.getBegrunnelseKode().isEmpty()));
+        avklartefakta.getRegistreringer().forEach(r -> assertNull(r.getBegrunnelseFritekst()));
     }
 
     @Test
@@ -70,9 +69,29 @@ public class AvklartefaktaDtoKonvertererTest {
         avklartefaktaDto.setBegrunnelsefritekst(fritekst);
         avklartefaktaDtoKonverterer.oppdaterAvklartefaktaFraDto(avklartefakta, avklartefaktaDto);
 
-//        assertTrue(avklartefakta.getRegistreringer().size() == 1);
-//        avklartefakta.getRegistreringer().forEach(r -> assertEquals(r.getBegrunnelseFritekst(), fritekst));
-//        avklartefakta.getRegistreringer().forEach(r -> assertNull(r.getBegrunnelseKode()));
+        assertTrue(avklartefakta.getRegistreringer().size() == 1);
+        avklartefakta.getRegistreringer().forEach(r -> assertEquals(r.getBegrunnelseFritekst(), fritekst));
+        avklartefakta.getRegistreringer().forEach(r -> assertNull(r.getBegrunnelseKode()));
+    }
+
+    @Test
+    public void testOppdaterMedEkstraRegistrering() throws NoSuchFieldException, IllegalAccessException {
+        String opphold1 = new String("Opphold");
+        String opphold2 = new String("Opphold");
+        String familie = new String("Familie");
+
+        Avklartefakta avklartefakta = new Avklartefakta();
+        AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
+        registrering.setBegrunnelseKode(opphold1);
+        registrering.setAvklartefakta(avklartefakta);
+
+        avklartefakta.setRegistreringer(new HashSet<>(Arrays.asList(registrering)));
+
+        avklartefaktaDto.setBegrunnelsekoder(new ArrayList<>(Arrays.asList(opphold2, familie)));
+        avklartefaktaDtoKonverterer.oppdaterAvklartefaktaFraDto(avklartefakta, avklartefaktaDto);
+
+        assertTrue(avklartefakta.getRegistreringer().size() == 2);
+        assertTrue(avklartefakta.getRegistreringer().contains(registrering));
     }
 
     @Test

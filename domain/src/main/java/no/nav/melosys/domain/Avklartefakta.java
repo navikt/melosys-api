@@ -78,6 +78,12 @@ public class Avklartefakta {
     }
 
     public void oppdaterRegistreringer(Set<AvklartefaktaRegistrering> nyeRegistreringer) {
+        if (this.registreringer == null) {
+            this.registreringer = nyeRegistreringer;
+            return;
+        }
+
+        nyeRegistreringer.forEach(r -> this.registreringer.add(r));
         this.registreringer.retainAll(nyeRegistreringer);
     }
 

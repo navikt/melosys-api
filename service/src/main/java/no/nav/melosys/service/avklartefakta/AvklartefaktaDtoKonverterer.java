@@ -57,7 +57,6 @@ public class AvklartefaktaDtoKonverterer {
                 avklartefakta.oppdaterRegistreringer(registreringer);
             }
         }
-        avklartefakta.setRegistreringer(registreringer);
     }
 
     private AvklartefaktaRegistrering lagFaktaregistrering() {
