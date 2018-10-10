@@ -9,12 +9,14 @@ import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@Component
+@Configuration
+@EnableSwagger2
 @Profile("test")
 public class SwaggerConfig implements
     ApplicationListener<ContextRefreshedEvent> {
