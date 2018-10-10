@@ -92,6 +92,7 @@
         <restFixture.version>4.4</restFixture.version>
         <servlet-api.version>3.1.0</servlet-api.version>
         <slf4j.version>1.7.25</slf4j.version>
+        <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.13</swagger.version>
 
 		</properties>
@@ -323,6 +324,16 @@
                         <artifactId>jsr311-api</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${springfox.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger-ui</artifactId>
+                <version>${springfox.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger</groupId>

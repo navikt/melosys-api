@@ -32,8 +32,10 @@ public class SaksbehandlerTjeneste extends RestTjeneste {
 
     @GET
     @Abac(bias = Decision.DENY, actions = @Abac.Attr(key = ACTION_ID, value = PepImpl.READ))
-    @ApiOperation(value = "Returnerer fullt navn for ident",
-                  notes = ("Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging."))
+    @ApiOperation(
+        value = "Returnerer fullt navn for ident",
+        notes = ("Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging."),
+        response = InnloggetBrukerDto.class)
     public InnloggetBrukerDto innloggetBruker() {
         String ident = SubjectHandler.getInstance().getUserID();
 

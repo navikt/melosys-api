@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -36,24 +37,24 @@ public class FaktaavklaringTjeneste extends RestTjeneste {
 
     @GET
     @Path("{behandlingID}")
-    @ApiOperation(value = "Henter faktaavklaring for en gitt søknad")
-    public Response hentFaktaavklaring(@PathParam("behandlingID") long behandlingID) {
+    @ApiOperation(value = "Henter faktaavklaring for en gitt søknad", response = String.class)
+    public Response hentFaktaavklaring(@ApiParam @PathParam("behandlingID") long behandlingID) {
         // TODO Mock. Venter på avklaringer
         return Response.ok().entity(jsonFaktaAvklaring).build();
     }
 
     @POST
     @Path("{behandlingID}")
-    @ApiOperation(value = "Lagrer faktaavklaring for en gitt søknad")
-    public Response utførFaktaavklaring(@PathParam("behandlingID") long behandlingID, String body) {
+    @ApiOperation(value = "Lagrer faktaavklaring for en gitt søknad", response = String.class)
+    public Response utførFaktaavklaring(@ApiParam @PathParam("behandlingID") long behandlingID, @ApiParam String body) {
         // TODO Mock. Venter på avklaringer
         return Response.ok().entity(body).build();
     }
 
     @GET
     @Path("bosted/{behandlingID}")
-    @ApiOperation(value = "Henter bostedavklaring for et gitt bosted")
-    public Response hentBostedAvklaring(@PathParam("behandlingID") long behandlingID) {
+    @ApiOperation(value = "Henter bostedavklaring for et gitt bosted", response = String.class)
+    public Response hentBostedAvklaring(@ApiParam @PathParam("behandlingID") long behandlingID) {
         // TODO Mock. Venter på avklaringer
         return Response.ok().entity(jsonBostedAvklaring).build();
     }

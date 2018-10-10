@@ -6,7 +6,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.regler.api.lovvalg.rep.*;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import no.nav.melosys.regler.api.lovvalg.rep.FastsettLovvalgReply;
 import no.nav.melosys.service.RegelmodulService;
 import no.nav.melosys.tjenester.gui.dto.LovvalgDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,8 @@ public class VurderingTjeneste extends RestTjeneste {
 
     @GET
     @Path("{behandlingID}")
-    public Response regelModulKall(@PathParam("behandlingID") long behandlingID) {
+    @ApiOperation(value = "Kall regelmodul.", response = LovvalgDto.class)
+    public Response regelModulKall(@ApiParam @PathParam("behandlingID") long behandlingID) {
 
         FastsettLovvalgReply fastsettLovvalgReply = regelmodulService.fastsettLovvalg(behandlingID);
 

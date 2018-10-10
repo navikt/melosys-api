@@ -72,8 +72,8 @@ public class FagsakTjeneste extends RestTjeneste {
 
     @GET
     @Path("{saksnr}")
-    @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."))
-    public Response hentFagsak(@PathParam("saksnr") @ApiParam("Saksnummer.") String saksnummer) {
+    @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."), response = Fagsak.class)
+    public Response hentFagsak(@ApiParam @PathParam("saksnr") String saksnummer) {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         if (sak == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -94,7 +94,7 @@ public class FagsakTjeneste extends RestTjeneste {
     @Deprecated // FIXME Trengs av test så langt
     @GET
     @Path("ny/{fnr}")
-    @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.")
+    @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.", response = String.class)
     public Response nyFagsakSikret(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
         try {
             Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, Behandlingstype.SØKNAD);
@@ -116,7 +116,11 @@ public class FagsakTjeneste extends RestTjeneste {
 
     @GET
     @Path("/sok")
-    @ApiOperation(value = "Søk etter saker på fødselsnummer eller d-nummer", notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."))
+    @ApiOperation(
+        value = "Søk etter saker på fødselsnummer eller d-nummer",
+        notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."),
+        response = FagsakOppsummeringDto.class,
+        responseContainer = "List")
     public List<FagsakOppsummeringDto> hentFagsaker(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
         Iterable<Fagsak> saker;
 

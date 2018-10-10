@@ -7,6 +7,7 @@ import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -35,8 +36,8 @@ public class OrganisasjonTjeneste extends RestTjeneste {
     }
 
     @GET
-    @ApiOperation(value = "Henter en organisasjon fra Enhetsregisteret.")
-    public Response hentOrganisasjon(@QueryParam("orgnr") String orgnummer) {
+    @ApiOperation(value = "Henter en organisasjon fra Enhetsregisteret.", response = OrganisasjonDokument.class)
+    public Response hentOrganisasjon(@QueryParam("orgnr") @ApiParam("Organisasjonsnummer.") String orgnummer) {
         if (orgnummer == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
