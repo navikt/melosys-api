@@ -1,7 +1,6 @@
 package no.nav.melosys.domain;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -34,7 +33,7 @@ public class Behandling {
     private Instant endretDato;
 
     @Column(name = "siste_opplysninger_hentet_dato", updatable = true)
-    private LocalDateTime sisteOpplysningerHentetDato;
+    private Instant sisteOpplysningerHentetDato;
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
@@ -86,11 +85,11 @@ public class Behandling {
         this.endretDato = endretDato;
     }
 
-    public LocalDateTime getSistOpplysningerHentetDato() {
+    public Instant getSistOpplysningerHentetDato() {
         return sisteOpplysningerHentetDato;
     }
 
-    public void setSisteOpplysningerHentetDato(LocalDateTime sisteOpplysningerHentetDato) {
+    public void setSisteOpplysningerHentetDato(Instant sisteOpplysningerHentetDato) {
         this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
     }
 

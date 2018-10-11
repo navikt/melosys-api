@@ -10,7 +10,10 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
@@ -78,13 +81,16 @@ public class OppgaveService {
             BehandlingsoppgaveDto behOppgaveDto = new BehandlingsoppgaveDto();
             Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
             if (fagsak == null) {
-                throw new RuntimeException("Fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer() + " ikke funnet!");
+                throw new TekniskException("Fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer() + " ikke funnet!");
             }
 
             behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
             behOppgaveDto.setSakstypeKode(fagsak.getType().getKode());
 
             Behandling behandling = fagsak.getAktivBehandling();
+            if (behandling == null) {
+                throw new TekniskException("Det finnes ingen aktiv behandling.");
+            }
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 
             hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
@@ -116,19 +122,17 @@ public class OppgaveService {
 
     private BehandlingDto mapBehandling(Behandling behandling) {
         BehandlingDto behandlingDto = new BehandlingDto();
-        if (behandling == null) {
-            throw new RuntimeException("Det finnes ingen aktive behandlinger");
+        behandlingDto.setBehandlingID(behandling.getId());
+        behandlingDto.setBehandlingsstatus(behandling.getStatus());
+        behandlingDto.setBehandlingType(behandling.getType());
+        behandlingDto.setEndretDato(behandling.getEndretDato());
+        behandlingDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
+
+        Optional<Prosessinstans> prosessinstans = prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(ProsessType.OPPFRISKNING, behandling.getId());
+        if (prosessinstans.isPresent()) {
+            behandlingDto.setErUnderOppdatering(true);
         } else {
-            behandlingDto.setBehandlingID(behandling.getId());
-            behandlingDto.setBehandlingsstatus(behandling.getStatus());
-            behandlingDto.setBehandlingType(behandling.getType());
-            behandlingDto.setEndretDato(behandling.getEndretDato());
-            Optional<Prosessinstans> prosessinstans = prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(ProsessType.OPPFRISKNING, behandling.getId());
-            if (prosessinstans.isPresent()) {
-                behandlingDto.setErUnderOppdatering(true);
-            } else {
-                behandlingDto.setErUnderOppdatering(false);
-            }
+            behandlingDto.setErUnderOppdatering(false);
         }
         return behandlingDto;
     }
