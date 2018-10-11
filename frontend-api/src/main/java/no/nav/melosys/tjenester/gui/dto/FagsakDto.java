@@ -11,7 +11,7 @@ public class FagsakDto {
 
     private String saksnummer;
     private Long gsakSaksnummer;
-    private Fagsakstype type;
+    private Fagsakstype sakstype;
     private Fagsaksstatus status;
     private Instant registrertDato;
     private Instant endretDato;
@@ -37,12 +37,12 @@ public class FagsakDto {
         this.gsakSaksnummer = gsakSaksnummer;
     }
 
-    public Fagsakstype getType() {
-        return type;
+    public Fagsakstype getSakstype() {
+        return sakstype;
     }
 
-    public void setType(Fagsakstype type) {
-        this.type = type;
+    public void setSakstype(Fagsakstype sakstype) {
+        this.sakstype = sakstype;
     }
 
     public Fagsaksstatus getStatus() {

@@ -5,20 +5,18 @@ import java.time.Instant;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({"ID", "tittel", "mottattDato"})
+@JsonPropertyOrder({"dokumentID", "tittel", "mottattDato"})
 public class DokumentDto {
-    private String ID;
+    private String dokumentID;
     private String tittel;
     private Instant mottattDato;
 
-
-    @JsonProperty("ID")
-    public String getID() {
-        return ID;
+    public String getDokumentID() {
+        return dokumentID;
     }
 
-    public void setID(String ID) {
-        this.ID = ID;
+    public void setDokumentID(String dokumentID) {
+        this.dokumentID = dokumentID;
     }
 
     public Instant getMottattDato() {

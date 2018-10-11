@@ -5,11 +5,15 @@ import java.util.Collection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.jackson.JacksonModule;
+import no.nav.melosys.tjenester.gui.jackson.serialize.MedlemsperiodeSerializer;
 import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -86,8 +90,11 @@ public abstract class JsonSchemaTest {
             objectMapperMedKodeverkServiceStub.configure(SerializationFeature.INDENT_OUTPUT, true);
             objectMapperMedKodeverkServiceStub.registerModule(new JavaTimeModule());
             KodeverkService kodeverkService = mock(KodeverkService.class);
-            when(kodeverkService.dekod(any(),any(),any())).thenReturn("DUMMY");
+            when(kodeverkService.dekod(any(), any(), any())).thenReturn("DUMMY");
+            when(kodeverkService.getKodeverdi(any(), any())).thenReturn(new KodeDto("DUMMY", "DUMMY"));
             objectMapperMedKodeverkServiceStub.registerModule(new JacksonModule(kodeverkService));
+            SimpleModule simpleModule = new SimpleModule().addSerializer(new MedlemsperiodeSerializer(kodeverkService));
+            objectMapperMedKodeverkServiceStub.registerModule(simpleModule);
         }
         return objectMapperMedKodeverkServiceStub;
     }
