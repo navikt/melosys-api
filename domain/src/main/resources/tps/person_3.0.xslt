@@ -78,6 +78,10 @@
                         <husnummer><xsl:value-of select="strukturertAdresse/husnummer"/></husnummer>
                         <husbokstav><xsl:value-of select="strukturertAdresse/husbokstav"/></husbokstav>
                     </gateadresse>
+                    <poststed><xsl:value-of select="strukturertAdresse/poststed"/></poststed>
+                    <land>
+                        <kode><xsl:value-of select="strukturertAdresse/landkode"/></kode>
+                    </land>
                 </xsl:when>
             </xsl:choose>
         </midlertidigPostadresse>
