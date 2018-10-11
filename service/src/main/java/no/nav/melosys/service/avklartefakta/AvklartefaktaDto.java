@@ -1,20 +1,20 @@
 package no.nav.melosys.service.avklartefakta;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.Avklartefakta;
 import no.nav.melosys.domain.AvklartefaktaType;
 import no.nav.melosys.domain.AvklartefaktaRegistrering;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 public class AvklartefaktaDto {
     private String subjektID;
 
-    private AvklartefaktaType avklartefaktaKode;
+    private AvklartefaktaType avklartefakta;
 
     private String referanse;
 
@@ -32,12 +32,18 @@ public class AvklartefaktaDto {
         this.subjektID = subjektID;
     }
 
-    public AvklartefaktaType getAvklartefaktaKode() {
-        return avklartefaktaKode;
+    public AvklartefaktaType getAvklartefakta() {
+        return avklartefakta;
     }
 
-    public void setAvklartefaktaKode(AvklartefaktaType avklartefaktaKode) {
-        this.avklartefaktaKode = avklartefaktaKode;
+    @JsonProperty("avklartefaktakode")
+    public String getAvklartefaktakodeKunKode() {
+        return avklartefakta.getKode();
+    }
+
+    @JsonProperty("avklartefaktakode")
+    public void setAvklartefakta(AvklartefaktaType avklartefakta) {
+        this.avklartefakta = avklartefakta;
     }
 
     public String getReferanse() {
@@ -64,10 +70,6 @@ public class AvklartefaktaDto {
         this.begrunnelsekoder = begrunnelsekoder;
     }
 
-    public boolean harBegrunnelsefritekst() {
-        return begrunnelsefritekst != null && !begrunnelsefritekst.isEmpty();
-    }
-
     public boolean harBegrunnelseKoder() {
         return begrunnelsekoder != null && !begrunnelsekoder.isEmpty();
     }
@@ -89,7 +91,7 @@ public class AvklartefaktaDto {
 
     public AvklartefaktaDto(Avklartefakta avklartefakta) {
         this.subjektID = avklartefakta.getSubjekt();
-        this.avklartefaktaKode = avklartefakta.getAvklartefaktakode();
+        this.avklartefakta = avklartefakta.getAvklartefaktaType();
         this.referanse = avklartefakta.getReferanse();
         this.begrunnelsefritekst = avklartefakta.getBegrunnelseFritekst();
 

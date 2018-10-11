@@ -1,29 +1,19 @@
 package no.nav.melosys.service.avklartefakta;
 
-import no.nav.melosys.domain.Avklartefakta;
-import no.nav.melosys.domain.AvklartefaktaRegistrering;
-import no.nav.melosys.repository.AvklarteFaktaRepository;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.Avklartefakta;
+import no.nav.melosys.domain.AvklartefaktaRegistrering;
+import org.springframework.stereotype.Component;
+
 @Component
 public class AvklartefaktaDtoKonverterer {
 
-    private AvklarteFaktaRepository avklarteFaktaRepository;
-
-    @Autowired
-    public AvklartefaktaDtoKonverterer(AvklarteFaktaRepository avklarteFaktaRepository) {
-        this.avklarteFaktaRepository = avklarteFaktaRepository;
-    }
-
     public void oppdaterAvklartefaktaFraDto(Avklartefakta avklartefakta, AvklartefaktaDto avklarteFaktaDto) {
         avklartefakta.setSubjekt(avklarteFaktaDto.getSubjektID());
-        avklartefakta.setAvklartefaktakode(avklarteFaktaDto.getAvklartefaktaKode());
+        avklartefakta.setAvklartefaktakode(avklarteFaktaDto.getAvklartefakta());
         avklartefakta.setReferanse(avklarteFaktaDto.getReferanse());
         avklartefakta.setBegrunnelseFritekst(avklarteFaktaDto.getBegrunnelsefritekst());
 
@@ -43,9 +33,9 @@ public class AvklartefaktaDtoKonverterer {
                 registrering.setAvklartefakta(avklartefakta);
 
                 registreringer.add(registrering);
-                avklartefakta.oppdaterRegistreringer(registreringer);
             }
         }
+        avklartefakta.oppdaterRegistreringer(registreringer);
     }
 
     public Set<AvklartefaktaDto> lagDtoFraAvklartefakta(Set<Avklartefakta> avklartefakta) {

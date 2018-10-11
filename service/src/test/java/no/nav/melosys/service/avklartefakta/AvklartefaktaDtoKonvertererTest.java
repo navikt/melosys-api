@@ -5,11 +5,10 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Avklartefakta;
 import no.nav.melosys.domain.AvklartefaktaRegistrering;
-import no.nav.melosys.repository.AvklarteFaktaRepository;
+import no.nav.melosys.domain.AvklartefaktaType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.*;
@@ -23,12 +22,9 @@ public class AvklartefaktaDtoKonvertererTest {
 
     private AvklartefaktaDto avklartefaktaDto;
 
-    @Mock
-    private AvklarteFaktaRepository avklarteFaktaRepository;
-
     @Before
     public void setup() {
-        avklartefaktaDtoKonverterer = new AvklartefaktaDtoKonverterer(avklarteFaktaRepository);
+        avklartefaktaDtoKonverterer = new AvklartefaktaDtoKonverterer();
 
         avklartefakta = new Avklartefakta();
 
@@ -41,7 +37,7 @@ public class AvklartefaktaDtoKonvertererTest {
         avklartefaktaDtoKonverterer.oppdaterAvklartefaktaFraDto(avklartefakta, avklartefaktaDto);
 
         assertEquals(avklartefakta.getSubjekt(), avklartefaktaDto.getSubjektID());
-        assertEquals(avklartefakta.getAvklartefaktakode(), avklartefaktaDto.getAvklartefaktaKode());
+        assertEquals(avklartefakta.getAvklartefaktaType(), avklartefaktaDto.getAvklartefakta());
         assertEquals(avklartefakta.getFakta(), avklartefaktaDto.getFakta().stream().collect(Collectors.joining(" ")));
         assertEquals(avklartefakta.getBegrunnelseFritekst(), avklartefaktaDto.getBegrunnelsefritekst());
     }
@@ -95,6 +91,34 @@ public class AvklartefaktaDtoKonvertererTest {
 
     @Test
     public void lagDtoFraAvklartefakta() {
+        String referanse = "Referenase";
+        String subjektID = "SubjektID";
+        String fakta = "NO";
+        AvklartefaktaType type = AvklartefaktaType.BOSTEDSLAND;
+        String begrunnelsekode = "Begrunnelse";
+        String begrunnelsefritekst = "Fritekst";
 
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setReferanse(referanse);
+        avklartefakta.setSubjekt(subjektID);
+        avklartefakta.setFakta(fakta);
+        avklartefakta.setAvklartefaktakode(type);
+        avklartefakta.setBegrunnelseFritekst(begrunnelsefritekst);
+
+        AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
+        registrering.setAvklartefakta(avklartefakta);
+        registrering.setBegrunnelseKode(begrunnelsekode);
+        avklartefakta.setRegistreringer(new HashSet<>(Arrays.asList(registrering)));
+
+        Set<Avklartefakta> avklartefaktaSet = new HashSet<>(Arrays.asList(avklartefakta));
+        Set<AvklartefaktaDto> avklartefaktaDtoSet = avklartefaktaDtoKonverterer.lagDtoFraAvklartefakta(avklartefaktaSet);
+
+        AvklartefaktaDto dto = avklartefaktaDtoSet.stream().findFirst().get();
+        assertEquals(referanse, dto.getReferanse());
+        assertEquals(subjektID, dto.getSubjektID());
+        assertEquals(Arrays.asList(fakta), dto.getFakta());
+        assertEquals(type, dto.getAvklartefakta());
+        assertEquals(Arrays.asList(begrunnelsekode), dto.getBegrunnelsekoder());
+        assertEquals(begrunnelsefritekst, dto.getBegrunnelsefritekst());
     }
 }

@@ -1,16 +1,17 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.Arrays;
+import java.util.Set;
 
-import no.nav.melosys.domain.Avklartefakta;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,47 +19,41 @@ import no.nav.melosys.service.abac.Tilgang;
 
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class AvklartefaktaTjenesteTest extends JsonSchemaTest {
 
     private static final Logger log = LoggerFactory.getLogger(AvklartefaktaTjenesteTest.class);
 
-    @InjectMocks
-    private AvklarteFaktaTjeneste avklartefaktaTjeneste;
+    private static final String AVKLARTEFAKTA_SCHEMA = "avklartefakta-schema.json";
+
+    private AvklartefaktaTjeneste avklartefaktaTjeneste;
 
     @Mock
-    private BehandlingService behandlingService;
+    private AvklartefaktaService avklartefaktaService;
+
+    @Mock
+    private Tilgang tilgang;
 
     @Override
     public String schemaNavn() {
-        return "soknad-schema.json";
+        return AVKLARTEFAKTA_SCHEMA;
     }
 
     @Before
     public void setUp()  {
-
-        Tilgang tilgang = mock(Tilgang.class);
-    }
-
-    @Captor ArgumentCaptor<Avklartefakta> avklartefakta;
-    @Test
-    public void testPostBostedAvklaring() {
-        String[] bostedLand = {"NO"};
-        String begrunnelse = "Familie";
-
-        AvklartefaktaDto avklartefaktaDto = mock(AvklartefaktaDto.class);
-        avklartefaktaDto.setFakta(Arrays.asList(bostedLand));
-        avklartefaktaDto.setBegrunnelsefritekst(begrunnelse);
-
-        //avklartefaktaTjeneste.postBostedAvklaring(1234567, bosted);
-
-        //verify(behandlingService).lagreAvklarteFakta(avklartefakta.capture());
-        //assertEquals(avklartefakta.getValue().getBostedsland(),bostedLand);
+        avklartefaktaTjeneste = new AvklartefaktaTjeneste(avklartefaktaService, tilgang);
     }
 
     @Test
-    public void avklartefaktaSchemaValidering()  {
+    @Ignore  // Mangler schema
+    public void hentAvklartefakta() throws IkkeFunnetException {
+        Set<AvklartefaktaDto> mockliste = defaultEnhancedRandom().randomSetOf(4, AvklartefaktaDto.class);
+        when(avklartefaktaService.hentAvklarteFakta(1L)).thenReturn(mockliste);
 
+        Set<AvklartefaktaDto> avklartefaktaDtoSet = avklartefaktaTjeneste.hentFaktaavklaringer(1L);
+        //validerListe(avklartefaktaDtoSet);
     }
 }
 

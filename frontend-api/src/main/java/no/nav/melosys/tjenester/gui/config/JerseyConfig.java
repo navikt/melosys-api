@@ -21,7 +21,7 @@ public class JerseyConfig extends ResourceConfig {
         register(DokMotQueueTestRestTjeneste.class);
         register(DokumentTjeneste.class);
         register(FagsakTjeneste.class);
-        register(AvklarteFaktaTjeneste.class);
+        register(AvklartefaktaTjeneste.class);
         register(FrontendLoggingTjeneste.class);
         register(InngangTjeneste.class);
         register(JournalfoeringTjeneste.class);

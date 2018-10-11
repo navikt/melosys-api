@@ -29,7 +29,9 @@ public class AvklartefaktaRegistrering extends RegistreringsInfo {
         this.avklartefakta = avklartefakta;
     }
 
-    public String getBegrunnelseKode() { return begrunnelseKode; }
+    public String getBegrunnelseKode() {
+        return begrunnelseKode;
+    }
 
     public void setBegrunnelseKode(String begrunnelseKode) {
         this.begrunnelseKode = begrunnelseKode;

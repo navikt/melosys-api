@@ -7,7 +7,7 @@ CREATE TABLE avklartefakta (
     fakta                         VARCHAR2(99) NULL,
     begrunnelse_fritekst          VARCHAR2(4000) NULL,
     CONSTRAINT pk_avklartefakta PRIMARY KEY (id),
-    CONSTRAINT unique_avklartefakta UNIQUE(beh_resultat_id, type),
+    CONSTRAINT unique_avklartefakta UNIQUE(beh_resultat_id, type, subjekt),
     CONSTRAINT unique_referanse UNIQUE(beh_resultat_id, referanse)
 );
 

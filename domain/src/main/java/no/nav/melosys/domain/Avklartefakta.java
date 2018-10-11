@@ -34,8 +34,7 @@ public class Avklartefakta {
     private String begrunnelseFritekst;
 
     @OneToMany(mappedBy = "avklartefakta", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AvklartefaktaRegistrering> registreringer;
-
+    private Set<AvklartefaktaRegistrering> registreringer = new HashSet<>();
 
     public Behandlingsresultat getBehandlingsresultat() {
         return behandlingsresultat;
@@ -45,7 +44,7 @@ public class Avklartefakta {
         this.behandlingsresultat = behandlingsresultat;
     }
 
-    public AvklartefaktaType getAvklartefaktakode() {
+    public AvklartefaktaType getAvklartefaktaType() {
         return type;
     }
 
@@ -90,19 +89,11 @@ public class Avklartefakta {
     }
 
     public void oppdaterRegistreringer(Set<AvklartefaktaRegistrering> nyeRegistreringer) {
-        if (this.registreringer == null) {
-            this.registreringer = nyeRegistreringer;
-            return;
-        }
-
         nyeRegistreringer.forEach(r -> this.registreringer.add(r));
         this.registreringer.retainAll(nyeRegistreringer);
     }
 
     public Set<AvklartefaktaRegistrering> getRegistreringer() {
-        if (registreringer == null) {
-            return new HashSet<>();
-        }
         return registreringer;
     }
 
@@ -115,9 +106,12 @@ public class Avklartefakta {
             return false;
         }
         Avklartefakta that = (Avklartefakta) o;
+
+        boolean unikAvklartefakta = Objects.equals(this.type, that.getAvklartefaktaType()) &&
+                                    Objects.equals(this.subjekt, that.getSubjekt());
+
         return Objects.equals(this.behandlingsresultat, that.getBehandlingsresultat()) &&
-                (Objects.equals(this.referanse, that.getReferanse()) ||
-                Objects.equals(this.type, that.getAvklartefaktakode()));
+                (unikAvklartefakta || Objects.equals(this.referanse, that.getReferanse()));
     }
 
     @Override
