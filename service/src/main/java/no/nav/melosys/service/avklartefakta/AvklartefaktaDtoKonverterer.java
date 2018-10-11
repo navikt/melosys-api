@@ -25,6 +25,7 @@ public class AvklartefaktaDtoKonverterer {
         avklartefakta.setSubjekt(avklarteFaktaDto.getSubjektID());
         avklartefakta.setAvklartefaktakode(avklarteFaktaDto.getAvklartefaktaKode());
         avklartefakta.setReferanse(avklarteFaktaDto.getReferanse());
+        avklartefakta.setBegrunnelseFritekst(avklarteFaktaDto.getBegrunnelsefritekst());
 
         String fakta = avklarteFaktaDto.getFakta().stream().collect(Collectors.joining(" "));
         avklartefakta.setFakta(fakta);
@@ -35,21 +36,9 @@ public class AvklartefaktaDtoKonverterer {
     private void oppdaterFaktaregistreringer(Avklartefakta avklartefakta, AvklartefaktaDto avklarteFaktaDto) {
         Set<AvklartefaktaRegistrering> registreringer = new HashSet<>();
 
-        if (avklarteFaktaDto.harBegrunnelsefritekst()) {
-            AvklartefaktaRegistrering registrering = lagFaktaregistrering();
-            registrering.setAvklartefakta(avklartefakta);
-            registrering.setBegrunnelseFritekst(avklarteFaktaDto.getBegrunnelsefritekst());
-
-            registreringer.add(registrering);
-            avklartefakta.oppdaterRegistreringer(registreringer);
-
-            // Kun interessert i begrunnelseskoder eller kun fritekst
-            return;
-        }
-
         if (avklarteFaktaDto.harBegrunnelseKoder()) {
             for (String begrunnelse : avklarteFaktaDto.getBegrunnelsekoder()) {
-                AvklartefaktaRegistrering registrering = lagFaktaregistrering();
+                AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
                 registrering.setBegrunnelseKode(begrunnelse);
                 registrering.setAvklartefakta(avklartefakta);
 
@@ -57,15 +46,6 @@ public class AvklartefaktaDtoKonverterer {
                 avklartefakta.oppdaterRegistreringer(registreringer);
             }
         }
-    }
-
-    private AvklartefaktaRegistrering lagFaktaregistrering() {
-        String ident = SubjectHandler.getInstance().getUserID();
-
-        AvklartefaktaRegistrering avklartefaktaRegistrering = new AvklartefaktaRegistrering();
-        avklartefaktaRegistrering.setRegistrertAv(ident);
-
-        return avklartefaktaRegistrering;
     }
 
     public Set<AvklartefaktaDto> lagDtoFraAvklartefakta(Set<Avklartefakta> avklartefakta) {

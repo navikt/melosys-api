@@ -1,5 +1,8 @@
 package no.nav.melosys.service.avklartefakta;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 import no.nav.melosys.domain.Avklartefakta;
 import no.nav.melosys.domain.AvklartefaktaRegistrering;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
@@ -8,10 +11,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -44,6 +43,7 @@ public class AvklartefaktaDtoKonvertererTest {
         assertEquals(avklartefakta.getSubjekt(), avklartefaktaDto.getSubjektID());
         assertEquals(avklartefakta.getAvklartefaktakode(), avklartefaktaDto.getAvklartefaktaKode());
         assertEquals(avklartefakta.getFakta(), avklartefaktaDto.getFakta().stream().collect(Collectors.joining(" ")));
+        assertEquals(avklartefakta.getBegrunnelseFritekst(), avklartefaktaDto.getBegrunnelsefritekst());
     }
 
     @Test
@@ -60,7 +60,6 @@ public class AvklartefaktaDtoKonvertererTest {
 
         assertTrue(avklartefakta.getRegistreringer().size() == 2);
         avklartefakta.getRegistreringer().forEach(r -> assertFalse(r.getBegrunnelseKode().isEmpty()));
-        avklartefakta.getRegistreringer().forEach(r -> assertNull(r.getBegrunnelseFritekst()));
     }
 
     @Test
@@ -69,8 +68,8 @@ public class AvklartefaktaDtoKonvertererTest {
         avklartefaktaDto.setBegrunnelsefritekst(fritekst);
         avklartefaktaDtoKonverterer.oppdaterAvklartefaktaFraDto(avklartefakta, avklartefaktaDto);
 
-        assertTrue(avklartefakta.getRegistreringer().size() == 1);
-        avklartefakta.getRegistreringer().forEach(r -> assertEquals(r.getBegrunnelseFritekst(), fritekst));
+        avklartefaktaDto.setBegrunnelsefritekst("Begrunnelsefritekst");
+        assertTrue(avklartefakta.getRegistreringer().size() == 0);
         avklartefakta.getRegistreringer().forEach(r -> assertNull(r.getBegrunnelseKode()));
     }
 

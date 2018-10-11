@@ -91,6 +91,7 @@ public class AvklartefaktaDto {
         this.subjektID = avklartefakta.getSubjekt();
         this.avklartefaktaKode = avklartefakta.getAvklartefaktakode();
         this.referanse = avklartefakta.getReferanse();
+        this.begrunnelsefritekst = avklartefakta.getBegrunnelseFritekst();
 
         String[] fakta = avklartefakta.getFakta().split(" ");
         this.fakta = Arrays.asList(fakta);
@@ -99,12 +100,5 @@ public class AvklartefaktaDto {
         this.begrunnelsekoder = registreringer.stream()
                 .map(AvklartefaktaRegistrering::getBegrunnelseKode)
                 .collect(Collectors.toList());
-
-        if (this.begrunnelsekoder.isEmpty()) {
-            this.begrunnelsefritekst = registreringer.stream()
-                    .map(AvklartefaktaRegistrering::getBegrunnelseFritekst)
-                    .filter(fritekst -> !fritekst.isEmpty())
-                    .collect(Collectors.joining());
-        }
     }
 }

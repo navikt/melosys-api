@@ -21,9 +21,6 @@ public class AvklartefaktaRegistrering extends RegistreringsInfo {
     @Column(name = "begrunnelse")
     private String begrunnelseKode;
 
-    @Column(name = "begrunnelse_fritekst")
-    private String begrunnelseFritekst;
-
     public Avklartefakta getAvklartefakta() {
         return avklartefakta;
     }
@@ -38,14 +35,6 @@ public class AvklartefaktaRegistrering extends RegistreringsInfo {
         this.begrunnelseKode = begrunnelseKode;
     }
 
-    public String getBegrunnelseFritekst() {
-        return begrunnelseFritekst;
-    }
-
-    public void setBegrunnelseFritekst(String begrunnelseFritekst) {
-        this.begrunnelseFritekst = begrunnelseFritekst;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -55,13 +44,12 @@ public class AvklartefaktaRegistrering extends RegistreringsInfo {
             return false;
         }
         AvklartefaktaRegistrering that = (AvklartefaktaRegistrering) o;
-        return Objects.equals(this.avklartefakta, that.avklartefakta) &&
-                (Objects.equals(this.begrunnelseKode, that.getBegrunnelseKode()) ||
-                 Objects.equals(this.begrunnelseFritekst, that.getBegrunnelseFritekst()));
+        return Objects.equals(this.avklartefakta, that.getAvklartefakta()) &&
+                Objects.equals(this.begrunnelseKode, that.getBegrunnelseKode());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(avklartefakta, begrunnelseKode, begrunnelseFritekst);
+        return Objects.hash(avklartefakta, begrunnelseKode);
     }
 }

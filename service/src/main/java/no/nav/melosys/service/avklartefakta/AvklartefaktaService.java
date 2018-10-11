@@ -9,7 +9,7 @@ import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.service.BehandlingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AvklartefaktaService {
@@ -28,7 +28,7 @@ public class AvklartefaktaService {
     }
 
     public Landkoder hentBosted(long behandlingsid) throws IkkeFunnetException {
-        Optional<Avklartefakta> fakta = avklarteFaktaRepository.findByBehandlingsidAndType(behandlingsid, AvklartefaktaType.BOSTEDSLAND);
+        Optional<Avklartefakta> fakta = avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, AvklartefaktaType.BOSTEDSLAND);
         if (!fakta.isPresent()) {
             throw new IkkeFunnetException("Fant ikke avklartefakta for behandlingsid: "+ behandlingsid);
         }
@@ -36,6 +36,7 @@ public class AvklartefaktaService {
         return Landkoder.valueOf(fakta.get().getFakta());
     }
 
+    @Transactional
     public void lagreAvklarteFakta(long behandlingsid, Set<AvklartefaktaDto> avklartefaktaDtos) throws IkkeFunnetException {
         Behandlingsresultat resultat = behandlingService.hentBehandlingresultat(behandlingsid);
         if (resultat == null) {
@@ -52,13 +53,14 @@ public class AvklartefaktaService {
         }
     }
 
+    @Transactional
     public Set<AvklartefaktaDto> hentAvklarteFakta(long behandlingsid) throws IkkeFunnetException {
         Behandlingsresultat resultat = behandlingService.hentBehandlingresultat(behandlingsid);
         if (resultat == null) {
             throw new IkkeFunnetException("Fant ikke behandlingsresultat for behandlingsid: "+ behandlingsid);
         }
 
-        Set<Avklartefakta> avklartefakta = avklarteFaktaRepository.findByBehandlingsresultat(resultat);
+        Set<Avklartefakta> avklartefakta = avklarteFaktaRepository.findByBehandlingsresultatId(behandlingsid);
         return faktaKonverterer.lagDtoFraAvklartefakta(avklartefakta);
     }
 }

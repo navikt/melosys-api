@@ -30,8 +30,12 @@ public class Avklartefakta {
     @Column(name = "fakta")
     private String fakta;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "avklartefakta", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "begrunnelse_fritekst")
+    private String begrunnelseFritekst;
+
+    @OneToMany(mappedBy = "avklartefakta", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AvklartefaktaRegistrering> registreringer;
+
 
     public Behandlingsresultat getBehandlingsresultat() {
         return behandlingsresultat;
@@ -73,6 +77,14 @@ public class Avklartefakta {
         return fakta;
     }
 
+    public String getBegrunnelseFritekst() {
+        return begrunnelseFritekst;
+    }
+
+    public void setBegrunnelseFritekst(String begrunnelseFritekst) {
+        this.begrunnelseFritekst = begrunnelseFritekst;
+    }
+
     public void setRegistreringer(Set<AvklartefaktaRegistrering> registreringer) {
         this.registreringer = registreringer;
     }
@@ -103,7 +115,7 @@ public class Avklartefakta {
             return false;
         }
         Avklartefakta that = (Avklartefakta) o;
-        return Objects.equals(this.behandlingsresultat, that.behandlingsresultat) &&
+        return Objects.equals(this.behandlingsresultat, that.getBehandlingsresultat()) &&
                 (Objects.equals(this.referanse, that.getReferanse()) ||
                 Objects.equals(this.type, that.getAvklartefaktakode()));
     }
