@@ -1,16 +1,13 @@
 // FIXME: Må flyttes ned til relevant pakke
 package no.nav.melosys.saksflyt.agent;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
@@ -59,20 +56,21 @@ public class OppfriskSaksopplysninger extends AbstraktStegBehandler {
 
     @Transactional
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+    public void utfør(Prosessinstans prosessinstans) {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
-        behandling.setSisteOpplysningerHentetDato(LocalDateTime.now());
+        behandling.setSisteOpplysningerHentetDato(Instant.now());
         behandlingRepository.save(behandling);
 
         if (prosessinstans.getType() == ProsessType.OPPFRISKNING) {
             prosessinstans.setSteg(null);
-            log.info("Oppfrisking av saksopplysning er ferdig for prosessinstans {} for behandlingId {}", prosessinstans.getId(), behandling.getId());
+            log.info("Oppfrisking av saksopplysninger er ferdig for prosessinstans {} og behandlingID {}.", prosessinstans.getId(), behandling.getId());
             return;
         } else {
             prosessinstans.setSteg(OPPRETT_OPPGAVE);
         }
-        log.info("Ferdigstilt Behandling {}", prosessinstans.getId());
+
+        log.debug("Prosessinstans {} oppdatert behandling {} med sisteOpplysningerHentetDato.", prosessinstans.getId(), behandling.getId());
     }
 }

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -116,7 +117,7 @@ public class SaksopplysningerTilDtoConverterTest {
         saksopplysninger.add(personhistorikkDokument);
 
         Behandling behandling = new Behandling();
-        behandling.setSisteOpplysningerHentetDato(LocalDate.of(2018, 1, 1).atStartOfDay());
+        behandling.setSisteOpplysningerHentetDato(LocalDate.of(2018, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC));
         behandling.setSaksopplysninger(saksopplysninger);
 
         BehandlingDto behandlingDto = modelMapper.map(behandling, BehandlingDto.class);

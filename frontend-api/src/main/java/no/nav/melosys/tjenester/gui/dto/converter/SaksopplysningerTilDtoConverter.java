@@ -104,7 +104,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
         */
         LocalDate gjeldendeDato = null;
         if (behandling.getSistOpplysningerHentetDato() != null) {
-            gjeldendeDato = behandling.getSistOpplysningerHentetDato().toLocalDate();
+            gjeldendeDato = LocalDateTime.ofInstant(behandling.getSistOpplysningerHentetDato(), ZoneOffset.UTC).toLocalDate();
         } else {
             gjeldendeDato = LocalDateTime.ofInstant(behandling.getEndretDato(), ZoneOffset.UTC).toLocalDate();
         }
