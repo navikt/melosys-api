@@ -32,12 +32,12 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public void sjekkStatusBehandling() {
-        when(prosessinstansRepository.findByStegIsNotNullAndBehandling_Id(anyLong())).thenReturn(Optional.empty());
-        assertThat(behandlingService.aktivProsessinstansEksistererFor(anyLong())).isFalse();
+    public void sjekkStatusBehandlingForOppfrisking() {
+        when(prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(ProsessType.OPPFRISKNING, 111L)).thenReturn(Optional.empty());
+        assertThat(behandlingService.harAktivOppfrisking(111L)).isFalse();
 
         Prosessinstans process = mock(Prosessinstans.class);
-        when(prosessinstansRepository.findByStegIsNotNullAndBehandling_Id(anyLong())).thenReturn(Optional.of(process));
-        assertThat(behandlingService.aktivProsessinstansEksistererFor(anyLong())).isTrue();
+        when(prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(ProsessType.OPPFRISKNING, 111L)).thenReturn(Optional.of(process));
+        assertThat(behandlingService.harAktivOppfrisking(111L)).isTrue();
     }
 }
