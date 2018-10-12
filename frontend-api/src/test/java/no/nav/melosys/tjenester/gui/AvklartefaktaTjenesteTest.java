@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.Arrays;
 import java.util.Set;
 
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -52,7 +51,7 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTest {
         Set<AvklartefaktaDto> mockliste = defaultEnhancedRandom().randomSetOf(4, AvklartefaktaDto.class);
         when(avklartefaktaService.hentAvklarteFakta(1L)).thenReturn(mockliste);
 
-        Set<AvklartefaktaDto> avklartefaktaDtoSet = avklartefaktaTjeneste.hentFaktaavklaringer(1L);
+        Set<AvklartefaktaDto> avklartefaktaDtoSet = avklartefaktaTjeneste.hentAvklarteFakta(1L);
         //validerListe(avklartefaktaDtoSet);
     }
 }

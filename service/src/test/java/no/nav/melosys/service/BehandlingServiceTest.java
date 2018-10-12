@@ -1,21 +1,18 @@
 package no.nav.melosys.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-
 import java.util.Optional;
 
-import no.nav.melosys.repository.AvklarteFaktaRepository;
-import no.nav.melosys.repository.BehandlingResultatRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BehandlingServiceTest {
@@ -26,15 +23,12 @@ public class BehandlingServiceTest {
 
     private BehandlingService behandlingService;
 
-    @Mock
-    private BehandlingResultatRepository behandlingResultatRepository;
-
     @Before
     public void setUp() {
         behandlingRepo = mock(BehandlingRepository.class);
         prosessinstansRepository = mock(ProsessinstansRepository.class);
 
-        behandlingService = new BehandlingService(prosessinstansRepository, behandlingRepo, behandlingResultatRepository);
+        behandlingService = new BehandlingService(prosessinstansRepository, behandlingRepo);
     }
 
     @Test

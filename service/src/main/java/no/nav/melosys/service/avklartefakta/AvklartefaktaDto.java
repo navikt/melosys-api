@@ -14,15 +14,15 @@ import no.nav.melosys.domain.AvklartefaktaRegistrering;
 public class AvklartefaktaDto {
     private String subjektID;
 
-    private AvklartefaktaType avklartefakta;
+    private AvklartefaktaType avklartefaktaType;
 
     private String referanse;
 
     private List<String> fakta;
 
-    private List<String> begrunnelsekoder;
+    private List<String> begrunnelseKoder;
 
-    private String begrunnelsefritekst;
+    private String begrunnelseFritekst;
 
     public String getSubjektID() {
         return subjektID;
@@ -32,18 +32,18 @@ public class AvklartefaktaDto {
         this.subjektID = subjektID;
     }
 
-    public AvklartefaktaType getAvklartefakta() {
-        return avklartefakta;
+    public AvklartefaktaType getAvklartefaktaType() {
+        return avklartefaktaType;
     }
 
-    @JsonProperty("avklartefaktakode")
+    @JsonProperty("avklartefaktaKode")
     public String getAvklartefaktakodeKunKode() {
-        return avklartefakta.getKode();
+        return avklartefaktaType.getKode();
     }
 
-    @JsonProperty("avklartefaktakode")
-    public void setAvklartefakta(AvklartefaktaType avklartefakta) {
-        this.avklartefakta = avklartefakta;
+    @JsonProperty("avklartefaktaKode")
+    public void setAvklartefaktaType(AvklartefaktaType avklartefakta) {
+        this.avklartefaktaType = avklartefakta;
     }
 
     public String getReferanse() {
@@ -62,24 +62,24 @@ public class AvklartefaktaDto {
         this.fakta = fakta;
     }
 
-    public List<String> getBegrunnelsekoder() {
-        return begrunnelsekoder;
+    public List<String> getBegrunnelseKoder() {
+        return begrunnelseKoder;
     }
 
-    public void setBegrunnelsekoder(List<String> begrunnelsekoder) {
-        this.begrunnelsekoder = begrunnelsekoder;
+    public void setBegrunnelseKoder(List<String> begrunnelseKoder) {
+        this.begrunnelseKoder = begrunnelseKoder;
     }
 
     public boolean harBegrunnelseKoder() {
-        return begrunnelsekoder != null && !begrunnelsekoder.isEmpty();
+        return begrunnelseKoder != null && !begrunnelseKoder.isEmpty();
     }
 
-    public String getBegrunnelsefritekst() {
-        return begrunnelsefritekst;
+    public String getBegrunnelseFritekst() {
+        return begrunnelseFritekst;
     }
 
-    public void setBegrunnelsefritekst(String begrunnelsefritekst) {
-        this.begrunnelsefritekst = begrunnelsefritekst;
+    public void setBegrunnelseFritekst(String begrunnelseFritekst) {
+        this.begrunnelseFritekst = begrunnelseFritekst;
     }
 
     @JsonCreator
@@ -91,15 +91,15 @@ public class AvklartefaktaDto {
 
     public AvklartefaktaDto(Avklartefakta avklartefakta) {
         this.subjektID = avklartefakta.getSubjekt();
-        this.avklartefakta = avklartefakta.getAvklartefaktaType();
+        this.avklartefaktaType = avklartefakta.getType();
         this.referanse = avklartefakta.getReferanse();
-        this.begrunnelsefritekst = avklartefakta.getBegrunnelseFritekst();
+        this.begrunnelseFritekst = avklartefakta.getBegrunnelseFritekst();
 
         String[] fakta = avklartefakta.getFakta().split(" ");
         this.fakta = Arrays.asList(fakta);
 
         Set<AvklartefaktaRegistrering> registreringer = avklartefakta.getRegistreringer();
-        this.begrunnelsekoder = registreringer.stream()
+        this.begrunnelseKoder = registreringer.stream()
                 .map(AvklartefaktaRegistrering::getBegrunnelseKode)
                 .collect(Collectors.toList());
     }

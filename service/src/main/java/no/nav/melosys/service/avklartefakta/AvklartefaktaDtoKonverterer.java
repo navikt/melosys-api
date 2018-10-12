@@ -13,9 +13,9 @@ public class AvklartefaktaDtoKonverterer {
 
     public void oppdaterAvklartefaktaFraDto(Avklartefakta avklartefakta, AvklartefaktaDto avklarteFaktaDto) {
         avklartefakta.setSubjekt(avklarteFaktaDto.getSubjektID());
-        avklartefakta.setAvklartefaktakode(avklarteFaktaDto.getAvklartefakta());
+        avklartefakta.setType(avklarteFaktaDto.getAvklartefaktaType());
         avklartefakta.setReferanse(avklarteFaktaDto.getReferanse());
-        avklartefakta.setBegrunnelseFritekst(avklarteFaktaDto.getBegrunnelsefritekst());
+        avklartefakta.setBegrunnelseFritekst(avklarteFaktaDto.getBegrunnelseFritekst());
 
         String fakta = avklarteFaktaDto.getFakta().stream().collect(Collectors.joining(" "));
         avklartefakta.setFakta(fakta);
@@ -27,7 +27,7 @@ public class AvklartefaktaDtoKonverterer {
         Set<AvklartefaktaRegistrering> registreringer = new HashSet<>();
 
         if (avklarteFaktaDto.harBegrunnelseKoder()) {
-            for (String begrunnelse : avklarteFaktaDto.getBegrunnelsekoder()) {
+            for (String begrunnelse : avklarteFaktaDto.getBegrunnelseKoder()) {
                 AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
                 registrering.setBegrunnelseKode(begrunnelse);
                 registrering.setAvklartefakta(avklartefakta);
@@ -36,14 +36,5 @@ public class AvklartefaktaDtoKonverterer {
             }
         }
         avklartefakta.oppdaterRegistreringer(registreringer);
-    }
-
-    public Set<AvklartefaktaDto> lagDtoFraAvklartefakta(Set<Avklartefakta> avklartefakta) {
-        Set<AvklartefaktaDto> avklartefaktaDtoer = new HashSet<>();
-
-        for (Avklartefakta a : avklartefakta) {
-            avklartefaktaDtoer.add(new AvklartefaktaDto(a));
-        }
-        return avklartefaktaDtoer;
     }
 }

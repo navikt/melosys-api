@@ -1,14 +1,14 @@
 CREATE TABLE avklartefakta (
     id                            NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     beh_resultat_id               NUMBER(19) NOT NULL,
-    referanse                     VARCHAR2(99) NULL,
+    referanse                     VARCHAR2(99) NOT NULL,
     type                          VARCHAR2(99) NULL,
     subjekt                       VARCHAR2(99) NULL,
-    fakta                         VARCHAR2(99) NULL,
+    fakta                         VARCHAR2(99) NOT NULL,
     begrunnelse_fritekst          VARCHAR2(4000) NULL,
     CONSTRAINT pk_avklartefakta PRIMARY KEY (id),
     CONSTRAINT unique_avklartefakta UNIQUE(beh_resultat_id, type, subjekt),
-    CONSTRAINT unique_referanse UNIQUE(beh_resultat_id, referanse)
+    CONSTRAINT unique_referanse UNIQUE(beh_resultat_id, referanse, subjekt)
 );
 
 ALTER TABLE avklartefakta

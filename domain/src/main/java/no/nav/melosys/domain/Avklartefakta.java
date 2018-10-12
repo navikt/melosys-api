@@ -44,11 +44,11 @@ public class Avklartefakta {
         this.behandlingsresultat = behandlingsresultat;
     }
 
-    public AvklartefaktaType getAvklartefaktaType() {
+    public AvklartefaktaType getType() {
         return type;
     }
 
-    public void setAvklartefaktakode(AvklartefaktaType type) {
+    public void setType(AvklartefaktaType type) {
         this.type = type;
     }
 
@@ -106,16 +106,14 @@ public class Avklartefakta {
             return false;
         }
         Avklartefakta that = (Avklartefakta) o;
-
-        boolean unikAvklartefakta = Objects.equals(this.type, that.getAvklartefaktaType()) &&
-                                    Objects.equals(this.subjekt, that.getSubjekt());
-
         return Objects.equals(this.behandlingsresultat, that.getBehandlingsresultat()) &&
-                (unikAvklartefakta || Objects.equals(this.referanse, that.getReferanse()));
+               Objects.equals(this.type, that.getType()) &&
+               Objects.equals(this.subjekt, that.getSubjekt()) &&
+               Objects.equals(this.referanse, that.getReferanse());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(behandlingsresultat);
+        return Objects.hash(behandlingsresultat, type, subjekt, referanse);
     }
 }

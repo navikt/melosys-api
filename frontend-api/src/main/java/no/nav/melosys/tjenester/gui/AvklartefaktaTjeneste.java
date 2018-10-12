@@ -36,8 +36,8 @@ public class AvklartefaktaTjeneste extends RestTjeneste {
 
     @GET
     @Path("{behandlingID}")
-    @ApiOperation(value = "Henter faktaavklaring for en gitt søknad")
-    public Set<AvklartefaktaDto> hentFaktaavklaringer(@PathParam("behandlingID") long behandlingID) {
+    @ApiOperation(value = "Henter avklartefakta for en gitt behandling")
+    public Set<AvklartefaktaDto> hentAvklarteFakta(@PathParam("behandlingID") long behandlingID) {
 
         Set<AvklartefaktaDto> avklartefaktaDtoer;
         try {
@@ -56,9 +56,9 @@ public class AvklartefaktaTjeneste extends RestTjeneste {
 
     @POST
     @Path("{behandlingID}")
-    @ApiOperation(value = "Lagre bostedavklaring")
-    public Response postAvklaring(@PathParam("behandlingID") long behandlingID,
-                                  @ApiParam("AvklartefaktaData") Set<AvklartefaktaDto> avklartefaktaDtoer) {
+    @ApiOperation(value = "Lagre avklartefakta")
+    public Response lagraAvklarteFakta(@PathParam("behandlingID") long behandlingID,
+                                       @ApiParam("AvklartefaktaData") Set<AvklartefaktaDto> avklartefaktaDtoer) {
         try {
             tilgang.sjekk(behandlingID);
             avklartefaktaService.lagreAvklarteFakta(behandlingID, avklartefaktaDtoer);
