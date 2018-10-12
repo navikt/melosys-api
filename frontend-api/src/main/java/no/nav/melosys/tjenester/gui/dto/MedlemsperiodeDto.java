@@ -7,7 +7,7 @@ public class MedlemsperiodeDto {
 
     public PeriodeDto periode;
 
-    public Periodetype medlemtype;
+    public Periodetype periodetype;
 
     public KodeDto status;
 

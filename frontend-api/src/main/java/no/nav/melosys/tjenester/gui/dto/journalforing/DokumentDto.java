@@ -19,19 +19,19 @@ public class DokumentDto {
         this.dokumentID = dokumentID;
     }
 
-    public Instant getMottattDato() {
-        return mottattDato;
-    }
-
-    public void setMottattDato(Instant mottattDato) {
-        this.mottattDato = mottattDato;
-    }
-
     public String getTittel() {
         return tittel;
     }
 
     public void setTittel(String tittel) {
         this.tittel = tittel;
+    }
+
+    public Instant getMottattDato() {
+        return mottattDato;
+    }
+
+    public void setMottattDato(Instant mottattDato) {
+        this.mottattDato = mottattDato;
     }
 }
