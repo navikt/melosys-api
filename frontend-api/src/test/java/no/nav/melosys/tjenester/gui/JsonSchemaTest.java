@@ -5,15 +5,12 @@ import java.util.Collection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.tjenester.gui.jackson.JacksonModule;
-import no.nav.melosys.tjenester.gui.jackson.serialize.MedlemsperiodeSerializer;
+import no.nav.melosys.tjenester.gui.jackson.MelosysModule;
 import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -53,6 +50,7 @@ public abstract class JsonSchemaTest {
         if (enhancedRandom == null) {
             enhancedRandom =  EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
                 .collectionSizeRange(1, 4)
+                .overrideDefaultInitialization(true)
                 .build();
         }
         return enhancedRandom;
@@ -79,6 +77,7 @@ public abstract class JsonSchemaTest {
             objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
             objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
             objectMapper.registerModule(new JavaTimeModule());
+            objectMapper.registerModule(new MelosysModule(null));
         }
         return objectMapper;
     }
@@ -92,9 +91,7 @@ public abstract class JsonSchemaTest {
             KodeverkService kodeverkService = mock(KodeverkService.class);
             when(kodeverkService.dekod(any(), any(), any())).thenReturn("DUMMY");
             when(kodeverkService.getKodeverdi(any(), any())).thenReturn(new KodeDto("DUMMY", "DUMMY"));
-            objectMapperMedKodeverkServiceStub.registerModule(new JacksonModule(kodeverkService));
-            SimpleModule simpleModule = new SimpleModule().addSerializer(new MedlemsperiodeSerializer(kodeverkService));
-            objectMapperMedKodeverkServiceStub.registerModule(simpleModule);
+            objectMapperMedKodeverkServiceStub.registerModule(new MelosysModule(kodeverkService));
         }
         return objectMapperMedKodeverkServiceStub;
     }

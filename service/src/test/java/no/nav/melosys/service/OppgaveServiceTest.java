@@ -1,5 +1,6 @@
 package no.nav.melosys.service;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -124,6 +125,7 @@ public class OppgaveServiceTest {
 
         List<Behandling> behandlinger = new ArrayList<>();
         Behandling behandling = new Behandling();
+        behandling.setEndretDato(Instant.now());
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandlinger.add(behandling);
