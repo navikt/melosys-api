@@ -1,9 +1,5 @@
 package no.nav.melosys.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-
 import java.util.Optional;
 
 import org.junit.Before;
@@ -13,6 +9,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BehandlingServiceTest {

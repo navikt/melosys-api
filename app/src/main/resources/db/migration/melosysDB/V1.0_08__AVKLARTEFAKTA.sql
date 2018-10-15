@@ -1,13 +1,14 @@
 CREATE TABLE avklartefakta (
     id                            NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     beh_resultat_id               NUMBER(19) NOT NULL,
-    arbeidsgiver_forretningsland  VARCHAR2(99) NULL,
-    mottar_kontantytelse          NUMBER(1) NULL,
-    kontantytelse_type            VARCHAR2(99) NULL,
-    offentlig_tjenestemann        NUMBER(1) NULL,
-    bostedsland                   VARCHAR2(99) NULL,
-    sokkel_skip                   VARCHAR2(99) NULL,
-    CONSTRAINT pk_avklartefakta PRIMARY KEY (id)
+    referanse                     VARCHAR2(99) NOT NULL,
+    type                          VARCHAR2(99) NULL,
+    subjekt                       VARCHAR2(99) NULL,
+    fakta                         VARCHAR2(99) NOT NULL,
+    begrunnelse_fritekst          VARCHAR2(4000) NULL,
+    CONSTRAINT pk_avklartefakta PRIMARY KEY (id),
+    CONSTRAINT unique_avklartefakta UNIQUE(beh_resultat_id, type, subjekt),
+    CONSTRAINT unique_referanse UNIQUE(beh_resultat_id, referanse, subjekt)
 );
 
 ALTER TABLE avklartefakta
@@ -16,9 +17,7 @@ ALTER TABLE avklartefakta
 CREATE TABLE avklartefakta_registrering (
     id                    NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     avklartefakta_id      NUMBER(19) NOT NULL,
-    fakta_type            VARCHAR2(99) NULL,
     begrunnelse           VARCHAR2(99) NULL,
-    begrunnelse_fritekst  VARCHAR2(4000) NULL,
     registrert_dato       TIMESTAMP NOT NULL,
     registrert_av         VARCHAR2(99) NULL,
     endret_dato           TIMESTAMP NOT NULL,

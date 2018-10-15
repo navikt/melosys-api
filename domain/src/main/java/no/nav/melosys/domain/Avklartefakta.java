@@ -1,5 +1,6 @@
 package no.nav.melosys.domain;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
@@ -8,39 +9,32 @@ import javax.persistence.*;
 @Table(name = "avklartefakta")
 public class Avklartefakta {
 
-    // Populeres av Hibernate med behandlingsresultat.id
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @MapsId
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name="beh_resultat_id")
     private Behandlingsresultat behandlingsresultat;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "arbeidsgiver_forretningsland")
-    private Landkoder arbeidsgiversForretningsland;
+    @Column(name = "type")
+    private AvklartefaktaType type;
 
-    @Column(name = "mottar_kontantytelse")
-    private Boolean mottarKontantytelse;
+    @Column(name = "referanse")
+    private String referanse;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "kontantytelse_type")
-    private KontantytelseType kontantytelsestype;
+    @Column(name = "subjekt")
+    private String subjekt;
 
-    @Column(name = "offentlig_tjenestemann")
-    private Boolean erOffentligTjenestemann;
+    @Column(name = "fakta")
+    private String fakta;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "bostedsland")
-    private Landkoder bostedsland;
+    @Column(name = "begrunnelse_fritekst")
+    private String begrunnelseFritekst;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "sokkel_skip")
-    private SokkelEllerSkip sokkelEllerSkip;
-
-    @OneToMany(mappedBy = "avklartefakta")
-    private Set<AvklartefaktaRegistrering> registrering;
+    @OneToMany(mappedBy = "avklartefakta", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<AvklartefaktaRegistrering> registreringer = new HashSet<>();
 
     public Behandlingsresultat getBehandlingsresultat() {
         return behandlingsresultat;
@@ -50,56 +44,57 @@ public class Avklartefakta {
         this.behandlingsresultat = behandlingsresultat;
     }
 
-    public Landkoder getArbeidsgiversForretningsland() {
-        return arbeidsgiversForretningsland;
+    public AvklartefaktaType getType() {
+        return type;
     }
 
-    public void setArbeidsgiversForretningsland(Landkoder arbeidsgiversForretningsland) {
-        this.arbeidsgiversForretningsland = arbeidsgiversForretningsland;
+    public void setType(AvklartefaktaType type) {
+        this.type = type;
     }
 
-    public Boolean getMottarKontantytelse() {
-        return mottarKontantytelse;
+    public String getReferanse() {
+        return referanse;
     }
 
-    public void setMottarKontantytelse(Boolean mottarKontantytelse) {
-        this.mottarKontantytelse = mottarKontantytelse;
+    public void setReferanse(String referanse) {
+        this.referanse = referanse;
     }
 
-    public KontantytelseType getKontantytelsestype() {
-        return kontantytelsestype;
+    public String getSubjekt() {
+        return subjekt;
     }
 
-    public void setKontantytelsestype(KontantytelseType kontantytelsestype) {
-        this.kontantytelsestype = kontantytelsestype;
+    public void setSubjekt(String subjekt) {
+        this.subjekt = subjekt;
     }
 
-    public Boolean getErOffentligTjenestemann() {
-        return erOffentligTjenestemann;
+    public void setFakta(String fakta) {
+        this.fakta = fakta;
     }
 
-    public void setErOffentligTjenestemann(Boolean erOffentligTjenestemann) {
-        this.erOffentligTjenestemann = erOffentligTjenestemann;
+    public String getFakta() {
+        return fakta;
     }
 
-    public Landkoder getBostedsland() {
-        return bostedsland;
+    public String getBegrunnelseFritekst() {
+        return begrunnelseFritekst;
     }
 
-    public void setBostedsland(Landkoder bostedsland) {
-        this.bostedsland = bostedsland;
+    public void setBegrunnelseFritekst(String begrunnelseFritekst) {
+        this.begrunnelseFritekst = begrunnelseFritekst;
     }
 
-    public SokkelEllerSkip getSokkelEllerSkip() {
-        return sokkelEllerSkip;
+    public void setRegistreringer(Set<AvklartefaktaRegistrering> registreringer) {
+        this.registreringer = registreringer;
     }
 
-    public void setSokkelEllerSkip(SokkelEllerSkip sokkelEllerSkip) {
-        this.sokkelEllerSkip = sokkelEllerSkip;
+    public void oppdaterRegistreringer(Set<AvklartefaktaRegistrering> nyeRegistreringer) {
+        nyeRegistreringer.forEach(r -> this.registreringer.add(r));
+        this.registreringer.retainAll(nyeRegistreringer);
     }
 
-    public Set<AvklartefaktaRegistrering> getRegistrering() {
-        return registrering;
+    public Set<AvklartefaktaRegistrering> getRegistreringer() {
+        return registreringer;
     }
 
     @Override
@@ -111,11 +106,14 @@ public class Avklartefakta {
             return false;
         }
         Avklartefakta that = (Avklartefakta) o;
-        return Objects.equals(this.behandlingsresultat, that.behandlingsresultat);
+        return Objects.equals(this.behandlingsresultat, that.getBehandlingsresultat()) &&
+               Objects.equals(this.type, that.getType()) &&
+               Objects.equals(this.subjekt, that.getSubjekt()) &&
+               Objects.equals(this.referanse, that.getReferanse());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(behandlingsresultat);
+        return Objects.hash(behandlingsresultat, type, subjekt, referanse);
     }
 }
