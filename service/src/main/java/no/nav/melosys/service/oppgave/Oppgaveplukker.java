@@ -83,21 +83,12 @@ public class Oppgaveplukker {
         List<Oppgave> oppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakstypeListe, behandlingstypeListe);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, oppgaver);
-
+        
         if (valg.isPresent()) {
             Oppgave oppgave = valg.get();
             // Tildeler oppgaven
             gsakFasade.tildelOppgave(oppgave.getOppgaveId(), saksbehandlerID);
-            if (oppgave.erBehandling()) {
-                // Finner fagsak og saksnummer som svarer til behandlingsoppgaven.
-                Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
-                if (fagsak == null) {
-                    throw new IkkeFunnetException("Fant ikke fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer());
-                }
-                oppgave.setSaksnummer(fagsak.getSaksnummer());
-            }
         }
-
         return valg;
     }
 

@@ -47,13 +47,13 @@ public class OppgaveService {
     }
 
     @Transactional
-    public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
+    public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException, FunksjonellException {
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
     @Transactional
-    public List<OppgaveDto> hentOppgaverMedBruker(String brukerIdent) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
+    public List<OppgaveDto> hentOppgaverMedBruker(String brukerIdent) throws TekniskException, FunksjonellException {
         String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
         if (aktørId == null) {
             throw new IkkeFunnetException("Finnes ikke aktørId for FNR " + brukerIdent);
@@ -79,9 +79,9 @@ public class OppgaveService {
             dest = jfrOppgaveDto;
         } else if (oppgave.erBehandling()) {
             BehandlingsoppgaveDto behOppgaveDto = new BehandlingsoppgaveDto();
-            Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
+            Fagsak fagsak = fagsakRepository.findBySaksnummer(oppgave.getSaksnummer());
             if (fagsak == null) {
-                throw new TekniskException("Fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer() + " ikke funnet!");
+                throw new TekniskException("Fagsak med saksnummer " + oppgave.getSaksnummer() + " ikke funnet!");
             }
 
             behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());

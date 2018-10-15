@@ -15,7 +15,6 @@ public class Oppgave {
     private Tema tema;
     private Oppgavetype oppgavetype;
     private PrioritetType prioritet;
-    private Long gsakSaksnummer;
     private String journalpostId;
     private String tilordnetRessurs;
     private int versjon;
@@ -106,14 +105,6 @@ public class Oppgave {
 
     public void setPrioritet(PrioritetType prioritet) {
         this.prioritet = prioritet;
-    }
-
-    public Long getGsakSaksnummer() {
-        return gsakSaksnummer;
-    }
-
-    public void setGsakSaksnummer(Long gsakSaksnummer) {
-        this.gsakSaksnummer = gsakSaksnummer;
     }
 
     public String getJournalpostId() {

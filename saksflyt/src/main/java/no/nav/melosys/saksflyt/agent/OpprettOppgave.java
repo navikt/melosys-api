@@ -11,7 +11,6 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
@@ -58,12 +57,12 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
     @Transactional
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandlingstype behandlingstype = prosessinstans.getBehandling().getType(); // Forutsetter at ingen tidligere steg har endret denne
         String aktørID = prosessinstans.getData(AKTØR_ID);
-        Long gsakSakID = prosessinstans.getData(GSAK_SAK_ID, Long.class);
+        String saksnummer = prosessinstans.getData(SAKSNUMMER);
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
 
         Oppgave oppgave = new Oppgave();
@@ -81,9 +80,9 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
         // FIXME: MELOSYS-1401 behandlingstema,temagruppe
         oppgave.setAktørId(aktørID);
-        oppgave.setGsakSaksnummer(gsakSakID);
         oppgave.setJournalpostId(journalpostID);
         oppgave.setPrioritet(PrioritetType.NORM);
+        oppgave.setSaksnummer(saksnummer);
 
         String oppgaveId = gsakFasade.opprettOppgave(oppgave);
 
