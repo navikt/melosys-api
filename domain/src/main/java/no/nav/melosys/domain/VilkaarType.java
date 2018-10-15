@@ -1,13 +1,18 @@
 package no.nav.melosys.domain;
 
+import no.nav.melosys.exception.IkkeFunnetException;
+
 public enum VilkaarType implements Kodeverk {
 
-    INNGANGSVILKÅR("INNGANGSVILKAAR", ""),
-    ART12_1("ART12_1", ""),
-    FORUTGÅENDE_MEDLEMSKAP("FORUTGAAENDE_MEDLEMSKAP", ""),
-    VESENTLIGVIRKSOMHET("VESENTLIGVIRKSOMHET", ""),
-    BOSATTINORGE("BOSATTINORGE", ""),
-    ART16_1("ART16_1", "");
+    INNGANGSVILKÅR_EOSFO("INNGANGSVILKAAR_EOSFO", "Vurdering av om bruker oppfyller inngangsvilkår av EU/EØS forordningen."),
+    ART12_1("ART12_1", "Vurdering av om bruker oppfyller ART12.1 vilkår."),
+    ART12_1_FORUTGÅENDE_MEDLEMSKAP("ART12_1_FORUTGAAENDE_MEDLEMSKAP", "Vurdering av om bruker oppfyller vilkår om forutgående medlemskap."),
+    ART12_1_VESENTLIG_VIRKSOMHET ("ART12_1_VESENTLIG_VIRKSOMHET", "Vurdering av om arbeidsgiver eller oppdragsgiver i Norge oppfyller vilkår om vesentlig virksomhet."),
+    ART12_2("ART12_2", "Vurdering av om bruker oppfyller ART12.2 vilkår."),
+    ART16_1 ("ART16_1 ", "Vurdering av om bruker oppfyller ART16.1 vilkår."),
+    BOSATT_I_NORGE("BOSATT_I_NORGE", "Vurdering av om bruker oppfyller vilkår om å være bosatt i Norge.");
+
+    private static final VilkaarType[] VALUES = values();
 
     private String kode;
     private String beskrivelse;
@@ -25,5 +30,14 @@ public enum VilkaarType implements Kodeverk {
     @Override
     public String getBeskrivelse() {
         return beskrivelse;
+    }
+
+    public static VilkaarType forKode(String kode) throws IkkeFunnetException {
+        for (VilkaarType type: VALUES) {
+            if (type.getKode().equals(kode)) {
+                return type;
+            }
+        }
+        throw new IkkeFunnetException("VilkaarType med kode " + kode + " finnes ikke.");
     }
 }

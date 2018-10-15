@@ -1,6 +1,8 @@
 package no.nav.melosys.domain;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.*;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -25,8 +27,8 @@ public class Vilkaarsresultat extends RegistreringsInfo {
     @Column(name = "oppfylt")
     private boolean oppfylt;
 
-    @Column(name = "begrunnelse")
-    private String begrunnelseKode;
+    @OneToMany(mappedBy = "vilkaarsresultat", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<VilkaarBegrunnelse> begrunnelser = new HashSet<>();
 
     @Column(name = "begrunnelse_fritekst")
     private String begrunnelseFritekst;
@@ -55,12 +57,12 @@ public class Vilkaarsresultat extends RegistreringsInfo {
         this.oppfylt = oppfylt;
     }
 
-    public String getBegrunnelseKode() {
-        return begrunnelseKode;
+    public Set<VilkaarBegrunnelse> getBegrunnelser() {
+        return begrunnelser;
     }
 
-    public void setBegrunnelseKode(String begrunnelseKode) {
-        this.begrunnelseKode = begrunnelseKode;
+    public void setBegrunnelser(Set<VilkaarBegrunnelse> begrunnelser) {
+        this.begrunnelser = begrunnelser;
     }
 
     public String getBegrunnelseFritekst() {
@@ -80,13 +82,19 @@ public class Vilkaarsresultat extends RegistreringsInfo {
             return false;
         }
         Vilkaarsresultat that = (Vilkaarsresultat) o;
-        return Objects.equals(this.behandlingsresultat, that.behandlingsresultat)
-            && Objects.equals(this.vilkaar, that.vilkaar);
+        return Objects.equals(getBehandlingsresultat(), that.getBehandlingsresultat())
+            && Objects.equals(getVilkaar(), that.getVilkaar());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(behandlingsresultat, vilkaar);
+        return Objects.hash(getBehandlingsresultat(), getVilkaar());
     }
 
+    public void oppdaterBegrunnelser(Set<VilkaarBegrunnelse> nyeBegrunnelser) {
+        // For å beholde registreringsdato for begrunnelser som er lagret allerede
+        getBegrunnelser().removeIf(v -> !nyeBegrunnelser.contains(v));
+        nyeBegrunnelser.removeAll(getBegrunnelser());
+        getBegrunnelser().addAll(nyeBegrunnelser);
+    }
 }

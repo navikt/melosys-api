@@ -1,0 +1,81 @@
+package no.nav.melosys.service.vilkaar;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.VilkaarBegrunnelse;
+import no.nav.melosys.domain.VilkaarType;
+import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.VilkaarsresultatRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class VilkaarsresultatService {
+
+    private final BehandlingsresultatRepository behandlingsresultatRepo;
+
+    private final VilkaarsresultatRepository vilkaarsresultatRepo;
+
+    @Autowired
+    public VilkaarsresultatService(BehandlingsresultatRepository behandlingsresultatRepo, VilkaarsresultatRepository vilkaarsresultatRepo) {
+        this.behandlingsresultatRepo = behandlingsresultatRepo;
+        this.vilkaarsresultatRepo = vilkaarsresultatRepo;
+    }
+
+    @Transactional
+    public List<VilkaarDto> hentVilkaar(long behandlingID) {
+        List<Vilkaarsresultat> vilkaarsresultatListe = vilkaarsresultatRepo.findByBehandlingsresultatId(behandlingID);
+
+        List<VilkaarDto> vilkaarDtoListe = new ArrayList<>();
+        for (Vilkaarsresultat vilkaarsresultat : vilkaarsresultatListe) {
+            VilkaarDto vilkaarDto = new VilkaarDto();
+            vilkaarDto.setVilkaar(vilkaarsresultat.getVilkaar().getKode());
+            vilkaarDto.setOppfylt(vilkaarsresultat.isOppfylt());
+            vilkaarDto.setBegrunnelseKoder(vilkaarsresultat.getBegrunnelser().stream().map(VilkaarBegrunnelse::getKode).collect(Collectors.toList()));
+            vilkaarDto.setBegrunnelseFritekst(vilkaarsresultat.getBegrunnelseFritekst());
+            vilkaarDtoListe.add(vilkaarDto);
+        }
+
+        return vilkaarDtoListe;
+    }
+
+    @Transactional
+    public void registrerVilkår(long behandlingID, VilkaarDto vilkaarDto) throws IkkeFunnetException {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findOne(behandlingID);
+
+        if (behandlingsresultat == null) {
+            throw new IkkeFunnetException("Registrering av vilkår feilet fordi behandlingsresulat med ID " + behandlingID + " er ikke funnet.");
+        }
+
+        final VilkaarType vilkaarType = VilkaarType.forKode(vilkaarDto.getVilkaar());
+        Vilkaarsresultat vilkaarsresultat = vilkaarsresultatRepo.findByBehandlingsresultatIdAndVilkaar(behandlingsresultat.getId(), vilkaarType);
+
+        if (vilkaarsresultat == null) {
+            vilkaarsresultat = new Vilkaarsresultat();
+        }
+
+        Set<VilkaarBegrunnelse> nyeBegrunnelser = new HashSet<>();
+        for (String kode : vilkaarDto.getBegrunnelseKoder()) {
+            VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
+            begrunnelse.setVilkaarsresultat(vilkaarsresultat);
+            begrunnelse.setKode(kode);
+            nyeBegrunnelser.add(begrunnelse);
+        }
+        vilkaarsresultat.oppdaterBegrunnelser(nyeBegrunnelser);
+
+        vilkaarsresultat.setBegrunnelseFritekst(vilkaarDto.getBegrunnelseFritekst());
+        vilkaarsresultat.setBehandlingsresultat(behandlingsresultat);
+        vilkaarsresultat.setVilkaar(vilkaarType);
+        vilkaarsresultat.setOppfylt(vilkaarDto.isOppfylt());
+
+        vilkaarsresultatRepo.save(vilkaarsresultat);
+    }
+}

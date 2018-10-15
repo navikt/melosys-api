@@ -33,6 +33,6 @@ public class JerseyConfig extends ResourceConfig {
         register(SaksflytTjeneste.class);
         register(SaksopplysningTjeneste.class);
         register(SoeknadTjeneste.class);
-        register(VurderingTjeneste.class);
+        register(VilkaarTjeneste.class);
     }
 }
