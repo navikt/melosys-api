@@ -1,12 +1,12 @@
 package no.nav.melosys.domain;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -106,7 +106,7 @@ public class AvklartefaktaTest {
     }
 
     @Test
-    public void equalSammeReferanserMedUlikSubjekt(){
+    public void equalSammeReferanserMedUlikSubjekt() {
         String fellesReferanse = "nyeOpplysninger_inngangsVilkaar";
 
         Avklartefakta valg1 = new Avklartefakta();

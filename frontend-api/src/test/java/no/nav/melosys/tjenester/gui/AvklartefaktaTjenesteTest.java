@@ -1,8 +1,10 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.io.IOException;
 import java.util.Set;
 
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.Before;
@@ -14,10 +16,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.melosys.service.abac.Tilgang;
-
-
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -41,18 +39,18 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTest {
     }
 
     @Before
-    public void setUp()  {
+    public void setUp() {
         avklartefaktaTjeneste = new AvklartefaktaTjeneste(avklartefaktaService, tilgang);
     }
 
     @Test
-    @Ignore  // Mangler schema
-    public void hentAvklartefakta() throws IkkeFunnetException {
+    @Ignore
+    public void hentAvklartefakta() throws IkkeFunnetException, IOException {
         Set<AvklartefaktaDto> mockliste = defaultEnhancedRandom().randomSetOf(4, AvklartefaktaDto.class);
         when(avklartefaktaService.hentAvklarteFakta(1L)).thenReturn(mockliste);
 
         Set<AvklartefaktaDto> avklartefaktaDtoSet = avklartefaktaTjeneste.hentAvklarteFakta(1L);
-        //validerListe(avklartefaktaDtoSet);
+        validerListe(avklartefaktaDtoSet);
     }
 }
 
