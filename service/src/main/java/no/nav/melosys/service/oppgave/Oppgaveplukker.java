@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fagsakstype;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -15,9 +14,10 @@ import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.util.KodeverkUtils;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import org.slf4j.Logger;
@@ -32,13 +32,12 @@ public class Oppgaveplukker {
     private static final Logger log =  LoggerFactory.getLogger(Oppgaveplukker.class);
 
     private final GsakFasade gsakFasade;
-    private final FagsakRepository fagsakRepository;
+
     private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
 
     @Autowired
-    public Oppgaveplukker(GsakFasade gsakFasade, FagsakRepository fagsakRepository, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo) {
+    public Oppgaveplukker(GsakFasade gsakFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo) {
         this.gsakFasade = gsakFasade;
-        this.fagsakRepository = fagsakRepository;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
     }
 
