@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
@@ -15,9 +16,13 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
+import no.nav.melosys.integrasjon.medl.behandle.BehandleMedlemskapConsumer;
 import no.nav.melosys.integrasjon.medl.medlemskap.HentPeriodeListeResponseWrapper;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumer;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumerConfig;
+import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.UgyldigInput;
+import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
+import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeResponse;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Foedselsnummer;
@@ -37,13 +42,18 @@ public class MedlService implements MedlFasade {
 
     private final MedlemskapConsumer medlemskapConsumer;
 
+    private final BehandleMedlemskapConsumer behandleMedlemskapConsumer;
+
     private DokumentFactory dokumentFactory;
 
     private final JAXBContext jaxbContext;
 
     @Autowired
-    public MedlService(MedlemskapConsumer medlemskapConsumer, DokumentFactory dokumentFactory) {
+    public MedlService(MedlemskapConsumer medlemskapConsumer,
+                       BehandleMedlemskapConsumer behandleMedlemskapConsumer,
+                       DokumentFactory dokumentFactory) {
         this.medlemskapConsumer = medlemskapConsumer;
+        this.behandleMedlemskapConsumer = behandleMedlemskapConsumer;
         this.dokumentFactory = dokumentFactory;
 
         try {
@@ -86,7 +96,33 @@ public class MedlService implements MedlFasade {
 
     @Override
     public Long opprettPeriode(String fnr, Medlemsperiode medlemsperiode) throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException {
-        return null;
+        OpprettPeriodeRequest request = new OpprettPeriodeRequest();
+
+        no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Foedselsnummer ident = new no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Foedselsnummer();
+        ident.setValue(fnr);
+
+        no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Medlemsperiode periode = new no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Medlemsperiode();
+        try {
+            periode.setFraOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(medlemsperiode.getPeriode().getFom()));
+            periode.setTilOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(medlemsperiode.getPeriode().getTom()));
+        } catch (DatatypeConfigurationException e) {
+            e.printStackTrace();
+        }
+        // FIXME sett kodeverdier på medlemsperiode
+
+        request.setIdent(ident);
+        request.setPeriode(periode);
+
+        try {
+            OpprettPeriodeResponse response = behandleMedlemskapConsumer.opprettPeriode(request);
+            return response.getPeriodeId();
+        } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.PersonIkkeFunnet e) {
+            throw new IkkeFunnetException(e);
+        } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.Sikkerhetsbegrensning e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (UgyldigInput e) {
+            throw new IntegrasjonException(e);
+        }
     }
 
     private HentPeriodeListeResponse hentPeriodeListeResponse(String fnr, LocalDate fom, LocalDate tom) throws SikkerhetsbegrensningException, IkkeFunnetException {

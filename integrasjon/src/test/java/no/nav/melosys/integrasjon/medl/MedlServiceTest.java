@@ -7,12 +7,14 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.medl.behandle.BehandleMedlemskapConsumer;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 public class MedlServiceTest {
 
@@ -21,8 +23,9 @@ public class MedlServiceTest {
     @Before
     public void setUp() {
         MedlemskapMock medlemskapMock = new MedlemskapMock();
+        BehandleMedlemskapConsumer behandleMedlemskapConsumer = mock(BehandleMedlemskapConsumer.class);
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
-        medlService = new MedlService(medlemskapMock, dokumentFactory);
+        medlService = new MedlService(medlemskapMock, behandleMedlemskapConsumer, dokumentFactory);
     }
 
     @Test

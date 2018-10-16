@@ -161,6 +161,10 @@
             <artifactId>nav-medlemskap-v2-tjenestespesifikasjon</artifactId>
             <classifier>joda</classifier>
         </dependency>
+        <dependency>
+            <groupId>no.nav.tjenester</groupId>
+            <artifactId>nav-behandleMedlemskap-v2-tjenestespesifikasjon</artifactId>
+        </dependency>
 
         <!--Test-->
         <dependency>
