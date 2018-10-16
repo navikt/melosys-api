@@ -7,13 +7,16 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @ServletComponentScan("no.nav.melosys.integrasjon.felles")
-@SpringBootApplication
 @PropertySource(value = "classpath:saksflyt.properties", encoding = "utf-8")
 @PropertySource(value = "classpath:service.properties", encoding = "utf-8")
+@SpringBootApplication
+@Controller
 public class Application extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
@@ -33,5 +36,10 @@ public class Application extends SpringBootServletInitializer {
                 registry.addResourceHandler("/frontendlogger/**").addResourceLocations("classpath:/frontendlogger/");
             }
         };
+    }
+
+    @GetMapping(path = {"/journalforing/**", "/sok/**"})
+    public String forward() {
+        return "forward:/";
     }
 }
