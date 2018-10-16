@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.FieldDefinitionBuilder;
@@ -14,6 +15,8 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
+import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
+import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +29,11 @@ import org.slf4j.LoggerFactory;
 public class FagsakTjenesteTest extends JsonSchemaTest {
 
     private static final Logger log = LoggerFactory.getLogger(FagsakTjenesteTest.class);
+
+    private static final String FAGSAKER_SCHEMA = "fagsaker-schema.json";
+    private static final String SOK_FAGSAKER_SCHEMA = "sok-fagsaker-schema.json";
+
+    private String schemaType;
 
     private EnhancedRandom random;
 
@@ -43,8 +51,9 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
 
     @Override
     public String schemaNavn() {
-        return "fagsaker-schema.json";
+        return schemaType;
     }
+
 
     @Test
     public void fagsakSchemaValidering() throws IOException, JSONException {
@@ -64,7 +73,16 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
         }
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
-
+        schemaType = FAGSAKER_SCHEMA;
         valider(jsonString, log);
+    }
+
+    @Test
+    public void fagsakSøkSchemaValidering() throws IOException, JSONException {
+        List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.randomListOf(2, FagsakOppsummeringDto.class);
+        fagsakOppsummeringDtoList.forEach(fagsakOppsummeringDto -> fagsakOppsummeringDto.setSoknadsperiode(new PeriodeDto(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))));
+
+        schemaType = SOK_FAGSAKER_SCHEMA;
+        validerListe(fagsakOppsummeringDtoList, log);
     }
 }
