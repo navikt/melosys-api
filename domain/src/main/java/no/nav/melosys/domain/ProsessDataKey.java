@@ -17,7 +17,7 @@ public enum ProsessDataKey {
     GSAK_SAK_ID("gsakSakID"),
     HOVEDDOKUMENT_TITTEL("hoveddokumentTittel"),
     JOURNALPOST_ID("journalpostID"),
-    LAND("land"),
+    OPPHOLDSLAND("land"),
     OPPGAVE_ID("oppgaveID"),
     REPRESENTANT("representant"),
     SAKSBEHANDLER("saksbehandler"),

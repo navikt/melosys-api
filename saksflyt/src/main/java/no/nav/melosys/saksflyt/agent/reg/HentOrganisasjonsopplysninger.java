@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.agent.reg;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -109,7 +109,7 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
         for (String orgnr : orgnumre) {
             Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(orgnr);
             saksopplysning.setBehandling(behandling);
-            saksopplysning.setRegistrertDato(LocalDateTime.now());
+            saksopplysning.setRegistrertDato(Instant.now());
             saksopplysningRepo.save(saksopplysning);
         }
     }

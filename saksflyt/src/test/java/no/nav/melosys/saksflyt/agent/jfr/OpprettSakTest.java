@@ -57,6 +57,6 @@ public class OpprettSakTest {
         verify(applicationEventPublisher, times(1)).publishEvent(any(FagsakOpprettetEvent.class));
         verify(applicationEventPublisher, times(1)).publishEvent(any(BehandlingOpprettetEvent.class));
 
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_GSAK_SAK);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SØKNAD);
     }
 }

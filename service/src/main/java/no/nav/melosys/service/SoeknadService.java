@@ -1,10 +1,12 @@
 package no.nav.melosys.service;
 
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -19,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class SoeknadService {
 
     private final BehandlingRepository behandlingRepo;
+
+    private static final String SØKNAD_VERSJON = "1.0";
 
     private final SaksopplysningRepository saksopplysningRepo;
 
@@ -40,7 +44,7 @@ public class SoeknadService {
         Comparator<? super Saksopplysning> comparator = Comparator.comparing(Saksopplysning::getRegistrertDato);
 
         // Vi henter den nyeste søknaden
-        Optional<Saksopplysning> nyeste = behandling.getSaksopplysninger().stream().filter(s -> s.getType().equals(SaksopplysningType.SØKNAD)).sorted(comparator.reversed()).findFirst();
+        Optional<Saksopplysning> nyeste = behandling.getSaksopplysninger().stream().filter(s -> s.getType().equals(SaksopplysningType.SØKNAD)).max(comparator);
 
         if (nyeste.isPresent()) {
             Saksopplysning saksopplysning = nyeste.get();
@@ -52,7 +56,7 @@ public class SoeknadService {
     }
 
     @Transactional
-    public SoeknadDokument registrerSøknad(long behandlingID, SoeknadDokument soeknadDokument) throws IkkeFunnetException {
+    public SoeknadDokument registrerSøknad(long behandlingID, SoeknadDokument soeknadDokument, SaksopplysningKilde kilde) throws IkkeFunnetException {
         // Finner behandlingen som er relatert til søkndaden
         Behandling behandling = behandlingRepo.findOne(behandlingID);
 
@@ -60,7 +64,11 @@ public class SoeknadService {
             throw new IkkeFunnetException("Registrering av søknad feilet fordi behandling med ID " + behandlingID + " er ikke funnet");
         }
 
-        Saksopplysning saksopplysning = new Saksopplysning(soeknadDokument);
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SØKNAD);
+        saksopplysning.setVersjon(SØKNAD_VERSJON);
+        saksopplysning.setKilde(kilde);
+        saksopplysning.setRegistrertDato(Instant.now());
         saksopplysning.setBehandling(behandling);
         saksopplysning.setDokument(soeknadDokument);
         String internXml = dokumentFactory.lagInternXml(saksopplysning);

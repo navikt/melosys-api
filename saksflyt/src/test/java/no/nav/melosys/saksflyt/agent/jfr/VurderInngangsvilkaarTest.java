@@ -116,7 +116,7 @@ public class VurderInngangsvilkaarTest {
         saksopplysninger.add(historiskSopp);
 
         p.getBehandling().setSaksopplysninger(saksopplysninger);
-        p.setData(ProsessDataKey.LAND, Collections.singletonList(Landkoder.CH.getKode()));
+        p.setData(ProsessDataKey.OPPHOLDSLAND, Collections.singletonList(Landkoder.CH.getKode()));
         p.setData(ProsessDataKey.SØKNADSPERIODE, new PeriodeDto(LocalDate.now().minusMonths(6), null));
 
         // Sett opp regelmodulService til å alltid returnere EØS og ingen feil.
@@ -144,7 +144,7 @@ public class VurderInngangsvilkaarTest {
         Saksopplysning sopp = new Saksopplysning();
         sopp.setDokument(pDok);
         p.getBehandling().setSaksopplysninger(Collections.singleton(sopp));
-        p.setData(ProsessDataKey.LAND, Collections.singletonList(Landkoder.PL.getKode()));
+        p.setData(ProsessDataKey.OPPHOLDSLAND, Collections.singletonList(Landkoder.PL.getKode()));
         p.setData(ProsessDataKey.SØKNADSPERIODE, new PeriodeDto(LocalDate.now(), null));
         return p;
     }

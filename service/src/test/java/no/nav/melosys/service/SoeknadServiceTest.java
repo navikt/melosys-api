@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,9 +33,7 @@ import org.mockito.junit.MockitoRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class SoeknadServiceTest {
 
@@ -75,16 +74,16 @@ public class SoeknadServiceTest {
 
         Saksopplysning saksopplysning_1 = new Saksopplysning();
         saksopplysning_1.setType(SaksopplysningType.SØKNAD);
-        saksopplysning_1.setRegistrertDato(LocalDateTime.now().minusMonths(3));
+        saksopplysning_1.setRegistrertDato(LocalDateTime.now().minusMonths(3).toInstant(ZoneOffset.UTC));
         saksopplysning_1.setKilde(SaksopplysningKilde.MEDL);
 
         Saksopplysning saksopplysning_2 = new Saksopplysning();
         saksopplysning_2.setType(SaksopplysningType.PERSONOPPLYSNING);
-        saksopplysning_2.setRegistrertDato(LocalDateTime.now().minusMonths(1));
+        saksopplysning_2.setRegistrertDato(LocalDateTime.now().minusMonths(1).toInstant(ZoneOffset.UTC));
         saksopplysning_2.setKilde(SaksopplysningKilde.TPS);
 
         Saksopplysning saksopplysning_3 = new Saksopplysning();
-        saksopplysning_3.setRegistrertDato(LocalDateTime.now().minusMonths(1));
+        saksopplysning_3.setRegistrertDato(LocalDateTime.now().minusMonths(1).toInstant(ZoneOffset.UTC));
         saksopplysning_3.setKilde(SaksopplysningKilde.SBH);
         saksopplysning_3.setType(SaksopplysningType.SØKNAD);
         saksopplysning_3.setDokument(soeknadDokument);
@@ -110,7 +109,7 @@ public class SoeknadServiceTest {
 
         when(behandlingRepo.findOne(1L)).thenReturn(b);
 
-        soeknadService.registrerSøknad(behandlingID, soeknadDokument);
+        soeknadService.registrerSøknad(behandlingID, soeknadDokument, SaksopplysningKilde.SBH);
 
         verify(saksopplysningRepo, times(1)).save((Saksopplysning) any());
     }

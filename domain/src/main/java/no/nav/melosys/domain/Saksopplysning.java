@@ -1,23 +1,12 @@
 package no.nav.melosys.domain;
 
+import java.time.Instant;
+import java.util.Objects;
+import javax.persistence.*;
+
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.jpa.SaksopplysningListener;
 import org.hibernate.annotations.ColumnTransformer;
-
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 
 @Entity
@@ -47,7 +36,7 @@ public class Saksopplysning {
     private SaksopplysningKilde kilde;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
-    private LocalDateTime registrertDato;
+    private Instant registrertDato;
 
     @ColumnTransformer(read = "NVL2(dokument_xml, (dokument_xml).getClobVal(), NULL)", write = "XMLType.createxml(?)")
     @Lob
@@ -63,16 +52,6 @@ public class Saksopplysning {
     private SaksopplysningDokument dokument;
 
     public Saksopplysning() {
-    }
-
-    /**
-     * Brukes når en saksbehandler oppretter saksopplysninger manuelt.
-     */
-    public Saksopplysning(SaksopplysningDokument saksopplysningDokument) {
-        setType(SaksopplysningType.SØKNAD);
-        setVersjon("0.1"); // FIXME Hvor lagrer vi versjonen?
-        setKilde(SaksopplysningKilde.SBH);
-        setRegistrertDato(LocalDateTime.now());
     }
 
     public long getId() {
@@ -111,11 +90,11 @@ public class Saksopplysning {
         this.kilde = kilde;
     }
 
-    public LocalDateTime getRegistrertDato() {
+    public Instant getRegistrertDato() {
         return registrertDato;
     }
 
-    public void setRegistrertDato(LocalDateTime registrertDato) {
+    public void setRegistrertDato(Instant registrertDato) {
         this.registrertDato = registrertDato;
     }
 
