@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
-public class UtenlandskID {
-    public String ID;
+public class UtenlandskIdent {
+    public String ident;
     public String landKode;
 }

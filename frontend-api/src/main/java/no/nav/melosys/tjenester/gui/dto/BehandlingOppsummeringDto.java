@@ -9,7 +9,7 @@ public class BehandlingOppsummeringDto {
 
     private Long behandlingID;
     private Behandlingsstatus status;
-    private Behandlingstype type;
+    private Behandlingstype behandlingstype;
     private Instant registrertDato;
     private Instant endretDato;
 
@@ -29,12 +29,12 @@ public class BehandlingOppsummeringDto {
         this.status = status;
     }
 
-    public Behandlingstype getType() {
-        return type;
+    public Behandlingstype getBehandlingstype() {
+        return behandlingstype;
     }
 
-    public void setType(Behandlingstype type) {
-        this.type = type;
+    public void setBehandlingstype(Behandlingstype behandlingstype) {
+        this.behandlingstype = behandlingstype;
     }
 
     public Instant getRegistrertDato() {

@@ -12,7 +12,6 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -85,7 +84,7 @@ public class OppgaveService {
             }
 
             behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
-            behOppgaveDto.setSakstypeKode(fagsak.getType().getKode());
+            behOppgaveDto.setSakstype(fagsak.getType());
 
             Behandling behandling = fagsak.getAktivBehandling();
             if (behandling == null) {
@@ -113,7 +112,6 @@ public class OppgaveService {
         dest.setAktivTil(oppgave.getFristFerdigstillelse());
         dest.setAnsvarligID(oppgave.getTilordnetRessurs());
         dest.setOppgaveID(oppgave.getOppgaveId());
-        dest.setOppgavetypeKode(oppgave.getOppgavetype().getKode());
         dest.setPrioritet(oppgave.getPrioritet());
         dest.setVersjon(oppgave.getVersjon());
 
@@ -124,8 +122,7 @@ public class OppgaveService {
         BehandlingDto behandlingDto = new BehandlingDto();
         behandlingDto.setBehandlingID(behandling.getId());
         behandlingDto.setBehandlingsstatus(behandling.getStatus());
-        behandlingDto.setBehandlingType(behandling.getType());
-        behandlingDto.setEndretDato(behandling.getEndretDato());
+        behandlingDto.setBehandlingstype(behandling.getType());
         behandlingDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
 
         Optional<Prosessinstans> prosessinstans = prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(ProsessType.OPPFRISKNING, behandling.getId());

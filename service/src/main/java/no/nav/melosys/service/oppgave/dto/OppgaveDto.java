@@ -9,7 +9,6 @@ public class OppgaveDto {
     private LocalDate aktivTil;
     private String ansvarligID;
     private String oppgaveID;
-    private String oppgavetypeKode;
     private PrioritetType prioritet;
     private int versjon;
 
@@ -36,14 +35,6 @@ public class OppgaveDto {
 
     public void setOppgaveID(String oppgaveID) {
         this.oppgaveID = oppgaveID;
-    }
-
-    public String getOppgavetypeKode() {
-        return oppgavetypeKode;
-    }
-
-    public void setOppgavetypeKode(String oppgavetypeKode) {
-        this.oppgavetypeKode = oppgavetypeKode;
     }
 
     public PrioritetType getPrioritet() {
