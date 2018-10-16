@@ -8,7 +8,6 @@ import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -44,7 +43,6 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    @Ignore
     public void hentAvklartefakta() throws IkkeFunnetException, IOException {
         Set<AvklartefaktaDto> mockliste = defaultEnhancedRandom().randomSetOf(4, AvklartefaktaDto.class);
         when(avklartefaktaService.hentAvklarteFakta(1L)).thenReturn(mockliste);
