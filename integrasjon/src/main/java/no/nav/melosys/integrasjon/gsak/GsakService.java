@@ -12,7 +12,10 @@ import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
@@ -133,7 +136,7 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());
         oppgaveDto.setOppgavetype(oppgave.getOppgavetype().getKode());
         oppgaveDto.setPrioritet(PrioritetType.NORM.toString());
-        oppgaveDto.setSaksreferanse(oppgave.getGsakSaksnummer().toString()); //TODO Bør vi bruke eget saksnummer?
+        oppgaveDto.setSaksreferanse(oppgave.getSaksnummer());
         oppgaveDto.setTema(oppgave.getTema().getKode());
         oppgaveDto.setTildeltEnhetsnr(Integer.toString(MELOSYS_ENHET_ID));
         oppgaveDto.setTilordnetRessurs(oppgave.getTilordnetRessurs());
@@ -175,8 +178,10 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
         domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
         domainOppgave.setJournalpostId(oppgave.getJournalpostId());
 
-        //TODO Bør vi bruke eget saksnummer?
-        domainOppgave.setGsakSaksnummer(oppgave.getSaksreferanse() != null ? Long.parseLong(oppgave.getSaksreferanse()) : null);
+        if (oppgave.getSaksreferanse() != null) {
+            domainOppgave.setSaksnummer(oppgave.getSaksreferanse());
+        }
+
         domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
 
         if (oppgave.getTema() != null && erGyldigKode(Tema.class, oppgave.getTema())) {

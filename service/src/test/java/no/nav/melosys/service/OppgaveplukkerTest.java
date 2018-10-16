@@ -12,7 +12,6 @@ import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
@@ -33,16 +32,13 @@ public class OppgaveplukkerTest {
     private GsakFasade gsakFasade;
 
     @Mock
-    private FagsakRepository fagsakRepository;
-
-    @Mock
     private OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
 
     private Oppgaveplukker oppgaveplukker;
 
     @Before
     public void setUp() {
-        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, fagsakRepository, oppgaveTilbakkeleggingRepo);
+        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, oppgaveTilbakkeleggingRepo);
     }
 
     @Test
