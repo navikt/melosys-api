@@ -1,7 +1,6 @@
 package no.nav.melosys.service.oppgave.dto;
 
 import java.time.Instant;
-import java.time.LocalDate;
 
 import no.nav.melosys.domain.Behandlingsstatus;
 import no.nav.melosys.domain.Behandlingstype;
@@ -12,7 +11,6 @@ public class BehandlingDto {
     private Behandlingstype behandlingstype;
     private Behandlingsstatus behandlingsstatus;
     private Instant sisteOpplysningerHentetDato;
-    private LocalDate endretDato;
     private boolean erUnderOppdatering;
 
     public boolean erUnderOppdatering() {
@@ -45,14 +43,6 @@ public class BehandlingDto {
 
     public void setBehandlingsstatus(Behandlingsstatus behandlingsstatus) {
         this.behandlingsstatus = behandlingsstatus;
-    }
-
-    public LocalDate getEndretDato() {
-        return endretDato;
-    }
-
-    public void setEndretDato(LocalDate endretDato) {
-        this.endretDato = endretDato;
     }
 
     public Instant getSisteOpplysningerHentetDato() {
