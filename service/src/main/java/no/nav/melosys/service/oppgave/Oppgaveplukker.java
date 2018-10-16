@@ -2,7 +2,6 @@ package no.nav.melosys.service.oppgave;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,7 +11,6 @@ import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
-import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -35,10 +33,13 @@ public class Oppgaveplukker {
 
     private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
 
+    private final PlukkOppgavePolicy plukkOppgavePolicy;
+
     @Autowired
-    public Oppgaveplukker(GsakFasade gsakFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo) {
+    public Oppgaveplukker(GsakFasade gsakFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo, PlukkOppgavePolicy plukkOppgavePolicy) {
         this.gsakFasade = gsakFasade;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
+        this.plukkOppgavePolicy = plukkOppgavePolicy;
     }
 
     /**
@@ -110,9 +111,9 @@ public class Oppgaveplukker {
         log.info("Oppgave med oppgaveId {} er lagt tilbake. ", oppgaveId);
     }
 
-    private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {
+    private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) throws TekniskException {
 
-        Optional<Oppgave> valg = oppgaver.stream().min(høyestTilLavestPrioritet);
+        Optional<Oppgave> valg = plukkOppgavePolicy.plukkOppgave(oppgaver);
         // Vi må ikke tildele en oppgave som var tilbakelagt.
         if (valg.isPresent()) {
             String oppgaveId = valg.get().getOppgaveId();
@@ -130,26 +131,5 @@ public class Oppgaveplukker {
         List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(saksbehandlerID, oppgaveId);
         return !tilbakelegging.isEmpty();
     }
-
-    private static final Comparator<Oppgave> høyestTilLavestPrioritet = (a, b) -> {
-        // Merk: Bryter med konvensjonen (a == b og b == c → a == c), men dette er ok.
-        int res = 0;
-        if (a.getPrioritet() == b.getPrioritet())
-            res = 0;
-        else if (a.getPrioritet() == PrioritetType.HOY)
-            res = -1;
-        else if (b.getPrioritet() == PrioritetType.HOY)
-            res = 1;
-        else if (a.getPrioritet() == PrioritetType.NORM)
-            res = -1;
-        else if (b.getPrioritet() == PrioritetType.NORM)
-            res = 1;
-        if (res == 0) {
-            if (a.getFristFerdigstillelse() == null || b.getFristFerdigstillelse() == null)
-                return 0;
-            return a.getFristFerdigstillelse().compareTo(b.getFristFerdigstillelse());
-        }
-        return res;
-    };
 
 }
