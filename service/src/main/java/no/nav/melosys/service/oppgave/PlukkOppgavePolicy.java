@@ -1,7 +1,7 @@
 package no.nav.melosys.service.oppgave;
 
-
-import java.time.LocalDate;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -13,11 +13,15 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.FagsakRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PlukkOppgavePolicy {
+
+    private static final Logger log =  LoggerFactory.getLogger(PlukkOppgavePolicy.class);
 
     private final FagsakRepository fagsakRepository;
 
@@ -26,22 +30,24 @@ public class PlukkOppgavePolicy {
         this.fagsakRepository = fagsakRepository;
     }
 
-    Optional<Oppgave> plukkOppgave(List<Oppgave> oppgaver) throws TekniskException {
-        Optional<Oppgave> oppgaverMedPrioritet = oppgaver.stream().min(høyestTilLavestPrioritet);
+    Optional<Oppgave> plukkOppgave(List<Oppgave> oppgaver) {
+        return oppgaver.stream().min(høyestTilLavestPrioritet);
+    }
 
-        if (oppgaverMedPrioritet.isPresent()) {
-            Oppgave oppgave = oppgaverMedPrioritet.get();
+    List<Oppgave> plukkOppgaverVenterIkkeForDokumentasjon(List<Oppgave> oppgaver) throws TekniskException {
+        List<Oppgave> oppgaverValgt = new ArrayList<>();
+
+        for (Oppgave oppgave : oppgaver) {
             Fagsak fagsak = fagsakRepository.findBySaksnummer(oppgave.getSaksnummer());
             Behandling behandling = fagsak.getAktivBehandling();
-            if (!Behandlingsstatus.erVenterForDokumentasjon(behandling.getStatus())) {
-                return oppgaverMedPrioritet;
-            }
-            if (oppgave.getFristFerdigstillelse().isBefore(LocalDate.now())) {
-                return oppgaverMedPrioritet;
+
+            if (!Behandlingsstatus.erVenterForDokumentasjon(behandling.getStatus())
+                || ((behandling.getDokumentasjonSvarfristDato() != null)
+                && behandling.getDokumentasjonSvarfristDato().isBefore(Instant.now()))) {
+                oppgaverValgt.add(oppgave);
             }
         }
-
-        return Optional.empty();
+        return oppgaverValgt;
     }
 
     private static final Comparator<Oppgave> høyestTilLavestPrioritet = (a, b) -> {

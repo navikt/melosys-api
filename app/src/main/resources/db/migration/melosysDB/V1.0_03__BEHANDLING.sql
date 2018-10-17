@@ -6,6 +6,7 @@ CREATE TABLE behandling (
     registrert_dato TIMESTAMP    NOT NULL,
     endret_dato     TIMESTAMP    NOT NULL,
     siste_opplysninger_hentet_dato  TIMESTAMP    NULL,
+    dokumentasjon_svarfrist_dato  TIMESTAMP    NULL,
     CONSTRAINT pk_behandling PRIMARY KEY (id)
 );
 

@@ -35,6 +35,9 @@ public class Behandling {
     @Column(name = "siste_opplysninger_hentet_dato")
     private Instant sisteOpplysningerHentetDato;
 
+    @Column(name = "dokumentasjon_svarfrist_dato")
+    private Instant dokumentasjonSvarfristDato;
+
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
 
@@ -89,14 +92,6 @@ public class Behandling {
         this.endretDato = endretDato;
     }
 
-    public Instant getSistOpplysningerHentetDato() {
-        return sisteOpplysningerHentetDato;
-    }
-
-    public void setSisteOpplysningerHentetDato(Instant sisteOpplysningerHentetDato) {
-        this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
-    }
-
     public Set<Saksopplysning> getSaksopplysninger() {
         return saksopplysninger;
     }
@@ -111,6 +106,22 @@ public class Behandling {
 
     public void setBehandlingshistorikk(Set<BehandlingHistorikk> behandlingshistorikk) {
         this.behandlingshistorikk = behandlingshistorikk;
+    }
+
+    public Instant getSistOpplysningerHentetDato() {
+        return sisteOpplysningerHentetDato;
+    }
+
+    public void setSisteOpplysningerHentetDato(Instant sisteOpplysningerHentetDato) {
+        this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
+    }
+
+    public Instant getDokumentasjonSvarfristDato() {
+        return dokumentasjonSvarfristDato;
+    }
+
+    public void setDokumentasjonSvarfristDato(Instant dokumentasjonSvarfristDato) {
+        this.dokumentasjonSvarfristDato = dokumentasjonSvarfristDato;
     }
 
     @Override

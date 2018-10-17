@@ -1,5 +1,7 @@
 package no.nav.melosys.service;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,8 +38,6 @@ public class OppgaveplukkerTest {
     @Mock
     private OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
 
-    private PlukkOppgavePolicy plukkOppgavePolicy;
-
     @Mock
     private FagsakRepository fagsakRepository;
 
@@ -45,7 +45,7 @@ public class OppgaveplukkerTest {
 
     @Before
     public void setUp() {
-        plukkOppgavePolicy = new PlukkOppgavePolicy(fagsakRepository);
+        PlukkOppgavePolicy plukkOppgavePolicy = new PlukkOppgavePolicy(fagsakRepository);
         this.oppgaveplukker = new Oppgaveplukker(gsakFasade, oppgaveTilbakkeleggingRepo, plukkOppgavePolicy);
     }
 
@@ -147,7 +147,7 @@ public class OppgaveplukkerTest {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstype.SØKNAD);
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
-
+        behandling.setDokumentasjonSvarfristDato(Instant.now().minus(Duration.ofDays(1)));
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
