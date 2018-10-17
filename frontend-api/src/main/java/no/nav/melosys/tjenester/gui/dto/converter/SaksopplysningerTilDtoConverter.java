@@ -110,7 +110,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
             gjeldendeDato = LocalDateTime.ofInstant(behandling.getEndretDato(), ZoneOffset.UTC).toLocalDate();
         }
 
-        if (søknadsperiode != null && søknadsperiode.getFom().isBefore(gjeldendeDato)) {
+        if (søknadsperiode != null && søknadsperiode.getFom() != null && søknadsperiode.getFom().isBefore(gjeldendeDato)) {
             dto.getPerson().statsborgerskap = historiskStatsborgerskap;
             dto.getPerson().statsborgerskapDato = søknadsperiode.getFom();
         } else {
