@@ -22,7 +22,7 @@ public class VilkaarTjenesteTest extends JsonSchemaTest {
 
     private static final Logger log = LoggerFactory.getLogger(VilkaarTjenesteTest.class);
 
-    private static final String VILKÅR_SCHEMA = "vilkaar-schema.json";
+    private static final String VILKÅR_SCHEMA = "vilkar-schema.json";
 
     @Mock
     private VilkaarsresultatService vilkaarsresultatService;
@@ -48,7 +48,7 @@ public class VilkaarTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    @Ignore //FIXME Definere schema
+    @Ignore //FIXME Schema er ikke i develop
     public void hentVilkår() throws IOException {
         List<VilkaarDto> mockListe = defaultEnhancedRandom().randomListOf(4, VilkaarDto.class);
         when(vilkaarsresultatService.hentVilkaar(1L)).thenReturn(mockListe);

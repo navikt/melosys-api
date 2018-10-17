@@ -10,12 +10,12 @@ public class KodeverkDto {
     private List<KodeDto> behandlingstyper;
     private List<KodeDto> behandlingsstatus;
     private List<KodeDto> dokumenttitler;
+    private List<KodeDto> dokumenttyper;
     private List<KodeDto> finansiering;
     private List<KodeDto> landkoder;
     private List<KodeDto> oppgavetyper;
     private List<KodeDto> sakstyper;
     private List<KodeDto> vedleggstitler;
-    private List<KodeDto> vilkaar;
 
     public BegrunnelserDto getBegrunnelser() {
         return begrunnelser;
@@ -54,6 +54,14 @@ public class KodeverkDto {
         this.dokumenttitler = dokumenttitler;
     }
 
+    public List<KodeDto> getDokumenttyper() {
+        return dokumenttyper;
+    }
+
+    public void setDokumenttyper(List<KodeDto> dokumenttyper) {
+        this.dokumenttyper = dokumenttyper;
+    }
+
     public List<KodeDto> getFinansiering() { return finansiering; }
 
     public void setFinansiering(List<KodeDto> finansiering) { this.finansiering = finansiering; }
@@ -88,13 +96,5 @@ public class KodeverkDto {
 
     public void setVedleggstitler(List<KodeDto> vedleggstitler) {
         this.vedleggstitler = vedleggstitler;
-    }
-
-    public List<KodeDto> getVilkaar() {
-        return vilkaar;
-    }
-
-    public void setVilkaar(List<KodeDto> vilkaar) {
-        this.vilkaar = vilkaar;
     }
 }

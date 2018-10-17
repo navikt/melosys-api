@@ -7,12 +7,10 @@ import org.everit.json.schema.ValidationException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Ignore//FIXME Definere vilkår
 public class KodeverkTjenesteTest extends JsonSchemaTest {
 
     private static final Logger logger = LoggerFactory.getLogger(KodeverkTjenesteTest.class);
