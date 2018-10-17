@@ -31,11 +31,6 @@ public final class SoeknadUtils {
     }
 
     public static Periode hentPeriode(SoeknadDokument soeknadDokument) {
-        Periode oppholdsPeriode = soeknadDokument.oppholdUtland.oppholdsPeriode;
-        if (oppholdsPeriode.getTom() == null || oppholdsPeriode.getFom() == null) {
-            throw new RuntimeException("OppholdsPerioden har null tom eller fom.");
-        } else {
-            return oppholdsPeriode;
-        }
+        return soeknadDokument.oppholdUtland.oppholdsPeriode;
     }
 }

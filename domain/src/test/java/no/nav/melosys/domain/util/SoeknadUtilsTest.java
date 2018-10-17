@@ -45,15 +45,6 @@ public class SoeknadUtilsTest {
         assertThat(res).isEqualTo(periode_2);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void hentPeriode_ingen() {
-        SoeknadDokument soeknad = new SoeknadDokument();
-        leggTilArbeidUtland(soeknad);
-
-        soeknad.oppholdUtland = new OppholdUtland();
-        SoeknadUtils.hentPeriode(soeknad);
-    }
-
     private void leggTilArbeidUtland(SoeknadDokument soeknad) {
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = new StandardAdresse();
