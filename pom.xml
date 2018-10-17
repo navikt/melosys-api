@@ -38,8 +38,8 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.frontend.version>0.14.1-287</melosys.frontend.version>
-        <melosys.jsonschema.version>0.11.5-89</melosys.jsonschema.version>
+        <melosys.frontend.version>0.14.1-296</melosys.frontend.version>
+        <melosys.jsonschema.version>0.11.5-96</melosys.jsonschema.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
