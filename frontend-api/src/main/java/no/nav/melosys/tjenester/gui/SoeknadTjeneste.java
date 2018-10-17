@@ -15,7 +15,6 @@ import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.validering.ValideringService;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
-import no.nav.melosys.tjenester.gui.dto.SoeknadInnDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -77,8 +76,9 @@ public class SoeknadTjeneste extends RestTjeneste {
     @ApiOperation(
         value = "Tjeneste for å registrere opplysninger fra papirsøknaden manuelt.",
         response = SoeknadDto.class)
-    public SoeknadDto registrerSøknad(@ApiParam @PathParam("behandlingID") long behandlingID, @ApiParam SoeknadInnDto soeknadInnDto) {
-        SoeknadDokument soeknadDokument = soeknadInnDto.getSoknadDokument();
+    public SoeknadDto registrerSøknad(@ApiParam SoeknadDto soeknadInnDto) {
+        long behandlingID = soeknadInnDto.getBehandlingID();
+        SoeknadDokument soeknadDokument = soeknadInnDto.getSoeknadDokument();
 
         try {
             tilgang.sjekk(behandlingID);
