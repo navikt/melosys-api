@@ -145,9 +145,6 @@ public class JournalfoeringService {
         if (journalfoeringDto.getFagsak().getLand() == null || journalfoeringDto.getFagsak().getLand().isEmpty()) {
             throw new FunksjonellException("Land mangler");
         }
-        if (journalfoeringDto.getArbeidsgiverID() == null || journalfoeringDto.getArbeidsgiverID().isEmpty()) {
-            throw new FunksjonellException("Arbeidsgiver mangler");
-        }
     }
 
 }
