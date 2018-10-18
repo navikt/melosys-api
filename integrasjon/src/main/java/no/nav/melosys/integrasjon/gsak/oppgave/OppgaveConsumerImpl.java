@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.gsak.oppgave;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -16,12 +15,15 @@ import javax.ws.rs.core.Response.Status.Family;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
+import no.nav.melosys.integrasjon.felles.RestClientLoggingFilter;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.gsak.felles.dto.FeilResponseDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSvar;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OpprettOppgaveDto;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.logging.LoggingFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +39,10 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
         this.erSystem = erSystem;
         try {
             SSLContext sslContext = SSLContext.getDefault();
-            Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();
+            ClientConfig clientConfig = new ClientConfig();
+            clientConfig.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, LoggingFeature.Verbosity.PAYLOAD_ANY);
+            clientConfig.register(new RestClientLoggingFilter());
+            Client client = ClientBuilder.newBuilder().sslContext(sslContext).withConfig(clientConfig).build();
             target = client.register(JacksonJsonProvider.class).target(endpointUrl);
         } catch (NoSuchAlgorithmException e) {
             log.error("Feilet under oppsett av integrasjon mot Sak API", e);
@@ -74,6 +79,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
         }
 
         lokalTarget = lokalTarget.queryParam("tildeltEnhetsnr", oppgaveSearchRequest.getTildeltEnhetsnr())
+            .queryParam("tildeltRessurs", oppgaveSearchRequest.getTildeltRessurs())
             .queryParam("sorteringsfelt", oppgaveSearchRequest.getSorteringsfelt())
             .queryParam("tilordnetRessurs", oppgaveSearchRequest.getTilordnetRessurs())
             .queryParam("statuskategori", oppgaveSearchRequest.getStatusKategori());

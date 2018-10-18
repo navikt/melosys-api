@@ -97,7 +97,8 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
             .medOppgaveTyper(new String[]{oppgavetype.getKode()})
             .medBehandlingsTyper(behandlingstyper.stream().map(Behandlingstype::hentFellesKode).toArray(String[]::new))
             .medSorteringsfelt(SORTERINGSFELT)
-            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN);
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .medTildeltRessurs(false);
 
         if (tema != null) {
             searchRequestBuilder = searchRequestBuilder.medTema( new String[]{tema.getKode()});
