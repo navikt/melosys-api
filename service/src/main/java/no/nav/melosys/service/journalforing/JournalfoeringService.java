@@ -32,12 +32,12 @@ public class JournalfoeringService {
         this.prosessinstansRepo = prosessinstansRepo;
     }
 
-    public Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, IntegrasjonException {
+    public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
         return joarkFasade.hentJournalpost(journalpostID);
     }
 
     @Transactional
-    public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException, TekniskException {
+    public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
         valider(journalfoeringDto);
         validerOpprettSakFelter(journalfoeringDto);
         

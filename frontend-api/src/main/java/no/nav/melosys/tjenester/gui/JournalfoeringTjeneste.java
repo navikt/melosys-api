@@ -83,9 +83,6 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         } catch (FunksjonellException e) {
             log.info("Funksjonell feil: {}", e.getMessage());
             throw new BadRequestException(e);
-        } catch (TekniskException e) {
-            log.error("TekniskException", e);
-            throw new InternalServerErrorException(e);
         }
     }
 
