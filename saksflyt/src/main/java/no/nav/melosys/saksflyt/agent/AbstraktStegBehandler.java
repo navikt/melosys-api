@@ -73,6 +73,6 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
         }
     }
     
-    protected abstract void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException, IntegrasjonException, FunksjonellException;
+    protected abstract void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException;
 
 }

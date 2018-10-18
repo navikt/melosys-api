@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.agent.unntak;
 
 import java.io.IOException;
+import javax.xml.ws.soap.SOAPFaultException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import no.nav.melosys.domain.Prosessinstans;
@@ -30,7 +31,7 @@ public class ExceptionBehandler implements UnntakBehandler {
     private ExceptionBehandler() {
     }
     
-    public static ExceptionBehandler exceptionBehandler() {
+    static ExceptionBehandler exceptionBehandler() {
         return instanse;
     }
     
@@ -61,7 +62,7 @@ public class ExceptionBehandler implements UnntakBehandler {
             ikkeFunnetBehandler.behandleUnntak(prosessinstans, melding, t);
             return;
         }
-        if (erForårsaketAv(t, IntegrasjonException.class)) {
+        if (erForårsaketAv(t, IntegrasjonException.class) || erForårsaketAv(t, SOAPFaultException.class)) {
             tekniskFeilBehandler.behandleUnntak(prosessinstans, melding, t);
             return;
         }
@@ -73,9 +74,8 @@ public class ExceptionBehandler implements UnntakBehandler {
             tekniskFeilBehandler.behandleUnntak(prosessinstans, melding, t);
             return;
         }
-        logger.info("Fikk unntak av type {}. Kastes som RTE og stopper prosessering i denne tråden", t.getClass().getName());
+        logger.error("Fikk ukjent unntak av type {}.", t.getClass().getName());
         settTilFeilet.behandleUnntak(prosessinstans, melding, t);
-        throw new RuntimeException(t);
     }
     
     private static boolean erForårsaketAv(Throwable e, Class<? extends Throwable> clzz) {
