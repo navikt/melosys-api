@@ -56,9 +56,11 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, journalfoeringDto.getFagsak().getLand());
         // Perioden trenges for å hente saksopplysninger
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
-        prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER, journalfoeringDto.getArbeidsgiverID());
+        if (!StringUtils.isEmpty(journalfoeringDto.getArbeidsgiverID())) {
+            prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER, journalfoeringDto.getArbeidsgiverID());
+        }
 
-        if (!(journalfoeringDto.getRepresentantID() == null || journalfoeringDto.getRepresentantID().isEmpty())) {
+        if (!StringUtils.isEmpty(journalfoeringDto.getRepresentantID())) {
             prosessinstans.setData(ProsessDataKey.REPRESENTANT, journalfoeringDto.getRepresentantID());
         }
 
