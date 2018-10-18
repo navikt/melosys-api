@@ -1,6 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Collection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,12 +16,14 @@ import no.nav.melosys.tjenester.gui.jackson.MelosysModule;
 import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
+import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -67,7 +71,7 @@ public abstract class JsonSchemaTest {
 
     protected Schema lastSchema(String schemaString) throws JSONException {
         JSONObject rawSchema = new JSONObject(schemaString);
-        SchemaLoader loader = SchemaLoader.builder().schemaJson(rawSchema).draftV7Support().useDefaults(true).build();
+        SchemaLoader loader = SchemaLoader.builder().schemaJson(rawSchema).httpClient(new ClasspathSchemaClient()).draftV7Support().useDefaults(true).build();
         return loader.load().build();
     }
 
@@ -134,5 +138,16 @@ public abstract class JsonSchemaTest {
             .map(ValidationException::toJSON)
             .forEach(jsonObject -> log.error(jsonObject.toString()));
         throw e;
+    }
+
+    private class ClasspathSchemaClient implements SchemaClient {
+        public InputStream get(String url) {
+            try {
+                url = url.replace("http://melosys.nav.no/schemas", "schema");
+                return new ClassPathResource(url).getInputStream();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
     }
 }
