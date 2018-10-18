@@ -21,6 +21,7 @@ import no.nav.melosys.integrasjon.medl.medlemskap.HentPeriodeListeResponseWrappe
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumer;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumerConfig;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.UgyldigInput;
+import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.kodeverk.*;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeResponse;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
@@ -105,10 +106,28 @@ public class MedlService implements MedlFasade {
         try {
             periode.setFraOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(medlemsperiode.getPeriode().getFom()));
             periode.setTilOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(medlemsperiode.getPeriode().getTom()));
+            periode.setDatoRegistrert(KonverteringsUtils.localDateToXMLGregorianCalendar(LocalDate.now()));
         } catch (DatatypeConfigurationException e) {
             e.printStackTrace();
         }
-        // FIXME sett kodeverdier på medlemsperiode
+        if (medlemsperiode.getStatus() != null) {
+            periode.setStatus(new Statuskode().withValue(medlemsperiode.getStatus()));
+        }
+        if (medlemsperiode.getTrygdedekning() != null) {
+            periode.setTrygdedekning(new Trygdedekning().withValue(medlemsperiode.getTrygdedekning().getKode()));
+        }
+        if (medlemsperiode.getLand() != null) {
+            periode.setLand(new Landkode().withValue(medlemsperiode.getLand()));
+        }
+        if (medlemsperiode.getLovvalg() != null) {
+            periode.setLovvalg(new Lovvalg().withValue(medlemsperiode.getLovvalg()));
+        }
+        if (medlemsperiode.getKildedokumenttype() != null) {
+            periode.setKildedokumenttype(new Kildedokumenttype().withValue(medlemsperiode.getKildedokumenttype()));
+        }
+        if (medlemsperiode.getGrunnlagstype() != null) {
+            periode.setGrunnlagstype(new Grunnlagstype().withValue(medlemsperiode.getGrunnlagstype().getKode()));
+        }
 
         request.setIdent(ident);
         request.setPeriode(periode);
