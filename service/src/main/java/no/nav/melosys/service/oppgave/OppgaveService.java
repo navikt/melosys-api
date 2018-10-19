@@ -88,7 +88,7 @@ public class OppgaveService {
 
             Behandling behandling = fagsak.getAktivBehandling();
             if (behandling == null) {
-                throw new TekniskException("Det finnes ingen aktiv behandling.");
+                throw new TekniskException("Det finnes ingen aktiv behandling for " + fagsak.getSaksnummer() + ".");
             }
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 
