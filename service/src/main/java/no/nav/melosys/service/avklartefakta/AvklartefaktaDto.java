@@ -38,7 +38,7 @@ public class AvklartefaktaDto {
 
     @JsonProperty("avklartefaktaKode")
     public String getAvklartefaktakodeKunKode() {
-        return avklartefaktaType.getKode();
+        return avklartefaktaType != null ? avklartefaktaType.getKode() : null;
     }
 
     @JsonProperty("avklartefaktaKode")
