@@ -19,6 +19,7 @@ CREATE TABLE prosess_type (
     CONSTRAINT pk_prosess_type PRIMARY KEY (kode)
 );
 
+INSERT INTO prosess_type (kode, navn) VALUES ('IVERKSETT_VEDTAK', 'iverksette vedtak');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_KNYTT', 'Journalføring på eksisterende sak');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_NY_SAK', 'Journalføring med ny sak og søknad');
 INSERT INTO prosess_type (kode, navn) VALUES ('SØKNAD_A1', 'Søknad A1');
@@ -29,6 +30,13 @@ CREATE TABLE prosess_steg (
     navn    VARCHAR2(99)  NOT NULL,
     CONSTRAINT pk_behandling_steg PRIMARY KEY (kode)
 );
+
+
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_VALIDERING', 'Validerer iverksatt vedtak');
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_SENDBREV', 'Send brev etter iverksatt vedtak');
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATERMEDL', 'Oppdatering av Meldlemskap');
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_FERDIGSTILLOPPGAVE', 'ferdigstille gsak oppgaven');
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_AVSLUTTBEHANDLING', 'Avslutt FagSak and aktiv behandling');
 
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('MOT_VURDER_AUTOMATISK_JFR', 'Vurder om journalføring kan skje automatisk');

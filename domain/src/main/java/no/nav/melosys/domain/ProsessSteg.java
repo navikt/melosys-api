@@ -10,6 +10,14 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     
     MOT_VURDER_AUTOMATISK_JFR("VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"), // FIXME: Ikke i bruk
 
+    //Iverksatt Vedtak
+    IV_VALIDERING("IV_VALIDERING", "Validerer iverksatt vedtak"),
+    IV_SENDBREV("IV_SENDBREV", "Send brev etter iverksatt vedtak"),
+    IV_OPPDATERMEDL("IV_OPPDATERMEDL", "Oppdatering av Meldlemskap"),
+    IV_FERDIGSTILLOPPGAVE("IV_FERDIGSTILLOPPGAVE", "ferdigstille gsak oppgaven"),
+    IV_AVSLUTTBEHANDLING("IV_AVSLUTTBEHANDLING", "Avslutt FagSak and aktiv behandling"),
+
+
     // Journalføring
     JFR_VALIDERING("JFR_VALIDERING", "Grunnleggende validering"),
     JFR_AVSLUTT_OPPGAVE("JFR_AVSLUTT_OPPGAVE", "Avslutter journalføringsoppgaven i GSAK"),

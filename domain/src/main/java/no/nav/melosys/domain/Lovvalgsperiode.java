@@ -6,6 +6,8 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.dokument.medlemskap.DekningMedltype;
+import no.nav.melosys.domain.dokument.medlemskap.GrunnlagMedltype;
 
 @Entity
 @Table(name = "lovvalg_periode")
@@ -16,7 +18,7 @@ public class Lovvalgsperiode implements ErPeriode {
     private long id;
 
     @Column(name = "bruker_id", updatable = false)
-    private String brukerID;
+    private String brukerID; //AktørID
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
@@ -144,4 +146,96 @@ public class Lovvalgsperiode implements ErPeriode {
         return Objects.hash(behandlingsresultat, fom);
     }
 
+    public DekningMedltype hentFellesKodeForTrygdDekningtype() {
+        DekningMedltype dekningMedltype = null;
+        switch (dekning) {
+            case FULL_DEKNING_EOSFO:
+                dekningMedltype = DekningMedltype.Full;
+                break;
+            case UTEN_DEKNING:
+                dekningMedltype = DekningMedltype.Full;
+            break;
+            default:
+                throw new RuntimeException("dekningstype støttes ikke:" + dekning.getKode());
+        }
+        return dekningMedltype;
+    }
+
+                public GrunnlagMedltype hentFellesKodeForGrunnlagMedltype() {
+        GrunnlagMedltype grunnlagMedltype = null;
+        switch (bestemmelse) {
+            //Article 11
+            case ART11_1:
+                //Kommer ikke aldri til her for lovvalgsbestemelse.
+                break;
+            case ART11_2:
+                grunnlagMedltype = GrunnlagMedltype.FO_11_2;
+                break;
+            case ART11_3A:
+                grunnlagMedltype = GrunnlagMedltype.FO_11_3_a;
+                break;
+            case ART11_3B:
+                grunnlagMedltype = GrunnlagMedltype.FO_11_3_b;
+                break;
+            case ART11_3C:
+                grunnlagMedltype = GrunnlagMedltype.FO_11_3_c;
+                break;
+            case ART11_3D:
+                //Norge støtter ikke
+                break;
+            case ART11_3E:
+                grunnlagMedltype = GrunnlagMedltype.FO_11_3_e;
+                break;
+
+            //Article 12
+            case ART12_1:
+                grunnlagMedltype = GrunnlagMedltype.FO_12_1;
+                break;
+            case ART12_2:
+                grunnlagMedltype = GrunnlagMedltype.FO_12_2;
+                break;
+
+            //Article 13
+            case ART13_1A:
+                grunnlagMedltype = GrunnlagMedltype.FO_13_1_a;
+                break;
+
+            case ART13_1B1:
+                grunnlagMedltype = GrunnlagMedltype.FO_13_1_b;
+                break;
+
+            case ART13_1B2:
+                grunnlagMedltype = GrunnlagMedltype.FO_13_b_ii;
+                break;
+
+            case ART13_1B3:
+                grunnlagMedltype = GrunnlagMedltype.FO_13_b_iii;
+                break;
+
+            case ART13_1B4:
+                grunnlagMedltype = GrunnlagMedltype.FO_13_b_iv;
+                break;
+
+            case ART13_2A:
+                grunnlagMedltype = GrunnlagMedltype.FO_13_2_a;
+                break;
+
+            case ART13_2B:
+                grunnlagMedltype = GrunnlagMedltype.FO_13_2_b;
+                break;
+
+            case ART13_3:
+                grunnlagMedltype = GrunnlagMedltype.FO_13_3;
+                break;
+
+            case ART13_4:
+                grunnlagMedltype = GrunnlagMedltype.FO_13_4;
+                break;
+
+            default:
+                throw new RuntimeException("Feil lovvlagsbestemmelse koden :" + bestemmelse.getKode() + ":" + bestemmelse.getBeskrivelse() );
+
+        }
+    return grunnlagMedltype;
+    }
 }

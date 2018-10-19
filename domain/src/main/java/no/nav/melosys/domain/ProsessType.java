@@ -4,6 +4,7 @@ import javax.persistence.Converter;
 
 public enum ProsessType implements InterntKodeverkTabell<ProsessType> {
 
+    IVERKSETT_VEDTAK("IVERKSETT_VEDTAK", "iverksette vedtak"),
     JFR_KNYTT("JFR_KNYTT", "Journalføring på eksisterende sak"),
     JFR_NY_SAK("JFR_NY_SAK", "Journalføring med ny sak og søknad"),
     MOTTAK("MOTTAK", "Journalføring av mottatt sak"),
