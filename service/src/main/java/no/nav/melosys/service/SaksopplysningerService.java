@@ -255,7 +255,9 @@ public class SaksopplysningerService {
 
         nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
 
-        nyprosessinstans.setRegistrertDato(LocalDateTime.now());
+        LocalDateTime nå = LocalDateTime.now();
+        nyprosessinstans.setRegistrertDato(nå);
+        nyprosessinstans.setEndretDato(nå);
 
         prosessinstansRepository.save(nyprosessinstans);
         binge.leggTil(nyprosessinstans);
