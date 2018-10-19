@@ -91,7 +91,7 @@ public class OppgaveServiceTest {
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12345678901");
         assertThat(mineSaker.size()).isEqualTo(1);
         assertThat(mineSaker.get(0).getOppgaveID()).isEqualTo("1");
-        assertThat(((BehandlingsoppgaveDto)mineSaker.get(0)).getBehandling().erUnderOppdatering()).isEqualTo(true);
+        assertThat(((BehandlingsoppgaveDto)mineSaker.get(0)).getBehandling().isErUnderOppdatering()).isEqualTo(true);
 
         mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12346678902");
         assertThat(mineSaker.size()).isEqualTo(0);

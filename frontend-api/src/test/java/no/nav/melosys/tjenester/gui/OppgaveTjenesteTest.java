@@ -27,7 +27,6 @@ import org.everit.json.schema.ValidationException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -63,7 +62,6 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    @Ignore //FIXME Schema må oppdateres
     public void mineOppgaver() throws MelosysException, IOException, JSONException {
         List<OppgaveDto> oppgaver = new ArrayList<>();
         int oppgaveNr = 1 + defaultEnhancedRandom().nextInt(2);

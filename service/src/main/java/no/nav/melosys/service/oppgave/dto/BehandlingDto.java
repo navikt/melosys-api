@@ -13,14 +13,6 @@ public class BehandlingDto {
     private Instant sisteOpplysningerHentetDato;
     private boolean erUnderOppdatering;
 
-    public boolean erUnderOppdatering() {
-        return erUnderOppdatering;
-    }
-
-    public void setErUnderOppdatering(boolean erUnderOppdatering) {
-        this.erUnderOppdatering = erUnderOppdatering;
-    }
-
     public Long getBehandlingID() {
         return behandlingID;
     }
@@ -53,4 +45,11 @@ public class BehandlingDto {
         this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
     }
 
+    public boolean isErUnderOppdatering() {
+        return erUnderOppdatering;
+    }
+
+    public void setErUnderOppdatering(boolean erUnderOppdatering) {
+        this.erUnderOppdatering = erUnderOppdatering;
+    }
 }
