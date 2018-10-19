@@ -17,7 +17,6 @@ import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
-import no.nav.melosys.service.oppgave.PlukkOppgavePolicy;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,8 +44,7 @@ public class OppgaveplukkerTest {
 
     @Before
     public void setUp() {
-        PlukkOppgavePolicy plukkOppgavePolicy = new PlukkOppgavePolicy(fagsakRepository);
-        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, oppgaveTilbakkeleggingRepo, plukkOppgavePolicy);
+        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, oppgaveTilbakkeleggingRepo, fagsakRepository);
     }
 
     @Test
