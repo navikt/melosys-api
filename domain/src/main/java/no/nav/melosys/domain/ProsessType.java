@@ -6,6 +6,7 @@ public enum ProsessType implements InterntKodeverkTabell<ProsessType> {
 
     //alfabetisk rekkefølge
     IVERKSETT_VEDTAK("IVERKSETT_VEDTAK", "Iverksett vedtak"),
+    STATUS_BEH("STATUS_BEH", "Oppdatering av behandlingsstatus"),
     JFR_KNYTT("JFR_KNYTT", "Journalføring på eksisterende sak"),
     JFR_NY_SAK("JFR_NY_SAK", "Journalføring med ny sak og søknad"),
     MOTTAK("MOTTAK", "Journalføring av mottatt sak"),

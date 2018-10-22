@@ -21,6 +21,7 @@ CREATE TABLE prosess_type (
 
 -- Alfabetisk rekkefølge
 INSERT INTO prosess_type (kode, navn) VALUES ('IVERKSETT_VEDTAK', 'Iverksette vedtak');
+INSERT INTO prosess_type (kode, navn) VALUES ('STATUS_BEH', 'Oppdatering av behandlingsstatus');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_KNYTT', 'Journalføring på eksisterende sak');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_NY_SAK', 'Journalføring med ny sak og søknad');
 INSERT INTO prosess_type (kode, navn) VALUES ('OPPFRISKNING', 'Oppfriskning av saksopplysninger');
@@ -63,7 +64,7 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('IV_SEND_BREV', 'Send brev etter i
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_MEDL', 'Oppdatering av Meldlemskap');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_AVSLUTT_BEHANDLING', 'Avslutt Fagsak og aktiv behandling');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_STATUS_BEH_AVSL', 'Oppdater Sak og Behandling ved lukking av behandling');
-
+INSERT INTO prosess_steg (kode, navn) VALUES ('STATUS_BEH_AVVENT_DOK_PART', 'Behandling avventer dokumentasjon fra en part');
 
 CREATE TABLE prosessinstans_hendelser (
     id                  NUMBER(19) GENERATED ALWAYS AS IDENTITY,

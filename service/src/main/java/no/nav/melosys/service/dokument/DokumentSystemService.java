@@ -14,6 +14,6 @@ public class DokumentSystemService extends DokumentService {
     @Autowired
     DokumentSystemService(BehandlingRepository behandlingRepository, BrevDataService brevDataService,
                           @Qualifier("system") DokSysFasade dokSysFasade, JoarkFasade joarkFasade) {
-        super(behandlingRepository, brevDataService, dokSysFasade, joarkFasade);
+        super(behandlingRepository, brevDataService, dokSysFasade, joarkFasade, null, null);
     }
 }

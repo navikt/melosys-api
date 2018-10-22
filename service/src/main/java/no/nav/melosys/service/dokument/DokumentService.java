@@ -1,7 +1,9 @@
 package no.nav.melosys.service.dokument;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.DokumentType;
+import java.time.LocalDateTime;
+import javax.transaction.Transactional;
+
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -11,6 +13,8 @@ import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingResponse;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,20 +25,28 @@ import org.springframework.stereotype.Service;
 @Primary
 public class DokumentService {
 
-    private BehandlingRepository behandlingRepository;
+    private final BehandlingRepository behandlingRepository;
 
-    private BrevDataService brevDataService;
+    private final BrevDataService brevDataService;
 
-    private DokSysFasade dokSysFasade;
+    private final DokSysFasade dokSysFasade;
 
-    private JoarkFasade joarkFasade;
+    private final JoarkFasade joarkFasade;
+
+    private final Binge binge;
+
+    private final ProsessinstansRepository prosessinstansRepo;
 
     @Autowired
-    DokumentService(BehandlingRepository behandlingRepository, BrevDataService brevDataService, DokSysFasade dokSysFasade, JoarkFasade joarkFasade) {
+    DokumentService(BehandlingRepository behandlingRepository, BrevDataService brevDataService,
+                    DokSysFasade dokSysFasade, JoarkFasade joarkFasade,
+                    Binge binge, ProsessinstansRepository prosessinstansRepo) {
         this.behandlingRepository = behandlingRepository;
         this.brevDataService = brevDataService;
         this.joarkFasade = joarkFasade;
         this.dokSysFasade = dokSysFasade;
+        this.binge = binge;
+        this.prosessinstansRepo = prosessinstansRepo;
     }
 
     /**
@@ -74,7 +86,27 @@ public class DokumentService {
         if (erUtkast) {
             return dokSysFasade.produserDokumentutkast(request, brevData);
         } else {
-            return dokSysFasade.produserIkkeredigerbartDokument(request, brevData);
+            DokumentbestillingResponse response = dokSysFasade.produserIkkeredigerbartDokument(request, brevData);
+            if (dokumentType == DokumentType.MANGLENDE_OPPL) {
+                leggTilOppdateringAvBehandlingsstatus(behandling);
+            }
+            return response;
         }
+    }
+
+    @Transactional
+    public void leggTilOppdateringAvBehandlingsstatus(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+
+        prosessinstans.setType(ProsessType.STATUS_BEH);
+        prosessinstans.setSteg(ProsessSteg.STATUS_BEH_AVVENT_DOK_PART);
+        prosessinstans.setBehandling(behandling);
+
+        LocalDateTime nå = LocalDateTime.now();
+        prosessinstans.setEndretDato(nå);
+        prosessinstans.setRegistrertDato(nå);
+
+        prosessinstansRepo.save(prosessinstans);
+        binge.leggTil(prosessinstans);
     }
 }

@@ -1,9 +1,9 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.net.URI;
+import java.util.Collections;
 import javax.ws.rs.*;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.DokumentType;
@@ -95,16 +95,19 @@ public class DokumentTjeneste extends RestTjeneste {
 
     @POST
     @Path("opprett/{behandlingID}/{dokumentTypeID}")
-    public Response produserDokument(@PathParam("behandlingID") long behandlingID,
+    public Response produserDokument(@Context UriInfo uriInfo,
+                                     @PathParam("behandlingID") long behandlingID,
                                      @PathParam("dokumentTypeID") String dokumentTypeID,
                                      BrevDataDto brevDataDto) {
         try {
             tilgang.sjekk(behandlingID);
             DokumentType dokumentType = DokumentType.forKode(dokumentTypeID);
-            dokumentService.produserDokument(behandlingID, dokumentType, brevDataDto);
             DokumentbestillingResponse response = dokumentService.produserDokument(behandlingID, dokumentType, brevDataDto);
-            String location = String.join("/", "dokumenter/pdf/", response.journalpostId, response.dokumentId);
-            return Response.created(URI.create(location)).build();
+
+            UriBuilder uriBuilder = uriInfo.getBaseUriBuilder().path("dokumenter/pdf").path(response.journalpostId).path(response.dokumentId);
+            String location = uriBuilder.build().toString();
+
+            return Response.created(URI.create(location)).entity(Collections.singletonMap("location", location)).build();
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (SikkerhetsbegrensningException e) {
