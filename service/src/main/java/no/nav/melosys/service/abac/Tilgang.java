@@ -32,13 +32,17 @@ public class Tilgang {
 
         Fagsak fagsak  = behandling.getFagsak();
         Aktoer aktør = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
-        pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
+        if (aktør != null) {
+            pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
+        }
     }
 
     // Fagsak
-    public void sjekk(Fagsak fagsak) throws SikkerhetsbegrensningException, TekniskException {
+    public void sjekkSak(Fagsak fagsak) throws SikkerhetsbegrensningException, TekniskException {
         Aktoer aktør = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
-        pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
+        if (aktør != null) {
+            pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
+        }
     }
 
     public void sjekkFnr(String fnr) throws SikkerhetsbegrensningException {

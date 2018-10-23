@@ -80,7 +80,7 @@ public class FagsakTjeneste extends RestTjeneste {
         }
 
         try {
-            tilgang.sjekk(sak);
+            tilgang.sjekkSak(sak);
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (TekniskException e) {
@@ -98,7 +98,7 @@ public class FagsakTjeneste extends RestTjeneste {
     public Response nyFagsakSikret(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
         try {
             Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, Behandlingstype.SØKNAD);
-            tilgang.sjekk(fagsak);
+            tilgang.sjekkSak(fagsak);
             if (fagsak == null) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             } else {

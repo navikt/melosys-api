@@ -34,7 +34,7 @@ public class Fagsak {
     private Instant registrertDato;
 
     @Column(name = "endret_dato", nullable = false, updatable = false)
-    private Instant endretDato; // FIXME: skulle vi bruke Instant her også ?
+    private Instant endretDato;
 
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Aktoer> aktører;

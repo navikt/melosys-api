@@ -87,12 +87,12 @@ public class TilgangTest {
     @Test
     public void testFagsakOk() throws SikkerhetsbegrensningException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
-        tilgang.sjekk(fagsakMocked);
+        tilgang.sjekkSak(fagsakMocked);
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
     public void testFagsakIkkeTilgang() throws SikkerhetsbegrensningException, TekniskException {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
-        tilgang.sjekk(fagsakMocked);
+        tilgang.sjekkSak(fagsakMocked);
     }
 }
