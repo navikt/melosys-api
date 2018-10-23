@@ -21,15 +21,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATERMEDL;
+import static no.nav.melosys.domain.ProsessSteg.IV_SENDBREV;
 
 /**
- * Avslutter en oppgave i GSAK.
+ * Oppdaterer medlemskap periode i MEDL.
  *
  * Transisjoner:
- * 1) ProsessType.JFR_NY_SAK:
- *     JFR_AVSLUTT_OPPGAVE -> JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
- * 2) ProsessType.JFR_KNYTT:
- *     JFR_AVSLUTT_OPPGAVE -> JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
+ * ProsessType.IVERKSETT_VEDTAK
+ *    IV_OPPDATERMEDL -> IV_SENDBREV eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class OppdaterMEDL extends AbstraktStegBehandler {
@@ -79,5 +78,6 @@ public class OppdaterMEDL extends AbstraktStegBehandler {
 
         medlFasade.opprettPeriode(fnr, medlemsperiode);
 
+        prosessinstans.setSteg(IV_SENDBREV);
     }
 }

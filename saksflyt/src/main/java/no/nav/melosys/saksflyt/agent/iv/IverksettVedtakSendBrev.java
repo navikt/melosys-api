@@ -17,24 +17,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_SENDBREV;
+import static no.nav.melosys.domain.ProsessSteg.*;
 
 /**
- * Avslutter en oppgave i GSAK.
+ * Sende ulike brev basert på lovvalgsbestemmelse.
  *
  * Transisjoner:
- * 1) ProsessType.JFR_NY_SAK:
- *     JFR_AVSLUTT_OPPGAVE -> JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
- * 2) ProsessType.JFR_KNYTT:
- *     JFR_AVSLUTT_OPPGAVE -> JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
+ * ProsessType.IVERKSETT_VEDTAK
+ *    IV_SENDBREV -> GSAK_AVSLUTT_OPPGAVE eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class SendBrev extends AbstraktStegBehandler {
+public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(SendBrev.class);
+    private static final Logger log = LoggerFactory.getLogger(IverksettVedtakSendBrev.class);
 
     @Autowired
-    public SendBrev() {
+    public IverksettVedtakSendBrev() {
         log.info("IverksetteVedtakSendBrev initialisert");
     }
 
@@ -56,8 +54,13 @@ public class SendBrev extends AbstraktStegBehandler {
 
         if (ProsessType.IVERKSETT_VEDTAK == prosessType) {
          //FIXME: Mangler send brev implementsjon
-
-        }
-
+            prosessinstans.setSteg(GSAK_AVSLUTT_OPPGAVE);
+        } else {
+        String feilmelding = "Ukjent prosess type: " + prosessType;
+        log.error("{}: {}", prosessinstans.getId(), feilmelding);
+        håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
     }
+
+
+}
 }

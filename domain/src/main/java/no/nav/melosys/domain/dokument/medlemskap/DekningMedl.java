@@ -1,13 +1,13 @@
 package no.nav.melosys.domain.dokument.medlemskap;
 
-public enum DekningMedltype {
+public enum DekningMedl {
     //FIXME: MELOSYS-1336: Skulle hente term(beskrivlse) fra felles kodeverk
     Untatt("Untatt"),
     Full("Full");
 
     private String kode;
 
-    DekningMedltype(String kode) {
+    DekningMedl(String kode) {
         this.kode = kode;
     }
 
@@ -15,4 +15,7 @@ public enum DekningMedltype {
         return kode;
     }
 
+    public void setKode(String kode) {
+        this.kode = kode;
+    }
 }

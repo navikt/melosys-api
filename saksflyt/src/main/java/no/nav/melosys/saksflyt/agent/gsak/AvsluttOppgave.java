@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.jfr;
+package no.nav.melosys.saksflyt.agent.gsak;
 
 import java.util.Map;
 
@@ -6,8 +6,6 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
@@ -29,9 +27,11 @@ import static no.nav.melosys.domain.ProsessSteg.*;
  *
  * Transisjoner:
  * 1) ProsessType.JFR_NY_SAK:
- *     JFR_AVSLUTT_OPPGAVE -> JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
+ *     GSAK_AVSLUTT_OPPGAVE -> JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
  * 2) ProsessType.JFR_KNYTT:
- *     JFR_AVSLUTT_OPPGAVE -> JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
+ *     GSAK_AVSLUTT_OPPGAVE -> JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
+ * 3) ProsessType.IVERKSETT_VEDTAK
+ *     GSAK_AVSLUTT_OPPGAVE -> IV_AVSLUTTBEHANDLING eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class AvsluttOppgave extends AbstraktStegBehandler {
@@ -48,7 +48,7 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return JFR_AVSLUTT_OPPGAVE;
+        return GSAK_AVSLUTT_OPPGAVE;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
     
     @Transactional
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws TekniskException, SikkerhetsbegrensningException, FunksjonellException, IkkeFunnetException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String oppgaveID = prosessinstans.getData(OPPGAVE_ID);
@@ -69,6 +69,8 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
             prosessinstans.setSteg(JFR_AKTØR_ID);
         } else if (type == ProsessType.JFR_KNYTT) {
             prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
+        } else if (type == ProsessType.IVERKSETT_VEDTAK) {
+            prosessinstans.setSteg(IV_AVSLUTTBEHANDLING);
         } else {
             String feilmelding = "Ukjent prosess type: " + type;
             log.error("{}: {}", prosessinstans.getId(), feilmelding);

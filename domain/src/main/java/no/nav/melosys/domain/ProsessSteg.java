@@ -10,6 +10,10 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     
     MOT_VURDER_AUTOMATISK_JFR("VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"), // FIXME: Ikke i bruk
 
+    //Gsak
+    GSAK_AVSLUTT_OPPGAVE("GSAK_AVSLUTT_OPPGAVE", "Avslutter oppgaven i GSAK"),
+    OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
+
     //Iverksatt Vedtak
     IV_VALIDERING("IV_VALIDERING", "Validerer iverksatt vedtak"),
     IV_SENDBREV("IV_SENDBREV", "Send brev etter iverksatt vedtak"),
@@ -20,7 +24,6 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
 
     // Journalføring
     JFR_VALIDERING("JFR_VALIDERING", "Grunnleggende validering"),
-    JFR_AVSLUTT_OPPGAVE("JFR_AVSLUTT_OPPGAVE", "Avslutter journalføringsoppgaven i GSAK"),
     JFR_AKTØR_ID("JFR_AKTØR_ID", "Henter aktørID"),
     JFR_OPPRETT_SAK_OG_BEH("JFR_OPPRETT_SAK_OG_BEH", "Oppretter ny sak og behandling i Melosys"),
     JFR_OPPRETT_SØKNAD("JFR_OPPRETT_SØKNAD", "Oppretter ny søknad i Melosys"),
@@ -38,7 +41,6 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     HENT_MEDL_OPPL("HENT_MEDL_OPPL", "Hent medlemskapsopplysninger fra MEDL"),
     HENT_SOB_SAKER("HENT_SOB_SAKER", "Hent saker fra Sak og behandling"),
     OPPFRISK_SAKSOPPLYSNINGER("OPPFRISK_SAKSOPPLYSNINGER", "oppfrisking av saksopplysninger"),
-    OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
     SEND_FORVALTNINGSMELDING("SEND_FORVALTNINGSMELDING", "Send forvaltningsmelding til søker"),
 
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),

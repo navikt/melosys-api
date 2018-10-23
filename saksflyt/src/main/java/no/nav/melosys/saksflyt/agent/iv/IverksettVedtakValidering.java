@@ -6,39 +6,34 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
-import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.ProsessDataKey.OPPGAVE_ID;
-import static no.nav.melosys.domain.ProsessSteg.IV_FERDIGSTILLOPPGAVE;
+import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATERMEDL;
 import static no.nav.melosys.domain.ProsessSteg.IV_VALIDERING;
 
 /**
- * Avslutter en oppgave i GSAK.
+ * Validerer opplysning bli brukt for iverksette vedtak.
  *
  * Transisjoner:
- * 1) ProsessType.JFR_NY_SAK:
- *     JFR_AVSLUTT_OPPGAVE -> JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
- * 2) ProsessType.JFR_KNYTT:
- *     JFR_AVSLUTT_OPPGAVE -> JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
+ *
+ * ProsessType.IVERKSETT_VEDTAK
+ *    IV_VALIDERING -> IV_OPPDATERMEDL eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class IverksetteVedtakValidering extends AbstraktStegBehandler {
+public class IverksettVedtakValidering extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(IverksetteVedtakValidering.class);
-
+    private static final Logger log = LoggerFactory.getLogger(IverksettVedtakValidering.class);
 
     @Autowired
-    public IverksetteVedtakValidering() {
-        log.info("FerdigStillOppgave initialisert");
+    public IverksettVedtakValidering() {
+        log.info("IverksetteVedtakValidering initialisert");
     }
 
     @Override
@@ -64,6 +59,9 @@ public class IverksetteVedtakValidering extends AbstraktStegBehandler {
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
             return;
         }
+        //mangler validering for vedtak opplysning
+
+        prosessinstans.setSteg(IV_OPPDATERMEDL);
 
     }
 }

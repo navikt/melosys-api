@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.dokument.medlemskap;
 
-public enum GrunnlagMedltype {
+public enum GrunnlagMedl {
     //FIXME: MELOSYS-1336: Skulle hente term(beskrivlse) fra felles kodeverk
     FO_11_2("FO_11_2"),
     FO_11_3_a("FO_11_3_a"),
@@ -17,16 +17,23 @@ public enum GrunnlagMedltype {
     FO_13_2_a("FO_13_2_a"),
     FO_13_2_b("FO_13_2_b"),
     FO_13_3("FO_13_3"),
-    FO_13_4("FO_13_4");
+    FO_13_4("FO_13_4"),
+    FO_1408_14_1_a("FO_1408_14_1_a"),
+    MEDFT("MEDFT"),
+    IMEDEOS("IMEDEOS");
 
     private String kode;
 
-    GrunnlagMedltype(String kode) {
+    GrunnlagMedl(String kode) {
         this.kode = kode;
     }
 
     public String getKode() {
         return kode;
+    }
+
+    public void setKode(String kode) {
+        this.kode = kode;
     }
 
 }

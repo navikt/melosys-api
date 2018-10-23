@@ -3,41 +3,44 @@ package no.nav.melosys.domain.dokument.medlemskap;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
-import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Medlemsperiode implements HarPeriode {
 
-    public Periode periode;
+    private Periode periode;
 
-    public Periodetype type; //"http://nav.no/kodeverk/Kodeverk/PeriodetypeMedl"
+    private Periodetype type; //"http://nav.no/kodeverk/Kodeverk/PeriodetypeMedl"
 
-    public String status; //"http://nav.no/kodeverk/Kodeverk/PeriodestatusMedl"
+    private String status; //"http://nav.no/kodeverk/Kodeverk/PeriodestatusMedl"
 
-    public GrunnlagMedltype grunnlagstype; //"http://nav.no/kodeverk/Kodeverk/GrunnlagMedl"
+    private GrunnlagMedl grunnlagstype; //"http://nav.no/kodeverk/Kodeverk/GrunnlagMedl"
 
-    public String land; //"http://nav.no/kodeverk/Kodeverk/Landkoder"
+    private String land; //"http://nav.no/kodeverk/Kodeverk/Landkoder"
 
-    public String lovvalg; //"http://nav.no/kodeverk/Kodeverk/LovvalgMedl"
+    private String lovvalg; //"http://nav.no/kodeverk/Kodeverk/LovvalgMedl"
 
-    public DekningMedltype trygdedekning; //"http://nav.no/kodeverk/Kodeverk/DekningMedl"
+    private DekningMedl trygdedekning; //"http://nav.no/kodeverk/Kodeverk/DekningMedl"
 
-    public String kildedokumenttype; //"http://nav.no/kodeverk/Kodeverk/KildedokumentMedl"
+    private String kildedokumenttype; //"http://nav.no/kodeverk/Kodeverk/KildedokumentMedl"
 
-    public String kilde; //"http://nav.no/kodeverk/Kodeverk/KildesystemMedl"
+    private String kilde; //"http://nav.no/kodeverk/Kodeverk/KildesystemMedl"
 
     public void setPeriode(Periode periode) {
         this.periode = periode;
     }
 
     @Override
-    public ErPeriode getPeriode() {
-        return null;
+    public Periode getPeriode() {
+        return periode;
     }
 
     public void setType(Periodetype type) {
         this.type = type;
+    }
+
+    public Periodetype getType() {
+        return type;
     }
 
     public String getStatus() {
@@ -48,11 +51,11 @@ public class Medlemsperiode implements HarPeriode {
         this.status = status;
     }
 
-    public GrunnlagMedltype getGrunnlagstype() {
+    public GrunnlagMedl getGrunnlagstype() {
         return grunnlagstype;
     }
 
-    public void setGrunnlagstype(GrunnlagMedltype grunnlagstype) {
+    public void setGrunnlagstype(GrunnlagMedl grunnlagstype) {
         this.grunnlagstype = grunnlagstype;
     }
 
@@ -72,11 +75,11 @@ public class Medlemsperiode implements HarPeriode {
         this.lovvalg = lovvalg;
     }
 
-    public DekningMedltype getTrygdedekning() {
+    public DekningMedl getTrygdedekning() {
         return trygdedekning;
     }
 
-    public void setTrygdedekning(DekningMedltype trygdedekning) {
+    public void setTrygdedekning(DekningMedl trygdedekning) {
         this.trygdedekning = trygdedekning;
     }
 
