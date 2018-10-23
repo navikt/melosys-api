@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.List;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -51,11 +50,12 @@ public class VilkaarTjeneste extends RestTjeneste {
 
     @POST
     @Path("{behandlingID}")
-    public Response registrerVilkår(@PathParam("behandlingID") long behandlingID, VilkaarDto vilkaarDto) {
+    public List<VilkaarDto> registrerVilkår(@PathParam("behandlingID") long behandlingID, VilkaarDto vilkaarDto) {
+        List<VilkaarDto> vilkaarDtoListe;
         try {
             tilgang.sjekk(behandlingID);
             vilkaarsresultatService.registrerVilkår(behandlingID, vilkaarDto);
-            return Response.ok().build();
+            vilkaarDtoListe = vilkaarsresultatService.hentVilkaar(behandlingID);
         } catch (IkkeFunnetException e) {
             throw new NotFoundException(e);
         } catch (SikkerhetsbegrensningException e) {
@@ -63,5 +63,7 @@ public class VilkaarTjeneste extends RestTjeneste {
         } catch (TekniskException e) {
             throw new InternalServerErrorException(e);
         }
+        
+        return vilkaarDtoListe;
     }
 }
