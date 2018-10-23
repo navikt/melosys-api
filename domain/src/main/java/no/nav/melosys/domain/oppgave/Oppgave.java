@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.oppgave;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 
 import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Tema;
@@ -138,5 +139,29 @@ public class Oppgave {
     public void setVersjon(int versjon) {
         this.versjon = versjon;
     }
+
+    /**
+     * Sorter oppgaver basert på prioritet (først) og frist.
+     */
+    public static final Comparator<Oppgave> høyestTilLavestPrioritet = (a, b) -> {
+        // Merk: Bryter med konvensjonen (a == b og b == c → a == c), men dette er ok.
+        int res = 0;
+        if (a.getPrioritet() == b.getPrioritet())
+            res = 0;
+        else if (a.getPrioritet() == PrioritetType.HOY)
+            res = -1;
+        else if (b.getPrioritet() == PrioritetType.HOY)
+            res = 1;
+        else if (a.getPrioritet() == PrioritetType.NORM)
+            res = -1;
+        else if (b.getPrioritet() == PrioritetType.NORM)
+            res = 1;
+        if (res == 0) {
+            if (a.getFristFerdigstillelse() == null || b.getFristFerdigstillelse() == null)
+                return 0;
+            return a.getFristFerdigstillelse().compareTo(b.getFristFerdigstillelse());
+        }
+        return res;
+    };
 
 }
