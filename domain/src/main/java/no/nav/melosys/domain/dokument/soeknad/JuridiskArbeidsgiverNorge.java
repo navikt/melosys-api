@@ -1,8 +1,8 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.math.BigDecimal;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Opplysninger om juridiske arbeidsgivere i Norge
@@ -18,6 +18,4 @@ public class JuridiskArbeidsgiverNorge {
     public BigDecimal andelOmsetningINorge;
     public BigDecimal andelKontrakterINorge;
     public boolean utsendtFortsetterArbeidsforholdIUtlandet;
-    public boolean utsendtArbeiderArbeiderMedKlienter;
-    public boolean utsendtArbeiderArbeiderMedKontrakter;
 }
