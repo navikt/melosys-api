@@ -1,7 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.net.URI;
-import java.util.Collections;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 
@@ -10,7 +8,6 @@ import no.nav.melosys.domain.DokumentType;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.doksys.DokumentbestillingResponse;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
@@ -78,10 +75,10 @@ public class DokumentTjeneste extends RestTjeneste {
             tilgang.sjekk(behandlingID);
             DokumentType dokumentType = DokumentType.forKode(dokumentTypeID);
             dokument = dokumentService.produserUtkast(behandlingID, dokumentType, brevDataDto);
-        } catch (IkkeFunnetException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (FunksjonellException e) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (TekniskException e) {
             log.error("TekniskException", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -102,16 +99,12 @@ public class DokumentTjeneste extends RestTjeneste {
         try {
             tilgang.sjekk(behandlingID);
             DokumentType dokumentType = DokumentType.forKode(dokumentTypeID);
-            DokumentbestillingResponse response = dokumentService.produserDokument(behandlingID, dokumentType, brevDataDto);
-
-            UriBuilder uriBuilder = uriInfo.getBaseUriBuilder().path("dokumenter/pdf").path(response.journalpostId).path(response.dokumentId);
-            String location = uriBuilder.build().toString();
-
-            return Response.created(URI.create(location)).entity(Collections.singletonMap("location", location)).build();
-        } catch (IkkeFunnetException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            dokumentService.produserDokument(behandlingID, dokumentType, brevDataDto);
+            return Response.noContent().build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (FunksjonellException e) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (TekniskException e) {
             log.error("TekniskException", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();

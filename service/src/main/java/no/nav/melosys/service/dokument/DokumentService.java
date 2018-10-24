@@ -4,13 +4,9 @@ import java.time.LocalDateTime;
 import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.doksys.DokSysFasade;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
-import no.nav.melosys.integrasjon.doksys.DokumentbestillingResponse;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
@@ -62,19 +58,20 @@ public class DokumentService {
      * @throws TekniskException 
      */
     public byte[] produserUtkast(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        return (byte[]) produserDokument(behandlingID, dokumentType, brevDataDto, true);
+        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
+        return produserDokument(behandlingID, dokumentType, brevDataDto, true);
     }
 
     /**
      * Produserer et dokument i Doksys
      */
-    public DokumentbestillingResponse produserDokument(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        return (DokumentbestillingResponse) produserDokument(behandlingID, dokumentType, brevDataDto, false);
+    public void produserDokument(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto)
+        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
+        produserDokument(behandlingID, dokumentType, brevDataDto, false);
     }
 
-    private Object produserDokument(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto, boolean erUtkast)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    private byte[] produserDokument(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto, boolean erUtkast)
+        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
@@ -86,20 +83,27 @@ public class DokumentService {
         if (erUtkast) {
             return dokSysFasade.produserDokumentutkast(request, brevData);
         } else {
-            DokumentbestillingResponse response = dokSysFasade.produserIkkeredigerbartDokument(request, brevData);
-            if (dokumentType == DokumentType.MANGLENDE_OPPL) {
-                leggTilOppdateringAvBehandlingsstatus(behandling);
-            }
-            return response;
+            leggProduksjonAvDokumentIBinge(behandling, dokumentType, brevDataDto);
+            return null;
         }
     }
 
     @Transactional
-    public void leggTilOppdateringAvBehandlingsstatus(Behandling behandling) {
+    public void leggProduksjonAvDokumentIBinge(Behandling behandling, DokumentType dokumentType, BrevDataDto brevDataDto) throws FunksjonellException {
         Prosessinstans prosessinstans = new Prosessinstans();
 
-        prosessinstans.setType(ProsessType.STATUS_BEH);
-        prosessinstans.setSteg(ProsessSteg.STATUS_BEH_AVVENT_DOK_PART);
+        switch (dokumentType) {
+            case MANGLENDE_OPPL:
+                prosessinstans.setType(ProsessType.MANGELBREV);
+                prosessinstans.setSteg(ProsessSteg.MANGELBREV);
+                break;
+            default:
+                throw new FunksjonellException("DokumentType " + dokumentType + " er ikke støttet.");
+        }
+
+        if (brevDataDto != null) {
+            prosessinstans.setData(ProsessDataKey.BREVDATA, brevDataDto);
+        }
         prosessinstans.setBehandling(behandling);
 
         LocalDateTime nå = LocalDateTime.now();

@@ -48,7 +48,7 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    protected void utfør(Prosessinstans prosessinstans) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();

@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.agent;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -33,7 +34,7 @@ public class SendForvaltningsmeldingTest {
     }
 
     @Test
-    public void utfoerSteg() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void utfoerSteg() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.setData(ProsessDataKey.SAKSBEHANDLER, "TEST");
