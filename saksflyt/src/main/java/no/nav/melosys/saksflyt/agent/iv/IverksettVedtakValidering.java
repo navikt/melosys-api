@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATERMEDL;
+import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
 import static no.nav.melosys.domain.ProsessSteg.IV_VALIDERING;
 
 /**
@@ -24,7 +24,7 @@ import static no.nav.melosys.domain.ProsessSteg.IV_VALIDERING;
  * Transisjoner:
  *
  * ProsessType.IVERKSETT_VEDTAK
- *    IV_VALIDERING -> IV_OPPDATERMEDL eller FEILET_MASKINELT hvis feil
+ *    IV_VALIDERING -> IV_OPPDATER_MEDL eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class IverksettVedtakValidering extends AbstraktStegBehandler {
@@ -61,7 +61,7 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
         }
         //mangler validering for vedtak opplysning
 
-        prosessinstans.setSteg(IV_OPPDATERMEDL);
+        prosessinstans.setSteg(IV_OPPDATER_MEDL);
 
     }
 }

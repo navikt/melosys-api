@@ -4,7 +4,7 @@ import java.util.Map;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
-import no.nav.melosys.domain.util.LandKoderUtils;
+import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -20,15 +20,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATERMEDL;
-import static no.nav.melosys.domain.ProsessSteg.IV_SENDBREV;
+import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
+import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
 
 /**
  * Oppdaterer medlemskap periode i MEDL.
  *
  * Transisjoner:
  * ProsessType.IVERKSETT_VEDTAK
- *    IV_OPPDATERMEDL -> IV_SENDBREV eller FEILET_MASKINELT hvis feil
+ *    IV_OPPDATER_MEDL -> IV_SEND_BREV eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class OppdaterMEDL extends AbstraktStegBehandler {
@@ -51,7 +51,7 @@ public class OppdaterMEDL extends AbstraktStegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return IV_OPPDATERMEDL;
+        return IV_OPPDATER_MEDL;
     }
 
     @Override
@@ -73,11 +73,11 @@ public class OppdaterMEDL extends AbstraktStegBehandler {
         Medlemsperiode medlemsperiode = new Medlemsperiode();
 
         medlemsperiode.setGrunnlagstype(lovvalgsperiode.hentFellesKodeForGrunnlagMedltype());
-        medlemsperiode.setLand(LandKoderUtils.tilIso3(lovvalgsperiode.getLovvalgsland().getKode()));
+        medlemsperiode.setLand(LandkoderUtils.tilIso3(lovvalgsperiode.getLovvalgsland().getKode()));
         medlemsperiode.setTrygdedekning(lovvalgsperiode.hentFellesKodeForTrygdDekningtype());
 
         medlFasade.opprettPeriode(fnr, medlemsperiode);
 
-        prosessinstans.setSteg(IV_SENDBREV);
+        prosessinstans.setSteg(IV_SEND_BREV);
     }
 }

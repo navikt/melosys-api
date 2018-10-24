@@ -12,15 +12,7 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
 
     //Gsak
     GSAK_AVSLUTT_OPPGAVE("GSAK_AVSLUTT_OPPGAVE", "Avslutter oppgaven i GSAK"),
-    OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
-
-    //Iverksatt Vedtak
-    IV_VALIDERING("IV_VALIDERING", "Validerer iverksatt vedtak"),
-    IV_SENDBREV("IV_SENDBREV", "Send brev etter iverksatt vedtak"),
-    IV_OPPDATERMEDL("IV_OPPDATERMEDL", "Oppdatering av Meldlemskap"),
-    IV_FERDIGSTILLOPPGAVE("IV_FERDIGSTILLOPPGAVE", "ferdigstille gsak oppgaven"),
-    IV_AVSLUTTBEHANDLING("IV_AVSLUTTBEHANDLING", "Avslutt FagSak and aktiv behandling"),
-
+    GSAK_OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
 
     // Journalføring
     JFR_VALIDERING("JFR_VALIDERING", "Grunnleggende validering"),
@@ -40,14 +32,20 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     HENT_ORG_OPPL("HENT_ORG_OPPL", "Hent organisasjoner fra EREG"),
     HENT_MEDL_OPPL("HENT_MEDL_OPPL", "Hent medlemskapsopplysninger fra MEDL"),
     HENT_SOB_SAKER("HENT_SOB_SAKER", "Hent saker fra Sak og behandling"),
-    OPPFRISK_SAKSOPPLYSNINGER("OPPFRISK_SAKSOPPLYSNINGER", "oppfrisking av saksopplysninger"),
+    OPPFRISK_SAKSOPPLYSNINGER("OPPFRISK_SAKSOPPLYSNINGER", "Oppfrisking av saksopplysninger"),
     SEND_FORVALTNINGSMELDING("SEND_FORVALTNINGSMELDING", "Send forvaltningsmelding til søker"),
 
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
 
     // FIXME: Prosessinstansen må få steg FATTET_VEDTAK når vedtak er fattet slik at status oppdateres i Sak og Behandling.
     FATTET_VEDTAK("FATTET_VEDTAK", "Saksbehandler har fattet vedtak i Melosys"),
-    STATUS_BEH_AVSL("STATUS_BEH_AVSL", "Oppdater Sak og Behandling ved lukking av behandling");
+    STATUS_BEH_AVSL("STATUS_BEH_AVSL", "Oppdater Sak og Behandling ved lukking av behandling"),
+
+    //Iverksett Vedtak
+    IV_VALIDERING("IV_VALIDERING", "Validere iverksett vedtak"),
+    IV_SEND_BREV("IV_SEND_BREV", "Send brev etter iverksett vedtak"),
+    IV_OPPDATER_MEDL("IV_OPPDATER_MEDL", "Oppdatering av Meldlemskap"),
+    IV_AVSLUTT_BEHANDLING("IV_AVSLUTT_BEHANDLING", "Avslutt FagSak og aktiv behandling");
 
     private String kode;
     private String beskrivelse;

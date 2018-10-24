@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.ProsessSteg.IV_AVSLUTTBEHANDLING;
+import static no.nav.melosys.domain.ProsessSteg.IV_AVSLUTT_BEHANDLING;
 import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_AVSL;
 
 /**
@@ -29,7 +29,7 @@ import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_AVSL;
  *
  * Transisjoner:
  * ProsessType.IVERKSETT_VEDTAK
- *    IV_AVSLUTTBEHANDLING -> STATUS_BEH_AVSL eller FEILET_MASKINELT hvis feil
+ *    IV_AVSLUTT_BEHANDLING -> STATUS_BEH_AVSL eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
@@ -52,7 +52,7 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return IV_AVSLUTTBEHANDLING;
+        return IV_AVSLUTT_BEHANDLING;
     }
 
     @Override

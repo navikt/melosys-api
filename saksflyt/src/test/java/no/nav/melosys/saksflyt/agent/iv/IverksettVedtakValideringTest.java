@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATERMEDL;
+import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -37,6 +37,6 @@ public class IverksettVedtakValideringTest {
 
         agent.utførSteg(p);
 
-        assertThat(p.getSteg()).isEqualTo(IV_OPPDATERMEDL);
+        assertThat(p.getSteg()).isEqualTo(IV_OPPDATER_MEDL);
     }
 }

@@ -10,7 +10,7 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.util.LandKoderUtils;
+import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
@@ -148,7 +148,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         List<String> landkoder = new ArrayList<>();
         
         for (String l : oppholdsland) {
-            landkoder.add(LandKoderUtils.tilIso3(l));
+            landkoder.add(LandkoderUtils.tilIso3(l));
         }
         return landkoder;
     }

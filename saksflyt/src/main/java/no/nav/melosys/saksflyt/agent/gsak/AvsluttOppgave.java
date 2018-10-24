@@ -23,7 +23,7 @@ import static no.nav.melosys.domain.ProsessDataKey.OPPGAVE_ID;
 import static no.nav.melosys.domain.ProsessSteg.*;
 
 /**
- * Avslutter en oppgave i GSAK.
+ * Avslutter/Ferdigstiller en oppgave i GSAK.
  *
  * Transisjoner:
  * 1) ProsessType.JFR_NY_SAK:
@@ -31,7 +31,7 @@ import static no.nav.melosys.domain.ProsessSteg.*;
  * 2) ProsessType.JFR_KNYTT:
  *     GSAK_AVSLUTT_OPPGAVE -> JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
  * 3) ProsessType.IVERKSETT_VEDTAK
- *     GSAK_AVSLUTT_OPPGAVE -> IV_AVSLUTTBEHANDLING eller FEILET_MASKINELT hvis feil
+ *     GSAK_AVSLUTT_OPPGAVE -> IV_AVSLUTT_BEHANDLING eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class AvsluttOppgave extends AbstraktStegBehandler {
@@ -65,17 +65,21 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
         gsakFasade.ferdigstillOppgave(oppgaveID);
 
         ProsessType type = prosessinstans.getType();
-        if (type == ProsessType.JFR_NY_SAK) {
-            prosessinstans.setSteg(JFR_AKTØR_ID);
-        } else if (type == ProsessType.JFR_KNYTT) {
-            prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
-        } else if (type == ProsessType.IVERKSETT_VEDTAK) {
-            prosessinstans.setSteg(IV_AVSLUTTBEHANDLING);
-        } else {
-            String feilmelding = "Ukjent prosess type: " + type;
-            log.error("{}: {}", prosessinstans.getId(), feilmelding);
-            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
-            return;
+        switch (type) {
+            case JFR_NY_SAK:
+                prosessinstans.setSteg(JFR_AKTØR_ID);
+                break;
+            case JFR_KNYTT:
+                prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
+                break;
+            case IVERKSETT_VEDTAK:
+                prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
+                break;
+            default:
+                String feilmelding = "Ukjent prosess type: " + type;
+                log.error("{}: {}", prosessinstans.getId(), feilmelding);
+                håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
+                return;
         }
 
         log.info("Lukket oppgave {} for prosessinstans {}", oppgaveID, prosessinstans.getId());

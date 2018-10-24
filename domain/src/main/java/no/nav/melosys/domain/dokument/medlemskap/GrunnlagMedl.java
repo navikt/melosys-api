@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.dokument.medlemskap;
 
 public enum GrunnlagMedl {
-    //FIXME: MELOSYS-1336: Skulle hente term(beskrivlse) fra felles kodeverk
     FO_11_2("FO_11_2"),
     FO_11_3_a("FO_11_3_a"),
     FO_11_3_b("FO_11_3_b"),

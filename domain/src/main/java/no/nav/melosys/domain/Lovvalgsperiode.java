@@ -227,7 +227,7 @@ public class Lovvalgsperiode implements ErPeriode {
                 break;
 
             default:
-                throw new RuntimeException("Feil lovvlagsbestemmelse koden :" + bestemmelse.getKode() + ":" + bestemmelse.getBeskrivelse() );
+                throw new RuntimeException("Feil lovvlagsbestemmelse koden :" + bestemmelse.getKode() + ":" + bestemmelse.getBeskrivelse());
         }
     return grunnlagMedltype;
     }

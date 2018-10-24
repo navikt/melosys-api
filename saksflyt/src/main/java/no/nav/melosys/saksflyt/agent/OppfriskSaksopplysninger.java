@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
-import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
+import static no.nav.melosys.domain.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
 
 /**
  * Oppdatere behandling med siste opplysninger hentet dato
@@ -27,7 +27,7 @@ import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
  * 1) ProsessType.OPPFRISKNING :
  * OPPFRISK_SAKSOPPLYSNINGER -> null siden oppfrisking av saksopplysning er ferdig og trenger ikke å opprette oppgaven
  * 2) Andre prosess typer
- * OPPFRISK_SAKSOPPLYSNINGER -> OPPRETT_OPPGAVE
+ * OPPFRISK_SAKSOPPLYSNINGER -> GSAK_OPPRETT_OPPGAVE
  * 3) Ved exception ellers teknisk feil
  * OPPFRISK_SAKSOPPLYSNINGER -> FEILET_MASKINELT
  */
@@ -68,7 +68,7 @@ public class OppfriskSaksopplysninger extends AbstraktStegBehandler {
             log.info("Oppfrisking av saksopplysninger er ferdig for prosessinstans {} og behandlingID {}.", prosessinstans.getId(), behandling.getId());
             return;
         } else {
-            prosessinstans.setSteg(OPPRETT_OPPGAVE);
+            prosessinstans.setSteg(GSAK_OPPRETT_OPPGAVE);
         }
 
         log.debug("Prosessinstans {} oppdatert behandling {} med sisteOpplysningerHentetDato.", prosessinstans.getId(), behandling.getId());

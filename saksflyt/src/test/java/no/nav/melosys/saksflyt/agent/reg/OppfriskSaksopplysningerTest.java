@@ -32,7 +32,7 @@ public class OppfriskSaksopplysningerTest {
     }
 
     @Test
-    public void utfoerSteg() throws SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+    public void utfoerSteg() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
         p.setBehandling(behandling);
@@ -41,11 +41,11 @@ public class OppfriskSaksopplysningerTest {
         agent.utførSteg(p);
 
         verify(behandlingRepository, times(1)).save(behandling);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.OPPRETT_OPPGAVE);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.GSAK_OPPRETT_OPPGAVE);
     }
 
     @Test
-    public void oppfriskSaksopplysningSteg() throws SikkerhetsbegrensningException, FunksjonellException {
+    public void oppfriskSaksopplysningSteg() throws FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.OPPFRISKNING);
         Behandling behandling = new Behandling();

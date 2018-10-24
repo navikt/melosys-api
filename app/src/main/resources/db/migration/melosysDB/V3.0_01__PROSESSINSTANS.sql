@@ -19,11 +19,12 @@ CREATE TABLE prosess_type (
     CONSTRAINT pk_prosess_type PRIMARY KEY (kode)
 );
 
-INSERT INTO prosess_type (kode, navn) VALUES ('IVERKSETT_VEDTAK', 'iverksette vedtak');
+-- Alfabetisk rekkefølge
+INSERT INTO prosess_type (kode, navn) VALUES ('IVERKSETT_VEDTAK', 'Iverksette vedtak');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_KNYTT', 'Journalføring på eksisterende sak');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_NY_SAK', 'Journalføring med ny sak og søknad');
+INSERT INTO prosess_type (kode, navn) VALUES ('OPPFRISKNING', 'Oppfriskning av saksopplysninger');
 INSERT INTO prosess_type (kode, navn) VALUES ('SØKNAD_A1', 'Søknad A1');
-INSERT INTO prosess_type (kode, navn) VALUES ('OPPFRISKNING', 'oppfriskning av saksopplysninger');
 
 CREATE TABLE prosess_steg (
     kode    VARCHAR2(99)  NOT NULL,
@@ -31,17 +32,12 @@ CREATE TABLE prosess_steg (
     CONSTRAINT pk_behandling_steg PRIMARY KEY (kode)
 );
 
-
-INSERT INTO prosess_steg (kode, navn) VALUES ('IV_VALIDERING', 'Validerer iverksatt vedtak');
-INSERT INTO prosess_steg (kode, navn) VALUES ('IV_SENDBREV', 'Send brev etter iverksatt vedtak');
-INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATERMEDL', 'Oppdatering av Meldlemskap');
-INSERT INTO prosess_steg (kode, navn) VALUES ('IV_FERDIGSTILLOPPGAVE', 'ferdigstille gsak oppgaven');
-INSERT INTO prosess_steg (kode, navn) VALUES ('IV_AVSLUTTBEHANDLING', 'Avslutt FagSak and aktiv behandling');
-
+--Logisk rekkefølge
+INSERT INTO prosess_steg (kode, navn) VALUES ('GSAK_AVSLUTT_OPPGAVE', 'Avslutter journalføringsoppgaven i GSAK');
+INSERT INTO prosess_steg (kode, navn) VALUES ('GSAK_OPPRETT_OPPGAVE', 'Oppretter oppgave i GSAK');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('MOT_VURDER_AUTOMATISK_JFR', 'Vurder om journalføring kan skje automatisk');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_VALIDERING', 'Grunnleggende validering');
-INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_AVSLUTT_OPPGAVE', 'Avslutter journalføringsoppgaven i GSAK');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_AKTØR_ID', 'Henter aktørID');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPRETT_SAK_OG_BEH', 'Oppretter ny sak og behandling i Melosys');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPRETT_SØKNAD', 'Oppretter ny søknad i Melosys');
@@ -57,12 +53,17 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_INNT_OPPL', 'Hent inntektopp
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_ORG_OPPL', 'Hent organisasjoner fra EREG');
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_MEDL_OPPL', 'Hent medlemskapsopplysninger fra MEDL');
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_SOB_SAKER', 'Hent sak fra Sak og behandling');
-INSERT INTO prosess_steg (kode, navn) VALUES ('OPPFRISK_SAKSOPPLYSNINGER', 'oppfrisking av saksopplysninger');
-INSERT INTO prosess_steg (kode, navn) VALUES ('OPPRETT_OPPGAVE', 'Oppretter oppgave i GSAK');
+INSERT INTO prosess_steg (kode, navn) VALUES ('OPPFRISK_SAKSOPPLYSNINGER', 'Oppfrisking av saksopplysninger');
 INSERT INTO prosess_steg (kode, navn) VALUES ('SEND_FORVALTNINGSMELDING', 'Send forvaltningsmelding til søker');
 INSERT INTO prosess_steg (kode, navn) VALUES ('FEILET_MASKINELT', 'Feilet maskinelt');
 INSERT INTO prosess_steg (kode, navn) VALUES ('FATTET_VEDTAK', 'Saksbehandler har fattet vedtak i Melosys');
 INSERT INTO prosess_steg (kode, navn) VALUES ('STATUS_BEH_AVSL', 'Oppdater Sak og Behandling ved lukking av behandling');
+
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_VALIDERING', 'Validerer iverksett vedtak');
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_SEND_BREV', 'Send brev etter iverksett vedtak');
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_MEDL', 'Oppdatering av Meldlemskap');
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_AVSLUTT_BEHANDLING', 'Avslutt Fagsak og aktiv behandling');
+
 
 CREATE TABLE prosessinstans_hendelser (
     id                  NUMBER(19) GENERATED ALWAYS AS IDENTITY,

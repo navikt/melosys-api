@@ -24,7 +24,7 @@ import static no.nav.melosys.domain.ProsessSteg.*;
  *
  * Transisjoner:
  * ProsessType.IVERKSETT_VEDTAK
- *    IV_SENDBREV -> GSAK_AVSLUTT_OPPGAVE eller FEILET_MASKINELT hvis feil
+ *    IV_SEND_BREV -> GSAK_AVSLUTT_OPPGAVE eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
@@ -38,7 +38,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return IV_SENDBREV;
+        return IV_SEND_BREV;
     }
 
     @Override

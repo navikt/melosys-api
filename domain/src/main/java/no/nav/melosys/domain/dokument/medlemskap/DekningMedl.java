@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.dokument.medlemskap;
 
 public enum DekningMedl {
-    //FIXME: MELOSYS-1336: Skulle hente term(beskrivlse) fra felles kodeverk
     Untatt("Untatt"),
     Full("Full");
 

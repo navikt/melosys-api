@@ -4,8 +4,9 @@ import no.nav.melosys.domain.Landkoder;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.exception.TekniskException;
 
-public final class LandKoderUtils {
+public final class LandkoderUtils {
     public static String tilIso3(String l) throws TekniskException {
+
         Landkoder iso2Kode = Landkoder.valueOf(l);
 
         switch (iso2Kode) {
