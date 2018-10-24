@@ -4,20 +4,13 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.service.datavarehus.BehandlingOpprettetEvent;
-import no.nav.melosys.service.datavarehus.FagsakOpprettetEvent;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,23 +23,15 @@ public class FagsakService {
 
     private final BehandlingRepository behandlingRepository;
 
-    private final SaksopplysningerService saksopplysningerService;
-
     private final TpsFasade tpsFasade;
 
-    // FIXME: Fjernes når testmetode for oppretting av fagsak fjernes
-    @Deprecated
-    private final ApplicationEventPublisher applicationEventPublisher;
-
     @Autowired
-    public FagsakService(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository,
-                         SaksopplysningerService saksopplysningerService, TpsFasade tpsFasade,
-                         ApplicationEventPublisher applicationEventPublisher) {
+    public FagsakService(FagsakRepository fagsakRepository,
+                         BehandlingRepository behandlingRepository,
+                         TpsFasade tpsFasade) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
-        this.saksopplysningerService = saksopplysningerService;
         this.tpsFasade = tpsFasade;
-        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public Fagsak hentFagsak(String saksnummer) {
@@ -117,25 +102,6 @@ public class FagsakService {
         behandling.setType(behandlingstype);
         behandlingRepository.save(behandling);
         return fagsak;
-    }
-
-    // FIXME Trenger test en metode for å opprette fagsaker utenom saksflyt?
-    @Deprecated
-    @Transactional
-    public Fagsak testFagsakOgBehandling(String ident, Behandlingstype behandlingstype) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
-        String aktørID = tpsFasade.hentAktørIdForIdent(ident);
-
-        Fagsak fagsak = nyFagsakOgBehandling(aktørID, null, null, behandlingstype);
-        fagsak.setType(Fagsakstype.EU_EØS);
-        Set<Saksopplysning> saksopplysninger = saksopplysningerService.hentSaksopplysninger(aktørID);
-        Behandling behandling = fagsak.getAktivBehandling();
-        saksopplysninger.forEach(x -> x.setBehandling(behandling));
-        behandling.setSaksopplysninger(saksopplysninger);
-
-        applicationEventPublisher.publishEvent(new FagsakOpprettetEvent(fagsak, SubjectHandler.getInstance().getUserID()));
-        applicationEventPublisher.publishEvent(new BehandlingOpprettetEvent(behandling, SubjectHandler.getInstance().getUserID()));
-
-        return fagsakRepository.save(fagsak);
     }
 
     private String hentNesteSaksnummer() {
