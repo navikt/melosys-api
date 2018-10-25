@@ -83,14 +83,19 @@ public class DokumentService {
         if (erUtkast) {
             return dokSysFasade.produserDokumentutkast(request, brevData);
         } else {
-            leggProduksjonAvDokumentIBinge(behandling, dokumentType, brevDataDto);
+            dokSysFasade.produserIkkeredigerbartDokument(request, brevData);
             return null;
         }
     }
 
     @Transactional
-    public void leggProduksjonAvDokumentIBinge(Behandling behandling, DokumentType dokumentType, BrevDataDto brevDataDto) throws FunksjonellException {
+    public void produserDokumentISaksflyt(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto) throws FunksjonellException {
+        Behandling behandling = behandlingRepository.findOne(behandlingID);
+        if (behandling == null) {
+            throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
+        }
         Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
 
         switch (dokumentType) {
             case MANGLENDE_OPPL:
@@ -104,8 +109,6 @@ public class DokumentService {
         if (brevDataDto != null) {
             prosessinstans.setData(ProsessDataKey.BREVDATA, brevDataDto);
         }
-        prosessinstans.setBehandling(behandling);
-
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);

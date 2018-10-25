@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent;
+package no.nav.melosys.saksflyt.agent.brev;
 
 import java.util.Map;
 
@@ -7,6 +7,8 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.feil.Feilkategori;
+import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;

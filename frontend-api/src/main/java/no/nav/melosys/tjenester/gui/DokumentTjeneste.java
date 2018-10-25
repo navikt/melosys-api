@@ -99,7 +99,7 @@ public class DokumentTjeneste extends RestTjeneste {
         try {
             tilgang.sjekk(behandlingID);
             DokumentType dokumentType = DokumentType.forKode(dokumentTypeID);
-            dokumentService.produserDokument(behandlingID, dokumentType, brevDataDto);
+            dokumentService.produserDokumentISaksflyt(behandlingID, dokumentType, brevDataDto);
             return Response.noContent().build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
