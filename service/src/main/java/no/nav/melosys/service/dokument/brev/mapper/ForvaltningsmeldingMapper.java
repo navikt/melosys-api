@@ -20,6 +20,9 @@ public class ForvaltningsmeldingMapper implements BrevDataMapper {
 
     private static final String XSD_LOCATION = "xsd/melosys_000082.xsd";
 
+    // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
+    private static final int SAKSBEHANDLINGSTID_UKER = 12;
+
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, BrevDataDto brevDataDto) throws JAXBException, SAXException, TekniskException {
         Fag fag = mapFag(behandling);
@@ -31,12 +34,11 @@ public class ForvaltningsmeldingMapper implements BrevDataMapper {
         Fag fag = new Fag();
         try {
             fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(behandling.getRegistrertDato()));
-            // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
-            fag.setSaksbehandlingstidDato(convertToXMLGregorianCalendarRemoveTimezone(LocalDate.now().plusWeeks(12))); // FIXME: 12 er et magisk tall...
+            fag.setSaksbehandlingstidDato(convertToXMLGregorianCalendarRemoveTimezone(LocalDate.now().plusWeeks(SAKSBEHANDLINGSTID_UKER)));
         } catch (DatatypeConfigurationException e) {
             throw new TekniskException("Konverteringsfeil", e);
         }
-        // FIXME Avhenger av Hendelse, som ikke er modellert ennå
+        // FIXME: Kan ikke utledes for behandling som ikke initieres av SED, og må registreres i journalføringen
         AvsenderType avsenderType = new AvsenderType();
         avsenderType.setRolle(RolleKode.BRUKER);
         fag.setAvsender(avsenderType);

@@ -11,13 +11,13 @@ import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKilde;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
@@ -251,6 +251,27 @@ public class TpsService implements TpsFasade {
             throw new SikkerhetsbegrensningException(e);
         } catch (HentPersonerMedSammeAdresseIkkeFunnet e) {
             throw new IkkeFunnetException(e);
+        }
+    }
+
+    @Override
+    public String hentFagsakIdentMedRolleType(Fagsak fagsak, RolleType rolleType) throws TekniskException {
+        Aktoer aktør = fagsak.hentAktørMedRolleType(rolleType);
+
+        if (aktør == null) {
+            throw new TekniskException("Det finnes ingen " + rolleType + " på sak " + fagsak.getSaksnummer());
+        }
+
+        if (aktør.getAktørId() != null) {
+            try {
+                return hentIdentForAktørId(aktør.getAktørId());
+            } catch (IkkeFunnetException e) {
+                throw new TekniskException("Det finnes ingen ident for aktørID " + aktør.getAktørId());
+            }
+        } else if (aktør.getOrgnr() != null) {
+            return aktør.getOrgnr();
+        } else {
+            throw new TekniskException("Det finnes ingen ident for " + rolleType + " på sak " + fagsak.getSaksnummer());
         }
     }
 }

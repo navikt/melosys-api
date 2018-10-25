@@ -59,12 +59,12 @@ public class BrevDataService {
 
         Fagsak fagsak = behandling.getFagsak();
 
-        metadata.bruker = hentFagsakIdentMedRolleType(fagsak, BRUKER);
+        metadata.bruker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, BRUKER);
 
         if (dokumentType == FORVALTNINGSMELDING) {
             metadata.mottaker = metadata.bruker;
         } else if (dokumentType == MANGLENDE_OPPL &&  brevDataDto.mottaker != null) {
-            metadata.mottaker = hentFagsakIdentMedRolleType(fagsak, brevDataDto.mottaker);
+            metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevDataDto.mottaker);
         } else {
             throw new TekniskException("Det finnes ingen mottaker på sak " + fagsak.getSaksnummer());
         }
@@ -82,26 +82,6 @@ public class BrevDataService {
         }
 
         return metadata;
-    }
-
-    private String hentFagsakIdentMedRolleType(Fagsak fagsak, RolleType rolleType) throws TekniskException {
-        Aktoer aktør = fagsak.hentAktørMedRolleType(rolleType);
-
-        if (aktør == null) {
-            throw new TekniskException("Det finnes ingen " + rolleType + " på sak " + fagsak.getSaksnummer());
-        }
-
-        if (aktør.getAktørId() != null) {
-            try {
-                return tpsFasade.hentIdentForAktørId(aktør.getAktørId());
-            } catch (IkkeFunnetException e) {
-                throw new TekniskException("Det finnes ingen ident for aktørID " + aktør.getAktørId());
-            }
-        } else if (aktør.getOrgnr() != null) {
-            return aktør.getOrgnr();
-        } else {
-            throw new TekniskException("Det finnes ingen ident for " + rolleType + " på sak " + fagsak.getSaksnummer());
-        }
     }
 
     /**
@@ -165,7 +145,7 @@ public class BrevDataService {
         return sakspart;
     }
 
-    private Mottaker lagMottaker(Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
+    Mottaker lagMottaker(Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
         Mottaker mottaker;
         Aktoer aktør = behandling.getFagsak().hentAktørMedRolleType(REPRESENTANT);
         if (brevDataDto.mottaker != null) {

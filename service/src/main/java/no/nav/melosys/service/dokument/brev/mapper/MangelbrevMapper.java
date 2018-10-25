@@ -20,6 +20,9 @@ public class MangelbrevMapper implements BrevDataMapper {
 
     private static final String XSD_LOCATION = "xsd/melosys_000074.xsd";
 
+    // Frist er 4 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
+    private static final int FRIST_UKER = 4;
+
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, BrevDataDto brevDataDto) throws JAXBException, SAXException, TekniskException {
         Fag fag = mapFag(behandling, brevDataDto);
@@ -36,13 +39,12 @@ public class MangelbrevMapper implements BrevDataMapper {
         manglendeOpplysningerType.setManglendeOpplysningerFritekst(brevDataDto.fritekst);
         try {
             fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(behandling.getRegistrertDato()));
-            // Fristdato er 4 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
-            manglendeOpplysningerType.setFristDato(convertToXMLGregorianCalendarRemoveTimezone(LocalDate.now().plusWeeks(4)));
+            manglendeOpplysningerType.setFristDato(convertToXMLGregorianCalendarRemoveTimezone(LocalDate.now().plusWeeks(FRIST_UKER)));
         } catch (DatatypeConfigurationException e) {
             throw new TekniskException("Konverteringsfeil", e);
         }
         fag.setManglendeOpplysninger(manglendeOpplysningerType);
-        // FIXME Avhenger av Hendelse, som ikke er modellert ennå
+        // FIXME: Kan ikke utledes for behandling som ikke initieres av SED, og må registreres i journalføringen
         AvsenderType avsenderType = new AvsenderType();
         avsenderType.setRolle(RolleKode.BRUKER);
         fag.setAvsender(avsenderType);
