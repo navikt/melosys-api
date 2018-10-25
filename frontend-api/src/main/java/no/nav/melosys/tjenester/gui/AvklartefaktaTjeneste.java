@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.Set;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -60,11 +59,13 @@ public class AvklartefaktaTjeneste extends RestTjeneste {
     @POST
     @Path("{behandlingID}")
     @ApiOperation(value = "Lagre avklartefakta")
-    public Response lagraAvklarteFakta(@PathParam("behandlingID") long behandlingID,
-                                       @ApiParam("AvklartefaktaData") Set<AvklartefaktaDto> avklartefaktaDtoer) {
+    public Set<AvklartefaktaDto> lagraAvklarteFakta(@PathParam("behandlingID") long behandlingID,
+                                                    @ApiParam("AvklartefaktaData") Set<AvklartefaktaDto> avklartefaktaDtoer) {
+        Set<AvklartefaktaDto> avklartefaktaDtoerUt;
         try {
             tilgang.sjekk(behandlingID);
             avklartefaktaService.lagreAvklarteFakta(behandlingID, avklartefaktaDtoer);
+            avklartefaktaDtoerUt = avklartefaktaService.hentAvklarteFakta(behandlingID);
         } catch (IkkeFunnetException e) {
             throw new NotFoundException(e);
         } catch (SikkerhetsbegrensningException e) {
@@ -73,6 +74,6 @@ public class AvklartefaktaTjeneste extends RestTjeneste {
             throw new InternalServerErrorException(e);
         }
 
-        return Response.ok().build();
+        return avklartefaktaDtoerUt;
     }
 }
