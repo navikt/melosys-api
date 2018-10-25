@@ -12,7 +12,6 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -47,13 +46,13 @@ public class OppgaveService {
     }
 
     @Transactional
-    public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
+    public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException, FunksjonellException {
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
     @Transactional
-    public List<OppgaveDto> hentOppgaverMedBruker(String brukerIdent) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
+    public List<OppgaveDto> hentOppgaverMedBruker(String brukerIdent) throws TekniskException, FunksjonellException {
         String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
         if (aktørId == null) {
             throw new IkkeFunnetException("Finnes ikke aktørId for FNR " + brukerIdent);
@@ -79,17 +78,17 @@ public class OppgaveService {
             dest = jfrOppgaveDto;
         } else if (oppgave.erBehandling()) {
             BehandlingsoppgaveDto behOppgaveDto = new BehandlingsoppgaveDto();
-            Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
+            Fagsak fagsak = fagsakRepository.findBySaksnummer(oppgave.getSaksnummer());
             if (fagsak == null) {
-                throw new TekniskException("Fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer() + " ikke funnet!");
+                throw new TekniskException("Fagsak med saksnummer " + oppgave.getSaksnummer() + " ikke funnet!");
             }
 
             behOppgaveDto.setSaksnummer(fagsak.getSaksnummer());
-            behOppgaveDto.setSakstypeKode(fagsak.getType().getKode());
+            behOppgaveDto.setSakstype(fagsak.getType());
 
             Behandling behandling = fagsak.getAktivBehandling();
             if (behandling == null) {
-                throw new TekniskException("Det finnes ingen aktiv behandling.");
+                throw new TekniskException("Det finnes ingen aktiv behandling for " + fagsak.getSaksnummer() + ".");
             }
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 
@@ -113,7 +112,6 @@ public class OppgaveService {
         dest.setAktivTil(oppgave.getFristFerdigstillelse());
         dest.setAnsvarligID(oppgave.getTilordnetRessurs());
         dest.setOppgaveID(oppgave.getOppgaveId());
-        dest.setOppgavetypeKode(oppgave.getOppgavetype().getKode());
         dest.setPrioritet(oppgave.getPrioritet());
         dest.setVersjon(oppgave.getVersjon());
 
@@ -124,8 +122,7 @@ public class OppgaveService {
         BehandlingDto behandlingDto = new BehandlingDto();
         behandlingDto.setBehandlingID(behandling.getId());
         behandlingDto.setBehandlingsstatus(behandling.getStatus());
-        behandlingDto.setBehandlingType(behandling.getType());
-        behandlingDto.setEndretDato(behandling.getEndretDato());
+        behandlingDto.setBehandlingstype(behandling.getType());
         behandlingDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
 
         Optional<Prosessinstans> prosessinstans = prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(ProsessType.OPPFRISKNING, behandling.getId());

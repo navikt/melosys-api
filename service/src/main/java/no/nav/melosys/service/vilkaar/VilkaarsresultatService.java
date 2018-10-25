@@ -48,34 +48,36 @@ public class VilkaarsresultatService {
     }
 
     @Transactional
-    public void registrerVilkår(long behandlingID, VilkaarDto vilkaarDto) throws IkkeFunnetException {
+    public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) throws IkkeFunnetException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findOne(behandlingID);
 
         if (behandlingsresultat == null) {
             throw new IkkeFunnetException("Registrering av vilkår feilet fordi behandlingsresulat med ID " + behandlingID + " er ikke funnet.");
         }
 
-        final VilkaarType vilkaarType = VilkaarType.forKode(vilkaarDto.getVilkaar());
-        Vilkaarsresultat vilkaarsresultat = vilkaarsresultatRepo.findByBehandlingsresultatIdAndVilkaar(behandlingsresultat.getId(), vilkaarType);
+        for (VilkaarDto vilkaarDto :  vilkaarDtoer) {
+            final VilkaarType vilkaarType = VilkaarType.forKode(vilkaarDto.getVilkaar());
+            Vilkaarsresultat vilkaarsresultat = vilkaarsresultatRepo.findByBehandlingsresultatIdAndVilkaar(behandlingsresultat.getId(), vilkaarType);
 
-        if (vilkaarsresultat == null) {
-            vilkaarsresultat = new Vilkaarsresultat();
+            if (vilkaarsresultat == null) {
+                vilkaarsresultat = new Vilkaarsresultat();
+            }
+
+            Set<VilkaarBegrunnelse> nyeBegrunnelser = new HashSet<>();
+            for (String kode : vilkaarDto.getBegrunnelseKoder()) {
+                VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
+                begrunnelse.setVilkaarsresultat(vilkaarsresultat);
+                begrunnelse.setKode(kode);
+                nyeBegrunnelser.add(begrunnelse);
+            }
+            vilkaarsresultat.oppdaterBegrunnelser(nyeBegrunnelser);
+
+            vilkaarsresultat.setBegrunnelseFritekst(vilkaarDto.getBegrunnelseFritekst());
+            vilkaarsresultat.setBehandlingsresultat(behandlingsresultat);
+            vilkaarsresultat.setVilkaar(vilkaarType);
+            vilkaarsresultat.setOppfylt(vilkaarDto.isOppfylt());
+
+            vilkaarsresultatRepo.save(vilkaarsresultat);
         }
-
-        Set<VilkaarBegrunnelse> nyeBegrunnelser = new HashSet<>();
-        for (String kode : vilkaarDto.getBegrunnelseKoder()) {
-            VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
-            begrunnelse.setVilkaarsresultat(vilkaarsresultat);
-            begrunnelse.setKode(kode);
-            nyeBegrunnelser.add(begrunnelse);
-        }
-        vilkaarsresultat.oppdaterBegrunnelser(nyeBegrunnelser);
-
-        vilkaarsresultat.setBegrunnelseFritekst(vilkaarDto.getBegrunnelseFritekst());
-        vilkaarsresultat.setBehandlingsresultat(behandlingsresultat);
-        vilkaarsresultat.setVilkaar(vilkaarType);
-        vilkaarsresultat.setOppfylt(vilkaarDto.isOppfylt());
-
-        vilkaarsresultatRepo.save(vilkaarsresultat);
     }
 }

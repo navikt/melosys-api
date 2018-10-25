@@ -65,7 +65,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         dto.setAvsenderID(avsenderID);
         dto.setErBrukerAvsender(brukerID != null && brukerID.equalsIgnoreCase(avsenderID));
         DokumentDto dokumentDto = new DokumentDto();
-        dokumentDto.setID(journalpost.getHoveddokumentId());
+        dokumentDto.setDokumentID(journalpost.getHoveddokumentId());
         dokumentDto.setMottattDato(journalpost.getForsendelseMottatt());
         dokumentDto.setTittel(journalpost.getHoveddokumentTittel());
         dto.setDokument(dokumentDto);
@@ -83,9 +83,6 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         } catch (FunksjonellException e) {
             log.info("Funksjonell feil: {}", e.getMessage());
             throw new BadRequestException(e);
-        } catch (TekniskException e) {
-            log.error("TekniskException", e);
-            throw new InternalServerErrorException(e);
         }
     }
 

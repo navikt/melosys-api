@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
@@ -69,12 +69,12 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
 
         Saksopplysning saksopplysning = tpsFasade.hentPersonMedAdresse(brukerId);
         saksopplysning.setBehandling(behandling);
-        saksopplysning.setRegistrertDato(LocalDateTime.now());
+        saksopplysning.setRegistrertDato(Instant.now());
         saksopplysningRepo.save(saksopplysning);
 
         saksopplysning = tpsFasade.hentPersonhistorikk(brukerId, søknadsperiode.getFom());
         saksopplysning.setBehandling(behandling);
-        saksopplysning.setRegistrertDato(LocalDateTime.now());
+        saksopplysning.setRegistrertDato(Instant.now());
         saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(JFR_VURDER_INNGANGSVILKÅR);

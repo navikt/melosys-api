@@ -35,13 +35,15 @@ public class OppgaveMappingMellomDTOogDomainTest {
         OppgaveDto oppgaveDto = new OppgaveDto();
         oppgaveDto.setId("1234");
         oppgaveDto.setSaksreferanse("456");
-        oppgaveDto.setOppgavetype("JFR");
+        oppgaveDto.setOppgavetype("BEH_SAK");
         oppgaveDto.setTema("MED");
+        oppgaveDto.setSaksreferanse("MEL-111");
+
         when(oppgaveConsumerMock.hentOppgave("1234")).thenReturn(oppgaveDto);
         Oppgave oppgave = gsakFasade.hentOppgave("1234");
         assertThat(oppgave.getOppgaveId()).isEqualTo("1234");
-        assertThat(oppgave.getGsakSaksnummer()).isEqualTo(456L);
-        assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetype.valueOf("JFR"));
+        assertThat(oppgave.getSaksnummer()).isEqualTo("MEL-111");
+        assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetype.valueOf("BEH_SAK"));
         assertThat(oppgave.getTema()).isEqualTo(Tema.valueOf("MED"));
     }
 }

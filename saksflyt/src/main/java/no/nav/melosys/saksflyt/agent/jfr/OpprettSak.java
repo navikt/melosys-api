@@ -6,14 +6,13 @@ import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.service.datavarehus.BehandlingOpprettetEvent;
-import no.nav.melosys.service.datavarehus.FagsakOpprettetEvent;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.service.datavarehus.BehandlingOpprettetEvent;
+import no.nav.melosys.service.datavarehus.FagsakOpprettetEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +21,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_GSAK_SAK;
 import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_SAK_OG_BEH;
+import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_SØKNAD;
 
 /**
  * Oppretter en sak og en behandling i Melosys.
  *
  * Transisjoner:
- * JFR_OPPRETT_SAK_OG_BEH -> JFR_OPPRETT_GSAK_SAK eller FEILET_MASKINELT hvis feil
+ * JFR_OPPRETT_SAK_OG_BEH -> JFR_OPPRETT_SOEKNAD eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class OpprettSak extends AbstraktStegBehandler {
@@ -59,7 +58,7 @@ public class OpprettSak extends AbstraktStegBehandler {
     
     @Transactional
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException {
+    public void utfør(Prosessinstans prosessinstans) {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String aktørId = prosessinstans.getData(AKTØR_ID);
@@ -74,7 +73,7 @@ public class OpprettSak extends AbstraktStegBehandler {
         applicationEventPublisher.publishEvent(new FagsakOpprettetEvent(fagsak, endretAv));
         applicationEventPublisher.publishEvent(new BehandlingOpprettetEvent(fagsak.getBehandlinger().get(0), endretAv));
 
-        prosessinstans.setSteg(JFR_OPPRETT_GSAK_SAK);
+        prosessinstans.setSteg(JFR_OPPRETT_SØKNAD);
         log.info("Opprettet fagsak {} for prosessinstans {}", fagsak.getSaksnummer(), prosessinstans.getId());
     }
 }

@@ -40,11 +40,9 @@ public class DatavarehusEventObserver {
             fagsakDvh.setFunksjonellTid(LocalDateTime.now());
             fagsakDvh.setEndretAv(fagsakOpprettetEvent.endretAv);
             fagsakDvh.setGsakSaksnummer(fagsak.getGsakSaksnummer());
+            fagsakDvh.setFagsakStatus(fagsak.getStatus().getKode());
             if (fagsak.getType() != null) {
                 fagsakDvh.setFagsakType(fagsak.getType().getKode());
-            }
-            if (fagsak.getStatus() != null) {
-                fagsakDvh.setFagsakStatus(fagsak.getStatus().getKode());
             }
             if (bruker != null) {
                 fagsakDvh.setBrukerId(bruker.getAktørId());

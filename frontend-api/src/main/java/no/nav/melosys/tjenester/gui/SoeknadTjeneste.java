@@ -6,6 +6,7 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -14,7 +15,6 @@ import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.validering.ValideringService;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
-import no.nav.melosys.tjenester.gui.dto.SoeknadInnDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -76,8 +76,9 @@ public class SoeknadTjeneste extends RestTjeneste {
     @ApiOperation(
         value = "Tjeneste for å registrere opplysninger fra papirsøknaden manuelt.",
         response = SoeknadDto.class)
-    public SoeknadDto registrerSøknad(@ApiParam @PathParam("behandlingID") long behandlingID, @ApiParam SoeknadInnDto soeknadInnDto) {
-        SoeknadDokument soeknadDokument = soeknadInnDto.getSoknadDokument();
+    public SoeknadDto registrerSøknad(@ApiParam SoeknadDto soeknadInnDto) {
+        long behandlingID = soeknadInnDto.getBehandlingID();
+        SoeknadDokument soeknadDokument = soeknadInnDto.getSoeknadDokument();
 
         try {
             tilgang.sjekk(behandlingID);
@@ -90,9 +91,9 @@ public class SoeknadTjeneste extends RestTjeneste {
         valideringService.validerOpplysninger(soeknadDokument);
 
         try {
-            soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
+            soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument, SaksopplysningKilde.SBH);
         } catch (IkkeFunnetException e) {
-            throw new NotFoundException(e);
+            throw new NotFoundException(e.getMessage());
         }
 
         return new SoeknadDto(behandlingID, soeknadDokument);

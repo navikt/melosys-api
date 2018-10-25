@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.agent.sob;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 
 import no.nav.melosys.domain.Behandling;
@@ -20,8 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
-import static no.nav.melosys.domain.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
 import static no.nav.melosys.domain.ProsessSteg.HENT_SOB_SAKER;
+import static no.nav.melosys.domain.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
 
 /**
  * Steget sørger for å hente saker fra SOB
@@ -65,7 +65,7 @@ public class HentSakOgBehandlingSaker extends AbstraktStegBehandler {
         Behandling behandling = prosessinstans.getBehandling();
         Saksopplysning saksopplysning = sakOgBehandlingFasade.finnSakOgBehandlingskjedeListe(aktørId);
         saksopplysning.setBehandling(behandling);
-        saksopplysning.setRegistrertDato(LocalDateTime.now());
+        saksopplysning.setRegistrertDato(Instant.now());
         saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(OPPFRISK_SAKSOPPLYSNINGER);

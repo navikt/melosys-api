@@ -64,7 +64,7 @@ public class FagsakTjeneste extends RestTjeneste {
         TypeMap<Behandling, BehandlingDto> typeMapBehandlingUt = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
         typeMapBehandlingUt.<Long>addMapping(Behandling::getId, (dest, id) -> dest.getOppsummering().setBehandlingID(id));
         typeMapBehandlingUt.<Behandlingsstatus>addMapping(Behandling::getStatus, (dest, status) -> dest.getOppsummering().setStatus(status));
-        typeMapBehandlingUt.<Behandlingstype>addMapping(Behandling::getType, (dest, type) -> dest.getOppsummering().setType(type));
+        typeMapBehandlingUt.<Behandlingstype>addMapping(Behandling::getType, (dest, type) -> dest.getOppsummering().setBehandlingstype(type));
         typeMapBehandlingUt.<Instant>addMapping(Behandling::getRegistrertDato, (dest, dato) -> dest.getOppsummering().setRegistrertDato(dato));
         typeMapBehandlingUt.<Instant>addMapping(Behandling::getEndretDato, (dest, dato) -> dest.getOppsummering().setEndretDato(dato));
         typeMapBehandlingUt.addMappings(mapper -> mapper.using(new SaksopplysningerTilDtoConverter()).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
@@ -80,7 +80,7 @@ public class FagsakTjeneste extends RestTjeneste {
         }
 
         try {
-            tilgang.sjekk(sak);
+            tilgang.sjekkSak(sak);
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (TekniskException e) {
@@ -89,29 +89,6 @@ public class FagsakTjeneste extends RestTjeneste {
 
         FagsakDto fagsakDto = tilDto(sak);
         return Response.ok(fagsakDto).build();
-    }
-
-    @Deprecated // FIXME Trengs av test så langt
-    @GET
-    @Path("ny/{fnr}")
-    @ApiOperation(value = "Oppretter en ny sak med et gitt fødselsnummer.", response = String.class)
-    public Response nyFagsakSikret(@PathParam("fnr") @ApiParam("Fødselsnummer.") String fnr) {
-        try {
-            Fagsak fagsak = fagsakService.testFagsakOgBehandling(fnr, Behandlingstype.SØKNAD);
-            tilgang.sjekk(fagsak);
-            if (fagsak == null) {
-                return Response.status(Response.Status.BAD_REQUEST).build();
-            } else {
-                return Response.ok(fagsak.getSaksnummer()).build();
-            }
-        } catch (IkkeFunnetException e) {
-            return Response.status(Response.Status.NOT_FOUND).entity("Ident " + fnr + " ikke funnet").build();
-        } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (TekniskException e) {
-            log.error("TekniskException", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
     }
 
     @GET

@@ -66,4 +66,8 @@ public class Land extends AbstraktKodeverkHjelper {
         return UKJENT.equals(kode);
     }
 
+    @Override
+    public String toString() {
+        return kode;
+    }
 }

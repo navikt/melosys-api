@@ -1,9 +1,6 @@
 package no.nav.melosys.service.vilkaar;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
@@ -69,7 +66,7 @@ public class VilkaarsresultatServiceTest {
         List<String> koder = new ArrayList<>();
         koder.add(Artikkel12_1.ERSTATTER_ANNEN.getKode());
         vilkaarDto.setBegrunnelseKoder(koder);
-        vilkaarsresultatService.registrerVilkår(behandlingID, vilkaarDto);
+        vilkaarsresultatService.registrerVilkår(behandlingID, Arrays.asList(vilkaarDto));
 
         verify(vilkaarsresultatRepo, times(1)).findByBehandlingsresultatIdAndVilkaar(any(Long.class), any(VilkaarType.class));
         verify(vilkaarsresultatRepo, times(1)).save(any(Vilkaarsresultat.class));
@@ -85,6 +82,6 @@ public class VilkaarsresultatServiceTest {
         List<String> koder = new ArrayList<>();
         koder.add(Artikkel12_1.ERSTATTER_ANNEN.getKode());
         vilkaarDto.setBegrunnelseKoder(koder);
-        vilkaarsresultatService.registrerVilkår(behandlingID, vilkaarDto);
+        vilkaarsresultatService.registrerVilkår(behandlingID, Arrays.asList(vilkaarDto));
     }
 }

@@ -4,16 +4,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Fagsakstype;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
+import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
+import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -37,10 +40,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-@SuppressWarnings("resource")
 public class OppgaveTjenesteTest extends JsonSchemaTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(FagsakTjenesteTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(OppgaveTjenesteTest.class);
 
     private OppgaveTjeneste tjeneste;
     @Mock
@@ -62,10 +64,10 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
     @Test
     public void mineOppgaver() throws MelosysException, IOException, JSONException {
         List<OppgaveDto> oppgaver = new ArrayList<>();
-        int oppgaveNr = 1 + defaultEnhancedRandom().nextInt(3);
+        int oppgaveNr = 1 + defaultEnhancedRandom().nextInt(2);
         for (int i = 0; i < oppgaveNr; i++) {
-            OppgaveDto oppgaveDto = defaultEnhancedRandom().nextObject(OppgaveDto.class);
-            oppgaver.add(oppgaveDto);
+            oppgaver.add(defaultEnhancedRandom().nextObject(BehandlingsoppgaveDto.class));
+            oppgaver.add(defaultEnhancedRandom().nextObject(JournalfoeringsoppgaveDto.class));
         }
 
         when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
@@ -84,7 +86,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void plukkOppgave() throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException {
+    public void plukkOppgave() throws FunksjonellException, TekniskException {
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
         innData.setOppgavetype("BEH_SAK");

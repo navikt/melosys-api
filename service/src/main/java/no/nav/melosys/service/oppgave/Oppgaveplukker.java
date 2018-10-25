@@ -1,21 +1,20 @@
 package no.nav.melosys.service.oppgave;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Fagsakstype;
-import no.nav.melosys.domain.Tema;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
-import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.util.KodeverkUtils;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
@@ -32,14 +31,16 @@ public class Oppgaveplukker {
     private static final Logger log =  LoggerFactory.getLogger(Oppgaveplukker.class);
 
     private final GsakFasade gsakFasade;
-    private final FagsakRepository fagsakRepository;
+
     private final OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
 
+    private final FagsakRepository fagsakRepository;
+
     @Autowired
-    public Oppgaveplukker(GsakFasade gsakFasade, FagsakRepository fagsakRepository, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo) {
+    public Oppgaveplukker(GsakFasade gsakFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo, FagsakRepository fagsakRepository) {
         this.gsakFasade = gsakFasade;
-        this.fagsakRepository = fagsakRepository;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
+        this.fagsakRepository = fagsakRepository;
     }
 
     /**
@@ -80,25 +81,32 @@ public class Oppgaveplukker {
             }
         }
 
-        List<Oppgave> oppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakstypeListe, behandlingstypeListe);
+        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakstypeListe, behandlingstypeListe);
+        fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
-        Optional<Oppgave> valg = velgNeste(saksbehandlerID, oppgaver);
-
+        Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);
+        
         if (valg.isPresent()) {
             Oppgave oppgave = valg.get();
             // Tildeler oppgaven
             gsakFasade.tildelOppgave(oppgave.getOppgaveId(), saksbehandlerID);
-            if (oppgave.erBehandling()) {
-                // Finner fagsak og saksnummer som svarer til behandlingsoppgaven.
-                Fagsak fagsak = fagsakRepository.findByGsakSaksnummer(oppgave.getGsakSaksnummer());
-                if (fagsak == null) {
-                    throw new IkkeFunnetException("Fant ikke fagsak med Gsak saksnummer " + oppgave.getGsakSaksnummer());
-                }
-                oppgave.setSaksnummer(fagsak.getSaksnummer());
+        }
+        return valg;
+    }
+
+    private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) throws TekniskException {
+        Iterator<Oppgave> iter = oppgaver.iterator();
+        while (iter.hasNext()) {
+            Oppgave oppgave = iter.next();
+            Fagsak fagsak = fagsakRepository.findBySaksnummer(oppgave.getSaksnummer());
+            Behandling behandling = fagsak.getAktivBehandling();
+
+            if (Behandlingsstatus.erVenterForDokumentasjon(behandling.getStatus())
+                && behandling.getDokumentasjonSvarfristDato() != null
+                && behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
+                iter.remove();
             }
         }
-
-        return valg;
     }
 
     @Transactional
@@ -122,7 +130,7 @@ public class Oppgaveplukker {
 
     private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {
 
-        Optional<Oppgave> valg = oppgaver.stream().min(høyestTilLavestPrioritet);
+        Optional<Oppgave> valg = oppgaver.stream().min(Oppgave.høyestTilLavestPrioritet);
         // Vi må ikke tildele en oppgave som var tilbakelagt.
         if (valg.isPresent()) {
             String oppgaveId = valg.get().getOppgaveId();
@@ -140,26 +148,5 @@ public class Oppgaveplukker {
         List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(saksbehandlerID, oppgaveId);
         return !tilbakelegging.isEmpty();
     }
-
-    private static final Comparator<Oppgave> høyestTilLavestPrioritet = (a, b) -> {
-        // Merk: Bryter med konvensjonen (a == b og b == c → a == c), men dette er ok.
-        int res = 0;
-        if (a.getPrioritet() == b.getPrioritet())
-            res = 0;
-        else if (a.getPrioritet() == PrioritetType.HOY)
-            res = -1;
-        else if (b.getPrioritet() == PrioritetType.HOY)
-            res = 1;
-        else if (a.getPrioritet() == PrioritetType.NORM)
-            res = -1;
-        else if (b.getPrioritet() == PrioritetType.NORM)
-            res = 1;
-        if (res == 0) {
-            if (a.getFristFerdigstillelse() == null || b.getFristFerdigstillelse() == null)
-                return 0;
-            return a.getFristFerdigstillelse().compareTo(b.getFristFerdigstillelse());
-        }
-        return res;
-    };
 
 }

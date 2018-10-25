@@ -11,16 +11,7 @@ public class BehandlingDto {
     private Behandlingstype behandlingstype;
     private Behandlingsstatus behandlingsstatus;
     private Instant sisteOpplysningerHentetDato;
-    private Instant endretDato;
     private boolean erUnderOppdatering;
-
-    public boolean erUnderOppdatering() {
-        return erUnderOppdatering;
-    }
-
-    public void setErUnderOppdatering(boolean erUnderOppdatering) {
-        this.erUnderOppdatering = erUnderOppdatering;
-    }
 
     public Long getBehandlingID() {
         return behandlingID;
@@ -30,11 +21,11 @@ public class BehandlingDto {
         this.behandlingID = behandlingID;
     }
 
-    public Behandlingstype getBehandlingType() {
+    public Behandlingstype getBehandlingstype() {
         return behandlingstype;
     }
 
-    public void setBehandlingType(Behandlingstype behandlingstype) {
+    public void setBehandlingstype(Behandlingstype behandlingstype) {
         this.behandlingstype = behandlingstype;
     }
 
@@ -46,14 +37,6 @@ public class BehandlingDto {
         this.behandlingsstatus = behandlingsstatus;
     }
 
-    public Instant getEndretDato() {
-        return endretDato;
-    }
-
-    public void setEndretDato(Instant endretDato) {
-        this.endretDato = endretDato;
-    }
-
     public Instant getSisteOpplysningerHentetDato() {
         return sisteOpplysningerHentetDato;
     }
@@ -62,4 +45,11 @@ public class BehandlingDto {
         this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
     }
 
+    public boolean isErUnderOppdatering() {
+        return erUnderOppdatering;
+    }
+
+    public void setErUnderOppdatering(boolean erUnderOppdatering) {
+        this.erUnderOppdatering = erUnderOppdatering;
+    }
 }

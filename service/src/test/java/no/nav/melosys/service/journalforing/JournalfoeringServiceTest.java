@@ -3,17 +3,25 @@ package no.nav.melosys.service.journalforing;
 import java.time.LocalDate;
 import java.util.Arrays;
 
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
-import no.nav.melosys.service.journalforing.dto.*;
+import no.nav.melosys.service.journalforing.dto.FagsakDto;
+import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
+import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
+import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JournalfoeringServiceTest {
@@ -68,6 +76,9 @@ public class JournalfoeringServiceTest {
         fagsakDto.setLand(Arrays.asList("DK", "NO"));
         opprettDto.setFagsak(fagsakDto);
         journalfoeringService.opprettSakOgJournalfør(opprettDto);
+
+        verify(prosessinstansRepo, times(1)).save(any(Prosessinstans.class));
+        verify(binge, times(1)).leggTil(any(Prosessinstans.class));
     }
 
     @Test(expected = FunksjonellException.class)
@@ -80,6 +91,9 @@ public class JournalfoeringServiceTest {
     public void tilordneSakOgJournalfør() throws FunksjonellException {
         tilordneDto.setSaksnummer("MEL-0123");
         journalfoeringService.tilordneSakOgJournalfør(tilordneDto);
+
+        verify(prosessinstansRepo, times(1)).save(any(Prosessinstans.class));
+        verify(binge, times(1)).leggTil(any(Prosessinstans.class));
     }
 
     @Test(expected = FunksjonellException.class)

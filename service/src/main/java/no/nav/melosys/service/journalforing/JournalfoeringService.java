@@ -32,12 +32,12 @@ public class JournalfoeringService {
         this.prosessinstansRepo = prosessinstansRepo;
     }
 
-    public Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, IntegrasjonException {
+    public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
         return joarkFasade.hentJournalpost(journalpostID);
     }
 
     @Transactional
-    public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException, TekniskException {
+    public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
         valider(journalfoeringDto);
         validerOpprettSakFelter(journalfoeringDto);
         
@@ -53,12 +53,14 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getDokumenttittel());
         //FIXME MELOSYS-1283 vedlegg
         // Land trenges av regelmodulen får å vurdere inngangsvilkår
-        prosessinstans.setData(ProsessDataKey.LAND, journalfoeringDto.getFagsak().getLand());
+        prosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, journalfoeringDto.getFagsak().getLand());
         // Perioden trenges for å hente saksopplysninger
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
-        prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER, journalfoeringDto.getArbeidsgiverID());
+        if (!StringUtils.isEmpty(journalfoeringDto.getArbeidsgiverID())) {
+            prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER, journalfoeringDto.getArbeidsgiverID());
+        }
 
-        if (!(journalfoeringDto.getRepresentantID() == null || journalfoeringDto.getRepresentantID().isEmpty())) {
+        if (!StringUtils.isEmpty(journalfoeringDto.getRepresentantID())) {
             prosessinstans.setData(ProsessDataKey.REPRESENTANT, journalfoeringDto.getRepresentantID());
         }
 
@@ -144,9 +146,6 @@ public class JournalfoeringService {
         }
         if (journalfoeringDto.getFagsak().getLand() == null || journalfoeringDto.getFagsak().getLand().isEmpty()) {
             throw new FunksjonellException("Land mangler");
-        }
-        if (journalfoeringDto.getArbeidsgiverID() == null || journalfoeringDto.getArbeidsgiverID().isEmpty()) {
-            throw new FunksjonellException("Arbeidsgiver mangler");
         }
     }
 

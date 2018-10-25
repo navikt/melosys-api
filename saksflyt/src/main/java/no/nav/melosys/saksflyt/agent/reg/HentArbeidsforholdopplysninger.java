@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.agent.reg;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
@@ -81,7 +81,7 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
 
         Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(brukerId, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
         saksopplysning.setBehandling(behandling);
-        saksopplysning.setRegistrertDato(LocalDateTime.now());
+        saksopplysning.setRegistrertDato(Instant.now());
         saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(ProsessSteg.HENT_INNT_OPPL);

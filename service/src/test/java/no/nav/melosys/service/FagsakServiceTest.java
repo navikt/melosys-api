@@ -28,7 +28,6 @@ import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.Assert.assertFalse;
@@ -57,7 +56,7 @@ public class FagsakServiceTest {
 
         fagsakRepo = mock(FagsakRepository.class);
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
-        fagsakService = new FagsakService(fagsakRepo, behandlingRepository, saksopplysningerService, tps, mock(ApplicationEventPublisher.class));
+        fagsakService = new FagsakService(fagsakRepo, behandlingRepository, tps);
     }
 
     @Test

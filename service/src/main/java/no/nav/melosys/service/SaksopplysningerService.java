@@ -1,5 +1,6 @@
 package no.nav.melosys.service;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -119,7 +120,7 @@ public class SaksopplysningerService {
             saksopplysninger.addAll(hentOrganisasjoner(orgnumre));
         }
 
-        saksopplysninger.forEach(x -> x.setRegistrertDato(LocalDateTime.now()));
+        saksopplysninger.forEach(x -> x.setRegistrertDato(Instant.now()));
 
         return saksopplysninger;
     }
@@ -250,11 +251,13 @@ public class SaksopplysningerService {
         nyprosessinstans.setData(ProsessDataKey.BRUKER_ID, tpsFasade.hentIdentForAktørId(aktør_Id));
 
         nyprosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, hentPeriode(søknadDokument));
-        nyprosessinstans.setData(ProsessDataKey.LAND, hentLand(søknadDokument));
+        nyprosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, hentLand(søknadDokument));
 
         nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
 
-        nyprosessinstans.setRegistrertDato(LocalDateTime.now());
+        LocalDateTime nå = LocalDateTime.now();
+        nyprosessinstans.setRegistrertDato(nå);
+        nyprosessinstans.setEndretDato(nå);
 
         prosessinstansRepository.save(nyprosessinstans);
         binge.leggTil(nyprosessinstans);

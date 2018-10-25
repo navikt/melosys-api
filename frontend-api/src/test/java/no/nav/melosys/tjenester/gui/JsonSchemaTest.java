@@ -1,6 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Collection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,17 +10,20 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
+import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.tjenester.gui.jackson.JacksonModule;
+import no.nav.melosys.tjenester.gui.jackson.MelosysModule;
 import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
+import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -49,6 +54,7 @@ public abstract class JsonSchemaTest {
         if (enhancedRandom == null) {
             enhancedRandom =  EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
                 .collectionSizeRange(1, 4)
+                .overrideDefaultInitialization(true)
                 .build();
         }
         return enhancedRandom;
@@ -65,7 +71,7 @@ public abstract class JsonSchemaTest {
 
     protected Schema lastSchema(String schemaString) throws JSONException {
         JSONObject rawSchema = new JSONObject(schemaString);
-        SchemaLoader loader = SchemaLoader.builder().schemaJson(rawSchema).draftV7Support().useDefaults(true).build();
+        SchemaLoader loader = SchemaLoader.builder().schemaJson(rawSchema).httpClient(new ClasspathSchemaClient()).draftV7Support().useDefaults(true).build();
         return loader.load().build();
     }
 
@@ -75,6 +81,7 @@ public abstract class JsonSchemaTest {
             objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
             objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
             objectMapper.registerModule(new JavaTimeModule());
+            objectMapper.registerModule(new MelosysModule(null));
         }
         return objectMapper;
     }
@@ -86,8 +93,9 @@ public abstract class JsonSchemaTest {
             objectMapperMedKodeverkServiceStub.configure(SerializationFeature.INDENT_OUTPUT, true);
             objectMapperMedKodeverkServiceStub.registerModule(new JavaTimeModule());
             KodeverkService kodeverkService = mock(KodeverkService.class);
-            when(kodeverkService.dekod(any(),any(),any())).thenReturn("DUMMY");
-            objectMapperMedKodeverkServiceStub.registerModule(new JacksonModule(kodeverkService));
+            when(kodeverkService.dekod(any(), any(), any())).thenReturn("DUMMY");
+            when(kodeverkService.getKodeverdi(any(), any())).thenReturn(new KodeDto("DUMMY", "DUMMY"));
+            objectMapperMedKodeverkServiceStub.registerModule(new MelosysModule(kodeverkService));
         }
         return objectMapperMedKodeverkServiceStub;
     }
@@ -130,5 +138,16 @@ public abstract class JsonSchemaTest {
             .map(ValidationException::toJSON)
             .forEach(jsonObject -> log.error(jsonObject.toString()));
         throw e;
+    }
+
+    private class ClasspathSchemaClient implements SchemaClient {
+        public InputStream get(String url) {
+            try {
+                url = url.replace("http://melosys.nav.no/schemas", "schema");
+                return new ClassPathResource(url).getInputStream();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
     }
 }

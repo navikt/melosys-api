@@ -1,8 +1,8 @@
 {
   "personOpplysninger": {
-    "utenlandskID": [
+    "utenlandskIdent": [
       {
-        "ID": "123456789",
+        "ident": "123456789",
         "landKode": "DK"
       }
     ]
@@ -46,7 +46,6 @@
   },
   "bosted": {
     "intensjonOmRetur": true,
-    "bostedUtenforNorge": true,
     "familiesBostedLandKode": "SE",
     "antallMaanederINorge": 8,
     "adresseIUtlandet": true,
@@ -78,9 +77,7 @@
     "antallAdminAnsatteEOS": 75,
     "andelOmsetningINorge": 78.5,
     "andelKontrakterINorge": 50.5,
-    "utsendtFortsetterArbeidsforholdIUtlandet": true,
-    "utsendtArbeiderArbeiderMedKlienter": true,
-    "utsendtArbeiderArbeiderMedKontrakter": true
+    "utsendtFortsetterArbeidsforholdIUtlandet": true
   },
   "arbeidsinntekt": {
     "inntektNorskIPerioden": 5500,

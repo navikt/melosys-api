@@ -7,7 +7,6 @@ import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -22,7 +21,7 @@ public class VilkaarTjenesteTest extends JsonSchemaTest {
 
     private static final Logger log = LoggerFactory.getLogger(VilkaarTjenesteTest.class);
 
-    private static final String VILKÅR_SCHEMA = "vilkaar-schema.json";
+    private static final String VILKÅR_SCHEMA = "vilkar-schema.json";
 
     @Mock
     private VilkaarsresultatService vilkaarsresultatService;
@@ -48,7 +47,6 @@ public class VilkaarTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    @Ignore //FIXME Definere schema
     public void hentVilkår() throws IOException {
         List<VilkaarDto> mockListe = defaultEnhancedRandom().randomListOf(4, VilkaarDto.class);
         when(vilkaarsresultatService.hentVilkaar(1L)).thenReturn(mockListe);

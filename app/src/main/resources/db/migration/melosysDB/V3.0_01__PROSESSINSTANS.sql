@@ -22,6 +22,7 @@ CREATE TABLE prosess_type (
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_KNYTT', 'Journalføring på eksisterende sak');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_NY_SAK', 'Journalføring med ny sak og søknad');
 INSERT INTO prosess_type (kode, navn) VALUES ('SØKNAD_A1', 'Søknad A1');
+INSERT INTO prosess_type (kode, navn) VALUES ('OPPFRISKNING', 'oppfriskning av saksopplysninger');
 
 CREATE TABLE prosess_steg (
     kode    VARCHAR2(99)  NOT NULL,
@@ -35,6 +36,7 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_VALIDERING', 'Grunnleggende v
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_AVSLUTT_OPPGAVE', 'Avslutter journalføringsoppgaven i GSAK');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_AKTØR_ID', 'Henter aktørID');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPRETT_SAK_OG_BEH', 'Oppretter ny sak og behandling i Melosys');
+INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPRETT_SØKNAD', 'Oppretter ny søknad i Melosys');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPRETT_GSAK_SAK', 'Oppretter Sak i GSAK');
 INSERT INTO prosess_steg (kode, navn) VALUES ('STATUS_BEH_OPPR', 'Oppdater Sak og Behandling ved oppretting av behandling');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPDATER_JOURNALPOST', 'Oppdaterer journalposten i Joark');

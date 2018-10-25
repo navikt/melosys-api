@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class OppgaveSearchRequest {
     private String tildeltEnhetsnr;
+    private Boolean tildeltRessurs;
     @JsonProperty("aktoerId")
     private String aktørId;
     private String[] oppgavetype;
@@ -15,6 +16,7 @@ public class OppgaveSearchRequest {
 
     private OppgaveSearchRequest(Builder builder) {
         this.tildeltEnhetsnr = builder.enhetId;
+        this.tildeltRessurs = builder.tildeltRessurs;
         this.aktørId = builder.aktørId;
         this.oppgavetype = builder.oppgavetype;
         this.behandlingstype = builder.behandlingstype;
@@ -44,6 +46,10 @@ public class OppgaveSearchRequest {
         return tildeltEnhetsnr;
     }
 
+    public Boolean getTildeltRessurs() {
+        return tildeltRessurs;
+    }
+
     public String getAktørId() {
         return aktørId;
     }
@@ -63,6 +69,7 @@ public class OppgaveSearchRequest {
         private String[] oppgavetype;
         private String[] behandlingstype;
         private String tilordnetRessurs;
+        private Boolean tildeltRessurs;
         private String[] tema;
         private String sorteringsfelt;
         private String statusKategori;
@@ -93,6 +100,11 @@ public class OppgaveSearchRequest {
 
         public Builder medTema(String[] tema) {
             this.tema = tema;
+            return this;
+        }
+
+        public Builder medTildeltRessurs(Boolean tildeltRessurs) {
+            this.tildeltRessurs = tildeltRessurs;
             return this;
         }
 

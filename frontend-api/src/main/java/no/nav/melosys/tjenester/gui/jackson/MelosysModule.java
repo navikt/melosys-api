@@ -10,10 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JacksonModule extends SimpleModule {
+public class MelosysModule extends SimpleModule {
 
     @Autowired
-    public JacksonModule(KodeverkService kodeverkService) {
+    public MelosysModule(KodeverkService kodeverkService) {
         super();
 
         addSerializer(new FellesKodeverkSerializer(kodeverkService));

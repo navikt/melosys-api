@@ -36,6 +36,7 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.setBehandlingsstatus(tilKoder(Behandlingsstatus.values()));
         kodeverk.setBehandlingstyper(tilKoder(Behandlingstype.values()));
         kodeverk.setDokumenttitler(tilKoder(DokumentTittel.values()));
+        kodeverk.setDokumenttyper(tilKoder(DokumentType.values()));
         kodeverk.setFinansiering(tilKoder(Finansiering.values()));
         kodeverk.setLandkoder(tilKoder(Landkoder.values()));
         kodeverk.getLovvalgsbestemmelser().forordning_883_2004 = tilKoder(LovvalgBestemmelse_883_2004.values());
@@ -44,7 +45,7 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.setOppgavetyper(tilKoder(Oppgavetype.values()));
         kodeverk.setSakstyper(tilKoder(Fagsakstype.values()));
         kodeverk.setVedleggstitler(tilKoder(VedleggTittel.values()));
-        kodeverk.setVilkaar(tilKoder(VilkaarType.values()));
+        //kodeverk.setVilkaar(tilKoder(VilkaarType.values())); FIXME venter på frontend
         return kodeverk;
     }
 

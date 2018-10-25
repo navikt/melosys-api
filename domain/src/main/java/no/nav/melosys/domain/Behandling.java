@@ -18,7 +18,7 @@ public class Behandling {
     @JoinColumn(name = "saksnummer", nullable = false, updatable = false)
     private Fagsak fagsak;
 
-    @Column(name = "status", nullable = false, updatable = true)
+    @Column(name = "status", nullable = false)
     @Convert(converter = Behandlingsstatus.DbKonverterer.class)
     private Behandlingsstatus status;
 
@@ -29,11 +29,14 @@ public class Behandling {
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private Instant registrertDato;
 
-    @Column(name = "endret_dato", nullable = false, updatable = true)
+    @Column(name = "endret_dato", nullable = false)
     private Instant endretDato;
 
-    @Column(name = "siste_opplysninger_hentet_dato", updatable = true)
+    @Column(name = "siste_opplysninger_hentet_dato")
     private Instant sisteOpplysningerHentetDato;
+
+    @Column(name = "dokumentasjon_svarfrist_dato")
+    private Instant dokumentasjonSvarfristDato;
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
@@ -43,6 +46,10 @@ public class Behandling {
 
     public long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public Fagsak getFagsak() {
@@ -85,14 +92,6 @@ public class Behandling {
         this.endretDato = endretDato;
     }
 
-    public Instant getSistOpplysningerHentetDato() {
-        return sisteOpplysningerHentetDato;
-    }
-
-    public void setSisteOpplysningerHentetDato(Instant sisteOpplysningerHentetDato) {
-        this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
-    }
-
     public Set<Saksopplysning> getSaksopplysninger() {
         return saksopplysninger;
     }
@@ -107,6 +106,22 @@ public class Behandling {
 
     public void setBehandlingshistorikk(Set<BehandlingHistorikk> behandlingshistorikk) {
         this.behandlingshistorikk = behandlingshistorikk;
+    }
+
+    public Instant getSistOpplysningerHentetDato() {
+        return sisteOpplysningerHentetDato;
+    }
+
+    public void setSisteOpplysningerHentetDato(Instant sisteOpplysningerHentetDato) {
+        this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
+    }
+
+    public Instant getDokumentasjonSvarfristDato() {
+        return dokumentasjonSvarfristDato;
+    }
+
+    public void setDokumentasjonSvarfristDato(Instant dokumentasjonSvarfristDato) {
+        this.dokumentasjonSvarfristDato = dokumentasjonSvarfristDato;
     }
 
     @Override
