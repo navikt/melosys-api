@@ -23,29 +23,9 @@
 	<xs:complexType name="Fag">
 		<xs:sequence>
 			<xs:element name="datoMottatt" type="st:FormatertDato"/>
-			<xs:element name="avsender" type="avsenderType"/>
+			<xs:element name="avsender" type="melosysfelles:avsenderType"/>
 			<xs:element name="saksbehandlingstidDato" type="st:FormatertDato"/>
 		</xs:sequence>
 	</xs:complexType>
-
-	<xs:complexType name="avsenderType">
-		<xs:sequence>
-			<xs:element name="rolle" type="rolleKode"/>
-			<xs:element name="trygdemyndighetsLand" type="xs:string" minOccurs="0"/>
-			<xs:element name="navn" type="xs:string" minOccurs="0"/>
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:simpleType name="rolleKode">
-		<xs:annotation>
-			<xs:documentation>Koder som angir hvilken rolle avsender har</xs:documentation>
-		</xs:annotation>
-		<xs:restriction base="xs:token">
-			<xs:enumeration value="BRUKER"/>
-			<xs:enumeration value="ARBEIDSGIVER"/>
-			<xs:enumeration value="REPRESENTANT"/>
-			<xs:enumeration value="MYNDIGHET"/>
-		</xs:restriction>
-	</xs:simpleType>
 
 </xs:schema>
