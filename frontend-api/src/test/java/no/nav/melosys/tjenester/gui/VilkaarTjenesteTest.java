@@ -7,7 +7,6 @@ import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -48,7 +47,6 @@ public class VilkaarTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    @Ignore //FIXME Schema er ikke i develop
     public void hentVilkår() throws IOException {
         List<VilkaarDto> mockListe = defaultEnhancedRandom().randomListOf(4, VilkaarDto.class);
         when(vilkaarsresultatService.hentVilkaar(1L)).thenReturn(mockListe);
