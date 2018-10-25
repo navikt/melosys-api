@@ -20,7 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.w3c.dom.Element;
 
 import static no.nav.melosys.domain.DokumentType.FORVALTNINGSMELDING;
-import static no.nav.melosys.domain.DokumentType.MANGLENDE_OPPL;
+import static no.nav.melosys.domain.DokumentType.MELDING_MANGLENDE_OPPLYSNINGER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -66,7 +66,7 @@ public class BrevDataServiceTest {
         brevDataDto.mottaker = RolleType.BRUKER;
         brevDataDto.fritekst = "Test";
 
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MANGLENDE_OPPL, behandling, brevDataDto);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevDataDto);
 
         assertThat(metadata.bruker).isEqualTo(FNR);
         assertThat(metadata.mottaker).isEqualTo(FNR);
@@ -78,7 +78,7 @@ public class BrevDataServiceTest {
             return mottaker;
         }).when(service).lagMottaker(any(), any());
 
-        Element element = service.lagBrevXML(MANGLENDE_OPPL, behandling, brevDataDto);
+        Element element = service.lagBrevXML(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevDataDto);
 
         assertThat(element).isNotNull();
     }
@@ -91,7 +91,7 @@ public class BrevDataServiceTest {
         brevDataDto.mottaker = RolleType.ARBEIDSGIVER;
         brevDataDto.fritekst = "Test";
 
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MANGLENDE_OPPL, behandling, brevDataDto);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevDataDto);
 
         assertThat(metadata.bruker).isEqualTo(FNR);
         assertThat(metadata.mottaker).isEqualTo(ORGNR);
@@ -103,7 +103,7 @@ public class BrevDataServiceTest {
             return mottaker;
         }).when(service).lagMottaker(any(), any());
 
-        Element element = service.lagBrevXML(MANGLENDE_OPPL, behandling, brevDataDto);
+        Element element = service.lagBrevXML(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevDataDto);
 
         assertThat(element).isNotNull();
     }

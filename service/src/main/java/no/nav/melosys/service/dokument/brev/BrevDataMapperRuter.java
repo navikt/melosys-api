@@ -15,7 +15,7 @@ public class BrevDataMapperRuter {
 
     static {
         mappere.put(DokumentType.FORVALTNINGSMELDING, ForvaltningsmeldingMapper.class);
-        mappere.put(DokumentType.MANGLENDE_OPPL, MangelbrevMapper.class);
+        mappere.put(DokumentType.MELDING_MANGLENDE_OPPLYSNINGER, MangelbrevMapper.class);
     }
 
     private BrevDataMapperRuter() {

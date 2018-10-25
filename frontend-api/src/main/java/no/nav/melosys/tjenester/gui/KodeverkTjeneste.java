@@ -13,6 +13,7 @@ import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_987_2009;
 import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.service.kodeverk.KodeDto;
+import no.nav.melosys.tjenester.gui.dto.Dokumenttype;
 import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.setBehandlingsstatus(tilKoder(Behandlingsstatus.values()));
         kodeverk.setBehandlingstyper(tilKoder(Behandlingstype.values()));
         kodeverk.setDokumenttitler(tilKoder(DokumentTittel.values()));
-        kodeverk.setDokumenttyper(tilKoder(DokumentType.values()));
+        kodeverk.setDokumenttyper(tilKoder(Dokumenttype.values()));
         kodeverk.setFinansiering(tilKoder(Finansiering.values()));
         kodeverk.setLandkoder(tilKoder(Landkoder.values()));
         kodeverk.getLovvalgsbestemmelser().forordning_883_2004 = tilKoder(LovvalgBestemmelse_883_2004.values());

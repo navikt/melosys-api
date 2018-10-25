@@ -16,7 +16,7 @@ public enum DokumentType implements Kodeverk {
     INNVILGELSE("000048", "Vedtaksbrev om bekreftelse på trygderettigheter "),
     KLAGE("TODO-17", "Klageoversendelse"),
     KLAGE_AVVIST("TODO-18", "Avvisning av klage"),
-    MANGLENDE_OPPL("000074", "Innhente manglende opplysninger"),
+    MELDING_MANGLENDE_OPPLYSNINGER("000074", "Melding om manglende opplysninger"),
     STATUS("TODO-110", "Orienteringsbrev om status i saken"),
     VEDTAK_BARN("TODO-111", "Vedtaksbrev for medfølgende barn");
 

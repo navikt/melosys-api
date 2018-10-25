@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.DokumentType.MANGLENDE_OPPL;
+import static no.nav.melosys.domain.DokumentType.MELDING_MANGLENDE_OPPLYSNINGER;
 import static no.nav.melosys.domain.ProsessSteg.MANGELBREV;
 
 /**
@@ -62,7 +62,7 @@ public class SendMangelbrev extends AbstraktStegBehandler {
         Behandling behandling = prosessinstans.getBehandling();
         BrevDataDto brevDataDto = prosessinstans.getData(ProsessDataKey.BREVDATA, BrevDataDto.class);
 
-        dokumentService.produserDokument(behandling.getId(), MANGLENDE_OPPL, brevDataDto);
+        dokumentService.produserDokument(behandling.getId(), MELDING_MANGLENDE_OPPLYSNINGER, brevDataDto);
 
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
         behandling.setDokumentasjonSvarfristDato(LocalDateTime.now().plusWeeks(DOKUMENTASJON_SVARFRIST_UKER).toInstant(ZoneOffset.UTC));

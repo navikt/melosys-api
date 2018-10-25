@@ -11,6 +11,7 @@ import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
+import no.nav.melosys.tjenester.gui.dto.Dokumenttype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,16 +65,16 @@ public class DokumentTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("utkast/pdf/{behandlingID}/{dokumentTypeID}")
+    @Path("utkast/pdf/{behandlingID}/{dokumenttypeKode}")
     @Produces("application/pdf")
     public Response produserUtkast(@PathParam("behandlingID") long behandlingID,
-                                   @PathParam("dokumentTypeID") String dokumentTypeID,
+                                   @PathParam("dokumenttypeKode") Dokumenttype dokumenttypeKode,
                                    BrevDataDto brevDataDto) {
         byte[] dokument;
 
         try {
             tilgang.sjekk(behandlingID);
-            DokumentType dokumentType = DokumentType.forKode(dokumentTypeID);
+            DokumentType dokumentType = DokumentType.valueOf(dokumenttypeKode.getKode());
             dokument = dokumentService.produserUtkast(behandlingID, dokumentType, brevDataDto);
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
@@ -91,14 +92,14 @@ public class DokumentTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("opprett/{behandlingID}/{dokumentTypeID}")
+    @Path("opprett/{behandlingID}/{dokumenttypeKode}")
     public Response produserDokument(@Context UriInfo uriInfo,
                                      @PathParam("behandlingID") long behandlingID,
-                                     @PathParam("dokumentTypeID") String dokumentTypeID,
+                                     @PathParam("dokumenttypeKode") Dokumenttype dokumenttypeKode,
                                      BrevDataDto brevDataDto) {
         try {
             tilgang.sjekk(behandlingID);
-            DokumentType dokumentType = DokumentType.forKode(dokumentTypeID);
+            DokumentType dokumentType = DokumentType.forKode(dokumenttypeKode.getKode());
             dokumentService.produserDokumentISaksflyt(behandlingID, dokumentType, brevDataDto);
             return Response.noContent().build();
         } catch (SikkerhetsbegrensningException e) {

@@ -28,7 +28,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.DokumentType.FORVALTNINGSMELDING;
-import static no.nav.melosys.domain.DokumentType.MANGLENDE_OPPL;
+import static no.nav.melosys.domain.DokumentType.MELDING_MANGLENDE_OPPLYSNINGER;
 import static no.nav.melosys.domain.RolleType.BRUKER;
 import static no.nav.melosys.domain.RolleType.REPRESENTANT;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
@@ -63,7 +63,7 @@ public class BrevDataService {
 
         if (dokumentType == FORVALTNINGSMELDING) {
             metadata.mottaker = metadata.bruker;
-        } else if (dokumentType == MANGLENDE_OPPL &&  brevDataDto.mottaker != null) {
+        } else if (dokumentType == MELDING_MANGLENDE_OPPLYSNINGER &&  brevDataDto.mottaker != null) {
             metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevDataDto.mottaker);
         } else {
             throw new TekniskException("Det finnes ingen mottaker på sak " + fagsak.getSaksnummer());

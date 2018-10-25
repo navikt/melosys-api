@@ -98,7 +98,7 @@ public class DokumentService {
         prosessinstans.setBehandling(behandling);
 
         switch (dokumentType) {
-            case MANGLENDE_OPPL:
+            case MELDING_MANGLENDE_OPPLYSNINGER:
                 prosessinstans.setType(ProsessType.MANGELBREV);
                 prosessinstans.setSteg(ProsessSteg.MANGELBREV);
                 break;
