@@ -75,15 +75,18 @@ public class SoeknadServiceTest {
         Saksopplysning saksopplysning_1 = new Saksopplysning();
         saksopplysning_1.setType(SaksopplysningType.SØKNAD);
         saksopplysning_1.setRegistrertDato(LocalDateTime.now().minusMonths(3).toInstant(ZoneOffset.UTC));
+        saksopplysning_1.setEndretDato(LocalDateTime.now().minusMonths(3).toInstant(ZoneOffset.UTC));
         saksopplysning_1.setKilde(SaksopplysningKilde.MEDL);
 
         Saksopplysning saksopplysning_2 = new Saksopplysning();
         saksopplysning_2.setType(SaksopplysningType.PERSONOPPLYSNING);
         saksopplysning_2.setRegistrertDato(LocalDateTime.now().minusMonths(1).toInstant(ZoneOffset.UTC));
+        saksopplysning_2.setEndretDato(LocalDateTime.now().minusMonths(1).toInstant(ZoneOffset.UTC));
         saksopplysning_2.setKilde(SaksopplysningKilde.TPS);
 
         Saksopplysning saksopplysning_3 = new Saksopplysning();
         saksopplysning_3.setRegistrertDato(LocalDateTime.now().minusMonths(1).toInstant(ZoneOffset.UTC));
+        saksopplysning_3.setEndretDato(LocalDateTime.now().minusMonths(1).toInstant(ZoneOffset.UTC));
         saksopplysning_3.setKilde(SaksopplysningKilde.SBH);
         saksopplysning_3.setType(SaksopplysningType.SØKNAD);
         saksopplysning_3.setDokument(soeknadDokument);

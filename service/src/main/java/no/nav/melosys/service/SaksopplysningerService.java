@@ -121,6 +121,7 @@ public class SaksopplysningerService {
         }
 
         saksopplysninger.forEach(x -> x.setRegistrertDato(Instant.now()));
+        saksopplysninger.forEach(x -> x.setEndretDato(Instant.now()));
 
         return saksopplysninger;
     }

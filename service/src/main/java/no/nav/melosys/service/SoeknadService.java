@@ -64,13 +64,11 @@ public class SoeknadService {
             throw new IkkeFunnetException("Registrering av søknad feilet fordi behandling med ID " + behandlingID + " er ikke funnet");
         }
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SØKNAD);
-        saksopplysning.setVersjon(SØKNAD_VERSJON);
-        saksopplysning.setKilde(kilde);
-        saksopplysning.setRegistrertDato(Instant.now());
-        saksopplysning.setBehandling(behandling);
+        Optional<Saksopplysning> eksisterendeSaksopplysning = saksopplysningRepo.findByBehandlingAndType(behandling, SaksopplysningType.SØKNAD);
+        Saksopplysning saksopplysning = eksisterendeSaksopplysning.orElse(opprettSaksopplysning(behandling));
         saksopplysning.setDokument(soeknadDokument);
+        saksopplysning.setEndretDato(Instant.now());
+
         String internXml = dokumentFactory.lagInternXml(saksopplysning);
         // N.B. Det er ingen forskjell mellom dokumentXml og internXml her så langt,
         // og dokument_xml må ikke være NULL i databasen.
@@ -80,6 +78,16 @@ public class SoeknadService {
         saksopplysningRepo.save(saksopplysning);
 
         return (SoeknadDokument) saksopplysning.getDokument();
+    }
+
+    private Saksopplysning opprettSaksopplysning(Behandling behandling) {
+        Saksopplysning sak = new Saksopplysning();
+        sak.setType(SaksopplysningType.SØKNAD);
+        sak.setKilde(SaksopplysningKilde.SBH);
+        sak.setVersjon(SØKNAD_VERSJON);
+        sak.setRegistrertDato(Instant.now());
+        sak.setBehandling(behandling);
+        return sak;
     }
 
 }

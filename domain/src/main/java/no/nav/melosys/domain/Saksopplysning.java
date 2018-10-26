@@ -35,19 +35,22 @@ public class Saksopplysning {
     @Convert(converter = SaksopplysningKilde.DbKonverterer.class)
     private SaksopplysningKilde kilde;
 
-    @Column(name = "registrert_dato", nullable = false, updatable = false)
+    @Column(name = "registrert_dato", nullable = false)
     private Instant registrertDato;
+
+    @Column(name = "endret_dato", nullable = false)
+    private Instant endretDato;
 
     @ColumnTransformer(read = "NVL2(dokument_xml, (dokument_xml).getClobVal(), NULL)", write = "XMLType.createxml(?)")
     @Lob
-    @Column(name = "dokument_xml", updatable = false, columnDefinition = "XMLType")
+    @Column(name = "dokument_xml", columnDefinition = "XMLType")
     private String dokumentXml;
 
     @ColumnTransformer(read = "NVL2(intern_xml, (intern_xml).getClobVal(), NULL)", write = "XMLType.createxml(?)")
     @Lob
-    @Column(name = "intern_xml", updatable = false, columnDefinition = "XMLType")
+    @Column(name = "intern_xml", columnDefinition = "XMLType")
     private String internXml;
-    
+
     @Transient
     private SaksopplysningDokument dokument;
 
@@ -85,7 +88,7 @@ public class Saksopplysning {
     public SaksopplysningKilde getKilde() {
         return kilde;
     }
-    
+
     public void setKilde(SaksopplysningKilde kilde) {
         this.kilde = kilde;
     }
@@ -96,6 +99,14 @@ public class Saksopplysning {
 
     public void setRegistrertDato(Instant registrertDato) {
         this.registrertDato = registrertDato;
+    }
+
+    public Instant getEndretDato() {
+        return endretDato;
+    }
+
+    public void setEndretDato(Instant endretDato) {
+        this.endretDato = endretDato;
     }
 
     public String getDokumentXml() {

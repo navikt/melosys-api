@@ -75,11 +75,12 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
         } else {
             tom = YearMonth.from(periode.getTom());
         }
-
+        Instant nå = Instant.now();
         Behandling behandling = prosessinstans.getBehandling();
         Saksopplysning saksopplysning = inntektFasade.hentInntektListe(brukerId, fom, tom);
         saksopplysning.setBehandling(behandling);
-        saksopplysning.setRegistrertDato(Instant.now());
+        saksopplysning.setRegistrertDato(nå);
+        saksopplysning.setEndretDato(nå);
         saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(ProsessSteg.HENT_ORG_OPPL);

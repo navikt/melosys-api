@@ -89,7 +89,7 @@ public class V1_1_05__SAKSOPPLYSNING_data implements JdbcMigration {
     }
 
     private void insertXML(Path file, Connection conn, SaksopplysningType opplysning_type, String versjon, SaksopplysningKilde kilde, int i) throws SQLException {
-        String query = "INSERT INTO SAKSOPPLYSNING (ID, BEHANDLING_ID, OPPLYSNING_TYPE, VERSJON, KILDE, REGISTRERT_DATO, DOKUMENT_XML) VALUES (?, ?, ?, ?, ?, ?, ?) ";
+        String query = "INSERT INTO SAKSOPPLYSNING (ID, BEHANDLING_ID, OPPLYSNING_TYPE, VERSJON, KILDE, REGISTRERT_DATO, ENDRET_DATO, DOKUMENT_XML) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ";
         try (OraclePreparedStatement ps = (OraclePreparedStatement) conn.prepareStatement(query)) {
             // Oppretter XML-type med Oracle API
             XMLType xml = XMLType.createXML(conn, Files.newInputStream(file));
@@ -100,7 +100,8 @@ public class V1_1_05__SAKSOPPLYSNING_data implements JdbcMigration {
             ps.setString(5, kilde.getKode());
             Timestamp x = Timestamp.valueOf(LocalDateTime.now());
             ps.setTimestamp(6, x);
-            ps.setObject(7, xml);
+            ps.setTimestamp(7, x);
+            ps.setObject(8, xml);
             if (ps.executeUpdate() == 1) {
                 log.info("Successfully inserted {} {}", file.getFileName(), i);
             }
