@@ -7,6 +7,7 @@ import no.nav.melosys.service.kodeverk.KodeDto;
 public class KodeverkDto {
     private BegrunnelserDto begrunnelser = new BegrunnelserDto();
     private LovvalgsBestemmelserDto lovvalgsbestemmelser = new LovvalgsBestemmelserDto();
+    private List<KodeDto> aktoerroller;
     private List<KodeDto> behandlingstyper;
     private List<KodeDto> behandlingsstatus;
     private List<KodeDto> dokumenttitler;
@@ -14,6 +15,7 @@ public class KodeverkDto {
     private List<KodeDto> finansiering;
     private List<KodeDto> landkoder;
     private List<KodeDto> oppgavetyper;
+    private List<KodeDto> representerer;
     private List<KodeDto> sakstyper;
     private List<KodeDto> vedleggstitler;
 
@@ -29,6 +31,14 @@ public class KodeverkDto {
     }
 
     public void setLovvalgsbestemmelser(LovvalgsBestemmelserDto lovvalgsbestemmelser) { this.lovvalgsbestemmelser = lovvalgsbestemmelser; }
+
+    public List<KodeDto> getAktoerroller() {
+        return aktoerroller;
+    }
+
+    public void setAktoerroller(List<KodeDto> aktoerroller) {
+        this.aktoerroller = aktoerroller;
+    }
 
     public List<KodeDto> getBehandlingstyper() {
         return behandlingstyper;
@@ -80,6 +90,14 @@ public class KodeverkDto {
 
     public void setOppgavetyper(List<KodeDto> oppgavetyper) {
         this.oppgavetyper = oppgavetyper;
+    }
+
+    public List<KodeDto> getRepresenterer() {
+        return representerer;
+    }
+
+    public void setRepresenterer(List<KodeDto> representerer) {
+        this.representerer = representerer;
     }
 
     public List<KodeDto> getSakstyper() {

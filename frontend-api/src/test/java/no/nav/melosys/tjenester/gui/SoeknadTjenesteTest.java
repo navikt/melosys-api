@@ -47,7 +47,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
         soeknadTjeneste = new SoeknadTjeneste(soeknadService, null, tilgang);
 
         EnhancedRandom random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
-            .collectionSizeRange(1, 4).build();
+            .overrideDefaultInitialization(true).collectionSizeRange(1, 4).build();
 
         SoeknadDokument soeknadDokument = random.nextObject(SoeknadDokument.class);
         when(soeknadService.hentSoeknad(anyLong())).thenReturn(soeknadDokument);
