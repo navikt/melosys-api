@@ -37,15 +37,13 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
 
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
 
-    // FIXME: Prosessinstansen må få steg FATTET_VEDTAK når vedtak er fattet slik at status oppdateres i Sak og Behandling.
-    FATTET_VEDTAK("FATTET_VEDTAK", "Saksbehandler har fattet vedtak i Melosys"),
-    STATUS_BEH_AVSL("STATUS_BEH_AVSL", "Oppdater Sak og Behandling ved lukking av behandling"),
-
     //Iverksett Vedtak
     IV_VALIDERING("IV_VALIDERING", "Validere iverksett vedtak"),
     IV_SEND_BREV("IV_SEND_BREV", "Send brev etter iverksett vedtak"),
     IV_OPPDATER_MEDL("IV_OPPDATER_MEDL", "Oppdatering av Meldlemskap"),
-    IV_AVSLUTT_BEHANDLING("IV_AVSLUTT_BEHANDLING", "Avslutt FagSak og aktiv behandling");
+    IV_AVSLUTT_BEHANDLING("IV_AVSLUTT_BEHANDLING", "Avslutt FagSak og aktiv behandling"),
+    IV_STATUS_BEH_AVSL("IV_STATUS_BEH_AVSL", "Oppdater Sak og Behandling ved lukking av behandling");
+
 
     private String kode;
     private String beskrivelse;

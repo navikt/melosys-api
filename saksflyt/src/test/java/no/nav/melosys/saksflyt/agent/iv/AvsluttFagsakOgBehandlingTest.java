@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationEventPublisher;
 
-import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_AVSL;
+import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -57,7 +57,7 @@ public class AvsluttFagsakOgBehandlingTest {
 
         agent.utførSteg(p);
 
-        assertThat(p.getSteg()).isEqualTo(STATUS_BEH_AVSL);
+        assertThat(p.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
         assertThat(p.getBehandling().getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
         assertThat(p.getBehandling().getFagsak().getStatus()).isEqualTo(Fagsaksstatus.AVSLUTTET);
 

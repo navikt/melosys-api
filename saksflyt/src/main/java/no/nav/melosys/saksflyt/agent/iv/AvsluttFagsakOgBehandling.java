@@ -22,14 +22,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.IV_AVSLUTT_BEHANDLING;
-import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_AVSL;
+import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
 
 /**
  * Avslutter en fagsak og Behanlding i Melosys.
  *
  * Transisjoner:
  * ProsessType.IVERKSETT_VEDTAK
- *    IV_AVSLUTT_BEHANDLING -> STATUS_BEH_AVSL eller FEILET_MASKINELT hvis feil
+ *    IV_AVSLUTT_BEHANDLING -> IV_STATUS_BEH_AVSL eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
@@ -77,6 +77,6 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
         applicationEventPublisher.publishEvent(new FagsakOpprettetEvent(fagsak, endretAv));
         applicationEventPublisher.publishEvent(new BehandlingOpprettetEvent(behandling, endretAv));
 
-        prosessinstans.setSteg(STATUS_BEH_AVSL);
+        prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
     }
 }
