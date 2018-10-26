@@ -24,7 +24,7 @@ import static no.nav.melosys.domain.ProsessSteg.IV_VALIDERING;
  * Transisjoner:
  *
  * ProsessType.IVERKSETT_VEDTAK
- *    IV_VALIDERING -> IV_OPPDATER_MEDL eller FEILET_MASKINELT hvis feil
+ *  IV_VALIDERING -> IV_OPPDATER_MEDL eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class IverksettVedtakValidering extends AbstraktStegBehandler {
@@ -59,7 +59,7 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
             return;
         }
-        //mangler validering for vedtak opplysning
+        //FIXME: mangler validering for vedtak opplysning
 
         prosessinstans.setSteg(IV_OPPDATER_MEDL);
 

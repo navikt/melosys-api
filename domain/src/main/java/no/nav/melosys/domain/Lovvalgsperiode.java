@@ -150,10 +150,10 @@ public class Lovvalgsperiode implements ErPeriode {
         DekningMedl dekningMedltype;
         switch (dekning) {
             case FULL_DEKNING_EOSFO:
-                dekningMedltype = DekningMedl.Full;
+                dekningMedltype = DekningMedl.FULL;
                 break;
             case UTEN_DEKNING:
-                dekningMedltype = DekningMedl.Untatt;
+                dekningMedltype = DekningMedl.UNTATT;
             break;
             default:
                 throw new RuntimeException("dekningstype støttes ikke:" + dekning.getKode());
@@ -162,23 +162,23 @@ public class Lovvalgsperiode implements ErPeriode {
     }
 
     public GrunnlagMedl hentFellesKodeForGrunnlagMedltype() {
-        GrunnlagMedl grunnlagMedltype = null;
+        GrunnlagMedl grunnlagMedltype;
         switch (bestemmelse) {
             //Article 11
             case ART11_2:
                 grunnlagMedltype = GrunnlagMedl.FO_11_2;
                 break;
             case ART11_3A:
-                grunnlagMedltype = GrunnlagMedl.FO_11_3_a;
+                grunnlagMedltype = GrunnlagMedl.FO_11_3_A;
                 break;
             case ART11_3B:
-                grunnlagMedltype = GrunnlagMedl.FO_11_3_b;
+                grunnlagMedltype = GrunnlagMedl.FO_11_3_B;
                 break;
             case ART11_3C:
-                grunnlagMedltype = GrunnlagMedl.FO_11_3_c;
+                grunnlagMedltype = GrunnlagMedl.FO_11_3_C;
                 break;
             case ART11_3E:
-                grunnlagMedltype = GrunnlagMedl.FO_11_3_e;
+                grunnlagMedltype = GrunnlagMedl.FO_11_3_E;
                 break;
 
             //Article 12
@@ -191,31 +191,31 @@ public class Lovvalgsperiode implements ErPeriode {
 
             //Article 13
             case ART13_1A:
-                grunnlagMedltype = GrunnlagMedl.FO_13_1_a;
+                grunnlagMedltype = GrunnlagMedl.FO_13_1_A;
                 break;
 
             case ART13_1B1:
-                grunnlagMedltype = GrunnlagMedl.FO_13_1_b;
+                grunnlagMedltype = GrunnlagMedl.FO_13_1_B;
                 break;
 
             case ART13_1B2:
-                grunnlagMedltype = GrunnlagMedl.FO_13_b_ii;
+                grunnlagMedltype = GrunnlagMedl.FO_13_B_II;
                 break;
 
             case ART13_1B3:
-                grunnlagMedltype = GrunnlagMedl.FO_13_b_iii;
+                grunnlagMedltype = GrunnlagMedl.FO_13_B_III;
                 break;
 
             case ART13_1B4:
-                grunnlagMedltype = GrunnlagMedl.FO_13_b_iv;
+                grunnlagMedltype = GrunnlagMedl.FO_13_B_IV;
                 break;
 
             case ART13_2A:
-                grunnlagMedltype = GrunnlagMedl.FO_13_2_a;
+                grunnlagMedltype = GrunnlagMedl.FO_13_2_A;
                 break;
 
             case ART13_2B:
-                grunnlagMedltype = GrunnlagMedl.FO_13_2_b;
+                grunnlagMedltype = GrunnlagMedl.FO_13_2_B;
                 break;
 
             case ART13_3:

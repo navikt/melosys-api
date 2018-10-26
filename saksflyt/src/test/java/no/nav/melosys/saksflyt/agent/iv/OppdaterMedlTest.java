@@ -19,17 +19,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OppdaterMEDLTest {
+public class OppdaterMedlTest {
 
-    private OppdaterMEDL agent;
+    private OppdaterMedl agent;
 
     @Mock
     private MedlFasade medlFasade;
@@ -42,7 +39,7 @@ public class OppdaterMEDLTest {
 
     @Before
     public void setUp() {
-        agent = new OppdaterMEDL(medlFasade, tpsFasade, lovvalgsperiodeRepository);
+        agent = new OppdaterMedl(medlFasade, tpsFasade, lovvalgsperiodeRepository);
     }
 
     @Test

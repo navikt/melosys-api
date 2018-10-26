@@ -14,7 +14,7 @@ public class LovvalgsperiodeTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.ART11_3A);
         GrunnlagMedl grunnlagMedltype = lovvalgsperiode.hentFellesKodeForGrunnlagMedltype();
-        assertThat(grunnlagMedltype).isEqualTo(GrunnlagMedl.FO_11_3_a);
+        assertThat(grunnlagMedltype).isEqualTo(GrunnlagMedl.FO_11_3_A);
 
         lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.ART11_1);
         given(lovvalgsperiode.hentFellesKodeForGrunnlagMedltype()).willThrow(new RuntimeException("Feil lovvlagsbestemmelse koden :ART11_1:Kun omfattet i en medlemsstat (art 11.1)"));

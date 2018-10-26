@@ -11,8 +11,8 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import no.nav.melosys.service.datavarehus.BehandlingOpprettetEvent;
-import no.nav.melosys.service.datavarehus.FagsakOpprettetEvent;
+import no.nav.melosys.service.datavarehus.BehandlingAvsluttetEvent;
+import no.nav.melosys.service.datavarehus.FagsakAvsluttetEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
  *
  * Transisjoner:
  * ProsessType.IVERKSETT_VEDTAK
- *    IV_AVSLUTT_BEHANDLING -> IV_STATUS_BEH_AVSL eller FEILET_MASKINELT hvis feil
+ *  IV_AVSLUTT_BEHANDLING -> IV_STATUS_BEH_AVSL eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
@@ -74,8 +74,8 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
 
-        applicationEventPublisher.publishEvent(new FagsakOpprettetEvent(fagsak, endretAv));
-        applicationEventPublisher.publishEvent(new BehandlingOpprettetEvent(behandling, endretAv));
+        applicationEventPublisher.publishEvent(new FagsakAvsluttetEvent(fagsak, endretAv));
+        applicationEventPublisher.publishEvent(new BehandlingAvsluttetEvent(behandling, endretAv));
 
         prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
     }

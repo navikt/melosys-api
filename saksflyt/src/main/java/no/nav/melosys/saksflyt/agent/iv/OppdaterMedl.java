@@ -28,12 +28,12 @@ import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
  *
  * Transisjoner:
  * ProsessType.IVERKSETT_VEDTAK
- *    IV_OPPDATER_MEDL -> IV_SEND_BREV eller FEILET_MASKINELT hvis feil
+ *  IV_OPPDATER_MEDL -> IV_SEND_BREV eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class OppdaterMEDL extends AbstraktStegBehandler {
+public class OppdaterMedl extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OppdaterMEDL.class);
+    private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
     private final MedlFasade medlFasade;
     private final TpsFasade tpsFasade;
@@ -41,12 +41,11 @@ public class OppdaterMEDL extends AbstraktStegBehandler {
 
 
     @Autowired
-    public OppdaterMEDL(MedlFasade medlFasade, TpsFasade tpsFasade, LovvalgsperiodeRepository lovvalgsperiodeRepository) {
+    public OppdaterMedl(MedlFasade medlFasade, TpsFasade tpsFasade, LovvalgsperiodeRepository lovvalgsperiodeRepository) {
         log.info("IverksetteVedtakOppdaterMEDL initialisert");
         this.medlFasade = medlFasade;
         this.tpsFasade = tpsFasade;
         this.lovvalgsperiodeRepository = lovvalgsperiodeRepository;
-
     }
 
     @Override
@@ -72,10 +71,11 @@ public class OppdaterMEDL extends AbstraktStegBehandler {
 
         Medlemsperiode medlemsperiode = new Medlemsperiode();
 
-        medlemsperiode.setGrunnlagstype(lovvalgsperiode.hentFellesKodeForGrunnlagMedltype());
-        medlemsperiode.setLand(LandkoderUtils.tilIso3(lovvalgsperiode.getLovvalgsland().getKode()));
-        medlemsperiode.setTrygdedekning(lovvalgsperiode.hentFellesKodeForTrygdDekningtype());
-
+        medlemsperiode.grunnlagstype = lovvalgsperiode.hentFellesKodeForGrunnlagMedltype();
+        medlemsperiode.land = LandkoderUtils.tilIso3(lovvalgsperiode.getLovvalgsland().getKode());
+        if (lovvalgsperiode.hentFellesKodeForTrygdDekningtype() != null) {
+            medlemsperiode.trygdedekning = lovvalgsperiode.hentFellesKodeForTrygdDekningtype();
+        }
         medlFasade.opprettPeriode(fnr, medlemsperiode);
 
         prosessinstans.setSteg(IV_SEND_BREV);

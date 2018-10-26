@@ -39,6 +39,7 @@ public enum Landkoder implements InterntKodeverkTabell<Landkoder> {
     DE("DE", "Tyskland"),
     HU("HU", "Ungarn"),
     AT("AT", "Østerrike");
+
     private String kode;
     private String beskrivelse;
 
@@ -64,4 +65,5 @@ public enum Landkoder implements InterntKodeverkTabell<Landkoder> {
             return Landkoder.values();
         }
     }
+
 }
