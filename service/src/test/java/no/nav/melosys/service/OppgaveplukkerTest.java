@@ -18,6 +18,7 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
+import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -290,6 +291,10 @@ public class OppgaveplukkerTest {
             return oppgaveTilbakelegging;
         }).getMock();
 
-        oppgaveplukker.leggTilbakeOppgave(oppgaveId, saksbehandlerID, begrunnelse);
+        TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
+        tilbakelegging.setOppgaveId(oppgaveId);
+        tilbakelegging.setBegrunnelse(begrunnelse);
+
+        oppgaveplukker.leggTilbakeOppgave(saksbehandlerID, tilbakelegging);
     }
 }

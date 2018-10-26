@@ -19,6 +19,7 @@ import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
+import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,22 +111,24 @@ public class Oppgaveplukker {
     }
 
     @Transactional
-    public synchronized void leggTilbakeOppgave(String oppgaveId, String saksbehandlerID, String begrunnelse) throws FunksjonellException, TekniskException {
-        Oppgave oppgave = gsakFasade.hentOppgave(oppgaveId);
+    public synchronized void leggTilbakeOppgave(String saksbehandlerID, TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
+        Oppgave oppgave = gsakFasade.hentOppgave(tilbakelegging.getOppgaveId());
 
         if (oppgave == null) {
-            log.error("Fant ikke oppgave med oppgaveId " + oppgaveId);
-            throw new IkkeFunnetException("Fant ikke oppgave med oppgaveId " + oppgaveId);
+            log.error("Fant ikke oppgave med oppgaveId " + tilbakelegging.getOppgaveId());
+            throw new IkkeFunnetException("Fant ikke oppgave med oppgaveId " + tilbakelegging.getOppgaveId());
         }
-        gsakFasade.leggTilbakeOppgave(oppgaveId);
+        gsakFasade.leggTilbakeOppgave(tilbakelegging.getOppgaveId());
 
-        OppgaveTilbakelegging oppgaveTilbakelegging = new OppgaveTilbakelegging();
-        oppgaveTilbakelegging.setOppgaveId(oppgaveId);
-        oppgaveTilbakelegging.setSaksbehandlerId(saksbehandlerID);
-        oppgaveTilbakelegging.setBegrunnelse(begrunnelse);
-        oppgaveTilbakelegging.setRegistrertDato(LocalDateTime.now());
-        oppgaveTilbakkeleggingRepo.save(oppgaveTilbakelegging);
-        log.info("Oppgave med oppgaveId {} er lagt tilbake. ", oppgaveId);
+        if (!tilbakelegging.erVenterPåDokumentasjon()) {
+            OppgaveTilbakelegging oppgaveTilbakelegging = new OppgaveTilbakelegging();
+            oppgaveTilbakelegging.setOppgaveId(tilbakelegging.getOppgaveId());
+            oppgaveTilbakelegging.setSaksbehandlerId(saksbehandlerID);
+            oppgaveTilbakelegging.setBegrunnelse(tilbakelegging.getBegrunnelse());
+            oppgaveTilbakelegging.setRegistrertDato(LocalDateTime.now());
+            oppgaveTilbakkeleggingRepo.save(oppgaveTilbakelegging);
+        }
+        log.info("Oppgave med oppgaveId {} er lagt tilbake. ", tilbakelegging.getOppgaveId());
     }
 
     private Optional<Oppgave> velgNeste(String saksbehandlerID, List<Oppgave> oppgaver) {
