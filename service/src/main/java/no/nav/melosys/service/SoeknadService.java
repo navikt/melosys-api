@@ -1,7 +1,6 @@
 package no.nav.melosys.service;
 
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
@@ -41,25 +40,17 @@ public class SoeknadService {
             throw new IkkeFunnetException("Behandling ikke funnet");
         }
 
-        Comparator<? super Saksopplysning> comparator = Comparator.comparing(Saksopplysning::getRegistrertDato);
+        Optional<Saksopplysning> soeknadOpt = behandling.getSaksopplysninger().stream()
+                .filter(s -> s.getType().equals(SaksopplysningType.SØKNAD))
+                .findFirst();
 
-        // Vi henter den nyeste søknaden
-        Optional<Saksopplysning> nyeste = behandling.getSaksopplysninger().stream().filter(s -> s.getType().equals(SaksopplysningType.SØKNAD)).max(comparator);
-
-        if (nyeste.isPresent()) {
-            Saksopplysning saksopplysning = nyeste.get();
-            return (SoeknadDokument) saksopplysning.getDokument();
-        } else {
-            return null; // Behandlingen har ingen søknader
-        }
-
+        Saksopplysning soeknad = soeknadOpt.orElseThrow(() -> new IkkeFunnetException("Søknad ikke funnet"));
+        return (SoeknadDokument) soeknad.getDokument();
     }
 
     @Transactional
     public SoeknadDokument registrerSøknad(long behandlingID, SoeknadDokument soeknadDokument, SaksopplysningKilde kilde) throws IkkeFunnetException {
-        // Finner behandlingen som er relatert til søkndaden
         Behandling behandling = behandlingRepo.findOne(behandlingID);
-
         if (behandling == null) {
             throw new IkkeFunnetException("Registrering av søknad feilet fordi behandling med ID " + behandlingID + " er ikke funnet");
         }

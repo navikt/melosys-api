@@ -73,10 +73,11 @@ public class SoeknadServiceTest {
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
 
         Saksopplysning saksopplysning_1 = new Saksopplysning();
-        saksopplysning_1.setType(SaksopplysningType.SØKNAD);
         saksopplysning_1.setRegistrertDato(LocalDateTime.now().minusMonths(3).toInstant(ZoneOffset.UTC));
         saksopplysning_1.setEndretDato(LocalDateTime.now().minusMonths(3).toInstant(ZoneOffset.UTC));
         saksopplysning_1.setKilde(SaksopplysningKilde.MEDL);
+        saksopplysning_1.setType(SaksopplysningType.SØKNAD);
+        saksopplysning_1.setDokument(soeknadDokument);
 
         Saksopplysning saksopplysning_2 = new Saksopplysning();
         saksopplysning_2.setType(SaksopplysningType.PERSONOPPLYSNING);
@@ -84,16 +85,8 @@ public class SoeknadServiceTest {
         saksopplysning_2.setEndretDato(LocalDateTime.now().minusMonths(1).toInstant(ZoneOffset.UTC));
         saksopplysning_2.setKilde(SaksopplysningKilde.TPS);
 
-        Saksopplysning saksopplysning_3 = new Saksopplysning();
-        saksopplysning_3.setRegistrertDato(LocalDateTime.now().minusMonths(1).toInstant(ZoneOffset.UTC));
-        saksopplysning_3.setEndretDato(LocalDateTime.now().minusMonths(1).toInstant(ZoneOffset.UTC));
-        saksopplysning_3.setKilde(SaksopplysningKilde.SBH);
-        saksopplysning_3.setType(SaksopplysningType.SØKNAD);
-        saksopplysning_3.setDokument(soeknadDokument);
-
         saksopplysninger.add(saksopplysning_1);
         saksopplysninger.add(saksopplysning_2);
-        saksopplysninger.add(saksopplysning_3);
 
         b.setSaksopplysninger(saksopplysninger);
 
@@ -106,11 +99,9 @@ public class SoeknadServiceTest {
 
     @Test
     public void registrerSøknad() throws Exception {
-
         long behandlingID = 1L;
         Behandling b = new Behandling();
-
-        when(behandlingRepo.findOne(1L)).thenReturn(b);
+        when(behandlingRepo.findOne(behandlingID)).thenReturn(b);
 
         soeknadService.registrerSøknad(behandlingID, soeknadDokument, SaksopplysningKilde.SBH);
 
