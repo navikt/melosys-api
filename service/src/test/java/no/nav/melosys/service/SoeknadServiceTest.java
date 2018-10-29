@@ -103,7 +103,7 @@ public class SoeknadServiceTest {
         Behandling b = new Behandling();
         when(behandlingRepo.findOne(behandlingID)).thenReturn(b);
 
-        soeknadService.registrerSøknad(behandlingID, soeknadDokument, SaksopplysningKilde.SBH);
+        soeknadService.registrerSøknad(behandlingID, soeknadDokument);
 
         verify(saksopplysningRepo, times(1)).save((Saksopplysning) any());
     }

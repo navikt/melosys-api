@@ -37,7 +37,7 @@ public class OpprettSoeknadTest {
 
         opprettSoeknad.utførSteg(p);
 
-        verify(søknadService, times(1)).registrerSøknad(anyLong(), any(SoeknadDokument.class), any(SaksopplysningKilde.class));
+        verify(søknadService, times(1)).registrerSøknad(anyLong(), any(SoeknadDokument.class));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_GSAK_SAK);
     }
 }

@@ -35,7 +35,7 @@ public class Saksopplysning {
     @Convert(converter = SaksopplysningKilde.DbKonverterer.class)
     private SaksopplysningKilde kilde;
 
-    @Column(name = "registrert_dato", nullable = false)
+    @Column(name = "registrert_dato", nullable = false, updatable = false)
     private Instant registrertDato;
 
     @Column(name = "endret_dato", nullable = false)

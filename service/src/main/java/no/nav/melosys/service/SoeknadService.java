@@ -49,7 +49,7 @@ public class SoeknadService {
     }
 
     @Transactional
-    public SoeknadDokument registrerSøknad(long behandlingID, SoeknadDokument soeknadDokument, SaksopplysningKilde kilde) throws IkkeFunnetException {
+    public SoeknadDokument registrerSøknad(long behandlingID, SoeknadDokument soeknadDokument) throws IkkeFunnetException {
         Behandling behandling = behandlingRepo.findOne(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Registrering av søknad feilet fordi behandling med ID " + behandlingID + " er ikke funnet");
@@ -72,13 +72,13 @@ public class SoeknadService {
     }
 
     private Saksopplysning opprettSaksopplysning(Behandling behandling) {
-        Saksopplysning sak = new Saksopplysning();
-        sak.setType(SaksopplysningType.SØKNAD);
-        sak.setKilde(SaksopplysningKilde.SBH);
-        sak.setVersjon(SØKNAD_VERSJON);
-        sak.setRegistrertDato(Instant.now());
-        sak.setBehandling(behandling);
-        return sak;
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SØKNAD);
+        saksopplysning.setKilde(SaksopplysningKilde.SBH);
+        saksopplysning.setVersjon(SØKNAD_VERSJON);
+        saksopplysning.setRegistrertDato(Instant.now());
+        saksopplysning.setBehandling(behandling);
+        return saksopplysning;
     }
 
 }

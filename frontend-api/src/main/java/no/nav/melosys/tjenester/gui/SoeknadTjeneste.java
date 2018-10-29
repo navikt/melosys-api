@@ -86,7 +86,7 @@ public class SoeknadTjeneste extends RestTjeneste {
         valideringService.validerOpplysninger(soeknadDokument);
 
         try {
-            soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument, SaksopplysningKilde.SBH);
+            soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
         } catch (IkkeFunnetException e) {
             throw new NotFoundException(e.getMessage());
         }
