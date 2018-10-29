@@ -62,12 +62,7 @@ public class SoeknadTjeneste extends RestTjeneste {
         }
 
         SoeknadDto soeknadDto;
-        if (soeknadDokument == null) {
-            soeknadDto = new SoeknadDto(behandlingID, new SoeknadDokument());
-        } else {
-            soeknadDto = new SoeknadDto(behandlingID, soeknadDokument);
-        }
-
+        soeknadDto = new SoeknadDto(behandlingID, soeknadDokument);
         return Response.ok(soeknadDto).build();
     }
 
@@ -91,7 +86,7 @@ public class SoeknadTjeneste extends RestTjeneste {
         valideringService.validerOpplysninger(soeknadDokument);
 
         try {
-            soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument, SaksopplysningKilde.SBH);
+            soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
         } catch (IkkeFunnetException e) {
             throw new NotFoundException(e.getMessage());
         }

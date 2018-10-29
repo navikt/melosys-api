@@ -64,7 +64,7 @@ public class OpprettSoeknad extends AbstraktStegBehandler {
         soeknadDokument.oppholdUtland.oppholdsPeriode = periode;
         soeknadDokument.oppholdUtland.oppholdslandKoder = prosessinstans.getData(ProsessDataKey.OPPHOLDSLAND, List.class);
 
-        søknadService.registrerSøknad(behandlingID, soeknadDokument, SaksopplysningKilde.SBH);
+        søknadService.registrerSøknad(behandlingID, soeknadDokument);
 
         prosessinstans.setSteg(JFR_OPPRETT_GSAK_SAK);
         log.info("Prosessinstans {} har opprettet søknad for behandling {}.", prosessinstans.getId(), behandlingID);

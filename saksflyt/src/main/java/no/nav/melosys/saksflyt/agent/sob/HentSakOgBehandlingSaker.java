@@ -62,10 +62,12 @@ public class HentSakOgBehandlingSaker extends AbstraktStegBehandler {
 
         String aktørId = prosessinstans.getData(AKTØR_ID);
 
+        Instant nå = Instant.now();
         Behandling behandling = prosessinstans.getBehandling();
         Saksopplysning saksopplysning = sakOgBehandlingFasade.finnSakOgBehandlingskjedeListe(aktørId);
         saksopplysning.setBehandling(behandling);
-        saksopplysning.setRegistrertDato(Instant.now());
+        saksopplysning.setRegistrertDato(nå);
+        saksopplysning.setEndretDato(nå);
         saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(OPPFRISK_SAKSOPPLYSNINGER);

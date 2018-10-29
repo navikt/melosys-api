@@ -106,10 +106,13 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
     }
 
     private void hentOrganisasjoner(Set<String> orgnumre, Behandling behandling) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
+
         for (String orgnr : orgnumre) {
+            Instant nå = Instant.now();
             Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(orgnr);
             saksopplysning.setBehandling(behandling);
-            saksopplysning.setRegistrertDato(Instant.now());
+            saksopplysning.setRegistrertDato(nå);
+            saksopplysning.setEndretDato(nå);
             saksopplysningRepo.save(saksopplysning);
         }
     }

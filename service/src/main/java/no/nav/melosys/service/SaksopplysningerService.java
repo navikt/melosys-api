@@ -120,7 +120,10 @@ public class SaksopplysningerService {
             saksopplysninger.addAll(hentOrganisasjoner(orgnumre));
         }
 
-        saksopplysninger.forEach(x -> x.setRegistrertDato(Instant.now()));
+        saksopplysninger.forEach((x) -> {
+            x.setRegistrertDato(Instant.now());
+            x.setEndretDato(Instant.now());
+        });
 
         return saksopplysninger;
     }

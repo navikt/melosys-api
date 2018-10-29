@@ -79,9 +79,11 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
             tom = periode.getTom();
         }
 
+        Instant nå = Instant.now();
         Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(brukerId, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
         saksopplysning.setBehandling(behandling);
-        saksopplysning.setRegistrertDato(Instant.now());
+        saksopplysning.setRegistrertDato(nå);
+        saksopplysning.setEndretDato(nå);
         saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(ProsessSteg.HENT_INNT_OPPL);

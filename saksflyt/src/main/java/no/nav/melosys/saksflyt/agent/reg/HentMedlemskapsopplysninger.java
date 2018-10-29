@@ -73,10 +73,12 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
         LocalDate fom = periode.getFom().minusYears(medlemskaphistorikkAntallÅr);
         LocalDate tom = LocalDate.now();
 
+        Instant nå = Instant.now();
         Behandling behandling = prosessinstans.getBehandling();
         Saksopplysning saksopplysning = medlFasade.hentPeriodeListe(brukerId, fom, tom);
         saksopplysning.setBehandling(behandling);
-        saksopplysning.setRegistrertDato(Instant.now());
+        saksopplysning.setRegistrertDato(nå);
+        saksopplysning.setEndretDato(nå);
         saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(HENT_SOB_SAKER);
