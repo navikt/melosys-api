@@ -27,6 +27,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -273,7 +275,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void leggTilbakeOppgave() throws MelosysException {
+    public void leggTilbakeOppgave_medBegrunnelse() throws MelosysException {
         final String oppgaveId = "42";
         final Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId(oppgaveId);
@@ -296,5 +298,26 @@ public class OppgaveplukkerTest {
         tilbakelegging.setBegrunnelse(begrunnelse);
 
         oppgaveplukker.leggTilbakeOppgave(saksbehandlerID, tilbakelegging);
+
+        verify(oppgaveTilbakkeleggingRepo, times(1)).save(any(OppgaveTilbakelegging.class));
+    }
+
+    @Test
+    public void leggTilbakeOppgave_venterPåDokumentasjon() throws MelosysException {
+        final String oppgaveId = "42";
+        final Oppgave oppgave = new Oppgave();
+        oppgave.setOppgaveId(oppgaveId);
+        oppgave.setPrioritet(PrioritetType.valueOf("HOY"));
+        final String saksbehandlerID = "test";
+
+        when(gsakFasade.hentOppgave(oppgaveId)).thenReturn(oppgave);
+
+        TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
+        tilbakelegging.setOppgaveId(oppgaveId);
+        tilbakelegging.setVenterPåDokumentasjon(true);
+
+        oppgaveplukker.leggTilbakeOppgave(saksbehandlerID, tilbakelegging);
+
+        verify(oppgaveTilbakkeleggingRepo, times(0)).save(any(OppgaveTilbakelegging.class));
     }
 }
