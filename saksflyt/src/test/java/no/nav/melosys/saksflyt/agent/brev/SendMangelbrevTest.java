@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.agent.brev;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.DokumentType;
+import no.nav.melosys.domain.Dokumenttype;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -48,7 +48,7 @@ public class SendMangelbrevTest {
 
         agent.utførSteg(p);
 
-        verify(dokumentService, times(1)).produserDokument(anyLong(), any(DokumentType.class), any(BrevDataDto.class));
+        verify(dokumentService, times(1)).produserDokument(anyLong(), any(Dokumenttype.class), any(BrevDataDto.class));
         verify(behandlingRepo, times(1)).save(any(Behandling.class));
 
         assertThat(p.getSteg()).isNull();

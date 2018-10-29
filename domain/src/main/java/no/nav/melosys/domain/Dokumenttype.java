@@ -1,6 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto;
-
-import no.nav.melosys.domain.Kodeverk;
+package no.nav.melosys.domain;
 
 public enum Dokumenttype implements Kodeverk {
     ATTEST_A1("ATTEST_A1", "Attest A1"),

@@ -4,14 +4,13 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.domain.DokumentType;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import no.nav.melosys.domain.Dokumenttype;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
-import no.nav.melosys.tjenester.gui.dto.Dokumenttype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,8 +73,7 @@ public class DokumentTjeneste extends RestTjeneste {
 
         try {
             tilgang.sjekk(behandlingID);
-            DokumentType dokumentType = DokumentType.valueOf(dokumenttypeKode.getKode());
-            dokument = dokumentService.produserUtkast(behandlingID, dokumentType, brevDataDto);
+            dokument = dokumentService.produserUtkast(behandlingID, dokumenttypeKode, brevDataDto);
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } catch (FunksjonellException e) {
@@ -99,8 +97,7 @@ public class DokumentTjeneste extends RestTjeneste {
                                      BrevDataDto brevDataDto) {
         try {
             tilgang.sjekk(behandlingID);
-            DokumentType dokumentType = DokumentType.forKode(dokumenttypeKode.getKode());
-            dokumentService.produserDokumentISaksflyt(behandlingID, dokumentType, brevDataDto);
+            dokumentService.produserDokumentISaksflyt(behandlingID, dokumenttypeKode, brevDataDto);
             return Response.noContent().build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();

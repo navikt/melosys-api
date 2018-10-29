@@ -57,24 +57,35 @@ public class DokumentService {
      * Kaller Doksys for å produsere et dokumentutkast
      * @throws TekniskException 
      */
-    public byte[] produserUtkast(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto)
+    public byte[] produserUtkast(long behandlingID, Dokumenttype dokumenttype, BrevDataDto brevDataDto)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
-        return produserDokument(behandlingID, dokumentType, brevDataDto, true);
+        return produserDokument(behandlingID, dokumenttype, brevDataDto, true);
     }
 
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto)
+    public void produserDokument(long behandlingID, Dokumenttype dokumenttype, BrevDataDto brevDataDto)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
-        produserDokument(behandlingID, dokumentType, brevDataDto, false);
+        produserDokument(behandlingID, dokumenttype, brevDataDto, false);
     }
 
-    private byte[] produserDokument(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto, boolean erUtkast)
+    private byte[] produserDokument(long behandlingID, Dokumenttype dokumenttype, BrevDataDto brevDataDto, boolean erUtkast)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
+        }
+
+        if (dokumenttype == null) {
+            throw new TekniskException("Ingen gyldig dokumenttype");
+        }
+
+        DokumentType dokumentType;
+        try {
+            dokumentType = DokumentType.valueOf(dokumenttype.name());
+        } catch (IllegalArgumentException e) {
+            throw new TekniskException("Fant ikke dokumenttypeId for dokumenttype " + dokumenttype);
         }
 
         DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(dokumentType, behandling, brevDataDto);
@@ -89,7 +100,7 @@ public class DokumentService {
     }
 
     @Transactional
-    public void produserDokumentISaksflyt(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto) throws FunksjonellException {
+    public void produserDokumentISaksflyt(long behandlingID, Dokumenttype dokumenttype, BrevDataDto brevDataDto) throws FunksjonellException {
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
@@ -97,13 +108,13 @@ public class DokumentService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        switch (dokumentType) {
+        switch (dokumenttype) {
             case MELDING_MANGLENDE_OPPLYSNINGER:
                 prosessinstans.setType(ProsessType.MANGELBREV);
                 prosessinstans.setSteg(ProsessSteg.MANGELBREV);
                 break;
             default:
-                throw new FunksjonellException("DokumentType " + dokumentType + " er ikke støttet.");
+                throw new FunksjonellException("Dokumenttype " + dokumenttype + " er ikke støttet.");
         }
 
         if (brevDataDto != null) {

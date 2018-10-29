@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.DokumentType.MELDING_MANGLENDE_OPPLYSNINGER;
+import static no.nav.melosys.domain.Dokumenttype.MELDING_MANGLENDE_OPPLYSNINGER;
 import static no.nav.melosys.domain.ProsessSteg.MANGELBREV;
 
 /**

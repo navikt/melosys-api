@@ -20,6 +20,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.dokument.DokumentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
@@ -27,10 +28,10 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.domain.DokumentType.FORVALTNINGSMELDING;
-import static no.nav.melosys.domain.DokumentType.MELDING_MANGLENDE_OPPLYSNINGER;
 import static no.nav.melosys.domain.RolleType.BRUKER;
 import static no.nav.melosys.domain.RolleType.REPRESENTANT;
+import static no.nav.melosys.service.dokument.DokumentType.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
+import static no.nav.melosys.service.dokument.DokumentType.MELDING_MANGLENDE_OPPLYSNINGER;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 /**
@@ -61,7 +62,7 @@ public class BrevDataService {
 
         metadata.bruker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, BRUKER);
 
-        if (dokumentType == FORVALTNINGSMELDING) {
+        if (dokumentType == MELDING_FORVENTET_SAKSBEHANDLINGSTID) {
             metadata.mottaker = metadata.bruker;
         } else if (dokumentType == MELDING_MANGLENDE_OPPLYSNINGER &&  brevDataDto.mottaker != null) {
             metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevDataDto.mottaker);
@@ -77,7 +78,7 @@ public class BrevDataService {
         metadata.utledRegisterInfo = true;
         metadata.saksbehandler = brevDataDto.saksbehandler;
 
-        if (dokumentType == FORVALTNINGSMELDING) {
+        if (dokumentType == MELDING_FORVENTET_SAKSBEHANDLINGSTID) {
             metadata.mottaker = metadata.bruker;
         }
 

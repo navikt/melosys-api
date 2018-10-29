@@ -40,7 +40,7 @@ public class SendForvaltningsmeldingTest {
 
         agent.utførSteg(p);
 
-        verify(dokumentService, times(1)).produserDokument(anyLong(), any(DokumentType.class), any(BrevDataDto.class));
+        verify(dokumentService, times(1)).produserDokument(anyLong(), any(Dokumenttype.class), any(BrevDataDto.class));
 
         assertThat(p.getSteg()).isNull();
     }

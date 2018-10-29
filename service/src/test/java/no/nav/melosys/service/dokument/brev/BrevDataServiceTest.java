@@ -19,8 +19,8 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.w3c.dom.Element;
 
-import static no.nav.melosys.domain.DokumentType.FORVALTNINGSMELDING;
-import static no.nav.melosys.domain.DokumentType.MELDING_MANGLENDE_OPPLYSNINGER;
+import static no.nav.melosys.service.dokument.DokumentType.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
+import static no.nav.melosys.service.dokument.DokumentType.MELDING_MANGLENDE_OPPLYSNINGER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -48,12 +48,12 @@ public class BrevDataServiceTest {
         BrevDataDto brevDataDto = new BrevDataDto();
         brevDataDto.saksbehandler = "TEST";
 
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(FORVALTNINGSMELDING, behandling, brevDataDto);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling, brevDataDto);
 
         assertThat(metadata.bruker).isEqualTo(FNR);
         assertThat(metadata.mottaker).isEqualTo(FNR);
 
-        Element element = service.lagBrevXML(FORVALTNINGSMELDING, lagBehandling(), brevDataDto);
+        Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, lagBehandling(), brevDataDto);
 
         assertThat(element).isNotNull();
     }

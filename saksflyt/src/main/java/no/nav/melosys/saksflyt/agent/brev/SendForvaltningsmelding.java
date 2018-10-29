@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.DokumentType.FORVALTNINGSMELDING;
+import static no.nav.melosys.domain.Dokumenttype.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
 
@@ -57,7 +57,7 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
         BrevDataDto brevDataDto = new BrevDataDto();
         brevDataDto.saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
 
-        dokumentService.produserDokument(behandling.getId(), FORVALTNINGSMELDING, brevDataDto);
+        dokumentService.produserDokument(behandling.getId(), MELDING_FORVENTET_SAKSBEHANDLINGSTID, brevDataDto);
 
         prosessinstans.setSteg(null);
         log.info("Sendt forvaltningsmelding for prosessinstans {}", prosessinstans.getId());
