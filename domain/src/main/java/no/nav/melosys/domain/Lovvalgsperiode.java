@@ -153,7 +153,7 @@ public class Lovvalgsperiode implements ErPeriode {
                 dekningMedltype = DekningMedl.FULL;
                 break;
             case UTEN_DEKNING:
-                dekningMedltype = DekningMedl.UNTATT;
+                dekningMedltype = DekningMedl.UNNTATT;
             break;
             default:
                 throw new RuntimeException("dekningstype støttes ikke:" + dekning.getKode());

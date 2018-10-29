@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.dokument.medlemskap;
 
 public enum DekningMedl {
-    UNTATT("Untatt"),
+    UNNTATT("Unntatt"),
     FULL("Full");
 
     private String kode;
