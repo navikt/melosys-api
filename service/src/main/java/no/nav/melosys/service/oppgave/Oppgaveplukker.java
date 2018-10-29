@@ -120,7 +120,7 @@ public class Oppgaveplukker {
         }
         gsakFasade.leggTilbakeOppgave(tilbakelegging.getOppgaveId());
 
-        if (!tilbakelegging.erVenterPåDokumentasjon()) {
+        if (!tilbakelegging.isVenterPåDokumentasjon()) {
             OppgaveTilbakelegging oppgaveTilbakelegging = new OppgaveTilbakelegging();
             oppgaveTilbakelegging.setOppgaveId(tilbakelegging.getOppgaveId());
             oppgaveTilbakelegging.setSaksbehandlerId(saksbehandlerID);

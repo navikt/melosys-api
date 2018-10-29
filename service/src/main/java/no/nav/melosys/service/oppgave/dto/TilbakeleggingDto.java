@@ -27,7 +27,7 @@ public class TilbakeleggingDto {
         this.begrunnelse = begrunnelse;
     }
 
-    public boolean erVenterPåDokumentasjon() {
+    public boolean isVenterPåDokumentasjon() {
         return venterPåDokumentasjon;
     }
 
