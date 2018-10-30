@@ -26,15 +26,17 @@ public class MedlemsperiodeSerializer extends StdSerializer<Medlemsperiode> {
         MedlemsperiodeDto medlemsperiodeDto = new MedlemsperiodeDto();
         Periode periode = medlemsperiode.getPeriode();
 
-        medlemsperiodeDto.periodetype = medlemsperiode.type;
+        medlemsperiodeDto.periodetype = medlemsperiode.getType();
         medlemsperiodeDto.periode = getPeriode(periode);
-        medlemsperiodeDto.land = kodeverkService.getKodeverdi(FellesKodeverk.LANDKODER, medlemsperiode.land);
-        medlemsperiodeDto.grunnlagstype = kodeverkService.getKodeverdi(FellesKodeverk.GRUNNLAG_MEDL, medlemsperiode.grunnlagstype);
-        medlemsperiodeDto.kilde = kodeverkService.getKodeverdi(FellesKodeverk.KILDESYSTEM_MEDL, medlemsperiode.kilde);
-        medlemsperiodeDto.kildedokumenttype = kodeverkService.getKodeverdi(FellesKodeverk.KILDEDOKUMENT_MEDL, medlemsperiode.kildedokumenttype);
-        medlemsperiodeDto.lovvalg = kodeverkService.getKodeverdi(FellesKodeverk.LOVVALG_MEDL, medlemsperiode.lovvalg);
-        medlemsperiodeDto.status = kodeverkService.getKodeverdi(FellesKodeverk.PERIODESTATUS_MEDL, medlemsperiode.status);
-        medlemsperiodeDto.trygdedekning = kodeverkService.getKodeverdi(FellesKodeverk.DEKNING_MEDL, medlemsperiode.trygdedekning);
+        medlemsperiodeDto.land = kodeverkService.getKodeverdi(FellesKodeverk.LANDKODER, medlemsperiode.getLand());
+        medlemsperiodeDto.grunnlagstype = kodeverkService.getKodeverdi(FellesKodeverk.GRUNNLAG_MEDL, medlemsperiode.getGrunnlagstype().getKode());
+        medlemsperiodeDto.kilde = kodeverkService.getKodeverdi(FellesKodeverk.KILDESYSTEM_MEDL, medlemsperiode.getKilde());
+        medlemsperiodeDto.kildedokumenttype = kodeverkService.getKodeverdi(FellesKodeverk.KILDEDOKUMENT_MEDL, medlemsperiode.getKildedokumenttype());
+        medlemsperiodeDto.lovvalg = kodeverkService.getKodeverdi(FellesKodeverk.LOVVALG_MEDL, medlemsperiode.getLovvalg());
+        medlemsperiodeDto.status = kodeverkService.getKodeverdi(FellesKodeverk.PERIODESTATUS_MEDL, medlemsperiode.getStatus());
+        if (medlemsperiode.getTrygdedekning() != null) {
+            medlemsperiodeDto.trygdedekning = kodeverkService.getKodeverdi(FellesKodeverk.DEKNING_MEDL, medlemsperiode.getTrygdedekning().getKode());
+        }
 
         generator.writeObject(medlemsperiodeDto);
     }

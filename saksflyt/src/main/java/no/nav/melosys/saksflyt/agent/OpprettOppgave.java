@@ -23,14 +23,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
-import static no.nav.melosys.domain.ProsessSteg.OPPRETT_OPPGAVE;
+import static no.nav.melosys.domain.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
 import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
 
 /**
  * Oppretter en oppgave i GSAK.
  *
  * Transisjoner:
- * OPPRETT_OPPGAVE -> SEND_FORVALTNINGSMELDING eller FEILET_MASKINELT hvis feil
+ * GSAK_OPPRETT_OPPGAVE -> SEND_FORVALTNINGSMELDING eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class OpprettOppgave extends AbstraktStegBehandler {
@@ -47,7 +47,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return OPPRETT_OPPGAVE;
+        return GSAK_OPPRETT_OPPGAVE;
     }
 
     @Override

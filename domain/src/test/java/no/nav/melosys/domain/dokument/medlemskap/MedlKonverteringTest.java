@@ -23,7 +23,7 @@ public class MedlKonverteringTest {
     @SuppressWarnings("Duplicates")
     public void transform() throws TransformerFactoryConfigurationError, TransformerException, IOException, JAXBException {
         InputStream xslt = getClass().getClassLoader().getResourceAsStream("medl/medlemskap_2.0.xslt");
-        InputStream kilde = getClass().getClassLoader().getResourceAsStream("medlemskap/66666666661.xml");
+        InputStream kilde = getClass().getClassLoader().getResourceAsStream("medlemskap/99999999996.xml");
 
         Transformer transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(xslt));
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
@@ -41,7 +41,7 @@ public class MedlKonverteringTest {
         assertThat(dokument.getMedlemsperiode()).isNotEmpty();
 
         for (Medlemsperiode medlemsperiode : dokument.getMedlemsperiode()) {
-            assertNotNull(medlemsperiode.getType());
+            assertNotNull(medlemsperiode.getKildedokumenttype());
             assertNotNull(medlemsperiode.getStatus());
             assertNotNull(medlemsperiode.getLovvalg());
             assertNotNull(medlemsperiode.getKilde());

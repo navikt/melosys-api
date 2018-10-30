@@ -3,6 +3,8 @@
                 xmlns:ns2="http://nav.no/tjeneste/virksomhet/medlemskap/v2">
 
     <xsl:output method="xml" indent="no"/>
+    <xsl:variable name="smallCase" select="'abcdefghijklmnopqrstuvwxyzåæø'"/>
+    <xsl:variable name="upperCase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZÅÆØ'"/>
 
     <xsl:template match="/|ns2:hentPeriodeListeResponse|response">
         <xsl:apply-templates/>
@@ -26,7 +28,13 @@
         </medlemsperiode>
     </xsl:template>
 
-    <xsl:template match="type|status|grunnlagstype|land|lovvalg|trygdedekning|kildedokumenttype|kilde">
+    <xsl:template match="grunnlagstype|trygdedekning">
+        <xsl:element name="{name()}">
+            <xsl:value-of select="translate(., $smallCase, $upperCase)"/>
+        </xsl:element>
+    </xsl:template>
+
+    <xsl:template match="type|status|land|lovvalg|kildedokumenttype|kilde">
         <xsl:element name="{name()}">
             <xsl:value-of select="."/>
         </xsl:element>

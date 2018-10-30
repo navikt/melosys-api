@@ -4,10 +4,12 @@ import javax.persistence.Converter;
 
 public enum ProsessType implements InterntKodeverkTabell<ProsessType> {
 
+    //alfabetisk rekkefølge
+    IVERKSETT_VEDTAK("IVERKSETT_VEDTAK", "Iverksett vedtak"),
     JFR_KNYTT("JFR_KNYTT", "Journalføring på eksisterende sak"),
     JFR_NY_SAK("JFR_NY_SAK", "Journalføring med ny sak og søknad"),
     MOTTAK("MOTTAK", "Journalføring av mottatt sak"),
-    OPPFRISKNING("OPPFRISKNING", "oppfriskning av saksopplysninger"),
+    OPPFRISKNING("OPPFRISKNING", "Oppfriskning av saksopplysninger"),
     SØKNAD_A1("SØKNAD_A1", "Søknad A1");
 
     private String kode;

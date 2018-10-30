@@ -102,7 +102,7 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
             return;
         }
 
-        prosessinstans.setSteg(ProsessSteg.JFR_AVSLUTT_OPPGAVE);
+        prosessinstans.setSteg(ProsessSteg.GSAK_AVSLUTT_OPPGAVE);
         log.info("Ferdig med grunnleggende validering av prosessinstans {}", prosessinstans.getId());
     }
 

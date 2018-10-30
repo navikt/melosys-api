@@ -14,13 +14,13 @@ public class Medlemsperiode implements HarPeriode {
 
     public String status; //"http://nav.no/kodeverk/Kodeverk/PeriodestatusMedl"
 
-    public String grunnlagstype; //"http://nav.no/kodeverk/Kodeverk/GrunnlagMedl"
+    public GrunnlagMedl grunnlagstype; //"http://nav.no/kodeverk/Kodeverk/GrunnlagMedl"
 
     public String land; //"http://nav.no/kodeverk/Kodeverk/Landkoder"
 
     public String lovvalg; //"http://nav.no/kodeverk/Kodeverk/LovvalgMedl"
 
-    public String trygdedekning; //"http://nav.no/kodeverk/Kodeverk/DekningMedl"
+    public DekningMedl trygdedekning; //"http://nav.no/kodeverk/Kodeverk/DekningMedl"
 
     public String kildedokumenttype; //"http://nav.no/kodeverk/Kodeverk/KildedokumentMedl"
 
@@ -39,7 +39,7 @@ public class Medlemsperiode implements HarPeriode {
         return status;
     }
 
-    public String getGrunnlagstype() {
+    public GrunnlagMedl getGrunnlagstype() {
         return grunnlagstype;
     }
 
@@ -51,7 +51,7 @@ public class Medlemsperiode implements HarPeriode {
         return lovvalg;
     }
 
-    public String getTrygdedekning() {
+    public DekningMedl getTrygdedekning() {
         return trygdedekning;
     }
 

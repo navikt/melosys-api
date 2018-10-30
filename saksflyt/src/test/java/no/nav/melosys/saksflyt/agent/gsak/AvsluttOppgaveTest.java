@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.jfr;
+package no.nav.melosys.saksflyt.agent.gsak;
 
 import java.util.Properties;
 
@@ -8,6 +8,7 @@ import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.saksflyt.agent.gsak.AvsluttOppgave;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,5 +45,17 @@ public class AvsluttOppgaveTest {
 
         verify(gsakFasade, times(1)).ferdigstillOppgave(oppgaveID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
+
+        p = new Prosessinstans();
+        p.setType(ProsessType.IVERKSETT_VEDTAK);
+        properties = new Properties();
+        oppgaveID = "1234";
+        properties.setProperty(ProsessDataKey.OPPGAVE_ID.getKode(), oppgaveID);
+        p.addData(properties);
+
+        agent.utførSteg(p);
+
+        verify(gsakFasade, times(1)).ferdigstillOppgave(oppgaveID);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 }

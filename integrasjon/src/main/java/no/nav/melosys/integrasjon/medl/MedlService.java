@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -81,6 +82,11 @@ public class MedlService implements MedlFasade {
         dokumentFactory.lagDokument(saksopplysning);
 
         return saksopplysning;
+    }
+
+    @Override
+    public Long opprettPeriode(String fnr, Medlemsperiode medlemsperiode) throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException {
+        return null;
     }
 
     private HentPeriodeListeResponse hentPeriodeListeResponse(String fnr, LocalDate fom, LocalDate tom) throws SikkerhetsbegrensningException, IkkeFunnetException {

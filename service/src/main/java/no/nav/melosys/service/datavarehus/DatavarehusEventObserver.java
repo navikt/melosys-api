@@ -29,7 +29,16 @@ public class DatavarehusEventObserver {
     @EventListener(FagsakOpprettetEvent.class)
     public void håndterFagsakLagretEvent(FagsakOpprettetEvent fagsakOpprettetEvent) {
         Fagsak fagsak = fagsakOpprettetEvent.fagsak;
+        konverterOgLagFagsakDvh(fagsak, fagsakOpprettetEvent.endretAv);
+    }
 
+    @EventListener(FagsakAvsluttetEvent.class)
+    public void håndterFagsakAvsluttetEvent(FagsakAvsluttetEvent fagsakAvsluttetEvent) {
+        Fagsak fagsak = fagsakAvsluttetEvent.fagsak;
+        konverterOgLagFagsakDvh(fagsak, fagsakAvsluttetEvent.endretAv);
+    }
+
+    private void konverterOgLagFagsakDvh(Fagsak fagsak, String endretAv) {
         try {
             Aktoer bruker = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
             Aktoer arbeidsgiver = fagsak.hentAktørMedRolleType(RolleType.ARBEIDSGIVER);
@@ -38,7 +47,7 @@ public class DatavarehusEventObserver {
             FagsakDvh fagsakDvh = new FagsakDvh();
             fagsakDvh.setSaksnummer(fagsak.getSaksnummer());
             fagsakDvh.setFunksjonellTid(LocalDateTime.now());
-            fagsakDvh.setEndretAv(fagsakOpprettetEvent.endretAv);
+            fagsakDvh.setEndretAv(endretAv);
             fagsakDvh.setGsakSaksnummer(fagsak.getGsakSaksnummer());
             fagsakDvh.setFagsakStatus(fagsak.getStatus().getKode());
             if (fagsak.getType() != null) {
@@ -65,12 +74,21 @@ public class DatavarehusEventObserver {
     @EventListener(BehandlingOpprettetEvent.class)
     public void håndterBehandlingLagretEvent(BehandlingOpprettetEvent behandlingOpprettetEvent) {
         Behandling behandling = behandlingOpprettetEvent.behandling;
+        konverterOgLagBehandlingDvh(behandling, behandlingOpprettetEvent.endretAv);
+    }
 
+    @EventListener(BehandlingAvsluttetEvent.class)
+    public void håndterBehandlingAvsluttetEvent(BehandlingAvsluttetEvent behandlingAvttetEvent) {
+        Behandling behandling = behandlingAvttetEvent.behandling;
+        konverterOgLagBehandlingDvh(behandling, behandlingAvttetEvent.endretAv);
+    }
+
+    private void konverterOgLagBehandlingDvh(Behandling behandling, String endretAv) {
         BehandlingDvh behandlingDvh = new BehandlingDvh();
         behandlingDvh.setBehandling(behandling.getId());
         behandlingDvh.setSaksnummer(behandling.getFagsak().getSaksnummer());
         behandlingDvh.setFunksjonellTid(LocalDateTime.now());
-        behandlingDvh.setEndretAv(behandlingOpprettetEvent.endretAv);
+        behandlingDvh.setEndretAv(endretAv);
         if (behandling.getStatus() != null) {
             behandlingDvh.setBehandlingStatus(behandling.getStatus().getKode());
         }
@@ -82,5 +100,4 @@ public class DatavarehusEventObserver {
         datavarehusRepository.lagre(behandlingDvh);
         log.info("Behandling med id " + behandling.getId() + " lagret");
     }
-
 }

@@ -1,0 +1,15 @@
+package no.nav.melosys.service.datavarehus;
+
+import no.nav.melosys.domain.Fagsak;
+
+public class FagsakAvsluttetEvent {
+
+    public Fagsak fagsak;
+
+    public String endretAv;
+
+    public FagsakAvsluttetEvent(Fagsak fagsak, String endretAv) {
+        this.fagsak = fagsak;
+        this.endretAv = endretAv;
+    }
+}
