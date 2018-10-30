@@ -6,14 +6,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
 import javax.persistence.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
-import no.nav.melosys.exception.TekniskException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * Arbeidstabell for saksflyt.
@@ -30,31 +29,31 @@ public class Prosessinstans {
     @Convert(converter = ProsessType.DbKonverterer.class)
     private ProsessType type;
 
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "behandling_id", nullable = true, updatable = true)
+    @ManyToOne()
+    @JoinColumn(name = "behandling_id")
     private Behandling behandling;
 
-    @Column(name = "data", nullable = true, updatable = true)
+    @Column(name = "data")
     @Convert(converter = PropertiesConverter.class)
     private Properties data = new Properties();
 
-    @Column(name = "steg", nullable = false, updatable = true)
+    @Column(name = "steg", nullable = false)
     @Convert(converter = ProsessSteg.DbKonverterer.class)
     private ProsessSteg steg;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
 
-    @Column(name = "antall_retry", nullable = false, updatable = true)
+    @Column(name = "antall_retry", nullable = false)
     private int antallRetry;
    
-    @Column(name = "sist_forsoekt", nullable = true, updatable = true)
+    @Column(name = "sist_forsoekt")
     private LocalDateTime sistForsøkt;
 
-    @Column(name = "sover_til", nullable = true, updatable = true)
+    @Column(name = "sover_til")
     private Instant soverTil;
     
-    @Column(name = "endret_dato", nullable = false, updatable = true)
+    @Column(name = "endret_dato", nullable = false)
     private LocalDateTime endretDato;
 
     @OneToMany(mappedBy = "prosessinstans", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -93,7 +92,6 @@ public class Prosessinstans {
 
     /** 
      * Returnerer et dataelement som et Object (etter JSON deserialisering)
-     * @throws TekniskException hvis feil ved deserialisering
      */
     public <T> T getData(ProsessDataKey key, Class<T> type) {
         String dataString = getData(key);
@@ -114,7 +112,6 @@ public class Prosessinstans {
 
     /**
      * Setter et dataelement til et objet (ved json serialisering)
-     * @throws TekniskException hvis feil ved deserialisering
      */
     public void setData(ProsessDataKey key, Object value) {
         try {
@@ -154,10 +151,6 @@ public class Prosessinstans {
         this.antallRetry = antallRetry;
     }
 
-    public LocalDateTime getSistForsøkt() {
-        return sistForsøkt;
-    }
-
     public void setSistForsøkt(LocalDateTime sistForsøkt) {
         this.sistForsøkt = sistForsøkt;
     }
@@ -181,12 +174,8 @@ public class Prosessinstans {
     public List<ProsessinstansHendelse> getHendelser() {
         return hendelser;
     }
-
-    public void setHendelser(List<ProsessinstansHendelse> hendelser) {
-        this.hendelser = hendelser;
-    }
     
-    public void leggTilHendelse(ProsessinstansHendelse piHend) {
+    private void leggTilHendelse(ProsessinstansHendelse piHend) {
         if (!this.equals(piHend.getProsessinstans())) {
             // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
             throw new RuntimeException("Forsøk på å legge til ProsessinstansHendelse på feil Prosessinstans");
@@ -200,6 +189,14 @@ public class Prosessinstans {
     public void leggTilHendelse(String type, String melding) {
         ProsessinstansHendelse pih = new ProsessinstansHendelse(this, LocalDateTime.now(), steg, type, melding);
         leggTilHendelse(pih);
+    }
+
+    public void leggTilHendelse(String type, String melding, Throwable t) {
+        if (t != null) {
+            leggTilHendelse(type, melding + " - " + ExceptionUtils.getStackTrace(t));
+        } else {
+            leggTilHendelse(type, melding);
+        }
     }
     
     @Override

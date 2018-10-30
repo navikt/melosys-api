@@ -14,7 +14,7 @@ public class OpprettHendelse implements UnntakBehandler {
     private OpprettHendelse() {
     }
     
-    public static OpprettHendelse opprettHendelse(String type) {
+    static OpprettHendelse opprettHendelse(String type) {
         OpprettHendelse res = new OpprettHendelse();
         res.type = type;
         return res;
@@ -23,7 +23,7 @@ public class OpprettHendelse implements UnntakBehandler {
     @Override
     public void behandleUnntak(Prosessinstans prosessinstans, String melding, Throwable t) {
         logger.info("Legger på hendelse på {}: {}", prosessinstans.getId(), melding, t);
-        prosessinstans.leggTilHendelse(type, melding);
+        prosessinstans.leggTilHendelse(type, melding, t);
     }
 
 }
