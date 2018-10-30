@@ -45,8 +45,6 @@ public class AvklartefaktaTjeneste extends RestTjeneste {
         try {
             tilgang.sjekk(behandlingID);
             avklartefaktaDtoer = avklartefaktaService.hentAvklarteFakta(behandlingID);
-        } catch (IkkeFunnetException e) {
-            throw new NotFoundException(e);
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException(e);
         } catch (TekniskException e) {

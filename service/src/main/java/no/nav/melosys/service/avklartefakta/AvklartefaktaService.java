@@ -4,7 +4,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Avklartefakta;
+import no.nav.melosys.domain.AvklartefaktaType;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Landkoder;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingResultatRepository;
@@ -29,6 +32,7 @@ public class AvklartefaktaService {
     }
 
     // Ment som eksempel på å hente ut avklarte fakta. Ikke i bruk enda
+    // FIXME skal dette brukes?
     public Landkoder hentBosted(long behandlingsid) throws IkkeFunnetException {
         Optional<Avklartefakta> fakta = avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, AvklartefaktaType.BOSTEDSLAND);
         if (!fakta.isPresent()) {
@@ -36,6 +40,13 @@ public class AvklartefaktaService {
         }
 
         return Landkoder.valueOf(fakta.get().getFakta());
+    }
+
+    @Transactional
+    public Set<AvklartefaktaDto> hentAvklarteFakta(long behandlingsid) {
+        Set<Avklartefakta> avklartefakta = avklarteFaktaRepository.findByBehandlingsresultatId(behandlingsid);
+
+        return avklartefakta.stream().map(AvklartefaktaDto::new).collect(Collectors.toSet());
     }
 
     @Transactional
@@ -56,17 +67,5 @@ public class AvklartefaktaService {
             faktaKonverterer.oppdaterAvklartefaktaFraDto(avklartefakta, avklarteFaktaDto);
             avklarteFaktaRepository.save(avklartefakta);
         }
-    }
-
-    @Transactional
-    public Set<AvklartefaktaDto> hentAvklarteFakta(long behandlingsid) throws IkkeFunnetException {
-        Behandlingsresultat resultat = behandlingResultatRepository.findOne(behandlingsid);
-        if (resultat == null) {
-            throw new IkkeFunnetException("Fant ikke behandlingsresultat for behandlingsid: " + behandlingsid);
-        }
-
-        Set<Avklartefakta> avklartefakta = avklarteFaktaRepository.findByBehandlingsresultatId(behandlingsid);
-
-        return avklartefakta.stream().map(AvklartefaktaDto::new).collect(Collectors.toSet());
     }
 }

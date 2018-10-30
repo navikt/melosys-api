@@ -25,6 +25,7 @@ CREATE TABLE behandlingsmaate (
 INSERT INTO behandlingsmaate (kode, navn) VALUES ('AUTOMATISERT', 'Automatisert');
 INSERT INTO behandlingsmaate (kode, navn) VALUES ('MANUELT', 'Manuelt');
 INSERT INTO behandlingsmaate (kode, navn) VALUES ('DELVIS_AUTOMATISERT', 'Delvis automatisert');
+INSERT INTO behandlingsmaate (kode, navn) VALUES ('UDEFINERT', 'Udefinert');
 
 ALTER TABLE behandlingsresultat ADD CONSTRAINT fk_behandlingsmaate FOREIGN KEY (behandlingsmaate) REFERENCES behandlingsmaate;
 
@@ -34,6 +35,7 @@ CREATE TABLE behandlingsresultat_type (
     CONSTRAINT pk_behandlingsresultat_type PRIMARY KEY (kode)
 );
 INSERT INTO behandlingsresultat_type (kode, navn) VALUES ('HENLEGGELSE', 'Henleggelse');
+INSERT INTO behandlingsresultat_type (kode, navn) VALUES ('IKKE_FASTSATT', 'Ikke fastsatt');
 INSERT INTO behandlingsresultat_type (kode, navn) VALUES ('FASTSATT_LOVVALGSLAND', 'Fastsatt lovvalgsland');
 INSERT INTO behandlingsresultat_type (kode, navn) VALUES ('FRIVILLIG_MEDLEMSKAP', 'Frivillig medlemskap');
 

@@ -31,16 +31,16 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_SØKNAD;
  * JFR_OPPRETT_SAK_OG_BEH -> JFR_OPPRETT_SOEKNAD eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class OpprettSak extends AbstraktStegBehandler {
+public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OpprettSak.class);
+    private static final Logger log = LoggerFactory.getLogger(OpprettFagsakOgBehandling.class);
 
     private final FagsakService fagsakService;
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
-    public OpprettSak(FagsakService fagsakService, ApplicationEventPublisher applicationEventPublisher) {
+    public OpprettFagsakOgBehandling(FagsakService fagsakService, ApplicationEventPublisher applicationEventPublisher) {
         this.fagsakService = fagsakService;
         this.applicationEventPublisher = applicationEventPublisher;
         log.info("OpprettSak initialisert");

@@ -24,10 +24,10 @@ import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.Assert.assertFalse;
@@ -35,9 +35,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 public class FagsakServiceTest {
-
-    @Mock
-    private FagsakRepository fagsakRepo;
 
     private FagsakService fagsakService;
 
@@ -54,13 +51,14 @@ public class FagsakServiceTest {
         ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 6);
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 6);
 
-        fagsakRepo = mock(FagsakRepository.class);
+        FagsakRepository fagsakRepo = mock(FagsakRepository.class);
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
-        fagsakService = new FagsakService(fagsakRepo, behandlingRepository, tps);
+        BehandlingsresultatRepository behandlingsresultatRepository = mock(BehandlingsresultatRepository.class);
+        fagsakService = new FagsakService(fagsakRepo, behandlingRepository, behandlingsresultatRepository, tps);
     }
 
     @Test
-    public void lagFagsak() throws Exception {
+    public void lagFagsak() {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(123L);
         fagsak.setStatus(Fagsaksstatus.OPPRETTET);
@@ -73,7 +71,7 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void nyFagsak() throws Exception {
+    public void nyFagsak() {
         final String[] identer = new String[]{"88888888884", "77777777779"};
 
         for (String fnr : identer) {

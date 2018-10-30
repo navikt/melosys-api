@@ -4,7 +4,8 @@ public enum Behandlingsmaate implements Kodeverk {
 
     AUTOMATISERT("AUTOMATISERT", "Automatisert"),
     MANUELT("MANUELT", "Manuelt"),
-    DELVIS_AUTOMATISERT("DELVIS_AUTOMATISERT", "Delvis automatisert");
+    DELVIS_AUTOMATISERT("DELVIS_AUTOMATISERT", "Delvis automatisert"),
+    UDEFINERT("UDEFINERT", "Udefinert");
 
 
     private String kode;

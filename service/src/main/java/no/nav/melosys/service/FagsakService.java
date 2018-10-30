@@ -9,6 +9,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,14 +24,18 @@ public class FagsakService {
 
     private final BehandlingRepository behandlingRepository;
 
+    private final BehandlingsresultatRepository behandlingsresultatRepository;
+
     private final TpsFasade tpsFasade;
 
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository,
                          BehandlingRepository behandlingRepository,
+                         BehandlingsresultatRepository behandlingsresultatRepository,
                          TpsFasade tpsFasade) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
+        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tpsFasade = tpsFasade;
     }
 
@@ -52,7 +57,9 @@ public class FagsakService {
     }
 
     /**
-     * Oppretter en fagsak og en behandling ut fra et fødselsnummer.
+     * - Oppretter en ny fagsak med en ny behandling.
+     * - Oppretter bruker, arbeidsgiver og representanter.
+     * - Oppretter tom behandlingsresultat.
      */
     @Transactional
     public Fagsak nyFagsakOgBehandling(String aktørID, String arbeidsgiver, String representant, Behandlingstype behandlingstype) {
@@ -101,6 +108,13 @@ public class FagsakService {
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         behandling.setType(behandlingstype);
         behandlingRepository.save(behandling);
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandling(behandling);
+        behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
+        behandlingsresultat.setType(BehandlingsresultatType.IKKE_FASTSATT);
+        behandlingsresultatRepository.save(behandlingsresultat);
+
         return fagsak;
     }
 

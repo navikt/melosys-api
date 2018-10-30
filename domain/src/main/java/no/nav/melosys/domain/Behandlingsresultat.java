@@ -23,11 +23,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
     private Behandling behandling;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "behandlingsmaate", nullable = false, updatable = false)
+    @Column(name = "behandlingsmaate", nullable = false)
     private Behandlingsmaate behandlingsmåte;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "resultat_type", nullable = false, updatable = false)
+    @Column(name = "resultat_type", nullable = false)
     private BehandlingsresultatType type;
 
     @Enumerated(EnumType.STRING)

@@ -7,7 +7,6 @@ import java.util.Set;
 import no.nav.melosys.domain.Avklartefakta;
 import no.nav.melosys.domain.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.AvklartefaktaType;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingResultatRepository;
@@ -55,7 +54,6 @@ public class AvklartefaktaServiceTest {
         avklartefakta.setRegistreringer(new HashSet<>(Arrays.asList(registrering)));
         Set<Avklartefakta> avklartefaktaSet = new HashSet<>(Arrays.asList(avklartefakta));
 
-        when(behandlingResultatRepository.findOne(anyLong())).thenReturn(new Behandlingsresultat());
         when(avklarteFaktaRepository.findByBehandlingsresultatId(anyLong())).thenReturn(avklartefaktaSet);
 
         AvklartefaktaDto dto = avklartefaktaService.hentAvklarteFakta(1L).stream().findFirst().get();

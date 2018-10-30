@@ -21,19 +21,19 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OpprettSakTest {
+public class OpprettFagsakOgBehandlingTest {
 
     @Mock
     private FagsakService fagsakService;
 
-    private OpprettSak agent;
+    private OpprettFagsakOgBehandling agent;
 
     private ApplicationEventPublisher applicationEventPublisher;
 
     @Before
     public void setUp() {
         applicationEventPublisher = mock(ApplicationEventPublisher.class);
-        agent = new OpprettSak(fagsakService, applicationEventPublisher);
+        agent = new OpprettFagsakOgBehandling(fagsakService, applicationEventPublisher);
     }
 
     @Test

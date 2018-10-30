@@ -92,7 +92,6 @@ public class ArbeiderTraad extends Thread {
     }
     
     private void setAktivPiTilFeilet() {
-        if (aktivProsessinstans.getSteg() == ProsessSteg.FEILET_MASKINELT) return;
         try {
             aktivProsessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
             prosessinstansRepo.save(aktivProsessinstans); // Kan resultere i DataAccessException, som kastes videre og merfører at tråden stoppes.

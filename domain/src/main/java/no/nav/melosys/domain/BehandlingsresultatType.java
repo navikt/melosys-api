@@ -5,6 +5,7 @@ import javax.persistence.Converter;
 public enum BehandlingsresultatType implements InterntKodeverkTabell<BehandlingsresultatType> {
 
     HENLEGGELSE("HENLEGGELSE", "Henleggelse"),
+    IKKE_FASTSATT("IKKE_FASTSATT", "Ikke fastsatt"),
     FASTSATT_LOVVALGSLAND("FASTSATT_LOVVALGSLAND", "Fastsatt lovvalgsland"),
     FRIVILLIG_MEDLEMSKAP("FRIVILLIG_MEDLEMSKAP", "Frivillig medlemskap");
 
