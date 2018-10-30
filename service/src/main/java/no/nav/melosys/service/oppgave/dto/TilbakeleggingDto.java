@@ -4,19 +4,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TilbakeleggingDto {
 
-    private String oppgaveId;
+    private Long behandlingID;
 
     private String begrunnelse;
 
     @JsonProperty("venterPaaDokumentasjon")
     private boolean venterPåDokumentasjon;
 
-    public String getOppgaveId() {
-        return oppgaveId;
+    public Long getBehandlingID() {
+        return behandlingID;
     }
 
-    public void setOppgaveId(String oppgaveId) {
-        this.oppgaveId = oppgaveId;
+    public void setBehandlingID(Long behandlingID) {
+        this.behandlingID = behandlingID;
     }
 
     public String getBegrunnelse() {
