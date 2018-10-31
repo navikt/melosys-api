@@ -88,7 +88,7 @@ public class OppgaveTjeneste extends RestTjeneste {
 
     @POST
     @Path("/tilbakelegge")
-    @ApiOperation(value = "Legger tilbake oppgaven med gitt oppgaveId i GSAK.")
+    @ApiOperation(value = "Legger tilbake oppgave knyttet til gitt behandlingID i GSAK.")
     public Response leggTilbakeOppgave(@ApiParam TilbakeleggingDto tilbakelegging) {
         String ident = SubjectHandler.getInstance().getUserID();
 

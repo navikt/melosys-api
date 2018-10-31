@@ -14,6 +14,7 @@ import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
@@ -27,9 +28,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppgaveplukkerTest {
@@ -45,9 +44,20 @@ public class OppgaveplukkerTest {
 
     private Oppgaveplukker oppgaveplukker;
 
+    private final static long BEHANDLING_ID = 123L;
+    private final static long GSAK_SAKSNUMMER = 42L;
+
     @Before
     public void setUp() {
-        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, oppgaveTilbakkeleggingRepo, fagsakRepository);
+        BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
+        this.oppgaveplukker = new Oppgaveplukker(gsakFasade, oppgaveTilbakkeleggingRepo, fagsakRepository, behandlingRepository);
+
+        Behandling behandling = new Behandling();
+        Fagsak fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer(GSAK_SAKSNUMMER);
+        behandling.setFagsak(fagsak);
+
+        when(behandlingRepository.findOne(BEHANDLING_ID)).thenReturn(behandling);
     }
 
     @Test
@@ -276,7 +286,7 @@ public class OppgaveplukkerTest {
 
     @Test
     public void leggTilbakeOppgave_medBegrunnelse() throws MelosysException {
-        final String oppgaveId = "42";
+        final String oppgaveId = String.valueOf(GSAK_SAKSNUMMER);
         final Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId(oppgaveId);
         oppgave.setPrioritet(PrioritetType.valueOf("HOY"));
@@ -287,14 +297,14 @@ public class OppgaveplukkerTest {
 
         when(oppgaveTilbakkeleggingRepo.save(any(OppgaveTilbakelegging.class))).then(arguments -> {
             OppgaveTilbakelegging oppgaveTilbakelegging = arguments.getArgument(0);
-            assertThat(oppgaveTilbakelegging.getOppgaveId()).isEqualTo("42");
-            assertThat(oppgaveTilbakelegging.getSaksbehandlerId()).isEqualTo("test");
-            assertThat(oppgaveTilbakelegging.getBegrunnelse()).isEqualTo("Oppgaven er kjedelig");
+            assertThat(oppgaveTilbakelegging.getOppgaveId()).isEqualTo(oppgaveId);
+            assertThat(oppgaveTilbakelegging.getSaksbehandlerId()).isEqualTo(saksbehandlerID);
+            assertThat(oppgaveTilbakelegging.getBegrunnelse()).isEqualTo(begrunnelse);
             return oppgaveTilbakelegging;
         }).getMock();
 
         TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
-        tilbakelegging.setOppgaveId(oppgaveId);
+        tilbakelegging.setBehandlingID(BEHANDLING_ID);
         tilbakelegging.setBegrunnelse(begrunnelse);
 
         oppgaveplukker.leggTilbakeOppgave(saksbehandlerID, tilbakelegging);
@@ -304,7 +314,7 @@ public class OppgaveplukkerTest {
 
     @Test
     public void leggTilbakeOppgave_venterPåDokumentasjon() throws MelosysException {
-        final String oppgaveId = "42";
+        final String oppgaveId = String.valueOf(GSAK_SAKSNUMMER);
         final Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId(oppgaveId);
         oppgave.setPrioritet(PrioritetType.valueOf("HOY"));
@@ -313,7 +323,7 @@ public class OppgaveplukkerTest {
         when(gsakFasade.hentOppgave(oppgaveId)).thenReturn(oppgave);
 
         TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
-        tilbakelegging.setOppgaveId(oppgaveId);
+        tilbakelegging.setBehandlingID(BEHANDLING_ID);
         tilbakelegging.setVenterPåDokumentasjon(true);
 
         oppgaveplukker.leggTilbakeOppgave(saksbehandlerID, tilbakelegging);
