@@ -18,16 +18,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Profile;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessagePostProcessor;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.integrasjon.felles.jms.JmsConfig.HENDELSESKØ;
 
-@Profile("!mocking") //FIXME MELOSYS-1284 (Bruker samme konfig og vil derfor ikke ha JmsTemplate + Queue med "mocking")
 @Component
 public class BehandlingstatusClientImpl implements BehandlingstatusClient {
+
+    public static final long DEFAULT_TIMEOUT = 5000;
 
     private static final Logger log = LoggerFactory.getLogger(BehandlingstatusClientImpl.class);
 
@@ -50,6 +50,8 @@ public class BehandlingstatusClientImpl implements BehandlingstatusClient {
         this.objectFactory = new ObjectFactory();
         this.jmsTemplate = jmsTemplate;
         this.hendelseshåndterer = hendelseshåndterer;
+
+        this.jmsTemplate.setReceiveTimeout(DEFAULT_TIMEOUT);
     }
 
     @Override
