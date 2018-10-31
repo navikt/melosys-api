@@ -53,7 +53,7 @@ public class OppdaterMedlTest {
         p.addData(properties);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.ART11_2);
+        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.CH);
         lovvalgsperiode.setDekning(TrygdeDekning.UTEN_DEKNING);
 
