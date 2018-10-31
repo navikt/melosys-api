@@ -10,7 +10,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.begrunnelse.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_987_2009;
-import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse;
+import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse_883_2004;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
@@ -41,7 +41,7 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.setLandkoder(tilKoder(Landkoder.values()));
         kodeverk.getLovvalgsbestemmelser().forordning_883_2004 = tilKoder(LovvalgBestemmelse_883_2004.values());
         kodeverk.getLovvalgsbestemmelser().forordning_987_2009 = tilKoder(LovvalgBestemmelse_987_2009.values());
-        kodeverk.getLovvalgsbestemmelser().tillegg = tilKoder(TilleggBestemmelse.values());
+        kodeverk.getLovvalgsbestemmelser().tillegg = tilKoder(TilleggBestemmelse_883_2004.values());
         kodeverk.setOppgavetyper(tilKoder(Oppgavetype.values()));
         kodeverk.setSakstyper(tilKoder(Fagsakstype.values()));
         kodeverk.setVedleggstitler(tilKoder(VedleggTittel.values()));
