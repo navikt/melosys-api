@@ -1,18 +1,16 @@
 package no.nav.melosys.tjenester.gui;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.domain.DokumentType;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import no.nav.melosys.domain.Dokumenttype;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,22 +63,21 @@ public class DokumentTjeneste extends RestTjeneste {
         return ok.build();
     }
 
-    @GET
-    @Path("utkast/pdf/{behandlingID}/{typeID}")
-    @ApiOperation(value = "produserer utkast for dokument", response = byte[].class)
+    @POST
+    @Path("utkast/pdf/{behandlingID}/{dokumenttypeKode}")
     @Produces("application/pdf")
-    public Response produserUtkast(@ApiParam @PathParam("behandlingID") long behandlingID, @ApiParam @PathParam("typeID") String typeID) {
+    public Response produserUtkast(@PathParam("behandlingID") long behandlingID,
+                                   @PathParam("dokumenttypeKode") Dokumenttype dokumenttypeKode,
+                                   BrevDataDto brevDataDto) {
         byte[] dokument;
 
         try {
-            DokumentType dokumentType = DokumentType.forKode(typeID);
-            BrevDataDto brevDataDto = new BrevDataDto();
-            brevDataDto.saksbehandler = SubjectHandler.getInstance().getUserID();
-            dokument = dokumentService.produserUtkast(behandlingID, dokumentType, brevDataDto);
-        } catch (IkkeFunnetException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            tilgang.sjekk(behandlingID);
+            dokument = dokumentService.produserUtkast(behandlingID, dokumenttypeKode, brevDataDto);
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (FunksjonellException e) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (TekniskException e) {
             log.error("TekniskException", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -93,24 +90,22 @@ public class DokumentTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("opprett/{behandlingID}/{typeID}")
-    @ApiOperation(value = "produserer dokument for behandling og type")
-    public Response produserDokument(@ApiParam @PathParam("behandlingID") long behandlingID, @ApiParam @PathParam("typeID") String typeID) {
+    @Path("opprett/{behandlingID}/{dokumenttypeKode}")
+    public Response produserDokument(@Context UriInfo uriInfo,
+                                     @PathParam("behandlingID") long behandlingID,
+                                     @PathParam("dokumenttypeKode") Dokumenttype dokumenttypeKode,
+                                     BrevDataDto brevDataDto) {
         try {
             tilgang.sjekk(behandlingID);
-            DokumentType dokumentType = DokumentType.forKode(typeID);
-            BrevDataDto brevDataDto = new BrevDataDto();
-            brevDataDto.saksbehandler = SubjectHandler.getInstance().getUserID();
-            dokumentService.produserDokument(behandlingID, dokumentType, brevDataDto);
-        } catch (IkkeFunnetException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            dokumentService.produserDokumentISaksflyt(behandlingID, dokumenttypeKode, brevDataDto);
+            return Response.noContent().build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (FunksjonellException e) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (TekniskException e) {
             log.error("TekniskException", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
-
-        return Response.ok().build();
     }
 }

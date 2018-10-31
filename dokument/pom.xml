@@ -72,6 +72,7 @@
                         <configuration>
                             <sources>
                                 <source>${basedir}/src/main/resources/xsd/melosys_000082.xsd</source>
+                                <source>${basedir}/src/main/resources/xsd/melosys_000074.xsd</source>
                             </sources>
                             <addGeneratedAnnotation>true</addGeneratedAnnotation>
                             <clearOutputDir>false</clearOutputDir>

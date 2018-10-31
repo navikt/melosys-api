@@ -33,16 +33,18 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.getBegrunnelser().ikkeSkip = tilKoder(IkkeSkip.values());
         kodeverk.getBegrunnelser().opphold = tilKoder(Opphold.values());
         kodeverk.getBegrunnelser().vesentligVirksomhet = tilKoder(VesentligVirksomhet.values());
+        kodeverk.setAktoerroller(tilKoder(RolleType.values()));
         kodeverk.setBehandlingsstatus(tilKoder(Behandlingsstatus.values()));
         kodeverk.setBehandlingstyper(tilKoder(Behandlingstype.values()));
         kodeverk.setDokumenttitler(tilKoder(DokumentTittel.values()));
-        kodeverk.setDokumenttyper(tilKoder(DokumentType.values()));
+        kodeverk.setDokumenttyper(tilKoder(Dokumenttype.values()));
         kodeverk.setFinansiering(tilKoder(Finansiering.values()));
         kodeverk.setLandkoder(tilKoder(Landkoder.values()));
         kodeverk.getLovvalgsbestemmelser().forordning_883_2004 = tilKoder(LovvalgBestemmelse_883_2004.values());
         kodeverk.getLovvalgsbestemmelser().forordning_987_2009 = tilKoder(LovvalgBestemmelse_987_2009.values());
         kodeverk.getLovvalgsbestemmelser().tillegg = tilKoder(TilleggBestemmelse.values());
         kodeverk.setOppgavetyper(tilKoder(Oppgavetype.values()));
+        kodeverk.setRepresenterer(tilKoder(Representerer.values()));
         kodeverk.setSakstyper(tilKoder(Fagsakstype.values()));
         kodeverk.setVedleggstitler(tilKoder(VedleggTittel.values()));
         //kodeverk.setVilkaar(tilKoder(VilkaarType.values())); FIXME venter på frontend

@@ -1,6 +1,7 @@
-package no.nav.melosys.saksflyt.agent;
+package no.nav.melosys.saksflyt.agent.brev;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -14,7 +15,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,14 +33,14 @@ public class SendForvaltningsmeldingTest {
     }
 
     @Test
-    public void utfoerSteg() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void utfoerSteg() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.setData(ProsessDataKey.SAKSBEHANDLER, "TEST");
 
         agent.utførSteg(p);
 
-        verify(dokumentService, times(1)).produserDokument(anyLong(), any(DokumentType.class), any(BrevDataDto.class));
+        verify(dokumentService, times(1)).produserDokument(anyLong(), any(Dokumenttype.class), any(BrevDataDto.class));
 
         assertThat(p.getSteg()).isNull();
     }

@@ -66,7 +66,7 @@ public final class BrevDataUtils {
     }
 
     // Adresse-stubs
-    static Kontaktinformasjon lagKontaktInformasjon() {
+    public static Kontaktinformasjon lagKontaktInformasjon() {
         Kontaktinformasjon kontaktinformasjon = new Kontaktinformasjon();
 
         kontaktinformasjon.setBesoksadresse(lagAdresse(new Besoksadresse(), lagNorskPostadresse()));
@@ -77,7 +77,7 @@ public final class BrevDataUtils {
         return kontaktinformasjon;
     }
 
-    static NorskPostadresse lagNorskPostadresse() {
+    public static NorskPostadresse lagNorskPostadresse() {
         NorskPostadresse adresse = new NorskPostadresse();
         adresse.setAdresselinje1(PLASSHOLDER_TEKST);
         adresse.setPostnummer(PLASSHOLDER_POSTNUMMER);

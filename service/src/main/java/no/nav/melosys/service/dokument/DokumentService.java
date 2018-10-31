@@ -1,15 +1,16 @@
 package no.nav.melosys.service.dokument;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.DokumentType;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import java.time.LocalDateTime;
+import javax.transaction.Transactional;
+
+import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.doksys.DokSysFasade;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,20 +21,28 @@ import org.springframework.stereotype.Service;
 @Primary
 public class DokumentService {
 
-    private BehandlingRepository behandlingRepository;
+    private final BehandlingRepository behandlingRepository;
 
-    private BrevDataService brevDataService;
+    private final BrevDataService brevDataService;
 
-    private DokSysFasade dokSysFasade;
+    private final DokSysFasade dokSysFasade;
 
-    private JoarkFasade joarkFasade;
+    private final JoarkFasade joarkFasade;
+
+    private final Binge binge;
+
+    private final ProsessinstansRepository prosessinstansRepo;
 
     @Autowired
-    DokumentService(BehandlingRepository behandlingRepository, BrevDataService brevDataService, DokSysFasade dokSysFasade, JoarkFasade joarkFasade) {
+    DokumentService(BehandlingRepository behandlingRepository, BrevDataService brevDataService,
+                    DokSysFasade dokSysFasade, JoarkFasade joarkFasade,
+                    Binge binge, ProsessinstansRepository prosessinstansRepo) {
         this.behandlingRepository = behandlingRepository;
         this.brevDataService = brevDataService;
         this.joarkFasade = joarkFasade;
         this.dokSysFasade = dokSysFasade;
+        this.binge = binge;
+        this.prosessinstansRepo = prosessinstansRepo;
     }
 
     /**
@@ -48,23 +57,35 @@ public class DokumentService {
      * Kaller Doksys for å produsere et dokumentutkast
      * @throws TekniskException 
      */
-    public byte[] produserUtkast(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        return produserDokument(behandlingID, dokumentType, brevDataDto, true);
+    public byte[] produserUtkast(long behandlingID, Dokumenttype dokumenttype, BrevDataDto brevDataDto)
+        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
+        return produserDokument(behandlingID, dokumenttype, brevDataDto, true);
     }
 
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        produserDokument(behandlingID, dokumentType, brevDataDto, false);
+    public void produserDokument(long behandlingID, Dokumenttype dokumenttype, BrevDataDto brevDataDto)
+        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
+        produserDokument(behandlingID, dokumenttype, brevDataDto, false);
     }
 
-    private byte[] produserDokument(long behandlingID, DokumentType dokumentType, BrevDataDto brevDataDto, boolean erUtkast)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    private byte[] produserDokument(long behandlingID, Dokumenttype dokumenttype, BrevDataDto brevDataDto, boolean erUtkast)
+        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
+        }
+
+        if (dokumenttype == null) {
+            throw new TekniskException("Ingen gyldig dokumenttype");
+        }
+
+        DokumentType dokumentType;
+        try {
+            dokumentType = DokumentType.valueOf(dokumenttype.name());
+        } catch (IllegalArgumentException e) {
+            throw new TekniskException("Fant ikke dokumenttypeId for dokumenttype " + dokumenttype);
         }
 
         DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(dokumentType, behandling, brevDataDto);
@@ -76,5 +97,34 @@ public class DokumentService {
             dokSysFasade.produserIkkeredigerbartDokument(request, brevData);
             return null;
         }
+    }
+
+    @Transactional
+    public void produserDokumentISaksflyt(long behandlingID, Dokumenttype dokumenttype, BrevDataDto brevDataDto) throws FunksjonellException {
+        Behandling behandling = behandlingRepository.findOne(behandlingID);
+        if (behandling == null) {
+            throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
+        }
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        switch (dokumenttype) {
+            case MELDING_MANGLENDE_OPPLYSNINGER:
+                prosessinstans.setType(ProsessType.MANGELBREV);
+                prosessinstans.setSteg(ProsessSteg.MANGELBREV);
+                break;
+            default:
+                throw new FunksjonellException("Dokumenttype " + dokumenttype + " er ikke støttet.");
+        }
+
+        if (brevDataDto != null) {
+            prosessinstans.setData(ProsessDataKey.BREVDATA, brevDataDto);
+        }
+        LocalDateTime nå = LocalDateTime.now();
+        prosessinstans.setEndretDato(nå);
+        prosessinstans.setRegistrertDato(nå);
+
+        prosessinstansRepo.save(prosessinstans);
+        binge.leggTil(prosessinstans);
     }
 }

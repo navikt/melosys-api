@@ -3,17 +3,19 @@ package no.nav.melosys.service.dokument.brev;
 import java.util.HashMap;
 import java.util.Map;
 
-import no.nav.melosys.domain.DokumentType;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.dokument.DokumentType;
 import no.nav.melosys.service.dokument.brev.mapper.BrevDataMapper;
 import no.nav.melosys.service.dokument.brev.mapper.ForvaltningsmeldingMapper;
+import no.nav.melosys.service.dokument.brev.mapper.MangelbrevMapper;
 
 public class BrevDataMapperRuter {
 
     private static Map<DokumentType, Class<? extends BrevDataMapper>> mappere = new HashMap<>();
 
     static {
-        mappere.put(DokumentType.FORVALTNINGSMELDING, ForvaltningsmeldingMapper.class);
+        mappere.put(DokumentType.MELDING_FORVENTET_SAKSBEHANDLINGSTID, ForvaltningsmeldingMapper.class);
+        mappere.put(DokumentType.MELDING_MANGLENDE_OPPLYSNINGER, MangelbrevMapper.class);
     }
 
     private BrevDataMapperRuter() {
