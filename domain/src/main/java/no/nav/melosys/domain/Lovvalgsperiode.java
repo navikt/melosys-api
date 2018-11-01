@@ -8,6 +8,7 @@ import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.domain.dokument.medlemskap.DekningMedl;
 import no.nav.melosys.domain.dokument.medlemskap.GrunnlagMedl;
+import no.nav.melosys.exception.TekniskException;
 
 @Entity
 @Table(name = "lovvalg_periode")
@@ -146,7 +147,7 @@ public class Lovvalgsperiode implements ErPeriode {
         return Objects.hash(behandlingsresultat, fom);
     }
 
-    public DekningMedl hentFellesKodeForTrygdDekningtype() {
+    public DekningMedl hentFellesKodeForTrygdDekningtype() throws TekniskException {
         DekningMedl dekningMedltype;
         switch (dekning) {
             case FULL_DEKNING_EOSFO:
@@ -156,18 +157,15 @@ public class Lovvalgsperiode implements ErPeriode {
                 dekningMedltype = DekningMedl.UNNTATT;
             break;
             default:
-                throw new RuntimeException("dekningstype støttes ikke:" + dekning.getKode());
+                throw new TekniskException("Dekningstype støttes ikke:" + dekning.getKode());
         }
         return dekningMedltype;
     }
 
-    public GrunnlagMedl hentFellesKodeForGrunnlagMedltype() {
+    public GrunnlagMedl hentFellesKodeForGrunnlagMedltype() throws TekniskException {
         GrunnlagMedl grunnlagMedltype;
         switch (bestemmelse) {
             //Article 11
-            case ART11_2:
-                grunnlagMedltype = GrunnlagMedl.FO_11_2;
-                break;
             case ART11_3A:
                 grunnlagMedltype = GrunnlagMedl.FO_11_3_A;
                 break;
@@ -227,7 +225,7 @@ public class Lovvalgsperiode implements ErPeriode {
                 break;
 
             default:
-                throw new RuntimeException("Feil lovvlagsbestemmelse koden :" + bestemmelse.getKode() + ":" + bestemmelse.getBeskrivelse());
+                throw new TekniskException("Lovvalgsbestemmelse støttes ikke i MEDL. Kode: " + bestemmelse.getKode() + " Beskrivelse: " + bestemmelse.getBeskrivelse());
         }
     return grunnlagMedltype;
     }
