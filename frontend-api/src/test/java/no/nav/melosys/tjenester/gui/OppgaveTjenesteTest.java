@@ -15,10 +15,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
-import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
-import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto;
-import no.nav.melosys.service.oppgave.dto.OppgaveDto;
-import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
+import no.nav.melosys.service.oppgave.dto.*;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.OppgaveOversiktDto;
@@ -44,6 +41,11 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
 
     private static final Logger logger = LoggerFactory.getLogger(OppgaveTjenesteTest.class);
 
+    private static final String OPPGAVER_OVERSIKT_SCHEMA = "oppgaver-oversikt-schema.json";
+    private static final String OPPGAVER_TILBAKELEGGE_SCHEMA = "oppgaver-tilbakelegge-schema.json";
+
+    private String schemaType;
+
     private OppgaveTjeneste tjeneste;
     @Mock
     private Oppgaveplukker oppgaveplukker;
@@ -52,7 +54,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
 
     @Override
     public String schemaNavn() {
-        return "oppgaver-oversikt-schema.json";
+        return schemaType;
     }
 
     @Before
@@ -78,6 +80,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
         String jsonString = objectMapper().writeValueAsString(oppgaveOversikt);
 
         try {
+            schemaType = OPPGAVER_OVERSIKT_SCHEMA;
             hentSchema().validate(new JSONObject(jsonString));
         } catch (ValidationException e) {
             logger.error(e.toJSON().toString());
@@ -112,5 +115,15 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
 
         PlukketOppgaveDto entity = (PlukketOppgaveDto) response.getEntity();
         assertThat(entity.getOppgaveID()).isEqualTo("1");
+    }
+
+    @Test
+    public void tilbakeleggOppgave() throws IOException {
+        TilbakeleggingDto tilbakelegging = defaultEnhancedRandom().nextObject(TilbakeleggingDto.class);
+
+        assertThat(tilbakelegging).isNotNull();
+
+        schemaType = OPPGAVER_TILBAKELEGGE_SCHEMA;
+        valider(tilbakelegging);
     }
 }
