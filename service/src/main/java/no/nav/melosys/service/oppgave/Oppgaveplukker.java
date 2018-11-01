@@ -16,9 +16,11 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
+import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +38,15 @@ public class Oppgaveplukker {
 
     private final FagsakRepository fagsakRepository;
 
+    private final BehandlingRepository behandlingRepository;
+
     @Autowired
-    public Oppgaveplukker(GsakFasade gsakFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo, FagsakRepository fagsakRepository) {
+    public Oppgaveplukker(GsakFasade gsakFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo,
+                          FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository) {
         this.gsakFasade = gsakFasade;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
         this.fagsakRepository = fagsakRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
     /**
@@ -110,21 +116,34 @@ public class Oppgaveplukker {
     }
 
     @Transactional
-    public synchronized void leggTilbakeOppgave(String oppgaveId, String saksbehandlerID, String begrunnelse) throws FunksjonellException, TekniskException {
-        Oppgave oppgave = gsakFasade.hentOppgave(oppgaveId);
+    public synchronized void leggTilbakeOppgave(String saksbehandlerID, TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
+        Behandling behandling = behandlingRepository.findOne(tilbakelegging.getBehandlingID());
+        if (behandling == null) {
+            log.error("Fant ikke behandling med behandlingID " + tilbakelegging.getBehandlingID());
+            throw new IkkeFunnetException("Fant ikke behandling med behandlingID " + tilbakelegging.getBehandlingID());
+        }
 
+        Fagsak fagsak = behandling.getFagsak();
+        if (fagsak == null || fagsak.getGsakSaksnummer() == null) {
+            log.error("Fant ikke oppgaveId på behandling med behandlingID " + tilbakelegging.getBehandlingID());
+            throw new IkkeFunnetException("Fant ikke oppgaveId på behandling med behandlingID " + tilbakelegging.getBehandlingID());
+        }
+        String oppgaveId = fagsak.getGsakSaksnummer().toString();
+        Oppgave oppgave = gsakFasade.hentOppgave(oppgaveId);
         if (oppgave == null) {
             log.error("Fant ikke oppgave med oppgaveId " + oppgaveId);
             throw new IkkeFunnetException("Fant ikke oppgave med oppgaveId " + oppgaveId);
         }
         gsakFasade.leggTilbakeOppgave(oppgaveId);
 
-        OppgaveTilbakelegging oppgaveTilbakelegging = new OppgaveTilbakelegging();
-        oppgaveTilbakelegging.setOppgaveId(oppgaveId);
-        oppgaveTilbakelegging.setSaksbehandlerId(saksbehandlerID);
-        oppgaveTilbakelegging.setBegrunnelse(begrunnelse);
-        oppgaveTilbakelegging.setRegistrertDato(LocalDateTime.now());
-        oppgaveTilbakkeleggingRepo.save(oppgaveTilbakelegging);
+        if (!tilbakelegging.isVenterPåDokumentasjon()) {
+            OppgaveTilbakelegging oppgaveTilbakelegging = new OppgaveTilbakelegging();
+            oppgaveTilbakelegging.setOppgaveId(oppgaveId);
+            oppgaveTilbakelegging.setSaksbehandlerId(saksbehandlerID);
+            oppgaveTilbakelegging.setBegrunnelse(tilbakelegging.getBegrunnelse());
+            oppgaveTilbakelegging.setRegistrertDato(LocalDateTime.now());
+            oppgaveTilbakkeleggingRepo.save(oppgaveTilbakelegging);
+        }
         log.info("Oppgave med oppgaveId {} er lagt tilbake. ", oppgaveId);
     }
 

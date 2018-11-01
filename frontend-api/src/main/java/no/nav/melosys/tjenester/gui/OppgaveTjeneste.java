@@ -17,14 +17,10 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
-import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
-import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto;
-import no.nav.melosys.service.oppgave.dto.OppgaveDto;
-import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
+import no.nav.melosys.service.oppgave.dto.*;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.OppgaveOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
-import no.nav.melosys.tjenester.gui.dto.TilbakeleggingDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,12 +88,12 @@ public class OppgaveTjeneste extends RestTjeneste {
 
     @POST
     @Path("/tilbakelegge")
-    @ApiOperation(value = "Legger tilbake oppgaven med gitt oppgaveId i GSAK.")
+    @ApiOperation(value = "Legger tilbake oppgave knyttet til gitt behandlingID i GSAK.")
     public Response leggTilbakeOppgave(@ApiParam TilbakeleggingDto tilbakelegging) {
         String ident = SubjectHandler.getInstance().getUserID();
 
         try {
-            oppgaveplukker.leggTilbakeOppgave(tilbakelegging.getOppgaveId(), ident, tilbakelegging.getBegrunnelse());
+            oppgaveplukker.leggTilbakeOppgave(ident, tilbakelegging);
             return Response.ok().build();
         } catch (SikkerhetsbegrensningException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
