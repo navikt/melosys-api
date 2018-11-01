@@ -5,11 +5,11 @@ public class StrukturertAdresseDto {
     public String gatenavn;
 
     // Sammensatt av husnummer og husbokstav
-    public String husnummer;
+    public String husnr;
 
-    public String postnummer;
+    public String postnr;
 
     public String poststed;
 
-    public String land;
+    public String landKode;
 }

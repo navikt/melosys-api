@@ -13,6 +13,7 @@ import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.tjenester.gui.MidlertidigPostadresseDto;
 import no.nav.melosys.tjenester.gui.dto.StrukturertAdresseDto;
 import no.nav.melosys.tjenester.gui.dto.UstrukturertAdresseDto;
 
@@ -29,40 +30,47 @@ public class MidlertidigPostadresseSerializer extends StdSerializer<MidlertidigP
 
     @Override
     public void serialize(MidlertidigPostadresse midlertidigPostadresse, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        MidlertidigPostadresseDto dto = new MidlertidigPostadresseDto();
 
         if (midlertidigPostadresse instanceof MidlertidigPostadresseNorge) {
             MidlertidigPostadresseNorge adresse = (MidlertidigPostadresseNorge) midlertidigPostadresse;
-            StrukturertAdresseDto adresseDto = new StrukturertAdresseDto();
+            dto.strukturertAdresse = new StrukturertAdresseDto();
 
-            adresseDto.gatenavn = adresse.gateadresse.getGatenavn();
-            adresseDto.husnummer =
+            dto.strukturertAdresse.gatenavn = adresse.gateadresse.getGatenavn();
+            dto.strukturertAdresse.husnr =
                 Stream.of(
                     adresse.gateadresse.getHusbokstav(),
                     adresse.gateadresse.getHusnummer()
                 ).filter(Objects::nonNull).map(Objects::toString).collect(Collectors.joining(" "));
-            adresseDto.postnummer = adresse.poststed;
-            adresseDto.poststed = kodeverkService.dekod(POSTNUMMER, adresse.poststed, LocalDate.now());
+            dto.strukturertAdresse.postnr = adresse.poststed;
+            dto.strukturertAdresse.poststed = kodeverkService.dekod(POSTNUMMER, adresse.poststed, LocalDate.now());
 
             if (midlertidigPostadresse.land != null) {
-                adresseDto.land = midlertidigPostadresse.land.getKode();
+                dto.strukturertAdresse.landKode = midlertidigPostadresse.land.getKode();
             }
-
-            generator.writeObject(adresseDto);
+            dto.adressetype = MidlertidigPostadresseDto.Adressetype.STRUKTURERT;
 
         } else if (midlertidigPostadresse instanceof MidlertidigPostadresseUtland) {
             MidlertidigPostadresseUtland adresse = (MidlertidigPostadresseUtland) midlertidigPostadresse;
-            UstrukturertAdresseDto adresseDto = new UstrukturertAdresseDto();
+            dto.ustrukturertAdresse = new UstrukturertAdresseDto();
 
-            adresseDto.adresselinje1 = adresse.adresselinje1;
-            adresseDto.adresselinje2 = adresse.adresselinje2;
-            adresseDto.adresselinje3 = adresse.adresselinje3;
-            adresseDto.adresselinje4 = adresse.adresselinje4;
-
-            if (midlertidigPostadresse.land != null) {
-                adresseDto.land = midlertidigPostadresse.land.getKode();
+            if (adresse.adresselinje1 != null) {
+                dto.ustrukturertAdresse.adresselinjer.add(adresse.adresselinje1);
             }
-
-            generator.writeObject(adresseDto);
+            if (adresse.adresselinje2 != null) {
+                dto.ustrukturertAdresse.adresselinjer.add(adresse.adresselinje2);
+            }
+            if (adresse.adresselinje3 != null) {
+                dto.ustrukturertAdresse.adresselinjer.add(adresse.adresselinje3);
+            }
+            if (adresse.adresselinje4 != null) {
+                dto.ustrukturertAdresse.adresselinjer.add(adresse.adresselinje4);
+            }
+            if (midlertidigPostadresse.land != null) {
+                dto.ustrukturertAdresse.landKode = midlertidigPostadresse.land.getKode();
+            }
+            dto.adressetype = MidlertidigPostadresseDto.Adressetype.USTRUKTURERT;
         }
+        generator.writeObject(dto);
     }
 }

@@ -1,14 +1,11 @@
 package no.nav.melosys.tjenester.gui.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UstrukturertAdresseDto {
 
-    public String adresselinje1;
+    public List<String> adresselinjer = new ArrayList<>();
 
-    public String adresselinje2;
-
-    public String adresselinje3;
-
-    public String adresselinje4;
-
-    public String land;
+    public String landKode;
 }
