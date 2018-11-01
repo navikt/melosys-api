@@ -2,10 +2,11 @@ package no.nav.melosys.tjenester.gui.config;
 
 import javax.ws.rs.ApplicationPath;
 
-import no.nav.melosys.tjenester.gui.*;
 import org.glassfish.jersey.CommonProperties;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Configuration;
+
+import no.nav.melosys.tjenester.gui.*;
 
 @Configuration
 @ApplicationPath("api")
@@ -25,6 +26,7 @@ public class JerseyConfig extends ResourceConfig {
         register(InngangTjeneste.class);
         register(JournalfoeringTjeneste.class);
         register(KodeverkTjeneste.class);
+        register(LovvalgsperiodeTjeneste.class);
         register(OppgaveTjeneste.class);
         register(OrganisasjonTjeneste.class);
         register(PersonTjeneste.class);

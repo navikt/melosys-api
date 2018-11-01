@@ -2,9 +2,9 @@ package no.nav.melosys.domain;
 
 import java.time.LocalDate;
 import java.util.Objects;
+
 import javax.persistence.*;
 
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.domain.dokument.medlemskap.DekningMedl;
 import no.nav.melosys.domain.dokument.medlemskap.GrunnlagMedl;
@@ -38,6 +38,14 @@ public class Lovvalgsperiode implements ErPeriode {
     @Enumerated(EnumType.STRING)
     @Column(name = "lovvalg_bestemmelse", nullable = false, updatable = false)
     private LovvalgBestemmelse_883_2004 bestemmelse;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "unntak_fra_lovvalgsland", nullable = false, updatable = false)
+    private Landkoder unntakFraLovvalgsland;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "unntak_fra_bestemmelse", nullable = false, updatable = false)
+    private LovvalgBestemmelse_883_2004 unntakFraBestemmelse;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "innvilgelse_resultat", nullable = false, updatable = false)
@@ -97,12 +105,28 @@ public class Lovvalgsperiode implements ErPeriode {
         this.lovvalgsland = lovvalgsland;
     }
 
-    public LovvalgBestemmelse getBestemmelse() {
+    public LovvalgBestemmelse_883_2004 getBestemmelse() {
         return bestemmelse;
     }
 
     public void setBestemmelse(LovvalgBestemmelse_883_2004 bestemmelse) {
         this.bestemmelse = bestemmelse;
+    }
+
+    public Landkoder getUnntakFraLovvalgsland() {
+        return unntakFraLovvalgsland;
+    }
+
+    public void setUnntakFraLovvalgsland(Landkoder unntakFraLovvalgsland) {
+        this.unntakFraLovvalgsland = unntakFraLovvalgsland;
+    }
+
+    public LovvalgBestemmelse_883_2004 getUnntakFraBestemmelse() {
+        return unntakFraBestemmelse;
+    }
+
+    public void setUnntakFraBestemmelse(LovvalgBestemmelse_883_2004 unntakFraBestemmelse) {
+        this.unntakFraBestemmelse = unntakFraBestemmelse;
     }
 
     public InnvilgelsesResultat getInnvilgelsesresultat() {

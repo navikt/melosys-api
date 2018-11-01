@@ -61,7 +61,7 @@
         <tps.person.version>3.4.1</tps.person.version>
         <medl2-v2.version>2.0.6</medl2-v2.version>
         <kodeverk-v2.version>2.0.0-alpha004</kodeverk-v2.version>
-        
+
         <!-- Versjoner av eksterne biblioteker -->
         <assertj.version>3.8.0</assertj.version>
         <cxf.version>3.1.11</cxf.version>
@@ -96,7 +96,7 @@
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.13</swagger.version>
 
-		</properties>
+    </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det brukes. -->
     <dependencyManagement>
