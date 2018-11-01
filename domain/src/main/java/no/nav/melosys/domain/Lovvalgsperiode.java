@@ -225,7 +225,7 @@ public class Lovvalgsperiode implements ErPeriode {
                 break;
 
             default:
-                throw new TekniskException("Lovvalgsbestemmelse støttes ikke i MEDL. Kode:" + bestemmelse.getKode() + ":" + bestemmelse.getBeskrivelse());
+                throw new TekniskException("Lovvalgsbestemmelse støttes ikke i MEDL. Kode: " + bestemmelse.getKode() + " Beskrivelse: " + bestemmelse.getBeskrivelse());
         }
     return grunnlagMedltype;
     }
