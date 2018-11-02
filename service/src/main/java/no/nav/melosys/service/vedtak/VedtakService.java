@@ -2,14 +2,12 @@ package no.nav.melosys.service.vedtak;
 
 import java.time.LocalDateTime;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +45,9 @@ public class VedtakService {
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
+
+        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
+
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);
     }

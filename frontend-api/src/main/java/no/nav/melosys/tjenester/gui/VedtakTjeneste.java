@@ -4,6 +4,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -32,7 +34,8 @@ public class VedtakTjeneste extends RestTjeneste {
 
     @POST
     @Path("{behandlingID}")
-    public Response fattVedtak(@PathParam("behandlingID") long behandlingID) {
+    @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
+    public Response fattVedtak(@ApiParam("behandlingID") @PathParam("behandlingID") long behandlingID) {
         try {
             tilgang.sjekk(behandlingID);
             vedtakService.fattVedtak(behandlingID);
