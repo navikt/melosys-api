@@ -1,9 +1,9 @@
-package no.nav.melosys.tjenester.gui.dto;
+package no.nav.melosys.domain.dokument.felles;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UstrukturertAdresseDto {
+public class UstrukturertAdresse {
 
     public List<String> adresselinjer = new ArrayList<>();
 
