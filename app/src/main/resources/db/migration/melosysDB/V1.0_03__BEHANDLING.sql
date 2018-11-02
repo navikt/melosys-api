@@ -38,8 +38,3 @@ INSERT INTO behandling_type (kode, navn) VALUES ('REVURDERING ', 'Behandling av 
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_fagsak FOREIGN KEY (saksnummer) REFERENCES fagsak;
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_status FOREIGN KEY (status) REFERENCES behandling_status;
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_type FOREIGN KEY (beh_type) REFERENCES behandling_type;
-
-CREATE SEQUENCE sob_behandling_seq
-MINVALUE 1
-NOMAXVALUE
-INCREMENT BY 1;
