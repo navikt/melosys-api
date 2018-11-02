@@ -23,7 +23,6 @@ import org.springframework.jms.core.JmsTemplate;
  * Konfigurasjon er tatt fra blant annet Foreldrepengers integrasjon mot IBM MQ:
  * http://stash.devillo.no/projects/VEDFP/repos/vl-fordel/browse/web/server/src/main/java/no/nav/foreldrepenger/fordel/web/server/JmsKonfig.java
 */
-@Profile("!mocking") //FIXME MELOSYS-1284
 @Configuration
 @EnableJms
 public class JmsConfig {
@@ -31,8 +30,6 @@ public class JmsConfig {
     private static final Logger log = LoggerFactory.getLogger(JmsConfig.class);
 
     public static final String HENDELSESKØ = "hendelseskø";
-
-    public static final String DOKUMENTKØ = "dokumentkø";
 
     @Value("${queueManager.hostName}")
     private String hostName;
@@ -52,17 +49,9 @@ public class JmsConfig {
     @Value("${SBEH.queueName}")
     private String sakBehKøNavn;
 
-    @Value("${DokMot.queueName}")
-    private String dokMotKøNavn;
-
     @Bean(name = HENDELSESKØ)
     public Queue hendelseshåndterer() throws JMSException {
         return new MQQueue(sakBehKøNavn);
-    }
-
-    @Bean(name = DOKUMENTKØ)
-    public Queue dokumentmottak() throws JMSException {
-        return new MQQueue(dokMotKøNavn);
     }
 
     @Bean

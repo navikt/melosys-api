@@ -42,6 +42,8 @@ fasitResources:
     resourceType: webserviceendpoint
   - alias: Journal_v3
     resourceType: webserviceendpoint
+  - alias: melosys_channel
+    resourceType: channel
   - alias: mqgateway02
     resourceType: queuemanager
   - alias: sbeh_saksbehandling
