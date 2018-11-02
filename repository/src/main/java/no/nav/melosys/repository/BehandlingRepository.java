@@ -14,7 +14,4 @@ public interface BehandlingRepository extends CrudRepository<Behandling, Long> {
 
     @Query("select b from Behandling b, Fagsak f where b.fagsak.saksnummer = f.saksnummer and f.gsakSaksnummer = ?1") //$NON-NLS-1$
     List<Behandling> findBySaksnummer(String saksnummer);
-
-    @Query(value = "SELECT sob_behandling_seq.nextval FROM dual", nativeQuery = true)
-    Long hentNesteSakOgBehandlingSekvensVerdi();
 }

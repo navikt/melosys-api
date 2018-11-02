@@ -23,7 +23,6 @@ public enum ProsessDataKey {
     REPRESENTANT("representant"),
     SAKSBEHANDLER("saksbehandler"),
     SAKSNUMMER("saksnummer"),
-    SOB_BEHANDLING_ID("sobBehandlingId"),
     SØKNADSPERIODE("søknadsperiode"),
     TEMA("tema");
 

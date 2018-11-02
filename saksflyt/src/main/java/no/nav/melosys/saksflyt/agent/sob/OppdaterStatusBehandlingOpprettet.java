@@ -61,8 +61,8 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
         Tema arkivtema = avgjørArkivTema(behandling.getType());
 
         String fagsystemkode = Fagsystem.MELOSYS.getKode();
-        String behandlingsId = String.format("%s-%d", fagsystemkode, behandlingRepository.hentNesteSakOgBehandlingSekvensVerdi());
-        prosessinstans.setData(SOB_BEHANDLING_ID, behandlingsId);
+        // BehandlingsId i SOB skal være unik i NAV, så vi prefikser med applikasjonsID.
+        String behandlingsId = String.format("%s-%d", Fagsystem.MELOSYS.getKode(), behandling.getId());
 
         // FIXME: Nullsjekk på noe her?
 
