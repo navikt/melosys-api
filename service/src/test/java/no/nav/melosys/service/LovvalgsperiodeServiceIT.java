@@ -1,6 +1,7 @@
 package no.nav.melosys.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -26,6 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
@@ -37,13 +39,9 @@ import no.nav.melosys.repository.LovvalgsperiodeRepository;
 @EnableJpaRepositories(basePackageClasses = LovvalgsperiodeRepository.class)
 @EntityScan(basePackageClasses = { Lovvalgsperiode.class })
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@ComponentScan(useDefaultFilters = false, 
-               basePackageClasses = { LovvalgsperiodeService.class,
-                                      LovvalgsperiodeRepository.class },
-               includeFilters = 
-                   @Filter(type = FilterType.REGEX, 
-                       pattern = { "no.nav.melosys.service.LovvalgsperiodeService",
-                                   "no.nav.melosys.repository.LovvalgsperiodeRepository" }))
+@ComponentScan(useDefaultFilters = false, basePackageClasses = { LovvalgsperiodeService.class,
+        LovvalgsperiodeRepository.class }, includeFilters = @Filter(type = FilterType.REGEX, pattern = { "no.nav.melosys.service.LovvalgsperiodeService",
+                "no.nav.melosys.repository.LovvalgsperiodeRepository" }))
 public class LovvalgsperiodeServiceIT {
 
     @SpringBootConfiguration
@@ -149,7 +147,7 @@ public class LovvalgsperiodeServiceIT {
     }
 
     @Test
-    public void lagreEnLovvalgsperiodeGirKopiMedGenerertId() {
+    public void lagreEnLovvalgsperiodeGirKopiMedGenerertId() throws Throwable {
         Lovvalgsperiode periode = lagLovvalgsperiode(testInstans.getBehandlingsresultat());
         Collection<Lovvalgsperiode> lovvalgsperioder = Collections.singleton(periode);
         Collection<Lovvalgsperiode> resultat = instans.lagreLovvalgsperioder(testInstans.getBehandlingsresultat().getId(), lovvalgsperioder);
@@ -158,18 +156,19 @@ public class LovvalgsperiodeServiceIT {
     }
 
     @Test
-    public void lagreIngenLovvalgsperioderErNoop() {
+    public void lagreIngenLovvalgsperioderErNoop() throws Throwable {
         Collection<Lovvalgsperiode> lovvalgsperioder = Collections.emptyList();
         Collection<Lovvalgsperiode> resultat = instans.lagreLovvalgsperioder(testInstans.getBehandlingsresultat().getId(), lovvalgsperioder);
         assertThat(resultat).isEmpty();
     }
 
     @Test
-    public void lagreLovvalgsperiodePåIkkeEkisterendeBehandlingGirTomListe() {
-        Lovvalgsperiode periode = lagLovvalgsperiode(testInstans.getBehandlingsresultat());
-        Collection<Lovvalgsperiode> lovvalgsperioder = Collections.singleton(periode);
-        Collection<Lovvalgsperiode> resultat = instans.lagreLovvalgsperioder(IKKE_EKSISTERENDE_BEH_ID, lovvalgsperioder);
-        assertThat(resultat).isEmpty();
+    public void lagreLovvalgsperiodePåIkkeEkisterendeBehandlingGirIkkeFunnetException() throws Throwable {
+        Collection<Lovvalgsperiode> lovvalgsperioder = 
+                Collections.singleton(lagLovvalgsperiode(testInstans.getBehandlingsresultat()));
+        Throwable thrown = catchThrowable(() -> instans.lagreLovvalgsperioder(IKKE_EKSISTERENDE_BEH_ID, lovvalgsperioder));
+        assertThat(thrown).isInstanceOf(IkkeFunnetException.class)
+                .hasMessageEndingWith("fins ikke.");
     }
 
 }

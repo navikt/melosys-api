@@ -1,6 +1,7 @@
 package no.nav.melosys.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -13,6 +14,7 @@ import org.junit.Test;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 
@@ -51,7 +53,7 @@ public class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    public void lagreLovvalgsperioderGirKopiMedBehandlingsresultat() {
+    public void lagreLovvalgsperioderGirKopiMedBehandlingsresultat() throws Throwable {
         assertThat(LOVVALGSPERIODER.iterator().next().getBehandlingsresultat()).isNull();
         Collection<Lovvalgsperiode> resultat = instanse.lagreLovvalgsperioder(13L, LOVVALGSPERIODER);
         assertThat(resultat).size().isEqualTo(LOVVALGSPERIODER.size());
@@ -59,9 +61,12 @@ public class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    public void lagreLovvalgsperioderUtenBehandlingsresultatGitTomListe() {
-        Collection<Lovvalgsperiode> resultat = instanse.lagreLovvalgsperioder(42L, LOVVALGSPERIODER);
-        assertThat(resultat).isEmpty();
+    public void lagreLovvalgsperioderUtenBehandlingsresultatKasterIkkeFunnetException() throws Throwable {
+        Throwable thrown = catchThrowable(() -> 
+            instanse.lagreLovvalgsperioder(42L, LOVVALGSPERIODER)       
+        );
+        assertThat(thrown).isInstanceOf(IkkeFunnetException.class)
+                .hasMessageEndingWith("fins ikke.");
     }
 
     private static Lovvalgsperiode lagLovvalgsperiode() {

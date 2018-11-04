@@ -53,22 +53,22 @@ public final class LovvalgsperiodeDto {
         this.periode = periode;
         this.lovvalg = lovvalg;
         this.unntak = unntak;
-        this.innvilgelsesResultat = innvilgelsesResultat != null ? innvilgelsesResultat.name() : null;
+        this.innvilgelsesResultat = innvilgelsesResultat.name();
         this.trygdeDekning = trygdeDekning != null ? trygdeDekning.name() : null;
-        this.medlemskapstype = medlemskapstype != null ? medlemskapstype.name() : null;
+        this.medlemskapstype = medlemskapstype.name();
     }
 
     @JsonCreator
     public LovvalgsperiodeDto(Map<String, String> json) {
-        this(new PeriodeDto(LocalDate.parse(json.get("fom")),
-                LocalDate.parse(json.get("tom"))),
+        this(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
+                LocalDate.parse(json.get("tomDato"))),
                 new LovvalgBestemmelseILand(LovvalgBestemmelse_883_2004.valueOf(json.get("lovvalgBestemmelse")),
-                        Landkoder.valueOf(json.get("lovvalgland"))),
+                        Landkoder.valueOf(json.get("lovvalgsland"))),
                 new UnntakFraBestemmelseILand(enumVerdiEllerNull(LovvalgBestemmelse_883_2004.class, json.get("unntakFraBestemmelse")),
                         enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland"))),
-                enumVerdiEllerNull(InnvilgelsesResultat.class, json.get("innvilgelsesResultat")),
+                InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
                 enumVerdiEllerNull(TrygdeDekning.class, json.get("trygdeDekning")),
-                enumVerdiEllerNull(Medlemskapstype.class, json.get("medlemskapstype")));
+                Medlemskapstype.valueOf(json.get("medlemskapstype")));
     }
 
     /**
@@ -105,7 +105,7 @@ public final class LovvalgsperiodeDto {
         return resultat;
     }
 
-    private static <E extends Enum<E>> E enumVerdiEllerNull(Class<E> enumKlasse, String nøkkel) {
+    static <E extends Enum<E>> E enumVerdiEllerNull(Class<E> enumKlasse, String nøkkel) {
         return nøkkel == null ? null : Enum.valueOf(enumKlasse, nøkkel);
 
     }

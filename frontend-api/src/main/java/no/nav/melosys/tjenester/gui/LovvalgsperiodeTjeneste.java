@@ -16,13 +16,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto;
 
-@Api(tags = { "lovvalgsperiode" })
+@Api(tags = { "lovvalgsperioder" })
 @Service
 @Path("/lovvalgsperioder")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
@@ -60,7 +61,11 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
         List<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeDtoer.stream()
                 .map(LovvalgsperiodeDto::til)
                 .collect(Collectors.toList());
-        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingsid, lovvalgsperioder);
+        try {
+            lovvalgsperiodeService.lagreLovvalgsperioder(behandlingsid, lovvalgsperioder);
+        } catch (IkkeFunnetException e) {
+            throw new NotFoundException(e);
+        }
         return lovvalgsperiodeDtoer;
     }
 
@@ -68,7 +73,6 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
         try {
             tilgang.sjekk(behandlingsid);
         } catch (SikkerhetsbegrensningException e) {
-            // TBD: Bør dette logges?
             throw new ForbiddenException(e);
         } catch (TekniskException e) {
             // TBD: Blir dette logget av Jersey?

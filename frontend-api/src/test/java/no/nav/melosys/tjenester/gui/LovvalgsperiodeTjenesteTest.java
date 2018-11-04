@@ -12,6 +12,7 @@ import java.util.Collections;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 
 import org.junit.AfterClass;
@@ -19,6 +20,7 @@ import org.junit.Test;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -99,7 +101,14 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTest {
 
     @Test
     public void lagreEnLovvalgsperiodeGir200OkOgEkko() throws Exception {
-        testLagreLovvalgsperioder(123, Collections.singletonList(FORVENTET));
+        testLagreLovvalgsperioder(42L, Collections.singletonList(FORVENTET));
+    }
+
+    @Test
+    public void lagreLovvalgsperiodeUtenBehandlingGir404() throws Exception {
+        Throwable thrown = catchThrowable(() -> testLagreLovvalgsperioder(123, Collections.singletonList(FORVENTET)));
+        assertThat(thrown).isInstanceOf(NotFoundException.class)
+                .hasCauseInstanceOf(IkkeFunnetException.class);
     }
 
     private void testLagreLovvalgsperioder(long behandlingsid,

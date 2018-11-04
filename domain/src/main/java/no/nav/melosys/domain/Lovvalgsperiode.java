@@ -40,11 +40,11 @@ public class Lovvalgsperiode implements ErPeriode {
     private LovvalgBestemmelse_883_2004 bestemmelse;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "unntak_fra_lovvalgsland", nullable = false, updatable = false)
+    @Column(name = "unntak_fra_lovvalgsland", nullable = true, updatable = false)
     private Landkoder unntakFraLovvalgsland;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "unntak_fra_bestemmelse", nullable = false, updatable = false)
+    @Column(name = "unntak_fra_bestemmelse", nullable = true, updatable = false)
     private LovvalgBestemmelse_883_2004 unntakFraBestemmelse;
 
     @Enumerated(EnumType.STRING)

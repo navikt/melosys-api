@@ -1,7 +1,6 @@
 package no.nav.melosys.service;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -12,6 +11,7 @@ import com.google.gson.Gson;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 
@@ -30,10 +30,11 @@ public final class LovvalgsperiodeService {
         return lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsid);
     }
 
-    public final Collection<Lovvalgsperiode> lagreLovvalgsperioder(long behandlingsid, Collection<Lovvalgsperiode> lovvalgsperioder) {
+    public final Collection<Lovvalgsperiode> lagreLovvalgsperioder(long behandlingsid, Collection<Lovvalgsperiode> lovvalgsperioder)
+            throws IkkeFunnetException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findOne(behandlingsid);
         if (behandlingsresultat == null) {
-            return Collections.emptyList();
+            throw new IkkeFunnetException(String.format("Behandling %s fins ikke.", behandlingsid));
         }
         lovvalgsperiodeRepo.delete(lovvalgsperioder);
         List<Lovvalgsperiode> perioderMedBehandling = lovvalgsperioder.stream()
