@@ -52,6 +52,14 @@ public class OppgaveService {
     }
 
     @Transactional
+    public void ferdigstillOppgaverforAnsvarlig(String ansvarligID) throws TekniskException, FunksjonellException {
+        List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
+        for (Oppgave oppgave : oppgaverFraDomain) {
+            gsakFasade.ferdigstillOppgave(oppgave.getOppgaveId());
+        }
+    }
+
+    @Transactional
     public List<OppgaveDto> hentOppgaverMedBruker(String brukerIdent) throws TekniskException, FunksjonellException {
         String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
         if (aktørId == null) {
