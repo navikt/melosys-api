@@ -21,7 +21,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Api(tags = {"rydde-oppgaver"})
 @Profile("test")
-@Path("/rydde-oppgaver")
+@Path("/oppgaver/rydd")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class RyddOppgaverTjeneste extends RestTjeneste {
@@ -36,7 +36,6 @@ public class RyddOppgaverTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("/alle")
     @ApiOperation(
         value = "Henter alle oppgaver som er tildelt en gitt saksbehandler og oppdater status på oppgaven som ferdigstilt."
     )
