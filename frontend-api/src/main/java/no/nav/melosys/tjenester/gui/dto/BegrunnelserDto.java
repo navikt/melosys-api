@@ -11,4 +11,5 @@ public class BegrunnelserDto {
     public List<KodeDto> ikkeSkip;
     public List<KodeDto> opphold;
     public List<KodeDto> artikkel12_1;
+    public List<KodeDto> artikkel16_1_anmodning;
 }

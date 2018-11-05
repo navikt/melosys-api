@@ -28,6 +28,7 @@ public class KodeverkTjeneste extends RestTjeneste {
     public KodeverkDto getKodeverk() {
         KodeverkDto kodeverk = new KodeverkDto();
         kodeverk.getBegrunnelser().artikkel12_1 = tilKoder(Artikkel12_1.values());
+        kodeverk.getBegrunnelser().artikkel16_1_anmodning = tilKoder(Artikkel16_1_Anmodning.values());
         kodeverk.getBegrunnelser().bosted = tilKoder(Bosted.values());
         kodeverk.getBegrunnelser().forutgaendeMedlemskap = tilKoder(ForutgaaendeMedlemskap.values());
         kodeverk.getBegrunnelser().ikkeSkip = tilKoder(IkkeSkip.values());
@@ -43,11 +44,12 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.getLovvalgsbestemmelser().forordning_883_2004 = tilKoder(LovvalgBestemmelse_883_2004.values());
         kodeverk.getLovvalgsbestemmelser().forordning_987_2009 = tilKoder(LovvalgBestemmelse_987_2009.values());
         kodeverk.getLovvalgsbestemmelser().tillegg = tilKoder(TilleggBestemmelse_883_2004.values());
+        // FIXME kodeverk ikke opprettet
+        kodeverk.setLovvalgsunntak(tilKoder(LovvalgBestemmelse_883_2004.values()));
         kodeverk.setOppgavetyper(tilKoder(Oppgavetype.values()));
         kodeverk.setRepresenterer(tilKoder(Representerer.values()));
         kodeverk.setSakstyper(tilKoder(Fagsakstype.values()));
         kodeverk.setVedleggstitler(tilKoder(VedleggTittel.values()));
-        //kodeverk.setVilkaar(tilKoder(VilkaarType.values())); FIXME venter på frontend
         return kodeverk;
     }
 
