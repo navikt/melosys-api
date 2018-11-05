@@ -35,9 +35,9 @@ public class SaksflytTjeneste extends RestTjeneste {
     public Response hentOppfriskingStatusForBehandling(@ApiParam @PathParam("behandlingID") long behandlingID) {
         String status;
         if (behandlingerService.harAktivOppfrisking(behandlingID)) {
-            status = "PROGRESS";
+            status = "\"PROGRESS\"";
         } else {
-            status = "DONE";
+            status = "\"DONE\"";
         }
         return Response.ok(status).build();
     }
