@@ -7,6 +7,8 @@ public class StrukturertAdresse {
     // Sammensatt av husnummer og husbokstav
     public String husnummer;
 
+    public String region;
+
     public String postnummer;
 
     public String poststed;
