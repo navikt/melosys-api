@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 public enum AvklartefaktaType implements Kodeverk {
 
-    AVKLARTE_ARBEIDSGIVER("AVKLARTE_ARBEIDSGIVER", "Avklarte Arbeidsgiver"),
+    AVKLARTE_ARBEIDSGIVER("AVKLARTE_ARBEIDSGIVER", "Avklarte arbeidsgiver"),
     AG_FORRETNINGSLAND("AG_FORRETNINGSLAND", "Arbeidsgivers forretningsland"),
     MOTTAR_KONTANTYTELSE("MOTTAR_KONTANTYTELSE", "Mottar kontantytelse"),
     OFFENTLIG_TJENESTEMANN("OFFENTLIG_TJENESTEMANN", "Offentlig tjenestemann"),
