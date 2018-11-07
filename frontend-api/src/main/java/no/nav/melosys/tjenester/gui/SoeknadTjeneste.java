@@ -1,20 +1,25 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Set;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.validering.ValideringService;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
+import no.nav.melosys.tjenester.gui.dto.SoeknadTilleggDataDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -32,12 +37,15 @@ public class SoeknadTjeneste extends RestTjeneste {
 
     private final ValideringService valideringService;
 
+    private final RegisterOppslagService registerOppslagService;
+
     private final Tilgang tilgang;
 
     @Autowired
-    public SoeknadTjeneste(SoeknadService soeknadService, ValideringService valideringService, Tilgang tilgang) {
+    public SoeknadTjeneste(SoeknadService soeknadService, ValideringService valideringService, RegisterOppslagService registerOppslagService, Tilgang tilgang) {
         this.soeknadService = soeknadService;
         this.valideringService = valideringService;
+        this.registerOppslagService = registerOppslagService;
         this.tilgang = tilgang;
     }
 
@@ -49,10 +57,13 @@ public class SoeknadTjeneste extends RestTjeneste {
         response = SoeknadDto.class)
     public Response hentSøknad(@ApiParam @PathParam("behandlingID") long behandlingID) {
         SoeknadDokument soeknadDokument;
+        SoeknadTilleggDataDto tilleggDataDto;
 
         try {
             tilgang.sjekk(behandlingID);
             soeknadDokument = soeknadService.hentSoeknad(behandlingID);
+            tilleggDataDto = lagTilleggsData(soeknadDokument);
+
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.NOT_FOUND).build();
         } catch (SikkerhetsbegrensningException e) {
@@ -62,7 +73,7 @@ public class SoeknadTjeneste extends RestTjeneste {
         }
 
         SoeknadDto soeknadDto;
-        soeknadDto = new SoeknadDto(behandlingID, soeknadDokument);
+        soeknadDto = new SoeknadDto(behandlingID, soeknadDokument, tilleggDataDto);
         return Response.ok(soeknadDto).build();
     }
 
@@ -74,13 +85,17 @@ public class SoeknadTjeneste extends RestTjeneste {
     public SoeknadDto registrerSøknad(@ApiParam SoeknadDto soeknadInnDto) {
         long behandlingID = soeknadInnDto.getBehandlingID();
         SoeknadDokument soeknadDokument = soeknadInnDto.getSoeknadDokument();
+        SoeknadTilleggDataDto tilleggDataDto;
 
         try {
             tilgang.sjekk(behandlingID);
+            tilleggDataDto = lagTilleggsData(soeknadDokument);
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException(e);
         } catch (TekniskException e) {
             throw new InternalServerErrorException(e);
+        } catch (IkkeFunnetException e) {
+            throw new NotFoundException(e);
         }
 
         valideringService.validerOpplysninger(soeknadDokument);
@@ -91,6 +106,20 @@ public class SoeknadTjeneste extends RestTjeneste {
             throw new NotFoundException(e.getMessage());
         }
 
-        return new SoeknadDto(behandlingID, soeknadDokument);
+        return new SoeknadDto(behandlingID, soeknadDokument, tilleggDataDto);
+    }
+
+
+    private SoeknadTilleggDataDto lagTilleggsData(SoeknadDokument soeknadDokument) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        Set<OrganisasjonDokument> organisasjoner;
+        Set<PersonDokument> personer;
+
+        Set<String> organisasjonsnummer = soeknadDokument.hentAlleOrganisasjonsnumre();
+        organisasjoner = registerOppslagService.hentOrganisasjoner(organisasjonsnummer);
+        Set<String> personnumre = soeknadDokument.hentAllePersonnumre();
+        personer = registerOppslagService.hentPersoner(personnumre);
+
+
+        return new SoeknadTilleggDataDto(organisasjoner, personer);
     }
 }

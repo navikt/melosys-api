@@ -9,6 +9,7 @@ import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
@@ -43,8 +44,10 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
     public void setUp() throws IkkeFunnetException {
 
         SoeknadService soeknadService = mock(SoeknadService.class);
+        RegisterOppslagService registerOppslagService = mock(RegisterOppslagService.class);
+
         Tilgang tilgang = mock(Tilgang.class);
-        soeknadTjeneste = new SoeknadTjeneste(soeknadService, null, tilgang);
+        soeknadTjeneste = new SoeknadTjeneste(soeknadService, null, registerOppslagService, tilgang);
 
         EnhancedRandom random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
             .overrideDefaultInitialization(true).collectionSizeRange(1, 4).build();
