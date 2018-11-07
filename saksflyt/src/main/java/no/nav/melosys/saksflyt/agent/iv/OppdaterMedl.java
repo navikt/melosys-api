@@ -62,10 +62,11 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        String aktørID = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
-        String fnr = tpsFasade.hentIdentForAktørId(aktørID);
-
         Behandling behandling = prosessinstans.getBehandling();
+        Fagsak fagsak = behandling.getFagsak();
+        Aktoer bruker = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
+        String aktørID = bruker.getAktørId();
+        String fnr = tpsFasade.hentIdentForAktørId(aktørID);
 
         Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeRepository.findByBehandlingsresultatId(behandling.getId());
 

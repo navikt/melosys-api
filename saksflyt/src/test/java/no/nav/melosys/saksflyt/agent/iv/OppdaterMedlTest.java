@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
-import java.util.Properties;
+import java.util.HashSet;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
@@ -45,12 +45,23 @@ public class OppdaterMedlTest {
     @Test
     public void utfoerSteg() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
-        p.setBehandling(new Behandling());
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("TEST-MEDL");
+        HashSet<Aktoer> aktører = new HashSet<>();
+        fagsak.setAktører(aktører);
+
+        Aktoer aktør = new Aktoer();
+        String aktørID = "12345678912";
+        aktør.setAktørId(aktørID);
+        aktør.setFagsak(fagsak);
+        aktør.setRolle(RolleType.BRUKER);
+        aktører.add(aktør);
+
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        p.setBehandling(behandling);
         p.getBehandling().setType(Behandlingstype.SØKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
-        Properties properties = new Properties();
-        properties.setProperty(ProsessDataKey.AKTØR_ID.getKode(), "12345678912");
-        p.addData(properties);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.ART12_1);
