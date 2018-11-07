@@ -69,6 +69,9 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         String fnr = tpsFasade.hentIdentForAktørId(aktørID);
 
         Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeRepository.findByBehandlingsresultatId(behandling.getId());
+        if (lovvalgsperiode == null) {
+            throw new FunksjonellException("Lovvalgsperiode mangler for behandling " + behandling.getId());
+        }
 
         Medlemsperiode medlemsperiode = new Medlemsperiode();
 
