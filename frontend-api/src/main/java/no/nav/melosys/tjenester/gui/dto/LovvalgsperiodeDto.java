@@ -7,52 +7,35 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.Lovvalgsperiode.LovvalgBestemmelsekonverterer;
+import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
 
 public final class LovvalgsperiodeDto {
 
-    public static final class LovvalgBestemmelseILand {
-
-        public final String lovvalgBestemmelse;
-        public final String lovvalgsland;
-
-        public LovvalgBestemmelseILand(LovvalgBestemmelse_883_2004 lovvalgBestemmelse, Landkoder land) {
-            this.lovvalgBestemmelse = lovvalgBestemmelse.name();
-            this.lovvalgsland = land.name();
-        }
-
-    }
-
-    public static final class UnntakFraBestemmelseILand {
-
-        public final String unntakFraBestemmelse;
-        public final String unntakFraLovvalgsland;
-
-        public UnntakFraBestemmelseILand(LovvalgBestemmelse_883_2004 unntakFraBestemmelse, Landkoder unntakFraLovvalgsland) {
-            this.unntakFraBestemmelse = unntakFraBestemmelse != null ? unntakFraBestemmelse.name() : null;
-            this.unntakFraLovvalgsland = unntakFraLovvalgsland != null ? unntakFraLovvalgsland.name() : null;
-        }
-
-    }
+    private static final LovvalgBestemmelsekonverterer konverterer = new LovvalgBestemmelsekonverterer();
 
     @JsonUnwrapped(suffix = "Dato")
     public final PeriodeDto periode;
-    @JsonUnwrapped
-    public final LovvalgBestemmelseILand lovvalg;
-    @JsonUnwrapped
-    public final UnntakFraBestemmelseILand unntak;
+    public final String lovvalgBestemmelse;
+    public final String lovvalgsland;
+    public final String unntakFraBestemmelse;
+    public final String unntakFraLovvalgsland;
     public final String innvilgelsesResultat;
     public final String trygdeDekning;
     public final String medlemskapstype;
 
     public LovvalgsperiodeDto(PeriodeDto periode,
-            LovvalgBestemmelseILand lovvalg,
-            UnntakFraBestemmelseILand unntak,
+            LovvalgBestemmelse lovvalgBestemmelse,
+            Landkoder lovvalgsland,
+            LovvalgBestemmelse unntakFraBestemmelse,
+            Landkoder unntakFraLovvalgsland,
             InnvilgelsesResultat innvilgelsesResultat,
             TrygdeDekning trygdeDekning, Medlemskapstype medlemskapstype) {
         this.periode = periode;
-        this.lovvalg = lovvalg;
-        this.unntak = unntak;
+        this.lovvalgBestemmelse = lovvalgBestemmelse.name();
+        this.lovvalgsland = lovvalgsland.name();
+        this.unntakFraBestemmelse = unntakFraBestemmelse != null ? unntakFraBestemmelse.name() : null;
+        this.unntakFraLovvalgsland = unntakFraLovvalgsland != null ? unntakFraLovvalgsland.name() : null;
         this.innvilgelsesResultat = innvilgelsesResultat.name();
         this.trygdeDekning = trygdeDekning != null ? trygdeDekning.name() : null;
         this.medlemskapstype = medlemskapstype.name();
@@ -62,10 +45,10 @@ public final class LovvalgsperiodeDto {
     public LovvalgsperiodeDto(Map<String, String> json) {
         this(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
                 LocalDate.parse(json.get("tomDato"))),
-                new LovvalgBestemmelseILand(LovvalgBestemmelse_883_2004.valueOf(json.get("lovvalgBestemmelse")),
-                        Landkoder.valueOf(json.get("lovvalgsland"))),
-                new UnntakFraBestemmelseILand(enumVerdiEllerNull(LovvalgBestemmelse_883_2004.class, json.get("unntakFraBestemmelse")),
-                        enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland"))),
+                konverterLovvalgsBestemmelse(json.get("lovvalgBestemmelse")),
+                Landkoder.valueOf(json.get("lovvalgsland")),
+                konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
+                enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
                 InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
                 enumVerdiEllerNull(TrygdeDekning.class, json.get("trygdeDekning")),
                 Medlemskapstype.valueOf(json.get("medlemskapstype")));
@@ -81,9 +64,10 @@ public final class LovvalgsperiodeDto {
     public static LovvalgsperiodeDto av(Lovvalgsperiode lovvalgsperiode) {
         return new LovvalgsperiodeDto(new PeriodeDto(lovvalgsperiode.getFom(),
                 lovvalgsperiode.getTom()),
-                new LovvalgBestemmelseILand(lovvalgsperiode.getBestemmelse(),
-                        lovvalgsperiode.getLovvalgsland()),
-                new UnntakFraBestemmelseILand(lovvalgsperiode.getUnntakFraBestemmelse(), lovvalgsperiode.getUnntakFraLovvalgsland()),
+                lovvalgsperiode.getBestemmelse(),
+                lovvalgsperiode.getLovvalgsland(),
+                lovvalgsperiode.getUnntakFraBestemmelse(),
+                lovvalgsperiode.getUnntakFraLovvalgsland(),
                 lovvalgsperiode.getInnvilgelsesresultat(),
                 lovvalgsperiode.getDekning(), lovvalgsperiode.getMedlemskapstype());
     }
@@ -97,12 +81,18 @@ public final class LovvalgsperiodeDto {
         Lovvalgsperiode resultat = new Lovvalgsperiode();
         resultat.setFom(periode.getFom());
         resultat.setTom(periode.getTom());
-        resultat.setLovvalgsland(Landkoder.valueOf(lovvalg.lovvalgsland));
-        resultat.setBestemmelse(LovvalgBestemmelse_883_2004.valueOf(lovvalg.lovvalgBestemmelse));
+        resultat.setLovvalgsland(Landkoder.valueOf(lovvalgsland));
+        resultat.setBestemmelse(konverterer.convertToEntityAttribute(lovvalgBestemmelse));
+        resultat.setUnntakFraBestemmelse(konverterer.convertToEntityAttribute(unntakFraBestemmelse));
+        resultat.setUnntakFraLovvalgsland(enumVerdiEllerNull(Landkoder.class, unntakFraLovvalgsland));
         resultat.setInnvilgelsesresultat(enumVerdiEllerNull(InnvilgelsesResultat.class, innvilgelsesResultat));
         resultat.setDekning(enumVerdiEllerNull(TrygdeDekning.class, trygdeDekning));
         resultat.setMedlemskapstype(enumVerdiEllerNull(Medlemskapstype.class, medlemskapstype));
         return resultat;
+    }
+
+    private static LovvalgBestemmelse konverterLovvalgsBestemmelse(String bestemmelsesnavn) {
+        return konverterer.convertToEntityAttribute(bestemmelsesnavn);
     }
 
     static <E extends Enum<E>> E enumVerdiEllerNull(Class<E> enumKlasse, String nøkkel) {

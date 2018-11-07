@@ -7,8 +7,11 @@ import java.util.stream.Collectors;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -27,8 +30,9 @@ import no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto;
 @Service
 @Path("/lovvalgsperioder")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-@Transactional
 public class LovvalgsperiodeTjeneste extends RestTjeneste {
+
+    private static final Logger logger = LoggerFactory.getLogger(LovvalgsperiodeTjeneste.class);
 
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final Tilgang tilgang;
@@ -42,7 +46,7 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
     @GET
     @Path("{behandlingsid}")
     @ApiOperation(value = "Henter en lovvalgsperiode for en gitt behandling", response = LovvalgsperiodeDto.class)
-    public Response hentLovvalgsperiode(@PathParam("behandlingsid") long behandlingsid) {
+    public Response hentLovvalgsperioder(@PathParam("behandlingsid") long behandlingsid) {
         sjekkTilgang(behandlingsid);
         Collection<LovvalgsperiodeDto> resultat = lovvalgsperiodeService
                 .hentLovvalgsperioder(behandlingsid)
@@ -55,7 +59,8 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
     @POST
     @Path("{behandlingsid}")
     @ApiOperation("Lagrer en lovvalgsperiode for en gitt behandling.")
-    public Collection<LovvalgsperiodeDto> lagreLovvalgsperiode(@PathParam("behandlingsid") long behandlingsid,
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Collection<LovvalgsperiodeDto> lagreLovvalgsperioder(@PathParam("behandlingsid") long behandlingsid,
             @ApiParam(value = "En liste av lovvalgsperioder å lagre.") Collection<LovvalgsperiodeDto> lovvalgsperiodeDtoer) {
         sjekkTilgang(behandlingsid);
         List<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeDtoer.stream()
@@ -69,13 +74,14 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
         return lovvalgsperiodeDtoer;
     }
 
-    private final void sjekkTilgang(long behandlingsid) {
+    private void sjekkTilgang(long behandlingsid) {
         try {
             tilgang.sjekk(behandlingsid);
         } catch (SikkerhetsbegrensningException e) {
+            logger.warn("SikkerhetsbegrensningException: ", e);
             throw new ForbiddenException(e);
         } catch (TekniskException e) {
-            // TBD: Blir dette logget av Jersey?
+            logger.error("Teknisk feil i tilgangssjekk: ", e);
             throw new InternalServerErrorException(e);
         }
     }

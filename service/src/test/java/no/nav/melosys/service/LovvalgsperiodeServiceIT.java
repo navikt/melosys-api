@@ -5,8 +5,10 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -94,12 +96,11 @@ public class LovvalgsperiodeServiceIT {
         rad.setFom(LocalDate.now());
         rad.setTom(LocalDate.now());
         rad.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
-        rad.setBestemmelse(LovvalgBestemmelse_883_2004.ART11_1);
+        rad.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_1);
         rad.setLovvalgsland(Landkoder.SK);
         rad.setUnntakFraLovvalgsland(Landkoder.SI);
-        rad.setUnntakFraBestemmelse(LovvalgBestemmelse_883_2004.ART11_3A);
+        rad.setUnntakFraBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_3A);
         rad.setMedlemskapstype(Medlemskapstype.UNNTATT);
-        rad.setBrukerID("Bruker Mye");
         return rad;
     }
 
@@ -149,10 +150,25 @@ public class LovvalgsperiodeServiceIT {
     @Test
     public void lagreEnLovvalgsperiodeGirKopiMedGenerertId() throws Throwable {
         Lovvalgsperiode periode = lagLovvalgsperiode(testInstans.getBehandlingsresultat());
+        periode.setFom(periode.getFom().minusDays(42));
         Collection<Lovvalgsperiode> lovvalgsperioder = Collections.singleton(periode);
         Collection<Lovvalgsperiode> resultat = instans.lagreLovvalgsperioder(testInstans.getBehandlingsresultat().getId(), lovvalgsperioder);
         assertThat(resultat).hasSize(1);
         assertThat(resultat.iterator().next().getId()).isNotEqualTo(0);
+    }
+
+    @Test
+    public void lagreToLovvalgsperioderGirToResultaterMedGenerertId() throws Throwable {
+        Lovvalgsperiode periode1 = lagLovvalgsperiode(testInstans.getBehandlingsresultat());
+        periode1.setFom(periode1.getFom().minusDays(42));
+        Lovvalgsperiode periode2 = lagLovvalgsperiode(testInstans.getBehandlingsresultat());
+        periode2.setFom(periode2.getFom().plusDays(42));
+        Collection<Lovvalgsperiode> lovvalgsperioder = Arrays.asList(periode1, periode2);
+        Collection<Lovvalgsperiode> resultat = instans.lagreLovvalgsperioder(testInstans.getBehandlingsresultat().getId(), lovvalgsperioder);
+        assertThat(resultat).hasSize(2);
+        Iterator<Lovvalgsperiode> iterator = resultat.iterator();
+        assertThat(iterator.next().getId()).isNotEqualTo(0);
+        assertThat(iterator.next().getId()).isNotEqualTo(0);
     }
 
     @Test

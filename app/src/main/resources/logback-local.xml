@@ -15,4 +15,11 @@
     <logger name="org.apache.cxf.services" level="WARN"/>
     <logger name="org.springframework.oxm.jaxb.Jaxb2Marshaller" level="WARN"/>
     <logger name="no.nav.melosys.frontendlogg" level="TRACE"/>
+
+    <logger name="org.springframework.orm.jpa" level="WARN" />    
+    <logger name="org.springframework.transaction" level="WARN" />
+    <logger name="org.springframework.transaction.interceptor" level="WARN" />    
+    <logger name="org.hibernate.SQL" level="WARN" />    
+    
+
 </included>

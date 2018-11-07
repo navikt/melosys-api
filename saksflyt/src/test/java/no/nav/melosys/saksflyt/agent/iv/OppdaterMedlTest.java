@@ -65,7 +65,7 @@ public class OppdaterMedlTest {
         p.setType(ProsessType.IVERKSETT_VEDTAK);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.ART12_1);
+        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.CH);
         lovvalgsperiode.setDekning(TrygdeDekning.UTEN_DEKNING);
 

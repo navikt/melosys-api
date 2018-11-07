@@ -9,13 +9,13 @@ import static org.mockito.Mockito.*;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 
-import org.junit.AfterClass;
 import org.junit.Test;
 
 import no.nav.melosys.domain.*;
@@ -28,25 +28,19 @@ import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto;
-import no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto.LovvalgBestemmelseILand;
-import no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto.UnntakFraBestemmelseILand;
 import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
 
 public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTest {
 
     private static final LocalDate FOM = LocalDate.now();
     private static final LovvalgsperiodeDto FORVENTET = new LovvalgsperiodeDto(new PeriodeDto(FOM, FOM),
-            new LovvalgBestemmelseILand(LovvalgBestemmelse_883_2004.ART16_2,
-                    Landkoder.SK),
-            new UnntakFraBestemmelseILand(null, null),
+            LovvalgBestemmelse_883_2004.FO_883_2004_ART16_2,
+            Landkoder.SK,
+            null, null,
             InnvilgelsesResultat.AVSLAATT, null, Medlemskapstype.FRIVILLIG);
 
     private static final long BEHANDLING_UTEN_TILGANG = 238L;
     private static final long BEHANDLING_MED_TEKNISK_FEIL = 832L;
-
-    @AfterClass
-    public static void tearDownAfterClass() throws Exception {
-    }
 
     @Override
     public String schemaNavn() {
@@ -55,7 +49,7 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTest {
 
     @Test
     public void hentEksisterendeLovvalgsperiodeGir200OkOgEnForekomst() throws Exception {
-        testHentLovvalgsperioder(42L, Collections.singletonList(FORVENTET));
+        testHentLovvalgsperioder(13L, Collections.singletonList(FORVENTET));
     }
 
     @Test
@@ -91,7 +85,7 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTest {
         doThrow(new TekniskException("Det har oppstått en..."))
                 .when(tilgang).sjekk(eq(BEHANDLING_MED_TEKNISK_FEIL));
         LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgang);
-        Response resultat = instans.hentLovvalgsperiode(behandlingsid);
+        Response resultat = instans.hentLovvalgsperioder(behandlingsid);
         assertEquals(Response.Status.OK.getStatusCode(), resultat.getStatus());
         @SuppressWarnings("unchecked")
         Collection<LovvalgsperiodeDto> resultatliste = (Collection<LovvalgsperiodeDto>) resultat.getEntity();
@@ -117,7 +111,7 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTest {
         Tilgang tilgang = mock(Tilgang.class);
         LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgang);
         validerListe(perioder);
-        Collection<LovvalgsperiodeDto> resultat = instans.lagreLovvalgsperiode(behandlingsid, perioder);
+        Collection<LovvalgsperiodeDto> resultat = instans.lagreLovvalgsperioder(behandlingsid, perioder);
         assertThat(resultat.size()).isEqualTo(perioder.size());
         if (!perioder.isEmpty()) {
             assertThat(perioder.iterator().next())
@@ -133,13 +127,22 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(FORVENTET.periode.getFom());
         lovvalgsperiode.setTom(FORVENTET.periode.getTom());
-        lovvalgsperiode.setLovvalgsland(Landkoder.valueOf(FORVENTET.lovvalg.lovvalgsland));
-        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.valueOf(FORVENTET.lovvalg.lovvalgBestemmelse));
+        lovvalgsperiode.setLovvalgsland(Landkoder.valueOf(FORVENTET.lovvalgsland));
+        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.valueOf(FORVENTET.lovvalgBestemmelse));
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET.innvilgelsesResultat));
         lovvalgsperiode.setMedlemskapstype(Medlemskapstype.valueOf(FORVENTET.medlemskapstype));
         when(behandlingsresultatRepo.findOne(eq(42L))).thenReturn(lagBehandlingsresultat());
-        when(lovvalgsperiodeRepo.findByBehandlingsresultatId(eq(42L))).thenReturn(Collections.singletonList(lovvalgsperiode));
+        List<Lovvalgsperiode> ingenPerioder = Collections.<Lovvalgsperiode> emptyList();
+        List<Lovvalgsperiode> enPeriode = Collections.singletonList(lovvalgsperiode);
+        when(lovvalgsperiodeRepo.findByBehandlingsresultatId(eq(13L))).thenReturn(enPeriode);
+        mockWithGenericVarargsArray(lovvalgsperiodeRepo, ingenPerioder, enPeriode);
         return lovvalgsperiodeService;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void mockWithGenericVarargsArray(LovvalgsperiodeRepository lovvalgsperiodeRepo,
+            List<Lovvalgsperiode> empty, List<Lovvalgsperiode> single) {
+        when(lovvalgsperiodeRepo.findByBehandlingsresultatId(eq(42L))).thenReturn(empty, single);
     }
 
     private static Behandlingsresultat lagBehandlingsresultat() {

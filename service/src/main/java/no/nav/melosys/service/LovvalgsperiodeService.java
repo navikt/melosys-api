@@ -1,13 +1,15 @@
 package no.nav.melosys.service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.Gson;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -16,7 +18,7 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 
 @Service
-public final class LovvalgsperiodeService {
+public class LovvalgsperiodeService {
 
     private final BehandlingsresultatRepository behandlingsresultatRepo;
     private final LovvalgsperiodeRepository lovvalgsperiodeRepo;
@@ -26,17 +28,18 @@ public final class LovvalgsperiodeService {
         this.lovvalgsperiodeRepo = lovvalgsperiodeRepo;
     }
 
-    public final Collection<Lovvalgsperiode> hentLovvalgsperioder(long behandlingsid) {
+    public Collection<Lovvalgsperiode> hentLovvalgsperioder(long behandlingsid) {
         return lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsid);
     }
 
-    public final Collection<Lovvalgsperiode> lagreLovvalgsperioder(long behandlingsid, Collection<Lovvalgsperiode> lovvalgsperioder)
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Collection<Lovvalgsperiode> lagreLovvalgsperioder(long behandlingsid, Collection<Lovvalgsperiode> lovvalgsperioder)
             throws IkkeFunnetException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findOne(behandlingsid);
         if (behandlingsresultat == null) {
             throw new IkkeFunnetException(String.format("Behandling %s fins ikke.", behandlingsid));
         }
-        lovvalgsperiodeRepo.delete(lovvalgsperioder);
+        lovvalgsperiodeRepo.deleteByBehandlingsresultat(behandlingsresultat);
         List<Lovvalgsperiode> perioderMedBehandling = lovvalgsperioder.stream()
                 .map(l -> kopierLovvalgsperiodeMedBehandlingsResultat(l, behandlingsresultat))
                 .collect(Collectors.toList());
@@ -45,10 +48,14 @@ public final class LovvalgsperiodeService {
     }
 
     private final Lovvalgsperiode kopierLovvalgsperiodeMedBehandlingsResultat(Lovvalgsperiode periode, Behandlingsresultat behandlingsresultat) {
-        Gson gson = new Gson();
-        Lovvalgsperiode klone = gson.fromJson(gson.toJson(periode), Lovvalgsperiode.class);
-        klone.setBehandlingsresultat(behandlingsresultat);
-        return klone;
+        Lovvalgsperiode kopi;
+        try {
+            kopi = (Lovvalgsperiode) BeanUtils.cloneBean(periode);
+        } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | InstantiationException e) {
+            throw new IllegalStateException(e);
+        }
+        kopi.setBehandlingsresultat(behandlingsresultat);
+        return kopi;
     }
 
 }

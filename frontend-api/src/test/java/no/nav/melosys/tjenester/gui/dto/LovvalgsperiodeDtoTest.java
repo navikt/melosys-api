@@ -16,8 +16,6 @@ import no.nav.melosys.domain.Landkoder;
 import no.nav.melosys.domain.Medlemskapstype;
 import no.nav.melosys.domain.TrygdeDekning;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
-import no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto.LovvalgBestemmelseILand;
-import no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto.UnntakFraBestemmelseILand;
 
 public class LovvalgsperiodeDtoTest {
 
@@ -25,7 +23,7 @@ public class LovvalgsperiodeDtoTest {
             "{" +
             "  \"fomDato\": \"2019-01-01\"," +
             "  \"tomDato\": \"2020-01-01\"," +
-            "  \"lovvalgBestemmelse\": \"ART12_1\"," +
+            "  \"lovvalgBestemmelse\": \"FO_883_2004_ART12_1\"," +
             "  \"unntakFraBestemmelse\": %s," +
             "  \"innvilgelsesResultat\": \"INNVILGET\"," +
             "  \"lovvalgsland\": \"NO\"," +
@@ -34,7 +32,7 @@ public class LovvalgsperiodeDtoTest {
             "  \"medlemskapstype\": \"PLIKTIG\"" +
             "}";
 
-    private static final String JSON_EKSEMPEL = String.format(JSON_MAL, "\"ART12_1\"", "\"NO\"", "\"FULL_DEKNING_EOSFO\"");
+    private static final String JSON_EKSEMPEL = String.format(JSON_MAL, "\"FO_883_2004_ART11_1\"", "\"NO\"", "\"FULL_DEKNING_EOSFO\"");
 
     @Test
     public void mapKonstruktørLagerSammeObjektSomOrdinærKonstruktør() throws Exception {
@@ -46,12 +44,10 @@ public class LovvalgsperiodeDtoTest {
     }
 
     private static LovvalgsperiodeDto lagLovvalgsperiodeDtoFraMap(Map<String, String> json) {
-        LovvalgBestemmelseILand lovvalg = new LovvalgBestemmelseILand(LovvalgBestemmelse_883_2004.valueOf(json.get("lovvalgBestemmelse")),
-                Landkoder.valueOf(json.get("lovvalgsland")));
-        UnntakFraBestemmelseILand unntak = new UnntakFraBestemmelseILand(enumVerdiEllerNull(LovvalgBestemmelse_883_2004.class, json.get("unntakFraBestemmelse")),
-                enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")));
         LovvalgsperiodeDto forventet = new LovvalgsperiodeDto(new PeriodeDto(LocalDate.parse(json.get("fomDato")), LocalDate.parse(json.get("tomDato"))),
-                lovvalg, unntak, InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
+                LovvalgBestemmelse_883_2004.valueOf(json.get("lovvalgBestemmelse")),
+                Landkoder.valueOf(json.get("lovvalgsland")), enumVerdiEllerNull(LovvalgBestemmelse_883_2004.class, json.get("unntakFraBestemmelse")),
+                enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")), InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
                 enumVerdiEllerNull(TrygdeDekning.class, json.get("trygdeDekning")), Medlemskapstype.valueOf(json.get("medlemskapstype")));
         return forventet;
     }
