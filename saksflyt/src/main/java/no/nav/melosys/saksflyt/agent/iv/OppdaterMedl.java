@@ -1,6 +1,13 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
+import java.util.List;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
@@ -14,11 +21,6 @@ import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
 import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
@@ -68,11 +70,12 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         String aktørID = bruker.getAktørId();
         String fnr = tpsFasade.hentIdentForAktørId(aktørID);
 
-        Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeRepository.findByBehandlingsresultatId(behandling.getId());
-        if (lovvalgsperiode == null) {
+        List<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeRepository.findByBehandlingsresultatId(behandling.getId());
+        if (lovvalgsperioder.isEmpty()) {
             throw new FunksjonellException("Lovvalgsperiode mangler for behandling " + behandling.getId());
         }
-
+        // FIXME: Støtte for flere perioder må legges til.
+        Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.get(0);
         Medlemsperiode medlemsperiode = new Medlemsperiode();
 
         medlemsperiode.grunnlagstype = lovvalgsperiode.hentFellesKodeForGrunnlagMedltype();

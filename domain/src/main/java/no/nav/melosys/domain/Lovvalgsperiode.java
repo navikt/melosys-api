@@ -1,11 +1,16 @@
 package no.nav.melosys.domain;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+
 import javax.persistence.*;
 
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_987_2009;
+import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse_883_2004;
 import no.nav.melosys.domain.dokument.medlemskap.DekningMedl;
 import no.nav.melosys.domain.dokument.medlemskap.GrunnlagMedl;
 import no.nav.melosys.exception.TekniskException;
@@ -14,12 +19,36 @@ import no.nav.melosys.exception.TekniskException;
 @Table(name = "lovvalg_periode")
 public class Lovvalgsperiode implements ErPeriode {
     
+    public static final class LovvalgBestemmelsekonverterer implements AttributeConverter<LovvalgBestemmelse, String> {
+
+        @Override
+        public String convertToDatabaseColumn(LovvalgBestemmelse attribute) {
+            return attribute != null ? attribute.name() : null;
+        }
+
+        @Override
+        public LovvalgBestemmelse convertToEntityAttribute(String dbData) {
+            if (dbData == null) {
+                return null;
+            }
+            try {
+                return LovvalgBestemmelse_883_2004.valueOf(dbData);
+            } catch (IllegalArgumentException e) {
+                // Bevisst NOOP for å fortsette oppslaget i andre oppramstyper.
+            }
+            try {
+                return LovvalgBestemmelse_987_2009.valueOf(dbData);
+            } catch (IllegalArgumentException e) {
+                // Bevisst NOOP for å fortsette oppslaget i andre oppramstyper.
+            }
+            return TilleggBestemmelse_883_2004.valueOf(dbData);
+        }
+
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @Column(name = "bruker_id", updatable = false)
-    private String brukerID; //AktørID
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
@@ -35,9 +64,17 @@ public class Lovvalgsperiode implements ErPeriode {
     @Column(name = "lovvalgsland", nullable = false, updatable = false)
     private Landkoder lovvalgsland;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "lovvalg_bestemmelse", nullable = false, updatable = false)
-    private LovvalgBestemmelse_883_2004 bestemmelse;
+    @Convert(converter = LovvalgBestemmelsekonverterer.class)
+    private LovvalgBestemmelse bestemmelse;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "unntak_fra_lovvalgsland", nullable = true, updatable = false)
+    private Landkoder unntakFraLovvalgsland;
+
+    @Column(name = "unntak_fra_bestemmelse", nullable = true, updatable = false)
+    @Convert(converter = LovvalgBestemmelsekonverterer.class)
+    private LovvalgBestemmelse unntakFraBestemmelse;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "innvilgelse_resultat", nullable = false, updatable = false)
@@ -51,16 +88,33 @@ public class Lovvalgsperiode implements ErPeriode {
     @Column(name = "trygde_dekning")
     private TrygdeDekning dekning;
 
+    private static final Map<LovvalgBestemmelse, GrunnlagMedl> lovvalgsbestemmelseTilGrunnlagMedlTabell;
+
+    static {
+        Map<LovvalgBestemmelse, GrunnlagMedl> tbl = new HashMap<>();
+        // Article 11
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_3A, GrunnlagMedl.FO_11_3_A);
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_3B, GrunnlagMedl.FO_11_3_B);
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_3C, GrunnlagMedl.FO_11_3_C);
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_3E, GrunnlagMedl.FO_11_3_E);
+        // Article 12
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1, GrunnlagMedl.FO_12_1);
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2, GrunnlagMedl.FO_12_2);
+        // Article 13
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART13_1A, GrunnlagMedl.FO_13_1_A);
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART13_1B1, GrunnlagMedl.FO_13_1_B);
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART13_1B2, GrunnlagMedl.FO_13_B_II);
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART13_1B3, GrunnlagMedl.FO_13_B_III);
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART13_1B4, GrunnlagMedl.FO_13_B_IV);
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART13_2A, GrunnlagMedl.FO_13_2_A);
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART13_2B, GrunnlagMedl.FO_13_2_B);
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART13_3, GrunnlagMedl.FO_13_3);
+        tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART13_4, GrunnlagMedl.FO_13_4);
+        lovvalgsbestemmelseTilGrunnlagMedlTabell = tbl;
+    }
+
     public long getId() {
         return id;
-    }
-
-    public String getBrukerID() {
-        return brukerID;
-    }
-
-    public void setBrukerID(String brukerID) {
-        this.brukerID = brukerID;
     }
 
     public Behandlingsresultat getBehandlingsresultat() {
@@ -101,8 +155,24 @@ public class Lovvalgsperiode implements ErPeriode {
         return bestemmelse;
     }
 
-    public void setBestemmelse(LovvalgBestemmelse_883_2004 bestemmelse) {
+    public void setBestemmelse(LovvalgBestemmelse bestemmelse) {
         this.bestemmelse = bestemmelse;
+    }
+
+    public Landkoder getUnntakFraLovvalgsland() {
+        return unntakFraLovvalgsland;
+    }
+
+    public void setUnntakFraLovvalgsland(Landkoder unntakFraLovvalgsland) {
+        this.unntakFraLovvalgsland = unntakFraLovvalgsland;
+    }
+
+    public LovvalgBestemmelse getUnntakFraBestemmelse() {
+        return unntakFraBestemmelse;
+    }
+
+    public void setUnntakFraBestemmelse(LovvalgBestemmelse unntakFraBestemmelse) {
+        this.unntakFraBestemmelse = unntakFraBestemmelse;
     }
 
     public InnvilgelsesResultat getInnvilgelsesresultat() {
@@ -163,70 +233,11 @@ public class Lovvalgsperiode implements ErPeriode {
     }
 
     public GrunnlagMedl hentFellesKodeForGrunnlagMedltype() throws TekniskException {
-        GrunnlagMedl grunnlagMedltype;
-        switch (bestemmelse) {
-            //Article 11
-            case ART11_3A:
-                grunnlagMedltype = GrunnlagMedl.FO_11_3_A;
-                break;
-            case ART11_3B:
-                grunnlagMedltype = GrunnlagMedl.FO_11_3_B;
-                break;
-            case ART11_3C:
-                grunnlagMedltype = GrunnlagMedl.FO_11_3_C;
-                break;
-            case ART11_3E:
-                grunnlagMedltype = GrunnlagMedl.FO_11_3_E;
-                break;
-
-            //Article 12
-            case ART12_1:
-                grunnlagMedltype = GrunnlagMedl.FO_12_1;
-                break;
-            case ART12_2:
-                grunnlagMedltype = GrunnlagMedl.FO_12_2;
-                break;
-
-            //Article 13
-            case ART13_1A:
-                grunnlagMedltype = GrunnlagMedl.FO_13_1_A;
-                break;
-
-            case ART13_1B1:
-                grunnlagMedltype = GrunnlagMedl.FO_13_1_B;
-                break;
-
-            case ART13_1B2:
-                grunnlagMedltype = GrunnlagMedl.FO_13_B_II;
-                break;
-
-            case ART13_1B3:
-                grunnlagMedltype = GrunnlagMedl.FO_13_B_III;
-                break;
-
-            case ART13_1B4:
-                grunnlagMedltype = GrunnlagMedl.FO_13_B_IV;
-                break;
-
-            case ART13_2A:
-                grunnlagMedltype = GrunnlagMedl.FO_13_2_A;
-                break;
-
-            case ART13_2B:
-                grunnlagMedltype = GrunnlagMedl.FO_13_2_B;
-                break;
-
-            case ART13_3:
-                grunnlagMedltype = GrunnlagMedl.FO_13_3;
-                break;
-
-            case ART13_4:
-                grunnlagMedltype = GrunnlagMedl.FO_13_4;
-                break;
-
-            default:
-                throw new TekniskException("Lovvalgsbestemmelse støttes ikke i MEDL. Kode: " + bestemmelse.getKode() + " Beskrivelse: " + bestemmelse.getBeskrivelse());
+        GrunnlagMedl grunnlagMedltype = lovvalgsbestemmelseTilGrunnlagMedlTabell.get(bestemmelse);
+        if (grunnlagMedltype == null) {
+            throw new TekniskException("Lovvalgsbestemmelse støttes ikke i MEDL. Kode: " + bestemmelse.getKode() + " Beskrivelse: " + bestemmelse.getBeskrivelse());
         }
-    return grunnlagMedltype;
+        return grunnlagMedltype;
     }
+
 }
