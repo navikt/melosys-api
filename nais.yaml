@@ -33,6 +33,10 @@ fasitResources:
     resourceType: datasource
   - alias: melosys:regelmodul
     resourceType: webserviceendpoint
+  - alias: oppgave.oppgaver
+    resourceType: restservice
+  - alias: sak.saker
+    resourceType: restservice
   - alias: Aktoer_v2
     resourceType: webserviceendpoint
   - alias: BehandleInngaaendeJournal_v1
@@ -63,9 +67,6 @@ fasitResources:
     resourceType: webserviceendpoint
   - alias: SakOgBehandling
     resourceType: webserviceendpoint
-# TODO sak.saker eksisterer ikke i T5
-#  - alias: sak.saker
-#    resourceType: restservice
   - alias: securityTokenService
     resourceType: baseurl
   - alias: OpenIdConnectAgent
