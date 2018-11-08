@@ -1,11 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,6 +24,12 @@ import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTest {
 
     private static final LocalDate FOM = LocalDate.now();
@@ -44,7 +44,7 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTest {
 
     @Override
     public String schemaNavn() {
-        return "lovvalgsperiode-schema.json";
+        return "lovvalgsperioder-schema.json";
     }
 
     @Test
