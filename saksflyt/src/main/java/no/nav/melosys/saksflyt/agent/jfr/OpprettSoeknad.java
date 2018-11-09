@@ -6,7 +6,6 @@ import java.util.Map;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -19,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_GSAK_SAK;
 import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_SØKNAD;
@@ -53,7 +51,6 @@ public class OpprettSoeknad extends AbstraktStegBehandler {
         return FeilStrategi.standardFeilHåndtering();
     }
 
-    @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws IkkeFunnetException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());

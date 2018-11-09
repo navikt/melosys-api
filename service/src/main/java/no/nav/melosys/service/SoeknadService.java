@@ -35,7 +35,7 @@ public class SoeknadService {
     }
 
     public SoeknadDokument hentSoeknad(long behandlingID) throws IkkeFunnetException {
-        Behandling behandling = behandlingRepo.findOne(behandlingID);
+        Behandling behandling = behandlingRepo.findOneWithSaksopplysningerById(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling ikke funnet");
         }

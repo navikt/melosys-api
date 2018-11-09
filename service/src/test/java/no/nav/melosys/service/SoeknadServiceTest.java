@@ -90,7 +90,7 @@ public class SoeknadServiceTest {
 
         b.setSaksopplysninger(saksopplysninger);
 
-        when(behandlingRepo.findOne(1L)).thenReturn(b);
+        when(behandlingRepo.findOneWithSaksopplysningerById(1L)).thenReturn(b);
 
         SoeknadDokument res = soeknadService.hentSoeknad(1L);
 

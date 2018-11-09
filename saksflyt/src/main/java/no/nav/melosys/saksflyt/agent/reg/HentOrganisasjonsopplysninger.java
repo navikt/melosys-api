@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Steget sørger for å hente Opplysninger om Orgnisjoner fra EREG
@@ -61,12 +60,11 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
         return FeilStrategi.standardFeilHåndtering();
     }
     
-    @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandling behandling = behandlingRepo.findOne(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingRepo.findOneWithSaksopplysningerById(prosessinstans.getBehandling().getId());
         Set<String> orgnumre = new HashSet<>();
         Set<Saksopplysning> alleSaksopplysninger = behandling.getSaksopplysninger();
 

@@ -224,7 +224,7 @@ public class SaksopplysningerService {
             return;
         }
 
-        Behandling behandling = behandlingRepository.findOne(behandlingsid);
+        Behandling behandling = behandlingRepository.findOneWithSaksopplysningerById(behandlingsid);
         if (behandling == null) {
             log.error("Behandling ikke funnet med behandlingsid {}", behandlingsid);
             throw new IkkeFunnetException("Behandling ikke funnet med behandlingsid: " + behandlingsid);

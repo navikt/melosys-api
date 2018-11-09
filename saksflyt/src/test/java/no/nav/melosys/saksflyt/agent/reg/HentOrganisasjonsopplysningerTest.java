@@ -45,7 +45,7 @@ public class HentOrganisasjonsopplysningerTest {
         p.setBehandling(new Behandling());
         p.getBehandling().setSaksopplysninger(new HashSet<>());
 
-        when(behRepo.findOne(any())).thenReturn(p.getBehandling());
+        when(behRepo.findOneWithSaksopplysningerById(any())).thenReturn(p.getBehandling());
         
         agent.utførSteg(p);
 
