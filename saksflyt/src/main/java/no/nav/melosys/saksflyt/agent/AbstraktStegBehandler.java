@@ -11,6 +11,7 @@ import no.nav.melosys.saksflyt.api.StegBehandler;
 import no.nav.melosys.saksflyt.impl.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 
 public abstract class AbstraktStegBehandler implements StegBehandler {
@@ -47,6 +48,7 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
     }
 
     @Override
+    @Transactional
     public void utførSteg(Prosessinstans prosessinstans) {
         try {
             utfør(prosessinstans);
@@ -72,7 +74,7 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
             håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, e);
         }
     }
-    
+
     protected abstract void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException;
 
 }

@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
 import static no.nav.melosys.domain.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
@@ -55,7 +54,6 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         return FeilStrategi.standardFeilHåndtering();
     }
 
-    @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
