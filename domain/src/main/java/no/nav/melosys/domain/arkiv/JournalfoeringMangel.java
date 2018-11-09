@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.joark;
+package no.nav.melosys.domain.arkiv;
 
 /**
  * Representerer journalføringsmangler i en journalpost fra Joark

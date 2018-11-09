@@ -3,6 +3,7 @@ package no.nav.melosys.service.journalforing;
 import java.time.LocalDateTime;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;

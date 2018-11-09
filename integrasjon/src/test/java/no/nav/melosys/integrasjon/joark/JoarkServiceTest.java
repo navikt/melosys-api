@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.joark;
 
 import java.util.List;
 
-import no.nav.melosys.domain.joark.JournalfoeringMangel;
+import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.DokumentInformasjonMangler;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Journalfoeringsbehov;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.JournalpostMangler;
