@@ -57,7 +57,7 @@ public class VurderInngangsvilkaarTest {
         res.feilmeldinger = Collections.emptyList();
         res.kvalifisererForEf883_2004 = true;
         when(regelmodulService.vurderInngangsvilkår(any(), any(), any())).thenReturn(res);
-        when(behandlingRepository.findOne(any())).thenReturn(p.getBehandling());
+        when(behandlingRepository.findOneWithSaksopplysningerById(any())).thenReturn(p.getBehandling());
         
         agent.utførSteg(p);
 
@@ -80,7 +80,7 @@ public class VurderInngangsvilkaarTest {
         VurderInngangsvilkaarReply res = new VurderInngangsvilkaarReply();
         res.feilmeldinger = Collections.singletonList(fm);
         when(regelmodulService.vurderInngangsvilkår(any(), any(), any())).thenReturn(res);
-        when(behandlingRepository.findOne(any())).thenReturn(p.getBehandling());
+        when(behandlingRepository.findOneWithSaksopplysningerById(any())).thenReturn(p.getBehandling());
         
         agent.utførSteg(p);
 
@@ -124,7 +124,7 @@ public class VurderInngangsvilkaarTest {
         res.feilmeldinger = Collections.emptyList();
         res.kvalifisererForEf883_2004 = true;
         when(regelmodulService.vurderInngangsvilkår(any(), any(), any())).thenReturn(res);
-        when(behandlingRepository.findOne(any())).thenReturn(p.getBehandling());
+        when(behandlingRepository.findOneWithSaksopplysningerById(any())).thenReturn(p.getBehandling());
 
         agent.utførSteg(p);
 

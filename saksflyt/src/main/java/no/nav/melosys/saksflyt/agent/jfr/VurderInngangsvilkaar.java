@@ -67,7 +67,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     @SuppressWarnings("unchecked")
     public void utfør(Prosessinstans prosessinstans) throws TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        Behandling behandling = behandlingRepository.findOne(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingRepository.findOneWithSaksopplysningerById(prosessinstans.getBehandling().getId());
 
         // Hent statsborgerskap fra saksopplysningene...
         // Ved søknad tilbake i tid brukes historisk statsborgerskap

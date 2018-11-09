@@ -64,7 +64,7 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandling behandling = behandlingRepo.findOne(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingRepo.findOneWithSaksopplysningerById(prosessinstans.getBehandling().getId());
         Set<String> orgnumre = new HashSet<>();
         Set<Saksopplysning> alleSaksopplysninger = behandling.getSaksopplysninger();
 
