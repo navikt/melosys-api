@@ -62,6 +62,8 @@ public class DokSysService implements DokSysFasade {
 
         info.setDokumenttypeId(metadata.dokumenttypeID);
         info.setUtledRegisterInfo(metadata.utledRegisterInfo);
+        // Hvis vedlegg skal sendes, må denne settes først når vedleggene har blitt sendt
+        info.setFerdigstillForsendelse(true);
 
         Fagsystemer bestillendeFagsystem = objectFactory.createFagsystemer();
         bestillendeFagsystem.setKodeRef(MELOSYS.getKode());
