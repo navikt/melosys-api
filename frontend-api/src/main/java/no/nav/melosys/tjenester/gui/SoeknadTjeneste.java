@@ -109,8 +109,7 @@ public class SoeknadTjeneste extends RestTjeneste {
         return new SoeknadDto(behandlingID, soeknadDokument, tilleggDataDto);
     }
 
-
-    private SoeknadTilleggDataDto lagTilleggsData(SoeknadDokument soeknadDokument) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    public SoeknadTilleggDataDto lagTilleggsData(SoeknadDokument soeknadDokument) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         Set<OrganisasjonDokument> organisasjoner;
         Set<PersonDokument> personer;
 
@@ -118,7 +117,6 @@ public class SoeknadTjeneste extends RestTjeneste {
         organisasjoner = registerOppslagService.hentOrganisasjoner(organisasjonsnummer);
         Set<String> personnumre = soeknadDokument.hentAllePersonnumre();
         personer = registerOppslagService.hentPersoner(personnumre);
-
 
         return new SoeknadTilleggDataDto(organisasjoner, personer);
     }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -41,7 +42,9 @@ public class SoeknadDokument extends SaksopplysningDokument {
     public Bosted bosted = new Bosted();
 
     public Set<String> hentAlleOrganisasjonsnumre() {
-        return selvstendigArbeid.hentAlleOrganisasjonsnumre()
+        return Stream.of(selvstendigArbeid.hentAlleOrganisasjonsnumre(),
+                         juridiskArbeidsgiverNorge.hentAlleOrganisasjonsnumre())
+                .flatMap(i -> i)
                 .collect(Collectors.toSet());
     }
 

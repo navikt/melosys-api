@@ -1,6 +1,9 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -18,4 +21,10 @@ public class JuridiskArbeidsgiverNorge {
     public BigDecimal andelOmsetningINorge;
     public BigDecimal andelKontrakterINorge;
     public boolean utsendtFortsetterArbeidsforholdIUtlandet;
+    public List<String> ekstraArbeidsgivere = new ArrayList<>();
+
+    public Stream<String> hentAlleOrganisasjonsnumre() {
+        return ekstraArbeidsgivere.stream();
+    }
 }
+
