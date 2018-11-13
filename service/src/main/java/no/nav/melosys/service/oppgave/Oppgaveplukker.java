@@ -54,7 +54,7 @@ public class Oppgaveplukker {
      * 2) Oppgaveplukker henter i GSAK en liste over alle aktive, ikke tildelte oppgaver med oppgitt parametre.
      * 3) Neste oppgave velges basert på prioritet (først) og frist.
      * 4) Oppgaven tildeles til saksbehandleren.
-     * 5) Saksnummer knyttes til oppgaven hvis oppgaven er en behandlingsoppgave.
+     * 5) Behandlingen endrer status hvis oppgaven er en behandlingsoppgave.
      */
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
@@ -178,7 +178,12 @@ public class Oppgaveplukker {
             throw new TekniskException("Fagsak med saksnummer " + saksnummer + " finnes ikke.");
         }
         Behandling behandling = fagsak.getAktivBehandling();
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandlingRepository.save(behandling);
+        if (behandling == null) {
+            throw new TekniskException("En behandlingsoppgave eksisterer i GSAK for sak " + saksnummer + " men ingen aktive behandlinger finnes.");
+        }
+        if (behandling.getStatus() == Behandlingsstatus.OPPRETTET) {
+            behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+            behandlingRepository.save(behandling);
+        }
     }
 }
