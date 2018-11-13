@@ -70,7 +70,7 @@ public class DokumentService {
             throw new IkkeFunnetException("Fagsak med saksnummer " + saksnummer + " finnes ikke");
         }
 
-        return joarkFasade.hentKjerneJournalpostListe(fagsak.getGsakSaksnummer()); //TODO konverterer til DTO her eller i frontend?
+        return joarkFasade.hentKjerneJournalpostListe(fagsak.getGsakSaksnummer());
     }
 
     /**
