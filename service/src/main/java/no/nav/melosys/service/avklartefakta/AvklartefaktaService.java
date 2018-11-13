@@ -61,7 +61,12 @@ public class AvklartefaktaService {
                     avklarteFaktaRepository.findByBehandlingsresultatAndReferanseAndSubjekt(resultat,
                                                                                             avklarteFaktaDto.getReferanse(),
                                                                                             avklarteFaktaDto.getSubjektID());
-            Avklartefakta avklartefakta = resultOpt.orElseGet(Avklartefakta::new);
+
+            resultOpt.ifPresent(avklartefakta -> {
+                avklarteFaktaRepository.delete(avklartefakta.getId());
+            });
+
+            Avklartefakta avklartefakta = new Avklartefakta();
             avklartefakta.setBehandlingsresultat(resultat);
 
             faktaKonverterer.oppdaterAvklartefaktaFraDto(avklartefakta, avklarteFaktaDto);

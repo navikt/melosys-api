@@ -116,4 +116,8 @@ public class Avklartefakta {
     public int hashCode() {
         return Objects.hash(behandlingsresultat, type, subjekt, referanse);
     }
+
+    public long getId() {
+        return id;
+    }
 }

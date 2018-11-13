@@ -7,23 +7,24 @@ import java.util.Set;
 import no.nav.melosys.domain.Avklartefakta;
 import no.nav.melosys.domain.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.AvklartefaktaType;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingResultatRepository;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AvklartefaktaServiceTest {
 
-    @InjectMocks
     private AvklartefaktaService avklartefaktaService;
 
     @Mock
@@ -31,6 +32,12 @@ public class AvklartefaktaServiceTest {
 
     @Mock
     private BehandlingResultatRepository behandlingResultatRepository;
+
+    @Before
+    public void setUp() {
+        AvklartefaktaDtoKonverterer avklartefaktaDtoKonverterer = new AvklartefaktaDtoKonverterer();
+        avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingResultatRepository, avklartefaktaDtoKonverterer);
+    }
 
     @Test
     public void hentAvklartefakta() throws IkkeFunnetException {
@@ -64,5 +71,21 @@ public class AvklartefaktaServiceTest {
         assertEquals(type, dto.getAvklartefaktaType());
         assertEquals(Arrays.asList(begrunnelsekode), dto.getBegrunnelseKoder());
         assertEquals(begrunnelsefritekst, dto.getBegrunnelseFritekst());
+    }
+
+    @Test
+    public void lagreAvklarteFakta() throws IkkeFunnetException {
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        when(behandlingResultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setFakta("test fakta");
+        when(avklarteFaktaRepository.findByBehandlingsresultatAndReferanseAndSubjekt(any(), any(), any())).
+            thenReturn(java.util.Optional.of(avklartefakta));
+
+        HashSet<AvklartefaktaDto> avklartefaktaDtoer = new HashSet<>();
+        avklartefaktaDtoer.add(new AvklartefaktaDto(avklartefakta));
+        avklartefaktaService.lagreAvklarteFakta(123L, avklartefaktaDtoer);
+        verify(avklarteFaktaRepository, times(1)).delete(anyLong());
     }
 }
