@@ -20,7 +20,8 @@ public enum FellesKodeverk {
     PERSONSTATUSER("Personstatuser"),
     POSTNUMMER("Postnummer"),
     SKIPSREGISTRE("Skipsregistre"),
-    SKIPSTYPER("Skipstyper");
+    SKIPSTYPER("Skipstyper"),
+    SIVILSTANDER("Sivilstander");
 
     FellesKodeverk(String navn) {
         this.navn = navn;

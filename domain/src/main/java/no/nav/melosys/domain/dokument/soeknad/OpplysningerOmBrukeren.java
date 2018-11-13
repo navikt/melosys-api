@@ -1,9 +1,8 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Stream;
 
 //Ekstra opplysning for bruker
 public class OpplysningerOmBrukeren {
@@ -12,11 +11,8 @@ public class OpplysningerOmBrukeren {
     public List<String> medfolgendeFamilie = new ArrayList<>();
     public String medfolgendeAndre;
 
-    public Set<String> hentAllePersonnummer() {
-        Set<String> personnummere = new HashSet(medfolgendeFamilie);
-        if (medfolgendeAndre != null) {
-            personnummere.add(medfolgendeAndre);
-        }
-        return personnummere;
+    public Stream<String> hentAllePersonnummer() {
+        return Stream.concat(medfolgendeFamilie.stream(),
+                   Stream.of(medfolgendeAndre));
     }
 }

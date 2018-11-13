@@ -8,7 +8,9 @@
     <xsl:template match="/tps3:hentPersonResponse/response/person">
         <personDokument>
             <fnr><xsl:value-of select="aktoer/ident/ident"/></fnr>
-            <sivilstand><xsl:value-of select="sivilstand/sivilstand"/></sivilstand>
+            <sivilstand>
+                <kode><xsl:value-of select="sivilstand/sivilstand"/></kode>
+            </sivilstand>
             <statsborgerskap>
                 <kode><xsl:value-of select="statsborgerskap/land"/></kode>
             </statsborgerskap>
