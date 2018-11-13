@@ -10,15 +10,20 @@ public class SoeknadDto {
 
     private SoeknadDokument soeknadDokument;
 
-    private SoeknadTilleggDataDto tilleggsData;
+    private SoeknadTilleggsDataDto tilleggsData;
+
+    public SoeknadDto(long behandlingID,
+                      SoeknadDokument soeknad,
+                      SoeknadTilleggsDataDto tilleggsData) {
+        this.behandlingID = behandlingID;
+        this.soeknadDokument = soeknad;
+        this.tilleggsData = tilleggsData;
+    }
 
     @JsonCreator
     public SoeknadDto(@JsonProperty("behandlingID") long behandlingID,
-                      @JsonProperty("soeknadDokument") SoeknadDokument soeknad,
-                      @JsonProperty("tilleggsData") SoeknadTilleggDataDto tilleggData) {
-        this.behandlingID = behandlingID;
-        this.soeknadDokument = soeknad;
-        this.tilleggsData = tilleggData;
+                      @JsonProperty("soeknadDokument") SoeknadDokument soeknad) {
+        this(behandlingID, soeknad, new SoeknadTilleggsDataDto());
     }
 
     public long getBehandlingID() {
@@ -37,11 +42,11 @@ public class SoeknadDto {
         this.soeknadDokument = soeknadDokument;
     }
 
-    public SoeknadTilleggDataDto getTilleggsData() {
+    public SoeknadTilleggsDataDto getTilleggsData() {
         return tilleggsData;
     }
 
-    public void setTilleggsData(SoeknadTilleggDataDto soeknadTilleggDataDto) {
-        this.tilleggsData = soeknadTilleggDataDto;
+    public void setTilleggsData(SoeknadTilleggsDataDto soeknadTilleggsDataDto) {
+        this.tilleggsData = soeknadTilleggsDataDto;
     }
 }

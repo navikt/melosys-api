@@ -12,6 +12,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.tjenester.gui.dto.PersonDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,6 @@ public class PersonTjeneste extends RestTjeneste {
             throw new InternalServerErrorException(e.getMessage());
         }
 
-        return Response.ok(personDokument).build();
+        return Response.ok(new PersonDto(personDokument)).build();
     }
 }

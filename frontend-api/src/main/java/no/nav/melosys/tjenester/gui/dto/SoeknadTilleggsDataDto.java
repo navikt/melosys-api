@@ -1,18 +1,21 @@
 package no.nav.melosys.tjenester.gui.dto;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 
-public class SoeknadTilleggDataDto {
+public class SoeknadTilleggsDataDto {
 
-    public Set<OrganisasjonDokument> organisasjoner;
-    public Set<PersonDto> personer;
+    public Set<OrganisasjonDokument> organisasjoner = new HashSet<>();
+    public Set<PersonDto> personer = new HashSet<>();
 
-    public SoeknadTilleggDataDto(Set<OrganisasjonDokument> organisasjoner,
-                                 Set<PersonDokument> personer) {
+    public SoeknadTilleggsDataDto() {}
+
+    public SoeknadTilleggsDataDto(Set<OrganisasjonDokument> organisasjoner,
+                                  Set<PersonDokument> personer) {
         this.organisasjoner = organisasjoner;
 
         this.personer = personer.stream()

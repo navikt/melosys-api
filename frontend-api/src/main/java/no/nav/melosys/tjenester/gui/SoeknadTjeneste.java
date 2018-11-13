@@ -19,7 +19,7 @@ import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.validering.ValideringService;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
-import no.nav.melosys.tjenester.gui.dto.SoeknadTilleggDataDto;
+import no.nav.melosys.tjenester.gui.dto.SoeknadTilleggsDataDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -57,12 +57,12 @@ public class SoeknadTjeneste extends RestTjeneste {
         response = SoeknadDto.class)
     public Response hentSøknad(@ApiParam @PathParam("behandlingID") long behandlingID) {
         SoeknadDokument soeknadDokument;
-        SoeknadTilleggDataDto tilleggDataDto;
+        SoeknadTilleggsDataDto tilleggDataDto;
 
         try {
             tilgang.sjekk(behandlingID);
             soeknadDokument = soeknadService.hentSoeknad(behandlingID);
-            tilleggDataDto = lagTilleggsData(soeknadDokument);
+            tilleggDataDto = hentTilleggsData(soeknadDokument);
 
         } catch (IkkeFunnetException e) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -85,31 +85,33 @@ public class SoeknadTjeneste extends RestTjeneste {
     public SoeknadDto registrerSøknad(@ApiParam SoeknadDto soeknadInnDto) {
         long behandlingID = soeknadInnDto.getBehandlingID();
         SoeknadDokument soeknadDokument = soeknadInnDto.getSoeknadDokument();
-        SoeknadTilleggDataDto tilleggDataDto;
 
         try {
             tilgang.sjekk(behandlingID);
-            tilleggDataDto = lagTilleggsData(soeknadDokument);
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException(e);
         } catch (TekniskException e) {
             throw new InternalServerErrorException(e);
-        } catch (IkkeFunnetException e) {
-            throw new NotFoundException(e);
         }
 
         valideringService.validerOpplysninger(soeknadDokument);
 
+        SoeknadTilleggsDataDto tilleggDataDto;
         try {
             soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
+            tilleggDataDto = hentTilleggsData(soeknadDokument);
         } catch (IkkeFunnetException e) {
             throw new NotFoundException(e.getMessage());
+        } catch (SikkerhetsbegrensningException e) {
+            throw new ForbiddenException(e);
+        } catch (TekniskException e) {
+            throw new InternalServerErrorException(e);
         }
 
         return new SoeknadDto(behandlingID, soeknadDokument, tilleggDataDto);
     }
 
-    public SoeknadTilleggDataDto lagTilleggsData(SoeknadDokument soeknadDokument) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    public SoeknadTilleggsDataDto hentTilleggsData(SoeknadDokument soeknadDokument) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         Set<OrganisasjonDokument> organisasjoner;
         Set<PersonDokument> personer;
 
@@ -118,6 +120,6 @@ public class SoeknadTjeneste extends RestTjeneste {
         Set<String> personnumre = soeknadDokument.hentAllePersonnumre();
         personer = registerOppslagService.hentPersoner(personnumre);
 
-        return new SoeknadTilleggDataDto(organisasjoner, personer);
+        return new SoeknadTilleggsDataDto(organisasjoner, personer);
     }
 }

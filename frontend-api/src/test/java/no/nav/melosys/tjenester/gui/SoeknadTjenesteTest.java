@@ -21,7 +21,7 @@ import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
-import no.nav.melosys.tjenester.gui.dto.SoeknadTilleggDataDto;
+import no.nav.melosys.tjenester.gui.dto.SoeknadTilleggsDataDto;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONException;
@@ -82,7 +82,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
 
     @Test
     public void testTilleggsDataDto() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        SoeknadTilleggDataDto tilleggDataDto = soeknadTjeneste.lagTilleggsData(soeknadDokument);
+        SoeknadTilleggsDataDto tilleggDataDto = soeknadTjeneste.hentTilleggsData(soeknadDokument);
 
         assertThat(tilleggDataDto.organisasjoner.size()).isEqualTo(1);
         assertThat(tilleggDataDto.personer.size()).isEqualTo(1);
@@ -95,7 +95,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
         SoeknadDto dto = (SoeknadDto) resultat.getEntity();
 
         assertThat(dto.getSoeknadDokument()).isNotNull();
-        SoeknadTilleggDataDto tilleggsDto = dto.getTilleggsData();
+        SoeknadTilleggsDataDto tilleggsDto = dto.getTilleggsData();
         assertThat(tilleggsDto).isNotNull();
         assertThat(tilleggsDto.organisasjoner.size()).isEqualTo(1);
         assertThat(tilleggsDto.personer.size()).isEqualTo(1);

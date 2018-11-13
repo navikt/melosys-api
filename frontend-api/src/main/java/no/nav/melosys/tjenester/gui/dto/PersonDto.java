@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.LocalDate;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.*;
 
@@ -14,26 +13,24 @@ public class PersonDto {
         statsborgerskap = person.statsborgerskap;
         sammensattNavn = person.sammensattNavn;
         personstatus = person.personstatus;
-        kjønn = person.kjønn;
-        fødselsdato = person.fødselsdato;
+        kjoenn = person.kjønn;
+        foedselsdato = person.fødselsdato;
         bostedsadresse = person.bostedsadresse;
     }
 
     public String fnr;
 
-    public Sivilstand sivilstand;
-
     public Land statsborgerskap;
+
+    public Sivilstand sivilstand;
 
     public String sammensattNavn;
 
     public Personstatus personstatus;
 
-    @JsonProperty("kjoenn")
-    public KjoennsType kjønn;
+    public KjoennsType kjoenn;
 
-    @JsonProperty("foedselsdato")
-    public LocalDate fødselsdato;
+    public LocalDate foedselsdato;
 
     public Bostedsadresse bostedsadresse;
 }
