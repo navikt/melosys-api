@@ -2,8 +2,8 @@ package no.nav.melosys.integrasjon.joark;
 
 import java.util.List;
 
-import no.nav.melosys.domain.Journalpost;
-import no.nav.melosys.domain.joark.JournalfoeringMangel;
+import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -25,6 +25,11 @@ public interface JoarkFasade {
      * Henter en journalpost fra Joark
      */
     Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, IntegrasjonException;
+
+    /**
+     * Henter en liste med journalposter knyttet til en sak.
+     */
+    List<Journalpost> hentKjerneJournalpostListe(Long gsakSakID) throws SikkerhetsbegrensningException, IntegrasjonException;
 
     /**
      * Oppdaterer en journalpost i Joark

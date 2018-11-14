@@ -5,7 +5,7 @@ import javax.ws.rs.core.Response;
 
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
-import no.nav.melosys.domain.Journalpost;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;

@@ -6,7 +6,7 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import no.nav.melosys.domain.Journalpost;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -65,9 +65,9 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         dto.setAvsenderID(avsenderID);
         dto.setErBrukerAvsender(brukerID != null && brukerID.equalsIgnoreCase(avsenderID));
         DokumentDto dokumentDto = new DokumentDto();
-        dokumentDto.setDokumentID(journalpost.getHoveddokumentId());
+        dokumentDto.setDokumentID(journalpost.getHoveddokument().getDokumentId());
         dokumentDto.setMottattDato(journalpost.getForsendelseMottatt());
-        dokumentDto.setTittel(journalpost.getHoveddokumentTittel());
+        dokumentDto.setTittel(journalpost.getHoveddokument().getTittel());
         dto.setDokument(dokumentDto);
         return Response.ok(dto).build();
     }

@@ -2,10 +2,9 @@ package no.nav.melosys.integrasjon.joark;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.DokumentTittel;
-import no.nav.melosys.domain.Journalpost;
-import no.nav.melosys.domain.joark.JournalfoeringMangel;
+import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -28,14 +27,18 @@ import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.meldinger.HentJournalpost
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.meldinger.HentJournalpostResponse;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.meldinger.UtledJournalfoeringsbehovRequest;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.meldinger.UtledJournalfoeringsbehovResponse;
-import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentDokumentIkkeFunnet;
-import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentJournalpostIkkeFunnet;
-import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentSikkerhetsbegrensning;
+import no.nav.tjeneste.virksomhet.journal.v3.*;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Variantformater;
+import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentRequest;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentResponse;
+import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeRequest;
+import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
+import static no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journaltilstand.UTGAAR;
 
 @Service
 public class JoarkService implements JoarkFasade {
@@ -128,11 +131,73 @@ public class JoarkService implements JoarkFasade {
             journalpost.setForsendelseMottatt(KonverteringsUtils.xmlGregorianCalendarToInstant(inngaaendeJournalpost.getForsendelseMottatt()));
         }
         Dokumentinformasjon hoveddokument = inngaaendeJournalpost.getHoveddokument();
-        journalpost.setHoveddokumentId(hoveddokument.getDokumentId());
-        // FIXME mangler opplysninger (tittel og vedleggstitler) fra https://jira.adeo.no/browse/PK-51497
-        journalpost.setHoveddokumentTittel(DokumentTittel.SØKNAD_MEDLEMSSKAP.getBeskrivelse());
+        ArkivDokument arkivDokument = new ArkivDokument();
+        arkivDokument.setDokumentId(hoveddokument.getDokumentId());
+        // FIXME Tjenesten mangler opplysninger (tittel og vedleggstitler) tilgjengelige i nye REST tjenester (https://jira.adeo.no/browse/PK-51497).
+        arkivDokument.setTittel("UKJENT");
+        journalpost.setHoveddokument(arkivDokument);
 
         return journalpost;
+    }
+
+    @Override
+    public List<Journalpost> hentKjerneJournalpostListe(Long arkivSakID) throws IntegrasjonException, SikkerhetsbegrensningException {
+        Assert.notNull(arkivSakID, "HentKjerneJournalpostListe krever en arkivSakID.");
+        HentKjerneJournalpostListeRequest hentKjerneJournalpostListeRequest = new HentKjerneJournalpostListeRequest();
+        hentKjerneJournalpostListeRequest.getArkivSakListe().add(lagArkivSak(arkivSakID, Fagsystem.GSAK_I_JOARK.getKode()));
+
+        HentKjerneJournalpostListeResponse hentKjerneJournalpostListeResponse;
+        try {
+            hentKjerneJournalpostListeResponse = journalConsumer.hentKjerneJournalpostListe(hentKjerneJournalpostListeRequest);
+        } catch (HentKjerneJournalpostListeSikkerhetsbegrensning e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (HentKjerneJournalpostListeUgyldigInput e) {
+            throw new IntegrasjonException(e);
+        }
+
+        return hentKjerneJournalpostListeResponse.getJournalpostListe()
+            .stream()
+            .filter(journalpost -> !UTGAAR.equals(journalpost.getJournaltilstand()))
+            .map(this::lagJournalpost)
+            .collect(Collectors.toList());
+    }
+
+    private no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.ArkivSak lagArkivSak(Long arkivSakId, String fagsystem) {
+        no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.ArkivSak arkivSak =
+            new no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.ArkivSak();
+        arkivSak.setArkivSakSystem(fagsystem);
+        arkivSak.setArkivSakId(Long.toString(arkivSakId));
+        arkivSak.setErFeilregistrert(false);
+        return arkivSak;
+    }
+
+    private Journalpost lagJournalpost(no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost j) {
+        Journalpost journalpost = new Journalpost(j.getJournalpostId());
+        if (j.getGjelderArkivSak() != null) {
+            journalpost.setArkivSakId(j.getGjelderArkivSak().getArkivSakId());
+        }
+        if (j.getForsendelseMottatt() != null) {
+            journalpost.setForsendelseMottatt(KonverteringsUtils.xmlGregorianCalendarToInstant(j.getForsendelseMottatt()));
+        }
+        journalpost.setHoveddokument(lagArkivDokument(j.getHoveddokument()));
+        journalpost.setInnhold(j.getInnhold());
+        if (j.getForsendelseJournalfoert() != null) {
+            journalpost.setForsendelseJournalfoert(KonverteringsUtils.xmlGregorianCalendarToInstant(j.getForsendelseJournalfoert()));
+        }
+        journalpost.setJournalposttype(Journalposttype.fraKode(j.getJournalposttype().getValue()));
+
+        j.getVedleggListe().forEach(vedlegg -> journalpost.getVedleggListe().add(lagArkivDokument(vedlegg)));
+        return journalpost;
+    }
+
+    private ArkivDokument lagArkivDokument(DetaljertDokumentinformasjon detaljertDokumentinformasjon) {
+        ArkivDokument arkivDokument = new ArkivDokument();
+        arkivDokument.setDokumentId(detaljertDokumentinformasjon.getDokumentId());
+        arkivDokument.setTittel(detaljertDokumentinformasjon.getTittel());
+
+        detaljertDokumentinformasjon.getSkannetInnholdListe()
+            .forEach(vedlegg -> arkivDokument.getInterneVedlegg().add(new ArkivDokumentVedlegg(vedlegg.getVedleggInnhold())));
+        return arkivDokument;
     }
 
     @Override
@@ -182,7 +247,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public List<JournalfoeringMangel> utledJournalfoeringsbehov(String journalpostID) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
+    public List<JournalfoeringMangel> utledJournalfoeringsbehov(String journalpostID) throws FunksjonellException {
         UtledJournalfoeringsbehovRequest request = new UtledJournalfoeringsbehovRequest();
         request.setJournalpostId(journalpostID);
 

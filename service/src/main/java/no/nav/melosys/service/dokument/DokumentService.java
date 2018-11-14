@@ -1,14 +1,17 @@
 package no.nav.melosys.service.dokument;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.doksys.DokSysFasade;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
@@ -23,6 +26,8 @@ public class DokumentService {
 
     private final BehandlingRepository behandlingRepository;
 
+    private final FagsakRepository fagsakRepository;
+
     private final BrevDataService brevDataService;
 
     private final DokSysFasade dokSysFasade;
@@ -34,10 +39,13 @@ public class DokumentService {
     private final ProsessinstansRepository prosessinstansRepo;
 
     @Autowired
-    DokumentService(BehandlingRepository behandlingRepository, BrevDataService brevDataService,
+    DokumentService(BehandlingRepository behandlingRepository,
+                    FagsakRepository fagsakRepository,
+                    BrevDataService brevDataService,
                     DokSysFasade dokSysFasade, JoarkFasade joarkFasade,
                     Binge binge, ProsessinstansRepository prosessinstansRepo) {
         this.behandlingRepository = behandlingRepository;
+        this.fagsakRepository = fagsakRepository;
         this.brevDataService = brevDataService;
         this.joarkFasade = joarkFasade;
         this.dokSysFasade = dokSysFasade;
@@ -51,6 +59,18 @@ public class DokumentService {
      */
     public byte[] hentDokument(String journalpostID, String dokumentID) throws SikkerhetsbegrensningException, IntegrasjonException, IkkeFunnetException {
         return joarkFasade.hentDokument(journalpostID, dokumentID);
+    }
+
+    /**
+     * Henter dokumenter knyttet til en sak med et gitt saksnummer
+     */
+    public List<Journalpost> hentDokumenter(String saksnummer) throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
+        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+        if (fagsak == null) {
+            throw new IkkeFunnetException("Fagsak med saksnummer " + saksnummer + " finnes ikke");
+        }
+
+        return joarkFasade.hentKjerneJournalpostListe(fagsak.getGsakSaksnummer());
     }
 
     /**

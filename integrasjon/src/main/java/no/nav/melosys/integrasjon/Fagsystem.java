@@ -2,17 +2,20 @@ package no.nav.melosys.integrasjon;
 
 import no.nav.melosys.domain.Kodeverk;
 
+/**
+ * https://confluence.adeo.no/display/APPKAT/Applikasjons-ID
+ */
 public enum Fagsystem implements Kodeverk {
 
     GSAK("FS19", "GSAK"),
-    // GSAK skal brukes som referanse til sakstilhørende fagsystem, men av historiske årsaker har det feil kode i Joark
-    GSAK_I_JOARK("FS22", "GSAK i Joark"),
-    MELOSYS("FS38", "Melosys"); // "https://confluence.adeo.no/display/APPKAT/Applikasjons-ID"
+    // GSAK brukes som referanse til sakstilhørende fagsystem, men av historiske årsaker har det feil kode i Joark.
+    GSAK_I_JOARK("FS22", "GSAK i Joark"), // Bruker Gosys appID
+    MELOSYS("FS38", "Melosys");
 
     private String kode;
     private String beskrivelse;
 
-    private Fagsystem(String kode, String beskrivelse) {
+    Fagsystem(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
