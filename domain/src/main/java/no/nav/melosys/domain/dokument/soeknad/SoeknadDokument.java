@@ -2,6 +2,10 @@ package no.nav.melosys.domain.dokument.soeknad;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -38,4 +42,17 @@ public class SoeknadDokument extends SaksopplysningDokument {
 
     public Bosted bosted = new Bosted();
 
+    public Set<String> hentAlleOrganisasjonsnumre() {
+        return Stream.of(selvstendigArbeid.hentAlleOrganisasjonsnumre(),
+                         juridiskArbeidsgiverNorge.hentAlleOrganisasjonsnumre())
+                .flatMap(i -> i)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<String> hentAllePersonnumre() {
+        return personOpplysninger.hentAllePersonnummer()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
 }

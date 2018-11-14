@@ -45,6 +45,7 @@ public class PersonDokument extends SaksopplysningDokument {
     @JsonIgnore // TODO må avklares
     public LocalDate dødsdato;
 
+    @JsonIgnore
     public Diskresjonskode diskresjonskode;
 
     @JsonProperty("personStatus")

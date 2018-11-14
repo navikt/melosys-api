@@ -1,35 +1,30 @@
 package no.nav.melosys.domain.dokument.medlemskap;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonValue;
-import no.nav.melosys.domain.dokument.KodeverkEnum;
+import no.nav.melosys.domain.Kodeverk;
 
 /**
  * Denne enumen er en hardkoding av kodeverket PeriodetypeMedl.
  */
-public enum Periodetype implements KodeverkEnum<Periodetype> {
-    PMMEDSKP("Periode med medlemskap"),
-    PUMEDSKP("Periode uten medlemskap"),
-    E500INFO("Utenlandsk id");
+public enum Periodetype implements Kodeverk {
+    PMMEDSKP("PMMEDSKP", "Periode med medlemskap"),
+    PUMEDSKP("PUMEDSKP", "Periode uten medlemskap"),
+    E500INFO("E500INFO", "Utenlandsk id");
 
-    private String navn;
+    private String kode;
+    private String beskrivelse;
 
-    Periodetype(String navn) {
-        this.navn = navn;
-    }
-
-    @JsonValue
-    public Map<String, String> getJson() {
-        Map<String, String> periodetypeMap = new HashMap<>();
-        periodetypeMap.put("kode", name());
-        periodetypeMap.put("term", navn);
-        return periodetypeMap;
+    Periodetype(String kode, String beskrivelse) {
+        this.kode = kode;
+        this.beskrivelse = beskrivelse;
     }
 
     @Override
-    public String getNavn() {
-        return navn;
+    public String getKode() {
+        return kode;
+    }
+
+    @Override
+    public String getBeskrivelse() {
+        return beskrivelse;
     }
 }

@@ -1,5 +1,8 @@
 package no.nav.melosys.service;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -25,11 +28,39 @@ public class RegisterOppslagService {
     }
 
     /**
+     *  Henter et sett med organisasjonsopplysninger
+     */
+    public Set<OrganisasjonDokument> hentOrganisasjoner(Set<String> orgnumre) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        Set<OrganisasjonDokument> organisasjoner = new HashSet<>();
+        for (String orgnr : orgnumre) {
+            OrganisasjonDokument saksopplysning = hentOrganisasjon(orgnr);
+            if (saksopplysning != null) {
+                organisasjoner.add(saksopplysning);
+            }
+        }
+        return organisasjoner;
+    }
+
+    /**
      * Henter organisasjonsopplysninger.
      */
     public OrganisasjonDokument hentOrganisasjon(String orgnummer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(orgnummer);
         return (OrganisasjonDokument) saksopplysning.getDokument();
+    }
+
+    /**
+     *  Henter et sett med personssopplysninger
+     */
+    public Set<PersonDokument> hentPersoner(Set<String> personnumre) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        Set<PersonDokument> personer = new HashSet<>();
+        for (String personnummer : personnumre) {
+            PersonDokument person = hentPerson(personnummer);
+            if (person != null) {
+                personer.add(person);
+            }
+        }
+        return personer;
     }
 
     /**
