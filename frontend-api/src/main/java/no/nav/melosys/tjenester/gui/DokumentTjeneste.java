@@ -1,18 +1,22 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Dokumenttype;
-import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
+import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +69,31 @@ public class DokumentTjeneste extends RestTjeneste {
         return ok.build();
     }
 
+    @GET
+    @Path("/oversikt/{saksnummer}")
+    @ApiOperation(
+        value = "Henter alle dokumenter knyttet til en fagsak",
+        response = JournalpostInfoDto.class,
+        responseContainer = "List")
+    public Response hentDokumenter(@PathParam("saksnummer") String saksnummer) {
+        try {
+            List<JournalpostInfoDto> dokumentListe = dokumentService.hentDokumenter(saksnummer)
+                .stream()
+                .map(JournalpostInfoDto::av)
+                .collect(Collectors.toList());
+            return Response.ok(dokumentListe).build();
+        } catch (SikkerhetsbegrensningException e) {
+            log.error("SikkerhetsbegrensningException", e);
+            return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (IntegrasjonException e) {
+            log.error("IntegrasjonException", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (FunksjonellException e) {
+            log.error("FunksjonellException", e);
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+    }
+
     @POST
     @Path("utkast/pdf/{behandlingID}/{dokumenttypeKode}")
     @Produces("application/pdf")
@@ -111,28 +140,6 @@ public class DokumentTjeneste extends RestTjeneste {
         } catch (TekniskException e) {
             log.error("TekniskException", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    @GET
-    @Path("/oversikt/{saksnummer}")
-    @ApiOperation(
-        value = "Henter alle dokumenter knyttet til en fagsak",
-        response = Journalpost.class,
-        responseContainer = "List")
-    public Response hentDokumenter(@PathParam("saksnummer") String saksnummer) {
-        try {
-            List<Journalpost> journalposter = dokumentService.hentDokumenter(saksnummer);
-            return Response.ok(journalposter).build();
-        } catch (SikkerhetsbegrensningException e) {
-            log.error("SikkerhetsbegrensningException", e);
-            return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (IntegrasjonException e) {
-            log.error("IntegrasjonException", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (FunksjonellException e) {
-            log.error("FunksjonellException", e);
-            return Response.status(Response.Status.BAD_REQUEST).build();
         }
     }
 }

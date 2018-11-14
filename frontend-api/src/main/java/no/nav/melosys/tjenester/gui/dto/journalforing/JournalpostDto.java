@@ -1,10 +1,23 @@
 package no.nav.melosys.tjenester.gui.dto.journalforing;
 
+import java.time.Instant;
+
+import no.nav.melosys.tjenester.gui.dto.dokument.DokumentDto;
+
 public class JournalpostDto {
+    private Instant mottattDato;
     private String brukerID;
     private String avsenderID;
     private boolean erBrukerAvsender;
     private DokumentDto dokument;
+
+    public Instant getMottattDato() {
+        return mottattDato;
+    }
+
+    public void setMottattDato(Instant mottattDato) {
+        this.mottattDato = mottattDato;
+    }
 
     public String getBrukerID() {
         return brukerID;

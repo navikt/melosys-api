@@ -12,6 +12,8 @@ public class Journalpost {
     private String arkivSakId;
     private String avsenderId;
     private String brukerId;
+    private String korrespondansepartNavn;
+    private String korrespondansepartId;
     private Instant forsendelseJournalfoert;
     private Instant forsendelseMottatt;
     private ArkivDokument hoveddokument;
@@ -44,6 +46,30 @@ public class Journalpost {
         this.avsenderId = avsenderId;
     }
 
+    public String getBrukerId() {
+        return brukerId;
+    }
+
+    public void setBrukerId(String brukerId) {
+        this.brukerId = brukerId;
+    }
+
+    public String getKorrespondansepartNavn() {
+        return korrespondansepartNavn;
+    }
+
+    public void setKorrespondansepartNavn(String korrespondansepartNavn) {
+        this.korrespondansepartNavn = korrespondansepartNavn;
+    }
+
+    public String getKorrespondansepartId() {
+        return korrespondansepartId;
+    }
+
+    public void setKorrespondansepartId(String korrespondansepartId) {
+        this.korrespondansepartId = korrespondansepartId;
+    }
+
     public Instant getForsendelseJournalfoert() {
         return forsendelseJournalfoert;
     }
@@ -58,14 +84,6 @@ public class Journalpost {
 
     public void setForsendelseMottatt(Instant forsendelseMottatt) {
         this.forsendelseMottatt = forsendelseMottatt;
-    }
-
-    public String getBrukerId() {
-        return brukerId;
-    }
-
-    public void setBrukerId(String brukerId) {
-        this.brukerId = brukerId;
     }
 
     public ArkivDokument getHoveddokument() {
@@ -94,9 +112,5 @@ public class Journalpost {
 
     public List<ArkivDokument> getVedleggListe() {
         return vedleggListe;
-    }
-
-    public void setVedleggListe(List<ArkivDokument> vedleggListe) {
-        this.vedleggListe = vedleggListe;
     }
 }

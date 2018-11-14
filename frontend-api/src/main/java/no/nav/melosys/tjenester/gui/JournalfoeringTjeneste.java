@@ -14,7 +14,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
-import no.nav.melosys.tjenester.gui.dto.journalforing.DokumentDto;
+import no.nav.melosys.tjenester.gui.dto.dokument.DokumentDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,15 +59,13 @@ public class JournalfoeringTjeneste extends RestTjeneste {
             throw new BadRequestException("Funksjonell feil: " + e.getMessage());
         }
         JournalpostDto dto = new JournalpostDto();
+        dto.setMottattDato(journalpost.getForsendelseMottatt());
         String brukerID = journalpost.getBrukerId();
         dto.setBrukerID(brukerID);
         String avsenderID = journalpost.getAvsenderId();
         dto.setAvsenderID(avsenderID);
         dto.setErBrukerAvsender(brukerID != null && brukerID.equalsIgnoreCase(avsenderID));
-        DokumentDto dokumentDto = new DokumentDto();
-        dokumentDto.setDokumentID(journalpost.getHoveddokument().getDokumentId());
-        dokumentDto.setMottattDato(journalpost.getForsendelseMottatt());
-        dokumentDto.setTittel(journalpost.getHoveddokument().getTittel());
+        DokumentDto dokumentDto = new DokumentDto(journalpost.getHoveddokument().getDokumentId(), journalpost.getHoveddokument().getTittel());
         dto.setDokument(dokumentDto);
         return Response.ok(dto).build();
     }
