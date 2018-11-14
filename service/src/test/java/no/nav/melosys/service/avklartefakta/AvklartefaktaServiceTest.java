@@ -56,7 +56,7 @@ public class AvklartefaktaServiceTest {
 
         when(avklarteFaktaRepository.findByBehandlingsresultatId(anyLong())).thenReturn(avklartefaktaSet);
 
-        AvklartefaktaDto dto = avklartefaktaService.hentAvklarteFakta(1L).stream().findFirst().get();
+        AvklartefaktaDto dto = avklartefaktaService.hentAlleAvklarteFakta(1L).stream().findFirst().get();
 
         assertEquals(referanse, dto.getReferanse());
         assertEquals(subjektID, dto.getSubjektID());

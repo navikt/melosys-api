@@ -47,7 +47,7 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTest {
     @Test
     public void hentAvklartefakta() throws Exception {
         Set<AvklartefaktaDto> mockliste = defaultEnhancedRandom().randomSetOf(4, AvklartefaktaDto.class);
-        when(avklartefaktaService.hentAvklarteFakta(1L)).thenReturn(mockliste);
+        when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(mockliste);
 
         Set<AvklartefaktaDto> avklartefaktaDtoSet = avklartefaktaTjeneste.hentAvklarteFakta(1L);
         validerListe(avklartefaktaDtoSet);

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema	attributeFormDefault="unqualified"
 			  elementFormDefault="qualified"
-			  xmlns:xs="http://www.w3.org/2001/XMLSchema"
 			  targetNamespace="http://nav.no/dok/melosysbrev/felles/melosys_felles"
 			  xmlns="http://nav.no/dok/melosysbrev/felles/melosys_felles"
+			  xmlns:xs="http://www.w3.org/2001/XMLSchema"
 			  xmlns:felles="http://nav.no/dok/brevdata/felles/v1/NAVFelles"
 			  xmlns:st="http://nav.no/dok/brevdata/felles/v1/SimpleTypes">
 
 	<xs:import namespace="http://nav.no/dok/brevdata/felles/v1/NAVFelles" schemaLocation="navfelles/v1.NAVFelles.xsd" />
 	<xs:import namespace="http://nav.no/dok/brevdata/felles/v1/SimpleTypes" schemaLocation="navfelles/v1.SimpleTypes.xsd"/>
-	
+
 	<xs:complexType name="MelosysNAVFelles">
 		<xs:annotation>
 			<xs:documentation>Gyldig versjon av felles informasjonsmodell</xs:documentation>
@@ -55,6 +55,14 @@
 		</xs:all>
 	</xs:complexType>
 
+	<xs:complexType name="avsenderType">
+		<xs:sequence>
+			<xs:element name="rolle" type="rolleKode"/>
+			<xs:element name="trygdemyndighetsLand" type="xs:string" minOccurs="0"/>
+			<xs:element name="navn" type="xs:string" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
 	<xs:simpleType name="rolleKode">
 		<xs:annotation>
 			<xs:documentation>Koder som angir hvilken rolle avsender har</xs:documentation>
@@ -67,12 +75,96 @@
 		</xs:restriction>
 	</xs:simpleType>
 
-	<xs:complexType name="avsenderType">
-		<xs:sequence>
-			<xs:element name="rolle" type="rolleKode"/>
-			<xs:element name="trygdemyndighetsLand" type="xs:string" minOccurs="0"/>
-			<xs:element name="navn" type="xs:string" minOccurs="0"/>
-		</xs:sequence>
-	</xs:complexType>
+	<xs:simpleType name="kjoennKode">
+		<xs:annotation>
+			<xs:documentation>Koder som angir hvilket kjønn søker har</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="K"/>
+			<xs:enumeration value="M"/>
+			<xs:enumeration value="U"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="yrkesaktivitetsKode">
+		<xs:annotation>
+			<xs:documentation>Koder som angir hvilken type yrkesaktivitet</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="SELVSTENDIG"/>
+			<xs:enumeration value="FRILANSER"/>
+			<xs:enumeration value="LOENNET_ARBEID"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="lovvalgsbestemmelseKode">
+		<xs:annotation>
+			<xs:documentation>Koder som angir hvilken lovvalgsbestemmelse som ligger til grunn</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="FO_883_2004_ART11_1"/>
+			<xs:enumeration value="FO_883_2004_ART11_3A"/>
+			<xs:enumeration value="FO_883_2004_ART11_3B"/>
+			<xs:enumeration value="FO_883_2004_ART11_3C"/>
+			<xs:enumeration value="FO_883_2004_ART11_3E"/>
+			<xs:enumeration value="FO_883_2004_ART11_4_2"/>
+			<xs:enumeration value="FO_883_2004_ART12_1"/>
+			<xs:enumeration value="FO_883_2004_ART12_2"/>
+			<xs:enumeration value="FO_883_2004_ART13_1A"/>
+			<xs:enumeration value="FO_883_2004_ART13_1B1"/>
+			<xs:enumeration value="FO_883_2004_ART13_1_B2"/>
+			<xs:enumeration value="FO_883_2004_ART13_1_B3"/>
+			<xs:enumeration value="FO_883_2004_ART13_1_B4"/>
+			<xs:enumeration value="FO_883_2004_ART13_2A"/>
+			<xs:enumeration value="FO_883_2004_ART13_2B"/>
+			<xs:enumeration value="FO_883_2004_ART13_3"/>
+			<xs:enumeration value="FO_883_2004_ART13_4"/>
+			<xs:enumeration value="FO_987_2009_ART14_11"/>
+			<xs:enumeration value="FO_883_2004_ART16_1"/>
+			<xs:enumeration value="FO_883_2004_ART16_2"/>
+			<xs:enumeration value="FO_883_2004_ANNET"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="tilleggsbestemmelseKode">
+		<xs:annotation>
+			<xs:documentation>Koder som angir hvilken tilleggsbestemmelse som ligger til grunn</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="FO_883_2004_ART11_2"/>
+			<xs:enumeration value="FO_883_2004_ART11_4_1"/>
+			<xs:enumeration value="FO_883_2004_ART11_5"/>
+			<xs:enumeration value="FO_883_2004_ART13_3"/>
+			<xs:enumeration value="FO_883_2004_ART13_4"/>
+			<xs:enumeration value="FO_883_2004_ART87"/>
+			<xs:enumeration value="FO_883_2004_ART87A"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="yrkesgruppeKode">
+		<xs:annotation>
+			<xs:documentation>Koder som angir hvilken type yrkesgruppe</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="SOKKEL_ELLER_SKIP"/>
+			<xs:enumeration value="FLYENDE_PERSONELL"/>
+			<xs:enumeration value="ORDINAER"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="behandlingstypeKode">
+		<xs:annotation>
+			<xs:documentation>Koder som angir hva slags behandling som ligger til grunn</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="SOEKNAD"/>
+			<xs:enumeration value="KLAGE"/>
+			<xs:enumeration value="POSTING_UTL"/>
+			<xs:enumeration value="NORGE_UTPEKT"/>
+			<xs:enumeration value="PAASTAND_UTL"/>
+			<xs:enumeration value="NY_VURDERING"/>
+			<xs:enumeration value="ENDRETPERIODE"/>
+		</xs:restriction>
+	</xs:simpleType>
 
 </xs:schema>

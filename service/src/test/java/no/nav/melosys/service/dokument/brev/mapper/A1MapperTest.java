@@ -4,46 +4,48 @@ import java.time.Instant;
 
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
-import no.nav.dok.melosysbrev._000074.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.RolleType;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.Mock;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MangelbrevMapperTest {
+public class A1MapperTest {
 
-    private MangelbrevMapper mapper;
-
-    @Mock
-    private Behandlingsresultat resultat;
+    private A1Mapper mapper;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     private EnhancedRandom enhancedRandom;
 
+    private String fritekst = "";
+    private Behandlingsresultat behandlingsresultat;
+
     @Before
     public void setUp() {
-        mapper = new MangelbrevMapper();
+        mapper = new A1Mapper();
         enhancedRandom = EnhancedRandomBuilder
             .aNewEnhancedRandomBuilder()
             .scanClasspathForConcreteTypes(true)
             .build();
+
+        behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setRegistrertDato(Instant.now());
     }
 
+    @SuppressWarnings("Duplicates")
     @Test
+    @Ignore
     public void mapTilBrevXML() throws Exception {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-1");
@@ -56,40 +58,8 @@ public class MangelbrevMapperTest {
         behandling.setRegistrertDato(Instant.now());
 
         BrevDataDto brevDataDto = new BrevDataDto();
-        brevDataDto.mottaker = RolleType.BRUKER;
-        brevDataDto.fritekst = "Test";
-
-        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevDataDto);
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevDataDto);
 
         assertThat(xml).isNotNull();
-    }
-
-    @Test
-    public void mapFag() throws Exception {
-        Behandling behandling = new Behandling();
-        behandling.setRegistrertDato(Instant.now());
-        BrevDataDto brevDataDto = new BrevDataDto();
-        brevDataDto.fritekst = "Test";
-
-        Fag fag = mapper.mapFag(behandling, brevDataDto);
-
-        assertThat(fag).isNotNull();
-        assertThat(fag.getDatoMottatt()).isNotNull();
-        assertThat(fag.getAvsender()).isNotNull();
-
-        assertThat(fag.getManglendeOpplysninger()).isNotNull();
-        assertThat(fag.getManglendeOpplysninger().getFristDato()).isNotNull();
-        assertThat(fag.getManglendeOpplysninger().getManglendeOpplysningerFritekst()).isNotNull();
-    }
-
-    @Test
-    public void mapFag_manglerFritekst() throws Exception {
-        Behandling behandling = new Behandling();
-        behandling.setRegistrertDato(Instant.now());
-        BrevDataDto brevDataDto = new BrevDataDto();
-
-        expectedException.expect(IntegrasjonException.class);
-
-        mapper.mapFag(behandling, brevDataDto);
     }
 }

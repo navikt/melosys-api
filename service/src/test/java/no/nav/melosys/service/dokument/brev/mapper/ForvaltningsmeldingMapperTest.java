@@ -42,7 +42,7 @@ public class ForvaltningsmeldingMapperTest {
         Behandling behandling = new Behandling();
         behandling.setRegistrertDato(Instant.now());
 
-        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null);
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling,null, null);
 
         assertThat(xml).isNotNull();
     }

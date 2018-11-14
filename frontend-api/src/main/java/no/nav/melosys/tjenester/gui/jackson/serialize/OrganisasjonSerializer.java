@@ -32,7 +32,7 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         OrganisasjonDto organisasjonDto = new OrganisasjonDto();
 
         organisasjonDto.setOrgnr(organisasjon.getOrgnummer());
-        organisasjonDto.setNavn(getNavn(organisasjon));
+        organisasjonDto.setNavn(organisasjon.getNavnSammenslått());
         organisasjonDto.setOppstartdato(organisasjon.getOppstartsdato());
         if (!StringUtils.isEmpty(organisasjon.getEnhetstype())) {
             organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype(), LocalDate.now()));
@@ -42,7 +42,7 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         List<GeografiskAdresse> forretningsadresser = null;
         List<GeografiskAdresse> postadresser = null;
         if (organisasjon.getOrganisasjonDetaljer() != null) {
-            forretningsadresser = organisasjon.getOrganisasjonDetaljer().getForretningsadresse();
+            forretningsadresser = organisasjon.getOrganisasjonDetaljer().getForretningsadresser();
             postadresser = organisasjon.getOrganisasjonDetaljer().getPostadresse();
         }
         organisasjonDto.setForretningsadresse(tilAdresseDto(forretningsadresser));
@@ -105,9 +105,6 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         }
     }
 
-    // Hvis man ikke har bruk for historikk på navn så er det best å bruke navn på nivå organisasjon.
-    private String getNavn(OrganisasjonDokument organisasjon) {
-        return organisasjon.getNavn() == null ? "UKJENT" : String.join(" ", organisasjon.getNavn());
-    }
+
 
 }

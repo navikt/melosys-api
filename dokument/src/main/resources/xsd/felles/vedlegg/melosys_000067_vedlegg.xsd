@@ -7,20 +7,10 @@
 		   xmlns:melosysfelles="http://nav.no/dok/melosysbrev/felles/melosys_felles"
 		   xmlns:st="http://nav.no/dok/brevdata/felles/v1/SimpleTypes">
 
-	<xs:import namespace="http://nav.no/dok/melosysbrev/felles/melosys_felles" schemaLocation="felles/melosys_felles.xsd" />
-	<xs:import namespace="http://nav.no/dok/brevdata/felles/v1/SimpleTypes" schemaLocation="felles/navfelles/v1.SimpleTypes.xsd"/>
+	<xs:import namespace="http://nav.no/dok/melosysbrev/felles/melosys_felles" schemaLocation="../melosys_felles.xsd" />
+	<xs:import namespace="http://nav.no/dok/brevdata/felles/v1/SimpleTypes" schemaLocation="../navfelles/v1.SimpleTypes.xsd"/>
 
-	<xs:element name="brevdata" type="brevdataType"/>
-
-	<xs:complexType name="brevdataType">
-		<xs:sequence>
-			<xs:element name="NAVFelles" type="melosysfelles:MelosysNAVFelles"/>
-			<xs:element name="felles" type="melosysfelles:FellesType"/>
-			<xs:element name="fag" type="Fag"/>
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="Fag">
+	<xs:complexType name="A1">
 		<xs:sequence>
 			<xs:element name="serienummer" type="xs:string"/>
 			<xs:element name="opprettelsesDato" type="st:FormatertDato"/>
@@ -28,7 +18,7 @@
 			<xs:element name="lovvalgsperiode" type="lovvalgsperiodeType"/>
 			<xs:element name="hovedvirksomhet" type="hovedvirksomhetType"/>
 			<xs:element name="ikkeFysiskArbeidssted" type="st:EmptyBoolean"/>
-			<xs:element name="yrkesgruppe" type="yrkesgruppeKode" minOccurs="0"/>
+			<xs:element name="yrkesgruppe" type="melosysfelles:yrkesgruppeKode" minOccurs="0"/>
 			<xs:element name="bivirksomhetListe" type="bivirksomhetListeType" minOccurs="0"/>
 			<xs:element name="bivirksomhetAdresseListe" type="bivirksomhetAdresseListeType" minOccurs="0"/>
 		</xs:sequence>
@@ -37,7 +27,7 @@
 	<xs:complexType name="personType">
 		<xs:sequence>
 			<xs:element name="personnavn" type="personnavnType"/>
-			<xs:element name="kjoenn" type="kjoennKode"/>
+			<xs:element name="kjoenn" type="melosysfelles:kjoennKode"/>
 			<xs:element name="foedselsdato" type="st:FormatertDato"/>
 			<xs:element name="statsborgerskap" type="xs:string"/>
 			<xs:element name="foedested" type="xs:string" minOccurs="0"/>
@@ -81,15 +71,15 @@
 			<xs:element name="lovvalgsLand" type="xs:string"/>
 			<xs:element name="fomDato" type="st:FormatertDato"/>
 			<xs:element name="tomDato" type="st:FormatertDato"/>
-			<xs:element name="lovvalgsbestemmelse" type="lovvalgsbestemmelseKode"/>
-			<xs:element name="tilleggsbestemmelse" type="tilleggsbestemmelseKode" minOccurs="0"/>
+			<xs:element name="lovvalgsbestemmelse" type="melosysfelles:lovvalgsbestemmelseKode"/>
+			<xs:element name="tilleggsbestemmelse" type="melosysfelles:tilleggsbestemmelseKode" minOccurs="0"/>
 			<xs:element name="fritekst" type="xs:string" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 
 	<xs:complexType name="hovedvirksomhetType">
 		<xs:sequence>
-			<xs:element name="yrkesaktivitet" type="yrkesaktivitetsKode"/>
+			<xs:element name="yrkesaktivitet" type="melosysfelles:yrkesaktivitetsKode"/>
 			<xs:element name="orgnummer" type="xs:string"/>
 			<xs:element name="navn" type="xs:string"/>
 			<xs:element name="gatenavn" type="xs:string"/>
@@ -109,7 +99,7 @@
 
 	<xs:complexType name="bivirksomhetType">
 		<xs:sequence>
-			<xs:element name="navn" type="xs:string" minOccurs="0"/>
+			<xs:element name="navn" type="xs:string"/>
 			<xs:element name="orgnummer" type="xs:string" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
@@ -131,68 +121,5 @@
 			<xs:element name="region" type="xs:string" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
-
-	<xs:simpleType name="kjoennKode">
-		<xs:annotation>
-			<xs:documentation>Koder som angir hvilket kjønn søker har</xs:documentation>
-		</xs:annotation>
-		<xs:restriction base="xs:token">
-			<xs:enumeration value="K"/>
-			<xs:enumeration value="M"/>
-			<xs:enumeration value="U"/>
-		</xs:restriction>
-	</xs:simpleType>
-
-	<xs:simpleType name="lovvalgsbestemmelseKode">
-		<xs:annotation>
-			<xs:documentation>Koder som angir hvilken lovvalgsbestemmelse som ligger til grunn</xs:documentation>
-		</xs:annotation>
-		<xs:restriction base="xs:token">
-			<xs:enumeration value="ART12_1"/>
-			<xs:enumeration value="ART13_1"/>
-			<xs:enumeration value="ART12_2"/>
-			<xs:enumeration value="ART13_2"/>
-			<xs:enumeration value="ART11_3B"/>
-			<xs:enumeration value="ART11_4_2"/>
-			<xs:enumeration value="ART13_3"/>
-			<xs:enumeration value="ART13_4"/>
-			<xs:enumeration value="ART16_1"/>
-			<xs:enumeration value="ART11_3A"/>
-		</xs:restriction>
-	</xs:simpleType>
-
-	<xs:simpleType name="tilleggsbestemmelseKode">
-		<xs:annotation>
-			<xs:documentation>Koder som angir hvilken tilleggsbestemmelse som ligger til grunn</xs:documentation>
-		</xs:annotation>
-		<xs:restriction base="xs:token">
-			<xs:enumeration value="ART11_4_1"/>
-			<xs:enumeration value="ART11_5"/>
-			<xs:enumeration value="ART87"/>
-			<xs:enumeration value="ART87A"/>
-		</xs:restriction>
-	</xs:simpleType>
-
-	<xs:simpleType name="yrkesaktivitetsKode">
-		<xs:annotation>
-			<xs:documentation>Koder som angir hvilken type yrkesaktivitet</xs:documentation>
-		</xs:annotation>
-		<xs:restriction base="xs:token">
-			<xs:enumeration value="SELVSTENDIG"/>
-			<xs:enumeration value="FRILANSER"/>
-			<xs:enumeration value="LØNNET_ARBEID"/>
-		</xs:restriction>
-	</xs:simpleType>
-
-	<xs:simpleType name="yrkesgruppeKode">
-		<xs:annotation>
-			<xs:documentation>Koder som angir hvilken type yrkesgruppe</xs:documentation>
-		</xs:annotation>
-		<xs:restriction base="xs:token">
-			<xs:enumeration value="ARBEID_PÅ_SKIP_SOKKEL"/>
-			<xs:enumeration value="FLYENDE_PERSONELL"/>
-			<xs:enumeration value="ORDINAER"/>
-		</xs:restriction>
-	</xs:simpleType>
 
 </xs:schema>

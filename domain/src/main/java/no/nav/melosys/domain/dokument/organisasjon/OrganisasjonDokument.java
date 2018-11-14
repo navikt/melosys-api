@@ -41,6 +41,10 @@ public class OrganisasjonDokument extends SaksopplysningDokument {
         return navn;
     }
 
+    public String getNavnSammenslått() {
+        return navn == null ? "UKJENT" : String.join(" ", navn);
+    }
+
     public void setNavn(List<String> navn) {
         this.navn = navn;
     }

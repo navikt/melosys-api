@@ -79,7 +79,16 @@ public class DokumentService {
      */
     public byte[] produserUtkast(long behandlingID, Dokumenttype dokumenttype, BrevDataDto brevDataDto)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
-        return produserDokument(behandlingID, dokumenttype, brevDataDto, true);
+        Behandling behandling = behandlingRepository.findOne(behandlingID);
+        if (behandling == null) {
+            throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
+        }
+
+        DokumentType dokumentType = lagDokumentType(dokumenttype);
+        DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(dokumentType, behandling, brevDataDto);
+        Object brevData = brevDataService.lagBrevXML(dokumentType, behandling, brevDataDto);
+
+        return dokSysFasade.produserDokumentutkast(request, brevData);
     }
 
     /**
@@ -87,16 +96,19 @@ public class DokumentService {
      */
     public void produserDokument(long behandlingID, Dokumenttype dokumenttype, BrevDataDto brevDataDto)
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
-        produserDokument(behandlingID, dokumenttype, brevDataDto, false);
-    }
-
-    private byte[] produserDokument(long behandlingID, Dokumenttype dokumenttype, BrevDataDto brevDataDto, boolean erUtkast)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
         }
 
+        DokumentType dokumentType = lagDokumentType(dokumenttype);
+        DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(dokumentType, behandling, brevDataDto);
+        Object brevData = brevDataService.lagBrevXML(dokumentType, behandling, brevDataDto);
+
+        dokSysFasade.produserIkkeredigerbartDokument(request, brevData);
+    }
+
+    private DokumentType lagDokumentType(Dokumenttype dokumenttype) throws TekniskException {
         if (dokumenttype == null) {
             throw new TekniskException("Ingen gyldig dokumenttype");
         }
@@ -107,16 +119,7 @@ public class DokumentService {
         } catch (IllegalArgumentException e) {
             throw new TekniskException("Fant ikke dokumenttypeId for dokumenttype " + dokumenttype);
         }
-
-        DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(dokumentType, behandling, brevDataDto);
-        Object brevData = brevDataService.lagBrevXML(dokumentType, behandling, brevDataDto);
-
-        if (erUtkast) {
-            return dokSysFasade.produserDokumentutkast(request, brevData);
-        } else {
-            dokSysFasade.produserIkkeredigerbartDokument(request, brevData);
-            return null;
-        }
+        return dokumentType;
     }
 
     @Transactional
