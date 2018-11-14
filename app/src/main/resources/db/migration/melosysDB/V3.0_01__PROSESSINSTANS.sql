@@ -60,9 +60,10 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('FEILET_MASKINELT', 'Feilet maskin
 INSERT INTO prosess_steg (kode, navn) VALUES ('FATTET_VEDTAK', 'Saksbehandler har fattet vedtak i Melosys');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_VALIDERING', 'Validerer iverksett vedtak');
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_RESULTAT', 'Oppdatering av behandlingsresultat');
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_MEDL', 'Oppdatering av medlemskap');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_SEND_BREV', 'Send brev etter iverksett vedtak');
-INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_MEDL', 'Oppdatering av Meldlemskap');
-INSERT INTO prosess_steg (kode, navn) VALUES ('IV_AVSLUTT_BEHANDLING', 'Avslutt Fagsak og aktiv behandling');
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_AVSLUTT_BEHANDLING', 'Avslutt fagsak og aktiv behandling');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_STATUS_BEH_AVSL', 'Oppdater Sak og Behandling ved lukking av behandling');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('MANGELBREV', 'Opprett mangelbrev');
