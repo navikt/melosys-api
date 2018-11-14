@@ -4,10 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
 
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
@@ -61,6 +58,9 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         Long behandlingID = prosessinstans.getBehandling().getId();
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandlingID);
+        if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK) {
+            behandlingsresultat.setType(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        }
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
         behandlingsresultat.setVedtaksdato(Instant.now());
         LocalDate klagefrist = LocalDate.now().plusWeeks(FRIST_KLAGE_UKER);
