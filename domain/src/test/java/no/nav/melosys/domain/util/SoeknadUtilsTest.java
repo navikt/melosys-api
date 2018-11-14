@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.*;
 import org.junit.Test;
 
@@ -47,7 +48,7 @@ public class SoeknadUtilsTest {
 
     private void leggTilArbeidUtland(SoeknadDokument soeknad) {
         ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse = new StandardAdresse();
+        arbeidUtland.adresse = new StrukturertAdresse();
         arbeidUtland.adresse.landKode = new Land(Land.BELGIA).getKode();
         soeknad.arbeidUtland = Collections.singletonList(arbeidUtland);
     }

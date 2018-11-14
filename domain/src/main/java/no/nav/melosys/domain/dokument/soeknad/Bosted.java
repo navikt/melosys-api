@@ -1,9 +1,11 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+
 public class Bosted {
     public boolean intensjonOmRetur;
     public String familiesBostedLandKode;
     public int antallMaanederINorge;
     public boolean adresseIUtlandet;
-    public StandardAdresse oppgittAdresse = new StandardAdresse();
+    public StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
 }

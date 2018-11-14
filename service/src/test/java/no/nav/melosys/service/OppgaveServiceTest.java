@@ -6,6 +6,7 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -110,7 +111,7 @@ public class OppgaveServiceTest {
 
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse = new StandardAdresse();
+        arbeidUtland.adresse = new StrukturertAdresse();
         arbeidUtland.adresse.landKode = new Land(Land.NORGE).getKode();
         soeknadDokument.arbeidUtland = Collections.singletonList(arbeidUtland);
 

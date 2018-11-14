@@ -8,11 +8,15 @@ import java.util.List;
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.FieldDefinitionBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
+import io.github.benas.randombeans.api.Randomizer;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
+import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
+import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
@@ -46,6 +50,7 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
             .objectPoolSize(100)
             .dateRange(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
             .exclude(FieldDefinitionBuilder.field().named("tilleggsinformasjonDetaljer").ofType(TilleggsinformasjonDetaljer.class).inClass(Tilleggsinformasjon.class).get())
+            .randomize(MidlertidigPostadresse.class, (Randomizer<MidlertidigPostadresse>) () -> Math.random() > 0.5 ? EnhancedRandom.random(MidlertidigPostadresseNorge.class) : EnhancedRandom.random(MidlertidigPostadresseUtland.class))
             .build();
     }
 

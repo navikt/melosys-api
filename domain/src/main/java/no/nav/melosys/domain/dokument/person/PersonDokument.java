@@ -57,7 +57,6 @@ public class PersonDokument extends SaksopplysningDokument {
     @JsonIgnore
     public UstrukturertAdresse postadresse = new UstrukturertAdresse();
 
-    @JsonIgnore
     public MidlertidigPostadresse midlertidigPostadresse = new MidlertidigPostadresse();
 
     @XmlTransient
