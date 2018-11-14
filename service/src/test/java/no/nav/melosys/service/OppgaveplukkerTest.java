@@ -169,7 +169,7 @@ public class OppgaveplukkerTest {
 
         assertThat(oppgave.isPresent()).isTrue();
         oppgave.ifPresent(o -> assertThat(o.getOppgaveId()).isEqualTo("2"));
-        assertThat(fagsak.getAktivBehandling().getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
+        assertThat(fagsak.getAktivBehandling().getStatus()).isEqualTo(Behandlingsstatus.AVVENT_DOK_PART);
     }
 
     @Test
@@ -199,7 +199,7 @@ public class OppgaveplukkerTest {
 
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstype.SØKNAD);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
 
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
@@ -258,7 +258,7 @@ public class OppgaveplukkerTest {
 
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstype.SØKNAD);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
 
         behandling.setFagsak(fagsak);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
@@ -285,7 +285,7 @@ public class OppgaveplukkerTest {
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
         assertThat(oppgave.isPresent()).isFalse();
-        assertThat(fagsak.getAktivBehandling().getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
+        assertThat(fagsak.getAktivBehandling().getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
     }
 
     @Test
