@@ -174,6 +174,8 @@ public class Prosessinstans {
     public List<ProsessinstansHendelse> getHendelser() {
         return hendelser;
     }
+
+    private static final int VARCHAR2_MAX_BYTES = 4000;
     
     private void leggTilHendelse(ProsessinstansHendelse piHend) {
         if (!this.equals(piHend.getProsessinstans())) {
@@ -193,7 +195,11 @@ public class Prosessinstans {
 
     public void leggTilHendelse(String type, String melding, Throwable t) {
         if (t != null) {
-            leggTilHendelse(type, melding + " - " + ExceptionUtils.getStackTrace(t));
+            String loggMelding = melding + " - " + ExceptionUtils.getStackTrace(t);
+            if (loggMelding.getBytes().length > VARCHAR2_MAX_BYTES) {
+                loggMelding = new String(loggMelding.getBytes(), 0, VARCHAR2_MAX_BYTES);
+            }
+            leggTilHendelse(type, loggMelding);
         } else {
             leggTilHendelse(type, melding);
         }
