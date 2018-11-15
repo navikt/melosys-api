@@ -83,6 +83,9 @@ public class DokumentTjeneste extends RestTjeneste {
         } catch (TekniskException e) {
             log.error("TekniskException", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (RuntimeException e) { // FIXME Midlertidig fiks inntil generell feilhåndtering er på plass
+            log.error("RuntimeException", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
         Response.ResponseBuilder ok = Response.ok(dokument);
