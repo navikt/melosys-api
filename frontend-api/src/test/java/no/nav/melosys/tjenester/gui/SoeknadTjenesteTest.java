@@ -68,6 +68,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
                 .overrideDefaultInitialization(true)
                 .collectionSizeRange(1, 4)
                 .randomize(GeografiskAdresse.class, (Randomizer<GeografiskAdresse>) () -> EnhancedRandom.random(SemistrukturertAdresse.class))
+                .stringLengthRange(2, 10)
                 .build();
 
         soeknadDokument = random.nextObject(SoeknadDokument.class);
@@ -102,7 +103,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void soeknadDokumentSchemaValidering() throws IOException, JSONException, IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    public void soeknadDokumentSchemaValidering() throws IOException, JSONException {
         Response response = soeknadTjeneste.hentSøknad(1222L);
         SoeknadDto søknadDto = (SoeknadDto)response.getEntity();
 
