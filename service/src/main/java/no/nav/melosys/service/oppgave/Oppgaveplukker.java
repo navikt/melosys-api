@@ -128,10 +128,6 @@ public class Oppgaveplukker {
         }
 
         Fagsak fagsak = behandling.getFagsak();
-        if (fagsak == null) {
-            log.error("Fant ikke fagsak på behandling med behandlingID " + tilbakelegging.getBehandlingID());
-            throw new IkkeFunnetException("Fant ikke fagsak på behandling med behandlingID " + tilbakelegging.getBehandlingID());
-        }
         Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(fagsak.getSaksnummer());
         if (oppgave == null) {
             log.error("Fant ikke behandlingsoppgave på fagsak med saksnummer " + fagsak.getSaksnummer());
