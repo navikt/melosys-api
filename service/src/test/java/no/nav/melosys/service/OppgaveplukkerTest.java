@@ -46,6 +46,7 @@ public class OppgaveplukkerTest {
 
     private final static long BEHANDLING_ID = 123L;
     private final static long GSAK_SAKSNUMMER = 42L;
+    private final static String SAKSNUMMER = "MOCK-1";
 
     @Before
     public void setUp() {
@@ -54,6 +55,7 @@ public class OppgaveplukkerTest {
 
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(SAKSNUMMER);
         fagsak.setGsakSaksnummer(GSAK_SAKSNUMMER);
         behandling.setFagsak(fagsak);
 
@@ -297,7 +299,7 @@ public class OppgaveplukkerTest {
         final String saksbehandlerID = "test";
         final String begrunnelse = "Oppgaven er kjedelig";
 
-        when(gsakFasade.hentOppgave(oppgaveId)).thenReturn(oppgave);
+        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgave);
 
         when(oppgaveTilbakkeleggingRepo.save(any(OppgaveTilbakelegging.class))).then(arguments -> {
             OppgaveTilbakelegging oppgaveTilbakelegging = arguments.getArgument(0);
@@ -324,7 +326,7 @@ public class OppgaveplukkerTest {
         oppgave.setPrioritet(PrioritetType.valueOf("HOY"));
         final String saksbehandlerID = "test";
 
-        when(gsakFasade.hentOppgave(oppgaveId)).thenReturn(oppgave);
+        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgave);
 
         TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
         tilbakelegging.setBehandlingID(BEHANDLING_ID);

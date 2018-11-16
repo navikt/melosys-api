@@ -128,16 +128,16 @@ public class Oppgaveplukker {
         }
 
         Fagsak fagsak = behandling.getFagsak();
-        if (fagsak == null || fagsak.getGsakSaksnummer() == null) {
-            log.error("Fant ikke oppgaveId på behandling med behandlingID " + tilbakelegging.getBehandlingID());
-            throw new IkkeFunnetException("Fant ikke oppgaveId på behandling med behandlingID " + tilbakelegging.getBehandlingID());
+        if (fagsak == null) {
+            log.error("Fant ikke fagsak på behandling med behandlingID " + tilbakelegging.getBehandlingID());
+            throw new IkkeFunnetException("Fant ikke fagsak på behandling med behandlingID " + tilbakelegging.getBehandlingID());
         }
-        String oppgaveId = fagsak.getGsakSaksnummer().toString();
-        Oppgave oppgave = gsakFasade.hentOppgave(oppgaveId);
+        Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(fagsak.getSaksnummer());
         if (oppgave == null) {
-            log.error("Fant ikke oppgave med oppgaveId " + oppgaveId);
-            throw new IkkeFunnetException("Fant ikke oppgave med oppgaveId " + oppgaveId);
+            log.error("Fant ikke behandlingsoppgave på fagsak med saksnummer " + fagsak.getSaksnummer());
+            throw new IkkeFunnetException("Fant ikke behandlingsoppgave på fagsak med saksnummer " + fagsak.getSaksnummer());
         }
+        String oppgaveId = oppgave.getOppgaveId();
         gsakFasade.leggTilbakeOppgave(oppgaveId);
 
         if (!tilbakelegging.isVenterPåDokumentasjon()) {

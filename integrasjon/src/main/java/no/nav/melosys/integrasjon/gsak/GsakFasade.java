@@ -39,6 +39,11 @@ public interface GsakFasade {
     List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
 
     /**
+     * Finner Oppgave med gitt saksnummer.
+     */
+    Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
+
+    /**
      * Hent oppgave fra GSAK på en gitt oppgaveId
      */
     Oppgave hentOppgave(String oppgaveId) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
