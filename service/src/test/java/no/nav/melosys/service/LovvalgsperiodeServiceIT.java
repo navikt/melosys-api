@@ -1,8 +1,5 @@
 package no.nav.melosys.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -29,11 +26,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -183,7 +182,7 @@ public class LovvalgsperiodeServiceIT {
         Collection<Lovvalgsperiode> lovvalgsperioder = 
                 Collections.singleton(lagLovvalgsperiode(testInstans.getBehandlingsresultat()));
         Throwable thrown = catchThrowable(() -> instans.lagreLovvalgsperioder(IKKE_EKSISTERENDE_BEH_ID, lovvalgsperioder));
-        assertThat(thrown).isInstanceOf(IkkeFunnetException.class)
+        assertThat(thrown).isInstanceOf(IllegalStateException.class)
                 .hasMessageEndingWith("fins ikke.");
     }
 

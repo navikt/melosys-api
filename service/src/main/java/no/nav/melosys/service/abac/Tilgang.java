@@ -1,16 +1,17 @@
 package no.nav.melosys.service.abac;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RolleType;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.sikkerhet.abac.Pep;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class Tilgang {
@@ -25,10 +26,10 @@ public class Tilgang {
     }
 
     // Behandling
-    public void sjekk(long behandlingsId) throws SikkerhetsbegrensningException, TekniskException {
+    public void sjekk(long behandlingsId) throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
         Behandling behandling = behandlingRepository.findOne(behandlingsId);
         if (behandling == null) {
-            throw new TekniskException(String.format("Klarte ikke å finne behandlingen med id %s.", behandling));
+            throw new IkkeFunnetException(String.format("Klarte ikke å finne behandlingen med id %s.", behandlingsId));
         }
 
         Fagsak fagsak = behandling.getFagsak();

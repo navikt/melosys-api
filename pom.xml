@@ -536,6 +536,27 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <id>download-tls-certificate-from-fasit</id>
+                        <inherited>false</inherited>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://fasit.adeo.no/api/v2/resources/3816108/file/keystore</url>
+                            <outputFileName>nav_truststore_nonproduction_ny2.jts</outputFileName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
     <profiles>

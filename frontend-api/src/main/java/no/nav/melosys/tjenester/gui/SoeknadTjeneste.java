@@ -1,12 +1,17 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.Set;
-import javax.ws.rs.*;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -20,6 +25,7 @@ import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.validering.ValideringService;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import no.nav.melosys.tjenester.gui.dto.SoeknadTilleggsDataDto;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -55,23 +61,11 @@ public class SoeknadTjeneste extends RestTjeneste {
         value = "Henter en søknad som hører til en gitt behandling",
         notes = ("Spesifikke saker kan hentes via saksnummer."),
         response = SoeknadDto.class)
-    public Response hentSøknad(@ApiParam @PathParam("behandlingID") long behandlingID) {
+    public Response hentSøknad(@ApiParam @PathParam("behandlingID") long behandlingID) throws TekniskException, IkkeFunnetException, SikkerhetsbegrensningException {
         SoeknadDokument soeknadDokument;
-        SoeknadTilleggsDataDto tilleggDataDto;
-
-        try {
-            tilgang.sjekk(behandlingID);
-            soeknadDokument = soeknadService.hentSoeknad(behandlingID);
-            tilleggDataDto = hentTilleggsData(soeknadDokument);
-
-        } catch (IkkeFunnetException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (TekniskException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-
+        tilgang.sjekk(behandlingID);
+        soeknadDokument = soeknadService.hentSoeknad(behandlingID);
+        SoeknadTilleggsDataDto tilleggDataDto = hentTilleggsData(soeknadDokument);
         SoeknadDto soeknadDto;
         soeknadDto = new SoeknadDto(behandlingID, soeknadDokument, tilleggDataDto);
         return Response.ok(soeknadDto).build();
@@ -82,32 +76,13 @@ public class SoeknadTjeneste extends RestTjeneste {
     @ApiOperation(
         value = "Tjeneste for å registrere opplysninger fra papirsøknaden manuelt.",
         response = SoeknadDto.class)
-    public SoeknadDto registrerSøknad(@ApiParam SoeknadDto soeknadInnDto) {
+    public SoeknadDto registrerSøknad(@ApiParam SoeknadDto soeknadInnDto) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
         long behandlingID = soeknadInnDto.getBehandlingID();
         SoeknadDokument soeknadDokument = soeknadInnDto.getSoeknadDokument();
-
-        try {
-            tilgang.sjekk(behandlingID);
-        } catch (SikkerhetsbegrensningException e) {
-            throw new ForbiddenException(e);
-        } catch (TekniskException e) {
-            throw new InternalServerErrorException(e);
-        }
-
+        tilgang.sjekk(behandlingID);
         valideringService.validerOpplysninger(soeknadDokument);
-
-        SoeknadTilleggsDataDto tilleggDataDto;
-        try {
-            soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
-            tilleggDataDto = hentTilleggsData(soeknadDokument);
-        } catch (IkkeFunnetException e) {
-            throw new NotFoundException(e.getMessage());
-        } catch (SikkerhetsbegrensningException e) {
-            throw new ForbiddenException(e);
-        } catch (TekniskException e) {
-            throw new InternalServerErrorException(e);
-        }
-
+        soeknadDokument = soeknadService.registrerSøknad(behandlingID, soeknadDokument);
+        SoeknadTilleggsDataDto tilleggDataDto = hentTilleggsData(soeknadDokument);
         return new SoeknadDto(behandlingID, soeknadDokument, tilleggDataDto);
     }
 

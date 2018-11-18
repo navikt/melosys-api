@@ -22,15 +22,9 @@ public class NaisOppstart implements Oppstart, EnvironmentAware {
     @Override
     public void setEnvironment(Environment environment) {
         NaisOppstart.environment = environment;
-
-        configureSsl();
-        loadSystemProperties();
-    }
-
-    @Override
-    public void configureSsl() {
         // Navikt javabaseimaget setter keystore/passord automatisk
         log.debug("Truststore: " + System.getProperty(TRUST_STORE_KEY));
+        loadSystemProperties();
     }
 
     @Override

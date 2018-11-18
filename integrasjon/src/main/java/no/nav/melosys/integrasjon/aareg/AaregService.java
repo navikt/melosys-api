@@ -8,6 +8,11 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -29,10 +34,6 @@ import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.FinnArbeidsforhold
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.FinnArbeidsforholdPrArbeidstakerResponse;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkRequest;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class AaregService implements AaregFasade {
@@ -45,20 +46,27 @@ public class AaregService implements AaregFasade {
 
     private DokumentFactory dokumentFactory;
 
-    private final JAXBContext jaxbContext;
+    final JAXBContext jaxbContext;
 
     @Autowired
     public AaregService(ArbeidsforholdConsumer arbeidsforholdConsumer, DokumentFactory dokumentFactory) {
-        this.arbeidsforholdConsumer = arbeidsforholdConsumer;
-        this.dokumentFactory = dokumentFactory;
+        this(arbeidsforholdConsumer, dokumentFactory, lagJaxbContext());
+    }
 
+    private static JAXBContext lagJaxbContext() {
         try {
-            jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.arbeidsforhold.v3.FinnArbeidsforholdPrArbeidstakerResponse.class,
+            return JAXBContext.newInstance(no.nav.tjeneste.virksomhet.arbeidsforhold.v3.FinnArbeidsforholdPrArbeidstakerResponse.class,
                     no.nav.tjeneste.virksomhet.arbeidsforhold.v3.HentArbeidsforholdHistorikkResponse.class);
         } catch (JAXBException e) {
             log.error("", e);
             throw new RuntimeException(e);
         }
+    }
+
+    AaregService(ArbeidsforholdConsumer arbeidsforholdConsumer, DokumentFactory dokumentFactory, JAXBContext jaxbContext) {
+        this.arbeidsforholdConsumer = arbeidsforholdConsumer;
+        this.dokumentFactory = dokumentFactory;
+        this.jaxbContext = jaxbContext;
     }
 
     @Override
@@ -133,7 +141,7 @@ public class AaregService implements AaregFasade {
         try {
             response = arbeidsforholdConsumer.hentArbeidsforholdHistorikk(request);
         } catch (HentArbeidsforholdHistorikkSikkerhetsbegrensning e) {
-            throw new SikkerhetsbegrensningException(e);
+            throw new SikkerhetsbegrensningException("SikkerhetsbegrensningException under oppslag av arbeidsforhold", e);
         } catch (HentArbeidsforholdHistorikkArbeidsforholdIkkeFunnet e) {
             throw new IkkeFunnetException(e);
         }
@@ -145,8 +153,7 @@ public class AaregService implements AaregFasade {
             xmlRoot.setParameters(response);
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
-            log.error("", e);
-            throw new IntegrasjonException(e);
+            throw new IntegrasjonException("Uventet IntegrasjonException under oppslag av arbeidsforhold", e);
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();

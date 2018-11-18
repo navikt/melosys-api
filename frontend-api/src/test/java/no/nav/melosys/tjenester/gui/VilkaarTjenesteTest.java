@@ -1,11 +1,11 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
 import java.util.List;
 
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +47,7 @@ public class VilkaarTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void hentVilkår() throws IOException {
+    public void hentVilkår() throws Exception {
         List<VilkaarDto> mockListe = defaultEnhancedRandom().randomListOf(4, VilkaarDto.class);
         when(vilkaarsresultatService.hentVilkaar(1L)).thenReturn(mockListe);
 

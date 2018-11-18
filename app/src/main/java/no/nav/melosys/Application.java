@@ -18,7 +18,23 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 public class Application {
 
     public static void main(String[] args) {
+        settSysteminnstillingerForTls();
         SpringApplication.run(Application.class, args);
+    }
+
+    // Kan skilles ut en Spring-profil for lokal utvikling, i form av en
+    // application lifecycle event listener eller liknende ved behov. Akkurat
+    // nå er det unødvendig, da default-initialiseringen ikke er i konflikt
+    // med noe i produksjon.
+    private static void settSysteminnstillingerForTls() {
+        System.setProperty("javax.net.ssl.trustStore",
+                System.getProperty("javax.net.ssl.trustStore",
+                        "../target/nav_truststore_nonproduction_ny2.jts"));
+        if (System.getProperty("javax.net.ssl.trustStorePassword") == null) {
+            throw new IllegalStateException("Husk å sette systemegenskapen "
+                    + "javax.net.ssl.trustStorePassword. Verdien kan hentes"
+                    + " på Fasit.");
+        }
     }
 
     @Bean
@@ -31,7 +47,7 @@ public class Application {
         };
     }
 
-    @GetMapping(path = {"/journalforing/**", "/sok/**"})
+    @GetMapping(path = { "/journalforing/**", "/sok/**" })
     public String forward() {
         return "forward:/";
     }

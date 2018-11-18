@@ -5,8 +5,6 @@ import java.util.List;
 
 public interface Oppstart {
 
-    void configureSsl();
-
     // Sikkerhet trenger system properties.
     default void loadSystemProperties() {
         List<String> list = new ArrayList<>();

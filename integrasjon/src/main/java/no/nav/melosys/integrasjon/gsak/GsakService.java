@@ -20,6 +20,7 @@ import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OpprettOppgaveDto;
 import no.nav.melosys.integrasjon.gsak.sak.SakConsumer;
 import no.nav.melosys.integrasjon.gsak.sak.dto.SakDto;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -242,7 +243,8 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
     public void tildelOppgave(String oppgaveId, String saksbehandlerID) throws FunksjonellException, TekniskException {
         OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
         if (oppgave == null ) {
-            throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveId);
+            throw new IkkeFunnetException(String.format("Feil ved henting av "
+                    + "oppgave %s for saksbehandler %s:", oppgaveId, saksbehandlerID));
         }
         oppgave.setTilordnetRessurs(saksbehandlerID);
         oppgaveConsumer.oppdaterOppgave(oppgave);
