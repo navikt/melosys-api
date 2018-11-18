@@ -58,32 +58,18 @@ public class DokumentTjeneste extends RestTjeneste {
 
     @GET
     @Path("/oversikt/{saksnummer}")
-    @ApiOperation(
-        value = "Henter alle dokumenter knyttet til en fagsak",
-        response = JournalpostInfoDto.class,
-        responseContainer = "List")
-    public Response hentDokumenter(@PathParam("saksnummer") String saksnummer) {
-        try {
-            List<JournalpostInfoDto> dokumentListe = dokumentService.hentDokumenter(saksnummer)
-                .stream()
-                .map(JournalpostInfoDto::av)
-                .collect(Collectors.toList());
-            return Response.ok(dokumentListe).build();
-        } catch (SikkerhetsbegrensningException e) {
-            log.error("SikkerhetsbegrensningException", e);
-            return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (IntegrasjonException e) {
-            log.error("IntegrasjonException", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (FunksjonellException e) {
-            log.error("FunksjonellException", e);
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
+    @ApiOperation(value = "Henter alle dokumenter knyttet til en fagsak", response = JournalpostInfoDto.class, responseContainer = "List")
+    public Response hentDokumenter(@PathParam("saksnummer") String saksnummer) throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
+        List<JournalpostInfoDto> dokumentListe = dokumentService.hentDokumenter(saksnummer)
+            .stream()
+            .map(JournalpostInfoDto::av)
+            .collect(Collectors.toList());
+        return Response.ok(dokumentListe).build();
     }
 
     @POST
     @Path("utkast/pdf/{behandlingID}/{dokumenttypeKode}")
-    @Produces("application/pdf")
+    @Produces({ "application/pdf", MediaType.APPLICATION_JSON + "; charset=UTF-8" })
     public Response produserUtkast(@PathParam("behandlingID") long behandlingID,
                                    @PathParam("dokumenttypeKode") Dokumenttype dokumenttypeKode,
             BrevDataDto brevDataDto) throws TekniskException, FunksjonellException {
@@ -106,4 +92,5 @@ public class DokumentTjeneste extends RestTjeneste {
         dokumentService.produserDokumentISaksflyt(behandlingID, dokumenttypeKode, brevDataDto);
         return Response.noContent().build();
     }
+
 }
