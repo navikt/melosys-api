@@ -3,6 +3,8 @@ package no.nav.melosys.tjenester.gui;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
@@ -153,12 +155,16 @@ public class OppgaveTjeneste extends RestTjeneste {
     @GET
     @Path("/sok")
     @ApiOperation(
-        value = "Henter alle oppgaver knyttet til en gitt bruker.",
-        response = OppgaveDto.class,
+        value = "Henter alle behandlingsoppgaver knyttet til en gitt bruker.",
+        response = BehandlingsoppgaveDto.class,
         responseContainer = "List")
     public Response hentOppgaver(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
         try {
-            List<OppgaveDto> oppgaver = oppgaveService.hentOppgaverMedBruker(fnr);
+            Set<BehandlingsoppgaveDto> oppgaver =oppgaveService.hentOppgaverMedBruker(fnr).stream()
+                    .filter(o -> o instanceof BehandlingsoppgaveDto)
+                    .map(o -> (BehandlingsoppgaveDto)o)
+                    .collect(Collectors.toSet());
+
             return Response.ok(oppgaver).build();
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException(e.getMessage());
