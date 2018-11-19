@@ -5,10 +5,12 @@
 		   xmlns="http://nav.no/dok/melosysbrev/000116"
 		   xmlns:xs="http://www.w3.org/2001/XMLSchema"
 		   xmlns:melosysfelles="http://nav.no/dok/melosysbrev/felles/melosys_felles"
-		   xmlns:melosysvedlegg="http://nav.no/dok/melosysbrev/felles/melosys_vedlegg">
+		   xmlns:melosysvedlegg="http://nav.no/dok/melosysbrev/felles/melosys_vedlegg"
+		   xmlns:st="http://nav.no/dok/brevdata/felles/v1/SimpleTypes">
 
 	<xs:import namespace="http://nav.no/dok/melosysbrev/felles/melosys_felles" schemaLocation="felles/melosys_felles.xsd" />
 	<xs:import namespace="http://nav.no/dok/melosysbrev/felles/melosys_vedlegg" schemaLocation="felles/melosys_vedlegg.xsd"/>
+	<xs:import namespace="http://nav.no/dok/brevdata/felles/v1/SimpleTypes" schemaLocation="felles/navfelles/v1.SimpleTypes.xsd"/>
 
 	<xs:element name="brevdata" type="brevdataType"/>
 
@@ -23,7 +25,8 @@
 
 	<xs:complexType name="Fag">
 		<xs:sequence>
-			<xs:element name="vedleggA1" type="xs:boolean"/>
+			<xs:element name="vedleggA1" type="st:EmptyBoolean" minOccurs="0"/>
+			<xs:element	name="vedleggSEDA001" type="st:EmptyBoolean" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 

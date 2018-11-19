@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Avklartefakta;
-import no.nav.melosys.domain.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import org.springframework.stereotype.Component;
 
 @Component

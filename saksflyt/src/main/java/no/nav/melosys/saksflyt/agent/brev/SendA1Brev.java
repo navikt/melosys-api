@@ -13,14 +13,14 @@ import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import no.nav.melosys.service.RegisterOppslagService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.Dokumenttype.ATTEST_A1;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
 
@@ -31,17 +31,18 @@ import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
  * SEND_A1 -> null eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class SendA1 extends AbstraktStegBehandler {
+public class SendA1Brev extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(SendA1.class);
+    private static final Logger log = LoggerFactory.getLogger(SendA1Brev.class);
 
-    private AvklartefaktaService avklartefaktaService;
-    private RegisterOppslagService registerOppslagService;
+    private BrevDataByggerA1 brevDataByggerA1;
+
+    private final DokumentSystemService dokumentService;
 
     @Autowired
-    public SendA1(AvklartefaktaService avklartefaktaService1, RegisterOppslagService registerOppslagService) {
-        this.avklartefaktaService = avklartefaktaService1;
-        this.registerOppslagService = registerOppslagService;
+    public SendA1Brev(BrevDataByggerA1 brevDataByggerA1, DokumentSystemService dokumentService) {
+        this.brevDataByggerA1 = brevDataByggerA1;
+        this.dokumentService = dokumentService;
     }
 
     @Override
@@ -59,16 +60,13 @@ public class SendA1 extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
+        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
 
-        brevDataDto.saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+        BrevDataDto brevDataDto = brevDataByggerA1.lag(behandling, saksbehandler);
+        dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevDataDto);
 
         prosessinstans.setSteg(null);
         log.info("Sendt forvaltningsmelding for prosessinstans {}", prosessinstans.getId());
     }
 
-    private BrevDataDto lagBrevDataDto(Prosessinstans prosessinstans) {
-        BrevDataDto brevDataDto = new BrevDataDto();
-        brevDataDto.saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-        brevDataDto.
-    }
 }

@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import no.nav.melosys.domain.Avklartefakta;
-import no.nav.melosys.domain.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.AvklartefaktaType;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingResultatRepository;

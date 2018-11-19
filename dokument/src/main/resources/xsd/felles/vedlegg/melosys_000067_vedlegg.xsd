@@ -12,7 +12,7 @@
 
 	<xs:complexType name="A1">
 		<xs:sequence>
-			<xs:element name="serienummer" type="xs:string"/>
+			<xs:element name="serienummer" type="st:NonEmptyString"/>
 			<xs:element name="opprettelsesDato" type="st:FormatertDato"/>
 			<xs:element name="person" type="personType"/>
 			<xs:element name="lovvalgsperiode" type="lovvalgsperiodeType"/>
@@ -26,32 +26,13 @@
 
 	<xs:complexType name="personType">
 		<xs:sequence>
-			<xs:element name="personnavn" type="personnavnType"/>
+			<xs:element name="personnavn" type="melosysfelles:personnavnType"/>
 			<xs:element name="kjoenn" type="melosysfelles:kjoennKode"/>
 			<xs:element name="foedselsdato" type="st:FormatertDato"/>
-			<xs:element name="statsborgerskap" type="xs:string"/>
+			<xs:element name="statsborgerskap" type="st:NonEmptyString"/>
 			<xs:element name="foedested" type="xs:string" minOccurs="0"/>
-			<xs:element name="bostedsadresse" type="bostedsadresseType"/>
+			<xs:element name="bostedsadresse" type="melosysfelles:bostedsadresseType"/>
 			<xs:element name="midlertidigOppholdsadresse" type="midlertidigOppholdsadresseType" minOccurs="0"/>
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="personnavnType">
-		<xs:sequence>
-			<xs:element name="fornavn" type="xs:string"/>
-			<xs:element name="mellomnavn" type="xs:string" minOccurs="0"/>
-			<xs:element name="etternavn" type="xs:string"/>
-		</xs:sequence>
-	</xs:complexType>
-
-	<xs:complexType name="bostedsadresseType">
-		<xs:sequence>
-			<xs:element name="gatenavn" type="xs:string"/>
-			<xs:element name="husnummer" type="xs:string" minOccurs="0"/>
-			<xs:element name="postnr" type="xs:string"/>
-			<xs:element name="poststed" type="xs:string"/>
-			<xs:element name="region" type="xs:string" minOccurs="0"/>
-			<xs:element name="landkode" type="xs:string"/>
 		</xs:sequence>
 	</xs:complexType>
 
@@ -68,7 +49,7 @@
 
 	<xs:complexType name="lovvalgsperiodeType">
 		<xs:sequence>
-			<xs:element name="lovvalgsLand" type="xs:string"/>
+			<xs:element name="lovvalgsLand" type="st:NonEmptyString"/>
 			<xs:element name="fomDato" type="st:FormatertDato"/>
 			<xs:element name="tomDato" type="st:FormatertDato"/>
 			<xs:element name="lovvalgsbestemmelse" type="melosysfelles:lovvalgsbestemmelseKode"/>
@@ -80,14 +61,14 @@
 	<xs:complexType name="hovedvirksomhetType">
 		<xs:sequence>
 			<xs:element name="yrkesaktivitet" type="melosysfelles:yrkesaktivitetsKode"/>
-			<xs:element name="orgnummer" type="xs:string"/>
-			<xs:element name="navn" type="xs:string"/>
-			<xs:element name="gatenavn" type="xs:string"/>
-			<xs:element name="husnummer" type="xs:string" minOccurs="0"/>
-			<xs:element name="landkode" type="xs:string"/>
-			<xs:element name="poststed" type="xs:string"/>
-			<xs:element name="region" type="xs:string" minOccurs="0"/>
-			<xs:element name="postnummer" type="xs:string"/>
+			<xs:element name="orgnummer" type="st:NonEmptyString"/>
+			<xs:element name="navn" type="st:NonEmptyString"/>
+            <xs:element name="adresselinje1" type="xs:string" minOccurs="0"/>
+            <xs:element name="adresselinje2" type="xs:string" minOccurs="0"/>
+            <xs:element name="adresselinje3" type="xs:string" minOccurs="0"/>
+            <xs:element name="adresselinje4" type="xs:string" minOccurs="0"/>
+            <xs:element name="adresselinje5" type="xs:string" minOccurs="0"/>
+			<xs:element name="land" type="st:NonEmptyString"/>
 		</xs:sequence>
 	</xs:complexType>
 
@@ -114,11 +95,11 @@
 		<xs:sequence>
 			<xs:element name="navn" type="xs:string" minOccurs="0"/>
 			<xs:element name="land" type="xs:string" minOccurs="0"/>
-			<xs:element name="gatenavn" type="xs:string" minOccurs="0"/>
-			<xs:element name="husnummer" type="xs:string" minOccurs="0"/>
-			<xs:element name="postnummer" type="xs:string" minOccurs="0"/>
-			<xs:element name="poststed" type="xs:string" minOccurs="0"/>
-			<xs:element name="region" type="xs:string" minOccurs="0"/>
+            <xs:element name="adresselinje1" type="xs:string" minOccurs="0"/>
+            <xs:element name="adresselinje2" type="xs:string" minOccurs="0"/>
+            <xs:element name="adresselinje3" type="xs:string" minOccurs="0"/>
+            <xs:element name="adresselinje4" type="xs:string" minOccurs="0"/>
+            <xs:element name="adresselinje5" type="xs:string" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 

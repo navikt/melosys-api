@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -17,38 +14,42 @@ import no.nav.dok.melosysbrev._000116.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.avklartefakta.YrkesgruppeType;
 import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.RegisterOppslagService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
-import no.nav.dok.melosysbrev._000116.ObjectFactory;
-
 public class A1Mapper implements BrevDataMapper {
 
-    final int MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV = 3;
+    private final int MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV = 3;
+
+    private static final String XSD_LOCATION = "xsd/melosys_000116.xsd";
+
+    private Behandling behandling;
+
+    private Behandlingsresultat resultat;
+
+    private BrevDataDto brevDataDto;
 
     private class Virksomhet {
-        Virksomhet(String navn, String orgnr, UstrukturertAdresse adresse) {
-            this.navn = navn;
-            this.orgnr = orgnr;
-            this.adresse = adresse;
+        Virksomhet(ForetakUtland foretak) {
+            this.navn = foretak.navn;
+            this.orgnr = foretak.orgnr;
+            this.adresse = new UstrukturertAdresse(foretak.adresse);
         }
 
-        Virksomhet(String navn, String orgnr, StrukturertAdresse adresse) {
-            this(navn, orgnr, new UstrukturertAdresse(adresse));
+        Virksomhet(OrganisasjonDokument foretak) {
+            this.navn = foretak.getNavnSammenslått();
+            this.orgnr = foretak.getOrgnummer();
+            this.adresse = foretak.getOrganisasjonDetaljer().getForretningsadresseUstrukturert();
         }
 
         public String navn;
@@ -56,32 +57,21 @@ public class A1Mapper implements BrevDataMapper {
         public UstrukturertAdresse adresse;
     }
 
-    private static final String XSD_LOCATION = "xsd/melosys_000067.xsd";
+    private class IkkeFysiskArbeidssted {
+        IkkeFysiskArbeidssted(String navn, String land) {
+            this.navn = navn;
+            this.land = land;
+        }
 
-    @Autowired
-    private AvklartefaktaService avklartefaktaService;
-
-    @Autowired
-    private RegisterOppslagService registerOppslagService;
-
-    private Behandling behandling;
-
-    private Behandlingsresultat resultat;
-
-    private SoeknadDokument søknad;
+        public String navn;
+        public String land;
+    }
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevDataDto brevDataDto) throws JAXBException, SAXException, TekniskException {
         this.behandling = behandling;
         this.resultat = resultat;
-
-        Optional<Saksopplysning> saksopplysning = behandling.getSaksopplysninger().stream()
-                .filter(s -> s.getType().equals(SaksopplysningType.SØKNAD))
-                .findFirst();
-
-        søknad = (SoeknadDokument)saksopplysning
-                .orElseThrow(() -> new TekniskException("Finner ikke søknad ved sending av A1"))
-                .getDokument();
+        this.brevDataDto = brevDataDto;
 
         Fag fag = mapFag();
         VedleggType vedlegg = new VedleggType();
@@ -92,7 +82,7 @@ public class A1Mapper implements BrevDataMapper {
 
     public Fag mapFag() throws TekniskException {
         Fag fag = new Fag();
-        fag.setVedleggA1(true);
+        fag.setVedleggA1("true");
         return fag;
     }
 
@@ -102,14 +92,16 @@ public class A1Mapper implements BrevDataMapper {
 
         try {
             a1.setOpprettelsesDato(convertToXMLGregorianCalendarRemoveTimezone(LocalDate.now()));
-        } catch (DatatypeConfigurationException e) {}
+        } catch (DatatypeConfigurationException e) {
+            throw new TekniskException("Konverteringsfeil");
+        }
 
-        Optional<Saksopplysning> saksopplysningPer = behandling.getSaksopplysninger().stream()
+        Optional<Saksopplysning> saksopplysning = behandling.getSaksopplysninger().stream()
                 .filter(s -> s.getType().equals(SaksopplysningType.PERSONOPPLYSNING))
                 .findFirst();
 
-        PersonDokument personDokument = (PersonDokument) saksopplysningPer
-                .orElseThrow(() -> new TekniskException("Finner ikke søknad ved sending av A1"))
+        PersonDokument personDokument = (PersonDokument) saksopplysning
+                .orElseThrow(() -> new TekniskException("Finner ikke persondokument ved sending av A1"))
                 .getDokument();
 
         a1.setPerson(mapPerson(personDokument));
@@ -117,27 +109,37 @@ public class A1Mapper implements BrevDataMapper {
         List<LovvalgsperiodeType> lovvalgsperioder = hentLovvalgsperioderFraBehandlingsresultat();
         a1.setLovvalgsperiode(lovvalgsperioder.get(0));    // Kun en lovvalgsperiode i Lev 1
 
+        a1.setYrkesgruppe(mapYrkesgruppe(brevDataDto.yrkesgruppe));
 
-        // Yrkesgruppe
 
+        List<Virksomhet> virksomheter = brevDataDto.norskeVirksomheter.stream()
+                .map(Virksomhet::new)
+                .collect(Collectors.toList());
 
-        List<Virksomhet> norskeAvklarteVirksomheter = hentNorskeAvklarteForetak();
-        List<ForetakUtland> utenlandskeForetak = hentUtenlandskeAvklarteforetak();
+        if (virksomheter.isEmpty()) {
+            throw new TekniskException("Trenger minst en valgt norsk virksomhet for ART12.1");
+        }
 
         // Lev1 kun norske virksomheter som hovedvirksomhet (og kun én)
-        Virksomhet hovedvirksomhet = norskeAvklarteVirksomheter.remove(0);
-        a1.setHovedvirksomhet(mapHovedvirksomhet(hovedvirksomhet, "ORDINÆR"));
+        Virksomhet hovedvirksomhet = virksomheter.remove(0);
+        a1.setHovedvirksomhet(mapHovedvirksomhet(hovedvirksomhet));
 
-        List<Virksomhet> bivirksomheter = norskeAvklarteVirksomheter;
-        bivirksomheter.addAll(utenlandskeForetak.stream()
-                .map(fu -> new Virksomhet(fu.navn, fu.orgnr, fu.adresse))
+        virksomheter.addAll(brevDataDto.utenlandskeVirksomheter.stream()
+                .map(Virksomhet::new)
                 .collect(Collectors.toList()));
 
-        boolean ikkeNokPlassIBrev = bivirksomheter.size() + 1 > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
-        a1.setIkkeFysiskArbeidssted(ikkeNokPlassIBrev ? "True" : "False");
+        a1.setBivirksomhetListe(mapBivirksomheter(virksomheter));
 
-        a1.setBivirksomhetListe(mapBivirksomheter(bivirksomheter));
-        a1.setBivirksomhetAdresseListe(mapBivirksomhetAdresser(bivirksomheter));
+        Set<UstrukturertAdresse> fysiskArbeidssteder = hentFysiskArbeidssteder();
+        if (harIkkeFysiskArbeidssted(fysiskArbeidssteder)) {
+            a1.setBivirksomhetAdresseListe(new BivirksomhetAdresseListeType());
+            a1.setIkkeFysiskArbeidssted("true");
+        }
+        else {
+            Set<IkkeFysiskArbeidssted> ikkeFysiskArbeidssteder = hentIkkeFysiskeArbeidssteder();
+            a1.setBivirksomhetAdresseListe(mapFysiskeAdresser(fysiskArbeidssteder, ikkeFysiskArbeidssteder));
+            a1.setIkkeFysiskArbeidssted("false");
+        }
 
         return a1;
     }
@@ -148,10 +150,10 @@ public class A1Mapper implements BrevDataMapper {
         person.setStatsborgerskap(personDokument.statsborgerskap.getKode());
         PersonnavnType navn = new PersonnavnType();
         navn.setFornavn(personDokument.fornavn);
-        //navn.setMellomnavn(personDokument.mellomnavn); // Finnes ikke i XML
+        //navn.setMellomnavn(personDokument.mellomnavn); // FIXME?: Finnes ikke i person-XML
         navn.setEtternavn(personDokument.etternavn);
         person.setPersonnavn(navn);
-        //person.setFoedested(); // Finnes ikke i XML
+
         try {
             person.setFoedselsdato(convertToXMLGregorianCalendarRemoveTimezone(personDokument.fødselsdato));
         } catch (DatatypeConfigurationException e) {
@@ -161,7 +163,7 @@ public class A1Mapper implements BrevDataMapper {
         Bostedsadresse bosted = personDokument.bostedsadresse;
         BostedsadresseType bostedAdresse = mapBostedsadresse(bosted);
         person.setBostedsadresse(bostedAdresse);
-        //person.setMidlertidigOppholdsadresse(); IKKE I BRUK
+        //person.setMidlertidigOppholdsadresse();
         return person;
     }
 
@@ -173,67 +175,8 @@ public class A1Mapper implements BrevDataMapper {
         bostedAdresse.setPostnr(bosted.getPostnr());
         bostedAdresse.setPoststed(bosted.getPoststed());
         bostedAdresse.setLandkode(bosted.getLand().getKode());
-        bostedAdresse.setRegion("");       // Finnes ikke for bostedsadresse
+        //bostedAdresse.setRegion("");       // TODO: Finnes ikke for bostedsadresse
         return bostedAdresse;
-    }
-
-    private HovedvirksomhetType mapHovedvirksomhet(Virksomhet virksomhet, String yrkesaktivitet) {
-        HovedvirksomhetType hovedvirksomhetBrev = new HovedvirksomhetType();
-        UstrukturertAdresse adresse = virksomhet.adresse;
-        hovedvirksomhetBrev.setOrgnummer(virksomhet.orgnr);
-        //hovedvirksomhetBrev.setRegion();
-        hovedvirksomhetBrev.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(yrkesaktivitet));
-
-        return hovedvirksomhetBrev;
-    }
-
-    private BivirksomhetAdresseListeType mapBivirksomhetAdresser(List<Virksomhet> virksomheter) {
-        BivirksomhetAdresseListeType bivirksomhetAdresserBrev = new BivirksomhetAdresseListeType();
-        for (Virksomhet virksomhet : virksomheter) {
-            AdresseType adresse = new AdresseType();
-            bivirksomhetAdresserBrev.getAdresse().add(adresse);
-        }
-        return bivirksomhetAdresserBrev;
-    }
-
-    private BivirksomhetListeType mapBivirksomheter(List<Virksomhet> virksomheter) {
-        BivirksomhetListeType bivirksomheterBrev = new BivirksomhetListeType();
-        for (Virksomhet virksomhet : virksomheter) {
-            BivirksomhetType bivirksomhetType = new BivirksomhetType();
-            bivirksomhetType.setNavn(virksomhet.navn);
-            bivirksomhetType.setOrgnummer(virksomhet.orgnr);
-            bivirksomheterBrev.getBivirksomhet().add(bivirksomhetType);
-        }
-        return bivirksomheterBrev;
-    }
-
-    private List<Virksomhet> hentNorskeAvklarteForetak() {
-        Set<String> avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(resultat.getId());
-
-        List<Virksomhet> norskeVirksomhet;
-        norskeVirksomhet = søknad.selvstendigArbeid.selvstendigForetak.stream()
-                .map(f -> new Virksomhet("", f.orgnr, new UstrukturertAdresse()))
-                .collect(Collectors.toList());
-
-        norskeVirksomhet.addAll(behandling.getSaksopplysninger().stream()
-                .filter(s -> s.getType() != SaksopplysningType.ORGANISASJON)
-                .map(s -> (OrganisasjonDokument)s.getDokument())
-                .map(org -> new Virksomhet(org.getNavnSammenslått(),
-                                           org.getOrgnummer(),
-                                           org.getOrganisasjonDetaljer().getForretningsadresseUstrukturert()))
-                .collect(Collectors.toList()));
-
-        norskeVirksomhet.retainAll(avklarteOrganisasjoner);
-
-        return norskeVirksomhet;
-    }
-
-    private List<ForetakUtland> hentUtenlandskeAvklarteforetak() {
-        Set<String> avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(resultat.getId());
-
-        return søknad.foretakUtland.stream()
-                .filter(foretak -> !avklarteOrganisasjoner.contains(foretak.orgnr))
-                .collect(Collectors.toList());
     }
 
     private List<LovvalgsperiodeType> hentLovvalgsperioderFraBehandlingsresultat() throws TekniskException {
@@ -253,8 +196,8 @@ public class A1Mapper implements BrevDataMapper {
         LovvalgsperiodeType brevPeriode = new LovvalgsperiodeType();
         brevPeriode.setLovvalgsLand(lovvalgsperiode.getLovvalgsland().getKode());
         brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getBestemmelse().getKode()));
-        //brevPeriode.setTilleggsbestemmelse();  Mangler i modellen!
-        brevPeriode.setFritekst("");   // Uvisst når/om vi trenger dette
+        //brevPeriode.setTilleggsbestemmelse();  // TODO: Mangler i modellen!
+        //brevPeriode.setFritekst("");   // TODO: Uvisst når/om vi trenger dette
 
         try {
             brevPeriode.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
@@ -263,6 +206,105 @@ public class A1Mapper implements BrevDataMapper {
             throw new TekniskException("Konferteringsfeil ved konvertering av lovvalgsperiode", e);
         }
         return brevPeriode;
+    }
+
+    private YrkesgruppeKode mapYrkesgruppe(YrkesgruppeType yrkesgruppe) throws TekniskException {
+        switch(yrkesgruppe) {
+            case YRKESAKTIV:
+                return YrkesgruppeKode.ORDINAER;
+            case YRKESAKTIV_FLYVENDE:
+                return YrkesgruppeKode.FLYENDE_PERSONELL;
+            case YRKESAKTIV_SKIP:
+                return YrkesgruppeKode.SOKKEL_ELLER_SKIP;
+            default:
+                throw new TekniskException("Sending av brev A1 feilet grunnet ukjent yrkesgruppe");
+        }
+    }
+
+    private HovedvirksomhetType mapHovedvirksomhet(Virksomhet virksomhet) {
+        HovedvirksomhetType hovedvirksomhetBrev = new HovedvirksomhetType();
+        UstrukturertAdresse adresse = virksomhet.adresse; // TODO: Map ustrukturert adresse når dette er på plass
+        hovedvirksomhetBrev.setOrgnummer(virksomhet.orgnr);
+        hovedvirksomhetBrev.setNavn(virksomhet.navn);
+        hovedvirksomhetBrev.setAdresselinje1(adresse.adresselinjer.get(0));
+        hovedvirksomhetBrev.setAdresselinje2(adresse.adresselinjer.get(1));
+        hovedvirksomhetBrev.setAdresselinje3(adresse.adresselinjer.get(2));
+        hovedvirksomhetBrev.setAdresselinje4(adresse.adresselinjer.get(3));
+        hovedvirksomhetBrev.setAdresselinje5(adresse.adresselinjer.get(4));
+        hovedvirksomhetBrev.setLand(adresse.landKode);
+
+        boolean selvstendigForetak = brevDataDto.selvstendigeForetak.contains(virksomhet.orgnr);
+        if (selvstendigForetak) {
+            hovedvirksomhetBrev.setYrkesaktivitet(YrkesaktivitetsKode.SELVSTENDIG);
+        }
+        else {
+            hovedvirksomhetBrev.setYrkesaktivitet(YrkesaktivitetsKode.LOENNET_ARBEID);
+        }
+        return hovedvirksomhetBrev;
+    }
+
+    private BivirksomhetListeType mapBivirksomheter(List<Virksomhet> virksomheter) {
+        BivirksomhetListeType bivirksomheterBrev = new BivirksomhetListeType();
+        for (Virksomhet virksomhet : virksomheter) {
+            BivirksomhetType bivirksomhetType = new BivirksomhetType();
+            bivirksomhetType.setNavn(virksomhet.navn);
+            bivirksomhetType.setOrgnummer(virksomhet.orgnr);
+            bivirksomheterBrev.getBivirksomhet().add(bivirksomhetType);
+        }
+        return bivirksomheterBrev;
+    }
+
+    private BivirksomhetAdresseListeType mapFysiskeAdresser(Set<UstrukturertAdresse> fysiskeArbeidssteder,
+                                                            Set<IkkeFysiskArbeidssted> ikkeFysiskArbeidssteder) {
+        BivirksomhetAdresseListeType bivirksomhetAdresserBrev = new BivirksomhetAdresseListeType();
+        for (IkkeFysiskArbeidssted ikkeFysiskArbeidssted : ikkeFysiskArbeidssteder) {
+            AdresseType adresseType = new AdresseType();
+            adresseType.setNavn(ikkeFysiskArbeidssted.navn);
+            adresseType.setLand(ikkeFysiskArbeidssted.land);
+            bivirksomhetAdresserBrev.getAdresse().add(adresseType);
+        }
+
+        for (UstrukturertAdresse adresse : fysiskeArbeidssteder) {
+            AdresseType adresseType = new AdresseType();
+            adresseType.setNavn("");
+            adresseType.setAdresselinje1(adresse.adresselinjer.get(0));
+            adresseType.setAdresselinje2(adresse.adresselinjer.get(1));
+            adresseType.setAdresselinje3(adresse.adresselinjer.get(2));
+            adresseType.setAdresselinje4(adresse.adresselinjer.get(3));
+            adresseType.setAdresselinje5(adresse.adresselinjer.get(4));
+            adresseType.setLand(adresse.landKode);
+
+            bivirksomhetAdresserBrev.getAdresse().add(adresseType);
+        }
+        return bivirksomhetAdresserBrev;
+    }
+
+    private boolean harIkkeFysiskArbeidssted(Set<UstrukturertAdresse> fysiskArbeidssteder) {
+        if (fysiskArbeidssteder.isEmpty()) {
+            return true;
+        }
+        boolean ikkeNokPlassiBrev = fysiskArbeidssteder.size() + 1 > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
+        if (ikkeNokPlassiBrev) {
+            return true;
+        }
+        return false;
+    }
+
+    private Set<UstrukturertAdresse> hentFysiskArbeidssteder() {
+        return brevDataDto.søknad.arbeidUtland.stream()
+                .map(au -> au.adresse)
+                .map(UstrukturertAdresse::new)
+                .collect(Collectors.toSet());
+    }
+
+    private Set<IkkeFysiskArbeidssted> hentIkkeFysiskeArbeidssteder() {
+        Set<IkkeFysiskArbeidssted> ikkeFysiskArbeidssteder = new HashSet<>();
+
+        // TODO: Sokkel skip mappes mot installasjonen
+        //fysiskeArbeidssteder.add(new IkkeFysiskArbeidssted("Ekofisk", "NO");
+        //fysiskeArbeidssteder.add(new IkkeFysiskArbeidssted("Seven Kestrel", "GB");
+
+        return ikkeFysiskArbeidssteder;
     }
 
     private JAXBElement<BrevdataType> mapintoBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag, VedleggType vedlegg) {

@@ -3,8 +3,8 @@ package no.nav.melosys.repository;
 import java.util.Optional;
 import java.util.Set;
 
-import no.nav.melosys.domain.Avklartefakta;
-import no.nav.melosys.domain.AvklartefaktaType;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
 import no.nav.melosys.domain.Behandlingsresultat;
 import org.springframework.data.repository.CrudRepository;
 

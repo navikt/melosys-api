@@ -63,6 +63,25 @@
 		</xs:sequence>
 	</xs:complexType>
 
+	<xs:complexType name="personnavnType">
+		<xs:sequence>
+			<xs:element name="fornavn" type="st:NonEmptyString"/>
+			<xs:element name="mellomnavn" type="xs:string" minOccurs="0"/>
+			<xs:element name="etternavn" type="st:NonEmptyString"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="bostedsadresseType">
+		<xs:sequence>
+			<xs:element name="gatenavn" type="st:NonEmptyString"/>
+			<xs:element name="husnummer" type="xs:string" minOccurs="0"/>
+			<xs:element name="postnr" type="st:NonEmptyString"/>
+			<xs:element name="poststed" type="st:NonEmptyString"/>
+			<xs:element name="region" type="xs:string" minOccurs="0"/>
+			<xs:element name="landkode" type="st:NonEmptyString"/>
+		</xs:sequence>
+	</xs:complexType>
+
 	<xs:simpleType name="rolleKode">
 		<xs:annotation>
 			<xs:documentation>Koder som angir hvilken rolle avsender har</xs:documentation>
