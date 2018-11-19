@@ -1,8 +1,10 @@
 package no.nav.melosys.service.avklartefakta;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import no.nav.melosys.domain.Avklartefakta;
 import no.nav.melosys.domain.AvklartefaktaType;
@@ -10,7 +12,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Landkoder;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
-import no.nav.melosys.repository.BehandlingResultatRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,14 +22,14 @@ public class AvklartefaktaService {
 
     private final AvklarteFaktaRepository avklarteFaktaRepository;
 
-    private final BehandlingResultatRepository behandlingResultatRepository;
+    private final BehandlingsresultatRepository behandlingsresultatRepository;
 
     private final AvklartefaktaDtoKonverterer faktaKonverterer;
 
     @Autowired
-    public AvklartefaktaService(AvklarteFaktaRepository avklarteFaktaRepository, BehandlingResultatRepository behandlingResultatRepository, AvklartefaktaDtoKonverterer faktaKonverterer) {
+    public AvklartefaktaService(AvklarteFaktaRepository avklarteFaktaRepository, BehandlingsresultatRepository behandlingsresultatRepository, AvklartefaktaDtoKonverterer faktaKonverterer) {
         this.avklarteFaktaRepository = avklarteFaktaRepository;
-        this.behandlingResultatRepository = behandlingResultatRepository;
+        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.faktaKonverterer = faktaKonverterer;
     }
 
@@ -51,26 +53,18 @@ public class AvklartefaktaService {
 
     @Transactional
     public void lagreAvklarteFakta(long behandlingsid, Set<AvklartefaktaDto> avklartefaktaDtos) throws IkkeFunnetException {
-        Behandlingsresultat resultat = behandlingResultatRepository.findOne(behandlingsid);
+        Behandlingsresultat resultat = behandlingsresultatRepository.findOne(behandlingsid);
         if (resultat == null) {
             throw new IkkeFunnetException("Fant ikke behandlingsresultat for behandlingsid: " + behandlingsid);
         }
 
-        for (AvklartefaktaDto avklarteFaktaDto : avklartefaktaDtos) {
-            Optional<Avklartefakta> resultOpt =
-                    avklarteFaktaRepository.findByBehandlingsresultatAndReferanseAndSubjekt(resultat,
-                                                                                            avklarteFaktaDto.getReferanse(),
-                                                                                            avklarteFaktaDto.getSubjektID());
+        avklarteFaktaRepository.deleteByBehandlingsresultat(resultat);
 
-            resultOpt.ifPresent(avklartefakta -> {
-                avklarteFaktaRepository.delete(avklartefakta.getId());
-            });
+        List<Avklartefakta> avklartefaktaList = avklartefaktaDtos.
+            stream().
+            map(avklartefaktaDto -> faktaKonverterer.oppdaterAvklartefaktaFraDto(avklartefaktaDto, resultat)).
+            collect(Collectors.toList());
 
-            Avklartefakta avklartefakta = new Avklartefakta();
-            avklartefakta.setBehandlingsresultat(resultat);
-
-            faktaKonverterer.oppdaterAvklartefaktaFraDto(avklartefakta, avklarteFaktaDto);
-            avklarteFaktaRepository.save(avklartefakta);
-        }
+        avklarteFaktaRepository.save(avklartefaktaList);
     }
 }

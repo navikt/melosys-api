@@ -89,7 +89,7 @@ public class Avklartefakta {
     }
 
     public void oppdaterRegistreringer(Set<AvklartefaktaRegistrering> nyeRegistreringer) {
-        nyeRegistreringer.forEach(r -> this.registreringer.add(r));
+        this.registreringer.addAll(nyeRegistreringer);
         this.registreringer.retainAll(nyeRegistreringer);
     }
 
@@ -117,7 +117,4 @@ public class Avklartefakta {
         return Objects.hash(behandlingsresultat, type, subjekt, referanse);
     }
 
-    public long getId() {
-        return id;
-    }
 }

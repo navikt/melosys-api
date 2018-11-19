@@ -10,7 +10,7 @@ import no.nav.melosys.domain.AvklartefaktaType;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
-import no.nav.melosys.repository.BehandlingResultatRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,12 +31,14 @@ public class AvklartefaktaServiceTest {
     private AvklarteFaktaRepository avklarteFaktaRepository;
 
     @Mock
-    private BehandlingResultatRepository behandlingResultatRepository;
+    private BehandlingsresultatRepository behandlingsresultatRepository;
+
+    @Mock
+    AvklartefaktaDtoKonverterer avklartefaktaDtoKonverterer;
 
     @Before
     public void setUp() {
-        AvklartefaktaDtoKonverterer avklartefaktaDtoKonverterer = new AvklartefaktaDtoKonverterer();
-        avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingResultatRepository, avklartefaktaDtoKonverterer);
+        avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, avklartefaktaDtoKonverterer);
     }
 
     @Test
@@ -77,15 +79,15 @@ public class AvklartefaktaServiceTest {
     public void lagreAvklarteFakta() throws IkkeFunnetException {
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingResultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
+        when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("test fakta");
-        when(avklarteFaktaRepository.findByBehandlingsresultatAndReferanseAndSubjekt(any(), any(), any())).
-            thenReturn(java.util.Optional.of(avklartefakta));
-
         HashSet<AvklartefaktaDto> avklartefaktaDtoer = new HashSet<>();
         avklartefaktaDtoer.add(new AvklartefaktaDto(avklartefakta));
         avklartefaktaService.lagreAvklarteFakta(123L, avklartefaktaDtoer);
-        verify(avklarteFaktaRepository, times(1)).delete(anyLong());
+        verify(avklarteFaktaRepository, times(1)).deleteByBehandlingsresultat(any());
+        verify(avklartefaktaDtoKonverterer, times(1)).oppdaterAvklartefaktaFraDto(any(), any());
+        verify(avklarteFaktaRepository, times(1)).save((Iterable<Avklartefakta>) any());
+
     }
 }
