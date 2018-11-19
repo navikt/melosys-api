@@ -179,6 +179,10 @@ public class JoarkService implements JoarkFasade {
         if (j.getForsendelseMottatt() != null) {
             journalpost.setForsendelseMottatt(KonverteringsUtils.xmlGregorianCalendarToInstant(j.getForsendelseMottatt()));
         }
+        if (j.getKorrespondansePart() != null) {
+            journalpost.setKorrespondansepartId(j.getKorrespondansePart().getKorrespondansepartId());
+            journalpost.setKorrespondansepartNavn(j.getKorrespondansePart().getKorrespondansepartNavn());
+        }
         journalpost.setHoveddokument(lagArkivDokument(j.getHoveddokument()));
         journalpost.setInnhold(j.getInnhold());
         if (j.getForsendelseJournalfoert() != null) {
