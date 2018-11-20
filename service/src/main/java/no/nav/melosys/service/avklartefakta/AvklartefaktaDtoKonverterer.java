@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class AvklartefaktaDtoKonverterer {
 
-    public Avklartefakta oppdaterAvklartefaktaFraDto(AvklartefaktaDto avklarteFaktaDto,
-                                                     Behandlingsresultat resultat) {
+    public Avklartefakta opprettAvklartefaktaFraDto(AvklartefaktaDto avklarteFaktaDto,
+                                                    Behandlingsresultat resultat) {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setSubjekt(avklarteFaktaDto.getSubjektID());
         avklartefakta.setType(avklarteFaktaDto.getAvklartefaktaType());

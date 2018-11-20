@@ -86,7 +86,7 @@ public class AvklartefaktaServiceTest {
         avklartefaktaDtoer.add(new AvklartefaktaDto(avklartefakta));
         avklartefaktaService.lagreAvklarteFakta(123L, avklartefaktaDtoer);
         verify(avklarteFaktaRepository, times(1)).deleteByBehandlingsresultat(any());
-        verify(avklartefaktaDtoKonverterer, times(1)).oppdaterAvklartefaktaFraDto(any(), any());
+        verify(avklartefaktaDtoKonverterer, times(1)).opprettAvklartefaktaFraDto(any(), any());
         verify(avklarteFaktaRepository, times(1)).save((Iterable<Avklartefakta>) any());
 
     }

@@ -32,7 +32,7 @@ public class AvklartefaktaDtoKonvertererTest {
 
     @Test
     public void testOppdaterAvklartefaktaInnhold() {
-        Avklartefakta avklartefakta = avklartefaktaDtoKonverterer.oppdaterAvklartefaktaFraDto(avklartefaktaDto, null);
+        Avklartefakta avklartefakta = avklartefaktaDtoKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, null);
 
         assertEquals(avklartefakta.getSubjekt(), avklartefaktaDto.getSubjektID());
         assertEquals(avklartefakta.getType(), avklartefaktaDto.getAvklartefaktaType());
@@ -42,7 +42,7 @@ public class AvklartefaktaDtoKonvertererTest {
 
     @Test
     public void testOppdaterAvklartefaktaUtenBegrunnelse() {
-        Avklartefakta avklartefakta = avklartefaktaDtoKonverterer.oppdaterAvklartefaktaFraDto(avklartefaktaDto, null);
+        Avklartefakta avklartefakta = avklartefaktaDtoKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, null);
 
         assertEquals(0, avklartefakta.getRegistreringer().size());
     }
@@ -50,7 +50,7 @@ public class AvklartefaktaDtoKonvertererTest {
     @Test
     public void testOppdaterAvklarteFaktaBegrunnelser() {
         avklartefaktaDto.setBegrunnelseKoder(new ArrayList<>(Arrays.asList("Opphold", "Familie")));
-        Avklartefakta avklartefakta = avklartefaktaDtoKonverterer.oppdaterAvklartefaktaFraDto(avklartefaktaDto, null);
+        Avklartefakta avklartefakta = avklartefaktaDtoKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, null);
 
         assertEquals(2, avklartefakta.getRegistreringer().size());
         avklartefakta.getRegistreringer().forEach(r -> assertFalse(r.getBegrunnelseKode().isEmpty()));
@@ -60,7 +60,7 @@ public class AvklartefaktaDtoKonvertererTest {
     public void testOppdaterAvklartefaktaBegrunnelseFritekst() {
         String fritekst = "Fritekst som beskriver begrunnelse";
         avklartefaktaDto.setBegrunnelseFritekst(fritekst);
-        Avklartefakta avklartefakta = avklartefaktaDtoKonverterer.oppdaterAvklartefaktaFraDto(avklartefaktaDto, null);
+        Avklartefakta avklartefakta = avklartefaktaDtoKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, null);
 
         assertEquals(0, avklartefakta.getRegistreringer().size());
     }

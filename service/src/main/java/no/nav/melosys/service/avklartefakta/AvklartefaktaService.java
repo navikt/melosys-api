@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import no.nav.melosys.domain.Avklartefakta;
 import no.nav.melosys.domain.AvklartefaktaType;
@@ -60,10 +59,9 @@ public class AvklartefaktaService {
 
         avklarteFaktaRepository.deleteByBehandlingsresultat(resultat);
 
-        List<Avklartefakta> avklartefaktaList = avklartefaktaDtos.
-            stream().
-            map(avklartefaktaDto -> faktaKonverterer.oppdaterAvklartefaktaFraDto(avklartefaktaDto, resultat)).
-            collect(Collectors.toList());
+        List<Avklartefakta> avklartefaktaList = avklartefaktaDtos.stream()
+            .map(avklartefaktaDto -> faktaKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, resultat))
+            .collect(Collectors.toList());
 
         avklarteFaktaRepository.save(avklartefaktaList);
     }
