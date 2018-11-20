@@ -219,7 +219,7 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
     }
 
     @Override
-    public Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException {
+    public Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
             .medOppgaveTyper(new String[]{Oppgavetype.BEH_SAK.getKode()})
@@ -233,7 +233,7 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
             .collect(Collectors.toList());
 
         if (oppgaver.size() > 1) {
-            throw new TekniskException("Det finnes mer enn en aktive behandlinger for sak " + saksnummer);
+            throw new TekniskException("Det finnes flere aktive behandlingsoppgaver for sak " + saksnummer);
         }
         return oppgaver.get(0);
     }
