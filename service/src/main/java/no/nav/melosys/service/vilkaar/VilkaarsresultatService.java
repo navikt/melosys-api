@@ -71,7 +71,7 @@ public class VilkaarsresultatService {
             begrunnelse.setKode(kode);
             nyeBegrunnelser.add(begrunnelse);
         }
-        vilkaarsresultat.oppdaterBegrunnelser(nyeBegrunnelser);
+        vilkaarsresultat.setBegrunnelser(nyeBegrunnelser);
 
         vilkaarsresultat.setBegrunnelseFritekst(vilkaarDto.getBegrunnelseFritekst());
         vilkaarsresultat.setBehandlingsresultat(behandlingsresultat);
