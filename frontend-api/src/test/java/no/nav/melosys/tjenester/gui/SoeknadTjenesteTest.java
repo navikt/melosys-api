@@ -1,14 +1,16 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import io.github.benas.randombeans.api.Randomizer;
+
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
@@ -22,9 +24,9 @@ import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import no.nav.melosys.tjenester.gui.dto.SoeknadTilleggsDataDto;
+
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -90,7 +92,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void testHentSøknad() {
+    public void testHentSøknad() throws Exception {
         Response resultat = soeknadTjeneste.hentSøknad(1L);
         assertThat(resultat.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
         SoeknadDto dto = (SoeknadDto) resultat.getEntity();
@@ -103,7 +105,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void soeknadDokumentSchemaValidering() throws IOException, JSONException {
+    public void soeknadDokumentSchemaValidering() throws Exception {
         Response response = soeknadTjeneste.hentSøknad(1222L);
         SoeknadDto søknadDto = (SoeknadDto)response.getEntity();
 

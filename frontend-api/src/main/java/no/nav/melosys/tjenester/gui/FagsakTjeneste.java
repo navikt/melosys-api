@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
@@ -25,6 +26,7 @@ import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
 import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
 import org.slf4j.Logger;
@@ -73,20 +75,12 @@ public class FagsakTjeneste extends RestTjeneste {
     @GET
     @Path("{saksnr}")
     @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."), response = Fagsak.class)
-    public Response hentFagsak(@ApiParam @PathParam("saksnr") String saksnummer) {
+    public Response hentFagsak(@ApiParam @PathParam("saksnr") String saksnummer) throws SikkerhetsbegrensningException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         if (sak == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-
-        try {
-            tilgang.sjekkSak(sak);
-        } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (TekniskException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-
+        tilgang.sjekkSak(sak);
         FagsakDto fagsakDto = tilDto(sak);
         return Response.ok(fagsakDto).build();
     }
@@ -98,27 +92,14 @@ public class FagsakTjeneste extends RestTjeneste {
         notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."),
         response = FagsakOppsummeringDto.class,
         responseContainer = "List")
-    public List<FagsakOppsummeringDto> hentFagsaker(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
+    public List<FagsakOppsummeringDto> hentFagsaker(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.") String fnr) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         Iterable<Fagsak> saker;
-
         if (fnr == null) {
             throw new BadRequestException();
-        } else {
-            try {
-                tilgang.sjekkFnr(fnr);
-                saker = fagsakService.hentFagsakerMedAktør(RolleType.BRUKER, fnr);
-            } catch (IkkeFunnetException e) {
-                throw new NotFoundException(e.getMessage());
-            } catch (SikkerhetsbegrensningException e) {
-                throw new ForbiddenException("Ikke tilgang");
-            }
         }
-        try {
-            return tilDtoer(saker);
-        } catch (TekniskException e) {
-            log.error("TekniskException", e);
-            throw new InternalServerErrorException("Intern feil");
-        }
+        tilgang.sjekkFnr(fnr);
+        saker = fagsakService.hentFagsakerMedAktør(RolleType.BRUKER, fnr);
+        return tilDtoer(saker);
     }
 
     private FagsakDto tilDto(Fagsak fagsak) {

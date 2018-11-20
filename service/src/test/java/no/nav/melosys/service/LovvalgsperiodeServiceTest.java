@@ -1,12 +1,5 @@
 package no.nav.melosys.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.util.Collection;
 import java.util.Collections;
 
@@ -14,9 +7,15 @@ import org.junit.Test;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class LovvalgsperiodeServiceTest {
 
@@ -61,11 +60,11 @@ public class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    public void lagreLovvalgsperioderUtenBehandlingsresultatKasterIkkeFunnetException() throws Throwable {
+    public void lagreLovvalgsperioderUtenBehandlingsresultatKasterException() throws Throwable {
         Throwable thrown = catchThrowable(() -> 
             instanse.lagreLovvalgsperioder(42L, LOVVALGSPERIODER)       
         );
-        assertThat(thrown).isInstanceOf(IkkeFunnetException.class)
+        assertThat(thrown).isInstanceOf(IllegalStateException.class)
                 .hasMessageEndingWith("fins ikke.");
     }
 

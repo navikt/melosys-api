@@ -2,21 +2,21 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.*;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+
 import no.nav.melosys.domain.Dokumenttype;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,24 +45,11 @@ public class DokumentTjeneste extends RestTjeneste {
     @GET
     @Path("pdf/{journalpostID}/{dokumentID}")
     @ApiOperation(value = "hent dokument knyttet til journalpost", response = byte[].class)
-    @Produces("application/pdf")
-    public Response hentDokument(@ApiParam @PathParam("journalpostID") String journalpostID, @ApiParam @PathParam("dokumentID") String dokumentID) {
+    @Produces({ "application/pdf", MediaType.APPLICATION_JSON + "; charset=UTF-8" })
+    public Response hentDokument(@ApiParam @PathParam("journalpostID") String journalpostID, @ApiParam @PathParam("dokumentID") String dokumentID)
+            throws SikkerhetsbegrensningException, IntegrasjonException, IkkeFunnetException {
         byte[] dokument;
-
-        try {
-            dokument = dokumentService.hentDokument(journalpostID, dokumentID);
-        } catch (SikkerhetsbegrensningException e) {
-            throw new ForbiddenException(e.getMessage());
-        } catch (IntegrasjonException e) {
-            log.error("IntegrasjonException", e);
-            throw new InternalServerErrorException(e.getMessage());
-        } catch (IkkeFunnetException e) {
-            throw new NotFoundException(e.getMessage());
-        } catch (FunksjonellException e) {
-            log.error("FunksjonellException", e);
-            throw new BadRequestException("Funksjonell feil: " + e.getMessage());
-        }
-
+        dokument = dokumentService.hentDokument(journalpostID, dokumentID);
         Response.ResponseBuilder ok = Response.ok(dokument);
         ok.header(HttpHeaders.CONTENT_LENGTH, dokument.length);
         ok.header(HttpHeaders.CONTENT_DISPOSITION, "inline");
@@ -71,52 +58,24 @@ public class DokumentTjeneste extends RestTjeneste {
 
     @GET
     @Path("/oversikt/{saksnummer}")
-    @ApiOperation(
-        value = "Henter alle dokumenter knyttet til en fagsak",
-        response = JournalpostInfoDto.class,
-        responseContainer = "List")
-    public Response hentDokumenter(@PathParam("saksnummer") String saksnummer) {
-        try {
-            List<JournalpostInfoDto> dokumentListe = dokumentService.hentDokumenter(saksnummer)
-                .stream()
-                .map(JournalpostInfoDto::av)
-                .collect(Collectors.toList());
-            return Response.ok(dokumentListe).build();
-        } catch (SikkerhetsbegrensningException e) {
-            log.error("SikkerhetsbegrensningException", e);
-            return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (IntegrasjonException e) {
-            log.error("IntegrasjonException", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (FunksjonellException e) {
-            log.error("FunksjonellException", e);
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
+    @ApiOperation(value = "Henter alle dokumenter knyttet til en fagsak", response = JournalpostInfoDto.class, responseContainer = "List")
+    public Response hentDokumenter(@PathParam("saksnummer") String saksnummer) throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
+        List<JournalpostInfoDto> dokumentListe = dokumentService.hentDokumenter(saksnummer)
+            .stream()
+            .map(JournalpostInfoDto::av)
+            .collect(Collectors.toList());
+        return Response.ok(dokumentListe).build();
     }
 
     @POST
     @Path("utkast/pdf/{behandlingID}/{dokumenttypeKode}")
-    @Produces("application/pdf")
+    @Produces({ "application/pdf", MediaType.APPLICATION_JSON + "; charset=UTF-8" })
     public Response produserUtkast(@PathParam("behandlingID") long behandlingID,
                                    @PathParam("dokumenttypeKode") Dokumenttype dokumenttypeKode,
-                                   BrevDataDto brevDataDto) {
+            BrevDataDto brevDataDto) throws TekniskException, FunksjonellException {
         byte[] dokument;
-
-        try {
-            tilgang.sjekk(behandlingID);
-            dokument = dokumentService.produserUtkast(behandlingID, dokumenttypeKode, brevDataDto);
-        } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (FunksjonellException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        } catch (TekniskException e) {
-            log.error("TekniskException", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (RuntimeException e) { // FIXME Midlertidig fiks inntil generell feilhåndtering er på plass
-            log.error("RuntimeException", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-
+        tilgang.sjekk(behandlingID);
+        dokument = dokumentService.produserUtkast(behandlingID, dokumenttypeKode, brevDataDto);
         Response.ResponseBuilder ok = Response.ok(dokument);
         ok.header(HttpHeaders.CONTENT_LENGTH, dokument.length);
         ok.header(HttpHeaders.CONTENT_DISPOSITION, "inline");
@@ -128,18 +87,10 @@ public class DokumentTjeneste extends RestTjeneste {
     public Response produserDokument(@Context UriInfo uriInfo,
                                      @PathParam("behandlingID") long behandlingID,
                                      @PathParam("dokumenttypeKode") Dokumenttype dokumenttypeKode,
-                                     BrevDataDto brevDataDto) {
-        try {
-            tilgang.sjekk(behandlingID);
-            dokumentService.produserDokumentISaksflyt(behandlingID, dokumenttypeKode, brevDataDto);
-            return Response.noContent().build();
-        } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (FunksjonellException e) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        } catch (TekniskException e) {
-            log.error("TekniskException", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
+            BrevDataDto brevDataDto) throws FunksjonellException, TekniskException {
+        tilgang.sjekk(behandlingID);
+        dokumentService.produserDokumentISaksflyt(behandlingID, dokumenttypeKode, brevDataDto);
+        return Response.noContent().build();
     }
+
 }

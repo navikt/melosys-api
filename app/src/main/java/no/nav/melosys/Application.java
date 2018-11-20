@@ -31,7 +31,7 @@ public class Application {
         };
     }
 
-    @GetMapping(path = {"/journalforing/**", "/sok/**"})
+    @GetMapping(path = { "/journalforing/**", "/sok/**" })
     public String forward() {
         return "forward:/";
     }

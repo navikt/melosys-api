@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 
@@ -33,11 +32,10 @@ public class LovvalgsperiodeService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Collection<Lovvalgsperiode> lagreLovvalgsperioder(long behandlingsid, Collection<Lovvalgsperiode> lovvalgsperioder)
-            throws IkkeFunnetException {
+    public Collection<Lovvalgsperiode> lagreLovvalgsperioder(long behandlingsid, Collection<Lovvalgsperiode> lovvalgsperioder) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findOne(behandlingsid);
         if (behandlingsresultat == null) {
-            throw new IkkeFunnetException(String.format("Behandling %s fins ikke.", behandlingsid));
+            throw new IllegalStateException(String.format("Behandling %s fins ikke.", behandlingsid));
         }
         lovvalgsperiodeRepo.deleteByBehandlingsresultat(behandlingsresultat);
         List<Lovvalgsperiode> perioderMedBehandling = lovvalgsperioder.stream()

@@ -2,7 +2,6 @@ package no.nav.melosys;
 
 import java.util.Properties;
 
-import no.nav.modig.testcertificates.TestCertificates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.EnvironmentAware;
@@ -21,15 +20,7 @@ public class LocalOppstart implements Oppstart, EnvironmentAware {
     @Override
     public void setEnvironment(Environment environment) {
         LocalOppstart.environment = environment;
-
-        configureSsl();
         loadSystemProperties();
-    }
-
-    @Override
-    public void configureSsl() {
-        log.info("Test sertifikater brukes.");
-        TestCertificates.setupKeyAndTrustStore();
     }
 
     @Override
