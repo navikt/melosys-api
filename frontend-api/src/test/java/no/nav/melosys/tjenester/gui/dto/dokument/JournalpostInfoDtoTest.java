@@ -17,6 +17,7 @@ public class JournalpostInfoDtoTest {
         Journalpost journalpost = new Journalpost(journalpostID);
         journalpost.setJournalposttype(Journalposttype.INN);
         journalpost.setForsendelseMottatt(Instant.now());
+        journalpost.setForsendelseJournalfoert(Instant.now());
         ArkivDokument hoveddokument = new ArkivDokument();
         String hovedTittel = "tittel";
         hoveddokument.setTittel(hovedTittel);
@@ -36,6 +37,7 @@ public class JournalpostInfoDtoTest {
         assertThat(dto.journalpostID).isEqualTo(journalpostID);
         assertThat(dto.mottaksretning).isEqualTo(Mottaksretning.INN);
         assertThat(dto.mottattDato).isBefore(Instant.now());
+        assertThat(dto.journalforingDato).isNotNull();
         assertThat(dto.avsenderEllerMottaker).isEqualTo(partNavn);
         assertThat(dto.hoveddokument.dokumentID).isEqualTo("1");
         assertThat(dto.hoveddokument.tittel).isEqualTo(hovedTittel);
