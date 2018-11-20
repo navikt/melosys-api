@@ -1,6 +1,8 @@
 package no.nav.melosys.tjenester.gui.dto.journalforing;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import no.nav.melosys.tjenester.gui.dto.dokument.DokumentDto;
 
@@ -9,7 +11,8 @@ public class JournalpostDto {
     private String brukerID;
     private String avsenderID;
     private boolean erBrukerAvsender;
-    private DokumentDto dokument;
+    private DokumentDto hoveddokument;
+    private List<DokumentDto> vedlegg = new ArrayList<>();
 
     public Instant getMottattDato() {
         return mottattDato;
@@ -43,11 +46,19 @@ public class JournalpostDto {
         this.avsenderID = avsenderID;
     }
 
-    public DokumentDto getDokument() {
-        return dokument;
+    public DokumentDto getHoveddokument() {
+        return hoveddokument;
     }
 
-    public void setDokument(DokumentDto dokument) {
-        this.dokument = dokument;
+    public void setHoveddokument(DokumentDto hoveddokument) {
+        this.hoveddokument = hoveddokument;
+    }
+
+    public List<DokumentDto> getVedlegg() {
+        return vedlegg;
+    }
+
+    public void setVedlegg(List<DokumentDto> vedlegg) {
+        this.vedlegg = vedlegg;
     }
 }

@@ -13,7 +13,6 @@ import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import org.json.JSONException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -63,7 +62,6 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    @Ignore //FIXME
     public void journalPostSchemaValidering() throws IOException, MelosysException, JSONException {
         Journalpost journalpost = random.nextObject(Journalpost.class);
         journalpost.setBrukerId(SAMPLE_FNR);
