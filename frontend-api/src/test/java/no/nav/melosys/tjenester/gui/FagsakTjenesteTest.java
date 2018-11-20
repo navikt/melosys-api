@@ -69,8 +69,8 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
             .objectPoolSize(100)
             .dateRange(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
             .exclude(FieldDefinitionBuilder.field().named("tilleggsinformasjonDetaljer").ofType(TilleggsinformasjonDetaljer.class).inClass(Tilleggsinformasjon.class).get())
-            .randomize(MidlertidigPostadresse.class, (Randomizer<MidlertidigPostadresse>) () -> Math.random() > 0.5 ? EnhancedRandom.random(MidlertidigPostadresseNorge.class) : EnhancedRandom.random(MidlertidigPostadresseUtland.class))
             .stringLengthRange(2, 10)
+            .randomize(MidlertidigPostadresse.class, (Randomizer<MidlertidigPostadresse>) () -> Math.random() > 0.5 ? random.random(MidlertidigPostadresseNorge.class) : random.random(MidlertidigPostadresseUtland.class))
             .build();
     }
 
