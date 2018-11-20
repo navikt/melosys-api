@@ -70,7 +70,7 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
             .dateRange(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
             .exclude(FieldDefinitionBuilder.field().named("tilleggsinformasjonDetaljer").ofType(TilleggsinformasjonDetaljer.class).inClass(Tilleggsinformasjon.class).get())
             .stringLengthRange(2, 10)
-            .randomize(MidlertidigPostadresse.class, (Randomizer<MidlertidigPostadresse>) () -> Math.random() > 0.5 ? random.random(MidlertidigPostadresseNorge.class) : random.random(MidlertidigPostadresseUtland.class))
+            .randomize(MidlertidigPostadresse.class, (Randomizer<MidlertidigPostadresse>) () -> Math.random() > 0.5 ? random.nextObject(MidlertidigPostadresseNorge.class) : random.nextObject(MidlertidigPostadresseUtland.class))
             .build();
     }
 
