@@ -157,7 +157,7 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
         FagsakService fagsakService = mock(FagsakService.class);
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(fagsakService.hentFagsakerMedAktør(eq(RolleType.BRUKER), eq(FNR)))
-                .thenReturn(Collections.singletonList(fagsak));
+            .thenReturn(Collections.singletonList(fagsak));
         FagsakTjeneste instans = new FagsakTjeneste(fagsakService, tilgang);
         return instans;
     }

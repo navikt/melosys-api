@@ -6,7 +6,8 @@ import no.nav.melosys.exception.FunksjonellException;
 
 import org.junit.Test;
 
-import static no.nav.melosys.tjenester.gui.unntakshandtering.IkkeFunnetExceptionMapperTest.testToResponse;
+import static no.nav.melosys.tjenester.gui.unntakshandtering.BaseExceptionMapperTest.testToResponse;
+
 
 public final class FunksjonellExceptionMapperTest {
 

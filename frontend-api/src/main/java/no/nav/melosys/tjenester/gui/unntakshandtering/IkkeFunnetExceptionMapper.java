@@ -12,17 +12,12 @@ import org.slf4j.event.Level;
 public final class IkkeFunnetExceptionMapper extends BaseExceptionMapper<IkkeFunnetException> {
 
     public IkkeFunnetExceptionMapper() {
-        // TBD: Skal IkkeFunnetException logges?
-        // De fleste opprinnelige forekomstene av unntakshåndtering logger
-        // ikke, med følgende unntak:
-        // * OppgaveTjeneste.mineOppgaver
-        // * .hentOppgaver
         super(Status.NOT_FOUND, Level.WARN, "");
     }
 
     @Override
     public Response toResponse(IkkeFunnetException exception) {
-        logger.warn("{} {}", melding, exception.getMessage());
+        logger.warn("{}", exception.getMessage());
         return Response.status(status).build();
     }
 

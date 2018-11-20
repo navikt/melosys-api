@@ -17,6 +17,18 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
     final Level loggnivå;
     final String melding;
 
+    /**
+     * Konstruer en unntaksoversetter.
+     * 
+     * @param status
+     *            HTTP-status å returnere (påkrevd).
+     * @param loggnivå
+     *            nivået å logge unntaket på: <code>WARN</code> eller <code>ERROR</code> for fullstendig logging med Slf4J, <
+     *            <code>WARN</code> eller <code>null</code> for å ikke logge noe.
+     * @param melding
+     *            en frivillig innledning til logging av unntaket (påkrevd). Gir anledning til å prefikse dump av stack trace
+     *            med ekstra informasjon.
+     */
     BaseExceptionMapper(Status status, Level loggnivå, String melding) {
         Objects.requireNonNull(status);
         Objects.requireNonNull(melding);

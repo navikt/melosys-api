@@ -17,8 +17,6 @@ import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -30,8 +28,6 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class PersonTjeneste extends RestTjeneste {
     
-    private static final Logger log = LoggerFactory.getLogger(PersonTjeneste.class);
-
     private RegisterOppslagService registerOppslag;
 
     private final Tilgang tilgang;
@@ -48,9 +44,7 @@ public class PersonTjeneste extends RestTjeneste {
         if (personnummer == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
-
-        PersonDokument personDokument;
-        personDokument = registerOppslag.hentPerson(personnummer);
+        PersonDokument personDokument = registerOppslag.hentPerson(personnummer);
         tilgang.sjekkFnr(personnummer);
         return Response.ok(new PersonDto(personDokument)).build();
     }
