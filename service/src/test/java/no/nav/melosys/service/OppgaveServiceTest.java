@@ -8,7 +8,10 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.*;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.dokument.soeknad.OppholdUtland;
+import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
@@ -16,7 +19,6 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
@@ -28,7 +30,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -46,7 +50,7 @@ public class OppgaveServiceTest {
     private TpsFasade tpsFasade;
 
     @Mock
-    private ProsessinstansRepository prosessinstansRepository;
+    private BehandlingService behandlingService;
 
     @Before
     public void setUp() {
@@ -54,11 +58,11 @@ public class OppgaveServiceTest {
                 gsakFasade,
                 fagsakRepository,
                 tpsFasade,
-                prosessinstansRepository);
+                behandlingService);
     }
 
     @Test
-    public void hentMineSaker() throws MelosysException {
+    public void hentOppgaverMedAnsvarlig() throws MelosysException {
 
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave();
@@ -76,11 +80,7 @@ public class OppgaveServiceTest {
                     return (string.equals("12345678901")) ? oppgaver : new ArrayList<>();
                 });
 
-        Behandling behandling = new Behandling();
-
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-        when(prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(any(), anyLong())).thenReturn(Optional.of(prosessinstans));
+        when(behandlingService.harAktivOppfrisking(anyLong())).thenReturn(true);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Fagsakstype.EU_EØS);
@@ -96,7 +96,6 @@ public class OppgaveServiceTest {
 
         mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12346678902");
         assertThat(mineSaker.size()).isEqualTo(0);
-
     }
 
     private List<Behandling> hentBehandlinger() {

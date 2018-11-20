@@ -32,7 +32,7 @@ public class BehandlingService {
      * Oppfrisking betyr å hente saksopplysninger på nytt for en gitt behandling.
      */
     public boolean harAktivOppfrisking(long behandlingID) {
-        Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(ProsessType.OPPFRISKNING, behandlingID);
+        Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType.OPPFRISKNING, ProsessSteg.FEILET_MASKINELT, behandlingID);
         if (aktivProsessinstans.isPresent()) {
             log.debug("Behandling {} er under oppfrisking.", behandlingID);
             return true;
