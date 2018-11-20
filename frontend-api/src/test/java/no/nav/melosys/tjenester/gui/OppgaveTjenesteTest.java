@@ -129,13 +129,13 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
     @Test
     public void sokEtterBehandlingsoppgave() throws FunksjonellException, TekniskException, IOException {
         BehandlingsoppgaveDto behandlingsoppgaveDto = defaultEnhancedRandom().nextObject(BehandlingsoppgaveDto.class);
-        List<OppgaveDto> oppgaver = Arrays.asList(behandlingsoppgaveDto);
+        List<BehandlingsoppgaveDto> oppgaver = Arrays.asList(behandlingsoppgaveDto);
 
-        when(oppgaveService.hentOppgaverMedBruker(anyString())).thenReturn(oppgaver);
+        when(oppgaveService.hentBehandlingsOppgaverMedBruker(anyString())).thenReturn(oppgaver);
 
         schemaType = OPPGAVER_SOK_SCHEMA;
 
-        Set<BehandlingsoppgaveDto> oppgave = (Set<BehandlingsoppgaveDto>) tjeneste.hentOppgaver("").getEntity();
+        List<BehandlingsoppgaveDto> oppgave = (List<BehandlingsoppgaveDto>) tjeneste.hentOppgaver("").getEntity();
         assertThat(oppgave).isNotNull();
         validerListe(oppgave);
     }

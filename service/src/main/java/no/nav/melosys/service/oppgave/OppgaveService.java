@@ -4,6 +4,7 @@ package no.nav.melosys.service.oppgave;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -67,6 +68,18 @@ public class OppgaveService {
         }
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedBruker(aktørId);
         return oppgaverTilDtoer(oppgaverFraDomain);
+    }
+
+    @Transactional
+    public List<BehandlingsoppgaveDto> hentBehandlingsOppgaverMedBruker(String brukerIdent) throws FunksjonellException, TekniskException {
+        String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
+        if (aktørId == null) {
+            throw new IkkeFunnetException("Finnes ikke aktørId for FNR " + brukerIdent);
+        }
+        List<Oppgave> oppgaverFraDomain = gsakFasade.finnBehandlingsOppgaverMedBruker(aktørId);
+        return oppgaverTilDtoer(oppgaverFraDomain).stream()
+                .map(oppgave -> (BehandlingsoppgaveDto) oppgave)
+                .collect(Collectors.toList());
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) throws TekniskException {
@@ -146,5 +159,4 @@ public class OppgaveService {
         Periode periode = hentPeriode(soeknadDokument);
         return new PeriodeDto(periode.getFom(), periode.getTom());
     }
-
 }

@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
@@ -157,17 +156,13 @@ public class OppgaveTjeneste extends RestTjeneste {
         responseContainer = "List")
     public Response hentOppgaver(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
         try {
-            Set<BehandlingsoppgaveDto> oppgaver = oppgaveService.hentOppgaverMedBruker(fnr).stream()
-                    .filter(o -> o instanceof BehandlingsoppgaveDto)
-                    .map(o -> (BehandlingsoppgaveDto)o)
-                    .collect(Collectors.toSet());
-
+            List<BehandlingsoppgaveDto> oppgaver = oppgaveService.hentBehandlingsOppgaverMedBruker(fnr);
             return Response.ok(oppgaver).build();
         } catch (SikkerhetsbegrensningException e) {
             throw new ForbiddenException(e.getMessage());
         } catch (IkkeFunnetException e) {
             log.info("IkkeFunnetException: {}", e.getMessage());
-            return Response.ok(new HashSet<BehandlingsoppgaveDto>()).build();
+            return Response.ok(new ArrayList<>()).build();
         } catch (TekniskException e) {
             log.error("TekniskException", e);
             throw new InternalServerErrorException("Teknisk feil: " + e.getMessage());
