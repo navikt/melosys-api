@@ -51,7 +51,7 @@ public class JournalfoeringServiceTest {
         opprettDto.setAvsenderNavn("setAvsenderNavn");
         opprettDto.setAvsenderID("setAvsenderID");
         opprettDto.setBrukerID("setBrukerID");
-        opprettDto.setDokumenttittel("setDokumenttittel");
+        opprettDto.setHoveddokumentTittel("setDokumenttittel");
         opprettDto.setArbeidsgiverID("123456789");
         this.opprettDto = opprettDto;
 
@@ -62,7 +62,7 @@ public class JournalfoeringServiceTest {
         tilordneDto.setAvsenderNavn("setAvsenderNavn");
         tilordneDto.setAvsenderID("setAvsenderID");
         tilordneDto.setBrukerID("setBrukerID");
-        tilordneDto.setDokumenttittel("setDokumenttittel");
+        tilordneDto.setHoveddokumentTittel("setDokumenttittel");
         this.tilordneDto = tilordneDto;
     }
 

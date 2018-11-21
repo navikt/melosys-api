@@ -56,7 +56,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
         dto.setAvsenderID(avsenderID);
         dto.setErBrukerAvsender(brukerID != null && brukerID.equalsIgnoreCase(avsenderID));
         DokumentDto dokumentDto = new DokumentDto(journalpost.getHoveddokument().getDokumentId(), journalpost.getHoveddokument().getTittel());
-        dto.setDokument(dokumentDto);
+        dto.setHoveddokument(dokumentDto);
         return Response.ok(dto).build();
     }
 

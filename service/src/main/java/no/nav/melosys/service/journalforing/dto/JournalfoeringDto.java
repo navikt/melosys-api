@@ -9,8 +9,8 @@ public class JournalfoeringDto {
     private String avsenderID;
     private String avsenderNavn;
     private String dokumentID;
-    private String dokumenttittel;
-    private List<String> vedleggstitler;
+    private String hoveddokumentTittel;
+    private List<DokumentDto> vedlegg;
 
     public String getJournalpostID() {
         return journalpostID;
@@ -60,20 +60,19 @@ public class JournalfoeringDto {
         this.dokumentID = dokumentID;
     }
 
-    public String getDokumenttittel() {
-        return dokumenttittel;
+    public String getHoveddokumentTittel() {
+        return hoveddokumentTittel;
     }
 
-    public void setDokumenttittel(String dokumenttittel) {
-        this.dokumenttittel = dokumenttittel;
+    public void setHoveddokumentTittel(String hoveddokumentTittel) {
+        this.hoveddokumentTittel = hoveddokumentTittel;
     }
 
-    public List<String> getVedleggstitler() {
-        return vedleggstitler;
+    public List<DokumentDto> getVedlegg() {
+        return vedlegg;
     }
 
-    public void setVedleggstitler(List<String> vedleggstitler) {
-        this.vedleggstitler = vedleggstitler;
+    public void setVedlegg(List<DokumentDto> vedlegg) {
+        this.vedlegg = vedlegg;
     }
-
 }

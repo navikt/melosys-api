@@ -14,6 +14,7 @@ import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse_883_2004;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
+import no.nav.melosys.tjenester.gui.dto.dokument.Mottaksretning;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
@@ -44,8 +45,9 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.getLovvalgsbestemmelser().forordning_883_2004 = tilKoder(LovvalgBestemmelse_883_2004.values());
         kodeverk.getLovvalgsbestemmelser().forordning_987_2009 = tilKoder(LovvalgBestemmelse_987_2009.values());
         kodeverk.getLovvalgsbestemmelser().tillegg = tilKoder(TilleggBestemmelse_883_2004.values());
-        // FIXME kodeverk ikke opprettet
+        // FIXME bør fjernes av MELOSYS-1848
         kodeverk.setLovvalgsunntak(tilKoder(LovvalgBestemmelse_883_2004.values()));
+        kodeverk.setMottaksretning(tilKoder(Mottaksretning.values()));
         kodeverk.setOppgavetyper(tilKoder(Oppgavetype.values()));
         kodeverk.setRepresenterer(tilKoder(Representerer.values()));
         kodeverk.setSakstyper(tilKoder(Fagsakstype.values()));
