@@ -11,7 +11,6 @@ import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.YrkesgruppeType;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
@@ -130,7 +129,7 @@ public class A1MapperTest {
         foretakUtland.orgnr = "1235234234";
 
         brevDataDto = new BrevDataDto();
-        brevDataDto.yrkesgruppe = YrkesgruppeType.YRKESAKTIV;
+        brevDataDto.yrkesgruppe = YrkesgruppeType.ORDINAER;
         brevDataDto.norskeVirksomheter = new HashSet<>();
         brevDataDto.norskeVirksomheter.add(organisasjonDokument);   // Hovedvirksomhet
         brevDataDto.selvstendigeForetak = new HashSet<>();

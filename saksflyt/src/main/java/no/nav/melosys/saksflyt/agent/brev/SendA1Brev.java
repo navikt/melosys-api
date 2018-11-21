@@ -14,15 +14,17 @@ import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.dokument.DokumentSystemService;
+import no.nav.melosys.service.dokument.brev.BrevDataByggerA1;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.Dokumenttype.ATTEST_A1;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
+import static no.nav.melosys.domain.ProsessSteg.SEND_A1;
 
 /**
  * Sender A1 til søker
@@ -30,7 +32,8 @@ import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
  * Transisjoner:
  * SEND_A1 -> null eller FEILET_MASKINELT hvis feil
  */
-@Component
+
+@Component(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class SendA1Brev extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(SendA1Brev.class);
@@ -47,7 +50,7 @@ public class SendA1Brev extends AbstraktStegBehandler {
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return SEND_FORVALTNINGSMELDING;
+        return SEND_A1;
     }
 
     @Override
@@ -68,5 +71,4 @@ public class SendA1Brev extends AbstraktStegBehandler {
         prosessinstans.setSteg(null);
         log.info("Sendt forvaltningsmelding for prosessinstans {}", prosessinstans.getId());
     }
-
 }

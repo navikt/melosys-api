@@ -1,7 +1,10 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -13,19 +16,20 @@ import no.nav.dok.melosysbrev._000116.Fag;
 import no.nav.dok.melosysbrev._000116.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.YrkesgruppeType;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone;
+import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 public class A1Mapper implements BrevDataMapper {
 
@@ -80,7 +84,7 @@ public class A1Mapper implements BrevDataMapper {
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    public Fag mapFag() throws TekniskException {
+    public Fag mapFag() {
         Fag fag = new Fag();
         fag.setVedleggA1("true");
         return fag;
@@ -96,21 +100,13 @@ public class A1Mapper implements BrevDataMapper {
             throw new TekniskException("Konverteringsfeil");
         }
 
-        Optional<Saksopplysning> saksopplysning = behandling.getSaksopplysninger().stream()
-                .filter(s -> s.getType().equals(SaksopplysningType.PERSONOPPLYSNING))
-                .findFirst();
-
-        PersonDokument personDokument = (PersonDokument) saksopplysning
-                .orElseThrow(() -> new TekniskException("Finner ikke persondokument ved sending av A1"))
-                .getDokument();
-
+        PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
         a1.setPerson(mapPerson(personDokument));
 
         List<LovvalgsperiodeType> lovvalgsperioder = hentLovvalgsperioderFraBehandlingsresultat();
         a1.setLovvalgsperiode(lovvalgsperioder.get(0));    // Kun en lovvalgsperiode i Lev 1
 
-        a1.setYrkesgruppe(mapYrkesgruppe(brevDataDto.yrkesgruppe));
-
+        a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevDataDto.yrkesgruppe.navn));
 
         List<Virksomhet> virksomheter = brevDataDto.norskeVirksomheter.stream()
                 .map(Virksomhet::new)
@@ -148,11 +144,8 @@ public class A1Mapper implements BrevDataMapper {
         PersonType person = new PersonType();
         person.setKjoenn(KjoennKode.fromValue(personDokument.kjønn.getKode()));
         person.setStatsborgerskap(personDokument.statsborgerskap.getKode());
-        PersonnavnType navn = new PersonnavnType();
-        navn.setFornavn(personDokument.fornavn);
-        //navn.setMellomnavn(personDokument.mellomnavn); // FIXME?: Finnes ikke i person-XML
-        navn.setEtternavn(personDokument.etternavn);
-        person.setPersonnavn(navn);
+
+        person.setPersonnavn(lagPersonnavn(personDokument));
 
         try {
             person.setFoedselsdato(convertToXMLGregorianCalendarRemoveTimezone(personDokument.fødselsdato));
@@ -161,22 +154,9 @@ public class A1Mapper implements BrevDataMapper {
         }
 
         Bostedsadresse bosted = personDokument.bostedsadresse;
-        BostedsadresseType bostedAdresse = mapBostedsadresse(bosted);
+        BostedsadresseType bostedAdresse = lagBostedsadresse(bosted);
         person.setBostedsadresse(bostedAdresse);
-        //person.setMidlertidigOppholdsadresse();
         return person;
-    }
-
-    private BostedsadresseType mapBostedsadresse(Bostedsadresse bosted) {
-        Gateadresse gateadresse = bosted.getGateadresse();
-        BostedsadresseType bostedAdresse = new BostedsadresseType();
-        bostedAdresse.setGatenavn(gateadresse.getGatenavn());
-        bostedAdresse.setHusnummer(gateadresse.getGatenummer()+" "+ gateadresse.getHusbokstav());
-        bostedAdresse.setPostnr(bosted.getPostnr());
-        bostedAdresse.setPoststed(bosted.getPoststed());
-        bostedAdresse.setLandkode(bosted.getLand().getKode());
-        //bostedAdresse.setRegion("");       // TODO: Finnes ikke for bostedsadresse
-        return bostedAdresse;
     }
 
     private List<LovvalgsperiodeType> hentLovvalgsperioderFraBehandlingsresultat() throws TekniskException {
@@ -206,19 +186,6 @@ public class A1Mapper implements BrevDataMapper {
             throw new TekniskException("Konferteringsfeil ved konvertering av lovvalgsperiode", e);
         }
         return brevPeriode;
-    }
-
-    private YrkesgruppeKode mapYrkesgruppe(YrkesgruppeType yrkesgruppe) throws TekniskException {
-        switch(yrkesgruppe) {
-            case YRKESAKTIV:
-                return YrkesgruppeKode.ORDINAER;
-            case YRKESAKTIV_FLYVENDE:
-                return YrkesgruppeKode.FLYENDE_PERSONELL;
-            case YRKESAKTIV_SKIP:
-                return YrkesgruppeKode.SOKKEL_ELLER_SKIP;
-            default:
-                throw new TekniskException("Sending av brev A1 feilet grunnet ukjent yrkesgruppe");
-        }
     }
 
     private HovedvirksomhetType mapHovedvirksomhet(Virksomhet virksomhet) {

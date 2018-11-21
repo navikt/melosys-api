@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.Gateadresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
@@ -50,11 +49,6 @@ public class OrganisasjonsDetaljer {
         return konverterTilUstrukturertAdresse(adresse);
     }
 
-    public StrukturertAdresse getForretningsadresseStrukturert() {
-        GeografiskAdresse adresse = hentFørsteGyldigeAdresse(forretningsadresse);
-        return konverterTilStrukturertAdresse(adresse);
-    }
-
     private GeografiskAdresse hentFørsteGyldigeAdresse(List<GeografiskAdresse> adresser) {
         for (GeografiskAdresse adresse : adresser) {
             Periode gyldighetsperiode = adresse.getGyldighetsperiode();
@@ -67,9 +61,9 @@ public class OrganisasjonsDetaljer {
 
     private UstrukturertAdresse konverterTilUstrukturertAdresse(GeografiskAdresse adresse) {
         UstrukturertAdresse ustrukturertAdresse = new UstrukturertAdresse();
-        Gateadresse gateadresse = (Gateadresse)adresse;
+        Gateadresse gateadresse = (Gateadresse) adresse;
         ustrukturertAdresse.adresselinjer.add(gateadresse.getGatenavn());
-        ustrukturertAdresse.adresselinjer.add(gateadresse.getHusnummer()+gateadresse.getHusbokstav());
+        ustrukturertAdresse.adresselinjer.add(gateadresse.getHusnummer() + gateadresse.getHusbokstav());
 
         if (adresse instanceof SemistrukturertAdresse) {
             ustrukturertAdresse.adresselinjer.add(((SemistrukturertAdresse) adresse).getPostnr());
@@ -78,20 +72,6 @@ public class OrganisasjonsDetaljer {
         ustrukturertAdresse.landKode = adresse.getLandkode();
 
         return ustrukturertAdresse;
-    }
-
-    private StrukturertAdresse konverterTilStrukturertAdresse(GeografiskAdresse adresse) {
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        Gateadresse gateadresse = (Gateadresse)adresse;
-        strukturertAdresse.gatenavn = gateadresse.getGatenavn();
-        strukturertAdresse.husnummer = gateadresse.getHusnummer() + gateadresse.getHusbokstav();
-        strukturertAdresse.poststed = gateadresse.getPoststed();
-        strukturertAdresse.landKode = gateadresse.getLandkode();
-
-        if (adresse instanceof SemistrukturertAdresse) {
-            strukturertAdresse.postnummer = ((SemistrukturertAdresse) adresse).getPostnr();
-        }
-        return strukturertAdresse;
     }
 
     public List<GeografiskAdresse> getPostadresse() {

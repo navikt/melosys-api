@@ -5,9 +5,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.YrkesgruppeType;
+import no.nav.melosys.domain.avklartefakta.AvklartYrkesaktivitetType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
-import no.nav.melosys.domain.avklartefakta.YrkesgruppeType;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
@@ -40,12 +41,9 @@ public class AvklartefaktaService {
     }
 
     public Set<String> hentAvklarteOrganisasjoner(long behandlingsid) {
-        Set<Avklartefakta> avklartefakta = avklarteFaktaRepository.findByBehandlingsresultatId(behandlingsid);
-        return avklartefakta.stream()
-                    .filter(af -> af.getType() != AvklartefaktaType.AVKLARTE_ARBEIDSGIVER)
-                    .filter(af -> af.getFakta() != "TRUE")
-                    .map(af -> af.getSubjekt())
-                    .collect(Collectors.toSet());
+        return avklarteFaktaRepository.hentAvklarteOrganisasjoner(behandlingsid).stream()
+                .map(Avklartefakta::getSubjekt)
+                .collect(Collectors.toSet());
     }
 
     public YrkesgruppeType hentYrkesGruppe(long behandlingsid) throws TekniskException {
@@ -53,7 +51,9 @@ public class AvklartefaktaService {
                 avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, AvklartefaktaType.YRKESGRUPPE);
 
         Avklartefakta avklartefakta = avklartefaktaOpt.orElseThrow(() ->new TekniskException("Finner ingen avklartefakta for yrkesgruppe"));
-        return YrkesgruppeType.valueOf(avklartefakta.getFakta());
+        AvklartYrkesaktivitetType aktivitetType = AvklartYrkesaktivitetType.valueOf(avklartefakta.getFakta());
+
+        return aktivitetType.tilYrkesgruppeType();
     }
 
     @Transactional

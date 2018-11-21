@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.RolleType;
-import no.nav.melosys.domain.avklartefakta.YrkesgruppeType;
+import no.nav.melosys.domain.YrkesgruppeType;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;

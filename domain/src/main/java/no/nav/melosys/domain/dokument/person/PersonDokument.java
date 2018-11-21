@@ -37,6 +37,9 @@ public class PersonDokument extends SaksopplysningDokument {
     public String fornavn;
 
     @JsonIgnore
+    public String mellomnavn;
+
+    @JsonIgnore
     public String etternavn;
 
     public String sammensattNavn;
