@@ -3,8 +3,9 @@ package no.nav.melosys.domain.begrunnelse;
 import no.nav.melosys.domain.Kodeverk;
 
 public enum Artikkel12_2 implements Kodeverk {
-    DRIVER_IKKE_VIKRSOMHET_NORGE("DRIVER_IKKE_VIKRSOMHET_NORGE", "Bruker driver vanligvis ikke selvstendig virksomhet i Norge."),
-    UTSENDELSE_FOR_LANG("UTSENDELSE_FOR_LANG", "Varighet utsendelse overskrider fastsatt lengden i forordningen.");
+    NORMALT_IKKE_DRIFT_NORGE("NORMALT_IKKE_DRIFT_NORGE", "Bruker driver vanligvis ikke selvstendig virksomhet i Norge."),
+    IKKE_LIGNENDE_VIRKSOMHET("IKKE_LIGNENDE_VIRKSOMHET", "Ikke lignende virksomhet."),
+    UTSENDELSE_OVER_24_MN("UTSENDELSE_OVER_24_MN", "Varighet utsendelse overskrider fastsatt lengden i forordningen.");
 
     private String kode;
     private String beskrivelse;

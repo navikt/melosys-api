@@ -9,8 +9,11 @@ public enum VilkaarType implements Kodeverk {
     ART12_1_FORUTGÅENDE_MEDLEMSKAP("ART12_1_FORUTGAAENDE_MEDLEMSKAP", "Vurdering av om bruker oppfyller vilkår om forutgående medlemskap."),
     ART12_1_VESENTLIG_VIRKSOMHET ("ART12_1_VESENTLIG_VIRKSOMHET", "Vurdering av om arbeidsgiver eller oppdragsgiver i Norge oppfyller vilkår om vesentlig virksomhet."),
     ART12_2("ART12_2", "Vurdering av om bruker oppfyller ART12.2 vilkår."),
+    ART12_2_NORMALT_DRIVER_VIRKSOMHET("ART12_2_NORMALT_DRIVER_VIRKSOMHET", "Vurdering av om selvstendig næringsdrivende normalt driver virksomhet i Norge."),
     ART16_1 ("ART16_1 ", "Vurdering av om bruker oppfyller ART16.1 vilkår."),
-    BOSATT_I_NORGE("BOSATT_I_NORGE", "Vurdering av om bruker oppfyller vilkår om å være bosatt i Norge.");
+    BOSATT_I_NORGE("BOSATT_I_NORGE", "Vurdering av om bruker oppfyller vilkår om å være bosatt i Norge."),
+    FO_883_2004_ART12_1("FO_883_2004_ART12_1", "Utsendt arbeidstaker (art 12.1)"),
+    FO_883_2004_ART12_2("FO_883_2004_ART12_2", "Utsendt selvstendig næringsrivende (art 12.2)");
 
     private static final VilkaarType[] VALUES = values();
 
