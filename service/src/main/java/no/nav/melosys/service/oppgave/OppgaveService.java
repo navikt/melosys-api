@@ -3,10 +3,11 @@ package no.nav.melosys.service.oppgave;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -17,7 +18,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.oppgave.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,17 +34,17 @@ public class OppgaveService {
     private final GsakFasade gsakFasade;
     private final FagsakRepository fagsakRepository;
     private final TpsFasade tpsFasade;
-    private final ProsessinstansRepository prosessinstansRepository;
+    private final BehandlingService behandlingService;
 
     @Autowired
     public OppgaveService(GsakFasade gsakFasade,
                           FagsakRepository fagsakRepository,
                           TpsFasade tpsFasade,
-                          ProsessinstansRepository prosessinstansRepository) {
+                          BehandlingService behandlingService) {
         this.gsakFasade = gsakFasade;
         this.fagsakRepository = fagsakRepository;
         this.tpsFasade = tpsFasade;
-        this.prosessinstansRepository = prosessinstansRepository;
+        this.behandlingService = behandlingService;
     }
 
     @Transactional
@@ -145,13 +146,7 @@ public class OppgaveService {
         behandlingDto.setBehandlingsstatus(behandling.getStatus());
         behandlingDto.setBehandlingstype(behandling.getType());
         behandlingDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
-
-        Optional<Prosessinstans> prosessinstans = prosessinstansRepository.findByStegIsNotNullAndTypeAndBehandling_Id(ProsessType.OPPFRISKNING, behandling.getId());
-        if (prosessinstans.isPresent()) {
-            behandlingDto.setErUnderOppdatering(true);
-        } else {
-            behandlingDto.setErUnderOppdatering(false);
-        }
+        behandlingDto.setErUnderOppdatering(behandlingService.harAktivOppfrisking(behandling.getId()));
         return behandlingDto;
     }
 

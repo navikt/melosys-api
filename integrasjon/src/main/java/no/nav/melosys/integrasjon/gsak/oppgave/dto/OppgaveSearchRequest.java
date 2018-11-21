@@ -13,6 +13,7 @@ public class OppgaveSearchRequest {
     private String[] tema;
     private String sorteringsfelt;
     private String statusKategori;
+    private String[] saksreferanse;
 
     private OppgaveSearchRequest(Builder builder) {
         this.tildeltEnhetsnr = builder.enhetId;
@@ -24,6 +25,7 @@ public class OppgaveSearchRequest {
         this.tema = builder.tema;
         this.sorteringsfelt = builder.sorteringsfelt;
         this.statusKategori = builder.statusKategori;
+        this.saksreferanse = builder.saksreferanse;
     }
 
     public String[] getOppgavetype() {
@@ -62,6 +64,10 @@ public class OppgaveSearchRequest {
         return statusKategori;
     }
 
+    public String[] getSaksreferanse() {
+        return saksreferanse;
+    }
+
     public static class Builder {
 
         private String enhetId;
@@ -73,6 +79,7 @@ public class OppgaveSearchRequest {
         private String[] tema;
         private String sorteringsfelt;
         private String statusKategori;
+        private String[] saksreferanse;
 
         public Builder(String enhetId ) {
             this.enhetId = enhetId;
@@ -115,6 +122,11 @@ public class OppgaveSearchRequest {
 
         public Builder medStatusKategori(String statusKategori) {
             this.statusKategori = statusKategori;
+            return this;
+        }
+
+        public Builder medSaksreferanse(String [] saksreferanse) {
+            this.saksreferanse = saksreferanse;
             return this;
         }
 

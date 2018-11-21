@@ -24,10 +24,6 @@ public class ArkivDokument {
         return interneVedlegg;
     }
 
-    public void setInterneVedlegg(List<ArkivDokumentVedlegg> interneVedlegg) {
-        this.interneVedlegg = interneVedlegg;
-    }
-
     public String getTittel() {
         return tittel;
     }

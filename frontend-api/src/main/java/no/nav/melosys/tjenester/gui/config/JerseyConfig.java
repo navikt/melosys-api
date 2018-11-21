@@ -2,11 +2,15 @@ package no.nav.melosys.tjenester.gui.config;
 
 import javax.ws.rs.ApplicationPath;
 
+import no.nav.melosys.tjenester.gui.*;
+import no.nav.melosys.tjenester.gui.unntakshandtering.FunksjonellExceptionMapper;
+import no.nav.melosys.tjenester.gui.unntakshandtering.IkkeFunnetExceptionMapper;
+import no.nav.melosys.tjenester.gui.unntakshandtering.SikkerhetsbegrensningExceptionMapper;
+import no.nav.melosys.tjenester.gui.unntakshandtering.TekniskExceptionMapper;
+
 import org.glassfish.jersey.CommonProperties;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Configuration;
-
-import no.nav.melosys.tjenester.gui.*;
 
 @Configuration
 @ApplicationPath("api")
@@ -37,5 +41,12 @@ public class JerseyConfig extends ResourceConfig {
         register(SoeknadTjeneste.class);
         register(VedtakTjeneste.class);
         register(VilkaarTjeneste.class);
+
+        // Globale ExceptionMappers (implisitt unntakshåndtering for hyppig
+        // forekommende unntak i REST-grensesnittet).
+        register(IkkeFunnetExceptionMapper.class);
+        register(SikkerhetsbegrensningExceptionMapper.class);
+        register(TekniskExceptionMapper.class);
+        register(FunksjonellExceptionMapper.class);
     }
 }

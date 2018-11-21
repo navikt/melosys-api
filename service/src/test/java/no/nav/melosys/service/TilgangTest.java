@@ -9,12 +9,14 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.sikkerhet.abac.Pep;
 import no.nav.melosys.sikkerhet.abac.PepImpl;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,13 +63,13 @@ public class TilgangTest {
         tilgang = new Tilgang(behandlingRepository, pep);
     }
 
-    @Test(expected = TekniskException.class)
-    public void testBehandlingsIdIkkeKnyttetTilFagsak() throws SikkerhetsbegrensningException, TekniskException {
+    @Test(expected = IkkeFunnetException.class)
+    public void testBehandlingsIdIkkeKnyttetTilFagsak() throws Throwable {
         tilgang.sjekk(102323934);
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
-    public void testBehandlingsIdIkketilgang() throws SikkerhetsbegrensningException, TekniskException {
+    public void testBehandlingsIdIkketilgang() throws Exception {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
 
         when(behandlingRepository.findOne(anyLong())).thenReturn(behandlingMocked);
@@ -76,7 +78,7 @@ public class TilgangTest {
     }
 
     @Test
-    public void testBehandlingsIdOk() throws SikkerhetsbegrensningException, TekniskException {
+    public void testBehandlingsIdOk() throws Exception {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
 
         when(behandlingRepository.findOne(anyLong())).thenReturn(behandlingMocked);

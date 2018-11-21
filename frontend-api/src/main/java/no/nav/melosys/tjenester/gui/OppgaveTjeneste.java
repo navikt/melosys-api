@@ -1,7 +1,12 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.*;
-import javax.ws.rs.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
@@ -11,14 +16,13 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.*;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.OppgaveOversiktDto;
-import no.nav.melosys.tjenester.gui.dto.PlukketOppgaveDto;
+import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveOversiktDto;
+import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,65 +50,37 @@ public class OppgaveTjeneste extends RestTjeneste {
     @POST
     @Path("/plukk")
     @ApiOperation(value = "Plukker fra GSAK neste oppgave som saksbehandler skal arbeide med.", response = PlukketOppgaveDto.class)
-    public Response plukkOppgave(@ApiParam PlukkOppgaveInnDto plukkDto) {
+    public Response plukkOppgave(@ApiParam PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
         String ident = SubjectHandler.getInstance().getUserID();
 
-        try {
-            Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto);
+        Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto);
 
-            if (plukket.isPresent()) {
-                Oppgave oppgave = plukket.get();
-                PlukketOppgaveDto dto = new PlukketOppgaveDto();
+        if (plukket.isPresent()) {
+            Oppgave oppgave = plukket.get();
+            PlukketOppgaveDto dto = new PlukketOppgaveDto();
 
-                dto.setOppgaveID(oppgave.getOppgaveId());
-                if (oppgave.erBehandling()) {
-                    dto.setOppgavetype(Oppgavetype.BEH_SAK.getKode());
-                    dto.setSaksnummer(oppgave.getSaksnummer());
-                } else if (oppgave.erJournalFøring()) {
-                    dto.setOppgavetype(Oppgavetype.JFR.getKode());
-                }
-                dto.setJournalpostID(oppgave.getJournalpostId());
-
-                return Response.ok(dto).build();
-            } else {
-                return Response.ok().build();
+            dto.setOppgaveID(oppgave.getOppgaveId());
+            if (oppgave.erBehandling()) {
+                dto.setOppgavetype(Oppgavetype.BEH_SAK.getKode());
+                dto.setSaksnummer(oppgave.getSaksnummer());
+            } else if (oppgave.erJournalFøring()) {
+                dto.setOppgavetype(Oppgavetype.JFR.getKode());
             }
+            dto.setJournalpostID(oppgave.getJournalpostId());
 
-        } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (IkkeFunnetException e) {
-            log.info("Ingen oppgaver funnet for ident {}. Feilmelding: ", ident, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        } catch (FunksjonellException e) {
-            log.info("Funksjonell feil: {}", e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        } catch (TekniskException e) {
-            log.error("Uventet teknisk Feil", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+            return Response.ok(dto).build();
+        } else {
+            return Response.ok().build();
         }
     }
 
     @POST
     @Path("/tilbakelegge")
     @ApiOperation(value = "Legger tilbake oppgave knyttet til gitt behandlingID i GSAK.")
-    public Response leggTilbakeOppgave(@ApiParam TilbakeleggingDto tilbakelegging) {
+    public Response leggTilbakeOppgave(@ApiParam TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
         String ident = SubjectHandler.getInstance().getUserID();
-
-        try {
-            oppgaveplukker.leggTilbakeOppgave(ident, tilbakelegging);
-            return Response.ok().build();
-        } catch (SikkerhetsbegrensningException e) {
-            return Response.status(Response.Status.FORBIDDEN).build();
-        } catch (IkkeFunnetException e) {
-            log.error("Ingen oppgaver funnet for ident {}. Feilmelding: ", ident, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        } catch (FunksjonellException e) {
-            log.info("Funksjonell feil: {}", e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        } catch (TekniskException e) {
-            log.error("Uventet teknisk Feil", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
+        oppgaveplukker.leggTilbakeOppgave(ident, tilbakelegging);
+        return Response.ok().build();
     }
 
     @GET
@@ -112,24 +88,10 @@ public class OppgaveTjeneste extends RestTjeneste {
     @ApiOperation(
         value = "Henter alle oppgaver som er tildelt en gitt saksbehandler.",
         response = OppgaveOversiktDto.class)
-    public Response mineOppgaver() {
+    public Response mineOppgaver() throws TekniskException, FunksjonellException {
         String ident = SubjectHandler.getInstance().getUserID();
         List<OppgaveDto> oppgaveDtoListe;
-        try {
-            oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
-        } catch (SikkerhetsbegrensningException e) {
-            throw new ForbiddenException(e.getMessage());
-        } catch (IkkeFunnetException e) {
-            log.info("IkkeFunnetException: {}", e.getMessage());
-            throw new NotFoundException(e.getMessage());
-        } catch (TekniskException e) {
-            log.error("TekniskException", e);
-            throw new InternalServerErrorException("Teknisk feil: " + e.getMessage());
-        } catch (FunksjonellException e) {
-            log.error("FunksjonellException", e);
-            throw new BadRequestException("Funksjonell feil: " + e.getMessage());
-        }
-
+        oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
         OppgaveOversiktDto oversiktDto = new OppgaveOversiktDto();
         List<JournalfoeringsoppgaveDto> journalføring = new ArrayList<>();
         List<BehandlingsoppgaveDto> saksbehandling = new ArrayList<>();
@@ -154,21 +116,12 @@ public class OppgaveTjeneste extends RestTjeneste {
         value = "Henter alle behandlingsoppgaver knyttet til en gitt bruker.",
         response = BehandlingsoppgaveDto.class,
         responseContainer = "List")
-    public Response hentOppgaver(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) {
+    public Response hentOppgaver(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) throws FunksjonellException, TekniskException {
         try {
             List<BehandlingsoppgaveDto> oppgaver = oppgaveService.hentBehandlingsOppgaverMedBruker(fnr);
             return Response.ok(oppgaver).build();
-        } catch (SikkerhetsbegrensningException e) {
-            throw new ForbiddenException(e.getMessage());
         } catch (IkkeFunnetException e) {
-            log.info("IkkeFunnetException: {}", e.getMessage());
             return Response.ok(new ArrayList<>()).build();
-        } catch (TekniskException e) {
-            log.error("TekniskException", e);
-            throw new InternalServerErrorException("Teknisk feil: " + e.getMessage());
-        } catch (FunksjonellException e) {
-            log.error("FunksjonellException", e);
-            throw new BadRequestException("Funksjonell feil: " + e.getMessage());
         }
     }
 }

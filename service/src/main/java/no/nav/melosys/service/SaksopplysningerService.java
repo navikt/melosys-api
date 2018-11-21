@@ -218,7 +218,7 @@ public class SaksopplysningerService {
     public void oppfriskSaksopplysning(long behandlingsid) throws IkkeFunnetException, TekniskException {
         log.info("Starter oppfrisking av behandlingsid: {} ", behandlingsid);
 
-        Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByStegIsNotNullAndBehandling_Id(behandlingsid);
+        Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessSteg.FEILET_MASKINELT, behandlingsid);
         if (aktivProsessinstans.isPresent()) {
             log.warn("Aktiv prosessinstans finnes allerede. Ikke mulig å oppfriske saksopplysning.");
             return;

@@ -1,13 +1,14 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
-
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
+
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
+
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
@@ -35,7 +36,7 @@ public class PersonTjenesteTest extends JsonSchemaTest {
     private PersonTjeneste personTjeneste;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
                 .overrideDefaultInitialization(true)
                 .collectionSizeRange(1, 4)
@@ -51,7 +52,7 @@ public class PersonTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void personSchemaValidering() throws IOException {
+    public void personSchemaValidering() throws Exception {
         Response person = personTjeneste.getPerson("12345678910");
         ObjectMapper mapper = objectMapperMedKodeverkServiceStub();
         String jsonInString = mapper.writeValueAsString(person.getEntity());

@@ -12,10 +12,7 @@ import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
@@ -23,6 +20,7 @@ import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OpprettOppgaveDto;
 import no.nav.melosys.integrasjon.gsak.sak.SakConsumer;
 import no.nav.melosys.integrasjon.gsak.sak.dto.SakDto;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -238,10 +236,31 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
     }
 
     @Override
+    public Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medSaksreferanse(new String[]{saksnummer})
+            .medOppgaveTyper(new String[]{Oppgavetype.BEH_SAK.getKode()})
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .build();
+
+        List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest);
+        List<Oppgave> oppgaver = finnOppgaveListeResponse.stream()
+            .filter(Objects::nonNull)
+            .map(GsakService::oppgaveMappingDtoTilDomain)
+            .collect(Collectors.toList());
+
+        if (oppgaver.size() > 1) {
+            throw new TekniskException("Det finnes flere aktive behandlingsoppgaver for sak " + saksnummer);
+        }
+        return oppgaver.get(0);
+    }
+
+    @Override
     public void tildelOppgave(String oppgaveId, String saksbehandlerID) throws FunksjonellException, TekniskException {
         OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
         if (oppgave == null ) {
-            throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveId);
+            throw new IkkeFunnetException(String.format("Feil ved henting av "
+                    + "oppgave %s for saksbehandler %s:", oppgaveId, saksbehandlerID));
         }
         oppgave.setTilordnetRessurs(saksbehandlerID);
         oppgaveConsumer.oppdaterOppgave(oppgave);

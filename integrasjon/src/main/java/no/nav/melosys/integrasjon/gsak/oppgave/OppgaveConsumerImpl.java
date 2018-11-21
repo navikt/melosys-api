@@ -72,7 +72,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
     }
 
     @Override
-    public List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, TekniskException {
+    public List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) throws FunksjonellException, TekniskException {
         WebTarget lokalTarget = target;
         if (oppgaveSearchRequest.getAktørId() != null) {
             lokalTarget = lokalTarget.queryParam("aktoerId", oppgaveSearchRequest.getAktørId());
@@ -82,6 +82,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
             .queryParam("tildeltRessurs", oppgaveSearchRequest.getTildeltRessurs())
             .queryParam("sorteringsfelt", oppgaveSearchRequest.getSorteringsfelt())
             .queryParam("tilordnetRessurs", oppgaveSearchRequest.getTilordnetRessurs())
+            .queryParam("saksreferanse", oppgaveSearchRequest.getSaksreferanse())
             .queryParam("statuskategori", oppgaveSearchRequest.getStatusKategori());
 
         lokalTarget = leggTilQueryParamSomArray(lokalTarget, "tema", oppgaveSearchRequest.getTema());

@@ -9,4 +9,8 @@ public class ArkivDokumentVedlegg {
     public ArkivDokumentVedlegg(String tittel) {
         this.tittel = tittel;
     }
+
+    public String getTittel() {
+        return tittel;
+    }
 }

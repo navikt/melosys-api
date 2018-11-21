@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +45,8 @@ public class SoeknadService {
                 .filter(s -> s.getType().equals(SaksopplysningType.SØKNAD))
                 .findFirst();
 
-        Saksopplysning soeknad = soeknadOpt.orElseThrow(() -> new IkkeFunnetException("Søknad ikke funnet"));
+        Saksopplysning soeknad = soeknadOpt.orElseThrow(() -> 
+            new IkkeFunnetException(String.format("Søknad ikke funnet for behandlingsid %s.", behandlingID)));
         return (SoeknadDokument) soeknad.getDokument();
     }
 

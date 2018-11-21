@@ -5,16 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 
 import org.junit.Test;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -30,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTest {
+public final class LovvalgsperiodeTjenesteTest {
 
     private static final LocalDate FOM = LocalDate.now();
     private static final LovvalgsperiodeDto FORVENTET = new LovvalgsperiodeDto(new PeriodeDto(FOM, FOM),
@@ -41,10 +37,10 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTest {
 
     private static final long BEHANDLING_UTEN_TILGANG = 238L;
     private static final long BEHANDLING_MED_TEKNISK_FEIL = 832L;
+    private final JsonSchemaTest jsonSchemaTest;
 
-    @Override
-    public String schemaNavn() {
-        return "lovvalgsperioder-schema.json";
+    public LovvalgsperiodeTjenesteTest() {
+        jsonSchemaTest = new JsonSchemaTest("lovvalgsperioder-schema.json");
     }
 
     @Test
@@ -60,20 +56,22 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTest {
     @Test
     public void hentLovvalgsperiodeUtenTilgang() throws Exception {
         testUnntakIhentLovvalgsperiode(BEHANDLING_UTEN_TILGANG,
-                Collections.emptyList(), new ForbiddenException(new SikkerhetsbegrensningException("ignorert")));
+                Collections.emptyList(), new SikkerhetsbegrensningException("ignorert"));
     }
 
     @Test
     public void hentLovvalgsperiodeMedTekniskFeil() throws Exception {
         testUnntakIhentLovvalgsperiode(BEHANDLING_MED_TEKNISK_FEIL,
-                Collections.emptyList(), new InternalServerErrorException(new TekniskException("ignorert")));
+                Collections.emptyList(), new TekniskException("ignorert"));
     }
 
     private void testUnntakIhentLovvalgsperiode(long behandlingsid,
             Collection<LovvalgsperiodeDto> forventet, Throwable forventetUnntak) throws Exception {
         Throwable unntak = catchThrowable(() -> testHentLovvalgsperioder(behandlingsid, Collections.emptyList()));
-        assertThat(unntak).isInstanceOf(forventetUnntak.getClass())
-                .hasCauseInstanceOf(forventetUnntak.getCause().getClass());
+        assertThat(unntak).isInstanceOf(forventetUnntak.getClass());
+        if (forventetUnntak.getCause() != null) {
+            assertThat(unntak).hasCauseInstanceOf(forventetUnntak.getCause().getClass());
+        }
     }
 
     private void testHentLovvalgsperioder(long behandlingsid,
@@ -90,7 +88,7 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTest {
         @SuppressWarnings("unchecked")
         Collection<LovvalgsperiodeDto> resultatliste = (Collection<LovvalgsperiodeDto>) resultat.getEntity();
         assertThat(resultatliste.size()).isEqualTo(forventet.size());
-        validerListe(resultatliste);
+        jsonSchemaTest.validerListe(resultatliste);
     }
 
     @Test
@@ -98,26 +96,19 @@ public final class LovvalgsperiodeTjenesteTest extends JsonSchemaTest {
         testLagreLovvalgsperioder(42L, Collections.singletonList(FORVENTET));
     }
 
-    @Test
-    public void lagreLovvalgsperiodeUtenBehandlingGir404() throws Exception {
-        Throwable thrown = catchThrowable(() -> testLagreLovvalgsperioder(123, Collections.singletonList(FORVENTET)));
-        assertThat(thrown).isInstanceOf(NotFoundException.class)
-                .hasCauseInstanceOf(IkkeFunnetException.class);
-    }
-
     private void testLagreLovvalgsperioder(long behandlingsid,
             Collection<LovvalgsperiodeDto> perioder) throws Exception {
         LovvalgsperiodeService lovvalgsperiodeService = lagLovvalgsperiodeService();
         Tilgang tilgang = mock(Tilgang.class);
         LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgang);
-        validerListe(perioder);
+        jsonSchemaTest.validerListe(perioder);
         Collection<LovvalgsperiodeDto> resultat = instans.lagreLovvalgsperioder(behandlingsid, perioder);
         assertThat(resultat.size()).isEqualTo(perioder.size());
         if (!perioder.isEmpty()) {
             assertThat(perioder.iterator().next())
                     .isEqualToComparingFieldByFieldRecursively(resultat.iterator().next());
         }
-        validerListe(resultat);
+        jsonSchemaTest.validerListe(resultat);
     }
 
     private static LovvalgsperiodeService lagLovvalgsperiodeService() {

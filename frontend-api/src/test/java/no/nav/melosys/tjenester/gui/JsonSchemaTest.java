@@ -8,12 +8,15 @@ import java.util.Collection;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
+
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.jackson.MelosysModule;
 import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
+
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaClient;
@@ -30,7 +33,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public abstract class JsonSchemaTest {
+public class JsonSchemaTest {
 
     private static final Logger log = LoggerFactory.getLogger(JsonSchemaTest.class);
 
@@ -44,11 +47,23 @@ public abstract class JsonSchemaTest {
 
     private static EnhancedRandom enhancedRandom;
 
+    private final String schemaNavn;
+
+    protected JsonSchemaTest() {
+        this(null);
+    }
+
+    public JsonSchemaTest(String schemaNavn) {
+        this.schemaNavn = schemaNavn;
+    }
+
     public Logger getLogger() {
         return log;
     }
 
-    public abstract String schemaNavn();
+    public String schemaNavn() {
+        return schemaNavn;
+    }
 
     protected static EnhancedRandom defaultEnhancedRandom() {
         if (enhancedRandom == null) {

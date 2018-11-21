@@ -150,11 +150,11 @@ public class SaksopplysningerServiceTest {
 
         behandling.setSaksopplysninger(saksopplysninger);
 
-        when(prosessinstansRepository.findByStegIsNotNullAndBehandling_Id(anyLong())).thenReturn(Optional.empty());
+        when(prosessinstansRepository.findByStegIsNotNullAndStegIsNotAndBehandling_Id(eq(ProsessSteg.FEILET_MASKINELT), anyLong())).thenReturn(Optional.empty());
         when(behandlingRepo.findOneWithSaksopplysningerById(anyLong())).thenReturn(behandling);
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("12345");
 
-        saksopplysningerService.oppfriskSaksopplysning(anyLong());
+        saksopplysningerService.oppfriskSaksopplysning(13L);
 
         assertThat(behandling.getSaksopplysninger().size()).isEqualTo(1);
         assertThat(behandling.getSaksopplysninger().stream().findFirst().get().getType()).isEqualTo(SaksopplysningType.SØKNAD);

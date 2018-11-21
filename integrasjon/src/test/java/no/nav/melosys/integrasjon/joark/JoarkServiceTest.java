@@ -19,6 +19,7 @@ import no.nav.tjeneste.virksomhet.journal.v3.HentKjerneJournalpostListeUgyldigIn
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journalposttyper;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.ArkivSak;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
+import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.KorrespendansePart;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeResponse;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,6 +54,12 @@ public class JoarkServiceTest {
         journalpost.setGjelderArkivSak(arkivSak);
         journalpost.setForsendelseMottatt(KonverteringsUtils.localDateToXMLGregorianCalendar(LocalDate.now()));
         journalpost.setForsendelseJournalfoert(KonverteringsUtils.localDateToXMLGregorianCalendar(LocalDate.now().plusDays(2)));
+        KorrespendansePart korrespendansePart = new KorrespendansePart();
+        String partID = "partID";
+        String partNavn = "Ola N";
+        korrespendansePart.setKorrespondansepartId(partID);
+        korrespendansePart.setKorrespondansepartNavn(partNavn);
+        journalpost.setKorrespondansePart(korrespendansePart);
         DetaljertDokumentinformasjon dokumentInfo = new DetaljertDokumentinformasjon();
         String dokID = "dokID_1";
         String tittel = "Tittel 1";
@@ -75,6 +82,8 @@ public class JoarkServiceTest {
         assertThat(journalpost1.getJournalposttype()).isEqualTo(Journalposttype.INN);
         assertThat(journalpost1.getForsendelseMottatt()).isNotNull();
         assertThat(journalpost1.getForsendelseJournalfoert()).isNotNull();
+        assertThat(journalpost1.getKorrespondansepartId()).isEqualTo(partID);
+        assertThat(journalpost1.getKorrespondansepartNavn()).isEqualTo(partNavn);
     }
 
 
