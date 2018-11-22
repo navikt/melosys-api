@@ -23,7 +23,6 @@ public class Oppgave {
     // FIXME: MELOSYS-1401 : skal implementere logikk rundt disse
     private Behandlingstype behandlingstype;
     private BehandlingTema behandlingstema;
-    private Temagruppe temagruppe;
 
     public Oppgave() {
     }
@@ -42,14 +41,6 @@ public class Oppgave {
 
     public void setBehandlingstema(BehandlingTema behandlingstema) {
         this.behandlingstema = behandlingstema;
-    }
-
-    public Temagruppe getTemagruppe() {
-        return temagruppe;
-    }
-
-    public void setTemagruppe(Temagruppe temagruppe) {
-        this.temagruppe = temagruppe;
     }
 
     public String getAktørId() {
