@@ -131,7 +131,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
         BehandlingsoppgaveDto behandlingsoppgaveDto = defaultEnhancedRandom().nextObject(BehandlingsoppgaveDto.class);
         List<BehandlingsoppgaveDto> oppgaver = Arrays.asList(behandlingsoppgaveDto);
 
-        when(oppgaveService.hentBehandlingsOppgaverMedBruker(anyString())).thenReturn(oppgaver);
+        when(oppgaveService.hentBehandlingsoppgaverMedBruker(anyString())).thenReturn(oppgaver);
 
         schemaType = OPPGAVER_SOK_SCHEMA;
 

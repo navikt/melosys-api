@@ -220,7 +220,7 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
     }
 
     @Override
-    public List<Oppgave> finnBehandlingsOppgaverMedBruker(String aktørId) throws FunksjonellException, TekniskException {
+    public List<Oppgave> finnBehandlingsoppgaverMedBruker(String aktørId) throws FunksjonellException, TekniskException {
         String[] oppgaveTyper = { Oppgavetype.BEH_SAK.getKode() };
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
                 .medAktørId(aktørId)

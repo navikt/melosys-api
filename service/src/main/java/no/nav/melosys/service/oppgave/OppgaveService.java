@@ -72,12 +72,12 @@ public class OppgaveService {
     }
 
     @Transactional
-    public List<BehandlingsoppgaveDto> hentBehandlingsOppgaverMedBruker(String brukerIdent) throws FunksjonellException, TekniskException {
+    public List<BehandlingsoppgaveDto> hentBehandlingsoppgaverMedBruker(String brukerIdent) throws FunksjonellException, TekniskException {
         String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
         if (aktørId == null) {
             throw new IkkeFunnetException("Finnes ikke aktørId for FNR " + brukerIdent);
         }
-        List<Oppgave> oppgaverFraDomain = gsakFasade.finnBehandlingsOppgaverMedBruker(aktørId);
+        List<Oppgave> oppgaverFraDomain = gsakFasade.finnBehandlingsoppgaverMedBruker(aktørId);
         return oppgaverTilDtoer(oppgaverFraDomain).stream()
                 .map(oppgave -> (BehandlingsoppgaveDto) oppgave)
                 .collect(Collectors.toList());

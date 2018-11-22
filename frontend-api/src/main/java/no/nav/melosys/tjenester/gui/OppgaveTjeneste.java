@@ -118,7 +118,7 @@ public class OppgaveTjeneste extends RestTjeneste {
         responseContainer = "List")
     public Response hentOppgaver(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.")  String fnr) throws FunksjonellException, TekniskException {
         try {
-            List<BehandlingsoppgaveDto> oppgaver = oppgaveService.hentBehandlingsOppgaverMedBruker(fnr);
+            List<BehandlingsoppgaveDto> oppgaver = oppgaveService.hentBehandlingsoppgaverMedBruker(fnr);
             return Response.ok(oppgaver).build();
         } catch (IkkeFunnetException e) {
             return Response.ok(new ArrayList<>()).build();
