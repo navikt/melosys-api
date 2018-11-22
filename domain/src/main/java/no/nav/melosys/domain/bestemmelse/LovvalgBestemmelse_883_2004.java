@@ -10,7 +10,7 @@ public enum LovvalgBestemmelse_883_2004 implements LovvalgBestemmelse {
     FO_883_2004_ART11_3E("Ikke-yrkesaktive er omfattet i bostedsstaten (art 11.3.e)"),
     FO_883_2004_ART11_4_2("Arbeid på skip, lønnet av arbeidsgiveer i bostedsstaten (art 11.4.2)"),
     FO_883_2004_ART12_1("Utsendt arbeidstaker (art 12.1)"),
-    FO_883_2004_ART12_2("Utsendt selvstendig næringsrivende (art 12.2)"),
+    FO_883_2004_ART12_2("Utsendt selvstendig næringsdrivende (art 12.2)"),
     FO_883_2004_ART13_1A("Arbeidstaker i to/flere land - omfattet i bostedsland (art. 13.1.a)"),
     FO_883_2004_ART13_1B1("Arbeidstaker i to/flere land - omfattet der arbeidsgiver har forretningssted (art 13.1.b.i)"),
     FO_883_2004_ART13_1B2("Arbeidstaker i to/flere land (art 13.1.b.ii)"),

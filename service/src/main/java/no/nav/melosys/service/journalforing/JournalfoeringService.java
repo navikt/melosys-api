@@ -51,7 +51,7 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringDto.getBrukerID());
         prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringDto.getAvsenderNavn());
-        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getDokumenttittel());
+        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
         //FIXME MELOSYS-1283 vedlegg
         // Land trenges av regelmodulen får å vurdere inngangsvilkår
         prosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, journalfoeringDto.getFagsak().getLand());
@@ -92,7 +92,7 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringDto.getBrukerID());
         prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringDto.getAvsenderNavn());
-        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getDokumenttittel());
+        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
         //FIXME MELOSYS-1283 vedlegg
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, journalfoeringDto.getSaksnummer());
 
@@ -127,7 +127,7 @@ public class JournalfoeringService {
         if (StringUtils.isEmpty(journalfoeringDto.getBrukerID())) {
             throw new FunksjonellException("BrukerID mangler");
         }
-        if (StringUtils.isEmpty(journalfoeringDto.getDokumenttittel())) {
+        if (StringUtils.isEmpty(journalfoeringDto.getHoveddokumentTittel())) {
             throw new FunksjonellException("Dokumenttittel mangler");
         }
     }
