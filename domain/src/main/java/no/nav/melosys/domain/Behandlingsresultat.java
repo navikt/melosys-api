@@ -47,13 +47,13 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Column(name = "vedtak_klagefrist")
     private LocalDate vedtakKlagefrist;
 
-    @OneToMany(mappedBy = "behandlingsresultat")
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Avklartefakta> avklartefakta;
 
-    @OneToMany(mappedBy = "behandlingsresultat", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Lovvalgsperiode> lovvalgsperioder;
 
-    @OneToMany(mappedBy = "behandlingsresultat", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Vilkaarsresultat> vilkaarsresultater;
 
     public long getId() {

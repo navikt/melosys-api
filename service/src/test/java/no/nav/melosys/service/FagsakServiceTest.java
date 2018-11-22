@@ -47,7 +47,7 @@ public class FagsakServiceTest {
         MedlFasade medl = new MedlService(new MedlemskapMock(), dokumentFactory);
         InntektFasade inntekt = new InntektService(new InntektMock(), dokumentFactory);
 
-        SaksopplysningerService saksopplysningerService = new SaksopplysningerService(tps, aareg, ereg, medl, inntekt , null, null , null);
+        SaksopplysningerService saksopplysningerService = new SaksopplysningerService(tps, aareg, ereg, medl, inntekt , null, null , null, null);
         ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 6);
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 6);
 

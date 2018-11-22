@@ -1,10 +1,7 @@
 package no.nav.melosys.service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -33,6 +30,7 @@ import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Before;
@@ -62,6 +60,8 @@ public class SaksopplysningerServiceTest {
 
     private BehandlingRepository behandlingRepo;
 
+    private BehandlingsresultatRepository behandlingsresultatRepo;
+
     private Binge binge;
 
 
@@ -77,8 +77,8 @@ public class SaksopplysningerServiceTest {
         binge = mock(Binge.class);
         prosessinstansRepository = mock(ProsessinstansRepository.class);
         tpsFasade = mock(TpsFasade.class);
-
-        saksopplysningerService = new SaksopplysningerService(tpsFasade, aareg, ereg, medl, inntekt, prosessinstansRepository, binge, behandlingRepo);
+        behandlingsresultatRepo = mock(BehandlingsresultatRepository.class);
+        saksopplysningerService = new SaksopplysningerService(tpsFasade, aareg, ereg, medl, inntekt, prosessinstansRepository, binge, behandlingRepo, behandlingsresultatRepo);
 
         ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 6);
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 6);
@@ -129,6 +129,11 @@ public class SaksopplysningerServiceTest {
         fagsak.setAktører(aktører);
         behandling.setFagsak(fagsak);
 
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setAvklartefakta(new HashSet<>(Collections.singletonList(new Avklartefakta())));
+        behandlingsresultat.setLovvalgsperioder(new HashSet<>(Collections.singletonList(new Lovvalgsperiode())));
+        behandlingsresultat.setVilkaarsresultater(new HashSet<>(Collections.singleton(new Vilkaarsresultat())));
+
         HashSet<Saksopplysning> saksopplysninger = new HashSet<>();
 
         Saksopplysning saksopplysningPerson = new Saksopplysning();
@@ -152,12 +157,16 @@ public class SaksopplysningerServiceTest {
 
         when(prosessinstansRepository.findByStegIsNotNullAndStegIsNotAndBehandling_Id(eq(ProsessSteg.FEILET_MASKINELT), anyLong())).thenReturn(Optional.empty());
         when(behandlingRepo.findOneWithSaksopplysningerById(anyLong())).thenReturn(behandling);
+        when(behandlingsresultatRepo.findOne(anyLong())).thenReturn(behandlingsresultat);
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("12345");
 
         saksopplysningerService.oppfriskSaksopplysning(13L);
 
         assertThat(behandling.getSaksopplysninger().size()).isEqualTo(1);
         assertThat(behandling.getSaksopplysninger().stream().findFirst().get().getType()).isEqualTo(SaksopplysningType.SØKNAD);
+        assertThat(behandlingsresultat.getAvklartefakta()).isEmpty();
+        assertThat(behandlingsresultat.getLovvalgsperioder()).isEmpty();
+        assertThat(behandlingsresultat.getVilkaarsresultater()).isEmpty();
         verify(binge, times(1)).leggTil(any());
     }
 }

@@ -26,6 +26,7 @@ import no.nav.melosys.integrasjon.inntk.InntektFasade;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.slf4j.Logger;
@@ -69,6 +70,8 @@ public class SaksopplysningerService {
 
     private final BehandlingRepository behandlingRepository;
 
+    private final BehandlingsresultatRepository behandlingsresultatRepository;
+
     @Autowired
     public SaksopplysningerService(TpsFasade tpsFasade,
                                    AaregFasade aaregFasade,
@@ -77,7 +80,8 @@ public class SaksopplysningerService {
                                    InntektFasade inntektFasade,
                                    ProsessinstansRepository prosessinstansRepository,
                                    Binge binge,
-                                   BehandlingRepository behandlingRepository) {
+                                   BehandlingRepository behandlingRepository,
+                                   BehandlingsresultatRepository behandlingsresultatRepository) {
         this.tpsFasade = tpsFasade;
         this.aaregFasade = aaregFasade;
         this.eregFasade = eregFasade;
@@ -86,6 +90,7 @@ public class SaksopplysningerService {
         this.prosessinstansRepository = prosessinstansRepository;
         this.binge = binge;
         this.behandlingRepository = behandlingRepository;
+        this.behandlingsresultatRepository = behandlingsresultatRepository;
     }
 
     public ArbeidsforholdDokument hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws SikkerhetsbegrensningException, IntegrasjonException, IkkeFunnetException {
@@ -240,6 +245,14 @@ public class SaksopplysningerService {
 
         behandling.getSaksopplysninger().removeIf(saksopplysning -> saksopplysning.getType() != SaksopplysningType.SØKNAD);
         behandlingRepository.save(behandling);
+
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandlingsid);
+        if (behandlingsresultat != null) {
+            behandlingsresultat.getAvklartefakta().clear();
+            behandlingsresultat.getLovvalgsperioder().clear();
+            behandlingsresultat.getVilkaarsresultater().clear();
+            behandlingsresultatRepository.save(behandlingsresultat);
+        }
 
         opprettOppfriskningsprosess(behandling, søknadDokument);
     }
