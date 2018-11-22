@@ -62,7 +62,7 @@ public class VilkaarsresultatServiceTest {
         when(behandlingsresultatRepo.findOne(behandlingID)).thenReturn(behandlingsresultat);
 
         VilkaarDto vilkaarDto = new VilkaarDto();
-        vilkaarDto.setVilkaar(VilkaarType.ART12_1.getKode());
+        vilkaarDto.setVilkaar(VilkaarType.FO_883_2004_ART12_1.getKode());
         List<String> koder = new ArrayList<>();
         koder.add(Artikkel12_1.ERSTATTER_ANNEN.getKode());
         vilkaarDto.setBegrunnelseKoder(koder);
@@ -78,7 +78,7 @@ public class VilkaarsresultatServiceTest {
         when(behandlingsresultatRepo.findOne(behandlingID)).thenReturn(null);
 
         VilkaarDto vilkaarDto = new VilkaarDto();
-        vilkaarDto.setVilkaar(VilkaarType.ART12_1.getKode());
+        vilkaarDto.setVilkaar(VilkaarType.FO_883_2004_ART12_1.getKode());
         List<String> koder = new ArrayList<>();
         koder.add(Artikkel12_1.ERSTATTER_ANNEN.getKode());
         vilkaarDto.setBegrunnelseKoder(koder);
