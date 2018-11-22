@@ -19,7 +19,7 @@ import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -47,18 +47,18 @@ public class A1Mapper implements BrevDataMapper {
         Virksomhet(ForetakUtland foretak) {
             this.navn = foretak.navn;
             this.orgnr = foretak.orgnr;
-            this.adresse = new UstrukturertAdresse(foretak.adresse);
+            this.adresse = foretak.adresse;
         }
 
         Virksomhet(OrganisasjonDokument foretak) {
             this.navn = foretak.getNavnSammenslått();
             this.orgnr = foretak.getOrgnummer();
-            this.adresse = foretak.getOrganisasjonDetaljer().getForretningsadresseUstrukturert();
+            this.adresse = foretak.getOrganisasjonDetaljer().getForretningsadresseStrukturert();
         }
 
         public String navn;
         public String orgnr;
-        public UstrukturertAdresse adresse;
+        public StrukturertAdresse adresse;
     }
 
     private class IkkeFysiskArbeidssted {
@@ -126,14 +126,14 @@ public class A1Mapper implements BrevDataMapper {
 
         a1.setBivirksomhetListe(mapBivirksomheter(virksomheter));
 
-        Set<UstrukturertAdresse> fysiskArbeidssteder = hentFysiskArbeidssteder();
+        Set<StrukturertAdresse> fysiskArbeidssteder = hentFysiskArbeidssteder();
         if (harIkkeFysiskArbeidssted(fysiskArbeidssteder)) {
-            a1.setBivirksomhetAdresseListe(new BivirksomhetAdresseListeType());
+            a1.setFysiskArbeidsstedAdresseListe(new FysiskArbeidsstedAdresseListeType());
             a1.setIkkeFysiskArbeidssted("true");
         }
         else {
             Set<IkkeFysiskArbeidssted> ikkeFysiskArbeidssteder = hentIkkeFysiskeArbeidssteder();
-            a1.setBivirksomhetAdresseListe(mapFysiskeAdresser(fysiskArbeidssteder, ikkeFysiskArbeidssteder));
+            a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(fysiskArbeidssteder, ikkeFysiskArbeidssteder));
             a1.setIkkeFysiskArbeidssted("false");
         }
 
@@ -190,15 +190,13 @@ public class A1Mapper implements BrevDataMapper {
 
     private HovedvirksomhetType mapHovedvirksomhet(Virksomhet virksomhet) {
         HovedvirksomhetType hovedvirksomhetBrev = new HovedvirksomhetType();
-        UstrukturertAdresse adresse = virksomhet.adresse; // TODO: Map ustrukturert adresse når dette er på plass
+        StrukturertAdresse adresse = virksomhet.adresse;
         hovedvirksomhetBrev.setOrgnummer(virksomhet.orgnr);
         hovedvirksomhetBrev.setNavn(virksomhet.navn);
-        hovedvirksomhetBrev.setAdresselinje1(adresse.adresselinjer.get(0));
-        hovedvirksomhetBrev.setAdresselinje2(adresse.adresselinjer.get(1));
-        hovedvirksomhetBrev.setAdresselinje3(adresse.adresselinjer.get(2));
-        hovedvirksomhetBrev.setAdresselinje4(adresse.adresselinjer.get(3));
-        hovedvirksomhetBrev.setAdresselinje5(adresse.adresselinjer.get(4));
-        hovedvirksomhetBrev.setLand(adresse.landKode);
+        hovedvirksomhetBrev.setGatenavn(adresse.gatenavn);
+        hovedvirksomhetBrev.setPostnr(adresse.postnummer);
+        hovedvirksomhetBrev.setPoststed(adresse.poststed);
+        hovedvirksomhetBrev.setLandkode(adresse.landKode);
 
         boolean selvstendigForetak = brevDataDto.selvstendigeForetak.contains(virksomhet.orgnr);
         if (selvstendigForetak) {
@@ -221,46 +219,47 @@ public class A1Mapper implements BrevDataMapper {
         return bivirksomheterBrev;
     }
 
-    private BivirksomhetAdresseListeType mapFysiskeAdresser(Set<UstrukturertAdresse> fysiskeArbeidssteder,
-                                                            Set<IkkeFysiskArbeidssted> ikkeFysiskArbeidssteder) {
-        BivirksomhetAdresseListeType bivirksomhetAdresserBrev = new BivirksomhetAdresseListeType();
+    private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(Set<StrukturertAdresse> fysiskeArbeidssteder,
+                                                                 Set<IkkeFysiskArbeidssted> ikkeFysiskArbeidssteder) {
+        FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
         for (IkkeFysiskArbeidssted ikkeFysiskArbeidssted : ikkeFysiskArbeidssteder) {
             AdresseType adresseType = new AdresseType();
             adresseType.setNavn(ikkeFysiskArbeidssted.navn);
             adresseType.setLand(ikkeFysiskArbeidssted.land);
-            bivirksomhetAdresserBrev.getAdresse().add(adresseType);
+            fysiskeAdresserBrev.getAdresse().add(adresseType);
         }
 
-        for (UstrukturertAdresse adresse : fysiskeArbeidssteder) {
+        for (StrukturertAdresse adresse : fysiskeArbeidssteder) {
             AdresseType adresseType = new AdresseType();
             adresseType.setNavn("");
-            adresseType.setAdresselinje1(adresse.adresselinjer.get(0));
-            adresseType.setAdresselinje2(adresse.adresselinjer.get(1));
-            adresseType.setAdresselinje3(adresse.adresselinjer.get(2));
-            adresseType.setAdresselinje4(adresse.adresselinjer.get(3));
-            adresseType.setAdresselinje5(adresse.adresselinjer.get(4));
+            adresseType.setGatenavn(adresse.gatenavn);
+            adresseType.setPostnummer(adresse.postnummer);
+            adresseType.setPoststed(adresse.poststed);
             adresseType.setLand(adresse.landKode);
 
-            bivirksomhetAdresserBrev.getAdresse().add(adresseType);
+            fysiskeAdresserBrev.getAdresse().add(adresseType);
         }
-        return bivirksomhetAdresserBrev;
+        return fysiskeAdresserBrev;
     }
 
-    private boolean harIkkeFysiskArbeidssted(Set<UstrukturertAdresse> fysiskArbeidssteder) {
+    /**
+     * Ikke fysisk arbeidssted er definert som flere enn 3 fysiske arbeidssteder
+     * eller ingen fysiske arbeidssteder.
+     */
+    private boolean harIkkeFysiskArbeidssted(Set<StrukturertAdresse> fysiskArbeidssteder) {
         if (fysiskArbeidssteder.isEmpty()) {
             return true;
         }
-        boolean ikkeNokPlassiBrev = fysiskArbeidssteder.size() + 1 > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
-        if (ikkeNokPlassiBrev) {
+
+        if (fysiskArbeidssteder.size() > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV) {
             return true;
         }
         return false;
     }
 
-    private Set<UstrukturertAdresse> hentFysiskArbeidssteder() {
+    private Set<StrukturertAdresse> hentFysiskArbeidssteder() {
         return brevDataDto.søknad.arbeidUtland.stream()
                 .map(au -> au.adresse)
-                .map(UstrukturertAdresse::new)
                 .collect(Collectors.toSet());
     }
 
