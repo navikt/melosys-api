@@ -23,3 +23,6 @@ CREATE TABLE avklartefakta_registrering (
     endret_av             VARCHAR2(99) NULL,
     CONSTRAINT pk_avklartefakta_reg PRIMARY KEY (id)
 );
+
+ALTER TABLE avklartefakta_registrering
+    ADD CONSTRAINT fk_avklartefakta_registrering FOREIGN KEY (avklartefakta_id) REFERENCES avklartefakta ON DELETE CASCADE;

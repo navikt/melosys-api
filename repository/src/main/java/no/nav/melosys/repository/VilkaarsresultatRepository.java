@@ -15,5 +15,14 @@ public interface VilkaarsresultatRepository extends CrudRepository<Vilkaarsresul
 
     List<Vilkaarsresultat> findByBehandlingsresultatId(long ID);
 
-    void deleteByBehandlingsresultat(Behandlingsresultat behandlingsresultat);
+    // Må her bruke ett skreddersydd query p.g.a. en bug i Spring Data og/eller
+    // JPA/Hibernate. Den automatisk genererte metoden (uten @Query) blir ikke
+    // flushet/committet i tide før en påfølgende lagreoperasjon (e.g.
+    // CrudRepository.save()). Er muligens relatert til:
+    // https://jira.spring.io/browse/DATAJPA-727
+    @Modifying
+    @Query("delete from Vilkaarsresultat l where l.behandlingsresultat.id = ?#{#bhndlngsRes.id}")
+    @Transactional(propagation = Propagation.REQUIRED)
+    void deleteByBehandlingsresultat(@Param("bhndlngsRes") Behandlingsresultat behandlingsresultat);
+
 }

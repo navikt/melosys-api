@@ -26,6 +26,8 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @EnableAutoConfiguration(exclude = {WebMvcAutoConfiguration.class})
@@ -56,6 +58,7 @@ public class AvklartefaktaServiceIT {
     private BehandlingRepository behandlingRepo;
     @Autowired
     private FagsakRepository fagsakRepo;
+
     private Avklartefakta testInstans;
 
     private static Avklartefakta lagAvklarteFakta(Behandlingsresultat behandlingsresultat) {
@@ -124,6 +127,7 @@ public class AvklartefaktaServiceIT {
         HashSet<AvklartefaktaDto> avklartefaktaDtoer = new HashSet<>();
         avklartefaktaDtoer.add(new AvklartefaktaDto(avklartefakta));
         instans.lagreAvklarteFakta(testInstans.getBehandlingsresultat().getId(), avklartefaktaDtoer);
+        assertThat(repo.findByBehandlingsresultatId(testInstans.getBehandlingsresultat().getId()).size()).isEqualTo(1);
 
         avklartefaktaDtoer.clear();
 
@@ -131,5 +135,7 @@ public class AvklartefaktaServiceIT {
         avklartefakta.setReferanse("ny referanse");
         avklartefaktaDtoer.add(new AvklartefaktaDto(avklartefakta));
         instans.lagreAvklarteFakta(testInstans.getBehandlingsresultat().getId(), avklartefaktaDtoer);
+        Avklartefakta avklartefaktaFraRepo = repo.findByBehandlingsresultatId(testInstans.getBehandlingsresultat().getId()).iterator().next();
+        assertThat(avklartefaktaFraRepo.getReferanse()).isEqualTo("ny referanse");
     }
 }
