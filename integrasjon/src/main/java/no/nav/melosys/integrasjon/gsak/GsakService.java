@@ -220,6 +220,22 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
     }
 
     @Override
+    public List<Oppgave> finnBehandlingsoppgaverMedBruker(String aktørId) throws FunksjonellException, TekniskException {
+        String[] oppgaveTyper = { Oppgavetype.BEH_SAK.getKode() };
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+                .medAktørId(aktørId)
+                .medOppgaveTyper(oppgaveTyper)
+                .medSorteringsfelt(SORTERINGSFELT)
+                .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+                .build();
+
+        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+                .filter(Objects::nonNull)
+                .map(GsakService::oppgaveMappingDtoTilDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})

@@ -1,9 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.Behandlingstype;
@@ -43,6 +41,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
 
     private static final String OPPGAVER_OVERSIKT_SCHEMA = "oppgaver-oversikt-schema.json";
     private static final String OPPGAVER_TILBAKELEGGE_SCHEMA = "oppgaver-tilbakelegge-schema.json";
+    private static final String OPPGAVER_SOK_SCHEMA = "oppgaver-sok-schema.json";
 
     private String schemaType;
 
@@ -125,5 +124,19 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
 
         schemaType = OPPGAVER_TILBAKELEGGE_SCHEMA;
         valider(tilbakelegging);
+    }
+
+    @Test
+    public void sokEtterBehandlingsoppgave() throws FunksjonellException, TekniskException, IOException {
+        BehandlingsoppgaveDto behandlingsoppgaveDto = defaultEnhancedRandom().nextObject(BehandlingsoppgaveDto.class);
+        List<BehandlingsoppgaveDto> oppgaver = Arrays.asList(behandlingsoppgaveDto);
+
+        when(oppgaveService.hentBehandlingsoppgaverMedBruker(anyString())).thenReturn(oppgaver);
+
+        schemaType = OPPGAVER_SOK_SCHEMA;
+
+        List<BehandlingsoppgaveDto> oppgave = (List<BehandlingsoppgaveDto>) tjeneste.hentOppgaver("").getEntity();
+        assertThat(oppgave).isNotNull();
+        validerListe(oppgave);
     }
 }
