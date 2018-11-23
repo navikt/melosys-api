@@ -24,7 +24,7 @@ public class ArbeidsforholdHistorikkTjenesteTest {
     public void setUp() throws JAXBException {
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
         AaregFasade aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
-        SaksopplysningerService saksopplysningerService = new SaksopplysningerService(null, aareg, null, null, null, null, null, null);
+        SaksopplysningerService saksopplysningerService = new SaksopplysningerService(null, aareg, null, null, null, null);
         tjeneste = new ArbeidsforholdHistorikkTjeneste(saksopplysningerService);
     }
 

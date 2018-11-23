@@ -1,13 +1,8 @@
 package no.nav.melosys.service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
@@ -22,31 +17,19 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.aareg.AaregService;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.ereg.EregService;
-import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonMock;
-import no.nav.melosys.integrasjon.inntk.InntektFasade;
-import no.nav.melosys.integrasjon.inntk.InntektService;
-import no.nav.melosys.integrasjon.inntk.inntekt.InntektMock;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.integrasjon.medl.MedlService;
-import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -62,23 +45,21 @@ public class SaksopplysningerServiceTest {
 
     private BehandlingRepository behandlingRepo;
 
-    private Binge binge;
+    private BehandlingsresultatService behandlingsresultatService;
 
+    private Binge binge;
 
     @Before
     public void setUp() {
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
 
         AaregFasade aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
-        EregFasade ereg = new EregService(new OrganisasjonMock(), dokumentFactory);
-        MedlFasade medl = new MedlService(new MedlemskapMock(), dokumentFactory);
-        InntektFasade inntekt = new InntektService(new InntektMock(), dokumentFactory);
         behandlingRepo = mock(BehandlingRepository.class);
         binge = mock(Binge.class);
         prosessinstansRepository = mock(ProsessinstansRepository.class);
         tpsFasade = mock(TpsFasade.class);
-
-        saksopplysningerService = new SaksopplysningerService(tpsFasade, aareg, ereg, medl, inntekt, prosessinstansRepository, binge, behandlingRepo);
+        behandlingsresultatService = mock(BehandlingsresultatService.class);
+        saksopplysningerService = new SaksopplysningerService(tpsFasade, aareg, prosessinstansRepository, binge, behandlingRepo, behandlingsresultatService);
 
         ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 6);
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 6);
@@ -91,29 +72,6 @@ public class SaksopplysningerServiceTest {
         ArbeidsforholdDokument dokument = saksopplysningerService.hentArbeidsforholdHistorikk(arbeidsforholdsID);
         assertFalse(dokument.getArbeidsforhold().isEmpty());
         assertTrue(dokument.getArbeidsforhold().get(0).getArbeidsavtaler().size() > 1);
-    }
-
-    @Ignore // FIXME: Denne testen må fikses
-    @Test
-    public void hentSaksopplysninger() throws Exception {
-        // Skru av logging for denne testen siden den skaper mye forventet støy
-        final Logger log = (Logger) LoggerFactory.getLogger(SaksopplysningerService.class);
-        Level opprinneligLevel = log.getLevel();
-        log.setLevel(Level.OFF);
-
-        final String[] identer = new String[]{"88888888884", "88888888885"};
-
-        when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn(String.valueOf(returnsFirstArg()));
-        when(tpsFasade.hentPersonMedAdresse(anyString())).thenReturn(new Saksopplysning());
-
-        for (String fnr : identer) {
-            Set<Saksopplysning> saksopplysninger = saksopplysningerService.hentSaksopplysninger(fnr);
-
-            assertFalse(saksopplysninger.isEmpty());
-        }
-
-        // Skru på logging igjen
-        log.setLevel(opprinneligLevel);
     }
 
     @Test
@@ -158,6 +116,7 @@ public class SaksopplysningerServiceTest {
 
         assertThat(behandling.getSaksopplysninger().size()).isEqualTo(1);
         assertThat(behandling.getSaksopplysninger().stream().findFirst().get().getType()).isEqualTo(SaksopplysningType.SØKNAD);
+        verify(behandlingsresultatService, times(1)).tømBehandlingsresultat(anyLong());
         verify(binge, times(1)).leggTil(any());
     }
 }
