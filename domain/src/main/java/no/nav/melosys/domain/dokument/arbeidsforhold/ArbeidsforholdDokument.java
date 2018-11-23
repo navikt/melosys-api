@@ -2,11 +2,15 @@ package no.nav.melosys.domain.dokument.arbeidsforhold;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.*;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import org.apache.commons.lang3.StringUtils;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -28,4 +32,10 @@ public class ArbeidsforholdDokument extends SaksopplysningDokument {
         return arbeidsforhold;
     }
 
+    public Set<String> hentOrgnumre() {
+        return getArbeidsforhold().stream()
+            .flatMap(arbeidsforhold -> Stream.of(arbeidsforhold.getArbeidsgiverID(), arbeidsforhold.getOpplysningspliktigID()))
+            .filter(StringUtils::isNotEmpty)
+            .collect(Collectors.toSet());
+    }
 }
