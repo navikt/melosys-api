@@ -12,15 +12,6 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.aareg.AaregService;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.ereg.EregService;
-import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonMock;
-import no.nav.melosys.integrasjon.inntk.InntektFasade;
-import no.nav.melosys.integrasjon.inntk.InntektService;
-import no.nav.melosys.integrasjon.inntk.inntekt.InntektMock;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.integrasjon.medl.MedlService;
-import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -43,11 +34,8 @@ public class FagsakServiceTest {
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
         TpsFasade tps = new TpsService(null, null, dokumentFactory, null);
         AaregFasade aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
-        EregFasade ereg = new EregService(new OrganisasjonMock(), dokumentFactory);
-        MedlFasade medl = new MedlService(new MedlemskapMock(), dokumentFactory);
-        InntektFasade inntekt = new InntektService(new InntektMock(), dokumentFactory);
 
-        SaksopplysningerService saksopplysningerService = new SaksopplysningerService(tps, aareg, ereg, medl, inntekt , null, null , null, null);
+        SaksopplysningerService saksopplysningerService = new SaksopplysningerService(tps, aareg, null, null , null, null);
         ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 6);
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 6);
 

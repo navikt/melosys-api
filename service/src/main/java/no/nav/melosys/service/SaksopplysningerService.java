@@ -1,32 +1,19 @@
 package no.nav.melosys.service;
 
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
-import no.nav.melosys.domain.dokument.inntekt.Inntekt;
-import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.inntk.InntektFasade;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.slf4j.Logger;
@@ -34,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentLand;
@@ -58,39 +46,28 @@ public class SaksopplysningerService {
 
     private final AaregFasade aaregFasade;
 
-    private final EregFasade eregFasade;
-
-    private final MedlFasade medlFasade;
-
-    private final InntektFasade inntektFasade;
-
     private final ProsessinstansRepository prosessinstansRepository;
 
     private final Binge binge;
 
     private final BehandlingRepository behandlingRepository;
 
-    private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
     public SaksopplysningerService(TpsFasade tpsFasade,
                                    AaregFasade aaregFasade,
-                                   EregFasade eregFasade,
-                                   MedlFasade medlFasade,
-                                   InntektFasade inntektFasade,
                                    ProsessinstansRepository prosessinstansRepository,
                                    Binge binge,
                                    BehandlingRepository behandlingRepository,
-                                   BehandlingsresultatRepository behandlingsresultatRepository) {
+                                   BehandlingsresultatService behandlingsresultatService) {
         this.tpsFasade = tpsFasade;
         this.aaregFasade = aaregFasade;
-        this.eregFasade = eregFasade;
-        this.medlFasade = medlFasade;
-        this.inntektFasade = inntektFasade;
         this.prosessinstansRepository = prosessinstansRepository;
         this.binge = binge;
         this.behandlingRepository = behandlingRepository;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.behandlingsresultatService = behandlingsresultatService;
+
     }
 
     public ArbeidsforholdDokument hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws SikkerhetsbegrensningException, IntegrasjonException, IkkeFunnetException {
@@ -98,128 +75,7 @@ public class SaksopplysningerService {
         return (ArbeidsforholdDokument) saksopplysning.getDokument();
     }
 
-    public Set<Saksopplysning> hentSaksopplysninger(String aktørID) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
-        String fnr = tpsFasade.hentIdentForAktørId(aktørID);
-
-        // FIXME: Når EESSI2-485 er ferdig må IntegrasjonsExceptions kastes videre
-        Optional<Saksopplysning> personSaksopplysning = Optional.ofNullable(hentPerson(fnr));
-        Optional<Saksopplysning> personhistorikkSaksopplysning = Optional.ofNullable(hentPersonhistorikk(fnr));
-        Optional<Saksopplysning> medlemskapSaksopplysning = Optional.ofNullable(hentMedlemskap(fnr));
-        Optional<Saksopplysning> arbeidsforholdSaksopplysning = Optional.ofNullable(hentArbeidsforhold(fnr));
-        Optional<Saksopplysning> inntektSaksopplysning = Optional.ofNullable(hentInntekt(fnr));
-
-        Set<Saksopplysning> saksopplysninger = new HashSet<>();
-
-        personSaksopplysning.ifPresent(saksopplysninger::add);
-        personhistorikkSaksopplysning.ifPresent(saksopplysninger::add);
-        medlemskapSaksopplysning.ifPresent(saksopplysninger::add);
-        arbeidsforholdSaksopplysning.ifPresent(saksopplysninger::add);
-        inntektSaksopplysning.ifPresent(saksopplysninger::add);
-
-        Set<String> orgnumre = new HashSet<>();
-
-        arbeidsforholdSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraArbeidsforhold(saksopplysning)));
-        inntektSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraInntekt(saksopplysning)));
-
-        if (!orgnumre.isEmpty()) {
-            saksopplysninger.addAll(hentOrganisasjoner(orgnumre));
-        }
-
-        saksopplysninger.forEach((x) -> {
-            x.setRegistrertDato(Instant.now());
-            x.setEndretDato(Instant.now());
-        });
-
-        return saksopplysninger;
-    }
-
-    private Saksopplysning hentPerson(String fnr) throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
-        // TODO: Informasjonsbehov.FAMILIERELASJONER kommer i runde 2
-        return tpsFasade.hentPersonMedAdresse(fnr);
-    }
-
-    private Saksopplysning hentPersonhistorikk(String fnr) throws SikkerhetsbegrensningException, TekniskException {
-        try {
-            return tpsFasade.hentPersonhistorikk(fnr, LocalDate.now());
-        } catch (IntegrasjonException integrasjonException) {
-            log.error("Uventet feil ved oppslag mot TPS", integrasjonException);
-            return null;
-        } catch (IkkeFunnetException e) {
-            log.error("Person med id " + fnr + " finnes ikke");
-            return null;
-        }
-    }
-
-    private Saksopplysning hentMedlemskap(String fnr) throws SikkerhetsbegrensningException, IkkeFunnetException {
-        final LocalDate tom  = LocalDate.now();
-        final LocalDate fom = tom.minusYears(medlemskaphistorikkAntallÅr);
-        try {
-            return medlFasade.hentPeriodeListe(fnr, fom, tom);
-        } catch (IntegrasjonException integrasjonException) {
-            log.error("Uventet feil ved oppslag mot MEDL", integrasjonException);
-            return null;
-        }
-    }
-
-    private Saksopplysning hentArbeidsforhold(String fnr) throws SikkerhetsbegrensningException, TekniskException {
-        final LocalDate tom  = LocalDate.now();
-        final LocalDate fom = tom.minusMonths(arbeidsforholdhistorikkAntallMåneder);
-        return aaregFasade.finnArbeidsforholdPrArbeidstaker(fnr, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
-    }
-
-    private Saksopplysning hentInntekt(String fnr) throws SikkerhetsbegrensningException {
-        final YearMonth tom = YearMonth.now();
-        final YearMonth fom = tom.minusMonths(inntektshistorikkAntallMåneder);
-        try {
-            return inntektFasade.hentInntektListe(fnr, fom, tom);
-        } catch (IntegrasjonException integrasjonException) {
-            log.error("Uventet feil ved oppslag mot Inntekt", integrasjonException);
-            return null;
-        }
-    }
-
-    private List<Saksopplysning> hentOrganisasjoner(Set<String> orgnumre) throws SikkerhetsbegrensningException {
-        List<Saksopplysning> saksopplysninger = new ArrayList<>();
-
-        for (String orgnr : orgnumre) {
-            Saksopplysning saksopplysning = hentOrganisasjon(orgnr);
-            if (saksopplysning != null) {
-                saksopplysninger.add(saksopplysning);
-            }
-        }
-        return saksopplysninger;
-    }
-
-    private static Set<String> hentOrgnumreFraArbeidsforhold(Saksopplysning saksopplysning) {
-        return ((ArbeidsforholdDokument) saksopplysning.getDokument()).getArbeidsforhold().stream()
-            .flatMap(arbeidsforhold -> Stream.of(arbeidsforhold.getArbeidsgiverID(), arbeidsforhold.getOpplysningspliktigID()))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toSet());
-    }
-
-    private static Set<String> hentOrgnumreFraInntekt(Saksopplysning saksopplysning) {
-        return ((InntektDokument) saksopplysning.getDokument()).getArbeidsInntektMaanedListe().stream()
-            .map(ArbeidsInntektMaaned::getArbeidsInntektInformasjon)
-            .filter(Objects::nonNull)
-            .map(ArbeidsInntektInformasjon::getInntektListe)
-            .flatMap(List::stream)
-            .filter(Objects::nonNull)
-            .map(Inntekt::getVirksomhetID)
-            .collect(Collectors.toSet());
-    }
-
-    private Saksopplysning hentOrganisasjon(String orgnr) throws SikkerhetsbegrensningException {
-        try {
-            return eregFasade.hentOrganisasjon(orgnr);
-        } catch (IntegrasjonException integrasjonException) {
-            log.error("Uventet feil ved oppslag mot EREG", integrasjonException);
-            return null;
-        } catch (IkkeFunnetException e) {
-            log.error("Organisasjon med orgnr " + orgnr + " finnes ikke");
-            return null;
-        }
-    }
-
+    @Transactional
     public void oppfriskSaksopplysning(long behandlingsid) throws IkkeFunnetException, TekniskException {
         log.info("Starter oppfrisking av behandlingsid: {} ", behandlingsid);
 
@@ -246,13 +102,7 @@ public class SaksopplysningerService {
         behandling.getSaksopplysninger().removeIf(saksopplysning -> saksopplysning.getType() != SaksopplysningType.SØKNAD);
         behandlingRepository.save(behandling);
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandlingsid);
-        if (behandlingsresultat != null) {
-            behandlingsresultat.getAvklartefakta().clear();
-            behandlingsresultat.getLovvalgsperioder().clear();
-            behandlingsresultat.getVilkaarsresultater().clear();
-            behandlingsresultatRepository.save(behandlingsresultat);
-        }
+        behandlingsresultatService.tømBehandlingsresultat(behandlingsid);
 
         opprettOppfriskningsprosess(behandling, søknadDokument);
     }
