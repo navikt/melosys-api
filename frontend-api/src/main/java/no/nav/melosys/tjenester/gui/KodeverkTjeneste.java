@@ -29,10 +29,12 @@ public class KodeverkTjeneste extends RestTjeneste {
     public KodeverkDto getKodeverk() {
         KodeverkDto kodeverk = new KodeverkDto();
         kodeverk.getBegrunnelser().artikkel12_1 = tilKoder(Artikkel12_1.values());
+        kodeverk.getBegrunnelser().artikkel12_2 = tilKoder(Artikkel12_2.values());
         kodeverk.getBegrunnelser().artikkel16_1_anmodning = tilKoder(Artikkel16_1_Anmodning.values());
         kodeverk.getBegrunnelser().bosted = tilKoder(Bosted.values());
         kodeverk.getBegrunnelser().forutgaendeMedlemskap = tilKoder(ForutgaaendeMedlemskap.values());
         kodeverk.getBegrunnelser().ikkeSkip = tilKoder(IkkeSkip.values());
+        kodeverk.getBegrunnelser().normaltDriverVirksomhet = tilKoder(NormaltDriverVirksomhet.values());
         kodeverk.getBegrunnelser().opphold = tilKoder(Opphold.values());
         kodeverk.getBegrunnelser().vesentligVirksomhet = tilKoder(VesentligVirksomhet.values());
         kodeverk.setAktoerroller(tilKoder(RolleType.values()));
