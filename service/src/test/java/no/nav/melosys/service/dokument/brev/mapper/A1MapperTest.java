@@ -23,7 +23,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.service.dokument.brev.BrevDataDto;
+import no.nav.melosys.service.dokument.brev.BrevDataA1Dto;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,7 +47,7 @@ public class A1MapperTest {
     private Behandlingsresultat behandlingsresultat;
     private Behandling behandling;
 
-    private BrevDataDto brevDataDto;
+    private BrevDataA1Dto brevDataDto;
 
     @Before
     public void setUp() {
@@ -117,7 +117,7 @@ public class A1MapperTest {
         søknad.arbeidUtland = Arrays.asList(arbeidUtland);
 
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
-        when(organisasjonsDetaljer.getForretningsadresseUstrukturert()).thenReturn(adresse);
+        when(organisasjonsDetaljer.getForretningsadresseStrukturert()).thenReturn(strukturertAdresse);
 
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.setNavn(Arrays.asList("JARLSBERG", "INTERNATIONAL"));
@@ -128,7 +128,7 @@ public class A1MapperTest {
         foretakUtland.navn = "Jarlsberg";
         foretakUtland.orgnr = "1235234234";
 
-        brevDataDto = new BrevDataDto();
+        brevDataDto = new BrevDataA1Dto();
         brevDataDto.yrkesgruppe = YrkesgruppeType.ORDINAER;
         brevDataDto.norskeVirksomheter = new HashSet<>();
         brevDataDto.norskeVirksomheter.add(organisasjonDokument);   // Hovedvirksomhet

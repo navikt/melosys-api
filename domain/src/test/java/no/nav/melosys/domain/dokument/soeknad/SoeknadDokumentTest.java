@@ -72,8 +72,12 @@ public class SoeknadDokumentTest {
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         soeknadDokument.selvstendigArbeid.selvstendigForetak = Arrays.asList(selvstendigForetak);
 
+        String orgNr2 = "10987654321";
+        soeknadDokument.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add("10987654321");
+
         Set<String> organisasjonsnumre = soeknadDokument.hentAlleOrganisasjonsnumre();
-        assertThat(organisasjonsnumre.size()).isEqualTo(1);
+        assertThat(organisasjonsnumre.size()).isEqualTo(2);
         assertThat(organisasjonsnumre.contains(selvstendigForetak.orgnr));
+        assertThat(organisasjonsnumre.contains(orgNr2));
     }
 }

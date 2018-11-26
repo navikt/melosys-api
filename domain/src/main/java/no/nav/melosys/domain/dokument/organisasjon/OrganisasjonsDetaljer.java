@@ -49,28 +49,12 @@ public class OrganisasjonsDetaljer {
         return konverterTilStrukturertAdresse(adresse);
     }
 
-    private GeografiskAdresse hentFørsteGyldigeAdresse(List<GeografiskAdresse> adresser) {
-        for (GeografiskAdresse adresse : adresser) {
-            Periode gyldighetsperiode = adresse.getGyldighetsperiode();
-            if (gyldighetsperiode.erGyldig()) {
-                return adresse;
-            }
-        }
-        return null;
+    public GeografiskAdresse hentFørsteGyldigeForretningsadresse() {
+        return hentFørsteGyldigeAdresse(forretningsadresse);
     }
 
-    private StrukturertAdresse konverterTilStrukturertAdresse(GeografiskAdresse adresse) {
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        Gateadresse gateadresse = (Gateadresse)adresse;
-        strukturertAdresse.gatenavn = gateadresse.getGatenavn();
-        strukturertAdresse.husnummer = gateadresse.getHusnummer() + gateadresse.getHusbokstav();
-        strukturertAdresse.poststed = gateadresse.getPoststed();
-        strukturertAdresse.landKode = gateadresse.getLandkode();
-
-        if (adresse instanceof SemistrukturertAdresse) {
-            strukturertAdresse.postnummer = ((SemistrukturertAdresse) adresse).getPostnr();
-        }
-        return strukturertAdresse;
+    public GeografiskAdresse hentFørsteGyldigePostadresse() {
+        return hentFørsteGyldigeAdresse(postadresse);
     }
 
     public List<GeografiskAdresse> getPostadresse() {
@@ -89,4 +73,27 @@ public class OrganisasjonsDetaljer {
         return naering;
     }
 
+    private StrukturertAdresse konverterTilStrukturertAdresse(GeografiskAdresse adresse) {
+        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
+        Gateadresse gateadresse = (Gateadresse) adresse;
+        strukturertAdresse.gatenavn = gateadresse.getGatenavn();
+        strukturertAdresse.husnummer = gateadresse.getHusnummer() + gateadresse.getHusbokstav();
+        strukturertAdresse.poststed = gateadresse.getPoststed();
+        strukturertAdresse.landKode = gateadresse.getLandkode();
+
+        if (adresse instanceof SemistrukturertAdresse) {
+            strukturertAdresse.postnummer = ((SemistrukturertAdresse) adresse).getPostnr();
+        }
+        return strukturertAdresse;
+    }
+
+    private GeografiskAdresse hentFørsteGyldigeAdresse(List<GeografiskAdresse> adresser) {
+        for (GeografiskAdresse adresse : adresser) {
+            Periode gyldighetsperiode = adresse.getGyldighetsperiode();
+            if (gyldighetsperiode.erGyldig()) {
+                return adresse;
+            }
+        }
+        return null;
+    }
 }

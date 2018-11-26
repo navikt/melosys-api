@@ -26,6 +26,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.dokument.brev.BrevDataA1Dto;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import org.xml.sax.SAXException;
 
@@ -41,7 +42,7 @@ public class A1Mapper implements BrevDataMapper {
 
     private Behandlingsresultat resultat;
 
-    private BrevDataDto brevDataDto;
+    private BrevDataA1Dto brevDataDto;
 
     private class Virksomhet {
         Virksomhet(ForetakUtland foretak) {
@@ -75,7 +76,11 @@ public class A1Mapper implements BrevDataMapper {
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevDataDto brevDataDto) throws JAXBException, SAXException, TekniskException {
         this.behandling = behandling;
         this.resultat = resultat;
-        this.brevDataDto = brevDataDto;
+        this.brevDataDto = (BrevDataA1Dto) brevDataDto;
+
+        if (this.brevDataDto == null) {
+            throw new TekniskException("A1 mapper trenger brevdata av type BrevDataA1Dto");
+        }
 
         Fag fag = mapFag();
         VedleggType vedlegg = new VedleggType();

@@ -8,6 +8,8 @@ import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.dokument.DokumentSystemService;
+import no.nav.melosys.service.dokument.brev.BrevDataByggerA1;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.ProsessSteg.GSAK_AVSLUTT_OPPGAVE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IverksettVedtakSendBrevTest {
@@ -23,7 +26,10 @@ public class IverksettVedtakSendBrevTest {
 
     @Before
     public void setUp() {
-        agent = new IverksettVedtakSendBrev();
+        DokumentSystemService dokumentService = mock(DokumentSystemService.class);
+        BrevDataByggerA1 brevDataByggerA1 = mock(BrevDataByggerA1.class);
+
+        agent = new IverksettVedtakSendBrev(dokumentService, brevDataByggerA1);
     }
 
     @Test

@@ -2,21 +2,24 @@ package no.nav.melosys.service.avklartefakta;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
+import no.nav.melosys.domain.YrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
-import no.nav.melosys.repository.BehandlingResultatRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
@@ -29,11 +32,8 @@ public class AvklartefaktaServiceTest {
     @Mock
     private AvklarteFaktaRepository avklarteFaktaRepository;
 
-    @Mock
-    private BehandlingResultatRepository behandlingResultatRepository;
-
     @Test
-    public void hentAvklartefakta() throws IkkeFunnetException {
+    public void hentAvklartefakta() {
         String referanse = "Referenase";
         String subjektID = "SubjektID";
         String fakta = "NO";
@@ -64,5 +64,27 @@ public class AvklartefaktaServiceTest {
         assertEquals(type, dto.getAvklartefaktaType());
         assertEquals(Arrays.asList(begrunnelsekode), dto.getBegrunnelseKoder());
         assertEquals(begrunnelsefritekst, dto.getBegrunnelseFritekst());
+    }
+
+    @Test
+    public void testYrkesgruppeOrdinær() throws TekniskException {
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setFakta("YRKESAKTIV");
+        Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
+
+        YrkesgruppeType yrkesgruppeType = avklartefaktaService.hentYrkesGruppe(1L);
+        assertThat(yrkesgruppeType).isEqualTo(YrkesgruppeType.ORDINAER);
+    }
+
+    @Test
+    public void testYrkesgruppeFlyvende() throws TekniskException {
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setFakta("YRKESAKTIV_FLYVENDE");
+        Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
+
+        YrkesgruppeType yrkesgruppeType = avklartefaktaService.hentYrkesGruppe(1L);
+        assertThat(yrkesgruppeType).isEqualTo(YrkesgruppeType.FLYENDE_PERSONELL);
     }
 }

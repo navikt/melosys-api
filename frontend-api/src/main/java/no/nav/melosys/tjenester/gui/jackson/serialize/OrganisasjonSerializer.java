@@ -2,14 +2,13 @@ package no.nav.melosys.tjenester.gui.jackson.serialize;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.List;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -38,37 +37,29 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
             organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype(), LocalDate.now()));
         }
 
-        // OrganisasjonDetaljer
-        List<GeografiskAdresse> forretningsadresser = null;
-        List<GeografiskAdresse> postadresser = null;
-        if (organisasjon.getOrganisasjonDetaljer() != null) {
-            forretningsadresser = organisasjon.getOrganisasjonDetaljer().getForretningsadresser();
-            postadresser = organisasjon.getOrganisasjonDetaljer().getPostadresse();
-        }
-        organisasjonDto.setForretningsadresse(tilAdresseDto(forretningsadresser));
-        organisasjonDto.setPostadresse(tilAdresseDto(postadresser));
+        OrganisasjonsDetaljer detaljer = organisasjon.getOrganisasjonDetaljer();
+        if (detaljer != null) {
+            GeografiskAdresse forretningsadresse = detaljer.hentFørsteGyldigeForretningsadresse();
+            organisasjonDto.setForretningsadresse(tilAdresseDto(forretningsadresse));
 
+            GeografiskAdresse postadresse = detaljer.hentFørsteGyldigePostadresse();
+            organisasjonDto.setPostadresse(tilAdresseDto(postadresse));
+        }
+        else {
+            organisasjonDto.setForretningsadresse(tilAdresseDto(null));
+            organisasjonDto.setPostadresse(tilAdresseDto(null));
+        }
         generator.writeObject(organisasjonDto);
     }
 
-    private AdresseDto tilAdresseDto(List<GeografiskAdresse> adresser) {
+    private AdresseDto tilAdresseDto(GeografiskAdresse adresse) {
         AdresseDto dto = new AdresseDto();
         GateadresseDto gateadresse = new GateadresseDto();
         dto.setGateadresse(gateadresse);
 
-        if (adresser == null || adresser.size() == 0) {
+        if (adresse == null) {
             // Tomt objekt til frontend (ikke null)
             return dto;
-        }
-
-        GeografiskAdresse adresse = null;
-
-        for (GeografiskAdresse a : adresser) {
-            Periode gyldighetsperiode = a.getGyldighetsperiode();
-            if (gyldighetsperiode.erGyldig()) { // TODO hvis det finnes flere gyldige adresser?
-                adresse = a;
-                break;
-            }
         }
 
         if (adresse instanceof SemistrukturertAdresse) {
@@ -104,7 +95,4 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
             throw new RuntimeException("GeografiskAdresse ikke støttet " + adresse.getClass().getSimpleName());
         }
     }
-
-
-
 }

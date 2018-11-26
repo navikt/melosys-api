@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument.brev;
 
 import java.io.IOException;
 import java.io.StringReader;
-
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
@@ -14,8 +13,8 @@ import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
 import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
@@ -31,9 +30,7 @@ import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.RolleType.BRUKER;
 import static no.nav.melosys.domain.RolleType.REPRESENTANT;
-import static no.nav.melosys.service.dokument.DokumentType.HENLEGGELSE;
-import static no.nav.melosys.service.dokument.DokumentType.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
-import static no.nav.melosys.service.dokument.DokumentType.MELDING_MANGLENDE_OPPLYSNINGER;
+import static no.nav.melosys.service.dokument.DokumentType.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 /**
@@ -67,7 +64,8 @@ public class BrevDataService {
 
         metadata.bruker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, BRUKER);
 
-        if (dokumentType == MELDING_FORVENTET_SAKSBEHANDLINGSTID) {
+        if (dokumentType == MELDING_FORVENTET_SAKSBEHANDLINGSTID ||
+            dokumentType == ATTEST_A1) {
             metadata.mottaker = metadata.bruker;
         } else if (dokumentType == MELDING_MANGLENDE_OPPLYSNINGER && brevDataDto.mottaker != null) {
             metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevDataDto.mottaker);
@@ -93,6 +91,9 @@ public class BrevDataService {
      */
     public Element lagBrevXML(DokumentType dokumentType, Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
         Behandlingsresultat behandlingsresultat = behandlingResultatRepository.findOne(behandling.getId());
+        if (behandlingsresultat == null) {
+            new TekniskException("Finner ingen behandlingsresultat for behandlingid");
+        }
 
         Element brevXmlElement;
         try {

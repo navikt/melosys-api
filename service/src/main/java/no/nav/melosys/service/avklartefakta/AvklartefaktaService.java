@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.YrkesgruppeType;
-import no.nav.melosys.domain.avklartefakta.AvklartYrkesaktivitetType;
+import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -40,8 +40,12 @@ public class AvklartefaktaService {
         return avklartefakta.stream().map(AvklartefaktaDto::new).collect(Collectors.toSet());
     }
 
-    public Set<String> hentAvklarteOrganisasjoner(long behandlingsid) {
-        return avklarteFaktaRepository.hentAvklarteOrganisasjoner(behandlingsid).stream()
+    public Set<String> hentAvklarteOrganisasjoner(long behandlingsid) throws IkkeFunnetException {
+        Set<Avklartefakta> avklartefakta =
+                avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid,
+                                                                                   AvklartefaktaType.AVKLARTE_ARBEIDSGIVER,
+                                                                            "TRUE");
+        return avklartefakta.stream()
                 .map(Avklartefakta::getSubjekt)
                 .collect(Collectors.toSet());
     }
@@ -50,8 +54,8 @@ public class AvklartefaktaService {
         Optional<Avklartefakta> avklartefaktaOpt =
                 avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, AvklartefaktaType.YRKESGRUPPE);
 
-        Avklartefakta avklartefakta = avklartefaktaOpt.orElseThrow(() ->new TekniskException("Finner ingen avklartefakta for yrkesgruppe"));
-        AvklartYrkesaktivitetType aktivitetType = AvklartYrkesaktivitetType.valueOf(avklartefakta.getFakta());
+        Avklartefakta avklartefakta = avklartefaktaOpt.orElseThrow(() -> new TekniskException("Finner ingen avklartefakta for yrkesgruppe"));
+        AvklartYrkesgruppeType aktivitetType = AvklartYrkesgruppeType.valueOf(avklartefakta.getFakta());
 
         return aktivitetType.tilYrkesgruppeType();
     }

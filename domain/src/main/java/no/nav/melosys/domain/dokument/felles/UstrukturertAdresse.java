@@ -5,8 +5,6 @@ import java.util.List;
 
 public class UstrukturertAdresse {
 
-    public UstrukturertAdresse() {}
-
     public List<String> adresselinjer = new ArrayList<>();
 
     public String landKode;
