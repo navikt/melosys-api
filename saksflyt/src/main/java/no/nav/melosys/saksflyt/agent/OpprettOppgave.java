@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.agent;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
@@ -18,7 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.*;
+import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
+import static no.nav.melosys.domain.ProsessDataKey.JOURNALPOST_ID;
 import static no.nav.melosys.domain.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
 import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
 
@@ -66,7 +66,8 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         oppgave.setTema(Tema.MED);
 
         if (fagsak.getType() == Fagsakstype.EU_EØS) {
-            oppgave.setBehandlingstema(Behandlingstema.ARB_EØS);
+            // FIXME MELOSYS-1401 Behandlingstema.ARB_EØS bør brukes men mappingen med underkategori er ikke definert og registrert.
+            oppgave.setBehandlingstema(null);
         } else {
             String feilmelding = "Fagsakstype " + fagsak.getType() + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
