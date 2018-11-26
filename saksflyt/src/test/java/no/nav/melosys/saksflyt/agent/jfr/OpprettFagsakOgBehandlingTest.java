@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Properties;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.audit.MelosysAuditorAware;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.datavarehus.BehandlingOpprettetEvent;
@@ -30,10 +31,12 @@ public class OpprettFagsakOgBehandlingTest {
 
     private ApplicationEventPublisher applicationEventPublisher;
 
+
     @Before
     public void setUp() {
         applicationEventPublisher = mock(ApplicationEventPublisher.class);
-        agent = new OpprettFagsakOgBehandling(fagsakService, applicationEventPublisher);
+        MelosysAuditorAware auditorAware = mock(MelosysAuditorAware.class);
+        agent = new OpprettFagsakOgBehandling(fagsakService, applicationEventPublisher, auditorAware);
     }
 
     @Test
