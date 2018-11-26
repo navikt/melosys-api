@@ -71,6 +71,7 @@ public class FagsakTjeneste extends RestTjeneste {
         typeMapBehandlingUt.<Behandlingstype>addMapping(Behandling::getType, (dest, type) -> dest.getOppsummering().setBehandlingstype(type));
         typeMapBehandlingUt.<Instant>addMapping(Behandling::getRegistrertDato, (dest, dato) -> dest.getOppsummering().setRegistrertDato(dato));
         typeMapBehandlingUt.<Instant>addMapping(Behandling::getEndretDato, (dest, dato) -> dest.getOppsummering().setEndretDato(dato));
+        typeMapBehandlingUt.<Instant>addMapping(Behandling::getSistOpplysningerHentetDato, (dest, dato) -> dest.getOppsummering().setSisteOpplysningerHentetDato(dato));
         typeMapBehandlingUt.addMappings(mapper -> mapper.using(new SaksopplysningerTilDtoConverter()).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
     }
 
