@@ -1,9 +1,12 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import javax.ws.rs.core.Response;
 
+import com.google.common.collect.Comparators;
+import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -19,6 +22,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
@@ -49,11 +53,14 @@ public class DokumentTjenesteTest extends JsonSchemaTest {
 
     @Test
     public void hentDokumenter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException, IOException {
-        List<Journalpost> journalposter = defaultEnhancedRandom().randomListOf(3, Journalpost.class);
+        List<Journalpost> journalposter = EnhancedRandom.randomListOf(3, Journalpost.class);
         given(dokumentService.hentDokumenter(anyString())).willReturn(journalposter);
 
         Response response = dokumentTjeneste.hentDokumenter("MEL-1873");
         List<JournalpostInfoDto> dtos = (List<JournalpostInfoDto>) response.getEntity();
+        boolean inOrder = Comparators.isInOrder(dtos, Comparator.comparing(JournalpostInfoDto::hentGjeldendeTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())));
+        assertThat(inOrder).isTrue();
+
 
         schema = "dokumenter-oversikt-schema.json";
         validerListe(dtos);

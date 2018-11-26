@@ -49,4 +49,8 @@ public class JournalpostInfoDto {
         interneVedlegg.forEach(v -> vedleggListe.add(new DokumentDto(v.getTittel())));
         return vedleggListe;
     }
+
+    public Instant hentGjeldendeTidspunkt() {
+        return this.mottattDato != null ? this.mottattDato : this.journalforingDato;
+    }
 }
