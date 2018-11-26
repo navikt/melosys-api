@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.agent;
 import java.util.Properties;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -59,7 +58,7 @@ public class OpprettOppgaveTest {
         verify(gsakFasade, times(1)).opprettOppgave(oppgave.capture());
 
         assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
-        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(Behandlingstema.ARB_EØS);
+        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(null);
         assertThat(p.getSteg()).isEqualTo(SEND_FORVALTNINGSMELDING);
     }
 
