@@ -1,12 +1,8 @@
-// FIXME: Må flyttes ned til relevant pakke
 package no.nav.melosys.saksflyt.agent;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.Tema;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
@@ -21,7 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.*;
+import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
+import static no.nav.melosys.domain.ProsessDataKey.JOURNALPOST_ID;
 import static no.nav.melosys.domain.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
 import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
 
@@ -58,25 +55,36 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandlingstype behandlingstype = prosessinstans.getBehandling().getType(); // Forutsetter at ingen tidligere steg har endret denne
+        Behandling behandling = prosessinstans.getBehandling();
+        Behandlingstype behandlingstype = behandling.getType();
+        Fagsak fagsak = behandling.getFagsak();
+        String saksnummer = fagsak.getSaksnummer();
         String aktørID = prosessinstans.getData(AKTØR_ID);
-        String saksnummer = prosessinstans.getData(SAKSNUMMER);
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
 
         Oppgave oppgave = new Oppgave();
+        oppgave.setTema(Tema.MED);
 
-        if (behandlingstype == Behandlingstype.SØKNAD) {
-            oppgave.setTema(Tema.MED);
-            oppgave.setBehandlingstype(Behandlingstype.SØKNAD);
-            oppgave.setOppgavetype(Oppgavetype.BEH_SAK);
+        if (fagsak.getType() == Fagsakstype.EU_EØS) {
+            // FIXME MELOSYS-1401 Behandlingstema.ARB_EØS bør brukes men mappingen med underkategori er ikke definert og registrert.
+            oppgave.setBehandlingstema(null);
         } else {
-            String feilmelding = "behandlingstype " + behandlingstype + " er ikke støttet";
+            String feilmelding = "Fagsakstype " + fagsak.getType() + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
             return;
         }
 
-        // FIXME: MELOSYS-1401 behandlingstema,temagruppe
+        if (behandlingstype == Behandlingstype.SØKNAD) {
+            oppgave.setBehandlingstype(Behandlingstype.SØKNAD);
+            oppgave.setOppgavetype(Oppgavetype.BEH_SAK);
+        } else {
+            String feilmelding = "Behandlingstype " + behandlingstype + " er ikke støttet";
+            log.error("{}: {}", prosessinstans.getId(), feilmelding);
+            håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
+            return;
+        }
+
         oppgave.setAktørId(aktørID);
         oppgave.setJournalpostId(journalpostID);
         oppgave.setPrioritet(PrioritetType.NORM);
