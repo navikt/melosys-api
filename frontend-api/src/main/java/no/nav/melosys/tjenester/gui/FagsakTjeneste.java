@@ -63,6 +63,8 @@ public class FagsakTjeneste extends RestTjeneste {
 
         this.modelMapper = new ModelMapper();
 
+        TypeMap<Fagsak, FagsakDto> typeMapFagsakUt = modelMapper.createTypeMap(Fagsak.class, FagsakDto.class);
+        typeMapFagsakUt.addMapping(Fagsak::getType, FagsakDto::setSakstype);
         TypeMap<Behandling, BehandlingDto> typeMapBehandlingUt = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
         typeMapBehandlingUt.<Long>addMapping(Behandling::getId, (dest, id) -> dest.getOppsummering().setBehandlingID(id));
         typeMapBehandlingUt.<Behandlingsstatus>addMapping(Behandling::getStatus, (dest, status) -> dest.getOppsummering().setStatus(status));
