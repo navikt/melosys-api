@@ -1,45 +1,65 @@
 package no.nav.melosys.service;
 
-import java.util.Optional;
-
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsstatus;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.ProsessinstansRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BehandlingServiceTest {
 
-    private ProsessinstansRepository prosessinstansRepository;
-
+    @Mock
     private BehandlingRepository behandlingRepo;
 
     private BehandlingService behandlingService;
 
     @Before
     public void setUp() {
-        behandlingRepo = mock(BehandlingRepository.class);
-        prosessinstansRepository = mock(ProsessinstansRepository.class);
-
-        behandlingService = new BehandlingService(prosessinstansRepository, behandlingRepo);
+        behandlingService = new BehandlingService(behandlingRepo);
     }
 
     @Test
-    public void sjekkStatusBehandlingForOppfrisking() {
-        when(prosessinstansRepository.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType.OPPFRISKNING, ProsessSteg.FEILET_MASKINELT, 111L)).thenReturn(Optional.empty());
-        assertThat(behandlingService.harAktivOppfrisking(111L)).isFalse();
+    public void oppdaterStatus() throws FunksjonellException {
+        long behandlingID = 11L;
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
+        when(behandlingRepo.findOne(anyLong())).thenReturn(behandling);
+        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVVENT_DOK_PART);
+    }
 
-        Prosessinstans process = mock(Prosessinstans.class);
-        when(prosessinstansRepository.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType.OPPFRISKNING, ProsessSteg.FEILET_MASKINELT, 111L)).thenReturn(Optional.of(process));
-        assertThat(behandlingService.harAktivOppfrisking(111L)).isTrue();
+    @Test(expected = IkkeFunnetException.class)
+    public void oppdaterStatus_behIkkeFunnet() throws FunksjonellException {
+        long behandlingID = 11L;
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
+        when(behandlingRepo.findOne(anyLong())).thenReturn(null);
+        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVVENT_DOK_PART);
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void oppdaterStatus_ugyldig() throws FunksjonellException {
+        long behandlingID = 11L;
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
+        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVSLUTTET);
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void oppdaterStatus_feilForrigeStatus() throws FunksjonellException {
+        long behandlingID = 11L;
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        when(behandlingRepo.findOne(anyLong())).thenReturn(behandling);
+        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVVENT_DOK_PART);
     }
 }

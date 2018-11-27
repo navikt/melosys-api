@@ -1,29 +1,21 @@
 package no.nav.melosys.service;
 
-import java.util.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.ProsessinstansRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class BehandlingService {
 
-    private static final Logger log = LoggerFactory.getLogger(BehandlingService.class);
-
-    private final ProsessinstansRepository prosessinstansRepository;
-
     private final BehandlingRepository behandlingRepository;
 
     @Autowired
-    public BehandlingService(ProsessinstansRepository prosessinstansRepository,
-                             BehandlingRepository behandlingRepository) {
-        this.prosessinstansRepository = prosessinstansRepository;
+    public BehandlingService(BehandlingRepository behandlingRepository) {
         this.behandlingRepository = behandlingRepository;
     }
 
@@ -39,5 +31,27 @@ public class BehandlingService {
         }
         log.debug("Behandling {} er ikke under oppfrisking", behandlingID);
         return false;
+    }
+
+    /**
+     * Oppdaterer status for en behandling med ID {@code behandlingID}.
+     * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.
+     */
+    public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException {
+        if ((status != Behandlingsstatus.UNDER_BEHANDLING)
+            && (status != Behandlingsstatus.AVVENT_DOK_PART)
+            && (status != Behandlingsstatus.AVVENT_DOK_UTL)) {
+            throw new FunksjonellException("Må ikke sette behanglingsstatus til " + status);
+        }
+
+        Behandling behandling = behandlingRepository.findOne(behandlingID);
+        if (behandling == null) {
+            throw new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke.");
+        }
+        if (behandling.getStatus() != Behandlingsstatus.VURDER_DOKUMENT) {
+            throw new FunksjonellException("Endring av status er bare mulig når behandling venter på dokumentasjon. Status var: " + behandling.getStatus());
+        }
+        behandling.setStatus(status);
+        behandlingRepository.save(behandling);
     }
 }

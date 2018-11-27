@@ -8,6 +8,7 @@ public enum Behandlingsstatus implements InterntKodeverkTabell<Behandlingsstatus
     UNDER_BEHANDLING("UNDER_BEHANDLING", "Under behandling"),
     AVVENT_DOK_UTL("AVVENT_DOK_UTL", "Avventer dokumentasjon fra utlandet"),
     AVVENT_DOK_PART ("AVVENT_DOK_PART", "Avventer dokumentasjon fra en part"),
+    VURDER_DOKUMENT("VURDER_DOKUMENT", "Nytt dokument mottatt på behandlingen"),
     AVSLUTTET("AVSLUTTET", "Avsluttet");
     
     private String kode;
