@@ -41,7 +41,7 @@ import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentLand;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 
-@Api(tags = {"fagsak"})
+@Api(tags = {"fagsaker"})
 @Path("/fagsaker")
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)

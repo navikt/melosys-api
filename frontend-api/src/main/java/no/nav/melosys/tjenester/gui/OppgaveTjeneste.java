@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
-@Api(value = "/oppgaver", tags = "oppgaver")
+@Api(tags = "oppgaver")
 @Path("/oppgaver")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)

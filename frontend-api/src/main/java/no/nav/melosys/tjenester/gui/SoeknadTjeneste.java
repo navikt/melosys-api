@@ -32,7 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-@Api(tags = {"soknad"})
+@Api(tags = {"søknad"})
 @Path("/soknader")
 @Service
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
