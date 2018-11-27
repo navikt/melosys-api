@@ -1,16 +1,16 @@
 package no.nav.melosys.saksflyt.agent.reg;
 
 import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
-import no.nav.melosys.domain.dokument.inntekt.Inntekt;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -66,44 +66,20 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
 
         Behandling behandling = behandlingRepo.findOneWithSaksopplysningerById(prosessinstans.getBehandling().getId());
         Set<String> orgnumre = new HashSet<>();
-        Set<Saksopplysning> alleSaksopplysninger = behandling.getSaksopplysninger();
 
-        Optional<Saksopplysning> arbeidsforholdSaksopplysning = hentSaksOpplysning(alleSaksopplysninger, SaksopplysningType.ARBEIDSFORHOLD);
-        Optional<Saksopplysning> inntektSaksopplysning = hentSaksOpplysning(alleSaksopplysninger, SaksopplysningType.INNTEKT);
+        Optional<SaksopplysningDokument> arbeidsforholdDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.ARBEIDSFORHOLD);
+        Optional<SaksopplysningDokument> inntektDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.INNTEKT);
 
-        arbeidsforholdSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraArbeidsforhold(saksopplysning)));
-        inntektSaksopplysning.ifPresent(saksopplysning -> orgnumre.addAll(hentOrgnumreFraInntekt(saksopplysning)));
+        arbeidsforholdDokument.ifPresent(dokument -> orgnumre.addAll(((ArbeidsforholdDokument)dokument).hentOrgnumre()));
+        inntektDokument.ifPresent(dokument -> orgnumre.addAll(((InntektDokument)dokument).hentOrgnumre()));
 
-        hentOrganisasjoner(orgnumre, behandling);
+        hentOgLagreOrganisasjoner(behandling, orgnumre);
 
         prosessinstans.setSteg(ProsessSteg.HENT_MEDL_OPPL);
         log.info("Hentet organisasjonsopplysninger for prosessinstans {}", prosessinstans.getId());
     }
 
-    private static Set<String> hentOrgnumreFraArbeidsforhold(Saksopplysning saksopplysning) {
-        return ((ArbeidsforholdDokument) saksopplysning.getDokument()).getArbeidsforhold().stream()
-            .flatMap(arbeidsforhold -> Stream.of(arbeidsforhold.getArbeidsgiverID(), arbeidsforhold.getOpplysningspliktigID()))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toSet());
-    }
-
-    private static Set<String> hentOrgnumreFraInntekt(Saksopplysning saksopplysning) {
-        return ((InntektDokument) saksopplysning.getDokument()).getArbeidsInntektMaanedListe().stream()
-            .map(ArbeidsInntektMaaned::getArbeidsInntektInformasjon)
-            .filter(Objects::nonNull)
-            .map(ArbeidsInntektInformasjon::getInntektListe)
-            .flatMap(List::stream)
-            .filter(Objects::nonNull)
-            .map(Inntekt::getVirksomhetID)
-            .collect(Collectors.toSet());
-    }
-
-    private Optional<Saksopplysning> hentSaksOpplysning(Set<Saksopplysning> saksopplysninger, SaksopplysningType saksopplysningType) {
-        return saksopplysninger.stream().
-            filter(saksopplysning -> saksopplysning.getType().equals(saksopplysningType)).findFirst();
-    }
-
-    private void hentOrganisasjoner(Set<String> orgnumre, Behandling behandling) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
+    private void hentOgLagreOrganisasjoner(Behandling behandling, Set<String> orgnumre) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
 
         for (String orgnr : orgnumre) {
             Instant nå = Instant.now();

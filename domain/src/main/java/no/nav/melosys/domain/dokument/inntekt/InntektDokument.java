@@ -1,10 +1,11 @@
 package no.nav.melosys.domain.dokument.inntekt;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.xml.bind.annotation.*;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import org.apache.commons.lang3.StringUtils;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -18,4 +19,14 @@ public class InntektDokument extends SaksopplysningDokument {
         return arbeidsInntektMaanedListe;
     }
 
+    public Set<String> hentOrgnumre() {
+        return getArbeidsInntektMaanedListe().stream()
+            .map(ArbeidsInntektMaaned::getArbeidsInntektInformasjon)
+            .filter(Objects::nonNull)
+            .map(ArbeidsInntektInformasjon::getInntektListe)
+            .flatMap(Collection::stream)
+            .map(Inntekt::getVirksomhetID)
+            .filter(StringUtils::isNotEmpty)
+            .collect(Collectors.toSet());
+    }
 }
