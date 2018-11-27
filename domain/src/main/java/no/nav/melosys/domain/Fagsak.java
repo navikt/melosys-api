@@ -11,7 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Entity
 @Table(name = "fagsak")
 @EntityListeners(AuditingEntityListener.class)
-public class Fagsak extends RegistreringsInfo{
+public class Fagsak extends RegistreringsInfo {
 
     // FIXME (farjam): Ikke tatt med fra logisk modell: tema, virkemiddel og registreringsmetainfo
 

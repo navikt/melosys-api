@@ -2,8 +2,11 @@ package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.audit.MelosysAuditorAware;
+import no.nav.melosys.audit.AuditorProvider;
+import no.nav.melosys.domain.Behandlingstype;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
@@ -36,10 +39,10 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    private final MelosysAuditorAware auditorAware;
+    private final AuditorProvider auditorAware;
 
     @Autowired
-    public OpprettFagsakOgBehandling(FagsakService fagsakService, ApplicationEventPublisher applicationEventPublisher, MelosysAuditorAware auditorAware) {
+    public OpprettFagsakOgBehandling(FagsakService fagsakService, ApplicationEventPublisher applicationEventPublisher, AuditorProvider auditorAware) {
         this.fagsakService = fagsakService;
         this.applicationEventPublisher = applicationEventPublisher;
         this.auditorAware = auditorAware;
@@ -64,7 +67,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         String arbeidsgiver = prosessinstans.getData(ARBEIDSGIVER);
         String representant = prosessinstans.getData(REPRESENTANT);
         String endretAv = prosessinstans.getData(SAKSBEHANDLER);
-        auditorAware.setSaksbehanlderBrukerID(endretAv);
+        auditorAware.setSaksbehanlderID(endretAv);
 
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, arbeidsgiver, representant, Behandlingstype.SØKNAD);
         prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());

@@ -5,7 +5,6 @@ import javax.transaction.Transactional;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fagsaksstatus;
 import no.nav.melosys.domain.Fagsakstype;
-import no.nav.melosys.domain.audit.MelosysAuditorAware;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,9 +22,11 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@ContextConfiguration(classes = no.nav.melosys.domain.PersistenceConfig.class)
+@ContextConfiguration(classes = no.nav.melosys.PersistenceConfig.class)
 @OverrideAutoConfiguration(enabled = false)
 @EnableJpaAuditing
 @Transactional
@@ -39,22 +40,22 @@ public class FagsakAuditingIT {
     private TestEntityManager entityManager;
 
     @Autowired
-    private MelosysAuditorAware auditorAware;
+    private AuditorProvider auditorAware;
 
     @Before
     public void setUp() {
-        auditorAware.setSaksbehanlderBrukerID("Z990123");
+        auditorAware.setSaksbehanlderID("Z990123");
     }
 
     @Test
-    @Rollback
+    @Rollback(false)
     public void insertFagSak() throws Exception {
 
         Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-6");
+        fagsak.setSaksnummer("TEST-667");
         fagsak.setGsakSaksnummer(124L);
         fagsak.setStatus(Fagsaksstatus.OPPRETTET);
         fagsak.setType(Fagsakstype.TRYGDEAVTALE);
-        entityManager.persistAndGetId(fagsak);
+        assertThat(entityManager.persistAndGetId(fagsak)).isNotNull();
     }
 }

@@ -1,6 +1,6 @@
-package no.nav.melosys.domain;
+package no.nav.melosys;
 
-import no.nav.melosys.domain.audit.MelosysAuditorAware;
+import no.nav.melosys.audit.AuditorProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -12,6 +12,6 @@ public class PersistenceConfig {
 
     @Bean
     public AuditorAware<String> auditorProvider() {
-        return new MelosysAuditorAware();
+        return new AuditorProvider();
     }
 }
