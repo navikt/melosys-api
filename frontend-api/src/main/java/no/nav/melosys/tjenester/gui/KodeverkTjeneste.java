@@ -11,6 +11,7 @@ import no.nav.melosys.domain.begrunnelse.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_987_2009;
 import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse_883_2004;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.tjenester.gui.dto.kodeverk.KodeverkDto;
@@ -33,7 +34,7 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.getBegrunnelser().artikkel16_1_anmodning = tilKoder(Artikkel16_1_Anmodning.values());
         kodeverk.getBegrunnelser().bosted = tilKoder(Bosted.values());
         kodeverk.getBegrunnelser().forutgaendeMedlemskap = tilKoder(ForutgaaendeMedlemskap.values());
-        kodeverk.getBegrunnelser().ikkeSkip = tilKoder(IkkeSkip.values());
+        kodeverk.getBegrunnelser().sokkelEllerSkip = tilKoder(IkkeSkip.values());
         kodeverk.getBegrunnelser().normaltDriverVirksomhet = tilKoder(NormaltDriverVirksomhet.values());
         kodeverk.getBegrunnelser().opphold = tilKoder(Opphold.values());
         kodeverk.getBegrunnelser().vesentligVirksomhet = tilKoder(VesentligVirksomhet.values());
@@ -48,6 +49,7 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.getYrker().yrkesgrupper = tilKoder(YrkesgruppeType.values());
         kodeverk.setAktoerroller(tilKoder(RolleType.values()));
         kodeverk.setDokumenttitler(tilKoder(DokumentTittel.values()));
+        kodeverk.setFartsomrader(tilKoder(Fartsomraade.values()));
         kodeverk.setFinansiering(tilKoder(Finansiering.values()));
         kodeverk.setLandkoder(tilKoder(Landkoder.values()));
         kodeverk.setMedlemskapstyper(tilKoder(Medlemskapstype.values()));
@@ -57,7 +59,6 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.setSaksstatuser(tilKoder(Fagsaksstatus.values()));
         kodeverk.setSakstyper(tilKoder(Fagsakstype.values()));
         kodeverk.setTrygdedekninger(tilKoder(TrygdeDekning.values()));
-        kodeverk.setVedleggstitler(tilKoder(VedleggTittel.values()));
         return kodeverk;
     }
 

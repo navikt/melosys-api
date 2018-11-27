@@ -16,6 +16,7 @@ public class OppholdUtland implements HarPeriode {
     public String studentFinansieringKode;
     public String studentSemester;
     public boolean ektefelleEllerBarnINorge;
+    public boolean forutgaendeBostedINorge;
     public boolean sammeAdresseSomArbeidsgiver;
 
     @Override
