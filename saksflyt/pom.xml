@@ -26,6 +26,10 @@
     <dependencies>
         <dependency>
             <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-domain</artifactId>
         </dependency>
         <dependency>
@@ -39,11 +43,6 @@
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-service</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.melosys</groupId>
-            <artifactId>melosys-config</artifactId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>

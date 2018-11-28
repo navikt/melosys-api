@@ -6,9 +6,12 @@ import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
 
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 @Entity
 @Table(name = "behandling")
-public class Behandling {
+@EntityListeners(AuditingEntityListener.class)
+public class Behandling extends RegistreringsInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,12 +28,6 @@ public class Behandling {
     @Column(name = "beh_type", nullable = false, updatable = false)
     @Convert(converter = Behandlingstype.DbKonverterer.class)
     private Behandlingstype type;
-
-    @Column(name = "registrert_dato", nullable = false, updatable = false)
-    private Instant registrertDato;
-
-    @Column(name = "endret_dato", nullable = false)
-    private Instant endretDato;
 
     @Column(name = "siste_opplysninger_hentet_dato")
     private Instant sisteOpplysningerHentetDato;
@@ -76,22 +73,6 @@ public class Behandling {
         this.type = type;
     }
     
-    public Instant getRegistrertDato() {
-        return registrertDato;
-    }
-
-    public void setRegistrertDato(Instant registrertDato) {
-        this.registrertDato = registrertDato;
-    }
-
-    public Instant getEndretDato() {
-        return endretDato;
-    }
-
-    public void setEndretDato(Instant endretDato) {
-        this.endretDato = endretDato;
-    }
-
     public Set<Saksopplysning> getSaksopplysninger() {
         return saksopplysninger;
     }
@@ -136,7 +117,7 @@ public class Behandling {
         if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
             return this.id == that.id;
         }
-        return Objects.equals(this.registrertDato, that.registrertDato)
+        return Objects.equals(registrertDato, that.registrertDato)
             && Objects.equals(this.fagsak, that.fagsak);
     }
 

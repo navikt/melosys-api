@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.Collections;
 import java.util.Properties;
 
+import no.nav.melosys.audit.AuditorProvider;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
@@ -30,10 +31,12 @@ public class OpprettFagsakOgBehandlingTest {
 
     private ApplicationEventPublisher applicationEventPublisher;
 
+
     @Before
     public void setUp() {
         applicationEventPublisher = mock(ApplicationEventPublisher.class);
-        agent = new OpprettFagsakOgBehandling(fagsakService, applicationEventPublisher);
+        AuditorProvider auditorAware = mock(AuditorProvider.class);
+        agent = new OpprettFagsakOgBehandling(fagsakService, applicationEventPublisher, auditorAware);
     }
 
     @Test

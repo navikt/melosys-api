@@ -14,7 +14,7 @@ public class RegistreringsInfo {
 
     @CreatedDate
     @Column(name = "registrert_dato", nullable = false, updatable = false)
-    private Instant registrertDato;
+    Instant registrertDato;
 
     @CreatedBy
     @Column(name = "registrert_av", nullable = false)

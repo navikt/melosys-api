@@ -1,17 +1,17 @@
 package no.nav.melosys.domain;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.persistence.*;
 
 import no.nav.melosys.exception.TekniskException;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "fagsak")
-public class Fagsak {
+@EntityListeners(AuditingEntityListener.class)
+public class Fagsak extends RegistreringsInfo {
 
     // FIXME (farjam): Ikke tatt med fra logisk modell: tema, virkemiddel og registreringsmetainfo
 
@@ -29,12 +29,6 @@ public class Fagsak {
     @Column(name = "status", nullable = false)
     @Convert(converter = Fagsaksstatus.DbKonverterer.class)
     private Fagsaksstatus status;
-
-    @Column(name = "registrert_dato", nullable = false, updatable = false)
-    private Instant registrertDato;
-
-    @Column(name = "endret_dato", nullable = false, updatable = false)
-    private Instant endretDato;
 
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Aktoer> aktører;
@@ -65,22 +59,6 @@ public class Fagsak {
 
     public void setStatus(Fagsaksstatus status) {
         this.status = status;
-    }
-
-    public Instant getRegistrertDato() {
-        return registrertDato;
-    }
-
-    public void setRegistrertDato(Instant registrertDato) {
-        this.registrertDato = registrertDato;
-    }
-
-    public Instant getEndretDato() {
-        return endretDato;
-    }
-
-    public void setEndretDato(Instant endretDato) {
-        this.endretDato = endretDato;
     }
 
     public Set<Aktoer> getAktører() {
