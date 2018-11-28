@@ -70,6 +70,20 @@ public class SaksopplysningerService {
 
     }
 
+    /***
+     * Metoden sjekker om en behandling med ID {@code behandlingID} har en oppfrisking i gang.
+     * Oppfrisking betyr å hente saksopplysninger på nytt for en gitt behandling.
+     */
+    public boolean harAktivOppfrisking(long behandlingID) {
+        Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType.OPPFRISKNING, ProsessSteg.FEILET_MASKINELT, behandlingID);
+        if (aktivProsessinstans.isPresent()) {
+            log.debug("Behandling {} er under oppfrisking.", behandlingID);
+            return true;
+        }
+        log.debug("Behandling {} er ikke under oppfrisking", behandlingID);
+        return false;
+    }
+
     public ArbeidsforholdDokument hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws SikkerhetsbegrensningException, IntegrasjonException, IkkeFunnetException {
         Saksopplysning saksopplysning = aaregFasade.hentArbeidsforholdHistorikk(arbeidsforholdsID);
         return (ArbeidsforholdDokument) saksopplysning.getDokument();

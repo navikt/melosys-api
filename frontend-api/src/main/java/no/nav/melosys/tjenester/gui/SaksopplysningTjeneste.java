@@ -8,7 +8,6 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.SaksopplysningerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -25,13 +24,10 @@ import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 @Transactional
 public class SaksopplysningTjeneste extends RestTjeneste {
 
-    private final BehandlingService behandlingService;
-
     private final SaksopplysningerService saksopplysningerService;
 
     @Autowired
-    public SaksopplysningTjeneste(BehandlingService behandlingService, SaksopplysningerService saksopplysningerService) {
-        this.behandlingService = behandlingService;
+    public SaksopplysningTjeneste(SaksopplysningerService saksopplysningerService) {
         this.saksopplysningerService = saksopplysningerService;
     }
 
@@ -53,7 +49,7 @@ public class SaksopplysningTjeneste extends RestTjeneste {
     @ApiOperation(value = "Status på oppfrisking av behandling ", notes = ("Returnerer status (Progress/Done) på oppfrisking av behandling"))
     public Response hentOppfriskingStatusForBehandling(@ApiParam @PathParam("behandlingID") long behandlingID) {
         String status;
-        if (behandlingService.harAktivOppfrisking(behandlingID)) {
+        if (saksopplysningerService.harAktivOppfrisking(behandlingID)) {
             status = "\"PROGRESS\"";
         } else {
             status = "\"DONE\"";

@@ -1,8 +1,7 @@
 package no.nav.melosys.service;
 
-import java.util.Optional;
-
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -17,20 +16,6 @@ public class BehandlingService {
     @Autowired
     public BehandlingService(BehandlingRepository behandlingRepository) {
         this.behandlingRepository = behandlingRepository;
-    }
-
-    /***
-     * Metoden sjekker om en behandling med ID {@code behandlingID} har en oppfrisking i gang.
-     * Oppfrisking betyr å hente saksopplysninger på nytt for en gitt behandling.
-     */
-    public boolean harAktivOppfrisking(long behandlingID) {
-        Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType.OPPFRISKNING, ProsessSteg.FEILET_MASKINELT, behandlingID);
-        if (aktivProsessinstans.isPresent()) {
-            log.debug("Behandling {} er under oppfrisking.", behandlingID);
-            return true;
-        }
-        log.debug("Behandling {} er ikke under oppfrisking", behandlingID);
-        return false;
     }
 
     /**

@@ -30,9 +30,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -50,7 +48,7 @@ public class OppgaveServiceTest {
     private TpsFasade tpsFasade;
 
     @Mock
-    private BehandlingService behandlingService;
+    private SaksopplysningerService saksopplysningerService;
 
     @Before
     public void setUp() {
@@ -58,7 +56,7 @@ public class OppgaveServiceTest {
                 gsakFasade,
                 fagsakRepository,
                 tpsFasade,
-                behandlingService);
+            saksopplysningerService);
     }
 
     @Test
@@ -80,7 +78,7 @@ public class OppgaveServiceTest {
                     return (string.equals("12345678901")) ? oppgaver : new ArrayList<>();
                 });
 
-        when(behandlingService.harAktivOppfrisking(anyLong())).thenReturn(true);
+        when(saksopplysningerService.harAktivOppfrisking(anyLong())).thenReturn(true);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Fagsakstype.EU_EØS);
