@@ -1,22 +1,20 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-
 import no.nav.melosys.domain.Dokumenttype;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
 import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +62,7 @@ public class DokumentTjeneste extends RestTjeneste {
             .stream()
             .map(JournalpostInfoDto::av)
             .collect(Collectors.toList());
+        dokumentListe.sort(Comparator.comparing(JournalpostInfoDto::hentGjeldendeTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())));
         return Response.ok(dokumentListe).build();
     }
 
