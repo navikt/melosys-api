@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class LandkoderTest {
     
-    private static final int EØS_MEDLEMER_OG_SVEITS = 32;
+    private static final int EØS_MEDLEMER_OG_SVEITS = 34;
 
     @Test
     public void test() {
