@@ -134,7 +134,6 @@ public class JoarkService implements JoarkFasade {
         ArkivDokument arkivDokument = new ArkivDokument();
         arkivDokument.setDokumentId(hoveddokument.getDokumentId());
         // FIXME Tjenesten mangler opplysninger (tittel og vedleggstitler) tilgjengelige i nye REST tjenester (https://jira.adeo.no/browse/PK-51497).
-        arkivDokument.setTittel("UKJENT");
         journalpost.setHoveddokument(arkivDokument);
 
         return journalpost;
