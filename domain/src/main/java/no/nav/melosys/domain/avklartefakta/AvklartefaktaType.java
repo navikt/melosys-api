@@ -4,13 +4,14 @@ import no.nav.melosys.domain.Kodeverk;
 
 public enum AvklartefaktaType implements Kodeverk {
 
+    // FIXME: Bruk riktige koder fra https://confluence.adeo.no/display/TEESSI/Kodeverk+i+Melosys#KodeverkiMelosys-AvklarteFakta
     AVKLARTE_ARBEIDSGIVER("AVKLARTE_ARBEIDSGIVER", "Avklarte arbeidsgiver"),
     YRKESGRUPPE("YRKESGRUPPE", "Yrkesgruppe"),
     AG_FORRETNINGSLAND("AG_FORRETNINGSLAND", "Arbeidsgivers forretningsland"),
     MOTTAR_KONTANTYTELSE("MOTTAR_KONTANTYTELSE", "Mottar kontantytelse"),
     OFFENTLIG_TJENESTEMANN("OFFENTLIG_TJENESTEMANN", "Offentlig tjenestemann"),
     BOSTEDSLAND("BOSTEDSLAND", "Bostedsland"),
-    SOKKEL_SKIP("SOKKEL_SKIP", "Arbeid på sokkel eller skip"),;
+    SOKKEL_SKIP("SOKKEL_SKIP", "Arbeid på sokkel eller skip");
 
     private String kode;
     private String beskrivelse;
