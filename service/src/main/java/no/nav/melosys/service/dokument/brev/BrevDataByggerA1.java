@@ -1,12 +1,16 @@
 package no.nav.melosys.service.dokument.brev;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
+import no.nav.melosys.domain.dokument.person.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -14,8 +18,10 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.service.RegisterOppslagService;
+import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.stereotype.Component;
@@ -25,19 +31,22 @@ import org.springframework.transaction.annotation.Transactional;
 public class BrevDataByggerA1 {
 
     private final AvklartefaktaService avklartefaktaService;
-    private final RegisterOppslagService registerOppslagService;
+    private final RegisterOppslagSystemService registerOppslagService;
     private final BehandlingRepository behandlingRepository;
 
-    private SoeknadDokument søknad;
     private Set<String> avklarteOrganisasjoner;
+    private KodeverkService kodeverkService;
+    private SoeknadDokument søknad;
+    private PersonDokument person;
 
     @Autowired
     public BrevDataByggerA1(AvklartefaktaService avklartefaktaService,
                             BehandlingRepository behandlingRepository,
-                            RegisterOppslagService registerOppslagService) {
+                            RegisterOppslagSystemService registerOppslagService, KodeverkService kodeverkService) {
         this.avklartefaktaService = avklartefaktaService;
         this.registerOppslagService = registerOppslagService;
         this.behandlingRepository = behandlingRepository;
+        this.kodeverkService = kodeverkService;
     }
 
     @Transactional
@@ -48,18 +57,26 @@ public class BrevDataByggerA1 {
         }
 
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
         this.avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandlingId);
 
         BrevDataA1Dto brevDataDto = new BrevDataA1Dto();
         brevDataDto.saksbehandler = saksbehandler;
 
         brevDataDto.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandlingId);
-        brevDataDto.utenlandskeVirksomheter = hentUtenlandskeAvklarteforetak();
-        brevDataDto.norskeVirksomheter = hentNorskeAvklarteForetak();
+        brevDataDto.utenlandskeVirksomheter = hentUtenlandskeAvklarteVirksomheter();
+        brevDataDto.norskeVirksomheter = hentAlleNorskeAvklarteVirksomheter();
         brevDataDto.selvstendigeForetak = hentAvklarteSelvstendigeForetak();
+        brevDataDto.bostedsadresse = hentBostedsadresse();
         brevDataDto.søknad = søknad;
 
         return brevDataDto;
+    }
+
+    private Bostedsadresse hentBostedsadresse() {
+        Bostedsadresse adresse = person.bostedsadresse;
+        adresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.getPostnr(), LocalDate.now()));
+        return adresse;
     }
 
     private Set<String> hentAvklarteSelvstendigeForetak() {
@@ -70,16 +87,26 @@ public class BrevDataByggerA1 {
         return organisasjonsnumre;
     }
 
-    private Set<OrganisasjonDokument> hentNorskeAvklarteForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    private List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         Set<String> organisasjonsnumre = søknad.hentAlleOrganisasjonsnumre();
         organisasjonsnumre.retainAll(avklarteOrganisasjoner);
 
-        return registerOppslagService.hentOrganisasjoner(organisasjonsnumre);
+        return registerOppslagService.hentOrganisasjoner(organisasjonsnumre).stream()
+                .map(org -> new Virksomhet(org.getSammenslåttNavn(), org.getOrgnummer(), utfyllManglendeAdressefelter(org)))
+                .collect(Collectors.toList());
     }
 
-    private List<ForetakUtland> hentUtenlandskeAvklarteforetak() {
+    private StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
+        StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
+        adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
+        return adresse;
+    }
+
+    private List<Virksomhet> hentUtenlandskeAvklarteVirksomheter() {
         return søknad.foretakUtland.stream()
-                .filter(foretak -> avklarteOrganisasjoner.contains(foretak.orgnr))
+                //TODO: utenlandske foretak har ikke nødvendigvis orgnr!
+                //.filter(foretak -> avklarteOrganisasjoner.contains(foretak.orgnr))
+                .map(Virksomhet::new)
                 .collect(Collectors.toList());
     }
 }

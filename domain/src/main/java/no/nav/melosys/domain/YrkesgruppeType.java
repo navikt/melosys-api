@@ -5,7 +5,7 @@ public enum YrkesgruppeType {
     FLYENDE_PERSONELL("FLYENDE_PERSONELL"),
     SOKKEL_ELLER_SKIP("SOKKEL_ELLER_SKIP");
 
-    public String navn;
+    private String navn;
 
     YrkesgruppeType(String navn) {
         this.navn = navn;

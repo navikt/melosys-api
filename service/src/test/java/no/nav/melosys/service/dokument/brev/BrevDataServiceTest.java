@@ -42,6 +42,7 @@ public class BrevDataServiceTest {
 
         when(tpsFasade.hentFagsakIdentMedRolleType(any(), any())).thenCallRealMethod();
         when(tpsFasade.hentIdentForAktørId(any())).thenReturn(FNR);
+        when(behandlingResultatRepository.findOne(anyLong())).thenReturn(new Behandlingsresultat());
     }
 
     @Test

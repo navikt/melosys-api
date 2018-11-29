@@ -2,6 +2,10 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.Set;
 
+import io.github.benas.randombeans.api.EnhancedRandom;
+import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,14 +14,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.melosys.service.abac.Tilgang;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-
-import io.github.benas.randombeans.api.EnhancedRandom;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AvklartefaktaTjenesteTest extends JsonSchemaTest {
@@ -56,7 +54,7 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTest {
     @Test
     public void lagreAvklartefaktaGirKopiAvInput() throws Exception {
         Set<AvklartefaktaDto> avklartefaktaDtoer = EnhancedRandom.randomSetOf(4, AvklartefaktaDto.class);
-        when(avklartefaktaService.hentAvklarteFakta(1L)).thenReturn(avklartefaktaDtoer);
+        when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(avklartefaktaDtoer);
         Set<AvklartefaktaDto> resultat = avklartefaktaTjeneste.lagraAvklarteFakta(1, avklartefaktaDtoer);
         assertThat(resultat).isEqualTo(avklartefaktaDtoer);
     }

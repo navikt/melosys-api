@@ -20,17 +20,17 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1Dto;
 import no.nav.melosys.service.dokument.brev.BrevDataDto;
+import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
+
+import no.nav.dok.melosysbrev._000116.ObjectFactory;
 
 public class A1Mapper implements BrevDataMapper {
 
@@ -44,25 +44,7 @@ public class A1Mapper implements BrevDataMapper {
 
     private BrevDataA1Dto brevDataDto;
 
-    private class Virksomhet {
-        Virksomhet(ForetakUtland foretak) {
-            this.navn = foretak.navn;
-            this.orgnr = foretak.orgnr;
-            this.adresse = foretak.adresse;
-        }
-
-        Virksomhet(OrganisasjonDokument foretak) {
-            this.navn = foretak.getNavnSammenslått();
-            this.orgnr = foretak.getOrgnummer();
-            this.adresse = foretak.getOrganisasjonDetaljer().getForretningsadresseStrukturert();
-        }
-
-        public String navn;
-        public String orgnr;
-        public StrukturertAdresse adresse;
-    }
-
-    private class IkkeFysiskArbeidssted {
+    class IkkeFysiskArbeidssted {
         IkkeFysiskArbeidssted(String navn, String land) {
             this.navn = navn;
             this.land = land;
@@ -111,12 +93,9 @@ public class A1Mapper implements BrevDataMapper {
         List<LovvalgsperiodeType> lovvalgsperioder = hentLovvalgsperioderFraBehandlingsresultat();
         a1.setLovvalgsperiode(lovvalgsperioder.get(0));    // Kun en lovvalgsperiode i Lev 1
 
-        a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevDataDto.yrkesgruppe.navn));
+        a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevDataDto.yrkesgruppe.name()));
 
-        List<Virksomhet> virksomheter = brevDataDto.norskeVirksomheter.stream()
-                .map(Virksomhet::new)
-                .collect(Collectors.toList());
-
+        List<Virksomhet> virksomheter = brevDataDto.norskeVirksomheter;
         if (virksomheter.isEmpty()) {
             throw new TekniskException("Trenger minst en valgt norsk virksomhet for ART12.1");
         }
@@ -125,9 +104,7 @@ public class A1Mapper implements BrevDataMapper {
         Virksomhet hovedvirksomhet = virksomheter.remove(0);
         a1.setHovedvirksomhet(mapHovedvirksomhet(hovedvirksomhet));
 
-        virksomheter.addAll(brevDataDto.utenlandskeVirksomheter.stream()
-                .map(Virksomhet::new)
-                .collect(Collectors.toList()));
+        virksomheter.addAll(brevDataDto.utenlandskeVirksomheter);
 
         a1.setBivirksomhetListe(mapBivirksomheter(virksomheter));
 
@@ -158,9 +135,7 @@ public class A1Mapper implements BrevDataMapper {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }
 
-        Bostedsadresse bosted = personDokument.bostedsadresse;
-        BostedsadresseType bostedAdresse = lagBostedsadresse(bosted);
-        person.setBostedsadresse(bostedAdresse);
+        person.setBostedsadresse(lagBostedsadresse(brevDataDto.bostedsadresse));
         return person;
     }
 

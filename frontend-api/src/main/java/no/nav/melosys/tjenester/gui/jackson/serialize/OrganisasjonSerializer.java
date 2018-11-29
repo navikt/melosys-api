@@ -7,10 +7,9 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.AdresseDto;
 import no.nav.melosys.tjenester.gui.dto.GateadresseDto;
@@ -31,7 +30,7 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         OrganisasjonDto organisasjonDto = new OrganisasjonDto();
 
         organisasjonDto.setOrgnr(organisasjon.getOrgnummer());
-        organisasjonDto.setNavn(organisasjon.getNavnSammenslått());
+        organisasjonDto.setNavn(organisasjon.getSammenslåttNavn());
         organisasjonDto.setOppstartdato(organisasjon.getOppstartsdato());
         if (!StringUtils.isEmpty(organisasjon.getEnhetstype())) {
             organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype(), LocalDate.now()));
@@ -39,10 +38,10 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
 
         OrganisasjonsDetaljer detaljer = organisasjon.getOrganisasjonDetaljer();
         if (detaljer != null) {
-            GeografiskAdresse forretningsadresse = detaljer.hentFørsteGyldigeForretningsadresse();
+            StrukturertAdresse forretningsadresse = detaljer.hentStrukturertForretningsadresse();
             organisasjonDto.setForretningsadresse(tilAdresseDto(forretningsadresse));
 
-            GeografiskAdresse postadresse = detaljer.hentFørsteGyldigePostadresse();
+            StrukturertAdresse postadresse = detaljer.hentStrukturertPostadresse();
             organisasjonDto.setPostadresse(tilAdresseDto(postadresse));
         }
         else {
@@ -52,7 +51,7 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         generator.writeObject(organisasjonDto);
     }
 
-    private AdresseDto tilAdresseDto(GeografiskAdresse adresse) {
+    private AdresseDto tilAdresseDto(StrukturertAdresse adresse) {
         AdresseDto dto = new AdresseDto();
         GateadresseDto gateadresse = new GateadresseDto();
         dto.setGateadresse(gateadresse);
@@ -62,37 +61,12 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
             return dto;
         }
 
-        if (adresse instanceof SemistrukturertAdresse) {
-            SemistrukturertAdresse sAdresse = (SemistrukturertAdresse) adresse;
+        gateadresse.setGatenavn(adresse.gatenavn);
 
-            // FIXME Hvordan formaterer vi adresselinjer?
-            StringBuilder stringBuilder = new StringBuilder();
+        dto.setPostnr(adresse.postnummer);
+        dto.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now()));
+        dto.setLand(kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, adresse.landKode, LocalDate.now()));
 
-            String linje1 = sAdresse.getAdresselinje1();
-            stringBuilder.append(linje1 == null ? "" : linje1);
-            String linje2 = sAdresse.getAdresselinje2();
-            stringBuilder.append(linje2 == null ? "" : linje2);
-            String linje3 = sAdresse.getAdresselinje3();
-            stringBuilder.append(linje3 == null ? "" : linje3);
-
-            String adresseLinje = stringBuilder.toString();
-            adresseLinje.replaceAll("\\s+", " ");
-
-            gateadresse.setGatenavn(adresseLinje);
-
-            String postNummer = sAdresse.getPostnr();
-
-            dto.setPostnr(postNummer);
-            dto.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postNummer, LocalDate.now()));
-            dto.setLand(kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, sAdresse.getLandkode(), LocalDate.now()));
-
-            return  dto;
-        } else if (adresse == null) {
-            // Ingen gyldige adresser
-            return dto;
-        } else {
-            // Enhetsregistret har bare SemistrukturertAdresser
-            throw new RuntimeException("GeografiskAdresse ikke støttet " + adresse.getClass().getSimpleName());
-        }
+        return  dto;
     }
 }

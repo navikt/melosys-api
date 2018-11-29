@@ -40,7 +40,7 @@ public class AvklartefaktaService {
         return avklartefakta.stream().map(AvklartefaktaDto::new).collect(Collectors.toSet());
     }
 
-    public Set<String> hentAvklarteOrganisasjoner(long behandlingsid) throws IkkeFunnetException {
+    public Set<String> hentAvklarteOrganisasjoner(long behandlingsid) {
         Set<Avklartefakta> avklartefakta =
                 avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid,
                                                                                    AvklartefaktaType.AVKLARTE_ARBEIDSGIVER,

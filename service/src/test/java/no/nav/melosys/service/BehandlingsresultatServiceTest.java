@@ -3,10 +3,10 @@ package no.nav.melosys.service;
 import java.util.Collections;
 import java.util.HashSet;
 
-import no.nav.melosys.domain.Avklartefakta;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
 import org.junit.Test;

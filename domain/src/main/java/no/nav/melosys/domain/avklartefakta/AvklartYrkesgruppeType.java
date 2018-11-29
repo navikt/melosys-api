@@ -10,7 +10,7 @@ public enum AvklartYrkesgruppeType {
     IKKE_YRKESAKTIV("IKKE_YRKESAKTIV"),
     KONTANTYTELSEMOTTAKER("KONTANTYTELSEMOTTAKER");
 
-    public String navn;
+    private String navn;
 
     AvklartYrkesgruppeType(String navn) {
         this.navn = navn;

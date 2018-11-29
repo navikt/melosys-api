@@ -6,9 +6,7 @@ import java.util.Set;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 public interface AvklarteFaktaRepository extends CrudRepository<Avklartefakta, Long> {
 
@@ -20,5 +18,7 @@ public interface AvklarteFaktaRepository extends CrudRepository<Avklartefakta, L
                                                                             String referanse,
                                                                             String subjekt);
 
-    Set<Avklartefakta> findByBehandlingsresultatIdAndTypeAndFakta(long behandlingsid, AvklartefaktaType type, String fakta);
+    Set<Avklartefakta> findByBehandlingsresultatIdAndTypeAndFakta(long behandlingsid,
+                                                                  AvklartefaktaType type,
+                                                                  String fakta);
 }

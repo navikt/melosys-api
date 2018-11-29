@@ -92,7 +92,7 @@ public class BrevDataService {
     public Element lagBrevXML(DokumentType dokumentType, Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
         Behandlingsresultat behandlingsresultat = behandlingResultatRepository.findOne(behandling.getId());
         if (behandlingsresultat == null) {
-            new TekniskException("Finner ingen behandlingsresultat for behandlingid");
+            throw new TekniskException("Finner ingen behandlingsresultat for behandlingid");
         }
 
         Element brevXmlElement;

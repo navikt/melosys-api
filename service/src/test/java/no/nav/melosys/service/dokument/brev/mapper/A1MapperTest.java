@@ -14,16 +14,14 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.service.dokument.brev.BrevDataA1Dto;
+import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -83,7 +81,6 @@ public class A1MapperTest {
         person.fødselsdato = LocalDate.now();
         person.statsborgerskap = new Land();
         person.statsborgerskap.setKode("NO");
-        person.bostedsadresse = boAdresse;
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.PERSONOPPLYSNING);
@@ -93,15 +90,6 @@ public class A1MapperTest {
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
         when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(saksopplysning)));
         when(behandling.getFagsak()).thenReturn(new Fagsak());
-
-
-        UstrukturertAdresse adresse = new UstrukturertAdresse();
-        adresse.landKode = "Land";
-        adresse.adresselinjer.add("Gatenavn");
-        adresse.adresselinjer.add("25");
-        adresse.adresselinjer.add("Postnummer");
-        adresse.adresselinjer.add("Poststed");
-        adresse.adresselinjer.add("Region");
 
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
         strukturertAdresse.husnummer = "25";
@@ -117,25 +105,23 @@ public class A1MapperTest {
         søknad.arbeidUtland = Arrays.asList(arbeidUtland);
 
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
-        when(organisasjonsDetaljer.getForretningsadresseStrukturert()).thenReturn(strukturertAdresse);
+        when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(strukturertAdresse);
 
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.setNavn(Arrays.asList("JARLSBERG", "INTERNATIONAL"));
-        organisasjonDokument.setOrgnummer("123456789");
-        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
+        Virksomhet virksomhet = new Virksomhet("JARLSBERG INTERNATIONAL",
+                                               "123456789",
+                                                strukturertAdresse);
 
-        ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.navn = "Jarlsberg";
-        foretakUtland.orgnr = "1235234234";
+        Virksomhet utenlandksVirksomhet = new Virksomhet("Jarlsberg",
+                                                         "123456789",
+                                                         strukturertAdresse);
 
         brevDataDto = new BrevDataA1Dto();
         brevDataDto.yrkesgruppe = YrkesgruppeType.ORDINAER;
-        brevDataDto.norskeVirksomheter = new HashSet<>();
-        brevDataDto.norskeVirksomheter.add(organisasjonDokument);   // Hovedvirksomhet
+        brevDataDto.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
         brevDataDto.selvstendigeForetak = new HashSet<>();
-        brevDataDto.utenlandskeVirksomheter = new ArrayList<>();
-        brevDataDto.utenlandskeVirksomheter.add(foretakUtland);
+        brevDataDto.utenlandskeVirksomheter = new ArrayList<>(Arrays.asList(utenlandksVirksomhet));
         brevDataDto.søknad = søknad;
+        brevDataDto.bostedsadresse = boAdresse;
     }
 
     @Test

@@ -6,9 +6,9 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
+import no.nav.melosys.domain.Landkoder;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.Gateadresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost;
@@ -44,8 +44,13 @@ public class OrganisasjonsDetaljer {
         return forretningsadresse;
     }
 
-    public StrukturertAdresse getForretningsadresseStrukturert() {
-        GeografiskAdresse adresse = hentFørsteGyldigeAdresse(forretningsadresse);
+    public StrukturertAdresse hentStrukturertPostadresse() {
+        GeografiskAdresse adresse = hentFørsteGyldigePostadresse();
+        return konverterTilStrukturertAdresse(adresse);
+    }
+
+    public StrukturertAdresse hentStrukturertForretningsadresse() {
+        GeografiskAdresse adresse = hentFørsteGyldigeForretningsadresse();
         return konverterTilStrukturertAdresse(adresse);
     }
 
@@ -73,20 +78,6 @@ public class OrganisasjonsDetaljer {
         return naering;
     }
 
-    private StrukturertAdresse konverterTilStrukturertAdresse(GeografiskAdresse adresse) {
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        Gateadresse gateadresse = (Gateadresse) adresse;
-        strukturertAdresse.gatenavn = gateadresse.getGatenavn();
-        strukturertAdresse.husnummer = gateadresse.getHusnummer() + gateadresse.getHusbokstav();
-        strukturertAdresse.poststed = gateadresse.getPoststed();
-        strukturertAdresse.landKode = gateadresse.getLandkode();
-
-        if (adresse instanceof SemistrukturertAdresse) {
-            strukturertAdresse.postnummer = ((SemistrukturertAdresse) adresse).getPostnr();
-        }
-        return strukturertAdresse;
-    }
-
     private GeografiskAdresse hentFørsteGyldigeAdresse(List<GeografiskAdresse> adresser) {
         for (GeografiskAdresse adresse : adresser) {
             Periode gyldighetsperiode = adresse.getGyldighetsperiode();
@@ -95,5 +86,43 @@ public class OrganisasjonsDetaljer {
             }
         }
         return null;
+    }
+
+    private StrukturertAdresse konverterTilStrukturertAdresse(GeografiskAdresse adresse) {
+        if(adresse == null) {
+            return null;
+        }
+
+        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
+        if (adresse instanceof SemistrukturertAdresse) {
+            SemistrukturertAdresse sAdresse = (SemistrukturertAdresse) adresse;
+
+            StringBuilder stringBuilder = new StringBuilder();
+            if (sAdresse.getAdresselinje1() != null) {
+                stringBuilder.append(sAdresse.getAdresselinje1());
+            }
+            if (sAdresse.getAdresselinje2() != null) {
+                stringBuilder.append(sAdresse.getAdresselinje2());
+            }
+            if (sAdresse.getAdresselinje3() != null) {
+                stringBuilder.append(sAdresse.getAdresselinje3());
+            }
+            String adresseLinje = stringBuilder.toString();
+
+            strukturertAdresse.gatenavn = adresseLinje.replaceAll("\\s+", " ");
+            strukturertAdresse.landKode = sAdresse.getLandkode();
+
+            if (!strukturertAdresse.landKode.equals(Landkoder.NO.getKode())) {
+                strukturertAdresse.postnummer = "";
+                strukturertAdresse.poststed = sAdresse.getPoststedUtland();
+            } else {
+                strukturertAdresse.postnummer = sAdresse.getPostnr();
+            }
+        }
+        else {
+            // Enhetsregistret har bare SemistrukturertAdresser
+            throw new RuntimeException("GeografiskAdresse ikke støttet " + adresse.getClass().getSimpleName());
+        }
+        return strukturertAdresse;
     }
 }
