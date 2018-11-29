@@ -4,10 +4,10 @@ import javax.persistence.Converter;
 
 public enum BehandlingsresultatType implements InterntKodeverkTabell<BehandlingsresultatType> {
 
-    HENLEGGELSE("HENLEGGELSE", "Henleggelse"),
-    IKKE_FASTSATT("IKKE_FASTSATT", "Ikke fastsatt"),
     FASTSATT_LOVVALGSLAND("FASTSATT_LOVVALGSLAND", "Fastsatt lovvalgsland"),
-    FRIVILLIG_MEDLEMSKAP("FRIVILLIG_MEDLEMSKAP", "Frivillig medlemskap");
+    FORELØPIG_FASTSATT_LOVVALGSLAND("FORELØPIG_FASTSATT_LOVVALGSLAND", "Foreløpig fastsatt lovvalgsland"),
+    HENLEGGELSE("HENLEGGELSE", "Henleggelse"),
+    IKKE_FASTSATT("ANMODNING_OM_UNNTAK", "Anmodning om unntak");
 
     private String kode;
     private String beskrivelse;

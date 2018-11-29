@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -20,23 +21,32 @@ public class VedtakService {
 
     private final BehandlingRepository behandlingRepository;
 
+    private final BehandlingsresultatRepository behandlingsresultatRepository;
+
     private final Binge binge;
 
     private final ProsessinstansRepository prosessinstansRepo;
 
+
+
     @Autowired
-    public VedtakService(BehandlingRepository behandlingRepository, Binge binge, ProsessinstansRepository prosessinstansRepo) {
+    public VedtakService(BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository, Binge binge, ProsessinstansRepository prosessinstansRepo) {
         this.behandlingRepository = behandlingRepository;
+        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.binge = binge;
         this.prosessinstansRepo = prosessinstansRepo;
     }
 
-    public void fattVedtak(long behandlingID) throws IkkeFunnetException {
+    public void fattVedtak(long behandlingID, String behandlingsresultatType) throws IkkeFunnetException {
         log.info("Fatter vedtak for behandling: " + behandlingID);
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + " finnes ikke.");
         }
+
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandlingID);
+        behandlingsresultat.setType(BehandlingsresultatType.valueOf(behandlingsresultatType));
+        behandlingsresultatRepository.save(behandlingsresultat);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);

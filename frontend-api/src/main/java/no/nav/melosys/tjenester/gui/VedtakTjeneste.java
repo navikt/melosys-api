@@ -15,6 +15,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.vedtak.VedtakService;
 
+import no.nav.melosys.tjenester.gui.dto.VedtakDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -39,9 +40,10 @@ public class VedtakTjeneste extends RestTjeneste {
     @POST
     @Path("{behandlingID}")
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
-    public Response fattVedtak(@ApiParam("behandlingID") @PathParam("behandlingID") long behandlingID) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public Response fattVedtak(@PathParam("behandlingID") long behandlingID, @ApiParam("vedtakDto") VedtakDto vedtakDto) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+
         tilgang.sjekk(behandlingID);
-        vedtakService.fattVedtak(behandlingID);
+        vedtakService.fattVedtak(behandlingID, vedtakDto.getBehandlingsresultatType());
         return Response.ok().build();
     }
 }

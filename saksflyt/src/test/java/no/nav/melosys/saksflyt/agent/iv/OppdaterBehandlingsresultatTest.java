@@ -49,7 +49,6 @@ public class OppdaterBehandlingsresultatTest {
         oppdaterBehandlingsresultat.utfør(p);
 
         verify(behandlingsresultatRepository).save(behandlingsresultatArgumentCaptor.capture());
-        assertThat(behandlingsresultat.getType()).isEqualTo(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
         assertThat(behandlingsresultat.getEndretAv()).isEqualTo(testbruker);
         assertThat(behandlingsresultat.getVedtaksdato()).isNotNull();
         assertThat(behandlingsresultat.getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));
