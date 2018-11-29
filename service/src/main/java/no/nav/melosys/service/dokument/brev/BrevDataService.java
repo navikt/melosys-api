@@ -114,7 +114,7 @@ public class BrevDataService {
         return brevXmlElement;
     }
 
-    private FellesType mapFellesType(Behandling behandling) throws TekniskException {
+    private FellesType mapFellesType(Behandling behandling) {
         final FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer(behandling.getFagsak().getSaksnummer());
 

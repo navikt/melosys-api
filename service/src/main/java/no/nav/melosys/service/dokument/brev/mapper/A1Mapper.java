@@ -212,9 +212,9 @@ public class A1Mapper implements BrevDataMapper {
         for (StrukturertAdresse adresse : fysiskeArbeidssteder) {
             AdresseType adresseType = new AdresseType();
             adresseType.setNavn("");
-            adresseType.setGatenavn(adresse.gatenavn);
-            adresseType.setPostnummer(adresse.postnummer);
-            adresseType.setPoststed(adresse.poststed);
+            adresseType.setAdresselinje1(adresse.gatenavn);
+            adresseType.setAdresselinje2(adresse.postnummer);
+            adresseType.setAdresselinje3(adresse.poststed);
             adresseType.setLand(adresse.landKode);
 
             fysiskeAdresserBrev.getAdresse().add(adresseType);

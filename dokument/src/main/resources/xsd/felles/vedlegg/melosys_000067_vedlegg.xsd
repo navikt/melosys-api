@@ -50,7 +50,7 @@
 	<xs:complexType name="lovvalgsperiodeType">
 		<xs:sequence>
 			<xs:element name="lovvalgsLand" type="st:NonEmptyString"/>
-			<xs:element name="fomDato" type="st:FormatertDato"/>
+			<xs:element name="fomDato" type="st:FormatertDato" minOccurs="0"/>
 			<xs:element name="tomDato" type="st:FormatertDato"/>
 			<xs:element name="lovvalgsbestemmelse" type="melosysfelles:lovvalgsbestemmelseKode"/>
 			<xs:element name="tilleggsbestemmelse" type="melosysfelles:tilleggsbestemmelseKode" minOccurs="0"/>
@@ -93,11 +93,10 @@
 		<xs:sequence>
 			<xs:element name="navn" type="xs:string"/>
 			<xs:element name="land" type="xs:string" minOccurs="0"/>
-			<xs:element name="gatenavn" type="xs:string" minOccurs="0"/>
-			<xs:element name="husnummer" type="xs:string" minOccurs="0"/>
-			<xs:element name="postnummer" type="xs:string" minOccurs="0"/>
-			<xs:element name="poststed" type="xs:string" minOccurs="0"/>
-			<xs:element name="region" type="xs:string" minOccurs="0"/>
+			<xs:element name="adresselinje1" type="xs:string" minOccurs="0"/>
+			<xs:element name="adresselinje2" type="xs:string" minOccurs="0"/>
+			<xs:element name="adresselinje3" type="xs:string" minOccurs="0"/>
+			<xs:element name="adresselinje4" type="xs:string" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 
