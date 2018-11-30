@@ -91,10 +91,4 @@ public class Vilkaarsresultat extends RegistreringsInfo {
         return Objects.hash(getBehandlingsresultat(), getVilkaar());
     }
 
-    public void oppdaterBegrunnelser(Set<VilkaarBegrunnelse> nyeBegrunnelser) {
-        // For å beholde registreringsdato for begrunnelser som er lagret allerede
-        getBegrunnelser().removeIf(v -> !nyeBegrunnelser.contains(v));
-        nyeBegrunnelser.removeAll(getBegrunnelser());
-        getBegrunnelser().addAll(nyeBegrunnelser);
-    }
 }
