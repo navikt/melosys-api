@@ -40,7 +40,7 @@ public class VedtakTjeneste extends RestTjeneste {
     @POST
     @Path("{behandlingID}")
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
-    public Response fattVedtak(@PathParam("behandlingID") long behandlingID, @ApiParam("vedtakDto") VedtakDto vedtakDto) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public Response fattVedtak(@ApiParam("behandlingID") @PathParam("behandlingID") long behandlingID, @ApiParam("vedtakDto") VedtakDto vedtakDto) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
 
         tilgang.sjekk(behandlingID);
         vedtakService.fattVedtak(behandlingID, vedtakDto.getBehandlingsresultatType());

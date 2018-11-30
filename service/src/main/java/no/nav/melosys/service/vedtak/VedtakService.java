@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -21,18 +20,13 @@ public class VedtakService {
 
     private final BehandlingRepository behandlingRepository;
 
-    private final BehandlingsresultatRepository behandlingsresultatRepository;
-
     private final Binge binge;
 
     private final ProsessinstansRepository prosessinstansRepo;
 
-
-
     @Autowired
-    public VedtakService(BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository, Binge binge, ProsessinstansRepository prosessinstansRepo) {
+    public VedtakService(BehandlingRepository behandlingRepository, Binge binge, ProsessinstansRepository prosessinstansRepo) {
         this.behandlingRepository = behandlingRepository;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.binge = binge;
         this.prosessinstansRepo = prosessinstansRepo;
     }
@@ -44,10 +38,6 @@ public class VedtakService {
             throw new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + " finnes ikke.");
         }
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandlingID);
-        behandlingsresultat.setType(BehandlingsresultatType.valueOf(behandlingsresultatType));
-        behandlingsresultatRepository.save(behandlingsresultat);
-
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
@@ -57,6 +47,7 @@ public class VedtakService {
         prosessinstans.setRegistrertDato(nå);
 
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType);
 
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);

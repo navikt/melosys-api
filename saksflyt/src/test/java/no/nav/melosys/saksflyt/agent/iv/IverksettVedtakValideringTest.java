@@ -28,6 +28,7 @@ public class IverksettVedtakValideringTest {
         p.setType(ProsessType.IVERKSETT_VEDTAK);
 
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
+        p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.FASTSATT_LOVVALGSLAND.getKode());
 
         agent.utførSteg(p);
 

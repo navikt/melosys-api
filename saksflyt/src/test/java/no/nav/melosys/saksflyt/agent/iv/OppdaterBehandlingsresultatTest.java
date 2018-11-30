@@ -42,6 +42,7 @@ public class OppdaterBehandlingsresultatTest {
         p.setType(ProsessType.IVERKSETT_VEDTAK);
         String testbruker = "Z097";
         p.setData(ProsessDataKey.SAKSBEHANDLER, testbruker);
+        p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.FASTSATT_LOVVALGSLAND.getKode());
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
@@ -49,6 +50,7 @@ public class OppdaterBehandlingsresultatTest {
         oppdaterBehandlingsresultat.utfør(p);
 
         verify(behandlingsresultatRepository).save(behandlingsresultatArgumentCaptor.capture());
+        assertThat(behandlingsresultat.getType()).isEqualTo(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
         assertThat(behandlingsresultat.getEndretAv()).isEqualTo(testbruker);
         assertThat(behandlingsresultat.getVedtaksdato()).isNotNull();
         assertThat(behandlingsresultat.getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));

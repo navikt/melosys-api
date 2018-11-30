@@ -3,7 +3,6 @@ package no.nav.melosys.service.vedtak;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -32,9 +31,6 @@ public class VedtakServiceTest {
     @Mock
     private ProsessinstansRepository prosessinstansRepo;
 
-    @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
-
     private VedtakService vedtakService;
 
     @Captor
@@ -42,7 +38,7 @@ public class VedtakServiceTest {
 
     @Before
     public void setUp() {
-        vedtakService = new VedtakService(behandlingRepository, behandlingsresultatRepository, binge, prosessinstansRepo);
+        vedtakService = new VedtakService(behandlingRepository, binge, prosessinstansRepo);
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
@@ -52,9 +48,6 @@ public class VedtakServiceTest {
         Behandling behandling = new Behandling();
         when(behandlingRepository.findOne(behandlingID)).thenReturn(behandling);
 
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatRepository.findOne(behandlingID)).thenReturn(behandlingsresultat);
-
         vedtakService.fattVedtak(behandlingID, BehandlingsresultatType.FASTSATT_LOVVALGSLAND.toString());
 
         verify(behandlingRepository, times(1)).findOne(behandlingID);
@@ -62,8 +55,6 @@ public class VedtakServiceTest {
         assertThat(prosessinstansArgumentCaptor.getValue().getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK);
         assertThat(prosessinstansArgumentCaptor.getValue().getSteg()).isEqualTo(ProsessSteg.IV_VALIDERING);
         verify(binge, times(1)).leggTil(any());
-        verify(behandlingsresultatRepository, times(1)).save((Behandlingsresultat) any());
-
     }
 
     @Test(expected = IkkeFunnetException.class)

@@ -1,18 +1,15 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class VedtakDto {
 
-    @JsonProperty("behandlingsresultat")
-    public String behandlingsresultatType;
+    public String behandlingsresultattype;
 
     public String getBehandlingsresultatType() {
-        return behandlingsresultatType;
+        return behandlingsresultattype;
     }
 
-    public void setBehandlingsresultatType(String behandlingsresultatType) {
-        this.behandlingsresultatType = behandlingsresultatType;
+    public void setBehandlingsresultatType(String behandlingsresultattype) {
+        this.behandlingsresultattype = behandlingsresultattype;
     }
 
 }
