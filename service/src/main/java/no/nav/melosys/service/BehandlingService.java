@@ -23,10 +23,8 @@ public class BehandlingService {
      * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.
      */
     public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException {
-        if ((status != Behandlingsstatus.UNDER_BEHANDLING)
-            && (status != Behandlingsstatus.AVVENT_DOK_PART)
-            && (status != Behandlingsstatus.AVVENT_DOK_UTL)) {
-            throw new FunksjonellException("Må ikke sette behanglingsstatus til " + status);
+        if (!status.erLovligNesteStatusEtterDokumentVurdering()) {
+            throw new FunksjonellException("Må ikke sette behandlingsstatus til " + status);
         }
 
         Behandling behandling = behandlingRepository.findOne(behandlingID);

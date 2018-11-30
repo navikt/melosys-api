@@ -122,7 +122,6 @@ public class SaksopplysningerServiceTest {
         verify(binge, times(1)).leggTil(any());
     }
 
-
     @Test
     public void sjekkStatusBehandlingForOppfrisking() {
         when(prosessinstansRepository.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType.OPPFRISKNING, ProsessSteg.FEILET_MASKINELT, 111L)).thenReturn(Optional.empty());

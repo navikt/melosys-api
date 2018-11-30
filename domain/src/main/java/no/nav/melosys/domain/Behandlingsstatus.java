@@ -37,6 +37,12 @@ public enum Behandlingsstatus implements InterntKodeverkTabell<Behandlingsstatus
         }
     }
 
+    public boolean erLovligNesteStatusEtterDokumentVurdering() {
+        return (this == Behandlingsstatus.UNDER_BEHANDLING)
+            || (this == Behandlingsstatus.AVVENT_DOK_PART)
+            || (this == Behandlingsstatus.AVVENT_DOK_UTL);
+    }
+
     public static boolean erVenterForDokumentasjon(Behandlingsstatus behandlingsstatus) {
         return (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_PART) || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL);
     }
