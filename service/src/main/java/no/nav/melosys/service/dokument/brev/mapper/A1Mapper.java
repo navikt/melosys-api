@@ -30,11 +30,9 @@ import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
-import no.nav.dok.melosysbrev._000116.ObjectFactory;
-
 public class A1Mapper implements BrevDataMapper {
 
-    private final int MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV = 3;
+    private static final int MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV = 3;
 
     private static final String XSD_LOCATION = "xsd/melosys_000116.xsd";
 
@@ -50,8 +48,8 @@ public class A1Mapper implements BrevDataMapper {
             this.land = land;
         }
 
-        public String navn;
-        public String land;
+        public final String navn;
+        public final String land;
     }
 
     @Override
@@ -231,10 +229,7 @@ public class A1Mapper implements BrevDataMapper {
             return true;
         }
 
-        if (fysiskArbeidssteder.size() > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV) {
-            return true;
-        }
-        return false;
+        return (fysiskArbeidssteder.size() > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV);
     }
 
     private Set<StrukturertAdresse> hentFysiskArbeidssteder() {

@@ -2,6 +2,7 @@ package no.nav.melosys.domain.dokument.organisasjon.adresse;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,6 +22,7 @@ public class SemistrukturertAdresse extends GeografiskAdresse {
     private String kommunenr;
 
     @JsonIgnore
+    @XmlElement(name = "poststed_utenlandsk")
     private String poststedUtland;
 
     public String getAdresselinje1() {

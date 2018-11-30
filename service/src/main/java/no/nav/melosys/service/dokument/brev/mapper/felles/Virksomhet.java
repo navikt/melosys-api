@@ -16,7 +16,7 @@ public class Virksomhet {
         this.adresse = adresse;
     }
 
-    public String navn;
-    public String orgnr;
-    public StrukturertAdresse adresse;
+    public final String navn;
+    public final String orgnr;
+    public final StrukturertAdresse adresse;
 }

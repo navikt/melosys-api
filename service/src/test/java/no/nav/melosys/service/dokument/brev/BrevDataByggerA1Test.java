@@ -31,6 +31,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -66,7 +67,7 @@ public class BrevDataByggerA1Test {
     public void setUp() {
         avklarteOrganisasjoner = new HashSet<>();
         when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong())).thenReturn(avklarteOrganisasjoner);
-        when(behandlingRepository.findOneWithSaksopplysningerById(1L)).thenReturn(behandling);
+        when(behandlingRepository.findOneWithSaksopplysningerById(eq(1L))).thenReturn(behandling);
 
         søknad = new SoeknadDokument();
         Saksopplysning soeknad = new Saksopplysning();
@@ -176,5 +177,11 @@ public class BrevDataByggerA1Test {
         assertThat(brevDataDto.selvstendigeForetak).isEmpty();
         // TODO: Orgnr ikke obligatorisk registrert for utenlandske foretak
         //assertThat(brevDataDto.utenlandskeVirksomheter).isEmpty();
+    }
+
+    @Test(expected = TekniskException.class)
+    public void testManglerBehandlingsresultat() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        when(behandlingRepository.findOneWithSaksopplysningerById(any())).thenReturn(null);
+        BrevDataA1Dto brevDataDto = (BrevDataA1Dto) brevDataByggerA1.lag(1L, saksbehandler);
     }
 }

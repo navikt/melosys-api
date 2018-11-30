@@ -38,7 +38,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
 
     private final DokumentSystemService dokumentService;
 
-    private BrevDataByggerA1 brevDataByggerA1;
+    private final BrevDataByggerA1 brevDataByggerA1;
 
     @Autowired
     public IverksettVedtakSendBrev(DokumentSystemService dokumentService, BrevDataByggerA1 brevDataByggerA1) {

@@ -21,6 +21,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -86,5 +87,40 @@ public class AvklartefaktaServiceTest {
 
         YrkesgruppeType yrkesgruppeType = avklartefaktaService.hentYrkesGruppe(1L);
         assertThat(yrkesgruppeType).isEqualTo(YrkesgruppeType.FLYENDE_PERSONELL);
+    }
+
+    @Test
+    public void testYrkesgruppeSokkelSkip() throws TekniskException {
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setFakta("YRKESAKTIV_SKIP");
+        Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
+
+        YrkesgruppeType yrkesgruppeType = avklartefaktaService.hentYrkesGruppe(1L);
+        assertThat(yrkesgruppeType).isEqualTo(YrkesgruppeType.SOKKEL_ELLER_SKIP);
+    }
+
+    @Test(expected = TekniskException.class)
+    public void testYrkesgruppeAnnet() throws TekniskException {
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setFakta("IKKE_YRKESAKTIV");
+        Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
+
+        avklartefaktaService.hentYrkesGruppe(1L);
+    }
+
+    @Test
+    public void testAvklarteOrganisasjoner() {
+        String orgnr1 = "12345678910";
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setType(AvklartefaktaType.AVKLARTE_ARBEIDSGIVER);
+        avklartefakta.setFakta("TRUE");
+        avklartefakta.setSubjekt(orgnr1);
+
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(anyLong(), any(), eq("TRUE"))).thenReturn(new HashSet<>(Arrays.asList(avklartefakta)));
+
+        Set<String> avklarteOrgnumre = avklartefaktaService.hentAvklarteOrganisasjoner(1L);
+        assertThat(avklarteOrgnumre).containsOnly(orgnr1);
     }
 }

@@ -4,21 +4,11 @@ import no.nav.melosys.domain.YrkesgruppeType;
 import no.nav.melosys.exception.TekniskException;
 
 public enum AvklartYrkesgruppeType {
-    YRKESAKTIV("YRKESAKTIV"),
-    YRKESAKTIV_FLYVENDE("YRKESAKTIV_FLYVENDE"),
-    YRKESAKTIV_SKIP("YRKESAKTIV_SKIP"),
-    IKKE_YRKESAKTIV("IKKE_YRKESAKTIV"),
-    KONTANTYTELSEMOTTAKER("KONTANTYTELSEMOTTAKER");
-
-    private String navn;
-
-    AvklartYrkesgruppeType(String navn) {
-        this.navn = navn;
-    }
-
-    public String value() {
-        return navn;
-    }
+    YRKESAKTIV,
+    YRKESAKTIV_FLYVENDE,
+    YRKESAKTIV_SKIP,
+    IKKE_YRKESAKTIV,
+    KONTANTYTELSEMOTTAKER;
 
     public YrkesgruppeType tilYrkesgruppeType() throws TekniskException {
         switch(this) {

@@ -78,7 +78,7 @@ public class DokumentService {
      * @throws TekniskException 
      */
     public byte[] produserUtkast(long behandlingID, Dokumenttype dokumenttype, BrevDataDto brevDataDto)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
+        throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
@@ -95,7 +95,7 @@ public class DokumentService {
      * Produserer et dokument i Doksys
      */
     public void produserDokument(long behandlingID, Dokumenttype dokumenttype, BrevDataDto brevDataDto)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
+        throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");

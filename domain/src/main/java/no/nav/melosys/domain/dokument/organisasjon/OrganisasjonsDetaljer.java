@@ -102,9 +102,11 @@ public class OrganisasjonsDetaljer {
                 stringBuilder.append(sAdresse.getAdresselinje1());
             }
             if (sAdresse.getAdresselinje2() != null) {
+                stringBuilder.append(" ");
                 stringBuilder.append(sAdresse.getAdresselinje2());
             }
             if (sAdresse.getAdresselinje3() != null) {
+                stringBuilder.append(" ");
                 stringBuilder.append(sAdresse.getAdresselinje3());
             }
             String adresseLinje = stringBuilder.toString();
@@ -117,6 +119,7 @@ public class OrganisasjonsDetaljer {
                 strukturertAdresse.poststed = sAdresse.getPoststedUtland();
             } else {
                 strukturertAdresse.postnummer = sAdresse.getPostnr();
+                strukturertAdresse.poststed = "";
             }
         }
         else {
