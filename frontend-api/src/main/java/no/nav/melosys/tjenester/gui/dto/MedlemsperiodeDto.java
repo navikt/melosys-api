@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import no.nav.melosys.domain.dokument.medlemskap.Periodetype;
+import no.nav.melosys.integrasjon.medl.Periodetype;
 import no.nav.melosys.service.kodeverk.KodeDto;
 
 public class MedlemsperiodeDto {

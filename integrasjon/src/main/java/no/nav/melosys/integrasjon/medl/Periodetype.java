@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.medlemskap;
+package no.nav.melosys.integrasjon.medl;
 
 import no.nav.melosys.domain.Kodeverk;
 

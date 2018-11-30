@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.medlemskap;
+package no.nav.melosys.integrasjon.medl;
 
 public enum DekningMedl {
     UNNTATT("Unntatt"),

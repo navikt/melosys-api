@@ -10,17 +10,17 @@ public class Medlemsperiode implements HarPeriode {
 
     public Periode periode;
 
-    public Periodetype type; //"http://nav.no/kodeverk/Kodeverk/PeriodetypeMedl"
+    public String type; //"http://nav.no/kodeverk/Kodeverk/PeriodetypeMedl"
 
     public String status; //"http://nav.no/kodeverk/Kodeverk/PeriodestatusMedl"
 
-    public GrunnlagMedl grunnlagstype; //"http://nav.no/kodeverk/Kodeverk/GrunnlagMedl"
+    public String grunnlagstype; //"http://nav.no/kodeverk/Kodeverk/GrunnlagMedl"
 
     public String land; //"http://nav.no/kodeverk/Kodeverk/Landkoder"
 
     public String lovvalg; //"http://nav.no/kodeverk/Kodeverk/LovvalgMedl"
 
-    public DekningMedl trygdedekning; //"http://nav.no/kodeverk/Kodeverk/DekningMedl"
+    public String trygdedekning; //"http://nav.no/kodeverk/Kodeverk/DekningMedl"
 
     public String kildedokumenttype; //"http://nav.no/kodeverk/Kodeverk/KildedokumentMedl"
 
@@ -31,7 +31,7 @@ public class Medlemsperiode implements HarPeriode {
         return periode;
     }
     
-    public Periodetype getType() {
+    public String getType() {
         return type;
     }
 
@@ -39,7 +39,7 @@ public class Medlemsperiode implements HarPeriode {
         return status;
     }
 
-    public GrunnlagMedl getGrunnlagstype() {
+    public String getGrunnlagstype() {
         return grunnlagstype;
     }
 
@@ -51,7 +51,7 @@ public class Medlemsperiode implements HarPeriode {
         return lovvalg;
     }
 
-    public DekningMedl getTrygdedekning() {
+    public String getTrygdedekning() {
         return trygdedekning;
     }
 

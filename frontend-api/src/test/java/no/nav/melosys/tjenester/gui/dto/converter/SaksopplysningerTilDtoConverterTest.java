@@ -18,7 +18,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
-import no.nav.melosys.domain.dokument.medlemskap.Periodetype;
+import no.nav.melosys.integrasjon.medl.Periodetype;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import org.junit.Before;

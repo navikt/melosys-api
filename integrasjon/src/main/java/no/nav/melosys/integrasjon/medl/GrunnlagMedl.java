@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.medlemskap;
+package no.nav.melosys.integrasjon.medl;
 
 public enum GrunnlagMedl {
     FO_11_2("FO_11_2"),
