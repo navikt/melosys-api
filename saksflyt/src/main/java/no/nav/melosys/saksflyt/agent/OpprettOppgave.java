@@ -10,6 +10,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +34,13 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettOppgave.class);
 
+    private final BehandlingRepository behandlingRepository;
+
     private final GsakFasade gsakFasade;
 
     @Autowired
-    public OpprettOppgave(@Qualifier("system")GsakFasade gsakFasade) {
+    public OpprettOppgave(BehandlingRepository behandlingRepository, @Qualifier("system")GsakFasade gsakFasade) {
+        this.behandlingRepository = behandlingRepository;
         this.gsakFasade = gsakFasade;
         log.info("OpprettOppgave initialisert");
     }
@@ -55,7 +59,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandling behandling = prosessinstans.getBehandling();
+        Behandling behandling = behandlingRepository.findOneWithSaksopplysningerById(prosessinstans.getBehandling().getId());
         Behandlingstype behandlingstype = behandling.getType();
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer();
