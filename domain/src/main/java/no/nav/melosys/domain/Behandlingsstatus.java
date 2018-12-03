@@ -8,6 +8,7 @@ public enum Behandlingsstatus implements InterntKodeverkTabell<Behandlingsstatus
     UNDER_BEHANDLING("UNDER_BEHANDLING", "Under behandling"),
     AVVENT_DOK_UTL("AVVENT_DOK_UTL", "Avventer dokumentasjon fra utlandet"),
     AVVENT_DOK_PART ("AVVENT_DOK_PART", "Avventer dokumentasjon fra en part"),
+    VURDER_DOKUMENT("VURDER_DOKUMENT", "Nytt dokument mottatt på behandlingen"),
     AVSLUTTET("AVSLUTTET", "Avsluttet");
     
     private String kode;
@@ -34,6 +35,12 @@ public enum Behandlingsstatus implements InterntKodeverkTabell<Behandlingsstatus
         protected Behandlingsstatus[] getLovligeVerdier() {
             return Behandlingsstatus.values();
         }
+    }
+
+    public boolean erLovligNesteStatusEtterDokumentVurdering() {
+        return (this == Behandlingsstatus.UNDER_BEHANDLING)
+            || (this == Behandlingsstatus.AVVENT_DOK_PART)
+            || (this == Behandlingsstatus.AVVENT_DOK_UTL);
     }
 
     public static boolean erVenterForDokumentasjon(Behandlingsstatus behandlingsstatus) {

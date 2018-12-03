@@ -1,43 +1,40 @@
 package no.nav.melosys.service;
 
-import java.util.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsstatus;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.repository.BehandlingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import no.nav.melosys.domain.*;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.ProsessinstansRepository;
 
 @Service
 public class BehandlingService {
 
-    private static final Logger log = LoggerFactory.getLogger(BehandlingService.class);
-
-    private final ProsessinstansRepository prosessinstansRepository;
-
     private final BehandlingRepository behandlingRepository;
 
     @Autowired
-    public BehandlingService(ProsessinstansRepository prosessinstansRepository,
-                             BehandlingRepository behandlingRepository) {
-        this.prosessinstansRepository = prosessinstansRepository;
+    public BehandlingService(BehandlingRepository behandlingRepository) {
         this.behandlingRepository = behandlingRepository;
     }
 
-    /***
-     * Metoden sjekker om en behandling med ID {@code behandlingID} har en oppfrisking i gang.
-     * Oppfrisking betyr å hente saksopplysninger på nytt for en gitt behandling.
+    /**
+     * Oppdaterer status for en behandling med ID {@code behandlingID}.
+     * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.
      */
-    public boolean harAktivOppfrisking(long behandlingID) {
-        Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType.OPPFRISKNING, ProsessSteg.FEILET_MASKINELT, behandlingID);
-        if (aktivProsessinstans.isPresent()) {
-            log.debug("Behandling {} er under oppfrisking.", behandlingID);
-            return true;
+    public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException {
+        if (!status.erLovligNesteStatusEtterDokumentVurdering()) {
+            throw new FunksjonellException("Må ikke sette behandlingsstatus til " + status);
         }
-        log.debug("Behandling {} er ikke under oppfrisking", behandlingID);
-        return false;
+
+        Behandling behandling = behandlingRepository.findOne(behandlingID);
+        if (behandling == null) {
+            throw new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke.");
+        }
+        if (behandling.getStatus() != Behandlingsstatus.VURDER_DOKUMENT) {
+            throw new FunksjonellException("Endring av status er bare mulig når behandling venter på dokumentasjon. Status var: " + behandling.getStatus());
+        }
+        behandling.setStatus(status);
+        behandlingRepository.save(behandling);
     }
 }

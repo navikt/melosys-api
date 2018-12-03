@@ -22,6 +22,7 @@ INSERT INTO behandling_status (kode, navn) VALUES ('OPPRETTET', 'Opprettet');
 INSERT INTO behandling_status (kode, navn) VALUES ('UNDER_BEHANDLING', 'Under behandling');
 INSERT INTO behandling_status (kode, navn) VALUES ('AVVENT_DOK_UTL', 'Avventer dokumentasjon fra utlandet');
 INSERT INTO behandling_status (kode, navn) VALUES ('AVVENT_DOK_PART', 'Avventer dokumentasjon fra en part');
+INSERT INTO behandling_status (kode, navn) VALUES ('VURDER_DOKUMENT', 'Nytt dokument mottatt på behandlingen');
 INSERT INTO behandling_status (kode, navn) VALUES ('AVSLUTTET', 'Avsluttet');
 
 CREATE TABLE behandling_type (

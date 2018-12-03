@@ -18,7 +18,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.oppgave.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,17 +34,17 @@ public class OppgaveService {
     private final GsakFasade gsakFasade;
     private final FagsakRepository fagsakRepository;
     private final TpsFasade tpsFasade;
-    private final BehandlingService behandlingService;
+    private final SaksopplysningerService saksopplysningerService;
 
     @Autowired
     public OppgaveService(GsakFasade gsakFasade,
                           FagsakRepository fagsakRepository,
                           TpsFasade tpsFasade,
-                          BehandlingService behandlingService) {
+                          SaksopplysningerService saksopplysningerService) {
         this.gsakFasade = gsakFasade;
         this.fagsakRepository = fagsakRepository;
         this.tpsFasade = tpsFasade;
-        this.behandlingService = behandlingService;
+        this.saksopplysningerService = saksopplysningerService;
     }
 
     @Transactional
@@ -146,7 +146,7 @@ public class OppgaveService {
         behandlingDto.setBehandlingsstatus(behandling.getStatus());
         behandlingDto.setBehandlingstype(behandling.getType());
         behandlingDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
-        behandlingDto.setErUnderOppdatering(behandlingService.harAktivOppfrisking(behandling.getId()));
+        behandlingDto.setErUnderOppdatering(saksopplysningerService.harAktivOppfrisking(behandling.getId()));
         return behandlingDto;
     }
 

@@ -1,7 +1,9 @@
 package no.nav.melosys.service;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentFactory;
@@ -119,4 +121,15 @@ public class SaksopplysningerServiceTest {
         verify(behandlingsresultatService, times(1)).tømBehandlingsresultat(anyLong());
         verify(binge, times(1)).leggTil(any());
     }
+
+    @Test
+    public void sjekkStatusBehandlingForOppfrisking() {
+        when(prosessinstansRepository.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType.OPPFRISKNING, ProsessSteg.FEILET_MASKINELT, 111L)).thenReturn(Optional.empty());
+        assertThat(saksopplysningerService.harAktivOppfrisking(111L)).isFalse();
+
+        Prosessinstans process = mock(Prosessinstans.class);
+        when(prosessinstansRepository.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType.OPPFRISKNING, ProsessSteg.FEILET_MASKINELT, 111L)).thenReturn(Optional.of(process));
+        assertThat(saksopplysningerService.harAktivOppfrisking(111L)).isTrue();
+    }
+
 }
