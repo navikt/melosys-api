@@ -109,6 +109,10 @@ public class Oppgaveplukker {
         while (iter.hasNext()) {
             Oppgave oppgave = iter.next();
             Fagsak fagsak = fagsakRepository.findBySaksnummer(oppgave.getSaksnummer());
+            if (fagsak == null) {
+                log.error("Fant ikke fagsak {} for oppgave {}", oppgave.getSaksnummer(), oppgave.getOppgaveId());
+                throw new TekniskException("Fant ikke fagsak " + oppgave.getSaksnummer());
+            }
             Behandling behandling = fagsak.getAktivBehandling();
 
             if (Behandlingsstatus.erVenterForDokumentasjon(behandling.getStatus())
