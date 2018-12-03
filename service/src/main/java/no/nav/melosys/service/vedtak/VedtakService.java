@@ -31,7 +31,7 @@ public class VedtakService {
         this.prosessinstansRepo = prosessinstansRepo;
     }
 
-    public void fattVedtak(long behandlingID) throws IkkeFunnetException {
+    public void fattVedtak(long behandlingID, String behandlingsresultatType) throws IkkeFunnetException {
         log.info("Fatter vedtak for behandling: " + behandlingID);
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
@@ -47,6 +47,7 @@ public class VedtakService {
         prosessinstans.setRegistrertDato(nå);
 
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType);
 
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);

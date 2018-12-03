@@ -1,9 +1,6 @@
 package no.nav.melosys.service.vedtak;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
@@ -51,7 +48,7 @@ public class VedtakServiceTest {
         Behandling behandling = new Behandling();
         when(behandlingRepository.findOne(behandlingID)).thenReturn(behandling);
 
-        vedtakService.fattVedtak(behandlingID);
+        vedtakService.fattVedtak(behandlingID, BehandlingsresultatType.FASTSATT_LOVVALGSLAND.toString());
 
         verify(behandlingRepository, times(1)).findOne(behandlingID);
         verify(prosessinstansRepo, times(1)).save(prosessinstansArgumentCaptor.capture());
@@ -63,6 +60,6 @@ public class VedtakServiceTest {
     @Test(expected = IkkeFunnetException.class)
     public void fattVedtak_behandlingIkkeFunnet() throws IkkeFunnetException {
         long behandlingID = 0L;
-        vedtakService.fattVedtak(behandlingID);
+        vedtakService.fattVedtak(behandlingID, BehandlingsresultatType.FASTSATT_LOVVALGSLAND.toString());
     }
 }

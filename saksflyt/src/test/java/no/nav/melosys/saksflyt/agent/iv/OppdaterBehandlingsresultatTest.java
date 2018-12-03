@@ -42,6 +42,7 @@ public class OppdaterBehandlingsresultatTest {
         p.setType(ProsessType.IVERKSETT_VEDTAK);
         String testbruker = "Z097";
         p.setData(ProsessDataKey.SAKSBEHANDLER, testbruker);
+        p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.FASTSATT_LOVVALGSLAND.getKode());
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);

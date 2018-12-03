@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.ProsessDataKey.BEHANDLINGSRESULTATTYPE;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_RESULTAT;
 import static no.nav.melosys.domain.ProsessSteg.IV_VALIDERING;
@@ -65,6 +66,13 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
         if (saksbehandlerID == null) {
             log.error("Funksjonell feil for prosessinstans {}: SaksbehandlerID er ikke oppgitt.", prosessinstans.getId());
             håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "saksbehandlerID er ikke oppgitt.", null);
+            return;
+        }
+
+        String behandlingsResultatType = prosessinstans.getData(BEHANDLINGSRESULTATTYPE);
+        if (behandlingsResultatType == null) {
+            log.error("Funksjonell feil for prosessinstans {}: behandlingsResultatType er ikke oppgitt.", prosessinstans.getId());
+            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "behandlingsResultatType er ikke oppgitt.", null);
             return;
         }
 

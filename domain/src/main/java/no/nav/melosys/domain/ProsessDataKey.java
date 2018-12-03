@@ -11,6 +11,7 @@ public enum ProsessDataKey {
     ARKIVSYSTEM("arkivsystem"),
     AVSENDER_ID("avsenderID"),
     AVSENDER_NAVN("avsenderNavn"),
+    BEHANDLINGSRESULTATTYPE("behandlingsresultatType"),
     BEHANDLINGSTEMA("behandlingstema"),
     BREVDATA("brevDataDto"),
     BRUKER_ID("brukerID"),
