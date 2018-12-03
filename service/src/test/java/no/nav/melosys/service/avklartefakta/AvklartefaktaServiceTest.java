@@ -48,7 +48,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentAvklartefakta() throws IkkeFunnetException {
+    public void hentAvklartefakta() {
         String referanse = "Referenase";
         String subjektID = "SubjektID";
         String fakta = "NO";
