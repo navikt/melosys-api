@@ -8,6 +8,8 @@ CREATE TABLE aktoer (
     CONSTRAINT pk_bruker PRIMARY KEY (id)
 );
 
+CREATE INDEX idx_aktoer_sak ON aktoer(saksnummer);
+
 CREATE TABLE rolle_type (
     kode        VARCHAR2(99)  NOT NULL,
     navn        VARCHAR2(99)  NOT NULL,

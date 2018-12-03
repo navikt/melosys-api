@@ -8,6 +8,8 @@ CREATE TABLE behandling_historikk (
     CONSTRAINT pk_behandling_resultat PRIMARY KEY (id)
 );
 
+CREATE INDEX idx_historikk_behandling ON behandling_historikk(behandling_id);
+
 ALTER TABLE behandling_historikk
     ADD CONSTRAINT fk_beh_historikk_behandling FOREIGN KEY (status) REFERENCES behandling_status;
 

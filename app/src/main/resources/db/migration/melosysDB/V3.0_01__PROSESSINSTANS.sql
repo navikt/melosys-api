@@ -13,6 +13,8 @@ CREATE TABLE prosessinstans (
     CONSTRAINT pk_prosessinstans PRIMARY KEY (id)
 );
 
+CREATE INDEX idx_prosessinstans_behandling ON prosessinstans(behandling_id);
+
 CREATE TABLE prosess_type (
     kode    VARCHAR2(99)  NOT NULL,
     navn    VARCHAR2(99)  NOT NULL,
