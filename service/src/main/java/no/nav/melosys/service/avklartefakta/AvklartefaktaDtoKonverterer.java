@@ -6,21 +6,26 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.Behandlingsresultat;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AvklartefaktaDtoKonverterer {
 
-    public void oppdaterAvklartefaktaFraDto(Avklartefakta avklartefakta, AvklartefaktaDto avklarteFaktaDto) {
+    public Avklartefakta opprettAvklartefaktaFraDto(AvklartefaktaDto avklarteFaktaDto,
+                                                    Behandlingsresultat resultat) {
+        Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setSubjekt(avklarteFaktaDto.getSubjektID());
         avklartefakta.setType(avklarteFaktaDto.getAvklartefaktaType());
         avklartefakta.setReferanse(avklarteFaktaDto.getReferanse());
         avklartefakta.setBegrunnelseFritekst(avklarteFaktaDto.getBegrunnelseFritekst());
+        avklartefakta.setBehandlingsresultat(resultat);
 
         String fakta = avklarteFaktaDto.getFakta().stream().collect(Collectors.joining(" "));
         avklartefakta.setFakta(fakta);
 
         oppdaterFaktaregistreringer(avklartefakta, avklarteFaktaDto);
+        return avklartefakta;
     }
 
     private void oppdaterFaktaregistreringer(Avklartefakta avklartefakta, AvklartefaktaDto avklarteFaktaDto) {

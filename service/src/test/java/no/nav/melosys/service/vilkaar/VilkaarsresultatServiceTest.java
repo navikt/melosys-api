@@ -68,7 +68,7 @@ public class VilkaarsresultatServiceTest {
         vilkaarDto.setBegrunnelseKoder(koder);
         vilkaarsresultatService.registrerVilkår(behandlingID, Arrays.asList(vilkaarDto));
 
-        verify(vilkaarsresultatRepo, times(1)).findByBehandlingsresultatIdAndVilkaar(any(Long.class), any(VilkaarType.class));
+        verify(vilkaarsresultatRepo, times(1)).deleteByBehandlingsresultat(any());
         verify(vilkaarsresultatRepo, times(1)).save(any(Vilkaarsresultat.class));
     }
 

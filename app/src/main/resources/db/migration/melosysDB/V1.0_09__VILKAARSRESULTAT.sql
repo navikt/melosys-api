@@ -29,6 +29,6 @@ CREATE TABLE vilkaar_begrunnelse (
 );
 
 ALTER TABLE vilkaar_begrunnelse
-    ADD CONSTRAINT fk_vilkaar_res_grunn FOREIGN KEY (vilkaar_resultat_id) REFERENCES vilkaarsresultat;
+    ADD CONSTRAINT fk_vilkaar_res_grunn FOREIGN KEY (vilkaar_resultat_id) REFERENCES vilkaarsresultat ON DELETE CASCADE;
 ALTER TABLE vilkaar_begrunnelse
     ADD CONSTRAINT uq_vilkaar_begrunnelse UNIQUE (vilkaar_resultat_id, kode);

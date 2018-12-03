@@ -5,12 +5,16 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.YrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -21,8 +25,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AvklartefaktaServiceTest {
@@ -33,8 +36,19 @@ public class AvklartefaktaServiceTest {
     @Mock
     private AvklarteFaktaRepository avklarteFaktaRepository;
 
+    @Mock
+    private BehandlingsresultatRepository behandlingsresultatRepository;
+
+    @Mock
+    AvklartefaktaDtoKonverterer avklartefaktaDtoKonverterer;
+
+    @Before
+    public void setUp() {
+        avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, avklartefaktaDtoKonverterer);
+    }
+
     @Test
-    public void hentAvklartefakta() {
+    public void hentAvklartefakta() throws IkkeFunnetException {
         String referanse = "Referenase";
         String subjektID = "SubjektID";
         String fakta = "NO";
@@ -65,6 +79,22 @@ public class AvklartefaktaServiceTest {
         assertEquals(type, dto.getAvklartefaktaType());
         assertEquals(Arrays.asList(begrunnelsekode), dto.getBegrunnelseKoder());
         assertEquals(begrunnelsefritekst, dto.getBegrunnelseFritekst());
+    }
+
+    @Test
+    public void lagreAvklarteFakta() throws IkkeFunnetException {
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setFakta("test fakta");
+        HashSet<AvklartefaktaDto> avklartefaktaDtoer = new HashSet<>();
+        avklartefaktaDtoer.add(new AvklartefaktaDto(avklartefakta));
+        avklartefaktaService.lagreAvklarteFakta(123L, avklartefaktaDtoer);
+        verify(avklarteFaktaRepository, times(1)).deleteByBehandlingsresultat(any());
+        verify(avklartefaktaDtoKonverterer, times(1)).opprettAvklartefaktaFraDto(any(), any());
+        verify(avklarteFaktaRepository, times(1)).save((Iterable<Avklartefakta>) any());
+
     }
 
     @Test
