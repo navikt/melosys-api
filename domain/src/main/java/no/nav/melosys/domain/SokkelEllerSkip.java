@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 public enum SokkelEllerSkip implements Kodeverk {
 
-    SOKKEL("SOKKEL ", "Arbeider på sokkel"),
+    SOKKEL("SOKKEL", "Arbeider på sokkel"),
     SKIP("SKIP", "Arbeider på skip"),
     IKKE("IKKE", "Arbeider ikke på sokkel eller skip");
 
