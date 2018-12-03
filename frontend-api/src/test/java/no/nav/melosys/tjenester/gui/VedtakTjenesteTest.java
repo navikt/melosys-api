@@ -51,8 +51,6 @@ public class VedtakTjenesteTest extends JsonSchemaTest {
         verify(vedtakService, times(1)).fattVedtak(behandlingID, vedtakDto.getBehandlingsresultatType());
 
         valider(vedtakDto);
-
     }
-
 
 }
