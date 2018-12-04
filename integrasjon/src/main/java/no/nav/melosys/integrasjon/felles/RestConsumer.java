@@ -42,5 +42,7 @@ public interface RestConsumer {
         return SubjectHandler.getInstance().getUserID();
     }
 
-    boolean isSystem();
+    default boolean isSystem() {
+        return false;
+    }
 }
