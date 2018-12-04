@@ -11,6 +11,7 @@ import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
@@ -37,17 +38,20 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private final MedlFasade medlFasade;
     private final TpsFasade tpsFasade;
     private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final LovvalgsperiodeRepository lovvalgsperiodeRepository;
 
 
     @Autowired
     public OppdaterMedl(MedlFasade medlFasade,
                         TpsFasade tpsFasade,
-                        BehandlingsresultatRepository behandlingsresultatRepository) {
+                        BehandlingsresultatRepository behandlingsresultatRepository,
+                        LovvalgsperiodeRepository lovvalgsperiodeRepository) {
 
         log.info("IverksetteVedtakOppdaterMEDL initialisert");
         this.medlFasade = medlFasade;
         this.tpsFasade = tpsFasade;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.lovvalgsperiodeRepository = lovvalgsperiodeRepository;
     }
 
     @Override
@@ -81,12 +85,19 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
         Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
 
+        Long medlPeriodeID;
         if (erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)) {
-            medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode);
+            medlPeriodeID = medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode);
         } else if (erPeriodeUnderAvklaring(behandlingsresultat)) {
-            medlFasade.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode);
+            medlPeriodeID = medlFasade.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode);
+        } else {
+            throw new FunksjonellException("Opprettelse av Periode i MEDL støttes ikke for behandlingsresultat type "
+                + behandlingsresultat.getType() + " og InnvilgelsesResultat type" + lovvalgsperiode.getInnvilgelsesresultat().getKode());
         }
-       prosessinstans.setSteg(IV_SEND_BREV);
+
+        lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
+
+        prosessinstans.setSteg(IV_SEND_BREV);
     }
 
     public boolean erPeriodeEndelig(Behandlingsresultat behandlingsresultat, Lovvalgsperiode lovvalgsperiode) {
@@ -95,5 +106,13 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
     public boolean erPeriodeUnderAvklaring(Behandlingsresultat behandlingsresultat) {
         return behandlingsresultat.getType() == BehandlingsresultatType.ANMODNING_OM_UNNTAK;
+    }
+
+    private void lagreMedlPeriodeId(Long medlPeriodeID, Lovvalgsperiode lovvalgsperiode, long behandlingID) throws FunksjonellException {
+        if (medlPeriodeID == null) {
+            throw new FunksjonellException("Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID fra MEDL tjeneste for behandling " + behandlingID);
+        }
+        lovvalgsperiode.setMedlPeriodeID(medlPeriodeID);
+        lovvalgsperiodeRepository.save(lovvalgsperiode);
     }
 }

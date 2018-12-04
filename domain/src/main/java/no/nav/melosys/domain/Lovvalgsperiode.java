@@ -63,10 +63,10 @@ public class Lovvalgsperiode implements ErPeriode {
     private LovvalgBestemmelse bestemmelse;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "unntak_fra_lovvalgsland", nullable = true, updatable = false)
+    @Column(name = "unntak_fra_lovvalgsland", updatable = false)
     private Landkoder unntakFraLovvalgsland;
 
-    @Column(name = "unntak_fra_bestemmelse", nullable = true, updatable = false)
+    @Column(name = "unntak_fra_bestemmelse", updatable = false)
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
     private LovvalgBestemmelse unntakFraBestemmelse;
 
@@ -81,6 +81,9 @@ public class Lovvalgsperiode implements ErPeriode {
     @Enumerated(EnumType.STRING)
     @Column(name = "trygde_dekning")
     private TrygdeDekning dekning;
+
+    @Column(name = "medlperiode_id")
+    private long medlPeriodeID;
 
     public long getId() {
         return id;
@@ -167,7 +170,11 @@ public class Lovvalgsperiode implements ErPeriode {
     public void setDekning(TrygdeDekning dekning) {
         this.dekning = dekning;
     }
-    
+
+    public void setMedlPeriodeID(long medlPeriodeID) {
+        this.medlPeriodeID = medlPeriodeID;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
