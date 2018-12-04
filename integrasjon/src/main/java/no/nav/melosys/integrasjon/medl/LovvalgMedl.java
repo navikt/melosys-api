@@ -1,10 +1,9 @@
 package no.nav.melosys.integrasjon.medl;
 
 public enum LovvalgMedl {
-    AVST("Avvist"),
-    GYLD("Gyldig"),
-    UAVK("Uavklart");
-
+    ENDL("Endelig"),
+    FORL("Foreløpig"),
+    UAVK("Under avklaring");
 
     private String kode;
 

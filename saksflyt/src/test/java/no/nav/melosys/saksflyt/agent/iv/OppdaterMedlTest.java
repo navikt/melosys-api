@@ -3,26 +3,31 @@ package no.nav.melosys.saksflyt.agent.iv;
 import java.util.Collections;
 import java.util.HashSet;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.medl.LovvalgMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
-
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterMedlTest {
@@ -38,14 +43,16 @@ public class OppdaterMedlTest {
     @Mock
     private LovvalgsperiodeRepository lovvalgsperiodeRepository;
 
-    @Before
-    public void setUp() {
-        agent = new OppdaterMedl(medlFasade, tpsFasade, lovvalgsperiodeRepository);
-    }
+    @Mock
+    private BehandlingsresultatRepository behandlingsresultatRepository;
 
-    @Test
-    public void utfoerSteg() throws FunksjonellException, TekniskException {
-        Prosessinstans p = new Prosessinstans();
+    private Prosessinstans p;
+
+    @Before
+    public void setUp() throws IkkeFunnetException {
+        agent = new OppdaterMedl(medlFasade, tpsFasade, lovvalgsperiodeRepository, behandlingsresultatRepository);
+
+        p = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("TEST-MEDL");
         HashSet<Aktoer> aktører = new HashSet<>();
@@ -60,23 +67,81 @@ public class OppdaterMedlTest {
 
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        p.setBehandling(behandling);
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
-        p.setType(ProsessType.IVERKSETT_VEDTAK);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.CH);
         lovvalgsperiode.setDekning(TrygdeDekning.UTEN_DEKNING);
-
-        // FIXME: Se kommentar i OppdaterMedl.
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         when(lovvalgsperiodeRepository.findByBehandlingsresultatId(anyLong())).thenReturn(Collections.singletonList(lovvalgsperiode));
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
+
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("12345678910");
+
+        p.setBehandling(behandling);
+        p.getBehandling().setType(Behandlingstype.SØKNAD);
+        p.setType(ProsessType.IVERKSETT_VEDTAK);
+
+    }
+
+    @Test
+    public void sjekkNestSteg() throws FunksjonellException, TekniskException {
+        agent.utførSteg(p);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_SEND_BREV);
+
+        verify(medlFasade, times(1)).opprettPeriode(anyString(),
+            Mockito.any(Lovvalgsperiode.class),
+            Mockito.any(PeriodestatusMedl.class),
+            Mockito.any(LovvalgMedl.class));
+
+    }
+
+    @Test
+    public void utførStegNårBehandlingsresultatTypeErFastsatt_lovvalgslandOgInnvilgelsesResultat_Innvilget() throws FunksjonellException, TekniskException {
 
         agent.utførSteg(p);
 
-        // FIXME: Se kommentar i OppdaterMedl.
-        // verify(medlFasade, times(1)).opprettPeriode(anyString(), Mockito.any(Medlemsperiode.class));
-        assertThat(p.getSteg()).isEqualTo(IV_SEND_BREV);
+        ArgumentCaptor acAktørID = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor acLovvalgsperiode = ArgumentCaptor.forClass(Lovvalgsperiode.class);
+        ArgumentCaptor acPeriodestatusMedl = ArgumentCaptor.forClass(PeriodestatusMedl.class);
+        ArgumentCaptor acLovvalgMedl = ArgumentCaptor.forClass(LovvalgMedl.class);
+
+        verify(medlFasade).opprettPeriode((String) acAktørID.capture(),
+            (Lovvalgsperiode) acLovvalgsperiode.capture(),
+            (PeriodestatusMedl) acPeriodestatusMedl.capture(),
+            (LovvalgMedl) acLovvalgMedl.capture());
+
+        assertThat(acAktørID).isNotNull();
+        assertThat(acLovvalgsperiode).isNotNull();
+        assertThat(acPeriodestatusMedl.getValue()).isEqualTo(PeriodestatusMedl.GYLD);
+        assertThat(acLovvalgMedl.getValue()).isEqualTo(LovvalgMedl.ENDL);
+    }
+
+    @Test
+    public void utførStegNårBehandlingsresultatTypeErAnmodning_om_unntak() throws FunksjonellException, TekniskException {
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(BehandlingsresultatType.ANMODNING_OM_UNNTAK);
+        when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
+
+        agent.utførSteg(p);
+
+        ArgumentCaptor acAktørID = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor acLovvalgsperiode = ArgumentCaptor.forClass(Lovvalgsperiode.class);
+        ArgumentCaptor acPeriodestatusMedl = ArgumentCaptor.forClass(PeriodestatusMedl.class);
+        ArgumentCaptor acLovvalgMedl = ArgumentCaptor.forClass(LovvalgMedl.class);
+
+        verify(medlFasade).opprettPeriode((String) acAktørID.capture(),
+            (Lovvalgsperiode) acLovvalgsperiode.capture(),
+            (PeriodestatusMedl) acPeriodestatusMedl.capture(),
+            (LovvalgMedl) acLovvalgMedl.capture());
+
+        assertThat(acAktørID).isNotNull();
+        assertThat(acLovvalgsperiode).isNotNull();
+        assertThat(acPeriodestatusMedl.getValue()).isEqualTo(PeriodestatusMedl.UAVK);
+        assertThat(acLovvalgMedl.getValue()).isEqualTo(LovvalgMedl.UAVK);
     }
 }

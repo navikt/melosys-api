@@ -1,13 +1,12 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import no.nav.melosys.integrasjon.medl.Periodetype;
 import no.nav.melosys.service.kodeverk.KodeDto;
 
 public class MedlemsperiodeDto {
 
     public PeriodeDto periode;
 
-    public Periodetype periodetype;
+    public KodeDto periodetype;
 
     public KodeDto status;
 

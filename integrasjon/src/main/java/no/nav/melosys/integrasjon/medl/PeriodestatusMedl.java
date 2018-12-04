@@ -1,9 +1,9 @@
 package no.nav.melosys.integrasjon.medl;
 
 public enum PeriodestatusMedl {
-    ENDL("Endelig"),
-    FORL("Foreløpig"),
-    UAVK("Under avklaring");
+    AVST("Avvist"),
+    GYLD("Gyldig"),
+    UAVK("Uavklart");
 
     private String kode;
 

@@ -4,6 +4,7 @@ import javax.persistence.Converter;
 
 public enum BehandlingsresultatType implements InterntKodeverkTabell<BehandlingsresultatType> {
 
+    ANMODNING_OM_UNNTAK("ANMODNING_OM_UNNTAK", "Anmodning om Unntak"),
     FASTSATT_LOVVALGSLAND("FASTSATT_LOVVALGSLAND", "Fastsatt lovvalgsland"),
     FORELØPIG_FASTSATT_LOVVALGSLAND("FORELØPIG_FASTSATT_LOVVALGSLAND", "Foreløpig fastsatt lovvalgsland"),
     HENLEGGELSE("HENLEGGELSE", "Henleggelse"),

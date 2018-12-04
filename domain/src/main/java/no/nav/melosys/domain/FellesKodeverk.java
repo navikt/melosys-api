@@ -17,6 +17,7 @@ public enum FellesKodeverk {
     LANDKODERISO2("LandkoderISO2"),
     LOVVALG_MEDL("LovvalgMedl"),
     PERIODESTATUS_MEDL("PeriodestatusMedl"),
+    PERIODETYPE_MEDL("PeriodetypeMedl"),
     PERSONSTATUSER("Personstatuser"),
     POSTNUMMER("Postnummer"),
     SKIPSREGISTRE("Skipsregistre"),

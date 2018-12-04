@@ -5,23 +5,22 @@ import java.time.LocalDate;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.datatype.DatatypeConfigurationException;
 
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.medl.behandle.BehandleMedlemskapConsumer;
 import no.nav.melosys.integrasjon.medl.medlemskap.HentPeriodeListeResponseWrapper;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumer;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumerConfig;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.UgyldigInput;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.kodeverk.*;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeResponse;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
@@ -96,43 +95,9 @@ public class MedlService implements MedlFasade {
     }
 
     @Override
-    public Long opprettPeriode(String fnr, Medlemsperiode medlemsperiode) throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException {
-        OpprettPeriodeRequest request = new OpprettPeriodeRequest();
-
-        no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Foedselsnummer ident = new no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Foedselsnummer();
-        ident.setValue(fnr);
-
-        no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Medlemsperiode periode = new no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Medlemsperiode();
+    public Long opprettPeriode(String aktørID, Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         try {
-            periode.setFraOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(medlemsperiode.getPeriode().getFom()));
-            periode.setTilOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(medlemsperiode.getPeriode().getTom()));
-            periode.setDatoRegistrert(KonverteringsUtils.localDateToXMLGregorianCalendar(LocalDate.now()));
-        } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
-        }
-        if (medlemsperiode.getStatus() != null) {
-            periode.setStatus(new Statuskode().withValue(medlemsperiode.getStatus()));
-        }
-        if (medlemsperiode.getTrygdedekning() != null) {
-            periode.setTrygdedekning(new Trygdedekning().withValue(medlemsperiode.getTrygdedekning().getKode()));
-        }
-        if (medlemsperiode.getLand() != null) {
-            periode.setLand(new Landkode().withValue(medlemsperiode.getLand()));
-        }
-        if (medlemsperiode.getLovvalg() != null) {
-            periode.setLovvalg(new Lovvalg().withValue(medlemsperiode.getLovvalg()));
-        }
-        if (medlemsperiode.getKildedokumenttype() != null) {
-            periode.setKildedokumenttype(new Kildedokumenttype().withValue(medlemsperiode.getKildedokumenttype()));
-        }
-        if (medlemsperiode.getGrunnlagstype() != null) {
-            periode.setGrunnlagstype(new Grunnlagstype().withValue(medlemsperiode.getGrunnlagstype().getKode()));
-        }
-
-        request.setIdent(ident);
-        request.setPeriode(periode);
-
-        try {
+            OpprettPeriodeRequest request = MedlPeriodeKonverter.konverterTilOpprettPeriodRequest(aktørID, lovvalgsperiode, periodestatusMedl, lovvalgMedl);
             OpprettPeriodeResponse response = behandleMedlemskapConsumer.opprettPeriode(request);
             return response.getPeriodeId();
         } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.PersonIkkeFunnet e) {
