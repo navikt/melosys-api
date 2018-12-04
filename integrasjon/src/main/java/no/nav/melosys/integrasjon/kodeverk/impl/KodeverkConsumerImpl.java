@@ -1,38 +1,41 @@
 package no.nav.melosys.integrasjon.kodeverk.impl;
 
-import no.nav.tjeneste.virksomhet.kodeverk.v2.HentKodeverkHentKodeverkKodeverkIkkeFunnet;
-import no.nav.tjeneste.virksomhet.kodeverk.v2.KodeverkPortType;
-import no.nav.tjeneste.virksomhet.kodeverk.v2.meldinger.HentKodeverkRequest;
-import no.nav.tjeneste.virksomhet.kodeverk.v2.meldinger.HentKodeverkResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import java.time.LocalDate;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 
-@Component
-public class KodeverkConsumerImpl implements KodeverkConsumer {
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import no.nav.melosys.integrasjon.felles.RestConsumer;
+import no.nav.melosys.integrasjon.kodeverk.impl.dto.KodeDto;
 
-    private KodeverkConsumerConfig config;
-    
-    private KodeverkPortType port;
+import static no.nav.melosys.integrasjon.kodeverk.impl.KodeverkRegisterImpl.BOKMÅL;
 
-    @Autowired
-    public KodeverkConsumerImpl(KodeverkConsumerConfig config) {
-        this.config = config;
-        this.port = config.getPort();
-    }
-    
-    @Override
-    public HentKodeverkResponse hentKodeverk(HentKodeverkRequest request) throws HentKodeverkHentKodeverkKodeverkIkkeFunnet {
-        return port.hentKodeverk(request);
-    }
+public class KodeverkConsumerImpl implements RestConsumer {
 
-    @Override
-    public void ping() {
-        port.ping();
+    private final String VERSJON = "v1";
+    private final String CONSUMER_ID = "srvmelosys";
+
+    private final WebTarget target;
+
+    KodeverkConsumerImpl(String endpointUrl) {
+        Client client = ClientBuilder.newBuilder().build();
+        target = client.register(JacksonJsonProvider.class).target(endpointUrl);
     }
 
-    @Override
-    public String getEndpointUrl() {
-        return config.getEndpointUrl();
+    public KodeDto hentKodeverk(String navn) {
+        String path = String.format("/%s/kodeverk/%s/koder/betydninger", VERSJON, navn);
+        return target
+            .path(path)
+            .queryParam("ekskluderUgyldige", false)
+            .queryParam("oppslagsdato", LocalDate.MIN)
+            .queryParam("spraak", BOKMÅL)
+            .request()
+            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+            .header("Nav-Call-Id", getCallID())
+            .header("Nav-Consumer-Id", CONSUMER_ID)
+            .get(KodeDto.class);
     }
-
 }

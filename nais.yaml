@@ -57,8 +57,6 @@ fasitResources:
     resourceType: webserviceendpoint
   - alias: virksomhet:Inntekt_v3
     resourceType: webserviceendpoint
-  - alias: virksomhet:Kodeverk_v2
-    resourceType: webserviceendpoint
   - alias: kodeverk.rest-api
     resourceType: restservice
   - alias: virksomhet:Medlemskap_v2

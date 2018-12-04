@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.kodeverk.rest;
+package no.nav.melosys.integrasjon.kodeverk.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

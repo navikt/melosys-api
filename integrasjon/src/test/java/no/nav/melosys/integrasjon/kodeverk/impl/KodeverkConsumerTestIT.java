@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.kodeverk.rest;
+package no.nav.melosys.integrasjon.kodeverk.impl;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;

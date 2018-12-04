@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.kodeverk.rest;
+package no.nav.melosys.integrasjon.kodeverk.impl;
 
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import org.junit.Before;

@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.kodeverk.rest.dto;
+package no.nav.melosys.integrasjon.kodeverk.impl.dto;
 
 public class BeskrivelseDto {
 
