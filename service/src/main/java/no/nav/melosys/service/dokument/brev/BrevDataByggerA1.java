@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
@@ -24,10 +25,9 @@ import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class BrevDataByggerA1 {
+public class BrevDataByggerA1 implements BrevDataBygger {
 
     private final AvklartefaktaService avklartefaktaService;
     private final RegisterOppslagSystemService registerOppslagService;
@@ -45,28 +45,23 @@ public class BrevDataByggerA1 {
         this.kodeverkService = kodeverkService;
     }
 
-    @Transactional
-    public BrevDataDto lag(long behandlingId, String saksbehandler) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        Behandling behandling = behandlingRepository.findOneWithSaksopplysningerById(behandlingId);
-        if (behandling == null) {
-            throw new TekniskException("Finner ikke behandling");
-        }
-
+    @Override
+    public BrevData lag(Behandling behandling, String saksbehandler) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         PersonDokument person = SaksopplysningerUtils.hentPersonDokument(behandling);
-        Set<String> avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandlingId);
+        Set<String> avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
 
-        BrevDataA1Dto brevDataDto = new BrevDataA1Dto();
-        brevDataDto.saksbehandler = saksbehandler;
+        BrevDataA1 brevData = new BrevDataA1(saksbehandler);
 
-        brevDataDto.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandlingId);
-        brevDataDto.utenlandskeVirksomheter = hentUtenlandskeAvklarteVirksomheter(søknad);
-        brevDataDto.norskeVirksomheter = hentAlleNorskeAvklarteVirksomheter(søknad, avklarteOrganisasjoner);
-        brevDataDto.selvstendigeForetak = hentAvklarteSelvstendigeForetak(søknad, avklarteOrganisasjoner);
-        brevDataDto.bostedsadresse = hentBostedsadresse(person);
-        brevDataDto.søknad = søknad;
+        brevData.mottaker = RolleType.BRUKER;
+        brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandling.getId());
+        brevData.utenlandskeVirksomheter = hentUtenlandskeAvklarteVirksomheter(søknad);
+        brevData.norskeVirksomheter = hentAlleNorskeAvklarteVirksomheter(søknad, avklarteOrganisasjoner);
+        brevData.selvstendigeForetak = hentAvklarteSelvstendigeForetak(søknad, avklarteOrganisasjoner);
+        brevData.bostedsadresse = hentBostedsadresse(person);
+        brevData.søknad = søknad;
 
-        return brevDataDto;
+        return brevData;
     }
 
     private Bostedsadresse hentBostedsadresse(PersonDokument person) {

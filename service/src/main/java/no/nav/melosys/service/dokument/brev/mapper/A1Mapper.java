@@ -20,8 +20,8 @@ import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.dokument.brev.BrevDataA1Dto;
-import no.nav.melosys.service.dokument.brev.BrevDataDto;
+import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.xml.sax.SAXException;
 
@@ -37,7 +37,7 @@ public class A1Mapper implements BrevDataMapper {
 
     private Behandlingsresultat resultat;
 
-    private BrevDataA1Dto brevDataDto;
+    private BrevDataA1 brevData;
 
     class IkkeFysiskArbeidssted {
         IkkeFysiskArbeidssted(String navn, String land) {
@@ -50,12 +50,12 @@ public class A1Mapper implements BrevDataMapper {
     }
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevDataDto brevDataDto) throws JAXBException, SAXException, TekniskException {
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
         this.behandling = behandling;
         this.resultat = resultat;
-        this.brevDataDto = (BrevDataA1Dto) brevDataDto;
+        this.brevData = (BrevDataA1) brevData;
 
-        Objects.requireNonNull(brevDataDto, "A1 mapper trenger brevdata av type BrevDataA1Dto");
+        Objects.requireNonNull(brevData, "A1 mapper trenger brevdata av type BrevDataA1Dto");
 
         Fag fag = mapFag();
         VedleggType vedlegg = new VedleggType();
@@ -86,9 +86,9 @@ public class A1Mapper implements BrevDataMapper {
         List<LovvalgsperiodeType> lovvalgsperioder = hentLovvalgsperioderFraBehandlingsresultat();
         a1.setLovvalgsperiode(lovvalgsperioder.get(0));    // Kun en lovvalgsperiode i Lev 1
 
-        a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevDataDto.yrkesgruppe.name()));
+        a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevData.yrkesgruppe.name()));
 
-        List<Virksomhet> virksomheter = brevDataDto.norskeVirksomheter;
+        List<Virksomhet> virksomheter = brevData.norskeVirksomheter;
         if (virksomheter.isEmpty()) {
             throw new TekniskException("Trenger minst en valgt norsk virksomhet for ART12.1");
         }
@@ -97,7 +97,7 @@ public class A1Mapper implements BrevDataMapper {
         Virksomhet hovedvirksomhet = virksomheter.remove(0);
         a1.setHovedvirksomhet(mapHovedvirksomhet(hovedvirksomhet));
 
-        virksomheter.addAll(brevDataDto.utenlandskeVirksomheter);
+        virksomheter.addAll(brevData.utenlandskeVirksomheter);
 
         a1.setBivirksomhetListe(mapBivirksomheter(virksomheter));
 
@@ -128,7 +128,7 @@ public class A1Mapper implements BrevDataMapper {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }
 
-        person.setBostedsadresse(lagBostedsadresse(brevDataDto.bostedsadresse));
+        person.setBostedsadresse(lagBostedsadresse(brevData.bostedsadresse));
         return person;
     }
 
@@ -171,7 +171,7 @@ public class A1Mapper implements BrevDataMapper {
         hovedvirksomhetBrev.setPoststed(adresse.poststed);
         hovedvirksomhetBrev.setLandkode(adresse.landKode);
 
-        boolean selvstendigForetak = brevDataDto.selvstendigeForetak.contains(virksomhet.orgnr);
+        boolean selvstendigForetak = brevData.selvstendigeForetak.contains(virksomhet.orgnr);
         if (selvstendigForetak) {
             hovedvirksomhetBrev.setYrkesaktivitet(YrkesaktivitetsKode.SELVSTENDIG);
         }
@@ -228,7 +228,7 @@ public class A1Mapper implements BrevDataMapper {
     }
 
     private Set<StrukturertAdresse> hentFysiskArbeidssteder() {
-        return brevDataDto.søknad.arbeidUtland.stream()
+        return brevData.søknad.arbeidUtland.stream()
                 .map(au -> au.adresse)
                 .collect(Collectors.toSet());
     }

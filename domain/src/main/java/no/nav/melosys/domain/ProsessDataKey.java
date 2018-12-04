@@ -13,7 +13,7 @@ public enum ProsessDataKey {
     AVSENDER_NAVN("avsenderNavn"),
     BEHANDLINGSRESULTATTYPE("behandlingsresultatType"),
     BEHANDLINGSTEMA("behandlingstema"),
-    BREVDATA("brevDataDto"),
+    BREVDATA("brevData"),
     BRUKER_ID("brukerID"),
     DOKUMENT_ID("dokumentID"),
     GSAK_SAK_ID("gsakSakID"),

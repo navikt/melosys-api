@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
@@ -31,12 +31,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BrevDataByggerA1Test {
+public class BrevDataByggerVelgerA1Test {
 
     @Mock
     private AvklartefaktaService avklartefaktaService;
@@ -54,20 +53,20 @@ public class BrevDataByggerA1Test {
 
     private SoeknadDokument søknad;
 
-    BrevDataByggerA1 brevDataByggerA1;
+    private BrevDataByggerA1 brevDataByggerA1;
 
-    String saksbehandler = "";
+    private String saksbehandler = "";
 
-    String orgnr1 = "12345678910";
-    String orgnr2 = "10987654321";
-    OrganisasjonDokument org1;
-    OrganisasjonDokument org2;
+    private String orgnr1 = "12345678910";
+    private String orgnr2 = "10987654321";
+    private OrganisasjonDokument org1;
+    private OrganisasjonDokument org2;
 
     @Before
     public void setUp() {
         avklarteOrganisasjoner = new HashSet<>();
         when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong())).thenReturn(avklarteOrganisasjoner);
-        when(behandlingRepository.findOneWithSaksopplysningerById(eq(1L))).thenReturn(behandling);
+
 
         søknad = new SoeknadDokument();
         Saksopplysning soeknad = new Saksopplysning();
@@ -110,7 +109,7 @@ public class BrevDataByggerA1Test {
         foretak2.orgnr = "10987654321";
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak2);
 
-        BrevDataA1Dto brevDataDto = (BrevDataA1Dto) brevDataByggerA1.lag(1L, saksbehandler);
+        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
         assertThat(brevDataDto.selvstendigeForetak).containsOnly(foretak.orgnr);
     }
 
@@ -126,7 +125,7 @@ public class BrevDataByggerA1Test {
         when(registerOppslagService.hentOrganisasjoner(any())).thenReturn(new HashSet<>(Arrays.asList(org1, org2)));
         søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr2);
 
-        BrevDataA1Dto brevDataDto = (BrevDataA1Dto) brevDataByggerA1.lag(1L, saksbehandler);
+        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
         assertThat(brevDataDto.selvstendigeForetak).containsOnly(orgnr1);
         assertThat(brevDataDto.norskeVirksomheter.stream()
                 .map(nv -> nv.orgnr)
@@ -145,7 +144,7 @@ public class BrevDataByggerA1Test {
         foretakUtland2.orgnr = orgnr2;
         søknad.foretakUtland.add(foretakUtland2);
 
-        BrevDataA1Dto brevDataDto = (BrevDataA1Dto) brevDataByggerA1.lag(1L, saksbehandler);
+        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
 
 //        assertThat(brevDataDto.utenlandskeVirksomheter.stream()
 //                .map(nv -> nv.orgnr)
@@ -157,7 +156,7 @@ public class BrevDataByggerA1Test {
         avklarteOrganisasjoner.add(orgnr1);
         avklarteOrganisasjoner.add(orgnr2);
 
-        BrevDataA1Dto brevDataDto = (BrevDataA1Dto) brevDataByggerA1.lag(1L, saksbehandler);
+        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
         assertThat(brevDataDto.selvstendigeForetak).isEmpty();
         assertThat(brevDataDto.norskeVirksomheter).isEmpty();
         assertThat(brevDataDto.utenlandskeVirksomheter).isEmpty();
@@ -173,15 +172,9 @@ public class BrevDataByggerA1Test {
         foretakUtland.orgnr = orgnr1;
         søknad.foretakUtland.add(foretakUtland);
 
-        BrevDataA1Dto brevDataDto = (BrevDataA1Dto) brevDataByggerA1.lag(1L, saksbehandler);
+        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
         assertThat(brevDataDto.selvstendigeForetak).isEmpty();
         // TODO: Orgnr ikke obligatorisk registrert for utenlandske foretak
         //assertThat(brevDataDto.utenlandskeVirksomheter).isEmpty();
-    }
-
-    @Test(expected = TekniskException.class)
-    public void testManglerBehandlingsresultat() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        when(behandlingRepository.findOneWithSaksopplysningerById(any())).thenReturn(null);
-        BrevDataA1Dto brevDataDto = (BrevDataA1Dto) brevDataByggerA1.lag(1L, saksbehandler);
     }
 }

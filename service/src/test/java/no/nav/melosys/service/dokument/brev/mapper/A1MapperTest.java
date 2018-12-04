@@ -20,7 +20,7 @@ import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.service.dokument.brev.BrevDataA1Dto;
+import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.junit.Before;
 import org.junit.Rule;
@@ -45,7 +45,7 @@ public class A1MapperTest {
     private Behandlingsresultat behandlingsresultat;
     private Behandling behandling;
 
-    private BrevDataA1Dto brevDataDto;
+    private BrevDataA1 brevData;
 
     @Before
     public void setUp() {
@@ -115,13 +115,13 @@ public class A1MapperTest {
                                                          "123456789",
                                                          strukturertAdresse);
 
-        brevDataDto = new BrevDataA1Dto();
-        brevDataDto.yrkesgruppe = YrkesgruppeType.ORDINAER;
-        brevDataDto.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
-        brevDataDto.selvstendigeForetak = new HashSet<>();
-        brevDataDto.utenlandskeVirksomheter = new ArrayList<>(Arrays.asList(utenlandksVirksomhet));
-        brevDataDto.søknad = søknad;
-        brevDataDto.bostedsadresse = boAdresse;
+        brevData = new BrevDataA1("Z1234567");
+        brevData.yrkesgruppe = YrkesgruppeType.ORDINAER;
+        brevData.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
+        brevData.selvstendigeForetak = new HashSet<>();
+        brevData.utenlandskeVirksomheter = new ArrayList<>(Arrays.asList(utenlandksVirksomhet));
+        brevData.søknad = søknad;
+        brevData.bostedsadresse = boAdresse;
     }
 
     @Test
@@ -133,7 +133,7 @@ public class A1MapperTest {
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
-        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevDataDto);
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 
         assertThat(xml).isNotNull();
     }

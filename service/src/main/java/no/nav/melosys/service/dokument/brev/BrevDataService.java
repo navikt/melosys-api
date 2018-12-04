@@ -30,7 +30,6 @@ import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.RolleType.BRUKER;
 import static no.nav.melosys.domain.RolleType.REPRESENTANT;
-import static no.nav.melosys.service.dokument.DokumentType.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 /**
@@ -57,22 +56,26 @@ public class BrevDataService {
     /**
      * Genererer metada til doksys angående dokumentbestillingen.
      */
-    public DokumentbestillingMetadata lagBestillingMetadata(DokumentType dokumentType, Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
+    public DokumentbestillingMetadata lagBestillingMetadata(DokumentType dokumentType, Behandling behandling, BrevData brevData) throws TekniskException {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
 
         Fagsak fagsak = behandling.getFagsak();
-
         metadata.bruker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, BRUKER);
 
-        if (dokumentType == MELDING_FORVENTET_SAKSBEHANDLINGSTID ||
-            dokumentType == ATTEST_A1) {
-            metadata.mottaker = metadata.bruker;
-        } else if (dokumentType == MELDING_MANGLENDE_OPPLYSNINGER && brevDataDto.mottaker != null) {
-            metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevDataDto.mottaker);
-        } else if (dokumentType == HENLEGGELSE && brevDataDto.mottaker != null) {
-            metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevDataDto.mottaker);
-        } else {
-            throw new TekniskException("Det finnes ingen mottaker på sak " + fagsak.getSaksnummer());
+        switch (dokumentType) {
+            case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
+                metadata.mottaker = metadata.bruker;
+                break;
+
+            case ATTEST_A1:
+            case MELDING_MANGLENDE_OPPLYSNINGER:
+            case HENLEGGELSE: {
+                if (brevData.mottaker == null) {
+                    throw new TekniskException("Det finnes ingen mottaker på sak " + fagsak.getSaksnummer());
+                }
+                metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevData.mottaker);
+                break;
+            }
         }
 
         metadata.dokumenttypeID = dokumentType.getKode();
@@ -81,7 +84,7 @@ public class BrevDataService {
         metadata.fagområde = Tema.MED.getKode();
         // Default=true i DOKKAT, men kan settes til false for å ikke utlede, eller berik=false for å overstyre enkeltelementer
         metadata.utledRegisterInfo = true;
-        metadata.saksbehandler = brevDataDto.saksbehandler;
+        metadata.saksbehandler = brevData.saksbehandler;
 
         return metadata;
     }
@@ -89,7 +92,7 @@ public class BrevDataService {
     /**
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
-    public Element lagBrevXML(DokumentType dokumentType, Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
+    public Element lagBrevXML(DokumentType dokumentType, Behandling behandling, BrevData brevData) throws TekniskException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandling.getId());
         if (behandlingsresultat == null) {
             throw new TekniskException("Finner ingen behandlingsresultat for behandlingid");
@@ -98,8 +101,8 @@ public class BrevDataService {
         Element brevXmlElement;
         try {
             FellesType fellesType = mapFellesType(behandling);
-            MelosysNAVFelles navFelles = mapNAVFelles(behandling, brevDataDto);
-            String brevXml = BrevDataMapperRuter.brevDataMapper(dokumentType).mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevDataDto);
+            MelosysNAVFelles navFelles = mapNAVFelles(behandling, brevData);
+            String brevXml = BrevDataMapperRuter.brevDataMapper(dokumentType).mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -121,14 +124,14 @@ public class BrevDataService {
         return fellesType;
     }
 
-    private MelosysNAVFelles mapNAVFelles(Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
+    private MelosysNAVFelles mapNAVFelles(Behandling behandling, BrevData brevData) throws TekniskException {
         final MelosysNAVFelles navFelles = new MelosysNAVFelles();
 
         navFelles.setSakspart(lagSakspart(behandling));
-        navFelles.setMottaker(lagMottaker(behandling, brevDataDto));
+        navFelles.setMottaker(lagMottaker(behandling, brevData));
         navFelles.setBehandlendeEnhet(lagNavEnhet());
-        navFelles.setSignerendeSaksbehandler(lagSaksbehandler(brevDataDto.saksbehandler));
-        navFelles.setSignerendeBeslutter(lagSaksbehandler(brevDataDto.saksbehandler));
+        navFelles.setSignerendeSaksbehandler(lagSaksbehandler(brevData.saksbehandler));
+        navFelles.setSignerendeBeslutter(lagSaksbehandler(brevData.saksbehandler));
         navFelles.setKontaktinformasjon(BrevDataUtils.lagKontaktInformasjon());
 
         return navFelles;
@@ -152,11 +155,11 @@ public class BrevDataService {
         return sakspart;
     }
 
-    Mottaker lagMottaker(Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
+    Mottaker lagMottaker(Behandling behandling, BrevData brevData) throws TekniskException {
         Mottaker mottaker;
         Aktoer aktør = behandling.getFagsak().hentAktørMedRolleType(REPRESENTANT);
-        if (brevDataDto.mottaker != null) {
-            aktør = behandling.getFagsak().hentAktørMedRolleType(brevDataDto.mottaker);
+        if (brevData.mottaker != null) {
+            aktør = behandling.getFagsak().hentAktørMedRolleType(brevData.mottaker);
         } else if (aktør == null) {
             aktør = behandling.getFagsak().hentAktørMedRolleType(BRUKER);
         }
