@@ -82,8 +82,6 @@ public class Lovvalgsperiode implements ErPeriode {
     @Column(name = "trygde_dekning")
     private TrygdeDekning dekning;
 
-
-
     public long getId() {
         return id;
     }

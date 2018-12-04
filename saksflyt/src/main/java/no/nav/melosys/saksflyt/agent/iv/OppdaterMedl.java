@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
@@ -13,7 +13,6 @@ import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
@@ -39,20 +38,17 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
     private final MedlFasade medlFasade;
     private final TpsFasade tpsFasade;
-    private final LovvalgsperiodeRepository lovvalgsperiodeRepository;
     private final BehandlingsresultatRepository behandlingsresultatRepository;
 
 
     @Autowired
     public OppdaterMedl(MedlFasade medlFasade,
                         TpsFasade tpsFasade,
-                        LovvalgsperiodeRepository lovvalgsperiodeRepository,
                         BehandlingsresultatRepository behandlingsresultatRepository) {
 
         log.info("IverksetteVedtakOppdaterMEDL initialisert");
         this.medlFasade = medlFasade;
         this.tpsFasade = tpsFasade;
-        this.lovvalgsperiodeRepository = lovvalgsperiodeRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
     }
 
@@ -81,22 +77,22 @@ public class OppdaterMedl extends AbstraktStegBehandler {
             throw new IkkeFunnetException("Opprettelse av MEDL Periode feilet fordi behandlingsresulat med ID " + behandling.getId() + " er ikke funnet.");
         }
 
-        List<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeRepository.findByBehandlingsresultatId(behandling.getId());
+        Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
         if (lovvalgsperioder.isEmpty()) {
             throw new FunksjonellException("Lovvalgsperiode mangler for behandling " + behandling.getId());
         }
-        // FIXME: Støtte for flere perioder må legges til.
-        Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.get(0);
+
+        Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
 
         PeriodestatusMedl periodestatusMedl = null;
         LovvalgMedl lovvalgMedl = null;
 
         if (behandlingsresultat.getType() == BehandlingsresultatType.FASTSATT_LOVVALGSLAND && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET) {
-            //lagre periode som 'Endelig'
+            //Lagre periode som 'Endelig'
             periodestatusMedl = PeriodestatusMedl.GYLD;
             lovvalgMedl = LovvalgMedl.ENDL;
         } else if (behandlingsresultat.getType() == BehandlingsresultatType.ANMODNING_OM_UNNTAK ) {
-            //lagre periode som 'Under avklaring'
+            //Lagre periode som 'Under avklaring'
             periodestatusMedl = PeriodestatusMedl.UAVK;
             lovvalgMedl = LovvalgMedl.UAVK;
         }

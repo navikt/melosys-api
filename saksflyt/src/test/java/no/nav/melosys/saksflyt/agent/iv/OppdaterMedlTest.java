@@ -13,7 +13,6 @@ import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,16 +40,15 @@ public class OppdaterMedlTest {
     private TpsFasade tpsFasade;
 
     @Mock
-    private LovvalgsperiodeRepository lovvalgsperiodeRepository;
-
-    @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
 
     private Prosessinstans p;
 
+    private Behandlingsresultat behandlingsresultat;
+
     @Before
     public void setUp() throws IkkeFunnetException {
-        agent = new OppdaterMedl(medlFasade, tpsFasade, lovvalgsperiodeRepository, behandlingsresultatRepository);
+        agent = new OppdaterMedl(medlFasade, tpsFasade, behandlingsresultatRepository);
 
         p = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
@@ -73,10 +71,10 @@ public class OppdaterMedlTest {
         lovvalgsperiode.setLovvalgsland(Landkoder.CH);
         lovvalgsperiode.setDekning(TrygdeDekning.UTEN_DEKNING);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        when(lovvalgsperiodeRepository.findByBehandlingsresultatId(anyLong())).thenReturn(Collections.singletonList(lovvalgsperiode));
 
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
         when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
 
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("12345678910");
@@ -96,7 +94,6 @@ public class OppdaterMedlTest {
             Mockito.any(Lovvalgsperiode.class),
             Mockito.any(PeriodestatusMedl.class),
             Mockito.any(LovvalgMedl.class));
-
     }
 
     @Test
@@ -123,7 +120,6 @@ public class OppdaterMedlTest {
     @Test
     public void utførStegNårBehandlingsresultatTypeErAnmodning_om_unntak() throws FunksjonellException, TekniskException {
 
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(BehandlingsresultatType.ANMODNING_OM_UNNTAK);
         when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
 
