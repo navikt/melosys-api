@@ -77,8 +77,6 @@ public class OppdaterMedlTest {
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
         when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
 
-        when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("12345678910");
-
         p.setBehandling(behandling);
         p.getBehandling().setType(Behandlingstype.SØKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);

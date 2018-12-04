@@ -69,7 +69,6 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         Fagsak fagsak = behandling.getFagsak();
         Aktoer bruker = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
         String aktørID = bruker.getAktørId();
-        String fnr = tpsFasade.hentIdentForAktørId(aktørID);
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandling.getId());
 
@@ -97,7 +96,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
             lovvalgMedl = LovvalgMedl.UAVK;
         }
 
-        medlFasade.opprettPeriode(fnr, lovvalgsperiode, periodestatusMedl, lovvalgMedl);
+        medlFasade.opprettPeriode(aktørID, lovvalgsperiode, periodestatusMedl, lovvalgMedl);
         prosessinstans.setSteg(IV_SEND_BREV);
     }
 }
