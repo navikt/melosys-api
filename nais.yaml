@@ -33,6 +33,9 @@ fasitResources:
     resourceType: datasource
   - alias: melosys:regelmodul
     resourceType: webserviceendpoint
+  # TODO REST kodeverk finnes bare i Q11
+  #- alias: kodeverk.rest-api
+  #  resourceType: restservice
   - alias: oppgave.oppgaver
     resourceType: restservice
   - alias: sak.saker
@@ -57,8 +60,6 @@ fasitResources:
     resourceType: webserviceendpoint
   - alias: virksomhet:Inntekt_v3
     resourceType: webserviceendpoint
-  - alias: kodeverk.rest-api
-    resourceType: restservice
   - alias: virksomhet:Medlemskap_v2
     resourceType: webserviceendpoint
   - alias: virksomhet:BehandleMedlemskap_v2
