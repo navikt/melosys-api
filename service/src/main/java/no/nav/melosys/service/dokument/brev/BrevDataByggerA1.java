@@ -23,10 +23,7 @@ import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class BrevDataByggerA1 implements BrevDataBygger {
 
     private final AvklartefaktaService avklartefaktaService;
@@ -34,7 +31,10 @@ public class BrevDataByggerA1 implements BrevDataBygger {
     private final BehandlingRepository behandlingRepository;
     private final KodeverkService kodeverkService;
 
-    @Autowired
+    private Set<String> avklarteOrganisasjoner;
+    private SoeknadDokument søknad;
+    private PersonDokument person;
+
     public BrevDataByggerA1(AvklartefaktaService avklartefaktaService,
                             BehandlingRepository behandlingRepository,
                             RegisterOppslagSystemService registerOppslagService,
@@ -47,30 +47,30 @@ public class BrevDataByggerA1 implements BrevDataBygger {
 
     @Override
     public BrevData lag(Behandling behandling, String saksbehandler) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
-        PersonDokument person = SaksopplysningerUtils.hentPersonDokument(behandling);
-        Set<String> avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
+        this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
+        this.avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
 
         BrevDataA1 brevData = new BrevDataA1(saksbehandler);
 
         brevData.mottaker = RolleType.BRUKER;
         brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandling.getId());
-        brevData.utenlandskeVirksomheter = hentUtenlandskeAvklarteVirksomheter(søknad);
-        brevData.norskeVirksomheter = hentAlleNorskeAvklarteVirksomheter(søknad, avklarteOrganisasjoner);
-        brevData.selvstendigeForetak = hentAvklarteSelvstendigeForetak(søknad, avklarteOrganisasjoner);
-        brevData.bostedsadresse = hentBostedsadresse(person);
+        brevData.utenlandskeVirksomheter = hentUtenlandskeAvklarteVirksomheter();
+        brevData.norskeVirksomheter = hentAlleNorskeAvklarteVirksomheter();
+        brevData.selvstendigeForetak = hentAvklarteSelvstendigeForetak();
+        brevData.bostedsadresse = hentBostedsadresse();
         brevData.søknad = søknad;
 
         return brevData;
     }
 
-    private Bostedsadresse hentBostedsadresse(PersonDokument person) {
+    private Bostedsadresse hentBostedsadresse() {
         Bostedsadresse adresse = person.bostedsadresse;
         adresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.getPostnr(), LocalDate.now()));
         return adresse;
     }
 
-    private Set<String> hentAvklarteSelvstendigeForetak(SoeknadDokument søknad, Set<String> avklarteOrganisasjoner) {
+    private Set<String> hentAvklarteSelvstendigeForetak() {
         Set<String> organisasjonsnumre = søknad.selvstendigArbeid.hentAlleOrganisasjonsnumre()
                 .collect(Collectors.toSet());
 
@@ -78,7 +78,7 @@ public class BrevDataByggerA1 implements BrevDataBygger {
         return organisasjonsnumre;
     }
 
-    private List<Virksomhet> hentAlleNorskeAvklarteVirksomheter(SoeknadDokument søknad, Set<String> avklarteOrganisasjoner) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    private List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         Set<String> organisasjonsnumre = søknad.hentAlleOrganisasjonsnumre();
         organisasjonsnumre.retainAll(avklarteOrganisasjoner);
 
@@ -93,7 +93,7 @@ public class BrevDataByggerA1 implements BrevDataBygger {
         return adresse;
     }
 
-    private List<Virksomhet> hentUtenlandskeAvklarteVirksomheter(SoeknadDokument søknad) {
+    private List<Virksomhet> hentUtenlandskeAvklarteVirksomheter() {
         return søknad.foretakUtland.stream()
                 //TODO: utenlandske foretak har ikke nødvendigvis orgnr!
                 //.filter(foretak -> avklarteOrganisasjoner.contains(foretak.orgnr))
