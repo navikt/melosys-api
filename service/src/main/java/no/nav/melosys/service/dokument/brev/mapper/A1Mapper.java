@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -23,6 +24,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
@@ -31,7 +33,7 @@ public class A1Mapper implements BrevDataMapper {
 
     private static final int MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV = 3;
 
-    private static final String XSD_LOCATION = "xsd/melosys_000116.xsd";
+    private static final String XSD_LOCATION = "melosysbrev/melosys_000116.xsd";
 
     private Behandling behandling;
 

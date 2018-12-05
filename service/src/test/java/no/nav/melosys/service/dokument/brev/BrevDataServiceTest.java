@@ -14,16 +14,20 @@ import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.dokument.DokumentType;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.w3c.dom.Element;
 
-import static no.nav.melosys.service.dokument.DokumentType.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
-import static no.nav.melosys.service.dokument.DokumentType.MELDING_MANGLENDE_OPPLYSNINGER;
+import static no.nav.melosys.service.dokument.DokumentType.*;
+
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -108,7 +112,64 @@ public class BrevDataServiceTest {
         assertThat(element).isNotNull();
     }
 
-    private Behandling lagBehandling() {
+    @Test
+    public void lagMetadataForInnvilgelsesbrevAngirDokTypeLikInnvilgelseYrkesaktiv() throws Exception {
+        testLagDokumentMetadata(INNVILGELSE_YRKESAKTIV);
+    }
+
+    @Test
+    public void lagMetadataForMangelbrevAngirDokTypeLikMangelbrev() throws Exception {
+        testLagDokumentMetadata(MELDING_MANGLENDE_OPPLYSNINGER);
+    }
+
+    @Test
+    public void lagMetadataForMangelbrevAngirDokTypeLikHenleggelse() throws Exception {
+        testLagDokumentMetadata(DokumentType.HENLEGGELSE);
+    }
+
+    @Test
+    public void lagMetadataUtenMottakerKasterUnntak() throws Exception {
+        Throwable unntak = catchThrowable(() -> service.lagBestillingMetadata(INNVILGELSE_YRKESAKTIV, lagBehandling(), new BrevData()));
+        assertThat(unntak).isInstanceOf(TekniskException.class)
+            .hasMessageContaining("finnes ingen mottaker")
+            .hasNoCause();
+    }
+
+    @Test
+    public void lagMetadataAvUkjentDokumenttypeKasterUnntak() throws Exception {
+        Throwable unntak = catchThrowable(() -> service.lagBestillingMetadata(AVSLAG_ARBEIDSGIVER, lagBehandling(), new BrevData()));
+        assertThat(unntak).isInstanceOf(TekniskException.class)
+            .hasMessageContaining("ype ikke støttet")
+            .hasNoCause();
+    }
+
+    private void testLagDokumentMetadata(DokumentType doktype) throws Exception {
+        DokumentbestillingMetadata resultat = service.lagBestillingMetadata(doktype, lagBehandling(), lagBrevData());
+        DokumentbestillingMetadata forventet = lagDokumentbestillingMetadata(doktype);
+        assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
+    }
+
+    private static DokumentbestillingMetadata lagDokumentbestillingMetadata(DokumentType doktype) {
+        DokumentbestillingMetadata forventet = new DokumentbestillingMetadata();
+        forventet.bruker = FNR;
+        forventet.mottaker = ORGNR;
+        forventet.dokumenttypeID = doktype.getKode();
+        forventet.fagområde = "MED";
+        forventet.journalsakID = "123";
+        forventet.saksbehandler = "TEST";
+        forventet.utledRegisterInfo = true;
+        return forventet;
+    }
+
+    private static BrevData lagBrevData() {
+        BrevData brevDataDto = new BrevData();
+        brevDataDto.saksbehandler = "TEST";
+        brevDataDto.mottaker = RolleType.ARBEIDSGIVER;
+        brevDataDto.fritekst = "Test";
+        return brevDataDto;
+    }
+
+    private static Behandling lagBehandling() {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MOCK-1");
         fagsak.setGsakSaksnummer(123L);
@@ -130,4 +191,5 @@ public class BrevDataServiceTest {
 
         return behandling;
     }
+
 }

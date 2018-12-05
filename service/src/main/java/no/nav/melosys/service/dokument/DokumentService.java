@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.*;
@@ -16,6 +17,7 @@ import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -41,7 +43,7 @@ public class DokumentService {
     private final BrevDataByggerVelger brevDataByggerVelger;
 
     @Autowired
-    DokumentService(BehandlingRepository behandlingRepository,
+    public DokumentService(BehandlingRepository behandlingRepository,
                     FagsakRepository fagsakRepository,
                     BrevDataService brevDataService,
                     DokSysFasade dokSysFasade, JoarkFasade joarkFasade,
@@ -59,9 +61,11 @@ public class DokumentService {
 
     /**
      * Henter et dokument fra Joark
-     * @throws IkkeFunnetException 
+     * 
+     * @throws IkkeFunnetException
+     * @throws SikkerhetsbegrensningException
      */
-    public byte[] hentDokument(String journalpostID, String dokumentID) throws SikkerhetsbegrensningException, IntegrasjonException, IkkeFunnetException {
+    public byte[] hentDokument(String journalpostID, String dokumentID) throws IkkeFunnetException, SikkerhetsbegrensningException {
         return joarkFasade.hentDokument(journalpostID, dokumentID);
     }
 
@@ -79,7 +83,8 @@ public class DokumentService {
 
     /**
      * Kaller Doksys for å produsere et dokumentutkast
-     * @throws TekniskException 
+     * 
+     * @throws TekniskException
      */
     public byte[] produserUtkast(long behandlingID, Dokumenttype dokumenttype, BrevbestillingDto brevbestillingDto)
         throws TekniskException, FunksjonellException {
@@ -120,6 +125,10 @@ public class DokumentService {
             throw new TekniskException("Ingen gyldig dokumenttype");
         }
 
+        // NB: Kan ved første øyekast se ut som meningsløs kode, men er en
+        // mapping til en enum i melosys-service med samme navn.
+        // TBD: Dette er vel symptom på uønsket kodeduplisering? Service-laget
+        // kan vel koples til domene-laget og gjenbruke typen derfra?
         DokumentType dokumentType;
         try {
             dokumentType = DokumentType.valueOf(dokumenttype.name());
@@ -139,12 +148,16 @@ public class DokumentService {
         prosessinstans.setBehandling(behandling);
 
         switch (dokumenttype) {
-            case MELDING_MANGLENDE_OPPLYSNINGER:
-                prosessinstans.setType(ProsessType.MANGELBREV);
-                prosessinstans.setSteg(ProsessSteg.MANGELBREV);
-                break;
-            default:
-                throw new FunksjonellException("Dokumenttype " + dokumenttype + " er ikke støttet.");
+        case MELDING_MANGLENDE_OPPLYSNINGER:
+            prosessinstans.setType(ProsessType.MANGELBREV);
+            prosessinstans.setSteg(ProsessSteg.MANGELBREV);
+            break;
+        case INNVILGELSE_YRKESAKTIV:
+            prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
+            prosessinstans.setSteg(ProsessSteg.IV_SEND_BREV);
+            break;
+        default:
+            throw new FunksjonellException("Dokumenttype " + dokumenttype + " er ikke støttet.");
         }
 
         if (brevbestillingDto != null) {

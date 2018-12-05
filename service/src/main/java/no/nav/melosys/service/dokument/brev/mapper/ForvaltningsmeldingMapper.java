@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -16,13 +17,14 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
+
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 public class ForvaltningsmeldingMapper implements BrevDataMapper {
 
-    private static final String XSD_LOCATION = "xsd/melosys_000082.xsd";
+    private static final String XSD_LOCATION = "melosysbrev/melosys_000082.xsd";
 
     // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
     private static final int SAKSBEHANDLINGSTID_UKER = 12;
