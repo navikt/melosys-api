@@ -13,7 +13,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
-import no.nav.melosys.repository.BehandlingResultatRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,13 +36,13 @@ public class BrevDataServiceTest {
 
     @Before
     public void setUp() throws IkkeFunnetException, TekniskException {
-        BehandlingResultatRepository behandlingResultatRepository = mock(BehandlingResultatRepository.class);
+        BehandlingsresultatRepository behandlingsresultatRepository = mock(BehandlingsresultatRepository.class);
         TpsFasade tpsFasade = mock(TpsService.class);
-        service = spy(new BrevDataService(tpsFasade, behandlingResultatRepository));
+        service = spy(new BrevDataService(tpsFasade, behandlingsresultatRepository));
 
         when(tpsFasade.hentFagsakIdentMedRolleType(any(), any())).thenCallRealMethod();
         when(tpsFasade.hentIdentForAktørId(any())).thenReturn(FNR);
-        when(behandlingResultatRepository.findOne(anyLong())).thenReturn(new Behandlingsresultat());
+        when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(new Behandlingsresultat());
     }
 
     @Test

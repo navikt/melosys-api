@@ -19,7 +19,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.BehandlingResultatRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.dokument.DokumentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,12 +46,12 @@ public class BrevDataService {
     static final String PLASSHOLDER_TEKST = "-";
     static final String PLASSHOLDER_POSTNUMMER = "0000";
 
-    private BehandlingResultatRepository behandlingResultatRepository;
+    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Autowired
-    public BrevDataService(TpsFasade tpsFasade, BehandlingResultatRepository behandlingResultatRepository) {
+    public BrevDataService(TpsFasade tpsFasade, BehandlingsresultatRepository behandlingsresultatRepository) {
         this.tpsFasade = tpsFasade;
-        this.behandlingResultatRepository = behandlingResultatRepository;
+        this.behandlingsresultatRepository = behandlingsresultatRepository;
     }
 
     /**
@@ -90,7 +90,7 @@ public class BrevDataService {
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
     public Element lagBrevXML(DokumentType dokumentType, Behandling behandling, BrevDataDto brevDataDto) throws TekniskException {
-        Behandlingsresultat behandlingsresultat = behandlingResultatRepository.findOne(behandling.getId());
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandling.getId());
         if (behandlingsresultat == null) {
             throw new TekniskException("Finner ingen behandlingsresultat for behandlingid");
         }
