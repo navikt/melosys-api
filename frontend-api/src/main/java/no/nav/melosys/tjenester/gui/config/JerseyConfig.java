@@ -22,6 +22,7 @@ public class JerseyConfig extends ResourceConfig {
         property(CommonProperties.METAINF_SERVICES_LOOKUP_DISABLE, true);
 
         // N.B. alfabetisk rekkefølge
+        register(AdresseTjeneste.class);
         register(AvklartefaktaTjeneste.class);
         register(ArbeidsforholdHistorikkTjeneste.class);
         register(BehandlingTjeneste.class);
