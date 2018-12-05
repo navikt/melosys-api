@@ -34,7 +34,7 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.getBegrunnelser().artikkel16_1_anmodning = tilKoder(Artikkel16_1_Anmodning.values());
         kodeverk.getBegrunnelser().bosted = tilKoder(Bosted.values());
         kodeverk.getBegrunnelser().forutgaendeMedlemskap = tilKoder(ForutgaaendeMedlemskap.values());
-        kodeverk.getBegrunnelser().sokkelEllerSkip = tilKoder(IkkeSkip.values());
+        kodeverk.getBegrunnelser().sokkelEllerSkip = tilKoder(SokkelEllerSkip.values());
         kodeverk.getBegrunnelser().normaltDriverVirksomhet = tilKoder(NormaltDriverVirksomhet.values());
         kodeverk.getBegrunnelser().opphold = tilKoder(Opphold.values());
         kodeverk.getBegrunnelser().vesentligVirksomhet = tilKoder(VesentligVirksomhet.values());

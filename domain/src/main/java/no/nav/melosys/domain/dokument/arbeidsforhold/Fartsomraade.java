@@ -5,10 +5,11 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import no.nav.melosys.domain.Kodeverk;
 
 public enum Fartsomraade implements Kodeverk {
+
     @XmlEnumValue("innenriks")
-    INNENRIKS("INNENRIKS", "Innenriks"),
+    INNENRIKS("innenriks", "Innenriks"),
     @XmlEnumValue("utenriks")
-    UTENRIKS("UTENRIKS", "Utenriks");
+    UTENRIKS("utenriks", "Utenriks");
 
     private String kode;
     private String beskrivelse;
