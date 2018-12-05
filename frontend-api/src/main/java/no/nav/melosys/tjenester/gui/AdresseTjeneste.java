@@ -8,7 +8,7 @@ import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.domain.Omraade;
+import no.nav.melosys.domain.Landkoder;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import org.springframework.context.annotation.Scope;
@@ -28,12 +28,12 @@ public class AdresseTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("/myndigheter/{omraade}")
+    @Path("/myndigheter/{landkode}")
     @ApiOperation(
         value = "Henter adressen til en gitt utenlandsk myndighet",
         response = UtenlandskMyndighet.class)
-    public Response hentMyndighet(@PathParam("omraade") Omraade omraade) {
-        UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetRepo.findByOmråde(omraade);
+    public Response hentMyndighet(@PathParam("landkode") Landkoder landkode) {
+        UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetRepo.findByLandkode(landkode);
         if (utenlandskMyndighet == null) {
             Response.status(Response.Status.NOT_FOUND).build();
         }

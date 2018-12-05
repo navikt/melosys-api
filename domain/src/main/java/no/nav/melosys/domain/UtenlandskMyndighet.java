@@ -22,8 +22,7 @@ public class UtenlandskMyndighet {
 
     public String land;
 
-    @Column(name = "omraade")
-    @Convert(converter = Omraade.DbKonverterer.class)
-    public Omraade område;
+    @Convert(converter = Landkoder.DbKonverterer.class)
+    public Landkoder landkode;
 
 }

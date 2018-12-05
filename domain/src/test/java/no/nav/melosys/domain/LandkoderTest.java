@@ -6,12 +6,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class LandkoderTest {
     
-    private static final int EØS_MEDLEMER_OG_SVEITS = 32;
+    private static final int MELOSYS_LANDKODER = 34;
 
     @Test
     public void test() {
         int length = Landkoder.values().length;
-        assertThat(length).isEqualTo(EØS_MEDLEMER_OG_SVEITS);
+        assertThat(length).isEqualTo(MELOSYS_LANDKODER);
     }
 
 }

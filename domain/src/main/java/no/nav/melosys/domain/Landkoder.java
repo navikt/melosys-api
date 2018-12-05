@@ -1,16 +1,20 @@
 package no.nav.melosys.domain;
 
+import javax.persistence.Converter;
+
 /**
  * ISO2 landkoder som vises i frontend.
  */
-public enum Landkoder implements Omraade {
+public enum Landkoder implements InterntKodeverkTabell<Landkoder> {
 
     BE("BE", "Belgia"),
     BG("BG", "Bulgaria"),
     DK("DK", "Danmark"),
     EE("EE", "Estland"),
     FI("FI", "Finland"),
+    FO("FO", "Færøyene"),
     FR("FR", "Frankrike"),
+    GL("GL", "Grønland"),
     GR("GR", "Hellas"),
     IE("IE", "Irland"),
     IS("IS", "Island"),
@@ -55,4 +59,13 @@ public enum Landkoder implements Omraade {
     public String getBeskrivelse() {
         return beskrivelse;
     }
+
+    @Converter
+    public static class DbKonverterer extends InterntKodeverkTabell.DbKonverterer<Landkoder> {
+        @Override
+        protected Landkoder[] getLovligeVerdier() {
+            return Landkoder.values();
+        }
+    }
+
 }
