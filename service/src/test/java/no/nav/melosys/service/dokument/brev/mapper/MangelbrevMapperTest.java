@@ -54,7 +54,7 @@ public class MangelbrevMapperTest {
         brevDataDto.mottaker = RolleType.BRUKER;
         brevDataDto.fritekst = "Test";
 
-        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, brevDataDto);
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, brevDataDto);
 
         assertThat(xml).isNotNull();
     }

@@ -3,7 +3,7 @@ package no.nav.melosys.service.avklartefakta;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

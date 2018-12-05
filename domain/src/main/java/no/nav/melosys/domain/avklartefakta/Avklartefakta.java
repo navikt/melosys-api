@@ -1,9 +1,11 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.avklartefakta;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
+
+import no.nav.melosys.domain.Behandlingsresultat;
 
 @Entity
 @Table(name = "avklartefakta")

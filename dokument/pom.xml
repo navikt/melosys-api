@@ -73,6 +73,9 @@
                             <sources>
                                 <source>${basedir}/src/main/resources/xsd/melosys_000082.xsd</source>
                                 <source>${basedir}/src/main/resources/xsd/melosys_000074.xsd</source>
+                                <source>${basedir}/src/main/resources/xsd/melosys_000072.xsd</source>
+                                <source>${basedir}/src/main/resources/xsd/melosys_000116.xsd</source>
+                                <source>${basedir}/src/main/resources/xsd/felles/vedlegg/melosys_000067_vedlegg.xsd</source>
                             </sources>
                             <addGeneratedAnnotation>true</addGeneratedAnnotation>
                             <clearOutputDir>false</clearOutputDir>

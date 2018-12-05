@@ -10,10 +10,13 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
+import no.nav.dok.melosysbrev.felles.melosys_felles.BostedsadresseType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.PersonnavnType;
+import no.nav.melosys.domain.dokument.person.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.Gateadresse;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataService.MELOSYS_ENHET_ID;
-import static no.nav.melosys.service.dokument.brev.BrevDataService.PLASSHOLDER_POSTNUMMER;
-import static no.nav.melosys.service.dokument.brev.BrevDataService.PLASSHOLDER_TEKST;
+import static no.nav.melosys.service.dokument.brev.BrevDataService.*;
 
 public final class BrevDataUtils {
 
@@ -93,4 +96,25 @@ public final class BrevDataUtils {
         adresse.setAdresse(postadresse);
         return adresse;
     }
+
+    public static BostedsadresseType lagBostedsadresse(Bostedsadresse bosted) {
+        Gateadresse gateadresse = bosted.getGateadresse();
+        BostedsadresseType bostedAdresse = new BostedsadresseType();
+        bostedAdresse.setGatenavn(gateadresse.getGatenavn());
+        bostedAdresse.setHusnummer(gateadresse.getGatenummer() + " " + gateadresse.getHusbokstav());
+        bostedAdresse.setPostnr(bosted.getPostnr());
+        bostedAdresse.setPoststed(bosted.getPoststed());
+        bostedAdresse.setLandkode(bosted.getLand().getKode());
+        //bostedAdresse.setRegion("");       // TODO: Finnes ikke for bostedsadresse
+        return bostedAdresse;
+    }
+
+    public static PersonnavnType lagPersonnavn(PersonDokument personDokument) {
+        PersonnavnType navn = new PersonnavnType();
+        navn.setFornavn(personDokument.fornavn);
+        navn.setMellomnavn(personDokument.mellomnavn);
+        navn.setEtternavn(personDokument.etternavn);
+        return navn;
+    }
+
 }

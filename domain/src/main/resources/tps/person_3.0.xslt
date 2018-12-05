@@ -17,6 +17,9 @@
             <kjønn>
                 <kode><xsl:value-of select="kjoenn/kjoenn"/></kode>
             </kjønn>
+            <fornavn><xsl:value-of select="personnavn/fornavn"/></fornavn>
+            <mellomnavn><xsl:value-of select="personnavn/mellomnavn"/></mellomnavn>
+            <etternavn><xsl:value-of select="personnavn/etternavn"/></etternavn>
             <sammensattNavn><xsl:value-of select="personnavn/sammensattNavn"/></sammensattNavn>
             <fødselsdato><xsl:value-of select="foedselsdato/foedselsdato"/></fødselsdato>
             <dødsdato><xsl:value-of select="doedsdato/doedsdato"/></dødsdato>

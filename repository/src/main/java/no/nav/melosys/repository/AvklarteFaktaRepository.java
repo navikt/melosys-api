@@ -3,9 +3,9 @@ package no.nav.melosys.repository;
 import java.util.Optional;
 import java.util.Set;
 
-import no.nav.melosys.domain.Avklartefakta;
-import no.nav.melosys.domain.AvklartefaktaType;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -18,6 +18,10 @@ public interface AvklarteFaktaRepository extends CrudRepository<Avklartefakta, L
     Set<Avklartefakta> findByBehandlingsresultatId(long behandlingsid);
 
     Optional<Avklartefakta> findByBehandlingsresultatIdAndType(long behandlingsid, AvklartefaktaType avklartefaktaType);
+
+    Set<Avklartefakta> findByBehandlingsresultatIdAndTypeAndFakta(long behandlingsid,
+                                                                  AvklartefaktaType type,
+                                                                  String fakta);
 
     // Må her bruke ett skreddersydd query p.g.a. en bug i Spring Data og/eller
     // JPA/Hibernate. Den automatisk genererte metoden (uten @Query) blir ikke

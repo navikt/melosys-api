@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified"
+		   elementFormDefault="qualified"
+		   targetNamespace="http://nav.no/dok/melosysbrev/000067"
+		   xmlns="http://nav.no/dok/melosysbrev/000067"
+		   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		   xmlns:melosysfelles="http://nav.no/dok/melosysbrev/felles/melosys_felles"
+		   xmlns:st="http://nav.no/dok/brevdata/felles/v1/SimpleTypes">
+
+	<xs:import namespace="http://nav.no/dok/melosysbrev/felles/melosys_felles" schemaLocation="../melosys_felles.xsd" />
+	<xs:import namespace="http://nav.no/dok/brevdata/felles/v1/SimpleTypes" schemaLocation="../navfelles/v1.SimpleTypes.xsd"/>
+
+	<xs:complexType name="A1">
+		<xs:sequence>
+			<xs:element name="serienummer" type="st:NonEmptyString"/>
+			<xs:element name="opprettelsesDato" type="st:FormatertDato"/>
+			<xs:element name="person" type="personType"/>
+			<xs:element name="lovvalgsperiode" type="lovvalgsperiodeType"/>
+			<xs:element name="hovedvirksomhet" type="hovedvirksomhetType"/>
+			<xs:element name="ikkeFysiskArbeidssted" type="st:EmptyBoolean"/>
+			<xs:element name="yrkesgruppe" type="melosysfelles:yrkesgruppeKode" minOccurs="0"/>
+			<xs:element name="bivirksomhetListe" type="bivirksomhetListeType" minOccurs="0"/>
+			<xs:element name="fysiskArbeidsstedAdresseListe" type="fysiskArbeidsstedAdresseListeType" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="personType">
+		<xs:sequence>
+			<xs:element name="personnavn" type="melosysfelles:personnavnType"/>
+			<xs:element name="kjoenn" type="melosysfelles:kjoennKode"/>
+			<xs:element name="foedselsdato" type="st:FormatertDato"/>
+			<xs:element name="statsborgerskap" type="st:NonEmptyString"/>
+			<xs:element name="foedested" type="xs:string" minOccurs="0"/>
+			<xs:element name="bostedsadresse" type="melosysfelles:bostedsadresseType"/>
+			<xs:element name="midlertidigOppholdsadresse" type="midlertidigOppholdsadresseType" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="midlertidigOppholdsadresseType">
+		<xs:sequence>
+			<xs:element name="gatenavn" type="xs:string" minOccurs="0"/>
+			<xs:element name="husnummer" type="xs:string" minOccurs="0"/>
+			<xs:element name="postnr" type="xs:string" minOccurs="0"/>
+			<xs:element name="poststed" type="xs:string" minOccurs="0"/>
+			<xs:element name="region" type="xs:string" minOccurs="0"/>
+			<xs:element name="landkode" type="xs:string" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="lovvalgsperiodeType">
+		<xs:sequence>
+			<xs:element name="lovvalgsLand" type="st:NonEmptyString"/>
+			<xs:element name="fomDato" type="st:FormatertDato" minOccurs="0"/>
+			<xs:element name="tomDato" type="st:FormatertDato"/>
+			<xs:element name="lovvalgsbestemmelse" type="melosysfelles:lovvalgsbestemmelseKode"/>
+			<xs:element name="tilleggsbestemmelse" type="melosysfelles:tilleggsbestemmelseKode" minOccurs="0"/>
+			<xs:element name="fritekst" type="xs:string" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="hovedvirksomhetType">
+		<xs:sequence>
+			<xs:element name="yrkesaktivitet" type="melosysfelles:yrkesaktivitetsKode"/>
+			<xs:element name="orgnummer" type="st:NonEmptyString"/>
+			<xs:element name="navn" type="st:NonEmptyString"/>
+			<xs:element name="gatenavn" type="st:NonEmptyString"/>
+			<xs:element name="landkode" type="st:NonEmptyString"/>
+			<xs:element name="poststed" type="st:NonEmptyString"/>
+			<xs:element name="postnr" type="st:NonEmptyString"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="bivirksomhetListeType">
+		<xs:sequence>
+			<xs:element name="bivirksomhet" type="bivirksomhetType" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="bivirksomhetType">
+		<xs:sequence>
+			<xs:element name="navn" type="xs:string"/>
+			<xs:element name="orgnummer" type="xs:string" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="fysiskArbeidsstedAdresseListeType">
+		<xs:sequence>
+			<xs:element name="adresse" type="adresseType" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="adresseType">
+		<xs:sequence>
+			<xs:element name="navn" type="xs:string"/>
+			<xs:element name="land" type="xs:string" minOccurs="0"/>
+			<xs:element name="adresselinje1" type="xs:string" minOccurs="0"/>
+			<xs:element name="adresselinje2" type="xs:string" minOccurs="0"/>
+			<xs:element name="adresselinje3" type="xs:string" minOccurs="0"/>
+			<xs:element name="adresselinje4" type="xs:string" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+</xs:schema>

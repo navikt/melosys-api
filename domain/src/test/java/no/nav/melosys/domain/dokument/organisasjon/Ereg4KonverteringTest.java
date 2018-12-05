@@ -61,7 +61,7 @@ public class Ereg4KonverteringTest {
         assertEquals("1201", postadresse.getKommunenr());
 
         // Test strukturert adresse...
-        Gateadresse forretningsadresse = (Gateadresse) dokument.getOrganisasjonDetaljer().getForretningsadresse().get(0);
+        Gateadresse forretningsadresse = (Gateadresse) dokument.getOrganisasjonDetaljer().getForretningsadresser().get(0);
         assertEquals("Gatenavn", forretningsadresse.getGatenavn());
         assertEquals("NO", forretningsadresse.getLandkode());
         

@@ -1,8 +1,11 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.avklartefakta;
+
+import no.nav.melosys.domain.Kodeverk;
 
 public enum AvklartefaktaType implements Kodeverk {
 
     AVKLARTE_ARBEIDSGIVER("AVKLARTE_ARBEIDSGIVER", "Avklarte arbeidsgiver"),
+    YRKESGRUPPE("YRKESGRUPPE", "Yrkesgruppe"),
     AG_FORRETNINGSLAND("AG_FORRETNINGSLAND", "Arbeidsgivers forretningsland"),
     MOTTAR_KONTANTYTELSE("MOTTAR_KONTANTYTELSE", "Mottar kontantytelse"),
     OFFENTLIG_TJENESTEMANN("OFFENTLIG_TJENESTEMANN", "Offentlig tjenestemann"),

@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.HashSet;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingRepository;

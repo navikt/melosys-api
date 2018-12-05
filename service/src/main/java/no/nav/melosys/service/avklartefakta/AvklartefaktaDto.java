@@ -7,9 +7,9 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.melosys.domain.Avklartefakta;
-import no.nav.melosys.domain.AvklartefaktaType;
-import no.nav.melosys.domain.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 
 public class AvklartefaktaDto {
     private String subjektID;

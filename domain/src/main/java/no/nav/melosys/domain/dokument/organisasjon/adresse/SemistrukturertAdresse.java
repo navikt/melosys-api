@@ -2,7 +2,10 @@ package no.nav.melosys.domain.dokument.organisasjon.adresse;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "SemistrukturertAdresse")
@@ -17,6 +20,10 @@ public class SemistrukturertAdresse extends GeografiskAdresse {
     private String postnr;
 
     private String kommunenr;
+
+    @JsonIgnore
+    @XmlElement(name = "poststed_utenlandsk")
+    private String poststedUtland;
 
     public String getAdresselinje1() {
         return adresselinje1;
@@ -56,5 +63,13 @@ public class SemistrukturertAdresse extends GeografiskAdresse {
 
     public void setKommunenr(String kommunenr) {
         this.kommunenr = kommunenr;
+    }
+
+    public String getPoststedUtland() {
+        return poststedUtland;
+    }
+
+    public void setPoststedUtland(String poststedUtland) {
+        this.poststedUtland = poststedUtland;
     }
 }

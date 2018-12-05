@@ -33,6 +33,15 @@ public class PersonDokument extends SaksopplysningDokument {
     @JsonProperty("kjoenn")
     public KjoennsType kjønn;
 
+    @JsonIgnore
+    public String fornavn;
+
+    @JsonIgnore
+    public String mellomnavn;
+
+    @JsonIgnore
+    public String etternavn;
+
     public String sammensattNavn;
 
     public List<Familiemedlem> familiemedlemmer = new ArrayList<>();
