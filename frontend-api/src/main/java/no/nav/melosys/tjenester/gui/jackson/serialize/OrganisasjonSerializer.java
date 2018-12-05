@@ -30,7 +30,7 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         OrganisasjonDto organisasjonDto = new OrganisasjonDto();
 
         organisasjonDto.setOrgnr(organisasjon.getOrgnummer());
-        organisasjonDto.setNavn(organisasjon.getSammenslåttNavn());
+        organisasjonDto.setNavn(organisasjon.lagSammenslåttNavn());
         organisasjonDto.setOppstartdato(organisasjon.getOppstartsdato());
         if (!StringUtils.isEmpty(organisasjon.getEnhetstype())) {
             organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype(), LocalDate.now()));

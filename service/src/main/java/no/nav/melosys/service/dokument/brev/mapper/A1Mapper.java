@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -58,9 +55,7 @@ public class A1Mapper implements BrevDataMapper {
         this.resultat = resultat;
         this.brevDataDto = (BrevDataA1Dto) brevDataDto;
 
-        if (this.brevDataDto == null) {
-            throw new TekniskException("A1 mapper trenger brevdata av type BrevDataA1Dto");
-        }
+        Objects.requireNonNull(brevDataDto, "A1 mapper trenger brevdata av type BrevDataA1Dto");
 
         Fag fag = mapFag();
         VedleggType vedlegg = new VedleggType();

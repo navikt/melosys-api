@@ -88,7 +88,7 @@ public class BrevDataByggerA1 {
         organisasjonsnumre.retainAll(avklarteOrganisasjoner);
 
         return registerOppslagService.hentOrganisasjoner(organisasjonsnumre).stream()
-                .map(org -> new Virksomhet(org.getSammenslåttNavn(), org.getOrgnummer(), utfyllManglendeAdressefelter(org)))
+                .map(org -> new Virksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), utfyllManglendeAdressefelter(org)))
                 .collect(Collectors.toList());
     }
 

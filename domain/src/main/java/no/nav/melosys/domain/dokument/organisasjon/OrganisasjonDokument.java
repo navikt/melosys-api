@@ -42,7 +42,7 @@ public class OrganisasjonDokument extends SaksopplysningDokument {
     }
 
     // Hvis man ikke har bruk for historikk på navn så er det best å bruke navn på nivå organisasjon.
-    public String getSammenslåttNavn() {
+    public String lagSammenslåttNavn() {
         return navn == null ? "UKJENT" : String.join(" ", navn);
     }
 
