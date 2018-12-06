@@ -1,17 +1,21 @@
 package no.nav.melosys.tjenester.gui;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Path("/behandlinger")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class BehandlingTjeneste {
+public class BehandlingTjeneste extends RestTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(DokumentTjeneste.class);
 
@@ -47,4 +51,21 @@ public class BehandlingTjeneste {
         tilgang.sjekk(behandlingID);
         behandlingService.oppdaterStatus(behandlingID, status);
     }
+
+    @POST
+    @Path("{behandlingID}/perioder")
+    public Response knyttMedlemsperioder(@PathParam("behandlingID") long behandlingID,
+                                         TidligereMedlemsperioderDto tidligereMedlemsperioder) throws FunksjonellException {
+        behandlingService.knyttMedlemsperioder(behandlingID, tidligereMedlemsperioder.periodeIder);
+        return Response.ok(tidligereMedlemsperioder).build();
+    }
+
+    @GET
+    @Path("{behandlingID}/perioder")
+    public Response knyttMedlemsperioder(@PathParam("behandlingID") long behandlingID) throws IkkeFunnetException {
+        TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
+        tidligereMedlemsperioderDto.periodeIder = behandlingService.finnMedlemsperioder(behandlingID);
+        return Response.ok(tidligereMedlemsperioderDto).build();
+    }
+
 }
