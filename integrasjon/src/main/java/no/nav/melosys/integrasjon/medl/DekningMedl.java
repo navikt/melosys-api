@@ -14,7 +14,4 @@ public enum DekningMedl {
         return kode;
     }
 
-    public void setKode(String kode) {
-        this.kode = kode;
-    }
 }

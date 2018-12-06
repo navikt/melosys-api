@@ -18,23 +18,23 @@ public class MedlPeriodeKonverterTest {
     @Test
     public void hentFellesKodeForGrunnlagMedltype() throws TekniskException {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_3A);
-        GrunnlagMedl grunnlagMedltype = MedlPeriodeKonverter.hentFellesKodeForGrunnlagMedltype(lovvalgsperiode.getBestemmelse());
-        assertThat(grunnlagMedltype).isEqualTo(GrunnlagMedl.FO_11_3_A);
+        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2);
+        GrunnlagMedl grunnlagMedltype = MedlPeriodeKonverter.tilGrunnlagMedltype(lovvalgsperiode.getBestemmelse());
+        assertThat(grunnlagMedltype).isEqualTo(GrunnlagMedl.FO_12_2);
     }
 
     @Test(expected = TekniskException.class)
     public void hentFellesKodeForGrunnlagMedltype_() throws TekniskException {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_1);
-        MedlPeriodeKonverter.hentFellesKodeForGrunnlagMedltype(lovvalgsperiode.getBestemmelse());
+        MedlPeriodeKonverter.tilGrunnlagMedltype(lovvalgsperiode.getBestemmelse());
     }
 
     @Test
     public void hentFellesKodeForDekningtype() throws TekniskException {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setDekning(TrygdeDekning.UTEN_DEKNING);
-        DekningMedl dekningMedl = MedlPeriodeKonverter.hentFellesKodeForTrygdDekningtype(lovvalgsperiode.getDekning());
+        DekningMedl dekningMedl = MedlPeriodeKonverter.tilMedlTrygdeDekning(lovvalgsperiode.getDekning());
         assertThat(dekningMedl).isEqualTo(DekningMedl.UNNTATT);
     }
 
@@ -57,10 +57,9 @@ public class MedlPeriodeKonverterTest {
         assertThat(medlemsperiode.getFraOgMed().toString()).isEqualTo("2015-01-01");
         assertThat(medlemsperiode.getTilOgMed().toString()).isEqualTo("2015-06-30");
         assertThat(medlemsperiode.getDatoRegistrert().toString()).isEqualTo(LocalDate.now().toString());
-        assertThat(medlemsperiode.getStatus().getValue()).isEqualTo("Gyldig");
-        assertThat(medlemsperiode.getLovvalg().getValue()).isEqualTo("Endelig");
+        assertThat(medlemsperiode.getStatus().getValue()).isEqualTo("GYLD");
+        assertThat(medlemsperiode.getLovvalg().getValue()).isEqualTo("ENDL");
         assertThat(medlemsperiode.getTrygdedekning().getValue()).isEqualTo("Full");
         assertThat(medlemsperiode.getGrunnlagstype().getValue()).isEqualTo("FO_11_3_a");
     }
-
 }

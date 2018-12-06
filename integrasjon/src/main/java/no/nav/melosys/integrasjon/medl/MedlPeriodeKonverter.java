@@ -41,7 +41,7 @@ public class MedlPeriodeKonverter {
         lovvalgsbestemmelseTilGrunnlagMedlTabell = tbl;
     }
 
-    public static DekningMedl hentFellesKodeForTrygdDekningtype(TrygdeDekning dekning) throws TekniskException {
+    public static DekningMedl tilMedlTrygdeDekning(TrygdeDekning dekning) throws TekniskException {
         DekningMedl dekningMedltype;
         switch (dekning) {
             case FULL_DEKNING_EOSFO:
@@ -56,7 +56,7 @@ public class MedlPeriodeKonverter {
         return dekningMedltype;
     }
 
-    public static GrunnlagMedl hentFellesKodeForGrunnlagMedltype(LovvalgBestemmelse bestemmelse) throws TekniskException {
+    public static GrunnlagMedl tilGrunnlagMedltype(LovvalgBestemmelse bestemmelse) throws TekniskException {
         GrunnlagMedl grunnlagMedltype = lovvalgsbestemmelseTilGrunnlagMedlTabell.get(bestemmelse);
         if (grunnlagMedltype == null) {
             throw new TekniskException("Lovvalgsbestemmelse støttes ikke i MEDL. Kode: " + bestemmelse.getKode() + " Beskrivelse: " + bestemmelse.getBeskrivelse());
@@ -64,7 +64,7 @@ public class MedlPeriodeKonverter {
         return grunnlagMedltype;
     }
 
-    public static OpprettPeriodeRequest konverterTilOpprettPeriodRequest(String aktørID,
+    public static OpprettPeriodeRequest konverterTilOpprettPeriodRequest(String fnr,
                                                                          Lovvalgsperiode lovvalgsperiode,
                                                                          PeriodestatusMedl periodestatusMedl,
                                                                          LovvalgMedl lovvalgMedl) throws TekniskException {
@@ -72,7 +72,7 @@ public class MedlPeriodeKonverter {
         OpprettPeriodeRequest request = new OpprettPeriodeRequest();
 
         no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Foedselsnummer ident = new no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Foedselsnummer();
-        ident.setValue(aktørID);
+        ident.setValue(fnr);
 
         no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Medlemsperiode periode = new no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Medlemsperiode();
         try {
@@ -91,7 +91,8 @@ public class MedlPeriodeKonverter {
         }
 
         if (lovvalgsperiode.getDekning() != null) {
-            periode.setTrygdedekning(new Trygdedekning().withValue(hentFellesKodeForTrygdDekningtype(lovvalgsperiode.getDekning()).getKode()));
+            DekningMedl dekningMedl = tilMedlTrygdeDekning(lovvalgsperiode.getDekning());
+            periode.setTrygdedekning(new Trygdedekning().withValue(dekningMedl.getKode()));
         }
 
         if (lovvalgsperiode.getLovvalgsland() != null) {
@@ -100,7 +101,8 @@ public class MedlPeriodeKonverter {
         }
 
         if (lovvalgsperiode.getBestemmelse() != null) {
-            periode.setGrunnlagstype(new Grunnlagstype().withValue(hentFellesKodeForGrunnlagMedltype(lovvalgsperiode.getBestemmelse()).getKode()));
+            GrunnlagMedl grunnlagMedl = tilGrunnlagMedltype(lovvalgsperiode.getBestemmelse());
+            periode.setGrunnlagstype(new Grunnlagstype().withValue(grunnlagMedl.getKode()));
         }
 
         request.setIdent(ident);

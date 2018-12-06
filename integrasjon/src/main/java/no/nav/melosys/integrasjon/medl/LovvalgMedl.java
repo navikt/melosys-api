@@ -1,9 +1,9 @@
 package no.nav.melosys.integrasjon.medl;
 
 public enum LovvalgMedl {
-    ENDL("Endelig"),
-    FORL("Foreløpig"),
-    UAVK("Under avklaring");
+    ENDL("ENDL"),//"Endelig"
+    FORL("FORL"),//"Foreløpig"
+    UAVK("UAVK");//"Under avklaring"
 
     private String kode;
 
@@ -15,7 +15,4 @@ public enum LovvalgMedl {
         return kode;
     }
 
-    public void setKode(String kode) {
-        this.kode = kode;
-    }
 }

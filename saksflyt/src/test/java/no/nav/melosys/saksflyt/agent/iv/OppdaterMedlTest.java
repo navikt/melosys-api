@@ -6,27 +6,21 @@ import java.util.HashSet;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.LovvalgMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterMedlTest {
@@ -47,7 +41,7 @@ public class OppdaterMedlTest {
     private Behandlingsresultat behandlingsresultat;
 
     @Before
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         agent = new OppdaterMedl(medlFasade, tpsFasade, behandlingsresultatRepository);
 
         p = new Prosessinstans();
@@ -80,39 +74,19 @@ public class OppdaterMedlTest {
         p.setBehandling(behandling);
         p.getBehandling().setType(Behandlingstype.SØKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
-
     }
 
     @Test
     public void sjekkNestSteg() throws FunksjonellException, TekniskException {
         agent.utførSteg(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_SEND_BREV);
-
-        verify(medlFasade, times(1)).opprettPeriode(anyString(),
-            Mockito.any(Lovvalgsperiode.class),
-            Mockito.any(PeriodestatusMedl.class),
-            Mockito.any(LovvalgMedl.class));
     }
 
     @Test
     public void utførStegNårBehandlingsresultatTypeErFastsatt_lovvalgslandOgInnvilgelsesResultat_Innvilget() throws FunksjonellException, TekniskException {
 
         agent.utførSteg(p);
-
-        ArgumentCaptor acAktørID = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor acLovvalgsperiode = ArgumentCaptor.forClass(Lovvalgsperiode.class);
-        ArgumentCaptor acPeriodestatusMedl = ArgumentCaptor.forClass(PeriodestatusMedl.class);
-        ArgumentCaptor acLovvalgMedl = ArgumentCaptor.forClass(LovvalgMedl.class);
-
-        verify(medlFasade).opprettPeriode((String) acAktørID.capture(),
-            (Lovvalgsperiode) acLovvalgsperiode.capture(),
-            (PeriodestatusMedl) acPeriodestatusMedl.capture(),
-            (LovvalgMedl) acLovvalgMedl.capture());
-
-        assertThat(acAktørID).isNotNull();
-        assertThat(acLovvalgsperiode).isNotNull();
-        assertThat(acPeriodestatusMedl.getValue()).isEqualTo(PeriodestatusMedl.GYLD);
-        assertThat(acLovvalgMedl.getValue()).isEqualTo(LovvalgMedl.ENDL);
+        verify(medlFasade ,times(1)).opprettPeriodeSomEndelig(any(), any());
     }
 
     @Test
@@ -123,19 +97,17 @@ public class OppdaterMedlTest {
 
         agent.utførSteg(p);
 
-        ArgumentCaptor acAktørID = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor acLovvalgsperiode = ArgumentCaptor.forClass(Lovvalgsperiode.class);
-        ArgumentCaptor acPeriodestatusMedl = ArgumentCaptor.forClass(PeriodestatusMedl.class);
-        ArgumentCaptor acLovvalgMedl = ArgumentCaptor.forClass(LovvalgMedl.class);
-
-        verify(medlFasade).opprettPeriode((String) acAktørID.capture(),
-            (Lovvalgsperiode) acLovvalgsperiode.capture(),
-            (PeriodestatusMedl) acPeriodestatusMedl.capture(),
-            (LovvalgMedl) acLovvalgMedl.capture());
-
-        assertThat(acAktørID).isNotNull();
-        assertThat(acLovvalgsperiode).isNotNull();
-        assertThat(acPeriodestatusMedl.getValue()).isEqualTo(PeriodestatusMedl.UAVK);
-        assertThat(acLovvalgMedl.getValue()).isEqualTo(LovvalgMedl.UAVK);
+        verify(medlFasade ,times(1)).opprettPeriodeSomUnderAvklaring(any(), any());
     }
+
+    @Test
+    public void utførStegNårBehandlingsresultatHarIngenLovvalgPeriode() throws FunksjonellException, TekniskException {
+
+        behandlingsresultat.setLovvalgsperioder(new HashSet<>());
+        when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
+
+        agent.utførSteg(p);
+        assertEquals(ProsessSteg.FEILET_MASKINELT, p.getSteg());
+    }
+
 }

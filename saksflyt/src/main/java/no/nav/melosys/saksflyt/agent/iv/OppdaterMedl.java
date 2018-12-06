@@ -8,9 +8,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
-import no.nav.melosys.integrasjon.medl.LovvalgMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
@@ -23,6 +21,8 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
 import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
+import static no.nav.melosys.domain.dokument.medlemskap.OpprettMedlemskapSpesifikasjon.erPeriodenSomEndeling;
+import static no.nav.melosys.domain.dokument.medlemskap.OpprettMedlemskapSpesifikasjon.erPeriodenSomUnderAvklaring;
 
 /**
  * Oppdaterer medlemskap periode i MEDL.
@@ -68,12 +68,12 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         Behandling behandling = prosessinstans.getBehandling();
         Fagsak fagsak = behandling.getFagsak();
         Aktoer bruker = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
-        String aktørID = bruker.getAktørId();
+        String fnr = tpsFasade.hentIdentForAktørId(bruker.getAktørId());
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandling.getId());
 
         if (behandlingsresultat == null ) {
-            throw new IkkeFunnetException("Opprettelse av MEDL Periode feilet fordi behandlingsresulat med ID " + behandling.getId() + " er ikke funnet.");
+            throw new IkkeFunnetException("Opprettelse av Periode iMEDL feilet fordi behandlingsresulat med ID " + behandling.getId() + " er ikke finnes.");
         }
 
         Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
@@ -83,20 +83,11 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
         Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
 
-        PeriodestatusMedl periodestatusMedl = null;
-        LovvalgMedl lovvalgMedl = null;
-
-        if (behandlingsresultat.getType() == BehandlingsresultatType.FASTSATT_LOVVALGSLAND && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET) {
-            //Lagre periode som 'Endelig'
-            periodestatusMedl = PeriodestatusMedl.GYLD;
-            lovvalgMedl = LovvalgMedl.ENDL;
-        } else if (behandlingsresultat.getType() == BehandlingsresultatType.ANMODNING_OM_UNNTAK ) {
-            //Lagre periode som 'Under avklaring'
-            periodestatusMedl = PeriodestatusMedl.UAVK;
-            lovvalgMedl = LovvalgMedl.UAVK;
+        if (erPeriodenSomEndeling(behandlingsresultat, lovvalgsperiode)) {
+            medlFasade.opprettPeriodeSomEndelig(fnr, lovvalgsperiode);
+        } else if (erPeriodenSomUnderAvklaring(behandlingsresultat)) {
+            medlFasade.opprettPeriodeSomUnderAvklaring(fnr, lovvalgsperiode);
         }
-
-        medlFasade.opprettPeriode(aktørID, lovvalgsperiode, periodestatusMedl, lovvalgMedl);
-        prosessinstans.setSteg(IV_SEND_BREV);
+       prosessinstans.setSteg(IV_SEND_BREV);
     }
 }

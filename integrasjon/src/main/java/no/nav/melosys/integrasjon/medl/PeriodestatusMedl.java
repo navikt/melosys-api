@@ -1,9 +1,9 @@
 package no.nav.melosys.integrasjon.medl;
 
 public enum PeriodestatusMedl {
-    AVST("Avvist"),
-    GYLD("Gyldig"),
-    UAVK("Uavklart");
+    AVIST("AVST"),//"Avvist"
+    GYLD("GYLD"),//"Gyldig"
+    UAVK("UAVK");//"Uavklart"
 
     private String kode;
 
@@ -15,7 +15,4 @@ public enum PeriodestatusMedl {
         return kode;
     }
 
-    public void setKode(String kode) {
-        this.kode = kode;
-    }
 }
