@@ -18,7 +18,6 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -35,13 +34,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BrevDataByggerVelgerA1Test {
+public class BrevDataByggerA1Test {
 
     @Mock
     private AvklartefaktaService avklartefaktaService;
-
-    @Mock
-    private BehandlingRepository behandlingRepository;
 
     @Mock
     private RegisterOppslagSystemService registerOppslagService;
@@ -94,7 +90,7 @@ public class BrevDataByggerVelgerA1Test {
 
         KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
-        brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, behandlingRepository, registerOppslagService, kodeverkService);
+        brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, registerOppslagService, kodeverkService);
     }
 
     @Test

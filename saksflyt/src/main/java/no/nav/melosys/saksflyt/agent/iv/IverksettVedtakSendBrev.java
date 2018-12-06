@@ -81,8 +81,9 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             brevData.mottaker = RolleType.BRUKER;
             dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
 
-            brevData.mottaker = RolleType.ARBEIDSGIVER;
-            dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
+            //TODO: Send også til Myndighet når brevservice støtter slik mottaker
+            //brevData.mottaker = RolleType.MYNDIGHET;
+            //dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
 
             prosessinstans.setSteg(GSAK_AVSLUTT_OPPGAVE);
         } else {

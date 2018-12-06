@@ -18,7 +18,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
@@ -28,7 +27,6 @@ public class BrevDataByggerA1 implements BrevDataBygger {
 
     private final AvklartefaktaService avklartefaktaService;
     private final RegisterOppslagSystemService registerOppslagService;
-    private final BehandlingRepository behandlingRepository;
     private final KodeverkService kodeverkService;
 
     private Set<String> avklarteOrganisasjoner;
@@ -36,12 +34,10 @@ public class BrevDataByggerA1 implements BrevDataBygger {
     private PersonDokument person;
 
     public BrevDataByggerA1(AvklartefaktaService avklartefaktaService,
-                            BehandlingRepository behandlingRepository,
                             RegisterOppslagSystemService registerOppslagService,
                             KodeverkService kodeverkService) {
         this.avklartefaktaService = avklartefaktaService;
         this.registerOppslagService = registerOppslagService;
-        this.behandlingRepository = behandlingRepository;
         this.kodeverkService = kodeverkService;
     }
 

@@ -76,6 +76,8 @@ public class BrevDataService {
                 metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevData.mottaker);
                 break;
             }
+            default:
+                throw new TekniskException("DokumentType ikke støttet");
         }
 
         metadata.dokumenttypeID = dokumentType.getKode();

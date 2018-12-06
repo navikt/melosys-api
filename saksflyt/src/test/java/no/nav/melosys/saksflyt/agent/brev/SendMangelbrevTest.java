@@ -8,15 +8,12 @@ import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
 public class SendMangelbrevTest {
 
     private BehandlingRepository behandlingRepo;
@@ -26,7 +23,7 @@ public class SendMangelbrevTest {
     private DokumentSystemService dokumentService;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         behandlingRepo = mock(BehandlingRepository.class);
         dokumentService = mock(DokumentSystemService.class);
         agent = new SendMangelbrev(behandlingRepo, dokumentService);

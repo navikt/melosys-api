@@ -17,8 +17,6 @@ import no.nav.melosys.service.dokument.brev.BrevDataByggerA1;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.ProsessSteg.GSAK_AVSLUTT_OPPGAVE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,7 +24,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
 public class IverksettVedtakSendBrevTest {
 
     private IverksettVedtakSendBrev agent;

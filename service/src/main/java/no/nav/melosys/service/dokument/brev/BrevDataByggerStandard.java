@@ -12,8 +12,7 @@ public class BrevDataByggerStandard implements BrevDataBygger {
 
     @Override
     public BrevData lag(Behandling behandling, String saksbehandler) {
-        BrevData brevData = new BrevData(brevbestillingDto);
+        BrevData brevData = new BrevData(brevbestillingDto, saksbehandler);
         return brevData;
     }
 }
-

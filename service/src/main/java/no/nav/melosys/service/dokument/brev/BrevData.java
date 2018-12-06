@@ -11,14 +11,17 @@ public class BrevData {
     public String fritekst;
 
     public BrevData(BrevbestillingDto brevbestillingDto) {
-        saksbehandler = SubjectHandler.getInstance().getUserID();
+        this(brevbestillingDto, SubjectHandler.getInstance().getUserID());
+    }
+
+    public BrevData(BrevbestillingDto brevbestillingDto, String saksbehandler) {
+        this.saksbehandler = saksbehandler;
         this.mottaker = brevbestillingDto.mottaker;
         this.fritekst = brevbestillingDto.fritekst;
     }
 
-    public BrevData() {
-        saksbehandler = SubjectHandler.getInstance().getUserID();
-    }
+    // Kun for deserialisering
+    public BrevData() { }
 
     // Brukes av saksflyt
     public BrevData(String saksbehandler) {

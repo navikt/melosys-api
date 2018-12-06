@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.DokumentType;
@@ -13,17 +12,14 @@ public class BrevDataByggerVelger {
 
     private final AvklartefaktaService avklartefaktaService;
     private final RegisterOppslagSystemService registerOppslagService;
-    private final BehandlingRepository behandlingRepository;
     private final KodeverkService kodeverkService;
 
     @Autowired
     public BrevDataByggerVelger(AvklartefaktaService avklartefaktaService,
                                 RegisterOppslagSystemService registerOppslagService,
-                                BehandlingRepository behandlingRepository,
                                 KodeverkService kodeverkService) {
         this.avklartefaktaService = avklartefaktaService;
         this.registerOppslagService = registerOppslagService;
-        this.behandlingRepository = behandlingRepository;
         this.kodeverkService = kodeverkService;
     }
 
@@ -36,7 +32,6 @@ public class BrevDataByggerVelger {
         switch (dokumentType) {
             case ATTEST_A1:
                 return new BrevDataByggerA1(avklartefaktaService,
-                                            behandlingRepository,
                                             registerOppslagService,
                                             kodeverkService);
             default:
