@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.medl;
 
 public enum PeriodestatusMedl {
-    AVIST("AVST"),//"Avvist"
+    AVST("AVST"),//"Avvist"
     GYLD("GYLD"),//"Gyldig"
     UAVK("UAVK");//"Uavklart"
 

@@ -13,7 +13,7 @@ public interface MedlFasade {
 
     Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException;
 
-    Long opprettPeriodeSomEndelig(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
+    Long opprettPeriodeEndelig(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
 
-    Long opprettPeriodeSomUnderAvklaring(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
+    Long opprettPeriodeUnderAvklaring(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
 }

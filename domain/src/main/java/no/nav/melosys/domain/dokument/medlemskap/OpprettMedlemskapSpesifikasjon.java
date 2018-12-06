@@ -7,11 +7,11 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 
 public class OpprettMedlemskapSpesifikasjon {
 
-    public static boolean erPeriodenSomEndeling(Behandlingsresultat behandlingsresultat, Lovvalgsperiode lovvalgsperiode) {
+    public static boolean erPeriodeEndelig(Behandlingsresultat behandlingsresultat, Lovvalgsperiode lovvalgsperiode) {
         return behandlingsresultat.getType() == BehandlingsresultatType.FASTSATT_LOVVALGSLAND && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET;
     }
 
-    public static boolean erPeriodenSomUnderAvklaring(Behandlingsresultat behandlingsresultat) {
+    public static boolean erPeriodeUnderAvklaring(Behandlingsresultat behandlingsresultat) {
         return behandlingsresultat.getType() == BehandlingsresultatType.ANMODNING_OM_UNNTAK;
     }
 }

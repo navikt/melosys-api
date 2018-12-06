@@ -86,7 +86,7 @@ public class OppdaterMedlTest {
     public void utførStegNårBehandlingsresultatTypeErFastsatt_lovvalgslandOgInnvilgelsesResultat_Innvilget() throws FunksjonellException, TekniskException {
 
         agent.utførSteg(p);
-        verify(medlFasade ,times(1)).opprettPeriodeSomEndelig(any(), any());
+        verify(medlFasade ,times(1)).opprettPeriodeEndelig(any(), any());
     }
 
     @Test
@@ -97,7 +97,7 @@ public class OppdaterMedlTest {
 
         agent.utførSteg(p);
 
-        verify(medlFasade ,times(1)).opprettPeriodeSomUnderAvklaring(any(), any());
+        verify(medlFasade ,times(1)).opprettPeriodeUnderAvklaring(any(), any());
     }
 
     @Test

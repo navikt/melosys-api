@@ -95,16 +95,16 @@ public class MedlService implements MedlFasade {
     }
 
     @Override
-    public Long opprettPeriodeSomEndelig(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public Long opprettPeriodeEndelig(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         return opprettPeriode(fnr, lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL) ;
     }
 
     @Override
-    public Long opprettPeriodeSomUnderAvklaring(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public Long opprettPeriodeUnderAvklaring(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         return opprettPeriode(fnr, lovvalgsperiode, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK) ;
     }
 
-    private Long opprettPeriode(String fnr, Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public Long opprettPeriode(String fnr, Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         try {
             OpprettPeriodeRequest request = MedlPeriodeKonverter.konverterTilOpprettPeriodRequest(fnr, lovvalgsperiode, periodestatusMedl, lovvalgMedl);
             OpprettPeriodeResponse response = behandleMedlemskapConsumer.opprettPeriode(request);

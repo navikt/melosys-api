@@ -21,8 +21,8 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
 import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
-import static no.nav.melosys.domain.dokument.medlemskap.OpprettMedlemskapSpesifikasjon.erPeriodenSomEndeling;
-import static no.nav.melosys.domain.dokument.medlemskap.OpprettMedlemskapSpesifikasjon.erPeriodenSomUnderAvklaring;
+import static no.nav.melosys.domain.dokument.medlemskap.OpprettMedlemskapSpesifikasjon.erPeriodeEndelig;
+import static no.nav.melosys.domain.dokument.medlemskap.OpprettMedlemskapSpesifikasjon.erPeriodeUnderAvklaring;
 
 /**
  * Oppdaterer medlemskap periode i MEDL.
@@ -73,7 +73,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandling.getId());
 
         if (behandlingsresultat == null ) {
-            throw new IkkeFunnetException("Opprettelse av Periode iMEDL feilet fordi behandlingsresulat med ID " + behandling.getId() + " er ikke finnes.");
+            throw new IkkeFunnetException("Opprettelse av periode i MEDL feilet fordi behandlingsresultat med behandling ID " + behandling.getId() + " finnes ikke.");
         }
 
         Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
@@ -83,10 +83,10 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
         Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
 
-        if (erPeriodenSomEndeling(behandlingsresultat, lovvalgsperiode)) {
-            medlFasade.opprettPeriodeSomEndelig(fnr, lovvalgsperiode);
-        } else if (erPeriodenSomUnderAvklaring(behandlingsresultat)) {
-            medlFasade.opprettPeriodeSomUnderAvklaring(fnr, lovvalgsperiode);
+        if (erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)) {
+            medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode);
+        } else if (erPeriodeUnderAvklaring(behandlingsresultat)) {
+            medlFasade.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode);
         }
        prosessinstans.setSteg(IV_SEND_BREV);
     }
