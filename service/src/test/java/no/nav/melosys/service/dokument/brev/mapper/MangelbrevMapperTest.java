@@ -10,7 +10,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.service.dokument.brev.BrevDataDto;
+import no.nav.melosys.service.dokument.brev.BrevData;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,11 +50,11 @@ public class MangelbrevMapperTest {
         Behandling behandling = new Behandling();
         behandling.setRegistrertDato(Instant.now());
 
-        BrevDataDto brevDataDto = new BrevDataDto();
-        brevDataDto.mottaker = RolleType.BRUKER;
-        brevDataDto.fritekst = "Test";
+        BrevData BrevData = new BrevData("Z123456");
+        BrevData.mottaker = RolleType.BRUKER;
+        BrevData.fritekst = "Test";
 
-        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, brevDataDto);
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, BrevData);
 
         assertThat(xml).isNotNull();
     }
@@ -63,10 +63,10 @@ public class MangelbrevMapperTest {
     public void mapFag() throws Exception {
         Behandling behandling = new Behandling();
         behandling.setRegistrertDato(Instant.now());
-        BrevDataDto brevDataDto = new BrevDataDto();
-        brevDataDto.fritekst = "Test";
+        BrevData BrevData = new BrevData("Z123456");
+        BrevData.fritekst = "Test";
 
-        Fag fag = mapper.mapFag(behandling, brevDataDto);
+        Fag fag = mapper.mapFag(behandling, BrevData);
 
         assertThat(fag).isNotNull();
         assertThat(fag.getDatoMottatt()).isNotNull();
@@ -81,10 +81,10 @@ public class MangelbrevMapperTest {
     public void mapFag_manglerFritekst() throws Exception {
         Behandling behandling = new Behandling();
         behandling.setRegistrertDato(Instant.now());
-        BrevDataDto brevDataDto = new BrevDataDto();
+        BrevData BrevData = new BrevData("Z123456");
 
         expectedException.expect(IntegrasjonException.class);
 
-        mapper.mapFag(behandling, brevDataDto);
+        mapper.mapFag(behandling, BrevData);
     }
 }

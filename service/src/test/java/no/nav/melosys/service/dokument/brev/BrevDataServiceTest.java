@@ -48,15 +48,14 @@ public class BrevDataServiceTest {
     @Test
     public void lagForvaltningsmelding() throws TekniskException {
         Behandling behandling = lagBehandling();
-        BrevDataDto brevDataDto = new BrevDataDto();
-        brevDataDto.saksbehandler = "TEST";
+        BrevData brevData = new BrevData("Z123456");
 
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling, brevDataDto);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling, brevData);
 
         assertThat(metadata.bruker).isEqualTo(FNR);
         assertThat(metadata.mottaker).isEqualTo(FNR);
 
-        Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, lagBehandling(), brevDataDto);
+        Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, lagBehandling(), brevData);
 
         assertThat(element).isNotNull();
     }
@@ -64,12 +63,11 @@ public class BrevDataServiceTest {
     @Test
     public void lagMangelbrevXml_mottakerErBruker() throws TekniskException {
         Behandling behandling = lagBehandling();
-        BrevDataDto brevDataDto = new BrevDataDto();
-        brevDataDto.saksbehandler = "TEST";
-        brevDataDto.mottaker = RolleType.BRUKER;
-        brevDataDto.fritekst = "Test";
+        BrevData brevData = new BrevData("Z123456");
+        brevData.mottaker = RolleType.BRUKER;
+        brevData.fritekst = "Test";
 
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevDataDto);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
         assertThat(metadata.bruker).isEqualTo(FNR);
         assertThat(metadata.mottaker).isEqualTo(FNR);
@@ -81,7 +79,7 @@ public class BrevDataServiceTest {
             return mottaker;
         }).when(service).lagMottaker(any(), any());
 
-        Element element = service.lagBrevXML(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevDataDto);
+        Element element = service.lagBrevXML(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
         assertThat(element).isNotNull();
     }
@@ -89,12 +87,11 @@ public class BrevDataServiceTest {
     @Test
     public void lagMangelbrevXml_mottakerErArbeidsgiver() throws TekniskException {
         Behandling behandling = lagBehandling();
-        BrevDataDto brevDataDto = new BrevDataDto();
-        brevDataDto.saksbehandler = "TEST";
-        brevDataDto.mottaker = RolleType.ARBEIDSGIVER;
-        brevDataDto.fritekst = "Test";
+        BrevData brevData = new BrevData("Z123456");
+        brevData.mottaker = RolleType.ARBEIDSGIVER;
+        brevData.fritekst = "Test";
 
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevDataDto);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
         assertThat(metadata.bruker).isEqualTo(FNR);
         assertThat(metadata.mottaker).isEqualTo(ORGNR);
@@ -106,7 +103,7 @@ public class BrevDataServiceTest {
             return mottaker;
         }).when(service).lagMottaker(any(), any());
 
-        Element element = service.lagBrevXML(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevDataDto);
+        Element element = service.lagBrevXML(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
         assertThat(element).isNotNull();
     }

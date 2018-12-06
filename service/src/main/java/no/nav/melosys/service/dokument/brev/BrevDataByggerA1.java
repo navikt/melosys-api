@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
@@ -17,65 +18,55 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-@Component
-public class BrevDataByggerA1 {
+public class BrevDataByggerA1 implements BrevDataBygger {
 
     private final AvklartefaktaService avklartefaktaService;
     private final RegisterOppslagSystemService registerOppslagService;
-    private final BehandlingRepository behandlingRepository;
     private final KodeverkService kodeverkService;
 
-    @Autowired
+    private Set<String> avklarteOrganisasjoner;
+    private SoeknadDokument søknad;
+    private PersonDokument person;
+
     public BrevDataByggerA1(AvklartefaktaService avklartefaktaService,
-                            BehandlingRepository behandlingRepository,
                             RegisterOppslagSystemService registerOppslagService,
                             KodeverkService kodeverkService) {
         this.avklartefaktaService = avklartefaktaService;
         this.registerOppslagService = registerOppslagService;
-        this.behandlingRepository = behandlingRepository;
         this.kodeverkService = kodeverkService;
     }
 
-    @Transactional
-    public BrevDataDto lag(long behandlingId, String saksbehandler) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        Behandling behandling = behandlingRepository.findOneWithSaksopplysningerById(behandlingId);
-        if (behandling == null) {
-            throw new TekniskException("Finner ikke behandling");
-        }
+    @Override
+    public BrevData lag(Behandling behandling, String saksbehandler) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
+        this.avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
 
-        SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
-        PersonDokument person = SaksopplysningerUtils.hentPersonDokument(behandling);
-        Set<String> avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandlingId);
+        BrevDataA1 brevData = new BrevDataA1(saksbehandler);
 
-        BrevDataA1Dto brevDataDto = new BrevDataA1Dto();
-        brevDataDto.saksbehandler = saksbehandler;
+        brevData.mottaker = RolleType.BRUKER;
+        brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandling.getId());
+        brevData.utenlandskeVirksomheter = hentUtenlandskeAvklarteVirksomheter();
+        brevData.norskeVirksomheter = hentAlleNorskeAvklarteVirksomheter();
+        brevData.selvstendigeForetak = hentAvklarteSelvstendigeForetak();
+        brevData.bostedsadresse = hentBostedsadresse();
+        brevData.søknad = søknad;
 
-        brevDataDto.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandlingId);
-        brevDataDto.utenlandskeVirksomheter = hentUtenlandskeAvklarteVirksomheter(søknad);
-        brevDataDto.norskeVirksomheter = hentAlleNorskeAvklarteVirksomheter(søknad, avklarteOrganisasjoner);
-        brevDataDto.selvstendigeForetak = hentAvklarteSelvstendigeForetak(søknad, avklarteOrganisasjoner);
-        brevDataDto.bostedsadresse = hentBostedsadresse(person);
-        brevDataDto.søknad = søknad;
-
-        return brevDataDto;
+        return brevData;
     }
 
-    private Bostedsadresse hentBostedsadresse(PersonDokument person) {
+    private Bostedsadresse hentBostedsadresse() {
         Bostedsadresse adresse = person.bostedsadresse;
         adresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.getPostnr(), LocalDate.now()));
         return adresse;
     }
 
-    private Set<String> hentAvklarteSelvstendigeForetak(SoeknadDokument søknad, Set<String> avklarteOrganisasjoner) {
+    private Set<String> hentAvklarteSelvstendigeForetak() {
         Set<String> organisasjonsnumre = søknad.selvstendigArbeid.hentAlleOrganisasjonsnumre()
                 .collect(Collectors.toSet());
 
@@ -83,7 +74,7 @@ public class BrevDataByggerA1 {
         return organisasjonsnumre;
     }
 
-    private List<Virksomhet> hentAlleNorskeAvklarteVirksomheter(SoeknadDokument søknad, Set<String> avklarteOrganisasjoner) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    private List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         Set<String> organisasjonsnumre = søknad.hentAlleOrganisasjonsnumre();
         organisasjonsnumre.retainAll(avklarteOrganisasjoner);
 
@@ -98,7 +89,7 @@ public class BrevDataByggerA1 {
         return adresse;
     }
 
-    private List<Virksomhet> hentUtenlandskeAvklarteVirksomheter(SoeknadDokument søknad) {
+    private List<Virksomhet> hentUtenlandskeAvklarteVirksomheter() {
         return søknad.foretakUtland.stream()
                 //TODO: utenlandske foretak har ikke nødvendigvis orgnr!
                 //.filter(foretak -> avklarteOrganisasjoner.contains(foretak.orgnr))

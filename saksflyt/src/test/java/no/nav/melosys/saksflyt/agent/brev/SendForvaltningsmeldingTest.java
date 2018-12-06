@@ -1,12 +1,15 @@
 package no.nav.melosys.saksflyt.agent.brev;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Dokumenttype;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.DokumentSystemService;
-import no.nav.melosys.service.dokument.brev.BrevDataDto;
+import no.nav.melosys.service.dokument.brev.BrevData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,9 +18,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SendForvaltningsmeldingTest {
@@ -40,7 +41,7 @@ public class SendForvaltningsmeldingTest {
 
         agent.utførSteg(p);
 
-        verify(dokumentService, times(1)).produserDokument(anyLong(), any(Dokumenttype.class), any(BrevDataDto.class));
+        verify(dokumentService, times(1)).produserDokument(anyLong(), any(Dokumenttype.class), any(BrevData.class));
 
         assertThat(p.getSteg()).isNull();
     }

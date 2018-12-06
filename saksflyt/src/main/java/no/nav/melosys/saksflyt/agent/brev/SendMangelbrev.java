@@ -13,7 +13,7 @@ import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.dokument.DokumentSystemService;
-import no.nav.melosys.service.dokument.brev.BrevDataDto;
+import no.nav.melosys.service.dokument.brev.BrevData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +60,9 @@ public class SendMangelbrev extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
-        BrevDataDto brevDataDto = prosessinstans.getData(ProsessDataKey.BREVDATA, BrevDataDto.class);
+        BrevData brevData = prosessinstans.getData(ProsessDataKey.BREVDATA, BrevData.class);
 
-        dokumentService.produserDokument(behandling.getId(), MELDING_MANGLENDE_OPPLYSNINGER, brevDataDto);
+        dokumentService.produserDokument(behandling.getId(), MELDING_MANGLENDE_OPPLYSNINGER, brevData);
 
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
         behandling.setDokumentasjonSvarfristDato(LocalDateTime.now().plusWeeks(DOKUMENTASJON_SVARFRIST_UKER).toInstant(ZoneOffset.UTC));

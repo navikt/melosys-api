@@ -5,13 +5,16 @@ import java.util.Map;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.dokument.DokumentSystemService;
-import no.nav.melosys.service.dokument.brev.BrevDataDto;
+import no.nav.melosys.service.dokument.brev.BrevData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,10 +57,8 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
-        BrevDataDto brevDataDto = new BrevDataDto();
-        brevDataDto.saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-
-        dokumentService.produserDokument(behandling.getId(), MELDING_FORVENTET_SAKSBEHANDLINGSTID, brevDataDto);
+        BrevData brevData = new BrevData(prosessinstans.getData(SAKSBEHANDLER));
+        dokumentService.produserDokument(behandling.getId(), MELDING_FORVENTET_SAKSBEHANDLINGSTID, brevData);
 
         prosessinstans.setSteg(null);
         log.info("Sendt forvaltningsmelding for prosessinstans {}", prosessinstans.getId());

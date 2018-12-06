@@ -8,7 +8,12 @@ import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 
-public class BrevDataA1Dto extends BrevDataDto {
+public class BrevDataA1 extends BrevData {
+
+    public BrevDataA1(String saksbehandler) {
+        super(saksbehandler);
+    }
+
     public List<Virksomhet> utenlandskeVirksomheter;
     public List<Virksomhet> norskeVirksomheter;
     public Set<String> selvstendigeForetak;

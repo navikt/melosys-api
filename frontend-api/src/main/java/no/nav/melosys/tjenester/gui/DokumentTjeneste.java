@@ -13,7 +13,7 @@ import no.nav.melosys.domain.Dokumenttype;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
-import no.nav.melosys.service.dokument.brev.BrevDataDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,10 +71,10 @@ public class DokumentTjeneste extends RestTjeneste {
     @Produces({ "application/pdf", MediaType.APPLICATION_JSON + "; charset=UTF-8" })
     public Response produserUtkast(@PathParam("behandlingID") long behandlingID,
                                    @PathParam("dokumenttypeKode") Dokumenttype dokumenttypeKode,
-            BrevDataDto brevDataDto) throws TekniskException, FunksjonellException {
+            BrevbestillingDto brevBestillingDto) throws TekniskException, FunksjonellException {
         byte[] dokument;
         tilgang.sjekk(behandlingID);
-        dokument = dokumentService.produserUtkast(behandlingID, dokumenttypeKode, brevDataDto);
+        dokument = dokumentService.produserUtkast(behandlingID, dokumenttypeKode, brevBestillingDto);
         Response.ResponseBuilder ok = Response.ok(dokument);
         ok.header(HttpHeaders.CONTENT_LENGTH, dokument.length);
         ok.header(HttpHeaders.CONTENT_DISPOSITION, "inline");
@@ -86,9 +86,9 @@ public class DokumentTjeneste extends RestTjeneste {
     public Response produserDokument(@Context UriInfo uriInfo,
                                      @PathParam("behandlingID") long behandlingID,
                                      @PathParam("dokumenttypeKode") Dokumenttype dokumenttypeKode,
-            BrevDataDto brevDataDto) throws FunksjonellException, TekniskException {
+            BrevbestillingDto brevBestillingDto) throws FunksjonellException, TekniskException {
         tilgang.sjekk(behandlingID);
-        dokumentService.produserDokumentISaksflyt(behandlingID, dokumenttypeKode, brevDataDto);
+        dokumentService.produserDokumentISaksflyt(behandlingID, dokumenttypeKode, brevBestillingDto);
         return Response.noContent().build();
     }
 
