@@ -47,8 +47,6 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.getLovvalgsbestemmelser().forordning_883_2004 = tilKoder(LovvalgBestemmelse_883_2004.values());
         kodeverk.getLovvalgsbestemmelser().forordning_987_2009 = tilKoder(LovvalgBestemmelse_987_2009.values());
         kodeverk.getLovvalgsbestemmelser().tillegg = tilKoder(TilleggBestemmelse_883_2004.values());
-        // FIXME bør fjernes av MELOSYS-1848
-        kodeverk.setLovvalgsunntak(tilKoder(LovvalgBestemmelse_883_2004.values()));
         kodeverk.setMottaksretning(tilKoder(Mottaksretning.values()));
         kodeverk.setOppgavetyper(tilKoder(Oppgavetype.values()));
         kodeverk.setRepresenterer(tilKoder(Representerer.values()));

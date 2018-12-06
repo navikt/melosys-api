@@ -14,7 +14,6 @@ public class KodeverkDto {
     private List<KodeDto> dokumenttyper;
     private List<KodeDto> finansiering;
     private List<KodeDto> landkoder;
-    private List<KodeDto> lovvalgsunntak;
     private List<KodeDto> mottaksretning;
     private List<KodeDto> oppgavetyper;
     private List<KodeDto> representerer;
@@ -85,14 +84,6 @@ public class KodeverkDto {
 
     public void setLandkoder(List<KodeDto> landkoder) {
         this.landkoder = landkoder;
-    }
-
-    public List<KodeDto> getLovvalgsunntak() {
-        return lovvalgsunntak;
-    }
-
-    public void setLovvalgsunntak(List<KodeDto> lovvalgsunntak) {
-        this.lovvalgsunntak = lovvalgsunntak;
     }
 
     public List<KodeDto> getMottaksretning() {
