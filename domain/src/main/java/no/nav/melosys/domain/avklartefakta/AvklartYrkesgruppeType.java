@@ -4,19 +4,19 @@ import no.nav.melosys.domain.YrkesgruppeType;
 import no.nav.melosys.exception.TekniskException;
 
 public enum AvklartYrkesgruppeType {
-    YRKESAKTIV,
-    YRKESAKTIV_FLYVENDE,
-    YRKESAKTIV_SKIP,
+    ORDINAER,
+    FLYENDE_PERSONELL,
+    SOKKEL_ELLER_SKIP,
     IKKE_YRKESAKTIV,
     KONTANTYTELSEMOTTAKER;
 
     public YrkesgruppeType tilYrkesgruppeType() throws TekniskException {
         switch(this) {
-            case YRKESAKTIV:
+            case ORDINAER:
                 return YrkesgruppeType.ORDINAER;
-            case YRKESAKTIV_FLYVENDE:
+            case FLYENDE_PERSONELL:
                 return YrkesgruppeType.FLYENDE_PERSONELL;
-            case YRKESAKTIV_SKIP:
+            case SOKKEL_ELLER_SKIP:
                 return YrkesgruppeType.SOKKEL_ELLER_SKIP;
             default:
                 throw new TekniskException("Finner ingen yrkesgruppe fra avklarte fakta");

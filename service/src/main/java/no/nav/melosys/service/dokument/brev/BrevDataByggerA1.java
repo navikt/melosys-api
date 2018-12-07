@@ -75,10 +75,7 @@ public class BrevDataByggerA1 implements BrevDataBygger {
     }
 
     private List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        Set<String> organisasjonsnumre = søknad.hentAlleOrganisasjonsnumre();
-        organisasjonsnumre.retainAll(avklarteOrganisasjoner);
-
-        return registerOppslagService.hentOrganisasjoner(organisasjonsnumre).stream()
+        return registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner).stream()
                 .map(org -> new Virksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), utfyllManglendeAdressefelter(org)))
                 .collect(Collectors.toList());
     }
