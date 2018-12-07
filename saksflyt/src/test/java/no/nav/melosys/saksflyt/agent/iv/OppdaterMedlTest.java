@@ -110,4 +110,21 @@ public class OppdaterMedlTest {
         assertEquals(ProsessSteg.FEILET_MASKINELT, p.getSteg());
     }
 
+    @Test
+    public void erPeriodeEndelig() {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        assertThat(agent.erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)).isTrue();
+    }
+
+    @Test
+    public void erPeriodeUnderAvklaring() {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(BehandlingsresultatType.ANMODNING_OM_UNNTAK);
+        assertThat(agent.erPeriodeUnderAvklaring(behandlingsresultat)).isTrue();
+    }
+
 }

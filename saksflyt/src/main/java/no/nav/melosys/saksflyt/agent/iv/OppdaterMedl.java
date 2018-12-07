@@ -21,8 +21,6 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
 import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
-import static no.nav.melosys.domain.dokument.medlemskap.OpprettMedlemskapSpesifikasjon.erPeriodeEndelig;
-import static no.nav.melosys.domain.dokument.medlemskap.OpprettMedlemskapSpesifikasjon.erPeriodeUnderAvklaring;
 
 /**
  * Oppdaterer medlemskap periode i MEDL.
@@ -89,5 +87,13 @@ public class OppdaterMedl extends AbstraktStegBehandler {
             medlFasade.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode);
         }
        prosessinstans.setSteg(IV_SEND_BREV);
+    }
+
+    public boolean erPeriodeEndelig(Behandlingsresultat behandlingsresultat, Lovvalgsperiode lovvalgsperiode) {
+        return behandlingsresultat.getType() == BehandlingsresultatType.FASTSATT_LOVVALGSLAND && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET;
+    }
+
+    public boolean erPeriodeUnderAvklaring(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.getType() == BehandlingsresultatType.ANMODNING_OM_UNNTAK;
     }
 }
