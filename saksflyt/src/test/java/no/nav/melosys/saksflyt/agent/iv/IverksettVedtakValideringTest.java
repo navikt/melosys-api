@@ -27,7 +27,6 @@ public class IverksettVedtakValideringTest {
         p.setType(ProsessType.IVERKSETT_VEDTAK);
 
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
-        p.setData(ProsessDataKey.OPPGAVE_ID, "12345");
 
         p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.FASTSATT_LOVVALGSLAND.getKode());
 
@@ -49,13 +48,4 @@ public class IverksettVedtakValideringTest {
         assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
-    @Test
-    public void utfoerSteg_manglerSaksbehandler() {
-        p = new Prosessinstans();
-        p.setType(ProsessType.IVERKSETT_VEDTAK);
-
-        agent.utførSteg(p);
-
-        assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
-    }
 }
