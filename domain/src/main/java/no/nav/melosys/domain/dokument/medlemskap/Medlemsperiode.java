@@ -8,6 +8,8 @@ import no.nav.melosys.domain.HarPeriode;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Medlemsperiode implements HarPeriode {
 
+    public Long id;
+
     public Periode periode;
 
     public String type; //"http://nav.no/kodeverk/Kodeverk/PeriodetypeMedl"

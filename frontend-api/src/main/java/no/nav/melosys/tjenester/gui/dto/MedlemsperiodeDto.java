@@ -4,6 +4,8 @@ import no.nav.melosys.service.kodeverk.KodeDto;
 
 public class MedlemsperiodeDto {
 
+    public long periodeID;
+
     public PeriodeDto periode;
 
     public KodeDto periodetype;

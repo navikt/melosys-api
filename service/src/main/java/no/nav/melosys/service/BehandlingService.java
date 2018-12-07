@@ -64,7 +64,7 @@ public class BehandlingService {
         tidligereMedlemsperiodeRepository.save(tidligereMedlemsperioder);
     }
 
-    public List<Long> finnMedlemsperioder(long behandlingID) {
+    public List<Long> hentMedlemsperioder(long behandlingID) {
         List<TidligereMedlemsperiode> tidligereMedlemsperioder = tidligereMedlemsperiodeRepository.findById_BehandlingId(behandlingID);
         if (tidligereMedlemsperioder == null) {
             return new ArrayList<>();

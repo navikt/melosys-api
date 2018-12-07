@@ -10,7 +10,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.abac.Tilgang;
@@ -54,18 +53,27 @@ public class BehandlingTjeneste extends RestTjeneste {
 
     @POST
     @Path("{behandlingID}/perioder")
+    @ApiOperation(value = "Knytt medlemsperioder til oppholdsland fra søknaden",
+        response = TidligereMedlemsperioderDto.class)
     public Response knyttMedlemsperioder(@PathParam("behandlingID") long behandlingID,
-                                         TidligereMedlemsperioderDto tidligereMedlemsperioder) throws FunksjonellException {
+                                         TidligereMedlemsperioderDto tidligereMedlemsperioder) throws FunksjonellException, TekniskException {
+        log.info("Saksbehandler {} ber om å knytte medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
+        tilgang.sjekk(behandlingID);
+
         behandlingService.knyttMedlemsperioder(behandlingID, tidligereMedlemsperioder.periodeIder);
         return Response.ok(tidligereMedlemsperioder).build();
     }
 
     @GET
     @Path("{behandlingID}/perioder")
-    public Response knyttMedlemsperioder(@PathParam("behandlingID") long behandlingID) throws IkkeFunnetException {
+    @ApiOperation(value = "Hent medlemsperioder knyttet til oppholdsland fra søknaden",
+        response = TidligereMedlemsperioderDto.class)
+    public Response hentMedlemsperioder(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
+        log.info("Saksbehandler {} ber om å hente medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
+        tilgang.sjekk(behandlingID);
+
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
-        tidligereMedlemsperioderDto.periodeIder = behandlingService.finnMedlemsperioder(behandlingID);
+        tidligereMedlemsperioderDto.periodeIder = behandlingService.hentMedlemsperioder(behandlingID);
         return Response.ok(tidligereMedlemsperioderDto).build();
     }
-
 }

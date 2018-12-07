@@ -34,7 +34,7 @@
         </xsl:element>
     </xsl:template>
 
-    <xsl:template match="type|status|land|lovvalg|kildedokumenttype|kilde">
+    <xsl:template match="id|type|status|land|lovvalg|kildedokumenttype|kilde">
         <xsl:element name="{name()}">
             <xsl:value-of select="."/>
         </xsl:element>

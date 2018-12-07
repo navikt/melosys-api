@@ -125,20 +125,20 @@ public class BehandlingServiceTest {
         long behandlingID = 11L;
         when(tidligereMedlemsperiodeRepo.findById_BehandlingId(anyLong())).thenReturn(null);
 
-        List<Long> periodeIder = behandlingService.finnMedlemsperioder(behandlingID);
+        List<Long> periodeIder = behandlingService.hentMedlemsperioder(behandlingID);
         assertThat(periodeIder).isNotNull();
         assertThat(periodeIder).isEmpty();
     }
 
     @Test
-    public void finnMedlemsperioder() {
+    public void hentMedlemsperioder() {
         long behandlingID = 11L;
         List<TidligereMedlemsperiode> tidligereMedlemsperioder = Arrays.asList(
             new TidligereMedlemsperiode(behandlingID, 2L),
             new TidligereMedlemsperiode(behandlingID, 3L));
         when(tidligereMedlemsperiodeRepo.findById_BehandlingId(anyLong())).thenReturn(tidligereMedlemsperioder);
 
-        List<Long> periodeIder = behandlingService.finnMedlemsperioder(behandlingID);
+        List<Long> periodeIder = behandlingService.hentMedlemsperioder(behandlingID);
         assertThat(periodeIder).isNotNull();
         assertThat(periodeIder).containsExactly(2L, 3L);
     }

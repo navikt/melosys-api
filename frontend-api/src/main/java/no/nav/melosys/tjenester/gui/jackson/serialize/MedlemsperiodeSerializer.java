@@ -26,6 +26,7 @@ public class MedlemsperiodeSerializer extends StdSerializer<Medlemsperiode> {
         MedlemsperiodeDto medlemsperiodeDto = new MedlemsperiodeDto();
         Periode periode = medlemsperiode.getPeriode();
 
+        medlemsperiodeDto.periodeID = medlemsperiode.id;
         medlemsperiodeDto.periodetype = kodeverkService.getKodeverdi(FellesKodeverk.PERIODETYPE_MEDL, medlemsperiode.getType());
         medlemsperiodeDto.periode = getPeriode(periode);
         medlemsperiodeDto.land = kodeverkService.getKodeverdi(FellesKodeverk.LANDKODER, medlemsperiode.getLand());
