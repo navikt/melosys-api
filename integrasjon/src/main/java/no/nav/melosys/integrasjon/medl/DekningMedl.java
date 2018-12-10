@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.medlemskap;
+package no.nav.melosys.integrasjon.medl;
 
 public enum DekningMedl {
     UNNTATT("Unntatt"),
@@ -14,7 +14,4 @@ public enum DekningMedl {
         return kode;
     }
 
-    public void setKode(String kode) {
-        this.kode = kode;
-    }
 }

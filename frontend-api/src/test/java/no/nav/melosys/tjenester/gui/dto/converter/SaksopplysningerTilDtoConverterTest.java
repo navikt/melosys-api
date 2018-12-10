@@ -18,7 +18,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
-import no.nav.melosys.domain.dokument.medlemskap.Periodetype;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import org.junit.Before;
@@ -75,20 +74,20 @@ public class SaksopplysningerTilDtoConverterTest {
     public void testMedlemsperioderKronologisk(){
         List<Medlemsperiode> medlemsperioder = new ArrayList<>() ;
         Medlemsperiode medlemsperiode1 = new Medlemsperiode();
-        medlemsperiode1.type = Periodetype.PMMEDSKP;
+        medlemsperiode1.type = "PMMEDSKP";
         medlemsperiode1.periode = new no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2005,1,1),LocalDate.of(2006,5,30));
 
         Medlemsperiode medlemsperiode2 = new Medlemsperiode();
         medlemsperiode2.periode = new no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2016,1,1),LocalDate.of(2016,12,31));
-        medlemsperiode2.type = Periodetype.PUMEDSKP;
+        medlemsperiode2.type = "PUMEDSKP";
 
         Medlemsperiode medlemsperiode3 = new Medlemsperiode();
         medlemsperiode3.periode = new no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2017,1,1),LocalDate.of(2017,12,31));
-        medlemsperiode3.type = Periodetype.PUMEDSKP;
+        medlemsperiode3.type = "PUMEDSKP";
 
         Medlemsperiode medlemsperiode4 = new Medlemsperiode();
         medlemsperiode4.periode = new no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2018,1,1),LocalDate.of(2018,12,31));
-        medlemsperiode4.type = Periodetype.PMMEDSKP;
+        medlemsperiode4.type = "PMMEDSKP";
 
         medlemsperioder.add(medlemsperiode1);
         medlemsperioder.add(medlemsperiode2);

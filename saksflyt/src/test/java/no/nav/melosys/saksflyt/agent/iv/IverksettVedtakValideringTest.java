@@ -15,21 +15,25 @@ public class IverksettVedtakValideringTest {
 
     private IverksettVedtakValidering agent;
 
+    private Prosessinstans p;
+
     @Before
     public void setUp() {
         agent = new IverksettVedtakValidering();
-    }
 
-    @Test
-    public void utfoerSteg() {
-        Prosessinstans p = new Prosessinstans();
+        p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setType(Behandlingstype.SØKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
 
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
+
         p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.FASTSATT_LOVVALGSLAND.getKode());
 
+    }
+
+    @Test
+    public void utfoerSteg() {
         agent.utførSteg(p);
 
         assertThat(p.getSteg()).isEqualTo(IV_OPPDATER_RESULTAT);
@@ -37,9 +41,6 @@ public class IverksettVedtakValideringTest {
 
     @Test
     public void utfoerSteg_feilProsessType() {
-        Prosessinstans p = new Prosessinstans();
-        p.setBehandling(new Behandling());
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
         p.setType(ProsessType.OPPFRISKNING);
 
         agent.utførSteg(p);
@@ -47,15 +48,4 @@ public class IverksettVedtakValideringTest {
         assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
-    @Test
-    public void utfoerSteg_manglerSaksbehandler() {
-        Prosessinstans p = new Prosessinstans();
-        p.setBehandling(new Behandling());
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
-        p.setType(ProsessType.IVERKSETT_VEDTAK);
-
-        agent.utførSteg(p);
-
-        assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
-    }
 }

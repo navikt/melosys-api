@@ -26,21 +26,15 @@ public class MedlemsperiodeSerializer extends StdSerializer<Medlemsperiode> {
         MedlemsperiodeDto medlemsperiodeDto = new MedlemsperiodeDto();
         Periode periode = medlemsperiode.getPeriode();
 
-        medlemsperiodeDto.periodetype = medlemsperiode.getType();
+        medlemsperiodeDto.periodetype = kodeverkService.getKodeverdi(FellesKodeverk.PERIODETYPE_MEDL, medlemsperiode.getType());
         medlemsperiodeDto.periode = getPeriode(periode);
         medlemsperiodeDto.land = kodeverkService.getKodeverdi(FellesKodeverk.LANDKODER, medlemsperiode.getLand());
-        // Feltet er required, men vi mapper til en Melosys-enum, og vil dermed ikke ha grunnlagstype for andre medlemsperioder
-        if (medlemsperiode.getGrunnlagstype() != null) {
-            medlemsperiodeDto.grunnlagstype = kodeverkService.getKodeverdi(FellesKodeverk.GRUNNLAG_MEDL, medlemsperiode.getGrunnlagstype().getKode());
-        }
+        medlemsperiodeDto.grunnlagstype = kodeverkService.getKodeverdi(FellesKodeverk.GRUNNLAG_MEDL, medlemsperiode.getGrunnlagstype());
         medlemsperiodeDto.kilde = kodeverkService.getKodeverdi(FellesKodeverk.KILDESYSTEM_MEDL, medlemsperiode.getKilde());
         medlemsperiodeDto.kildedokumenttype = kodeverkService.getKodeverdi(FellesKodeverk.KILDEDOKUMENT_MEDL, medlemsperiode.getKildedokumenttype());
         medlemsperiodeDto.lovvalg = kodeverkService.getKodeverdi(FellesKodeverk.LOVVALG_MEDL, medlemsperiode.getLovvalg());
         medlemsperiodeDto.status = kodeverkService.getKodeverdi(FellesKodeverk.PERIODESTATUS_MEDL, medlemsperiode.getStatus());
-        if (medlemsperiode.getTrygdedekning() != null) {
-            medlemsperiodeDto.trygdedekning = kodeverkService.getKodeverdi(FellesKodeverk.DEKNING_MEDL, medlemsperiode.getTrygdedekning().getKode());
-        }
-
+        medlemsperiodeDto.trygdedekning = kodeverkService.getKodeverdi(FellesKodeverk.DEKNING_MEDL, medlemsperiode.getTrygdedekning());
         generator.writeObject(medlemsperiodeDto);
     }
 
