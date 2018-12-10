@@ -21,6 +21,8 @@ public class XsltConfig {
 
     public static final String SOB_MAPPE = "sob";
 
+    public static final String SØKNAD_MAPPE = "soeknad";
+
     public static final String TPS_MAPPE = "tps";
 
     /* Tjenester */
@@ -37,6 +39,8 @@ public class XsltConfig {
     public static final String PERSONHISTORIKK_TJENESTE = "personhistorikk";
 
     private static final String SAKOGBEHANDLING_TJENESTE = "sakogbehandling";
+
+    private static final String SØKNAD = "soeknad";
 
     /**
      * Returnerer en sti til xslt filen som brukes for å konvertere mot det felles domene.
@@ -61,6 +65,7 @@ public class XsltConfig {
             case INNTEKT: return XsltConfig.INNTEKT_TJENESTE;
             case MEDLEMSKAP: return XsltConfig.MEDLEMSKAP_TJENESTE;
             case SOB_SAK: return XsltConfig.SAKOGBEHANDLING_TJENESTE;
+            case SØKNAD: return XsltConfig.SØKNAD;
             default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
         }
     }
@@ -73,6 +78,7 @@ public class XsltConfig {
             case INNTEKT: return XsltConfig.INNTK_MAPPE;
             case MEDLEMSKAP: return XsltConfig.MEDL_MAPPE;
             case SOB_SAK: return XsltConfig.SOB_MAPPE;
+            case SØKNAD: return XsltConfig.SØKNAD_MAPPE;
             default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
         }
     }
