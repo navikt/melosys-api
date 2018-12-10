@@ -485,6 +485,12 @@
                 <classifier>jaxb</classifier>
                 <version>${dokprod.melosysbrev.version}</version>                
             </dependency>
+            <dependency>
+                <groupId>no.nav.dok.metaforcemal</groupId>
+                <artifactId>melosysbrev</artifactId>
+                <classifier>jaxb-sources</classifier>
+                <version>${dokprod.melosysbrev.version}</version>                
+            </dependency>            
 
             <!-- Test -->
             <dependency>

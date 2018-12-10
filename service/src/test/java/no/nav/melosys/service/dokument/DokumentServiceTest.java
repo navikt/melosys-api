@@ -1,10 +1,15 @@
 package no.nav.melosys.service.dokument;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
+import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -28,6 +33,9 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Test;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import static no.nav.melosys.domain.avklartefakta.AvklartefaktaType.AG_FORRETNINGSLAND;
+import static no.nav.melosys.domain.avklartefakta.AvklartefaktaType.AVKLARTE_ARBEIDSGIVER;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -154,6 +162,15 @@ public final class DokumentServiceTest {
             .thenReturn(String.format("IDENT%s", aktør.getAktørId()));
         BehandlingsresultatRepository behandlingsresultatRepository = mock(BehandlingsresultatRepository.class);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        List<Avklartefakta> faktaliste = Arrays.asList(lagAvklarteFakta(AVKLARTE_ARBEIDSGIVER, "Lorum"),
+                lagAvklarteFakta(AG_FORRETNINGSLAND, "SE"));
+        behandlingsresultat.setAvklartefakta(new HashSet<>(faktaliste));
+        Lovvalgsperiode periode = new Lovvalgsperiode();
+        periode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1);
+        periode.setFom(LocalDate.now());
+        periode.setTom(LocalDate.now());
+        List<Lovvalgsperiode> perioder = Arrays.asList(periode);
+        behandlingsresultat.setLovvalgsperioder(new HashSet<>(perioder));
         when(behandlingsresultatRepository.findOne(BEHANDLINGSID)).thenReturn(behandlingsresultat);
         BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository);
         JoarkFasade joarkFasade = mock(JoarkFasade.class);
@@ -170,6 +187,14 @@ public final class DokumentServiceTest {
         return new DokumentService(behandlingRepository, fagsakRepository,
                 brevDataService, dokSysFasade, joarkFasade, binge,
                 prosessinstansRepo, brevdatabyggervelger);
+    }
+
+    private static Avklartefakta lagAvklarteFakta(AvklartefaktaType type, String subjekt) {
+        Avklartefakta arbeidsgiverFaktum = new Avklartefakta();
+        arbeidsgiverFaktum.setSubjekt(subjekt);
+        arbeidsgiverFaktum.setType(type);
+        arbeidsgiverFaktum.setFakta("TRUE");
+        return arbeidsgiverFaktum;
     }
 
     private static Aktoer lagAktør(RolleType type) {
