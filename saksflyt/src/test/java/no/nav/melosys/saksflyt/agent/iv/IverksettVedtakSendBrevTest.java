@@ -28,13 +28,13 @@ import static org.mockito.Mockito.when;
 public class IverksettVedtakSendBrevTest {
 
     private final IverksettVedtakSendBrev agent;
-    private static final Long BEHANDLINGSID = 42L;
-    private static final Long BEHANDLINGSID_MED_FLERE_PERIODER = 43L;
-    private static final Long INNVILGET_BEHANDLINGSID = 44L;
-    private static final Long BEHANDLINGSID_UTENLANDSK_LOVVALG = 45L;
+    private static final long BEHANDLINGSID = 42L;
+    private static final long BEHANDLINGSID_MED_FLERE_PERIODER = 43L;
+    private static final long INNVILGET_BEHANDLINGSID = 44L;
+    private static final long BEHANDLINGSID_UTENLANDSK_LOVVALG = 45L;
     private static final long BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE = 46L;
     private static final long INNVILGET_BEHANDLINGSID_12_1 = 47L;
-    private static final Long INNVILGET_BEHANDLINGSID_12_2 = 48L;
+    private static final long INNVILGET_BEHANDLINGSID_12_2 = 48L;
 
     public IverksettVedtakSendBrevTest() throws Exception {
         agent = lagStegbehandler(lagBehandling(INNVILGET_BEHANDLINGSID));
