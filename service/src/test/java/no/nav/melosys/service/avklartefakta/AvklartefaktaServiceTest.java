@@ -100,7 +100,7 @@ public class AvklartefaktaServiceTest {
     @Test
     public void testYrkesgruppeOrdinær() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setFakta("YRKESAKTIV");
+        avklartefakta.setFakta("ORDINAER");
         Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
 
@@ -109,9 +109,9 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void testYrkesgruppeFlyvende() throws TekniskException {
+    public void testYrkesgruppeFlyende() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setFakta("YRKESAKTIV_FLYVENDE");
+        avklartefakta.setFakta("FLYENDE_PERSONELL");
         Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
 
@@ -122,7 +122,7 @@ public class AvklartefaktaServiceTest {
     @Test
     public void testYrkesgruppeSokkelSkip() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setFakta("YRKESAKTIV_SKIP");
+        avklartefakta.setFakta("SOKKEL_ELLER_SKIP");
         Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
 
