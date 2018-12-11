@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper.felles;
 
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.Adresse;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 
 public class Virksomhet {
@@ -10,7 +10,7 @@ public class Virksomhet {
         this.adresse = foretak.adresse;
     }
 
-    public Virksomhet(String navn, String orgnr, StrukturertAdresse adresse) {
+    public Virksomhet(String navn, String orgnr, Adresse adresse) {
         this.navn = navn;
         this.orgnr = orgnr;
         this.adresse = adresse;
@@ -18,5 +18,5 @@ public class Virksomhet {
 
     public final String navn;
     public final String orgnr;
-    public final StrukturertAdresse adresse;
+    public final Adresse adresse;
 }

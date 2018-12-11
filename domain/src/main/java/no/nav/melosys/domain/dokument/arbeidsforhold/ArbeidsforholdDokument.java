@@ -2,6 +2,7 @@ package no.nav.melosys.domain.dokument.arbeidsforhold;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -10,6 +11,7 @@ import javax.xml.bind.annotation.*;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import org.apache.commons.lang3.StringUtils;
 
 @XmlRootElement
@@ -37,5 +39,12 @@ public class ArbeidsforholdDokument extends SaksopplysningDokument {
             .flatMap(arbeidsforhold -> Stream.of(arbeidsforhold.getArbeidsgiverID(), arbeidsforhold.getOpplysningspliktigID()))
             .filter(StringUtils::isNotEmpty)
             .collect(Collectors.toSet());
+    }
+
+    public List<Periode> hentPerioder() {
+        return getArbeidsforhold().stream()
+                .map(arbeidsforhold -> arbeidsforhold.getAnsettelsesPeriode())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }

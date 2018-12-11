@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -23,11 +22,13 @@ import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
+import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
-
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
+
+import no.nav.dok.melosysbrev._000116.ObjectFactory;
 
 public class A1Mapper implements BrevDataMapper {
 
@@ -40,16 +41,6 @@ public class A1Mapper implements BrevDataMapper {
     private Behandlingsresultat resultat;
 
     private BrevDataA1 brevData;
-
-    class IkkeFysiskArbeidssted {
-        IkkeFysiskArbeidssted(String navn, String land) {
-            this.navn = navn;
-            this.land = land;
-        }
-
-        public final String navn;
-        public final String land;
-    }
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
@@ -109,7 +100,7 @@ public class A1Mapper implements BrevDataMapper {
             a1.setIkkeFysiskArbeidssted("true");
         }
         else {
-            Set<IkkeFysiskArbeidssted> ikkeFysiskArbeidssteder = hentIkkeFysiskeArbeidssteder();
+            Set<Arbeidssted> ikkeFysiskArbeidssteder = hentIkkeFysiskeArbeidssteder();
             a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(fysiskArbeidssteder, ikkeFysiskArbeidssteder));
             a1.setIkkeFysiskArbeidssted("false");
         }
@@ -165,7 +156,7 @@ public class A1Mapper implements BrevDataMapper {
 
     private HovedvirksomhetType mapHovedvirksomhet(Virksomhet virksomhet) {
         HovedvirksomhetType hovedvirksomhetBrev = new HovedvirksomhetType();
-        StrukturertAdresse adresse = virksomhet.adresse;
+        StrukturertAdresse adresse = (StrukturertAdresse) virksomhet.adresse;
         hovedvirksomhetBrev.setOrgnummer(virksomhet.orgnr);
         hovedvirksomhetBrev.setNavn(virksomhet.navn);
         hovedvirksomhetBrev.setGatenavn(adresse.gatenavn);
@@ -195,12 +186,12 @@ public class A1Mapper implements BrevDataMapper {
     }
 
     private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(Set<StrukturertAdresse> fysiskeArbeidssteder,
-                                                                 Set<IkkeFysiskArbeidssted> ikkeFysiskArbeidssteder) {
+                                                                 Set<Arbeidssted> ikkeFysiskArbeidssteder) {
         FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
-        for (IkkeFysiskArbeidssted ikkeFysiskArbeidssted : ikkeFysiskArbeidssteder) {
+        for (Arbeidssted ikkeFysiskArbeidssted : ikkeFysiskArbeidssteder) {
             AdresseType adresseType = new AdresseType();
             adresseType.setNavn(ikkeFysiskArbeidssted.navn);
-            adresseType.setLand(ikkeFysiskArbeidssted.land);
+            adresseType.setLand(ikkeFysiskArbeidssted.landKode);
             fysiskeAdresserBrev.getAdresse().add(adresseType);
         }
 
@@ -218,7 +209,7 @@ public class A1Mapper implements BrevDataMapper {
     }
 
     /**
-     * Ikke fysisk arbeidssted er definert som flere enn 3 fysiske arbeidssteder
+     * Ikke fysisk Arbeidssted er definert som flere enn 3 fysiske arbeidssteder
      * eller ingen fysiske arbeidssteder.
      */
     private boolean harIkkeFysiskArbeidssted(Set<StrukturertAdresse> fysiskArbeidssteder) {
@@ -235,12 +226,12 @@ public class A1Mapper implements BrevDataMapper {
                 .collect(Collectors.toSet());
     }
 
-    private Set<IkkeFysiskArbeidssted> hentIkkeFysiskeArbeidssteder() {
-        Set<IkkeFysiskArbeidssted> ikkeFysiskArbeidssteder = new HashSet<>();
+    private Set<Arbeidssted> hentIkkeFysiskeArbeidssteder() {
+        Set<Arbeidssted> ikkeFysiskArbeidssteder = new HashSet<>();
 
         // TODO: Sokkel skip mappes mot installasjonen
-        //fysiskeArbeidssteder.add(new IkkeFysiskArbeidssted("Ekofisk", "NO");
-        //fysiskeArbeidssteder.add(new IkkeFysiskArbeidssted("Seven Kestrel", "GB");
+        //fysiskeArbeidssteder.add(new Arbeidssted("Ekofisk", "NO");
+        //fysiskeArbeidssteder.add(new Arbeidssted("Seven Kestrel", "GB");
 
         return ikkeFysiskArbeidssteder;
     }
@@ -254,4 +245,5 @@ public class A1Mapper implements BrevDataMapper {
         brevdataType.setVedlegg(vedlegg);
         return factory.createBrevdata(brevdataType);
     }
+
 }

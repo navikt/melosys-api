@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlElement;
 import no.nav.melosys.domain.Landkoder;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost;
@@ -54,6 +55,11 @@ public class OrganisasjonsDetaljer {
         return konverterTilStrukturertAdresse(adresse);
     }
 
+    public UstrukturertAdresse hentUstrukturertForretningsadresse() {
+        GeografiskAdresse adresse = hentFørsteGyldigeForretningsadresse();
+        return konverterTilUstrukturertAdresse(adresse);
+    }
+
     public GeografiskAdresse hentFørsteGyldigeForretningsadresse() {
         return hentFørsteGyldigeAdresse(forretningsadresse);
     }
@@ -86,6 +92,34 @@ public class OrganisasjonsDetaljer {
             }
         }
         return null;
+    }
+
+    private UstrukturertAdresse konverterTilUstrukturertAdresse(GeografiskAdresse adresse) {
+        if(adresse == null) {
+            return null;
+        }
+
+        UstrukturertAdresse ustrukturertAdresse = new UstrukturertAdresse();
+        if (adresse instanceof SemistrukturertAdresse) {
+            SemistrukturertAdresse sAdresse = (SemistrukturertAdresse) adresse;
+            if (sAdresse.getAdresselinje1() != null) {
+                ustrukturertAdresse.adresselinjer.add(sAdresse.getAdresselinje1());
+            }
+            if (sAdresse.getAdresselinje2() != null) {
+                ustrukturertAdresse.adresselinjer.add(sAdresse.getAdresselinje2());
+            }
+            if (sAdresse.getAdresselinje3() != null) {
+                ustrukturertAdresse.adresselinjer.add(sAdresse.getAdresselinje3());
+            }
+            ustrukturertAdresse.landKode = sAdresse.getLandkode();
+
+            if (!sAdresse.getLandkode().equals(Landkoder.NO.getKode())) {
+                ustrukturertAdresse.adresselinjer.add(sAdresse.getPoststedUtland());
+            } else {
+                ustrukturertAdresse.adresselinjer.add(sAdresse.getPostnr());
+            }
+        }
+        return ustrukturertAdresse;
     }
 
     private StrukturertAdresse konverterTilStrukturertAdresse(GeografiskAdresse adresse) {
