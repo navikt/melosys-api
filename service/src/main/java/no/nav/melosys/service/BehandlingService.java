@@ -1,21 +1,32 @@
 package no.nav.melosys.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsstatus;
+import no.nav.melosys.domain.TidligereMedlemsperiode;
+import no.nav.melosys.domain.TidligereMedlemsperiodeId;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BehandlingService {
 
     private final BehandlingRepository behandlingRepository;
 
+    private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
+
     @Autowired
-    public BehandlingService(BehandlingRepository behandlingRepository) {
+    public BehandlingService(BehandlingRepository behandlingRepository, TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository) {
         this.behandlingRepository = behandlingRepository;
+        this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
     }
 
     /**
@@ -36,5 +47,31 @@ public class BehandlingService {
         }
         behandling.setStatus(status);
         behandlingRepository.save(behandling);
+    }
+
+    @Transactional
+    public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) throws FunksjonellException {
+        Behandling behandling = behandlingRepository.findOne(behandlingID);
+        if (behandling == null) {
+            throw new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke.");
+        }
+        if (behandling.getStatus() != Behandlingsstatus.UNDER_BEHANDLING) {
+            throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
+        }
+        List<TidligereMedlemsperiode> tidligereMedlemsperioder = periodeIder.stream()
+            .map(pid -> new TidligereMedlemsperiode(behandlingID, pid)).collect(Collectors.toList());
+        tidligereMedlemsperiodeRepository.deleteById_BehandlingId(behandlingID);
+        tidligereMedlemsperiodeRepository.save(tidligereMedlemsperioder);
+    }
+
+    public List<Long> hentMedlemsperioder(long behandlingID) {
+        List<TidligereMedlemsperiode> tidligereMedlemsperioder = tidligereMedlemsperiodeRepository.findById_BehandlingId(behandlingID);
+        if (tidligereMedlemsperioder == null) {
+            return new ArrayList<>();
+        }
+        return tidligereMedlemsperioder.stream()
+            .map(TidligereMedlemsperiode::getId)
+            .map(TidligereMedlemsperiodeId::getPeriodeId)
+            .collect(Collectors.toList());
     }
 }
