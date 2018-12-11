@@ -4,12 +4,16 @@ import javax.persistence.Converter;
 
 public enum Behandlingsstatus implements InterntKodeverkTabell<Behandlingsstatus> {
 
-    OPPRETTET("OPPRETTET", "Opprettet"),
-    UNDER_BEHANDLING("UNDER_BEHANDLING", "Under behandling"),
-    AVVENT_DOK_UTL("AVVENT_DOK_UTL", "Avventer dokumentasjon fra utlandet"),
-    AVVENT_DOK_PART ("AVVENT_DOK_PART", "Avventer dokumentasjon fra en part"),
-    VURDER_DOKUMENT("VURDER_DOKUMENT", "Nytt dokument mottatt på behandlingen"),
-    AVSLUTTET("AVSLUTTET", "Avsluttet");
+    OPPRETTET("OPPRETTET", "Behandlingen er opprettet"),
+    UNDER_BEHANDLING("UNDER_BEHANDLING", "Behandlingen pågår"),
+    AVSLUTTET("AVSLUTTET", "Behandlingen er avsluttet"),
+    AVVENT_DOK_UTL("AVVENT_DOK_UTL", "Avventer svar fra utenlandsk trygdemyndighet"),
+    AVVENT_DOK_PART ("AVVENT_DOK_PART", "Avventer svar fra part i saken"),
+    ANMODNING_UNNTAK_SENDT("ANMODNING_UNNTAK_SENDT", "Anmodning om unntak er sendt"),
+    VURDER_DOKUMENT("VURDER_DOKUMENT", "Vurder dokument"),
+    TIDSFRIST_UTLOEPT("TIDSFRIST_UTLOEPT", "Tidsfristen er utløpt på etterspurte opplysninger"),
+    FORELOEPIG_LOVVALG("FORELOEPIG_LOVVALG", "Avventer svar på foreløpig lovvalg"),
+    IVERKSETTER_VEDTAK("IVERKSETTER_VEDTAK", "Vedtak iverksettes");
     
     private String kode;
     private String beskrivelse;

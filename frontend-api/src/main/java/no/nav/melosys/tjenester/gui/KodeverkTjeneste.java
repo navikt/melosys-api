@@ -50,6 +50,7 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.setMottaksretning(tilKoder(Mottaksretning.values()));
         kodeverk.setOppgavetyper(tilKoder(Oppgavetype.values()));
         kodeverk.setRepresenterer(tilKoder(Representerer.values()));
+        kodeverk.setSaksstatuser(tilKoder(Fagsaksstatus.values()));
         kodeverk.setSakstyper(tilKoder(Fagsakstype.values()));
         kodeverk.setVedleggstitler(tilKoder(VedleggTittel.values()));
         return kodeverk;

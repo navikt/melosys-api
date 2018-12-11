@@ -119,6 +119,7 @@ public class FagsakTjeneste extends RestTjeneste {
             FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
             fagsakOppsummeringDto.setSaksnummer(fagsak.getSaksnummer());
             fagsakOppsummeringDto.setSakstype(fagsak.getType());
+            fagsakOppsummeringDto.setSaksstatus(fagsak.getStatus());
             fagsakOppsummeringDto.setOpprettetDato(fagsak.getRegistrertDato());
 
             Behandling behandling = fagsak.getAktivBehandling();

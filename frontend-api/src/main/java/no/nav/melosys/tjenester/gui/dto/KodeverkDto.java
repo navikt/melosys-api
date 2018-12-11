@@ -17,6 +17,7 @@ public class KodeverkDto {
     private List<KodeDto> mottaksretning;
     private List<KodeDto> oppgavetyper;
     private List<KodeDto> representerer;
+    private List<KodeDto> saksstatuser;
     private List<KodeDto> sakstyper;
     private List<KodeDto> vedleggstitler;
 
@@ -108,6 +109,14 @@ public class KodeverkDto {
 
     public void setRepresenterer(List<KodeDto> representerer) {
         this.representerer = representerer;
+    }
+
+    public List<KodeDto> getSaksstatuser() {
+        return saksstatuser;
+    }
+
+    public void setSaksstatuser(List<KodeDto> saksstatuser) {
+        this.saksstatuser = saksstatuser;
     }
 
     public List<KodeDto> getSakstyper() {

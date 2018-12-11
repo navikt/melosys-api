@@ -12,7 +12,7 @@ public class FagsakDto {
     private String saksnummer;
     private Long gsakSaksnummer;
     private Fagsakstype sakstype;
-    private Fagsaksstatus status;
+    private Fagsaksstatus saksstatus;
     private Instant registrertDato;
     private Instant endretDato;
     private List<BehandlingDto> behandlinger;
@@ -45,12 +45,12 @@ public class FagsakDto {
         this.sakstype = sakstype;
     }
 
-    public Fagsaksstatus getStatus() {
-        return status;
+    public Fagsaksstatus getSaksstatus() {
+        return saksstatus;
     }
 
-    public void setStatus(Fagsaksstatus status) {
-        this.status = status;
+    public void setSaksstatus(Fagsaksstatus saksstatus) {
+        this.saksstatus = saksstatus;
     }
 
     public Instant getRegistrertDato() {
