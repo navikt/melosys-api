@@ -6,10 +6,13 @@ import java.util.HashSet;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,13 +39,16 @@ public class OppdaterMedlTest {
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
 
+    @Mock
+    private LovvalgsperiodeRepository lovvalgsperiodeRepository;
+
     private Prosessinstans p;
 
     private Behandlingsresultat behandlingsresultat;
 
     @Before
     public void setUp() {
-        agent = new OppdaterMedl(medlFasade, tpsFasade, behandlingsresultatRepository);
+        agent = new OppdaterMedl(medlFasade, tpsFasade, behandlingsresultatRepository, lovvalgsperiodeRepository);
 
         p = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
@@ -87,6 +93,12 @@ public class OppdaterMedlTest {
 
         agent.utførSteg(p);
         verify(medlFasade ,times(1)).opprettPeriodeEndelig(any(), any());
+    }
+
+    @Test
+    public void lagreMedlPeriodeId() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        agent.utførSteg(p);
+        verify(lovvalgsperiodeRepository ,times(1)).save(any(Lovvalgsperiode.class));
     }
 
     @Test

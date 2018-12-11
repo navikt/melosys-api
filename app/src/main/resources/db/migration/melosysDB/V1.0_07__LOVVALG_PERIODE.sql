@@ -10,6 +10,7 @@ CREATE TABLE lovvalg_periode (
     innvilgelse_resultat    VARCHAR2(99)   NOT NULL,
     medlemskapstype         VARCHAR2(99)   NOT NULL,
     trygde_dekning          VARCHAR2(99)   NULL,
+    medlperiode_id          NUMBER(19)     NULL,
     CONSTRAINT pk_lovvalg_periode PRIMARY KEY (id)
     
 );
