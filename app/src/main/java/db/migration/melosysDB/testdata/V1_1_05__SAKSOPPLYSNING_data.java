@@ -76,6 +76,9 @@ public class V1_1_05__SAKSOPPLYSNING_data implements JdbcMigration {
             case XsltConfig.MEDL_MAPPE:
                 generateBatch(conn, dir, SaksopplysningType.MEDLEMSKAP, "2.0", SaksopplysningKilde.MEDL);
                 return;
+            case XsltConfig.SØKNAD_MAPPE:
+                generateBatch(conn, dir, SaksopplysningType.SØKNAD, "1.0", SaksopplysningKilde.SBH);
+                return;
         }
         throw new IllegalStateException("Unknown xml data directory: " + dir.getFileName());
     }

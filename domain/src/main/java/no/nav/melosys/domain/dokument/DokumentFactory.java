@@ -1,5 +1,15 @@
 package no.nav.melosys.domain.dokument;
 
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Templates;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import org.slf4j.Logger;
@@ -10,16 +20,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Templates;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 
 /**
  * SaksopplysningDokumentFactory konverterer et xml-resultat fra en ekstern tjeneste til et internt xml-dokument ved hejlp av XSLT med JAXP.
@@ -58,18 +58,27 @@ public class DokumentFactory {
             return null;
         }
 
+        // Hvis saksopplysning.getDokument() eksisterer kan man serialisere direkte for å få intern xml.
         if (dokument != null) {
             StreamResult result = new StreamResult(new StringWriter());
             marshaller.marshal(dokument, result);
             String xml = result.getWriter().toString();
             saksopplysning.setInternXml(xml);
-            return  xml;
+            return xml;
         }
 
         SaksopplysningType type = saksopplysning.getType();
         String versjon = saksopplysning.getVersjon();
 
-        // {@code dokumentXml} transformeres med en JAXP Transformer
+        if (saksopplysning.getInternXml() == null) {
+            saksopplysning.setInternXml(transformer(dokumentXml, type, versjon));
+        }
+
+        return saksopplysning.getInternXml();
+    }
+
+    // {@code dokumentXml} transformeres med en JAXP Transformer
+    private String transformer(String dokumentXml, SaksopplysningType type, String versjon) {
         StreamResult outputTarget = new StreamResult(new StringWriter());
         try {
             Templates templates = xsltTemplatesFactory.getXsltTemplates(type, versjon);
@@ -84,12 +93,7 @@ public class DokumentFactory {
             throw new RuntimeException(e);
         }
 
-        String internXml = outputTarget.getWriter().toString();
-        if (saksopplysning.getInternXml() == null) {
-            saksopplysning.setInternXml(internXml);
-        }
-
-        return internXml;
+        return outputTarget.getWriter().toString();
     }
 
     /**
