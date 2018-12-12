@@ -7,11 +7,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum Behandlingstype implements InterntKodeverkTabell<Behandlingstype> {
 
     SØKNAD("SOEKNAD", "Behandling av søknad"),
-    KLAGE("KLAGE", "Behandling av klage eller anke"),
-    NORGE_UTPEKT("NORGE_UTPEKT", "Behandling av at Norge er utpekt fra utenlandske myndigheter"),
-    PÅSTAND_UTL("PAASTAND_UTL", "Behandling av påstand fra utenlandske myndigheter"),
-    POSTING_UTL("POSTING_UTL", "Behandling av melding om posting fra utenlandske myndigheter"),
-    NY_VURDERING("NY_VURDERING", "Behandling av revurdering av et tidligere vedtak");
+    KLAGE("KLAGE", "Behandling av klage"),
+    ANKE("ANKE", "Behandling av anke"),
+    UNNTAK_FRA_MEDLEMSKAP("UNNTAK_FRA_MEDLEMSKAP", "Registrering av unntak"),
+    NORGE_UTPEKT("NORGE_UTPEKT", "Behandle at Norge er utpekt"),
+    PÅSTAND_UTL("PAASTAND_UTL", "Behandle påstand fra utlandet"),
+    NY_VURDERING("NY_VURDERING", "Behandle ny vurdering"),
+    ENDRET_PERIODE("ENDRET_PERIODE", "Behandle forkortet periode");
 
     private String kode;
     private String beskrivelse;

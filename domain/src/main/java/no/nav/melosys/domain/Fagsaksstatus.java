@@ -5,7 +5,7 @@ import javax.persistence.Converter;
 public enum Fagsaksstatus implements InterntKodeverkTabell<Fagsaksstatus> {
 
     OPPRETTET("OPPRETTET", "Saken er opprettet"),
-    LOVVALG_AVKLART("LOVVALG AVKLART", "Lovvalget er avklart"),
+    LOVVALG_AVKLART("LOVVALG_AVKLART", "Lovvalget er avklart"),
     AVSLUTTET("AVSLUTTET", "Saken er avsluttet"),
     HENLAGT("HENLAGT", "Saken er henlagt");
 

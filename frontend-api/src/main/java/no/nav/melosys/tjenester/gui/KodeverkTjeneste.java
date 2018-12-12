@@ -6,7 +6,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 import io.swagger.annotations.Api;
+import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.begrunnelse.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_987_2009;
@@ -37,21 +39,27 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.getBegrunnelser().normaltDriverVirksomhet = tilKoder(NormaltDriverVirksomhet.values());
         kodeverk.getBegrunnelser().opphold = tilKoder(Opphold.values());
         kodeverk.getBegrunnelser().vesentligVirksomhet = tilKoder(VesentligVirksomhet.values());
-        kodeverk.setAktoerroller(tilKoder(RolleType.values()));
-        kodeverk.setBehandlingsstatus(tilKoder(Behandlingsstatus.values()));
-        kodeverk.setBehandlingstyper(tilKoder(Behandlingstype.values()));
-        kodeverk.setDokumenttitler(tilKoder(DokumentTittel.values()));
-        kodeverk.setDokumenttyper(tilKoder(Dokumenttype.values()));
-        kodeverk.setFinansiering(tilKoder(Finansiering.values()));
-        kodeverk.setLandkoder(tilKoder(Landkoder.values()));
+        kodeverk.getBehandlinger().behandlingsstatus = tilKoder(Behandlingsstatus.values());
+        kodeverk.getBehandlinger().behandlingstyper = tilKoder(Behandlingstype.values());
+        kodeverk.getBehandlinger().behandlingsresultattyper = tilKoder(BehandlingsresultatType.values());
+        kodeverk.getBrev().dokumentTypeIder = tilKoder(Dokumenttype.values());
+        kodeverk.getBrev().dokumenttyper = tilKoder(new Kodeverk[]{}); // TODO: Implementeres hvis behov frontend
         kodeverk.getLovvalgsbestemmelser().forordning_883_2004 = tilKoder(LovvalgBestemmelse_883_2004.values());
         kodeverk.getLovvalgsbestemmelser().forordning_987_2009 = tilKoder(LovvalgBestemmelse_987_2009.values());
         kodeverk.getLovvalgsbestemmelser().tillegg = tilKoder(TilleggBestemmelse_883_2004.values());
+        kodeverk.getYrker().yrkesaktivitetstyper = tilKoder(YrkesaktivitetsType.values());
+        kodeverk.getYrker().yrkesgrupper = tilKoder(YrkesgruppeType.values());
+        kodeverk.setAktoerroller(tilKoder(RolleType.values()));
+        kodeverk.setDokumenttitler(tilKoder(DokumentTittel.values()));
+        kodeverk.setFinansiering(tilKoder(Finansiering.values()));
+        kodeverk.setLandkoder(tilKoder(Landkoder.values()));
+        kodeverk.setMedlemskapstyper(tilKoder(Medlemskapstype.values()));
         kodeverk.setMottaksretning(tilKoder(Mottaksretning.values()));
         kodeverk.setOppgavetyper(tilKoder(Oppgavetype.values()));
         kodeverk.setRepresenterer(tilKoder(Representerer.values()));
         kodeverk.setSaksstatuser(tilKoder(Fagsaksstatus.values()));
         kodeverk.setSakstyper(tilKoder(Fagsakstype.values()));
+        kodeverk.setTrygdedekninger(tilKoder(TrygdeDekning.values()));
         kodeverk.setVedleggstitler(tilKoder(VedleggTittel.values()));
         return kodeverk;
     }

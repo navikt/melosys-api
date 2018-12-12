@@ -1,17 +1,26 @@
 package no.nav.melosys.domain;
 
-public enum YrkesgruppeType {
-    ORDINAER("ORDINAER"),
-    FLYENDE_PERSONELL("FLYENDE_PERSONELL"),
-    SOKKEL_ELLER_SKIP("SOKKEL_ELLER_SKIP");
+public enum YrkesgruppeType implements Kodeverk {
 
-    private String navn;
+    ORDINAER("ORDINAER", "Ordinær arbeid som ikke gjelder flyende personell eller på sokkel eller skip"),
+    FLYENDE_PERSONELL("FLYENDE_PERSONELL", "Arbeider som flyende personell"),
+    SOKKEL_ELLER_SKIP("SOKKEL_ELLER_SKIP", "Arbeider på sokkel eller skip");
 
-    YrkesgruppeType(String navn) {
-        this.navn = navn;
+    private String kode;
+    private String beskrivelse;
+
+    YrkesgruppeType(String kode, String beskrivelse) {
+        this.kode = kode;
+        this.beskrivelse = beskrivelse;
     }
 
-    public String value() {
-        return navn;
+    @Override
+    public String getKode() {
+        return kode;
+    }
+
+    @Override
+    public String getBeskrivelse() {
+        return beskrivelse;
     }
 }

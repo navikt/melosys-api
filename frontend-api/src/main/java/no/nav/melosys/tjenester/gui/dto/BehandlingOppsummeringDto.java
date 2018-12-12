@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Behandlingstype;
 public class BehandlingOppsummeringDto {
 
     private Long behandlingID;
-    private Behandlingsstatus status;
+    private Behandlingsstatus behandlingsstatus;
     private Behandlingstype behandlingstype;
     private Instant registrertDato;
     private Instant endretDato;
@@ -22,12 +22,12 @@ public class BehandlingOppsummeringDto {
         this.behandlingID = behandlingID;
     }
 
-    public Behandlingsstatus getStatus() {
-        return status;
+    public Behandlingsstatus getBehandlingsstatus() {
+        return behandlingsstatus;
     }
 
-    public void setStatus(Behandlingsstatus status) {
-        this.status = status;
+    public void setBehandlingsstatus(Behandlingsstatus behandlingsstatus) {
+        this.behandlingsstatus = behandlingsstatus;
     }
 
     public Behandlingstype getBehandlingstype() {
