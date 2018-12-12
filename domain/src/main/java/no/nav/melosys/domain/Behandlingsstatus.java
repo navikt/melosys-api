@@ -6,14 +6,14 @@ public enum Behandlingsstatus implements InterntKodeverkTabell<Behandlingsstatus
 
     OPPRETTET("OPPRETTET", "Behandlingen er opprettet"),
     UNDER_BEHANDLING("UNDER_BEHANDLING", "Behandlingen pågår"),
-    AVSLUTTET("AVSLUTTET", "Behandlingen er avsluttet"),
     AVVENT_DOK_UTL("AVVENT_DOK_UTL", "Avventer svar fra utenlandsk trygdemyndighet"),
     AVVENT_DOK_PART ("AVVENT_DOK_PART", "Avventer svar fra part i saken"),
-    ANMODNING_UNNTAK_SENDT("ANMODNING_UNNTAK_SENDT", "Anmodning om unntak er sendt"),
-    VURDER_DOKUMENT("VURDER_DOKUMENT", "Vurder dokument"),
     TIDSFRIST_UTLOEPT("TIDSFRIST_UTLOEPT", "Tidsfristen er utløpt på etterspurte opplysninger"),
+    VURDER_DOKUMENT("VURDER_DOKUMENT", "Vurder dokument"),
     FORELOEPIG_LOVVALG("FORELOEPIG_LOVVALG", "Avventer svar på foreløpig lovvalg"),
-    IVERKSETTER_VEDTAK("IVERKSETTER_VEDTAK", "Vedtak iverksettes");
+    ANMODNING_UNNTAK_SENDT("ANMODNING_UNNTAK_SENDT", "Anmodning om unntak er sendt"),
+    IVERKSETTER_VEDTAK("IVERKSETTER_VEDTAK", "Vedtak iverksettes"),
+    AVSLUTTET("AVSLUTTET", "Behandlingen er avsluttet");
     
     private String kode;
     private String beskrivelse;
