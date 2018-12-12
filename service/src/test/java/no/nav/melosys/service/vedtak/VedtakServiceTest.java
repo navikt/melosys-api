@@ -61,7 +61,7 @@ public class VedtakServiceTest {
         when(behandlingRepository.findOne(behandlingID)).thenReturn(behandling);
         Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId("1");
-        when(oppgaveService.finnOppgaveMedFagSaksnummer(anyString())).thenReturn(oppgave);
+        when(oppgaveService.hentOppgaveMedFagSaksnummer(anyString())).thenReturn(oppgave);
 
         vedtakService.fattVedtak(behandlingID, BehandlingsresultatType.FASTSATT_LOVVALGSLAND.toString());
 
@@ -70,7 +70,7 @@ public class VedtakServiceTest {
         assertThat(prosessinstansArgumentCaptor.getValue().getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK);
         assertThat(prosessinstansArgumentCaptor.getValue().getSteg()).isEqualTo(ProsessSteg.IV_VALIDERING);
         verify(binge, times(1)).leggTil(any());
-        verify(oppgaveService, times(1)).avsluttOppgave(oppgave.getOppgaveId());
+        verify(oppgaveService, times(1)).ferdigstillOppgave(oppgave.getOppgaveId());
     }
 
     @Test(expected = IkkeFunnetException.class)

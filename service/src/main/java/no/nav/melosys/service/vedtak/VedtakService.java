@@ -43,15 +43,18 @@ public class VedtakService {
     @Transactional
     public void fattVedtak(long behandlingID, String behandlingsresultatType) throws FunksjonellException, TekniskException {
         log.info("Fatter vedtak for behandling: " + behandlingID);
+
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
-            throw new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + " finnes ikke.");
+            throw new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + " ikke finnes.");
         }
-        opprettProsessInstantIverksettVedtak(behandlingsresultatType, behandling);
+
+        opprettProsessinstansIverksettVedtak(behandlingsresultatType, behandling);
+
         avsluttBehandlingsoppgave(behandling.getFagsak().getSaksnummer());
     }
 
-    private void opprettProsessInstantIverksettVedtak(String behandlingsresultatType, Behandling behandling) {
+    private void opprettProsessinstansIverksettVedtak(String behandlingsresultatType, Behandling behandling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
@@ -68,12 +71,8 @@ public class VedtakService {
     }
 
     private void avsluttBehandlingsoppgave(String fagSaksnummer) throws FunksjonellException, TekniskException {
-        Oppgave oppgave = oppgaveService.finnOppgaveMedFagSaksnummer(fagSaksnummer);
+        Oppgave oppgave = oppgaveService.hentOppgaveMedFagSaksnummer(fagSaksnummer);
 
-        if (oppgave == null) {
-            log.error("Fant ikke behandlingsoppgave på fagsak med saksnummer " + fagSaksnummer);
-            throw new IkkeFunnetException("Fant ikke behandlingsoppgave på fagsak med saksnummer " + fagSaksnummer);
-        }
-        oppgaveService.avsluttOppgave(oppgave.getOppgaveId());
+        oppgaveService.ferdigstillOppgave(oppgave.getOppgaveId());
     }
 }

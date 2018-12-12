@@ -34,7 +34,6 @@ CREATE TABLE prosess_steg (
 );
 
 --Logisk rekkefølge
-INSERT INTO prosess_steg (kode, navn) VALUES ('GSAK_AVSLUTT_OPPGAVE', 'Avslutter journalføringsoppgaven i GSAK');
 INSERT INTO prosess_steg (kode, navn) VALUES ('GSAK_OPPRETT_OPPGAVE', 'Oppretter oppgave i GSAK');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('MOT_VURDER_AUTOMATISK_JFR', 'Vurder om journalføring kan skje automatisk');

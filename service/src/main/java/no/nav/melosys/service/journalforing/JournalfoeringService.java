@@ -11,6 +11,7 @@ import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +25,19 @@ public class JournalfoeringService {
 
     private final JoarkFasade joarkFasade;
 
-    private ProsessinstansRepository prosessinstansRepo;
+    private final ProsessinstansRepository prosessinstansRepo;
+
+    private final OppgaveService oppgaveService;
 
     @Autowired
-    public JournalfoeringService(Binge binge, JoarkFasade joarkFasade, ProsessinstansRepository prosessinstansRepo) {
+    public JournalfoeringService(Binge binge,
+                                 JoarkFasade joarkFasade,
+                                 ProsessinstansRepository prosessinstansRepo,
+                                 OppgaveService oppgaveService) {
         this.binge = binge;
         this.joarkFasade = joarkFasade;
         this.prosessinstansRepo = prosessinstansRepo;
+        this.oppgaveService = oppgaveService;
     }
 
     public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
@@ -38,7 +45,7 @@ public class JournalfoeringService {
     }
 
     @Transactional
-    public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
+    public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException, TekniskException {
         valider(journalfoeringDto);
         validerOpprettSakFelter(journalfoeringDto);
         
@@ -74,10 +81,12 @@ public class JournalfoeringService {
         prosessinstans.setRegistrertDato(nå);
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);
+
+        oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
     @Transactional
-    public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException {
+    public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException, TekniskException {
         valider(journalfoeringDto);
         if (StringUtils.isEmpty(journalfoeringDto.getSaksnummer())) {
             throw new FunksjonellException("Saksnummer mangler");
@@ -105,6 +114,8 @@ public class JournalfoeringService {
         prosessinstans.setRegistrertDato(nå);
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);
+
+        oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
     // Denne er package-visible kun for at det skal være lettere å teste den isolert

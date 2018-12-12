@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
@@ -44,7 +45,7 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @GET
     @Path("{journalpostID}")
     @ApiOperation(value = "Hent journalpost opplysninger.", response = JournalpostDto.class)
-    public Response hentJournalpostOpplysninger(@ApiParam @PathParam("journalpostID") String journalpostID) throws IntegrasjonException, FunksjonellException {
+    public Response hentJournalpostOpplysninger(@PathParam("journalpostID") String journalpostID) throws IntegrasjonException, FunksjonellException {
         log.debug("Journalpost med ID {} hentes.", journalpostID);
         Journalpost journalpost;
         journalpost = journalføringService.hentJournalpost(journalpostID);
@@ -63,14 +64,14 @@ public class JournalfoeringTjeneste extends RestTjeneste {
     @POST
     @Path("opprett")
     @ApiOperation(value = "Opprett sak og journalfør.")
-    public void opprettSakOgJournalfør(@ApiParam JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
+    public void opprettSakOgJournalfør(@ApiParam JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException, TekniskException {
         journalføringService.opprettSakOgJournalfør(journalfoeringDto);
     }
 
     @POST
     @Path("tilordne")
     @ApiOperation(value = "Tilordne sak og journalfør.")
-    public void tilordneSakOgJournalfør(@ApiParam JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException {
+    public void tilordneSakOgJournalfør(@ApiParam JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException, TekniskException {
         journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
     }
 
