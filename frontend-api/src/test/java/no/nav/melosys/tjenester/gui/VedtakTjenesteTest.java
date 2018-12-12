@@ -2,8 +2,7 @@ package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
 
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.vedtak.VedtakService;
@@ -41,7 +40,7 @@ public class VedtakTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void fattVedtak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, IOException {
+    public void fattVedtak() throws FunksjonellException, TekniskException, IOException {
         VedtakDto vedtakDto = new VedtakDto();
         vedtakDto.setBehandlingsresultatType("HENLEGGELSE");
         long behandlingID = 3;

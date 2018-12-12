@@ -8,13 +8,10 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.vedtak.VedtakService;
-
 import no.nav.melosys.tjenester.gui.dto.VedtakDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -40,7 +37,7 @@ public class VedtakTjeneste extends RestTjeneste {
     @POST
     @Path("{behandlingID}")
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
-    public Response fattVedtak(@ApiParam("behandlingID") @PathParam("behandlingID") long behandlingID, @ApiParam("vedtakDto") VedtakDto vedtakDto) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public Response fattVedtak(@PathParam("behandlingID") long behandlingID, @ApiParam("vedtakDto") VedtakDto vedtakDto) throws FunksjonellException, TekniskException {
 
         tilgang.sjekk(behandlingID);
         vedtakService.fattVedtak(behandlingID, vedtakDto.getBehandlingsresultatType());

@@ -29,8 +29,6 @@ import static no.nav.melosys.domain.ProsessSteg.*;
  *     GSAK_AVSLUTT_OPPGAVE -> JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
  * 2) ProsessType.JFR_KNYTT:
  *     GSAK_AVSLUTT_OPPGAVE -> JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
- * 3) ProsessType.IVERKSETT_VEDTAK
- *     GSAK_AVSLUTT_OPPGAVE -> IV_AVSLUTT_BEHANDLING eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class AvsluttOppgave extends AbstraktStegBehandler {
@@ -69,9 +67,6 @@ public class AvsluttOppgave extends AbstraktStegBehandler {
                 break;
             case JFR_KNYTT:
                 prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
-                break;
-            case IVERKSETT_VEDTAK:
-                prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
                 break;
             default:
                 String feilmelding = "Ukjent prosess type: " + type;

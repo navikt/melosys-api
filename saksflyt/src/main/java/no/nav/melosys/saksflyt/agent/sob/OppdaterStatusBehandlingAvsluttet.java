@@ -2,11 +2,7 @@ package no.nav.melosys.saksflyt.agent.sob;
 
 import java.time.LocalDateTime;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.Tema;
-import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
@@ -15,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.*;
 import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
+import static no.nav.melosys.domain.RolleType.BRUKER;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.generateCallId;
 
@@ -45,12 +41,17 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, TekniskException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        String aktørID = prosessinstans.getData(AKTØR_ID);
-        String saksnummer = prosessinstans.getData(SAKSNUMMER);
         Behandling behandling = prosessinstans.getBehandling();
+
+        Fagsak fagsak = behandling.getFagsak();
+        String saksnummer = fagsak.getSaksnummer();
+
+        Aktoer aktør = fagsak.hentAktørMedRolleType(BRUKER);
+        String aktørID = aktør.getAktørId();
+
         Tema arkivtema = avgjørArkivTema(behandling.getType());
 
         // BehandlingsId i SOB skal være unik i NAV, så vi prefikser med applikasjonsID.

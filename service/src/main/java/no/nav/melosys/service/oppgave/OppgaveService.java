@@ -83,6 +83,14 @@ public class OppgaveService {
                 .collect(Collectors.toList());
     }
 
+    public void avsluttOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
+        gsakFasade.ferdigstillOppgave(oppgaveID);
+    }
+
+    public Oppgave finnOppgaveMedFagSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
+        return  gsakFasade.finnOppgaveMedSaksnummer(fagSaksnummer);
+    }
+
     private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) throws TekniskException {
         List<OppgaveDto> res = new ArrayList<>();
         for (Oppgave o : oppgaverFraDomain) {
