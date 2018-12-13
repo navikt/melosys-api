@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.Dokumenttype.ATTEST_A1;
-import static no.nav.melosys.domain.Dokumenttype.INNVILGELSE_YRKESAKTIV;
+import static no.nav.melosys.domain.DokumenttypeId.ATTEST_A1;
+import static no.nav.melosys.domain.DokumenttypeId.INNVILGELSE_YRKESAKTIV;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.IV_AVSLUTT_BEHANDLING;
 import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;

@@ -6,9 +6,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 import io.swagger.annotations.Api;
-import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.begrunnelse.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_987_2009;
@@ -42,8 +40,8 @@ public class KodeverkTjeneste extends RestTjeneste {
         kodeverk.getBehandlinger().behandlingsstatus = tilKoder(Behandlingsstatus.values());
         kodeverk.getBehandlinger().behandlingstyper = tilKoder(Behandlingstype.values());
         kodeverk.getBehandlinger().behandlingsresultattyper = tilKoder(BehandlingsresultatType.values());
-        kodeverk.getBrev().dokumentTypeIder = tilKoder(Dokumenttype.values());
-        kodeverk.getBrev().dokumenttyper = tilKoder(new Kodeverk[]{}); // TODO: Implementeres hvis behov frontend
+        kodeverk.getBrev().dokumentTypeIder = tilKoder(DokumenttypeId.values());
+        kodeverk.getBrev().dokumenttyper = tilKoder(Dokumenttype.values());
         kodeverk.getLovvalgsbestemmelser().forordning_883_2004 = tilKoder(LovvalgBestemmelse_883_2004.values());
         kodeverk.getLovvalgsbestemmelser().forordning_987_2009 = tilKoder(LovvalgBestemmelse_987_2009.values());
         kodeverk.getLovvalgsbestemmelser().tillegg = tilKoder(TilleggBestemmelse_883_2004.values());
