@@ -3,8 +3,6 @@ package no.nav.melosys.service.dokument;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.*;
@@ -21,6 +19,7 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Primary
@@ -86,8 +85,13 @@ public class DokumentService {
      * 
      * @throws TekniskException
      */
+    // Bruker Transactional for å støtte lazy loading gjennom Hibernate,
+    // selv om dataene som hentes ut egentlig er read-only. Det ser ut til å
+    // være påkrevd for Hibernate å finne en sesjon via Spring-transaksjonen
+    // for å kunne laste lazy collections i objektgrafen.
+    @Transactional
     public byte[] produserUtkast(long behandlingID, Dokumenttype dokumenttype, BrevbestillingDto brevbestillingDto)
-        throws TekniskException, FunksjonellException {
+            throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingRepository.findOneWithSaksopplysningerById(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
@@ -127,7 +131,7 @@ public class DokumentService {
 
         // NB: Kan ved første øyekast se ut som meningsløs kode, men er en
         // mapping til en enum i melosys-service med samme navn.
-        // TBD: Dette er vel symptom på uønsket kodeduplisering? Service-laget
+        // FIXME: Dette er vel symptom på uønsket kodeduplisering? Service-laget
         // kan vel koples til domene-laget og gjenbruke typen derfra?
         DokumentType dokumentType;
         try {
@@ -148,16 +152,12 @@ public class DokumentService {
         prosessinstans.setBehandling(behandling);
 
         switch (dokumenttype) {
-        case MELDING_MANGLENDE_OPPLYSNINGER:
-            prosessinstans.setType(ProsessType.MANGELBREV);
-            prosessinstans.setSteg(ProsessSteg.MANGELBREV);
-            break;
-        case INNVILGELSE_YRKESAKTIV:
-            prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
-            prosessinstans.setSteg(ProsessSteg.IV_SEND_BREV);
-            break;
-        default:
-            throw new FunksjonellException("Dokumenttype " + dokumenttype + " er ikke støttet.");
+            case MELDING_MANGLENDE_OPPLYSNINGER:
+                prosessinstans.setType(ProsessType.MANGELBREV);
+                prosessinstans.setSteg(ProsessSteg.MANGELBREV);
+                break;
+            default:
+                throw new FunksjonellException("Dokumenttype " + dokumenttype + " er ikke støttet.");
         }
 
         if (brevbestillingDto != null) {

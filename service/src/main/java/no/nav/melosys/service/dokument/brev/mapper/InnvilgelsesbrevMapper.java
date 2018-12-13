@@ -22,12 +22,13 @@ import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataUtils;
+import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.avklartefakta.AvklartefaktaType.AG_FORRETNINGSLAND;
-import static no.nav.melosys.domain.avklartefakta.AvklartefaktaType.AVKLARTE_ARBEIDSGIVER;
 
 public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
@@ -35,26 +36,28 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws JAXBException, SAXException, TekniskException {
-        Fag fag = mapFag(behandling, resultat, brevdata);
-        JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
+        Fag fag = mapFag(behandling, resultat, (BrevDataA1) brevdata);
+        JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private static Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws TekniskException {
+    private final Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataA1 brevdata) {
         Fag fag = new Fag();
         fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
-        fag.setArbeidsgiver(hentAvklartFaktum(resultat, AVKLARTE_ARBEIDSGIVER).getSubjekt());
+        Virksomhet arbeidsgiver = brevdata.norskeVirksomheter.iterator().next();
+        fag.setArbeidsgiver(arbeidsgiver.navn);
         // Slå opp arbeidsland i avklartefakte, fall tilbake på søknaden (kan overkjøres av saksbehandler for sokkel/skip).
         String arbeidsland = finnAvklartFaktum(resultat, AG_FORRETNINGSLAND).map(Avklartefakta::getSubjekt)
             .orElseGet(() -> hentArbeidslandFraSøknaden(behandling));
         fag.setArbeidsland(arbeidsland);
         Set<Lovvalgsperiode> perioder = resultat.getLovvalgsperioder();
         if (perioder.size() != 1) {
-            throw new UnsupportedOperationException("Antall lovvalgsperioder ulik 1 støttes ikke i første versjon av Melosys.");
+            throw new UnsupportedOperationException(String.format("Antall lovvalgsperioder (%s) ulik 1 støttes ikke i første versjon av Melosys.",
+                    perioder.size()));
         }
         Lovvalgsperiode periode = perioder.iterator().next();
-        fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.valueOf(tilMelosysbrevBestemmelseskode(periode.getBestemmelse().getKode())));
+        fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(periode.getBestemmelse().getKode()));
         fag.setPeriode(PeriodeType.builder().withFomDato(lagXmlDato(periode.getFom()))
             .withTomDato(lagXmlDato(periode.getTom()))
             .build());
@@ -68,13 +71,6 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         // avdekker noe behov for to separate felt.
         fag.setTrygdemyndighetsland(arbeidsland);
         return fag;
-    }
-
-    // Workaround for en feil i navnene på oppramstyper i Melosysbrev.
-    // Må fjernes når Melosysbrev er oppdatert med korrekte kodenavn.
-    private static String tilMelosysbrevBestemmelseskode(String kode) {
-        int artIndeks = kode.lastIndexOf("ART");
-        return kode.substring(0, artIndeks + 3) + "_" + kode.substring(artIndeks + 3);
     }
 
     private static String hentArbeidslandFraSøknaden(Behandling behandling) {
@@ -91,12 +87,6 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             .findFirst();
     }
 
-    private static Avklartefakta hentAvklartFaktum(Behandlingsresultat resultat, AvklartefaktaType type) throws TekniskException {
-        return finnAvklartFaktum(resultat, type)
-            .orElseThrow(() -> new TekniskException(String.format("Resultatet til behandling %s mangler faktumet %s (%s).",
-                    resultat.getId(), type.getKode(), type.getBeskrivelse())));
-    }
-
     private static XMLGregorianCalendar lagXmlDato(LocalDate dato) {
         try {
             return BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone(dato);
@@ -105,7 +95,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         }
     }
 
-    private static JAXBElement<BrevdataType> mapintoBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {
+    private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {
         ObjectFactory factory = new ObjectFactory();
         BrevdataType brevdataType = BrevdataType.builder()
             .withFelles(fellesType)

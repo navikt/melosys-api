@@ -50,7 +50,7 @@ public class IverksettVedtakSendBrevTest {
         when(byggerVelger.hent(any())).thenReturn(brevDataByggerA1);
 
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
-        when(behandlingRepository.findOneWithSaksopplysningerById(any())).thenReturn(behandling);
+        when(behandlingRepository.findOneWithSaksopplysningerById(eq(behandling.getId()))).thenReturn(behandling);
 
         DokumentSystemService dokService = lagDokumentService(byggerVelger);
         return new IverksettVedtakSendBrev(dokService, byggerVelger, behandlingRepository, behandlingsresultatRepo);
@@ -151,7 +151,7 @@ public class IverksettVedtakSendBrevTest {
     }
 
     @Test
-    public void utfoerSteg() {
+    public void utfoerSteg() throws Exception {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setId(BEHANDLINGSID);
@@ -159,8 +159,8 @@ public class IverksettVedtakSendBrevTest {
         p.setType(ProsessType.IVERKSETT_VEDTAK);
         Properties properties = new Properties();
         p.addData(properties);
-
-        agent.utførSteg(p);
+        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID));
+        instans.utførSteg(p);
 
         assertThat(p.getSteg()).isEqualTo(GSAK_AVSLUTT_OPPGAVE);
     }
@@ -183,14 +183,15 @@ public class IverksettVedtakSendBrevTest {
     @Test
     public final void utførStegPåInnvilgelsesBrevBestemtAv12_1GårTilGsakAvsluttOppgave() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(INNVILGET_BEHANDLINGSID_12_1);
-        agent.utførSteg(prosessinstans);
+        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(INNVILGET_BEHANDLINGSID_12_1));
+        instans.utførSteg(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.GSAK_AVSLUTT_OPPGAVE);
     }
 
     @Test
     public final void utførStegPåInnvilgelsesBrevBestemtAv12_2GårTilGsakAvsluttOppgave() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(INNVILGET_BEHANDLINGSID_12_2);
-        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(INNVILGET_BEHANDLINGSID_12_1));
+        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(INNVILGET_BEHANDLINGSID_12_2));
         instans.utførSteg(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.GSAK_AVSLUTT_OPPGAVE);
     }
@@ -198,7 +199,8 @@ public class IverksettVedtakSendBrevTest {
     @Test
     public final void utførStegPåFastsattLovvalgIUtlandetGårTilGsakAvsluttOppgave() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_UTENLANDSK_LOVVALG);
-        agent.utførSteg(prosessinstans);
+        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_UTENLANDSK_LOVVALG));
+        instans.utførSteg(prosessinstans);        
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.GSAK_AVSLUTT_OPPGAVE);
     }
 
@@ -212,9 +214,18 @@ public class IverksettVedtakSendBrevTest {
 
     @Test
     public final void utførStegPåUkjentProsesstypeFeiler() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID, ProsessType.JFR_KNYTT);
+        Prosessinstans prosessinstans = lagProsessinstans(INNVILGET_BEHANDLINGSID, ProsessType.JFR_KNYTT);
         agent.utførSteg(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+    }
+
+    @Test
+    public final void utførStegPåIkkeEksisterendeBehandlingFeiler() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(~INNVILGET_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE));
+        instans.utførSteg(prosessinstans);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+
     }
 
     private static Prosessinstans lagProsessinstans(long behandlingsid) {

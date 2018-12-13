@@ -5,6 +5,7 @@ import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.DokumentType;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,9 +32,18 @@ public class BrevDataByggerVelgerTest {
     }
 
     @Test
-    public void testA1() {
-        BrevDataBygger bygger = brevDataByggerVelger.hent(DokumentType.ATTEST_A1);
-        assertThat(bygger).isInstanceOf(BrevDataByggerA1.class);
+    public void testA1() throws Exception {
+        testHent(DokumentType.ATTEST_A1, BrevDataByggerA1.class);
+    }
+
+    @Test
+    public final void hentInnvilelsesYrksaktivGirA1Bygger() {
+        testHent(DokumentType.INNVILGELSE_YRKESAKTIV, BrevDataByggerA1.class);
+    }
+
+    private final void testHent(DokumentType type, Class<? extends BrevDataBygger> forventetKlasse) {
+        BrevDataBygger resultat = brevDataByggerVelger.hent(type);
+        assertThat(resultat).isInstanceOf(forventetKlasse);
     }
 
     @Test

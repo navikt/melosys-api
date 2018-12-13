@@ -20,7 +20,6 @@
         <module>app</module>
         <module>build</module>
         <module>config</module>
-        <module>dokument</module>
         <module>domain</module>
         <module>feil</module>
         <module>frontend-api</module>
@@ -48,6 +47,7 @@
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandle-medlemskap-v2.version>2.2.1</behandle-medlemskap-v2.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
+        <dokprod.melosysbrev.version>1.0.21</dokprod.melosysbrev.version>                
         <doksys.dokumentproduksjon.version>3.3.0</doksys.dokumentproduksjon.version>
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>
         <gsak.oppgavebehandling.version>3.1.1</gsak.oppgavebehandling.version>
@@ -63,7 +63,6 @@
         <tps.person.version>3.4.1</tps.person.version>
         <medl2-v2.version>2.0.6</medl2-v2.version>
         <kodeverk-v2.version>2.0.0-alpha004</kodeverk-v2.version>
-        <dokprod.melosysbrev.version>1.0.17</dokprod.melosysbrev.version>
 
         <!-- Versjoner av eksterne biblioteker -->
         <assertj.version>3.8.0</assertj.version>
@@ -115,12 +114,6 @@
                 <groupId>${project.groupId}</groupId>
                 <artifactId>melosys-config</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>dokument</artifactId>
-                <version>${project.version}</version>
-                <classifier>jaxb</classifier>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>

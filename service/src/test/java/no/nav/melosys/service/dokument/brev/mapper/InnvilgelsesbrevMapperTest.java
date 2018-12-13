@@ -22,7 +22,8 @@ import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataA1;
+import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 
 import org.junit.Test;
 
@@ -68,7 +69,7 @@ public class InnvilgelsesbrevMapperTest {
         Set<Lovvalgsperiode> perioder = new HashSet<>(Arrays.asList(lagLovvalgsperiode(LocalDate.MIN), lagLovvalgsperiode(LocalDate.now())));
         Throwable unntak = catchThrowable(() -> testMapTilBrevXml(lagBehandlingsresultat(perioder)));
         assertThat(unntak).isInstanceOf(UnsupportedOperationException.class)
-            .hasMessageContaining("perioder ulik 1 støttes ikke");
+            .hasMessageContaining("perioder (2) ulik 1 støttes ikke");
     }
 
     @Test
@@ -89,27 +90,6 @@ public class InnvilgelsesbrevMapperTest {
             .hasMessageContaining("Finner ikke søknaddokument");
     }
 
-    @Test
-    public final void mapTilBrevXmlUtenAvklartArbeidsgiverKasterUnntak() throws Exception {
-        Behandlingsresultat resultatUtenAvklartArbeidsgiver = lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
-                Collections.emptySet());
-        Throwable unntak = catchThrowable(() -> testMapTilBrevXml(resultatUtenAvklartArbeidsgiver));
-        assertThat(unntak).isInstanceOf(TekniskException.class)
-            .hasNoCause()
-            .hasMessageContaining("mangler faktumet AVKLART");
-    }
-
-    @Test
-    public final void mapTilBrevXmlMedUavklartArbeidsgiverFaktumKasterUnntak() throws Exception {
-        Avklartefakta uavklartArbeidsgiverFaktum = lagAvklarteFakta(AvklartefaktaType.AVKLARTE_ARBEIDSGIVER, "987654321", "VET IKKE");
-        Behandlingsresultat resultatUtenAvklartArbeidsgiver = lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
-                Collections.singleton(uavklartArbeidsgiverFaktum));
-        Throwable unntak = catchThrowable(() -> testMapTilBrevXml(resultatUtenAvklartArbeidsgiver));
-        assertThat(unntak).isInstanceOf(TekniskException.class)
-            .hasNoCause()
-            .hasMessageContaining("mangler faktumet AVKLART");
-    }
-
     public void testMapTilBrevXml() throws Exception {
         testMapTilBrevXml(lagBehandlingsresultat());
     }
@@ -121,7 +101,9 @@ public class InnvilgelsesbrevMapperTest {
     public void testMapTilBrevXml(Behandling behandling, Behandlingsresultat behandlingsresultat) throws Exception {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = LagMelosysNAVFelles();
-        BrevData brevdata = new BrevData();
+        BrevDataA1 brevdata = new BrevDataA1("SAKSBEHANDLER");
+        Virksomhet virksomhet = new Virksomhet("Virker ikke", "123456789", null);
+        brevdata.norskeVirksomheter = Collections.singletonList(virksomhet);
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdata);
         // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
         // grundig mot forventninger.

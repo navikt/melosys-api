@@ -34,7 +34,8 @@ import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
 /**
  * Sende ulike brev basert på lovvalgsbestemmelse.
  * <p>
- * Transisjoner: ProsessType.IVERKSETT_VEDTAK IV_SEND_BREV -> GSAK_AVSLUTT_OPPGAVE eller FEILET_MASKINELT hvis feil
+ * Transisjoner: ProsessType.IVERKSETT_VEDTAK
+ *  IV_SEND_BREV -> GSAK_AVSLUTT_OPPGAVE eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
@@ -75,7 +76,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         // Henter ut behandling på nytt for å få med saksopplysninger
         Behandling behandling = behandlingRepository.findOneWithSaksopplysningerById(prosessinstans.getBehandling().getId());
         if (behandling == null) {
-            throw new TekniskException("Finner ikke behandling");
+            throw new TekniskException(String.format("Finner ikke behandlingen %s.", prosessinstans.getBehandling().getId()));
         }
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         ProsessType prosessType = prosessinstans.getType();
@@ -89,8 +90,9 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
                 //TODO: Send også til Myndighet når brevservice støtter slik mottaker
                 //brevData.mottaker = RolleType.MYNDIGHET;
                 //dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
-                
-                brevData = prosessinstans.getData(ProsessDataKey.BREVDATA, BrevData.class);
+
+                // Gjenbruker A1 sine brevdata, da disse er ett supersett av de
+                // ordinære brevdata innvilgelsesbrev trenger.
                 dokumentService.produserDokument(behandling.getId(), INNVILGELSE_YRKESAKTIV, brevData);
                 log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
             }

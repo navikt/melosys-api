@@ -31,6 +31,7 @@ public class BrevDataByggerVelger {
     public BrevDataBygger hent(DokumentType dokumentType, BrevbestillingDto brevbestillingDto) {
         switch (dokumentType) {
             case ATTEST_A1:
+            case INNVILGELSE_YRKESAKTIV:    
                 return new BrevDataByggerA1(avklartefaktaService,
                                             registerOppslagService,
                                             kodeverkService);
