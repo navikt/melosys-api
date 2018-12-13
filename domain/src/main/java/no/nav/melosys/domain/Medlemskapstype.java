@@ -2,9 +2,9 @@ package no.nav.melosys.domain;
 
 public enum Medlemskapstype implements Kodeverk {
 
-    FRIVILLIG("FRIVILLIG", "Frivillig"),
-    PLIKTIG("PLIKTIG", "Pliktig"),
-    UNNTATT("UNNTATT", "Untatt");
+    FRIVILLIG("FRIVILLIG", "Frivillig medlemska"),
+    PLIKTIG("PLIKTIG", "Pliktig medlemskap"),
+    UNNTATT("UNNTATT", "Unntatt medlemskap");
 
     private String kode;
     private String beskrivelse;
