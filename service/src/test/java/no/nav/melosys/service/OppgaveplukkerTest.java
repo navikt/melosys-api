@@ -20,6 +20,7 @@ import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -218,7 +219,7 @@ public class OppgaveplukkerTest {
         sakstyper.add(Fagsakstype.FOLKETRYGD.getKode());
 
         List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(Behandlingstype.REVURDERING.getKode());
+        behandlingstyper.add(Behandlingstype.NY_VURDERING.getKode());
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
         plukkOppgaveInnDto.setOppgavetype("BEH_SAK");

@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev;
 
 import java.io.IOException;
 import java.io.StringReader;
+
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
@@ -14,15 +15,21 @@ import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Tema;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.dokument.DokumentType;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -68,6 +75,7 @@ public class BrevDataService {
                 break;
 
             case ATTEST_A1:
+            case INNVILGELSE_YRKESAKTIV:
             case MELDING_MANGLENDE_OPPLYSNINGER:
             case HENLEGGELSE: {
                 if (brevData.mottaker == null) {
@@ -94,6 +102,7 @@ public class BrevDataService {
     /**
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
+    @Transactional(propagation = Propagation.MANDATORY)
     public Element lagBrevXML(DokumentType dokumentType, Behandling behandling, BrevData brevData) throws TekniskException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandling.getId());
         if (behandlingsresultat == null) {
@@ -174,7 +183,7 @@ public class BrevDataService {
             } catch (IkkeFunnetException e) {
                 throw new TekniskException("Det finnes ingen ident for aktørID " + aktør.getAktørId());
             }
-        } else if (aktør != null && aktør.getOrgnr() != null)  {
+        } else if (aktør != null && aktør.getOrgnr() != null) {
             mottaker = new Organisasjon();
             mottaker.setId(aktør.getOrgnr());
             mottaker.setTypeKode(AktoerType.ORGANISASJON);

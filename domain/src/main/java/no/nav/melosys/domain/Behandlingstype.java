@@ -11,7 +11,7 @@ public enum Behandlingstype implements InterntKodeverkTabell<Behandlingstype> {
     NORGE_UTPEKT("NORGE_UTPEKT", "Behandling av at Norge er utpekt fra utenlandske myndigheter"),
     PÅSTAND_UTL("PAASTAND_UTL", "Behandling av påstand fra utenlandske myndigheter"),
     POSTING_UTL("POSTING_UTL", "Behandling av melding om posting fra utenlandske myndigheter"),
-    REVURDERING("REVURDERING", "Behandling av revurdering av et tidligere vedtak");
+    NY_VURDERING("NY_VURDERING", "Behandling av revurdering av et tidligere vedtak");
 
     private String kode;
     private String beskrivelse;
@@ -47,7 +47,7 @@ public enum Behandlingstype implements InterntKodeverkTabell<Behandlingstype> {
         switch (this) {
             case SØKNAD: return "ae0034";
             case KLAGE: return  "ae0058";
-            case REVURDERING: return "ae0028";
+            case NY_VURDERING: return "ae0028";
             default: throw new RuntimeException(this + " er ikke implementert i felleskodeverk.");
         }
     }

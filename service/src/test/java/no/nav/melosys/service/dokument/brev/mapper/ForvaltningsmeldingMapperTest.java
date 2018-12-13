@@ -2,17 +2,19 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 
-import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
+
 import no.nav.dok.melosysbrev._000082.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ForvaltningsmeldingMapperTest {
@@ -24,10 +26,9 @@ public class ForvaltningsmeldingMapperTest {
     @Before
     public void setUp() throws Exception {
         mapper = new ForvaltningsmeldingMapper();
-        enhancedRandom = EnhancedRandomBuilder
-            .aNewEnhancedRandomBuilder()
-            .scanClasspathForConcreteTypes(true)
-            .build();
+        // Sparer ~= 10 sek. kjøretid i forhold til å skanne hele
+        // klassestien (.scanClasspathForConcreteTypes(true))
+        enhancedRandom = EnhancedRandomConfigurer.randomForDokProd();
     }
 
     @Test

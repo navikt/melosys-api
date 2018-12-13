@@ -1,5 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -19,7 +20,6 @@
         <module>app</module>
         <module>build</module>
         <module>config</module>
-        <module>dokument</module>
         <module>domain</module>
         <module>feil</module>
         <module>frontend-api</module>
@@ -47,6 +47,7 @@
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandle-medlemskap-v2.version>2.2.1</behandle-medlemskap-v2.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
+        <dokprod.melosysbrev.version>1.0.21</dokprod.melosysbrev.version>                
         <doksys.dokumentproduksjon.version>3.3.0</doksys.dokumentproduksjon.version>
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>
         <gsak.oppgavebehandling.version>3.1.1</gsak.oppgavebehandling.version>
@@ -99,7 +100,8 @@
 
     </properties>
 
-    <!-- Unngå å put scope i dependency management. Sett det heller der det brukes. -->
+    <!-- Unngå å put scope i dependency management. Sett det heller der det 
+        brukes. -->
     <dependencyManagement>
         <dependencies>
             <!-- Melosys moduler -->
@@ -112,12 +114,6 @@
                 <groupId>${project.groupId}</groupId>
                 <artifactId>melosys-config</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>dokument</artifactId>
-                <version>${project.version}</version>
-                <classifier>jaxb</classifier>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -440,7 +436,7 @@
                 <version>${sakogbehandling.version}</version>
                 <classifier>jaxws</classifier>
             </dependency>
-            <!--Gsak-->
+            <!--Gsak -->
             <dependency>
                 <groupId>no.nav.tjenester.fim</groupId>
                 <artifactId>nav-fim-oppgave-v3-tjenestespesifikasjon</artifactId>
@@ -458,7 +454,7 @@
                 <version>${kodeverk-v2.version}</version>
                 <classifier>jaxws</classifier>
             </dependency>
-            <!--MEDL2-->
+            <!--MEDL2 -->
             <dependency>
                 <groupId>no.nav.tjenester</groupId>
                 <artifactId>nav-medlemskap-v2-tjenestespesifikasjon</artifactId>
@@ -469,7 +465,25 @@
                 <groupId>no.nav.tjenester</groupId>
                 <artifactId>nav-behandleMedlemskap-v2-tjenestespesifikasjon</artifactId>
                 <version>${behandle-medlemskap-v2.version}</version>
+            </dependency>                
+            <!-- Dokumenthåndtering (DOKPROD) -->
+            <dependency>
+                <groupId>no.nav.dok.metaforcemal</groupId>
+                <artifactId>melosysbrev</artifactId>
+                <version>${dokprod.melosysbrev.version}</version>
+            </dependency>            
+            <dependency>
+                <groupId>no.nav.dok.metaforcemal</groupId>
+                <artifactId>melosysbrev</artifactId>
+                <classifier>jaxb</classifier>
+                <version>${dokprod.melosysbrev.version}</version>                
             </dependency>
+            <dependency>
+                <groupId>no.nav.dok.metaforcemal</groupId>
+                <artifactId>melosysbrev</artifactId>
+                <classifier>jaxb-sources</classifier>
+                <version>${dokprod.melosysbrev.version}</version>                
+            </dependency>            
 
             <!-- Test -->
             <dependency>
@@ -575,7 +589,7 @@
                 <!-- maven.root bør overstyres fra cmdline -->
                 <maven.root>${project.basedir}</maven.root>
 
-                <sonar.language/>
+                <sonar.language />
                 <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
                 <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
                 <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>

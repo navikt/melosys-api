@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -16,9 +15,11 @@ import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Primary
@@ -41,7 +42,7 @@ public class DokumentService {
     private final BrevDataByggerVelger brevDataByggerVelger;
 
     @Autowired
-    DokumentService(BehandlingRepository behandlingRepository,
+    public DokumentService(BehandlingRepository behandlingRepository,
                     FagsakRepository fagsakRepository,
                     BrevDataService brevDataService,
                     DokSysFasade dokSysFasade, JoarkFasade joarkFasade,
@@ -59,9 +60,11 @@ public class DokumentService {
 
     /**
      * Henter et dokument fra Joark
-     * @throws IkkeFunnetException 
+     * 
+     * @throws IkkeFunnetException
+     * @throws SikkerhetsbegrensningException
      */
-    public byte[] hentDokument(String journalpostID, String dokumentID) throws SikkerhetsbegrensningException, IntegrasjonException, IkkeFunnetException {
+    public byte[] hentDokument(String journalpostID, String dokumentID) throws IkkeFunnetException, SikkerhetsbegrensningException {
         return joarkFasade.hentDokument(journalpostID, dokumentID);
     }
 
@@ -79,10 +82,16 @@ public class DokumentService {
 
     /**
      * Kaller Doksys for å produsere et dokumentutkast
-     * @throws TekniskException 
+     * 
+     * @throws TekniskException
      */
+    // Bruker Transactional for å støtte lazy loading gjennom Hibernate,
+    // selv om dataene som hentes ut egentlig er read-only. Det ser ut til å
+    // være påkrevd for Hibernate å finne en sesjon via Spring-transaksjonen
+    // for å kunne laste lazy collections i objektgrafen.
+    @Transactional
     public byte[] produserUtkast(long behandlingID, Dokumenttype dokumenttype, BrevbestillingDto brevbestillingDto)
-        throws TekniskException, FunksjonellException {
+            throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingRepository.findOneWithSaksopplysningerById(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
@@ -120,6 +129,10 @@ public class DokumentService {
             throw new TekniskException("Ingen gyldig dokumenttype");
         }
 
+        // NB: Kan ved første øyekast se ut som meningsløs kode, men er en
+        // mapping til en enum i melosys-service med samme navn.
+        // FIXME: Dette er vel symptom på uønsket kodeduplisering? Service-laget
+        // kan vel koples til domene-laget og gjenbruke typen derfra?
         DokumentType dokumentType;
         try {
             dokumentType = DokumentType.valueOf(dokumenttype.name());
