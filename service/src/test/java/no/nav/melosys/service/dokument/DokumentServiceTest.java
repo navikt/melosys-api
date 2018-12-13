@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
@@ -148,7 +149,7 @@ public final class DokumentServiceTest {
         BehandlingRepository behandlingRepository = mockBehandlingRepository(behandling);
         TpsFasade tpsFasade = mockTpsFasade(aktør);
         Avklartefakta arbeidsgiverFaktum = lagAvklarteFakta(AVKLARTE_ARBEIDSGIVER, ORGNR);
-        Avklartefakta yrkesgruppeFaktum = lagAvklarteFakta(YRKESGRUPPE, "YRKESAKTIV", null);
+        Avklartefakta yrkesgruppeFaktum = lagAvklarteFakta(YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name(), null);
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(Arrays.asList(arbeidsgiverFaktum,
                 lagAvklarteFakta(AG_FORRETNINGSLAND, "SE"),
                 yrkesgruppeFaktum));
