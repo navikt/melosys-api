@@ -13,7 +13,6 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.*;
-
 import org.junit.Test;
 
 import static no.nav.melosys.domain.ProsessSteg.IV_AVSLUTT_BEHANDLING;
@@ -176,7 +175,7 @@ public class IverksettVedtakSendBrevTest {
     public final void utførStegPåInnvilgelsesBrevBestemtAv16_1GårTilGsakAvsluttOppgave() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(INNVILGET_BEHANDLINGSID);
         agent.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.GSAK_AVSLUTT_OPPGAVE);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 
     @Test
@@ -184,7 +183,7 @@ public class IverksettVedtakSendBrevTest {
         Prosessinstans prosessinstans = lagProsessinstans(INNVILGET_BEHANDLINGSID_12_1);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(INNVILGET_BEHANDLINGSID_12_1));
         instans.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.GSAK_AVSLUTT_OPPGAVE);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 
     @Test
@@ -192,7 +191,7 @@ public class IverksettVedtakSendBrevTest {
         Prosessinstans prosessinstans = lagProsessinstans(INNVILGET_BEHANDLINGSID_12_2);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(INNVILGET_BEHANDLINGSID_12_2));
         instans.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.GSAK_AVSLUTT_OPPGAVE);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 
     @Test
@@ -200,7 +199,7 @@ public class IverksettVedtakSendBrevTest {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_UTENLANDSK_LOVVALG);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_UTENLANDSK_LOVVALG));
         instans.utførSteg(prosessinstans);        
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.GSAK_AVSLUTT_OPPGAVE);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 
     @Test
@@ -208,7 +207,7 @@ public class IverksettVedtakSendBrevTest {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE));
         instans.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.GSAK_AVSLUTT_OPPGAVE);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 
     @Test
