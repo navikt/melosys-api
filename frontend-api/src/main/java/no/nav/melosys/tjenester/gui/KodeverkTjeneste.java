@@ -13,7 +13,7 @@ import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_987_2009;
 import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse_883_2004;
 import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.service.kodeverk.KodeDto;
-import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
+import no.nav.melosys.tjenester.gui.dto.kodeverk.KodeverkDto;
 import no.nav.melosys.tjenester.gui.dto.dokument.Mottaksretning;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
