@@ -50,6 +50,7 @@ public class AvsluttFagsakOgBehandlingTest {
         Behandling behandling = new Behandling();
 
         Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-112");
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
         behandling.setFagsak(fagsak);

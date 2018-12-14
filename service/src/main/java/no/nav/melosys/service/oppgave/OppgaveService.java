@@ -62,6 +62,11 @@ public class OppgaveService {
     }
 
     @Transactional
+    public void ferdigstillOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
+        gsakFasade.ferdigstillOppgave(oppgaveID);
+    }
+
+    @Transactional
     public List<OppgaveDto> hentOppgaverMedBruker(String brukerIdent) throws TekniskException, FunksjonellException {
         String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
         if (aktørId == null) {
@@ -81,6 +86,10 @@ public class OppgaveService {
         return oppgaverTilDtoer(oppgaverFraDomain).stream()
                 .map(oppgave -> (BehandlingsoppgaveDto) oppgave)
                 .collect(Collectors.toList());
+    }
+
+    public Oppgave hentOppgaveMedFagSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
+        return  gsakFasade.finnOppgaveMedSaksnummer(fagSaksnummer);
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) throws TekniskException {

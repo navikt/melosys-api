@@ -13,6 +13,7 @@ import no.nav.melosys.service.journalforing.dto.FagsakDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -35,6 +37,9 @@ public class JournalfoeringServiceTest {
     @Mock
     private ProsessinstansRepository prosessinstansRepo;
 
+   @Mock
+    private OppgaveService oppgaveService;
+
     private JournalfoeringService journalfoeringService;
 
     private JournalfoeringOpprettDto opprettDto;
@@ -43,7 +48,7 @@ public class JournalfoeringServiceTest {
 
     @Before
     public void setup() {
-        this.journalfoeringService = new JournalfoeringService(binge, joarkFasade, prosessinstansRepo);
+        this.journalfoeringService = new JournalfoeringService(binge, joarkFasade, prosessinstansRepo, oppgaveService);
         JournalfoeringOpprettDto opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setDokumentID("setDokumentID");
@@ -79,6 +84,8 @@ public class JournalfoeringServiceTest {
 
         verify(prosessinstansRepo, times(1)).save(any(Prosessinstans.class));
         verify(binge, times(1)).leggTil(any(Prosessinstans.class));
+        verify(oppgaveService, times(1)).ferdigstillOppgave(anyString());
+
     }
 
     @Test(expected = FunksjonellException.class)
@@ -88,16 +95,18 @@ public class JournalfoeringServiceTest {
     }
 
     @Test
-    public void tilordneSakOgJournalfør() throws FunksjonellException {
+    public void tilordneSakOgJournalfør() throws FunksjonellException, TekniskException {
         tilordneDto.setSaksnummer("MEL-0123");
         journalfoeringService.tilordneSakOgJournalfør(tilordneDto);
 
         verify(prosessinstansRepo, times(1)).save(any(Prosessinstans.class));
         verify(binge, times(1)).leggTil(any(Prosessinstans.class));
+        verify(oppgaveService, times(1)).ferdigstillOppgave(anyString());
+
     }
 
     @Test(expected = FunksjonellException.class)
-    public void tilordneSakOgJournalfør_saksnr_mangler() throws FunksjonellException {
+    public void tilordneSakOgJournalfør_saksnr_mangler() throws FunksjonellException, TekniskException {
         tilordneDto.setSaksnummer("");
         journalfoeringService.tilordneSakOgJournalfør(tilordneDto);
     }

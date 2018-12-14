@@ -28,14 +28,15 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.Dokumenttype.ATTEST_A1;
 import static no.nav.melosys.domain.Dokumenttype.INNVILGELSE_YRKESAKTIV;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.ProsessSteg.GSAK_AVSLUTT_OPPGAVE;
+import static no.nav.melosys.domain.ProsessSteg.IV_AVSLUTT_BEHANDLING;
 import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
 
 /**
  * Sende ulike brev basert på lovvalgsbestemmelse.
  * <p>
- * Transisjoner: ProsessType.IVERKSETT_VEDTAK
- *  IV_SEND_BREV -> GSAK_AVSLUTT_OPPGAVE eller FEILET_MASKINELT hvis feil
+ * Transisjoner:
+ * ProsessType.IVERKSETT_VEDTAK
+ *  IV_SEND_BREV -> IV_AVSLUTT_BEHANDLING eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
@@ -96,7 +97,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
                 dokumentService.produserDokument(behandling.getId(), INNVILGELSE_YRKESAKTIV, brevData);
                 log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
             }
-            prosessinstans.setSteg(GSAK_AVSLUTT_OPPGAVE);
+            prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
         } else {
             String feilmelding = "Ukjent prosess type: " + prosessType;
             log.error("{}: {}", prosessinstans.getId(), feilmelding);

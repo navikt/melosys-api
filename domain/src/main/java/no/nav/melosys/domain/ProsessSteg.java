@@ -11,7 +11,6 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     MOT_VURDER_AUTOMATISK_JFR("VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"), // FIXME: Ikke i bruk
 
     //Gsak
-    GSAK_AVSLUTT_OPPGAVE("GSAK_AVSLUTT_OPPGAVE", "Avslutter oppgaven i GSAK"),
     GSAK_OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
 
     // Journalføring

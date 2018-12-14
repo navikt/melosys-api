@@ -133,10 +133,6 @@ public class Oppgaveplukker {
 
         Fagsak fagsak = behandling.getFagsak();
         Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(fagsak.getSaksnummer());
-        if (oppgave == null) {
-            log.error("Fant ikke behandlingsoppgave på fagsak med saksnummer " + fagsak.getSaksnummer());
-            throw new IkkeFunnetException("Fant ikke behandlingsoppgave på fagsak med saksnummer " + fagsak.getSaksnummer());
-        }
         String oppgaveId = oppgave.getOppgaveId();
         gsakFasade.leggTilbakeOppgave(oppgaveId);
 

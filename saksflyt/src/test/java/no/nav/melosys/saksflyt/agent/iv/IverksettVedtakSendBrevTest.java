@@ -16,8 +16,7 @@ import no.nav.melosys.service.dokument.brev.*;
 
 import org.junit.Test;
 
-import static no.nav.melosys.domain.ProsessSteg.GSAK_AVSLUTT_OPPGAVE;
-
+import static no.nav.melosys.domain.ProsessSteg.IV_AVSLUTT_BEHANDLING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.ArgumentMatchers.any;
@@ -162,7 +161,7 @@ public class IverksettVedtakSendBrevTest {
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID));
         instans.utførSteg(p);
 
-        assertThat(p.getSteg()).isEqualTo(GSAK_AVSLUTT_OPPGAVE);
+        assertThat(p.getSteg()).isEqualTo(IV_AVSLUTT_BEHANDLING);
     }
 
     @Test

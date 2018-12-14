@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
+import static no.nav.melosys.domain.ProsessSteg.JFR_AKTØR_ID;
+import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
 import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
 
 /**
@@ -34,7 +36,7 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
         log.info("GrunnleggendeValidering initialisert");
     }
 
-    
+
     @Override
     protected ProsessSteg inngangsSteg() {
         return ProsessSteg.JFR_VALIDERING;
@@ -102,7 +104,19 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
             return;
         }
 
-        prosessinstans.setSteg(ProsessSteg.GSAK_AVSLUTT_OPPGAVE);
+        switch (prosessType) {
+            case JFR_NY_SAK:
+                prosessinstans.setSteg(JFR_AKTØR_ID);
+                break;
+            case JFR_KNYTT:
+                prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
+                break;
+            default:
+                String feilmelding = "Ukjent prosess type: " + prosessType;
+                log.error("{}: {}", prosessinstans.getId(), feilmelding);
+                håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
+                return;
+        }
         log.info("Ferdig med grunnleggende validering av prosessinstans {}", prosessinstans.getId());
     }
 
