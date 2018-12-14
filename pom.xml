@@ -38,8 +38,8 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.frontend.version>0.16.0-357</melosys.frontend.version>
-        <melosys.jsonschema.version>0.13.0-136</melosys.jsonschema.version>
+        <melosys.frontend.version>0.16.0-359</melosys.frontend.version>
+        <melosys.jsonschema.version>0.13.0-138</melosys.jsonschema.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
@@ -467,8 +467,7 @@
             <dependency>
                 <groupId>no.nav.melosys</groupId>
                 <artifactId>melosys-schema</artifactId>
-                <!--<version>${melosys.jsonschema.version}</version>-->
-                <version>0.13.0-PR-164-SNAPSHOT</version>
+                <version>${melosys.jsonschema.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.everit-org.json-schema</groupId>

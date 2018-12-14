@@ -1,6 +1,6 @@
 package no.nav.melosys.domain;
 
-public enum DokumenttypeId implements Kodeverk {
+public enum ProduserbartDokument implements Kodeverk {
     ATTEST_A1("ATTEST_A1", "Attest A1"),
     INNVILGELSE_YRKESAKTIV("INNVILGELSE_YRKESAKTIV", "Innvilgelse yrkesaktiv"),
     ORIENTERING_ANMODNING_UNNTAK("ORIENTERING_ANMODNING_UNNTAK", "Orienteringsbrev om anmodning unntak"),
@@ -11,7 +11,7 @@ public enum DokumenttypeId implements Kodeverk {
     private String kode;
     private String beskrivelse;
 
-    DokumenttypeId(String kode, String beskrivelse) {
+    ProduserbartDokument(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }

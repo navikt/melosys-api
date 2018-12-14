@@ -39,7 +39,7 @@ public class SendMangelbrevTest {
 
         agent.utførSteg(p);
 
-        verify(dokumentService, times(1)).produserDokument(anyLong(), any(DokumenttypeId.class), any(BrevData.class));
+        verify(dokumentService, times(1)).produserDokument(anyLong(), any(ProduserbartDokument.class), any(BrevData.class));
         verify(behandlingRepo, times(1)).save(any(Behandling.class));
 
         assertThat(p.getSteg()).isNull();

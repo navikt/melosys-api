@@ -90,14 +90,14 @@ public class DokumentService {
     // være påkrevd for Hibernate å finne en sesjon via Spring-transaksjonen
     // for å kunne laste lazy collections i objektgrafen.
     @Transactional
-    public byte[] produserUtkast(long behandlingID, DokumenttypeId dokumenttypeId, BrevbestillingDto brevbestillingDto)
+    public byte[] produserUtkast(long behandlingID, ProduserbartDokument produserbartDokument, BrevbestillingDto brevbestillingDto)
         throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingRepository.findOneWithSaksopplysningerById(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
         }
 
-        DokumentType dokumentType = lagDokumentType(dokumenttypeId);
+        DokumentType dokumentType = lagDokumentType(produserbartDokument);
         BrevDataBygger bygger = brevDataByggerVelger.hent(dokumentType, brevbestillingDto);
         BrevData brevData = bygger.lag(behandling, SubjectHandler.getInstance().getUserID());
 
@@ -110,23 +110,23 @@ public class DokumentService {
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(long behandlingID, DokumenttypeId dokumenttypeId, BrevData brevData)
+    public void produserDokument(long behandlingID, ProduserbartDokument produserbartDokument, BrevData brevData)
         throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
         }
 
-        DokumentType dokumentType = lagDokumentType(dokumenttypeId);
+        DokumentType dokumentType = lagDokumentType(produserbartDokument);
         DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(dokumentType, behandling, brevData);
         Object brevinnhold = brevDataService.lagBrevXML(dokumentType, behandling, brevData);
 
         dokSysFasade.produserIkkeredigerbartDokument(request, brevinnhold);
     }
 
-    private DokumentType lagDokumentType(DokumenttypeId dokumenttypeId) throws TekniskException {
-        if (dokumenttypeId == null) {
-            throw new TekniskException("Ingen gyldig dokumenttypeId");
+    private DokumentType lagDokumentType(ProduserbartDokument produserbartDokument) throws TekniskException {
+        if (produserbartDokument == null) {
+            throw new TekniskException("Ingen gyldig produserbartDokument");
         }
 
         // NB: Kan ved første øyekast se ut som meningsløs kode, men er en
@@ -135,15 +135,15 @@ public class DokumentService {
         // kan vel koples til domene-laget og gjenbruke typen derfra?
         DokumentType dokumentType;
         try {
-            dokumentType = DokumentType.valueOf(dokumenttypeId.name());
+            dokumentType = DokumentType.valueOf(produserbartDokument.name());
         } catch (IllegalArgumentException e) {
-            throw new TekniskException("Fant ikke dokumentType for dokumenttypeId " + dokumenttypeId);
+            throw new TekniskException("Fant ikke dokumentType for produserbartDokument " + produserbartDokument);
         }
         return dokumentType;
     }
 
     @Transactional
-    public void produserDokumentISaksflyt(long behandlingID, DokumenttypeId dokumenttypeId, BrevbestillingDto brevbestillingDto) throws FunksjonellException {
+    public void produserDokumentISaksflyt(long behandlingID, ProduserbartDokument produserbartDokument, BrevbestillingDto brevbestillingDto) throws FunksjonellException {
         Behandling behandling = behandlingRepository.findOne(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
@@ -151,13 +151,13 @@ public class DokumentService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        switch (dokumenttypeId) {
+        switch (produserbartDokument) {
             case MELDING_MANGLENDE_OPPLYSNINGER:
                 prosessinstans.setType(ProsessType.MANGELBREV);
                 prosessinstans.setSteg(ProsessSteg.MANGELBREV);
                 break;
             default:
-                throw new FunksjonellException("DokumenttypeId " + dokumenttypeId + " er ikke støttet.");
+                throw new FunksjonellException("ProduserbartDokument " + produserbartDokument + " er ikke støttet.");
         }
 
         if (brevbestillingDto != null) {
