@@ -15,7 +15,6 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.dokument.DokumentType;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +22,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.w3c.dom.Element;
 
 import static no.nav.melosys.service.dokument.DokumentType.*;
-
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,11 +35,14 @@ public class BrevDataServiceTest {
 
     private static final String FNR = "Fnr";
     private static final String ORGNR = "Org-Nr";
+    private static final String REPRESENTANT = "Representant";
+
+    private TpsFasade tpsFasade;
 
     @Before
     public void setUp() throws IkkeFunnetException, TekniskException {
         BehandlingsresultatRepository behandlingsresultatRepository = mock(BehandlingsresultatRepository.class);
-        TpsFasade tpsFasade = mock(TpsService.class);
+        tpsFasade = mock(TpsService.class);
         service = spy(new BrevDataService(tpsFasade, behandlingsresultatRepository));
 
         when(tpsFasade.hentFagsakIdentMedRolleType(any(), any())).thenCallRealMethod();
@@ -50,7 +51,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagForvaltningsmelding() throws TekniskException {
+    public void lagForvaltningsmelding_representantErNull_tilBruker() throws TekniskException {
         Behandling behandling = lagBehandling();
         BrevData brevData = new BrevData("Z123456");
 
@@ -58,6 +59,29 @@ public class BrevDataServiceTest {
 
         assertThat(metadata.bruker).isEqualTo(FNR);
         assertThat(metadata.mottaker).isEqualTo(FNR);
+
+        Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, lagBehandling(), brevData);
+
+        assertThat(element).isNotNull();
+    }
+
+    @Test
+    public void lagForvaltningsmelding_representantIkkeNull_tilRepresentant() throws TekniskException, IkkeFunnetException {
+
+        Aktoer representant = new Aktoer();
+        representant.setAktørId("Representant");
+        representant.setRolle(RolleType.REPRESENTANT);
+
+        Behandling behandling = lagBehandling();
+        behandling.getFagsak().getAktører().add(representant);
+        BrevData brevData = new BrevData("Z123456");
+
+        when(tpsFasade.hentFagsakIdentMedRolleType(behandling.getFagsak(), RolleType.REPRESENTANT)).thenReturn(REPRESENTANT);
+
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling, brevData);
+
+        assertThat(metadata.bruker).isEqualTo(FNR);
+        assertThat(metadata.mottaker).isEqualTo(REPRESENTANT);
 
         Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, lagBehandling(), brevData);
 

@@ -68,12 +68,17 @@ public class BrevDataService {
 
         Fagsak fagsak = behandling.getFagsak();
         metadata.bruker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, BRUKER);
+        Aktoer representant = fagsak.hentAktørMedRolleType(REPRESENTANT);
 
         switch (dokumentType) {
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
-                metadata.mottaker = metadata.bruker;
+            case MELDING_FORVENTET_SAKSBEHANDLINGSTID: {
+                if (representant != null) {
+                    metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, REPRESENTANT);
+                } else {
+                    metadata.mottaker = metadata.bruker;
+                }
                 break;
-
+            }
             case ATTEST_A1:
             case INNVILGELSE_YRKESAKTIV:
             case MELDING_MANGLENDE_OPPLYSNINGER:
