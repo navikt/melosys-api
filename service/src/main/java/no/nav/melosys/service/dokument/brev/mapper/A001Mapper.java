@@ -9,6 +9,7 @@ import no.nav.dok.melosysbrev._000115.*;
 import no.nav.dok.melosysbrev._000115.BostedsadresseType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse_883_2004;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
@@ -52,15 +53,16 @@ public class A001Mapper {
 
         seda001.setArbeidsstedListe(mapArbeidsstedliste(brevData.arbeidssteder));
 
-        // TODO: Kommer med sokkel/skip
-        // seda001.setTilleggsbestemmelse();
-
         seda001.setLovvalgsPeriodeListe(mapLovvalgsperioder(brevData.lovvalgsperioder));
 
         // Alle lovvalgsperiodene må ha samme landKode
         Lovvalgsperiode lovvalgsperiode = brevData.lovvalgsperioder.iterator().next();
-        seda001.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getBestemmelse().getKode()));
-        seda001.setLovvalgsLand(lovvalgsperiode.getLovvalgsland().getKode());
+        seda001.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getUnntakFraBestemmelse().getKode()));
+        seda001.setLovvalgsLand(lovvalgsperiode.getLovvalgsland().getKode());  // Alltid Norge
+
+        // TODO: Implementasjon mangler i lovvalgsperiode
+        TilleggBestemmelse_883_2004 tilleggsbestemmelse = TilleggBestemmelse_883_2004.FO_883_2004_ART11_5;
+        seda001.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(tilleggsbestemmelse.getKode()));
 
         // Mangler implementasjon i oppgavene. Lev1 støtter ikke purring
         seda001.setForespørselType(ForespoerselTypeKode.FOERSTEGANG);
@@ -213,7 +215,7 @@ public class A001Mapper {
         ArbeidsstedType arbeidsstedBrev = new ArbeidsstedType();
         arbeidsstedBrev.setNavn(arbeidssted.navn);
         arbeidsstedBrev.setIkkeFysiskArbeidssted("true");
-        arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.fromValue(arbeidssted.yrkesgruppe.value()));
+        arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.fromValue(arbeidssted.yrkesgruppe.getKode()));
 
         AdresseType3 adresseBrev = new AdresseType3();
         adresseBrev.setLand(arbeidssted.landKode);
@@ -242,7 +244,7 @@ public class A001Mapper {
             foretak.setNavn(virksomhet.navn);
             foretak.setOrgnummer(virksomhet.orgnr);
             foretak.setYrkesaktivitet(YrkesaktivitetsKode.LOENNET_ARBEID); // TODO: Frilanser ikke implementert
-            foretak.setHovedvirksomhet("TRUE");  // Kun et foretak i Lev1
+            foretak.setHovedvirksomhet("true");  // Kun et foretak i Lev1
 
             UstrukturertAdresse adresse = (UstrukturertAdresse) virksomhet.adresse;
             AdresseType adresseBrev = new AdresseType();
@@ -293,15 +295,30 @@ public class A001Mapper {
     private LovvalgsPeriodeListeType mapLovvalgsperioder(List<Lovvalgsperiode> lovvalgsperioder) throws TekniskException {
         LovvalgsPeriodeListeType lovvalgsperioderBrev = new LovvalgsPeriodeListeType();
         for (Lovvalgsperiode periode : lovvalgsperioder) {
-            LovvalgsPeriodeType lovvalgsperiodeBrev = new LovvalgsPeriodeType();
-            try {
-                lovvalgsperiodeBrev.setFomDato(BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone(periode.getFom()));
-                lovvalgsperiodeBrev.setTomDato(BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone(periode.getTom()));
-            } catch (DatatypeConfigurationException e) {
-                throw new TekniskException("Feil ved konvertering");
-            }
+            LovvalgsPeriodeType lovvalgsperiodeBrev = mapLovvalgsperiode(periode);
             lovvalgsperioderBrev.getLovvalgsPeriode().add(lovvalgsperiodeBrev);
+
+            UnntakFraLovvalgslandType unntakFraLovvalgslandType = mapUnntaksland(periode);
+            lovvalgsperioderBrev.getUnntakFraLovvalgsland().add(unntakFraLovvalgslandType);
         }
         return lovvalgsperioderBrev;
+    }
+
+    private LovvalgsPeriodeType mapLovvalgsperiode(Lovvalgsperiode periode) throws TekniskException {
+        LovvalgsPeriodeType lovvalgsperiodeBrev = new LovvalgsPeriodeType();
+        try {
+            lovvalgsperiodeBrev.setFomDato(BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone(periode.getFom()));
+            lovvalgsperiodeBrev.setTomDato(BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone(periode.getTom()));
+        } catch (DatatypeConfigurationException e) {
+            throw new TekniskException("Feil ved konvertering");
+        }
+        return lovvalgsperiodeBrev;
+    }
+
+    private UnntakFraLovvalgslandType mapUnntaksland(Lovvalgsperiode periode) {
+        UnntakFraLovvalgslandType unntakFraLovvalgslandType = new UnntakFraLovvalgslandType();
+        String land = periode.getUnntakFraLovvalgsland().getKode();
+        unntakFraLovvalgslandType.getUnntakFraLovvalgsland().add(land);
+        return unntakFraLovvalgslandType;
     }
 }

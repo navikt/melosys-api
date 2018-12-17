@@ -66,10 +66,6 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         // evt. ta i bruk nytt predikat i regel-modulen (PR som ikke er flettet
         // ennå, http://stash.devillo.no/projects/MELOSYS/repos/melosys-regler/pull-requests/14/overview).
         fag.setTredjelandsborger("false");
-        // Er alltid lik arbeidsland for 12.x-brevene i leveranse 1.
-        // Feltet kan bli slått sammen med førstnevnte dersom avklaring ikke
-        // avdekker noe behov for to separate felt.
-        fag.setTrygdemyndighetsland(arbeidsland);
         return fag;
     }
 

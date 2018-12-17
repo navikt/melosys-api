@@ -14,7 +14,7 @@ public class BrevDataMapperRuter {
     static {
         mappere.put(DokumentType.MELDING_FORVENTET_SAKSBEHANDLINGSTID, ForvaltningsmeldingMapper.class);
         mappere.put(DokumentType.MELDING_MANGLENDE_OPPLYSNINGER, MangelbrevMapper.class);
-        mappere.put(DokumentType.ATTEST_A1, A1Mapper.class);
+        mappere.put(DokumentType.ATTEST_A1, AttestMapper.class);
         mappere.put(DokumentType.INNVILGELSE_YRKESAKTIV, InnvilgelsesbrevMapper.class);
     }
 

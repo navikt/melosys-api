@@ -5,16 +5,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 
 import io.github.benas.randombeans.api.EnhancedRandom;
-import no.nav.dok.melosysbrev._000116.BrevdataType;
-import no.nav.dok.melosysbrev._000116.Fag;
-import no.nav.dok.melosysbrev._000116.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -25,15 +19,13 @@ import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
@@ -41,9 +33,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class A1MapperTest {
+public class AttestMapperTest {
 
-    private A1Mapper mapper;
+    private AttestMapper mapper;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -53,11 +45,11 @@ public class A1MapperTest {
     private Behandlingsresultat behandlingsresultat;
     private Behandling behandling;
 
-    private BrevDataA1 brevData;
+    private BrevDataVedlegg brevData;
 
     @Before
     public void setUp() {
-        mapper = new A1Mapper();
+        mapper = new AttestMapper();
         enhancedRandom = EnhancedRandomConfigurer.randomForDokProd();
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -120,55 +112,29 @@ public class A1MapperTest {
                                                          "123456789",
                                                          strukturertAdresse);
 
-        brevData = new BrevDataA1("Z1234567");
-        brevData.yrkesgruppe = YrkesgruppeType.ORDINAER;
-        brevData.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
-        brevData.selvstendigeForetak = new HashSet<>();
-        brevData.utenlandskeVirksomheter = new ArrayList<>(Arrays.asList(utenlandksVirksomhet));
-        brevData.søknad = søknad;
-        brevData.bostedsadresse = boAdresse;
+        BrevDataA1 a1Data = new BrevDataA1("Z1234567");
+        a1Data.yrkesgruppe = YrkesgruppeType.ORDINAER;
+        a1Data.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
+        a1Data.selvstendigeForetak = new HashSet<>();
+        a1Data.utenlandskeVirksomheter = new ArrayList<>(Arrays.asList(utenlandksVirksomhet));
+        a1Data.søknad = søknad;
+        a1Data.bostedsadresse = boAdresse;
+
+        brevData = new BrevDataVedlegg("Z1234567");
+        brevData.brevDataA1 = a1Data;
     }
 
     @Test
     public void mapTilBrevXML() throws Exception {
         FellesType fellesType = new FellesType();
-        fellesType.setFagsaksnummer("MELTEST-4");
+        fellesType.setFagsaksnummer("MELTEST-1");
 
         MelosysNAVFelles navFelles = enhancedRandom.nextObject(MelosysNAVFelles.class);
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
-        String xml = mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 
         assertThat(xml).isNotNull();
     }
-
-
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
-        final String XSD_LOCATION = "melosysbrev/melosys_000116.xsd";
-
-        Fag fag = mapFag();
-        VedleggType vedlegg = new VedleggType();
-        vedlegg.setA1(mapper.mapA1(behandling, resultat, (BrevDataA1) brevData));
-        JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag, vedlegg);
-
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
-    }
-
-    public Fag mapFag() {
-        Fag fag = new Fag();
-        fag.setVedleggA1("true");
-        return fag;
-    }
-
-    private JAXBElement<BrevdataType> mapintoBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag, VedleggType vedlegg) {
-        ObjectFactory factory = new ObjectFactory();
-        BrevdataType brevdataType = factory.createBrevdataType();
-        brevdataType.setFelles(fellesType);
-        brevdataType.setNAVFelles(navFelles);
-        brevdataType.setFag(fag);
-        brevdataType.setVedlegg(vedlegg);
-        return factory.createBrevdata(brevdataType);
-    }
-
 }

@@ -80,6 +80,7 @@ public class BrevDataService {
                 break;
             }
             case ATTEST_A1:
+            case ATTEST_A001:
             case INNVILGELSE_YRKESAKTIV:
             case MELDING_MANGLENDE_OPPLYSNINGER:
             case HENLEGGELSE: {

@@ -209,7 +209,11 @@ public final class DokumentServiceTest {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
         KodeverkRegister kodeverkRegister = mock(KodeverkRegister.class);
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
-        BrevDataByggerVelger brevdatabyggervelger = new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService);
+        TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository = mock(TidligereMedlemsperiodeRepository.class);
+        VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
+        LovvalgsperiodeRepository lovvalgsperiodeRepository = mock(LovvalgsperiodeRepository.class);
+        UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
+        BrevDataByggerVelger brevdatabyggervelger = new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, tidligereMedlemsperiodeRepository, utenlandskMyndighetRepository, lovvalgsperiodeRepository, vilkaarsresultatRepository);
         return brevdatabyggervelger;
     }
 

@@ -6,6 +6,7 @@ package no.nav.melosys.service.dokument;
 public enum DokumentType {
     // FIXME: Koder erstattes med riktig dokumenttypeID når disse er bestilt
     ATTEST_A1("000116"),
+    ATTEST_A001("000116"),  // Attestene bruker samme dokumentmal med ulikt innhold
     AVSLAG_ARBEIDSTAGER("TODO-12"),
     AVSLAG_ARBEIDSGIVER("TODO-13"),
     BEHANDLINGSTID("TODO-14"),

@@ -13,10 +13,6 @@ import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 
 public class BrevDataA001 extends BrevData {
 
-    public BrevDataA001(String saksbehandler) {
-        super(saksbehandler);
-    }
-
     public UtenlandskMyndighet utenlandskMyndighet;
 
     public PersonDokument personDokument;

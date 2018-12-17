@@ -1,62 +1,44 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.util.Objects;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-
-import no.nav.dok.melosysbrev._000116.BrevdataType;
-import no.nav.dok.melosysbrev._000116.Fag;
-import no.nav.dok.melosysbrev._000116.ObjectFactory;
-import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
-import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
-import org.xml.sax.SAXException;
 
-public class VedleggMapper implements BrevDataMapper {
-
-    private static final int MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV = 3;
-
-    private static final String XSD_LOCATION = "xsd/melosys_000116.xsd";
+public class VedleggMapper  {
 
     private Behandling behandling;
-
     private Behandlingsresultat resultat;
+    private VedleggType vedlegg;
 
-    private BrevDataA1 brevData;
-
-    @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
+    public VedleggMapper(Behandling behandling, Behandlingsresultat resultat) {
         this.behandling = behandling;
         this.resultat = resultat;
-        this.brevData = (BrevDataA1) brevData;
-
-        Objects.requireNonNull(brevData, "A1 mapper trenger brevdata av type BrevDataA1Dto");
-
-        Fag fag = mapFag();
-        VedleggType vedlegg = new VedleggType();
-        //vedlegg.setA1(mapA1());
-        JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag, vedlegg);
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+        this.vedlegg = new VedleggType();
     }
 
-    public Fag mapFag() {
-        Fag fag = new Fag();
-        fag.setVedleggA1("true");
-        return fag;
+    public void map(BrevDataA1 brevDataA1, BrevDataA001 brevDataA001) throws TekniskException {
+        if (brevDataA1 != null) {
+            map(brevDataA1);
+        }
+        if (brevDataA001 != null) {
+            map(brevDataA001);
+        }
     }
 
-    private JAXBElement<BrevdataType> mapintoBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag, VedleggType vedlegg) {
-        ObjectFactory factory = new ObjectFactory();
-        BrevdataType brevdataType = factory.createBrevdataType();
-        brevdataType.setFelles(fellesType);
-        brevdataType.setNAVFelles(navFelles);
-        brevdataType.setFag(fag);
-        brevdataType.setVedlegg(vedlegg);
-        return factory.createBrevdata(brevdataType);
+    public void map(BrevDataA1 brevDataA1) throws TekniskException {
+        A1Mapper mapper = new A1Mapper();
+        vedlegg.setA1(mapper.mapA1(behandling, resultat, brevDataA1));
+    }
+
+    public void map(BrevDataA001 brevDataA001) throws TekniskException {
+        A001Mapper mapper = new A001Mapper();
+        vedlegg.setSEDA001(mapper.mapSEDA001(brevDataA001));
+    }
+
+    public VedleggType hent() {
+        return vedlegg;
     }
 }
