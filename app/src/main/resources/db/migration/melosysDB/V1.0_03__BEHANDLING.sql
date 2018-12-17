@@ -22,7 +22,11 @@ INSERT INTO behandling_status (kode, navn) VALUES ('OPPRETTET', 'Opprettet');
 INSERT INTO behandling_status (kode, navn) VALUES ('UNDER_BEHANDLING', 'Under behandling');
 INSERT INTO behandling_status (kode, navn) VALUES ('AVVENT_DOK_UTL', 'Avventer dokumentasjon fra utlandet');
 INSERT INTO behandling_status (kode, navn) VALUES ('AVVENT_DOK_PART', 'Avventer dokumentasjon fra en part');
+INSERT INTO behandling_status (kode, navn) VALUES ('TIDSFRIST_UTLOEPT', 'Tidsfristen er utløpt på etterspurte opplysninger');
 INSERT INTO behandling_status (kode, navn) VALUES ('VURDER_DOKUMENT', 'Nytt dokument mottatt på behandlingen');
+INSERT INTO behandling_status (kode, navn) VALUES ('FORELOEPIG_LOVVALG', 'Avventer svar på foreløpig lovvalg');
+INSERT INTO behandling_status (kode, navn) VALUES ('ANMODNING_UNNTAK_SENDT', 'Anmodning om unntak er sendt');
+INSERT INTO behandling_status (kode, navn) VALUES ('IVERKSETTER_VEDTAK', 'Vedtak iverksettes');
 INSERT INTO behandling_status (kode, navn) VALUES ('AVSLUTTET', 'Avsluttet');
 
 CREATE TABLE behandling_type (
@@ -33,10 +37,12 @@ CREATE TABLE behandling_type (
 
 INSERT INTO behandling_type (kode, navn) VALUES ('SOEKNAD', 'Behandling av søknad');
 INSERT INTO behandling_type (kode, navn) VALUES ('KLAGE', 'Behandling av klage eller anke');
-INSERT INTO behandling_type (kode, navn) VALUES ('POSTING_UTL', 'Behandling av melding om posting fra utenlandske myndigheter');
+INSERT INTO behandling_type (kode, navn) VALUES ('ANKE', 'Anke');
+INSERT INTO behandling_type (kode, navn) VALUES ('UNNTAK_FRA_MEDLEMSKAP', 'Registrering av unntak');
 INSERT INTO behandling_type (kode, navn) VALUES ('NORGE_UTPEKT', 'Behandling av at Norge er utpekt fra utenlandske myndigheter');
 INSERT INTO behandling_type (kode, navn) VALUES ('PAASTAND_UTL', 'Behandling av påstand fra utenlandske myndigheter');
-INSERT INTO behandling_type (kode, navn) VALUES ('REVURDERING ', 'Behandling av revurdering av et tidligere vedtak');
+INSERT INTO behandling_type (kode, navn) VALUES ('NY_VURDERING ', 'Behandling av revurdering av et tidligere vedtak');
+INSERT INTO behandling_type (kode, navn) VALUES ('ENDRET_PERIODE', 'Behandle forkortet periode');
 
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_fagsak FOREIGN KEY (saksnummer) REFERENCES fagsak;
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_status FOREIGN KEY (status) REFERENCES behandling_status;
