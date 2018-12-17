@@ -2,12 +2,11 @@ package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
 
-import no.nav.melosys.tjenester.gui.dto.KodeverkDto;
+import no.nav.melosys.tjenester.gui.dto.kodeverk.KodeverkDto;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

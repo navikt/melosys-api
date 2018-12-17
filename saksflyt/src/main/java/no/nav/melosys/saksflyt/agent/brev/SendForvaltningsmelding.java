@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.Dokumenttype.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
+import static no.nav.melosys.domain.ProduserbartDokument.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
 

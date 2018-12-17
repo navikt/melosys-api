@@ -180,7 +180,7 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
         resultat.setRegistrertDato(fagsak.getRegistrertDato());
         resultat.setSaksnummer(fagsak.getSaksnummer());
         resultat.setSakstype(fagsak.getType());
-        resultat.setStatus(fagsak.getStatus());
+        resultat.setSaksstatus(fagsak.getStatus());
         return resultat;
     }
 

@@ -62,7 +62,7 @@ public final class DokumentServiceTest {
     @Test
     public final void produserInnvilgelsesbrevFunker() throws Exception {
         BrevData brevData = lagBrevData(RolleType.BRUKER);
-        instans.produserDokument(BEHANDLINGSID, Dokumenttype.INNVILGELSE_YRKESAKTIV, brevData);
+        instans.produserDokument(BEHANDLINGSID, ProduserbartDokument.INNVILGELSE_YRKESAKTIV, brevData);
         verify(dokSysFasade).produserIkkeredigerbartDokument(any(DokumentbestillingMetadata.class), any(Object.class));
     }
 
@@ -72,7 +72,7 @@ public final class DokumentServiceTest {
                 "Issuer Not", null, null, null, null, null);
         SecurityContextHolder.getContext().setAuthentication(auth);
         BrevbestillingDto brevbestilling = lagBrevBestillingDto(RolleType.BRUKER);
-        byte[] resultat = instans.produserUtkast(BEHANDLINGSID, Dokumenttype.INNVILGELSE_YRKESAKTIV, brevbestilling);
+        byte[] resultat = instans.produserUtkast(BEHANDLINGSID, ProduserbartDokument.INNVILGELSE_YRKESAKTIV, brevbestilling);
         assertThat(resultat).isNull();
         verify(dokSysFasade).produserDokumentutkast(any(DokumentbestillingMetadata.class), any(Object.class));
     }
@@ -80,13 +80,13 @@ public final class DokumentServiceTest {
     @Test
     public final void produserInnvilgelsesbrevMedFullmektigFunker() throws Exception {
         BrevData brevDataDto = lagBrevData(RolleType.REPRESENTANT);
-        instans.produserDokument(BEHANDLINGSID, Dokumenttype.INNVILGELSE_YRKESAKTIV, brevDataDto);
+        instans.produserDokument(BEHANDLINGSID, ProduserbartDokument.INNVILGELSE_YRKESAKTIV, brevDataDto);
     }
 
     @Test
     public final void produserMangelbrevISaksflyt() throws Exception {
         BrevbestillingDto brevbestilling = lagBrevBestillingDto(RolleType.BRUKER);
-        instans.produserDokumentISaksflyt(BEHANDLINGSID, Dokumenttype.MELDING_MANGLENDE_OPPLYSNINGER, brevbestilling);
+        instans.produserDokumentISaksflyt(BEHANDLINGSID, ProduserbartDokument.MELDING_MANGLENDE_OPPLYSNINGER, brevbestilling);
     }
 
     private static BrevbestillingDto lagBrevBestillingDto(RolleType rolle) {
@@ -97,26 +97,26 @@ public final class DokumentServiceTest {
 
     @Test
     public final void produserMangelbrevISaksflytUtenBrevdata() throws Exception {
-        instans.produserDokumentISaksflyt(BEHANDLINGSID, Dokumenttype.MELDING_MANGLENDE_OPPLYSNINGER, null);
+        instans.produserDokumentISaksflyt(BEHANDLINGSID, ProduserbartDokument.MELDING_MANGLENDE_OPPLYSNINGER, null);
     }
 
     @Test
     public final void produserInnvilgelsesbrevISaksflytUtenBehandlingKasterUnntak() throws Exception {
         Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(~BEHANDLINGSID,
-                Dokumenttype.INNVILGELSE_YRKESAKTIV, lagBrevBestillingDto(RolleType.BRUKER)));
+                ProduserbartDokument.INNVILGELSE_YRKESAKTIV, lagBrevBestillingDto(RolleType.BRUKER)));
         assertThat(unntak).isInstanceOfAny(IkkeFunnetException.class).hasNoCause().hasMessageContaining("finnes ikke");
     }
 
     @Test
     public final void produserUkjentDokumenttypeISaksflytKasterUnntak() throws Exception {
         Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(BEHANDLINGSID,
-                Dokumenttype.MELDING_HENLAGT_SAK, lagBrevBestillingDto(RolleType.BRUKER)));
+                ProduserbartDokument.MELDING_HENLAGT_SAK, lagBrevBestillingDto(RolleType.BRUKER)));
         assertThat(unntak).isInstanceOfAny(FunksjonellException.class).hasNoCause().hasMessageContaining("er ikke støttet");
     }
 
     @Test
     public final void produserDokumentUtenBehandlingKasterUnntak() throws Exception {
-        Throwable unntak = catchThrowable(() -> instans.produserDokument(~BEHANDLINGSID, Dokumenttype.ATTEST_A1, lagBrevData(RolleType.ARBEIDSGIVER)));
+        Throwable unntak = catchThrowable(() -> instans.produserDokument(~BEHANDLINGSID, ProduserbartDokument.ATTEST_A1, lagBrevData(RolleType.ARBEIDSGIVER)));
         assertThat(unntak).isInstanceOf(IkkeFunnetException.class).hasNoCause().hasMessageContaining("finnes ikke");
     }
 
@@ -128,11 +128,11 @@ public final class DokumentServiceTest {
 
     @Test
     public final void produserDokumentMedDokumenttypeUtenIdKasterUnntak() throws Exception {
-        Throwable unntak = catchThrowable(() -> instans.produserDokument(BEHANDLINGSID, Dokumenttype.MELDING_HENLAGT_SAK,
+        Throwable unntak = catchThrowable(() -> instans.produserDokument(BEHANDLINGSID, ProduserbartDokument.MELDING_HENLAGT_SAK,
                 lagBrevData(RolleType.ARBEIDSGIVER)));
         assertThat(unntak).isInstanceOf(TekniskException.class)
             .hasNoCause()
-            .hasMessageContaining("Fant ikke dokumenttypeId");
+            .hasMessageContaining("Fant ikke dokumentType");
     }
 
     private final BrevDataA1 lagBrevData(RolleType mottakerRolle) {

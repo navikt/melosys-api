@@ -6,11 +6,13 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandlingsstatus;
 import no.nav.melosys.domain.Behandlingstype;
+import no.nav.melosys.domain.Fagsaksstatus;
 import no.nav.melosys.domain.Fagsakstype;
 
 public class FagsakOppsummeringDto {
     private String saksnummer;
     private Fagsakstype sakstype;
+    private Fagsaksstatus saksstatus;
     private Behandlingstype behandlingstype;
     private Behandlingsstatus behandlingsstatus;
     private Instant opprettetDato;
@@ -36,6 +38,14 @@ public class FagsakOppsummeringDto {
 
     public void setSakstype(Fagsakstype sakstype) {
         this.sakstype = sakstype;
+    }
+
+    public Fagsaksstatus getSaksstatus() {
+        return saksstatus;
+    }
+
+    public void setSaksstatus(Fagsaksstatus saksstatus) {
+        this.saksstatus = saksstatus;
     }
 
     public Behandlingstype getBehandlingstype() {

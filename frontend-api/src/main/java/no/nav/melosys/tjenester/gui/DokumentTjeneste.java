@@ -9,7 +9,7 @@ import javax.ws.rs.core.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import no.nav.melosys.domain.Dokumenttype;
+import no.nav.melosys.domain.ProduserbartDokument;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
@@ -67,14 +67,14 @@ public class DokumentTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("utkast/pdf/{behandlingID}/{dokumenttypeKode}")
+    @Path("utkast/pdf/{behandlingID}/{produserbartDokument}")
     @Produces({ "application/pdf", MediaType.APPLICATION_JSON + "; charset=UTF-8" })
     public Response produserUtkast(@PathParam("behandlingID") long behandlingID,
-                                   @PathParam("dokumenttypeKode") Dokumenttype dokumenttypeKode,
+                                   @PathParam("produserbartDokument") ProduserbartDokument produserbartDokument,
             BrevbestillingDto brevBestillingDto) throws TekniskException, FunksjonellException {
         byte[] dokument;
         tilgang.sjekk(behandlingID);
-        dokument = dokumentService.produserUtkast(behandlingID, dokumenttypeKode, brevBestillingDto);
+        dokument = dokumentService.produserUtkast(behandlingID, produserbartDokument, brevBestillingDto);
         Response.ResponseBuilder ok = Response.ok(dokument);
         ok.header(HttpHeaders.CONTENT_LENGTH, dokument.length);
         ok.header(HttpHeaders.CONTENT_DISPOSITION, "inline");
@@ -82,13 +82,13 @@ public class DokumentTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("opprett/{behandlingID}/{dokumenttypeKode}")
+    @Path("opprett/{behandlingID}/{produserbartDokument}")
     public Response produserDokument(@Context UriInfo uriInfo,
                                      @PathParam("behandlingID") long behandlingID,
-                                     @PathParam("dokumenttypeKode") Dokumenttype dokumenttypeKode,
+                                     @PathParam("produserbartDokument") ProduserbartDokument produserbartDokument,
             BrevbestillingDto brevBestillingDto) throws FunksjonellException, TekniskException {
         tilgang.sjekk(behandlingID);
-        dokumentService.produserDokumentISaksflyt(behandlingID, dokumenttypeKode, brevBestillingDto);
+        dokumentService.produserDokumentISaksflyt(behandlingID, produserbartDokument, brevBestillingDto);
         return Response.noContent().build();
     }
 

@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto;
+package no.nav.melosys.tjenester.gui.dto.kodeverk;
 
 import java.util.List;
 
@@ -6,33 +6,60 @@ import no.nav.melosys.service.kodeverk.KodeDto;
 
 public class KodeverkDto {
     private BegrunnelserDto begrunnelser = new BegrunnelserDto();
+    private BehandlingerDto behandlinger = new BehandlingerDto();
+    private BrevDto brev = new BrevDto();
     private LovvalgsBestemmelserDto lovvalgsbestemmelser = new LovvalgsBestemmelserDto();
+    private YrkerDto yrker = new YrkerDto();
     private List<KodeDto> aktoerroller;
-    private List<KodeDto> behandlingstyper;
-    private List<KodeDto> behandlingsstatus;
     private List<KodeDto> dokumenttitler;
-    private List<KodeDto> dokumenttyper;
     private List<KodeDto> finansiering;
     private List<KodeDto> landkoder;
+    private List<KodeDto> medlemskapstyper;
     private List<KodeDto> mottaksretning;
     private List<KodeDto> oppgavetyper;
     private List<KodeDto> representerer;
+    private List<KodeDto> saksstatuser;
     private List<KodeDto> sakstyper;
+    private List<KodeDto> trygdedekninger;
     private List<KodeDto> vedleggstitler;
 
     public BegrunnelserDto getBegrunnelser() {
         return begrunnelser;
     }
 
-    public LovvalgsBestemmelserDto getLovvalgsbestemmelser() {
-        return lovvalgsbestemmelser;
-    }
-
     public void setBegrunnelser(BegrunnelserDto begrunnelser) {
         this.begrunnelser = begrunnelser;
     }
 
+    public BehandlingerDto getBehandlinger() {
+        return behandlinger;
+    }
+
+    public void setBehandlinger(BehandlingerDto behandlinger) {
+        this.behandlinger = behandlinger;
+    }
+
+    public BrevDto getBrev() {
+        return brev;
+    }
+
+    public void setBrev(BrevDto brev) {
+        this.brev = brev;
+    }
+
+    public LovvalgsBestemmelserDto getLovvalgsbestemmelser() {
+        return lovvalgsbestemmelser;
+    }
+
     public void setLovvalgsbestemmelser(LovvalgsBestemmelserDto lovvalgsbestemmelser) { this.lovvalgsbestemmelser = lovvalgsbestemmelser; }
+
+    public YrkerDto getYrker() {
+        return yrker;
+    }
+
+    public void setYrker(YrkerDto yrker) {
+        this.yrker = yrker;
+    }
 
     public List<KodeDto> getAktoerroller() {
         return aktoerroller;
@@ -42,36 +69,12 @@ public class KodeverkDto {
         this.aktoerroller = aktoerroller;
     }
 
-    public List<KodeDto> getBehandlingstyper() {
-        return behandlingstyper;
-    }
-
-    public void setBehandlingstyper(List<KodeDto> behandlingstyper) {
-        this.behandlingstyper = behandlingstyper;
-    }
-
-    public List<KodeDto> getBehandlingsstatus() {
-        return behandlingsstatus;
-    }
-
-    public void setBehandlingsstatus(List<KodeDto> behandlingsstatus) {
-        this.behandlingsstatus = behandlingsstatus;
-    }
-
     public List<KodeDto> getDokumenttitler() {
         return dokumenttitler;
     }
 
     public void setDokumenttitler(List<KodeDto> dokumenttitler) {
         this.dokumenttitler = dokumenttitler;
-    }
-
-    public List<KodeDto> getDokumenttyper() {
-        return dokumenttyper;
-    }
-
-    public void setDokumenttyper(List<KodeDto> dokumenttyper) {
-        this.dokumenttyper = dokumenttyper;
     }
 
     public List<KodeDto> getFinansiering() { return finansiering; }
@@ -84,6 +87,14 @@ public class KodeverkDto {
 
     public void setLandkoder(List<KodeDto> landkoder) {
         this.landkoder = landkoder;
+    }
+
+    public List<KodeDto> getMedlemskapstyper() {
+        return medlemskapstyper;
+    }
+
+    public void setMedlemskapstyper(List<KodeDto> medlemskapstyper) {
+        this.medlemskapstyper = medlemskapstyper;
     }
 
     public List<KodeDto> getMottaksretning() {
@@ -110,12 +121,28 @@ public class KodeverkDto {
         this.representerer = representerer;
     }
 
+    public List<KodeDto> getSaksstatuser() {
+        return saksstatuser;
+    }
+
+    public void setSaksstatuser(List<KodeDto> saksstatuser) {
+        this.saksstatuser = saksstatuser;
+    }
+
     public List<KodeDto> getSakstyper() {
         return sakstyper;
     }
 
     public void setSakstyper(List<KodeDto> sakstyper) {
         this.sakstyper = sakstyper;
+    }
+
+    public List<KodeDto> getTrygdedekninger() {
+        return trygdedekninger;
+    }
+
+    public void setTrygdedekninger(List<KodeDto> trygdedekninger) {
+        this.trygdedekninger = trygdedekninger;
     }
 
     public List<KodeDto> getVedleggstitler() {
