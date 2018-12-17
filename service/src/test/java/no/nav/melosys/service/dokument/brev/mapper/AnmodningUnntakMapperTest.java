@@ -11,6 +11,8 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.begrunnelse.Artikkel12_1;
 import no.nav.melosys.domain.begrunnelse.Artikkel16_1_Anmodning;
+import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
+import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,6 +35,8 @@ public class AnmodningUnntakMapperTest {
             .build();
     }
 
+    // FIXME: Bedre testdekning
+
     @Test
     public void mapTilBrevXML() throws Exception {
         FellesType fellesType = new FellesType();
@@ -41,6 +45,11 @@ public class AnmodningUnntakMapperTest {
         MelosysNAVFelles navFelles = enhancedRandom.nextObject(MelosysNAVFelles.class);
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
+
+        Behandling behandling = new Behandling();
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Fagsakstype.EU_EØS);
+        behandling.setFagsak(fagsak);
 
         Behandlingsresultat resultat = new Behandlingsresultat();
 
@@ -66,7 +75,10 @@ public class AnmodningUnntakMapperTest {
         vilkaarsresultat16_1.setBegrunnelser(Collections.singleton(begrunnelse_16_1));
         resultat.getVilkaarsresultater().add(vilkaarsresultat16_1);
 
-        String xml = mapper.mapTilBrevXML(fellesType, navFelles, null, resultat, null);
+        BrevDataAnmodningUnntak brevData = new BrevDataAnmodningUnntak("Z999999");
+        brevData.hovedvirksomhet = new Virksomhet("Test AS", null, null);
+
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 
         assertThat(xml).isNotNull();
     }

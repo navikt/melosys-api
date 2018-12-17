@@ -12,6 +12,8 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.begrunnelse.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
+import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -24,16 +26,26 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
-        Fag fag = mapFag(resultat, brevData);
+        Fag fag = mapFag(behandling, resultat, (BrevDataAnmodningUnntak) brevData);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    public Fag mapFag(Behandlingsresultat resultat, BrevData brevData) throws TekniskException {
+    public Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntak brevData) throws TekniskException {
         Fag fag = new Fag();
-        fag.setForetakNavn("TODO"); // FIXME
-        fag.setYrkesaktivitet(YrkesaktivitetsKode.FRILANSER); // FIXME
-        fag.setInngangsvilkårBegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER); // FIXME
+
+        if (brevData.hovedvirksomhet == null) {
+            throw new TekniskException("Trenger minst en norsk virksomhet for ART16.1");
+        }
+        fag.setForetakNavn(brevData.hovedvirksomhet.navn);
+        // FIXME: Utledes fra arbeidsforhold eller avklares av saksbehandler?
+        fag.setYrkesaktivitet(YrkesaktivitetsKode.FRILANSER);
+        if (behandling.getFagsak().getType() == Fagsakstype.EU_EØS) {
+            // FIXME: Respons fra regelmodulen skiller ikke mellom begrunnelser for 883/2004
+            fag.setInngangsvilkårBegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
+        } else {
+            throw new TekniskException("Forholdet er ikke dekket av inngangsvilkårene for 883/2004");
+        }
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat));
 
         Art121BegrunnelseType art121BegrunnelseType = lagArt121BegrunnelseType();
@@ -56,7 +68,6 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
                     art122NormalVirksomhetBegrunnelseType = mapArt122NormalVirksomhetBegrunnelseType(art122NormalVirksomhetBegrunnelseType, vilkaarsresultat.getBegrunnelser());
                     break;
                 case FO_883_2004_ART16_1:
-                    // FIXME: Flere enn én begrunnelse?
                     VilkaarBegrunnelse vilkaarBegrunnelse = vilkaarsresultat.getBegrunnelser().stream()
                         .findFirst().orElseThrow(() -> new TekniskException("Ingen begunnelse funnet for Artikkel 16.1"));
                     fag.setArt161AnmodningBegrunnelse(Art161AnmodningBegrunnelseKode.valueOf(vilkaarBegrunnelse.getKode()));
@@ -67,7 +78,10 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
             throw new TekniskException("Ingen begrunnelse satt for Artikkel 16.1");
         }
         if (fag.getArt161AnmodningBegrunnelse() == Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN) {
-            fag.setAnmodningFritekst(brevData.fritekst); // FIXME: Må settes
+            if (StringUtils.isEmpty(brevData.fritekst)) {
+                throw new TekniskException("Ingen fritekstbegrunnelse satt for Artikkel 16.1");
+            }
+            fag.setAnmodningFritekst(brevData.fritekst);
         }
 
         fag.setArt121Begrunnelse(art121BegrunnelseType);
@@ -79,7 +93,7 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
     }
 
     private LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
-        // Kun en lovvalgsperiode i Lev 1
+        // Kun én lovvalgsperiode i Lev 1
         Lovvalgsperiode lovvalgsperiode = resultat.getLovvalgsperioder()
             .stream().findFirst().orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode funnet for behandlingsresultat"));
 
@@ -147,7 +161,12 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
                 case UNNTATT_MEDLEMSKAP:
                     art121ForutgaaendeBegrunnelseType.setUntattMedlemskap(JA);
                     break;
-                // FIXME
+                case FOLKEREGISTRERT_IKKE_ARBEIDET_I_NORGE:
+                    art121ForutgaaendeBegrunnelseType.setFolkeregistrertIkkeArbeidetINorge(JA);
+                    break;
+                case IKKE_FOLKEREGISTRERT_ELLER_ARBEIDET_I_NORGE:
+                    art121ForutgaaendeBegrunnelseType.setIkkeFolkeregistrertEllerArbeidetINorge(JA);
+                    break;
             }
         }
         return art121ForutgaaendeBegrunnelseType;

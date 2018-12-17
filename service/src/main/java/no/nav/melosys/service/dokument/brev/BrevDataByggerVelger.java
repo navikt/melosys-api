@@ -67,6 +67,9 @@ public class BrevDataByggerVelger {
                                 kodeverkService);
                 return new BrevDataByggerVedlegg(a1Bygger, brevbestillingDto);
             }
+            case ORIENTERING_ANMODNING_UNNTAK:
+                return new BrevDataByggerAnmodningUnntak(avklartefaktaService,
+                                                         registerOppslagService);
             default:
                 return new BrevDataByggerStandard(brevbestillingDto);
         }

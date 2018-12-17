@@ -8,6 +8,8 @@ public enum ForutgaaendeMedlemskap implements Kodeverk {
     UNNTATT_MEDLEMSKAP("UNNTATT_MEDLEMSKAP", "Har direkte forutgående medlemskap i MEDL."),
     MOTTAT_LOENN_UTL("MOTTAT_LOENN_UTL", "Mottok lønn opptjent i annet land forutgående måned."),
     IKKE_FOLKEREGISTRERT_NORGE("IKKE_FOLKEREGISTRERT_NORGE", "Har ikke TPS-adresse i Norge."),
+    FOLKEREGISTRERT_IKKE_ARBEIDET_I_NORGE("FOLKEREGISTRERT_IKKE_ARBEIDET_I_NORGE", "Bor, men har arbeidet utenfor Norge"),
+    IKKE_FOLKEREGISTRERT_ELLER_ARBEIDET_I_NORGE("IKKE_FOLKEREGISTRERT_ELLER_ARBEIDET_I_NORGE", "Hverken bor eller arbeidet i Norge"),
     IKKE_ANSATT_UTSEND_AG("IKKE_ANSATT_UTSEND_AG", "Er IKKE registrert i Aa-registeret hos utsendende arbeidsgiver.");
 
     private String kode;
