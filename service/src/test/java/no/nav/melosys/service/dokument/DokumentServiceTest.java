@@ -135,12 +135,15 @@ public final class DokumentServiceTest {
             .hasMessageContaining("Fant ikke dokumentType");
     }
 
-    private final BrevDataA1 lagBrevData(RolleType mottakerRolle) {
-        BrevDataA1 brevData = new BrevDataA1("Behandler Ei");
-        brevData.mottaker = mottakerRolle;
+    private final BrevData lagBrevData(RolleType mottakerRolle) {
+        BrevDataA1 brevData = new BrevDataA1();
         Virksomhet arbeidsgiver = new Virksomhet("Virker av og til", "987654321", null);
         brevData.norskeVirksomheter = Collections.singletonList(arbeidsgiver);
-        return brevData;
+
+        BrevDataVedlegg vedlegg = new BrevDataVedlegg("Saksbehandler");
+        vedlegg.mottaker = mottakerRolle;
+        vedlegg.brevDataA1 = brevData;
+        return vedlegg;
     }
 
     private static DokumentService lagDokumentService(DokSysFasade dokSysFasade) throws Exception {

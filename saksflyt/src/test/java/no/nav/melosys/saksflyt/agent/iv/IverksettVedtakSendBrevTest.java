@@ -40,12 +40,14 @@ public class IverksettVedtakSendBrevTest {
 
     private static IverksettVedtakSendBrev lagStegbehandler(Behandling behandling) throws Exception {
         BehandlingsresultatRepository behandlingsresultatRepo = mockBehandlingsresultatRepository();
-        BrevData brevdata = new BrevDataA1("Z123456");
-        BrevDataByggerA1 brevDataByggerA1 = mock(BrevDataByggerA1.class);
-        when(brevDataByggerA1.lag(any(), any())).thenReturn(brevdata);
+        BrevDataA1 brevdata = new BrevDataA1();
+        BrevDataVedlegg brevdataVedlegg = new BrevDataVedlegg("Z123456");
+        brevdataVedlegg.brevDataA1 = brevdata;
+        BrevDataByggerVedlegg brevDataByggerVedlegg = mock(BrevDataByggerVedlegg.class);
+        when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(brevdataVedlegg);
 
         BrevDataByggerVelger byggerVelger = mock(BrevDataByggerVelger.class);
-        when(byggerVelger.hent(any())).thenReturn(brevDataByggerA1);
+        when(byggerVelger.hent(any())).thenReturn(brevDataByggerVedlegg);
 
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
         when(behandlingRepository.findOneWithSaksopplysningerById(eq(behandling.getId()))).thenReturn(behandling);

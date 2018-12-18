@@ -9,7 +9,6 @@ import no.nav.dok.melosysbrev._000115.*;
 import no.nav.dok.melosysbrev._000115.BostedsadresseType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse_883_2004;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
@@ -61,8 +60,7 @@ public class A001Mapper {
         seda001.setLovvalgsLand(lovvalgsperiode.getLovvalgsland().getKode());  // Alltid Norge
 
         // TODO: Implementasjon mangler i lovvalgsperiode
-        TilleggBestemmelse_883_2004 tilleggsbestemmelse = TilleggBestemmelse_883_2004.FO_883_2004_ART11_5;
-        seda001.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(tilleggsbestemmelse.getKode()));
+        //seda001.setTilleggsbestemmelse();
 
         // Mangler implementasjon i oppgavene. Lev1 støtter ikke purring
         seda001.setForespørselType(ForespoerselTypeKode.FOERSTEGANG);
@@ -78,9 +76,6 @@ public class A001Mapper {
         }
 
         seda001.setFritekst(brevData.vilkårsresultat161.getBegrunnelseFritekst());
-
-        // FIXME: Skal ikke være obligatorisk
-        seda001.setUnderskrift(" ");
 
         return seda001;
     }
@@ -132,7 +127,7 @@ public class A001Mapper {
 
         TrygdemyndighetsadresseType adresseBrev = new TrygdemyndighetsadresseType();
         adresseBrev.setGatenavn(utenlandskMyndighet.gateadresse);
-        adresseBrev.setPostnr(utenlandskMyndighet.postnummer);
+        adresseBrev.setPostnummer(utenlandskMyndighet.postnummer);
         adresseBrev.setPoststed(utenlandskMyndighet.poststed);
         trygdemyndighet.setTrygdemyndighetsadresse(adresseBrev);
 
@@ -203,7 +198,7 @@ public class A001Mapper {
         adresseBrev.setGatenavn(adresse.gatenavn);
         adresseBrev.setHusnummer(adresse.husnummer);
         adresseBrev.setPostnummer(adresse.postnummer);
-        adresseBrev.setBy(adresse.poststed);
+        adresseBrev.setPossted(adresse.poststed);
         adresseBrev.setRegion(adresse.region);
         adresseBrev.setLand(adresse.landKode);
         arbeidsstedBrev.setAdresse(adresseBrev);
@@ -229,10 +224,9 @@ public class A001Mapper {
         BostedsadresseType bostedsadresse = new BostedsadresseType();
         bostedsadresse.setGatenavn(gateadresse.getGatenavn());
         bostedsadresse.setHusnummer(gateadresse.getGatenummer() + " " + gateadresse.getHusbokstav());
-        bostedsadresse.setPostnr(bosted.getPostnr());
+        bostedsadresse.setPostnummer(bosted.getPostnr());
         bostedsadresse.setPoststed(bosted.getPoststed());
-        bostedsadresse.setLandkode(bosted.getLand().getKode());
-        bostedsadresse.setLand(bosted.getLand().getKode());  // FIXME: Skal kun sende Landkode. Venter på brev
+        bostedsadresse.setLand(bosted.getLand().getKode());
         bostedsadresse.setAdresseType(BostedsadresseTypeKode.BOSTEDSLAND); // Lev1 kun bostedsland
         return bostedsadresse;
     }

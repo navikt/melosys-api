@@ -112,7 +112,7 @@ public class AttestMapperTest {
                                                          "123456789",
                                                          strukturertAdresse);
 
-        BrevDataA1 a1Data = new BrevDataA1("Z1234567");
+        BrevDataA1 a1Data = new BrevDataA1();
         a1Data.yrkesgruppe = YrkesgruppeType.ORDINAER;
         a1Data.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
         a1Data.selvstendigeForetak = new HashSet<>();

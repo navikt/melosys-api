@@ -145,7 +145,7 @@ public class A001MapperTest {
         begrunnelse.setKode("UTSENDELSE_MELLOM_24_MN_OG_5_AAR");
         vilkår.getBegrunnelser().add(begrunnelse);
 
-        brevData = new BrevDataA001("Z1234567");
+        brevData = new BrevDataA001();
         brevData.arbeidsgivendeVirkomsheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
         brevData.selvstendigeVirksomheter = new ArrayList<>();
         brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidssted));   // Hovedvirksomhet

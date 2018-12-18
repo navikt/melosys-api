@@ -50,6 +50,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     private PersonDokument person;
     private Behandling behandling;
 
+    // TODO: MELOSYS-2028 - Gjenbruke felles funksjonalitet i A1 og A001
     public BrevDataByggerA001(AvklartefaktaService avklartefaktaService,
                               RegisterOppslagSystemService registerOppslagService,
                               KodeverkService kodeverkService,
@@ -225,7 +226,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
 
         MedlemskapDokument medlemskapdokument = SaksopplysningerUtils.hentMedlemskapDokument(behandling);
         Set<Medlemsperiode> perioder = medlemskapdokument.getMedlemsperiode().stream()
-                .filter(periode -> !utvalgtePeriodeIDer.contains(periode.id))
+                .filter(periode -> utvalgtePeriodeIDer.contains(periode.id))
                 .collect(Collectors.toSet());
 
         List<Lovvalgsperiode> tidligereLovvalgsperioder = new ArrayList<>();

@@ -47,7 +47,7 @@ public class BrevDataByggerVelgerTest {
 
     @Test
     public final void hentInnvilelsesYrksaktivGirA1Bygger() {
-        testHent(DokumentType.INNVILGELSE_YRKESAKTIV, BrevDataByggerA1.class);
+        testHent(DokumentType.INNVILGELSE_YRKESAKTIV, BrevDataByggerVedlegg.class);
     }
 
     private final void testHent(DokumentType type, Class<? extends BrevDataBygger> forventetKlasse) {
@@ -68,8 +68,5 @@ public class BrevDataByggerVelgerTest {
         BrevDataBygger bygger = brevDataByggerVelger.hent(DokumentType.MELDING_FORVENTET_SAKSBEHANDLINGSTID, bestilling);
         assertThat(bygger).isInstanceOf(BrevDataByggerStandard.class);
     }
-
-
-
 
 }

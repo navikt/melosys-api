@@ -64,10 +64,13 @@ public class BrevDataByggerVelger {
                                 vilkaarsresultatRepository);
                 return new BrevDataByggerVedlegg(a001Bygger, brevbestillingDto);
             }
-            case INNVILGELSE_YRKESAKTIV:
-                return new BrevDataByggerA1(avklartefaktaService,
-                                            registerOppslagService,
-                                            kodeverkService);
+            case INNVILGELSE_YRKESAKTIV: {
+                BrevDataByggerA1 a1Bygger =
+                        new BrevDataByggerA1(avklartefaktaService,
+                                registerOppslagService,
+                                kodeverkService);
+                return new BrevDataByggerVedlegg(a1Bygger, brevbestillingDto);
+            }
             default:
                 return new BrevDataByggerStandard(brevbestillingDto);
         }

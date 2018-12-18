@@ -120,7 +120,7 @@ public class A1MapperTest {
                                                          "123456789",
                                                          strukturertAdresse);
 
-        brevData = new BrevDataA1("Z1234567");
+        brevData = new BrevDataA1();
         brevData.yrkesgruppe = YrkesgruppeType.ORDINAER;
         brevData.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
         brevData.selvstendigeForetak = new HashSet<>();
