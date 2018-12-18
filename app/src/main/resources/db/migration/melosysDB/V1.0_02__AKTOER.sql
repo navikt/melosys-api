@@ -9,6 +9,7 @@ CREATE TABLE aktoer (
 );
 
 CREATE INDEX idx_aktoer_sak ON aktoer(saksnummer);
+CREATE INDEX idx_aktoer_rolle ON aktoer(rolle);
 
 CREATE TABLE rolle_type (
     kode        VARCHAR2(99)  NOT NULL,

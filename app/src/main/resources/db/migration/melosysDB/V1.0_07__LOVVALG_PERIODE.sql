@@ -15,9 +15,11 @@ CREATE TABLE lovvalg_periode (
     
 );
 
+CREATE UNIQUE INDEX idx_periode_unik_i_beh ON lovvalg_periode(beh_resultat_id, fom_dato, tom_dato);
+CREATE INDEX idx_lovvalg_periode_resultat ON lovvalg_periode(beh_resultat_id);
+
 ALTER TABLE lovvalg_periode
     ADD CONSTRAINT fk_periode_beh_resultat FOREIGN KEY (beh_resultat_id) REFERENCES behandlingsresultat;
-    
-CREATE UNIQUE INDEX idx_periode_unik_i_beh ON lovvalg_periode(beh_resultat_id, fom_dato, tom_dato);    
+
 ALTER TABLE lovvalg_periode
     ADD CONSTRAINT periode_unik_i_beh UNIQUE(beh_resultat_id, fom_dato, tom_dato) using index idx_periode_unik_i_beh;

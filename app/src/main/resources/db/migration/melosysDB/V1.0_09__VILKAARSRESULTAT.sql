@@ -11,6 +11,8 @@ CREATE TABLE vilkaarsresultat (
     CONSTRAINT pk_vilkaarsresultat PRIMARY KEY (id)
 );
 
+CREATE INDEX idx_vilkaar_resultat ON vilkaarsresultat(beh_resultat_id);
+
 ALTER TABLE vilkaarsresultat
     ADD CONSTRAINT fk_vilkaar_beh_resultat FOREIGN KEY (beh_resultat_id) REFERENCES behandlingsresultat;
 

@@ -10,6 +10,8 @@ CREATE TABLE avklartefakta (
     CONSTRAINT unique_referanse UNIQUE(beh_resultat_id, referanse, subjekt)
 );
 
+CREATE INDEX idx_avklartefakta_resultat ON avklartefakta(beh_resultat_id);
+
 ALTER TABLE avklartefakta
     ADD CONSTRAINT fk_avklartefakta_beh_resultat FOREIGN KEY (beh_resultat_id) REFERENCES behandlingsresultat;
 
@@ -23,6 +25,8 @@ CREATE TABLE avklartefakta_registrering (
     endret_av             VARCHAR2(99) NULL,
     CONSTRAINT pk_avklartefakta_reg PRIMARY KEY (id)
 );
+
+CREATE INDEX idx_avklartefakta_registrering ON avklartefakta_registrering(avklartefakta_id);
 
 ALTER TABLE avklartefakta_registrering
     ADD CONSTRAINT fk_avklartefakta_registrering FOREIGN KEY (avklartefakta_id) REFERENCES avklartefakta ON DELETE CASCADE;

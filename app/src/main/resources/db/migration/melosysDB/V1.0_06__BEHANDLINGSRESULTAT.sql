@@ -14,6 +14,9 @@ CREATE TABLE behandlingsresultat (
     CONSTRAINT pk_resultat PRIMARY KEY (behandling_id)
 );
 
+CREATE INDEX idx_behandlingsmaate ON behandlingsresultat(behandlingsmaate);
+CREATE INDEX idx_behandlingsresultat_type ON behandlingsresultat(resultat_type);
+
 ALTER TABLE behandlingsresultat
     ADD CONSTRAINT fk_resultat_behandling FOREIGN KEY (behandling_id) REFERENCES behandling;
 
