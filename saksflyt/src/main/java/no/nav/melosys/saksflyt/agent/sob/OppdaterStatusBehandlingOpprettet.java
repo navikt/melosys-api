@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.agent.sob;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
@@ -12,15 +13,16 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
-import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_OPPR;
+import static no.nav.melosys.domain.ProsessSteg.*;
 
 /**
  * Steget sørger for å skrive til Sak og Behandling når behandling opprettes
  *
  * Transisjoner:
- * STATUS_BEH_OPPR → JFR_OPPDATER_JOURNALPOST hvis alt ok
- * STATUS_BEH_OPPR → FEILET_MASKINELT hvis oppdatering av status feilet
+ * 1) ProsessType.JFR_NY_SAK:
+ * STATUS_BEH_OPPR → JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
+ * 2) ProsessType.JFR_KNYTT:
+ * STATUS_BEH_OPPR → GSAK_OPPRETT_OPPGAVE eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehander {
@@ -50,7 +52,11 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
 
         sakOgBehandlingFasade.sendBehandlingOpprettet(lagBehandlingStatusMapper(saksnummer, behandling.getId(), aktørID));
 
-        prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
+        if (prosessinstans.getType() == ProsessType.JFR_KNYTT) {
+            prosessinstans.setSteg(GSAK_OPPRETT_OPPGAVE);
+        } else {
+            prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
+        }
         log.info("Oppdatert sob-status til opprettet for prosessinstans {}", prosessinstans.getId());
     }
 }

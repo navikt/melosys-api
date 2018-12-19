@@ -99,13 +99,27 @@ public class FagsakService {
 
         lagre(fagsak);
 
+        Behandling behandling = nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, behandlingstype);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+
+        return fagsak;
+    }
+
+    /**
+     * - Oppretter en ny behandling.
+     * - Oppretter tom behandlingsresultat.
+     */
+    @Transactional
+    public Behandling nyBehandling(Fagsak fagsak, Behandlingsstatus behandlingsstatus, Behandlingstype behandlingstype) {
+        Instant nå = Instant.now();
+
         Behandling behandling = new Behandling();
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);
 
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+        behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
         behandlingRepository.save(behandling);
 
@@ -115,7 +129,7 @@ public class FagsakService {
         behandlingsresultat.setType(BehandlingsresultatType.IKKE_FASTSATT);
         behandlingsresultatRepository.save(behandlingsresultat);
 
-        return fagsak;
+        return behandling;
     }
 
     private String hentNesteSaksnummer() {

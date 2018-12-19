@@ -40,7 +40,7 @@ public class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    public void utfoerSteg() throws SikkerhetsbegrensningException {
+    public void utførSteg_typeJfrNySak_tilStegJfrOpprettSøknad() throws SikkerhetsbegrensningException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
         Properties properties = new Properties();
@@ -61,5 +61,26 @@ public class OpprettFagsakOgBehandlingTest {
         verify(applicationEventPublisher, times(1)).publishEvent(any(BehandlingOpprettetEvent.class));
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SØKNAD);
+    }
+
+    @Test
+    public void utførSteg_typeJfrKnytt_tilStegStatusBehOppr() throws SikkerhetsbegrensningException {
+        Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.JFR_KNYTT);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
+        p.setData(ProsessDataKey.SAKSNUMMER, "MELTEST-333");
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MELTEST-333");
+        when(fagsakService.hentFagsak("MELTEST-333")).thenReturn(fagsak);
+        when(fagsakService.nyBehandling(eq(fagsak), any(), any())).thenReturn(new Behandling());
+
+        agent.utførSteg(p);
+
+        verify(fagsakService, times(1)).nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, Behandlingstype.SØKNAD);
+        verify(applicationEventPublisher, times(0)).publishEvent(any(FagsakOpprettetEvent.class));
+        verify(applicationEventPublisher, times(1)).publishEvent(any(BehandlingOpprettetEvent.class));
+
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
     }
 }

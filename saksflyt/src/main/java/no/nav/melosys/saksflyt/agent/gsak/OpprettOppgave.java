@@ -29,7 +29,10 @@ import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
  * Oppretter en oppgave i GSAK.
  *
  * Transisjoner:
- * GSAK_OPPRETT_OPPGAVE -> SEND_FORVALTNINGSMELDING eller FEILET_MASKINELT hvis feil
+ * 1) ProsessType.JFR_NY_SAK:
+ *      GSAK_OPPRETT_OPPGAVE -> SEND_FORVALTNINGSMELDING eller FEILET_MASKINELT hvis feil
+ * 2) ProsessType.JFR_KNYTT:
+ *      GSAK_OPPRETT_OPPGAVE -> null eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class OpprettOppgave extends AbstraktStegBehandler {
@@ -98,7 +101,11 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
         String oppgaveId = gsakFasade.opprettOppgave(oppgave);
 
-        prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
+        if (prosessinstans.getType() == ProsessType.JFR_KNYTT) {
+            prosessinstans.setSteg(null);
+        } else {
+            prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
+        }
         log.info("Opprettet oppgave {} for prosessinstans {}", oppgaveId, prosessinstans.getId());
     }
 }

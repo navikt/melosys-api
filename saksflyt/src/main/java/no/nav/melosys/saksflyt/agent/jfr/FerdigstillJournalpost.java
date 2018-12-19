@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.ProsessDataKey.JOURNALPOST_ID;
 import static no.nav.melosys.domain.ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST;
 import static no.nav.melosys.domain.ProsessSteg.JFR_HENT_PERS_OPPL;
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_BEHANDLINGSOPPGAVE;
+import static no.nav.melosys.domain.ProsessSteg.JFR_INNKOMMENDE_DOKUMENT;
 
 /**
  * Ferdigstiller en journalpost i Joark.
@@ -31,7 +31,7 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_BEHANDLINGSOPPGAVE;
  * 1) ProsessType.JFR_NY_SAK:
  *     JFR_FERDIGSTILL_JOURNALPOST -> JFR_HENT_PERS_OPPL eller FEILET_MASKINELT hvis feil
  * 2) ProsessType.JFR_KNYTT:
- *     JFR_FERDIGSTILL_JOURNALPOST -> JFR_OPPDATER_BEHANDLINGSOPPGAVE eller FEILET_MASKINELT hvis feil
+ *     JFR_FERDIGSTILL_JOURNALPOST -> JFR_INNKOMMENDE_DOKUMENT eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class FerdigstillJournalpost extends AbstraktStegBehandler {
@@ -67,7 +67,7 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
         if (type == ProsessType.JFR_NY_SAK) {
             prosessinstans.setSteg(JFR_HENT_PERS_OPPL);
         } else if (type == ProsessType.JFR_KNYTT) {
-            prosessinstans.setSteg(JFR_OPPDATER_BEHANDLINGSOPPGAVE);
+            prosessinstans.setSteg(JFR_INNKOMMENDE_DOKUMENT);
         } else {
             String feilmelding = "Ukjent prosess type: " + type;
             log.error("{}: {}", prosessinstans.getId(), feilmelding);

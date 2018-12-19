@@ -32,17 +32,44 @@ public class FerdigstillJournalpostTest {
     }
 
     @Test
-    public void utfoerSteg() throws MelosysException {
-        Prosessinstans p = new Prosessinstans();
-        p.setType(ProsessType.JFR_NY_SAK);
-        Properties properties = new Properties();
+    public void utførSteg_typeJfrNySak_tilStegJfrHentPersOppl() throws MelosysException {
         String journalpostID = "Journal_ID";
-        properties.setProperty(ProsessDataKey.JOURNALPOST_ID.getKode(), journalpostID);
-        p.addData(properties);
+        Prosessinstans p = nyProsessinstans(ProsessType.JFR_NY_SAK, journalpostID);
 
         agent.utførSteg(p);
 
         verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_PERS_OPPL);
+    }
+
+    @Test
+    public void utførSteg_typeJfrKnytt_tilStegJfrVurderBehandling() throws MelosysException {
+        String journalpostID = "Journal_ID";
+        Prosessinstans p = nyProsessinstans(ProsessType.JFR_KNYTT, journalpostID);
+
+        agent.utførSteg(p);
+
+        verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_INNKOMMENDE_DOKUMENT);
+    }
+
+    @Test
+    public void utførSteg_typeUgyldig_tilStegFeiletMaskinelt() throws MelosysException {
+        String journalpostID = "Journal_ID";
+        Prosessinstans p = nyProsessinstans(null, journalpostID);
+
+        agent.utførSteg(p);
+
+        verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+    }
+
+    private Prosessinstans nyProsessinstans(ProsessType prosessType, String journalpostID) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(prosessType);
+        Properties properties = new Properties();
+        properties.setProperty(ProsessDataKey.JOURNALPOST_ID.getKode(), journalpostID);
+        prosessinstans.addData(properties);
+        return prosessinstans;
     }
 }
