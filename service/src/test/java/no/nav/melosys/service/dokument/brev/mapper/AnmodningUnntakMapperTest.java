@@ -11,6 +11,8 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.begrunnelse.Artikkel12_1;
 import no.nav.melosys.domain.begrunnelse.Artikkel16_1_Anmodning;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.junit.Before;
@@ -35,8 +37,6 @@ public class AnmodningUnntakMapperTest {
             .build();
     }
 
-    // FIXME: Bedre testdekning
-
     @Test
     public void mapTilBrevXML() throws Exception {
         FellesType fellesType = new FellesType();
@@ -50,6 +50,11 @@ public class AnmodningUnntakMapperTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Fagsakstype.EU_EØS);
         behandling.setFagsak(fagsak);
+
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(new SoeknadDokument());
+        saksopplysning.setType(SaksopplysningType.SØKNAD);
+        behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
 
         Behandlingsresultat resultat = new Behandlingsresultat();
 

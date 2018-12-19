@@ -10,6 +10,8 @@ import no.nav.dok.melosysbrev._000081.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.begrunnelse.*;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
@@ -38,10 +40,16 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
             throw new TekniskException("Trenger minst en norsk virksomhet for ART16.1");
         }
         fag.setForetakNavn(brevData.hovedvirksomhet.navn);
-        // FIXME: Utledes fra arbeidsforhold eller avklares av saksbehandler?
+        SoeknadDokument soeknadDokument = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        // TODO: Frilansaktivitet håndteres ikke i Lev 1
+        if (soeknadDokument.selvstendigArbeid.erSelvstendig) {
+            fag.setYrkesaktivitet(YrkesaktivitetsKode.SELVSTENDIG);
+        } else {
+            fag.setYrkesaktivitet(YrkesaktivitetsKode.LOENNET_ARBEID);
+        }
         fag.setYrkesaktivitet(YrkesaktivitetsKode.FRILANSER);
         if (behandling.getFagsak().getType() == Fagsakstype.EU_EØS) {
-            // FIXME: Respons fra regelmodulen skiller ikke mellom begrunnelser for 883/2004
+            // TODO: Respons fra regelmodulen skiller ikke mellom begrunnelser for 883/2004 (MELOSYS-1863)
             fag.setInngangsvilkårBegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
         } else {
             throw new TekniskException("Forholdet er ikke dekket av inngangsvilkårene for 883/2004");
