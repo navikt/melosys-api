@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.RolleType;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
 import org.junit.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;

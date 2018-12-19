@@ -68,7 +68,7 @@ public class MedlPeriodeKonverter {
     public static LovvalgBestemmelse tilLovvalgBestemmelse(GrunnlagMedl grunnlagKode) throws TekniskException {
         LovvalgBestemmelse lovvalgBestemmelse = lovvalgsbestemmelseTilGrunnlagMedlTabell.inverse().get(grunnlagKode);
         if (lovvalgBestemmelse == null) {
-            throw new TekniskException("GrunnlagMedlKode er ukjent i melosys. Kode: " + grunnlagKode.getKode() );
+            throw new TekniskException("GrunnlagMedlKode er ukjent. Kode: " + grunnlagKode.getKode() );
         }
         return lovvalgBestemmelse;
     }

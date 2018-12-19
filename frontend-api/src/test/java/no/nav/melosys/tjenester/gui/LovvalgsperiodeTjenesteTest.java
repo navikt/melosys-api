@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
+import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import org.junit.Test;
 
 import no.nav.melosys.domain.*;
@@ -114,7 +115,8 @@ public final class LovvalgsperiodeTjenesteTest {
     private static LovvalgsperiodeService lagLovvalgsperiodeService() {
         BehandlingsresultatRepository behandlingsresultatRepo = mock(BehandlingsresultatRepository.class);
         LovvalgsperiodeRepository lovvalgsperiodeRepo = mock(LovvalgsperiodeRepository.class);
-        LovvalgsperiodeService lovvalgsperiodeService = new LovvalgsperiodeService(behandlingsresultatRepo, lovvalgsperiodeRepo);
+        TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository = mock(TidligereMedlemsperiodeRepository.class);
+        LovvalgsperiodeService lovvalgsperiodeService = new LovvalgsperiodeService(behandlingsresultatRepo, lovvalgsperiodeRepo, tidligereMedlemsperiodeRepository);
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(FORVENTET.periode.getFom());
         lovvalgsperiode.setTom(FORVENTET.periode.getTom());

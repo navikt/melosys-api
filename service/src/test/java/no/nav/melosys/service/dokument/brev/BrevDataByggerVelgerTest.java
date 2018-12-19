@@ -2,14 +2,17 @@ package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
-import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.DokumentType;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -31,12 +34,12 @@ public class BrevDataByggerVelgerTest {
         KodeverkService kodeverkService = mock(KodeverkService.class);
         RegisterOppslagSystemService registerOppslagService = mock(RegisterOppslagSystemService.class);
         AvklartefaktaService avklartefaktaService = mock(AvklartefaktaService.class);
-        TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository = mock(TidligereMedlemsperiodeRepository.class);
+        LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         LovvalgsperiodeRepository lovvalgsperiodeRepository = mock(LovvalgsperiodeRepository.class);
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
 
-        brevDataByggerVelger = new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, tidligereMedlemsperiodeRepository, utenlandskMyndighetRepository, lovvalgsperiodeRepository, vilkaarsresultatRepository);
+        brevDataByggerVelger = new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, lovvalgsperiodeService, utenlandskMyndighetRepository, vilkaarsresultatRepository);
     }
 
     @Test

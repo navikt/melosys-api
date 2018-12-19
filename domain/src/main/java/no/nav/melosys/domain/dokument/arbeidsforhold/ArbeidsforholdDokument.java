@@ -1,9 +1,6 @@
 package no.nav.melosys.domain.dokument.arbeidsforhold;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.bind.annotation.*;
@@ -41,10 +38,11 @@ public class ArbeidsforholdDokument extends SaksopplysningDokument {
             .collect(Collectors.toSet());
     }
 
-    public List<Periode> hentPerioder() {
+    public Set<Periode> hentAnsettelsesperioder(Collection<String> orgnummere) {
         return getArbeidsforhold().stream()
+                .filter(arbeidsforhold -> orgnummere.contains(arbeidsforhold.arbeidsgiverID))
                 .map(arbeidsforhold -> arbeidsforhold.getAnsettelsesPeriode())
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 }

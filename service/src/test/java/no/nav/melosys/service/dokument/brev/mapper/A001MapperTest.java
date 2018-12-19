@@ -154,6 +154,8 @@ public class A001MapperTest {
         brevData.utenlandskMyndighet = myndighet;
         brevData.lovvalgsperioder = Arrays.asList(lovvalgsperiode);
         brevData.vilkårsresultat161 = vilkår;
+        brevData.utenlandskIdent = Optional.empty();
+        brevData.ansettelsesperiode = Optional.empty();
     }
 
     @Test

@@ -1,12 +1,12 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.repository.LovvalgsperiodeRepository;
-import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.DokumentType;
+import no.nav.melosys.service.dokument.brev.bygger.*;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,25 +17,22 @@ public class BrevDataByggerVelger {
     private final AvklartefaktaService avklartefaktaService;
     private final RegisterOppslagSystemService registerOppslagService;
     private final KodeverkService kodeverkService;
-    private TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
-    private UtenlandskMyndighetRepository utenlandskMyndighetRepository;
-    private LovvalgsperiodeRepository lovvalgsperiodeRepository;
-    private VilkaarsresultatRepository vilkaarsresultatRepository;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
+    private final VilkaarsresultatRepository vilkaarsresultatRepository;
 
     @Autowired
     public BrevDataByggerVelger(AvklartefaktaService avklartefaktaService,
                                 RegisterOppslagSystemService registerOppslagService,
                                 KodeverkService kodeverkService,
-                                TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
+                                LovvalgsperiodeService lovvalgsperiodeService,
                                 UtenlandskMyndighetRepository utenlandskMyndighetRepository,
-                                LovvalgsperiodeRepository lovvalgsperiodeRepository,
                                 VilkaarsresultatRepository vilkaarsresultatRepository) {
         this.avklartefaktaService = avklartefaktaService;
         this.registerOppslagService = registerOppslagService;
         this.kodeverkService = kodeverkService;
-        this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
-        this.lovvalgsperiodeRepository = lovvalgsperiodeRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
 
@@ -58,9 +55,8 @@ public class BrevDataByggerVelger {
                         new BrevDataByggerA001(avklartefaktaService,
                                 registerOppslagService,
                                 kodeverkService,
-                                tidligereMedlemsperiodeRepository,
+                                lovvalgsperiodeService,
                                 utenlandskMyndighetRepository,
-                                lovvalgsperiodeRepository,
                                 vilkaarsresultatRepository);
                 return new BrevDataByggerVedlegg(a001Bygger, brevbestillingDto);
             }

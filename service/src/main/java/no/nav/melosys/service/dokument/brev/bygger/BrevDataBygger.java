@@ -1,9 +1,10 @@
-package no.nav.melosys.service.dokument.brev;
+package no.nav.melosys.service.dokument.brev.bygger;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.dokument.brev.BrevData;
 
 public interface BrevDataBygger {
 

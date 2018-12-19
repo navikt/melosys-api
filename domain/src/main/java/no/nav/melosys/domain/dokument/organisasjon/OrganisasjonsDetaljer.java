@@ -119,6 +119,10 @@ public class OrganisasjonsDetaljer {
                 ustrukturertAdresse.adresselinjer.add(sAdresse.getPostnr());
             }
         }
+        else {
+            // Enhetsregistret har bare SemistrukturertAdresser
+            throw new RuntimeException("Adresse ikke støttet " + adresse.getClass().getSimpleName());
+        }
         return ustrukturertAdresse;
     }
 

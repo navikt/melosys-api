@@ -1,18 +1,13 @@
-package no.nav.melosys.service.dokument.brev;
+package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
-import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -21,28 +16,24 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
-import no.nav.melosys.repository.LovvalgsperiodeRepository;
-import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import org.apache.commons.lang3.EnumUtils;
-
-import static no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.tilLovvalgBestemmelse;
 
 public class BrevDataByggerA001 implements BrevDataBygger {
 
     private final AvklartefaktaService avklartefaktaService;
     private final RegisterOppslagSystemService registerOppslagService;
     private final KodeverkService kodeverkService;
-    private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
-    private final LovvalgsperiodeRepository lovvalgsperiodeRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
 
     private Set<String> avklarteOrganisasjoner;
@@ -54,16 +45,14 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     public BrevDataByggerA001(AvklartefaktaService avklartefaktaService,
                               RegisterOppslagSystemService registerOppslagService,
                               KodeverkService kodeverkService,
-                              TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
+                              LovvalgsperiodeService lovvalgsperiodeService,
                               UtenlandskMyndighetRepository utenlandskMyndighetRepository,
-                              LovvalgsperiodeRepository lovvalgsperiodeRepository,
                               VilkaarsresultatRepository vilkaarsresultatRepository) {
         this.avklartefaktaService = avklartefaktaService;
         this.registerOppslagService = registerOppslagService;
         this.kodeverkService = kodeverkService;
-        this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
-        this.lovvalgsperiodeRepository = lovvalgsperiodeRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
 
@@ -73,10 +62,9 @@ public class BrevDataByggerA001 implements BrevDataBygger {
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
         this.avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
-        tidligereMedlemsperiodeRepository.findById_BehandlingId(behandling.getId());
 
-        List<Lovvalgsperiode> lovvalgsperioder = hentLovvalgsperioder();
-        Landkoder landkode = lovvalgsperioder.get(0).getUnntakFraLovvalgsland();
+        Collection<Lovvalgsperiode> lovvalgsperioder = hentLovvalgsperioder();
+        Landkoder landkode = lovvalgsperioder.iterator().next().getUnntakFraLovvalgsland();
 
         BrevDataA001 brevData = new BrevDataA001();
 
@@ -91,13 +79,13 @@ public class BrevDataByggerA001 implements BrevDataBygger {
         brevData.vilkårsresultat161 = hentVilkårsresultat();
         brevData.utenlandskIdent = hentUtenlandskIdent(landkode);
         brevData.lovvalgsperioder = lovvalgsperioder;
-        brevData.tidligereLovvalgsperioder = hentTidligereLovvalgsperioder();
+        brevData.tidligereLovvalgsperioder = lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling);
         brevData.ansettelsesperiode = hentAnsettelsesperiode();
 
         return brevData;
     }
 
-    public UtenlandskMyndighet hentUtenlandsMyndighet(Landkoder landkode) throws TekniskException {
+    private UtenlandskMyndighet hentUtenlandsMyndighet(Landkoder landkode) throws TekniskException {
         UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetRepository.findByLandkode(landkode);
         if (utenlandskMyndighet == null) {
             throw new TekniskException("Fant ingen utenlandsk myndighet for landkode: "+ landkode.getKode());
@@ -142,14 +130,11 @@ public class BrevDataByggerA001 implements BrevDataBygger {
                 .collect(Collectors.toList());
     }
 
-    private String hentUtenlandskIdent(Landkoder landKode) throws TekniskException {
-        Optional<String> ident = søknad.personOpplysninger.utenlandskIdent.stream()
+    private Optional<String> hentUtenlandskIdent(Landkoder landKode) throws TekniskException {
+        return søknad.personOpplysninger.utenlandskIdent.stream()
                 .filter(utenlandskIdent -> utenlandskIdent.landKode != landKode.getKode())
                 .map(utenlandskIdent -> utenlandskIdent.ident)
                 .findFirst();
-
-        return ident.orElseThrow(
-                () -> new TekniskException("Fant ingen utenlands ident for valgt landKode: " + landKode.getKode()));
     }
 
     private List<Arbeidssted> hentArbeidssteder() throws TekniskException {
@@ -196,13 +181,13 @@ public class BrevDataByggerA001 implements BrevDataBygger {
                                utenlandskVirksomhet.adresse.landKode);
     }
 
-    private List<Lovvalgsperiode> hentLovvalgsperioder() throws TekniskException {
-        List<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeRepository.findByBehandlingsresultatId(behandling.getId());
+    private Collection<Lovvalgsperiode> hentLovvalgsperioder() throws TekniskException {
+        Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId());
         if (lovvalgsperioder.isEmpty()) {
             throw new TekniskException("Trenger minst en lovvalgsperiode");
         }
 
-        Lovvalgsperiode valgtLovvalgsperiode = lovvalgsperioder.get(0);
+        Lovvalgsperiode valgtLovvalgsperiode = lovvalgsperioder.iterator().next();
         boolean lovvalgsperiodeIkkeGyldig = lovvalgsperioder.stream()
                 .anyMatch(periode -> !validerPeriode(periode, valgtLovvalgsperiode));
         if (lovvalgsperiodeIkkeGyldig) {
@@ -219,41 +204,15 @@ public class BrevDataByggerA001 implements BrevDataBygger {
                 p1.getUnntakFraLovvalgsland() == p2.getUnntakFraLovvalgsland();
     }
 
-    private List<Lovvalgsperiode> hentTidligereLovvalgsperioder() throws TekniskException {
-        Set<Long> utvalgtePeriodeIDer = tidligereMedlemsperiodeRepository.findById_BehandlingId(behandling.getId()).stream()
-                                            .map(utvalgtPeriode -> utvalgtPeriode.getId().getPeriodeId())
-                                            .collect(Collectors.toSet());
-
-        MedlemskapDokument medlemskapdokument = SaksopplysningerUtils.hentMedlemskapDokument(behandling);
-        Set<Medlemsperiode> perioder = medlemskapdokument.getMedlemsperiode().stream()
-                .filter(periode -> utvalgtePeriodeIDer.contains(periode.id))
-                .collect(Collectors.toSet());
-
-        List<Lovvalgsperiode> tidligereLovvalgsperioder = new ArrayList<>();
-        for (Medlemsperiode periode : perioder) {
-            Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-            lovvalgsperiode.setFom(periode.periode.getFom());
-            lovvalgsperiode.setTom(periode.periode.getTom());
-
-            if (EnumUtils.isValidEnum(GrunnlagMedl.class, periode.getGrunnlagstype())) {
-                GrunnlagMedl grunnlagMedlKode = GrunnlagMedl.valueOf(periode.getGrunnlagstype());
-                lovvalgsperiode.setBestemmelse(tilLovvalgBestemmelse(grunnlagMedlKode));
-            }
-            else {
-                lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ANNET);
-            }
-
-            tidligereLovvalgsperioder.add(lovvalgsperiode);
-        }
-        return tidligereLovvalgsperioder;
-    }
-
-    private Periode hentAnsettelsesperiode() throws TekniskException {
+    private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {
         ArbeidsforholdDokument arbeidsforholdDok = SaksopplysningerUtils.hentArbeidsforholdDokument(behandling);
-        List<Periode> ansettelsesPerioder = arbeidsforholdDok.hentPerioder();
-        if (ansettelsesPerioder.isEmpty()) {
-            return null;
-        }
-        return ansettelsesPerioder.get(0);
+
+        // Lev1: Kun en avklart arbeidsgiver
+        Stream<Periode> avklarteAnsettelsesPerioder =
+                arbeidsforholdDok.hentAnsettelsesperioder(avklarteOrganisasjoner).stream();
+
+        // Usikkert hva som er formålet med feltet i brevet.
+        // Bestemt å bruke den seneste datoen for avklart arbeidsgiver inntil vi vet mer
+        return avklarteAnsettelsesPerioder.max(Comparator.comparing(p -> p.getFom()));
     }
 }

@@ -4,7 +4,9 @@ import java.util.Arrays;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,6 +39,40 @@ public class OrganisasjonsDetaljerTest {
         adresse.setPoststedUtland(poststedUtland);
         adresse.setKommunenr(kommunenr);
         adresse.setGyldighetsperiode(periode);
+    }
+
+    @Test
+    public void testKonverterForretningsadresseTilUstrukturertAdresse() {
+        String landkode = "NO";
+        adresse.setLandkode(landkode);
+
+        OrganisasjonsDetaljer orgDetaljer = new OrganisasjonsDetaljer();
+        orgDetaljer.forretningsadresse = Arrays.asList(adresse);
+
+        UstrukturertAdresse resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse();
+        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(0)).isEqualTo(linje1);
+        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(1)).isEqualTo(linje2);
+        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(2)).isEqualTo(linje3);
+        AssertionsForClassTypes.assertThat(resultatAdresse.landKode).isEqualTo(landkode);
+
+        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(3)).isEqualTo(postnr);
+    }
+
+    @Test
+    public void testKonverterUtenlandskForretningsadresseTilUstrukturertAdresse() {
+        String landkode = "DK";
+        adresse.setLandkode(landkode);
+
+        OrganisasjonsDetaljer orgDetaljer = new OrganisasjonsDetaljer();
+        orgDetaljer.forretningsadresse = Arrays.asList(adresse);
+
+        UstrukturertAdresse resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse();
+        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(0)).isEqualTo(linje1);
+        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(1)).isEqualTo(linje2);
+        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(2)).isEqualTo(linje3);
+        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(3)).isEqualTo(poststedUtland);
+        AssertionsForClassTypes.assertThat(resultatAdresse.landKode).isEqualTo(landkode);
+
     }
 
     @Test

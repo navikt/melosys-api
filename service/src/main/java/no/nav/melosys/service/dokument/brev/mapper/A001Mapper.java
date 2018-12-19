@@ -2,7 +2,9 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000115.*;
@@ -71,8 +73,8 @@ public class A001Mapper {
 
         seda001.setVilkårBegrunnelse(mapVilkårBegrunnelse(brevData.vilkårsresultat161));
 
-        if (brevData.ansettelsesperiode != null) {
-            seda001.setAnsettelsesPeriode(mapAnsettelsesperiode(brevData.ansettelsesperiode));
+        if (brevData.ansettelsesperiode.isPresent()) {
+            seda001.setAnsettelsesPeriode(mapAnsettelsesperiode(brevData.ansettelsesperiode.get()));
         }
 
         seda001.setFritekst(brevData.vilkårsresultat161.getBegrunnelseFritekst());
@@ -86,7 +88,7 @@ public class A001Mapper {
         return ansettelsesperiodeType;
     }
 
-    private TidligereLovvalgsperiodeListeType mapTidligereLovvalgsperioder(List<Lovvalgsperiode> tidligerePerioder) throws TekniskException {
+    private TidligereLovvalgsperiodeListeType mapTidligereLovvalgsperioder(Collection<Lovvalgsperiode> tidligerePerioder) throws TekniskException {
         TidligereLovvalgsperiodeListeType tidligereLovvalgsperiodeListeType = new TidligereLovvalgsperiodeListeType();
         for (Lovvalgsperiode lovvalgsperiode : tidligerePerioder) {
             PeriodeType periode = new PeriodeType();
@@ -134,16 +136,17 @@ public class A001Mapper {
         return trygdemyndighet;
     }
 
-    private PersonType mapPerson(PersonDokument personDok, Bostedsadresse adresse, String utenlandskIdent) throws TekniskException {
+    private PersonType mapPerson(PersonDokument personDok, Bostedsadresse adresse, Optional<String> utenlandskIdent) throws TekniskException {
         PersonType person = new PersonType();
         person.setPersonnavn(lagPersonnavn(personDok));
         person.setStatsborgerskapListe(mapStatsborgerskapListe(personDok));
         person.setKjønn(KjoennKode.fromValue(personDok.kjønn.getKode()));
         person.setBostedsadresse(mapBostedAdresse(adresse));
         person.setFødselsnummer(personDok.fnr);
-        person.setUtenlandskID(utenlandskIdent);
-        //person.setFødeland(personDok.); //Skal ikke fylles ut
-        //person.setFødested(); //Skal ikke fylles ut
+        //Fødeland og Fødested skal ikke fylles ut
+        if (utenlandskIdent.isPresent()) {
+            person.setUtenlandskID(utenlandskIdent.get());
+        }
         try {
             person.setFødselsdato(convertToXMLGregorianCalendarRemoveTimezone(personDok.fødselsdato));
         } catch (DatatypeConfigurationException e) {
@@ -286,7 +289,7 @@ public class A001Mapper {
         return selvstendigeVirksomheter;
     }
 
-    private LovvalgsPeriodeListeType mapLovvalgsperioder(List<Lovvalgsperiode> lovvalgsperioder) throws TekniskException {
+    private LovvalgsPeriodeListeType mapLovvalgsperioder(Collection<Lovvalgsperiode> lovvalgsperioder) throws TekniskException {
         LovvalgsPeriodeListeType lovvalgsperioderBrev = new LovvalgsPeriodeListeType();
         for (Lovvalgsperiode periode : lovvalgsperioder) {
             LovvalgsPeriodeType lovvalgsperiodeBrev = mapLovvalgsperiode(periode);

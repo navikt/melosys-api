@@ -25,6 +25,7 @@ import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.*;
 import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -212,11 +213,11 @@ public final class DokumentServiceTest {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
         KodeverkRegister kodeverkRegister = mock(KodeverkRegister.class);
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
-        TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository = mock(TidligereMedlemsperiodeRepository.class);
+        LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         LovvalgsperiodeRepository lovvalgsperiodeRepository = mock(LovvalgsperiodeRepository.class);
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
-        BrevDataByggerVelger brevdatabyggervelger = new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, tidligereMedlemsperiodeRepository, utenlandskMyndighetRepository, lovvalgsperiodeRepository, vilkaarsresultatRepository);
+        BrevDataByggerVelger brevdatabyggervelger = new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, lovvalgsperiodeService, utenlandskMyndighetRepository, vilkaarsresultatRepository);
         return brevdatabyggervelger;
     }
 

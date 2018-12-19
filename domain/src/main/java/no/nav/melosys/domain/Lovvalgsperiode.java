@@ -171,6 +171,10 @@ public class Lovvalgsperiode implements ErPeriode {
         this.dekning = dekning;
     }
 
+    public long getMedlPeriodeID() {
+        return medlPeriodeID;
+    }
+
     public void setMedlPeriodeID(long medlPeriodeID) {
         this.medlPeriodeID = medlPeriodeID;
     }
