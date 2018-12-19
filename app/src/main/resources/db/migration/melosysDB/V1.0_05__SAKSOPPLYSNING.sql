@@ -11,9 +11,7 @@ CREATE TABLE saksopplysning (
     CONSTRAINT pk_saksopplysning PRIMARY KEY (id)
 );
 
-CREATE INDEX idx_saksopplysning_behandling ON saksopplysning(behandling_id);
-CREATE INDEX idx_saksopplysning_kilde ON saksopplysning(kilde);
-CREATE INDEX idx_saksopplysning_type ON saksopplysning(opplysning_type);
+CREATE INDEX idx_saksopplysning_behandling ON saksopplysning(behandling_id,opplysning_type);
 
 CREATE TABLE saksopplysning_type (
     kode        VARCHAR2(99)  NOT NULL,

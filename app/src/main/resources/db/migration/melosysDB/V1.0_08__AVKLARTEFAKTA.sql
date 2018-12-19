@@ -10,7 +10,7 @@ CREATE TABLE avklartefakta (
     CONSTRAINT unique_referanse UNIQUE(beh_resultat_id, referanse, subjekt)
 );
 
-CREATE INDEX idx_avklartefakta_resultat ON avklartefakta(beh_resultat_id);
+CREATE INDEX idx_avklartefakta_1 ON avklartefakta(beh_resultat_id,type,fakta);
 
 ALTER TABLE avklartefakta
     ADD CONSTRAINT fk_avklartefakta_beh_resultat FOREIGN KEY (beh_resultat_id) REFERENCES behandlingsresultat;
