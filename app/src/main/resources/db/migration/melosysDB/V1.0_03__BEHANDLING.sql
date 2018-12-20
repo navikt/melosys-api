@@ -12,6 +12,10 @@ CREATE TABLE behandling (
     CONSTRAINT pk_behandling PRIMARY KEY (id)
 );
 
+CREATE INDEX idx_behandling_fagsak ON behandling(saksnummer);
+CREATE INDEX idx_behandling_status ON behandling(status);
+CREATE INDEX idx_behandling_type ON behandling(beh_type);
+
 CREATE TABLE behandling_status (
     kode    VARCHAR2(99)  NOT NULL,
     navn    VARCHAR2(99)  NOT NULL,

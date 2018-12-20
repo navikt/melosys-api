@@ -10,6 +10,9 @@ CREATE TABLE fagsak (
     CONSTRAINT pk_fagsak PRIMARY KEY (saksnummer)
 );
 
+CREATE INDEX idx_fagsak_type ON fagsak(fagsak_type);
+CREATE INDEX idx_fagsak_status ON fagsak(status);
+
 CREATE TABLE fagsak_type (
     kode        VARCHAR2(99)  NOT NULL,
     navn        VARCHAR2(99)  NOT NULL,

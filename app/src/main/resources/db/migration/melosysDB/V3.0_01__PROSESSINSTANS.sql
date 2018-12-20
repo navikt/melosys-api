@@ -13,6 +13,10 @@ CREATE TABLE prosessinstans (
     CONSTRAINT pk_prosessinstans PRIMARY KEY (id)
 );
 
+CREATE INDEX idx_prosessinstans_behandling ON prosessinstans(behandling_id);
+CREATE INDEX idx_prosessinstans_type ON prosessinstans(prosess_type);
+CREATE INDEX idx_prosessinstans_steg ON prosessinstans(steg);
+
 CREATE TABLE prosess_type (
     kode    VARCHAR2(99)  NOT NULL,
     navn    VARCHAR2(99)  NOT NULL,
@@ -77,6 +81,8 @@ CREATE TABLE prosessinstans_hendelser (
     CONSTRAINT pk_pi_hendelser PRIMARY KEY (id)
 );
 
+CREATE INDEX idx_pi_hendelser_pi ON prosessinstans_hendelser(prosessinstans_id);
+CREATE INDEX idx_pi_hendelser_steg ON prosessinstans_hendelser(steg);
 
 ALTER TABLE prosessinstans ADD CONSTRAINT fk_prosinst_behandling FOREIGN KEY (behandling_id) REFERENCES behandling;
 ALTER TABLE prosessinstans ADD CONSTRAINT fk_prosinst_type FOREIGN KEY (prosess_type) REFERENCES prosess_type;
