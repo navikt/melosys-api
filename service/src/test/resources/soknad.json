@@ -99,13 +99,14 @@
     "trygdeavgiftTrukketGjennomSkatt": true,
     "trygdeavgiftTrukketGjennomSkattDato": "2018-01-01"
   },
-  "maritimtArbeid": {
-    "maritimTypeKode": "SKIP",
-    "skipsNavn": "Navn på skipet",
-    "fartsomradeKode": "INNENRIKS",
-    "flaggLandKode": "GB",
-    "installasjonsLandKode": "GB"
-  }
+  "maritimtArbeid": [
+    {
+      "navn": "Navn på skipet",
+      "fartsomradeKode": "INNENRIKS",
+      "flaggLandKode": "GB",
+      "installasjonsLandKode": "GB"
+    }
+  ]
 }
 
 

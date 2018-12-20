@@ -12,6 +12,7 @@ public class KodeverkDto {
     private YrkerDto yrker = new YrkerDto();
     private List<KodeDto> aktoerroller;
     private List<KodeDto> dokumenttitler;
+    private List<KodeDto> fartsomrader;
     private List<KodeDto> finansiering;
     private List<KodeDto> landkoder;
     private List<KodeDto> medlemskapstyper;
@@ -21,7 +22,6 @@ public class KodeverkDto {
     private List<KodeDto> saksstatuser;
     private List<KodeDto> sakstyper;
     private List<KodeDto> trygdedekninger;
-    private List<KodeDto> vedleggstitler;
 
     public BegrunnelserDto getBegrunnelser() {
         return begrunnelser;
@@ -75,6 +75,14 @@ public class KodeverkDto {
 
     public void setDokumenttitler(List<KodeDto> dokumenttitler) {
         this.dokumenttitler = dokumenttitler;
+    }
+
+    public List<KodeDto> getFartsomrader() {
+        return fartsomrader;
+    }
+
+    public void setFartsomrader(List<KodeDto> fartsomrader) {
+        this.fartsomrader = fartsomrader;
     }
 
     public List<KodeDto> getFinansiering() { return finansiering; }
@@ -143,13 +151,5 @@ public class KodeverkDto {
 
     public void setTrygdedekninger(List<KodeDto> trygdedekninger) {
         this.trygdedekninger = trygdedekninger;
-    }
-
-    public List<KodeDto> getVedleggstitler() {
-        return vedleggstitler;
-    }
-
-    public void setVedleggstitler(List<KodeDto> vedleggstitler) {
-        this.vedleggstitler = vedleggstitler;
     }
 }

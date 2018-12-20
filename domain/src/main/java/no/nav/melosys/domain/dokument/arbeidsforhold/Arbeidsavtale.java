@@ -38,7 +38,7 @@ public class Arbeidsavtale implements HarPeriode {
     public LocalDate endringsdatoStillingsprosent;
 
     @JsonProperty("fartsomraade")
-    public Fartsomraade fartsområde = new Fartsomraade();
+    public Fartsomraade fartsområde; //"http://nav.no/kodeverk/Kodeverk/Fartsområder"
 
     public Skipsregister skipsregister = new Skipsregister();
 

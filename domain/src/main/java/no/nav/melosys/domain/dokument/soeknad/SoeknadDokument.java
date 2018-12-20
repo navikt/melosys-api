@@ -38,7 +38,7 @@ public class SoeknadDokument extends SaksopplysningDokument {
     // Bekreftelser fra arbeidsgiveren
     public ArbeidsgiversBekreftelse arbeidsgiversBekreftelse = new ArbeidsgiversBekreftelse();
 
-    public MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
+    public List<MaritimtArbeid> maritimtArbeid = new ArrayList<>();
 
     public Bosted bosted = new Bosted();
 

@@ -41,7 +41,7 @@
                                     <xsl:when test="@xsi:type='ns4:MaritimArbeidsavtale'">
                                         <maritimArbeidsavtale>true</maritimArbeidsavtale>
                                         <fartsområde>
-                                            <kode><xsl:value-of select="fartsomraade/@kodeRef" /></kode>
+                                            <xsl:value-of select="fartsomraade/@kodeRef" />
                                         </fartsområde>
                                         <skipsregister>
                                             <kode><xsl:value-of select="skipsregister/@kodeRef" /></kode>
