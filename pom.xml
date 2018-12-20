@@ -467,8 +467,7 @@
             <dependency>
                 <groupId>no.nav.melosys</groupId>
                 <artifactId>melosys-schema</artifactId>
-                <!-- FIXME -->
-                <version>0.13.0-PR-159-SNAPSHOT</version>
+                <version>${melosys.jsonschema.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.everit-org.json-schema</groupId>
