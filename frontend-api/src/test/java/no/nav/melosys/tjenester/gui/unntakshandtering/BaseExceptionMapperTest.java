@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 public final class BaseExceptionMapperTest {
 
-    // TODO: Testnavnet overdriver, men gjenspeiler ambisjonen. Vi kan utvide
+    // Testnavnet overdriver, men gjenspeiler ambisjonen. Vi kan utvide
     // testen til å sjekke innholdet av en in-memory stream med redirigert
     // logging. I denne omgang ekserserer testen kun en grein som ikke blir
     // berørt av andre tester.
@@ -19,7 +19,7 @@ public final class BaseExceptionMapperTest {
     public final void avbilderMedLavtLoggnivåBlirIkkeLogget() {
         BaseExceptionMapper<Throwable> avbilder = new BaseExceptionMapper<Throwable>(Status.METHOD_NOT_ALLOWED, Level.TRACE, "Ooops") {
         };
-        BaseExceptionMapperTest.testToResponse(avbilder, new Exception("Auuauua"), Status.METHOD_NOT_ALLOWED);
+        testToResponse(avbilder, new Exception("Auuauua"), Status.METHOD_NOT_ALLOWED);
     }
 
     static <T extends Throwable> void testToResponse(ExceptionMapper<T> oversetter, T unntak, Status forventetStatus) {

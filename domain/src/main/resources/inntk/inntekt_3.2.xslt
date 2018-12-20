@@ -91,14 +91,6 @@
         <xsl:apply-templates select="tidsrom|etterbetalingsperiode" />
     </xsl:template>
 
-    <xsl:template match="forskuddstrekkListe">
-        <!--FIXME-->
-    </xsl:template>
-
-    <xsl:template match="fradragListe">
-        <!--FIXME-->
-    </xsl:template>
-
     <xsl:template match="ident"/>
 
 </xsl:stylesheet>

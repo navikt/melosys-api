@@ -111,8 +111,9 @@ public class JoarkService implements JoarkFasade {
         Journalpost journalpost = new Journalpost(journalpostID);
         List<Aktoer> brukerListe = inngaaendeJournalpost.getBrukerListe();
         if (!brukerListe.isEmpty()) {
-            // FIXME Vi antar foreløpig at det er bare en bruker. Vi trenger en avklaring.
             if (brukerListe.size() > 1) {
+                // Vi antar at det er bare en bruker.
+                // Flere brukere på samme journalpost har ikke vært et behov.
                 throw new FunksjonellException("Det finnes flere brukere i journalpost " + journalpostID); 
             } else {
                 Aktoer aktoer = brukerListe.get(0);
@@ -133,7 +134,8 @@ public class JoarkService implements JoarkFasade {
         Dokumentinformasjon hoveddokument = inngaaendeJournalpost.getHoveddokument();
         ArkivDokument arkivDokument = new ArkivDokument();
         arkivDokument.setDokumentId(hoveddokument.getDokumentId());
-        // FIXME Tjenesten mangler opplysninger (tittel og vedleggstitler) tilgjengelige i nye REST tjenester (https://jira.adeo.no/browse/PK-51497).
+        // FIXME MELOSYS-1416
+        // Tjenesten mangler opplysninger (tittel og vedleggstitler) tilgjengelige i nye REST tjenester (https://jira.adeo.no/browse/PK-51497).
         arkivDokument.setTittel("");
         journalpost.setHoveddokument(arkivDokument);
 
