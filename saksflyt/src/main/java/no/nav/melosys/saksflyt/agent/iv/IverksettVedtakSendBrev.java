@@ -15,7 +15,6 @@ import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.dokument.DokumentSystemService;
-import no.nav.melosys.service.dokument.DokumentType;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
@@ -83,7 +82,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         ProsessType prosessType = prosessinstans.getType();
         if (ProsessType.IVERKSETT_VEDTAK == prosessType) {
             if (innvilgelsesbrevSkalSendes(behandling)) {
-                BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(DokumentType.ATTEST_A1);
+                BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(ProduserbartDokument.ATTEST_A1);
                 BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
                 brevData.mottaker = RolleType.BRUKER;
                 dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);

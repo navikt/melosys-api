@@ -1,11 +1,11 @@
 package no.nav.melosys.service.dokument.brev;
 
+import no.nav.melosys.domain.ProduserbartDokument;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.DokumentType;
 import no.nav.melosys.service.dokument.brev.bygger.*;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +37,12 @@ public class BrevDataByggerVelger {
     }
 
     // For brevbygging i saksflyt
-    public BrevDataBygger hent(DokumentType dokumentType) {
-        return hent(dokumentType, new BrevbestillingDto());
+    public BrevDataBygger hent(ProduserbartDokument produserbartDokument) {
+        return hent(produserbartDokument, new BrevbestillingDto());
     }
 
-    public BrevDataBygger hent(DokumentType dokumentType, BrevbestillingDto brevbestillingDto) {
-        switch (dokumentType) {
+    public BrevDataBygger hent(ProduserbartDokument produserbartDokument, BrevbestillingDto brevbestillingDto) {
+        switch (produserbartDokument) {
             case ATTEST_A1: {
                 BrevDataByggerA1 a1Bygger =
                         new BrevDataByggerA1(avklartefaktaService,
@@ -50,7 +50,7 @@ public class BrevDataByggerVelger {
                                 kodeverkService);
                 return new BrevDataByggerVedlegg(a1Bygger, brevbestillingDto);
             }
-            case ATTEST_A001: {
+            case ORIENTERING_ANMODNING_UNNTAK: {
                 BrevDataByggerA001 a001Bygger =
                         new BrevDataByggerA001(avklartefaktaService,
                                 registerOppslagService,

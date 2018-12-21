@@ -119,7 +119,7 @@ public class A1Mapper {
         LovvalgsperiodeType brevPeriode = new LovvalgsperiodeType();
         brevPeriode.setLovvalgsLand(lovvalgsperiode.getLovvalgsland().getKode());
         brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getBestemmelse().getKode()));
-        //brevPeriode.setTilleggsbestemmelse();  // TODO: Mangler i modellen!
+        //brevPeriode.setTilleggsbestemmelse();  // TODO: Mangler i modellen! (MELOSYS-2029)
         //brevPeriode.setFritekst("");   // TODO: Uvisst når/om vi trenger dette
 
         try {

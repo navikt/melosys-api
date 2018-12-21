@@ -127,15 +127,6 @@ public final class DokumentServiceTest {
         assertThat(unntak).isInstanceOf(TekniskException.class).hasNoCause().hasMessageContaining("Ingen gyldig");
     }
 
-    @Test
-    public final void produserDokumentMedDokumenttypeUtenIdKasterUnntak() throws Exception {
-        Throwable unntak = catchThrowable(() -> instans.produserDokument(BEHANDLINGSID, ProduserbartDokument.MELDING_HENLAGT_SAK,
-                lagBrevData(RolleType.ARBEIDSGIVER)));
-        assertThat(unntak).isInstanceOf(TekniskException.class)
-            .hasNoCause()
-            .hasMessageContaining("Fant ikke dokumentType");
-    }
-
     private final BrevData lagBrevData(RolleType mottakerRolle) {
         BrevDataA1 brevData = new BrevDataA1();
         Virksomhet arbeidsgiver = new Virksomhet("Virker av og til", "987654321", null);
@@ -215,7 +206,6 @@ public final class DokumentServiceTest {
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
         LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
-        LovvalgsperiodeRepository lovvalgsperiodeRepository = mock(LovvalgsperiodeRepository.class);
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         BrevDataByggerVelger brevdatabyggervelger = new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, lovvalgsperiodeService, utenlandskMyndighetRepository, vilkaarsresultatRepository);
         return brevdatabyggervelger;

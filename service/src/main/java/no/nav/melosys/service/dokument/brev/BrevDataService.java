@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument.brev;
 
 import java.io.IOException;
 import java.io.StringReader;
-
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
@@ -15,17 +14,12 @@ import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Tema;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.service.dokument.DokumentType;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -63,14 +57,17 @@ public class BrevDataService {
     /**
      * Genererer metada til doksys angående dokumentbestillingen.
      */
-    public DokumentbestillingMetadata lagBestillingMetadata(DokumentType dokumentType, Behandling behandling, BrevData brevData) throws TekniskException {
+    public DokumentbestillingMetadata lagBestillingMetadata(ProduserbartDokument produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
+        if (produserbartDokument == null) {
+            throw new TekniskException("Ingen gyldig produserbartDokument");
+        }
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
 
         Fagsak fagsak = behandling.getFagsak();
         metadata.bruker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, BRUKER);
         Aktoer representant = fagsak.hentAktørMedRolleType(REPRESENTANT);
 
-        switch (dokumentType) {
+        switch (produserbartDokument) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID: {
                 if (representant != null) {
                     metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, REPRESENTANT);
@@ -80,10 +77,10 @@ public class BrevDataService {
                 break;
             }
             case ATTEST_A1:
-            case ATTEST_A001:
+            case ORIENTERING_ANMODNING_UNNTAK:
             case INNVILGELSE_YRKESAKTIV:
             case MELDING_MANGLENDE_OPPLYSNINGER:
-            case HENLEGGELSE: {
+            case MELDING_HENLAGT_SAK: {
                 if (brevData.mottaker == null) {
                     throw new TekniskException("Det finnes ingen mottaker på sak " + fagsak.getSaksnummer());
                 }
@@ -91,10 +88,10 @@ public class BrevDataService {
                 break;
             }
             default:
-                throw new TekniskException("DokumentType ikke støttet");
+                throw new TekniskException("ProduserbartDokument ikke støttet");
         }
 
-        metadata.dokumenttypeID = dokumentType.getKode();
+        metadata.dokumenttypeID = DokumenttypeID.hentID(produserbartDokument);
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
         metadata.fagområde = Tema.MED.getKode();
@@ -109,7 +106,7 @@ public class BrevDataService {
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
     @Transactional(propagation = Propagation.MANDATORY)
-    public Element lagBrevXML(DokumentType dokumentType, Behandling behandling, BrevData brevData) throws TekniskException {
+    public Element lagBrevXML(ProduserbartDokument produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandling.getId());
         if (behandlingsresultat == null) {
             throw new TekniskException("Finner ingen behandlingsresultat for behandlingid");
@@ -119,7 +116,7 @@ public class BrevDataService {
         try {
             FellesType fellesType = mapFellesType(behandling);
             MelosysNAVFelles navFelles = mapNAVFelles(behandling, brevData);
-            String brevXml = BrevDataMapperRuter.brevDataMapper(dokumentType).mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
+            String brevXml = BrevDataMapperRuter.brevDataMapper(produserbartDokument).mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);

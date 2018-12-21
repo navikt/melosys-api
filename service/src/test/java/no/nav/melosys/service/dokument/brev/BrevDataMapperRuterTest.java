@@ -6,11 +6,10 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.ProduserbartDokument;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.dokument.DokumentType;
 import no.nav.melosys.service.dokument.brev.mapper.BrevDataMapper;
 import no.nav.melosys.service.dokument.brev.mapper.InnvilgelsesbrevMapper;
-
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -33,20 +32,20 @@ public class BrevDataMapperRuterTest {
 
     @Test
     public void oppslagAvInnvilgelseYrkesaktivGirInnvelgelsesbrevMapper() throws Exception {
-        BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(DokumentType.INNVILGELSE_YRKESAKTIV);
+        BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(ProduserbartDokument.INNVILGELSE_YRKESAKTIV);
         assertThat(resultat).isInstanceOf(InnvilgelsesbrevMapper.class);
     }
 
     @Test
-    public void oppslagAvUkjentDoktypeKasterUnntak() throws Exception {
-        Throwable unntak = catchThrowable(() -> BrevDataMapperRuter.brevDataMapper(DokumentType.VEDTAK_BARN));
-        assertThat(unntak).isInstanceOf(TekniskException.class).hasNoCause().hasMessageMatching("DokumentType med kode .* støttes ikke");
+    public void oppslagAvUkjentDoktypeKasterUnntak() {
+        Throwable unntak = catchThrowable(() -> BrevDataMapperRuter.brevDataMapper(ProduserbartDokument.MELDING_HENLAGT_SAK));
+        assertThat(unntak).isInstanceOf(TekniskException.class).hasNoCause().hasMessageMatching("ProduserbartDokument .* støttes ikke");
     }
 
     @Test
-    public void oppslagAvIkkeInstansierbarMapperKasterUnntak() throws Exception {
-        BrevDataMapperRuter.mappere.put(DokumentType.VEDTAK_BARN, IkkeInstansierbarMapper.class);
-        Throwable unntak = catchThrowable(() -> BrevDataMapperRuter.brevDataMapper(DokumentType.VEDTAK_BARN));
+    public void oppslagAvIkkeInstansierbarMapperKasterUnntak() {
+        BrevDataMapperRuter.mappere.put(ProduserbartDokument.MELDING_HENLAGT_SAK, IkkeInstansierbarMapper.class);
+        Throwable unntak = catchThrowable(() -> BrevDataMapperRuter.brevDataMapper(ProduserbartDokument.MELDING_HENLAGT_SAK));
         assertThat(unntak).isInstanceOf(TekniskException.class).hasCauseInstanceOf(InstantiationException.class);
     }
 }
