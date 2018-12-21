@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000067.*;
@@ -63,9 +64,9 @@ public class A1Mapper {
         a1.setHovedvirksomhet(mapHovedvirksomhet(hovedvirksomhet));
 
         virksomheter.addAll(brevData.utenlandskeVirksomheter);
-
-        a1.setBivirksomhetListe(mapBivirksomheter(virksomheter));
-
+        if (!virksomheter.isEmpty()) {
+            a1.setBivirksomhetListe(mapBivirksomheter(virksomheter));
+        }
         if (harIkkeFysiskArbeidssted(brevData.arbeidssteder)) {
             a1.setIkkeFysiskArbeidssted("true");
         }
