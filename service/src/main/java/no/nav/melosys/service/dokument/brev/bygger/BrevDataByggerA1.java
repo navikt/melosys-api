@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument.brev;
+package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
@@ -20,6 +19,8 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
@@ -47,9 +48,8 @@ public class BrevDataByggerA1 implements BrevDataBygger {
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
         this.avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
 
-        BrevDataA1 brevData = new BrevDataA1(saksbehandler);
+        BrevDataA1 brevData = new BrevDataA1();
 
-        brevData.mottaker = RolleType.BRUKER;
         brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandling.getId());
         brevData.utenlandskeVirksomheter = hentUtenlandskeAvklarteVirksomheter();
         brevData.norskeVirksomheter = hentAlleNorskeAvklarteVirksomheter();

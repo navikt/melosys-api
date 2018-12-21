@@ -16,10 +16,14 @@ import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,8 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -40,10 +43,10 @@ public class BrevDataByggerA1Test {
     private AvklartefaktaService avklartefaktaService;
 
     @Mock
-    private RegisterOppslagSystemService registerOppslagService;
+    private EregFasade ereg;
 
     @Mock
-    Behandling behandling;
+    private Behandling behandling;
 
     private Set<String> avklarteOrganisasjoner;
 
@@ -55,14 +58,13 @@ public class BrevDataByggerA1Test {
 
     private String orgnr1 = "12345678910";
     private String orgnr2 = "10987654321";
-    private OrganisasjonDokument org1;
-    private OrganisasjonDokument org2;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(TpsFasade.class));
+
         avklarteOrganisasjoner = new HashSet<>();
         when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong())).thenReturn(avklarteOrganisasjoner);
-
 
         søknad = new SoeknadDokument();
         Saksopplysning soeknad = new Saksopplysning();
@@ -78,19 +80,24 @@ public class BrevDataByggerA1Test {
         OrganisasjonsDetaljer detaljer = mock(OrganisasjonsDetaljer.class);
         when(detaljer.hentStrukturertForretningsadresse()).thenReturn(new StrukturertAdresse());
 
-        org1 = new OrganisasjonDokument();
-        org1.setOrgnummer(orgnr1);
-        org1.setNavn(Arrays.asList("navn1"));
-        org1.setOrganisasjonDetaljer(detaljer);
-
-        org2 = new OrganisasjonDokument();
-        org2.setOrgnummer(orgnr2);
-        org2.setOrganisasjonDetaljer(detaljer);
-        org2.setNavn(Arrays.asList("navn2"));
+        leggTilTestorganisasjon("navn1", orgnr1, detaljer);
+        leggTilTestorganisasjon("navn2", orgnr2, detaljer);
 
         KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
+
         brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, registerOppslagService, kodeverkService);
+    }
+
+    private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        OrganisasjonDokument org = new OrganisasjonDokument();
+        org.setOrgnummer(orgnummer);
+        org.setOrganisasjonDetaljer(detaljer);
+        org.setNavn(Arrays.asList(navn));
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.ORGANISASJON);
+        saksopplysning.setDokument(org);
+        when(ereg.hentOrganisasjon(eq(orgnummer))).thenReturn(saksopplysning);
     }
 
     @Test
@@ -118,7 +125,6 @@ public class BrevDataByggerA1Test {
         foretak.orgnr = orgnr1;
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
 
-        when(registerOppslagService.hentOrganisasjoner(any())).thenReturn(new HashSet<>(Arrays.asList(org1, org2)));
         søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr2);
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
@@ -145,17 +151,6 @@ public class BrevDataByggerA1Test {
 //        assertThat(brevDataDto.utenlandskeVirksomheter.stream()
 //                .map(nv -> nv.orgnr)
 //                .collect(Collectors.toList())).containsOnly(orgnr1);
-    }
-
-    @Test
-    public void testIngenForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        avklarteOrganisasjoner.add(orgnr1);
-        avklarteOrganisasjoner.add(orgnr2);
-
-        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
-        assertThat(brevDataDto.selvstendigeForetak).isEmpty();
-        assertThat(brevDataDto.norskeVirksomheter).isEmpty();
-        assertThat(brevDataDto.utenlandskeVirksomheter).isEmpty();
     }
 
     @Test

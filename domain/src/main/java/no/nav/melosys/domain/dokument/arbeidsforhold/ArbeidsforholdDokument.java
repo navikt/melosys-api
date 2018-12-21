@@ -1,8 +1,6 @@
 package no.nav.melosys.domain.dokument.arbeidsforhold;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.bind.annotation.*;
@@ -10,6 +8,7 @@ import javax.xml.bind.annotation.*;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import org.apache.commons.lang3.StringUtils;
 
 @XmlRootElement
@@ -34,8 +33,16 @@ public class ArbeidsforholdDokument extends SaksopplysningDokument {
 
     public Set<String> hentOrgnumre() {
         return getArbeidsforhold().stream()
-            .flatMap(arbeidsforhold -> Stream.of(arbeidsforhold.getArbeidsgiverID(), arbeidsforhold.getOpplysningspliktigID()))
+            .flatMap(af -> Stream.of(af.getArbeidsgiverID(), af.getOpplysningspliktigID()))
             .filter(StringUtils::isNotEmpty)
             .collect(Collectors.toSet());
+    }
+
+    public Set<Periode> hentAnsettelsesperioder(Collection<String> orgnummere) {
+        return getArbeidsforhold().stream()
+                .filter(arbeidsforhold -> orgnummere.contains(arbeidsforhold.arbeidsgiverID))
+                .map(arbeidsforhold -> arbeidsforhold.getAnsettelsesPeriode())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 }

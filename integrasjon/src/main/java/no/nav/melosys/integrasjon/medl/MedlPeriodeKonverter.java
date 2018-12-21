@@ -1,10 +1,10 @@
 package no.nav.melosys.integrasjon.medl;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 import javax.xml.datatype.DatatypeConfigurationException;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.TrygdeDekning;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
@@ -16,10 +16,11 @@ import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.kodeverk.*;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
 
 public class MedlPeriodeKonverter {
-    private static final Map<LovvalgBestemmelse, GrunnlagMedl> lovvalgsbestemmelseTilGrunnlagMedlTabell;
+
+    private static final BiMap<LovvalgBestemmelse, GrunnlagMedl> lovvalgsbestemmelseTilGrunnlagMedlTabell;
 
     static {
-        Map<LovvalgBestemmelse, GrunnlagMedl> tbl = new HashMap<>();
+        BiMap<LovvalgBestemmelse, GrunnlagMedl> tbl = HashBiMap.create();
         // Article 11
         tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_3A, GrunnlagMedl.FO_11_3_A);
         tbl.put(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_3B, GrunnlagMedl.FO_11_3_B);
@@ -62,6 +63,14 @@ public class MedlPeriodeKonverter {
             throw new TekniskException("Lovvalgsbestemmelse støttes ikke i MEDL. Kode: " + bestemmelse.getKode() + " Beskrivelse: " + bestemmelse.getBeskrivelse());
         }
         return grunnlagMedltype;
+    }
+
+    public static LovvalgBestemmelse tilLovvalgBestemmelse(GrunnlagMedl grunnlagKode) throws TekniskException {
+        LovvalgBestemmelse lovvalgBestemmelse = lovvalgsbestemmelseTilGrunnlagMedlTabell.inverse().get(grunnlagKode);
+        if (lovvalgBestemmelse == null) {
+            throw new TekniskException("GrunnlagMedlKode er ukjent. Kode: " + grunnlagKode.getKode() );
+        }
+        return lovvalgBestemmelse;
     }
 
     public static OpprettPeriodeRequest konverterTilOpprettPeriodRequest(String fnr,

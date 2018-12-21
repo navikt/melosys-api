@@ -14,6 +14,7 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.dokument.brev.*;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 
 import org.springframework.beans.factory.annotation.Autowired;

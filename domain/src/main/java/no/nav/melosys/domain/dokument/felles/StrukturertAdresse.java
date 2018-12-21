@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.dokument.felles;
 
-public class StrukturertAdresse {
+public class StrukturertAdresse extends Adresse {
 
     public String gatenavn;
 
@@ -13,5 +13,4 @@ public class StrukturertAdresse {
 
     public String poststed;
 
-    public String landKode;
 }

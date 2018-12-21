@@ -2,9 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -19,6 +17,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
@@ -27,7 +26,8 @@ import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.BrevDataA1;
+import no.nav.melosys.service.dokument.brev.BrevDataA001;
+import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.junit.Before;
 import org.junit.Rule;
@@ -41,9 +41,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class A1MapperTest {
+public class A001MapperTest {
 
-    private A1Mapper mapper;
+    private A001Mapper mapper;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -53,11 +53,11 @@ public class A1MapperTest {
     private Behandlingsresultat behandlingsresultat;
     private Behandling behandling;
 
-    private BrevDataA1 brevData;
+    private BrevDataA001 brevData;
 
     @Before
     public void setUp() {
-        mapper = new A1Mapper();
+        mapper = new A001Mapper();
         enhancedRandom = EnhancedRandomConfigurer.randomForDokProd();
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -66,6 +66,8 @@ public class A1MapperTest {
         lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART16_2);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
+        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setUnntakFraBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1);
 
         behandlingsresultat = mock(Behandlingsresultat.class);
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());
@@ -84,6 +86,7 @@ public class A1MapperTest {
         person.fornavn = "Ola";
         person.etternavn = "Nordmann";
         person.fødselsdato = LocalDate.now();
+        person.fnr = "123456789";
         person.statsborgerskap = new Land();
         person.statsborgerskap.setKode("NO");
 
@@ -95,6 +98,14 @@ public class A1MapperTest {
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
         when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(saksopplysning)));
         when(behandling.getFagsak()).thenReturn(new Fagsak());
+
+        UstrukturertAdresse adresse = new UstrukturertAdresse();
+        adresse.landKode = "Land";
+        adresse.adresselinjer.add("Gatenavn");
+        adresse.adresselinjer.add("25");
+        adresse.adresselinjer.add("Postnummer");
+        adresse.adresselinjer.add("Poststed");
+        adresse.adresselinjer.add("Region");
 
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
         strukturertAdresse.husnummer = "25";
@@ -110,46 +121,62 @@ public class A1MapperTest {
         søknad.arbeidUtland = Arrays.asList(arbeidUtland);
 
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
-        when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(strukturertAdresse);
+        when(organisasjonsDetaljer.hentUstrukturertForretningsadresse()).thenReturn(adresse);
 
-        Virksomhet virksomhet = new Virksomhet("JARLSBERG INTERNATIONAL",
+        Virksomhet virksomhet = new Virksomhet("JARLSBERG AS",
                                                "123456789",
-                                                strukturertAdresse);
+                                                adresse);
 
-        Virksomhet utenlandksVirksomhet = new Virksomhet("Jarlsberg",
-                                                         "123456789",
-                                                         strukturertAdresse);
+        Arbeidssted fysiskArbeidssted = new Arbeidssted("JARLSBERG INTERNATIONAL", strukturertAdresse);
+        Arbeidssted maritimtArbeidssted = new Arbeidssted("Seven Kestrel", "GB", YrkesgruppeType.SOKKEL_ELLER_SKIP);
 
-        brevData = new BrevDataA1();
-        brevData.yrkesgruppe = YrkesgruppeType.ORDINAER;
-        brevData.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
-        brevData.selvstendigeForetak = new HashSet<>();
-        brevData.utenlandskeVirksomheter = new ArrayList<>(Arrays.asList(utenlandksVirksomhet));
-        brevData.søknad = søknad;
+        UtenlandskMyndighet myndighet = new UtenlandskMyndighet();
+        myndighet.navn = "SAV";
+        myndighet.institusjonskode = "23";
+        myndighet.gateadresse = "Adresse";
+        myndighet.postnummer = "0165";
+        myndighet.poststed ="Stockholm";
+        myndighet.landkode = Landkoder.SK;
+
+        Vilkaarsresultat vilkår = new Vilkaarsresultat();
+        vilkår.setBegrunnelseFritekst("Fritekst");
+        vilkår.setOppfylt(true);
+        VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
+        begrunnelse.setKode("UTSENDELSE_MELLOM_24_MN_OG_5_AAR");
+        vilkår.getBegrunnelser().add(begrunnelse);
+
+        brevData = new BrevDataA001();
+        brevData.arbeidsgivendeVirkomsheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
+        brevData.selvstendigeVirksomheter = new ArrayList<>();
+        brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidssted));
+        brevData.personDokument = person;
         brevData.bostedsadresse = boAdresse;
+        brevData.utenlandskMyndighet = myndighet;
+        brevData.lovvalgsperioder = Arrays.asList(lovvalgsperiode);
+        brevData.vilkårsresultat161 = vilkår;
+        brevData.utenlandskIdent = Optional.empty();
+        brevData.ansettelsesperiode = Optional.empty();
     }
 
     @Test
     public void mapTilBrevXML() throws Exception {
         FellesType fellesType = new FellesType();
-        fellesType.setFagsaksnummer("MELTEST-4");
+        fellesType.setFagsaksnummer("MELTEST-2");
 
         MelosysNAVFelles navFelles = enhancedRandom.nextObject(MelosysNAVFelles.class);
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
         String xml = mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
-
         assertThat(xml).isNotNull();
     }
-
 
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
         final String XSD_LOCATION = "melosysbrev/melosys_000116.xsd";
 
         Fag fag = mapFag();
         VedleggType vedlegg = new VedleggType();
-        vedlegg.setA1(mapper.mapA1(behandling, resultat, (BrevDataA1) brevData));
+        vedlegg.setSEDA001(mapper.mapSEDA001((BrevDataA001) brevData));
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag, vedlegg);
 
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
@@ -157,7 +184,7 @@ public class A1MapperTest {
 
     public Fag mapFag() {
         Fag fag = new Fag();
-        fag.setVedleggA1("true");
+        fag.setVedleggSEDA001("true");
         return fag;
     }
 
@@ -170,5 +197,4 @@ public class A1MapperTest {
         brevdataType.setVedlegg(vedlegg);
         return factory.createBrevdata(brevdataType);
     }
-
 }

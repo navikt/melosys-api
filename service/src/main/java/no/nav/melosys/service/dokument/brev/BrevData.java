@@ -20,7 +20,6 @@ public class BrevData {
         this.fritekst = brevbestillingDto.fritekst;
     }
 
-    // Kun for deserialisering
     public BrevData() { }
 
     // Brukes av saksflyt

@@ -1,6 +1,8 @@
-package no.nav.melosys.service.dokument.brev;
+package no.nav.melosys.service.dokument.brev.bygger;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 
 public class BrevDataByggerStandard implements BrevDataBygger {
 
