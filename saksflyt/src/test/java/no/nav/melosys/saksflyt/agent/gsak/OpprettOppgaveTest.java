@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent;
+package no.nav.melosys.saksflyt.agent.gsak;
 
 import java.util.Properties;
 
