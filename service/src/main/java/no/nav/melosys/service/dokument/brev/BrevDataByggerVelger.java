@@ -50,7 +50,7 @@ public class BrevDataByggerVelger {
                                 kodeverkService);
                 return new BrevDataByggerVedlegg(a1Bygger, brevbestillingDto);
             }
-            case ORIENTERING_ANMODNING_UNNTAK: {
+            case SED_A001: {
                 BrevDataByggerA001 a001Bygger =
                         new BrevDataByggerA001(avklartefaktaService,
                                 registerOppslagService,

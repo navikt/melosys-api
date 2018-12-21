@@ -168,7 +168,7 @@ public class BrevDataServiceTest {
         DokumentbestillingMetadata forventet = new DokumentbestillingMetadata();
         forventet.bruker = FNR;
         forventet.mottaker = ORGNR;
-        forventet.dokumenttypeID = DokumenttypeID.hentID(doktype);
+        forventet.dokumenttypeID = DokumenttypeIdMapper.hentID(doktype);
         forventet.fagområde = "MED";
         forventet.journalsakID = "123";
         forventet.saksbehandler = "TEST";

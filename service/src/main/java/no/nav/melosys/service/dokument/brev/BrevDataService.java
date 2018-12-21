@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -58,9 +59,8 @@ public class BrevDataService {
      * Genererer metada til doksys angående dokumentbestillingen.
      */
     public DokumentbestillingMetadata lagBestillingMetadata(ProduserbartDokument produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
-        if (produserbartDokument == null) {
-            throw new TekniskException("Ingen gyldig produserbartDokument");
-        }
+        Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument");
+
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
 
         Fagsak fagsak = behandling.getFagsak();
@@ -77,7 +77,7 @@ public class BrevDataService {
                 break;
             }
             case ATTEST_A1:
-            case ORIENTERING_ANMODNING_UNNTAK:
+            case SED_A001:
             case INNVILGELSE_YRKESAKTIV:
             case MELDING_MANGLENDE_OPPLYSNINGER:
             case MELDING_HENLAGT_SAK: {
@@ -91,7 +91,7 @@ public class BrevDataService {
                 throw new TekniskException("ProduserbartDokument ikke støttet");
         }
 
-        metadata.dokumenttypeID = DokumenttypeID.hentID(produserbartDokument);
+        metadata.dokumenttypeID = DokumenttypeIdMapper.hentID(produserbartDokument);
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
         metadata.fagområde = Tema.MED.getKode();

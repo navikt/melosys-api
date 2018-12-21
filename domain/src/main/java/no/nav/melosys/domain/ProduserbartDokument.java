@@ -6,7 +6,8 @@ public enum ProduserbartDokument implements Kodeverk {
     ORIENTERING_ANMODNING_UNNTAK("ORIENTERING_ANMODNING_UNNTAK", "Orienteringsbrev om anmodning unntak"),
     MELDING_FORVENTET_SAKSBEHANDLINGSTID("MELDING_FORVENTET_SAKSBEHANDLINGSTID", "Melding om forventet sakbehandlingstid"),
     MELDING_HENLAGT_SAK("MELDING_HENLAGT_SAK", "Melding om henlagt sak"),
-    MELDING_MANGLENDE_OPPLYSNINGER("MELDING_MANGLENDE_OPPLYSNINGER", "Melding om manglende opplysninger");
+    MELDING_MANGLENDE_OPPLYSNINGER("MELDING_MANGLENDE_OPPLYSNINGER", "Melding om manglende opplysninger"),
+    SED_A001("SED_A001", "SED A001");
 
     private String kode;
     private String beskrivelse;

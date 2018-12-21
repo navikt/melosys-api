@@ -124,7 +124,7 @@ public final class DokumentServiceTest {
     @Test
     public final void produserDokumentUtenDokumenttypeKasterUnntak() throws Exception {
         Throwable unntak = catchThrowable(() -> instans.produserDokument(BEHANDLINGSID, null, lagBrevData(RolleType.ARBEIDSGIVER)));
-        assertThat(unntak).isInstanceOf(TekniskException.class).hasNoCause().hasMessageContaining("Ingen gyldig");
+        assertThat(unntak).isInstanceOf(IllegalArgumentException.class).hasNoCause().hasMessageContaining("Ingen gyldig");
     }
 
     private final BrevData lagBrevData(RolleType mottakerRolle) {
