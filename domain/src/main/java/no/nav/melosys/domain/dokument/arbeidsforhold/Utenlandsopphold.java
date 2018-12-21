@@ -21,7 +21,7 @@ public class Utenlandsopphold {
     @JsonProperty("rapporteringsAarMaaned")
     private YearMonth rapporteringsperiode;
 
-    /** Obs. Ikke kodeverk! */ //TODO FA: tjenesten leverer både kodeverk og verdi skal vi ha kodeverk her?
+    /** Obs. Ikke kodeverk! */
     public String getLand() {
         return land;
     }

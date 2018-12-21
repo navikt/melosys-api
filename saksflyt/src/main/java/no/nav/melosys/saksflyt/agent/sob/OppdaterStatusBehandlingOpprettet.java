@@ -1,27 +1,19 @@
 package no.nav.melosys.saksflyt.agent.sob;
 
-import java.time.LocalDateTime;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.Tema;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
-import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
-import no.nav.melosys.repository.BehandlingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.*;
+import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
+import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
 import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
 import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_OPPR;
-import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
-import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.generateCallId;
 
 /**
  * Steget sørger for å skrive til Sak og Behandling når behandling opprettes
@@ -35,13 +27,10 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterStatusBehandlingOpprettet.class);
 
-    private final BehandlingRepository behandlingRepository;
-
     private final SakOgBehandlingFasade sakOgBehandlingFasade;
 
     @Autowired
-    public OppdaterStatusBehandlingOpprettet(BehandlingRepository behandlingRepository, SakOgBehandlingFasade sakOgBehandlingFasade) {
-        this.behandlingRepository = behandlingRepository;
+    public OppdaterStatusBehandlingOpprettet(SakOgBehandlingFasade sakOgBehandlingFasade) {
         this.sakOgBehandlingFasade = sakOgBehandlingFasade;
         log.info("OppdaterStatusBehandlingOpprettet initialisert");
     }
@@ -52,31 +41,14 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, TekniskException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String aktørID = prosessinstans.getData(AKTØR_ID);
         String saksnummer = prosessinstans.getData(SAKSNUMMER);
         Behandling behandling = prosessinstans.getBehandling();
-        Tema arkivtema = avgjørArkivTema(behandling.getType());
 
-        String fagsystemkode = Fagsystem.MELOSYS.getKode();
-        // BehandlingsId i SOB skal være unik i NAV, så vi prefikser med applikasjonsID.
-        String behandlingsId = String.format("%s-%d", Fagsystem.MELOSYS.getKode(), behandling.getId());
-
-        // FIXME: Nullsjekk på noe her?
-
-        BehandlingStatusMapper.Builder builder = new BehandlingStatusMapper.Builder();
-        builder.medBehandlingsId(behandlingsId);
-        builder.medHendelsesId(generateCallId());
-        builder.medSaksnummer(saksnummer);
-        builder.medHendelsesprodusent(fagsystemkode);
-        builder.medHendelsestidspunkt(LocalDateTime.now());
-        builder.medArkivtema(arkivtema.getKode());
-        builder.medAktørID(aktørID);
-        builder.medAnsvarligEnhet(Integer.toString(MELOSYS_ENHET_ID));
-
-        sakOgBehandlingFasade.sendBehandlingOpprettet(builder.build());
+        sakOgBehandlingFasade.sendBehandlingOpprettet(lagBehandlingStatusMapper(saksnummer, behandling.getId(), aktørID));
 
         prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
         log.info("Oppdatert sob-status til opprettet for prosessinstans {}", prosessinstans.getId());

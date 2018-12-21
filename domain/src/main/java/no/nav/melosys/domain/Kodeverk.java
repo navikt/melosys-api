@@ -18,6 +18,8 @@ public interface Kodeverk {
     /**
      * Returnerer en saksbehandler-vennlig beskrivelse av enumen.
      */
-    String getBeskrivelse();
+    default String getBeskrivelse() {
+        return getKode();
+    }
 
 }

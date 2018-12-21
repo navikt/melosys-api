@@ -59,8 +59,6 @@ public class Arbeidsforhold implements HarPeriode {
     @JsonProperty("timerTimelonnet")
     public List<AntallTimerIPerioden> antallTimerForTimeloennet = new ArrayList<>();
 
-    // FIXME: Endre brukenb av gjenværende metoder til direkteaksess
-
     @Override
     @JsonIgnore
     public ErPeriode getPeriode() {

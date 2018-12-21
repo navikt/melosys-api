@@ -13,8 +13,6 @@ import org.hibernate.annotations.ColumnTransformer;
 @EntityListeners({SaksopplysningListener.class})
 @Table(name = "saksopplysning")
 public class Saksopplysning {
-
-    // FIXME (farjam): Ikke tatt med fra den logiske modellen: opplysningsGyldighet, beskyttelsesbehov. betydning, registreringInfo og formål
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

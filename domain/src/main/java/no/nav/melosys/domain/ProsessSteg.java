@@ -4,14 +4,8 @@ import javax.persistence.Converter;
 
 public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
 
-    // Disse skal være i logisk rekkefølge
-    
-    // TODO (MELOSYS-1390: Rekkefølgen må revideres. JFR_AVSLUTT_OPPGAVE bør kanskje komme før JFR_VALIDERING.
-    
-    MOT_VURDER_AUTOMATISK_JFR("VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"), // FIXME: Ikke i bruk
-
-    //Gsak
-    GSAK_OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
+    // NB! Disse skal være i logisk rekkefølge
+    MOT_VURDER_AUTOMATISK_JFR("VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"),
 
     // Journalføring
     JFR_VALIDERING("JFR_VALIDERING", "Grunnleggende validering"),
@@ -32,6 +26,10 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     HENT_MEDL_OPPL("HENT_MEDL_OPPL", "Hent medlemskapsopplysninger fra MEDL"),
     HENT_SOB_SAKER("HENT_SOB_SAKER", "Hent saker fra Sak og behandling"),
     OPPFRISK_SAKSOPPLYSNINGER("OPPFRISK_SAKSOPPLYSNINGER", "Oppfrisking av saksopplysninger"),
+
+    //Gsak
+    GSAK_OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter oppgave i GSAK"),
+
     SEND_FORVALTNINGSMELDING("SEND_FORVALTNINGSMELDING", "Send forvaltningsmelding til søker"),
 
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),

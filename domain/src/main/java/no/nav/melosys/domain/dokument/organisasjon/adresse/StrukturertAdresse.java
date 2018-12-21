@@ -4,7 +4,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 
-//FIXME (Francois) mangler EREG testdata for å teste StrukturertAdresse
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "StrukturertAdresse")
 public abstract class StrukturertAdresse extends GeografiskAdresse {

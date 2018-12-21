@@ -13,8 +13,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class Fagsak extends RegistreringsInfo {
 
-    // FIXME (farjam): Ikke tatt med fra logisk modell: tema, virkemiddel og registreringsmetainfo
-
     @Id
     @Column(name = "saksnummer", nullable = false)
     private String saksnummer;
@@ -33,7 +31,6 @@ public class Fagsak extends RegistreringsInfo {
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Aktoer> aktører;
 
-    // FIXME Diskutere strategi for eager/lazy loading
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Behandling> behandlinger;
 

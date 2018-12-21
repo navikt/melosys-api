@@ -87,9 +87,8 @@ public class GsakService implements GsakFasade {
         }
     }
 
-    //FIXME: Mangler implementasjon for sakstyper
     @Override
-public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<Fagsakstype> sakstyper, List<Behandlingstype> behandlingstyper)
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<Fagsakstype> sakstyper, List<Behandlingstype> behandlingstyper)
         throws FunksjonellException, TekniskException {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(new String[]{oppgavetype.getKode()})
@@ -99,7 +98,7 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
             .medTildeltRessurs(false);
 
         if (tema != null) {
-            searchRequestBuilder = searchRequestBuilder.medTema( new String[]{tema.getKode()});
+            searchRequestBuilder = searchRequestBuilder.medTema(new String[]{tema.getKode()});
         }
 
         List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(searchRequestBuilder.build());
@@ -108,7 +107,7 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
     }
 
     @Override
-    public Oppgave hentOppgave(String oppgaveId) throws FunksjonellException, TekniskException  {
+    public Oppgave hentOppgave(String oppgaveId) throws FunksjonellException, TekniskException {
         OppgaveDto gsakOppgave = oppgaveConsumer.hentOppgave(oppgaveId);
 
         if (gsakOppgave == null) {
@@ -171,7 +170,7 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
         Oppgave domainOppgave = new Oppgave();
         domainOppgave.setOppgaveId(oppgave.getId());
         domainOppgave.setVersjon(oppgave.getVersjon());
-        if (oppgave.getPrioritet() != null ) {
+        if (oppgave.getPrioritet() != null) {
             domainOppgave.setPrioritet(PrioritetType.valueOf(oppgave.getPrioritet()));
         }
         domainOppgave.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
@@ -185,7 +184,7 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
 
         if (oppgave.getTema() != null && erGyldigKode(Tema.class, oppgave.getTema())) {
             domainOppgave.setTema(Tema.valueOf(oppgave.getTema()));
-        }  else {
+        } else {
             log.error("Fikk uventet Tema: {} for OppgaveID: {}", oppgave.getTema(), oppgave.getId());
         }
 
@@ -221,18 +220,18 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
 
     @Override
     public List<Oppgave> finnBehandlingsoppgaverMedBruker(String aktørId) throws FunksjonellException, TekniskException {
-        String[] oppgaveTyper = { Oppgavetype.BEH_SAK.getKode() };
+        String[] oppgaveTyper = {Oppgavetype.BEH_SAK.getKode()};
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
-                .medAktørId(aktørId)
-                .medOppgaveTyper(oppgaveTyper)
-                .medSorteringsfelt(SORTERINGSFELT)
-                .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
-                .build();
+            .medAktørId(aktørId)
+            .medOppgaveTyper(oppgaveTyper)
+            .medSorteringsfelt(SORTERINGSFELT)
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .build();
 
         return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
-                .filter(Objects::nonNull)
-                .map(GsakService::oppgaveMappingDtoTilDomain)
-                .collect(Collectors.toList());
+            .filter(Objects::nonNull)
+            .map(GsakService::oppgaveMappingDtoTilDomain)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -258,9 +257,9 @@ public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Te
     @Override
     public void tildelOppgave(String oppgaveId, String saksbehandlerID) throws FunksjonellException, TekniskException {
         OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveId);
-        if (oppgave == null ) {
+        if (oppgave == null) {
             throw new IkkeFunnetException(String.format("Feil ved henting av "
-                    + "oppgave %s for saksbehandler %s:", oppgaveId, saksbehandlerID));
+                + "oppgave %s for saksbehandler %s:", oppgaveId, saksbehandlerID));
         }
         oppgave.setTilordnetRessurs(saksbehandlerID);
         oppgaveConsumer.oppdaterOppgave(oppgave);

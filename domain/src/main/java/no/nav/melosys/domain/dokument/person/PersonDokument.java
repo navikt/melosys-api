@@ -15,8 +15,6 @@ import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
 /**
  * Representerer svar fra personregisteret (TPS)
- * 
- * TODO (Farjam 2017-09-19): Trenger revisjon, se EESSI2-279.
  *  
  */
 @XmlRootElement
@@ -51,7 +49,7 @@ public class PersonDokument extends SaksopplysningDokument {
     public LocalDate fødselsdato;
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    @JsonIgnore // TODO må avklares
+    @JsonIgnore
     public LocalDate dødsdato;
 
     @JsonIgnore
