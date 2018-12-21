@@ -71,6 +71,10 @@ public class BrevDataByggerA1Test {
         soeknad.setDokument(søknad);
         soeknad.setType(SaksopplysningType.SØKNAD);
 
+        ForetakUtland foretakUtland = new ForetakUtland();
+        foretakUtland.orgnr = orgnr1;
+        søknad.foretakUtland.add(foretakUtland);
+
         Saksopplysning person = new Saksopplysning();
         PersonDokument personDok = new PersonDokument();
         person.setDokument(personDok);
@@ -134,23 +138,15 @@ public class BrevDataByggerA1Test {
                 .collect(Collectors.toList())).containsOnly(orgnr1, orgnr2);
     }
 
-    @Test
-    public void testForetakiUtlandet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    @Test(expected = TekniskException.class)
+    public void testForetakiUtlandetSkalKasteException() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         avklarteOrganisasjoner.add(orgnr1);
 
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.orgnr = orgnr1;
-        søknad.foretakUtland.add(foretakUtland);
+        søknad.foretakUtland.clear();
 
-        ForetakUtland foretakUtland2 = new ForetakUtland();
-        foretakUtland2.orgnr = orgnr2;
-        søknad.foretakUtland.add(foretakUtland2);
-
-        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
-
-//        assertThat(brevDataDto.utenlandskeVirksomheter.stream()
-//                .map(nv -> nv.orgnr)
-//                .collect(Collectors.toList())).containsOnly(orgnr1);
+        brevDataByggerA1.lag(behandling, saksbehandler);
     }
 
     @Test
@@ -158,10 +154,6 @@ public class BrevDataByggerA1Test {
         SelvstendigForetak foretak = new SelvstendigForetak();
         foretak.orgnr = orgnr1;
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
-
-        ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.orgnr = orgnr1;
-        søknad.foretakUtland.add(foretakUtland);
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
         assertThat(brevDataDto.selvstendigeForetak).isEmpty();

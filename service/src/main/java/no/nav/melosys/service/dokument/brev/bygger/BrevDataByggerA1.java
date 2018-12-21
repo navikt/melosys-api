@@ -2,16 +2,12 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -24,22 +20,17 @@ import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
-public class BrevDataByggerA1 implements BrevDataBygger {
+public class BrevDataByggerA1 extends BrevDatabyggerBase implements BrevDataBygger {
 
     private final AvklartefaktaService avklartefaktaService;
     private final RegisterOppslagSystemService registerOppslagService;
-    private final KodeverkService kodeverkService;
-
-    private Set<String> avklarteOrganisasjoner;
-    private SoeknadDokument søknad;
-    private PersonDokument person;
 
     public BrevDataByggerA1(AvklartefaktaService avklartefaktaService,
                             RegisterOppslagSystemService registerOppslagService,
                             KodeverkService kodeverkService) {
+        super(kodeverkService);
         this.avklartefaktaService = avklartefaktaService;
         this.registerOppslagService = registerOppslagService;
-        this.kodeverkService = kodeverkService;
     }
 
     @Override
@@ -51,27 +42,14 @@ public class BrevDataByggerA1 implements BrevDataBygger {
         BrevDataA1 brevData = new BrevDataA1();
 
         brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandling.getId());
-        brevData.utenlandskeVirksomheter = hentUtenlandskeAvklarteVirksomheter();
+        brevData.utenlandskeVirksomheter = hentUtenlandskeVirksomheter();
         brevData.norskeVirksomheter = hentAlleNorskeAvklarteVirksomheter();
-        brevData.selvstendigeForetak = hentAvklarteSelvstendigeForetak();
+        brevData.selvstendigeForetak = hentAvklarteSelvstendigeForetakOrgnumre();
         brevData.bostedsadresse = hentBostedsadresse();
+        brevData.arbeidssteder = hentArbeidssteder();
         brevData.søknad = søknad;
 
         return brevData;
-    }
-
-    private Bostedsadresse hentBostedsadresse() {
-        Bostedsadresse adresse = person.bostedsadresse;
-        adresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.getPostnr(), LocalDate.now()));
-        return adresse;
-    }
-
-    private Set<String> hentAvklarteSelvstendigeForetak() {
-        Set<String> organisasjonsnumre = søknad.selvstendigArbeid.hentAlleOrganisasjonsnumre()
-                .collect(Collectors.toSet());
-
-        organisasjonsnumre.retainAll(avklarteOrganisasjoner);
-        return organisasjonsnumre;
     }
 
     private List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
@@ -84,13 +62,5 @@ public class BrevDataByggerA1 implements BrevDataBygger {
         StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
         adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
         return adresse;
-    }
-
-    private List<Virksomhet> hentUtenlandskeAvklarteVirksomheter() {
-        return søknad.foretakUtland.stream()
-                //TODO: utenlandske foretak har ikke nødvendigvis orgnr!
-                //.filter(foretak -> avklarteOrganisasjoner.contains(foretak.orgnr))
-                .map(Virksomhet::new)
-                .collect(Collectors.toList());
     }
 }

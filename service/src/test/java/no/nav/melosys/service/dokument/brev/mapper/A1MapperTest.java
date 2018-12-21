@@ -127,6 +127,7 @@ public class A1MapperTest {
         brevData.utenlandskeVirksomheter = new ArrayList<>(Arrays.asList(utenlandksVirksomhet));
         brevData.søknad = søknad;
         brevData.bostedsadresse = boAdresse;
+        brevData.arbeidssteder = new ArrayList<>();
     }
 
     @Test
