@@ -15,6 +15,10 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 
+/*
+ * Alle feltene er resultatverdier fra funksjoner i brevbygger, som brukes direkte i mapper.
+ * Det er derfor brukt Optional på felter som kan være tomme
+ */
 public class BrevDataA001 extends BrevData {
 
     public UtenlandskMyndighet utenlandskMyndighet;

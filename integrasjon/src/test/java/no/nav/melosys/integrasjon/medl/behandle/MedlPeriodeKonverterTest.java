@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.Landkoder;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.TrygdeDekning;
+import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.*;
@@ -17,24 +18,34 @@ public class MedlPeriodeKonverterTest {
 
     @Test
     public void hentFellesKodeForGrunnlagMedltype() throws TekniskException {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2);
-        GrunnlagMedl grunnlagMedltype = MedlPeriodeKonverter.tilGrunnlagMedltype(lovvalgsperiode.getBestemmelse());
+        LovvalgBestemmelse_883_2004 lovvalgsbestemmelse = LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2;
+        GrunnlagMedl grunnlagMedltype = MedlPeriodeKonverter.tilGrunnlagMedltype(lovvalgsbestemmelse);
         assertThat(grunnlagMedltype).isEqualTo(GrunnlagMedl.FO_12_2);
     }
 
     @Test(expected = TekniskException.class)
     public void hentFellesKodeForGrunnlagMedltype_() throws TekniskException {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_1);
-        MedlPeriodeKonverter.tilGrunnlagMedltype(lovvalgsperiode.getBestemmelse());
+        LovvalgBestemmelse_883_2004 lovvalgsbestemmelse = LovvalgBestemmelse_883_2004.FO_883_2004_ART11_1;
+        MedlPeriodeKonverter.tilGrunnlagMedltype(lovvalgsbestemmelse);
+    }
+
+    @Test
+    public void hentKodeverkForLovvalgsbestemmelse() throws TekniskException {
+        GrunnlagMedl grunnlagKode = GrunnlagMedl.FO_12_2;
+        LovvalgBestemmelse lovvalgsbestemmelse = MedlPeriodeKonverter.tilLovvalgBestemmelse(grunnlagKode);
+        assertThat(lovvalgsbestemmelse).isEqualTo(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2);
+    }
+
+    @Test(expected = TekniskException.class)
+    public void hentKodeverkForLovvalgsbestemmelseUkjentMedlKode() throws TekniskException {
+        GrunnlagMedl grunnlagKode = GrunnlagMedl.MEDFT;
+        MedlPeriodeKonverter.tilLovvalgBestemmelse(grunnlagKode);
     }
 
     @Test
     public void hentFellesKodeForDekningtype() throws TekniskException {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setDekning(TrygdeDekning.UTEN_DEKNING);
-        DekningMedl dekningMedl = MedlPeriodeKonverter.tilMedlTrygdeDekning(lovvalgsperiode.getDekning());
+        TrygdeDekning trygdeDekning = TrygdeDekning.UTEN_DEKNING;
+        DekningMedl dekningMedl = MedlPeriodeKonverter.tilMedlTrygdeDekning(trygdeDekning);
         assertThat(dekningMedl).isEqualTo(DekningMedl.UNNTATT);
     }
 

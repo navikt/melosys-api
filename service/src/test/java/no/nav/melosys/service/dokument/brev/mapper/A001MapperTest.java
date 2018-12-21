@@ -148,7 +148,7 @@ public class A001MapperTest {
         brevData = new BrevDataA001();
         brevData.arbeidsgivendeVirkomsheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
         brevData.selvstendigeVirksomheter = new ArrayList<>();
-        brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidssted));   // Hovedvirksomhet
+        brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidssted));
         brevData.personDokument = person;
         brevData.bostedsadresse = boAdresse;
         brevData.utenlandskMyndighet = myndighet;

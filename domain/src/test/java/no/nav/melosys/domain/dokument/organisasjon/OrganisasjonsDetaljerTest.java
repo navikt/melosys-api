@@ -6,11 +6,10 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,12 +49,11 @@ public class OrganisasjonsDetaljerTest {
         orgDetaljer.forretningsadresse = Arrays.asList(adresse);
 
         UstrukturertAdresse resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse();
-        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(0)).isEqualTo(linje1);
-        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(1)).isEqualTo(linje2);
-        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(2)).isEqualTo(linje3);
-        AssertionsForClassTypes.assertThat(resultatAdresse.landKode).isEqualTo(landkode);
-
-        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(3)).isEqualTo(postnr);
+        assertThat(resultatAdresse.adresselinjer.get(0)).isEqualTo(linje1);
+        assertThat(resultatAdresse.adresselinjer.get(1)).isEqualTo(linje2);
+        assertThat(resultatAdresse.adresselinjer.get(2)).isEqualTo(linje3);
+        assertThat(resultatAdresse.adresselinjer.get(3)).isEqualTo(postnr);
+        assertThat(resultatAdresse.landKode).isEqualTo(landkode);
     }
 
     @Test
@@ -67,12 +65,11 @@ public class OrganisasjonsDetaljerTest {
         orgDetaljer.forretningsadresse = Arrays.asList(adresse);
 
         UstrukturertAdresse resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse();
-        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(0)).isEqualTo(linje1);
-        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(1)).isEqualTo(linje2);
-        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(2)).isEqualTo(linje3);
-        AssertionsForClassTypes.assertThat(resultatAdresse.adresselinjer.get(3)).isEqualTo(poststedUtland);
-        AssertionsForClassTypes.assertThat(resultatAdresse.landKode).isEqualTo(landkode);
-
+        assertThat(resultatAdresse.adresselinjer.get(0)).isEqualTo(linje1);
+        assertThat(resultatAdresse.adresselinjer.get(1)).isEqualTo(linje2);
+        assertThat(resultatAdresse.adresselinjer.get(2)).isEqualTo(linje3);
+        assertThat(resultatAdresse.adresselinjer.get(3)).isEqualTo(poststedUtland);
+        assertThat(resultatAdresse.landKode).isEqualTo(landkode);
     }
 
     @Test

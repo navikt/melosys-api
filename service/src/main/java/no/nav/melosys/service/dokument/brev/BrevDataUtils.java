@@ -38,11 +38,15 @@ public final class BrevDataUtils {
         return navEnhet;
     }
 
-    public static XMLGregorianCalendar convertToXMLGregorianCalendarRemoveTimezone(Instant instant) throws DatatypeConfigurationException {
+    public static XMLGregorianCalendar convertToXMLGregorianCalendarRemoveTimezone(Instant instant) {
         if (instant == null) {
             return null;
         }
-        return convertToXMLGregorianCalendarRemoveTimezone(LocalDateTime.ofInstant(instant, ZoneOffset.UTC));
+        try {
+            return convertToXMLGregorianCalendarRemoveTimezone(LocalDateTime.ofInstant(instant, ZoneOffset.UTC));
+        } catch (DatatypeConfigurationException e) {
+            throw new RuntimeException("Feil ved konvertering av Instant til XmlGregorianCalendar");
+        }
     }
 
     public static XMLGregorianCalendar convertToXMLGregorianCalendarRemoveTimezone(LocalDateTime localDateTime) throws DatatypeConfigurationException {

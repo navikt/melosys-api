@@ -33,7 +33,7 @@ public class ArbeidsforholdDokument extends SaksopplysningDokument {
 
     public Set<String> hentOrgnumre() {
         return getArbeidsforhold().stream()
-            .flatMap(arbeidsforhold -> Stream.of(arbeidsforhold.getArbeidsgiverID(), arbeidsforhold.getOpplysningspliktigID()))
+            .flatMap(af -> Stream.of(af.getArbeidsgiverID(), af.getOpplysningspliktigID()))
             .filter(StringUtils::isNotEmpty)
             .collect(Collectors.toSet());
     }

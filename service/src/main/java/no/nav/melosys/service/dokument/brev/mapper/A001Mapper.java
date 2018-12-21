@@ -33,11 +33,7 @@ public class A001Mapper {
 
         seda001.setAntallVedlegg("0");
 
-        try {
-            seda001.setDatoSendt(BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone(Instant.now()));
-        } catch (DatatypeConfigurationException e) {
-            throw new TekniskException("Feil ved konvertering");
-        }
+        seda001.setDatoSendt(BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone(Instant.now()));
 
         seda001.setLandkodeAvsender(Landkoder.NO.getKode());
 
@@ -73,9 +69,7 @@ public class A001Mapper {
 
         seda001.setVilkårBegrunnelse(mapVilkårBegrunnelse(brevData.vilkårsresultat161));
 
-        if (brevData.ansettelsesperiode.isPresent()) {
-            seda001.setAnsettelsesPeriode(mapAnsettelsesperiode(brevData.ansettelsesperiode.get()));
-        }
+        brevData.ansettelsesperiode.ifPresent(periode -> seda001.setAnsettelsesPeriode(mapAnsettelsesperiode(periode)));
 
         seda001.setFritekst(brevData.vilkårsresultat161.getBegrunnelseFritekst());
 
@@ -144,9 +138,7 @@ public class A001Mapper {
         person.setBostedsadresse(mapBostedAdresse(adresse));
         person.setFødselsnummer(personDok.fnr);
         //Fødeland og Fødested skal ikke fylles ut
-        if (utenlandskIdent.isPresent()) {
-            person.setUtenlandskID(utenlandskIdent.get());
-        }
+        utenlandskIdent.ifPresent(utenlandskId -> person.setUtenlandskID(utenlandskId));
         try {
             person.setFødselsdato(convertToXMLGregorianCalendarRemoveTimezone(personDok.fødselsdato));
         } catch (DatatypeConfigurationException e) {
