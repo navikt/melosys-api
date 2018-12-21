@@ -3,16 +3,19 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import no.nav.dok.melosysbrev._000067.A1;
 import no.nav.dok.melosysbrev._000108.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.BehandlingstypeKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsbestemmelseKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
+import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -25,6 +28,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataUtils;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.avklartefakta.AvklartefaktaType.AG_FORRETNINGSLAND;
@@ -35,8 +39,11 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws JAXBException, SAXException, TekniskException {
-        Fag fag = mapFag(behandling, resultat, ((BrevDataVedlegg) brevdata).brevDataA1);
-        JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag);
+        BrevDataA1 brevdataA1 = ((BrevDataVedlegg) brevdata).brevDataA1;        
+        Fag fag = mapFag(behandling, resultat, brevdataA1);
+        A1 a1 = new A1Mapper().mapA1(behandling, resultat, brevdataA1);
+        VedleggType a1Vedlegg = VedleggType.builder().withA1(a1).build();
+        JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag, a1Vedlegg);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
@@ -90,12 +97,13 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         }
     }
 
-    private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {
+    private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag, VedleggType a1Vedlegg) {
         ObjectFactory factory = new ObjectFactory();
         BrevdataType brevdataType = BrevdataType.builder()
             .withFelles(fellesType)
             .withNAVFelles(navFelles)
             .withFag(fag)
+            .withVedlegg(a1Vedlegg)
             .build();
         return factory.createBrevdata(brevdataType);
     }

@@ -16,15 +16,14 @@ import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProduserbartDokument.ATTEST_A1;
 import static no.nav.melosys.domain.ProduserbartDokument.INNVILGELSE_YRKESAKTIV;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.IV_AVSLUTT_BEHANDLING;
@@ -82,21 +81,24 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         ProsessType prosessType = prosessinstans.getType();
         if (ProsessType.IVERKSETT_VEDTAK == prosessType) {
             if (innvilgelsesbrevSkalSendes(behandling)) {
+                // Bruker A1-vedlegget sine brevdata, da disse er ett supersett av de
+                // ordinære brevdata innvilgelsesbrev trenger.
                 BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(ProduserbartDokument.ATTEST_A1);
                 BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
-                brevData.mottaker = RolleType.BRUKER;
-                dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
 
                 //TODO: Send også til Myndighet når brevservice støtter slik mottaker
                 //brevData.mottaker = RolleType.MYNDIGHET;
                 //dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
 
-                // Gjenbruker A1 sine brevdata, da disse er ett supersett av de
-                // ordinære brevdata innvilgelsesbrev trenger.
                 dokumentService.produserDokument(behandling.getId(), INNVILGELSE_YRKESAKTIV, brevData);
                 log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
+                prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
+            } else {
+                log.warn("Innvilgelsesbrev kan ikke sendes for behandling {} i "
+                        + "prosessinstansen {}.",
+                        behandling.getId(), prosessinstans.getId());
+                prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
             }
-            prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
         } else {
             String feilmelding = "Ukjent prosess type: " + prosessType;
             log.error("{}: {}", prosessinstans.getId(), feilmelding);

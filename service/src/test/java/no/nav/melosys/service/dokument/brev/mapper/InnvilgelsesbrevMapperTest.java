@@ -1,10 +1,8 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
@@ -12,21 +10,30 @@ import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
 import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.Gateadresse;
+import no.nav.melosys.domain.dokument.person.KjoennsType;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+
 import org.junit.Test;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
@@ -100,14 +107,40 @@ public class InnvilgelsesbrevMapperTest {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = LagMelosysNAVFelles();
         BrevDataA1 brevdata = new BrevDataA1();
+        Virksomhet virksomhet = new Virksomhet("Virker ikke", "123456789", lagStrukturertAdresse());
+        brevdata.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet, virksomhet));
+        brevdata.bostedsadresse = lagBostedsadresse();
+        brevdata.yrkesgruppe = YrkesgruppeType.FLYENDE_PERSONELL;
+        brevdata.selvstendigeForetak = Collections.emptySet();
+        brevdata.utenlandskeVirksomheter = Collections.emptyList();
+        SoeknadDokument søknad = new SoeknadDokument();
+        brevdata.søknad = søknad;
         BrevDataVedlegg brevVedlegg = new BrevDataVedlegg("SAKSBEHANDLER");
         brevVedlegg.brevDataA1 = brevdata;
-        Virksomhet virksomhet = new Virksomhet("Virker ikke", "123456789", null);
-        brevdata.norskeVirksomheter = Collections.singletonList(virksomhet);
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevVedlegg);
         // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
         // grundig mot forventninger.
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
+    }
+
+    private static Bostedsadresse lagBostedsadresse() {
+        Bostedsadresse adresse = new Bostedsadresse();
+        Gateadresse gateadresse = new Gateadresse();
+        gateadresse.setGatenavn("Gate");
+        adresse.setGateadresse(gateadresse);
+        adresse.setPostnr("1234");
+        adresse.setPoststed("Sted");
+        adresse.setLand(new Land(Land.BULGARIA));
+        return adresse;
+    }
+
+    private static StrukturertAdresse lagStrukturertAdresse() {
+        StrukturertAdresse vadr = new StrukturertAdresse();
+        vadr.gatenavn = "Gate";
+        vadr.landKode = Land.BULGARIA;
+        vadr.poststed = "Sted";
+        vadr.postnummer = "4321";
+        return vadr;
     }
 
     private static Behandlingsresultat lagBehandlingsresultat() {
@@ -141,6 +174,7 @@ public class InnvilgelsesbrevMapperTest {
         // periode.setFom(LocalDate.now());
         periode.setFom(fom);
         periode.setTom(LocalDate.now());
+        periode.setLovvalgsland(Landkoder.AT);
         return periode;
     }
 
@@ -163,15 +197,35 @@ public class InnvilgelsesbrevMapperTest {
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
-        Saksopplysning søknad = new Saksopplysning();
-        søknad.setType(SaksopplysningType.SØKNAD);
+        PersonDokument pdok = new PersonDokument();
+        pdok.kjønn = new KjoennsType();
+        pdok.kjønn.setKode(KjoennKode.U.name());
+        pdok.fornavn = "For";
+        pdok.etternavn = "Etter";
+        pdok.statsborgerskap = new Land(Land.BELGIA);
+        pdok.fødselsdato = LocalDate.ofYearDay(1900, 1);
+        Saksopplysning søknad = lagSoeknadssaksopplysning();
+        return lagBehandling(fagsak, new HashSet<>(Arrays.asList(søknad, lagSaksopplysning(SaksopplysningType.PERSONOPPLYSNING, pdok))));
+    }
+
+    private static Saksopplysning lagSoeknadssaksopplysning() {
+        return lagSaksopplysning(SaksopplysningType.SØKNAD, lagSoeknadDokument());
+    }
+
+    private static SoeknadDokument lagSoeknadDokument() {
         SoeknadDokument dokument = new SoeknadDokument();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = new StrukturertAdresse();
         arbeidUtland.adresse.landKode = Landkoder.AT.getKode();
         dokument.arbeidUtland = Arrays.asList(arbeidUtland);
+        return dokument;
+    }
+
+    private static Saksopplysning lagSaksopplysning(SaksopplysningType type, SaksopplysningDokument dokument) {
+        Saksopplysning søknad = new Saksopplysning();
+        søknad.setType(type);
         søknad.setDokument(dokument);
-        return lagBehandling(fagsak, Collections.singleton(søknad));
+        return søknad;
     }
 
     private static Behandling lagBehandling(Fagsak fagsak, Set<Saksopplysning> saksopplysninger) {
