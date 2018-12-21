@@ -14,14 +14,13 @@ import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.service.dokument.DokumentType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.w3c.dom.Element;
 
-import static no.nav.melosys.service.dokument.DokumentType.*;
+import static no.nav.melosys.domain.ProduserbartDokument.*;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -148,7 +147,7 @@ public class BrevDataServiceTest {
 
     @Test
     public void lagMetadataForMangelbrevAngirDokTypeLikHenleggelse() throws Exception {
-        testLagDokumentMetadata(DokumentType.HENLEGGELSE);
+        testLagDokumentMetadata(MELDING_HENLAGT_SAK);
     }
 
     @Test
@@ -159,25 +158,17 @@ public class BrevDataServiceTest {
             .hasNoCause();
     }
 
-    @Test
-    public void lagMetadataAvUkjentDokumenttypeKasterUnntak() throws Exception {
-        Throwable unntak = catchThrowable(() -> service.lagBestillingMetadata(AVSLAG_ARBEIDSGIVER, lagBehandling(), new BrevData()));
-        assertThat(unntak).isInstanceOf(TekniskException.class)
-            .hasMessageContaining("ype ikke støttet")
-            .hasNoCause();
-    }
-
-    private void testLagDokumentMetadata(DokumentType doktype) throws Exception {
+    private void testLagDokumentMetadata(ProduserbartDokument doktype) throws Exception {
         DokumentbestillingMetadata resultat = service.lagBestillingMetadata(doktype, lagBehandling(), lagBrevData());
         DokumentbestillingMetadata forventet = lagDokumentbestillingMetadata(doktype);
         assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
     }
 
-    private static DokumentbestillingMetadata lagDokumentbestillingMetadata(DokumentType doktype) {
+    private static DokumentbestillingMetadata lagDokumentbestillingMetadata(ProduserbartDokument doktype) throws TekniskException {
         DokumentbestillingMetadata forventet = new DokumentbestillingMetadata();
         forventet.bruker = FNR;
         forventet.mottaker = ORGNR;
-        forventet.dokumenttypeID = doktype.getKode();
+        forventet.dokumenttypeID = DokumenttypeIdMapper.hentID(doktype);
         forventet.fagområde = "MED";
         forventet.journalsakID = "123";
         forventet.saksbehandler = "TEST";

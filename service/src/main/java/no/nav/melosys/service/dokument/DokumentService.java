@@ -61,9 +61,6 @@ public class DokumentService {
 
     /**
      * Henter et dokument fra Joark
-     * 
-     * @throws IkkeFunnetException
-     * @throws SikkerhetsbegrensningException
      */
     public byte[] hentDokument(String journalpostID, String dokumentID) throws IkkeFunnetException, SikkerhetsbegrensningException {
         return joarkFasade.hentDokument(journalpostID, dokumentID);
@@ -83,8 +80,6 @@ public class DokumentService {
 
     /**
      * Kaller Doksys for å produsere et dokumentutkast
-     * 
-     * @throws TekniskException
      */
     // Bruker Transactional for å støtte lazy loading gjennom Hibernate,
     // selv om dataene som hentes ut egentlig er read-only. Det ser ut til å
@@ -98,12 +93,11 @@ public class DokumentService {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
         }
 
-        DokumentType dokumentType = lagDokumentType(produserbartDokument);
-        BrevDataBygger bygger = brevDataByggerVelger.hent(dokumentType, brevbestillingDto);
+        BrevDataBygger bygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
         BrevData brevData = bygger.lag(behandling, SubjectHandler.getInstance().getUserID());
 
-        DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(dokumentType, behandling, brevData);
-        Object brevinnhold = brevDataService.lagBrevXML(dokumentType, behandling, brevData);
+        DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(produserbartDokument, behandling, brevData);
+        Object brevinnhold = brevDataService.lagBrevXML(produserbartDokument, behandling, brevData);
 
         return dokSysFasade.produserDokumentutkast(request, brevinnhold);
     }
@@ -118,29 +112,10 @@ public class DokumentService {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
         }
 
-        DokumentType dokumentType = lagDokumentType(produserbartDokument);
-        DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(dokumentType, behandling, brevData);
-        Object brevinnhold = brevDataService.lagBrevXML(dokumentType, behandling, brevData);
+        DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(produserbartDokument, behandling, brevData);
+        Object brevinnhold = brevDataService.lagBrevXML(produserbartDokument, behandling, brevData);
 
         dokSysFasade.produserIkkeredigerbartDokument(request, brevinnhold);
-    }
-
-    private DokumentType lagDokumentType(ProduserbartDokument produserbartDokument) throws TekniskException {
-        if (produserbartDokument == null) {
-            throw new TekniskException("Ingen gyldig produserbartDokument");
-        }
-
-        // NB: Kan ved første øyekast se ut som meningsløs kode, men er en
-        // mapping til en enum i melosys-service med samme navn.
-        // FIXME: Dette er vel symptom på uønsket kodeduplisering? Service-laget
-        // kan vel koples til domene-laget og gjenbruke typen derfra?
-        DokumentType dokumentType;
-        try {
-            dokumentType = DokumentType.valueOf(produserbartDokument.name());
-        } catch (IllegalArgumentException e) {
-            throw new TekniskException("Fant ikke dokumentType for produserbartDokument " + produserbartDokument);
-        }
-        return dokumentType;
     }
 
     @Transactional

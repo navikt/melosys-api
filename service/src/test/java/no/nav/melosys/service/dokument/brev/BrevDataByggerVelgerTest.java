@@ -1,13 +1,11 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.repository.LovvalgsperiodeRepository;
+import no.nav.melosys.domain.ProduserbartDokument;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.DokumentType;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
@@ -25,8 +23,6 @@ import static org.mockito.Mockito.mock;
 @RunWith(MockitoJUnitRunner.class)
 public class BrevDataByggerVelgerTest {
 
-    private SoeknadDokument søknad;
-
     private BrevDataByggerVelger brevDataByggerVelger;
 
     @Before
@@ -36,7 +32,6 @@ public class BrevDataByggerVelgerTest {
         AvklartefaktaService avklartefaktaService = mock(AvklartefaktaService.class);
         LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
-        LovvalgsperiodeRepository lovvalgsperiodeRepository = mock(LovvalgsperiodeRepository.class);
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
 
         brevDataByggerVelger = new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, lovvalgsperiodeService, utenlandskMyndighetRepository, vilkaarsresultatRepository);
@@ -44,16 +39,16 @@ public class BrevDataByggerVelgerTest {
 
     @Test
     @Ignore
-    public void testA1() throws Exception {
-        testHent(DokumentType.ATTEST_A1, BrevDataByggerA1.class);
+    public void testA1() {
+        testHent(ProduserbartDokument.ATTEST_A1, BrevDataByggerA1.class);
     }
 
     @Test
     public final void hentInnvilelsesYrksaktivGirA1Bygger() {
-        testHent(DokumentType.INNVILGELSE_YRKESAKTIV, BrevDataByggerVedlegg.class);
+        testHent(ProduserbartDokument.INNVILGELSE_YRKESAKTIV, BrevDataByggerVedlegg.class);
     }
 
-    private final void testHent(DokumentType type, Class<? extends BrevDataBygger> forventetKlasse) {
+    private void testHent(ProduserbartDokument type, Class<? extends BrevDataBygger> forventetKlasse) {
         BrevDataBygger resultat = brevDataByggerVelger.hent(type);
         assertThat(resultat).isInstanceOf(forventetKlasse);
     }
@@ -61,14 +56,14 @@ public class BrevDataByggerVelgerTest {
     @Test
     public void testMangelbrev() {
         BrevbestillingDto bestilling = new BrevbestillingDto();
-        BrevDataBygger bygger = brevDataByggerVelger.hent(DokumentType.MELDING_MANGLENDE_OPPLYSNINGER, bestilling);
+        BrevDataBygger bygger = brevDataByggerVelger.hent(ProduserbartDokument.MELDING_MANGLENDE_OPPLYSNINGER, bestilling);
         assertThat(bygger).isInstanceOf(BrevDataByggerStandard.class);
     }
 
     @Test
     public void testForvaltningsmelding() {
         BrevbestillingDto bestilling = new BrevbestillingDto();
-        BrevDataBygger bygger = brevDataByggerVelger.hent(DokumentType.MELDING_FORVENTET_SAKSBEHANDLINGSTID, bestilling);
+        BrevDataBygger bygger = brevDataByggerVelger.hent(ProduserbartDokument.MELDING_FORVENTET_SAKSBEHANDLINGSTID, bestilling);
         assertThat(bygger).isInstanceOf(BrevDataByggerStandard.class);
     }
 

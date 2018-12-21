@@ -3,27 +3,27 @@ package no.nav.melosys.service.dokument.brev;
 import java.util.HashMap;
 import java.util.Map;
 
+import no.nav.melosys.domain.ProduserbartDokument;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.dokument.DokumentType;
 import no.nav.melosys.service.dokument.brev.mapper.*;
 
 public class BrevDataMapperRuter {
 
-    static Map<DokumentType, Class<? extends BrevDataMapper>> mappere = new HashMap<>();
+    static Map<ProduserbartDokument, Class<? extends BrevDataMapper>> mappere = new HashMap<>();
 
     static {
-        mappere.put(DokumentType.MELDING_FORVENTET_SAKSBEHANDLINGSTID, ForvaltningsmeldingMapper.class);
-        mappere.put(DokumentType.MELDING_MANGLENDE_OPPLYSNINGER, MangelbrevMapper.class);
-        mappere.put(DokumentType.ATTEST_A1, AttestMapper.class);
-        mappere.put(DokumentType.INNVILGELSE_YRKESAKTIV, InnvilgelsesbrevMapper.class);
+        mappere.put(ProduserbartDokument.MELDING_FORVENTET_SAKSBEHANDLINGSTID, ForvaltningsmeldingMapper.class);
+        mappere.put(ProduserbartDokument.MELDING_MANGLENDE_OPPLYSNINGER, MangelbrevMapper.class);
+        mappere.put(ProduserbartDokument.ATTEST_A1, AttestMapper.class);
+        mappere.put(ProduserbartDokument.INNVILGELSE_YRKESAKTIV, InnvilgelsesbrevMapper.class);
     }
 
     private BrevDataMapperRuter() {
     }
 
-    public static BrevDataMapper brevDataMapper(DokumentType type) throws TekniskException {
+    public static BrevDataMapper brevDataMapper(ProduserbartDokument type) throws TekniskException {
         if (!mappere.containsKey(type)) {
-            throw new TekniskException("DokumentType med kode " + type.getKode() + " støttes ikke");
+            throw new TekniskException("ProduserbartDokument " + type.getKode() + " støttes ikke");
         }
         try {
             return mappere.get(type).newInstance();

@@ -80,7 +80,7 @@ public class RegelmodulService {
             String fastsettLovvalgRequest = lagRequest(behandling);
 
             return ClientBuilder.newClient().target(regelmodulUrl)
-                    .path("/fastsettLovvalg") // FIXME property eller verdi i LovvalgTjeneste?
+                    .path("/fastsettLovvalg")
                     .request(LovvalgTjeneste.MEDIA_TYPE_CONSUMED)
                     .post(Entity.entity(fastsettLovvalgRequest, LovvalgTjeneste.MEDIA_TYPE_CONSUMED), FastsettLovvalgReply.class);
 
