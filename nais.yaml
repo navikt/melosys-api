@@ -77,3 +77,7 @@ fasitResources:
     resourceType: baseurl
   - alias: abac.pdp.endpoint
     resourceType: restservice
+  - alias: EuxBasis_v1
+    resourceType: restservice
+  - alias: security-token-service-token
+    resourceType: restservice
