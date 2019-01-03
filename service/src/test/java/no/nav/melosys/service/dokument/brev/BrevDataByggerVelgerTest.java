@@ -8,6 +8,7 @@ import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntak;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -50,7 +51,7 @@ public class BrevDataByggerVelgerTest {
 
     @Test
     public final void hentBrevDataBygger_medDokumentTypeAnmodningUnntak_girBrevDataByggerA1() {
-        testHent(DokumentType.ORIENTERING_ANMODNING_UNNTAK, BrevDataByggerAnmodningUnntak.class);
+        testHent(ProduserbartDokument.ORIENTERING_ANMODNING_UNNTAK, BrevDataByggerAnmodningUnntak.class);
     }
 
     private final void testHent(ProduserbartDokument type, Class<? extends BrevDataBygger> forventetKlasse) {

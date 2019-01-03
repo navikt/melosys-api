@@ -47,7 +47,7 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         } else {
             fag.setYrkesaktivitet(YrkesaktivitetsKode.LOENNET_ARBEID);
         }
-        fag.setYrkesaktivitet(YrkesaktivitetsKode.FRILANSER);
+
         if (behandling.getFagsak().getType() == Fagsakstype.EU_EØS) {
             // TODO: Respons fra regelmodulen skiller ikke mellom begrunnelser for 883/2004 (MELOSYS-1863)
             fag.setInngangsvilkårBegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
@@ -101,7 +101,6 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
     }
 
     private LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
-        // Kun én lovvalgsperiode i Lev 1
         Lovvalgsperiode lovvalgsperiode = resultat.getLovvalgsperioder()
             .stream().findFirst().orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode funnet for behandlingsresultat"));
 
