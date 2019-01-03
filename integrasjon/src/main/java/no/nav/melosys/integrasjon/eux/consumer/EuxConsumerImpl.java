@@ -1,9 +1,8 @@
 package no.nav.melosys.integrasjon.eux.consumer;
 
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
-import no.nav.melosys.integrasjon.felles.RestSTSClient;
+import no.nav.melosys.integrasjon.felles.RestStsClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -19,106 +18,113 @@ import java.util.List;
 public class EuxConsumerImpl implements EuxConsumer {
 
     private final RestTemplate euxRestTemplate;
+    private final RestStsClient restSTSClient;
 
-    private final RestSTSClient restSTSClient;
+    private final String RINA_SAKSNUMMER = "RINASaksnummer";
+    private final String KORRELASJONS_ID = "KorrelasjonsID";
+    private final String BUC_TYPE = "BuCType";
+    private final String DOKUMENT_ID = "DokumentID";
+
+    private final String BUC_PATH = "/BUC";
+    private final String SED_PATH = "/SED";
 
     @Autowired
-    public EuxConsumerImpl(RestTemplate euxRestTemplate, RestSTSClient restSTSClient) {
+    public EuxConsumerImpl(RestTemplate euxRestTemplate, RestStsClient restSTSClient) {
         this.euxRestTemplate = euxRestTemplate;
         this.restSTSClient = restSTSClient;
     }
 
     @Override
-    public String opprettRinaSak(String bucType) throws TekniskException, FunksjonellException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/BuC")
-                .queryParam("BuCType", bucType);
+    public String opprettRinaSak(String bucType) throws MelosysException {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(BUC_PATH)
+                .queryParam(BUC_TYPE, bucType);
 
         return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(getDefaultHeaders(false)),
                 new ParameterizedTypeReference<String>() {});
     }
 
     @Override
-    public String hentBuc(String rinaSaksnummer) throws FunksjonellException, TekniskException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/BuC")
-                .queryParam("RINASaksnummer", rinaSaksnummer);
+    public String hentBuc(String rinaSaksnummer) throws MelosysException {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(BUC_PATH)
+                .queryParam(RINA_SAKSNUMMER, rinaSaksnummer);
 
         return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
                 new ParameterizedTypeReference<String>() {});
     }
 
     @Override
-    public void opprettSED(String rinaSaksnummer, String euFormat, String korrelasjonsId, Object SED) throws TekniskException, FunksjonellException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/SED")
-                .queryParam("RINASaksnummer", rinaSaksnummer)
+    public void opprettSed(String rinaSaksnummer, String euFormat, String korrelasjonsId, Object sed) throws MelosysException {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(SED_PATH)
+                .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
                 .queryParam("EUFormat", euFormat)
-                .queryParam("KorrelasjonsID", korrelasjonsId);
+                .queryParam(KORRELASJONS_ID, korrelasjonsId);
 
-        exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(SED, getDefaultHeaders(false)),new ParameterizedTypeReference<Void>() {});
+        exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(sed, getDefaultHeaders(false)),new ParameterizedTypeReference<Void>() {});
     }
 
     @Override
-    public String hentSED(String rinaSaksnummer, String dokumentId) throws FunksjonellException, TekniskException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/SED")
-                .queryParam("RINASaksnummer", rinaSaksnummer)
-                .queryParam("DokumentID", dokumentId);
+    public String hentSed(String rinaSaksnummer, String dokumentId) throws MelosysException {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(SED_PATH)
+                .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
+                .queryParam(DOKUMENT_ID, dokumentId);
 
         return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
                 new ParameterizedTypeReference<String>() {});
     }
 
     @Override
-    public void oppdaterSED(String rinaSaksnummer, String korrelasjonsId, String sedType, String dokumentId, Object SED) throws FunksjonellException, TekniskException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/SED")
-                .queryParam("RINASaksnummer", rinaSaksnummer)
+    public void oppdaterSed(String rinaSaksnummer, String korrelasjonsId, String sedType, String dokumentId, Object sed) throws MelosysException {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(SED_PATH)
+                .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
                 .queryParam("SEDType", sedType)
-                .queryParam("KorrelasjonsID", korrelasjonsId);
+                .queryParam(KORRELASJONS_ID, korrelasjonsId);
 
-        exchange(builder.toUriString(), HttpMethod.PUT, new HttpEntity<>(SED, getDefaultHeaders(false)),
+        exchange(builder.toUriString(), HttpMethod.PUT, new HttpEntity<>(sed, getDefaultHeaders(false)),
                 new ParameterizedTypeReference<Void>() {});
     }
 
     @Override
-    public void sendSED(String korrelasjonsId, String dokumentId) throws TekniskException, FunksjonellException {
+    public void sendSed(String korrelasjonsId, String dokumentId) throws MelosysException {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/sendSED")
-                .queryParam("DokumentID", dokumentId)
-                .queryParam("KorrelasjonsID", korrelasjonsId);
+                .queryParam(DOKUMENT_ID, dokumentId)
+                .queryParam(KORRELASJONS_ID, korrelasjonsId);
 
         exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(getDefaultHeaders(false)),
                 new ParameterizedTypeReference<Void>() {});
     }
 
     @Override
-    public List<String> hentTilgjengeligeSEDTyper(String rinaSaksnummer) throws FunksjonellException, TekniskException {
+    public List<String> hentTilgjengeligeSedTyper(String rinaSaksnummer) throws MelosysException {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/TilgjengeligeSEDTyper")
-                .queryParam("RINASaksnummer", rinaSaksnummer);
+                .queryParam(RINA_SAKSNUMMER, rinaSaksnummer);
 
         return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
                 new ParameterizedTypeReference<List<String>>() {});
     }
 
     @Override
-    public String opprettBuCogSED(String bucType, String fagSakNummer, String mottakerId, String filType, String korrelasjonsId) throws TekniskException, FunksjonellException {
+    public String opprettBucOgSed(String bucType, String fagSakNummer, String mottakerId, String filType, String korrelasjonsId) throws MelosysException {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/OpprettBuCogSED")
-                .queryParam("BucType", bucType)
+                .queryParam(BUC_TYPE, bucType)
                 .queryParam("FagSakNummer", fagSakNummer)
                 .queryParam("MottakerID", mottakerId)
                 .queryParam("Filtype", filType)
-                .queryParam("KorrelasjonsID", korrelasjonsId);
+                .queryParam(KORRELASJONS_ID, korrelasjonsId);
 
         return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(getDefaultHeaders(false)),
                 new ParameterizedTypeReference<String>() {});
     }
 
     @Override
-    public List<String> bucTypePerSektor() throws FunksjonellException, TekniskException {
+    public List<String> bucTypePerSektor() throws MelosysException {
         return exchange("/BuCTypePerSektor", HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
                 new ParameterizedTypeReference<List<String>>() {});
     }
 
     @Override
-    public List<String> getInstitusjoner(String bucType, String landkode) throws TekniskException, FunksjonellException {
+    public List<String> getInstitusjoner(String bucType, String landkode) throws MelosysException {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/Institusjoner")
-                .queryParam("BucType", bucType)
+                .queryParam(BUC_TYPE, bucType)
                 .queryParam("landKode", landkode);
 
         return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
@@ -126,27 +132,26 @@ public class EuxConsumerImpl implements EuxConsumer {
     }
 
     @Override
-    public String leggTilVedlegg(String rinaSaksnummer, String dokumentId, String filType) throws TekniskException, FunksjonellException {
+    public String leggTilVedlegg(String rinaSaksnummer, String dokumentId, String filType) throws MelosysException {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/Vedlegg")
-                .queryParam("RINASaksnummer", rinaSaksnummer)
-                .queryParam("DokumentID", dokumentId)
+                .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
+                .queryParam(DOKUMENT_ID, dokumentId)
                 .queryParam("Filtype", filType);
 
-        return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity(getDefaultHeaders(false)),
+        return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(getDefaultHeaders(false)),
                 new ParameterizedTypeReference<String>() {});
     }
 
-    private <T> T exchange(String uri, HttpMethod method, HttpEntity entity, ParameterizedTypeReference<T> responseType) throws FunksjonellException, TekniskException {
+    private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType) throws MelosysException {
         try {
             ResponseEntity<T> response = euxRestTemplate.exchange(uri, method, entity, responseType);
             return response.getBody();
         } catch (RestClientException e) {
-            ExceptionMapper.SpringExTilMelosysEx(e);
-            return null;
+            throw ExceptionMapper.springExTilMelosysEx(e);
         }
     }
 
-    private HttpHeaders getDefaultHeaders(boolean systemAuth) throws FunksjonellException, TekniskException {
+    private HttpHeaders getDefaultHeaders(boolean systemAuth) throws MelosysException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_PLAIN);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -156,7 +161,7 @@ public class EuxConsumerImpl implements EuxConsumer {
 
     // I tilfelle noe automatisering ønskes.
     // Henter token for autentisering ved systembruker, srvmelosys, da eux krever oidc
-    private String getSystemOidcAuth() throws FunksjonellException, TekniskException {
+    private String getSystemOidcAuth() throws MelosysException {
         return "Bearer " + restSTSClient.collectToken();
     }
 

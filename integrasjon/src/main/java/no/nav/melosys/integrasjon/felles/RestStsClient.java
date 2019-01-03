@@ -1,10 +1,11 @@
 package no.nav.melosys.integrasjon.felles;
 
-import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -13,26 +14,30 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
-public class RestSTSClient implements RestConsumer {
+public class RestStsClient implements RestConsumer {
+
+    private static final Logger log = LoggerFactory.getLogger(RestStsClient.class);
 
     private static final Long EXPIRE_TIME_TO_REFRESH = 60L;
+
+    private static final String ACCESS_TOKEN_KEY = "access_token";
+    private static final String EXPIRES_IN_KEY = "expires_in";
 
     private volatile LocalDateTime expiryTime = LocalDateTime.now();
 
     private String token;
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     @Autowired
-    public RestSTSClient(@Value("REST_STS.url") String url) {
-        restTemplate = new RestTemplateBuilder()
-                .rootUri(url)
-                .build();
+    public RestStsClient(RestTemplate stsRestTemplate) {
+        this.restTemplate = stsRestTemplate;
     }
 
-    public synchronized String collectToken() throws FunksjonellException, TekniskException {
+    public synchronized String collectToken() throws MelosysException {
         if (shouldCollectNewToken()) {
             token = generateToken();
         }
@@ -40,19 +45,19 @@ public class RestSTSClient implements RestConsumer {
         return token;
     }
 
-    private String generateToken() throws FunksjonellException, TekniskException {
-
+    private String generateToken() throws MelosysException {
+        log.info("Henter oidc-token fra security-token-service");
         try {
-            ResponseEntity<Token> response = restTemplate.exchange(createUriString(), HttpMethod.GET, createHttpEntity(), Token.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate
+                    .exchange(createUriString(), HttpMethod.GET, createHttpEntity(), new ParameterizedTypeReference<Map<String, Object>>() {});
 
-            Token token = response.getBody();
-            setExpiryTime(token);
+            Map<String, Object> responseBody = response.getBody();
+            setExpiryTime(Long.valueOf(responseBody.get(EXPIRES_IN_KEY).toString()));
 
-            return token.access_token;
+            return (String) responseBody.get(ACCESS_TOKEN_KEY);
 
         } catch (HttpStatusCodeException ex) {
-            ExceptionMapper.SpringExTilMelosysEx(ex);
-            return null;
+            throw ExceptionMapper.springExTilMelosysEx(ex);
         } catch (Exception ex) {
             throw new TekniskException("Ukjent feil ved henting av OIDC-token fra STS", ex);
         }
@@ -62,17 +67,17 @@ public class RestSTSClient implements RestConsumer {
         return LocalDateTime.now().isAfter(expiryTime);
     }
 
-    private void setExpiryTime(Token token) {
-        this.expiryTime = LocalDateTime.now().plus(Duration.ofSeconds(token.expires_in - EXPIRE_TIME_TO_REFRESH));
+    private void setExpiryTime(long expiryTime) {
+        this.expiryTime = LocalDateTime.now().plus(Duration.ofSeconds(expiryTime - EXPIRE_TIME_TO_REFRESH));
     }
 
     private String createUriString() {
-        return UriComponentsBuilder.newInstance()
+        return UriComponentsBuilder.fromPath("/")
                 .queryParam("grant_type", "client_credentials")
                 .queryParam("scope", "openid").toUriString();
     }
 
-    private HttpEntity createHttpEntity() {
+    private HttpEntity<?> createHttpEntity() {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
         headers.add(HttpHeaders.AUTHORIZATION, getAuth());
@@ -83,13 +88,5 @@ public class RestSTSClient implements RestConsumer {
     @Override
     public boolean isSystem() {
         return true;
-    }
-
-    private class Token {
-        private String access_token;
-
-        private String token_type;
-
-        private Long expires_in;
     }
 }

@@ -45,6 +45,8 @@ fasitResources:
     resourceType: webserviceendpoint
   - alias: Dokumentproduksjon_v3
     resourceType: webserviceendpoint
+  - alias: EuxBasis_v1
+    resourceType: restservice
   - alias: InngaaendeJournal_v1
     resourceType: webserviceendpoint
   - alias: Journal_v3
@@ -71,13 +73,11 @@ fasitResources:
     resourceType: webserviceendpoint
   - alias: securityTokenService
     resourceType: baseurl
+  - alias: security-token-service-token
+    resourceType: restservice
   - alias: OpenIdConnectAgent
     resourceType: credential
   - alias: OpenIdConnect
     resourceType: baseurl
   - alias: abac.pdp.endpoint
-    resourceType: restservice
-  - alias: EuxBasis_v1
-    resourceType: restservice
-  - alias: security-token-service-token
     resourceType: restservice

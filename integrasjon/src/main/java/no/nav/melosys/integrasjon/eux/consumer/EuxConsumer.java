@@ -1,33 +1,32 @@
 package no.nav.melosys.integrasjon.eux.consumer;
 
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 
 import java.util.List;
 
 interface EuxConsumer extends RestConsumer {
 
-    List<String> getInstitusjoner(String bucType, String landkode) throws TekniskException, FunksjonellException;
+    List<String> getInstitusjoner(String bucType, String landkode) throws MelosysException;
 
-    String opprettBuCogSED(String bucType, String fagSakNummer, String mottakerId, String filType, String korrelasjonsId) throws TekniskException, FunksjonellException;
+    String opprettBucOgSed(String bucType, String fagSakNummer, String mottakerId, String filType, String korrelasjonsId) throws MelosysException;
 
-    String opprettRinaSak(String bucType) throws TekniskException, FunksjonellException;
+    String opprettRinaSak(String bucType) throws MelosysException;
 
-    void oppdaterSED(String rinaSaksnummer, String korrelasjonsId, String sedType, String dokumentId, Object sed) throws FunksjonellException, TekniskException;
+    void oppdaterSed(String rinaSaksnummer, String korrelasjonsId, String sedType, String dokumentId, Object sed) throws MelosysException;
 
-    void sendSED(String korrelasjonsId, String dokumentId) throws TekniskException, FunksjonellException;
+    void sendSed(String korrelasjonsId, String dokumentId) throws MelosysException;
 
-    void opprettSED(String rinaSaksnummer, String euFormat, String korrelasjonsId, Object SED) throws TekniskException, FunksjonellException;
+    void opprettSed(String rinaSaksnummer, String euFormat, String korrelasjonsId, Object SED) throws MelosysException;
 
-    String leggTilVedlegg(String rinaSaksnummer, String dokumentId, String filType) throws TekniskException, FunksjonellException;
+    String leggTilVedlegg(String rinaSaksnummer, String dokumentId, String filType) throws MelosysException;
 
-    String hentSED(String rinaSaksnummer, String dokumentId) throws FunksjonellException, TekniskException;
+    String hentSed(String rinaSaksnummer, String dokumentId) throws MelosysException;
 
-    String hentBuc(String buc) throws FunksjonellException, TekniskException;
+    String hentBuc(String buc) throws MelosysException;
 
-    List<String> hentTilgjengeligeSEDTyper(String rinaSaksnummer) throws FunksjonellException, TekniskException;
+    List<String> hentTilgjengeligeSedTyper(String rinaSaksnummer) throws MelosysException;
 
-    List<String> bucTypePerSektor() throws FunksjonellException, TekniskException;
+    List<String> bucTypePerSektor() throws MelosysException;
 
 }
