@@ -57,7 +57,6 @@ public class BrevDataByggerA001 extends BrevDatabyggerBase implements BrevDataBy
         Landkoder landkode = lovvalgsperioder.iterator().next().getUnntakFraLovvalgsland();
 
         BrevDataA001 brevData = new BrevDataA001();
-
         brevData.personDokument = this.person;
         brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
         brevData.arbeidsgivendeVirkomsheter = hentAlleNorskeAvklarteVirksomheter();
@@ -113,7 +112,7 @@ public class BrevDataByggerA001 extends BrevDatabyggerBase implements BrevDataBy
 
     private Optional<String> hentUtenlandskIdent(Landkoder landKode) {
         return søknad.personOpplysninger.utenlandskIdent.stream()
-                .filter(utenlandskIdent -> utenlandskIdent.landKode != landKode.getKode())
+                .filter(utenlandskIdent -> !utenlandskIdent.landKode.equals(landKode.getKode()))
                 .map(utenlandskIdent -> utenlandskIdent.ident)
                 .findFirst();
     }

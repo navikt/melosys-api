@@ -40,7 +40,6 @@ public class BrevDataByggerA1 extends BrevDatabyggerBase implements BrevDataBygg
         this.avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
 
         BrevDataA1 brevData = new BrevDataA1();
-
         brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandling.getId());
         brevData.utenlandskeVirksomheter = hentUtenlandskeVirksomheter();
         brevData.norskeVirksomheter = hentAlleNorskeAvklarteVirksomheter();

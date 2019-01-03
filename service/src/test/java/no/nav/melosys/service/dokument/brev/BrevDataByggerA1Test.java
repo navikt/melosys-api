@@ -141,9 +141,6 @@ public class BrevDataByggerA1Test {
     @Test(expected = TekniskException.class)
     public void testForetakiUtlandetSkalKasteException() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         avklarteOrganisasjoner.add(orgnr1);
-
-        ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.orgnr = orgnr1;
         søknad.foretakUtland.clear();
 
         brevDataByggerA1.lag(behandling, saksbehandler);

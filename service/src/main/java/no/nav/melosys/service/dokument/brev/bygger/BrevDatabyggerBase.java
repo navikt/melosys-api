@@ -55,11 +55,12 @@ public abstract class BrevDatabyggerBase {
         List<Arbeidssted> arbeidssteder = hentFysiskearbeidsstederMedNavn(utenlandskVirksomhet.navn);
         arbeidssteder.addAll(hentIkkeFysiskeArbeidssteder());
 
-        if (arbeidssteder.isEmpty()) {
-            // Brevet krever alltid minst et arbeidssted - selv når det ikke er oppgitt i søknad
-            return Arrays.asList(utledArbeidsstedFraVirksomhet(utenlandskVirksomhet));
+        if (!arbeidssteder.isEmpty()) {
+            return arbeidssteder;
         }
-        return arbeidssteder;
+
+        // Brevet krever alltid minst et arbeidssted - selv når det ikke er oppgitt i søknad
+        return Arrays.asList(utledArbeidsstedFraVirksomhet(utenlandskVirksomhet));
     }
 
     protected List<Virksomhet> hentUtenlandskeVirksomheter() {

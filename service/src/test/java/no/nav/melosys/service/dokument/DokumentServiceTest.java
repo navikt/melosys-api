@@ -14,6 +14,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.JuridiskArbeidsgiverNorge;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.*;
@@ -32,13 +33,11 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-
 import org.junit.Test;
 import org.mitre.openid.connect.model.OIDCAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import static no.nav.melosys.domain.avklartefakta.AvklartefaktaType.*;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -169,6 +168,9 @@ public final class DokumentServiceTest {
         behandling.setType(Behandlingstype.KLAGE);
         behandling.setId(BEHANDLINGSID);
         SoeknadDokument dok = new SoeknadDokument();
+        ForetakUtland foretakUtland = new ForetakUtland();
+        foretakUtland.orgnr = "12345678910";
+        dok.foretakUtland.add(foretakUtland);
         dok.juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
         dok.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = Collections.singletonList(ORGNR);
         Saksopplysning søknad = lagSaksopplysning(SaksopplysningType.SØKNAD, dok);
