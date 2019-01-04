@@ -171,7 +171,7 @@ public class A001Mapper {
         for (Arbeidssted arbeidssted : arbeidssteder) {
 
             ArbeidsstedType arbeidsstedBrev;
-            if (arbeidssted.adresse != null) {
+            if (arbeidssted.erFysisk()) {
                 arbeidsstedBrev = mapFysiskArbeidssted(arbeidssted);
             }
             else {
