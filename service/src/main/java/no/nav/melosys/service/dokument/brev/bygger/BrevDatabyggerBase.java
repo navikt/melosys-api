@@ -24,8 +24,8 @@ public abstract class BrevDatabyggerBase {
 
     protected Set<String> avklarteOrganisasjoner;
 
-    protected BrevDatabyggerBase(KodeverkService kodeverkService1) {
-        this.kodeverkService = kodeverkService1;
+    protected BrevDatabyggerBase(KodeverkService kodeverkService) {
+        this.kodeverkService = kodeverkService;
     }
 
     protected Bostedsadresse hentBostedsadresse() {
