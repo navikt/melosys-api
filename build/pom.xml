@@ -80,10 +80,6 @@
                         </exclude>
                         <exclude>
                             <groupId>no.nav.melosys</groupId>
-                            <artifactId>melosys-web-local</artifactId>
-                        </exclude>
-                        <exclude>
-                            <groupId>no.nav.melosys</groupId>
                             <artifactId>melosys-frontendlogger</artifactId>
                         </exclude>
                     </excludes>
