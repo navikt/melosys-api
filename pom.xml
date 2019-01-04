@@ -95,6 +95,8 @@
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.13</swagger.version>
 
+        <pac4j.version>3.4.0</pac4j.version>
+
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det 
@@ -511,6 +513,21 @@
                         <artifactId>android-json</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.pac4j</groupId>
+                <artifactId>spring-security-pac4j</artifactId>
+                <version>4.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.pac4j</groupId>
+                <artifactId>pac4j-oidc</artifactId>
+                <version>${pac4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.pac4j</groupId>
+                <artifactId>pac4j-core</artifactId>
+                <version>${pac4j.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

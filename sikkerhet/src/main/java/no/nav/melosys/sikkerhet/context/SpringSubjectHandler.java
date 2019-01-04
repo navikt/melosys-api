@@ -1,31 +1,35 @@
 package no.nav.melosys.sikkerhet.context;
 
-import org.mitre.openid.connect.model.OIDCAuthenticationToken;
+
+import org.pac4j.oidc.profile.OidcProfile;
+import org.pac4j.springframework.security.authentication.Pac4jAuthentication;
+import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Optional;
 
 public class SpringSubjectHandler extends SubjectHandler {
 
     @Override
     public String getOidcTokenString() {
-        OIDCAuthenticationToken auth = (OIDCAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth != null) {
-            return auth.getIdToken().getParsedString();
-        } else {
-            return null;
-        }
+        return oidcProfile().map(OidcProfile::getIdTokenString).orElse(null);
     }
 
     @Override
     public String getUserID() {
-        OIDCAuthenticationToken auth = (OIDCAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth != null) {
-            // BrukerID er case sensitive men Gosys bruker store bokstaver.
-            return auth.getSub().toUpperCase();
-        } else {
-            return null;
-        }
+        return oidcProfile()
+            .map(OidcProfile::getSubject)
+            .map(s -> s.toUpperCase())
+            .orElse(null);
     }
 
+    private static Optional<OidcProfile> oidcProfile() {
+        return authentication()
+            .map(Pac4jAuthentication::getProfile)
+            .map(commonProfile -> OidcProfile.class.cast(commonProfile));
+    }
+
+    private static Optional<Pac4jAuthenticationToken> authentication() {
+        return Optional.ofNullable((Pac4jAuthenticationToken) SecurityContextHolder.getContext().getAuthentication());
+    }
 }
