@@ -2,8 +2,9 @@ package no.nav.melosys.integrasjon.eux.consumer;
 
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
-import no.nav.melosys.integrasjon.felles.RestStsClient;
+import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -29,8 +30,8 @@ public class EuxConsumerImpl implements EuxConsumer {
     private final String SED_PATH = "/SED";
 
     @Autowired
-    public EuxConsumerImpl(RestTemplate euxRestTemplate, RestStsClient restSTSClient) {
-        this.euxRestTemplate = euxRestTemplate;
+    public EuxConsumerImpl(@Qualifier("euxRestTemplate") RestTemplate restTemplate, RestStsClient restSTSClient) {
+        this.euxRestTemplate = restTemplate;
         this.restSTSClient = restSTSClient;
     }
 

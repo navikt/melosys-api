@@ -1,10 +1,13 @@
-package no.nav.melosys.integrasjon.felles;
+package no.nav.melosys.integrasjon.reststs;
 
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.felles.ExceptionMapper;
+import no.nav.melosys.integrasjon.felles.RestConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -33,8 +36,8 @@ public class RestStsClient implements RestConsumer {
     private final RestTemplate restTemplate;
 
     @Autowired
-    public RestStsClient(RestTemplate stsRestTemplate) {
-        this.restTemplate = stsRestTemplate;
+    public RestStsClient(@Qualifier("stsRestTemplate") RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     public synchronized String collectToken() throws MelosysException {

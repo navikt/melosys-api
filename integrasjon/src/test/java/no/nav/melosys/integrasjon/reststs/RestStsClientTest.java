@@ -1,6 +1,7 @@
-package no.nav.melosys.integrasjon.felles;
+package no.nav.melosys.integrasjon.reststs;
 
 import com.google.common.collect.Maps;
+import no.nav.melosys.integrasjon.felles.EnvironmentHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
