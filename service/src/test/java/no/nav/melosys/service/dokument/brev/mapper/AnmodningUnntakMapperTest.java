@@ -11,7 +11,6 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.begrunnelse.Artikkel12_1;
 import no.nav.melosys.domain.begrunnelse.Artikkel16_1_Anmodning;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
@@ -72,6 +71,10 @@ public class AnmodningUnntakMapperTest {
         begrunnelse12_1.setKode(Artikkel12_1.IKKE_VESENTLIG_VIRKSOMHET.getKode());
         vilkaarsresultat12_1.setBegrunnelser(Collections.singleton(begrunnelse12_1));
         resultat.getVilkaarsresultater().add(vilkaarsresultat12_1);
+
+        Vilkaarsresultat vilkaarsresultat12_2 = new Vilkaarsresultat();
+        vilkaarsresultat12_2.setVilkaar(VilkaarType.FO_883_2004_ART12_2);
+        resultat.getVilkaarsresultater().add(vilkaarsresultat12_2);
 
         Vilkaarsresultat vilkaarsresultat16_1 = new Vilkaarsresultat();
         vilkaarsresultat16_1.setVilkaar(VilkaarType.FO_883_2004_ART16_1);

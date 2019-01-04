@@ -1,13 +1,16 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000081.*;
-import no.nav.dok.melosysbrev._000081.ObjectFactory;
-import no.nav.dok.melosysbrev.felles.melosys_felles.*;
+import no.nav.dok.melosysbrev.felles.melosys_felles.Art161AnmodningBegrunnelseKode;
+import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
+import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.begrunnelse.*;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -18,6 +21,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
 import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
+import static no.nav.melosys.domain.VilkaarType.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 public class AnmodningUnntakMapper implements BrevDataMapper {
@@ -56,48 +60,37 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         }
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat));
 
-        Art121BegrunnelseType art121BegrunnelseType = lagArt121BegrunnelseType();
-        Art121ForutgaaendeBegrunnelseType art121ForutgaaendeBegrunnelseType = lagArt121ForutgaaendeBegrunnelseType();
-        Art122BegrunnelseType art122BegrunnelseType = lagArt122BegrunnelseType();
-        Art122NormalVirksomhetBegrunnelseType art122NormalVirksomhetBegrunnelseType = lagArt122NormalVirksomhetBegrunnelseType();
+        Set<VilkaarBegrunnelse> art121Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_1);
+        fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
 
-        for (Vilkaarsresultat vilkaarsresultat : resultat.getVilkaarsresultater()) {
-            switch (vilkaarsresultat.getVilkaar()) {
-                case FO_883_2004_ART12_1:
-                    art121BegrunnelseType = mapArt121BegrunnelseType(art121BegrunnelseType, vilkaarsresultat.getBegrunnelser());
-                    break;
-                case ART12_1_FORUTGÅENDE_MEDLEMSKAP:
-                    art121ForutgaaendeBegrunnelseType = mapArt121ForutgaaendeBegrunnelseType(art121ForutgaaendeBegrunnelseType, vilkaarsresultat.getBegrunnelser());
-                    break;
-                case FO_883_2004_ART12_2:
-                    art122BegrunnelseType = mapArt122BegrunnelseType(art122BegrunnelseType, vilkaarsresultat.getBegrunnelser());
-                    break;
-                case ART12_2_NORMALT_DRIVER_VIRKSOMHET:
-                    art122NormalVirksomhetBegrunnelseType = mapArt122NormalVirksomhetBegrunnelseType(art122NormalVirksomhetBegrunnelseType, vilkaarsresultat.getBegrunnelser());
-                    break;
-                case FO_883_2004_ART16_1:
-                    VilkaarBegrunnelse vilkaarBegrunnelse = vilkaarsresultat.getBegrunnelser().stream()
-                        .findFirst().orElseThrow(() -> new TekniskException("Ingen begunnelse funnet for Artikkel 16.1"));
-                    fag.setArt161AnmodningBegrunnelse(Art161AnmodningBegrunnelseKode.valueOf(vilkaarBegrunnelse.getKode()));
-                    break;
-            }
-        }
-        if (fag.getArt161AnmodningBegrunnelse() == null) {
-            throw new TekniskException("Ingen begrunnelse satt for Artikkel 16.1");
-        }
+        Set<VilkaarBegrunnelse> art121ForutgåendeBegrunnelser = hentVilkaarbegrunnelser(resultat, ART12_1_FORUTGÅENDE_MEDLEMSKAP);
+        fag.setArt121ForutgåendeBegrunnelse(mapArt121ForutgaaendeBegrunnelseType(art121ForutgåendeBegrunnelser));
+
+        Set<VilkaarBegrunnelse> art122Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_2);
+        fag.setArt122Begrunnelse(mapArt122BegrunnelseType(art122Begrunnelser));
+
+        Set<VilkaarBegrunnelse> art122NormalVirksomhetBegrunnelse = hentVilkaarbegrunnelser(resultat, ART12_2_NORMALT_DRIVER_VIRKSOMHET);
+        fag.setArt122NormalVirksomhetBegrunnelse(mapArt122NormalVirksomhetBegrunnelseType(art122NormalVirksomhetBegrunnelse));
+
+        Set<VilkaarBegrunnelse> art161AnmodningBegrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART16_1);
+        VilkaarBegrunnelse vilkaarBegrunnelse = art161AnmodningBegrunnelser.stream()
+                        .findFirst().orElseThrow(() -> new TekniskException("Ingen begrunnelse funnet for Artikkel 16.1"));
+        fag.setArt161AnmodningBegrunnelse(Art161AnmodningBegrunnelseKode.valueOf(vilkaarBegrunnelse.getKode()));
+
         if (fag.getArt161AnmodningBegrunnelse() == Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN) {
             if (StringUtils.isEmpty(brevData.fritekst)) {
                 throw new TekniskException("Ingen fritekstbegrunnelse satt for Artikkel 16.1");
             }
             fag.setAnmodningFritekst(brevData.fritekst);
         }
-
-        fag.setArt121Begrunnelse(art121BegrunnelseType);
-        fag.setArt121ForutgåendeBegrunnelse(art121ForutgaaendeBegrunnelseType);
-        fag.setArt122Begrunnelse(art122BegrunnelseType);
-        fag.setArt122NormalVirksomhetBegrunnelse(art122NormalVirksomhetBegrunnelseType);
-
         return fag;
+    }
+
+    private Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Behandlingsresultat resultat, VilkaarType vilkaarType) {
+        return resultat.getVilkaarsresultater().stream()
+                .filter(vr -> vr.getVilkaar() == vilkaarType)
+                .flatMap(vr -> vr.getBegrunnelser().stream())
+                .collect(Collectors.toSet());
     }
 
     private LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
@@ -126,7 +119,8 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         return art121BegrunnelseType;
     }
 
-    private Art121BegrunnelseType mapArt121BegrunnelseType(Art121BegrunnelseType art121BegrunnelseType, Set<VilkaarBegrunnelse> begrunnelser) {
+    private Art121BegrunnelseType mapArt121BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) {
+        Art121BegrunnelseType art121BegrunnelseType = lagArt121BegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
             Artikkel12_1 artikkel12_1 = Artikkel12_1.valueOf(vilkaarBegrunnelse.getKode());
             switch (artikkel12_1) {
@@ -161,7 +155,9 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         return art121ForutgaaendeBegrunnelseType;
     }
 
-    private Art121ForutgaaendeBegrunnelseType mapArt121ForutgaaendeBegrunnelseType(Art121ForutgaaendeBegrunnelseType art121ForutgaaendeBegrunnelseType, Set<VilkaarBegrunnelse> begrunnelser) {
+    private Art121ForutgaaendeBegrunnelseType mapArt121ForutgaaendeBegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) {
+        Art121ForutgaaendeBegrunnelseType art121ForutgaaendeBegrunnelseType = lagArt121ForutgaaendeBegrunnelseType();
+
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
             ForutgaaendeMedlemskap forutgaaendeMedlemskap = ForutgaaendeMedlemskap.valueOf(vilkaarBegrunnelse.getKode());
             switch (forutgaaendeMedlemskap) {
@@ -187,7 +183,8 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         return art122BegrunnelseType;
     }
 
-    private Art122BegrunnelseType mapArt122BegrunnelseType(Art122BegrunnelseType art122BegrunnelseType, Set<VilkaarBegrunnelse> begrunnelser) {
+    private Art122BegrunnelseType mapArt122BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) {
+        Art122BegrunnelseType art122BegrunnelseType = lagArt122BegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
             Artikkel12_2 artikkel12_2 = Artikkel12_2.valueOf(vilkaarBegrunnelse.getKode());
             switch (artikkel12_2) {
@@ -213,7 +210,8 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
         return art122NormalVirksomhetBegrunnelseType;
     }
 
-    private Art122NormalVirksomhetBegrunnelseType mapArt122NormalVirksomhetBegrunnelseType(Art122NormalVirksomhetBegrunnelseType art122NormalVirksomhetBegrunnelseType, Set<VilkaarBegrunnelse> begrunnelser) {
+    private Art122NormalVirksomhetBegrunnelseType mapArt122NormalVirksomhetBegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) {
+        Art122NormalVirksomhetBegrunnelseType art122NormalVirksomhetBegrunnelseType = lagArt122NormalVirksomhetBegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
             NormaltDriverVirksomhet normaltDriverVirksomhet = NormaltDriverVirksomhet.valueOf(vilkaarBegrunnelse.getKode());
             switch (normaltDriverVirksomhet) {
