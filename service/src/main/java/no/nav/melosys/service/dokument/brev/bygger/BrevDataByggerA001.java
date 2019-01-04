@@ -143,7 +143,9 @@ public class BrevDataByggerA001 extends BrevDatabyggerBase implements BrevDataBy
     private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {
         ArbeidsforholdDokument arbeidsforholdDok = SaksopplysningerUtils.hentArbeidsforholdDokument(behandling);
 
-        // Lev1: Kun en avklart arbeidsgiver
+        if (avklarteOrganisasjoner.size() != 1) {
+            throw new TekniskException("Kan ikke avgjøre ansettelsesperiode ved flere arbeidsforhold");
+        }
         Stream<Periode> avklarteAnsettelsesPerioder =
                 arbeidsforholdDok.hentAnsettelsesperioder(avklarteOrganisasjoner).stream();
 
