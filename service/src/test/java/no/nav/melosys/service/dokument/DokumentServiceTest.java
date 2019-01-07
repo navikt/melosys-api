@@ -17,7 +17,10 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.JuridiskArbeidsgiverNorge;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.doksys.DokSysFasade;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -34,7 +37,8 @@ import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Test;
-import org.mitre.openid.connect.model.OIDCAuthenticationToken;
+import org.pac4j.oidc.profile.OidcProfile;
+import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import static no.nav.melosys.domain.avklartefakta.AvklartefaktaType.*;
@@ -68,8 +72,9 @@ public final class DokumentServiceTest {
 
     @Test
     public final void produserInnvilgelsesbrevutkastFunker() throws Exception {
-        OIDCAuthenticationToken auth = new OIDCAuthenticationToken("bruker ikke",
-                "Issuer Not", null, null, null, null, null);
+        OidcProfile oidcProfile = mock(OidcProfile.class);
+        when(oidcProfile.getSubject()).thenReturn("testbruker");
+        Pac4jAuthenticationToken auth = new Pac4jAuthenticationToken(Collections.singletonList(oidcProfile));
         SecurityContextHolder.getContext().setAuthentication(auth);
         BrevbestillingDto brevbestilling = lagBrevBestillingDto(RolleType.BRUKER);
         byte[] resultat = instans.produserUtkast(BEHANDLINGSID, ProduserbartDokument.INNVILGELSE_YRKESAKTIV, brevbestilling);
