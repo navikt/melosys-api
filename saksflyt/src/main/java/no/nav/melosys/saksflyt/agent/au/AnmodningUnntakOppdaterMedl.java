@@ -1,11 +1,10 @@
-package no.nav.melosys.saksflyt.agent.iv;
+package no.nav.melosys.saksflyt.agent.au;
 
 import java.util.Map;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
@@ -20,20 +19,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
-import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
+import static no.nav.melosys.domain.ProsessSteg.AU_OPPDATER_MEDL;
+import static no.nav.melosys.domain.ProsessSteg.AU_SEND_BREV;
 
 /**
  * Oppdaterer medlemskap periode i MEDL.
  *
  * Transisjoner:
- * ProsessType.IVERKSETT_VEDTAK
- *  IV_OPPDATER_MEDL -> IV_SEND_BREV eller FEILET_MASKINELT hvis feil
+ * ProsessType.ANMODNING_UNNTAK
+ *  AU_OPPDATER_MEDL -> AU_SEND_BREV eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class OppdaterMedl extends AbstraktStegBehandler {
+public class AnmodningUnntakOppdaterMedl extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
+    private static final Logger log = LoggerFactory.getLogger(AnmodningUnntakOppdaterMedl.class);
 
     private final MedlFasade medlFasade;
     private final TpsFasade tpsFasade;
@@ -42,12 +41,12 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
 
     @Autowired
-    public OppdaterMedl(MedlFasade medlFasade,
-                        TpsFasade tpsFasade,
-                        BehandlingsresultatRepository behandlingsresultatRepository,
-                        LovvalgsperiodeRepository lovvalgsperiodeRepository) {
+    public AnmodningUnntakOppdaterMedl(MedlFasade medlFasade,
+                                       TpsFasade tpsFasade,
+                                       BehandlingsresultatRepository behandlingsresultatRepository,
+                                       LovvalgsperiodeRepository lovvalgsperiodeRepository) {
 
-        log.info("IverksetteVedtakOppdaterMEDL initialisert");
+        log.info("AnmodningUnntakOppdaterMEDL initialisert");
         this.medlFasade = medlFasade;
         this.tpsFasade = tpsFasade;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
@@ -56,7 +55,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return IV_OPPDATER_MEDL;
+        return AU_OPPDATER_MEDL;
     }
 
     @Override
@@ -74,30 +73,16 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandling.getId());
 
-        if (behandlingsresultat == null ) {
-            throw new IkkeFunnetException("Opprettelse av periode i MEDL feilet fordi behandlingsresultat med behandling ID " + behandling.getId() + " ikke finnes.");
-        }
-
         Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
-        if (lovvalgsperioder.isEmpty()) {
-            throw new FunksjonellException("Lovvalgsperiode mangler for behandling " + behandling.getId());
+        if (lovvalgsperioder.size() != 1) {
+            throw new FunksjonellException("Det er enten ingen eller for mange Lovvalgsperioder for behandling " + behandling.getId());
         }
 
         Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
+        Long medlPeriodeID = medlFasade.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode);
+        lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
 
-        if (erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)) {
-            Long medlPeriodeID = medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode);
-            lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
-        } else {
-            throw new FunksjonellException("Opprettelse av Periode i MEDL støttes ikke for behandlingsresultat type "
-                + behandlingsresultat.getType() + " og InnvilgelsesResultat type" + lovvalgsperiode.getInnvilgelsesresultat().getKode());
-        }
-
-        prosessinstans.setSteg(IV_SEND_BREV);
-    }
-
-    public boolean erPeriodeEndelig(Behandlingsresultat behandlingsresultat, Lovvalgsperiode lovvalgsperiode) {
-        return behandlingsresultat.getType() == BehandlingsresultatType.FASTSATT_LOVVALGSLAND && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET;
+        prosessinstans.setSteg(AU_SEND_BREV);
     }
 
     private void lagreMedlPeriodeId(Long medlPeriodeID, Lovvalgsperiode lovvalgsperiode, long behandlingID) throws FunksjonellException {

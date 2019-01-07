@@ -40,8 +40,38 @@ public class VedtakService {
         this.oppgaveService = oppgaveService;
     }
 
+    public void anmodningOmUnntak(long behandlingID) throws IkkeFunnetException {
+        log.info("Anmodning om unntak for behandling: " + behandlingID);
+
+        Behandling behandling = behandlingRepository.findOne(behandlingID);
+        if (behandling == null) {
+            throw new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + " ikke finnes.");
+        }
+        lagreProsessinstans(opprettProsessinstansAnmodningUnntak(), behandling);
+    }
+
+    private Prosessinstans opprettProsessinstansAnmodningUnntak() {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.ANMODNING_UNNTAK);
+        prosessinstans.setSteg(ProsessSteg.AU_VALIDERING);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.ANMODNING_OM_UNNTAK);
+        return prosessinstans;
+    }
+
+    private void lagreProsessinstans(Prosessinstans prosessinstans, Behandling behandling) {
+        LocalDateTime nå = LocalDateTime.now();
+        prosessinstans.setEndretDato(nå);
+        prosessinstans.setRegistrertDato(nå);
+
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
+
+        prosessinstansRepo.save(prosessinstans);
+        binge.leggTil(prosessinstans);
+    }
+
     @Transactional
-    public void fattVedtak(long behandlingID, String behandlingsresultatType) throws FunksjonellException, TekniskException {
+    public void fattVedtak(long behandlingID, BehandlingsresultatType behandlingsresultatType) throws FunksjonellException, TekniskException {
         log.info("Fatter vedtak for behandling: " + behandlingID);
 
         Behandling behandling = behandlingRepository.findOne(behandlingID);
@@ -49,25 +79,18 @@ public class VedtakService {
             throw new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + " ikke finnes.");
         }
 
-        opprettProsessinstansIverksettVedtak(behandlingsresultatType, behandling);
+        Prosessinstans prosessinstans = opprettProsessinstansIverksettVedtak(behandlingsresultatType);
+        lagreProsessinstans(prosessinstans, behandling);
 
         avsluttBehandlingsoppgave(behandling.getFagsak().getSaksnummer());
     }
 
-    private void opprettProsessinstansIverksettVedtak(String behandlingsresultatType, Behandling behandling) {
+    private Prosessinstans opprettProsessinstansIverksettVedtak(BehandlingsresultatType behandlingsresultatType) {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
         prosessinstans.setSteg(ProsessSteg.IV_VALIDERING);
-        LocalDateTime nå = LocalDateTime.now();
-        prosessinstans.setEndretDato(nå);
-        prosessinstans.setRegistrertDato(nå);
-
-        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType);
-
-        prosessinstansRepo.save(prosessinstans);
-        binge.leggTil(prosessinstans);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
+        return prosessinstans;
     }
 
     private void avsluttBehandlingsoppgave(String fagSaksnummer) throws FunksjonellException, TekniskException {

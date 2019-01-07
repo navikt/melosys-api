@@ -24,6 +24,7 @@ CREATE TABLE prosess_type (
 );
 
 -- Alfabetisk rekkefølge
+INSERT INTO prosess_type (kode, navn) VALUES ('ANMODNING_UNNTAK', 'Anmodning om unntak');
 INSERT INTO prosess_type (kode, navn) VALUES ('IVERKSETT_VEDTAK', 'Iverksette vedtak');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_KNYTT', 'Journalføring på eksisterende sak');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_NY_SAK', 'Journalføring med ny sak og søknad');
@@ -61,6 +62,11 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('OPPFRISK_SAKSOPPLYSNINGER', 'Oppf
 INSERT INTO prosess_steg (kode, navn) VALUES ('SEND_FORVALTNINGSMELDING', 'Send forvaltningsmelding til søker');
 INSERT INTO prosess_steg (kode, navn) VALUES ('FEILET_MASKINELT', 'Feilet maskinelt');
 INSERT INTO prosess_steg (kode, navn) VALUES ('FATTET_VEDTAK', 'Saksbehandler har fattet vedtak i Melosys');
+
+INSERT INTO prosess_steg (kode, navn) VALUES ('AU_VALIDERING', 'Validering av data for anmodning om unntak');
+INSERT INTO prosess_steg (kode, navn) VALUES ('AU_OPPDATER_RESULTAT', 'Oppdatering av behandlingsresultat for anmodning om unntak');
+INSERT INTO prosess_steg (kode, navn) VALUES ('AU_OPPDATER_MEDL', 'Oppdatering av medlemskap med anmodning om unntak');
+INSERT INTO prosess_steg (kode, navn) VALUES ('AU_SEND_BREV', 'Send orienteringsbrev og A001 for anmodning om unntak');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_VALIDERING', 'Validerer iverksett vedtak');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_RESULTAT', 'Oppdatering av behandlingsresultat');

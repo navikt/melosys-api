@@ -63,7 +63,7 @@ public class VedtakServiceTest {
         oppgave.setOppgaveId("1");
         when(oppgaveService.hentOppgaveMedFagSaksnummer(anyString())).thenReturn(oppgave);
 
-        vedtakService.fattVedtak(behandlingID, BehandlingsresultatType.FASTSATT_LOVVALGSLAND.toString());
+        vedtakService.fattVedtak(behandlingID, BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
 
         verify(behandlingRepository, times(1)).findOne(behandlingID);
         verify(prosessinstansRepo, times(1)).save(prosessinstansArgumentCaptor.capture());
@@ -76,6 +76,6 @@ public class VedtakServiceTest {
     @Test(expected = IkkeFunnetException.class)
     public void fattVedtak_behandlingIkkeFunnet() throws FunksjonellException, TekniskException {
         long behandlingID = 0L;
-        vedtakService.fattVedtak(behandlingID, BehandlingsresultatType.FASTSATT_LOVVALGSLAND.toString());
+        vedtakService.fattVedtak(behandlingID, BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
     }
 }
