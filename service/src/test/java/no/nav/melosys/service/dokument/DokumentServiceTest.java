@@ -1,5 +1,8 @@
 package no.nav.melosys.service.dokument;
 
+import java.time.LocalDate;
+import java.util.*;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -32,14 +35,10 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.pac4j.oidc.profile.OidcProfile;
 import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import java.time.LocalDate;
-import java.util.*;
 
 import static no.nav.melosys.domain.avklartefakta.AvklartefaktaType.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,9 +70,9 @@ public final class DokumentServiceTest {
     }
 
     @Test
-    @Ignore("[org.xml.sax.SAXParseException; lineNumber: 0; columnNumber: 0; cvc-complex-type.2.4.b: The content of element 'ns1:navAnsatt' is not complete. One of '{\"http://nav.no/dok/brevdata/felles/v1/NAVFelles\":ansattId}' is expected.]")
     public final void produserInnvilgelsesbrevutkastFunker() throws Exception {
-        OidcProfile oidcProfile = new OidcProfile();
+        OidcProfile oidcProfile = mock(OidcProfile.class);
+        when(oidcProfile.getSubject()).thenReturn("testbruker");
         Pac4jAuthenticationToken auth = new Pac4jAuthenticationToken(Collections.singletonList(oidcProfile));
         SecurityContextHolder.getContext().setAuthentication(auth);
         BrevbestillingDto brevbestilling = lagBrevBestillingDto(RolleType.BRUKER);

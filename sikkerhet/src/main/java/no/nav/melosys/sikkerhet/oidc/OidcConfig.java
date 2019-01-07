@@ -20,8 +20,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-@EnableWebSecurity
 @Configuration
+@EnableWebSecurity
 public class OidcConfig {
     private static final String OIDC_CLIENT_NAME = "OidcClient";
     private static final String CALLBACKURI = "/openid_connect_login";
