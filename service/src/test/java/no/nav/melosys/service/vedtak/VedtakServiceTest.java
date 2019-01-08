@@ -40,18 +40,17 @@ public class VedtakServiceTest {
 
     private VedtakService vedtakService;
 
+    private long behandlingID;
+
     @Captor
     private ArgumentCaptor<Prosessinstans> prosessinstansArgumentCaptor;
 
     @Before
-    public void setUp() {
+    public void setUp() throws FunksjonellException, TekniskException {
         vedtakService = new VedtakService(behandlingRepository, binge, prosessinstansRepo, oppgaveService);
         SpringSubjectHandler.set(new TestSubjectHandler());
-    }
 
-    @Test
-    public void fattVedtak() throws FunksjonellException, TekniskException {
-        Long behandlingID = 1L;
+        behandlingID = 1L;
         Behandling behandling = new Behandling();
 
         Fagsak fagsak = new Fagsak();
@@ -59,6 +58,10 @@ public class VedtakServiceTest {
         behandling.setFagsak(fagsak);
 
         when(behandlingRepository.findOne(behandlingID)).thenReturn(behandling);
+    }
+
+    @Test
+    public void fattVedtak() throws FunksjonellException, TekniskException {
         Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId("1");
         when(oppgaveService.hentOppgaveMedFagSaksnummer(anyString())).thenReturn(oppgave);
@@ -71,6 +74,18 @@ public class VedtakServiceTest {
         assertThat(prosessinstansArgumentCaptor.getValue().getSteg()).isEqualTo(ProsessSteg.IV_VALIDERING);
         verify(binge, times(1)).leggTil(any());
         verify(oppgaveService, times(1)).ferdigstillOppgave(oppgave.getOppgaveId());
+    }
+
+    @Test
+    public void anmodningOmUnntak() throws IkkeFunnetException {
+        vedtakService.anmodningOmUnntak(behandlingID);
+
+        verify(behandlingRepository, times(1)).findOne(behandlingID);
+        verify(prosessinstansRepo, times(1)).save(prosessinstansArgumentCaptor.capture());
+        assertThat(prosessinstansArgumentCaptor.getValue().getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK);
+        assertThat(prosessinstansArgumentCaptor.getValue().getSteg()).isEqualTo(ProsessSteg.AOU_VALIDERING);
+
+        verify(binge, times(1)).leggTil(any());
     }
 
     @Test(expected = IkkeFunnetException.class)

@@ -47,13 +47,13 @@ public class VedtakService {
         if (behandling == null) {
             throw new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + " ikke finnes.");
         }
-        lagreProsessinstans(opprettProsessinstansAnmodningUnntak(), behandling);
+        lagreProsessinstans(opprettProsessinstansAnmodningOmUnntak(), behandling);
     }
 
-    private Prosessinstans opprettProsessinstansAnmodningUnntak() {
+    private Prosessinstans opprettProsessinstansAnmodningOmUnntak() {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.ANMODNING_UNNTAK);
-        prosessinstans.setSteg(ProsessSteg.AU_VALIDERING);
+        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
+        prosessinstans.setSteg(ProsessSteg.AOU_VALIDERING);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.ANMODNING_OM_UNNTAK);
         return prosessinstans;
     }

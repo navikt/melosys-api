@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.au;
+package no.nav.melosys.saksflyt.agent.aou;
 
 import no.nav.melosys.domain.*;
 import org.junit.Before;
@@ -6,24 +6,24 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessSteg.AU_OPPDATER_RESULTAT;
+import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_RESULTAT;
 import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AnmodningUnntakValideringTest {
+public class AnmodningOmUnntakValideringTest {
 
-    private AnmodningUnntakValidering agent;
+    private AnmodningOmUnntakValidering agent;
     private Prosessinstans p;
 
     @Before
     public void setUp() {
-        agent = new AnmodningUnntakValidering();
+        agent = new AnmodningOmUnntakValidering();
 
         p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setType(Behandlingstype.SØKNAD);
-        p.setType(ProsessType.ANMODNING_UNNTAK);
+        p.setType(ProsessType.ANMODNING_OM_UNNTAK);
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
         p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.ANMODNING_OM_UNNTAK);
     }
@@ -31,7 +31,7 @@ public class AnmodningUnntakValideringTest {
     @Test
     public void utfoerSteg() {
         agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(AU_OPPDATER_RESULTAT);
+        assertThat(p.getSteg()).isEqualTo(AOU_OPPDATER_RESULTAT);
     }
 
     @Test
@@ -46,7 +46,7 @@ public class AnmodningUnntakValideringTest {
         p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setType(Behandlingstype.SØKNAD);
-        p.setType(ProsessType.ANMODNING_UNNTAK);
+        p.setType(ProsessType.ANMODNING_OM_UNNTAK);
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
 
         agent.utførSteg(p);

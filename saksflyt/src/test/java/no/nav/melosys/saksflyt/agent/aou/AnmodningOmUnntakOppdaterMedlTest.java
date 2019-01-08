@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.au;
+package no.nav.melosys.saksflyt.agent.aou;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,9 +24,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AnmodningUnntakOppdaterMedlTest {
+public class AnmodningOmUnntakOppdaterMedlTest {
 
-    private AnmodningUnntakOppdaterMedl agent;
+    private AnmodningOmUnntakOppdaterMedl agent;
 
     @Mock
     private MedlFasade medlFasade;
@@ -46,7 +46,7 @@ public class AnmodningUnntakOppdaterMedlTest {
 
     @Before
     public void setUp() {
-        agent = new AnmodningUnntakOppdaterMedl(medlFasade, tpsFasade, behandlingsresultatRepository, lovvalgsperiodeRepository);
+        agent = new AnmodningOmUnntakOppdaterMedl(medlFasade, tpsFasade, behandlingsresultatRepository, lovvalgsperiodeRepository);
 
         p = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
@@ -76,13 +76,13 @@ public class AnmodningUnntakOppdaterMedlTest {
 
         p.setBehandling(behandling);
         p.getBehandling().setType(Behandlingstype.SØKNAD);
-        p.setType(ProsessType.ANMODNING_UNNTAK);
+        p.setType(ProsessType.ANMODNING_OM_UNNTAK);
     }
 
     @Test
     public void sjekkNestSteg() {
         agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.AU_SEND_BREV);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_SEND_BREV);
     }
 
     @Test

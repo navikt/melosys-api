@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.au;
+package no.nav.melosys.saksflyt.agent.aou;
 
 import java.util.Map;
 
@@ -17,8 +17,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.BEHANDLINGSRESULTATTYPE;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.ProsessSteg.AU_OPPDATER_RESULTAT;
-import static no.nav.melosys.domain.ProsessSteg.AU_VALIDERING;
+import static no.nav.melosys.domain.ProsessSteg.*;
 import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
 
 /**
@@ -26,22 +25,22 @@ import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
  *
  * Transisjoner:
  *
- * ProsessType.ANMODNING_UNNTAK
- *  AU_VALIDERING -> AU_OPPDATER_RESULTAT eller FEILET_MASKINELT hvis feil
+ * ProsessType.ANMODNING_OM_UNNTAK
+ *  AOU_VALIDERING -> AOU_OPPDATER_RESULTAT eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class AnmodningUnntakValidering extends AbstraktStegBehandler {
+public class AnmodningOmUnntakValidering extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(AnmodningUnntakValidering.class);
+    private static final Logger log = LoggerFactory.getLogger(AnmodningOmUnntakValidering.class);
 
     @Autowired
-    public AnmodningUnntakValidering() {
-        log.info("AnmodningUnntakValidering initialisert");
+    public AnmodningOmUnntakValidering() {
+        log.info("AnmodningOmUnntakValidering initialisert");
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return AU_VALIDERING;
+        return AOU_VALIDERING;
     }
 
     @Override
@@ -54,7 +53,7 @@ public class AnmodningUnntakValidering extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         ProsessType prosessType = prosessinstans.getType();
-        if (prosessType != ProsessType.ANMODNING_UNNTAK) {
+        if (prosessType != ProsessType.ANMODNING_OM_UNNTAK) {
             String feilmelding = "ProsessType " + prosessType + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
@@ -75,6 +74,6 @@ public class AnmodningUnntakValidering extends AbstraktStegBehandler {
             return;
         }
 
-        prosessinstans.setSteg(AU_OPPDATER_RESULTAT);
+        prosessinstans.setSteg(AOU_OPPDATER_RESULTAT);
     }
 }

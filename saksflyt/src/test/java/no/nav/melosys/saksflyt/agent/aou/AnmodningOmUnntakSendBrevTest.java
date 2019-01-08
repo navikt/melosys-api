@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.au;
+package no.nav.melosys.saksflyt.agent.aou;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AnmodningUnntakSendBrevTest {
+public class AnmodningOmUnntakSendBrevTest {
     private class MockBrevDataBygger implements BrevDataBygger {
         @Override
         public BrevData lag(Behandling behandling, String saksbehandler) {
@@ -45,7 +45,7 @@ public class AnmodningUnntakSendBrevTest {
     private BehandlingsresultatRepository behandlingsresultatRepository;
 
     private Prosessinstans p;
-    private AnmodningUnntakSendBrev agent;
+    private AnmodningOmUnntakSendBrev agent;
 
     @Before
     public void setUp() {
@@ -58,11 +58,11 @@ public class AnmodningUnntakSendBrevTest {
 
         p = new Prosessinstans();
         p.setBehandling(behandling);
-        p.setType(ProsessType.ANMODNING_UNNTAK);
+        p.setType(ProsessType.ANMODNING_OM_UNNTAK);
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
         p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.ANMODNING_OM_UNNTAK.getKode());
 
-        agent = new AnmodningUnntakSendBrev(dokService, byggerVelger, behandlingRepository, behandlingsresultatRepository);
+        agent = new AnmodningOmUnntakSendBrev(dokService, byggerVelger, behandlingRepository, behandlingsresultatRepository);
     }
 
     @Test

@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.au;
+package no.nav.melosys.saksflyt.agent.aou;
 
 import java.util.Map;
 
@@ -23,19 +23,19 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.ProduserbartDokument.ORIENTERING_ANMODNING_UNNTAK;
 import static no.nav.melosys.domain.ProduserbartDokument.SED_A001;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.ProsessSteg.AU_SEND_BREV;
+import static no.nav.melosys.domain.ProsessSteg.AOU_SEND_BREV;
 
 /**
  * Sende ulike brev basert på lovvalgsbestemmelse.
  * <p>
  * Transisjoner:
- * ProsessType.ANMODNING_UNNTAK
- *  AU_SEND_BREV -> AU_AVSLUTT_BEHANDLING eller FEILET_MASKINELT hvis feil
+ * ProsessType.ANMODNING_OM_UNNTAK
+ *  AOU_SEND_BREV -> AOU_AVSLUTT_BEHANDLING eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class AnmodningUnntakSendBrev extends AbstraktStegBehandler {
+public class AnmodningOmUnntakSendBrev extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(AnmodningUnntakSendBrev.class);
+    private static final Logger log = LoggerFactory.getLogger(AnmodningOmUnntakSendBrev.class);
 
     private final DokumentSystemService dokumentService;
     private final BrevDataByggerVelger brevDataByggerVelger;
@@ -43,21 +43,21 @@ public class AnmodningUnntakSendBrev extends AbstraktStegBehandler {
     private final BehandlingsresultatRepository behandlingsResultatRepo;
 
     @Autowired
-    public AnmodningUnntakSendBrev(DokumentSystemService dokumentService,
-                                   BrevDataByggerVelger brevDataByggerVelger,
-                                   BehandlingRepository behandlingRepository,
-                                   BehandlingsresultatRepository behandlingsResultatRepo) {
+    public AnmodningOmUnntakSendBrev(DokumentSystemService dokumentService,
+                                     BrevDataByggerVelger brevDataByggerVelger,
+                                     BehandlingRepository behandlingRepository,
+                                     BehandlingsresultatRepository behandlingsResultatRepo) {
         this.dokumentService = dokumentService;
         this.brevDataByggerVelger = brevDataByggerVelger;
         this.behandlingRepository = behandlingRepository;
         this.behandlingsResultatRepo = behandlingsResultatRepo;
 
-        log.info("AnmodningUnntakSendBrev initialisert");
+        log.info("AnmodningOmUnntakSendBrev initialisert");
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return AU_SEND_BREV;
+        return AOU_SEND_BREV;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class AnmodningUnntakSendBrev extends AbstraktStegBehandler {
 
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         ProsessType prosessType = prosessinstans.getType();
-        if (prosessType == ProsessType.ANMODNING_UNNTAK) {
+        if (prosessType == ProsessType.ANMODNING_OM_UNNTAK) {
             sendBrev(behandling, saksbehandler, ORIENTERING_ANMODNING_UNNTAK, RolleType.BRUKER);
             sendBrev(behandling, saksbehandler, SED_A001, RolleType.MYNDIGHET);
 

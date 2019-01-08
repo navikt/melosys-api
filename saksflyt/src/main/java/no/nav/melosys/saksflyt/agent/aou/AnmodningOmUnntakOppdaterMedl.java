@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.au;
+package no.nav.melosys.saksflyt.agent.aou;
 
 import java.util.Map;
 import java.util.Set;
@@ -19,20 +19,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.AU_OPPDATER_MEDL;
-import static no.nav.melosys.domain.ProsessSteg.AU_SEND_BREV;
+import static no.nav.melosys.domain.ProsessSteg.*;
 
 /**
  * Oppdaterer medlemskap periode i MEDL.
  *
  * Transisjoner:
- * ProsessType.ANMODNING_UNNTAK
- *  AU_OPPDATER_MEDL -> AU_SEND_BREV eller FEILET_MASKINELT hvis feil
+ * ProsessType.ANMODNING_OM_UNNTAK
+ *  AOU_OPPDATER_MEDL -> AOU_SEND_BREV eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class AnmodningUnntakOppdaterMedl extends AbstraktStegBehandler {
+public class AnmodningOmUnntakOppdaterMedl extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(AnmodningUnntakOppdaterMedl.class);
+    private static final Logger log = LoggerFactory.getLogger(AnmodningOmUnntakOppdaterMedl.class);
 
     private final MedlFasade medlFasade;
     private final TpsFasade tpsFasade;
@@ -41,12 +40,12 @@ public class AnmodningUnntakOppdaterMedl extends AbstraktStegBehandler {
 
 
     @Autowired
-    public AnmodningUnntakOppdaterMedl(MedlFasade medlFasade,
-                                       TpsFasade tpsFasade,
-                                       BehandlingsresultatRepository behandlingsresultatRepository,
-                                       LovvalgsperiodeRepository lovvalgsperiodeRepository) {
+    public AnmodningOmUnntakOppdaterMedl(MedlFasade medlFasade,
+                                         TpsFasade tpsFasade,
+                                         BehandlingsresultatRepository behandlingsresultatRepository,
+                                         LovvalgsperiodeRepository lovvalgsperiodeRepository) {
 
-        log.info("AnmodningUnntakOppdaterMEDL initialisert");
+        log.info("AnmodningOmUnntakOppdaterMEDL initialisert");
         this.medlFasade = medlFasade;
         this.tpsFasade = tpsFasade;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
@@ -55,7 +54,7 @@ public class AnmodningUnntakOppdaterMedl extends AbstraktStegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return AU_OPPDATER_MEDL;
+        return AOU_OPPDATER_MEDL;
     }
 
     @Override
@@ -82,7 +81,7 @@ public class AnmodningUnntakOppdaterMedl extends AbstraktStegBehandler {
         Long medlPeriodeID = medlFasade.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode);
         lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
 
-        prosessinstans.setSteg(AU_SEND_BREV);
+        prosessinstans.setSteg(AOU_SEND_BREV);
     }
 
     private void lagreMedlPeriodeId(Long medlPeriodeID, Lovvalgsperiode lovvalgsperiode, long behandlingID) throws FunksjonellException {

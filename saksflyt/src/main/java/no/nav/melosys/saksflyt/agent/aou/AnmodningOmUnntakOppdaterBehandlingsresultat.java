@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.au;
+package no.nav.melosys.saksflyt.agent.aou;
 
 import java.util.Map;
 
@@ -7,7 +7,6 @@ import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
-import no.nav.melosys.saksflyt.agent.jfr.OppdaterJournalpost;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,31 +14,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.ProsessSteg.AU_OPPDATER_MEDL;
-import static no.nav.melosys.domain.ProsessSteg.AU_OPPDATER_RESULTAT;
+import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_MEDL;
+import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_RESULTAT;
 
 /**
- * Oppdaterer behandlingsresultat med vedtaksdato og klagefrist.
+ * Oppdaterer behandlingsresultat behandlingsresultatet.
  *
  * Transisjoner:
- * AU_OPPDATER_RESULTAT -> AU_OPPDATER_MEDL eller FEILET_MASKINELT hvis feil
+ * AOU_OPPDATER_RESULTAT -> AOU_OPPDATER_MEDL eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class AnmodningUnntakOppdaterBehandlingsresultat extends AbstraktStegBehandler {
+public class AnmodningOmUnntakOppdaterBehandlingsresultat extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OppdaterJournalpost.class);
+    private static final Logger log = LoggerFactory.getLogger(AnmodningOmUnntakOppdaterBehandlingsresultat.class);
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Autowired
-    public AnmodningUnntakOppdaterBehandlingsresultat(BehandlingsresultatRepository behandlingsresultatRepository) {
+    public AnmodningOmUnntakOppdaterBehandlingsresultat(BehandlingsresultatRepository behandlingsresultatRepository) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
-        log.info("OppdaterBehandlingsresultat initialisert");
+        log.info("AnmodningOmUnntakOppdaterBehandlingsresultat initialisert");
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return AU_OPPDATER_RESULTAT;
+        return AOU_OPPDATER_RESULTAT;
     }
 
     @Override
@@ -59,7 +58,7 @@ public class AnmodningUnntakOppdaterBehandlingsresultat extends AbstraktStegBeha
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
         behandlingsresultatRepository.save(behandlingsresultat);
 
-        prosessinstans.setSteg(AU_OPPDATER_MEDL);
+        prosessinstans.setSteg(AOU_OPPDATER_MEDL);
         log.info("Oppdatert behandlingsresultat for prosessinstans {}.", prosessinstans.getId());
     }
 }

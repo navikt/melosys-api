@@ -9,7 +9,6 @@ import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
-import no.nav.melosys.saksflyt.agent.jfr.OppdaterJournalpost;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,7 @@ import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_RESULTAT;
 @Component
 public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OppdaterJournalpost.class);
+    private static final Logger log = LoggerFactory.getLogger(OppdaterBehandlingsresultat.class);
 
     static final int FRIST_KLAGE_UKER = 6;
 
