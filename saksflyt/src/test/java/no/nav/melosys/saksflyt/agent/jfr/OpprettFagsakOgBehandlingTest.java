@@ -5,7 +5,6 @@ import java.util.Properties;
 
 import no.nav.melosys.audit.AuditorProvider;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.datavarehus.BehandlingOpprettetEvent;
 import no.nav.melosys.service.datavarehus.FagsakOpprettetEvent;
@@ -40,7 +39,7 @@ public class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    public void utførSteg_typeJfrNySak_tilStegJfrOpprettSøknad() throws SikkerhetsbegrensningException {
+    public void utførSteg_typeJfrNySak_tilStegJfrOpprettSøknad() {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
         Properties properties = new Properties();
@@ -64,9 +63,9 @@ public class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    public void utførSteg_typeJfrKnytt_tilStegStatusBehOppr() throws SikkerhetsbegrensningException {
+    public void utførSteg_typeJfrNyBehandling_tilStegStatusBehOppr() {
         Prosessinstans p = new Prosessinstans();
-        p.setType(ProsessType.JFR_KNYTT);
+        p.setType(ProsessType.JFR_NY_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
         p.setData(ProsessDataKey.SAKSNUMMER, "MELTEST-333");
 
@@ -82,5 +81,17 @@ public class OpprettFagsakOgBehandlingTest {
         verify(applicationEventPublisher, times(1)).publishEvent(any(BehandlingOpprettetEvent.class));
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
+    }
+
+    @Test
+    public void utførSteg_ukjentType_feiler() {
+        Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.JFR_KNYTT);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
+        p.setData(ProsessDataKey.SAKSNUMMER, "MELTEST-333");
+
+        agent.utførSteg(p);
+
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
     }
 }

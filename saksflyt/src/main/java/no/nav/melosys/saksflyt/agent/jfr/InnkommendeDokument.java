@@ -6,7 +6,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
@@ -16,32 +15,30 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
+
 /**
- * Oppretter eller oppdaterer behandlingsoppgave i Melosys ved mottak av nytt dokument.
- * https://confluence.adeo.no/pages/viewpage.action?pageId=264973205
+ * Ved mottak av nytt dokument på eksisterende sak.
  * <p>
  * Transisjoner:
  * 1) Saken har aktiv behandling (behandlingsstatus oppdateres til VURDER_DOKUMENT):
- * JFR_INNKOMMENDE_DOKUMENT → null eller FEILET_MASKINELT hvis feil
+ * JFR_INNKOMMENDE_DOKUMENT → JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
  * 2) Saken har ikke aktiv behandling og skal ikke behandles (behandlingstype null):
- * JFR_INNKOMMENDE_DOKUMENT → null eller FEILET_MASKINELT hvis feil *
+ * JFR_INNKOMMENDE_DOKUMENT → JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
  * 3) Saken har ikke aktiv behandling og skal behandles:
  * JFR_INNKOMMENDE_DOKUMENT → JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class VurderDokument extends AbstraktStegBehandler {
+public class InnkommendeDokument extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(VurderDokument.class);
+    private static final Logger log = LoggerFactory.getLogger(SettVurderDokument.class);
 
     private final FagsakRepository fagsakRepository;
 
-    private final BehandlingRepository behandlingRepository;
-
     @Autowired
-    public VurderDokument(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository) {
+    public InnkommendeDokument(FagsakRepository fagsakRepository) {
         this.fagsakRepository = fagsakRepository;
-        this.behandlingRepository = behandlingRepository;
-        log.info("OppdaterBehandlingsoppgave initialisert");
+        log.info("InnkommendeDokument initialisert");
     }
 
     @Override
@@ -58,8 +55,8 @@ public class VurderDokument extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandlingstype behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.class);
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
+        Behandlingstype behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.class);
 
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
         if (fagsak == null) {
@@ -71,15 +68,15 @@ public class VurderDokument extends AbstraktStegBehandler {
 
         Behandling behandling = fagsak.getAktivBehandling();
         if (behandling != null) {
-            behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-            behandlingRepository.save(behandling);
-            prosessinstans.setSteg(null);
+            // Dokumentet journalføres direkte.
+            prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
         } else {
-            if (behandlingstype == null) {
-                prosessinstans.setSteg(null);
-            } else {
+            if (behandlingstype != null) {
                 // Ny behandling trenges.
+                prosessinstans.setType(ProsessType.JFR_NY_BEHANDLING);
                 prosessinstans.setSteg(ProsessSteg.JFR_AKTØR_ID);
+            } else {
+                prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
             }
         }
 

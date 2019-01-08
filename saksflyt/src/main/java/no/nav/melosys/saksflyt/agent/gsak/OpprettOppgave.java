@@ -31,7 +31,7 @@ import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
  * Transisjoner:
  * 1) ProsessType.JFR_NY_SAK:
  *      GSAK_OPPRETT_OPPGAVE -> SEND_FORVALTNINGSMELDING eller FEILET_MASKINELT hvis feil
- * 2) ProsessType.JFR_KNYTT:
+ * 2) ProsessType.JFR_NY_BEHANDLING:
  *      GSAK_OPPRETT_OPPGAVE -> null eller FEILET_MASKINELT hvis feil
  */
 @Component
@@ -64,7 +64,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandling behandling = behandlingRepository.findOneWithSaksopplysningerById(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingRepository.findOne(prosessinstans.getBehandling().getId());
         Behandlingstype behandlingstype = behandling.getType();
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer();
@@ -101,10 +101,15 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
         String oppgaveId = gsakFasade.opprettOppgave(oppgave);
 
-        if (prosessinstans.getType() == ProsessType.JFR_KNYTT) {
+        if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
+            prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
+        } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
             prosessinstans.setSteg(null);
         } else {
-            prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
+            String feilmelding = "ProsessType " + prosessinstans.getType() + " er ikke støttet";
+            log.error("{}: {}", prosessinstans.getId(), feilmelding);
+            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
+            return;
         }
         log.info("Opprettet oppgave {} for prosessinstans {}", oppgaveId, prosessinstans.getId());
     }

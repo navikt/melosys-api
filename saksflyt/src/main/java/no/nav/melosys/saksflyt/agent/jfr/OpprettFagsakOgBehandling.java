@@ -70,7 +70,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         String endretAv = prosessinstans.getData(SAKSBEHANDLER);
         auditorAware.setSaksbehanlderID(endretAv);
 
-        if (prosessinstans.getType() == ProsessType.JFR_KNYTT) {
+        if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
             String saksnummer = prosessinstans.getData(SAKSNUMMER);
             Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
             Behandlingstype behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstype.class);
@@ -81,7 +81,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
             prosessinstans.setSteg(STATUS_BEH_OPPR);
             log.info("Opprettet behandling {} for prosessinstans {}", behandling.getId(), prosessinstans.getId());
-        } else {
+        } else if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
             Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, arbeidsgiver, representant, Behandlingstype.SØKNAD);
             prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
             prosessinstans.setBehandling(fagsak.getBehandlinger().get(0));
@@ -91,6 +91,11 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
             prosessinstans.setSteg(JFR_OPPRETT_SØKNAD);
             log.info("Opprettet fagsak {} for prosessinstans {}", fagsak.getSaksnummer(), prosessinstans.getId());
+        } else {
+            String feilmelding = "ProsessType " + prosessinstans.getType() + " er ikke støttet";
+            log.error("{}: {}", prosessinstans.getId(), feilmelding);
+            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
+            return;
         }
     }
 }

@@ -43,14 +43,25 @@ public class FerdigstillJournalpostTest {
     }
 
     @Test
-    public void utførSteg_typeJfrKnytt_tilStegJfrVurderBehandling() throws MelosysException {
+    public void utførSteg_typeJfrNyBehandling_tilStegJfrHentPersOppl() throws MelosysException {
+        String journalpostID = "Journal_ID";
+        Prosessinstans p = nyProsessinstans(ProsessType.JFR_NY_BEHANDLING, journalpostID);
+
+        agent.utførSteg(p);
+
+        verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_PERS_OPPL);
+    }
+
+    @Test
+    public void utførSteg_typeJfrKnytt_tilStegJfrSettVurderDokument() throws MelosysException {
         String journalpostID = "Journal_ID";
         Prosessinstans p = nyProsessinstans(ProsessType.JFR_KNYTT, journalpostID);
 
         agent.utførSteg(p);
 
         verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_INNKOMMENDE_DOKUMENT);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_SETT_VURDER_DOKUMENT);
     }
 
     @Test

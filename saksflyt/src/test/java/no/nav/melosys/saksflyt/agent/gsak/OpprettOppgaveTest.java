@@ -42,23 +42,23 @@ public class OpprettOppgaveTest {
     }
 
     @Test
-    public void utfoerSteg() throws FunksjonellException, TekniskException {
+    public void utfoerSteg_nySak_sendForvaltningsmelding() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);
         fagsak.setType(Fagsakstype.EU_EØS);
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setType(Behandlingstype.SØKNAD);
         behandling.setFagsak(fagsak);
 
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(behandling);
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
         p.setType(ProsessType.JFR_NY_SAK);
         Properties properties = new Properties();
         p.addData(properties);
 
-        when(behandlingRepository.findOneWithSaksopplysningerById(anyLong())).thenReturn(behandling);
+        when(behandlingRepository.findOne(anyLong())).thenReturn(behandling);
 
         agent.utførSteg(p);
 
@@ -70,7 +70,35 @@ public class OpprettOppgaveTest {
     }
 
     @Test
-    public void utfoerSteg_feilSakstype() {
+    public void utfoerSteg_nyBehandling_tilNull() throws FunksjonellException, TekniskException {
+        Fagsak fagsak = new Fagsak();
+        String saksnummer = "MEL-TESTx";
+        fagsak.setSaksnummer(saksnummer);
+        fagsak.setType(Fagsakstype.EU_EØS);
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setFagsak(fagsak);
+
+        Prosessinstans p = new Prosessinstans();
+        p.setBehandling(behandling);
+        p.setType(ProsessType.JFR_NY_BEHANDLING);
+        Properties properties = new Properties();
+        p.addData(properties);
+
+        when(behandlingRepository.findOne(anyLong())).thenReturn(behandling);
+
+        agent.utførSteg(p);
+
+        verify(gsakFasade, times(1)).opprettOppgave(oppgave.capture());
+
+        assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
+        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(null);
+        assertThat(p.getSteg()).isNull();
+    }
+
+    @Test
+    public void utfoerSteg_feilSakstype_feiler() {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);
@@ -82,7 +110,7 @@ public class OpprettOppgaveTest {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(behandling);
 
-        when(behandlingRepository.findOneWithSaksopplysningerById(anyLong())).thenReturn(behandling);
+        when(behandlingRepository.findOne(anyLong())).thenReturn(behandling);
 
         agent.utførSteg(p);
 
@@ -90,7 +118,7 @@ public class OpprettOppgaveTest {
     }
 
     @Test
-    public void utfoerSteg_feilBehandlingstype() {
+    public void utfoerSteg_feilBehandlingstype_feiler() {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);
@@ -103,7 +131,29 @@ public class OpprettOppgaveTest {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(behandling);
 
-        when(behandlingRepository.findOneWithSaksopplysningerById(anyLong())).thenReturn(behandling);
+        when(behandlingRepository.findOne(anyLong())).thenReturn(behandling);
+
+        agent.utførSteg(p);
+
+        assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
+    }
+
+    @Test
+    public void utfoerSteg_feilProsessType_feiler() {
+        Fagsak fagsak = new Fagsak();
+        String saksnummer = "MEL-TESTx";
+        fagsak.setSaksnummer(saksnummer);
+        fagsak.setType(Fagsakstype.EU_EØS);
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setFagsak(fagsak);
+
+        Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.MANGELBREV);
+        p.setBehandling(behandling);
+
+        when(behandlingRepository.findOne(anyLong())).thenReturn(behandling);
 
         agent.utførSteg(p);
 

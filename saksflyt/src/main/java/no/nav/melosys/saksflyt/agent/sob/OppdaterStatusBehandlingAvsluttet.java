@@ -45,8 +45,12 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
         String saksnummer = fagsak.getSaksnummer();
 
         Aktoer aktør = fagsak.hentAktørMedRolleType(BRUKER);
-        String aktørID = aktør.getAktørId();
-        if (aktørID == null) {
+        String aktørID = null;
+        if (aktør != null) {
+            aktørID = aktør.getAktørId();
+        }
+
+        if (aktør == null || aktørID == null) {
             throw new FunksjonellException("Sak " + saksnummer + " har ingen bruker." );
         }
 

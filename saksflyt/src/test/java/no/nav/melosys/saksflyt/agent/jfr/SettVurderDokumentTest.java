@@ -6,37 +6,38 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class VurderDokumentTest {
+public class SettVurderDokumentTest {
 
+    @Mock
     private FagsakRepository fagsakRepository;
 
+    @Mock
     private BehandlingRepository behandlingRepository;
 
-    private VurderDokument agent;
+    private SettVurderDokument agent;
 
     private final static String SAKSNUMMER_FINNES_IKKE = "MELTEST-0";
     private final static String SAKSNUMMER_UTEN_BEHANDLING = "MELTEST-1";
     private final static String SAKSNUMMER_MED_BEHANDLING = "MELTEST-2";
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    @Captor
+    private ArgumentCaptor<Behandling> behandlingArgumentCaptor;
 
     @Before
     public void setUp() {
-        fagsakRepository = mock(FagsakRepository.class);
-        behandlingRepository = mock(BehandlingRepository.class);
-        agent = new VurderDokument(fagsakRepository, behandlingRepository);
+        agent = new SettVurderDokument(fagsakRepository, behandlingRepository);
 
         Fagsak fagsak = new Fagsak();
 
@@ -50,7 +51,28 @@ public class VurderDokumentTest {
     }
 
     @Test
-    public void fagsakFinnesIkke() {
+    public void utførSteg_sakMedBehandling_oppdatererStatus() {
+        Prosessinstans p = new Prosessinstans();
+        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
+        agent.utførSteg(p);
+        assertThat(p.getSteg()).isNull();
+        verify(behandlingRepository).save(behandlingArgumentCaptor.capture());
+        assertThat(behandlingArgumentCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.VURDER_DOKUMENT);
+    }
+
+    @Test
+    public void utførSteg_sakUtenBehandling_ingenStatusEndring() {
+        Prosessinstans p = new Prosessinstans();
+        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
+        agent.utførSteg(p);
+        assertThat(p.getSteg()).isNull();
+        verify(behandlingRepository, never()).save(any(Behandling.class));
+    }
+
+    @Test
+    public void utførSteg_ukjentSak_feiler() {
         Prosessinstans p = new Prosessinstans();
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_FINNES_IKKE);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
@@ -58,24 +80,5 @@ public class VurderDokumentTest {
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
         assertThat(p.getHendelser()).isNotEmpty();
         assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Det finnes ingen fagsak med saksnummer " + SAKSNUMMER_FINNES_IKKE);
-    }
-
-    @Test
-    public void fagsakMedBehandling() {
-        Prosessinstans p = new Prosessinstans();
-        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
-        agent.utførSteg(p);
-        verify(behandlingRepository, times(1)).save(any(Behandling.class));
-        assertThat(p.getSteg()).isNull();
-    }
-
-    @Test
-    public void fagsakUtenBehandling() {
-        Prosessinstans p = new Prosessinstans();
-        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
-        agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
     }
 }

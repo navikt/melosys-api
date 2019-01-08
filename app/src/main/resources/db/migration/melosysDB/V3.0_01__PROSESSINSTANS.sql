@@ -29,7 +29,6 @@ INSERT INTO prosess_type (kode, navn) VALUES ('JFR_KNYTT', 'Journalføring på e
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_NY_SAK', 'Journalføring med ny sak og søknad');
 INSERT INTO prosess_type (kode, navn) VALUES ('OPPFRISKNING', 'Oppfriskning av saksopplysninger');
 INSERT INTO prosess_type (kode, navn) VALUES ('MANGELBREV', 'Opprett mangelbrev');
-INSERT INTO prosess_type (kode, navn) VALUES ('SØKNAD_A1', 'Søknad A1');
 
 CREATE TABLE prosess_steg (
     kode    VARCHAR2(99)  NOT NULL,
