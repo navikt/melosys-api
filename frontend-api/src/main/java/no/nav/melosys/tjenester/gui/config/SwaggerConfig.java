@@ -1,7 +1,5 @@
 package no.nav.melosys.tjenester.gui.config;
 
-import java.util.Arrays;
-
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
@@ -60,12 +58,7 @@ public class SwaggerConfig implements
         beanConfig.setConfigId("melosys-api");
         beanConfig.setContact("Team Melosys");
         beanConfig.setSchemes(new String[]{"http", "https"});
-
-        if (Arrays.asList(environment.getActiveProfiles()).contains("local")) {
-            beanConfig.setBasePath("melosys/api");
-        } else {
-            beanConfig.setBasePath("/api");
-        }
+        beanConfig.setBasePath("/api");
         beanConfig.setResourcePackage("no.nav.melosys.tjenester.gui");
         beanConfig.setPrettyPrint(true);
         beanConfig.setScan(true);
