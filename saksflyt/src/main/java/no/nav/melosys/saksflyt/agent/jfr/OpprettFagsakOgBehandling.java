@@ -8,6 +8,7 @@ import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.datavarehus.BehandlingOpprettetEvent;
 import no.nav.melosys.service.datavarehus.FagsakOpprettetEvent;
@@ -38,13 +39,19 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
     private final FagsakService fagsakService;
 
+    private final BehandlingService behandlingService;
+
     private final ApplicationEventPublisher applicationEventPublisher;
 
     private final AuditorProvider auditorAware;
 
     @Autowired
-    public OpprettFagsakOgBehandling(FagsakService fagsakService, ApplicationEventPublisher applicationEventPublisher, AuditorProvider auditorAware) {
+    public OpprettFagsakOgBehandling(FagsakService fagsakService,
+                                     BehandlingService behandlingService,
+                                     ApplicationEventPublisher applicationEventPublisher,
+                                     AuditorProvider auditorAware) {
         this.fagsakService = fagsakService;
+        this.behandlingService = behandlingService;
         this.applicationEventPublisher = applicationEventPublisher;
         this.auditorAware = auditorAware;
         log.info("OpprettSak initialisert");
@@ -59,7 +66,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
     protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
         return FeilStrategi.standardFeilHåndtering();
     }
-    
+
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
@@ -74,7 +81,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             String saksnummer = prosessinstans.getData(SAKSNUMMER);
             Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
             Behandlingstype behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstype.class);
-            Behandling behandling = fagsakService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype);
+            Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype);
             prosessinstans.setBehandling(behandling);
 
             applicationEventPublisher.publishEvent(new BehandlingOpprettetEvent(behandling, endretAv));

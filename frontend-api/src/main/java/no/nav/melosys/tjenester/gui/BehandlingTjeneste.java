@@ -53,7 +53,7 @@ public class BehandlingTjeneste extends RestTjeneste {
 
     @POST
     @Path("{behandlingID}/perioder")
-    @ApiOperation(value = "Knytt medlemsperioder til oppholdsland fra søknaden",
+    @ApiOperation(value = "Knytt medlemsperioder fra MEDL til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
     public Response knyttMedlemsperioder(@PathParam("behandlingID") long behandlingID,
                                          TidligereMedlemsperioderDto tidligereMedlemsperioder) throws FunksjonellException, TekniskException {
