@@ -1,16 +1,13 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
-
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import io.github.benas.randombeans.api.Randomizer;
-
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
@@ -24,13 +21,11 @@ import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import no.nav.melosys.tjenester.gui.dto.SoeknadTilleggsDataDto;
-
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,9 +44,6 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
 
     private SoeknadDokument soeknadDokument;
 
-    @Mock
-    private RegisterOppslagService registerOppslagService;
-
     @Override
     public String schemaNavn() {
         return "soknad-schema.json";
@@ -64,23 +56,23 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
         RegisterOppslagService registerOppslagService = mock(RegisterOppslagService.class);
 
         Tilgang tilgang = mock(Tilgang.class);
-        soeknadTjeneste = new SoeknadTjeneste(soeknadService, null, registerOppslagService, tilgang);
+        soeknadTjeneste = new SoeknadTjeneste(soeknadService, registerOppslagService, tilgang);
 
         EnhancedRandom random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
-                .overrideDefaultInitialization(true)
-                .collectionSizeRange(1, 4)
-                .randomize(GeografiskAdresse.class, (Randomizer<GeografiskAdresse>) () -> EnhancedRandom.random(SemistrukturertAdresse.class))
-                .stringLengthRange(2, 10)
-                .build();
+            .overrideDefaultInitialization(true)
+            .collectionSizeRange(1, 4)
+            .randomize(GeografiskAdresse.class, (Randomizer<GeografiskAdresse>) () -> EnhancedRandom.random(SemistrukturertAdresse.class))
+            .stringLengthRange(2, 10)
+            .build();
 
         soeknadDokument = random.nextObject(SoeknadDokument.class);
         when(soeknadService.hentSoeknad(anyLong())).thenReturn(soeknadDokument);
 
         OrganisasjonDokument organisasjonDokument = random.nextObject(OrganisasjonDokument.class);
-        when(registerOppslagService.hentOrganisasjoner(anySet())).thenReturn(new HashSet<>(Arrays.asList(organisasjonDokument)));
+        when(registerOppslagService.hentOrganisasjoner(anySet())).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
 
         PersonDokument personDokument = random.nextObject(PersonDokument.class);
-        when(registerOppslagService.hentPersoner(anySet())).thenReturn(new HashSet<>(Arrays.asList(personDokument)));
+        when(registerOppslagService.hentPersoner(anySet())).thenReturn(new HashSet<>(Collections.singletonList(personDokument)));
     }
 
     @Test
@@ -107,7 +99,7 @@ public class SoeknadTjenesteTest extends JsonSchemaTest {
     @Test
     public void soeknadDokumentSchemaValidering() throws Exception {
         Response response = soeknadTjeneste.hentSøknad(1222L);
-        SoeknadDto søknadDto = (SoeknadDto)response.getEntity();
+        SoeknadDto søknadDto = (SoeknadDto) response.getEntity();
 
         assertThat(søknadDto).isNotNull();
 
