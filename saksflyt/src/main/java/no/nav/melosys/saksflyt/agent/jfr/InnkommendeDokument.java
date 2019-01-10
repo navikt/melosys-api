@@ -31,7 +31,7 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
 @Component
 public class InnkommendeDokument extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(SettVurderDokument.class);
+    private static final Logger log = LoggerFactory.getLogger(InnkommendeDokument.class);
 
     private final FagsakRepository fagsakRepository;
 
@@ -56,7 +56,7 @@ public class InnkommendeDokument extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
-        Behandlingstype behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.class);
+        Behandlingstype nyBehandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.class);
 
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
         if (fagsak == null) {
@@ -66,18 +66,14 @@ public class InnkommendeDokument extends AbstraktStegBehandler {
             return;
         }
 
-        Behandling behandling = fagsak.getAktivBehandling();
-        if (behandling != null) {
+        Behandling aktivBehandling = fagsak.getAktivBehandling();
+        if (aktivBehandling == null && nyBehandlingstype != null) {
+            // Ny behandling trenges.
+            prosessinstans.setType(ProsessType.JFR_NY_BEHANDLING);
+            prosessinstans.setSteg(ProsessSteg.JFR_AKTØR_ID);
+        } else {
             // Dokumentet journalføres direkte.
             prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
-        } else {
-            if (behandlingstype != null) {
-                // Ny behandling trenges.
-                prosessinstans.setType(ProsessType.JFR_NY_BEHANDLING);
-                prosessinstans.setSteg(ProsessSteg.JFR_AKTØR_ID);
-            } else {
-                prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
-            }
         }
 
         log.info("Prosessinstans {} har vurdert behov for behandling av dokument", prosessinstans.getId());

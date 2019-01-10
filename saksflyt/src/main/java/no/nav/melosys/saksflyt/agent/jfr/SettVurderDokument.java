@@ -64,11 +64,12 @@ public class SettVurderDokument extends AbstraktStegBehandler {
         if (behandling != null) {
             behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
             behandlingRepository.save(behandling);
-            prosessinstans.setSteg(null);
             log.info("Prosessinstans {} har endret status av behandling {} til {}", prosessinstans.getId(), behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
         } else {
             log.debug("Prosessinstans {}: ingen endring for sak {}", prosessinstans.getId(), saksnummer);
         }
+
+        prosessinstans.setSteg(null);
     }
 }
 
