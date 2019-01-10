@@ -6,20 +6,12 @@ import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fagsaksstatus;
 import no.nav.melosys.domain.Fagsakstype;
-import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
-import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
-import no.nav.melosys.integrasjon.aareg.AaregFasade;
-import no.nav.melosys.integrasjon.aareg.AaregService;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -31,14 +23,7 @@ public class FagsakServiceTest {
 
     @Before
     public void setUp() {
-        DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
-        TpsFasade tps = new TpsService(null, null, dokumentFactory, null);
-        AaregFasade aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
-
-        SaksopplysningerService saksopplysningerService = new SaksopplysningerService(tps, aareg, null, null , null, null);
-        ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 6);
-        ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 6);
-
+        TpsFasade tps = mock(TpsFasade.class);
         FagsakRepository fagsakRepo = mock(FagsakRepository.class);
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
         BehandlingsresultatRepository behandlingsresultatRepository = mock(BehandlingsresultatRepository.class);
@@ -63,11 +48,9 @@ public class FagsakServiceTest {
         final String[] identer = new String[]{"88888888884", "77777777779"};
 
         for (String fnr : identer) {
-            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(fnr, "123456789", null, Behandlingstype.SØKNAD);
-
+            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(fnr, "123456789", "", Behandlingstype.SØKNAD);
             assertNotNull(fagsak);
             assertFalse(fagsak.getBehandlinger().isEmpty());
-
         }
     }
 }
