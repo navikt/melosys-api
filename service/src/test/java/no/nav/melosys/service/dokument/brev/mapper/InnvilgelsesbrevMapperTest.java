@@ -3,9 +3,6 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.LocalDate;
 import java.util.*;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
 import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
@@ -29,11 +26,10 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
-
 import org.junit.Test;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
-
+import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPersonDokument;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
@@ -48,25 +44,6 @@ public class InnvilgelsesbrevMapperTest {
     @Test
     public void mapTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml();
-    }
-
-    @Test
-    public void mapTilBrevXmlMedDysfunksjoneltDataTypeFactoryKasterUnntak() throws Exception {
-        String dataTypeFactoryClass = null;
-        Throwable unntak;
-        try {
-            dataTypeFactoryClass = System.setProperty(DatatypeFactory.DATATYPEFACTORY_PROPERTY, "no.datatypefactory.here.Hahahahahha");
-            unntak = catchThrowable(() -> testMapTilBrevXml());
-        } finally {
-            if (dataTypeFactoryClass != null) {
-                System.setProperty(DatatypeFactory.DATATYPEFACTORY_PROPERTY, dataTypeFactoryClass);
-            } else {
-                System.getProperties().remove(DatatypeFactory.DATATYPEFACTORY_PROPERTY);
-            }
-        }
-        assertThat(unntak).isInstanceOf(IllegalStateException.class)
-            .hasCauseInstanceOf(DatatypeConfigurationException.class)
-            .hasMessageContaining("Kan ikke lage DatatypeConverterFactory");
     }
 
     @Test
@@ -106,17 +83,17 @@ public class InnvilgelsesbrevMapperTest {
     public void testMapTilBrevXml(Behandling behandling, Behandlingsresultat behandlingsresultat) throws Exception {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = LagMelosysNAVFelles();
-        BrevDataA1 brevdata = new BrevDataA1();
+        BrevDataA1 brevdataA1 = new BrevDataA1();
         Virksomhet virksomhet = new Virksomhet("Virker ikke", "123456789", lagStrukturertAdresse());
-        brevdata.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet, virksomhet));
-        brevdata.bostedsadresse = lagBostedsadresse();
-        brevdata.yrkesgruppe = YrkesgruppeType.FLYENDE_PERSONELL;
-        brevdata.selvstendigeForetak = Collections.emptySet();
-        brevdata.utenlandskeVirksomheter = Collections.emptyList();
-        SoeknadDokument søknad = new SoeknadDokument();
-        brevdata.søknad = søknad;
+        brevdataA1.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet, virksomhet));
+        brevdataA1.bostedsadresse = lagBostedsadresse();
+        brevdataA1.yrkesgruppe = YrkesgruppeType.FLYENDE_PERSONELL;
+        brevdataA1.selvstendigeForetak = Collections.emptySet();
+        brevdataA1.utenlandskeVirksomheter = Collections.emptyList();
+        brevdataA1.person = lagPersonDokument();
+        brevdataA1.arbeidssteder = new ArrayList<>();
         BrevDataVedlegg brevVedlegg = new BrevDataVedlegg("SAKSBEHANDLER");
-        brevVedlegg.brevDataA1 = brevdata;
+        brevVedlegg.brevDataA1 = brevdataA1;
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevVedlegg);
         // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
         // grundig mot forventninger.
