@@ -11,6 +11,7 @@ import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
+import no.nav.melosys.saksflyt.deltekontekster.OppdaterMedlFelles;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterMedlTest {
 
-    private OppdaterMedl agent;
+    private OppdaterMedlBase agent;
 
     @Mock
     private MedlFasade medlFasade;
@@ -45,7 +46,8 @@ public class OppdaterMedlTest {
 
     @Before
     public void setUp() {
-        agent = new OppdaterMedl(medlFasade, tpsFasade, behandlingsresultatRepository, lovvalgsperiodeRepository);
+        OppdaterMedlFelles felles = new OppdaterMedlFelles(tpsFasade, behandlingsresultatRepository, lovvalgsperiodeRepository);
+        agent = new OppdaterMedlBase(medlFasade, felles);
 
         p = new Prosessinstans();
         Fagsak fagsak = new Fagsak();

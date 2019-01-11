@@ -18,20 +18,20 @@ import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_MEDL;
 import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_RESULTAT;
 
 /**
- * Oppdaterer behandlingsresultat behandlingsresultatet.
+ * Oppdaterer behandlingsresultat.
  *
  * Transisjoner:
  * AOU_OPPDATER_RESULTAT -> AOU_OPPDATER_MEDL eller FEILET_MASKINELT hvis feil
  */
-@Component
-public class AnmodningOmUnntakOppdaterBehandlingsresultat extends AbstraktStegBehandler {
+@Component("AnmodningOmUnntakOppdaterBehandlingsresultat")
+public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(AnmodningOmUnntakOppdaterBehandlingsresultat.class);
+    private static final Logger log = LoggerFactory.getLogger(OppdaterBehandlingsresultat.class);
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Autowired
-    public AnmodningOmUnntakOppdaterBehandlingsresultat(BehandlingsresultatRepository behandlingsresultatRepository) {
+    public OppdaterBehandlingsresultat(BehandlingsresultatRepository behandlingsresultatRepository) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         log.info("AnmodningOmUnntakOppdaterBehandlingsresultat initialisert");
     }

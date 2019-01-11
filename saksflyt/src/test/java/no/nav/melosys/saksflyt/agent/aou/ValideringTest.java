@@ -11,14 +11,14 @@ import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AnmodningOmUnntakValideringTest {
+public class ValideringTest {
 
-    private AnmodningOmUnntakValidering agent;
+    private Validering agent;
     private Prosessinstans p;
 
     @Before
     public void setUp() {
-        agent = new AnmodningOmUnntakValidering();
+        agent = new Validering();
 
         p = new Prosessinstans();
         p.setBehandling(new Behandling());

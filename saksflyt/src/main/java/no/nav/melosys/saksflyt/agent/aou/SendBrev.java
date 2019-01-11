@@ -32,10 +32,10 @@ import static no.nav.melosys.domain.ProsessSteg.AOU_SEND_BREV;
  * ProsessType.ANMODNING_OM_UNNTAK
  *  AOU_SEND_BREV -> AOU_AVSLUTT_BEHANDLING eller FEILET_MASKINELT hvis feil
  */
-@Component
-public class AnmodningOmUnntakSendBrev extends AbstraktStegBehandler {
+@Component("AnmodningOmUnntakSendBrev")
+public class SendBrev extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(AnmodningOmUnntakSendBrev.class);
+    private static final Logger log = LoggerFactory.getLogger(SendBrev.class);
 
     private final DokumentSystemService dokumentService;
     private final BrevDataByggerVelger brevDataByggerVelger;
@@ -43,10 +43,10 @@ public class AnmodningOmUnntakSendBrev extends AbstraktStegBehandler {
     private final BehandlingsresultatRepository behandlingsResultatRepo;
 
     @Autowired
-    public AnmodningOmUnntakSendBrev(DokumentSystemService dokumentService,
-                                     BrevDataByggerVelger brevDataByggerVelger,
-                                     BehandlingRepository behandlingRepository,
-                                     BehandlingsresultatRepository behandlingsResultatRepo) {
+    public SendBrev(DokumentSystemService dokumentService,
+                    BrevDataByggerVelger brevDataByggerVelger,
+                    BehandlingRepository behandlingRepository,
+                    BehandlingsresultatRepository behandlingsResultatRepo) {
         this.dokumentService = dokumentService;
         this.brevDataByggerVelger = brevDataByggerVelger;
         this.behandlingRepository = behandlingRepository;

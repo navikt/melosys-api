@@ -48,7 +48,7 @@ public class VedtakTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void fattVedtak() throws FunksjonellException, TekniskException, IOException {
+    public void fattVedtak_henleggelse_fungerer() throws FunksjonellException, TekniskException, IOException {
         vedtakDto.setBehandlingsresultattype(BehandlingsresultatType.HENLEGGELSE);
         vedtakTjeneste.fattVedtak(behandlingID, vedtakDto);
 
@@ -59,7 +59,7 @@ public class VedtakTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void anmodningOmUnntak() throws FunksjonellException, TekniskException, IOException {
+    public void fattVedtak_anmodningOmUnntak_fungerer() throws FunksjonellException, TekniskException, IOException {
         vedtakDto.setBehandlingsresultattype(BehandlingsresultatType.ANMODNING_OM_UNNTAK);
         vedtakTjeneste.fattVedtak(behandlingID, vedtakDto);
 
@@ -70,7 +70,7 @@ public class VedtakTjenesteTest extends JsonSchemaTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public void dtoManglerBehandlingresultat() throws FunksjonellException, TekniskException, IOException {
+    public void fattVedtak_dtoManglerBehandlingresultat_girException() throws FunksjonellException, TekniskException, IOException {
         vedtakTjeneste.fattVedtak(behandlingID, vedtakDto);
 
         verify(tilgang, times(1)).sjekk(behandlingID);

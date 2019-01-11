@@ -28,13 +28,13 @@ import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
  * ProsessType.ANMODNING_OM_UNNTAK
  *  AOU_VALIDERING -> AOU_OPPDATER_RESULTAT eller FEILET_MASKINELT hvis feil
  */
-@Component
-public class AnmodningOmUnntakValidering extends AbstraktStegBehandler {
+@Component("AnmodningOmUnntakValidering")
+public class Validering extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(AnmodningOmUnntakValidering.class);
+    private static final Logger log = LoggerFactory.getLogger(Validering.class);
 
     @Autowired
-    public AnmodningOmUnntakValidering() {
+    public Validering() {
         log.info("AnmodningOmUnntakValidering initialisert");
     }
 

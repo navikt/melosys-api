@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AnmodningOmUnntakSendBrevTest {
+public class SendBrevTest {
     private class MockBrevDataBygger implements BrevDataBygger {
         @Override
         public BrevData lag(Behandling behandling, String saksbehandler) {
@@ -45,7 +45,7 @@ public class AnmodningOmUnntakSendBrevTest {
     private BehandlingsresultatRepository behandlingsresultatRepository;
 
     private Prosessinstans p;
-    private AnmodningOmUnntakSendBrev agent;
+    private SendBrev agent;
 
     @Before
     public void setUp() {
@@ -62,7 +62,7 @@ public class AnmodningOmUnntakSendBrevTest {
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
         p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.ANMODNING_OM_UNNTAK.getKode());
 
-        agent = new AnmodningOmUnntakSendBrev(dokService, byggerVelger, behandlingRepository, behandlingsresultatRepository);
+        agent = new SendBrev(dokService, byggerVelger, behandlingRepository, behandlingsresultatRepository);
     }
 
     @Test

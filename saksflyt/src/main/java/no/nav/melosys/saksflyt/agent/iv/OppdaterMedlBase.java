@@ -1,0 +1,79 @@
+package no.nav.melosys.saksflyt.agent.iv;
+
+import java.util.Map;
+
+import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.feil.Feilkategori;
+import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.agent.UnntakBehandler;
+import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import no.nav.melosys.saksflyt.deltekontekster.OppdaterMedlFelles;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
+import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
+
+/**
+ * Oppdaterer medlemskap periode i MEDL.
+ *
+ * Transisjoner:
+ * ProsessType.IVERKSETT_VEDTAK
+ *  IV_OPPDATER_MEDL -> IV_SEND_BREV eller FEILET_MASKINELT hvis feil
+ */
+@Component
+public class OppdaterMedlBase extends AbstraktStegBehandler {
+
+    private static final Logger log = LoggerFactory.getLogger(OppdaterMedlBase.class);
+
+    private final MedlFasade medlFasade;
+    private OppdaterMedlFelles felles;
+
+    @Autowired
+    public OppdaterMedlBase(MedlFasade medlFasade,
+                            OppdaterMedlFelles felles) {
+
+        log.info("IverksetteVedtakOppdaterMEDL initialisert");
+        this.medlFasade = medlFasade;
+        this.felles = felles;
+    }
+
+    @Override
+    public ProsessSteg inngangsSteg() {
+        return IV_OPPDATER_MEDL;
+    }
+
+    @Override
+    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
+        return FeilStrategi.standardFeilHåndtering();
+    }
+    
+    @Override
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
+        Behandling behandling = prosessinstans.getBehandling();
+
+        String fnr = felles.hentFnr(behandling);
+        Lovvalgsperiode lovvalgsperiode = felles.hentLovvalgsperiode(behandling);
+
+        Behandlingsresultat behandlingsresultat = felles.hentBehandlingsresultat(behandling);
+        if (erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)) {
+            Long medlPeriodeID = medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode);
+            felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
+        } else {
+            throw new FunksjonellException("Opprettelse av Periode i MEDL støttes ikke for behandlingsresultat type "
+                + behandlingsresultat.getType() + " og InnvilgelsesResultat type" + lovvalgsperiode.getInnvilgelsesresultat().getKode());
+        }
+
+        prosessinstans.setSteg(IV_SEND_BREV);
+    }
+
+    public boolean erPeriodeEndelig(Behandlingsresultat behandlingsresultat, Lovvalgsperiode lovvalgsperiode) {
+        return behandlingsresultat.getType() == BehandlingsresultatType.FASTSATT_LOVVALGSLAND && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET;
+    }
+}

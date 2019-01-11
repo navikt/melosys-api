@@ -5,31 +5,25 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_MEDL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AnmodningOmUnntakOppdaterBehandlingsresultatTest {
+public class OppdaterBehandlingsresultatTest {
 
     @Mock
     BehandlingsresultatRepository behandlingsresultatRepository;
 
-    AnmodningOmUnntakOppdaterBehandlingsresultat oppdaterBehandlingsresultat;
-
-    @Captor
-    private ArgumentCaptor<Behandlingsresultat> behandlingsresultatArgumentCaptor;
+    OppdaterBehandlingsresultat oppdaterBehandlingsresultat;
 
     @Before
     public void setUp() {
-        oppdaterBehandlingsresultat = new AnmodningOmUnntakOppdaterBehandlingsresultat(behandlingsresultatRepository);
+        oppdaterBehandlingsresultat = new OppdaterBehandlingsresultat(behandlingsresultatRepository);
     }
 
     @Test
@@ -47,7 +41,6 @@ public class AnmodningOmUnntakOppdaterBehandlingsresultatTest {
 
         oppdaterBehandlingsresultat.utfør(p);
 
-        verify(behandlingsresultatRepository).save(behandlingsresultatArgumentCaptor.capture());
         assertThat(behandlingsresultat.getType()).isEqualTo(BehandlingsresultatType.ANMODNING_OM_UNNTAK);
         assertThat(behandlingsresultat.getEndretAv()).isEqualTo(testbruker);
         assertThat(p.getSteg()).isEqualTo(AOU_OPPDATER_MEDL);
