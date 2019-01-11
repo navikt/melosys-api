@@ -27,7 +27,7 @@ import static no.nav.melosys.domain.ProsessSteg.*;
  * 1) ProsessType.JFR_NY_SAK:
  *     JFR_FERDIGSTILL_JOURNALPOST -> JFR_HENT_PERS_OPPL eller FEILET_MASKINELT hvis feil
  * 2) ProsessType.JFR_KNYTT:
- *     JFR_FERDIGSTILL_JOURNALPOST -> JFR_INNKOMMENDE_DOKUMENT eller FEILET_MASKINELT hvis feil
+ *     JFR_FERDIGSTILL_JOURNALPOST -> JFR_SETT_VURDER_DOKUMENT eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class FerdigstillJournalpost extends AbstraktStegBehandler {

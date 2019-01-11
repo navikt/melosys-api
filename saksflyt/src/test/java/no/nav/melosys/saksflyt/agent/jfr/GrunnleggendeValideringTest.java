@@ -40,7 +40,7 @@ public class GrunnleggendeValideringTest {
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, new Periode(LocalDate.now(), LocalDate.now().plusYears(1)));
         prosessinstans.setData(lagProsessData_nySak());
         agent.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_INNKOMMENDE_DOKUMENT);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_VURDER_JOURNALFOERINGSTYPE);
     }
 
     @Test

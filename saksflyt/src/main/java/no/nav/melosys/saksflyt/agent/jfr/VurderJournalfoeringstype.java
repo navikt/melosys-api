@@ -18,32 +18,35 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.ProsessSteg.*;
 
 /**
- * Ved mottak av nytt dokument på eksisterende sak.
- * <p>
+ * Journalføring av nytt dokument på eksisterende sak.
+ *
  * Transisjoner:
- * 1) Saken har aktiv behandling (behandlingsstatus oppdateres til VURDER_DOKUMENT):
- * JFR_INNKOMMENDE_DOKUMENT → JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
- * 2) Saken har ikke aktiv behandling og skal ikke behandles (behandlingstype null):
- * JFR_INNKOMMENDE_DOKUMENT → JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
- * 3) Saken har ikke aktiv behandling og skal behandles:
- * JFR_INNKOMMENDE_DOKUMENT → JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
+ * 1) ProsessType.JFR_NY_SAK:
+ *  JFR_VURDER_JOURNALFOERINGSTYPE → JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
+ * 2) ProsessType.JFR_KNYTT:
+ *  a) Saken har aktiv behandling (behandlingsstatus oppdateres til VURDER_DOKUMENT):
+ *  JFR_VURDER_JOURNALFOERINGSTYPE → JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
+ *  b) Saken har ikke aktiv behandling og skal ikke behandles (behandlingstype null):
+ *  JFR_VURDER_JOURNALFOERINGSTYPE → JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
+ *  c) Saken har ikke aktiv behandling og skal behandles:
+ *  JFR_VURDER_JOURNALFOERINGSTYPE → JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class InnkommendeDokument extends AbstraktStegBehandler {
+public class VurderJournalfoeringstype extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(InnkommendeDokument.class);
+    private static final Logger log = LoggerFactory.getLogger(VurderJournalfoeringstype.class);
 
     private final FagsakRepository fagsakRepository;
 
     @Autowired
-    public InnkommendeDokument(FagsakRepository fagsakRepository) {
+    public VurderJournalfoeringstype(FagsakRepository fagsakRepository) {
         this.fagsakRepository = fagsakRepository;
-        log.info("InnkommendeDokument initialisert");
+        log.info("VurderJournalfoeringstype initialisert");
     }
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.JFR_INNKOMMENDE_DOKUMENT;
+        return ProsessSteg.JFR_VURDER_JOURNALFOERINGSTYPE;
     }
 
     @Override
@@ -60,7 +63,7 @@ public class InnkommendeDokument extends AbstraktStegBehandler {
                 prosessinstans.setSteg(JFR_AKTØR_ID);
                 break;
             case JFR_KNYTT:
-                toBeNamed(prosessinstans);
+                knyttEllerNyBehandling(prosessinstans);
                 break;
             default:
                 String feilmelding = "Ukjent prosesstype: " + prosessinstans.getType();
@@ -69,10 +72,11 @@ public class InnkommendeDokument extends AbstraktStegBehandler {
                 return;
         }
 
-        log.info("Prosessinstans {} har vurdert behov for behandling av dokument", prosessinstans.getId());
+        log.info("Prosessinstans {} har vurdert journalpost {}", prosessinstans.getId(), prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID));
+        log.debug("Neste steg blir: {}", prosessinstans.getSteg());
     }
 
-    private void toBeNamed(Prosessinstans prosessinstans) throws TekniskException {
+    private void knyttEllerNyBehandling(Prosessinstans prosessinstans) throws TekniskException {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         Behandlingstype nyBehandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.class);
 

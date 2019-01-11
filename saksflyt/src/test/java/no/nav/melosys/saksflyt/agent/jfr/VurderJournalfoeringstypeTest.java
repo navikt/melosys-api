@@ -16,9 +16,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class InnkommendeDokumentTest {
+public class VurderJournalfoeringstypeTest {
 
-    private InnkommendeDokument agent;
+    private VurderJournalfoeringstype agent;
 
     private final static String SAKSNUMMER_UTEN_BEHANDLING = "MELTEST-1";
     private final static String SAKSNUMMER_MED_BEHANDLING = "MELTEST-2";
@@ -29,7 +29,7 @@ public class InnkommendeDokumentTest {
     @Before
     public void setUp() {
         FagsakRepository fagsakRepository = mock(FagsakRepository.class);
-        agent = new InnkommendeDokument(fagsakRepository);
+        agent = new VurderJournalfoeringstype(fagsakRepository);
 
         Fagsak fagsak = new Fagsak();
 

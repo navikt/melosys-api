@@ -9,7 +9,7 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
 
     // Journalføring
     JFR_VALIDERING("JFR_VALIDERING", "Grunnleggende validering"),
-    JFR_INNKOMMENDE_DOKUMENT("JFR_INNKOMMENDE_DOKUMENT", "Nytt innkommende dokument. Saksbehandler vurderer behov for opprettelse av ny behandling."),
+    JFR_VURDER_JOURNALFOERINGSTYPE("JFR_VURDER_JOURNALFOERINGSTYPE", "Nytt innkommende dokument. Saksbehandler vurderer behov for opprettelse av ny behandling."),
     JFR_AKTØR_ID("JFR_AKTØR_ID", "Henter aktørID"),
     JFR_OPPRETT_SAK_OG_BEH("JFR_OPPRETT_SAK_OG_BEH", "Oppretter ny sak og behandling i Melosys"),
     JFR_OPPRETT_SØKNAD("JFR_OPPRETT_SØKNAD", "Oppretter ny søknad i Melosys"),

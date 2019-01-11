@@ -41,7 +41,7 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('GSAK_OPPRETT_OPPGAVE', 'Oppretter
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('MOT_VURDER_AUTOMATISK_JFR', 'Vurder om journalføring kan skje automatisk');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_VALIDERING', 'Grunnleggende validering');
-INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_INNKOMMENDE_DOKUMENT', 'Nytt innkommende dokument. Saksbehandler vurderer behov for opprettelse av ny behandling.');
+INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_VURDER_JOURNALFOERINGSTYPE', 'Nytt innkommende dokument. Saksbehandler vurderer behov for opprettelse av ny behandling.');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_AKTØR_ID', 'Henter aktørID');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPRETT_SAK_OG_BEH', 'Oppretter ny sak og behandling i Melosys');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPRETT_SØKNAD', 'Oppretter ny søknad i Melosys');

@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
-import static no.nav.melosys.domain.ProsessSteg.JFR_INNKOMMENDE_DOKUMENT;
+import static no.nav.melosys.domain.ProsessSteg.JFR_VURDER_JOURNALFOERINGSTYPE;
 import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
 
 /**
@@ -113,7 +113,7 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
             return;
         }
 
-        prosessinstans.setSteg(JFR_INNKOMMENDE_DOKUMENT);
+        prosessinstans.setSteg(JFR_VURDER_JOURNALFOERINGSTYPE);
 
         log.info("Ferdig med grunnleggende validering av prosessinstans {}", prosessinstans.getId());
     }
