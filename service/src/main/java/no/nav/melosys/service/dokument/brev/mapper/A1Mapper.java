@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +16,6 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
@@ -39,14 +38,9 @@ public class A1Mapper {
         A1 a1 = new A1();
         a1.setSerienummer(behandling.getFagsak().getSaksnummer() + behandling.getId());
 
-        try {
-            a1.setOpprettelsesDato(convertToXMLGregorianCalendarRemoveTimezone(LocalDate.now()));
-        } catch (DatatypeConfigurationException e) {
-            throw new TekniskException("Konverteringsfeil");
-        }
+        a1.setOpprettelsesDato(convertToXMLGregorianCalendarRemoveTimezone(Instant.now()));
 
-        PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
-        a1.setPerson(mapPerson(personDokument));
+        a1.setPerson(mapPerson(brevData.person));
 
         List<LovvalgsperiodeType> lovvalgsperioder = hentLovvalgsperioderFraBehandlingsresultat();
         a1.setLovvalgsperiode(lovvalgsperioder.get(0));    // Alle lovvalgsperiodene har samme bestemmelse og land i Lev1
@@ -63,9 +57,9 @@ public class A1Mapper {
         a1.setHovedvirksomhet(mapHovedvirksomhet(hovedvirksomhet));
 
         virksomheter.addAll(brevData.utenlandskeVirksomheter);
-
-        a1.setBivirksomhetListe(mapBivirksomheter(virksomheter));
-
+        if (!virksomheter.isEmpty()) {
+            a1.setBivirksomhetListe(mapBivirksomheter(virksomheter));
+        }
         if (harIkkeFysiskArbeidssted(brevData.arbeidssteder)) {
             a1.setIkkeFysiskArbeidssted("true");
         }

@@ -23,8 +23,6 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
@@ -78,22 +76,8 @@ public class A1MapperTest {
         boAdresse.setPoststed("Oslo");
         boAdresse.setLand(new Land(Land.NORGE));
 
-        PersonDokument person = new PersonDokument();
-        person.kjønn = new KjoennsType();
-        person.kjønn.setKode("K");
-        person.fornavn = "Ola";
-        person.etternavn = "Nordmann";
-        person.fødselsdato = LocalDate.now();
-        person.statsborgerskap = new Land();
-        person.statsborgerskap.setKode("NO");
-
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.PERSONOPPLYSNING);
-        saksopplysning.setDokument(person);
-
         behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
-        when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(saksopplysning)));
         when(behandling.getFagsak()).thenReturn(new Fagsak());
 
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
@@ -103,11 +87,6 @@ public class A1MapperTest {
         strukturertAdresse.poststed = "Poststed";
         strukturertAdresse.region = "Region";
         strukturertAdresse.landKode = "Land";
-
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse = strukturertAdresse;
-        SoeknadDokument søknad = new SoeknadDokument();
-        søknad.arbeidUtland = Arrays.asList(arbeidUtland);
 
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(strukturertAdresse);
@@ -125,9 +104,21 @@ public class A1MapperTest {
         brevData.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
         brevData.selvstendigeForetak = new HashSet<>();
         brevData.utenlandskeVirksomheter = new ArrayList<>(Arrays.asList(utenlandksVirksomhet));
-        brevData.søknad = søknad;
         brevData.bostedsadresse = boAdresse;
         brevData.arbeidssteder = new ArrayList<>();
+        brevData.person = lagPersonDokument();
+    }
+
+    public static PersonDokument lagPersonDokument() {
+        PersonDokument person = new PersonDokument();
+        person.kjønn = new KjoennsType();
+        person.kjønn.setKode("K");
+        person.fornavn = "Ola";
+        person.etternavn = "Nordmann";
+        person.fødselsdato = LocalDate.now();
+        person.statsborgerskap = new Land();
+        person.statsborgerskap.setKode("NO");
+        return person;
     }
 
     @Test

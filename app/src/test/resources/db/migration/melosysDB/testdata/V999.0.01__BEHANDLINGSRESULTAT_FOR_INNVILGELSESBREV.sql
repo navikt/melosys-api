@@ -1,7 +1,7 @@
 insert into avklartefakta (beh_resultat_id, type, subjekt, fakta, referanse)
 values (3, 'AVKLARTE_ARBEIDSGIVER', '123456789', 'TRUE', 'ref');
 insert into avklartefakta (beh_resultat_id, type, subjekt, fakta, referanse)
-values (3, 'AG_FORRETNINGSLAND', 'AT', 'TRUE', 'ref');
+values (3, 'ARBEIDSLAND', 'AT', 'TRUE', 'ref');
 insert into lovvalg_periode(beh_resultat_id, fom_dato, tom_dato, LOVVALGSLAND, 
                             LOVVALG_BESTEMMELSE, INNVILGELSE_RESULTAT, 
                             MEDLEMSKAPSTYPE, trygde_dekning) 
@@ -35,7 +35,7 @@ insert into avklartefakta (beh_resultat_id, type, subjekt, fakta, referanse)
             'AVKLARTE_ARBEIDSGIVER', '819731322', 'TRUE', 'ref');
 insert into avklartefakta (beh_resultat_id, type, subjekt, fakta, referanse)
     values ((select behandling.id from behandling where saksnummer = 'MELTEST-1' and REGISTRERT_AV = 'K135703'), 
-            'AG_FORRETNINGSLAND', 'AT', 'TRUE', 'ref');
+            'ARBEIDSLAND', 'AT', 'TRUE', 'ref');
 insert into avklartefakta (beh_resultat_id, type, subjekt, fakta, referanse)
     values ((select behandling.id from behandling where saksnummer = 'MELTEST-1' and REGISTRERT_AV = 'K135703'), 
             'YRKESGRUPPE', null, 'YRKESAKTIV', 'ref');

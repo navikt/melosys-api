@@ -9,22 +9,25 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.Gateadresse;
+import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.JuridiskArbeidsgiverNorge;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.doksys.DokSysFasade;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.*;
@@ -34,6 +37,7 @@ import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.*;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Test;
@@ -60,7 +64,7 @@ public final class DokumentServiceTest {
 
     public DokumentServiceTest() throws Exception {
         this.dokSysFasade = mock(DokSysFasade.class);
-        this.instans = lagDokumentService(dokSysFasade);
+        this.instans = lagDokumentService(dokSysFasade, null);
     }
 
     @Test
@@ -77,7 +81,9 @@ public final class DokumentServiceTest {
         Pac4jAuthenticationToken auth = new Pac4jAuthenticationToken(Collections.singletonList(oidcProfile));
         SecurityContextHolder.getContext().setAuthentication(auth);
         BrevbestillingDto brevbestilling = lagBrevBestillingDto(RolleType.BRUKER);
-        byte[] resultat = instans.produserUtkast(BEHANDLINGSID, ProduserbartDokument.INNVILGELSE_YRKESAKTIV, brevbestilling);
+
+        DokumentService dokumentServiceMedMockVelger = lagDokumentService(dokSysFasade, lagBrevdatabyggerVelgerMock(brevbestilling));
+        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, ProduserbartDokument.INNVILGELSE_YRKESAKTIV, brevbestilling);
         assertThat(resultat).isNull();
         verify(dokSysFasade).produserDokumentutkast(any(DokumentbestillingMetadata.class), any(Object.class));
     }
@@ -131,18 +137,34 @@ public final class DokumentServiceTest {
         assertThat(unntak).isInstanceOf(IllegalArgumentException.class).hasNoCause().hasMessageContaining("Ingen gyldig");
     }
 
-    private final BrevData lagBrevData(RolleType mottakerRolle) {
-        BrevDataA1 brevData = new BrevDataA1();
-        Virksomhet arbeidsgiver = new Virksomhet("Virker av og til", "987654321", null);
-        brevData.norskeVirksomheter = Collections.singletonList(arbeidsgiver);
-
+    private static BrevData lagBrevData(RolleType mottakerRolle) {
+        BrevDataA1 brevDataA1 = new BrevDataA1();
+        brevDataA1.mottaker = mottakerRolle;
+        Virksomhet arbeidsgiver = new Virksomhet("Virker av og til", "987654321", lagStrukturertAdresse());
+        brevDataA1.norskeVirksomheter = new ArrayList<>(Arrays.asList(arbeidsgiver, arbeidsgiver));
+        brevDataA1.bostedsadresse = lagBostedsadresse();
+        brevDataA1.yrkesgruppe = YrkesgruppeType.FLYENDE_PERSONELL;
+        brevDataA1.selvstendigeForetak = Collections.emptySet();
+        brevDataA1.utenlandskeVirksomheter = Collections.emptyList();
+        brevDataA1.person = lagPersonDokument();
+        brevDataA1.arbeidssteder = new ArrayList<>();
         BrevDataVedlegg vedlegg = new BrevDataVedlegg("Saksbehandler");
         vedlegg.mottaker = mottakerRolle;
-        vedlegg.brevDataA1 = brevData;
+        vedlegg.brevDataA1 = brevDataA1;
         return vedlegg;
     }
 
-    private static DokumentService lagDokumentService(DokSysFasade dokSysFasade) throws Exception {
+    private static StrukturertAdresse lagStrukturertAdresse() {
+        StrukturertAdresse sadr = new StrukturertAdresse();
+        sadr.landKode = "NL";
+        sadr.poststed = "Sted";
+        sadr.postnummer = "1234";
+        sadr.gatenavn = "Gate";
+        sadr.husnummer = "1";
+        return sadr;
+    }
+
+    private static DokumentService lagDokumentService(DokSysFasade dokSysFasade, BrevDataByggerVelger brevdatabyggervelger) throws Exception {
         Aktoer aktør = lagAktør(RolleType.BRUKER);
         Behandling behandling = lagBehandling();
         BehandlingRepository behandlingRepository = mockBehandlingRepository(behandling);
@@ -150,11 +172,14 @@ public final class DokumentServiceTest {
         Avklartefakta arbeidsgiverFaktum = lagAvklarteFakta(AVKLARTE_ARBEIDSGIVER, ORGNR);
         Avklartefakta yrkesgruppeFaktum = lagAvklarteFakta(YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name(), null);
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(Arrays.asList(arbeidsgiverFaktum,
-                lagAvklarteFakta(AG_FORRETNINGSLAND, "SE"),
+                lagAvklarteFakta(ARBEIDSLAND, "SE"),
                 yrkesgruppeFaktum));
         BehandlingsresultatRepository behandlingsresultatRepository = mockBehandlingsresultatRepo(behandlingsresultat);
         AvklarteFaktaRepository avklarteFaktaRepository = mockAvklarteFaktaRepository(arbeidsgiverFaktum, yrkesgruppeFaktum);
-        BrevDataByggerVelger brevdatabyggervelger = lagBrevdataByggerVelger(tpsFasade, avklarteFaktaRepository, behandlingsresultatRepository);
+        if (brevdatabyggervelger == null) {
+            brevdatabyggervelger = lagBrevdataByggerVelger(tpsFasade, avklarteFaktaRepository, behandlingsresultatRepository);
+        }
+
         BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository);
         return new DokumentService(behandlingRepository, mock(FagsakRepository.class), brevDataService, dokSysFasade, mock(JoarkFasade.class), mock(Binge.class),
                 mock(ProsessinstansRepository.class), brevdatabyggervelger);
@@ -179,9 +204,45 @@ public final class DokumentServiceTest {
         dok.juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
         dok.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = Collections.singletonList(ORGNR);
         Saksopplysning søknad = lagSaksopplysning(SaksopplysningType.SØKNAD, dok);
-        Saksopplysning personopplysninger = lagSaksopplysning(SaksopplysningType.PERSONOPPLYSNING, new PersonDokument());
+        Saksopplysning personopplysninger = lagSaksopplysning(SaksopplysningType.PERSONOPPLYSNING, lagPersonDokument());
         behandling.setSaksopplysninger(new HashSet<>(Arrays.asList(søknad, personopplysninger)));
         return behandling;
+    }
+
+    private static PersonDokument lagPersonDokument() {
+        PersonDokument resultat = new PersonDokument();
+        resultat.kjønn = lagKjoennsType("K");
+        resultat.statsborgerskap = new Land(Land.BELGIA);
+        resultat.fornavn = "For";
+        resultat.etternavn = "Etter";
+        resultat.fødselsdato = LocalDate.ofYearDay(1900, 1);
+        resultat.bostedsadresse = lagBostedsadresse();
+        return resultat;
+    }
+
+    private static KjoennsType lagKjoennsType(String kode) {
+        KjoennsType kjønn = new KjoennsType();
+        kjønn.setKode(kode);
+        return kjønn;
+    }
+
+    private static Bostedsadresse lagBostedsadresse() {
+        Bostedsadresse badr = new Bostedsadresse();
+        badr.setLand(new Land(Land.BELGIA));
+        badr.setPoststed("Sted");
+        badr.setPostnr("1234");
+        Gateadresse gadr = lagGateAdresse();
+        badr.setGateadresse(gadr);
+        return badr;
+    }
+
+    private static Gateadresse lagGateAdresse() {
+        Gateadresse gadr = new Gateadresse();
+        gadr.setGatenavn("Gate");
+        gadr.setGatenummer(1);
+        gadr.setHusbokstav("A");
+        gadr.setHusnummer(123);
+        return gadr;
     }
 
     private static AvklarteFaktaRepository mockAvklarteFaktaRepository(Avklartefakta arbeidsgiverFaktum, Avklartefakta yrkesgruppeFaktum) {
@@ -197,25 +258,57 @@ public final class DokumentServiceTest {
             throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         AvklartefaktaDtoKonverterer faktaKonverterer = new AvklartefaktaDtoKonverterer();
         AvklartefaktaService avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, faktaKonverterer);
+        EregFasade eregFasade = mockEregFasade();
+        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
+        KodeverkRegister kodeverkRegister = mockKodeverkRegister();
+        KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
+        LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
+        VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
+        UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
+        BrevDataByggerVelger brevdatabyggervelger = new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, lovvalgsperiodeService, utenlandskMyndighetRepository,
+                vilkaarsresultatRepository);
+        return brevdatabyggervelger;
+    }
+
+    public BrevDataByggerVelger lagBrevdatabyggerVelgerMock(BrevbestillingDto bestillingDto) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        BrevDataByggerVedlegg brevDataByggerVedlegg = mock(BrevDataByggerVedlegg.class);
+
+        BrevDataByggerVelger brevdatabyggervelger = mock(BrevDataByggerVelger.class);
+        if (bestillingDto != null) {
+            when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(lagBrevData(bestillingDto.mottaker));
+            when(brevdatabyggervelger.hent(any(), eq(bestillingDto))).thenReturn(brevDataByggerVedlegg);
+        }
+        else {
+            when(brevdatabyggervelger.hent(any())).thenReturn(brevDataByggerVedlegg);
+            when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(lagBrevData(RolleType.BRUKER));
+        }
+
+        return brevdatabyggervelger;
+    }
+
+    private static EregFasade mockEregFasade() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         EregFasade eregFasade = mock(EregFasade.class);
         OrganisasjonDokument orgDok = new OrganisasjonDokument();
         orgDok.setNavn(Collections.singletonList("Virker av og til"));
         OrganisasjonsDetaljer organisasjonDetaljer = new OrganisasjonsDetaljer();
         SemistrukturertAdresse adresse = new SemistrukturertAdresse();
         adresse.setLandkode("NO");
-        Periode gyldighetsperiode = new Periode();
+        adresse.setAdresselinje1("Gate 1");
+        adresse.setPostnr("1234");
+        Periode gyldighetsperiode = new Periode(LocalDate.now().minusYears(10), LocalDate.now().plusYears(10));
         adresse.setGyldighetsperiode(gyldighetsperiode);
         organisasjonDetaljer.forretningsadresse = Arrays.asList(adresse);
         orgDok.setOrganisasjonDetaljer(organisasjonDetaljer);
+        orgDok.setOrgnummer(ORGNR);
         when(eregFasade.hentOrganisasjon(ORGNR)).thenReturn(lagSaksopplysning(SaksopplysningType.ORGANISASJON, orgDok));
-        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
+        return eregFasade;
+    }
+
+    private static KodeverkRegister mockKodeverkRegister() {
         KodeverkRegister kodeverkRegister = mock(KodeverkRegister.class);
-        KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
-        LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
-        VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
-        UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
-        BrevDataByggerVelger brevdatabyggervelger = new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, lovvalgsperiodeService, utenlandskMyndighetRepository, vilkaarsresultatRepository);
-        return brevdatabyggervelger;
+        Kodeverk kodeverk = new Kodeverk("", Collections.emptyMap());
+        when(kodeverkRegister.hentKodeverk(FellesKodeverk.POSTNUMMER.getNavn())).thenReturn(kodeverk);
+        return kodeverkRegister;
     }
 
     private static Behandlingsresultat lagBehandlingsresultat(List<Avklartefakta> faktaliste) {
@@ -225,6 +318,7 @@ public final class DokumentServiceTest {
         periode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1);
         periode.setFom(LocalDate.now());
         periode.setTom(LocalDate.now());
+        periode.setLovvalgsland(Landkoder.NO);
         List<Lovvalgsperiode> perioder = Arrays.asList(periode);
         behandlingsresultat.setLovvalgsperioder(new HashSet<>(perioder));
         return behandlingsresultat;
@@ -276,5 +370,4 @@ public final class DokumentServiceTest {
         aktør.setRolle(type);
         return aktør;
     }
-
 }

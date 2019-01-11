@@ -18,9 +18,8 @@ import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
+import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.junit.Before;
@@ -80,13 +79,8 @@ public class AttestMapperTest {
         person.statsborgerskap = new Land();
         person.statsborgerskap.setKode("NO");
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.PERSONOPPLYSNING);
-        saksopplysning.setDokument(person);
-
         behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
-        when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(saksopplysning)));
         when(behandling.getFagsak()).thenReturn(new Fagsak());
 
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
@@ -99,8 +93,6 @@ public class AttestMapperTest {
 
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = strukturertAdresse;
-        SoeknadDokument søknad = new SoeknadDokument();
-        søknad.arbeidUtland = Arrays.asList(arbeidUtland);
 
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(strukturertAdresse);
@@ -121,9 +113,9 @@ public class AttestMapperTest {
         a1Data.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
         a1Data.selvstendigeForetak = new HashSet<>();
         a1Data.utenlandskeVirksomheter = new ArrayList<>(Arrays.asList(utenlandksVirksomhet));
-        a1Data.søknad = søknad;
         a1Data.bostedsadresse = boAdresse;
         a1Data.arbeidssteder = Arrays.asList(fysiskArbeidssted, ikkeFysiskArbeidssted);
+        a1Data.person = person;
 
         brevData = new BrevDataVedlegg("Z1234567");
         brevData.brevDataA1 = a1Data;

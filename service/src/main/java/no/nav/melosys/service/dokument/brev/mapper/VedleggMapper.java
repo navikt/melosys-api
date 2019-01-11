@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
+import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 
 public class VedleggMapper  {
 
@@ -19,12 +20,12 @@ public class VedleggMapper  {
         this.vedlegg = new VedleggType();
     }
 
-    public void map(BrevDataA1 brevDataA1, BrevDataA001 brevDataA001) throws TekniskException {
-        if (brevDataA1 != null) {
-            map(brevDataA1);
+    public void map(BrevDataVedlegg vedleggData) throws TekniskException {
+        if (vedleggData.brevDataA1 != null) {
+            map(vedleggData.brevDataA1);
         }
-        if (brevDataA001 != null) {
-            map(brevDataA001);
+        if (vedleggData.brevDataA001 != null) {
+            map(vedleggData.brevDataA001);
         }
     }
 

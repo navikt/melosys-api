@@ -46,7 +46,7 @@ public class BrevDataByggerA1 extends BrevDatabyggerBase implements BrevDataBygg
         brevData.selvstendigeForetak = hentAvklarteSelvstendigeForetakOrgnumre();
         brevData.bostedsadresse = hentBostedsadresse();
         brevData.arbeidssteder = hentArbeidssteder();
-        brevData.søknad = søknad;
+        brevData.person = person;
 
         return brevData;
     }
