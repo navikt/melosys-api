@@ -1,7 +1,5 @@
 package no.nav.melosys.saksflyt.agent.gsak;
 
-import java.util.Properties;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -55,8 +53,6 @@ public class OpprettOppgaveTest {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(behandling);
         p.setType(ProsessType.JFR_NY_SAK);
-        Properties properties = new Properties();
-        p.addData(properties);
 
         when(behandlingRepository.findOne(anyLong())).thenReturn(behandling);
 
@@ -83,8 +79,6 @@ public class OpprettOppgaveTest {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(behandling);
         p.setType(ProsessType.JFR_NY_BEHANDLING);
-        Properties properties = new Properties();
-        p.addData(properties);
 
         when(behandlingRepository.findOne(anyLong())).thenReturn(behandling);
 

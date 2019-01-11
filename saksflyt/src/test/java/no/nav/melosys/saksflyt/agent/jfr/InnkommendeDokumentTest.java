@@ -20,7 +20,6 @@ public class InnkommendeDokumentTest {
 
     private InnkommendeDokument agent;
 
-    private final static String SAKSNUMMER_FINNES_IKKE = "MELTEST-0";
     private final static String SAKSNUMMER_UTEN_BEHANDLING = "MELTEST-1";
     private final static String SAKSNUMMER_MED_BEHANDLING = "MELTEST-2";
 
@@ -44,19 +43,27 @@ public class InnkommendeDokumentTest {
     }
 
     @Test
-    public void fagsakFinnesIkke() {
+    public void ukjentProsesstype_Feiler() {
         Prosessinstans p = new Prosessinstans();
-        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_FINNES_IKKE);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
+        p.setType(ProsessType.IVERKSETT_VEDTAK);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
         assertThat(p.getHendelser()).isNotEmpty();
-        assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Det finnes ingen fagsak med saksnummer " + SAKSNUMMER_FINNES_IKKE);
+        assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Ukjent prosesstype: " + p.getType());
     }
 
     @Test
-    public void fagsakMedBehandling() {
+    public void nySak_tilHentAktørID() {
         Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.JFR_NY_SAK);
+        agent.utførSteg(p);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
+    }
+
+    @Test
+    public void knyttTilFagsakMedAktivBehandling_tilOppdaterJournalpost() {
+        Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
         agent.utførSteg(p);
@@ -64,16 +71,18 @@ public class InnkommendeDokumentTest {
     }
 
     @Test
-    public void behandlingstypeNull() {
+    public void knyttMedBehandlingstypeNull_tilOppdaterJournalpost() {
         Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
     }
 
     @Test
-    public void fagsakUtenBehandling() {
+    public void knyttTilFagsakUtenAktivBehandling_tilNyBehandling() {
         Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
         agent.utførSteg(p);

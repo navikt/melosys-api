@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
 import java.util.Collections;
-import java.util.Properties;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
@@ -44,8 +43,6 @@ public class AvsluttFagsakOgBehandlingTest {
         p.setBehandling(new Behandling());
         p.getBehandling().setType(Behandlingstype.SØKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
-        Properties properties = new Properties();
-        p.addData(properties);
 
         Behandling behandling = new Behandling();
 

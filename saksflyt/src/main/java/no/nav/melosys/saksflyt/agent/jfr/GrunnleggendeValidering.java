@@ -12,12 +12,13 @@ import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
-import static no.nav.melosys.domain.ProsessSteg.*;
+import static no.nav.melosys.domain.ProsessSteg.JFR_INNKOMMENDE_DOKUMENT;
 import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
 
 /**
@@ -47,7 +48,6 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void utfør(Prosessinstans prosessinstans) throws TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
@@ -64,6 +64,16 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
             if (periode == null || periode.getFom() == null) {
                 log.error("Funksjonell feil for prosessinstans {}: Søknadsperioden er ikke oppgitt eller mangler fom.", prosessinstans.getId());
                 håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Søknadsperioden er ikke oppgitt eller mangler fom.", null);
+                return;
+            }
+        }
+
+        if (prosessType == ProsessType.JFR_KNYTT) {
+            String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
+            if (StringUtils.isEmpty(saksnummer)) {
+                String feilmelding = "Det finnes ingen fagsak med saksnummer " + saksnummer;
+                log.error(feilmelding);
+                håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
                 return;
             }
         }
@@ -103,19 +113,8 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
             return;
         }
 
-        switch (prosessType) {
-            case JFR_NY_SAK:
-                prosessinstans.setSteg(JFR_AKTØR_ID);
-                break;
-            case JFR_KNYTT:
-                prosessinstans.setSteg(JFR_INNKOMMENDE_DOKUMENT);
-                break;
-            default:
-                String feilmelding = "Ukjent prosess type: " + prosessType;
-                log.error("{}: {}", prosessinstans.getId(), feilmelding);
-                håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
-                return;
-        }
+        prosessinstans.setSteg(JFR_INNKOMMENDE_DOKUMENT);
+
         log.info("Ferdig med grunnleggende validering av prosessinstans {}", prosessinstans.getId());
     }
 

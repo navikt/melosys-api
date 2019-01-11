@@ -51,7 +51,7 @@ public class OpprettFagsakOgBehandlingTest {
         properties.setProperty(ProsessDataKey.AKTØR_ID.getKode(), "FJERNET93");
         properties.setProperty(ProsessDataKey.ARBEIDSGIVER.getKode(), "104568393");
 
-        p.addData(properties);
+        p.setData(properties);
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
         fagsak.setBehandlinger(Collections.singletonList(new Behandling()));

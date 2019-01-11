@@ -1,5 +1,9 @@
 package no.nav.melosys.domain;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Property keys brukt i saksflyt
  */
@@ -30,11 +34,25 @@ public enum ProsessDataKey {
 
     private String kode;
 
+    private static final Map<String, ProsessDataKey> KEYS;
+
+    static {
+        Map<String, ProsessDataKey> map = new ConcurrentHashMap<>();
+        for (ProsessDataKey key : ProsessDataKey.values()) {
+            map.put(key.getKode(), key);
+        }
+        KEYS = Collections.unmodifiableMap(map);
+    }
+
     ProsessDataKey(String kode) {
         this.kode = kode;
     }
 
     public String getKode() {
         return kode;
+    }
+
+    public static ProsessDataKey fraKode(String kode) {
+        return KEYS.get(kode);
     }
 }

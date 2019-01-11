@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
+import static no.nav.melosys.domain.ProsessSteg.*;
 
 /**
  * Ved mottak av nytt dokument på eksisterende sak.
@@ -55,17 +55,28 @@ public class InnkommendeDokument extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
+        switch (prosessinstans.getType()) {
+            case JFR_NY_SAK:
+                prosessinstans.setSteg(JFR_AKTØR_ID);
+                break;
+            case JFR_KNYTT:
+                toBeNamed(prosessinstans);
+                break;
+            default:
+                String feilmelding = "Ukjent prosesstype: " + prosessinstans.getType();
+                log.error("{}: {}", prosessinstans.getId(), feilmelding);
+                håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
+                return;
+        }
+
+        log.info("Prosessinstans {} har vurdert behov for behandling av dokument", prosessinstans.getId());
+    }
+
+    private void toBeNamed(Prosessinstans prosessinstans) throws TekniskException {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         Behandlingstype nyBehandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.class);
 
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
-        if (fagsak == null) {
-            String feilmelding = "Det finnes ingen fagsak med saksnummer " + saksnummer;
-            log.error(feilmelding);
-            håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
-            return;
-        }
-
         Behandling aktivBehandling = fagsak.getAktivBehandling();
         if (aktivBehandling == null && nyBehandlingstype != null) {
             // Ny behandling trenges.
@@ -74,8 +85,7 @@ public class InnkommendeDokument extends AbstraktStegBehandler {
         } else {
             // Dokumentet journalføres direkte.
             prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
-        }
 
-        log.info("Prosessinstans {} har vurdert behov for behandling av dokument", prosessinstans.getId());
+        }
     }
 }

@@ -160,8 +160,6 @@ public class IverksettVedtakSendBrevTest {
         p.getBehandling().setId(BEHANDLINGSID);
         p.getBehandling().setType(Behandlingstype.SØKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
-        Properties properties = new Properties();
-        p.addData(properties);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID));
         instans.utførSteg(p);
 

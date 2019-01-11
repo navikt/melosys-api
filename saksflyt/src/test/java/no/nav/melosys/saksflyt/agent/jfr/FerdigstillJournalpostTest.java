@@ -80,7 +80,7 @@ public class FerdigstillJournalpostTest {
         prosessinstans.setType(prosessType);
         Properties properties = new Properties();
         properties.setProperty(ProsessDataKey.JOURNALPOST_ID.getKode(), journalpostID);
-        prosessinstans.addData(properties);
+        prosessinstans.setData(properties);
         return prosessinstans;
     }
 }
