@@ -8,8 +8,6 @@ import java.util.List;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,20 +20,16 @@ public class FagsakService {
 
     private final FagsakRepository fagsakRepository;
 
-    private final BehandlingRepository behandlingRepository;
-
-    private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final BehandlingService behandlingService;
 
     private final TpsFasade tpsFasade;
 
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository,
-                         BehandlingRepository behandlingRepository,
-                         BehandlingsresultatRepository behandlingsresultatRepository,
+                         BehandlingService behandlingService,
                          TpsFasade tpsFasade) {
         this.fagsakRepository = fagsakRepository;
-        this.behandlingRepository = behandlingRepository;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.behandlingService = behandlingService;
         this.tpsFasade = tpsFasade;
     }
 
@@ -99,31 +93,13 @@ public class FagsakService {
 
         lagre(fagsak);
 
-        Behandling behandling = new Behandling();
+        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, behandlingstype);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
-        behandling.setFagsak(fagsak);
-        behandling.setRegistrertDato(nå);
-        behandling.setEndretDato(nå);
-
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        behandling.setType(behandlingstype);
-        behandlingRepository.save(behandling);
-
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setBehandling(behandling);
-        behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
-        behandlingsresultat.setType(BehandlingsresultatType.IKKE_FASTSATT);
-        behandlingsresultatRepository.save(behandlingsresultat);
 
         return fagsak;
     }
 
     private String hentNesteSaksnummer() {
-        Long sekvensVerdi = fagsakRepository.hentNesteSekvensVerdi();
-        if (sekvensVerdi == null) {
-            throw new RuntimeException("Henting av neste SekvensVerdi fra sekvensen feilet.");
-        } else {
-            return FAGSAKID_PREFIX + Long.toString(sekvensVerdi);
-        }
+        return FAGSAKID_PREFIX + fagsakRepository.hentNesteSekvensVerdi();
     }
 }

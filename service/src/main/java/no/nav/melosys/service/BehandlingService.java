@@ -1,16 +1,16 @@
 package no.nav.melosys.service;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsstatus;
-import no.nav.melosys.domain.TidligereMedlemsperiode;
-import no.nav.melosys.domain.TidligereMedlemsperiodeId;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,12 +21,33 @@ public class BehandlingService {
 
     private final BehandlingRepository behandlingRepository;
 
+    private final BehandlingsresultatRepository behandlingsresultatRepository;
+
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
 
     @Autowired
-    public BehandlingService(BehandlingRepository behandlingRepository, TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository) {
+    public BehandlingService(BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository, TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository) {
         this.behandlingRepository = behandlingRepository;
+        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
+    }
+
+    /**
+     * Knytt medlemsperioder fra MEDL til behandlingen.
+     */
+    @Transactional
+    public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) throws FunksjonellException {
+        Behandling behandling = behandlingRepository.findOne(behandlingID);
+        if (behandling == null) {
+            throw new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke.");
+        }
+        if (behandling.getStatus() != Behandlingsstatus.UNDER_BEHANDLING) {
+            throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
+        }
+        List<TidligereMedlemsperiode> tidligereMedlemsperioder = periodeIder.stream()
+            .map(pid -> new TidligereMedlemsperiode(behandlingID, pid)).collect(Collectors.toList());
+        tidligereMedlemsperiodeRepository.deleteById_BehandlingId(behandlingID);
+        tidligereMedlemsperiodeRepository.save(tidligereMedlemsperioder);
     }
 
     /**
@@ -49,19 +70,31 @@ public class BehandlingService {
         behandlingRepository.save(behandling);
     }
 
+    /**
+     * - Oppretter en ny behandling.
+     * - Oppretter tom behandlingsresultat.
+     */
     @Transactional
-    public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) throws FunksjonellException {
-        Behandling behandling = behandlingRepository.findOne(behandlingID);
-        if (behandling == null) {
-            throw new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke.");
-        }
-        if (behandling.getStatus() != Behandlingsstatus.UNDER_BEHANDLING) {
-            throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
-        }
-        List<TidligereMedlemsperiode> tidligereMedlemsperioder = periodeIder.stream()
-            .map(pid -> new TidligereMedlemsperiode(behandlingID, pid)).collect(Collectors.toList());
-        tidligereMedlemsperiodeRepository.deleteById_BehandlingId(behandlingID);
-        tidligereMedlemsperiodeRepository.save(tidligereMedlemsperioder);
+    public Behandling nyBehandling(Fagsak fagsak, Behandlingsstatus behandlingsstatus, Behandlingstype behandlingstype) {
+        Instant nå = Instant.now();
+
+        Behandling behandling = new Behandling();
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        behandling.setFagsak(fagsak);
+        behandling.setRegistrertDato(nå);
+        behandling.setEndretDato(nå);
+
+        behandling.setStatus(behandlingsstatus);
+        behandling.setType(behandlingstype);
+        behandlingRepository.save(behandling);
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandling(behandling);
+        behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
+        behandlingsresultat.setType(BehandlingsresultatType.IKKE_FASTSATT);
+        behandlingsresultatRepository.save(behandlingsresultat);
+
+        return behandling;
     }
 
     public List<Long> hentMedlemsperioder(long behandlingID) {
