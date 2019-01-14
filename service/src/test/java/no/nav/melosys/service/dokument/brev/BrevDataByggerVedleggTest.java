@@ -60,6 +60,7 @@ public class BrevDataByggerVedleggTest {
         BrevbestillingDto brevbestilling = new BrevbestillingDto();
         brevbestilling.mottaker = RolleType.BRUKER;
         brevbestilling.fritekst = "FRITEKST";
+        brevbestilling.begrunnelseKode = "tom";
 
         BrevDataBygger brevDataByggerVedlegg = new BrevDataByggerVedlegg(brevDatabyggerA001, brevbestilling);
         BrevDataVedlegg brevData = (BrevDataVedlegg) brevDataByggerVedlegg.lag(behandling, "Z123456");

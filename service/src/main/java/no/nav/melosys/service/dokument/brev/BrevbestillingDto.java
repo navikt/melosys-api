@@ -7,4 +7,6 @@ public class BrevbestillingDto {
     public RolleType mottaker;
 
     public String fritekst;
+
+    public String begrunnelseKode;
 }

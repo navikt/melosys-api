@@ -10,6 +10,8 @@ public class BrevData {
 
     public String fritekst;
 
+    public String begrunnelseKode;
+
     public BrevData(BrevbestillingDto brevbestillingDto) {
         this(brevbestillingDto, SubjectHandler.getInstance().getUserID());
     }
@@ -18,6 +20,7 @@ public class BrevData {
         this.saksbehandler = saksbehandler;
         this.mottaker = brevbestillingDto.mottaker;
         this.fritekst = brevbestillingDto.fritekst;
+        this.begrunnelseKode = brevbestillingDto.begrunnelseKode;
     }
 
     public BrevData() { }
