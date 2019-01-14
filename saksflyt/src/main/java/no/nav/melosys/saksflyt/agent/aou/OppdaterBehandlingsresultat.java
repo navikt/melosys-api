@@ -50,10 +50,9 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
+
         Long behandlingID = prosessinstans.getBehandling().getId();
-
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandlingID);
-
         behandlingsresultat.setType(BehandlingsresultatType.ANMODNING_OM_UNNTAK);
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
         behandlingsresultatRepository.save(behandlingsresultat);

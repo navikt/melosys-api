@@ -38,12 +38,10 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private OppdaterMedlFelles felles;
 
     @Autowired
-    public OppdaterMedl(MedlFasade medlFasade,
-                        OppdaterMedlFelles felles) {
+    public OppdaterMedl(MedlFasade medlFasade, OppdaterMedlFelles felles) {
         this.felles = felles;
-
-        log.info("AnmodningOmUnntakOppdaterMEDL initialisert");
         this.medlFasade = medlFasade;
+        log.info("AnmodningOmUnntakOppdaterMEDL initialisert");
     }
 
     @Override

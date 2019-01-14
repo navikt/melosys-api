@@ -7,7 +7,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
@@ -40,17 +39,14 @@ public class SendBrev extends AbstraktStegBehandler {
     private final DokumentSystemService dokumentService;
     private final BrevDataByggerVelger brevDataByggerVelger;
     private final BehandlingRepository behandlingRepository;
-    private final BehandlingsresultatRepository behandlingsResultatRepo;
 
     @Autowired
     public SendBrev(DokumentSystemService dokumentService,
                     BrevDataByggerVelger brevDataByggerVelger,
-                    BehandlingRepository behandlingRepository,
-                    BehandlingsresultatRepository behandlingsResultatRepo) {
+                    BehandlingRepository behandlingRepository) {
         this.dokumentService = dokumentService;
         this.brevDataByggerVelger = brevDataByggerVelger;
         this.behandlingRepository = behandlingRepository;
-        this.behandlingsResultatRepo = behandlingsResultatRepo;
 
         log.info("AnmodningOmUnntakSendBrev initialisert");
     }
@@ -97,6 +93,6 @@ public class SendBrev extends AbstraktStegBehandler {
         brevData.mottaker = mottaker;
 
         dokumentService.produserDokument(behandling.getId(), dokumentType, brevData);
-        log.info("Sendt brevet '{}'", dokumentType);
+        log.info("Sendt brevet '{}', for behandling {}", dokumentType, behandling.getId());
     }
 }

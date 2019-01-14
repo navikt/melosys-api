@@ -4,7 +4,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
@@ -16,9 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -41,9 +38,6 @@ public class SendBrevTest {
     @Mock
     private BehandlingRepository behandlingRepository;
 
-    @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
-
     private Prosessinstans p;
     private SendBrev agent;
 
@@ -62,7 +56,7 @@ public class SendBrevTest {
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
         p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.ANMODNING_OM_UNNTAK.getKode());
 
-        agent = new SendBrev(dokService, byggerVelger, behandlingRepository, behandlingsresultatRepository);
+        agent = new SendBrev(dokService, byggerVelger, behandlingRepository);
     }
 
     @Test

@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterMedlTest {
 
-    private OppdaterMedlBase agent;
+    private OppdaterMedl agent;
 
     @Mock
     private MedlFasade medlFasade;
@@ -47,7 +47,7 @@ public class OppdaterMedlTest {
     @Before
     public void setUp() {
         OppdaterMedlFelles felles = new OppdaterMedlFelles(tpsFasade, behandlingsresultatRepository, lovvalgsperiodeRepository);
-        agent = new OppdaterMedlBase(medlFasade, felles);
+        agent = new OppdaterMedl(medlFasade, felles);
 
         p = new Prosessinstans();
         Fagsak fagsak = new Fagsak();

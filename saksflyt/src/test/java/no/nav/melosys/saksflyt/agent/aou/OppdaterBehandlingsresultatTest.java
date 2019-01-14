@@ -34,7 +34,6 @@ public class OppdaterBehandlingsresultatTest {
         p.setType(ProsessType.ANMODNING_OM_UNNTAK);
         String testbruker = "Z097";
         p.setData(ProsessDataKey.SAKSBEHANDLER, testbruker);
-        p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.ANMODNING_OM_UNNTAK.getKode());
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);

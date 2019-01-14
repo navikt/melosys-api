@@ -27,20 +27,18 @@ import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
  *  IV_OPPDATER_MEDL -> IV_SEND_BREV eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class OppdaterMedlBase extends AbstraktStegBehandler {
+public class OppdaterMedl extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OppdaterMedlBase.class);
+    private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
     private final MedlFasade medlFasade;
     private OppdaterMedlFelles felles;
 
     @Autowired
-    public OppdaterMedlBase(MedlFasade medlFasade,
-                            OppdaterMedlFelles felles) {
-
-        log.info("IverksetteVedtakOppdaterMEDL initialisert");
+    public OppdaterMedl(MedlFasade medlFasade, OppdaterMedlFelles felles) {
         this.medlFasade = medlFasade;
         this.felles = felles;
+        log.info("IverksetteVedtakOppdaterMEDL initialisert");
     }
 
     @Override

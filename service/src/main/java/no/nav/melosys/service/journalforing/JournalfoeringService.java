@@ -1,18 +1,19 @@
 package no.nav.melosys.service.journalforing;
 
-import java.time.LocalDateTime;
-
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.service.ProsessinstansService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,23 +22,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class JournalfoeringService {
 
-    private final Binge binge;
-
     private final JoarkFasade joarkFasade;
-
-    private final ProsessinstansRepository prosessinstansRepo;
 
     private final OppgaveService oppgaveService;
 
+    private final ProsessinstansService prosessinstansService;
+
     @Autowired
-    public JournalfoeringService(Binge binge,
+    public JournalfoeringService(
                                  JoarkFasade joarkFasade,
-                                 ProsessinstansRepository prosessinstansRepo,
-                                 OppgaveService oppgaveService) {
-        this.binge = binge;
+                                 OppgaveService oppgaveService,
+                                 ProsessinstansService prosessinstansService) {
         this.joarkFasade = joarkFasade;
-        this.prosessinstansRepo = prosessinstansRepo;
         this.oppgaveService = oppgaveService;
+        this.prosessinstansService = prosessinstansService;
     }
 
     public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
@@ -72,16 +70,7 @@ public class JournalfoeringService {
             prosessinstans.setData(ProsessDataKey.REPRESENTANT, journalfoeringDto.getRepresentantID());
         }
 
-        if (SubjectHandler.getInstance().getUserID() != null) {
-            prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
-        }
-
-        LocalDateTime nå = LocalDateTime.now();
-        prosessinstans.setEndretDato(nå);
-        prosessinstans.setRegistrertDato(nå);
-        prosessinstansRepo.save(prosessinstans);
-        binge.leggTil(prosessinstans);
-
+        prosessinstansService.lagreProsessinstans(prosessinstans);
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
@@ -107,16 +96,8 @@ public class JournalfoeringService {
         if (journalfoeringDto.getBehandlingstype() != null) {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, journalfoeringDto.getBehandlingstype());
         }
-        if (SubjectHandler.getInstance().getUserID() != null) {
-            prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
-        }
 
-        LocalDateTime nå = LocalDateTime.now();
-        prosessinstans.setEndretDato(nå);
-        prosessinstans.setRegistrertDato(nå);
-        prosessinstansRepo.save(prosessinstans);
-        binge.leggTil(prosessinstans);
-
+        prosessinstansService.lagreProsessinstans(prosessinstans);
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
