@@ -108,10 +108,8 @@ public class BrevDataService {
      */
     @Transactional(propagation = Propagation.MANDATORY)
     public Element lagBrevXML(ProduserbartDokument produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandling.getId());
-        if (behandlingsresultat == null) {
-            throw new TekniskException("Finner ingen behandlingsresultat for behandlingid");
-        }
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
+            .orElseThrow(() -> new TekniskException("Finner ingen behandlingsresultat for behandlingid"));
 
         Element brevXmlElement;
         try {

@@ -53,7 +53,7 @@ public class IverksettVedtakSendBrevTest {
         when(byggerVelger.hent(any())).thenReturn(brevDataByggerVedlegg);
 
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
-        when(behandlingRepository.findOneWithSaksopplysningerById(eq(behandling.getId()))).thenReturn(behandling);
+        when(behandlingRepository.findWithSaksopplysningerById(eq(behandling.getId()))).thenReturn(behandling);
 
         DokumentSystemService dokService = lagDokumentService(byggerVelger);
         return new IverksettVedtakSendBrev(dokService, byggerVelger, behandlingRepository, behandlingsresultatRepo);
@@ -63,10 +63,10 @@ public class IverksettVedtakSendBrevTest {
         Fagsak fagsak = lagFagsak();
         Behandling behandling = lagBehandling(fagsak);
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
-        when(behandlingRepository.findOne(or(or(eq(INNVILGET_BEHANDLINGSID),
+        when(behandlingRepository.findById(or(or(eq(INNVILGET_BEHANDLINGSID),
                 eq(INNVILGET_BEHANDLINGSID_12_1)),
                 eq(INNVILGET_BEHANDLINGSID_12_2))))
-                    .thenReturn(behandling);
+                    .thenReturn(Optional.of(behandling));
         return behandlingRepository;
     }
 
@@ -84,21 +84,21 @@ public class IverksettVedtakSendBrevTest {
         BehandlingsresultatRepository behandlingsresultatRepo = mock(BehandlingsresultatRepository.class);
         Lovvalgsperiode periode = lagLovvalgsperiode();
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(periode, Landkoder.AT, BehandlingsresultatType.IKKE_FASTSATT);
-        when(behandlingsresultatRepo.findOne(BEHANDLINGSID)).thenReturn(behandlingsresultat);
+        when(behandlingsresultatRepo.findById(BEHANDLINGSID)).thenReturn(Optional.of(behandlingsresultat));
         Lovvalgsperiode periode2 = lagLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1, LocalDate.now().plusDays(30));
         Behandlingsresultat behandlingsresultatMedFlerePerioder = lagBehandlingsresultat(new HashSet<Lovvalgsperiode>(Arrays.asList(periode, periode2)), null, BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
         assertThat(behandlingsresultatMedFlerePerioder.getLovvalgsperioder().size()).isGreaterThan(1);
-        when(behandlingsresultatRepo.findOne(BEHANDLINGSID_MED_FLERE_PERIODER)).thenReturn(behandlingsresultatMedFlerePerioder);
+        when(behandlingsresultatRepo.findById(BEHANDLINGSID_MED_FLERE_PERIODER)).thenReturn(Optional.of(behandlingsresultatMedFlerePerioder));
         Behandlingsresultat innvilgetBehandlingsResultat = lagBehandlingsresultat(periode, Landkoder.NO);
-        when(behandlingsresultatRepo.findOne(INNVILGET_BEHANDLINGSID)).thenReturn(innvilgetBehandlingsResultat);
+        when(behandlingsresultatRepo.findById(INNVILGET_BEHANDLINGSID)).thenReturn(Optional.of(innvilgetBehandlingsResultat));
         Behandlingsresultat innvilgetResultat12_1 = lagBehandlingsresultat(lagLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1), Landkoder.NO);
-        when(behandlingsresultatRepo.findOne(INNVILGET_BEHANDLINGSID_12_1)).thenReturn(innvilgetResultat12_1);
+        when(behandlingsresultatRepo.findById(INNVILGET_BEHANDLINGSID_12_1)).thenReturn(Optional.of(innvilgetResultat12_1));
         Behandlingsresultat innvilgetResultat12_2 = lagBehandlingsresultat(lagLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2), Landkoder.NO);
-        when(behandlingsresultatRepo.findOne(INNVILGET_BEHANDLINGSID_12_2)).thenReturn(innvilgetResultat12_2);
+        when(behandlingsresultatRepo.findById(INNVILGET_BEHANDLINGSID_12_2)).thenReturn(Optional.of(innvilgetResultat12_2));
         Behandlingsresultat utenlandskLovvalgResultat = lagBehandlingsresultat(periode, Landkoder.BE);
-        when(behandlingsresultatRepo.findOne(BEHANDLINGSID_UTENLANDSK_LOVVALG)).thenReturn(utenlandskLovvalgResultat);
+        when(behandlingsresultatRepo.findById(BEHANDLINGSID_UTENLANDSK_LOVVALG)).thenReturn(Optional.of(utenlandskLovvalgResultat));
         Behandlingsresultat norskLovvalgUtenInnvilgetBestemmelse = lagBehandlingsresultat(lagLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ANNET), Landkoder.NO);
-        when(behandlingsresultatRepo.findOne(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE)).thenReturn(norskLovvalgUtenInnvilgetBestemmelse);
+        when(behandlingsresultatRepo.findById(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE)).thenReturn(Optional.of(norskLovvalgUtenInnvilgetBestemmelse));
         return behandlingsresultatRepo;
     }
 

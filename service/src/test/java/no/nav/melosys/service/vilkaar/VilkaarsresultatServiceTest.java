@@ -59,7 +59,7 @@ public class VilkaarsresultatServiceTest {
     public void registrerVilkår() throws IkkeFunnetException {
         long behandlingID = 1L;
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatRepo.findOne(behandlingID)).thenReturn(behandlingsresultat);
+        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(behandlingsresultat));
 
         VilkaarDto vilkaarDto = new VilkaarDto();
         vilkaarDto.setVilkaar(VilkaarType.FO_883_2004_ART12_1.getKode());
@@ -75,7 +75,7 @@ public class VilkaarsresultatServiceTest {
     @Test(expected = IkkeFunnetException.class)
     public void registrerVilkår_resIkkeFunnet() throws IkkeFunnetException {
         long behandlingID = 1L;
-        when(behandlingsresultatRepo.findOne(behandlingID)).thenReturn(null);
+        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.empty());
 
         VilkaarDto vilkaarDto = new VilkaarDto();
         vilkaarDto.setVilkaar(VilkaarType.FO_883_2004_ART12_1.getKode());

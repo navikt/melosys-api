@@ -56,7 +56,7 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Long behandlingID = prosessinstans.getBehandling().getId();
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandlingID);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID).orElse(null);
         behandlingsresultat.setType(BehandlingsresultatType.valueOf(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE)));
 
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);

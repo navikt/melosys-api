@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.agent.iv;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
@@ -74,7 +75,7 @@ public class OppdaterMedlTest {
         behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
-        when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
+        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
         p.setBehandling(behandling);
         p.getBehandling().setType(Behandlingstype.SØKNAD);
@@ -90,19 +91,19 @@ public class OppdaterMedlTest {
     @Test
     public void utførStegNårBehandlingsresultatTypeErFastsatt_lovvalgslandOgInnvilgelsesResultat_Innvilget() throws FunksjonellException, TekniskException {
         agent.utførSteg(p);
-        verify(medlFasade ,times(1)).opprettPeriodeEndelig(any(), any());
+        verify(medlFasade).opprettPeriodeEndelig(any(), any());
     }
 
     @Test
     public void lagreMedlPeriodeId() {
         agent.utførSteg(p);
-        verify(lovvalgsperiodeRepository ,times(1)).save(any(Lovvalgsperiode.class));
+        verify(lovvalgsperiodeRepository).save(any(Lovvalgsperiode.class));
     }
 
     @Test
     public void utførStegNårBehandlingsresultatHarIngenLovvalgPeriode() {
         behandlingsresultat.setLovvalgsperioder(new HashSet<>());
-        when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
+        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
         agent.utførSteg(p);
         assertEquals(ProsessSteg.FEILET_MASKINELT, p.getSteg());

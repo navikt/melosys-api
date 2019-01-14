@@ -60,7 +60,7 @@ public class OppgaveplukkerTest {
         fagsak.setGsakSaksnummer(GSAK_SAKSNUMMER);
         behandling.setFagsak(fagsak);
 
-        when(behandlingRepository.findOne(BEHANDLING_ID)).thenReturn(behandling);
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
     }
 
     @Test

@@ -125,11 +125,8 @@ public class Oppgaveplukker {
 
     @Transactional
     public synchronized void leggTilbakeOppgave(String saksbehandlerID, TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
-        Behandling behandling = behandlingRepository.findOne(tilbakelegging.getBehandlingID());
-        if (behandling == null) {
-            log.error("Fant ikke behandling med behandlingID " + tilbakelegging.getBehandlingID());
-            throw new IkkeFunnetException("Fant ikke behandling med behandlingID " + tilbakelegging.getBehandlingID());
-        }
+        Behandling behandling = behandlingRepository.findById(tilbakelegging.getBehandlingID())
+            .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandling med behandlingID " + tilbakelegging.getBehandlingID()));
 
         Fagsak fagsak = behandling.getFagsak();
         Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(fagsak.getSaksnummer());

@@ -49,13 +49,13 @@ public class LovvalgsperiodeServiceTest {
         LovvalgsperiodeRepository mock = mock(LovvalgsperiodeRepository.class);
         @SuppressWarnings("unchecked")
         Collection<Lovvalgsperiode> anyCollection = any(Collection.class);
-        when(mock.save(anyCollection)).thenAnswer(i -> i.getArgument(0));
+        when(mock.saveAll(anyCollection)).thenAnswer(i -> i.getArgument(0));
         return mock;
     }
 
     private static BehandlingsresultatRepository mockBehandlingsresultatRepo() {
         BehandlingsresultatRepository mock = mock(BehandlingsresultatRepository.class);
-        when(mock.findOne(eq(13L))).thenReturn(lagBehandlingsresultat(13L));
+        when(mock.findById(eq(13L))).thenReturn(Optional.of(lagBehandlingsresultat(13L)));
         return mock;
     }
 

@@ -46,11 +46,8 @@ public class VilkaarsresultatService {
 
     @Transactional
     public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) throws IkkeFunnetException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findOne(behandlingID);
-
-        if (behandlingsresultat == null) {
-            throw new IkkeFunnetException("Registrering av vilkår feilet fordi behandlingsresulat med ID " + behandlingID + " er ikke funnet.");
-        }
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Registrering av vilkår feilet fordi behandlingsresulat med ID " + behandlingID + " er ikke funnet."));
 
         vilkaarsresultatRepo.deleteByBehandlingsresultat(behandlingsresultat);
 

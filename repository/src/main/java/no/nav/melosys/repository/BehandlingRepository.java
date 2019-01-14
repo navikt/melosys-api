@@ -17,5 +17,5 @@ public interface BehandlingRepository extends CrudRepository<Behandling, Long> {
     List<Behandling> findBySaksnummer(String saksnummer);
 
     @EntityGraph(attributePaths = "saksopplysninger")
-    Behandling findOneWithSaksopplysningerById(Long behandlingID);
+    Behandling findWithSaksopplysningerById(Long behandlingID);
 }

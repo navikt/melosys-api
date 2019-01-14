@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
@@ -129,7 +130,7 @@ public final class LovvalgsperiodeTjenesteTest {
         lovvalgsperiode.setTilleggsbestemmelse(TilleggBestemmelse_883_2004.valueOf(FORVENTET.tilleggBestemmelse));
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET.innvilgelsesResultat));
         lovvalgsperiode.setMedlemskapstype(Medlemskapstype.valueOf(FORVENTET.medlemskapstype));
-        when(behandlingsresultatRepo.findOne(eq(42L))).thenReturn(lagBehandlingsresultat());
+        when(behandlingsresultatRepo.findById(eq(42L))).thenReturn(Optional.of(lagBehandlingsresultat()));
         List<Lovvalgsperiode> ingenPerioder = Collections.<Lovvalgsperiode> emptyList();
         List<Lovvalgsperiode> enPeriode = Collections.singletonList(lovvalgsperiode);
         when(lovvalgsperiodeRepo.findByBehandlingsresultatId(eq(13L))).thenReturn(enPeriode);

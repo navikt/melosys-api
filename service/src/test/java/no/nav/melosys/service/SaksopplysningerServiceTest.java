@@ -104,7 +104,7 @@ public class SaksopplysningerServiceTest {
         behandling.setSaksopplysninger(saksopplysninger);
 
         when(prosessinstansRepository.findByStegIsNotNullAndStegIsNotAndBehandling_Id(eq(ProsessSteg.FEILET_MASKINELT), anyLong())).thenReturn(Optional.empty());
-        when(behandlingRepo.findOneWithSaksopplysningerById(anyLong())).thenReturn(behandling);
+        when(behandlingRepo.findWithSaksopplysningerById(anyLong())).thenReturn(behandling);
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("12345");
 
         saksopplysningerService.oppfriskSaksopplysning(13L);

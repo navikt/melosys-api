@@ -66,7 +66,7 @@ public class SendBrev extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         // Henter ut behandling på nytt for å få med saksopplysninger
-        Behandling behandling = behandlingRepository.findOneWithSaksopplysningerById(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
         if (behandling == null) {
             throw new TekniskException(String.format("Finner ikke behandlingen %s.", prosessinstans.getBehandling().getId()));
         }

@@ -1,5 +1,7 @@
 package no.nav.melosys.service.vedtak;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -60,7 +62,7 @@ public class VedtakServiceTest {
         fagsak.setSaksnummer("MEL-111");
         behandling.setFagsak(fagsak);
 
-        when(behandlingRepository.findOne(behandlingID)).thenReturn(behandling);
+        when(behandlingRepository.findById(behandlingID)).thenReturn(Optional.of(behandling));
     }
 
     @Test
@@ -71,30 +73,31 @@ public class VedtakServiceTest {
 
         vedtakService.fattVedtak(behandlingID, resultatType);
 
-        verify(behandlingRepository, times(1)).findOne(behandlingID);
-        verify(prosessinstansRepo, times(1)).save(prosessinstansArgumentCaptor.capture());
+        verify(behandlingRepository).findById(behandlingID);
+        verify(prosessinstansRepo).save(prosessinstansArgumentCaptor.capture());
 
         Prosessinstans pi = prosessinstansArgumentCaptor.getValue();
         assertThat(pi.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK);
         assertThat(pi.getSteg()).isEqualTo(ProsessSteg.IV_VALIDERING);
         assertThat(BehandlingsresultatType.valueOf(pi.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE))).isEqualTo(resultatType);
 
-        verify(binge, times(1)).leggTil(any());
-        verify(oppgaveService, times(1)).ferdigstillOppgaveMedSaksnummer(any());
+        verify(binge).leggTil(any());
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 
     @Test
     public void anmodningOmUnntak_fungerer() throws FunksjonellException, TekniskException {
         vedtakService.anmodningOmUnntak(behandlingID);
 
-        verify(behandlingRepository, times(1)).findOne(behandlingID);
-        verify(behandlingRepository, times(1)).save(behandling);
-        verify(prosessinstansRepo, times(1)).save(prosessinstansArgumentCaptor.capture());
+        verify(behandlingRepository).findById(behandlingID);;
+        verify(behandlingRepository).save(behandling);
+
+        verify(prosessinstansRepo).save(prosessinstansArgumentCaptor.capture());
         assertThat(prosessinstansArgumentCaptor.getValue().getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK);
         assertThat(prosessinstansArgumentCaptor.getValue().getSteg()).isEqualTo(ProsessSteg.AOU_VALIDERING);
 
-        verify(binge, times(1)).leggTil(any());
-        verify(oppgaveService, times(1)).leggTilbakeOppgaveMedSaksnummer(any());
+        verify(binge).leggTil(any());
+        verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
     }
 
     @Test(expected = IkkeFunnetException.class)

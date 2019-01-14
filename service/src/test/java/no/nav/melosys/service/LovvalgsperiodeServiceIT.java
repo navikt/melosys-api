@@ -7,6 +7,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -23,13 +29,6 @@ import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.repository.LovvalgsperiodeRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -72,7 +71,7 @@ public class LovvalgsperiodeServiceIT {
 
     @Before
     public void ryddOgOpprettTestdata() {
-        repo.delete(repo.findByBehandlingsresultatId(IKKE_EKSISTERENDE_BEH_ID));
+        repo.deleteAll(repo.findByBehandlingsresultatId(IKKE_EKSISTERENDE_BEH_ID));
         testInstans = opprettTestdata();
     }
 

@@ -63,7 +63,7 @@ public class HentOrganisasjonsopplysningerTest {
 
         p.getBehandling().setSaksopplysninger(saksopplysninger);
 
-        when(behRepo.findOneWithSaksopplysningerById(any())).thenReturn(p.getBehandling());
+        when(behRepo.findWithSaksopplysningerById(any())).thenReturn(p.getBehandling());
         when(eregFasade.hentOrganisasjon(eq(orgnr1))).thenReturn(new Saksopplysning());
         
         agent.utførSteg(p);

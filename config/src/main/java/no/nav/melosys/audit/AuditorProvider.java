@@ -1,5 +1,7 @@
 package no.nav.melosys.audit;
 
+import java.util.Optional;
+
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.data.domain.AuditorAware;
 
@@ -10,14 +12,15 @@ public class AuditorProvider implements AuditorAware<String> {
     private String saksbehandlerID;
 
     @Override
-    public String getCurrentAuditor() {
+    public Optional<String> getCurrentAuditor() {
         String auditor = SubjectHandler.getInstance().getUserID();
         if (auditor != null) {
-            return auditor;
+            return Optional.of(auditor);
         } else if (saksbehandlerID != null) {
-            return saksbehandlerID;
-        } else
-            return MELOSYS;
+            return Optional.of(saksbehandlerID);
+        } else {
+            return Optional.of(MELOSYS);
+        }
     }
 
     public void setSaksbehanlderID(String saksbehanlderID) {

@@ -48,15 +48,14 @@ public class LovvalgsperiodeService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Collection<Lovvalgsperiode> lagreLovvalgsperioder(long behandlingsid, Collection<Lovvalgsperiode> lovvalgsperioder) {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findOne(behandlingsid);
-        if (behandlingsresultat == null) {
-            throw new IllegalStateException(String.format("Behandling %s fins ikke.", behandlingsid));
-        }
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findById(behandlingsid)
+            .orElseThrow(() -> new IllegalStateException(String.format("Behandling %s fins ikke.", behandlingsid)));
+
         lovvalgsperiodeRepo.deleteByBehandlingsresultat(behandlingsresultat);
         List<Lovvalgsperiode> perioderMedBehandling = lovvalgsperioder.stream()
                 .map(l -> kopierLovvalgsperiodeMedBehandlingsResultat(l, behandlingsresultat))
                 .collect(Collectors.toList());
-        return StreamSupport.stream(lovvalgsperiodeRepo.save(perioderMedBehandling).spliterator(), false)
+        return StreamSupport.stream(lovvalgsperiodeRepo.saveAll(perioderMedBehandling).spliterator(), false)
                 .collect(Collectors.toList());
     }
 

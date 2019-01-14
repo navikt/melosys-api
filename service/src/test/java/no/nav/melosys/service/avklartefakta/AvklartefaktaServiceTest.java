@@ -85,7 +85,7 @@ public class AvklartefaktaServiceTest {
     public void lagreAvklarteFakta() throws IkkeFunnetException {
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
+        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("test fakta");
         HashSet<AvklartefaktaDto> avklartefaktaDtoer = new HashSet<>();
@@ -93,7 +93,7 @@ public class AvklartefaktaServiceTest {
         avklartefaktaService.lagreAvklarteFakta(123L, avklartefaktaDtoer);
         verify(avklarteFaktaRepository, times(1)).deleteByBehandlingsresultat(any());
         verify(avklartefaktaDtoKonverterer, times(1)).opprettAvklartefaktaFraDto(any(), any());
-        verify(avklarteFaktaRepository, times(1)).save((Iterable<Avklartefakta>) any());
+        verify(avklarteFaktaRepository, times(1)).saveAll(any());
 
     }
 

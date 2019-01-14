@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -45,7 +46,7 @@ public class OppdaterBehandlingsresultatTest {
         p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.FASTSATT_LOVVALGSLAND.getKode());
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
+        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
         oppdaterBehandlingsresultat.utfør(p);
 

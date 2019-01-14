@@ -43,7 +43,7 @@ public class RegelmodulServiceTest {
 
     @Test
     public void fastsettLovvalg_behandlingIkkeFunnet() {
-        when(behandlingRepository.findOneWithSaksopplysningerById(0L)).thenReturn(null);
+        when(behandlingRepository.findWithSaksopplysningerById(0L)).thenReturn(null);
 
         FastsettLovvalgReply fastsettLovvalgReply = regelmodulService.fastsettLovvalg(0L);
         assertThat(fastsettLovvalgReply).isNull();

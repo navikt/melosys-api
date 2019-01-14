@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -76,7 +77,7 @@ public class SoeknadServiceTest {
     public void hentSoeknad() throws Exception {
         Behandling b = lagBehandling();
 
-        when(behandlingRepo.findOneWithSaksopplysningerById(1L)).thenReturn(b);
+        when(behandlingRepo.findWithSaksopplysningerById(1L)).thenReturn(b);
 
         SoeknadDokument res = soeknadService.hentSoeknad(1L);
 
@@ -85,7 +86,7 @@ public class SoeknadServiceTest {
 
     @Test
     public void hentBehandlingUtenSøknadKasterUnntak() throws Exception {
-        when(behandlingRepo.findOneWithSaksopplysningerById(1L)).thenReturn(lagBehandling(Collections.emptySet()));
+        when(behandlingRepo.findWithSaksopplysningerById(1L)).thenReturn(lagBehandling(Collections.emptySet()));
         Throwable unntak = catchThrowable(() -> soeknadService.hentSoeknad(1L));
         assertThat(unntak).isInstanceOf(IkkeFunnetException.class)
                 .hasMessageContaining("ikke funnet for behandlingsid 1");
@@ -128,7 +129,7 @@ public class SoeknadServiceTest {
     public void registrerSøknad() throws Exception {
         long behandlingID = 1L;
         Behandling b = new Behandling();
-        when(behandlingRepo.findOne(behandlingID)).thenReturn(b);
+        when(behandlingRepo.findById(behandlingID)).thenReturn(Optional.of(b));
 
         soeknadService.registrerSøknad(behandlingID, soeknadDokument);
 

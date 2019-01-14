@@ -88,7 +88,7 @@ public class DokumentService {
     @Transactional
     public byte[] produserUtkast(long behandlingID, ProduserbartDokument produserbartDokument, BrevbestillingDto brevbestillingDto)
         throws TekniskException, FunksjonellException {
-        Behandling behandling = behandlingRepository.findOneWithSaksopplysningerById(behandlingID);
+        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
         }
@@ -107,10 +107,8 @@ public class DokumentService {
      */
     public void produserDokument(long behandlingID, ProduserbartDokument produserbartDokument, BrevData brevData)
         throws TekniskException, FunksjonellException {
-        Behandling behandling = behandlingRepository.findOne(behandlingID);
-        if (behandling == null) {
-            throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
-        }
+        Behandling behandling = behandlingRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke"));
 
         DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(produserbartDokument, behandling, brevData);
         Object brevinnhold = brevDataService.lagBrevXML(produserbartDokument, behandling, brevData);
@@ -120,10 +118,9 @@ public class DokumentService {
 
     @Transactional
     public void produserDokumentISaksflyt(long behandlingID, ProduserbartDokument produserbartDokument, BrevbestillingDto brevbestillingDto) throws FunksjonellException {
-        Behandling behandling = behandlingRepository.findOne(behandlingID);
-        if (behandling == null) {
-            throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
-        }
+        Behandling behandling = behandlingRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke"));
+
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 

@@ -20,7 +20,7 @@ public class BehandlingsresultatService {
 
     @Transactional
     public void tømBehandlingsresultat(long behandlingsid) {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandlingsid);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingsid).orElse(null);
         if (behandlingsresultat != null) {
             log.info("Fjerner avklarte fakta, lovvalgsperioder og vilkårsresultater fra behandlingsresultat med behandlingsid: {} ", behandlingsid);
             behandlingsresultat.getAvklartefakta().clear();

@@ -2,19 +2,18 @@ package no.nav.melosys.metrics;
 
 import javax.annotation.PostConstruct;
 
-import io.micrometer.spring.autoconfigure.MeterRegistryCustomizer;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.hotspot.DefaultExports;
-import io.prometheus.client.spring.boot.EnableSpringBootMetricsCollector;
+import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableSpringBootMetricsCollector
 public class MetricsConfig {
 
     @Bean
-    MeterRegistryCustomizer<?> registryCustomizer() {
+    MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
         return registry -> registry.config().commonTags("team", "melosys");
     }
 

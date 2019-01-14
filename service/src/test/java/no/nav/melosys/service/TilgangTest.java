@@ -1,5 +1,7 @@
 package no.nav.melosys.service;
 
+import java.util.Optional;
+
 import no.nav.freg.abac.core.annotation.context.AbacContext;
 import no.nav.freg.abac.core.dto.request.XacmlRequest;
 import no.nav.freg.abac.core.dto.response.Decision;
@@ -8,7 +10,6 @@ import no.nav.freg.abac.core.service.AbacService;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -16,7 +17,6 @@ import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.sikkerhet.abac.Pep;
 import no.nav.melosys.sikkerhet.abac.PepImpl;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +44,7 @@ public class TilgangTest {
     private Behandling behandlingMocked;
 
     @Before
-    public void setUp() throws FunksjonellException, TekniskException {
+    public void setUp() throws TekniskException {
         AbacContext abacContext = mock(AbacContext.class);
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
 
@@ -72,7 +72,7 @@ public class TilgangTest {
     public void testBehandlingsIdIkketilgang() throws Exception {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
 
-        when(behandlingRepository.findOne(anyLong())).thenReturn(behandlingMocked);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandlingMocked));
 
         tilgang.sjekk(102323934);
     }
@@ -81,7 +81,7 @@ public class TilgangTest {
     public void testBehandlingsIdOk() throws Exception {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
 
-        when(behandlingRepository.findOne(anyLong())).thenReturn(behandlingMocked);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandlingMocked));
 
         tilgang.sjekk(102323934);
     }

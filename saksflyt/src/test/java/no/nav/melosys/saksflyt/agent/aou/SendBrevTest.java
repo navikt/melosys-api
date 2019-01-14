@@ -47,7 +47,7 @@ public class SendBrevTest {
         behandling.setType(Behandlingstype.SØKNAD);
         behandling.setId(1L);
 
-        when(behandlingRepository.findOneWithSaksopplysningerById(any())).thenReturn(behandling);
+        when(behandlingRepository.findWithSaksopplysningerById(any())).thenReturn(behandling);
         when(byggerVelger.hent(any())).thenReturn(new MockBrevDataBygger());
 
         p = new Prosessinstans();
