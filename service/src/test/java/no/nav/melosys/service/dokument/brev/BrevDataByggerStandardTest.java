@@ -23,5 +23,6 @@ public class BrevDataByggerStandardTest {
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
         assertThat(brevData.mottaker).isEqualTo(bestilling.mottaker);
         assertThat(brevData.fritekst).isEqualTo(bestilling.fritekst);
+        assertThat(brevData.begrunnelseKode).isEqualTo(bestilling.begrunnelseKode);
     }
 }
