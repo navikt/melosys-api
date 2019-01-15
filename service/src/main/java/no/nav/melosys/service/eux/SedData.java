@@ -16,7 +16,7 @@ public abstract class SedData {
     private SoeknadDokument søknadDokument;
     private PersonDokument personDokument;
 
-    private Bostedsadresse bostedsadresse; //FJERN?
+    private Bostedsadresse bostedsadresse;
 
     private List<Virksomhet> arbeidsgivendeVirkomsheter;
     private List<Virksomhet> selvstendigeVirksomheter;
