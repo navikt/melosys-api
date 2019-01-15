@@ -1,10 +1,18 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Landkoder;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.VilkaarType;
+import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
@@ -24,13 +32,10 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class BrevDataByggerA001 extends BrevDatabyggerBase implements BrevDataBygger {
 
-    private final AvklartefaktaService avklartefaktaService;
     private final RegisterOppslagSystemService registerOppslagService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
-
-    private Behandling behandling;
 
     public BrevDataByggerA001(AvklartefaktaService avklartefaktaService,
                               RegisterOppslagSystemService registerOppslagService,
@@ -38,8 +43,7 @@ public class BrevDataByggerA001 extends BrevDatabyggerBase implements BrevDataBy
                               LovvalgsperiodeService lovvalgsperiodeService,
                               UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                               VilkaarsresultatRepository vilkaarsresultatRepository) {
-        super(kodeverkService);
-        this.avklartefaktaService = avklartefaktaService;
+        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
         this.registerOppslagService = registerOppslagService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
@@ -104,7 +108,7 @@ public class BrevDataByggerA001 extends BrevDatabyggerBase implements BrevDataBy
                 .collect(Collectors.toList());
     }
 
-    private List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    protected List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         return registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner).stream()
                 .map(org -> new Virksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), org.getOrganisasjonDetaljer().hentUstrukturertForretningsadresse()))
                 .collect(Collectors.toList());
@@ -115,29 +119,6 @@ public class BrevDataByggerA001 extends BrevDatabyggerBase implements BrevDataBy
                 .filter(utenlandskIdent -> !utenlandskIdent.landKode.equals(landKode.getKode()))
                 .map(utenlandskIdent -> utenlandskIdent.ident)
                 .findFirst();
-    }
-
-    private Collection<Lovvalgsperiode> hentLovvalgsperioder() throws TekniskException {
-        Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId());
-        if (lovvalgsperioder.isEmpty()) {
-            throw new TekniskException("Trenger minst en lovvalgsperiode");
-        }
-
-        Lovvalgsperiode valgtLovvalgsperiode = lovvalgsperioder.iterator().next();
-        boolean lovvalgsperiodeIkkeGyldig = lovvalgsperioder.stream()
-                .anyMatch(periode -> !validerPeriode(periode, valgtLovvalgsperiode));
-        if (lovvalgsperiodeIkkeGyldig) {
-            throw new TekniskException("A001 kan ha flere  lovvalgsperioder, men ikke med ulike Land eller unntak");
-        }
-        return lovvalgsperioder;
-    }
-
-    private boolean validerPeriode(Lovvalgsperiode p1, Lovvalgsperiode p2) {
-        return p1.getLovvalgsland() == p2.getLovvalgsland() &&
-                p1.getUnntakFraBestemmelse() != null &&
-                p1.getUnntakFraBestemmelse() == p2.getUnntakFraBestemmelse() &&
-                p1.getUnntakFraLovvalgsland() != null &&
-                p1.getUnntakFraLovvalgsland() == p2.getUnntakFraLovvalgsland();
     }
 
     private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {

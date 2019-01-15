@@ -1,10 +1,14 @@
 package no.nav.melosys.service.dokument.brev;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
@@ -13,18 +17,17 @@ import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDatabyggerBase;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class BrevDatabyggerBaseTest {
 
@@ -40,11 +43,18 @@ public class BrevDatabyggerBaseTest {
                                          PersonDokument person,
                                          SoeknadDokument søknad,
                                          Set<String> avklarteOrganisasjoner) {
-            super(kodeverkService);
+            super(kodeverkService, null, mock(AvklartefaktaService.class));
             this.person = person;
             this.søknad = søknad;
             this.avklarteOrganisasjoner = avklarteOrganisasjoner;
         }
+
+        @Override
+        protected List<Virksomhet> hentAlleNorskeAvklarteVirksomheter()
+            throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+            return null;
+        }
+
         public Bostedsadresse hentBostedsadresse() {
             return super.hentBostedsadresse();
         }

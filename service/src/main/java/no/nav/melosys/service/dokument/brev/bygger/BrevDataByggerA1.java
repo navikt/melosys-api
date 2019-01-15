@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
@@ -22,19 +21,18 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class BrevDataByggerA1 extends BrevDatabyggerBase implements BrevDataBygger {
 
-    private final AvklartefaktaService avklartefaktaService;
     private final RegisterOppslagSystemService registerOppslagService;
 
     public BrevDataByggerA1(AvklartefaktaService avklartefaktaService,
                             RegisterOppslagSystemService registerOppslagService,
                             KodeverkService kodeverkService) {
-        super(kodeverkService);
-        this.avklartefaktaService = avklartefaktaService;
+        super(kodeverkService, null, avklartefaktaService);
         this.registerOppslagService = registerOppslagService;
     }
 
     @Override
     public BrevData lag(Behandling behandling, String saksbehandler) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        this.behandling = behandling;
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
         this.avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
@@ -51,7 +49,7 @@ public class BrevDataByggerA1 extends BrevDatabyggerBase implements BrevDataBygg
         return brevData;
     }
 
-    private List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    protected List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         return registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner).stream()
                 .map(org -> new Virksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), utfyllManglendeAdressefelter(org)))
                 .collect(Collectors.toList());
