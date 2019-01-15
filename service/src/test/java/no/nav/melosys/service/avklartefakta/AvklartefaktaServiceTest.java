@@ -6,10 +6,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.YrkesgruppeType;
+import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
@@ -52,7 +52,7 @@ public class AvklartefaktaServiceTest {
         String referanse = "Referenase";
         String subjektID = "SubjektID";
         String fakta = "NO";
-        AvklartefaktaType type = AvklartefaktaType.BOSTEDSLAND;
+        Avklartefaktatype type = Avklartefaktatype.BOSTEDSLAND;
         String begrunnelsekode = "Begrunnelse";
         String begrunnelsefritekst = "Fritekst";
 
@@ -104,8 +104,8 @@ public class AvklartefaktaServiceTest {
         Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
 
-        YrkesgruppeType yrkesgruppeType = avklartefaktaService.hentYrkesGruppe(1L);
-        assertThat(yrkesgruppeType).isEqualTo(YrkesgruppeType.ORDINAER);
+        Yrkesgrupper yrkesgruppeType = avklartefaktaService.hentYrkesGruppe(1L);
+        assertThat(yrkesgruppeType).isEqualTo(Yrkesgrupper.ORDINAER);
     }
 
     @Test
@@ -115,8 +115,8 @@ public class AvklartefaktaServiceTest {
         Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
 
-        YrkesgruppeType yrkesgruppeType = avklartefaktaService.hentYrkesGruppe(1L);
-        assertThat(yrkesgruppeType).isEqualTo(YrkesgruppeType.FLYENDE_PERSONELL);
+        Yrkesgrupper yrkesgruppeType = avklartefaktaService.hentYrkesGruppe(1L);
+        assertThat(yrkesgruppeType).isEqualTo(Yrkesgrupper.FLYENDE_PERSONELL);
     }
 
     @Test
@@ -126,8 +126,8 @@ public class AvklartefaktaServiceTest {
         Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
 
-        YrkesgruppeType yrkesgruppeType = avklartefaktaService.hentYrkesGruppe(1L);
-        assertThat(yrkesgruppeType).isEqualTo(YrkesgruppeType.SOKKEL_ELLER_SKIP);
+        Yrkesgrupper yrkesgruppeType = avklartefaktaService.hentYrkesGruppe(1L);
+        assertThat(yrkesgruppeType).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP);
     }
 
     @Test(expected = TekniskException.class)
@@ -144,7 +144,7 @@ public class AvklartefaktaServiceTest {
     public void testAvklarteOrganisasjoner() {
         String orgnr1 = "12345678910";
         Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setType(AvklartefaktaType.AVKLARTE_ARBEIDSGIVER);
+        avklartefakta.setType(Avklartefaktatype.AVKLARTE_ARBEIDSGIVER);
         avklartefakta.setFakta("TRUE");
         avklartefakta.setSubjekt(orgnr1);
 

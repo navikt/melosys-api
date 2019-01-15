@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 
 public interface BehandlingRepository extends CrudRepository<Behandling, Long> {
 

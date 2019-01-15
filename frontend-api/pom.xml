@@ -25,6 +25,10 @@
         </dependency>
         <dependency>
             <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-internt-kodeverk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
             <artifactId>regler-api</artifactId>
         </dependency>
         <dependency>

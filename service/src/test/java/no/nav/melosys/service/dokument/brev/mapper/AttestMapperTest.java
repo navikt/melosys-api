@@ -10,7 +10,6 @@ import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
@@ -18,6 +17,9 @@ import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
@@ -55,7 +57,7 @@ public class AttestMapperTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
 
-        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART16_2);
+        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
 
@@ -106,10 +108,10 @@ public class AttestMapperTest {
                                                          strukturertAdresse);
 
         Arbeidssted fysiskArbeidssted = new Arbeidssted("JARLSBERG INTERNATIONAL", strukturertAdresse);
-        Arbeidssted ikkeFysiskArbeidssted = new Arbeidssted("Seven Kestrel", "GB", YrkesgruppeType.SOKKEL_ELLER_SKIP);
+        Arbeidssted ikkeFysiskArbeidssted = new Arbeidssted("Seven Kestrel", "GB", Yrkesgrupper.SOKKEL_ELLER_SKIP);
 
         BrevDataA1 a1Data = new BrevDataA1();
-        a1Data.yrkesgruppe = YrkesgruppeType.ORDINAER;
+        a1Data.yrkesgruppe = Yrkesgrupper.ORDINAER;
         a1Data.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
         a1Data.selvstendigeForetak = new HashSet<>();
         a1Data.utenlandskeVirksomheter = new ArrayList<>(Arrays.asList(utenlandksVirksomhet));

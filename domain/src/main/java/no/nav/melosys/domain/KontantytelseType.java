@@ -1,5 +1,7 @@
 package no.nav.melosys.domain;
 
+import no.nav.melosys.domain.kodeverk.Kodeverk;
+
 public enum KontantytelseType implements Kodeverk {
 
     FP("FP", "Foreldrepenger"),

@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
 
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -22,7 +23,7 @@ public class Vilkaarsresultat extends RegistreringsInfo {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "vilkaar")
-    private VilkaarType vilkaar;
+    private Vilkaar vilkaar;
 
     @Column(name = "oppfylt")
     private boolean oppfylt;
@@ -41,11 +42,11 @@ public class Vilkaarsresultat extends RegistreringsInfo {
         this.behandlingsresultat = behandlingsresultat;
     }
 
-    public VilkaarType getVilkaar() {
+    public Vilkaar getVilkaar() {
         return vilkaar;
     }
 
-    public void setVilkaar(VilkaarType vilkaar) {
+    public void setVilkaar(Vilkaar vilkaar) {
         this.vilkaar = vilkaar;
     }
 

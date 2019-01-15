@@ -2,7 +2,12 @@ package no.nav.melosys.saksflyt.agent.iv;
 
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,12 +33,12 @@ public class IverksettVedtakValideringTest {
 
         p = new Prosessinstans();
         p.setBehandling(new Behandling());
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
 
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
 
-        p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.FASTSATT_LOVVALGSLAND.getKode());
+        p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND.getKode());
 
     }
 
@@ -57,7 +62,7 @@ public class IverksettVedtakValideringTest {
     public void utfoerSteg_manglerBehandlingsresultatType() {
         p = new Prosessinstans();
         p.setBehandling(new Behandling());
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
 
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");

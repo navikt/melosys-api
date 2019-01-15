@@ -15,6 +15,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.ProduserbartDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
@@ -30,8 +31,8 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.domain.RolleType.BRUKER;
-import static no.nav.melosys.domain.RolleType.REPRESENTANT;
+import static no.nav.melosys.domain.kodeverk.Aktoerroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoerroller.REPRESENTANT;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 /**

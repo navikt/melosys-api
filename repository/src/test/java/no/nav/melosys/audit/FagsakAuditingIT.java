@@ -3,8 +3,8 @@ package no.nav.melosys.audit;
 import javax.transaction.Transactional;
 
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Fagsaksstatus;
-import no.nav.melosys.domain.Fagsakstype;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,8 +54,8 @@ public class FagsakAuditingIT {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("TEST-667");
         fagsak.setGsakSaksnummer(124L);
-        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
-        fagsak.setType(Fagsakstype.TRYGDEAVTALE);
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+        fagsak.setType(Sakstyper.TRYGDEAVTALE);
         assertThat(entityManager.persistAndGetId(fagsak)).isNotNull();
     }
 }

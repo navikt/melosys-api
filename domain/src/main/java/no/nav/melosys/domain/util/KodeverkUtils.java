@@ -2,7 +2,7 @@ package no.nav.melosys.domain.util;
 
 import java.util.Arrays;
 
-import no.nav.melosys.domain.Kodeverk;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.exception.IkkeFunnetException;
 
 public final class KodeverkUtils {

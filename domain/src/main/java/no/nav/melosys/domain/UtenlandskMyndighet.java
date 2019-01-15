@@ -2,6 +2,8 @@ package no.nav.melosys.domain;
 
 import javax.persistence.*;
 
+import no.nav.melosys.domain.kodeverk.Landkoder;
+
 @Entity
 @Table(name = "utenlandsk_myndighet")
 public class UtenlandskMyndighet {

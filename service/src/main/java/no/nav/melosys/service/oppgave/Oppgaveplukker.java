@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
-import no.nav.melosys.domain.oppgave.Oppgavetype;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -59,31 +62,31 @@ public class Oppgaveplukker {
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
         String type = plukkDto.getOppgavetype();
-        Oppgavetype oppgavetype = KodeverkUtils.dekod(Oppgavetype.class, type);
+        Oppgavetyper oppgavetype = KodeverkUtils.dekod(Oppgavetyper.class, type);
 
         Tema fagområde = null;
-        if (oppgavetype == Oppgavetype.JFR) {
+        if (oppgavetype == Oppgavetyper.JFR) {
             String fagområdeKode = plukkDto.getFagomrade();
             fagområde = KodeverkUtils.dekod(Tema.class, fagområdeKode);
         }
 
-        List<Fagsakstype> fagsakstypeListe = new ArrayList<>();
-        List<Behandlingstype> behandlingstypeListe = new ArrayList<>();
-        if (oppgavetype == Oppgavetype.BEH_SAK) {
+        List<Sakstyper> fagsakstypeListe = new ArrayList<>();
+        List<Behandlingstyper> behandlingstypeListe = new ArrayList<>();
+        if (oppgavetype == Oppgavetyper.BEH_SAK) {
 
             List<String> sakstyper = plukkDto.getSakstyper();
             for (String s : sakstyper) {
-                fagsakstypeListe.add(KodeverkUtils.dekod(Fagsakstype.class, s));
+                fagsakstypeListe.add(KodeverkUtils.dekod(Sakstyper.class, s));
             }
 
             List<String> behandlingstyper = plukkDto.getBehandlingstyper();
             for (String b : behandlingstyper) {
                 // FIXME: Internt kodeverk må oppdateres i frontend.
                 if (b.equals("SKND")) {
-                    behandlingstypeListe.add(Behandlingstype.SØKNAD);
+                    behandlingstypeListe.add(Behandlingstyper.SOEKNAD);
                     continue;
                 }
-                behandlingstypeListe.add(KodeverkUtils.dekod(Behandlingstype.class, b));
+                behandlingstypeListe.add(KodeverkUtils.dekod(Behandlingstyper.class, b));
             }
         }
 
@@ -97,7 +100,7 @@ public class Oppgaveplukker {
             // Tildeler oppgaven
             gsakFasade.tildelOppgave(oppgave.getOppgaveId(), saksbehandlerID);
 
-            if (oppgavetype == Oppgavetype.BEH_SAK) {
+            if (oppgavetype == Oppgavetyper.BEH_SAK) {
                 settBehandlingsstatusUnderBehandling(oppgave.getSaksnummer());
             }
         }
@@ -115,7 +118,7 @@ public class Oppgaveplukker {
             }
             Behandling behandling = fagsak.getAktivBehandling();
 
-            if (Behandlingsstatus.erVenterForDokumentasjon(behandling.getStatus())
+            if (erVenterForDokumentasjon(behandling.getStatus())
                 && behandling.getDokumentasjonSvarfristDato() != null
                 && behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
                 iter.remove();
@@ -178,5 +181,9 @@ public class Oppgaveplukker {
             behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
             behandlingRepository.save(behandling);
         }
+    }
+
+    public static boolean erVenterForDokumentasjon(Behandlingsstatus behandlingsstatus) {
+        return (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_PART) || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL);
     }
 }

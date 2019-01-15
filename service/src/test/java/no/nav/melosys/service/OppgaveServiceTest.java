@@ -4,7 +4,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -12,8 +15,11 @@ import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.OppholdUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
@@ -70,9 +76,9 @@ public class OppgaveServiceTest {
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave();
         oppgave1.setOppgaveId("1");
-        oppgave1.setOppgavetype(Oppgavetype.BEH_SAK);
+        oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK);
         oppgave1.setPrioritet(PrioritetType.HOY);
-        oppgave1.setOppgavetype(Oppgavetype.BEH_SAK);
+        oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK);
         oppgave1.setSaksnummer("MEL-12345");
         oppgave1.setTilordnetRessurs("12345678901");
         oppgaver.add(oppgave1);
@@ -86,10 +92,10 @@ public class OppgaveServiceTest {
         when(saksopplysningerService.harAktivOppfrisking(anyLong())).thenReturn(true);
 
         Fagsak fagsak = new Fagsak();
-        fagsak.setType(Fagsakstype.EU_EØS);
-        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
-        List<Behandling> behandlinger = new ArrayList<>();
-        behandlinger.add(lagBehandling());
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+        List<Behandling> behandlinger = hentBehandlinger();
+
         fagsak.setBehandlinger(behandlinger);
         when(fagsakRepository.findBySaksnummer(any(String.class))).thenReturn(fagsak);
         when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(lagBehandling());

@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.Collections;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
@@ -54,7 +56,7 @@ public class SettVurderDokumentTest {
     public void utførSteg_sakMedBehandling_oppdatererStatus() {
         Prosessinstans p = new Prosessinstans();
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isNull();
         verify(behandlingRepository).save(behandlingArgumentCaptor.capture());
@@ -65,7 +67,7 @@ public class SettVurderDokumentTest {
     public void utførSteg_sakUtenBehandling_ingenStatusEndring() {
         Prosessinstans p = new Prosessinstans();
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isNull();
         verify(behandlingRepository, never()).save(any(Behandling.class));
@@ -75,7 +77,7 @@ public class SettVurderDokumentTest {
     public void utførSteg_ukjentSak_feiler() {
         Prosessinstans p = new Prosessinstans();
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_FINNES_IKKE);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
         assertThat(p.getHendelser()).isNotEmpty();

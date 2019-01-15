@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.ProduserbartDokument;
 import no.nav.melosys.integrasjon.joark.JoarkService;
+import no.nav.melosys.domain.kodeverk.ProduserbartDokument;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;

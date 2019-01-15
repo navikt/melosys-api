@@ -1,10 +1,10 @@
 package no.nav.melosys.service.journalforing.dto;
 
-import no.nav.melosys.domain.Behandlingstype;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 
 public class JournalfoeringTilordneDto extends JournalfoeringDto {
     private String saksnummer; // Melosys saksnummer
-    private Behandlingstype behandlingstype;
+    private Behandlingstyper behandlingstype;
 
     public String getSaksnummer() {
         return saksnummer;
@@ -14,11 +14,11 @@ public class JournalfoeringTilordneDto extends JournalfoeringDto {
         this.saksnummer = saksnummer;
     }
 
-    public Behandlingstype getBehandlingstype() {
+    public Behandlingstyper getBehandlingstype() {
         return behandlingstype;
     }
 
-    public void setBehandlingstype(Behandlingstype behandlingstype) {
+    public void setBehandlingstype(Behandlingstyper behandlingstype) {
         this.behandlingstype = behandlingstype;
     }
 }

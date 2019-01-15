@@ -1,8 +1,8 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.kodeverk;
 
 import no.nav.melosys.exception.IkkeFunnetException;
 
-public enum VilkaarType implements Kodeverk {
+public enum Vilkaar implements Kodeverk {
 
     INNGANGSVILKÅR_EOSFO("INNGANGSVILKAAR_EOSFO", "Vurdering av om bruker oppfyller inngangsvilkår av EU/EØS forordningen."),
     FO_883_2004_ART12_1("FO_883_2004_ART12_1", "Vurdering av om bruker oppfyller ART12.1 vilkår."),
@@ -13,12 +13,12 @@ public enum VilkaarType implements Kodeverk {
     FO_883_2004_ART16_1("FO_883_2004_ART16_1", "Vurdering av om bruker oppfyller ART16.1 vilkår."),
     BOSATT_I_NORGE("BOSATT_I_NORGE", "Vurdering av om bruker oppfyller vilkår om å være bosatt i Norge.");
 
-    private static final VilkaarType[] VALUES = values();
+    private static final Vilkaar[] VALUES = values();
 
     private String kode;
     private String beskrivelse;
 
-    VilkaarType(String kode, String beskrivelse) {
+    Vilkaar(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
@@ -33,8 +33,8 @@ public enum VilkaarType implements Kodeverk {
         return beskrivelse;
     }
 
-    public static VilkaarType forKode(String kode) throws IkkeFunnetException {
-        for (VilkaarType type: VALUES) {
+    public static Vilkaar forKode(String kode) throws IkkeFunnetException {
+        for (Vilkaar type: VALUES) {
             if (type.getKode().equals(kode)) {
                 return type;
             }

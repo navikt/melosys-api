@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.begrunnelse;
 
-import no.nav.melosys.domain.Kodeverk;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 
 public enum SokkelEllerSkip implements Kodeverk {
 

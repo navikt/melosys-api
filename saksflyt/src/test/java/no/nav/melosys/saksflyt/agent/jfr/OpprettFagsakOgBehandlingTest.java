@@ -4,6 +4,8 @@ import java.util.Collections;
 
 import no.nav.melosys.audit.AuditorProvider;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.FagsakService;
 import org.junit.Before;
@@ -73,7 +75,7 @@ public class OpprettFagsakOgBehandlingTest {
 
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.SAKSNUMMER, "MELTEST-333");
         p.setData(JOURNALPOST_ID, initierendeJournalpostId);
         p.setData(DOKUMENT_ID, initierendeDokumentId);
@@ -94,7 +96,7 @@ public class OpprettFagsakOgBehandlingTest {
     public void utførSteg_ukjentType_feiler() {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.SAKSNUMMER, "MELTEST-333");
 
         agent.utførSteg(p);

@@ -1,6 +1,9 @@
 package no.nav.melosys.saksflyt.agent.aou;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.ProduserbartDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -44,7 +47,7 @@ public class SendBrevTest {
     @Before
     public void setUp() {
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setId(1L);
 
         when(behandlingRepository.findWithSaksopplysningerById(any())).thenReturn(behandling);
@@ -54,7 +57,7 @@ public class SendBrevTest {
         p.setBehandling(behandling);
         p.setType(ProsessType.ANMODNING_OM_UNNTAK);
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
-        p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.ANMODNING_OM_UNNTAK.getKode());
+        p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, Behandlingsresultattyper.ANMODNING_OM_UNNTAK.getKode());
 
         agent = new SendBrev(dokService, byggerVelger, behandlingRepository);
     }

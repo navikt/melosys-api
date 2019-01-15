@@ -5,23 +5,25 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import javax.ws.rs.core.Response;
 
-import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse_883_2004;
-import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
-import org.junit.Test;
-
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
+import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -33,14 +35,14 @@ public final class LovvalgsperiodeTjenesteTest {
 
     private static final LocalDate FOM = LocalDate.now();
     private static final LovvalgsperiodeDto FORVENTET = new LovvalgsperiodeDto(new PeriodeDto(FOM, FOM),
-            LovvalgBestemmelse_883_2004.FO_883_2004_ART16_2,
-            TilleggBestemmelse_883_2004.FO_883_2004_ART13_4,
+            LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2,
+            TilleggsBestemmelser_883_2004.FO_883_2004_ART13_4,
             Landkoder.SK,
             null,
             null,
             InnvilgelsesResultat.AVSLAATT,
             null,
-            Medlemskapstype.FRIVILLIG);
+            Medlemskapstyper.FRIVILLIG);
 
     private static final long BEHANDLING_UTEN_TILGANG = 238L;
     private static final long BEHANDLING_MED_TEKNISK_FEIL = 832L;
@@ -126,10 +128,12 @@ public final class LovvalgsperiodeTjenesteTest {
         lovvalgsperiode.setFom(FORVENTET.periode.getFom());
         lovvalgsperiode.setTom(FORVENTET.periode.getTom());
         lovvalgsperiode.setLovvalgsland(Landkoder.valueOf(FORVENTET.lovvalgsland));
-        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.valueOf(FORVENTET.lovvalgBestemmelse));
-        lovvalgsperiode.setTilleggsbestemmelse(TilleggBestemmelse_883_2004.valueOf(FORVENTET.tilleggBestemmelse));
+        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.valueOf(FORVENTET.lovvalgBestemmelse));
+        lovvalgsperiode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.valueOf(FORVENTET.tilleggBestemmelse));
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET.innvilgelsesResultat));
-        lovvalgsperiode.setMedlemskapstype(Medlemskapstype.valueOf(FORVENTET.medlemskapstype));
+        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET.medlemskapstype));
+        when(behandlingsresultatRepo.findById(eq(42L))).thenReturn(Optional.of(lagBehandlingsresultat()));
+        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET.medlemskapstype));
         when(behandlingsresultatRepo.findById(eq(42L))).thenReturn(Optional.of(lagBehandlingsresultat()));
         List<Lovvalgsperiode> ingenPerioder = Collections.<Lovvalgsperiode> emptyList();
         List<Lovvalgsperiode> enPeriode = Collections.singletonList(lovvalgsperiode);

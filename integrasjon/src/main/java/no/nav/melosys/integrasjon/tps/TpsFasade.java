@@ -3,8 +3,8 @@ package no.nav.melosys.integrasjon.tps;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.kodeverk.Aktoerroller;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -28,5 +28,5 @@ public interface TpsFasade {
      */
     int hentAntallPersonerSomBorPåBostedsadresse(String aktørId) throws IntegrasjonException, IkkeFunnetException, SikkerhetsbegrensningException;
 
-    String hentFagsakIdentMedRolleType(Fagsak fagsak, RolleType rolleType) throws TekniskException;
+    String hentFagsakIdentMedRolleType(Fagsak fagsak, Aktoerroller rolleType) throws TekniskException;
 }

@@ -1,10 +1,10 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.RolleType;
+import no.nav.melosys.domain.kodeverk.Aktoerroller;
 
 public class BrevbestillingDto {
 
-    public RolleType mottaker;
+    public Aktoerroller mottaker;
 
     public String fritekst;
 

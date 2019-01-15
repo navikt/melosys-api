@@ -8,7 +8,7 @@ import no.nav.dok.melosysbrev._000074.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.RolleType;
+import no.nav.melosys.domain.kodeverk.Aktoerroller;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 
@@ -50,7 +50,7 @@ public class MangelbrevMapperTest {
         behandling.setRegistrertDato(Instant.now());
 
         BrevData BrevData = new BrevData("Z123456");
-        BrevData.mottaker = RolleType.BRUKER;
+        BrevData.mottaker = Aktoerroller.BRUKER;
         BrevData.fritekst = "Test";
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, BrevData);

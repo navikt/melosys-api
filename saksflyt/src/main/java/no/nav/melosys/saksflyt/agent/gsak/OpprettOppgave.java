@@ -3,8 +3,10 @@ package no.nav.melosys.saksflyt.agent.gsak;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -65,7 +67,8 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = behandlingRepository.findById(prosessinstans.getBehandling().getId()).orElse(null);
-        Behandlingstype behandlingstype = behandling.getType();
+        Behandlingstyper behandlingstype = behandling.getType();
+
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer();
         String aktørID = prosessinstans.getData(AKTØR_ID);
@@ -74,19 +77,19 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         Oppgave oppgave = new Oppgave();
         oppgave.setTema(Tema.MED);
 
-        if (fagsak.getType() == Fagsakstype.EU_EØS) {
+        if (fagsak.getType() == Sakstyper.EU_EOS) {
             // FIXME MELOSYS-1401 Behandlingstema.ARB_EØS bør brukes men mappingen med underkategori er ikke definert og registrert.
             oppgave.setBehandlingstema(null);
         } else {
-            String feilmelding = "Fagsakstype " + fagsak.getType() + " er ikke støttet";
+            String feilmelding = "Sakstyper " + fagsak.getType() + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
             return;
         }
 
-        if (behandlingstype == Behandlingstype.SØKNAD) {
-            oppgave.setBehandlingstype(Behandlingstype.SØKNAD);
-            oppgave.setOppgavetype(Oppgavetype.BEH_SAK);
+        if (behandlingstype == Behandlingstyper.SOEKNAD) {
+            oppgave.setBehandlingstype(Behandlingstyper.SOEKNAD);
+            oppgave.setOppgavetype(Oppgavetyper.BEH_SAK);
         } else {
             String feilmelding = "Behandlingstype " + behandlingstype + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);

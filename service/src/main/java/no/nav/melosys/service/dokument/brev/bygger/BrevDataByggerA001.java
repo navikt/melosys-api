@@ -4,9 +4,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -82,7 +87,7 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
     private Vilkaarsresultat hentVilkårsresultat() throws TekniskException {
         List<Vilkaarsresultat> vilkaarresultater = vilkaarsresultatRepository.findByBehandlingsresultatId(behandling.getId());
         Optional<Vilkaarsresultat> vilkårsresultat161 = vilkaarresultater.stream()
-                .filter(vilkaarsresultat -> vilkaarsresultat.getVilkaar() == VilkaarType.FO_883_2004_ART16_1)
+                .filter(vilkaarsresultat -> vilkaarsresultat.getVilkaar() == Vilkaar.FO_883_2004_ART16_1)
                 .findFirst();
 
         Vilkaarsresultat resultat = vilkårsresultat161.orElseThrow(() ->

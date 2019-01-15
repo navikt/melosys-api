@@ -1,10 +1,10 @@
 package no.nav.melosys.service.dokument.brev.mapper.felles;
 
-import no.nav.melosys.domain.YrkesgruppeType;
+import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 
 public class Arbeidssted {
-    public Arbeidssted(String navn, String landKode, YrkesgruppeType type) {
+    public Arbeidssted(String navn, String landKode, Yrkesgrupper type) {
         this.navn = navn;
         this.landKode = landKode;
         this.yrkesgruppe = type;
@@ -15,14 +15,14 @@ public class Arbeidssted {
         this.navn = navn;
         this.landKode = adresse.landKode;
         this.adresse = adresse;
-        this.yrkesgruppe = YrkesgruppeType.ORDINAER;
+        this.yrkesgruppe = Yrkesgrupper.ORDINAER;
     }
 
     public Arbeidssted(String navn, String landKode) {
         this.navn = navn;
         this.landKode = landKode;
         this.adresse = null;
-        this.yrkesgruppe = YrkesgruppeType.ORDINAER;
+        this.yrkesgruppe = Yrkesgrupper.ORDINAER;
     }
 
     public boolean erFysisk() {
@@ -31,6 +31,6 @@ public class Arbeidssted {
 
     public final String navn;
     public final String landKode;
-    public final YrkesgruppeType yrkesgruppe;
+    public final Yrkesgrupper yrkesgruppe;
     public final StrukturertAdresse adresse;
 }

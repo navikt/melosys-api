@@ -4,9 +4,9 @@ import java.util.*;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.VilkaarType;
 import no.nav.melosys.domain.Vilkaarsresultat;
-import no.nav.melosys.domain.begrunnelse.Artikkel12_1;
+import no.nav.melosys.domain.kodeverk.Art12_1_Begrunnelser;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
@@ -41,7 +41,7 @@ public class VilkaarsresultatServiceTest {
         long behandlingID = 1L;
         List<Vilkaarsresultat> vilkaarsresultatListe = new ArrayList<>();
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-        vilkaarsresultat.setVilkaar(VilkaarType.ART12_1_FORUTGÅENDE_MEDLEMSKAP);
+        vilkaarsresultat.setVilkaar(Vilkaar.ART12_1_FORUTGÅENDE_MEDLEMSKAP);
         vilkaarsresultat.setOppfylt(true);
         vilkaarsresultat.setBegrunnelseFritekst("begrunnelse");
         Set<VilkaarBegrunnelse> beggrunnelser = new HashSet<>();
@@ -62,9 +62,9 @@ public class VilkaarsresultatServiceTest {
         when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(behandlingsresultat));
 
         VilkaarDto vilkaarDto = new VilkaarDto();
-        vilkaarDto.setVilkaar(VilkaarType.FO_883_2004_ART12_1.getKode());
+        vilkaarDto.setVilkaar(Vilkaar.FO_883_2004_ART12_1.getKode());
         List<String> koder = new ArrayList<>();
-        koder.add(Artikkel12_1.ERSTATTER_ANNEN.getKode());
+        koder.add(Art12_1_Begrunnelser.ERSTATTER_ANNEN.getKode());
         vilkaarDto.setBegrunnelseKoder(koder);
         vilkaarsresultatService.registrerVilkår(behandlingID, Arrays.asList(vilkaarDto));
 
@@ -78,9 +78,9 @@ public class VilkaarsresultatServiceTest {
         when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.empty());
 
         VilkaarDto vilkaarDto = new VilkaarDto();
-        vilkaarDto.setVilkaar(VilkaarType.FO_883_2004_ART12_1.getKode());
+        vilkaarDto.setVilkaar(Vilkaar.FO_883_2004_ART12_1.getKode());
         List<String> koder = new ArrayList<>();
-        koder.add(Artikkel12_1.ERSTATTER_ANNEN.getKode());
+        koder.add(Art12_1_Begrunnelser.ERSTATTER_ANNEN.getKode());
         vilkaarDto.setBegrunnelseKoder(koder);
         vilkaarsresultatService.registrerVilkår(behandlingID, Arrays.asList(vilkaarDto));
     }

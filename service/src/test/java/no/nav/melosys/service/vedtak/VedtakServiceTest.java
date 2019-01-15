@@ -3,6 +3,7 @@ package no.nav.melosys.service.vedtak;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -69,7 +70,7 @@ public class VedtakServiceTest {
     public void fattVedtak_fungerer() throws FunksjonellException, TekniskException {
         Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId("1");
-        BehandlingsresultatType resultatType = BehandlingsresultatType.FASTSATT_LOVVALGSLAND;
+        Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 
         vedtakService.fattVedtak(behandlingID, resultatType);
 
@@ -79,7 +80,7 @@ public class VedtakServiceTest {
         Prosessinstans pi = prosessinstansArgumentCaptor.getValue();
         assertThat(pi.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK);
         assertThat(pi.getSteg()).isEqualTo(ProsessSteg.IV_VALIDERING);
-        assertThat(BehandlingsresultatType.valueOf(pi.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE))).isEqualTo(resultatType);
+        assertThat(Behandlingsresultattyper.valueOf(pi.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE))).isEqualTo(resultatType);
 
         verify(binge).leggTil(any());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
@@ -103,6 +104,6 @@ public class VedtakServiceTest {
     @Test(expected = IkkeFunnetException.class)
     public void fattVedtak_behandlingIkkeFunnet() throws FunksjonellException, TekniskException {
         long behandlingID = 0L;
-        vedtakService.fattVedtak(behandlingID, BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
 }

@@ -9,23 +9,22 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.repository.LovvalgsperiodeRepository;
 
 import static no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.tilLovvalgBestemmelse;
 
@@ -91,7 +90,7 @@ public class LovvalgsperiodeService {
                 lovvalgsperiode.setBestemmelse(tilLovvalgBestemmelse(grunnlagMedlKode));
             }
             else {
-                lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ANNET);
+                lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ANNET);
             }
             tidligereLovvalgsperioder.add(lovvalgsperiode);
         }

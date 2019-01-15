@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.integrasjon.doksys.DokSysFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -115,17 +115,17 @@ public class IverksettVedtakSendBrevTest {
     private static Behandling lagBehandling(Fagsak fagsak) {
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         return behandling;
     }
 
     private static Fagsak lagFagsak() {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(1234L);
-        fagsak.setType(Fagsakstype.EU_EØS);
+        fagsak.setType(Sakstyper.EU_EOS);
         Aktoer aktør = new Aktoer();
         aktør.setAktørId("1");
-        aktør.setRolle(RolleType.BRUKER);
+        aktør.setRolle(Aktoerroller.BRUKER);
         fagsak.setAktører(Collections.singleton(aktør));
         return fagsak;
     }
@@ -157,14 +157,14 @@ public class IverksettVedtakSendBrevTest {
     }
 
     private static Behandlingsresultat lagBehandlingsresultat(Lovvalgsperiode periode, Landkoder land) {
-        return lagBehandlingsresultat(Collections.singleton(periode), land, BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        return lagBehandlingsresultat(Collections.singleton(periode), land, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
 
-    private static Behandlingsresultat lagBehandlingsresultat(Lovvalgsperiode periode, Landkoder land, BehandlingsresultatType type) {
+    private static Behandlingsresultat lagBehandlingsresultat(Lovvalgsperiode periode, Landkoder land, Behandlingsresultattyper type) {
         return lagBehandlingsresultat(Collections.singleton(periode), land, type);
     }
 
-    private static Behandlingsresultat lagBehandlingsresultat(Set<Lovvalgsperiode> perioder, Landkoder land, BehandlingsresultatType type) {
+    private static Behandlingsresultat lagBehandlingsresultat(Set<Lovvalgsperiode> perioder, Landkoder land, Behandlingsresultattyper type) {
         Behandlingsresultat utenlandskLovvalgResultat = new Behandlingsresultat();
         utenlandskLovvalgResultat.setLovvalgsperioder(perioder);
         utenlandskLovvalgResultat.setType(type);
@@ -181,7 +181,7 @@ public class IverksettVedtakSendBrevTest {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setId(BEHANDLINGSID);
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID));
         instans.utførSteg(p);
@@ -278,7 +278,7 @@ public class IverksettVedtakSendBrevTest {
         resultat.setBehandling(behandling);
         resultat.setType(type);
         BrevData brevdata = new BrevData();
-        brevdata.mottaker = RolleType.BRUKER;
+        brevdata.mottaker = Aktoerroller.BRUKER;
         resultat.setData(ProsessDataKey.BREVDATA, brevdata);
         return resultat;
     }
@@ -286,7 +286,7 @@ public class IverksettVedtakSendBrevTest {
     private static Behandling lagBehandling(long behandlingsid) {
         Behandling behandling = new Behandling();
         behandling.setId(behandlingsid);
-        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         return behandling;
     }
 }

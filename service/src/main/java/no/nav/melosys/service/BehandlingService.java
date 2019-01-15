@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -54,7 +57,7 @@ public class BehandlingService {
      * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.
      */
     public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException {
-        if (!status.erLovligNesteStatusEtterDokumentVurdering()) {
+        if (!erLovligNesteStatusEtterDokumentVurdering(status)) {
             throw new FunksjonellException("Må ikke sette behandlingsstatus til " + status);
         }
 
@@ -72,7 +75,7 @@ public class BehandlingService {
      * - Oppretter tom behandlingsresultat.
      */
     @Transactional
-    public Behandling nyBehandling(Fagsak fagsak, Behandlingsstatus behandlingsstatus, Behandlingstype behandlingstype, String initierendeJournalpostId, String initierendeDokumentId) {
+    public Behandling nyBehandling(Fagsak fagsak, Behandlingsstatus behandlingsstatus, Behandlingstyper behandlingstype, String initierendeJournalpostId, String initierendeDokumentId) {
         Instant nå = Instant.now();
 
         Behandling behandling = new Behandling();
@@ -90,7 +93,7 @@ public class BehandlingService {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(behandling);
         behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
-        behandlingsresultat.setType(BehandlingsresultatType.IKKE_FASTSATT);
+        behandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
         behandlingsresultatRepository.save(behandlingsresultat);
 
         return behandling;
@@ -106,4 +109,11 @@ public class BehandlingService {
             .map(TidligereMedlemsperiodeId::getPeriodeId)
             .collect(Collectors.toList());
     }
+
+    public boolean erLovligNesteStatusEtterDokumentVurdering(Behandlingsstatus behandlingsstatus) {
+        return (behandlingsstatus == Behandlingsstatus.UNDER_BEHANDLING)
+            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_PART)
+            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL);
+    }
+
 }

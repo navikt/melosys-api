@@ -7,6 +7,8 @@ import java.util.List;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.ArkivDokumentVedlegg;
 import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.arkiv.Journalposttype;
+import no.nav.melosys.domain.kodeverk.Mottaksretning;
 
 public class JournalpostInfoDto {
     public final String journalpostID;
@@ -37,7 +39,7 @@ public class JournalpostInfoDto {
         return new JournalpostInfoDto(journalpost.getJournalpostId(),
             journalpost.getForsendelseMottatt(),
             journalpost.getForsendelseJournalfoert(),
-            Mottaksretning.av(journalpost.getJournalposttype()),
+            av(journalpost.getJournalposttype()),
             journalpost.getKorrespondansepartNavn(),
             new DokumentDto(journalpost.getHoveddokument().getDokumentId(), journalpost.getHoveddokument().getTittel()),
             lagVedlegg(journalpost.getVedleggListe(), journalpost.getHoveddokument().getInterneVedlegg()));
@@ -52,5 +54,20 @@ public class JournalpostInfoDto {
 
     public Instant hentGjeldendeTidspunkt() {
         return this.mottattDato != null ? this.mottattDato : this.journalforingDato;
+    }
+
+    public static Mottaksretning av(Journalposttype journalposttype) {
+        Mottaksretning retning;
+        switch (journalposttype) {
+            case INN: retning = Mottaksretning.INN;
+                break;
+            case UT: retning = Mottaksretning.UT;
+                break;
+            case NOTAT: retning = Mottaksretning.NOTAT;
+                break;
+            default:
+                throw new IllegalArgumentException("Journalposttype " + journalposttype.getKode() + " støttes ikke.");
+        }
+        return retning;
     }
 }

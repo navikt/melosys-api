@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.agent.iv;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -21,11 +22,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProduserbartDokument.AVSLAG_YRKESAKTIV;
-import static no.nav.melosys.domain.ProduserbartDokument.INNVILGELSE_YRKESAKTIV;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.ProsessSteg.*;
-import static no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator.*;
+import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
+import static no.nav.melosys.domain.ProsessSteg.IV_SEND_SED;
+import static no.nav.melosys.domain.kodeverk.Produserbaredokument.ATTEST_A1;
+import static no.nav.melosys.domain.kodeverk.ProduserbartDokument.INNVILGELSE_YRKESAKTIV;
 
 /**
  * Sende ulike brev basert på lovvalgsbestemmelse.
@@ -96,12 +97,12 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             } else if (innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
                 BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(INNVILGELSE_YRKESAKTIV);
                 BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
-                brevData.mottaker = RolleType.BRUKER;
+                brevData.mottaker = Aktoerroller.BRUKER;
                 dokumentService.produserDokument(behandling.getId(), INNVILGELSE_YRKESAKTIV, brevData);
+                dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
 
-                // FIXME Myndigheter støttes ikke.
-                //brevData.mottaker = RolleType.MYNDIGHET;
-                //dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
+                brevData.mottaker = Aktoerroller.MYNDIGHET;
+                dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
 
                 log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
                 prosessinstans.setSteg(IV_SEND_SED);
@@ -116,5 +117,40 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
         }
+    }
+
+    /**
+     * Finn ut om innvilgelsesbrev skal sendes.
+     * 
+     * Innvilgelsesbrev skal sendes dersom behandlingen har resultert i:
+     * <ul>
+     * <li>Lovvalgsland er avklart</li>
+     * <li>Lovvalgsland er Norge</li>
+     * <li>Lovvalgbestemmelsen er 12.1, 12.2 eller 16.1</li>
+     * 
+     * </ul>
+     * 
+     * @param behandling
+     *            en behandling å sjekke.
+     * @return <code>true</code> hvis innvilgelsesbrev skal sendes, ellers <code>false</code>.
+     */
+    private boolean innvilgelsesbrevSkalSendes(Behandling behandling) {
+        Behandlingsresultat resultat = behandlingsResultatRepo.findById(behandling.getId()).orElse(null);
+        Set<Lovvalgsperiode> lovvalgsperioder = resultat.getLovvalgsperioder();
+        if (lovvalgsperioder.size() > 1) {
+            throw new UnsupportedOperationException(String.format("Flere enn en"
+                    + " lovvalgsperiode er ikke støttet i første leveranse av "
+                    + "Melosys (behandlingsid %s).", behandling.getId()));
+        }
+        LovvalgBestemmelse bestemmelse = resultat.getLovvalgsperioder().iterator().next().getBestemmelse();
+        return resultat.getType() == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND &&
+                resultat.getFastsattAvLand() == Landkoder.NO &&
+                bestemmelseKanInnvilges(bestemmelse);
+    }
+
+    private static boolean bestemmelseKanInnvilges(LovvalgBestemmelse bestemmelse) {
+        return bestemmelse == LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1 ||
+                bestemmelse == LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_2 ||
+                bestemmelse == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1;
     }
 }

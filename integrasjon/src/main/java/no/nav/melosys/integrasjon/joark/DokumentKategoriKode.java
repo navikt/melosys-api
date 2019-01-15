@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.joark;
 
-import no.nav.melosys.domain.Kodeverk;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 
 /**
  * Enum for Joark koder i K_KATEGORI_T.

@@ -3,7 +3,7 @@ package no.nav.melosys.service.dokument.brev;
 import java.util.HashMap;
 import java.util.Map;
 
-import no.nav.melosys.domain.ProduserbartDokument;
+import no.nav.melosys.domain.kodeverk.ProduserbartDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.mapper.*;
 

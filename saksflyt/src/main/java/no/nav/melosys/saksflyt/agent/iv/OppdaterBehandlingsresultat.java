@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
@@ -57,7 +59,7 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         Long behandlingID = prosessinstans.getBehandling().getId();
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID).orElse(null);
-        behandlingsresultat.setType(BehandlingsresultatType.valueOf(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE)));
+        behandlingsresultat.setType(Behandlingsresultattyper.valueOf(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE)));
 
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));

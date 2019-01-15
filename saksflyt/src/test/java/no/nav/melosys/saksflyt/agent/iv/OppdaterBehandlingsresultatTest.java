@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,11 +43,12 @@ public class OppdaterBehandlingsresultatTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         p.setBehandling(behandling);
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
+        p.setBehandling(new Behandling());
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
         String testbruker = "Z097";
         p.setData(ProsessDataKey.SAKSBEHANDLER, testbruker);
-        p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.FASTSATT_LOVVALGSLAND.getKode());
+        p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND.getKode());
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
@@ -54,7 +57,7 @@ public class OppdaterBehandlingsresultatTest {
 
         verify(behandlingsresultatRepository).save(behandlingsresultatArgumentCaptor.capture());
         Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
-        assertThat(capture.getType()).isEqualTo(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        assertThat(capture.getType()).isEqualTo(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         assertThat(capture.getEndretAv()).isEqualTo(testbruker);
         assertThat(capture.getVedtaksdato()).isNotNull();
         assertThat(capture.getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));

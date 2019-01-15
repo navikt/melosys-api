@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import no.nav.melosys.domain.kodeverk.Aktoerroller;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.exception.TekniskException;
 import org.junit.Test;
 
@@ -75,15 +77,15 @@ public class FagsakTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a1 = new Aktoer();
-        a1.setRolle(RolleType.BRUKER);
+        a1.setRolle(Aktoerroller.BRUKER);
         a1.setAktørId("123");
         fagsak.getAktører().add(a1);
         Aktoer a2 = new Aktoer();
-        a2.setRolle(RolleType.ARBEIDSGIVER);
+        a2.setRolle(Aktoerroller.ARBEIDSGIVER);
         a2.setAktørId("456");
         fagsak.getAktører().add(a2);
 
-        Aktoer bruker = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
+        Aktoer bruker = fagsak.hentAktørMedRolleType(Aktoerroller.BRUKER);
 
         assertThat(bruker).isEqualTo(a1);
     }
@@ -93,11 +95,11 @@ public class FagsakTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a2 = new Aktoer();
-        a2.setRolle(RolleType.ARBEIDSGIVER);
+        a2.setRolle(Aktoerroller.ARBEIDSGIVER);
         a2.setAktørId("456");
         fagsak.getAktører().add(a2);
 
-        Aktoer bruker = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
+        Aktoer bruker = fagsak.hentAktørMedRolleType(Aktoerroller.BRUKER);
 
         assertThat(bruker).isNull();
     }
@@ -107,15 +109,15 @@ public class FagsakTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a1 = new Aktoer();
-        a1.setRolle(RolleType.BRUKER);
+        a1.setRolle(Aktoerroller.BRUKER);
         a1.setAktørId("123");
         fagsak.getAktører().add(a1);
         Aktoer a2 = new Aktoer();
-        a2.setRolle(RolleType.BRUKER);
+        a2.setRolle(Aktoerroller.BRUKER);
         a2.setAktørId("456");
         fagsak.getAktører().add(a2);
 
-        Aktoer bruker = fagsak.hentAktørMedRolleType(RolleType.BRUKER);
+        Aktoer bruker = fagsak.hentAktørMedRolleType(Aktoerroller.BRUKER);
 
         assertThat(bruker).isEqualTo(a1);
     }

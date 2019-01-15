@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.agent.brev;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProduserbartDokument;
+import no.nav.melosys.domain.kodeverk.ProduserbartDokument;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;

@@ -1,8 +1,8 @@
 package no.nav.melosys.integrasjon.gsak.oppgave;
 
 import no.nav.melosys.domain.Tema;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.gsak.GsakService;
@@ -43,7 +43,7 @@ public class OppgaveMappingMellomDTOogDomainTest {
         Oppgave oppgave = gsakFasade.hentOppgave("1234");
         assertThat(oppgave.getOppgaveId()).isEqualTo("1234");
         assertThat(oppgave.getSaksnummer()).isEqualTo("MEL-111");
-        assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetype.valueOf("BEH_SAK"));
+        assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetyper.valueOf("BEH_SAK"));
         assertThat(oppgave.getTema()).isEqualTo(Tema.valueOf("MED"));
     }
 }

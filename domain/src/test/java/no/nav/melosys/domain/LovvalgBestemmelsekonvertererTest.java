@@ -1,15 +1,14 @@
 package no.nav.melosys.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-
+import no.nav.melosys.domain.Lovvalgsperiode.LovvalgBestemmelsekonverterer;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_987_2009;
+import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
 import org.junit.Test;
 
-import no.nav.melosys.domain.Lovvalgsperiode.LovvalgBestemmelsekonverterer;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_987_2009;
-import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse_883_2004;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 public final class LovvalgBestemmelsekonvertererTest {
 
@@ -21,17 +20,17 @@ public final class LovvalgBestemmelsekonvertererTest {
 
     @Test
     public void konverterFra883_2004TilDbKolonneGirStreng() {
-        testConvertToDatabseColumn(LovvalgBestemmelse_883_2004.FO_883_2004_ART16_2, "ART16_2");
+        testConvertToDatabseColumn(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2, "ART16_2");
     }
     
     @Test
     public void konverterFra987_2009TilDbKolonneGirStreng() {
-        testConvertToDatabseColumn(LovvalgBestemmelse_987_2009.FO_987_2009_ART14_11, "ART14_11");
+        testConvertToDatabseColumn(LovvalgsBestemmelser_987_2009.FO_987_2009_ART14_11, "ART14_11");
     }
 
     @Test
     public void konverterFraTillegg883_2004TilDbKolonneGirStreng() {
-        testConvertToDatabseColumn(TilleggBestemmelse_883_2004.FO_883_2004_ART11_2, "ART11_2");
+        testConvertToDatabseColumn(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_2, "ART11_2");
     }
 
     @Test
@@ -50,17 +49,17 @@ public final class LovvalgBestemmelsekonvertererTest {
 
     @Test
     public void konverter883_2004TilEntitsattributtGirOppramsInstans() {
-        testKonverterTIlEntitetsAttributt(LovvalgBestemmelse_883_2004.FO_883_2004_ANNET);
+        testKonverterTIlEntitetsAttributt(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2);
     }
 
     @Test
     public void konverter987_2009TilEntitsattributtGirOppramsInstans() {
-        testKonverterTIlEntitetsAttributt(LovvalgBestemmelse_987_2009.FO_987_2009_ART14_11);
+        testKonverterTIlEntitetsAttributt(LovvalgsBestemmelser_987_2009.FO_987_2009_ART14_11);
     }
 
     @Test
     public void konverterTillegg883_2004TilEntitsattributtGirOppramsInstans() {
-        testKonverterTIlEntitetsAttributt(TilleggBestemmelse_883_2004.FO_883_2004_ART87A);
+        testKonverterTIlEntitetsAttributt(TilleggsBestemmelser_883_2004.FO_883_2004_ART87A);
     }
 
     @Test

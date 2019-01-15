@@ -1,6 +1,8 @@
 package no.nav.melosys.service.vedtak;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -42,7 +44,7 @@ public class VedtakService {
     }
 
     @Transactional
-    public void fattVedtak(long behandlingID, BehandlingsresultatType behandlingsresultatType) throws FunksjonellException, TekniskException {
+    public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType) throws FunksjonellException, TekniskException {
         log.info("Fatter vedtak for behandling: {}", behandlingID);
 
         Behandling behandling = behandlingRepository.findById(behandlingID)

@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
@@ -94,11 +94,11 @@ public class LovvalgsperiodeServiceIT {
         rad.setFom(LocalDate.now());
         rad.setTom(LocalDate.now());
         rad.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
-        rad.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_1);
+        rad.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_1);
         rad.setLovvalgsland(Landkoder.SK);
         rad.setUnntakFraLovvalgsland(Landkoder.SI);
-        rad.setUnntakFraBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_3A);
-        rad.setMedlemskapstype(Medlemskapstype.UNNTATT);
+        rad.setUnntakFraBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3A);
+        rad.setMedlemskapstype(Medlemskapstyper.UNNTATT);
         return rad;
     }
 
@@ -110,7 +110,7 @@ public class LovvalgsperiodeServiceIT {
         behandlingsresultat.setRegistrertAv("Avregistrerer");
         behandlingsresultat.setRegistrertDato(ENDRET_DATO);
         behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.AUTOMATISERT);
-        behandlingsresultat.setType(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         return behandlingsresultat;
     }
 
@@ -120,7 +120,7 @@ public class LovvalgsperiodeServiceIT {
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(ENDRET_DATO);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling.setType(Behandlingstype.KLAGE);
+        behandling.setType(Behandlingstyper.KLAGE);
         return behandling;
     }
 
@@ -129,7 +129,7 @@ public class LovvalgsperiodeServiceIT {
         fagsak.setSaksnummer("123");
         fagsak.setEndretDato(ENDRET_DATO);
         fagsak.setRegistrertDato(ENDRET_DATO);
-        fagsak.setStatus(Fagsaksstatus.AVSLUTTET);
+        fagsak.setStatus(Saksstatuser.AVSLUTTET);
         return fagsak;
     }
 

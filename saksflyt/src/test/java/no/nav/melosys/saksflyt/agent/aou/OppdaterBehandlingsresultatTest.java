@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.agent.aou;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
@@ -35,7 +37,7 @@ public class OppdaterBehandlingsresultatTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         p.setBehandling(behandling);
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.ANMODNING_OM_UNNTAK);
         String testbruker = "Z097";
         p.setData(ProsessDataKey.SAKSBEHANDLER, testbruker);
@@ -45,7 +47,7 @@ public class OppdaterBehandlingsresultatTest {
 
         oppdaterBehandlingsresultat.utfør(p);
 
-        assertThat(behandlingsresultat.getType()).isEqualTo(BehandlingsresultatType.ANMODNING_OM_UNNTAK);
+        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
         assertThat(behandlingsresultat.getEndretAv()).isEqualTo(testbruker);
         assertThat(p.getSteg()).isEqualTo(AOU_OPPDATER_MEDL);
     }

@@ -8,7 +8,9 @@ import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -31,7 +33,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat_type", nullable = false)
-    private BehandlingsresultatType type;
+    private Behandlingsresultattyper type;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "fastsatt_av_land")
@@ -79,11 +81,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.behandlingsmåte = behandlingsmåte;
     }
 
-    public BehandlingsresultatType getType() {
+    public Behandlingsresultattyper getType() {
         return type;
     }
 
-    public void setType(BehandlingsresultatType type) {
+    public void setType(Behandlingsresultattyper type) {
         this.type = type;
     }
 

@@ -6,7 +6,11 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.RegistreringsInfo;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -43,7 +47,7 @@ public class FagsakService {
         return fagsakRepository.findBySaksnummer(saksnummer);
     }
 
-    public List<Fagsak> hentFagsakerMedAktør(RolleType rolleType, String ident) throws IkkeFunnetException {
+    public List<Fagsak> hentFagsakerMedAktør(Aktoerroller rolleType, String ident) throws IkkeFunnetException {
         String aktørID = tpsFasade.hentAktørIdForIdent(ident);
         return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
     }
@@ -62,7 +66,7 @@ public class FagsakService {
      * - Oppretter tom behandlingsresultat.
      */
     @Transactional
-    public Fagsak nyFagsakOgBehandling(String aktørID, String arbeidsgiver, String representant, Behandlingstype behandlingstype, String initierendeJournalpostId, String initierendeDokumentId) {
+    public Fagsak nyFagsakOgBehandling(String aktørID, String arbeidsgiver, String representant, Behandlingstyper behandlingstype, String initierendeJournalpostId, String initierendeDokumentId) {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(hentNesteSaksnummer());
 
@@ -71,14 +75,14 @@ public class FagsakService {
         Aktoer aktør = new Aktoer();
         aktør.setAktørId(aktørID);
         aktør.setFagsak(fagsak);
-        aktør.setRolle(RolleType.BRUKER);
+        aktør.setRolle(Aktoerroller.BRUKER);
         aktører.add(aktør);
 
         if (arbeidsgiver != null) {
             Aktoer aktørArbeidsgiver = new Aktoer();
             aktørArbeidsgiver.setOrgnr(arbeidsgiver);
             aktørArbeidsgiver.setFagsak(fagsak);
-            aktørArbeidsgiver.setRolle(RolleType.ARBEIDSGIVER);
+            aktørArbeidsgiver.setRolle(Aktoerroller.ARBEIDSGIVER);
             aktører.add(aktørArbeidsgiver);
         }
 
@@ -86,7 +90,7 @@ public class FagsakService {
             Aktoer aktørRepresentant = new Aktoer();
             aktørRepresentant.setOrgnr(representant);
             aktørRepresentant.setFagsak(fagsak);
-            aktørRepresentant.setRolle(RolleType.REPRESENTANT);
+            aktørRepresentant.setRolle(Aktoerroller.REPRESENTANT);
             aktører.add(aktørRepresentant);
         }
 
@@ -95,7 +99,7 @@ public class FagsakService {
         fagsak.setAktører(aktører);
         fagsak.setRegistrertDato(nå);
         fagsak.setEndretDato(nå);
-        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
 
         lagre(fagsak);
 

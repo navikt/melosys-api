@@ -5,10 +5,13 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Lovvalgsperiode.LovvalgBestemmelsekonverterer;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
 public final class LovvalgsperiodeDto {
 
@@ -32,8 +35,8 @@ public final class LovvalgsperiodeDto {
             LovvalgBestemmelse unntakFraBestemmelse,
             Landkoder unntakFraLovvalgsland,
             InnvilgelsesResultat innvilgelsesResultat,
-            TrygdeDekning trygdeDekning,
-            Medlemskapstype medlemskapstype) {
+            Trygdedekninger trygdeDekning,
+            Medlemskapstyper medlemskapstype) {
         this.periode = periode;
         this.lovvalgBestemmelse = lovvalgBestemmelse.name();
         this.tilleggBestemmelse = tilleggBestemmelse != null ? tilleggBestemmelse.name() : null;
@@ -55,8 +58,8 @@ public final class LovvalgsperiodeDto {
                 konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
                 enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
                 InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
-                enumVerdiEllerNull(TrygdeDekning.class, json.get("trygdeDekning")),
-                Medlemskapstype.valueOf(json.get("medlemskapstype")));
+                enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
+                Medlemskapstyper.valueOf(json.get("medlemskapstype")));
     }
 
     /**
@@ -93,8 +96,8 @@ public final class LovvalgsperiodeDto {
         resultat.setTilleggsbestemmelse(konverterer.convertToEntityAttribute(tilleggBestemmelse));
         resultat.setUnntakFraLovvalgsland(enumVerdiEllerNull(Landkoder.class, unntakFraLovvalgsland));
         resultat.setInnvilgelsesresultat(enumVerdiEllerNull(InnvilgelsesResultat.class, innvilgelsesResultat));
-        resultat.setDekning(enumVerdiEllerNull(TrygdeDekning.class, trygdeDekning));
-        resultat.setMedlemskapstype(enumVerdiEllerNull(Medlemskapstype.class, medlemskapstype));
+        resultat.setDekning(enumVerdiEllerNull(Trygdedekninger.class, trygdeDekning));
+        resultat.setMedlemskapstype(enumVerdiEllerNull(Medlemskapstyper.class, medlemskapstype));
         return resultat;
     }
 

@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -18,6 +18,8 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -83,7 +85,7 @@ public class BrevDataByggerA001Test {
 
         Landkoder unntakFraLovvalgsland = Landkoder.SE;
         Lovvalgsperiode periode = new Lovvalgsperiode();
-        periode.setUnntakFraBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1);
+        periode.setUnntakFraBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setUnntakFraLovvalgsland(unntakFraLovvalgsland);
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Arrays.asList(periode));
 
@@ -93,7 +95,7 @@ public class BrevDataByggerA001Test {
         VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
         begrunnelse.setKode("God grunn");
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-        vilkaarsresultat.setVilkaar(VilkaarType.FO_883_2004_ART16_1);
+        vilkaarsresultat.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
         vilkaarsresultat.setBegrunnelser(new HashSet<>(Arrays.asList(begrunnelse)));
         when(vilkårRepo.findByBehandlingsresultatId(anyLong())).thenReturn(Arrays.asList(vilkaarsresultat));
 

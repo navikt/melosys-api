@@ -2,11 +2,11 @@ package no.nav.melosys.integrasjon.medl.behandle;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.Landkoder;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.TrygdeDekning;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.*;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
@@ -18,14 +18,14 @@ public class MedlPeriodeKonverterTest {
 
     @Test
     public void hentFellesKodeForGrunnlagMedltype() throws TekniskException {
-        LovvalgBestemmelse_883_2004 lovvalgsbestemmelse = LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2;
+        LovvalgsBestemmelser_883_2004 lovvalgsbestemmelse = LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_2;
         GrunnlagMedl grunnlagMedltype = MedlPeriodeKonverter.tilGrunnlagMedltype(lovvalgsbestemmelse);
         assertThat(grunnlagMedltype).isEqualTo(GrunnlagMedl.FO_12_2);
     }
 
     @Test(expected = TekniskException.class)
     public void hentFellesKodeForGrunnlagMedltype_() throws TekniskException {
-        LovvalgBestemmelse_883_2004 lovvalgsbestemmelse = LovvalgBestemmelse_883_2004.FO_883_2004_ART11_1;
+        LovvalgsBestemmelser_883_2004 lovvalgsbestemmelse = LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_1;
         MedlPeriodeKonverter.tilGrunnlagMedltype(lovvalgsbestemmelse);
     }
 
@@ -33,7 +33,7 @@ public class MedlPeriodeKonverterTest {
     public void hentKodeverkForLovvalgsbestemmelse() throws TekniskException {
         GrunnlagMedl grunnlagKode = GrunnlagMedl.FO_12_2;
         LovvalgBestemmelse lovvalgsbestemmelse = MedlPeriodeKonverter.tilLovvalgBestemmelse(grunnlagKode);
-        assertThat(lovvalgsbestemmelse).isEqualTo(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2);
+        assertThat(lovvalgsbestemmelse).isEqualTo(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_2);
     }
 
     @Test(expected = TekniskException.class)
@@ -44,7 +44,7 @@ public class MedlPeriodeKonverterTest {
 
     @Test
     public void hentFellesKodeForDekningtype() throws TekniskException {
-        TrygdeDekning trygdeDekning = TrygdeDekning.UTEN_DEKNING;
+        Trygdedekninger trygdeDekning = Trygdedekninger.UTEN_DEKNING;
         DekningMedl dekningMedl = MedlPeriodeKonverter.tilMedlTrygdeDekning(trygdeDekning);
         assertThat(dekningMedl).isEqualTo(DekningMedl.UNNTATT);
     }
@@ -54,8 +54,8 @@ public class MedlPeriodeKonverterTest {
 
         String aktørId = "12345678910";
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_3A);
-        lovvalgsperiode.setDekning(TrygdeDekning.FULL_DEKNING_EOSFO);
+        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3A);
+        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
         lovvalgsperiode.setLovvalgsland(Landkoder.BE);
         lovvalgsperiode.setFom(LocalDate.of(2015, 1, 1));
         lovvalgsperiode.setTom(LocalDate.of(2015, 6, 30));

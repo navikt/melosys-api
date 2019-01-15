@@ -2,7 +2,15 @@ package no.nav.melosys.saksflyt.agent.iv;
 
 import java.util.Collections;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
@@ -35,7 +43,7 @@ public class AvsluttFagsakOgBehandlingTest {
     public void utfoerSteg() {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
 
         Behandling behandling = new Behandling();
@@ -51,7 +59,7 @@ public class AvsluttFagsakOgBehandlingTest {
 
         assertThat(p.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
         assertThat(p.getBehandling().getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
-        assertThat(p.getBehandling().getFagsak().getStatus()).isEqualTo(Fagsaksstatus.AVSLUTTET);
+        assertThat(p.getBehandling().getFagsak().getStatus()).isEqualTo(Saksstatuser.AVSLUTTET);
 
     }
 } 

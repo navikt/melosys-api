@@ -1,6 +1,8 @@
 package no.nav.melosys.saksflyt.agent.brev;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Aktoerroller;
+import no.nav.melosys.domain.kodeverk.ProduserbartDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -53,7 +55,7 @@ public class SendMangelbrevTest {
         p.setBehandling(new Behandling());
 
         BrevData brevData = new BrevData("Z123456");
-        brevData.mottaker = RolleType.MYNDIGHET;
+        brevData.mottaker = Aktoerroller.MYNDIGHET;
         brevData.fritekst = "Fritekst";
 
         p.setData(ProsessDataKey.BREVDATA, brevData);

@@ -2,7 +2,12 @@ package no.nav.melosys.saksflyt.agent.gsak;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -46,14 +51,16 @@ public class OpprettOppgaveTest {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);
-        fagsak.setType(Fagsakstype.EU_EØS);
+        fagsak.setType(Sakstyper.EU_EOS);
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setFagsak(fagsak);
 
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(behandling);
+
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.JFR_NY_SAK);
 
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
@@ -72,10 +79,10 @@ public class OpprettOppgaveTest {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);
-        fagsak.setType(Fagsakstype.EU_EØS);
+        fagsak.setType(Sakstyper.EU_EOS);
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setFagsak(fagsak);
 
         Prosessinstans p = new Prosessinstans();
@@ -98,7 +105,7 @@ public class OpprettOppgaveTest {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);
-        fagsak.setType(Fagsakstype.FOLKETRYGD);
+        fagsak.setType(Sakstyper.FTRL);
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
@@ -118,10 +125,10 @@ public class OpprettOppgaveTest {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);
-        fagsak.setType(Fagsakstype.EU_EØS);
+        fagsak.setType(Sakstyper.EU_EOS);
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setType(Behandlingstype.NORGE_UTPEKT);
+        behandling.setType(Behandlingstyper.NORGE_UTPEKT);
         behandling.setFagsak(fagsak);
 
         Prosessinstans p = new Prosessinstans();
@@ -139,10 +146,10 @@ public class OpprettOppgaveTest {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);
-        fagsak.setType(Fagsakstype.EU_EØS);
+        fagsak.setType(Sakstyper.EU_EOS);
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setFagsak(fagsak);
 
         Prosessinstans p = new Prosessinstans();

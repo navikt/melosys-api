@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon;
 
-import no.nav.melosys.domain.Kodeverk;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 
 /**
  * https://confluence.adeo.no/display/APPKAT/Applikasjons-ID

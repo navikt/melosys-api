@@ -7,6 +7,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Aktoerroller;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -128,7 +129,7 @@ public class SaksopplysningerService {
         nyprosessinstans.setBehandling(behandling);
         nyprosessinstans.setType(ProsessType.OPPFRISKNING);
 
-        String aktør_Id = behandling.getFagsak().hentAktørMedRolleType(RolleType.BRUKER).getAktørId();
+        String aktør_Id = behandling.getFagsak().hentAktørMedRolleType(Aktoerroller.BRUKER).getAktørId();
         nyprosessinstans.setData(ProsessDataKey.AKTØR_ID, aktør_Id);
         nyprosessinstans.setData(ProsessDataKey.BRUKER_ID, tpsFasade.hentIdentForAktørId(aktør_Id));
 

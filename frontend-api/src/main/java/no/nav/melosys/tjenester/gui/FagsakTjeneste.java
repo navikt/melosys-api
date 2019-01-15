@@ -10,10 +10,15 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Aktoerroller;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -63,7 +68,7 @@ public class FagsakTjeneste extends RestTjeneste {
         TypeMap<Behandling, BehandlingDto> typeMapBehandlingUt = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
         typeMapBehandlingUt.<Long>addMapping(Behandling::getId, (dest, id) -> dest.getOppsummering().setBehandlingID(id));
         typeMapBehandlingUt.<Behandlingsstatus>addMapping(Behandling::getStatus, (dest, status) -> dest.getOppsummering().setBehandlingsstatus(status));
-        typeMapBehandlingUt.<Behandlingstype>addMapping(Behandling::getType, (dest, type) -> dest.getOppsummering().setBehandlingstype(type));
+        typeMapBehandlingUt.<Behandlingstyper>addMapping(Behandling::getType, (dest, type) -> dest.getOppsummering().setBehandlingstype(type));
         typeMapBehandlingUt.<Instant>addMapping(Behandling::getRegistrertDato, (dest, dato) -> dest.getOppsummering().setRegistrertDato(dato));
         typeMapBehandlingUt.<Instant>addMapping(Behandling::getEndretDato, (dest, dato) -> dest.getOppsummering().setEndretDato(dato));
         typeMapBehandlingUt.<Instant>addMapping(Behandling::getSistOpplysningerHentetDato, (dest, dato) -> dest.getOppsummering().setSisteOpplysningerHentetDato(dato));
@@ -96,7 +101,7 @@ public class FagsakTjeneste extends RestTjeneste {
             throw new BadRequestException();
         }
         tilgang.sjekkFnr(fnr);
-        saker = fagsakService.hentFagsakerMedAktør(RolleType.BRUKER, fnr);
+        saker = fagsakService.hentFagsakerMedAktør(Aktoerroller.BRUKER, fnr);
         return tilDtoer(saker);
     }
 
