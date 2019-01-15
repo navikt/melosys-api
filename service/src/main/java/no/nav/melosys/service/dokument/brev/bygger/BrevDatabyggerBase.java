@@ -107,8 +107,7 @@ public abstract class BrevDatabyggerBase {
     protected Collection<Lovvalgsperiode> hentLovvalgsperioder() throws TekniskException {
         Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId());
         if (lovvalgsperioder.isEmpty()) {
-//            throw new TekniskException("Trenger minst en lovvalgsperiode");
-            return lovvalgsperioder;
+            throw new TekniskException("Trenger minst en lovvalgsperiode");
         }
 
         Lovvalgsperiode valgtLovvalgsperiode = lovvalgsperioder.iterator().next();
