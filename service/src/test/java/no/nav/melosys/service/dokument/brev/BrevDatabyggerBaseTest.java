@@ -21,6 +21,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDatabyggerBase;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
@@ -43,7 +44,7 @@ public class BrevDatabyggerBaseTest {
                                          PersonDokument person,
                                          SoeknadDokument søknad,
                                          Set<String> avklarteOrganisasjoner) {
-            super(kodeverkService, null, mock(AvklartefaktaService.class));
+            super(kodeverkService, mock(LovvalgsperiodeService.class), mock(AvklartefaktaService.class));
             this.person = person;
             this.søknad = søknad;
             this.avklarteOrganisasjoner = avklarteOrganisasjoner;
