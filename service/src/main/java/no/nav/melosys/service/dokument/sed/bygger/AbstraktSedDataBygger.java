@@ -18,12 +18,12 @@ import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.dokument.sed.SedData;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
-public abstract class SedDataBygger extends AbstraktDokumentDataBygger {
+public abstract class AbstraktSedDataBygger extends AbstraktDokumentDataBygger {
 
     private RegisterOppslagService registerOppslagService;
 
-    protected SedDataBygger(KodeverkService kodeverkService, RegisterOppslagService registerOppslagService,
-                            LovvalgsperiodeService lovvalgsperiodeService, AvklartefaktaService avklartefaktaService) {
+    protected AbstraktSedDataBygger(KodeverkService kodeverkService, RegisterOppslagService registerOppslagService,
+                                    LovvalgsperiodeService lovvalgsperiodeService, AvklartefaktaService avklartefaktaService) {
         super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
         this.registerOppslagService = registerOppslagService;
 

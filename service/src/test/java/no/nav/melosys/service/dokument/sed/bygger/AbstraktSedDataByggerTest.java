@@ -37,17 +37,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class SedDataByggerTest {
+public class AbstraktSedDataByggerTest {
 
-    private SedDataBygger dataBygger;
+    private AbstraktSedDataBygger dataBygger;
     private Behandling behandling;
 
-    class StubSedDataBygger extends SedDataBygger {
+    class AbstraktSedDataByggerStub extends AbstraktSedDataBygger {
 
-        StubSedDataBygger(KodeverkService kodeverkService,
-                          RegisterOppslagService registerOppslagService,
-                          LovvalgsperiodeService lovvalgsperiodeService,
-                          AvklartefaktaService avklartefaktaService) {
+        AbstraktSedDataByggerStub(KodeverkService kodeverkService,
+                                  RegisterOppslagService registerOppslagService,
+                                  LovvalgsperiodeService lovvalgsperiodeService,
+                                  AvklartefaktaService avklartefaktaService) {
             super(kodeverkService, registerOppslagService, lovvalgsperiodeService, avklartefaktaService);
         }
     }
@@ -112,7 +112,7 @@ public class SedDataByggerTest {
 
         AvklartefaktaService avklartefaktaService = mock(AvklartefaktaService.class);
 
-        dataBygger = new StubSedDataBygger(kodeverkService, registerOppslagService, lovvalgsperiodeService, avklartefaktaService);
+        dataBygger = new AbstraktSedDataByggerStub(kodeverkService, registerOppslagService, lovvalgsperiodeService, avklartefaktaService);
     }
 
     @Test
