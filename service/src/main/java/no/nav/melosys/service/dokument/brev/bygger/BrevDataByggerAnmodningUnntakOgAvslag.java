@@ -10,16 +10,16 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
+import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 
-public class BrevDataByggerAnmodningUnntak implements BrevDataBygger {
+public class BrevDataByggerAnmodningUnntakOgAvslag implements BrevDataBygger {
 
     private final AvklartefaktaService avklartefaktaService;
     private final RegisterOppslagService registerOppslagService;
 
-    public BrevDataByggerAnmodningUnntak(AvklartefaktaService avklartefaktaService,
-                                         RegisterOppslagService registerOppslagService) {
+    public BrevDataByggerAnmodningUnntakOgAvslag(AvklartefaktaService avklartefaktaService,
+                                                 RegisterOppslagService registerOppslagService) {
         this.avklartefaktaService = avklartefaktaService;
         this.registerOppslagService = registerOppslagService;
     }
@@ -32,7 +32,7 @@ public class BrevDataByggerAnmodningUnntak implements BrevDataBygger {
             .map(org -> new Virksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), null))
             .findFirst();
 
-        BrevDataAnmodningUnntak brevData = new BrevDataAnmodningUnntak(saksbehandler);
+        BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
         hovedvirksomhet.ifPresent(hv -> brevData.hovedvirksomhet = hv);
 
         return brevData;
