@@ -1,16 +1,10 @@
-package no.nav.melosys.service.eux.bygger;
+package no.nav.melosys.service.dokument.sed.bygger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -30,25 +24,30 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.eux.SedData;
+import no.nav.melosys.service.dokument.sed.SedData;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class ElektroniskBrevDataByggerTest {
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-    private ElektroniskBrevDataBygger dataBygger;
+@RunWith(MockitoJUnitRunner.Silent.class)
+public class SedDataByggerTest {
+
+    private SedDataBygger dataBygger;
     private Behandling behandling;
 
-    class SedDataBygger extends ElektroniskBrevDataBygger {
+    class StubSedDataBygger extends SedDataBygger {
 
-        SedDataBygger(KodeverkService kodeverkService,
-            RegisterOppslagService registerOppslagService,
-            LovvalgsperiodeService lovvalgsperiodeService,
-            AvklartefaktaService avklartefaktaService) {
+        StubSedDataBygger(KodeverkService kodeverkService,
+                          RegisterOppslagService registerOppslagService,
+                          LovvalgsperiodeService lovvalgsperiodeService,
+                          AvklartefaktaService avklartefaktaService) {
             super(kodeverkService, registerOppslagService, lovvalgsperiodeService, avklartefaktaService);
         }
     }
@@ -113,7 +112,7 @@ public class ElektroniskBrevDataByggerTest {
 
         AvklartefaktaService avklartefaktaService = mock(AvklartefaktaService.class);
 
-        dataBygger = new SedDataBygger(kodeverkService, registerOppslagService, lovvalgsperiodeService, avklartefaktaService);
+        dataBygger = new StubSedDataBygger(kodeverkService, registerOppslagService, lovvalgsperiodeService, avklartefaktaService);
     }
 
     @Test

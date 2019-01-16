@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
@@ -14,12 +15,13 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
-public class BrevDataByggerA1 extends BrevDatabyggerBase implements BrevDataBygger {
+public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements BrevDataBygger {
 
     private final RegisterOppslagSystemService registerOppslagService;
 

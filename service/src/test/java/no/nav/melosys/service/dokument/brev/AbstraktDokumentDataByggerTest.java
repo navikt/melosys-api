@@ -19,7 +19,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDatabyggerBase;
+import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class BrevDatabyggerBaseTest {
+public class AbstraktDokumentDataByggerTest {
 
     private SoeknadDokument søknad;
     private PersonDokument person;
@@ -39,7 +39,7 @@ public class BrevDatabyggerBaseTest {
 
     private BrevDatabyggerbaseImpl brevDatabyggerbase;
 
-    class BrevDatabyggerbaseImpl extends BrevDatabyggerBase {
+    class BrevDatabyggerbaseImpl extends AbstraktDokumentDataBygger {
 
         protected BrevDatabyggerbaseImpl(KodeverkService kodeverkService,
                                          PersonDokument person,

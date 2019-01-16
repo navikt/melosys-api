@@ -1,6 +1,7 @@
-package no.nav.melosys.service.eux;
+package no.nav.melosys.service.dokument.sed;
 
 import java.util.List;
+
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;

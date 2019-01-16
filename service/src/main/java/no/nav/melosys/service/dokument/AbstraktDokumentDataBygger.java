@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument.brev.bygger;
+package no.nav.melosys.service.dokument;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -20,7 +20,7 @@ import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
-public abstract class BrevDatabyggerBase {
+public abstract class AbstraktDokumentDataBygger {
     final protected KodeverkService kodeverkService;
     final protected LovvalgsperiodeService lovvalgsperiodeService;
     final protected AvklartefaktaService avklartefaktaService;
@@ -32,9 +32,9 @@ public abstract class BrevDatabyggerBase {
 
     protected Set<String> avklarteOrganisasjoner;
 
-    protected BrevDatabyggerBase(KodeverkService kodeverkService,
-        LovvalgsperiodeService lovvalgsperiodeService,
-        AvklartefaktaService avklartefaktaService) {
+    protected AbstraktDokumentDataBygger(KodeverkService kodeverkService,
+                                         LovvalgsperiodeService lovvalgsperiodeService,
+                                         AvklartefaktaService avklartefaktaService) {
         this.kodeverkService = kodeverkService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.avklartefaktaService = avklartefaktaService;

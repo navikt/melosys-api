@@ -1,4 +1,4 @@
-package no.nav.melosys.service.eux.mapper;
+package no.nav.melosys.service.dokument.sed.mapper;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -17,7 +17,7 @@ import no.nav.melosys.eux.model.medlemskap.Medlemskap;
 import no.nav.melosys.eux.model.nav.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
-import no.nav.melosys.service.eux.SedData;
+import no.nav.melosys.service.dokument.sed.SedData;
 
 import static no.nav.melosys.domain.dokument.person.Familierelasjon.FARA;
 import static no.nav.melosys.domain.dokument.person.Familierelasjon.MORA;

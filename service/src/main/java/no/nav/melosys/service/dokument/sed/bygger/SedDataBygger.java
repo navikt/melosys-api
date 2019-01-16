@@ -1,8 +1,9 @@
-package no.nav.melosys.service.eux.bygger;
+package no.nav.melosys.service.dokument.sed.bygger;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -12,17 +13,17 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDatabyggerBase;
+import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
-import no.nav.melosys.service.eux.SedData;
+import no.nav.melosys.service.dokument.sed.SedData;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
-public abstract class ElektroniskBrevDataBygger extends BrevDatabyggerBase {
+public abstract class SedDataBygger extends AbstraktDokumentDataBygger {
 
     private RegisterOppslagService registerOppslagService;
 
-    protected ElektroniskBrevDataBygger(KodeverkService kodeverkService, RegisterOppslagService registerOppslagService,
-        LovvalgsperiodeService lovvalgsperiodeService, AvklartefaktaService avklartefaktaService) {
+    protected SedDataBygger(KodeverkService kodeverkService, RegisterOppslagService registerOppslagService,
+                            LovvalgsperiodeService lovvalgsperiodeService, AvklartefaktaService avklartefaktaService) {
         super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
         this.registerOppslagService = registerOppslagService;
 

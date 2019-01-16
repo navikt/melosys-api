@@ -1,18 +1,10 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Landkoder;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.VilkaarType;
-import no.nav.melosys.domain.Vilkaarsresultat;
+
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
@@ -25,12 +17,13 @@ import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
-public class BrevDataByggerA001 extends BrevDatabyggerBase implements BrevDataBygger {
+public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements BrevDataBygger {
 
     private final RegisterOppslagSystemService registerOppslagService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
