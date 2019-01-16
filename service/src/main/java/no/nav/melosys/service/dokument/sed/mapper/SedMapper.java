@@ -30,6 +30,7 @@ public abstract class SedMapper<T extends Medlemskap, S extends SedData> {
 
     protected final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
+    //Versjonen til SED'en. Generasjon og versjon (SED_G_VER.SED_VER = 4.1)
     private final String SED_G_VER = "4";
     private final String SED_VER = "1";
 
@@ -81,14 +82,12 @@ public abstract class SedMapper<T extends Medlemskap, S extends SedData> {
 
         person.setFornavn(personDokument.fornavn);
         person.setEtternavn(personDokument.etternavn);
-        person.setFornavnvedfoedsel(personDokument.fornavn);    //finnes ikke i melosys datamodell. ikke påkrevd
-        person.setEtternavnvedfoedsel(personDokument.etternavn);//finnes ikke i melosys datamodell. ikke påkrevd
         person.setFoedselsdato(dateTimeFormatter.format(personDokument.fødselsdato));
         person.setFoedested(null); //det antas at ikke trengs når NAV fyller ut.
         person.setKjoenn(personDokument.kjønn.getKode());
 
         Statsborgerskap statsborgerskap = new Statsborgerskap();
-        statsborgerskap.setLand(personDokument.statsborgerskap.getKode()); //TODO: Noen land har bare enveis-mapping
+        statsborgerskap.setLand(personDokument.statsborgerskap.getKode());
 
         person.setStatsborgerskap(Collections.singletonList(statsborgerskap));
 
