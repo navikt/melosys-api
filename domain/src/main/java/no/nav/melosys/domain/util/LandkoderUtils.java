@@ -22,7 +22,7 @@ public final class LandkoderUtils {
             case IE: return Land.IRLAND;
             case IS: return Land.ISLAND;
             case IT: return Land.ITALIA;
-            case HR: return Land.UNGARN;
+            case HR: return Land.KROATIA;
             case CY: return Land.KYPROS;
             case LV: return Land.LATVIA;
             case LI: return Land.LIECHTENSTEIN;
