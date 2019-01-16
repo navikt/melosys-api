@@ -1,32 +1,46 @@
-package no.nav.melosys.service.dokument.brev.bygger;
+package no.nav.melosys.service.dokument;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
-public abstract class BrevDatabyggerBase {
+public abstract class AbstraktDokumentDataBygger {
     final protected KodeverkService kodeverkService;
+    final protected LovvalgsperiodeService lovvalgsperiodeService;
+    final protected AvklartefaktaService avklartefaktaService;
 
     protected PersonDokument person;
     protected SoeknadDokument søknad;
 
+    protected Behandling behandling;
+
     protected Set<String> avklarteOrganisasjoner;
 
-    protected BrevDatabyggerBase(KodeverkService kodeverkService) {
+    protected AbstraktDokumentDataBygger(KodeverkService kodeverkService,
+                                         LovvalgsperiodeService lovvalgsperiodeService,
+                                         AvklartefaktaService avklartefaktaService) {
         this.kodeverkService = kodeverkService;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.avklartefaktaService = avklartefaktaService;
     }
+
+    protected abstract List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
 
     protected Bostedsadresse hentBostedsadresse() {
         Bostedsadresse adresse = person.bostedsadresse;
@@ -85,5 +99,14 @@ public abstract class BrevDatabyggerBase {
 
     private Arbeidssted utledArbeidsstedFraVirksomhet(Virksomhet virksomhet) {
         return new Arbeidssted(virksomhet.navn, virksomhet.adresse.landKode);
+    }
+
+    protected Collection<Lovvalgsperiode> hentLovvalgsperioder() throws TekniskException {
+        Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId());
+        if (lovvalgsperioder.isEmpty()) {
+            throw new TekniskException("Trenger minst en lovvalgsperiode");
+        }
+
+        return lovvalgsperioder;
     }
 }

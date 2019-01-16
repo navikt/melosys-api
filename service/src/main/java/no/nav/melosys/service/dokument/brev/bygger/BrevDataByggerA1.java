@@ -15,26 +15,26 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
-public class BrevDataByggerA1 extends BrevDatabyggerBase implements BrevDataBygger {
+public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements BrevDataBygger {
 
-    private final AvklartefaktaService avklartefaktaService;
     private final RegisterOppslagSystemService registerOppslagService;
 
     public BrevDataByggerA1(AvklartefaktaService avklartefaktaService,
                             RegisterOppslagSystemService registerOppslagService,
                             KodeverkService kodeverkService) {
-        super(kodeverkService);
-        this.avklartefaktaService = avklartefaktaService;
+        super(kodeverkService, null, avklartefaktaService);
         this.registerOppslagService = registerOppslagService;
     }
 
     @Override
     public BrevData lag(Behandling behandling, String saksbehandler) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        this.behandling = behandling;
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
         this.avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
@@ -51,7 +51,7 @@ public class BrevDataByggerA1 extends BrevDatabyggerBase implements BrevDataBygg
         return brevData;
     }
 
-    private List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    protected List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         return registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner).stream()
                 .map(org -> new Virksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), utfyllManglendeAdressefelter(org)))
                 .collect(Collectors.toList());
