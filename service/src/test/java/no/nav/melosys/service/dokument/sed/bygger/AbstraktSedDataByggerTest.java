@@ -24,7 +24,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.sed.SedData;
+import no.nav.melosys.service.dokument.sed.AbstraktSedData;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +52,7 @@ public class AbstraktSedDataByggerTest {
         }
     }
 
-    private class SedDataImpl extends SedData{}
+    private class SedDataImpl extends AbstraktSedData {}
 
     @Before
     @SuppressWarnings("unchecked")
@@ -118,7 +118,7 @@ public class AbstraktSedDataByggerTest {
     @Test
     public void testHentAvklarteSelvstendigeForetak()
         throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        SedData sedData = dataBygger.lag(behandling, new SedDataImpl());
+        AbstraktSedData sedData = dataBygger.lag(behandling, new SedDataImpl());
 
         assertNotNull(sedData);
         assertNotNull(sedData.getPersonDokument());

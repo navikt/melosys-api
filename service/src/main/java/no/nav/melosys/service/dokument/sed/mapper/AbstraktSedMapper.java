@@ -17,7 +17,7 @@ import no.nav.melosys.eux.model.medlemskap.Medlemskap;
 import no.nav.melosys.eux.model.nav.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
-import no.nav.melosys.service.dokument.sed.SedData;
+import no.nav.melosys.service.dokument.sed.AbstraktSedData;
 
 import static no.nav.melosys.domain.dokument.person.Familierelasjon.FARA;
 import static no.nav.melosys.domain.dokument.person.Familierelasjon.MORA;
@@ -26,7 +26,7 @@ import static no.nav.melosys.domain.dokument.person.Familierelasjon.MORA;
  * Felles mapper-klasse for alle typer SED. Mapper NAV-objektet i NAV-SED,
  * som brukes av eux for å plukke ut nødvendig informasjon for en angitt SED.
  */
-public abstract class SedMapper<T extends Medlemskap, S extends SedData> {
+public abstract class AbstraktSedMapper<T extends Medlemskap, S extends AbstraktSedData> {
 
     protected final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
@@ -48,11 +48,11 @@ public abstract class SedMapper<T extends Medlemskap, S extends SedData> {
         return sed;
     }
 
-    protected abstract T hentMedlemskap(S sedData);
+    protected abstract T hentMedlemskap(S sedData) throws TekniskException;
 
     protected abstract SedType getSedType();
 
-    private Nav prefillNav(SedData sedData) throws TekniskException {
+    private Nav prefillNav(AbstraktSedData sedData) throws TekniskException {
         Nav nav = new Nav();
 
         nav.setBruker(hentBruker(sedData.getPersonDokument(), sedData.getSøknadDokument(), sedData.getBostedsadresse()));
@@ -77,7 +77,7 @@ public abstract class SedMapper<T extends Medlemskap, S extends SedData> {
         return bruker;
     }
 
-    private Person hentPerson(PersonDokument personDokument, SoeknadDokument søknadDokument) throws TekniskException {
+    private Person hentPerson(PersonDokument personDokument, SoeknadDokument søknadDokument) {
         Person person = new Person();
 
         person.setFornavn(personDokument.fornavn);

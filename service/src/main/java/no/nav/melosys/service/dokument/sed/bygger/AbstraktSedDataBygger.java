@@ -15,7 +15,7 @@ import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
-import no.nav.melosys.service.dokument.sed.SedData;
+import no.nav.melosys.service.dokument.sed.AbstraktSedData;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public abstract class AbstraktSedDataBygger extends AbstraktDokumentDataBygger {
@@ -29,7 +29,7 @@ public abstract class AbstraktSedDataBygger extends AbstraktDokumentDataBygger {
 
     }
 
-    public <T extends SedData> T lag(Behandling behandling, T sedData)
+    public <T extends AbstraktSedData> T lag(Behandling behandling, T sedData)
         throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         this.behandling = behandling;
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);

@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Lists;
-import no.nav.melosys.domain.dokument.felles.Adresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.*;
@@ -26,7 +25,7 @@ import no.nav.melosys.eux.model.medlemskap.Medlemskap;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
-import no.nav.melosys.service.dokument.sed.SedData;
+import no.nav.melosys.service.dokument.sed.AbstraktSedData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,12 +33,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SedMapperTest {
 
-    protected class SedMapperImpl extends SedMapper<MedlemskapImpl, SedDataImpl> {
+    protected class SedMapperImpl extends AbstraktSedMapper<MedlemskapImpl, SedDataImpl> {
 
         @Override
         protected MedlemskapImpl hentMedlemskap(SedDataImpl sedData) {
@@ -52,7 +50,7 @@ public class SedMapperTest {
         }
     }
 
-    private final class SedDataImpl extends SedData {}
+    private final class SedDataImpl extends AbstraktSedData {}
     private final class MedlemskapImpl extends Medlemskap {}
 
     private SedMapperImpl sedMapper = new SedMapperImpl();
@@ -89,6 +87,8 @@ public class SedMapperTest {
         person.fnr = "123456789";
         person.statsborgerskap = new Land();
         person.statsborgerskap.setKode("NOR");
+        person.erEgenAnsatt = true;
+
 
         Familiemedlem far = new Familiemedlem();
         far.familierelasjon = Familierelasjon.FARA;
@@ -114,7 +114,7 @@ public class SedMapperTest {
         sedData.setBostedsadresse(new Bostedsadresse());
         sedData.getBostedsadresse().setGateadresse(new Gateadresse());
         sedData.setSelvstendigeVirksomheter(Collections.singletonList(
-            new Virksomhet("navn", "orgnr", mock(Adresse.class))));
+            new Virksomhet("navn", "orgnr", strukturertAdresse)));
     }
 
     @Test

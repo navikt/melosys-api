@@ -9,10 +9,10 @@ import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 
 /**
- * SedData vil inneholde all Melosys-informasjon som trengs for å kunne mappe til Nav-objekt i en SED.
+ * AbstraktSedData vil inneholde all Melosys-informasjon som trengs for å kunne mappe til Nav-objekt i en SED.
  * Subklasser vil inneholde unik Melosys-informasjon for hver SED.
  */
-public abstract class SedData {
+public abstract class AbstraktSedData {
 
     private SoeknadDokument søknadDokument;
     private PersonDokument personDokument;
