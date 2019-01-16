@@ -114,6 +114,28 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
                 .findFirst();
     }
 
+    @Override
+    protected Collection<Lovvalgsperiode> hentLovvalgsperioder() throws TekniskException {
+        Collection<Lovvalgsperiode> lovvalgsperioder = super.hentLovvalgsperioder();
+
+        Lovvalgsperiode valgtLovvalgsperiode = lovvalgsperioder.iterator().next();
+        boolean lovvalgsperiodeIkkeGyldig = lovvalgsperioder.stream()
+            .anyMatch(periode -> !validerPeriode(periode, valgtLovvalgsperiode));
+        if (lovvalgsperiodeIkkeGyldig) {
+            throw new TekniskException("Flere lovvalgsperioder støttes, men ikke med ulike Land eller unntak");
+        }
+
+        return lovvalgsperioder;
+    }
+
+    private boolean validerPeriode(Lovvalgsperiode p1, Lovvalgsperiode p2) {
+        return p1.getLovvalgsland() == p2.getLovvalgsland() &&
+            p1.getUnntakFraBestemmelse() != null &&
+            p1.getUnntakFraBestemmelse() == p2.getUnntakFraBestemmelse() &&
+            p1.getUnntakFraLovvalgsland() != null &&
+            p1.getUnntakFraLovvalgsland() == p2.getUnntakFraLovvalgsland();
+    }
+
     private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {
         ArbeidsforholdDokument arbeidsforholdDok = SaksopplysningerUtils.hentArbeidsforholdDokument(behandling);
 

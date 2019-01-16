@@ -107,20 +107,6 @@ public abstract class AbstraktDokumentDataBygger {
             throw new TekniskException("Trenger minst en lovvalgsperiode");
         }
 
-        Lovvalgsperiode valgtLovvalgsperiode = lovvalgsperioder.iterator().next();
-        boolean lovvalgsperiodeIkkeGyldig = lovvalgsperioder.stream()
-            .anyMatch(periode -> !validerPeriode(periode, valgtLovvalgsperiode));
-        if (lovvalgsperiodeIkkeGyldig) {
-            throw new TekniskException("Flere lovvalgsperioder støttes, men ikke med ulike Land eller unntak");
-        }
         return lovvalgsperioder;
-    }
-
-    private boolean validerPeriode(Lovvalgsperiode p1, Lovvalgsperiode p2) {
-        return p1.getLovvalgsland() == p2.getLovvalgsland() &&
-            p1.getUnntakFraBestemmelse() != null &&
-            p1.getUnntakFraBestemmelse() == p2.getUnntakFraBestemmelse() &&
-            p1.getUnntakFraLovvalgsland() != null &&
-            p1.getUnntakFraLovvalgsland() == p2.getUnntakFraLovvalgsland();
     }
 }
