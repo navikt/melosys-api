@@ -1,12 +1,9 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -114,7 +111,7 @@ public abstract class BrevDatabyggerBase {
         boolean lovvalgsperiodeIkkeGyldig = lovvalgsperioder.stream()
             .anyMatch(periode -> !validerPeriode(periode, valgtLovvalgsperiode));
         if (lovvalgsperiodeIkkeGyldig) {
-            throw new TekniskException("A001 kan ha flere  lovvalgsperioder, men ikke med ulike Land eller unntak");
+            throw new TekniskException("Flere lovvalgsperioder støttes, men ikke med ulike Land eller unntak");
         }
         return lovvalgsperioder;
     }

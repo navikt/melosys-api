@@ -1,38 +1,26 @@
 package no.nav.melosys.service.eux.mapper;
 
-import static no.nav.melosys.domain.dokument.person.Familierelasjon.FARA;
-import static no.nav.melosys.domain.dokument.person.Familierelasjon.MORA;
-
-import com.google.common.collect.Lists;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Lists;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.eux.model.SedType;
 import no.nav.melosys.eux.model.medlemskap.Medlemskap;
-import no.nav.melosys.eux.model.nav.Adresse;
-import no.nav.melosys.eux.model.nav.Arbeidsgiver;
-import no.nav.melosys.eux.model.nav.Arbeidssted;
-import no.nav.melosys.eux.model.nav.Bruker;
-import no.nav.melosys.eux.model.nav.Far;
-import no.nav.melosys.eux.model.nav.Identifikator;
-import no.nav.melosys.eux.model.nav.Mor;
-import no.nav.melosys.eux.model.nav.Nav;
-import no.nav.melosys.eux.model.nav.Person;
-import no.nav.melosys.eux.model.nav.Pin;
-import no.nav.melosys.eux.model.nav.SED;
-import no.nav.melosys.eux.model.nav.Selvstendig;
-import no.nav.melosys.eux.model.nav.Statsborgerskap;
+import no.nav.melosys.eux.model.nav.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.eux.SedData;
+
+import static no.nav.melosys.domain.dokument.person.Familierelasjon.FARA;
+import static no.nav.melosys.domain.dokument.person.Familierelasjon.MORA;
 
 /**
  * Felles mapper-klasse for alle typer SED. Mapper NAV-objektet i NAV-SED,
@@ -100,7 +88,7 @@ public abstract class SedMapper<T extends Medlemskap, S extends SedData> {
         person.setKjoenn(personDokument.kjønn.getKode());
 
         Statsborgerskap statsborgerskap = new Statsborgerskap();
-        statsborgerskap.setLand(LandkoderUtils.tilIso2(personDokument.statsborgerskap.toString()).getKode()); //TODO: Noen land har bare enveis-mapping, ex kroatia
+        statsborgerskap.setLand(personDokument.statsborgerskap.getKode()); //TODO: Noen land har bare enveis-mapping
 
         person.setStatsborgerskap(Collections.singletonList(statsborgerskap));
 
@@ -180,7 +168,7 @@ public abstract class SedMapper<T extends Medlemskap, S extends SedData> {
         }).collect(Collectors.toList()); //TODO: må tilrettelegge for maritime arbeidssteder når dette blir avklart.ref: BrevByggerBase:hentIkkeFysiskeArbeidssteder()
     }
 
-    private List<Arbeidsgiver> hentArbeidsGiver(List<Virksomhet> arbeidsGivendeVirksomheter) {
+    protected List<Arbeidsgiver> hentArbeidsGiver(List<Virksomhet> arbeidsGivendeVirksomheter) {
 
         return arbeidsGivendeVirksomheter.stream().map(virksomhet -> {
             Arbeidsgiver arbeidsgiver = new Arbeidsgiver();
