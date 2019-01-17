@@ -33,6 +33,7 @@ public class VedtakTjenesteTest extends JsonSchemaTest {
     private static final String schemaType = "vedtak-post-schema.json";
 
     private VedtakDto vedtakDto;
+
     private long behandlingID;
 
     @Override

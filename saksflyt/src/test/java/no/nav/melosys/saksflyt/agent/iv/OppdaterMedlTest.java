@@ -11,7 +11,7 @@ import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
-import no.nav.melosys.saksflyt.deltekontekster.OppdaterMedlFelles;
+import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

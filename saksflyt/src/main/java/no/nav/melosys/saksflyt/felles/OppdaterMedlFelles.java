@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.deltekontekster;
+package no.nav.melosys.saksflyt.felles;
 
 import java.util.Set;
 

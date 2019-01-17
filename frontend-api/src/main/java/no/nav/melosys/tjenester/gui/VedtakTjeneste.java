@@ -47,10 +47,9 @@ public class VedtakTjeneste extends RestTjeneste {
         tilgang.sjekk(behandlingID);
         if (vedtakDto.getBehandlingsresultattype() == BehandlingsresultatType.ANMODNING_OM_UNNTAK) {
             vedtakService.anmodningOmUnntak(behandlingID);
-            return Response.ok().build();
+        } else {
+            vedtakService.fattVedtak(behandlingID, vedtakDto.getBehandlingsresultattype());
         }
-
-        vedtakService.fattVedtak(behandlingID, vedtakDto.getBehandlingsresultattype());
         return Response.ok().build();
     }
 }
