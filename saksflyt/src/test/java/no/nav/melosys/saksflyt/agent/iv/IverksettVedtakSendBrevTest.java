@@ -14,9 +14,11 @@ import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
+
 import org.junit.Test;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_AVSLUTT_BEHANDLING;
+import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.ArgumentMatchers.any;
@@ -158,12 +160,10 @@ public class IverksettVedtakSendBrevTest {
         p.getBehandling().setId(BEHANDLINGSID);
         p.getBehandling().setType(Behandlingstype.SØKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
-        Properties properties = new Properties();
-        p.addData(properties);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID));
         instans.utførSteg(p);
 
-        assertThat(p.getSteg()).isEqualTo(IV_AVSLUTT_BEHANDLING);
+        assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
     @Test
@@ -198,19 +198,19 @@ public class IverksettVedtakSendBrevTest {
     }
 
     @Test
-    public final void utførStegPåFastsattLovvalgIUtlandetGårTilGsakAvsluttOppgave() throws Exception {
+    public final void utførStegPåFastsattLovvalgIUtlandetGårTilFeiletMaskinelt() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_UTENLANDSK_LOVVALG);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_UTENLANDSK_LOVVALG));
         instans.utførSteg(prosessinstans);        
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
+        assertThat(prosessinstans.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
     @Test
-    public final void utførStegPåFastsattLovvalgINorgeUtenInnvilgetBestemmelseGårTilGsakAvsluttOppgave() throws Exception {
+    public final void utførStegPåFastsattLovvalgINorgeUtenInnvilgetBestemmelseGårTilFeiletMaskinelt() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE));
         instans.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
+        assertThat(prosessinstans.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
     @Test

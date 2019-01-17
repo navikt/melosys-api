@@ -3,12 +3,11 @@ package no.nav.melosys.service;
 import java.util.Arrays;
 import java.util.List;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsstatus;
-import no.nav.melosys.domain.TidligereMedlemsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import org.junit.Before;
 import org.junit.Rule;
@@ -19,17 +18,17 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BehandlingServiceTest {
 
     @Mock
     private BehandlingRepository behandlingRepo;
+
+    @Mock
+    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Mock
     private TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepo;
@@ -41,7 +40,7 @@ public class BehandlingServiceTest {
 
     @Before
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepo, tidligereMedlemsperiodeRepo);
+        behandlingService = new BehandlingService(behandlingRepo, behandlingsresultatRepository, tidligereMedlemsperiodeRepo);
     }
 
     @Test
@@ -141,5 +140,13 @@ public class BehandlingServiceTest {
         List<Long> periodeIder = behandlingService.hentMedlemsperioder(behandlingID);
         assertThat(periodeIder).isNotNull();
         assertThat(periodeIder).containsExactly(2L, 3L);
+    }
+
+    @Test
+    public void nyBehandling() {
+        Behandling behandling = behandlingService.nyBehandling(new Fagsak(), Behandlingsstatus.OPPRETTET, Behandlingstype.SØKNAD);
+        verify(behandlingRepo).save(any(Behandling.class));
+        assertThat(behandling.getType()).isEqualTo(Behandlingstype.SØKNAD);
+        assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
     }
 }

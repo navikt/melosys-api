@@ -6,9 +6,7 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
@@ -20,8 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.JOURNALPOST_ID;
-import static no.nav.melosys.domain.ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST;
-import static no.nav.melosys.domain.ProsessSteg.JFR_HENT_PERS_OPPL;
+import static no.nav.melosys.domain.ProsessSteg.*;
 
 /**
  * Ferdigstiller en journalpost i Joark.
@@ -30,7 +27,7 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_HENT_PERS_OPPL;
  * 1) ProsessType.JFR_NY_SAK:
  *     JFR_FERDIGSTILL_JOURNALPOST -> JFR_HENT_PERS_OPPL eller FEILET_MASKINELT hvis feil
  * 2) ProsessType.JFR_KNYTT:
- *     JFR_FERDIGSTILL_JOURNALPOST -> null eller FEILET_MASKINELT hvis feil
+ *     JFR_FERDIGSTILL_JOURNALPOST -> JFR_SETT_VURDER_DOKUMENT eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class FerdigstillJournalpost extends AbstraktStegBehandler {
@@ -56,17 +53,17 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
     }
     
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws SikkerhetsbegrensningException, IntegrasjonException, IkkeFunnetException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         ProsessType type = prosessinstans.getType();
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
         joarkFasade.ferdigstillJournalføring(journalpostID);
 
-        if (type == ProsessType.JFR_NY_SAK) {
+        if (type == ProsessType.JFR_NY_SAK || type == ProsessType.JFR_NY_BEHANDLING) {
             prosessinstans.setSteg(JFR_HENT_PERS_OPPL);
         } else if (type == ProsessType.JFR_KNYTT) {
-            prosessinstans.setSteg(null);
+            prosessinstans.setSteg(JFR_SETT_VURDER_DOKUMENT);
         } else {
             String feilmelding = "Ukjent prosess type: " + type;
             log.error("{}: {}", prosessinstans.getId(), feilmelding);

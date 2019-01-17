@@ -74,6 +74,10 @@
             <groupId>no.nav.melosys</groupId>
             <artifactId>saksflyt-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-eux</artifactId>
+        </dependency>
 
         <!-- Test -->
         <dependency>

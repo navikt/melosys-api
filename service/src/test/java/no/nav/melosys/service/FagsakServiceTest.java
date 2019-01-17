@@ -2,72 +2,74 @@ package no.nav.melosys.service;
 
 import java.time.Instant;
 
-import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Fagsaksstatus;
-import no.nav.melosys.domain.Fagsakstype;
-import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
-import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
-import no.nav.melosys.integrasjon.aareg.AaregFasade;
-import no.nav.melosys.integrasjon.aareg.AaregService;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.integrasjon.tps.TpsService;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class FagsakServiceTest {
+
+    @Mock
+    private FagsakRepository fagsakRepo;
+
+    @Mock
+    private BehandlingService behandlingService;
+
+    @Mock
+    private TpsFasade tps;
 
     private FagsakService fagsakService;
 
     @Before
     public void setUp() {
-        DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
-        TpsFasade tps = new TpsService(null, null, dokumentFactory, null);
-        AaregFasade aareg = new AaregService(new ArbeidsforholdMock(), dokumentFactory);
-
-        SaksopplysningerService saksopplysningerService = new SaksopplysningerService(tps, aareg, null, null , null, null);
-        ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 6);
-        ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 6);
-
-        FagsakRepository fagsakRepo = mock(FagsakRepository.class);
-        BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
-        BehandlingsresultatRepository behandlingsresultatRepository = mock(BehandlingsresultatRepository.class);
-        fagsakService = new FagsakService(fagsakRepo, behandlingRepository, behandlingsresultatRepository, tps);
+        fagsakService = new FagsakService(fagsakRepo, behandlingService, tps);
     }
 
     @Test
-    public void lagFagsak() {
+    public void hentFagsak() {
+        String saksnummer = "saksnummer";
+        fagsakService.hentFagsak(saksnummer);
+        verify(fagsakRepo).findBySaksnummer(eq(saksnummer));
+    }
+
+    @Test
+    public void hentFagsakerMedAktør() throws IkkeFunnetException {
+        when(tps.hentAktørIdForIdent(any())).thenReturn("AKTOER_ID");
+        fagsakService.hentFagsakerMedAktør(RolleType.BRUKER, "FNR");
+        verify(fagsakRepo).findByRolleAndAktør(eq(RolleType.BRUKER), eq("AKTOER_ID"));
+    }
+
+    @Test
+    public void lagre() {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(123L);
         fagsak.setStatus(Fagsaksstatus.OPPRETTET);
         fagsak.setType(Fagsakstype.EU_EØS);
         fagsak.setRegistrertDato(Instant.now());
-
         fagsakService.lagre(fagsak);
-        assertNotNull(fagsak);
-        assertNotNull(fagsak.getSaksnummer());
+        verify(fagsakRepo).save(fagsak);
+        assertThat(fagsak).isNotNull();
+        assertThat(fagsak.getSaksnummer()).isNotEmpty();
     }
 
     @Test
-    public void nyFagsak() {
-        final String[] identer = new String[]{"88888888884", "77777777779"};
-
-        for (String fnr : identer) {
-            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(fnr, "123456789", null, Behandlingstype.SØKNAD);
-
-            assertNotNull(fagsak);
-            assertFalse(fagsak.getBehandlinger().isEmpty());
-
-        }
+    public void nyFagsakOgBehandling() {
+        Fagsak fagsak = fagsakService.nyFagsakOgBehandling("AKTOER_ID", "123456789", "", Behandlingstype.SØKNAD);
+        verify(fagsakRepo).save(any(Fagsak.class));
+        verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstype.SØKNAD));
+        assertThat(fagsak.getBehandlinger()).isNotEmpty();
     }
+
 }

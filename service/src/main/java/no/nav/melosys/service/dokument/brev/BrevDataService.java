@@ -68,7 +68,8 @@ public class BrevDataService {
         Aktoer representant = fagsak.hentAktørMedRolleType(REPRESENTANT);
 
         switch (produserbartDokument) {
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID: {
+            case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
+            case ORIENTERING_ANMODNING_UNNTAK: {
                 if (representant != null) {
                     metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, REPRESENTANT);
                 } else {

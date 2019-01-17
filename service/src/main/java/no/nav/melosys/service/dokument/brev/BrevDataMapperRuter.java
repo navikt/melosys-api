@@ -16,6 +16,7 @@ public class BrevDataMapperRuter {
         mappere.put(ProduserbartDokument.MELDING_MANGLENDE_OPPLYSNINGER, MangelbrevMapper.class);
         mappere.put(ProduserbartDokument.ATTEST_A1, AttestMapper.class);
         mappere.put(ProduserbartDokument.INNVILGELSE_YRKESAKTIV, InnvilgelsesbrevMapper.class);
+        mappere.put(ProduserbartDokument.ORIENTERING_ANMODNING_UNNTAK, AnmodningUnntakMapper.class);
     }
 
     private BrevDataMapperRuter() {

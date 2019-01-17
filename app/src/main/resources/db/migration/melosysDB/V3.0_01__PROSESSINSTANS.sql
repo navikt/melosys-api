@@ -29,7 +29,6 @@ INSERT INTO prosess_type (kode, navn) VALUES ('JFR_KNYTT', 'Journalføring på e
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_NY_SAK', 'Journalføring med ny sak og søknad');
 INSERT INTO prosess_type (kode, navn) VALUES ('OPPFRISKNING', 'Oppfriskning av saksopplysninger');
 INSERT INTO prosess_type (kode, navn) VALUES ('MANGELBREV', 'Opprett mangelbrev');
-INSERT INTO prosess_type (kode, navn) VALUES ('SØKNAD_A1', 'Søknad A1');
 
 CREATE TABLE prosess_steg (
     kode    VARCHAR2(99)  NOT NULL,
@@ -42,6 +41,7 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('GSAK_OPPRETT_OPPGAVE', 'Oppretter
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('MOT_VURDER_AUTOMATISK_JFR', 'Vurder om journalføring kan skje automatisk');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_VALIDERING', 'Grunnleggende validering');
+INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_VURDER_JOURNALFOERINGSTYPE', 'Nytt innkommende dokument. Saksbehandler vurderer behov for opprettelse av ny behandling.');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_AKTØR_ID', 'Henter aktørID');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPRETT_SAK_OG_BEH', 'Oppretter ny sak og behandling i Melosys');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPRETT_SØKNAD', 'Oppretter ny søknad i Melosys');

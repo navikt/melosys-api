@@ -123,7 +123,7 @@ public class Prosessinstans {
         }
     }
 
-    public void addData(Properties data) {
+    public void setData(Properties data) {
         this.data.putAll(data);
     }
 

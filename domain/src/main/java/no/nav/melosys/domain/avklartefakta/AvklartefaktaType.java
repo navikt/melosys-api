@@ -11,7 +11,6 @@ public enum AvklartefaktaType implements Kodeverk {
     TIDLIGERE_LOVVALGSPERIODE("TIDLIGERE_LOVVALGSPERIODE", "Tidligere lovvalgsperiode"),
     YRKESGRUPPE("YRKESGRUPPE", "Yrkesgruppe"),
     // Støtter flyt i stegvelger frontend // FIXME Synces med frontend
-    AG_FORRETNINGSLAND("AG_FORRETNINGSLAND", "Arbeidsgivers forretningsland"),
     MOTTAR_KONTANTYTELSE("MOTTAR_KONTANTYTELSE", "Mottar kontantytelse"),
     OFFENTLIG_TJENESTEMANN("OFFENTLIG_TJENESTEMANN", "Offentlig tjenestemann"),
     BOSTEDSLAND("BOSTEDSLAND", "Bostedsland"),

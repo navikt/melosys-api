@@ -7,12 +7,11 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntak;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -38,19 +37,23 @@ public class BrevDataByggerVelgerTest {
     }
 
     @Test
-    @Ignore
-    public void testA1() {
-        testHent(ProduserbartDokument.ATTEST_A1, BrevDataByggerA1.class);
+    public void hent_medAttestA1_girVedleggBygger() {
+        testHent(ProduserbartDokument.ATTEST_A1, BrevDataByggerVedlegg.class);
     }
 
     @Test
-    public final void hentInnvilelsesYrksaktivGirA1Bygger() {
+    public void hent_medSEDA001_girVedleggBygger() {
+        testHent(ProduserbartDokument.SED_A001, BrevDataByggerVedlegg.class);
+    }
+
+    @Test
+    public final void hent_InnvilelsesYrksaktiv_girVedleggBygger() {
         testHent(ProduserbartDokument.INNVILGELSE_YRKESAKTIV, BrevDataByggerVedlegg.class);
     }
 
-    private void testHent(ProduserbartDokument type, Class<? extends BrevDataBygger> forventetKlasse) {
-        BrevDataBygger resultat = brevDataByggerVelger.hent(type);
-        assertThat(resultat).isInstanceOf(forventetKlasse);
+    @Test
+    public final void hent_medDokumentTypeAnmodningUnntak_girBrevDataByggerAnmodningUnntak() {
+        testHent(ProduserbartDokument.ORIENTERING_ANMODNING_UNNTAK, BrevDataByggerAnmodningUnntak.class);
     }
 
     @Test
@@ -67,4 +70,8 @@ public class BrevDataByggerVelgerTest {
         assertThat(bygger).isInstanceOf(BrevDataByggerStandard.class);
     }
 
+    private final void testHent(ProduserbartDokument type, Class<? extends BrevDataBygger> forventetKlasse) {
+        BrevDataBygger resultat = brevDataByggerVelger.hent(type);
+        assertThat(resultat).isInstanceOf(forventetKlasse);
+    }
 }

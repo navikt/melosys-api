@@ -5,7 +5,8 @@ import java.util.Set;
 
 import no.nav.melosys.domain.YrkesgruppeType;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 
 public class BrevDataA1 extends BrevData {
@@ -13,7 +14,9 @@ public class BrevDataA1 extends BrevData {
     public List<Virksomhet> norskeVirksomheter;
     public Set<String> selvstendigeForetak;
     public YrkesgruppeType yrkesgruppe;
-    public SoeknadDokument søknad;
+    public PersonDokument person;
+
+    public List<Arbeidssted> arbeidssteder;
 
     public Bostedsadresse bostedsadresse;
 }

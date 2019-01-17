@@ -25,6 +25,10 @@ public class Arbeidssted {
         this.yrkesgruppe = YrkesgruppeType.ORDINAER;
     }
 
+    public boolean erFysisk() {
+        return adresse != null;
+    }
+
     public final String navn;
     public final String landKode;
     public final YrkesgruppeType yrkesgruppe;

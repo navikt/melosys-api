@@ -177,22 +177,21 @@ public class BrevDataByggerA001Test {
     @Test
     public void testHentAvklarteNorskeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         avklarteOrganisasjoner.add(orgnr1);
-        avklarteOrganisasjoner.add(orgnr2);
 
         SelvstendigForetak foretak = new SelvstendigForetak();
         foretak.orgnr = orgnr1;
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
 
-        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr2);
+        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr1);
 
         BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(behandling, "Z12345");
         assertThat(brevDataDto.selvstendigeVirksomheter.stream()
                 .map(nv -> nv.orgnr)).containsOnly(orgnr1);
         assertThat(brevDataDto.arbeidsgivendeVirkomsheter.stream()
-                .map(nv -> nv.orgnr)).containsOnly(orgnr1, orgnr2);
+                .map(nv -> nv.orgnr)).containsOnly(orgnr1);
     }
 
-    @Test
+    @Test(expected = TekniskException.class)
     public void testIngenAvklarteforetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         SelvstendigForetak foretak = new SelvstendigForetak();
         foretak.orgnr = orgnr1;
@@ -200,8 +199,6 @@ public class BrevDataByggerA001Test {
 
         BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(behandling, "Z12345");
         assertThat(brevDataDto.arbeidsgivendeVirkomsheter).isEmpty();
-        // TODO: Orgnr ikke obligatorisk registrert for utenlandske foretak
-        //assertThat(brevDataDto.utenlandskeVirksomheter).isEmpty();
     }
 
     @Test
@@ -227,6 +224,8 @@ public class BrevDataByggerA001Test {
 
     @Test
     public void testIngenAnsettelsePeriode() throws NoSuchFieldException, TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+        avklarteOrganisasjoner.add(orgnr1);
+
         BrevData brevDataA001 = brevDataByggerA001.lag(behandling, "Z12345");
         assertThat(((BrevDataA001)brevDataA001).ansettelsesperiode.isPresent()).isFalse();
     }

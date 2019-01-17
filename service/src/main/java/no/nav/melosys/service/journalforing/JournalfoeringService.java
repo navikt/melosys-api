@@ -104,7 +104,9 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
         //FIXME MELOSYS-1283 vedlegg
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, journalfoeringDto.getSaksnummer());
-
+        if (journalfoeringDto.getBehandlingstype() != null) {
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, journalfoeringDto.getBehandlingstype());
+        }
         if (SubjectHandler.getInstance().getUserID() != null) {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
         }

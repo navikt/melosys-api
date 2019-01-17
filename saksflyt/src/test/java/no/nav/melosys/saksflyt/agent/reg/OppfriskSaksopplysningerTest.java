@@ -1,7 +1,5 @@
 package no.nav.melosys.saksflyt.agent.reg;
 
-import java.util.Properties;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -48,7 +46,6 @@ public class OppfriskSaksopplysningerTest {
         p.setType(ProsessType.OPPFRISKNING);
         Behandling behandling = new Behandling();
         p.setBehandling(behandling);
-        p.addData(new Properties());
         agent.utførSteg(p);
 
         assertThat(p.getSteg()).isNull();

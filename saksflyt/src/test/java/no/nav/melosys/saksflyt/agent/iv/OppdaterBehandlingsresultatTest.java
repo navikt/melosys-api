@@ -50,10 +50,11 @@ public class OppdaterBehandlingsresultatTest {
         oppdaterBehandlingsresultat.utfør(p);
 
         verify(behandlingsresultatRepository).save(behandlingsresultatArgumentCaptor.capture());
-        assertThat(behandlingsresultat.getType()).isEqualTo(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
-        assertThat(behandlingsresultat.getEndretAv()).isEqualTo(testbruker);
-        assertThat(behandlingsresultat.getVedtaksdato()).isNotNull();
-        assertThat(behandlingsresultat.getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));
+        Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
+        assertThat(capture.getType()).isEqualTo(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        assertThat(capture.getEndretAv()).isEqualTo(testbruker);
+        assertThat(capture.getVedtaksdato()).isNotNull();
+        assertThat(capture.getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));
         assertThat(p.getSteg()).isEqualTo(IV_OPPDATER_MEDL);
     }
 }

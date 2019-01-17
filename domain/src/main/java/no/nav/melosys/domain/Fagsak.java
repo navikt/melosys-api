@@ -78,6 +78,9 @@ public class Fagsak extends RegistreringsInfo {
      * Returnerer den aktive behandlingen knyttet til saken eller {@code null} hvis den ikke finnes.
      */
     public Behandling getAktivBehandling() throws TekniskException {
+        if (getBehandlinger() == null) {
+            return null;
+        }
         List<Behandling> behandlinger = getBehandlinger().stream()
             .filter(b -> !b.getStatus().equals(Behandlingsstatus.AVSLUTTET)).collect(Collectors.toList());
         if (behandlinger.size() > 1) {
