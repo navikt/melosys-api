@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.agent.aou;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.BehandlingsresultatType;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
@@ -15,9 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.BEHANDLINGSRESULTATTYPE;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.ProsessSteg.*;
+import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_RESULTAT;
+import static no.nav.melosys.domain.ProsessSteg.AOU_VALIDERING;
 import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
 
 /**
@@ -64,13 +63,6 @@ public class Validering extends AbstraktStegBehandler {
         if (saksbehandlerID == null) {
             log.error("Funksjonell feil for prosessinstans {}: SaksbehandlerID er ikke oppgitt.", prosessinstans.getId());
             håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "saksbehandlerID er ikke oppgitt.", null);
-            return;
-        }
-
-        BehandlingsresultatType behandlingsresultatType = prosessinstans.getData(BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.class);
-        if (behandlingsresultatType != BehandlingsresultatType.ANMODNING_OM_UNNTAK) {
-            log.error("Funksjonell feil for prosessinstans {}: behandlingsresultatType er ikke oppgitt.", prosessinstans.getId());
-            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "behandlingsresultatType er ikke oppgitt.", null);
             return;
         }
 

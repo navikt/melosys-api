@@ -72,19 +72,11 @@ public class SendBrev extends AbstraktStegBehandler {
         }
 
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-        ProsessType prosessType = prosessinstans.getType();
-        if (prosessType == ProsessType.ANMODNING_OM_UNNTAK) {
-            sendBrev(behandling, saksbehandler, ORIENTERING_ANMODNING_UNNTAK, RolleType.BRUKER);
-            sendBrev(behandling, saksbehandler, SED_A001, RolleType.MYNDIGHET);
+        sendBrev(behandling, saksbehandler, ORIENTERING_ANMODNING_UNNTAK, RolleType.BRUKER);
+        sendBrev(behandling, saksbehandler, SED_A001, RolleType.MYNDIGHET);
 
-            log.info("Sendt alle brev for anmodning om unntak. Prosessinstans {}", prosessinstans.getId());
-
-            prosessinstans.setSteg(null);
-        } else {
-            String feilmelding = "Ukjent prosess type: " + prosessType;
-            log.error("{}: {}", prosessinstans.getId(), feilmelding);
-            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
-        }
+        log.info("Sendt alle brev for anmodning om unntak. Prosessinstans {}", prosessinstans.getId());
+        prosessinstans.setSteg(null);
     }
 
     public void sendBrev(Behandling behandling, String saksbehandler, ProduserbartDokument dokumentType, RolleType mottaker) throws TekniskException, FunksjonellException {

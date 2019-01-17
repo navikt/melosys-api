@@ -34,7 +34,6 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
         prosessinstans.setSteg(ProsessSteg.AOU_VALIDERING);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.ANMODNING_OM_UNNTAK);
         prosessinstans.setBehandling(behandling);
 
         lagreProsessinstans(prosessinstans);
