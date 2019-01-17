@@ -8,7 +8,7 @@ public enum BehandlingsresultatType implements InterntKodeverkTabell<Behandlings
     FASTSATT_LOVVALGSLAND("FASTSATT_LOVVALGSLAND", "Lovvalgsland er fastsatt"),
     FORELØPIG_FASTSATT_LOVVALGSLAND("FORELOEPIG_FASTSATT_LOVVALGSLAND", "Lovvalgsland er foreløpig fastsatt"),
     HENLEGGELSE("HENLEGGELSE", "Saken er henlagt"),
-    IKKE_FASTSATT("ANMODNING_OM_UNNTAK", "Anmodning om unntak");
+    IKKE_FASTSATT("IKKE_FASTSATT", "Ikke fastsatt");
 
     private String kode;
     private String beskrivelse;

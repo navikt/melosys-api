@@ -1,8 +1,11 @@
-package no.nav.melosys.saksflyt.agent.iv;
+package no.nav.melosys.saksflyt.agent.aou;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -16,17 +19,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
-import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
+import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_MEDL;
+import static no.nav.melosys.domain.ProsessSteg.AOU_SEND_BREV;
 
 /**
  * Oppdaterer medlemskap periode i MEDL.
  *
  * Transisjoner:
- * ProsessType.IVERKSETT_VEDTAK
- *  IV_OPPDATER_MEDL -> IV_SEND_BREV eller FEILET_MASKINELT hvis feil
+ * ProsessType.ANMODNING_OM_UNNTAK
+ *  AOU_OPPDATER_MEDL -> AOU_SEND_BREV eller FEILET_MASKINELT hvis feil
  */
-@Component
+@Component("AnmodningOmUnntakOppdaterMedl")
 public class OppdaterMedl extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
@@ -36,14 +39,14 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
     @Autowired
     public OppdaterMedl(MedlFasade medlFasade, OppdaterMedlFelles felles) {
-        this.medlFasade = medlFasade;
         this.felles = felles;
-        log.info("IverksetteVedtakOppdaterMEDL initialisert");
+        this.medlFasade = medlFasade;
+        log.info("AnmodningOmUnntakOppdaterMEDL initialisert");
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return IV_OPPDATER_MEDL;
+        return AOU_OPPDATER_MEDL;
     }
 
     @Override
@@ -59,19 +62,9 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         String fnr = felles.hentFnr(behandling);
         Lovvalgsperiode lovvalgsperiode = felles.hentLovvalgsperiode(behandling);
 
-        Behandlingsresultat behandlingsresultat = felles.hentBehandlingsresultat(behandling);
-        if (erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)) {
-            Long medlPeriodeID = medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode);
-            felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
-        } else {
-            throw new FunksjonellException("Opprettelse av Periode i MEDL støttes ikke for behandlingsresultat type "
-                + behandlingsresultat.getType() + " og InnvilgelsesResultat type" + lovvalgsperiode.getInnvilgelsesresultat().getKode());
-        }
+        Long medlPeriodeID = medlFasade.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode);
+        felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
 
-        prosessinstans.setSteg(IV_SEND_BREV);
-    }
-
-    public boolean erPeriodeEndelig(Behandlingsresultat behandlingsresultat, Lovvalgsperiode lovvalgsperiode) {
-        return behandlingsresultat.getType() == BehandlingsresultatType.FASTSATT_LOVVALGSLAND && lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET;
+        prosessinstans.setSteg(AOU_SEND_BREV);
     }
 }

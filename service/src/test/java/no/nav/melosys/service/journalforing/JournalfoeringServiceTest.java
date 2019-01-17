@@ -9,6 +9,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.service.ProsessinstansService;
 import no.nav.melosys.service.journalforing.dto.FagsakDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
@@ -48,7 +49,8 @@ public class JournalfoeringServiceTest {
 
     @Before
     public void setup() {
-        this.journalfoeringService = new JournalfoeringService(binge, joarkFasade, prosessinstansRepo, oppgaveService);
+        ProsessinstansService prosessinstansService = new ProsessinstansService(binge, prosessinstansRepo);
+        this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService);
         JournalfoeringOpprettDto opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setDokumentID("setDokumentID");
