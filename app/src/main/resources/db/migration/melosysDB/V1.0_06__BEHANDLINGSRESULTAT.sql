@@ -37,9 +37,10 @@ CREATE TABLE behandlingsresultat_type (
     navn        VARCHAR2(99)  NOT NULL,
     CONSTRAINT pk_behandlingsresultat_type PRIMARY KEY (kode)
 );
-INSERT INTO behandlingsresultat_type (kode, navn) VALUES ('HENLEGGELSE', 'Henleggelse');
+INSERT INTO behandlingsresultat_type (kode, navn) VALUES ('ANMODNING_OM_UNNTAK', 'Anmodning om unntak');
+INSERT INTO behandlingsresultat_type (kode, navn) VALUES ('HENLEGGELSE', 'Saken er henlagt');
+INSERT INTO behandlingsresultat_type (kode, navn) VALUES ('FASTSATT_LOVVALGSLAND', 'Lovvalgsland er fastsatt');
+INSERT INTO behandlingsresultat_type (kode, navn) VALUES ('FORELOEPIG_FASTSATT_LOVVALGSLAND', 'Lovvalgsland er foreløpig fastsatt');
 INSERT INTO behandlingsresultat_type (kode, navn) VALUES ('IKKE_FASTSATT', 'Ikke fastsatt');
-INSERT INTO behandlingsresultat_type (kode, navn) VALUES ('FASTSATT_LOVVALGSLAND', 'Fastsatt lovvalgsland');
-INSERT INTO behandlingsresultat_type (kode, navn) VALUES ('FRIVILLIG_MEDLEMSKAP', 'Frivillig medlemskap');
 
 ALTER TABLE behandlingsresultat ADD CONSTRAINT fk_behandlingsresultat_type FOREIGN KEY (resultat_type) REFERENCES behandlingsresultat_type;

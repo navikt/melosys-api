@@ -67,6 +67,18 @@ public class OppgaveService {
     }
 
     @Transactional
+    public void ferdigstillOppgaveMedSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
+        Oppgave oppgave = hentOppgaveMedFagSaksnummer(fagSaksnummer);
+        ferdigstillOppgave(oppgave.getOppgaveId());
+    }
+
+    @Transactional
+    public void leggTilbakeOppgaveMedSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
+        Oppgave oppgave = hentOppgaveMedFagSaksnummer(fagSaksnummer);
+        gsakFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
+    }
+
+    @Transactional
     public List<OppgaveDto> hentOppgaverMedBruker(String brukerIdent) throws TekniskException, FunksjonellException {
         String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
         if (aktørId == null) {

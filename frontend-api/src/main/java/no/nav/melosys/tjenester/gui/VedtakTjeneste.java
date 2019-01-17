@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -8,6 +9,7 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import no.nav.melosys.domain.BehandlingsresultatType;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.Tilgang;
@@ -38,9 +40,16 @@ public class VedtakTjeneste extends RestTjeneste {
     @Path("{behandlingID}")
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
     public Response fattVedtak(@PathParam("behandlingID") long behandlingID, @ApiParam("vedtakDto") VedtakDto vedtakDto) throws FunksjonellException, TekniskException {
+        if (vedtakDto == null || vedtakDto.getBehandlingsresultattype() == null) {
+            throw new BadRequestException();
+        }
 
         tilgang.sjekk(behandlingID);
-        vedtakService.fattVedtak(behandlingID, vedtakDto.getBehandlingsresultatType());
+        if (vedtakDto.getBehandlingsresultattype() == BehandlingsresultatType.ANMODNING_OM_UNNTAK) {
+            vedtakService.anmodningOmUnntak(behandlingID);
+        } else {
+            vedtakService.fattVedtak(behandlingID, vedtakDto.getBehandlingsresultattype());
+        }
         return Response.ok().build();
     }
 }

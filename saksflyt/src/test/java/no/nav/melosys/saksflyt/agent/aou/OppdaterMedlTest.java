@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.iv;
+package no.nav.melosys.saksflyt.agent.aou;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -42,6 +42,7 @@ public class OppdaterMedlTest {
     private LovvalgsperiodeRepository lovvalgsperiodeRepository;
 
     private Prosessinstans p;
+
     private Behandlingsresultat behandlingsresultat;
 
     @Before
@@ -69,7 +70,6 @@ public class OppdaterMedlTest {
         lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.CH);
         lovvalgsperiode.setDekning(TrygdeDekning.UTEN_DEKNING);
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
 
         behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
@@ -78,19 +78,13 @@ public class OppdaterMedlTest {
 
         p.setBehandling(behandling);
         p.getBehandling().setType(Behandlingstype.SØKNAD);
-        p.setType(ProsessType.IVERKSETT_VEDTAK);
+        p.setType(ProsessType.ANMODNING_OM_UNNTAK);
     }
 
     @Test
     public void sjekkNestSteg() {
         agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_SEND_BREV);
-    }
-
-    @Test
-    public void utførStegNårBehandlingsresultatTypeErFastsatt_lovvalgslandOgInnvilgelsesResultat_Innvilget() throws FunksjonellException, TekniskException {
-        agent.utførSteg(p);
-        verify(medlFasade ,times(1)).opprettPeriodeEndelig(any(), any());
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_SEND_BREV);
     }
 
     @Test
@@ -100,21 +94,20 @@ public class OppdaterMedlTest {
     }
 
     @Test
+    public void utførStegNårBehandlingsresultatTypeErAnmodning_om_unntak() throws FunksjonellException, TekniskException {
+        behandlingsresultat.setType(BehandlingsresultatType.ANMODNING_OM_UNNTAK);
+        when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
+
+        agent.utførSteg(p);
+        verify(medlFasade ,times(1)).opprettPeriodeUnderAvklaring(any(), any());
+    }
+
+    @Test
     public void utførStegNårBehandlingsresultatHarIngenLovvalgPeriode() {
         behandlingsresultat.setLovvalgsperioder(new HashSet<>());
         when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
 
         agent.utførSteg(p);
         assertEquals(ProsessSteg.FEILET_MASKINELT, p.getSteg());
-    }
-
-    @Test
-    public void erPeriodeEndelig() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setType(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
-
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        assertThat(agent.erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)).isTrue();
     }
 }

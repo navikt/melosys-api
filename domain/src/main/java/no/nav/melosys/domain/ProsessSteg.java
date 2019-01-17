@@ -36,6 +36,12 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
 
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
 
+    //Anmodning om unntak
+    AOU_VALIDERING("AOU_VALIDERING", "Validering av data for anmodning om unntak"),
+    AOU_OPPDATER_RESULTAT("AOU_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat for anmodning om unntak"),
+    AOU_OPPDATER_MEDL("AOU_OPPDATER_MEDL", "Oppdatering av medlemskap med anmodning om unntak"),
+    AOU_SEND_BREV("AOU_SEND_BREV", "Send orienteringsbrev og A001 for anmodning om unntak"),
+
     //Iverksett Vedtak
     IV_VALIDERING("IV_VALIDERING", "Validere iverksett vedtak"),
     IV_OPPDATER_RESULTAT("IV_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),

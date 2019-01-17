@@ -5,6 +5,7 @@ import javax.persistence.Converter;
 public enum ProsessType implements InterntKodeverkTabell<ProsessType> {
 
     //alfabetisk rekkefølge
+    ANMODNING_OM_UNNTAK("ANMODNING_OM_UNNTAK", "Anmodning om unntak"),
     IVERKSETT_VEDTAK("IVERKSETT_VEDTAK", "Iverksett vedtak"),
     JFR_KNYTT("JFR_KNYTT", "Journalføring på eksisterende sak"),
     JFR_NY_BEHANDLING("JFR_NY_BEHANDLING", "Journalføring på eksisterende sak oppretter en ny behandling"),

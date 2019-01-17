@@ -1,7 +1,5 @@
-package no.nav.melosys.saksflyt.agent.iv;
+package no.nav.melosys.saksflyt.agent.aou;
 
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
@@ -16,33 +14,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
-import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_RESULTAT;
+import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_MEDL;
+import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_RESULTAT;
 
 /**
- * Oppdaterer behandlingsresultat med vedtaksdato og klagefrist.
+ * Oppdaterer behandlingsresultat.
  *
  * Transisjoner:
- * IV_OPPDATER_RESULTAT -> IV_OPPDATER_MEDL eller FEILET_MASKINELT hvis feil
+ * AOU_OPPDATER_RESULTAT -> AOU_OPPDATER_MEDL eller FEILET_MASKINELT hvis feil
  */
-@Component
+@Component("AnmodningOmUnntakOppdaterBehandlingsresultat")
 public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterBehandlingsresultat.class);
-
-    static final int FRIST_KLAGE_UKER = 6;
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Autowired
     public OppdaterBehandlingsresultat(BehandlingsresultatRepository behandlingsresultatRepository) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
-        log.info("OppdaterBehandlingsresultat initialisert");
+        log.info("AnmodningOmUnntakOppdaterBehandlingsresultat initialisert");
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return IV_OPPDATER_RESULTAT;
+        return AOU_OPPDATER_RESULTAT;
     }
 
     @Override
@@ -54,18 +50,14 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
+
         Long behandlingID = prosessinstans.getBehandling().getId();
-
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandlingID);
-        behandlingsresultat.setType(BehandlingsresultatType.valueOf(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE)));
-
+        behandlingsresultat.setType(BehandlingsresultatType.ANMODNING_OM_UNNTAK);
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
-        behandlingsresultat.setVedtaksdato(Instant.now());
-        LocalDate klagefrist = LocalDate.now().plusWeeks(FRIST_KLAGE_UKER);
-        behandlingsresultat.setVedtakKlagefrist(klagefrist);
         behandlingsresultatRepository.save(behandlingsresultat);
 
-        prosessinstans.setSteg(IV_OPPDATER_MEDL);
-        log.info("Oppdatert behandlingsresultat for prosessinstans {}. Klagefrist: {}", prosessinstans.getId(), klagefrist);
+        prosessinstans.setSteg(AOU_OPPDATER_MEDL);
+        log.info("Oppdatert behandlingsresultat for prosessinstans {}.", prosessinstans.getId());
     }
 }
