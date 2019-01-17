@@ -9,8 +9,17 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 public class Gjelderperiode {
 
-
     private Fastperiode fastperiode;
+
+    private AapenPeriode aapenperiode;
+
+    public AapenPeriode getAapenperiode() {
+        return aapenperiode;
+    }
+
+    public void setAapenperiode(AapenPeriode aapenperiode) {
+        this.aapenperiode = aapenperiode;
+    }
 
     public Fastperiode getFastperiode() {
         return fastperiode;
