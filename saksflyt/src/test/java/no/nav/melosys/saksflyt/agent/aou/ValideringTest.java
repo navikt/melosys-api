@@ -25,7 +25,6 @@ public class ValideringTest {
         p.getBehandling().setType(Behandlingstype.SØKNAD);
         p.setType(ProsessType.ANMODNING_OM_UNNTAK);
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
-        p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.ANMODNING_OM_UNNTAK);
     }
 
     @Test
@@ -42,12 +41,11 @@ public class ValideringTest {
     }
 
     @Test
-    public void utfoerSteg_manglerBehandlingsresultatType() {
+    public void utfoerSteg_manglerSaksbehandler_feiler() {
         p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setType(Behandlingstype.SØKNAD);
         p.setType(ProsessType.ANMODNING_OM_UNNTAK);
-        p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
 
         agent.utførSteg(p);
         assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);

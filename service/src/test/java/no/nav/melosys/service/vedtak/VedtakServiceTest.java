@@ -67,13 +67,17 @@ public class VedtakServiceTest {
     public void fattVedtak_fungerer() throws FunksjonellException, TekniskException {
         Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId("1");
+        BehandlingsresultatType resultatType = BehandlingsresultatType.FASTSATT_LOVVALGSLAND;
 
-        vedtakService.fattVedtak(behandlingID, BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        vedtakService.fattVedtak(behandlingID, resultatType);
 
         verify(behandlingRepository, times(1)).findOne(behandlingID);
         verify(prosessinstansRepo, times(1)).save(prosessinstansArgumentCaptor.capture());
-        assertThat(prosessinstansArgumentCaptor.getValue().getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK);
-        assertThat(prosessinstansArgumentCaptor.getValue().getSteg()).isEqualTo(ProsessSteg.IV_VALIDERING);
+
+        Prosessinstans pi = prosessinstansArgumentCaptor.getValue();
+        assertThat(pi.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK);
+        assertThat(pi.getSteg()).isEqualTo(ProsessSteg.IV_VALIDERING);
+        assertThat(BehandlingsresultatType.valueOf(pi.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE))).isEqualTo(resultatType);
 
         verify(binge, times(1)).leggTil(any());
         verify(oppgaveService, times(1)).ferdigstillOppgaveMedSaksnummer(any());
