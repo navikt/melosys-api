@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.sed.mapper;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
-import java.util.Collections;
 
 import no.nav.melosys.domain.Landkoder;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -37,7 +36,7 @@ public class A009MapperTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1L));
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
-        a009Data.setLovvalgsperioder(Collections.singletonList(lovvalgsperiode));
+        a009Data.setLovvalgsperioder(lovvalgsperiode);
 
         a009Data.getPersonDokument().erEgenAnsatt = false;
     }
@@ -62,7 +61,7 @@ public class A009MapperTest {
 
     @Test
     public void hentMedlemskapErSelvstendigOg12_2_forventGyldigMedlemskap() throws FunksjonellException, TekniskException {
-        a009Data.getLovvalgsperioder().iterator().next().setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2);
+        a009Data.getLovvalgsperiode().setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2);
         a009Data.getPersonDokument().erEgenAnsatt = true;
         SED sed = a009Mapper.mapTilSed(a009Data);
 
@@ -81,14 +80,14 @@ public class A009MapperTest {
 
     @Test(expected = FunksjonellException.class)
     public void hentMedlemkapFeilLovvalgsBestemmelse_forventFunksjonellException() throws FunksjonellException, TekniskException {
-        a009Data.getLovvalgsperioder().iterator().next().setBestemmelse(LovvalgBestemmelse_987_2009.FO_987_2009_ART14_11);
+        a009Data.getLovvalgsperiode().setBestemmelse(LovvalgBestemmelse_987_2009.FO_987_2009_ART14_11);
         a009Mapper.mapTilSed(a009Data);
     }
 
-    @Test(expected = TekniskException.class)
+    @Test(expected = NullPointerException.class)
     @SuppressWarnings("unchecked")
     public void ingenLovvalgsperioder_forventTekniskException() throws FunksjonellException, TekniskException {
-        a009Data.setLovvalgsperioder(Collections.EMPTY_LIST);
+        a009Data.setLovvalgsperioder(null);
         a009Mapper.mapTilSed(a009Data);
     }
 }

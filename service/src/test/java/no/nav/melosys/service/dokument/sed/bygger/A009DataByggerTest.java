@@ -6,10 +6,7 @@ import java.util.Collections;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -20,7 +17,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.doReturn;
@@ -51,11 +49,10 @@ public class A009DataByggerTest {
     }
 
     @Test
-    public void lagA009DataObjekt_forventLovvalgBestemmelse12_1() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void lagA009DataObjekt_forventLovvalgBestemmelse12_1() throws FunksjonellException, TekniskException {
         A009Data a009Data = a009DataBygger.lag(behandling);
-        assertNotNull(a009Data.getLovvalgsperioder());
-        assertTrue(a009Data.getLovvalgsperioder().iterator().hasNext());
-        assertEquals(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1, a009Data.getLovvalgsperioder().iterator().next().getBestemmelse());
+        assertNotNull(a009Data.getLovvalgsperiode());
+        assertEquals(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1, a009Data.getLovvalgsperiode().getBestemmelse());
 
     }
 

@@ -59,7 +59,7 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
 
         nav.setBruker(hentBruker(sedData.getPersonDokument(), sedData.getSøknadDokument(), sedData.getBostedsadresse()));
         nav.setArbeidssted(hentArbeidssted(sedData.getArbeidssteder()));
-        nav.setArbeidsgiver(hentArbeidsGiver(sedData.getArbeidsgivendeVirkomsheter()));
+        nav.setArbeidsgiver(hentArbeidsGiver(sedData.getArbeidsgivendeVirksomheter()));
 
         if (sedData.getPersonDokument().erEgenAnsatt && !sedData.getSelvstendigeVirksomheter().isEmpty()) {
             nav.setSelvstendig(hentSelvStendig(sedData.getSelvstendigeVirksomheter()));

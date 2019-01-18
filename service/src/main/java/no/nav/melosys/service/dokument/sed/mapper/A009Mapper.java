@@ -1,8 +1,7 @@
 package no.nav.melosys.service.dokument.sed.mapper;
 
-import java.util.Collection;
-
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.eux.model.SedType;
 import no.nav.melosys.eux.model.medlemskap.impl.MedlemskapA009;
@@ -21,13 +20,9 @@ public class A009Mapper extends AbstraktSedMapper<MedlemskapA009, A009Data> {
 
         final MedlemskapA009 medlemskap = new MedlemskapA009();
 
-        Collection<Lovvalgsperiode> lovvalgsperioder = sedData.getLovvalgsperioder();
+        Lovvalgsperiode lovvalgsperiode = sedData.getLovvalgsperiode();
 
-        if (lovvalgsperioder.size() != 1) {
-            throw new TekniskException("SED A009 skal kun ha én lovvalgsperiode");
-        }
-
-        medlemskap.setVedtak(hentVedtak(lovvalgsperioder.iterator().next()));
+        medlemskap.setVedtak(hentVedtak(lovvalgsperiode));
 
         if (!sedData.getPersonDokument().erEgenAnsatt) {
             medlemskap.setUtsendingsland(hentUtsendingsland(sedData));
@@ -43,17 +38,11 @@ public class A009Mapper extends AbstraktSedMapper<MedlemskapA009, A009Data> {
         vedtak.setLand(lovvalgsperiode.getLovvalgsland().getKode());
         vedtak.setGjeldervarighetyrkesaktivitet("nei"); //Vil være 'ja' om det er åpen periode. Melosys støtter ikke åpen periode.
 
-        String bestemmelse = null;
-
-        if (LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1.getKode().equals(lovvalgsperiode.getBestemmelse().getKode())) {
-            bestemmelse = "12_1";
-        } else if (LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2.getKode().equals(lovvalgsperiode.getBestemmelse().getKode())) {
-            bestemmelse = "12_2";
-        } else {
+        if (!erKorrektLovvalgbestemmelse(lovvalgsperiode.getBestemmelse())) {
             throw new FunksjonellException("Lovvalgsbestemmelse er ikke av artikkel 12!");
         }
 
-        vedtak.setArtikkelforordning(bestemmelse);
+        vedtak.setArtikkelforordning(LovvalgTilEuxMapper.mapMelosysLovvalgTilEux(lovvalgsperiode.getBestemmelse()));
 
         GjelderPeriode gjelderperiode = new GjelderPeriode();
 
@@ -68,9 +57,14 @@ public class A009Mapper extends AbstraktSedMapper<MedlemskapA009, A009Data> {
         return vedtak;
     }
 
+    private boolean erKorrektLovvalgbestemmelse(LovvalgBestemmelse lovvalgBestemmelse) {
+        return lovvalgBestemmelse == LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1
+            || lovvalgBestemmelse == LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2;
+    }
+
     private Utsendingsland hentUtsendingsland(A009Data sedData) {
         Utsendingsland utsendingsland = new Utsendingsland();
-        utsendingsland.setArbeidsgiver(hentArbeidsGiver(sedData.getArbeidsgivendeVirkomsheter()));
+        utsendingsland.setArbeidsgiver(hentArbeidsGiver(sedData.getArbeidsgivendeVirksomheter()));
         return utsendingsland;
     }
 

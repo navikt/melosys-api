@@ -61,14 +61,14 @@ public class AbstraktSedDataByggerTest {
 
         assertNotNull(sedData);
         assertNotNull(sedData.getPersonDokument());
-        assertNotNull(sedData.getArbeidsgivendeVirkomsheter());
+        assertNotNull(sedData.getArbeidsgivendeVirksomheter());
         assertNotNull(sedData.getArbeidssteder());
         assertNotNull(sedData.getBostedsadresse());
         assertNotNull(sedData.getSelvstendigeVirksomheter());
         assertNotNull(sedData.getSøknadDokument());
         assertNotNull(sedData.getUtenlandskeVirksomheter());
 
-        assertFalse(sedData.getArbeidsgivendeVirkomsheter().isEmpty());
-        assertEquals("Land", sedData.getArbeidsgivendeVirkomsheter().get(0).adresse.landKode);
+        assertFalse(sedData.getArbeidsgivendeVirksomheter().isEmpty());
+        assertEquals("Land", sedData.getArbeidsgivendeVirksomheter().get(0).adresse.landKode);
     }
 }

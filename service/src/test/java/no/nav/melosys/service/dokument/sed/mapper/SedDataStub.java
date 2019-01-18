@@ -76,7 +76,7 @@ class SedDataStub {
         sedData.setPersonDokument(person);
         sedData.setSøknadDokument(soeknadDokument);
         sedData.setArbeidssteder(Lists.newArrayList(new Arbeidssted("navn", "land")));
-        sedData.setArbeidsgivendeVirkomsheter(Lists.newArrayList(new Virksomhet("navn", "orgnr", new StrukturertAdresse())));
+        sedData.setArbeidsgivendeVirksomheter(Lists.newArrayList(new Virksomhet("navn", "orgnr", new StrukturertAdresse())));
         sedData.setBostedsadresse(new Bostedsadresse());
         sedData.getBostedsadresse().setGateadresse(new Gateadresse());
         sedData.setSelvstendigeVirksomheter(Collections.singletonList(
