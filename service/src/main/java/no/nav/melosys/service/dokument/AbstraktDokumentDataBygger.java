@@ -10,10 +10,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
@@ -108,5 +105,15 @@ public abstract class AbstraktDokumentDataBygger {
         }
 
         return lovvalgsperioder;
+    }
+
+    protected Lovvalgsperiode hentLovvalgsperiode() throws FunksjonellException {
+        Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId());
+
+        if (lovvalgsperioder == null || lovvalgsperioder.size() != 1) {
+            throw new FunksjonellException("Forventer kun en lovvalgsperiode!");
+        }
+
+        return lovvalgsperioder.iterator().next();
     }
 }

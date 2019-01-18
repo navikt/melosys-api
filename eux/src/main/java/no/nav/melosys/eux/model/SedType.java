@@ -1,5 +1,16 @@
 package no.nav.melosys.eux.model;
 
 public enum SedType {
-    A009
+    A001,
+    A002,
+    A003,
+    A004,
+    A005,
+    A006,
+    A007,
+    A008,
+    A009,
+    A010,
+    A011,
+    A012
 }

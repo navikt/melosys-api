@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.sed.mapper;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
@@ -15,6 +16,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.eux.model.SedType;
 import no.nav.melosys.eux.model.medlemskap.Medlemskap;
 import no.nav.melosys.eux.model.nav.*;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.dokument.sed.AbstraktSedData;
@@ -36,7 +38,7 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
 
     //Hvis det skulle trenges noen spesifikke endringer av NAV-objektet for enkelte SED'er,
     // bør denne metoden overrides.
-    public SED mapTilSed(S sedData) throws TekniskException {
+    public SED mapTilSed(S sedData) throws TekniskException, FunksjonellException {
         SED sed = new SED();
 
         sed.setNav(prefillNav(sedData));
@@ -48,7 +50,7 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
         return sed;
     }
 
-    protected abstract T hentMedlemskap(S sedData) throws TekniskException;
+    protected abstract T hentMedlemskap(S sedData) throws TekniskException, FunksjonellException;
 
     protected abstract SedType getSedType();
 
@@ -57,7 +59,7 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
 
         nav.setBruker(hentBruker(sedData.getPersonDokument(), sedData.getSøknadDokument(), sedData.getBostedsadresse()));
         nav.setArbeidssted(hentArbeidssted(sedData.getArbeidssteder()));
-        nav.setArbeidsgiver(hentArbeidsGiver(sedData.getArbeidsgivendeVirkomsheter()));
+        nav.setArbeidsgiver(hentArbeidsGiver(sedData.getArbeidsgivendeVirksomheter()));
 
         if (sedData.getPersonDokument().erEgenAnsatt && !sedData.getSelvstendigeVirksomheter().isEmpty()) {
             nav.setSelvstendig(hentSelvStendig(sedData.getSelvstendigeVirksomheter()));
@@ -82,7 +84,7 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
 
         person.setFornavn(personDokument.fornavn);
         person.setEtternavn(personDokument.etternavn);
-        person.setFoedselsdato(dateTimeFormatter.format(personDokument.fødselsdato));
+        person.setFoedselsdato(formaterDato(personDokument.fødselsdato));
         person.setFoedested(null); //det antas at ikke trengs når NAV fyller ut.
         person.setKjoenn(personDokument.kjønn.getKode());
 
@@ -167,7 +169,7 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
         }).collect(Collectors.toList()); //TODO: må tilrettelegge for maritime arbeidssteder når dette blir avklart.ref: BrevByggerBase:hentIkkeFysiskeArbeidssteder()
     }
 
-    protected List<Arbeidsgiver> hentArbeidsGiver(List<Virksomhet> arbeidsGivendeVirksomheter) {
+    List<Arbeidsgiver> hentArbeidsGiver(List<Virksomhet> arbeidsGivendeVirksomheter) {
 
         return arbeidsGivendeVirksomheter.stream().map(virksomhet -> {
             Arbeidsgiver arbeidsgiver = new Arbeidsgiver();
@@ -210,6 +212,10 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
         );
 
         return selvstendig;
+    }
+
+    protected String formaterDato(LocalDate dato) {
+        return dateTimeFormatter.format(dato);
     }
 
     private String[] splitFulltNavn(String navn) {
