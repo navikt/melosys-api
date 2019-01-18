@@ -51,7 +51,7 @@ public class A009DataByggerTest {
     }
 
     @Test
-    public void testLagA009() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void lagA009DataObjekt_forventLovvalgBestemmelse12_1() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         A009Data a009Data = a009DataBygger.lag(behandling);
         assertNotNull(a009Data.getLovvalgsperioder());
         assertTrue(a009Data.getLovvalgsperioder().iterator().hasNext());

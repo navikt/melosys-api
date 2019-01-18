@@ -7,7 +7,7 @@ import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.eux.model.SedType;
 import no.nav.melosys.eux.model.medlemskap.impl.MedlemskapA009;
 import no.nav.melosys.eux.model.nav.Fastperiode;
-import no.nav.melosys.eux.model.nav.Gjelderperiode;
+import no.nav.melosys.eux.model.nav.GjelderPeriode;
 import no.nav.melosys.eux.model.nav.Utsendingsland;
 import no.nav.melosys.eux.model.nav.Vedtak;
 import no.nav.melosys.exception.FunksjonellException;
@@ -45,19 +45,17 @@ public class A009Mapper extends AbstraktSedMapper<MedlemskapA009, A009Data> {
 
         String bestemmelse = null;
 
-        if (lovvalgsperiode.getBestemmelse() instanceof LovvalgBestemmelse_883_2004) {
-            if(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1.getKode().equals(lovvalgsperiode.getBestemmelse().getKode())) {
-                bestemmelse = "12_1";
-            } else if (LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2.getKode().equals(lovvalgsperiode.getBestemmelse().getKode())) {
-                bestemmelse = "12_2";
-            }
+        if (LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1.getKode().equals(lovvalgsperiode.getBestemmelse().getKode())) {
+            bestemmelse = "12_1";
+        } else if (LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2.getKode().equals(lovvalgsperiode.getBestemmelse().getKode())) {
+            bestemmelse = "12_2";
+        } else {
+            throw new FunksjonellException("Lovvalgsbestemmelse er ikke av artikkel 12!");
         }
-
-        if (bestemmelse == null) throw new FunksjonellException("Lovvalgsbestemmelse er ikke av artikkel 12!");
 
         vedtak.setArtikkelforordning(bestemmelse);
 
-        Gjelderperiode gjelderperiode = new Gjelderperiode();
+        GjelderPeriode gjelderperiode = new GjelderPeriode();
 
         //Vil alltid være fast periode
         Fastperiode fastperiode = new Fastperiode();

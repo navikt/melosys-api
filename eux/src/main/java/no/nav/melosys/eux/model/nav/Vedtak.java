@@ -16,7 +16,7 @@ public class Vedtak {
 
     private String erendringsvedtak;
 
-    private Gjelderperiode gjelderperiode;
+    private GjelderPeriode gjelderperiode;
 
     private String gjeldervarighetyrkesaktivitet;
 
@@ -48,11 +48,11 @@ public class Vedtak {
         this.erendringsvedtak = erendringsvedtak;
     }
 
-    public Gjelderperiode getGjelderperiode() {
+    public GjelderPeriode getGjelderperiode() {
         return gjelderperiode;
     }
 
-    public void setGjelderperiode(Gjelderperiode gjelderperiode) {
+    public void setGjelderperiode(GjelderPeriode gjelderperiode) {
         this.gjelderperiode = gjelderperiode;
     }
 

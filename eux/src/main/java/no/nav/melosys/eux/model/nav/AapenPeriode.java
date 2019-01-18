@@ -2,20 +2,22 @@ package no.nav.melosys.eux.model.nav;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(Include.NON_NULL)
 public class AapenPeriode {
 
-    private String type;
+    @JsonProperty("type")
+    private String ukjentEllerÅpenSluttdato;
 
     private String startdato;
 
-    public String getType() {
-        return type;
+    public String getUkjentEllerÅpenSluttdato() {
+        return ukjentEllerÅpenSluttdato;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setUkjentEllerÅpenSluttdato(String ukjentEllerÅpenSluttdato) {
+        this.ukjentEllerÅpenSluttdato = ukjentEllerÅpenSluttdato;
     }
 
     public String getStartdato() {

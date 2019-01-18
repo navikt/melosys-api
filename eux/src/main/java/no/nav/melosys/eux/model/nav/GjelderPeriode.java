@@ -7,11 +7,11 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @SuppressWarnings("unused")
 @JsonInclude(Include.NON_NULL)
-public class Gjelderperiode {
-
-    private Fastperiode fastperiode;
+public class GjelderPeriode {
 
     private AapenPeriode aapenperiode;
+
+    private Fastperiode fastperiode;
 
     public AapenPeriode getAapenperiode() {
         return aapenperiode;

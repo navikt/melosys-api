@@ -43,8 +43,7 @@ public class A009MapperTest {
     }
 
     @Test
-    public void testHentMedlemskapIkkeSelvstendigOg12_1() throws FunksjonellException, TekniskException {
-        a009Data.getPersonDokument().erEgenAnsatt = false;
+    public void hentMedlemskapIkkeSelvstendigOg12_1_forventGyldigMedlemskap() throws FunksjonellException, TekniskException {
         SED sed = a009Mapper.mapTilSed(a009Data);
 
         assertEquals(MedlemskapA009.class, sed.getMedlemskap().getClass());
@@ -62,7 +61,7 @@ public class A009MapperTest {
     }
 
     @Test
-    public void testHentMedlemskapErSelvstendigOg12_2() throws FunksjonellException, TekniskException {
+    public void hentMedlemskapErSelvstendigOg12_2_forventGyldigMedlemskap() throws FunksjonellException, TekniskException {
         a009Data.getLovvalgsperioder().iterator().next().setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2);
         a009Data.getPersonDokument().erEgenAnsatt = true;
         SED sed = a009Mapper.mapTilSed(a009Data);
@@ -81,14 +80,14 @@ public class A009MapperTest {
     }
 
     @Test(expected = FunksjonellException.class)
-    public void testHentMedlemkapFeilLovvalgsBestemmelse() throws FunksjonellException, TekniskException {
+    public void hentMedlemkapFeilLovvalgsBestemmelse_forventFunksjonellException() throws FunksjonellException, TekniskException {
         a009Data.getLovvalgsperioder().iterator().next().setBestemmelse(LovvalgBestemmelse_987_2009.FO_987_2009_ART14_11);
         a009Mapper.mapTilSed(a009Data);
     }
 
     @Test(expected = TekniskException.class)
     @SuppressWarnings("unchecked")
-    public void testIngenLovvalgsperioder() throws FunksjonellException, TekniskException {
+    public void ingenLovvalgsperioder_forventTekniskException() throws FunksjonellException, TekniskException {
         a009Data.setLovvalgsperioder(Collections.EMPTY_LIST);
         a009Mapper.mapTilSed(a009Data);
     }

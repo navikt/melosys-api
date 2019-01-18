@@ -13,7 +13,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 public class A009DataBygger extends AbstraktSedDataBygger {
 
     public A009DataBygger(KodeverkService kodeverkService, RegisterOppslagService registerOppslagService,
-        LovvalgsperiodeService lovvalgsperiodeService, AvklartefaktaService avklartefaktaService) {
+                          LovvalgsperiodeService lovvalgsperiodeService, AvklartefaktaService avklartefaktaService) {
         super(kodeverkService, registerOppslagService, lovvalgsperiodeService, avklartefaktaService);
     }
 
