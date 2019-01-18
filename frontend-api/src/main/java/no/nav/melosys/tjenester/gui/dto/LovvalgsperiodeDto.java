@@ -17,6 +17,7 @@ public final class LovvalgsperiodeDto {
     @JsonUnwrapped(suffix = "Dato")
     public final PeriodeDto periode;
     public final String lovvalgBestemmelse;
+    public final String tilleggsbestemmelse;
     public final String lovvalgsland;
     public final String unntakFraBestemmelse;
     public final String unntakFraLovvalgsland;
@@ -26,13 +27,16 @@ public final class LovvalgsperiodeDto {
 
     public LovvalgsperiodeDto(PeriodeDto periode,
             LovvalgBestemmelse lovvalgBestemmelse,
+            LovvalgBestemmelse tilleggsbestemmelse,
             Landkoder lovvalgsland,
             LovvalgBestemmelse unntakFraBestemmelse,
             Landkoder unntakFraLovvalgsland,
             InnvilgelsesResultat innvilgelsesResultat,
-            TrygdeDekning trygdeDekning, Medlemskapstype medlemskapstype) {
+            TrygdeDekning trygdeDekning,
+            Medlemskapstype medlemskapstype) {
         this.periode = periode;
         this.lovvalgBestemmelse = lovvalgBestemmelse.name();
+        this.tilleggsbestemmelse = tilleggsbestemmelse != null ? tilleggsbestemmelse.name() : null;
         this.lovvalgsland = lovvalgsland.name();
         this.unntakFraBestemmelse = unntakFraBestemmelse != null ? unntakFraBestemmelse.name() : null;
         this.unntakFraLovvalgsland = unntakFraLovvalgsland != null ? unntakFraLovvalgsland.name() : null;
@@ -46,6 +50,7 @@ public final class LovvalgsperiodeDto {
         this(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
                 LocalDate.parse(json.get("tomDato"))),
                 konverterLovvalgsBestemmelse(json.get("lovvalgBestemmelse")),
+                konverterLovvalgsBestemmelse(json.get("tilleggsbestemmelse")),
                 Landkoder.valueOf(json.get("lovvalgsland")),
                 konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
                 enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
@@ -65,6 +70,7 @@ public final class LovvalgsperiodeDto {
         return new LovvalgsperiodeDto(new PeriodeDto(lovvalgsperiode.getFom(),
                 lovvalgsperiode.getTom()),
                 lovvalgsperiode.getBestemmelse(),
+                lovvalgsperiode.getTilleggsbestemmelse(),
                 lovvalgsperiode.getLovvalgsland(),
                 lovvalgsperiode.getUnntakFraBestemmelse(),
                 lovvalgsperiode.getUnntakFraLovvalgsland(),
@@ -84,6 +90,7 @@ public final class LovvalgsperiodeDto {
         resultat.setLovvalgsland(Landkoder.valueOf(lovvalgsland));
         resultat.setBestemmelse(konverterer.convertToEntityAttribute(lovvalgBestemmelse));
         resultat.setUnntakFraBestemmelse(konverterer.convertToEntityAttribute(unntakFraBestemmelse));
+        resultat.setTilleggsbestemmelse(konverterer.convertToEntityAttribute(tilleggsbestemmelse));
         resultat.setUnntakFraLovvalgsland(enumVerdiEllerNull(Landkoder.class, unntakFraLovvalgsland));
         resultat.setInnvilgelsesresultat(enumVerdiEllerNull(InnvilgelsesResultat.class, innvilgelsesResultat));
         resultat.setDekning(enumVerdiEllerNull(TrygdeDekning.class, trygdeDekning));
