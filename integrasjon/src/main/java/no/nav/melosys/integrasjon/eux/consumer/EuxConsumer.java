@@ -11,7 +11,7 @@ interface EuxConsumer extends RestConsumer {
 
     List<String> hentInstitusjoner(String bucType, String landkode) throws MelosysException;
 
-    String opprettRinaSak(String bucType) throws MelosysException;
+    String opprettBuC(String bucType) throws MelosysException;
 
     void oppdaterSed(String rinaSaksnummer, String korrelasjonsId, String sedType, String dokumentId, SED sed) throws MelosysException;
 
@@ -19,7 +19,7 @@ interface EuxConsumer extends RestConsumer {
 
     void sendSed(String rinaSaksnummer, String korrelasjonsId, String dokumentId) throws MelosysException;
 
-    void slettRinaSak(String rinaSaksnummer) throws MelosysException;
+    void slettBuC(String rinaSaksnummer) throws MelosysException;
 
     JsonNode hentKodeverk(String kodeverk) throws MelosysException;
 
@@ -37,7 +37,7 @@ interface EuxConsumer extends RestConsumer {
 
     SED hentSed(String rinaSaksnummer, String dokumentId) throws MelosysException;
 
-    JsonNode hentBuc(String buc) throws MelosysException;
+    JsonNode hentBuC(String buc) throws MelosysException;
 
     List<String> hentTilgjengeligeSedTyper(String rinaSaksnummer) throws MelosysException;
 

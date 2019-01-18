@@ -33,7 +33,7 @@ public class EuxConsumerImpl implements EuxConsumer {
     private final String BUC_TYPE = "BuCType";
     private final String DOKUMENT_ID = "DokumentID";
 
-    private final String BUC_PATH = "/BUC";
+    private final String BUC_PATH = "/BuC";
     private final String SED_PATH = "/SED";
 
     @Autowired
@@ -50,7 +50,7 @@ public class EuxConsumerImpl implements EuxConsumer {
      * @throws MelosysException
      */
     @Override
-    public JsonNode hentBuc(String rinaSaksnummer) throws MelosysException {
+    public JsonNode hentBuC(String rinaSaksnummer) throws MelosysException {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath(BUC_PATH)
             .queryParam(RINA_SAKSNUMMER, rinaSaksnummer);
 
@@ -65,7 +65,7 @@ public class EuxConsumerImpl implements EuxConsumer {
      * @throws MelosysException
      */
     @Override
-    public String opprettRinaSak(String bucType) throws MelosysException {
+    public String opprettBuC(String bucType) throws MelosysException {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath(BUC_PATH)
                 .queryParam(BUC_TYPE, bucType);
 
@@ -79,7 +79,7 @@ public class EuxConsumerImpl implements EuxConsumer {
      * @throws MelosysException
      */
     @Override
-    public void slettRinaSak(String rinaSaksnummer) throws MelosysException {
+    public void slettBuC(String rinaSaksnummer) throws MelosysException {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath(BUC_PATH)
             .queryParam(RINA_SAKSNUMMER, rinaSaksnummer);
 
@@ -95,7 +95,7 @@ public class EuxConsumerImpl implements EuxConsumer {
      */
     @Override
     public void settMottaker(String rinaSaksnummer, String mottakerId) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/BuCTypePerSektor")
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/BuCDeltagere")
             .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
             .queryParam("MottakerID", mottakerId);
 
@@ -125,7 +125,7 @@ public class EuxConsumerImpl implements EuxConsumer {
     public List<String> hentInstitusjoner(String bucType, String landkode) throws MelosysException {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/Institusjoner")
             .queryParam(BUC_TYPE, bucType)
-            .queryParam("landKode", landkode);
+            .queryParam("LandKode", landkode);
 
         return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
             new ParameterizedTypeReference<List<String>>() {});
@@ -217,7 +217,7 @@ public class EuxConsumerImpl implements EuxConsumer {
             .queryParam("Status", status);
 
         //Må vurdere å endre returverdi til en POJO om denne integrasjonen faktisk tas i bruk
-        return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+        return exchange(builder.build(false).toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
             new ParameterizedTypeReference<JsonNode>() {});
     }
 
@@ -268,8 +268,8 @@ public class EuxConsumerImpl implements EuxConsumer {
     public void oppdaterSed(String rinaSaksnummer, String korrelasjonsId, String sedType, String dokumentId, SED sed) throws MelosysException {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath(SED_PATH)
                 .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
-                .queryParam("SEDType", sedType)
-                .queryParam(KORRELASJONS_ID, korrelasjonsId);
+                .queryParam(KORRELASJONS_ID, korrelasjonsId)
+                .queryParam("SEDType", sedType);
 
         exchange(builder.toUriString(), HttpMethod.PUT, new HttpEntity<>(sed, getDefaultHeaders(false)),
                 new ParameterizedTypeReference<Void>() {});
@@ -300,10 +300,10 @@ public class EuxConsumerImpl implements EuxConsumer {
      */
     @Override
     public void sendSed(String rinaSaksnummer, String korrelasjonsId, String dokumentId) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/sendSED")
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/SendSED")
             .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
-            .queryParam(DOKUMENT_ID, dokumentId)
-            .queryParam(KORRELASJONS_ID, korrelasjonsId);
+            .queryParam(KORRELASJONS_ID, korrelasjonsId)
+            .queryParam(DOKUMENT_ID, dokumentId);
 
         exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(getDefaultHeaders(false)),
                 new ParameterizedTypeReference<Void>() {});
@@ -344,7 +344,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_OCTET_STREAM));
         headers.add(HttpHeaders.AUTHORIZATION, getAuth()); //TODO; denne må endres om det viser seg at det trengs automatisering på dette steget - gitt at eux støtter dette da
 
-        return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+        return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(headers),
             new ParameterizedTypeReference<byte[]>() {});
     }
 
@@ -397,7 +397,7 @@ public class EuxConsumerImpl implements EuxConsumer {
 
     private HttpHeaders getDefaultHeaders(boolean systemAuth) throws MelosysException {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.TEXT_PLAIN);
+        headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.add(HttpHeaders.AUTHORIZATION, systemAuth ? getSystemOidcAuth() : getAuth());
         return headers;
