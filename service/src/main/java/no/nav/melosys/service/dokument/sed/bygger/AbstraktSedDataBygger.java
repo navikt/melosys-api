@@ -40,7 +40,7 @@ public abstract class AbstraktSedDataBygger extends AbstraktDokumentDataBygger {
         sedData.setSøknadDokument(this.søknad);
 
         sedData.setBostedsadresse(hentBostedsadresse());
-        sedData.setArbeidsgivendeVirkomsheter(hentAlleNorskeAvklarteVirksomheter());
+        sedData.setArbeidsgivendeVirksomheter(hentAlleNorskeAvklarteVirksomheter());
         sedData.setArbeidssteder(hentArbeidssteder());
         sedData.setUtenlandskeVirksomheter(hentUtenlandskeVirksomheter()); //Lev1, kun en utenlandsk virksomhet
 

@@ -9,10 +9,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.dok.melosysbrev._000108.*;
-import no.nav.dok.melosysbrev.felles.melosys_felles.BehandlingstypeKode;
-import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
-import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsbestemmelseKode;
-import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
+import no.nav.dok.melosysbrev._000108.ObjectFactory;
+import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -66,9 +64,10 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         }
         Lovvalgsperiode periode = perioder.iterator().next();
         fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(periode.getBestemmelse().getKode()));
-        fag.setPeriode(PeriodeType.builder().withFomDato(lagXmlDato(periode.getFom()))
-            .withTomDato(lagXmlDato(periode.getTom()))
-            .build());
+        fag.setLovvalgsperiode(LovvalgsperiodeType.builder().withFomDato(lagXmlDato(periode.getFom()))
+                                                            .withTomDato(lagXmlDato(periode.getTom()))
+                                                            .build());
+
         // TODO: Ikke avklart/kjent i denne omgang, må fylles ut seinere.
         // Kan utledes ved å se på statsborgerskapet til søkeren i perioden,
         // evt. ta i bruk nytt predikat i regel-modulen (PR som ikke er flettet

@@ -19,7 +19,7 @@ public abstract class AbstraktSedData {
 
     private Bostedsadresse bostedsadresse;
 
-    private List<Virksomhet> arbeidsgivendeVirkomsheter;
+    private List<Virksomhet> arbeidsgivendeVirksomheter;
     private List<Virksomhet> selvstendigeVirksomheter;
     private List<Arbeidssted> arbeidssteder; //Utenlandske arbeidsSTED
     private List<Virksomhet> utenlandskeVirksomheter;
@@ -48,13 +48,13 @@ public abstract class AbstraktSedData {
         this.bostedsadresse = bostedsadresse;
     }
 
-    public List<Virksomhet> getArbeidsgivendeVirkomsheter() {
-        return arbeidsgivendeVirkomsheter;
+    public List<Virksomhet> getArbeidsgivendeVirksomheter() {
+        return arbeidsgivendeVirksomheter;
     }
 
-    public void setArbeidsgivendeVirkomsheter(
-        List<Virksomhet> arbeidsgivendeVirkomsheter) {
-        this.arbeidsgivendeVirkomsheter = arbeidsgivendeVirkomsheter;
+    public void setArbeidsgivendeVirksomheter(
+        List<Virksomhet> arbeidsgivendeVirksomheter) {
+        this.arbeidsgivendeVirksomheter = arbeidsgivendeVirksomheter;
     }
 
     public List<Virksomhet> getSelvstendigeVirksomheter() {
