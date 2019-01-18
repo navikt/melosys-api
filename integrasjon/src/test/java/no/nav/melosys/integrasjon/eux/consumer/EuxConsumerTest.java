@@ -53,7 +53,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_hentBuC_returnerObjekt() throws MelosysException {
+    public void hentBuC_returnerObjekt() throws MelosysException {
         String id = "1234";
         server.expect(requestTo("/BuC?RINASaksnummer=" + id))
             .andRespond(withSuccess("1234", MediaType.APPLICATION_JSON));
@@ -63,7 +63,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_opprettBuC_returnererId() throws MelosysException {
+    public void opprettBuC_returnererId() throws MelosysException {
         String id = "1234";
         String buc = "LA_BUC_04";
         server.expect(requestTo("/BuC?BuCType=" + buc))
@@ -74,7 +74,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_slettBuC_ingenRetur() throws MelosysException {
+    public void slettBuC_ingenRetur() throws MelosysException {
         String id = "1234";
         server.expect(requestTo("/BuC?RINASaksnummer=" + id))
             .andRespond(withSuccess());
@@ -83,7 +83,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_settMottaker_ingenRetur() throws MelosysException {
+    public void settMottaker_ingenRetur() throws MelosysException {
         String id = "1234";
         String mottaker = "NAV_DANMARK_123";
         server.expect(requestTo("/BuCDeltagere?RINASaksnummer=" + id + "&MottakerID=" + mottaker))
@@ -93,7 +93,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_hentBucTypePerSektor_returnerListe() throws MelosysException, JsonProcessingException {
+    public void hentBucTypePerSektor_returnerListe() throws MelosysException, JsonProcessingException {
 
         List<String> forventetRetur = Lists.newArrayList("en", "to", "tre");
 
@@ -105,7 +105,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_hentInstitusjoner_forventListe() throws MelosysException, JsonProcessingException {
+    public void hentInstitusjoner_forventListe() throws MelosysException, JsonProcessingException {
         List<String> forventetRetur = Lists.newArrayList("en", "to", "tre");
         String buctype = "LA_BUC_04";
         String landkode = "NO";
@@ -118,7 +118,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_hentKodeverk_forventJson() throws MelosysException, JsonProcessingException {
+    public void hentKodeverk_forventJson() throws MelosysException, JsonProcessingException {
         Map<String, Object> forventetRetur = Maps.newHashMap();
         forventetRetur.put("string", "value");
         forventetRetur.put("int", 1L);
@@ -134,7 +134,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_hentMuligeAksjoner_forventJson() throws MelosysException, JsonProcessingException {
+    public void hentMuligeAksjoner_forventJson() throws MelosysException, JsonProcessingException {
         Map<String, Object> forventetRetur = Maps.newHashMap();
         forventetRetur.put("string", "value");
         forventetRetur.put("int", 1L);
@@ -149,7 +149,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_opprettBucOgSed_forventString() throws MelosysException {
+    public void opprettBucOgSed_forventString() throws MelosysException {
         String buc = "buc", fagsak = "123", mottaker = "NAV", filtype = "virus.exe", korrelasjon = "111", vedlegg = "vedlegg";
         SED sed = new SED();
 
@@ -162,7 +162,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_finndRinaSaker_forventJson() throws MelosysException, JsonProcessingException {
+    public void finndRinaSaker_forventJson() throws MelosysException, JsonProcessingException {
         Map<String, Object> forventetRetur = Maps.newHashMap();
         forventetRetur.put("string", "value");
         forventetRetur.put("int", 1L);
@@ -183,7 +183,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_hentSed_forventSed() throws MelosysException, JsonProcessingException {
+    public void hentSed_forventSed() throws MelosysException, JsonProcessingException {
         String id = "123";
         String dokumentId = "312";
         SED sed = new SED();
@@ -200,7 +200,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_opprettSed_forventId() throws MelosysException {
+    public void opprettSed_forventId() throws MelosysException {
         String id = "123";
         String korrelasjonId = "312";
         SED sed = new SED();
@@ -215,7 +215,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_oppdaterSed_ingenRetur() throws MelosysException {
+    public void oppdaterSed_ingenRetur() throws MelosysException {
         String id = "123";
         String korrelasjonId = "312";
         String sedType = "LA_BUC_04";
@@ -229,7 +229,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_slettSed_ingenRetur() throws MelosysException {
+    public void slettSed_ingenRetur() throws MelosysException {
         String id = "123";
         String dokumentId = "1122233";
 
@@ -240,7 +240,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_sendSed_ingenRetur() throws MelosysException {
+    public void sendSed_ingenRetur() throws MelosysException {
         String id = "123";
         String korrelasjonsId = "111";
         String dokumentId = "22";
@@ -252,7 +252,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_hentTilgjengeligeSedType_forventListeString() throws MelosysException, JsonProcessingException {
+    public void hentTilgjengeligeSedType_forventListeString() throws MelosysException, JsonProcessingException {
         String id = "123";
 
         List<String> forventetRetur = Lists.newArrayList("en", "to", "tre");
@@ -265,7 +265,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_hentVedlegg_ForventByteArray() throws MelosysException {
+    public void hentVedlegg_ForventByteArray() throws MelosysException {
         String id = "123";
         String dokumentId = "123321";
         String vedleggId = "2222";
@@ -280,7 +280,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_leggTilVedlegg_forventId() throws MelosysException {
+    public void leggTilVedlegg_forventId() throws MelosysException {
         String id = "123";
         String dokumentId = "123321";
         String filtype = "virus.exe";
@@ -295,7 +295,7 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void test_slettVedlegg_ingenRetur() throws MelosysException {
+    public void slettVedlegg_ingenRetur() throws MelosysException {
         String id = "123";
         String dokumentId = "123321";
         String vedleggId = "2222";
@@ -307,7 +307,7 @@ public class EuxConsumerTest {
     }
 
     @Test(expected = MelosysException.class)
-    public void test_exceptionHåndtering_forventMelsoysException() throws MelosysException {
+    public void exceptionHåndtering_forventMelsoysException() throws MelosysException {
         String id = "123";
         String dokumentId = "123321";
         String vedleggId = "2222";
