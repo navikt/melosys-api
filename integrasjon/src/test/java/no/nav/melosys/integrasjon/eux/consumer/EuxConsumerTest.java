@@ -29,6 +29,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -50,8 +51,9 @@ public class EuxConsumerTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Before
-    public void setup() {
+    public void setup() throws MelosysException {
         server = MockRestServiceServer.createServer(restTemplate);
+        when(restStsClient.collectToken()).thenReturn("supersecret123");
     }
 
     @Test
