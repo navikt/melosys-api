@@ -25,7 +25,7 @@ public class LovvalgsperiodeDtoTest {
             "  \"fomDato\": \"2019-01-01\"," +
             "  \"tomDato\": \"2020-01-01\"," +
             "  \"lovvalgBestemmelse\": \"FO_883_2004_ART12_1\"," +
-            "  \"tilleggsbestemmelse\": \"FO_883_2004_ART11_2\"," +
+            "  \"tilleggBestemmelse\": \"FO_883_2004_ART11_2\"," +
             "  \"unntakFraBestemmelse\": %s," +
             "  \"innvilgelsesResultat\": \"INNVILGET\"," +
             "  \"lovvalgsland\": \"NO\"," +
@@ -49,7 +49,7 @@ public class LovvalgsperiodeDtoTest {
         LovvalgsperiodeDto forventet = new LovvalgsperiodeDto(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
             LocalDate.parse(json.get("tomDato"))),
             LovvalgBestemmelse_883_2004.valueOf(json.get("lovvalgBestemmelse")),
-            TilleggBestemmelse_883_2004.valueOf(json.get("tilleggsbestemmelse")),
+            TilleggBestemmelse_883_2004.valueOf(json.get("tilleggBestemmelse")),
             Landkoder.valueOf(json.get("lovvalgsland")),
             enumVerdiEllerNull(LovvalgBestemmelse_883_2004.class, json.get("unntakFraBestemmelse")),
             enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),

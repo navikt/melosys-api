@@ -56,6 +56,7 @@ public class A001Mapper {
         Lovvalgsperiode lovvalgsperiode = brevData.lovvalgsperioder.iterator().next();
         seda001.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getUnntakFraBestemmelse().getKode()));
         seda001.setLovvalgsLand(lovvalgsperiode.getLovvalgsland().getKode());  // Alltid Norge
+
         if (lovvalgsperiode.getTilleggsbestemmelse() != null) {
             seda001.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(lovvalgsperiode.getTilleggsbestemmelse().getKode()));
         }
