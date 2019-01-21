@@ -6,7 +6,7 @@ import java.net.URISyntaxException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.eux.model.SedType;
-import no.nav.melosys.eux.model.medlemskap.Medlemskap;
+import no.nav.melosys.eux.model.medlemskap.impl.MedlemskapA009;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.sed.AbstraktSedData;
@@ -21,11 +21,11 @@ import static org.junit.Assert.assertNotNull;
 @RunWith(MockitoJUnitRunner.class)
 public class SedMapperTest {
 
-    protected class SedMapperImpl extends AbstraktSedMapper<MedlemskapImpl, SedDataImpl> {
+    protected class SedMapperImpl extends AbstraktSedMapper<MedlemskapA009, SedDataImpl> {
 
         @Override
-        protected MedlemskapImpl hentMedlemskap(SedDataImpl sedData) {
-            return new MedlemskapImpl();
+        protected MedlemskapA009 hentMedlemskap(SedDataImpl sedData) {
+            return new MedlemskapA009();
         }
 
         @Override
@@ -35,7 +35,6 @@ public class SedMapperTest {
     }
 
     private final class SedDataImpl extends AbstraktSedData {}
-    private final class MedlemskapImpl extends Medlemskap {}
 
     private SedMapperImpl sedMapper = new SedMapperImpl();
     private SedDataImpl sedData;

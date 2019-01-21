@@ -1,5 +1,7 @@
 package no.nav.melosys.integrasjon.eux.consumer;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -9,11 +11,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import no.nav.melosys.eux.model.SedType;
-import no.nav.melosys.eux.model.nav.Nav;
+import no.nav.melosys.eux.model.medlemskap.impl.MedlemskapA009;
 import no.nav.melosys.eux.model.nav.SED;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -183,20 +185,23 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void hentSed_forventSed() throws MelosysException, JsonProcessingException {
+    public void hentSed_forventSed() throws MelosysException, IOException {
         String id = "123";
         String dokumentId = "312";
-        SED sed = new SED();
-        sed.setSed(SedType.A009.name());
-        sed.setNav(new Nav());
+
+        URL jsonUrl = getClass().getClassLoader().getResource("mock/eux/sedA009.json");
+        assertNotNull(jsonUrl);
+        String sed = IOUtils.toString(jsonUrl);
 
         server.expect(requestTo("/SED?RINASaksnummer=" + id + "&DokumentID=" + dokumentId))
-            .andRespond(withSuccess(objectMapper.writeValueAsString(sed), MediaType.APPLICATION_JSON));
+            .andRespond(withSuccess(sed, MediaType.APPLICATION_JSON));
 
         SED resultat = euxConsumer.hentSed(id, dokumentId);
         assertNotNull(resultat);
         assertNotNull(resultat.getNav());
-        assertEquals(sed.getSed(), resultat.getSed());
+        assertEquals("A009", resultat.getSed());
+        assertNotNull(resultat.getMedlemskap());
+        assertEquals(MedlemskapA009.class, resultat.getMedlemskap().getClass());
     }
 
     @Test

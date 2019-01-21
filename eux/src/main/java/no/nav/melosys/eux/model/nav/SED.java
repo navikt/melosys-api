@@ -4,6 +4,9 @@ package no.nav.melosys.eux.model.nav;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
+import no.nav.melosys.eux.json.MedlemskapTypeResolver;
 import no.nav.melosys.eux.model.medlemskap.Medlemskap;
 
 @SuppressWarnings("unused")
@@ -24,6 +27,8 @@ public class SED {
         return medlemskap;
     }
 
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "sed")
+    @JsonTypeIdResolver(MedlemskapTypeResolver.class)
     public void setMedlemskap(Medlemskap medlemskap) {
         this.medlemskap = medlemskap;
     }
