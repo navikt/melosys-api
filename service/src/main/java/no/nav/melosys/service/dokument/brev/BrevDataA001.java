@@ -9,6 +9,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.YrkesgruppeType;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -29,6 +30,7 @@ public class BrevDataA001 extends BrevData {
 
     public List<Virksomhet> arbeidsgivendeVirkomsheter;
     public List<Virksomhet> selvstendigeVirksomheter;
+    public YrkesgruppeType yrkesgruppe;
 
     public List<Arbeidssted> arbeidssteder;
 
