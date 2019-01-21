@@ -74,7 +74,6 @@
         <hibernate.version>5.3.7.Final</hibernate.version>
         <hikaricp.version>3.3.0</hikaricp.version>
         <ibmmq.version>9.0.5.0</ibmmq.version>
-        <jackson.version>2.9.4</jackson.version>
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
         <jms-api.version>2.0.1</jms-api.version>
         <junit.version>4.12</junit.version>
