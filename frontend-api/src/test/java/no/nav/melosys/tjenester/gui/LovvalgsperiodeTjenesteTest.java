@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
+import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse_883_2004;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import org.junit.Test;
 
@@ -32,9 +33,13 @@ public final class LovvalgsperiodeTjenesteTest {
     private static final LocalDate FOM = LocalDate.now();
     private static final LovvalgsperiodeDto FORVENTET = new LovvalgsperiodeDto(new PeriodeDto(FOM, FOM),
             LovvalgBestemmelse_883_2004.FO_883_2004_ART16_2,
+            TilleggBestemmelse_883_2004.FO_883_2004_ART13_4,
             Landkoder.SK,
-            null, null,
-            InnvilgelsesResultat.AVSLAATT, null, Medlemskapstype.FRIVILLIG);
+            null,
+            null,
+            InnvilgelsesResultat.AVSLAATT,
+            null,
+            Medlemskapstype.FRIVILLIG);
 
     private static final long BEHANDLING_UTEN_TILGANG = 238L;
     private static final long BEHANDLING_MED_TEKNISK_FEIL = 832L;

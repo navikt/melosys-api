@@ -15,6 +15,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse_883_2004;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
@@ -64,6 +65,7 @@ public class A001MapperTest {
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
 
         lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART16_2);
+        lovvalgsperiode.setTilleggsbestemmelse(TilleggBestemmelse_883_2004.FO_883_2004_ART11_5);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
         lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.NO);
