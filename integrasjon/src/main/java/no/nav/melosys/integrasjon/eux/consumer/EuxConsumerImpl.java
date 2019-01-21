@@ -3,14 +3,18 @@ package no.nav.melosys.integrasjon.eux.consumer;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.eux.model.nav.SED;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -168,7 +172,7 @@ public class EuxConsumerImpl implements EuxConsumer {
      * @param mottakerId Mottaker sin Rina-id
      * @param filType filtype til vedlegg
      * @param korrelasjonsId Optional, ikke brukt av eux per nå
-     * @return
+     * @return id til rina-sak som ble opprettet
      * @throws MelosysException
      */
     @Override
@@ -185,8 +189,22 @@ public class EuxConsumerImpl implements EuxConsumer {
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.add(HttpHeaders.AUTHORIZATION, getAuth()); //TODO; denne må endres om det viser seg at det trengs automatisering på dette steget - gitt at eux støtter dette da
 
+        byte[] sedBytes;
+        try {
+            sedBytes = new ObjectMapper().writeValueAsString(sed).getBytes();
+        } catch (JsonProcessingException ex) {
+            throw new TekniskException("Feil ved mapping fra sed til bytes");
+        }
+
+        ByteArrayResource dokument = new ByteArrayResource(sedBytes) {
+            @Override
+            public String getFilename() {
+                return "document";
+            }
+        };
+
         MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        map.add("document", sed);
+        map.add("document", dokument);
         map.add("attachment", vedlegg); //Vedlegg ikke påkrevd. Vet ikke om vi trenger, setter den enn så lenge.
 
         return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(map, headers),
