@@ -57,8 +57,9 @@ public class A001Mapper {
         seda001.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getUnntakFraBestemmelse().getKode()));
         seda001.setLovvalgsLand(lovvalgsperiode.getLovvalgsland().getKode());  // Alltid Norge
 
-        // TODO: Implementasjon mangler i lovvalgsperiode (MELOSYS-2029)
-        //seda001.setTilleggsbestemmelse();
+        if (lovvalgsperiode.getTilleggsbestemmelse() != null) {
+            seda001.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(lovvalgsperiode.getTilleggsbestemmelse().getKode()));
+        }
 
         // Mangler implementasjon i oppgavene. Lev1 støtter ikke purring
         seda001.setForespørselType(ForespoerselTypeKode.FOERSTEGANG);

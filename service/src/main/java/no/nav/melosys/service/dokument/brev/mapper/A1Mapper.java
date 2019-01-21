@@ -7,10 +7,8 @@ import java.util.Set;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000067.*;
-import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode;
-import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsbestemmelseKode;
-import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
-import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesgruppeKode;
+import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -105,7 +103,9 @@ public class A1Mapper {
         LovvalgsperiodeType brevPeriode = new LovvalgsperiodeType();
         brevPeriode.setLovvalgsLand(lovvalgsperiode.getLovvalgsland().getKode());
         brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getBestemmelse().getKode()));
-        //brevPeriode.setTilleggsbestemmelse();  // TODO: Mangler i modellen (MELOSYS-2029)
+        if (lovvalgsperiode.getTilleggsbestemmelse() != null) {
+            brevPeriode.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(lovvalgsperiode.getTilleggsbestemmelse().getKode()));
+        }
 
         try {
             brevPeriode.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));

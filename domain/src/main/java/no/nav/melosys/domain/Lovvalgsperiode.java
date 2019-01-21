@@ -62,6 +62,10 @@ public class Lovvalgsperiode implements ErPeriode {
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
     private LovvalgBestemmelse bestemmelse;
 
+    @Column(name = "tillegg_bestemmelse", updatable = false)
+    @Convert(converter = LovvalgBestemmelsekonverterer.class)
+    private LovvalgBestemmelse tilleggsbestemmelse;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "unntak_fra_lovvalgsland", updatable = false)
     private Landkoder unntakFraLovvalgsland;
@@ -129,6 +133,14 @@ public class Lovvalgsperiode implements ErPeriode {
 
     public void setBestemmelse(LovvalgBestemmelse bestemmelse) {
         this.bestemmelse = bestemmelse;
+    }
+
+    public LovvalgBestemmelse getTilleggsbestemmelse() {
+        return tilleggsbestemmelse;
+    }
+
+    public void setTilleggsbestemmelse(LovvalgBestemmelse tilleggsbestemmelse) {
+        this.tilleggsbestemmelse = tilleggsbestemmelse;
     }
 
     public Landkoder getUnntakFraLovvalgsland() {

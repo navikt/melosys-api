@@ -13,7 +13,7 @@
     <groupId>no.nav.melosys</groupId>
 
     <artifactId>melosys-pom</artifactId>
-    <version>0.59.0-SNAPSHOT</version>
+    <version>0.60.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -40,7 +40,7 @@
 
         <!-- Melosys -->
         <melosys.frontend.version>0.17.0-367</melosys.frontend.version>
-        <melosys.jsonschema.version>0.13.0-145</melosys.jsonschema.version>
+        <melosys.jsonschema.version>0.13.0-146</melosys.jsonschema.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
