@@ -1,7 +1,5 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
-import java.math.BigDecimal;
-
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 
 /**
@@ -10,9 +8,8 @@ import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
  */
 
 public class ArbeidUtland {
-    public BigDecimal arbeidsandelNorge;
-    public BigDecimal arbeidsandelUtland;
+    public String foretakNavn;
+    public String foretakOrgnr;
     public boolean arbeidUtlandHjemmekontor;
-    public boolean arbeidUtlandErstatning;
     public StrukturertAdresse adresse = new StrukturertAdresse();
 }
