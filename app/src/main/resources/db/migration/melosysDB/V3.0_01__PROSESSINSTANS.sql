@@ -50,6 +50,7 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPRETT_GSAK_SAK', 'Oppretter
 INSERT INTO prosess_steg (kode, navn) VALUES ('STATUS_BEH_OPPR', 'Oppdater Sak og Behandling ved oppretting av behandling');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_OPPDATER_JOURNALPOST', 'Oppdaterer journalposten i Joark');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_FERDIGSTILL_JOURNALPOST', 'Ferdigstiller journalposten i Joark');
+INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_SETT_VURDER_DOKUMENT', 'Setter status til VURDER_DOKUMENT');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_HENT_PERS_OPPL', 'Hent personopplysninger fra TPS');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_VURDER_INNGANGSVILKÅR', 'Vurderer inngangsvilkår');
 
