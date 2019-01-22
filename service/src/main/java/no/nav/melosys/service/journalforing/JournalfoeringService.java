@@ -142,6 +142,9 @@ public class JournalfoeringService {
         if (journalfoeringDto.getFagsak().getLand() == null || journalfoeringDto.getFagsak().getLand().isEmpty()) {
             throw new FunksjonellException("Land mangler");
         }
+        if (journalfoeringDto.getFagsak().getLand().contains(null)) {
+            throw new FunksjonellException("Et oppholdsland er null!");
+        }
     }
 
 }
