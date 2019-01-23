@@ -70,6 +70,8 @@ class SedDataStub {
 
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = strukturertAdresse;
+        arbeidUtland.foretakNavn = "JARLSBERG International";
+        arbeidUtland.foretakOrgnr = "123456789";
         SoeknadDokument søknad = new SoeknadDokument();
         søknad.arbeidUtland = Arrays.asList(arbeidUtland);
 
