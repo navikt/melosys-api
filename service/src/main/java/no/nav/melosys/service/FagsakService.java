@@ -1,7 +1,6 @@
 package no.nav.melosys.service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -13,14 +12,9 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static no.nav.melosys.domain.ProsessSteg.HENLEGG_SAK;
 
 @Service
 public class FagsakService {
@@ -35,23 +29,19 @@ public class FagsakService {
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
 
-    private final ProsessinstansRepository prosessinstansRepo;
-
-    private final Binge binge;
+    private ProsessinstansService prosessinstansService;
 
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository,
                          BehandlingService behandlingService,
                          BehandlingsresultatRepository behandlingsresultatRepository,
                          TpsFasade tpsFasade,
-                         ProsessinstansRepository prosessinstansRepo,
-                         Binge binge) {
+                         ProsessinstansService prosessinstansService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tpsFasade = tpsFasade;
-        this.prosessinstansRepo = prosessinstansRepo;
-        this.binge = binge;
+        this.prosessinstansService = prosessinstansService;
     }
 
     public Fagsak hentFagsak(String saksnummer) {
@@ -124,8 +114,8 @@ public class FagsakService {
         return FAGSAKID_PREFIX + fagsakRepository.hentNesteSekvensVerdi();
     }
 
-    public void henleggFagsak(String saksnummer, String begrunnelse, String fritekst) throws TekniskException {
-        Prosessinstans prosessinstans = new Prosessinstans();
+    @Transactional
+    public void henleggFagsak(String saksnummer, String begrunnelseKode, String fritekst) throws TekniskException {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
 
         if (fagsak.getBehandlinger().isEmpty()) {
@@ -133,15 +123,15 @@ public class FagsakService {
         }
 
         //hent siste behandling
-        Behandling sisteBehandling = fagsak.getBehandlinger()
+        Behandling sisteIkkeAvsluttedeBehandling = fagsak.getBehandlinger()
             .stream()
+            .filter(behandling -> behandling.getStatus() != Behandlingsstatus.AVSLUTTET)
             .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
             .get();
 
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(sisteIkkeAvsluttedeBehandling.getId());
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(sisteBehandling.getId());
-
-        Henleggelsesgrunner henleggelsesgrunn = Henleggelsesgrunner.valueOf(begrunnelse.toUpperCase());
+        Henleggelsesgrunner henleggelsesgrunn = Henleggelsesgrunner.valueOf(begrunnelseKode.toUpperCase());
         behandlingsresultat.setHenleggelsesgrunn(henleggelsesgrunn);
 
         if (Henleggelsesgrunner.ANNET == henleggelsesgrunn) {
@@ -150,18 +140,6 @@ public class FagsakService {
 
         behandlingsresultatRepository.save(behandlingsresultat);
 
-        prosessinstans.setBehandling(sisteBehandling);
-        prosessinstans.setType(ProsessType.HENLEGG_SAK);   //skal vi ha en egen prosesstype for henleggelse?
-        LocalDateTime nå = LocalDateTime.now();
-        prosessinstans.setEndretDato(nå);
-        prosessinstans.setRegistrertDato(nå);
-
-        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.HENLEGGELSE);
-
-        prosessinstans.setSteg(HENLEGG_SAK);
-
-        prosessinstansRepo.save(prosessinstans);
-        binge.leggTil(prosessinstans);
+        prosessinstansService.opprettProsessinstansHenleggSak(sisteIkkeAvsluttedeBehandling);
     }
 }

@@ -9,6 +9,8 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.ProsessSteg.HENLEGG_SAK;
+
 @Service
 public class ProsessinstansService {
     private final Binge binge;
@@ -50,6 +52,24 @@ public class ProsessinstansService {
         if (saksbehandler != null) {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
         }
+
+        prosessinstansRepo.save(prosessinstans);
+        binge.leggTil(prosessinstans);
+    }
+
+    public void opprettProsessinstansHenleggSak(Behandling sisteBehandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+
+        prosessinstans.setBehandling(sisteBehandling);
+        prosessinstans.setType(ProsessType.HENLEGG_SAK);
+        LocalDateTime nå = LocalDateTime.now();
+        prosessinstans.setEndretDato(nå);
+        prosessinstans.setRegistrertDato(nå);
+
+        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.HENLEGGELSE);
+
+        prosessinstans.setSteg(HENLEGG_SAK);
 
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);
