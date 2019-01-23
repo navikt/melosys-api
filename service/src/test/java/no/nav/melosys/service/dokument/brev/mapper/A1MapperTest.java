@@ -27,6 +27,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
+import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.junit.Before;
 import org.junit.Rule;
@@ -101,13 +102,16 @@ public class A1MapperTest {
                                                          "123456789",
                                                          strukturertAdresse);
 
+        Arbeidssted fysiskArbeidssted = new Arbeidssted("JARLSBERG INTERNATIONAL", strukturertAdresse);
+        Arbeidssted maritimtArbeidssted = new Arbeidssted("Dunfjæder", "GB", YrkesgruppeType.SOKKEL_ELLER_SKIP);
+
         brevData = new BrevDataA1();
         brevData.yrkesgruppe = YrkesgruppeType.ORDINAER;
         brevData.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
         brevData.selvstendigeForetak = new HashSet<>();
         brevData.utenlandskeVirksomheter = new ArrayList<>(Arrays.asList(utenlandksVirksomhet));
         brevData.bostedsadresse = boAdresse;
-        brevData.arbeidssteder = new ArrayList<>();
+        brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidssted));
         brevData.person = lagPersonDokument();
     }
 

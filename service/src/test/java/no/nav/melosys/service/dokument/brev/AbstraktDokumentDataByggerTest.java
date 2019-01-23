@@ -19,7 +19,6 @@ import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
@@ -170,9 +169,7 @@ public class AbstraktDokumentDataByggerTest {
         avklartefakta.setReferanse("INSTALLASJON_ARBEIDSLAND");
         avklartefakta.setSubjekt("Dunfjæder");
 
-        AvklartefaktaDto avklartefaktaDto = new AvklartefaktaDto(avklartefakta);
-
-        when(avklartefaktaService.hentAlleAvklarteFakta(anyLong())).thenReturn(new HashSet<>(Arrays.asList((avklartefaktaDto))));
+        when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList((avklartefakta))));
 
         List<Arbeidssted> arbeidSteder = brevDatabyggerbase.hentArbeidssteder();
 

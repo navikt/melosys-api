@@ -58,8 +58,6 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
         brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
         brevData.arbeidsgivendeVirkomsheter = hentAlleNorskeAvklarteVirksomheter();
         brevData.selvstendigeVirksomheter = hentAvklarteSelvstendigeForetak();
-        brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandling.getId());
-
 
         brevData.bostedsadresse = hentBostedsadresse();
         brevData.arbeidssteder = hentArbeidssteder();

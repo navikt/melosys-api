@@ -8,13 +8,12 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.YrkesgruppeType;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
@@ -78,7 +77,7 @@ public abstract class AbstraktDokumentDataBygger {
     }
 
     protected List<Virksomhet> hentUtenlandskeVirksomheter() {
-        // Lev1 har alltid kun et utenlandsk foretak.
+        // For nå har alltid kun et utenlandsk foretak.
         // Det er derfor ikke nødvendig med filtrering av avklarte foretak
         return søknad.foretakUtland.stream()
                 .map(Virksomhet::new)
@@ -92,10 +91,10 @@ public abstract class AbstraktDokumentDataBygger {
     }
 
     private List<Arbeidssted> hentIkkeFysiskeArbeidssteder() {
-        Set<AvklartefaktaDto> avklartefaktaDtoer = avklartefaktaService.hentAlleAvklarteFakta(behandling.getId());
-        return avklartefaktaDtoer.stream()
-            .filter(avklartefaktaDto -> avklartefaktaDto.getAvklartefaktaType() == AvklartefaktaType.ARBEIDSLAND)
-            .map(avklartefaktaDto -> new Arbeidssted(avklartefaktaDto.getSubjektID(), avklartefaktaDto.getFakta().get(0), YrkesgruppeType.SOKKEL_ELLER_SKIP))
+        Set<Avklartefakta> avklartefaktaSet = avklartefaktaService.hentAlleAvklarteArbeidsland(behandling.getId());
+
+        return avklartefaktaSet.stream()
+            .map(avklartefakta -> new Arbeidssted(avklartefakta.getSubjekt(), avklartefakta.getFakta(), YrkesgruppeType.SOKKEL_ELLER_SKIP))
             .collect(Collectors.toList());
     }
 
