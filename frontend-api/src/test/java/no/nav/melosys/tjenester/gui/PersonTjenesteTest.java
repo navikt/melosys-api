@@ -3,12 +3,9 @@ package no.nav.melosys.tjenester.gui;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
-
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
-
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
@@ -23,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class PersonTjenesteTest extends JsonSchemaTest {
 
     private static final Logger log = LoggerFactory.getLogger(PersonTjenesteTest.class);

@@ -50,7 +50,9 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     IV_AVSLUTT_BEHANDLING("IV_AVSLUTT_BEHANDLING", "Avslutt fagsak og aktiv behandling"),
     IV_STATUS_BEH_AVSL("IV_STATUS_BEH_AVSL", "Oppdater Sak og Behandling ved lukking av behandling"),
 
-    MANGELBREV("MANGELBREV", "Opprett mangelbrev");
+    MANGELBREV("MANGELBREV", "Opprett mangelbrev"),
+
+    HENLEGG_SAK("HENLEGG_SAK", "Henlegg en sak");
 
     private String kode;
     private String beskrivelse;

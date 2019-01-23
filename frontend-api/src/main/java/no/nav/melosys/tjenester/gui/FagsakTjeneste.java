@@ -4,29 +4,24 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
-import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
-import no.nav.melosys.tjenester.gui.dto.FagsakDto;
-import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
-import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
+import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
-
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
 import org.slf4j.Logger;
@@ -103,6 +98,20 @@ public class FagsakTjeneste extends RestTjeneste {
         tilgang.sjekkFnr(fnr);
         saker = fagsakService.hentFagsakerMedAktør(RolleType.BRUKER, fnr);
         return tilDtoer(saker);
+    }
+
+    @POST
+    @Path("{saksnr}/henlegg")
+    @ApiOperation(value = "Henlegger en fagsak")
+    public Response henleggFagsak(@ApiParam @PathParam("saksnr") String saksnummer, @ApiParam("henleggelseDto") HenleggelseDto henleggelseDto) throws FunksjonellException, TekniskException {
+        Fagsak sak = fagsakService.hentFagsak(saksnummer);
+        if (sak == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        tilgang.sjekkSak(sak);
+
+        fagsakService.henleggFagsak(saksnummer, henleggelseDto.getBegrunnelseKode(), henleggelseDto.getFritekst());
+        return Response.ok().build();
     }
 
     private FagsakDto tilDto(Fagsak fagsak) {
