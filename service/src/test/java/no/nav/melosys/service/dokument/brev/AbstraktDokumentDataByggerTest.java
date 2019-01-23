@@ -1,9 +1,10 @@
 package no.nav.melosys.service.dokument.brev;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.YrkesgruppeType;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
@@ -12,9 +13,11 @@ import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
@@ -22,16 +25,12 @@ import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
 public class AbstraktDokumentDataByggerTest {
 
     private SoeknadDokument søknad;
@@ -40,24 +39,21 @@ public class AbstraktDokumentDataByggerTest {
 
     private BrevDatabyggerbaseImpl brevDatabyggerbase;
 
-    private AvklartefaktaService avklartefaktaService;
-
     class BrevDatabyggerbaseImpl extends AbstraktDokumentDataBygger {
 
         protected BrevDatabyggerbaseImpl(KodeverkService kodeverkService,
-                                         AvklartefaktaService avklartefaktaService,
                                          PersonDokument person,
                                          SoeknadDokument søknad,
                                          Set<String> avklarteOrganisasjoner) {
-            super(kodeverkService, mock(LovvalgsperiodeService.class), avklartefaktaService);
+            super(kodeverkService, mock(LovvalgsperiodeService.class), mock(AvklartefaktaService.class));
             this.person = person;
             this.søknad = søknad;
             this.avklarteOrganisasjoner = avklarteOrganisasjoner;
-            this.behandling = new Behandling();
         }
 
         @Override
-        protected List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() {
+        protected List<Virksomhet> hentAlleNorskeAvklarteVirksomheter()
+            throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
             return null;
         }
 
@@ -78,7 +74,6 @@ public class AbstraktDokumentDataByggerTest {
     @Before
     public void setUp() {
         KodeverkService kodeverkService = mock(KodeverkService.class);
-        avklartefaktaService = mock(AvklartefaktaService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
 
         Bostedsadresse boAdresse = new Bostedsadresse();
@@ -95,12 +90,7 @@ public class AbstraktDokumentDataByggerTest {
 
         avklarteOrganisasjoner.add("12345678910");
 
-        brevDatabyggerbase = new BrevDatabyggerbaseImpl(
-            kodeverkService,
-            avklartefaktaService,
-            person,
-            søknad,
-            avklarteOrganisasjoner);
+        brevDatabyggerbase = new BrevDatabyggerbaseImpl(kodeverkService, person, søknad, avklarteOrganisasjoner);
     }
 
     @Test
@@ -162,23 +152,5 @@ public class AbstraktDokumentDataByggerTest {
     @Test(expected = TekniskException.class)
     public void hentArbeidsstederKreverUtenlandskVirksomhet() throws TekniskException {
         brevDatabyggerbase.hentArbeidssteder();
-    }
-
-    @Test
-    public void hentArbeidsstederForMartimtArbeid_listMedArbeidssteder() throws TekniskException {
-        this.søknad.foretakUtland.add(new ForetakUtland());
-        AvklartefaktaDto avklartefaktaDto = new AvklartefaktaDto(Collections.singletonList("BG"), "INSTALLASJON_ARBEIDSLAND");
-        avklartefaktaDto.setSubjektID("Dunfjæder");
-        when(avklartefaktaService.hentAlleAvklarteFakta(anyLong())).
-            thenReturn(new HashSet<>(Arrays.asList((avklartefaktaDto))));
-
-        List<Arbeidssted> arbeidSteder = brevDatabyggerbase.hentArbeidssteder();
-
-        assertThat(arbeidSteder.size()).isEqualTo(1);
-        Arbeidssted arbeidssted = arbeidSteder.get(0);
-        assertThat(arbeidssted.navn).isEqualTo("Dunfjæder");
-        assertThat(arbeidssted.landKode).isEqualTo("BG");
-        assertThat(arbeidssted.yrkesgruppe.getKode()).isEqualTo(YrkesgruppeType.SOKKEL_ELLER_SKIP.getKode());
-
     }
 }

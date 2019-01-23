@@ -1,23 +1,17 @@
 package no.nav.melosys.service.dokument;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.YrkesgruppeType;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
@@ -95,11 +89,9 @@ public abstract class AbstraktDokumentDataBygger {
     }
 
     private List<Arbeidssted> hentIkkeFysiskeArbeidssteder() {
-        Set<AvklartefaktaDto> avklartefaktaDtoer = avklartefaktaService.hentAlleAvklarteFakta(behandling.getId());
-        return avklartefaktaDtoer.stream()
-            .filter(avklartefaktaDto -> avklartefaktaDto.getAvklartefaktaType() == AvklartefaktaType.ARBEIDSLAND)
-            .map(avklartefaktaDto -> new Arbeidssted(avklartefaktaDto.getSubjektID(), avklartefaktaDto.getFakta().get(0), YrkesgruppeType.SOKKEL_ELLER_SKIP))
-            .collect(Collectors.toList());
+        List<Arbeidssted> ikkeFysiskArbeidssteder = new ArrayList<>();
+        //TODO: hente ut maritimt arbeid
+        return ikkeFysiskArbeidssteder;
     }
 
     private Arbeidssted utledArbeidsstedFraVirksomhet(Virksomhet virksomhet) {
