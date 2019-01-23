@@ -80,8 +80,7 @@ public final class LovvalgsperiodeTjenesteTest {
         }
     }
 
-    private void testHentLovvalgsperioder(long behandlingsid,
-            Collection<LovvalgsperiodeDto> forventet) throws Exception {
+    private void testHentLovvalgsperioder(long behandlingsid, Collection<LovvalgsperiodeDto> forventet) throws Exception {
         LovvalgsperiodeService lovvalgsperiodeService = lagLovvalgsperiodeService();
         Tilgang tilgang = mock(Tilgang.class);
         doThrow(new SikkerhetsbegrensningException("Computer says no"))
@@ -127,6 +126,7 @@ public final class LovvalgsperiodeTjenesteTest {
         lovvalgsperiode.setTom(FORVENTET.periode.getTom());
         lovvalgsperiode.setLovvalgsland(Landkoder.valueOf(FORVENTET.lovvalgsland));
         lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.valueOf(FORVENTET.lovvalgBestemmelse));
+        lovvalgsperiode.setTilleggsbestemmelse(TilleggBestemmelse_883_2004.valueOf(FORVENTET.tilleggBestemmelse));
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET.innvilgelsesResultat));
         lovvalgsperiode.setMedlemskapstype(Medlemskapstype.valueOf(FORVENTET.medlemskapstype));
         when(behandlingsresultatRepo.findOne(eq(42L))).thenReturn(lagBehandlingsresultat());
