@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@RunWith(MockitoJUnitRunner.class)
 public class PersonTjenesteTest extends JsonSchemaTest {
 
     private static final Logger log = LoggerFactory.getLogger(PersonTjenesteTest.class);

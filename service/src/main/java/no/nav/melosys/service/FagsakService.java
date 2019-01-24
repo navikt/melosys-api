@@ -129,17 +129,6 @@ public class FagsakService {
             .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
             .get();
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(sisteIkkeAvsluttedeBehandling.getId());
-
-        Henleggelsesgrunner henleggelsesgrunn = Henleggelsesgrunner.valueOf(begrunnelseKode.toUpperCase());
-        behandlingsresultat.setHenleggelsesgrunn(henleggelsesgrunn);
-
-        if (Henleggelsesgrunner.ANNET == henleggelsesgrunn) {
-            behandlingsresultat.setHenleggelseFritekst(fritekst);
-        }
-
-        behandlingsresultatRepository.save(behandlingsresultat);
-
-        prosessinstansService.opprettProsessinstansHenleggSak(sisteIkkeAvsluttedeBehandling);
+        prosessinstansService.opprettProsessinstansOppdaterBehandlingsresultatHenleggSak(sisteIkkeAvsluttedeBehandling, begrunnelseKode, fritekst);
     }
 }

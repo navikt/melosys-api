@@ -30,7 +30,9 @@ public enum ProsessDataKey {
     SAKSBEHANDLER("saksbehandler"),
     SAKSNUMMER("saksnummer"),
     SØKNADSPERIODE("søknadsperiode"),
-    TEMA("tema");
+    TEMA("tema"),
+    BEGRUNNELSEKODE("begrunnelsekode"),
+    FRITEKST("fritekst");
 
     private String kode;
 

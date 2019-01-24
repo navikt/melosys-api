@@ -97,13 +97,13 @@ public class ProsessinstansServiceTest {
         when(subjectHandler.getUserID()).thenReturn(saksbehandler);
 
         Behandling behandling = new Behandling();
-        service.opprettProsessinstansHenleggSak(behandling);
+        service.opprettProsessinstansOppdaterBehandlingsresultatHenleggSak(behandling, "ANNET", "");
 
         verify(prosessinstansRepo, times(1)).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.HENLEGG_SAK);
-        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.HENLEGG_SAK);
+        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.OPPDATER_RESULTAT_HENLEGG_SAK);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
     }
 }

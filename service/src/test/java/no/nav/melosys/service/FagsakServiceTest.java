@@ -97,12 +97,14 @@ public class FagsakServiceTest {
 
         initierFagsakMedToBehandlinger(fagsak, saksnummer, førsteBehandling, andreBehandling, førsteBehandlingId, andreBehandlingId, behandlingsresultat);
 
-        fagsakService.henleggFagsak(saksnummer, "ANNET", "Fri tale");
+        String begrunnelseKode = "ANNET";
+        String fritekst = "Fri tale";
+        fagsakService.henleggFagsak(saksnummer, begrunnelseKode, fritekst);
 
-        verify(prosessinstansService).opprettProsessinstansHenleggSak(andreBehandling);
+        verify(prosessinstansService).opprettProsessinstansOppdaterBehandlingsresultatHenleggSak(andreBehandling, begrunnelseKode, fritekst);
 
         verify(behandlingsresultatRepository, never()).findOne(førsteBehandlingId);
-        verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(førsteBehandling);
+        verify(prosessinstansService, never()).opprettProsessinstansOppdaterBehandlingsresultatHenleggSak(eq(førsteBehandling), anyString(), anyString());
     }
 
     @Test
@@ -118,70 +120,14 @@ public class FagsakServiceTest {
 
         initierFagsakMedToBehandlinger(fagsak, saksnummer, førsteBehandling, andreBehandling, førsteBehandlingId, andreBehandlingId, behandlingsresultat);
 
-        fagsakService.henleggFagsak(saksnummer, "ANNET", "Fri tale");
+        String begrunnelseKode = "ANNET";
+        String fritekst = "Fri tale";
+        fagsakService.henleggFagsak(saksnummer, begrunnelseKode, fritekst);
 
-        verify(prosessinstansService).opprettProsessinstansHenleggSak(førsteBehandling);
+        verify(prosessinstansService).opprettProsessinstansOppdaterBehandlingsresultatHenleggSak(førsteBehandling, begrunnelseKode, fritekst);
 
         verify(behandlingsresultatRepository, never()).findOne(andreBehandlingId);
-        verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(andreBehandling);
-    }
-
-    @Test
-    public void henleggFagsakMedGrunnAnnetLeggerTilFritekstPåBehandlingsresultat() throws TekniskException {
-        Fagsak fagsak = new Fagsak();
-        String saksnummer = "123456789";
-        Behandling førsteBehandling = new Behandling();
-        Behandling andreBehandling = new Behandling();
-        long førsteBehandlingId = 999L;
-        long andreBehandlingId = 234L;
-        Behandlingsresultat behandlingsresultat = mock(Behandlingsresultat.class);
-
-        initierFagsakMedToBehandlinger(fagsak, saksnummer, førsteBehandling, andreBehandling, førsteBehandlingId, andreBehandlingId, behandlingsresultat);
-
-        String fritekst = "Fri tale";
-        fagsakService.henleggFagsak(saksnummer, "ANNET", fritekst);
-
-        verify(behandlingsresultat).setHenleggelsesgrunn(Henleggelsesgrunner.ANNET);
-        verify(behandlingsresultat).setHenleggelseFritekst(fritekst);
-        verify(behandlingsresultatRepository).save(behandlingsresultat);
-    }
-
-    @Test
-    public void henleggFagsakMedGrunnAvlystLeggerIkkeTilFritekstPåBehandlingsresultat() throws TekniskException {
-        Fagsak fagsak = new Fagsak();
-        String saksnummer = "123456789";
-        Behandling førsteBehandling = new Behandling();
-        Behandling andreBehandling = new Behandling();
-        long førsteBehandlingId = 999L;
-        long andreBehandlingId = 234L;
-        Behandlingsresultat behandlingsresultat = mock(Behandlingsresultat.class);
-
-        initierFagsakMedToBehandlinger(fagsak, saksnummer, førsteBehandling, andreBehandling, førsteBehandlingId, andreBehandlingId, behandlingsresultat);
-
-        fagsakService.henleggFagsak(saksnummer, "OPPHOLD_UTL_AVLYST", "Fri tale");
-
-        verify(behandlingsresultat).setHenleggelsesgrunn(Henleggelsesgrunner.OPPHOLD_UTL_AVLYST);
-        verify(behandlingsresultat, never()).setHenleggelseFritekst(anyString());
-        verify(behandlingsresultatRepository).save(behandlingsresultat);
-    }
-
-    @Test
-    public void henleggFagsakMedGrunnTrukketLeggerIkkeTilFritekstPåBehandlingsresultat() throws TekniskException {
-        Fagsak fagsak = new Fagsak();
-        String saksnummer = "123456789";
-        Behandling førsteBehandling = new Behandling();
-        Behandling andreBehandling = new Behandling();
-        long førsteBehandlingId = 999L;
-        long andreBehandlingId = 234L;
-        Behandlingsresultat behandlingsresultat = mock(Behandlingsresultat.class);
-
-        initierFagsakMedToBehandlinger(fagsak, saksnummer, førsteBehandling, andreBehandling, førsteBehandlingId, andreBehandlingId, behandlingsresultat);
-
-        fagsakService.henleggFagsak(saksnummer, "SØKNADEN_TRUKKET", "Fri tale");
-
-        verify(behandlingsresultat).setHenleggelsesgrunn(Henleggelsesgrunner.SØKNADEN_TRUKKET);
-        verify(behandlingsresultat, never()).setHenleggelseFritekst(anyString());
-        verify(behandlingsresultatRepository).save(behandlingsresultat);
+        verify(prosessinstansService, never()).opprettProsessinstansOppdaterBehandlingsresultatHenleggSak(eq(andreBehandling), anyString(), anyString());
     }
 
     private void initierFagsakMedToBehandlinger(Fagsak fagsak, String saksnummer, Behandling førsteBehandling, Behandling andreBehandling, long førsteBehandlingId, long andreBehandlingId, Behandlingsresultat behandlingsresultat) {
@@ -192,8 +138,6 @@ public class FagsakServiceTest {
         andreBehandling.setRegistrertDato(registrertDatoForSisteBehandling);
         fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
 
-        doReturn(behandlingsresultat).when(behandlingsresultatRepository).findOne(førsteBehandlingId);
-        doReturn(behandlingsresultat).when(behandlingsresultatRepository).findOne(andreBehandlingId);
         doReturn(fagsak).when(fagsakRepo).findBySaksnummer(saksnummer);
     }
 }

@@ -9,7 +9,7 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.ProsessSteg.HENLEGG_SAK;
+import static no.nav.melosys.domain.ProsessSteg.OPPDATER_RESULTAT_HENLEGG_SAK;
 
 @Service
 public class ProsessinstansService {
@@ -57,10 +57,11 @@ public class ProsessinstansService {
         binge.leggTil(prosessinstans);
     }
 
-    public void opprettProsessinstansHenleggSak(Behandling sisteBehandling) {
+    public void opprettProsessinstansOppdaterBehandlingsresultatHenleggSak(Behandling behandling, String begrunnelseKode, String fritekst) {
+        Henleggelsesgrunner henleggelsesgrunn = Henleggelsesgrunner.valueOf(begrunnelseKode.toUpperCase());
         Prosessinstans prosessinstans = new Prosessinstans();
 
-        prosessinstans.setBehandling(sisteBehandling);
+        prosessinstans.setBehandling(behandling);
         prosessinstans.setType(ProsessType.HENLEGG_SAK);
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
@@ -68,8 +69,10 @@ public class ProsessinstansService {
 
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.HENLEGGELSE);
+        prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, henleggelsesgrunn);
+        prosessinstans.setData(ProsessDataKey.FRITEKST, henleggelsesgrunn == Henleggelsesgrunner.ANNET ? fritekst : null);
 
-        prosessinstans.setSteg(HENLEGG_SAK);
+        prosessinstans.setSteg(OPPDATER_RESULTAT_HENLEGG_SAK);
 
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);
