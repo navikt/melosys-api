@@ -87,7 +87,7 @@ public class KodeverkService {
 
         List<Kode> kodeperioder = hentKodeverk(kodeverk.getNavn()).getKoder().get(kode);
         if (kodeperioder == null) {
-            log.error("Fant ikke term for kode '{}' kodeverk '{}'", kode, kodeverk.getNavn());
+            log.warn("Fant ikke term for kode '{}' kodeverk '{}'", kode, kodeverk.getNavn());
             return UKJENT;
         }
         // kodeperioder er en liste med samme kode men med forskjellige gyldighetsperiode. Det holder at en er gyldig.
@@ -96,7 +96,7 @@ public class KodeverkService {
                 return kandidat.getNavn();
             }
         }
-        log.error("Finner ingen term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
+        log.warn("Finner ingen term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
         return UKJENT;
     }
 
