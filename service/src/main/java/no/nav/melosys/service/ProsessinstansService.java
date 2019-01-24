@@ -49,7 +49,7 @@ public class ProsessinstansService {
     }
 
     public void lagreProsessinstans(Prosessinstans prosessinstans, String saksbehandler) {
-        logger.info("lagreProsessinstans med pid={}", prosessinstans.getId());
+        logger.debug("Inn i lagreProsessinstans med steg {}", prosessinstans.getSteg());
 
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
