@@ -6,11 +6,16 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProsessinstansService {
+
+    private static Logger logger = LoggerFactory.getLogger(ProsessinstansService.class);
+
     private final Binge binge;
     private final ProsessinstansRepository prosessinstansRepo;
 
@@ -44,6 +49,8 @@ public class ProsessinstansService {
     }
 
     public void lagreProsessinstans(Prosessinstans prosessinstans, String saksbehandler) {
+        logger.info("lagreProsessinstans med pid={}", prosessinstans.getId());
+
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
@@ -53,5 +60,7 @@ public class ProsessinstansService {
 
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);
+
+        logger.info("Lagret prosessinstans med ID {}. Saksbehandler={}", prosessinstans.getId(), saksbehandler);
     }
 }
