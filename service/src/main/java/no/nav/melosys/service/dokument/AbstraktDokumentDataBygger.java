@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.YrkesgruppeType;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -75,7 +77,7 @@ public abstract class AbstraktDokumentDataBygger {
     }
 
     protected List<Virksomhet> hentUtenlandskeVirksomheter() {
-        // Lev1 har alltid kun et utenlandsk foretak.
+        // For nå har alltid kun et utenlandsk foretak.
         // Det er derfor ikke nødvendig med filtrering av avklarte foretak
         return søknad.foretakUtland.stream()
                 .map(Virksomhet::new)
@@ -89,9 +91,11 @@ public abstract class AbstraktDokumentDataBygger {
     }
 
     private List<Arbeidssted> hentIkkeFysiskeArbeidssteder() {
-        List<Arbeidssted> ikkeFysiskArbeidssteder = new ArrayList<>();
-        //TODO: hente ut maritimt arbeid
-        return ikkeFysiskArbeidssteder;
+        Set<Avklartefakta> avklartefaktaSet = avklartefaktaService.hentAlleAvklarteArbeidsland(behandling.getId());
+
+        return avklartefaktaSet.stream()
+            .map(avklartefakta -> new Arbeidssted(avklartefakta.getSubjekt(), avklartefakta.getFakta(), YrkesgruppeType.SOKKEL_ELLER_SKIP))
+            .collect(Collectors.toList());
     }
 
     private Arbeidssted utledArbeidsstedFraVirksomhet(Virksomhet virksomhet) {

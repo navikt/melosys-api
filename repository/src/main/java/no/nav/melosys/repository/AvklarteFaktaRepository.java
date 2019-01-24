@@ -19,6 +19,8 @@ public interface AvklarteFaktaRepository extends CrudRepository<Avklartefakta, L
 
     Optional<Avklartefakta> findByBehandlingsresultatIdAndType(long behandlingsid, AvklartefaktaType avklartefaktaType);
 
+    Set<Avklartefakta> findAllByBehandlingsresultatIdAndType(long behandlingsid, AvklartefaktaType avklartefaktaType);
+
     Set<Avklartefakta> findByBehandlingsresultatIdAndTypeAndFakta(long behandlingsid,
                                                                   AvklartefaktaType type,
                                                                   String fakta);
