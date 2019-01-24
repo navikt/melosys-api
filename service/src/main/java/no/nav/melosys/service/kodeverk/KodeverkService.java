@@ -13,8 +13,8 @@ import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
  * Merk: Klassen casher oppslag mot felles-kodevek, og er derfor egentlig ikke stateless (men den er trådsikker).
  */
 @Service
-public class KodeverkService implements ApplicationListener<ContextRefreshedEvent> {
+public class KodeverkService {
 
     private static final long MILLIS_MELLOM_VÅKNE_OPP = 3600000;
 
@@ -43,8 +43,8 @@ public class KodeverkService implements ApplicationListener<ContextRefreshedEven
         this.kodeverkCache = new HashMap<>();
     }
 
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
+    @EventListener
+    public void onApplicationEvent(ApplicationReadyEvent event) {
         new TømCacheScheduler().start();
     }
 

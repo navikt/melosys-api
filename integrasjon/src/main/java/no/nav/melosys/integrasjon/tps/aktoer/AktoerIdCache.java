@@ -7,7 +7,7 @@ import java.util.concurrent.DelayQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -48,7 +48,7 @@ public class AktoerIdCache {
     }
 
     @EventListener
-    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+    public void onApplicationEvent(ApplicationReadyEvent event) {
         new TømCacheScheduler().start();
     }
 
