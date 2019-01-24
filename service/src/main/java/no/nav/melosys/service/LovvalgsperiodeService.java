@@ -60,7 +60,7 @@ public class LovvalgsperiodeService {
                 .collect(Collectors.toList());
     }
 
-    private final Lovvalgsperiode kopierLovvalgsperiodeMedBehandlingsResultat(Lovvalgsperiode periode, Behandlingsresultat behandlingsresultat) {
+    private Lovvalgsperiode kopierLovvalgsperiodeMedBehandlingsResultat(Lovvalgsperiode periode, Behandlingsresultat behandlingsresultat) {
         Lovvalgsperiode kopi;
         try {
             kopi = (Lovvalgsperiode) BeanUtils.cloneBean(periode);
