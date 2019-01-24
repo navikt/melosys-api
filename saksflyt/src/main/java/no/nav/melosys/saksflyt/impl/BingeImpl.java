@@ -29,7 +29,7 @@ public class BingeImpl implements Binge {
     @Override
     public synchronized boolean leggTil(Prosessinstans prosessinstans) {
         if (prosessinstanser.containsKey(prosessinstans.getId())) {
-            logger.error("Forsøk på å legge inn prosessinstans som allerede finnes i Bingen. prosessinstansId=%d", prosessinstans.getId());
+            logger.error("Forsøk på å legge inn prosessinstans som allerede finnes i Bingen. prosessinstansId={}", prosessinstans.getId());
             return false;
         }
         prosessinstanser.put(prosessinstans.getId(), prosessinstans);
@@ -55,7 +55,7 @@ public class BingeImpl implements Binge {
     public synchronized Prosessinstans fjernProsessinstans(long prosessinstansId) {
         Prosessinstans prosessinstans = prosessinstanser.remove(prosessinstansId);
         if (prosessinstans == null) {
-            logger.error("Forsøk på å fjerne prosessinstans som ikke finnes i bingen. prosessinstansId=%d", prosessinstansId);
+            logger.error("Forsøk på å fjerne prosessinstans som ikke finnes i bingen. prosessinstansId={}", prosessinstansId);
         }
         return prosessinstans;
     }
