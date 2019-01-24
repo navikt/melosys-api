@@ -97,7 +97,7 @@ public class ProsessinstansServiceTest {
         when(subjectHandler.getUserID()).thenReturn(saksbehandler);
 
         Behandling behandling = new Behandling();
-        service.opprettProsessinstansOppdaterBehandlingsresultatHenleggSak(behandling, "ANNET", "");
+        service.opprettProsessinstansHenleggSak(behandling, "ANNET", "");
 
         verify(prosessinstansRepo, times(1)).save(piCaptor.capture());
 

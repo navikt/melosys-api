@@ -57,7 +57,7 @@ public class ProsessinstansService {
         binge.leggTil(prosessinstans);
     }
 
-    public void opprettProsessinstansOppdaterBehandlingsresultatHenleggSak(Behandling behandling, String begrunnelseKode, String fritekst) {
+    public void opprettProsessinstansHenleggSak(Behandling behandling, String begrunnelseKode, String fritekst) {
         Henleggelsesgrunner henleggelsesgrunn = Henleggelsesgrunner.valueOf(begrunnelseKode.toUpperCase());
         Prosessinstans prosessinstans = new Prosessinstans();
 
@@ -68,7 +68,6 @@ public class ProsessinstansService {
         prosessinstans.setRegistrertDato(nå);
 
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.HENLEGGELSE);
         prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, henleggelsesgrunn);
         prosessinstans.setData(ProsessDataKey.FRITEKST, henleggelsesgrunn == Henleggelsesgrunner.ANNET ? fritekst : null);
 

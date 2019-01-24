@@ -101,10 +101,10 @@ public class FagsakServiceTest {
         String fritekst = "Fri tale";
         fagsakService.henleggFagsak(saksnummer, begrunnelseKode, fritekst);
 
-        verify(prosessinstansService).opprettProsessinstansOppdaterBehandlingsresultatHenleggSak(andreBehandling, begrunnelseKode, fritekst);
+        verify(prosessinstansService).opprettProsessinstansHenleggSak(andreBehandling, begrunnelseKode, fritekst);
 
         verify(behandlingsresultatRepository, never()).findOne(førsteBehandlingId);
-        verify(prosessinstansService, never()).opprettProsessinstansOppdaterBehandlingsresultatHenleggSak(eq(førsteBehandling), anyString(), anyString());
+        verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(eq(førsteBehandling), anyString(), anyString());
     }
 
     @Test
@@ -124,10 +124,10 @@ public class FagsakServiceTest {
         String fritekst = "Fri tale";
         fagsakService.henleggFagsak(saksnummer, begrunnelseKode, fritekst);
 
-        verify(prosessinstansService).opprettProsessinstansOppdaterBehandlingsresultatHenleggSak(førsteBehandling, begrunnelseKode, fritekst);
+        verify(prosessinstansService).opprettProsessinstansHenleggSak(førsteBehandling, begrunnelseKode, fritekst);
 
         verify(behandlingsresultatRepository, never()).findOne(andreBehandlingId);
-        verify(prosessinstansService, never()).opprettProsessinstansOppdaterBehandlingsresultatHenleggSak(eq(andreBehandling), anyString(), anyString());
+        verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(eq(andreBehandling), anyString(), anyString());
     }
 
     private void initierFagsakMedToBehandlinger(Fagsak fagsak, String saksnummer, Behandling førsteBehandling, Behandling andreBehandling, long førsteBehandlingId, long andreBehandlingId, Behandlingsresultat behandlingsresultat) {

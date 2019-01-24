@@ -15,12 +15,14 @@ public enum ProsessDataKey {
     ARKIVSYSTEM("arkivsystem"),
     AVSENDER_ID("avsenderID"),
     AVSENDER_NAVN("avsenderNavn"),
+    BEGRUNNELSEKODE("begrunnelsekode"),
     BEHANDLINGSRESULTATTYPE("behandlingsresultatType"),
     BEHANDLINGSTEMA("behandlingstema"),
     BEHANDLINGSTYPE("behandlingstype"),
     BREVDATA("brevData"),
     BRUKER_ID("brukerID"),
     DOKUMENT_ID("dokumentID"),
+    FRITEKST("fritekst"),
     GSAK_SAK_ID("gsakSakID"),
     HOVEDDOKUMENT_TITTEL("hoveddokumentTittel"),
     JOURNALPOST_ID("journalpostID"),
@@ -30,9 +32,7 @@ public enum ProsessDataKey {
     SAKSBEHANDLER("saksbehandler"),
     SAKSNUMMER("saksnummer"),
     SØKNADSPERIODE("søknadsperiode"),
-    TEMA("tema"),
-    BEGRUNNELSEKODE("begrunnelsekode"),
-    FRITEKST("fritekst");
+    TEMA("tema");
 
     private String kode;
 

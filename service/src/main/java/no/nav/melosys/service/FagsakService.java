@@ -129,6 +129,6 @@ public class FagsakService {
             .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
             .get();
 
-        prosessinstansService.opprettProsessinstansOppdaterBehandlingsresultatHenleggSak(sisteIkkeAvsluttedeBehandling, begrunnelseKode, fritekst);
+        prosessinstansService.opprettProsessinstansHenleggSak(sisteIkkeAvsluttedeBehandling, begrunnelseKode, fritekst);
     }
 }
