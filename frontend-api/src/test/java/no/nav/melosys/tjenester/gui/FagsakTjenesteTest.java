@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -14,7 +13,6 @@ import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.FieldDefinitionBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import io.github.benas.randombeans.api.Randomizer;
-
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RolleType;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -25,16 +23,15 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
-import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
-import no.nav.melosys.tjenester.gui.dto.FagsakDto;
-import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
-import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
-
+import no.nav.melosys.tjenester.gui.dto.*;
 import org.json.JSONException;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
@@ -43,8 +40,7 @@ import org.slf4j.LoggerFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FagsakTjenesteTest extends JsonSchemaTest {
@@ -55,10 +51,15 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
     private static final String SOK_FAGSAKER_SCHEMA = "sok-fagsaker-schema.json";
 
     private static final String FNR = "12345678901";
+    private static FagsakService fagsakService;
+    private static Tilgang tilgang;
 
     private String schemaType;
 
     private EnhancedRandom random;
+
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -152,9 +153,49 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
         assertThat(unntak).isInstanceOf(BadRequestException.class);
     }
 
+    @Test
+    public final void henleggFagsakSenderSaksnummerFritekstOgBegrunnelseTilService() throws Exception {
+        HenleggelseDto henleggelseDto = new HenleggelseDto();
+        String begrunnelseKode = "GOD_GRUNN_TIL_HENLEGGELSE";
+        String fritekst = "Dette er fritekst";
+        henleggelseDto.setBegrunnelseKode(begrunnelseKode);
+        henleggelseDto.setFritekst(fritekst);
+
+        Fagsak fagsak = lagFagsak();
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+
+        String saksnummer = "123";
+        Response resultat = instans.henleggFagsak(saksnummer, henleggelseDto);
+
+        assertThat(resultat.getStatusInfo()).isEqualTo(Status.OK);
+        verify(fagsakService).henleggFagsak(saksnummer, begrunnelseKode, fritekst);
+    }
+
+    @Test
+    public final void henleggFagsakReturnererIkkeFunnetNårIngenSakBlirFunnet() throws Exception {
+        FagsakTjeneste instans = lagFagsakTjeneste(null);
+        Response resultat = instans.henleggFagsak("123", new HenleggelseDto());
+
+        assertThat(resultat.getStatusInfo()).isEqualTo(Status.NOT_FOUND);
+        verify(fagsakService, never()).henleggFagsak(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public final void henleggFagsakKasterExceptionNårIkkeTilgangTilSak() throws Exception {
+        Fagsak fagsak = lagFagsak();
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+
+        doThrow(SikkerhetsbegrensningException.class).when(tilgang).sjekkSak(fagsak);
+
+        expectedException.expect(SikkerhetsbegrensningException.class);
+        instans.henleggFagsak("123", new HenleggelseDto());
+
+        verify(fagsakService, never()).henleggFagsak(anyString(), anyString(), anyString());
+    }
+
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
-        Tilgang tilgang = mock(Tilgang.class);
-        FagsakService fagsakService = mock(FagsakService.class);
+        tilgang = mock(Tilgang.class);
+        fagsakService = mock(FagsakService.class);
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(fagsakService.hentFagsakerMedAktør(eq(RolleType.BRUKER), eq(FNR)))
             .thenReturn(Collections.singletonList(fagsak));

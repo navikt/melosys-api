@@ -28,7 +28,7 @@ public class AnmodningUnntakMapperTest {
     private EnhancedRandom enhancedRandom;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         mapper = new AnmodningUnntakMapper();
         enhancedRandom = EnhancedRandomBuilder
             .aNewEnhancedRandomBuilder()

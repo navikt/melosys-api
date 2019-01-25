@@ -23,7 +23,7 @@ import static no.nav.melosys.domain.ProsessSteg.IV_VALIDERING;
 import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
 
 /**
- * Validerer opplysning bli brukt for iverksette vedtak.
+ * Validerer opplysning bli brukt for iverksett vedtak.
  *
  * Transisjoner:
  *

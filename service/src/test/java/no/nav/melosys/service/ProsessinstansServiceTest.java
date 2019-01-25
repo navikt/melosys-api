@@ -88,4 +88,22 @@ public class ProsessinstansServiceTest {
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
         assertThat(BehandlingsresultatType.valueOf(lagretInstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE))).isEqualTo(resultatType);
     }
+
+    @Test
+    public void opprettProsessinstansHenleggeSak() {
+        String saksbehandler = "Z123456";
+        SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
+        SubjectHandler.set(subjectHandler);
+        when(subjectHandler.getUserID()).thenReturn(saksbehandler);
+
+        Behandling behandling = new Behandling();
+        service.opprettProsessinstansHenleggSak(behandling, Henleggelsesgrunner.ANNET, "");
+
+        verify(prosessinstansRepo, times(1)).save(piCaptor.capture());
+
+        Prosessinstans lagretInstans = piCaptor.getValue();
+        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.HENLEGG_SAK);
+        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.OPPDATER_RESULTAT_HENLEGG_SAK);
+        assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
+    }
 }

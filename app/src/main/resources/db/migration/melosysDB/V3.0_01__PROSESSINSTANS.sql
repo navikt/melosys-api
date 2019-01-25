@@ -25,7 +25,8 @@ CREATE TABLE prosess_type (
 
 -- Alfabetisk rekkefølge
 INSERT INTO prosess_type (kode, navn) VALUES ('ANMODNING_OM_UNNTAK', 'Anmodning om unntak');
-INSERT INTO prosess_type (kode, navn) VALUES ('IVERKSETT_VEDTAK', 'Iverksette vedtak');
+INSERT INTO prosess_type (kode, navn) VALUES ('HENLEGG_SAK', 'Henlegg en sak');
+INSERT INTO prosess_type (kode, navn) VALUES ('IVERKSETT_VEDTAK', 'Iverksett vedtak');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_KNYTT', 'Journalføring på eksisterende sak');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_NY_SAK', 'Journalføring med ny sak og søknad');
 INSERT INTO prosess_type (kode, navn) VALUES ('OPPFRISKNING', 'Oppfriskning av saksopplysninger');
@@ -75,6 +76,8 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_MEDL', 'Oppdatering a
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_SEND_BREV', 'Send brev etter iverksett vedtak');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_AVSLUTT_BEHANDLING', 'Avslutt fagsak og aktiv behandling');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_STATUS_BEH_AVSL', 'Oppdater Sak og Behandling ved lukking av behandling');
+
+INSERT INTO prosess_steg (kode, navn) VALUES ('HENLEGG_SAK', 'Henlegg en sak');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('MANGELBREV', 'Opprett mangelbrev');
 

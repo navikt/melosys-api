@@ -8,15 +8,12 @@ import java.util.Collection;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
-
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.jackson.MelosysModule;
 import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
-
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaClient;
@@ -30,8 +27,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class JsonSchemaTest {
 
@@ -109,7 +105,7 @@ public class JsonSchemaTest {
             objectMapperMedKodeverkServiceStub.registerModule(new JavaTimeModule());
             KodeverkService kodeverkService = mock(KodeverkService.class);
             when(kodeverkService.dekod(any(), any(), any())).thenReturn("DUMMY");
-            when(kodeverkService.getKodeverdi(any(), any())).thenReturn(new KodeDto("DUMMY", "DUMMY"));
+            lenient().when(kodeverkService.getKodeverdi(any(), any())).thenReturn(new KodeDto("DUMMY", "DUMMY"));
             objectMapperMedKodeverkServiceStub.registerModule(new MelosysModule(kodeverkService));
         }
         return objectMapperMedKodeverkServiceStub;

@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.ProsessSteg.OPPDATER_RESULTAT_HENLEGG_SAK;
+
 @Service
 public class ProsessinstansService {
 
@@ -62,5 +64,24 @@ public class ProsessinstansService {
         binge.leggTil(prosessinstans);
 
         logger.info("Lagret prosessinstans med ID {}. Saksbehandler={}", prosessinstans.getId(), saksbehandler);
+    }
+
+    public void opprettProsessinstansHenleggSak(Behandling behandling, Henleggelsesgrunner begrunnelseKode, String fritekst) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setType(ProsessType.HENLEGG_SAK);
+        LocalDateTime nå = LocalDateTime.now();
+        prosessinstans.setEndretDato(nå);
+        prosessinstans.setRegistrertDato(nå);
+
+        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
+        prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, begrunnelseKode);
+        prosessinstans.setData(ProsessDataKey.FRITEKST, begrunnelseKode == Henleggelsesgrunner.ANNET ? fritekst : null);
+
+        prosessinstans.setSteg(OPPDATER_RESULTAT_HENLEGG_SAK);
+
+        prosessinstansRepo.save(prosessinstans);
+        binge.leggTil(prosessinstans);
     }
 }
