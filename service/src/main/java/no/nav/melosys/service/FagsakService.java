@@ -125,13 +125,16 @@ public class FagsakService {
             throw new TekniskException(begrunnelseKodeString.toUpperCase() + " er ingen gyldig henleggelsesgrunn");
         }
 
-        //hent siste behandling
-        Behandling sisteIkkeAvsluttedeBehandling = fagsak.getBehandlinger()
+        Behandling sisteIkkeAvsluttedeBehandling = getSisteIkkeAvsluttedeBehandlingBehandling(fagsak);
+
+        prosessinstansService.opprettProsessinstansHenleggSak(sisteIkkeAvsluttedeBehandling, begrunnelseKode, fritekst);
+    }
+
+    private Behandling getSisteIkkeAvsluttedeBehandlingBehandling(Fagsak fagsak) {
+        return fagsak.getBehandlinger()
             .stream()
             .filter(behandling -> behandling.getStatus() != Behandlingsstatus.AVSLUTTET)
             .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
             .get();
-
-        prosessinstansService.opprettProsessinstansHenleggSak(sisteIkkeAvsluttedeBehandling, begrunnelseKode, fritekst);
     }
 }
