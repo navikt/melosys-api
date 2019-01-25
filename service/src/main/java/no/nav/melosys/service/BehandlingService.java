@@ -41,7 +41,7 @@ public class BehandlingService {
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke.");
         }
-        if (behandling.getStatus() != Behandlingsstatus.UNDER_BEHANDLING) {
+        if (!behandling.erAktiv()) {
             throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
         }
         List<TidligereMedlemsperiode> tidligereMedlemsperioder = periodeIder.stream()
@@ -63,8 +63,8 @@ public class BehandlingService {
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke.");
         }
-        if (behandling.getStatus() != Behandlingsstatus.VURDER_DOKUMENT) {
-            throw new FunksjonellException("Endring av status er bare mulig når behandling venter på dokumentasjon. Status var: " + behandling.getStatus());
+        if (!behandling.erAktiv()) {
+            throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres. Status var: " + behandling.getStatus());
         }
         behandling.setStatus(status);
         behandlingRepository.save(behandling);
