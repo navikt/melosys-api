@@ -1,8 +1,10 @@
 package no.nav.melosys.integrasjon.felles;
 
-import javax.ws.rs.*;
-
 import no.nav.melosys.exception.*;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
+
+import javax.ws.rs.*;
 
 public final class ExceptionMapper {
 
@@ -22,6 +24,27 @@ public final class ExceptionMapper {
             // Mæpper alle andre feil, inkl. RuntimeException til TekniskEx
             throw new TekniskException(e.getMessage(), e);
         }
+    }
+
+    public static MelosysException springExTilMelosysEx(RestClientException ex) {
+        if (ex instanceof HttpStatusCodeException) {
+            switch (((HttpStatusCodeException)ex).getStatusCode()) {
+                case UNAUTHORIZED:
+                case FORBIDDEN:
+                    return new SikkerhetsbegrensningException(ex);
+                case NOT_FOUND:
+                    return new IkkeFunnetException(ex);
+                case INTERNAL_SERVER_ERROR:
+                case BAD_REQUEST:
+                case METHOD_NOT_ALLOWED:
+                case SERVICE_UNAVAILABLE:
+                    return new IntegrasjonException(ex);
+                default:
+                    return new TekniskException(ex);
+            }
+        }
+
+        return new TekniskException(ex);
     }
     
 }

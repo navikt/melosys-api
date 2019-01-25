@@ -172,6 +172,10 @@
             </exclusions>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-eux</artifactId>
+        </dependency>
 
     </dependencies>
 </project>
