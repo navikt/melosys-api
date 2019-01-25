@@ -345,11 +345,6 @@
                 <version>${guava.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-xml</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.ibm.mq</groupId>
                 <artifactId>com.ibm.mq.allclient</artifactId>
                 <version>${ibmmq.version}</version>
