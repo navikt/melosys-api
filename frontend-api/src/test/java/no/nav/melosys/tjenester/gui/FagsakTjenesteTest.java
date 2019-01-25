@@ -23,9 +23,11 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import org.json.JSONException;
 import org.junit.Before;
@@ -52,6 +54,8 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
 
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
+    private static OppgaveService oppgaveService;
+
     private static Tilgang tilgang;
 
     private String schemaType;
@@ -196,10 +200,11 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
         tilgang = mock(Tilgang.class);
         fagsakService = mock(FagsakService.class);
+        oppgaveService = mock(OppgaveService.class);
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(fagsakService.hentFagsakerMedAktør(eq(RolleType.BRUKER), eq(FNR)))
             .thenReturn(Collections.singletonList(fagsak));
-        FagsakTjeneste instans = new FagsakTjeneste(fagsakService, tilgang);
+        FagsakTjeneste instans = new FagsakTjeneste(fagsakService, oppgaveService, tilgang);
         return instans;
     }
 

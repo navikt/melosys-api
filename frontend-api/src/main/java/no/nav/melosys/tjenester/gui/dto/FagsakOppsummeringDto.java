@@ -4,24 +4,18 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.melosys.domain.Behandlingsstatus;
-import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Fagsaksstatus;
 import no.nav.melosys.domain.Fagsakstype;
 
 public class FagsakOppsummeringDto {
     private String saksnummer;
+    private String saksbehandler;
     private Fagsakstype sakstype;
     private Fagsaksstatus saksstatus;
-    private Behandlingstype behandlingstype;
-    private Behandlingsstatus behandlingsstatus;
     private Instant opprettetDato;
-    private PeriodeDto soknadsperiode;
-    private List<String> land;
+    private List<BehandlingOppsummeringDto> behandlingoppsummeringer;
 
     public FagsakOppsummeringDto() {
-        this.soknadsperiode = new PeriodeDto();
-        this.land = new ArrayList<>();
     }
 
     public String getSaksnummer() {
@@ -30,6 +24,14 @@ public class FagsakOppsummeringDto {
 
     public void setSaksnummer(String saksnummer) {
         this.saksnummer = saksnummer;
+    }
+
+    public String getSaksbehandler() {
+        return saksbehandler;
+    }
+
+    public void setSaksbehandler(String saksbehandler) {
+        this.saksbehandler = saksbehandler;
     }
 
     public Fagsakstype getSakstype() {
@@ -48,22 +50,6 @@ public class FagsakOppsummeringDto {
         this.saksstatus = saksstatus;
     }
 
-    public Behandlingstype getBehandlingstype() {
-        return behandlingstype;
-    }
-
-    public void setBehandlingstype(Behandlingstype behandlingstype) {
-        this.behandlingstype = behandlingstype;
-    }
-
-    public Behandlingsstatus getBehandlingsstatus() {
-        return behandlingsstatus;
-    }
-
-    public void setBehandlingsstatus(Behandlingsstatus behandlingsstatus) {
-        this.behandlingsstatus = behandlingsstatus;
-    }
-
     public Instant getOpprettetDato() {
         return opprettetDato;
     }
@@ -72,19 +58,11 @@ public class FagsakOppsummeringDto {
         this.opprettetDato = opprettetDato;
     }
 
-    public PeriodeDto getSoknadsperiode() {
-        return soknadsperiode;
+    public List<BehandlingOppsummeringDto> getBehandlingoppsummeringer() {
+        return behandlingoppsummeringer;
     }
 
-    public void setSoknadsperiode(PeriodeDto søknadsperiode) {
-        this.soknadsperiode = søknadsperiode;
-    }
-
-    public List<String> getLand() {
-        return land;
-    }
-
-    public void setLand(List<String> land) {
-        this.land = land;
+    public void setBehandlingoppsummeringer(List<BehandlingOppsummeringDto> behandlingoppsummeringer) {
+        this.behandlingoppsummeringer = behandlingoppsummeringer;
     }
 }

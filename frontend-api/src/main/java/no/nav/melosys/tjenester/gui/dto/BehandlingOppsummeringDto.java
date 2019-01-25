@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.Instant;
+import java.util.List;
 
 import no.nav.melosys.domain.Behandlingsstatus;
 import no.nav.melosys.domain.Behandlingstype;
@@ -13,6 +14,8 @@ public class BehandlingOppsummeringDto {
     private Instant registrertDato;
     private Instant endretDato;
     private Instant sisteOpplysningerHentetDato;
+    private PeriodeDto soknadsperiode;
+    private List<String> land;
 
     public Long getBehandlingID() {
         return behandlingID;
@@ -61,4 +64,21 @@ public class BehandlingOppsummeringDto {
     public void setSisteOpplysningerHentetDato(Instant sisteOpplysningerHentetDato) {
         this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
     }
+
+    public PeriodeDto getSoknadsperiode() {
+        return soknadsperiode;
+    }
+
+    public void setSoknadsperiode(PeriodeDto søknadsperiode) {
+        this.soknadsperiode = søknadsperiode;
+    }
+
+    public List<String> getLand() {
+        return land;
+    }
+
+    public void setLand(List<String> land) {
+        this.land = land;
+    }
+
 }

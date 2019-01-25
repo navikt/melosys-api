@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -14,12 +15,13 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
 import org.modelmapper.ModelMapper;
@@ -45,15 +47,18 @@ public class FagsakTjeneste extends RestTjeneste {
     
     private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
 
-    private FagsakService fagsakService;
+    private final FagsakService fagsakService;
+
+    private final OppgaveService oppgaveService;
 
     private ModelMapper modelMapper;
 
     private final Tilgang tilgang;
 
     @Autowired
-    public FagsakTjeneste(FagsakService fagsakService, Tilgang tilgang) {
+    public FagsakTjeneste(FagsakService fagsakService, OppgaveService oppgaveService, Tilgang tilgang) {
         this.fagsakService = fagsakService;
+        this.oppgaveService = oppgaveService;
         this.tilgang = tilgang;
 
         this.modelMapper = new ModelMapper();
@@ -90,7 +95,7 @@ public class FagsakTjeneste extends RestTjeneste {
         notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."),
         response = FagsakOppsummeringDto.class,
         responseContainer = "List")
-    public List<FagsakOppsummeringDto> hentFagsaker(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.") String fnr) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public List<FagsakOppsummeringDto> hentFagsaker(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.") String fnr) throws FunksjonellException, TekniskException {
         Iterable<Fagsak> saker;
         if (fnr == null) {
             throw new BadRequestException();
@@ -121,34 +126,42 @@ public class FagsakTjeneste extends RestTjeneste {
         return fagsakDto;
     }
 
-    private List<FagsakOppsummeringDto> tilDtoer(Iterable<Fagsak> saker) throws TekniskException {
+    private List<FagsakOppsummeringDto> tilDtoer(Iterable<Fagsak> saker) throws FunksjonellException, TekniskException {
         List<FagsakOppsummeringDto> fagsakListe = new ArrayList<>();
-
         for (Fagsak fagsak : saker) {
             FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
             fagsakOppsummeringDto.setSaksnummer(fagsak.getSaksnummer());
             fagsakOppsummeringDto.setSakstype(fagsak.getType());
             fagsakOppsummeringDto.setSaksstatus(fagsak.getStatus());
             fagsakOppsummeringDto.setOpprettetDato(fagsak.getRegistrertDato());
+            fagsakOppsummeringDto.setBehandlingoppsummeringer(new ArrayList<>());
 
-            Behandling behandling = fagsak.getAktivBehandling();
-            if (behandling != null) {
-                fagsakOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
-                fagsakOppsummeringDto.setBehandlingstype(behandling.getType());
+            Oppgave oppgave = oppgaveService.hentOppgaveMedFagSaksnummer(fagsak.getSaksnummer());
+            fagsakOppsummeringDto.setSaksbehandler(oppgave.getTilordnetRessurs());
 
-                Optional<SaksopplysningDokument> opt = hentDokument(behandling, SaksopplysningType.SØKNAD);
-                if (opt.isPresent()) {
-                    SoeknadDokument soeknadDokument = (SoeknadDokument) opt.get();
-                    fagsakOppsummeringDto.setLand(hentLand(soeknadDokument));
-
-                    Periode periode = hentPeriode(soeknadDokument);
-                    fagsakOppsummeringDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
-                }
-            }
-
-            fagsakListe.add(fagsakOppsummeringDto);
+            List<Behandling> behandlinger = fagsak.getBehandlinger();
+            behandlinger.stream()
+                .filter(Objects::nonNull)
+                .forEach(behandling -> tilBehandlingOppsummeringDto(fagsakOppsummeringDto, behandling));
         }
-
         return fagsakListe;
+    }
+
+    private void tilBehandlingOppsummeringDto(FagsakOppsummeringDto fagsakOppsummeringDto, Behandling behandling) {
+        BehandlingOppsummeringDto oppsummeringDto = new BehandlingOppsummeringDto();
+        if (behandling != null) {
+            oppsummeringDto.setBehandlingID(behandling.getId());
+            oppsummeringDto.setBehandlingsstatus(behandling.getStatus());
+            oppsummeringDto.setBehandlingstype(behandling.getType());
+            oppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
+            Optional<SaksopplysningDokument> opt = hentDokument(behandling, SaksopplysningType.SØKNAD);
+            if (opt.isPresent()) {
+                SoeknadDokument soeknadDokument = (SoeknadDokument) opt.get();
+                oppsummeringDto.setLand(hentLand(soeknadDokument));
+                Periode periode = hentPeriode(soeknadDokument);
+                oppsummeringDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
+            }
+            fagsakOppsummeringDto.getBehandlingoppsummeringer().add(oppsummeringDto);
+        }
     }
 }
