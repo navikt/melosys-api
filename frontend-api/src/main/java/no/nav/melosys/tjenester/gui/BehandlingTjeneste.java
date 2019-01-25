@@ -28,7 +28,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingTjeneste extends RestTjeneste {
 
-    private static final Logger log = LoggerFactory.getLogger(DokumentTjeneste.class);
+    private static final Logger log = LoggerFactory.getLogger(BehandlingTjeneste.class);
 
     private final BehandlingService behandlingService;
 
