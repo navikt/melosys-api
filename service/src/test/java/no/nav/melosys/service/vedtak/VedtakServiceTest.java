@@ -89,7 +89,7 @@ public class VedtakServiceTest {
     public void anmodningOmUnntak_fungerer() throws FunksjonellException, TekniskException {
         vedtakService.anmodningOmUnntak(behandlingID);
 
-        verify(behandlingRepository).findById(behandlingID);;
+        verify(behandlingRepository).findById(behandlingID);
         verify(behandlingRepository).save(behandling);
 
         verify(prosessinstansRepo).save(prosessinstansArgumentCaptor.capture());
