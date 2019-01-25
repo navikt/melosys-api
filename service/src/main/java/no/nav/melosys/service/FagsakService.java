@@ -110,11 +110,19 @@ public class FagsakService {
     }
 
     @Transactional
-    public void henleggFagsak(String saksnummer, String begrunnelseKode, String fritekst) throws TekniskException {
+    public void henleggFagsak(String saksnummer, String begrunnelseKodeString, String fritekst) throws TekniskException {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
 
         if (fagsak.getBehandlinger().isEmpty()) {
             throw new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen tilknyttede behandlinger.");
+        }
+
+        Henleggelsesgrunner begrunnelseKode;
+        try {
+            begrunnelseKode = Henleggelsesgrunner.valueOf(begrunnelseKodeString.toUpperCase());
+        }
+        catch (java.lang.IllegalArgumentException iae) {
+            throw new TekniskException(begrunnelseKodeString.toUpperCase() + " er ingen gyldig henleggelsesgrunn");
         }
 
         //hent siste behandling

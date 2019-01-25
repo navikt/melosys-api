@@ -7,10 +7,11 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,15 +24,14 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FagsakServiceTest {
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private FagsakRepository fagsakRepo;
 
     @Mock
     private BehandlingService behandlingService;
-
-    @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Mock
     private TpsFasade tps;
@@ -42,9 +42,10 @@ public class FagsakServiceTest {
     @InjectMocks
     private FagsakService fagsakService;
 
+
     @Before
     public void setUp() {
-        fagsakService = new FagsakService(fagsakRepo, behandlingService, behandlingsresultatRepository, tps, prosessinstansService);
+        fagsakService = new FagsakService(fagsakRepo, behandlingService, tps, prosessinstansService);
     }
 
     @Test
@@ -97,14 +98,12 @@ public class FagsakServiceTest {
 
         initierFagsakMedToBehandlinger(fagsak, saksnummer, førsteBehandling, andreBehandling, førsteBehandlingId, andreBehandlingId, behandlingsresultat);
 
-        String begrunnelseKode = "ANNET";
         String fritekst = "Fri tale";
-        fagsakService.henleggFagsak(saksnummer, begrunnelseKode, fritekst);
+        fagsakService.henleggFagsak(saksnummer, "ANNET", fritekst);
 
-        verify(prosessinstansService).opprettProsessinstansHenleggSak(andreBehandling, begrunnelseKode, fritekst);
+        verify(prosessinstansService).opprettProsessinstansHenleggSak(andreBehandling, Henleggelsesgrunner.ANNET, fritekst);
 
-        verify(behandlingsresultatRepository, never()).findOne(førsteBehandlingId);
-        verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(eq(førsteBehandling), anyString(), anyString());
+        verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(eq(førsteBehandling), any(), anyString());
     }
 
     @Test
@@ -120,14 +119,24 @@ public class FagsakServiceTest {
 
         initierFagsakMedToBehandlinger(fagsak, saksnummer, førsteBehandling, andreBehandling, førsteBehandlingId, andreBehandlingId, behandlingsresultat);
 
-        String begrunnelseKode = "ANNET";
         String fritekst = "Fri tale";
-        fagsakService.henleggFagsak(saksnummer, begrunnelseKode, fritekst);
+        fagsakService.henleggFagsak(saksnummer, "ANNET", fritekst);
 
-        verify(prosessinstansService).opprettProsessinstansHenleggSak(førsteBehandling, begrunnelseKode, fritekst);
+        verify(prosessinstansService).opprettProsessinstansHenleggSak(førsteBehandling, Henleggelsesgrunner.ANNET, fritekst);
 
-        verify(behandlingsresultatRepository, never()).findOne(andreBehandlingId);
-        verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(eq(andreBehandling), anyString(), anyString());
+        verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(eq(andreBehandling), any(), anyString());
+    }
+
+    @Test
+    public void henleggFagsakMedToBehandlingerKasterExceptionNårIkkeGyldigHenleggelsesgrunn() throws TekniskException {
+        String saksnummer = "123456789";
+        initierFagsakMedToBehandlinger(new Fagsak(), saksnummer, new Behandling(), new Behandling(), 999L, 234L, mock(Behandlingsresultat.class));
+
+        expectedException.expect(TekniskException.class);
+
+        fagsakService.henleggFagsak(saksnummer, "UGYLDIGKODE", "Fri tale");
+
+        verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(any(), any(), anyString());
     }
 
     private void initierFagsakMedToBehandlinger(Fagsak fagsak, String saksnummer, Behandling førsteBehandling, Behandling andreBehandling, long førsteBehandlingId, long andreBehandlingId, Behandlingsresultat behandlingsresultat) {
