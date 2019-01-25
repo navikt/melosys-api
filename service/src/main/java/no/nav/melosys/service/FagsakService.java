@@ -10,7 +10,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,19 +26,15 @@ public class FagsakService {
 
     private final TpsFasade tpsFasade;
 
-    private final BehandlingsresultatRepository behandlingsresultatRepository;
-
-    private ProsessinstansService prosessinstansService;
+    private final ProsessinstansService prosessinstansService;
 
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository,
                          BehandlingService behandlingService,
-                         BehandlingsresultatRepository behandlingsresultatRepository,
                          TpsFasade tpsFasade,
                          ProsessinstansService prosessinstansService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tpsFasade = tpsFasade;
         this.prosessinstansService = prosessinstansService;
     }
