@@ -69,15 +69,6 @@ public class BehandlingServiceTest {
         behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVSLUTTET);
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void oppdaterStatus_feilForrigeStatus() throws FunksjonellException {
-        long behandlingID = 11L;
-        Behandling behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        when(behandlingRepo.findOne(anyLong())).thenReturn(behandling);
-        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVVENT_DOK_PART);
-    }
-
     @Test
     public void knyttMedlemsperioder_ingenBehandling() throws FunksjonellException {
         long behandlingID = 11L;

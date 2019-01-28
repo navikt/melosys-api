@@ -105,6 +105,10 @@ public class Behandling extends RegistreringsInfo {
         this.dokumentasjonSvarfristDato = dokumentasjonSvarfristDato;
     }
 
+    public boolean erAktiv() {
+        return !status.equals(Behandlingsstatus.AVSLUTTET);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
