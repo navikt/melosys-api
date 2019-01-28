@@ -39,7 +39,6 @@ public class EuxConsumerImpl implements EuxConsumer {
     private final String RINA_SAKSNUMMER = "RINASaksnummer";
     private final String KORRELASJONS_ID = "KorrelasjonsId";
     private final String BUC_TYPE = "BuCType";
-    private final String DOKUMENT_ID = "DokumentID";
 
     private final String BUC_PATH = "/buc/%s";
     private final String SED_PATH = "/buc/%s/sed/%s";
