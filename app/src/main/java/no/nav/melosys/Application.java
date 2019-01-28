@@ -8,7 +8,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @ServletComponentScan("no.nav.melosys.integrasjon.felles")
 @PropertySource(value = "classpath:saksflyt.properties", encoding = "utf-8")
@@ -22,8 +22,8 @@ public class Application {
     }
 
     @Bean
-    public WebMvcConfigurerAdapter dispatcherServletConfigurer() {
-        return new WebMvcConfigurerAdapter() {
+    public WebMvcConfigurer dispatcherServletConfigurer() {
+        return new WebMvcConfigurer() {
             @Override
             public void addResourceHandlers(ResourceHandlerRegistry registry) {
                 registry.addResourceHandler("/frontendlogger/**").addResourceLocations("classpath:/frontendlogger/");
