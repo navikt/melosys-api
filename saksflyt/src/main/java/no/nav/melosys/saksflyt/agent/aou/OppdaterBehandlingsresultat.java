@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.agent.aou;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
@@ -48,11 +49,12 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
 
     @Transactional
     @Override
-    public void utfør(Prosessinstans prosessinstans) {
+    public void utfør(Prosessinstans prosessinstans) throws IkkeFunnetException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Long behandlingID = prosessinstans.getBehandling().getId();
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandlingID);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Kan ikke sende andmodning om unntak fordi behandling " + behandlingID + " ikke finnes."));
         behandlingsresultat.setType(BehandlingsresultatType.ANMODNING_OM_UNNTAK);
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
         behandlingsresultatRepository.save(behandlingsresultat);

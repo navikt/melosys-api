@@ -74,7 +74,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         // Henter ut behandling på nytt for å få med saksopplysninger
-        Behandling behandling = behandlingRepository.findOneWithSaksopplysningerById(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
         if (behandling == null) {
             throw new TekniskException(String.format("Finner ikke behandlingen %s.", prosessinstans.getBehandling().getId()));
         }
@@ -121,7 +121,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
      * @return <code>true</code> hvis innvilgelsesbrev skal sendes, ellers <code>false</code>.
      */
     private boolean innvilgelsesbrevSkalSendes(Behandling behandling) {
-        Behandlingsresultat resultat = behandlingsResultatRepo.findOne(behandling.getId());
+        Behandlingsresultat resultat = behandlingsResultatRepo.findById(behandling.getId()).orElse(null);
         Set<Lovvalgsperiode> lovvalgsperioder = resultat.getLovvalgsperioder();
         if (lovvalgsperioder.size() > 1) {
             throw new UnsupportedOperationException(String.format("Flere enn en"

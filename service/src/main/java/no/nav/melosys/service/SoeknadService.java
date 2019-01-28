@@ -36,7 +36,7 @@ public class SoeknadService {
     }
 
     public SoeknadDokument hentSoeknad(long behandlingID) throws IkkeFunnetException {
-        Behandling behandling = behandlingRepo.findOneWithSaksopplysningerById(behandlingID);
+        Behandling behandling = behandlingRepo.findWithSaksopplysningerById(behandlingID);
         if (behandling == null) {
             throw new IkkeFunnetException("Behandling ikke funnet");
         }
@@ -52,10 +52,8 @@ public class SoeknadService {
 
     @Transactional
     public SoeknadDokument registrerSøknad(long behandlingID, SoeknadDokument soeknadDokument) throws IkkeFunnetException {
-        Behandling behandling = behandlingRepo.findOne(behandlingID);
-        if (behandling == null) {
-            throw new IkkeFunnetException("Registrering av søknad feilet fordi behandling med ID " + behandlingID + " er ikke funnet");
-        }
+        Behandling behandling = behandlingRepo.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Registrering av søknad feilet fordi behandling med ID " + behandlingID + " er ikke funnet"));
 
         Optional<Saksopplysning> eksisterendeSaksopplysning = saksopplysningRepo.findByBehandlingAndType(behandling, SaksopplysningType.SØKNAD);
         Saksopplysning saksopplysning = eksisterendeSaksopplysning.orElse(opprettSaksopplysning(behandling));

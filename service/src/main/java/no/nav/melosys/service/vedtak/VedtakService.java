@@ -32,10 +32,8 @@ public class VedtakService {
     public void anmodningOmUnntak(long behandlingID) throws FunksjonellException, TekniskException {
         log.info("Anmodning om unntak for behandling: {}", behandlingID);
 
-        Behandling behandling = behandlingRepository.findOne(behandlingID);
-        if (behandling == null) {
-            throw new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + " ikke finnes.");
-        }
+        Behandling behandling = behandlingRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Kan ikke sende andmodning om unntak fordi behandling " + behandlingID + " ikke finnes."));
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling);
         oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
 
@@ -47,10 +45,8 @@ public class VedtakService {
     public void fattVedtak(long behandlingID, BehandlingsresultatType behandlingsresultatType) throws FunksjonellException, TekniskException {
         log.info("Fatter vedtak for behandling: {}", behandlingID);
 
-        Behandling behandling = behandlingRepository.findOne(behandlingID);
-        if (behandling == null) {
-            throw new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + " ikke finnes.");
-        }
+        Behandling behandling = behandlingRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + " ikke finnes."));
 
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());

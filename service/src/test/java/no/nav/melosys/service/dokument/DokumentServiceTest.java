@@ -326,7 +326,7 @@ public final class DokumentServiceTest {
 
     private static BehandlingsresultatRepository mockBehandlingsresultatRepo(Behandlingsresultat behandlingsresultat) {
         BehandlingsresultatRepository behandlingsresultatRepository = mock(BehandlingsresultatRepository.class);
-        when(behandlingsresultatRepository.findOne(BEHANDLINGSID)).thenReturn(behandlingsresultat);
+        when(behandlingsresultatRepository.findById(BEHANDLINGSID)).thenReturn(Optional.of(behandlingsresultat));
         return behandlingsresultatRepository;
     }
 
@@ -339,8 +339,8 @@ public final class DokumentServiceTest {
 
     private static BehandlingRepository mockBehandlingRepository(Behandling behandling) {
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
-        when(behandlingRepository.findOne(eq(BEHANDLINGSID))).thenReturn(behandling);
-        when(behandlingRepository.findOneWithSaksopplysningerById(eq(BEHANDLINGSID))).thenReturn(behandling);
+        when(behandlingRepository.findById(eq(BEHANDLINGSID))).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findWithSaksopplysningerById(eq(BEHANDLINGSID))).thenReturn(behandling);
         return behandlingRepository;
     }
 

@@ -27,10 +27,8 @@ public class Tilgang {
 
     // Behandling
     public void sjekk(long behandlingsId) throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
-        Behandling behandling = behandlingRepository.findOne(behandlingsId);
-        if (behandling == null) {
-            throw new IkkeFunnetException(String.format("Klarte ikke å finne behandlingen med id %s.", behandlingsId));
-        }
+        Behandling behandling = behandlingRepository.findById(behandlingsId)
+            .orElseThrow(() -> new IkkeFunnetException(String.format("Klarte ikke å finne behandlingen med id %s.", behandlingsId)));
 
         Fagsak fagsak = behandling.getFagsak();
         Aktoer aktør = fagsak.hentAktørMedRolleType(RolleType.BRUKER);

@@ -12,9 +12,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
+import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
 import no.nav.melosys.integrasjon.felles.RestClientLoggingFilter;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.gsak.felles.dto.FeilResponseDto;
@@ -43,7 +43,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
             clientConfig.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, LoggingFeature.Verbosity.PAYLOAD_ANY);
             clientConfig.register(new RestClientLoggingFilter());
             Client client = ClientBuilder.newBuilder().sslContext(sslContext).withConfig(clientConfig).build();
-            target = client.register(JacksonJsonProvider.class).target(endpointUrl);
+            target = client.register(JacksonObjectMapperProvider.class).target(endpointUrl);
         } catch (NoSuchAlgorithmException e) {
             log.error("Feilet under oppsett av integrasjon mot Sak API", e);
             throw new IntegrasjonException("Feilet under oppsett av integrasjon mot Oppgave API");

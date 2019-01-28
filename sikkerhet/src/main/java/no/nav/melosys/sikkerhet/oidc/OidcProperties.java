@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "OpenIdConnect")
+@ConfigurationProperties(prefix = "security.oidc")
 public class OidcProperties {
 
     private String username;

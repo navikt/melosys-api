@@ -67,10 +67,8 @@ public class AvklartefaktaService {
 
     @Transactional
     public void lagreAvklarteFakta(long behandlingsid, Set<AvklartefaktaDto> avklartefaktaDtos) throws IkkeFunnetException {
-        Behandlingsresultat resultat = behandlingsresultatRepository.findOne(behandlingsid);
-        if (resultat == null) {
-            throw new IkkeFunnetException("Fant ikke behandlingsresultat for behandlingsid: " + behandlingsid);
-        }
+        Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
+            .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandlingsresultat for behandlingsid: " + behandlingsid));
 
         avklarteFaktaRepository.deleteByBehandlingsresultat(resultat);
 
@@ -78,6 +76,6 @@ public class AvklartefaktaService {
             .map(avklartefaktaDto -> faktaKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, resultat))
             .collect(Collectors.toList());
 
-        avklarteFaktaRepository.save(avklartefaktaList);
+        avklarteFaktaRepository.saveAll(avklartefaktaList);
     }
 }

@@ -70,7 +70,7 @@ public class RegelmodulService {
      * @param behandlingID Database ID til den behandlingen som brukes for å konstruere requesten til regelmodulen.
      */
     public FastsettLovvalgReply fastsettLovvalg(long behandlingID) {
-        Behandling behandling = behandlingRepo.findOneWithSaksopplysningerById(behandlingID);
+        Behandling behandling = behandlingRepo.findWithSaksopplysningerById(behandlingID);
         if (behandling == null) {
             // Ikke funnet
             return null;

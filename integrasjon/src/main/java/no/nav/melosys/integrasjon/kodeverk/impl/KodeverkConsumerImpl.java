@@ -7,11 +7,12 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.kodeverk.impl.dto.KodeDto;
 
 import static no.nav.melosys.integrasjon.kodeverk.impl.KodeverkRegisterImpl.BOKMÅL;
+
 
 public class KodeverkConsumerImpl implements RestConsumer {
 
@@ -22,7 +23,7 @@ public class KodeverkConsumerImpl implements RestConsumer {
 
     KodeverkConsumerImpl(String endpointUrl) {
         Client client = ClientBuilder.newBuilder().build();
-        target = client.register(JacksonJsonProvider.class).target(endpointUrl);
+        target = client.register(JacksonObjectMapperProvider.class).target(endpointUrl);
     }
 
     public KodeDto hentKodeverk(String navn) {

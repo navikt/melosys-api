@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
 import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon;
@@ -46,7 +47,7 @@ public class BrevDataServiceTest {
 
         when(tpsFasade.hentFagsakIdentMedRolleType(any(), any())).thenCallRealMethod();
         when(tpsFasade.hentIdentForAktørId(any())).thenReturn(FNR);
-        when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(new Behandlingsresultat());
+        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(new Behandlingsresultat()));
     }
 
     @Test

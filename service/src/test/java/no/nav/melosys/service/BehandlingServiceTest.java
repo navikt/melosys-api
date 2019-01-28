@@ -2,6 +2,7 @@ package no.nav.melosys.service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
@@ -48,7 +49,7 @@ public class BehandlingServiceTest {
         long behandlingID = 11L;
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-        when(behandlingRepo.findOne(anyLong())).thenReturn(behandling);
+        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
         behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVVENT_DOK_PART);
     }
 
@@ -57,7 +58,7 @@ public class BehandlingServiceTest {
         long behandlingID = 11L;
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-        when(behandlingRepo.findOne(anyLong())).thenReturn(null);
+        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.empty());
         behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVVENT_DOK_PART);
     }
 
@@ -73,7 +74,7 @@ public class BehandlingServiceTest {
     public void knyttMedlemsperioder_ingenBehandling() throws FunksjonellException {
         long behandlingID = 11L;
         List<Long> periodeIder = Arrays.asList(2L, 3L);
-        when(behandlingRepo.findOne(anyLong())).thenReturn(null);
+        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.empty());
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Behandling " + behandlingID + " finnes ikke.");
@@ -88,7 +89,7 @@ public class BehandlingServiceTest {
         Behandling behandling = new Behandling();
         behandling.setStatus(behandlingsstatus);
         List<Long> periodeIder = Arrays.asList(2L, 3L);
-        when(behandlingRepo.findOne(anyLong())).thenReturn(behandling);
+        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Medlemsperioder kan ikke lagres på behandling med status " + behandlingsstatus);
@@ -103,11 +104,11 @@ public class BehandlingServiceTest {
         Behandling behandling = new Behandling();
         behandling.setStatus(behandlingsstatus);
         List<Long> periodeIder = Arrays.asList(2L, 3L);
-        when(behandlingRepo.findOne(anyLong())).thenReturn(behandling);
+        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         behandlingService.knyttMedlemsperioder(behandlingID, periodeIder);
         verify(tidligereMedlemsperiodeRepo, times(1)).deleteById_BehandlingId(behandlingID);
-        verify(tidligereMedlemsperiodeRepo, times(1)).save(anyList());
+        verify(tidligereMedlemsperiodeRepo).saveAll(anyList());
     }
 
     @Test

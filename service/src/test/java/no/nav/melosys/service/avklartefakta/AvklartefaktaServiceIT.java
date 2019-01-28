@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -105,7 +105,7 @@ public class AvklartefaktaServiceIT {
 
     @Before
     public void ryddOgOpprettTestdata() {
-        repo.delete(repo.findByBehandlingsresultatId(IKKE_EKSISTERENDE_BEH_ID));
+        repo.deleteAll(repo.findByBehandlingsresultatId(IKKE_EKSISTERENDE_BEH_ID));
         testInstans = opprettTestdata();
     }
 

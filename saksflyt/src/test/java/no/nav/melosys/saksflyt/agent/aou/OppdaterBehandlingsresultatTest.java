@@ -1,6 +1,9 @@
 package no.nav.melosys.saksflyt.agent.aou;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.*;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +30,7 @@ public class OppdaterBehandlingsresultatTest {
     }
 
     @Test
-    public void utfør() {
+    public void utfør() throws IkkeFunnetException {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setType(Behandlingstype.SØKNAD);
@@ -36,7 +39,7 @@ public class OppdaterBehandlingsresultatTest {
         p.setData(ProsessDataKey.SAKSBEHANDLER, testbruker);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatRepository.findOne(anyLong())).thenReturn(behandlingsresultat);
+        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
         oppdaterBehandlingsresultat.utfør(p);
 

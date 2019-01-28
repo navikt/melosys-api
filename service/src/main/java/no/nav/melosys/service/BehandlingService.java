@@ -37,17 +37,16 @@ public class BehandlingService {
      */
     @Transactional
     public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) throws FunksjonellException {
-        Behandling behandling = behandlingRepository.findOne(behandlingID);
-        if (behandling == null) {
-            throw new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke.");
-        }
+        Behandling behandling = behandlingRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke."));
+
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
         }
         List<TidligereMedlemsperiode> tidligereMedlemsperioder = periodeIder.stream()
             .map(pid -> new TidligereMedlemsperiode(behandlingID, pid)).collect(Collectors.toList());
         tidligereMedlemsperiodeRepository.deleteById_BehandlingId(behandlingID);
-        tidligereMedlemsperiodeRepository.save(tidligereMedlemsperioder);
+        tidligereMedlemsperiodeRepository.saveAll(tidligereMedlemsperioder);
     }
 
     /**
@@ -59,10 +58,8 @@ public class BehandlingService {
             throw new FunksjonellException("Må ikke sette behandlingsstatus til " + status);
         }
 
-        Behandling behandling = behandlingRepository.findOne(behandlingID);
-        if (behandling == null) {
-            throw new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke.");
-        }
+        Behandling behandling = behandlingRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke."));
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres. Status var: " + behandling.getStatus());
         }

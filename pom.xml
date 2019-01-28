@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.8.RELEASE</version>
+        <version>2.1.2.RELEASE</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -66,21 +66,19 @@
         <cxf.version>3.1.11</cxf.version>
         <commons-lang.version>3.2.1</commons-lang.version>
         <everit.jsonschema.validator.version>1.9.1</everit.jsonschema.validator.version>
-        <flyway.version>5.0.0</flyway.version>
+        <flyway.version>5.1.4</flyway.version>
         <gson.version>2.8.0</gson.version>
         <guava.version>21.0</guava.version>
         <logback.version>1.2.3</logback.version>
         <logstash.version>4.10</logstash.version>
         <hibernate.version>5.3.7.Final</hibernate.version>
-        <hikaricp.version>2.6.1</hikaricp.version>
+        <hikaricp.version>3.3.0</hikaricp.version>
         <ibmmq.version>9.0.5.0</ibmmq.version>
-        <jackson.version>2.9.4</jackson.version>
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
         <jms-api.version>2.0.1</jms-api.version>
         <junit.version>4.12</junit.version>
-        <micrometer.version>1.0.6</micrometer.version>
         <mockito.version>2.20.0</mockito.version>
-        <mockrunner.version>1.0.3</mockrunner.version>
+        <mockrunner.version>2.0.1</mockrunner.version>
         <modelmapper.version>1.1.0</modelmapper.version>
         <ojdbc.version>12.2.0.1</ojdbc.version>
         <org.json.version>20180813</org.json.version>
@@ -89,9 +87,8 @@
         <prometheus.version>0.5.0</prometheus.version>
         <random-beans.version>3.7.0</random-beans.version>
         <restFixture.version>4.4</restFixture.version>
-        <servlet-api.version>3.1.0</servlet-api.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <spring-boot.version>1.5.8.RELEASE</spring-boot.version>
+        <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
         <spring-security-pac4j.version>4.1.0</spring-security-pac4j.version>
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.13</swagger.version>
@@ -215,11 +212,6 @@
             </dependency>
             <dependency>
                 <groupId>io.micrometer</groupId>
-                <artifactId>micrometer-spring-legacy</artifactId>
-                <version>${micrometer.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.micrometer</groupId>
                 <artifactId>micrometer-registry-prometheus</artifactId>
                 <version>${micrometer.version}</version>
             </dependency>
@@ -231,11 +223,6 @@
             <dependency>
                 <groupId>io.prometheus</groupId>
                 <artifactId>simpleclient_hotspot</artifactId>
-                <version>${prometheus.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.prometheus</groupId>
-                <artifactId>simpleclient_spring_boot</artifactId>
                 <version>${prometheus.version}</version>
             </dependency>
             <dependency>

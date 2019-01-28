@@ -32,7 +32,8 @@ public class OppdaterMedlFelles {
     }
 
     public Lovvalgsperiode hentLovvalgsperiode(Behandling behandling) throws FunksjonellException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandling.getId());
+        Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandling);
+
         Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
         if (lovvalgsperioder.size() != 1) {
             throw new FunksjonellException("Det er enten ingen eller for mange Lovvalgsperioder for behandling " + behandling.getId());
@@ -41,10 +42,8 @@ public class OppdaterMedlFelles {
     }
 
     public Behandlingsresultat hentBehandlingsresultat(Behandling behandling) throws IkkeFunnetException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findOne(behandling.getId());
-        if (behandlingsresultat == null) {
-            throw new IkkeFunnetException("Opprettelse av periode i MEDL feilet fordi behandlingsresultat med behandling ID " + behandling.getId() + " ikke finnes.");
-        }
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
+            .orElseThrow(() -> new IkkeFunnetException("Opprettelse av periode i MEDL feilet fordi behandlingsresultat med behandling ID " + behandling.getId() + " ikke finnes."));
         return behandlingsresultat;
     }
 

@@ -2,6 +2,7 @@ package no.nav.melosys.service;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -38,7 +39,7 @@ public class BehandlingsresultatServiceTest {
         behandlingsresultat.setLovvalgsperioder(new HashSet<>(Collections.singletonList(new Lovvalgsperiode())));
         behandlingsresultat.setVilkaarsresultater(new HashSet<>(Collections.singleton(new Vilkaarsresultat())));
 
-        when(behandlingsresultatRepo.findOne(anyLong())).thenReturn(behandlingsresultat);
+        when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
         behandlingsresultatService.tømBehandlingsresultat(1L);
 

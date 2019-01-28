@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.agent.gsak;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -54,7 +56,7 @@ public class OpprettOppgaveTest {
         p.setBehandling(behandling);
         p.setType(ProsessType.JFR_NY_SAK);
 
-        when(behandlingRepository.findOne(anyLong())).thenReturn(behandling);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         agent.utførSteg(p);
 
@@ -80,7 +82,7 @@ public class OpprettOppgaveTest {
         p.setBehandling(behandling);
         p.setType(ProsessType.JFR_NY_BEHANDLING);
 
-        when(behandlingRepository.findOne(anyLong())).thenReturn(behandling);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         agent.utførSteg(p);
 
@@ -104,7 +106,7 @@ public class OpprettOppgaveTest {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(behandling);
 
-        when(behandlingRepository.findOne(anyLong())).thenReturn(behandling);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         agent.utførSteg(p);
 
@@ -125,7 +127,7 @@ public class OpprettOppgaveTest {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(behandling);
 
-        when(behandlingRepository.findOne(anyLong())).thenReturn(behandling);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         agent.utførSteg(p);
 
@@ -147,7 +149,7 @@ public class OpprettOppgaveTest {
         p.setType(ProsessType.MANGELBREV);
         p.setBehandling(behandling);
 
-        when(behandlingRepository.findOne(anyLong())).thenReturn(behandling);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         agent.utførSteg(p);
 
