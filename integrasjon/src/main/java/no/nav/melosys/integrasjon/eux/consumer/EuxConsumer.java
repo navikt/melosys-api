@@ -9,11 +9,17 @@ import no.nav.melosys.integrasjon.felles.RestConsumer;
 
 interface EuxConsumer extends RestConsumer {
 
+    void setSakSensitiv(String rinaSaksnummer) throws MelosysException;
+
+    void fjernSensitivPaaSak(String rinaSaksnummer) throws MelosysException;
+
+    String opprettBucOgSedMedVedlegg(String bucType, String fagSakNummer, String mottakerId, String filType, String korrelasjonsId, SED sed, Object vedlegg) throws MelosysException;
+
     List<String> hentInstitusjoner(String bucType, String landkode) throws MelosysException;
 
     String opprettBuC(String bucType) throws MelosysException;
 
-    void oppdaterSed(String rinaSaksnummer, String korrelasjonsId, String sedType, String dokumentId, SED sed) throws MelosysException;
+    void oppdaterSed(String rinaSaksnummer, String korrelasjonsId, String dokumentId, SED sed) throws MelosysException;
 
     void slettSed(String rinaSaksnummer, String dokumentId) throws MelosysException;
 
@@ -25,7 +31,7 @@ interface EuxConsumer extends RestConsumer {
 
     JsonNode hentMuligeAksjoner(String rinaSaksnummer) throws MelosysException;
 
-    String opprettBucOgSed(String bucType, String fagSakNummer, String mottakerId, String filType, String korrelasjonsId, SED sed, Object vedlegg) throws MelosysException;
+    String opprettBucOgSed(String bucType, String mottakerId, SED sed) throws MelosysException;
 
     JsonNode finnRinaSaker(String fnr, String fornavn, String etternavn, String fødselsdato, String rinaSaksnummer, String bucType, String status) throws MelosysException;
 
@@ -42,6 +48,8 @@ interface EuxConsumer extends RestConsumer {
     List<String> hentTilgjengeligeSedTyper(String rinaSaksnummer) throws MelosysException;
 
     void settMottaker(String rinaSaksnummer, String mottakerId) throws MelosysException;
+
+    List<String> hentDeltagere(String rinaSaksnummer) throws MelosysException;
 
     List<String> bucTypePerSektor() throws MelosysException;
 
