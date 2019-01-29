@@ -9,6 +9,8 @@ CREATE TABLE behandling (
     dokumentasjon_svarfrist_dato  TIMESTAMP    NULL,
     registrert_av   VARCHAR2(99) NULL,
     endret_av       VARCHAR2(99) NULL,
+    initierende_journalpost_id VARCHAR2(99) NULL,
+    initierende_dokument_id VARCHAR2(99) NULL,
     CONSTRAINT pk_behandling PRIMARY KEY (id)
 );
 

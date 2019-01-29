@@ -4,7 +4,7 @@ public enum Henleggelsesgrunner implements Kodeverk {
 
     ANNET("ANNET", "Annet"),
     OPPHOLD_UTL_AVLYST("OPPHOLD_UTL_AVLYST", "Utlandsopphold avlyst"),
-    SØKNADEN_TRUKKET("SØKNADEN_TRUKKET", "Søknaden trukket");
+    SOEKNADEN_TRUKKET("SOEKNADEN_TRUKKET", "Søknaden trukket");
 
     private String kode;
     private String beskrivelse;

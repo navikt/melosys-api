@@ -62,7 +62,7 @@ public class FagsakService {
      * - Oppretter tom behandlingsresultat.
      */
     @Transactional
-    public Fagsak nyFagsakOgBehandling(String aktørID, String arbeidsgiver, String representant, Behandlingstype behandlingstype) {
+    public Fagsak nyFagsakOgBehandling(String aktørID, String arbeidsgiver, String representant, Behandlingstype behandlingstype, String initierendeJournalpostId, String initierendeDokumentId) {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(hentNesteSaksnummer());
 
@@ -100,6 +100,10 @@ public class FagsakService {
         lagre(fagsak);
 
         Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, behandlingstype);
+
+        behandling.setInitierendeJournalpostId(initierendeJournalpostId);
+        behandling.setInitierendeDokumentId(initierendeDokumentId);
+
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
         return fagsak;

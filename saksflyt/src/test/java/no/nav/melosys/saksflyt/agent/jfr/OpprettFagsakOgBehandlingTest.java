@@ -48,18 +48,23 @@ public class OpprettFagsakOgBehandlingTest {
         p.setType(ProsessType.JFR_NY_SAK);
         Properties properties = new Properties();
         String aktørId = "FJERNET93";
-        properties.setProperty(ProsessDataKey.AKTØR_ID.getKode(), "FJERNET93");
-        properties.setProperty(ProsessDataKey.ARBEIDSGIVER.getKode(), "104568393");
+        String journalpostId = "44553";
+        String dokuemntId = "222221";
+        String arbeidsgiver = "104568393";
+        properties.setProperty(ProsessDataKey.AKTØR_ID.getKode(), aktørId);
+        properties.setProperty(ProsessDataKey.ARBEIDSGIVER.getKode(), arbeidsgiver);
+        properties.setProperty(ProsessDataKey.JOURNALPOST_ID.getKode(), journalpostId);
+        properties.setProperty(ProsessDataKey.DOKUMENT_ID.getKode(), dokuemntId);
 
         p.setData(properties);
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
         fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
-        when(fagsakService.nyFagsakOgBehandling(anyString(), anyString(), any(), eq(Behandlingstype.SØKNAD))).thenReturn(fagsak);
+        when(fagsakService.nyFagsakOgBehandling(anyString(), anyString(), any(), eq(Behandlingstype.SØKNAD), any(), any())).thenReturn(fagsak);
 
         agent.utførSteg(p);
 
-        verify(fagsakService, times(1)).nyFagsakOgBehandling(aktørId, "104568393", null, Behandlingstype.SØKNAD);
+        verify(fagsakService, times(1)).nyFagsakOgBehandling(aktørId, arbeidsgiver, null, Behandlingstype.SØKNAD, journalpostId, dokuemntId);
         verify(applicationEventPublisher, times(1)).publishEvent(any(FagsakOpprettetEvent.class));
         verify(applicationEventPublisher, times(1)).publishEvent(any(BehandlingOpprettetEvent.class));
 

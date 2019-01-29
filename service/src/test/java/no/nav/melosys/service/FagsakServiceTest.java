@@ -80,7 +80,7 @@ public class FagsakServiceTest {
         Behandling behandling = mock(Behandling.class);
         doReturn(behandling).when(behandlingService).nyBehandling(any(), any(), any());
 
-        Fagsak fagsak = fagsakService.nyFagsakOgBehandling("AKTOER_ID", "123456789", "", Behandlingstype.SØKNAD);
+        Fagsak fagsak = fagsakService.nyFagsakOgBehandling("AKTOER_ID", "123456789", "", Behandlingstype.SØKNAD, "123213", "4433");
         verify(fagsakRepo).save(any(Fagsak.class));
         verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstype.SØKNAD));
         assertThat(fagsak.getBehandlinger()).isNotEmpty();
