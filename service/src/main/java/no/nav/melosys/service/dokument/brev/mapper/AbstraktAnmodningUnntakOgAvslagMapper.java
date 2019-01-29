@@ -47,9 +47,13 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
     Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntakOgAvslag brevData) throws TekniskException {
         Fag fag = new Fag();
 
-        if (brevData.hovedvirksomhet == null) {
-            throw new TekniskException("Trenger minst en norsk virksomhet for avslag og ART16.1");
+        if (behandling.getFagsak().getType() == Fagsakstype.EU_EØS) {
+            // Respons fra regelmodulen skiller ikke mellom begrunnelser for 883/2004 (MELOSYS-1863)
+            fag.setInngangsvilkårBegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
+        } else {
+            throw new TekniskException("Forholdet er ikke dekket av inngangsvilkårene for 883/2004");
         }
+
         fag.setForetakNavn(brevData.hovedvirksomhet.navn);
         SoeknadDokument soeknadDokument = SaksopplysningerUtils.hentSøknadDokument(behandling);
         // Frilansaktivitet håndteres ikke i Lev 1
@@ -59,12 +63,6 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
             fag.setYrkesaktivitet(YrkesaktivitetsKode.LOENNET_ARBEID);
         }
 
-        if (behandling.getFagsak().getType() == Fagsakstype.EU_EØS) {
-            // Respons fra regelmodulen skiller ikke mellom begrunnelser for 883/2004 (MELOSYS-1863)
-            fag.setInngangsvilkårBegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
-        } else {
-            throw new TekniskException("Forholdet er ikke dekket av inngangsvilkårene for 883/2004");
-        }
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat));
 
         Set<VilkaarBegrunnelse> art121Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_1);

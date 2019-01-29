@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
@@ -28,12 +27,13 @@ public class BrevDataByggerAnmodningUnntakOgAvslag implements BrevDataBygger {
     public BrevData lag(Behandling behandling, String saksbehandler) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
 
         Set<String> avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
-        Optional<Virksomhet> hovedvirksomhet = registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner).stream()
+        Virksomhet hovedvirksomhet = registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner).stream()
             .map(org -> new Virksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), null))
-            .findFirst();
+            .findFirst()
+            .orElseThrow(() -> new TekniskException("Trenger minst en norsk virksomhet for avslag og ART16.1"));
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
-        hovedvirksomhet.ifPresent(hv -> brevData.hovedvirksomhet = hv);
+        brevData.hovedvirksomhet = hovedvirksomhet;
 
         return brevData;
     }
