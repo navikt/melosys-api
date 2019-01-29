@@ -9,14 +9,10 @@ import no.nav.melosys.domain.Fagsakstype;
 
 public class FagsakOppsummeringDto {
     private String saksnummer;
-    private String saksbehandler;
+    private String sammensattNavn;
     private Fagsakstype sakstype;
     private Fagsaksstatus saksstatus;
     private Instant opprettetDato;
-    private List<BehandlingOppsummeringDto> behandlingoppsummeringer;
-
-    public FagsakOppsummeringDto() {
-    }
 
     public String getSaksnummer() {
         return saksnummer;
@@ -26,12 +22,12 @@ public class FagsakOppsummeringDto {
         this.saksnummer = saksnummer;
     }
 
-    public String getSaksbehandler() {
-        return saksbehandler;
+    public String getSammensattNavn() {
+        return sammensattNavn;
     }
 
-    public void setSaksbehandler(String saksbehandler) {
-        this.saksbehandler = saksbehandler;
+    public void setSammensattNavn(String sammensattNavn) {
+        this.sammensattNavn = sammensattNavn;
     }
 
     public Fagsakstype getSakstype() {
@@ -56,13 +52,5 @@ public class FagsakOppsummeringDto {
 
     public void setOpprettetDato(Instant opprettetDato) {
         this.opprettetDato = opprettetDato;
-    }
-
-    public List<BehandlingOppsummeringDto> getBehandlingoppsummeringer() {
-        return behandlingoppsummeringer;
-    }
-
-    public void setBehandlingoppsummeringer(List<BehandlingOppsummeringDto> behandlingoppsummeringer) {
-        this.behandlingoppsummeringer = behandlingoppsummeringer;
     }
 }

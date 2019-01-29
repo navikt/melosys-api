@@ -13,15 +13,14 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
 import org.modelmapper.ModelMapper;
@@ -49,16 +48,13 @@ public class FagsakTjeneste extends RestTjeneste {
 
     private final FagsakService fagsakService;
 
-    private final OppgaveService oppgaveService;
-
     private ModelMapper modelMapper;
 
     private final Tilgang tilgang;
 
     @Autowired
-    public FagsakTjeneste(FagsakService fagsakService, OppgaveService oppgaveService, Tilgang tilgang) {
+    public FagsakTjeneste(FagsakService fagsakService, Tilgang tilgang) {
         this.fagsakService = fagsakService;
-        this.oppgaveService = oppgaveService;
         this.tilgang = tilgang;
 
         this.modelMapper = new ModelMapper();
@@ -95,7 +91,7 @@ public class FagsakTjeneste extends RestTjeneste {
         notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."),
         response = FagsakOppsummeringDto.class,
         responseContainer = "List")
-    public List<FagsakOppsummeringDto> hentFagsaker(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.") String fnr) throws FunksjonellException, TekniskException {
+    public List<FagsakOppsummeringDto> hentFagsaker(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.") String fnr) throws FunksjonellException {
         Iterable<Fagsak> saker;
         if (fnr == null) {
             throw new BadRequestException();
@@ -126,7 +122,7 @@ public class FagsakTjeneste extends RestTjeneste {
         return fagsakDto;
     }
 
-    private List<FagsakOppsummeringDto> tilDtoer(Iterable<Fagsak> saker) throws FunksjonellException, TekniskException {
+    private List<FagsakOppsummeringDto> tilDtoer(Iterable<Fagsak> saker) {
         List<FagsakOppsummeringDto> fagsakListe = new ArrayList<>();
         for (Fagsak fagsak : saker) {
             FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
@@ -136,13 +132,11 @@ public class FagsakTjeneste extends RestTjeneste {
             fagsakOppsummeringDto.setOpprettetDato(fagsak.getRegistrertDato());
             fagsakOppsummeringDto.setBehandlingoppsummeringer(new ArrayList<>());
 
-            Oppgave oppgave = oppgaveService.hentOppgaveMedFagSaksnummer(fagsak.getSaksnummer());
-            fagsakOppsummeringDto.setSaksbehandler(oppgave.getTilordnetRessurs());
-
             List<Behandling> behandlinger = fagsak.getBehandlinger();
             behandlinger.stream()
                 .filter(Objects::nonNull)
                 .forEach(behandling -> tilBehandlingOppsummeringDto(fagsakOppsummeringDto, behandling));
+            fagsakListe.add(fagsakOppsummeringDto);
         }
         return fagsakListe;
     }
@@ -161,6 +155,13 @@ public class FagsakTjeneste extends RestTjeneste {
                 Periode periode = hentPeriode(soeknadDokument);
                 oppsummeringDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
             }
+
+            hentDokument(behandling, SaksopplysningType.PERSONOPPLYSNING).ifPresent(
+                saksopplysningDokument -> {
+                    PersonDokument personDokument = (PersonDokument) saksopplysningDokument;
+                    fagsakOppsummeringDto.setSammensattNavn(personDokument.sammensattNavn);
+                });
+
             fagsakOppsummeringDto.getBehandlingoppsummeringer().add(oppsummeringDto);
         }
     }

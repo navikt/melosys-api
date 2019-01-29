@@ -23,11 +23,9 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import org.json.JSONException;
 import org.junit.Before;
@@ -54,7 +52,6 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
 
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
-    private static OppgaveService oppgaveService;
 
     private static Tilgang tilgang;
 
@@ -108,8 +105,9 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
 
     @Test
     public void fagsakSøkSchemaValidering() throws IOException, JSONException {
-        List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.randomListOf(2, FagsakOppsummeringDto.class);
-        fagsakOppsummeringDtoList.forEach(fagsakOppsummeringDto -> fagsakOppsummeringDto.setSoknadsperiode(new PeriodeDto(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))));
+        List<BehandlingOppsummeringDto> oppsummeringDtos = random.randomListOf(1, BehandlingOppsummeringDto.class);
+        List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.randomListOf(1, FagsakOppsummeringDto.class);
+      //  fagsakOppsummeringDtoList.get(0).setBehandlingoppsummeringer(oppsummeringDtos);
 
         schemaType = SOK_FAGSAKER_SCHEMA;
         validerListe(fagsakOppsummeringDtoList, log);
@@ -143,7 +141,7 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(FNR);
-        List<FagsakOppsummeringDto> forventet = Collections.singletonList(lagFagsakOppsummeringDto(fagsak));
+        List<FagsakOppsummeringDto> forventet = Collections.singletonList(lagFagsakOppsummeringDto());
         assertThat(forventet.size()).isEqualTo(resultat.size());
         for (int i = 0; i < forventet.size(); i++) {
             assertThat(forventet.get(i)).isEqualToComparingFieldByFieldRecursively(resultat.get(i));
@@ -200,16 +198,17 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
         tilgang = mock(Tilgang.class);
         fagsakService = mock(FagsakService.class);
-        oppgaveService = mock(OppgaveService.class);
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
-        when(fagsakService.hentFagsakerMedAktør(eq(RolleType.BRUKER), eq(FNR)))
-            .thenReturn(Collections.singletonList(fagsak));
-        FagsakTjeneste instans = new FagsakTjeneste(fagsakService, oppgaveService, tilgang);
+        ArrayList<Fagsak> fagsaker = new ArrayList<>();
+        fagsaker.add(fagsak);
+        doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(eq(RolleType.BRUKER), eq(FNR));
+        FagsakTjeneste instans = new FagsakTjeneste(fagsakService, tilgang);
         return instans;
     }
 
-    private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Fagsak fagsak) {
+    private static FagsakOppsummeringDto lagFagsakOppsummeringDto() {
         FagsakOppsummeringDto result = new FagsakOppsummeringDto();
+        result.setBehandlingoppsummeringer(new ArrayList<>());
         return result;
     }
 
