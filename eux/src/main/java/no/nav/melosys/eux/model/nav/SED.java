@@ -2,6 +2,7 @@
 package no.nav.melosys.eux.model.nav;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -11,6 +12,7 @@ import no.nav.melosys.eux.model.medlemskap.Medlemskap;
 
 @SuppressWarnings("unused")
 @JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SED {
 
     private Medlemskap medlemskap;

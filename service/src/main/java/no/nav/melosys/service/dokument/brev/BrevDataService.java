@@ -70,6 +70,7 @@ public class BrevDataService {
 
         switch (produserbartDokument) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
+            case AVSLAG_YRKESAKTIV:
             case ORIENTERING_ANMODNING_UNNTAK: {
                 if (representant != null) {
                     metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, REPRESENTANT);

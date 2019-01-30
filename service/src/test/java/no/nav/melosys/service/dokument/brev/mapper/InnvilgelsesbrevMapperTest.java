@@ -268,5 +268,4 @@ public class InnvilgelsesbrevMapperTest {
             .build();
         return person;
     }
-
 }

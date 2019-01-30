@@ -7,10 +7,6 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.*;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntak;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -49,31 +45,33 @@ public class BrevDataByggerVelger {
         switch (produserbartDokument) {
             case ATTEST_A1: {
                 BrevDataByggerA1 a1Bygger =
-                        new BrevDataByggerA1(avklartefaktaService,
-                                registerOppslagService,
-                                kodeverkService);
+                    new BrevDataByggerA1(avklartefaktaService,
+                        registerOppslagService,
+                        kodeverkService);
                 return new BrevDataByggerVedlegg(a1Bygger, brevbestillingDto);
+            }
+            case AVSLAG_YRKESAKTIV:
+            case ORIENTERING_ANMODNING_UNNTAK: {
+                return new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService,
+                    registerOppslagService);
             }
             case SED_A001: {
                 BrevDataByggerA001 a001Bygger =
-                        new BrevDataByggerA001(avklartefaktaService,
-                                registerOppslagService,
-                                kodeverkService,
-                                lovvalgsperiodeService,
-                                utenlandskMyndighetRepository,
-                                vilkaarsresultatRepository);
+                    new BrevDataByggerA001(avklartefaktaService,
+                        registerOppslagService,
+                        kodeverkService,
+                        lovvalgsperiodeService,
+                        utenlandskMyndighetRepository,
+                        vilkaarsresultatRepository);
                 return new BrevDataByggerVedlegg(a001Bygger, brevbestillingDto);
             }
             case INNVILGELSE_YRKESAKTIV: {
                 BrevDataByggerA1 a1Bygger =
-                        new BrevDataByggerA1(avklartefaktaService,
-                                registerOppslagService,
-                                kodeverkService);
+                    new BrevDataByggerA1(avklartefaktaService,
+                        registerOppslagService,
+                        kodeverkService);
                 return new BrevDataByggerVedlegg(a1Bygger, brevbestillingDto);
             }
-            case ORIENTERING_ANMODNING_UNNTAK:
-                return new BrevDataByggerAnmodningUnntak(avklartefaktaService,
-                                                         registerOppslagService);
             default:
                 return new BrevDataByggerStandard(brevbestillingDto);
         }

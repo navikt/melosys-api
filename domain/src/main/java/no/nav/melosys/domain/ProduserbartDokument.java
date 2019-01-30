@@ -2,6 +2,7 @@ package no.nav.melosys.domain;
 
 public enum ProduserbartDokument implements Kodeverk {
     ATTEST_A1("ATTEST_A1", "Attest A1"),
+    AVSLAG_YRKESAKTIV("AVSLAG_YRKESAKTIV", "Avslag yrkesaktiv"),
     INNVILGELSE_YRKESAKTIV("INNVILGELSE_YRKESAKTIV", "Innvilgelse yrkesaktiv"),
     ORIENTERING_ANMODNING_UNNTAK("ORIENTERING_ANMODNING_UNNTAK", "Orienteringsbrev om anmodning unntak"),
     MELDING_FORVENTET_SAKSBEHANDLINGSTID("MELDING_FORVENTET_SAKSBEHANDLINGSTID", "Melding om forventet sakbehandlingstid"),

@@ -7,7 +7,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntak;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntakOgAvslag;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -52,8 +52,13 @@ public class BrevDataByggerVelgerTest {
     }
 
     @Test
-    public final void hent_medDokumentTypeAnmodningUnntak_girBrevDataByggerAnmodningUnntak() {
-        testHent(ProduserbartDokument.ORIENTERING_ANMODNING_UNNTAK, BrevDataByggerAnmodningUnntak.class);
+    public final void hent_Avslag_girBrevDataByggerAvslagOgAnmodningUnntak() {
+        testHent(ProduserbartDokument.AVSLAG_YRKESAKTIV, BrevDataByggerAnmodningUnntakOgAvslag.class);
+    }
+
+    @Test
+    public final void hent_medDokumentTypeAnmodningUnntak_girBrevDataByggerAvslagOgAnmodningUnntak() {
+        testHent(ProduserbartDokument.ORIENTERING_ANMODNING_UNNTAK, BrevDataByggerAnmodningUnntakOgAvslag.class);
     }
 
     @Test
@@ -70,7 +75,7 @@ public class BrevDataByggerVelgerTest {
         assertThat(bygger).isInstanceOf(BrevDataByggerStandard.class);
     }
 
-    private final void testHent(ProduserbartDokument type, Class<? extends BrevDataBygger> forventetKlasse) {
+    private void testHent(ProduserbartDokument type, Class<? extends BrevDataBygger> forventetKlasse) {
         BrevDataBygger resultat = brevDataByggerVelger.hent(type);
         assertThat(resultat).isInstanceOf(forventetKlasse);
     }

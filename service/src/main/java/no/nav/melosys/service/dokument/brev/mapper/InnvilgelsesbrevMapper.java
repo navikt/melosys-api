@@ -8,8 +8,11 @@ import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import no.nav.dok.melosysbrev._000108.*;
+import no.nav.dok.melosysbrev._000108.BrevdataType;
+import no.nav.dok.melosysbrev._000108.Fag;
+import no.nav.dok.melosysbrev._000108.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000108.ObjectFactory;
+import no.nav.dok.melosysbrev._000108.SakstypeKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
@@ -47,7 +50,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private final Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataA1 brevdata) {
+    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataA1 brevdata) {
         Fag fag = new Fag();
         fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
@@ -60,13 +63,13 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         Set<Lovvalgsperiode> perioder = resultat.getLovvalgsperioder();
         if (perioder.size() != 1) {
             throw new UnsupportedOperationException(String.format("Antall lovvalgsperioder (%s) ulik 1 støttes ikke i første versjon av Melosys.",
-                    perioder.size()));
+                perioder.size()));
         }
         Lovvalgsperiode periode = perioder.iterator().next();
         fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(periode.getBestemmelse().getKode()));
         fag.setLovvalgsperiode(LovvalgsperiodeType.builder().withFomDato(lagXmlDato(periode.getFom()))
-                                                            .withTomDato(lagXmlDato(periode.getTom()))
-                                                            .build());
+            .withTomDato(lagXmlDato(periode.getTom()))
+            .build());
 
         // TODO: Ikke avklart/kjent i denne omgang, må fylles ut seinere.
         // Kan utledes ved å se på statsborgerskapet til søkeren i perioden,
