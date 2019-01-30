@@ -2,9 +2,9 @@ package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 
-public class BrevDataAnmodningUnntak extends BrevData {
+public class BrevDataAnmodningUnntakOgAvslag extends BrevData {
 
-    public BrevDataAnmodningUnntak(String saksbehandler) {
+    public BrevDataAnmodningUnntakOgAvslag(String saksbehandler) {
         super(saksbehandler);
     }
 
