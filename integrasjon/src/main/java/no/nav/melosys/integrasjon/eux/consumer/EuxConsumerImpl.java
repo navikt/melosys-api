@@ -11,6 +11,8 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
@@ -29,16 +31,21 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class EuxConsumerImpl implements EuxConsumer {
 
+    private static final Logger log = LoggerFactory.getLogger(EuxConsumerImpl.class);
+
     private final RestTemplate euxRestTemplate;
     private final RestStsClient restSTSClient;
 
     private final String RINA_SAKSNUMMER = "RINASaksnummer";
-    private final String KORRELASJONS_ID = "KorrelasjonsID";
+    private final String KORRELASJONS_ID = "KorrelasjonsId";
     private final String BUC_TYPE = "BuCType";
-    private final String DOKUMENT_ID = "DokumentID";
 
-    private final String BUC_PATH = "/BuC";
-    private final String SED_PATH = "/SED";
+    private final String BUC_PATH = "/buc/%s";
+    private final String SED_PATH = "/buc/%s/sed/%s";
+    private final String VEDLEGG_PATH = "/buc/%s/sed/%s/vedlegg";
+    private final String BUCDELTAKERE_PATH = "/buc/%s/bucdeltakere";
+    private final String DOKUMENTMAL_PATH = "/buc/%s/dokumentmal";
+    private final String MULIGEAKSJONER_PATH = "/buc/%s/muligeaksjoner";
 
     @Autowired
     public EuxConsumerImpl(@Qualifier("euxRestTemplate") RestTemplate restTemplate, RestStsClient restSTSClient) {
@@ -55,10 +62,11 @@ public class EuxConsumerImpl implements EuxConsumer {
      */
     @Override
     public JsonNode hentBuC(String rinaSaksnummer) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(BUC_PATH)
-            .queryParam(RINA_SAKSNUMMER, rinaSaksnummer);
 
-        return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+        log.info("Henter buc: {}", rinaSaksnummer);
+        String uri = String.format(BUC_PATH, rinaSaksnummer);
+
+        return exchange(uri, HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
             new ParameterizedTypeReference<JsonNode>() {});
     }
 
@@ -70,7 +78,8 @@ public class EuxConsumerImpl implements EuxConsumer {
      */
     @Override
     public String opprettBuC(String bucType) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(BUC_PATH)
+        log.info("Oppretter buc, type: {}", bucType);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/buc")
                 .queryParam(BUC_TYPE, bucType);
 
         return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(getDefaultHeaders(false)),
@@ -84,10 +93,10 @@ public class EuxConsumerImpl implements EuxConsumer {
      */
     @Override
     public void slettBuC(String rinaSaksnummer) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(BUC_PATH)
-            .queryParam(RINA_SAKSNUMMER, rinaSaksnummer);
+        log.info("Sletter buc: {}", rinaSaksnummer);
+        String uri = String.format(BUC_PATH, rinaSaksnummer);
 
-        exchange(builder.toUriString(), HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders(false)),
+        exchange(uri, HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders(false)),
             new ParameterizedTypeReference<Void>() {});
     }
 
@@ -99,12 +108,305 @@ public class EuxConsumerImpl implements EuxConsumer {
      */
     @Override
     public void settMottaker(String rinaSaksnummer, String mottakerId) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/BuCDeltagere")
-            .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
-            .queryParam("MottakerID", mottakerId);
+
+        log.info("Setter mottaker {} til sak {}", mottakerId, rinaSaksnummer);
+        UriComponentsBuilder builder = UriComponentsBuilder
+            .fromPath(String.format(BUCDELTAKERE_PATH, rinaSaksnummer))
+            .queryParam("MottakerId", mottakerId);
 
         exchange(builder.toUriString(), HttpMethod.PUT, new HttpEntity<>(getDefaultHeaders(false)),
             new ParameterizedTypeReference<Void>() {});
+    }
+
+    /**
+     * Henter deltagere i saken
+     * @param rinaSaksnummer
+     * @return liste over deltagere
+     * @throws MelosysException
+     */
+    @Override
+    public List<String> hentDeltagere(String rinaSaksnummer) throws MelosysException {
+
+        log.info("Henter deltakere til sak {}", rinaSaksnummer);
+        String uri = String.format(BUCDELTAKERE_PATH, rinaSaksnummer);
+
+        return exchange(uri, HttpMethod.PUT, new HttpEntity<>(getDefaultHeaders(false)),
+            new ParameterizedTypeReference<List<String>>() {});
+    }
+
+    /**
+     * Henter ut en liste over mulige aksjoner
+     * @param rinaSaksnummer
+     * @return liste over mulige aksjoner på en rina-sak
+     * @throws MelosysException
+     */
+    @Override
+    public JsonNode hentMuligeAksjoner(String rinaSaksnummer) throws MelosysException {
+        log.info("Henter mulige aksjoner for sak {}", rinaSaksnummer);
+        String uri = String.format(MULIGEAKSJONER_PATH, rinaSaksnummer);
+
+        return exchange(uri, HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+            new ParameterizedTypeReference<JsonNode>() {});
+    }
+
+    /**
+     * Oppretter en SED på en eksisterende BuC
+     * @param rinaSaksnummer saksnummer til BuC/rina-saken
+     * @param korrelasjonsId
+     * @param sed SED'en som skal legges til rina-saken
+     * @return dokumentId' til SED'en
+     * @throws MelosysException
+     */
+    @Override
+    public String opprettSed(String rinaSaksnummer, String korrelasjonsId, SED sed) throws MelosysException {
+
+        log.info("Oppretter SED {} på sak {}", sed.getSed(), rinaSaksnummer);
+        String uri = UriComponentsBuilder.fromPath(String.format("/buc/%s/sed", rinaSaksnummer))
+            .queryParam(KORRELASJONS_ID, korrelasjonsId).toUriString();
+
+        return exchange(uri, HttpMethod.POST, new HttpEntity<>(sed, getDefaultHeaders(false)),
+            new ParameterizedTypeReference<String>() {});
+    }
+
+    /**
+     * Henter ut en eksisterende SED
+     * @param rinaSaksnummer saksnummeret hvor SED'en er tilknyttet
+     * @param dokumentId id' til SED'en som skal hentes
+     * @return
+     */
+    @Override
+    public SED hentSed(String rinaSaksnummer, String dokumentId) throws MelosysException {
+        log.info("Henter sed med id {}, fra sak {}", dokumentId, rinaSaksnummer);
+        String uri = String.format(SED_PATH, rinaSaksnummer, dokumentId);
+
+        return exchange(uri, HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+            new ParameterizedTypeReference<SED>() {});
+    }
+
+    /**
+     * Oppdaterer en eksisterende SED
+     * @param rinaSaksnummer saksnummeret
+     * @param korrelasjonsId Optional, brukes ikke av eux per nå
+     * @param dokumentId Id'en til SED'en som skal oppdateres
+     * @param sed Den nye versjonen av SED'en
+     * @throws MelosysException
+     */
+    @Override
+    public void oppdaterSed(String rinaSaksnummer, String korrelasjonsId, String dokumentId, SED sed) throws MelosysException {
+        log.info("Oppdaterer sed {} på sak {}", dokumentId, rinaSaksnummer);
+        String uri = UriComponentsBuilder.fromPath(String.format(SED_PATH, rinaSaksnummer, dokumentId))
+            .queryParam(KORRELASJONS_ID, korrelasjonsId).toUriString();
+
+
+        exchange(uri, HttpMethod.PUT, new HttpEntity<>(sed, getDefaultHeaders(false)),
+            new ParameterizedTypeReference<Void>() {});
+    }
+
+    /**
+     * Sletter en eksisterende SED
+     * @param rinaSaksnummer saksnummeret
+     * @param dokumentId ID til SED som skal slettes
+     * @throws MelosysException
+     */
+    @Override
+    public void slettSed(String rinaSaksnummer, String dokumentId) throws MelosysException {
+        log.info("Sletter sed {} på sak {}", dokumentId, rinaSaksnummer);
+        String uri = String.format(SED_PATH, rinaSaksnummer, dokumentId);
+
+        exchange(uri, HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders(false)),
+            new ParameterizedTypeReference<Void>() {});
+    }
+
+
+    /**
+     * Sender en SED til mottakkere. Mottakere må være satt før den kan sendes.
+     * @param rinaSaksnummer saksnummeret
+     * @param dokumentId id' til SED som skal sendes
+     * @param korrelasjonsId optional, ikke brukt av eux per nå
+     * @throws MelosysException
+     */
+    @Override
+    public void sendSed(String rinaSaksnummer, String korrelasjonsId, String dokumentId) throws MelosysException {
+        log.info("Sender sed {} fra sak {}", dokumentId, rinaSaksnummer);
+        String uri = UriComponentsBuilder.fromPath(String.format(SED_PATH, rinaSaksnummer, dokumentId) + "/send")
+            .queryParam(KORRELASJONS_ID, korrelasjonsId).toUriString();
+
+        exchange(uri, HttpMethod.POST, new HttpEntity<>(getDefaultHeaders(false)),
+            new ParameterizedTypeReference<Void>() {});
+    }
+
+    /**
+     * Legger til et vedlegg for et dokument
+     * @param rinaSaksnummer saksnummeret
+     * @param dokumentId id til SED'en vedlegget skal legges til
+     * @param filType filtype
+     * @param vedlegg Selve vedlegget som skal legges til
+     * @return ukjent
+     * @throws MelosysException
+     */
+    @Override
+    public String leggTilVedlegg(String rinaSaksnummer, String dokumentId, String filType, Object vedlegg) throws MelosysException {
+        log.info("Legger til vedlegg på sak {} og dokument {}", rinaSaksnummer, dokumentId);
+        String uri = UriComponentsBuilder.fromPath(String.format(VEDLEGG_PATH, rinaSaksnummer, dokumentId))
+            .queryParam("Filtype", filType).toUriString();
+
+        return exchange(uri, HttpMethod.POST, new HttpEntity<>(vedlegg, getDefaultHeaders(false)),
+            new ParameterizedTypeReference<String>() {});
+    }
+
+    /**
+     * Henter et vedlegg tilhørende sak og dokument
+     * @param rinaSaksnummer saksnummeret
+     * @param dokumentId id til SED'en
+     * @param vedleggId id til vedlegget
+     * @return
+     * @throws MelosysException
+     */
+    @Override
+    public byte[] hentVedlegg(String rinaSaksnummer, String dokumentId, String vedleggId) throws MelosysException {
+        log.info("Henter vedlegg for sak {} og dokument {}", rinaSaksnummer, dokumentId);
+        String uri = String.format(VEDLEGG_PATH, rinaSaksnummer, dokumentId) + "/" + vedleggId;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_OCTET_STREAM));
+        headers.add(HttpHeaders.AUTHORIZATION, getAuth()); //TODO; denne må endres om det viser seg at det trengs automatisering på dette steget - gitt at eux støtter dette da
+
+        return exchange(uri, HttpMethod.GET, new HttpEntity<>(headers),
+            new ParameterizedTypeReference<byte[]>() {});
+    }
+
+    /**
+     * Sletter et eksisterende vedlegg tilhørende et dokument(sed)
+     * @param rinaSaksnummer saksnummeret
+     * @param dokumentId id til sed'en
+     * @param vedleggId id til vedlegget
+     * @return
+     * @throws MelosysException
+     */
+    @Override
+    public void slettVedlegg(String rinaSaksnummer, String dokumentId, String vedleggId) throws MelosysException {
+        log.info("Sletter vedlegg {} på sak {} og dokument {}", vedleggId, rinaSaksnummer, dokumentId);
+        String uri = String.format(VEDLEGG_PATH, rinaSaksnummer, dokumentId) + "/" + vedleggId;
+
+        exchange(uri, HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders(false)),
+            new ParameterizedTypeReference<Void>() {});
+    }
+
+    /**
+     * Henter liste av alle SED-typer som kan opprettes i sakens nåværende tilstand
+     * @param rinaSaksnummer saksnummeret
+     * @return liste av SED-typer
+     * @throws MelosysException
+     */
+    @Override
+    public List<String> hentTilgjengeligeSedTyper(String rinaSaksnummer) throws MelosysException {
+        log.info("Henter tilgjenglige sed-typer for sak {}", rinaSaksnummer);
+        String uri = String.format(BUC_PATH, rinaSaksnummer) + "/sedtyper";
+
+        return exchange(uri, HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+            new ParameterizedTypeReference<List<String>>() {});
+    }
+
+    /**
+     * Setter en sak sensitiv
+     * @param rinaSaksnummer saksnummeret
+     * @throws MelosysException
+     */
+    @Override
+    public void setSakSensitiv(String rinaSaksnummer) throws MelosysException {
+        log.info("Setter sak {} sensitiv", rinaSaksnummer);
+        String uri = String.format(BUC_PATH, rinaSaksnummer) + "/sensitivsak";
+
+        exchange(uri, HttpMethod.PUT, new HttpEntity<>(getDefaultHeaders(false)),
+            new ParameterizedTypeReference<Void>() {});
+    }
+    /**
+     * Fjerner 'sensitiv sak' markør på saken
+     * @param rinaSaksnummer saksnummeret
+     * @throws MelosysException
+     */
+    @Override
+    public void fjernSakSensitiv(String rinaSaksnummer) throws MelosysException {
+        log.info("Fjerner 'sensitiv sak' på sak {}", rinaSaksnummer);
+        String uri = String.format(BUC_PATH, rinaSaksnummer) + "/sensitivsak";
+
+        exchange(uri, HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders(false)),
+            new ParameterizedTypeReference<Void>() {});
+    }
+
+    /**
+     * Oppretter en BuC med en tilhørende SED
+     * @param bucType Hvilken type buc som skal opprettes. Eks LA_BUC_04
+     * @param mottakerId Mottaker sin Rina-id
+     * @return id til rina-sak som ble opprettet
+     * @throws MelosysException
+     */
+    @Override
+    public String opprettBucOgSed(String bucType, String mottakerId, SED sed) throws MelosysException {
+        log.info("Oppretter buc {}, med sed {}, med mottaker {}", bucType, sed.getSed(), mottakerId);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/buc/sed")
+            .queryParam("BucType", bucType)
+            .queryParam("MottakerId", mottakerId);
+
+        return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(sed, getDefaultHeaders(false)),
+            new ParameterizedTypeReference<String>() {});
+    }
+
+    /**
+     * Oppretter en BuC med en tilhørende SED og evt vedlegg
+     * @param bucType Hvilken type buc som skal opprettes. Eks LA_BUC_04
+     * @param fagSakNummer Optional da eux per 17.01: unknown.. brukes ikke av eux,
+     * @param mottakerId Mottaker sin Rina-id
+     * @param filType filtype til vedlegg
+     * @param korrelasjonsId Optional, ikke brukt av eux per nå
+     * @param sed sed'en som skal opprettes
+     * @param vedlegg vedlegget som skal legges til saken
+     * @return id til rina-sak som ble opprettet
+     * @throws MelosysException
+     */
+    @Override
+    public String opprettBucOgSedMedVedlegg(String bucType, String fagSakNummer, String mottakerId, String filType, String korrelasjonsId, SED sed, Object vedlegg) throws MelosysException {
+        log.info("Oppretter buc {}, med sed {}, med mottaker {} og legger til vedlegg", bucType, sed.getSed(), mottakerId);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/buc/sed/vedlegg")
+            .queryParam(BUC_TYPE, bucType)
+            .queryParam("FagSakNummer", fagSakNummer)
+            .queryParam("MottakerID", mottakerId)
+            .queryParam("FilType", filType)
+            .queryParam(KORRELASJONS_ID, korrelasjonsId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.add(HttpHeaders.AUTHORIZATION, getAuth());
+
+        byte[] documentBytes, attachmentBytes;
+        try {
+            documentBytes = new ObjectMapper().writeValueAsBytes(sed);
+            attachmentBytes = new ObjectMapper().writeValueAsBytes(vedlegg);
+        } catch (JsonProcessingException ex) {
+            throw new TekniskException("Feil ved mapping fra sed til bytes");
+        }
+
+        ByteArrayResource document = new ByteArrayResource(documentBytes) {
+            @Override
+            public String getFilename() {
+                return "document";
+            }
+        };
+        ByteArrayResource attachment = new ByteArrayResource(attachmentBytes) {
+            @Override
+            public String getFilename() {
+                return "attachment";
+            }
+        };
+
+        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+        map.add("document", document);
+        map.add("attachment", attachment);
+
+        return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(map, headers),
+            new ParameterizedTypeReference<String>() {});
     }
 
     /**
@@ -114,7 +416,8 @@ public class EuxConsumerImpl implements EuxConsumer {
      */
     @Override
     public List<String> bucTypePerSektor() throws MelosysException {
-        return exchange("/BuCTypePerSektor", HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+        log.info("Henter buctyper per sektor");
+        return exchange("/buctypepersektor", HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
             new ParameterizedTypeReference<List<String>>() {});
     }
 
@@ -127,7 +430,8 @@ public class EuxConsumerImpl implements EuxConsumer {
      */
     @Override
     public List<String> hentInstitusjoner(String bucType, String landkode) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/Institusjoner")
+        log.info("Henter institusjoner for buctype {} og landkode", bucType, landkode);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/institusjoner")
             .queryParam(BUC_TYPE, bucType)
             .queryParam("LandKode", landkode);
 
@@ -143,72 +447,12 @@ public class EuxConsumerImpl implements EuxConsumer {
      */
     @Override
     public JsonNode hentKodeverk(String kodeverk) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/Kodeverk")
+        log.info("Henter kodeverk {}", kodeverk);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/kodeverk")
             .queryParam("Kodeverk", kodeverk);
 
         return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
             new ParameterizedTypeReference<JsonNode>() {});
-    }
-
-    /**
-     * Henter ut en liste over mulige aksjoner
-     * @param rinaSaksnummer
-     * @return liste over mulige aksjoner på en rina-sak
-     * @throws MelosysException
-     */
-    @Override
-    public JsonNode hentMuligeAksjoner(String rinaSaksnummer) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/MuligeAksjoner")
-            .queryParam(RINA_SAKSNUMMER, rinaSaksnummer);
-
-        return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
-            new ParameterizedTypeReference<JsonNode>() {});
-    }
-
-    /**
-     * Oppretter en BuC med en tilhørende SED og evt vedlegg
-     * @param bucType Hvilken type buc som skal opprettes. Eks LA_BUC_04
-     * @param fagSakNummer Optional da eux per 17.01: unknown.. brukes ikke av eux,
-     * @param mottakerId Mottaker sin Rina-id
-     * @param filType filtype til vedlegg
-     * @param korrelasjonsId Optional, ikke brukt av eux per nå
-     * @return id til rina-sak som ble opprettet
-     * @throws MelosysException
-     */
-    @Override
-    public String opprettBucOgSed(String bucType, String fagSakNummer, String mottakerId, String filType, String korrelasjonsId, SED sed, Object vedlegg) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/OpprettBuCogSED")
-            .queryParam(BUC_TYPE, bucType)
-            .queryParam("FagSakNummer", fagSakNummer)
-            .queryParam("MottakerID", mottakerId)
-            .queryParam("Filtype", filType)
-            .queryParam(KORRELASJONS_ID, korrelasjonsId);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        headers.add(HttpHeaders.AUTHORIZATION, getAuth()); //TODO; denne må endres om det viser seg at det trengs automatisering på dette steget - gitt at eux støtter dette da
-
-        byte[] sedBytes;
-        try {
-            sedBytes = new ObjectMapper().writeValueAsString(sed).getBytes();
-        } catch (JsonProcessingException ex) {
-            throw new TekniskException("Feil ved mapping fra sed til bytes");
-        }
-
-        ByteArrayResource dokument = new ByteArrayResource(sedBytes) {
-            @Override
-            public String getFilename() {
-                return "document";
-            }
-        };
-
-        MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        map.add("document", dokument);
-        map.add("attachment", vedlegg); //Vedlegg ikke påkrevd. Vet ikke om vi trenger, setter den enn så lenge.
-
-        return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(map, headers),
-            new ParameterizedTypeReference<String>() {});
     }
 
     /**
@@ -225,7 +469,8 @@ public class EuxConsumerImpl implements EuxConsumer {
      */
     @Override
     public JsonNode finnRinaSaker(String fnr, String fornavn, String etternavn, String fødselsdato, String rinaSaksnummer, String bucType, String status) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/RINASaker")
+        log.info("Søker etter rina-saker");
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/rinasaker")
             .queryParam("Fødselsnummer", fnr)
             .queryParam("Fornavn", fornavn)
             .queryParam("Etternavn", etternavn)
@@ -237,172 +482,6 @@ public class EuxConsumerImpl implements EuxConsumer {
         //Må vurdere å endre returverdi til en POJO om denne integrasjonen faktisk tas i bruk
         return exchange(builder.build(false).toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
             new ParameterizedTypeReference<JsonNode>() {});
-    }
-
-    /**
-     * Henter ut en eksisterende SED
-     * @param rinaSaksnummer saksnummeret hvor SED'en er tilknyttet
-     * @param dokumentId id' til SED'en som skal hentes
-     * @return
-     */
-    @Override
-    public SED hentSed(String rinaSaksnummer, String dokumentId) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(SED_PATH)
-            .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
-            .queryParam(DOKUMENT_ID, dokumentId);
-
-        return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
-            new ParameterizedTypeReference<SED>() {});
-    }
-
-    /**
-     * Oppretter en SED på en eksisterende BuC
-     * @param rinaSaksnummer saksnummer til BuC/rina-saken
-     * @param korrelasjonsId
-     * @param sed SED'en som skal legges til rina-saken
-     * @return dokumentId' til SED'en
-     * @throws MelosysException
-     */
-    @Override
-    public String opprettSed(String rinaSaksnummer, String korrelasjonsId, SED sed) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(SED_PATH)
-                .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
-                .queryParam(KORRELASJONS_ID, korrelasjonsId);
-
-        return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(sed, getDefaultHeaders(false)),
-            new ParameterizedTypeReference<String>() {});
-    }
-
-    /**
-     * Oppdaterer en eksisterende SED
-     * @param rinaSaksnummer saksnummeret
-     * @param korrelasjonsId Optional, brukes ikke av eux per nå
-     * @param sedType Typen sed
-     * @param dokumentId Id'en til SED'en som skal oppdateres
-     * @param sed Den nye versjonen av SED'en
-     * @throws MelosysException
-     */
-    @Override
-    public void oppdaterSed(String rinaSaksnummer, String korrelasjonsId, String sedType, String dokumentId, SED sed) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(SED_PATH)
-                .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
-                .queryParam(KORRELASJONS_ID, korrelasjonsId)
-                .queryParam("SEDType", sedType);
-
-        exchange(builder.toUriString(), HttpMethod.PUT, new HttpEntity<>(sed, getDefaultHeaders(false)),
-                new ParameterizedTypeReference<Void>() {});
-    }
-
-    /**
-     * Sletter en eksisterende SED
-     * @param rinaSaksnummer saksnummeret
-     * @param dokumentId ID til SED som skal slettes
-     * @throws MelosysException
-     */
-    @Override
-    public void slettSed(String rinaSaksnummer, String dokumentId) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(SED_PATH)
-            .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
-            .queryParam(DOKUMENT_ID, dokumentId);
-
-        exchange(builder.toUriString(), HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders(false)),
-            new ParameterizedTypeReference<Void>() {});
-    }
-
-    /**
-     * Sender en SED til mottakkere. Mottakere må være satt før den kan sendes.
-     * @param rinaSaksnummer saksnummeret
-     * @param dokumentId id' til SED som skal sendes
-     * @param korrelasjonsId optional, ikke brukt av eux per nå
-     * @throws MelosysException
-     */
-    @Override
-    public void sendSed(String rinaSaksnummer, String korrelasjonsId, String dokumentId) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/SendSED")
-            .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
-            .queryParam(KORRELASJONS_ID, korrelasjonsId)
-            .queryParam(DOKUMENT_ID, dokumentId);
-
-        exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(getDefaultHeaders(false)),
-                new ParameterizedTypeReference<Void>() {});
-    }
-
-    /**
-     * Henter liste av alle SED-typer som kan opprettes i sakens nåværende tilstand
-     * @param rinaSaksnummer saksnummeret
-     * @return liste av SED-typer
-     * @throws MelosysException
-     */
-    @Override
-    public List<String> hentTilgjengeligeSedTyper(String rinaSaksnummer) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/TilgjengeligeSEDTyper")
-                .queryParam(RINA_SAKSNUMMER, rinaSaksnummer);
-
-        return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
-                new ParameterizedTypeReference<List<String>>() {});
-    }
-
-    /**
-     * Henter et vedlegg tilhørende sak og dokument
-     * @param rinaSaksnummer saksnummeret
-     * @param dokumentId id til SED'en
-     * @param vedleggId id til vedlegget
-     * @return
-     * @throws MelosysException
-     */
-    @Override
-    public byte[] hentVedlegg(String rinaSaksnummer, String dokumentId, String vedleggId) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/Vedlegg")
-            .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
-            .queryParam(DOKUMENT_ID, dokumentId)
-            .queryParam("VedleggID", vedleggId);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_OCTET_STREAM));
-        headers.add(HttpHeaders.AUTHORIZATION, getAuth()); //TODO; denne må endres om det viser seg at det trengs automatisering på dette steget - gitt at eux støtter dette da
-
-        return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(headers),
-            new ParameterizedTypeReference<byte[]>() {});
-    }
-
-    /**
-     * Legger til et vedlegg for et dokument
-     * @param rinaSaksnummer saksnummeret
-     * @param dokumentId id til SED'en vedlegget skal legges til
-     * @param filType filtype
-     * @param vedlegg Selve vedlegget som skal legges til
-     * @return ukjent
-     * @throws MelosysException
-     */
-    @Override
-    public String leggTilVedlegg(String rinaSaksnummer, String dokumentId, String filType, Object vedlegg) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/Vedlegg")
-                .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
-                .queryParam(DOKUMENT_ID, dokumentId)
-                .queryParam("Filtype", filType);
-
-        return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(vedlegg, getDefaultHeaders(false)),
-                new ParameterizedTypeReference<String>() {});
-    }
-
-    /**
-     * Sletter et eksisterende vedlegg tilhørende et dokument(sed)
-     * @param rinaSaksnummer saksnummeret
-     * @param dokumentId id til sed'en
-     * @param vedleggId id til vedlegget
-     * @return
-     * @throws MelosysException
-     */
-    @Override
-    public void slettVedlegg(String rinaSaksnummer, String dokumentId, String vedleggId) throws MelosysException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/Vedlegg")
-                .queryParam(RINA_SAKSNUMMER, rinaSaksnummer)
-                .queryParam(DOKUMENT_ID, dokumentId)
-                .queryParam("VedleggID", vedleggId);
-
-        exchange(builder.toUriString(), HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders(false)),
-                new ParameterizedTypeReference<Void>() {});
     }
 
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType) throws MelosysException {

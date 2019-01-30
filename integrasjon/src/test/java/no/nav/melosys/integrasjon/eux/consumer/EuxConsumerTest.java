@@ -50,15 +50,14 @@ public class EuxConsumerTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Before
-    public void setup() throws MelosysException {
+    public void setup() {
         server = MockRestServiceServer.createServer(restTemplate);
-//        when(restStsClient.collectToken()).thenReturn("supersecret123");
     }
 
     @Test
     public void hentBuC_returnerObjekt() throws MelosysException {
         String id = "1234";
-        server.expect(requestTo("/BuC?RINASaksnummer=" + id))
+        server.expect(requestTo("/buc/" + id))
             .andRespond(withSuccess("1234", MediaType.APPLICATION_JSON));
 
         JsonNode response = euxConsumer.hentBuC(id);
@@ -69,7 +68,7 @@ public class EuxConsumerTest {
     public void opprettBuC_returnererId() throws MelosysException {
         String id = "1234";
         String buc = "LA_BUC_04";
-        server.expect(requestTo("/BuC?BuCType=" + buc))
+        server.expect(requestTo("/buc?BuCType=" + buc))
             .andRespond(withSuccess("1234", MediaType.APPLICATION_JSON));
 
         String response = euxConsumer.opprettBuC(buc);
@@ -79,7 +78,7 @@ public class EuxConsumerTest {
     @Test
     public void slettBuC_ingenRetur() throws MelosysException {
         String id = "1234";
-        server.expect(requestTo("/BuC?RINASaksnummer=" + id))
+        server.expect(requestTo("/buc/" + id))
             .andRespond(withSuccess());
 
         euxConsumer.slettBuC(id);
@@ -89,7 +88,7 @@ public class EuxConsumerTest {
     public void settMottaker_ingenRetur() throws MelosysException {
         String id = "1234";
         String mottaker = "NAV_DANMARK_123";
-        server.expect(requestTo("/BuCDeltagere?RINASaksnummer=" + id + "&MottakerID=" + mottaker))
+        server.expect(requestTo("/buc/" + id + "/bucdeltakere?MottakerId=" + mottaker))
             .andRespond(withSuccess("1234", MediaType.APPLICATION_JSON));
 
         euxConsumer.settMottaker(id, mottaker);
@@ -100,7 +99,7 @@ public class EuxConsumerTest {
 
         List<String> forventetRetur = Lists.newArrayList("en", "to", "tre");
 
-        server.expect(requestTo("/BuCTypePerSektor"))
+        server.expect(requestTo("/buctypepersektor"))
             .andRespond(withSuccess(objectMapper.writeValueAsString(forventetRetur), MediaType.APPLICATION_JSON));
 
         List<String> resultat = euxConsumer.bucTypePerSektor();
@@ -113,7 +112,7 @@ public class EuxConsumerTest {
         String buctype = "LA_BUC_04";
         String landkode = "NO";
 
-        server.expect(requestTo("/Institusjoner?BuCType=" + buctype + "&LandKode=" + landkode))
+        server.expect(requestTo("/institusjoner?BuCType=" + buctype + "&LandKode=" + landkode))
             .andRespond(withSuccess(objectMapper.writeValueAsString(forventetRetur), MediaType.APPLICATION_JSON));
 
         List<String> resultat = euxConsumer.hentInstitusjoner(buctype, landkode);
@@ -128,7 +127,7 @@ public class EuxConsumerTest {
 
         String kodeverk = "Test";
 
-        server.expect(requestTo("/Kodeverk?Kodeverk=" + kodeverk))
+        server.expect(requestTo("/kodeverk?Kodeverk=" + kodeverk))
             .andRespond(withSuccess(objectMapper.writeValueAsString(forventetRetur), MediaType.APPLICATION_JSON));
 
         JsonNode resultat = euxConsumer.hentKodeverk(kodeverk);
@@ -143,7 +142,7 @@ public class EuxConsumerTest {
         forventetRetur.put("int", 1L);
 
         String id = "1234";
-        server.expect(requestTo("/MuligeAksjoner?RINASaksnummer=" + id))
+        server.expect(requestTo("/buc/" + id + "/muligeaksjoner"))
             .andRespond(withSuccess(objectMapper.writeValueAsString(forventetRetur), MediaType.APPLICATION_JSON));
 
         JsonNode resultat = euxConsumer.hentMuligeAksjoner(id);
@@ -153,19 +152,31 @@ public class EuxConsumerTest {
 
     @Test
     public void opprettBucOgSed_forventString() throws MelosysException {
-        String buc = "buc", fagsak = "123", mottaker = "NAV", filtype = "virus.exe", korrelasjon = "111", vedlegg = "vedlegg";
+        String buc = "buc", mottaker = "NAV";
         SED sed = new SED();
 
-        server.expect(requestTo("/OpprettBuCogSED?BuCType=" + buc + "&FagSakNummer=" + fagsak +
-            "&MottakerID=" + mottaker + "&Filtype=" + filtype + "&KorrelasjonsID=" + korrelasjon))
+        server.expect(requestTo("/buc/sed?BucType=" + buc + "&MottakerId=" + mottaker))
             .andRespond(withSuccess("SUKSESS123", MediaType.APPLICATION_JSON));
 
-        String resultat = euxConsumer.opprettBucOgSed(buc, fagsak, mottaker, filtype, korrelasjon, sed, vedlegg);
+        String resultat = euxConsumer.opprettBucOgSed(buc, mottaker, sed);
         assertNotNull(resultat);
     }
 
     @Test
-    public void finndRinaSaker_forventJson() throws MelosysException, JsonProcessingException {
+    public void opprettBucOgSedMedVedlegg_forventString() throws MelosysException {
+        String buc = "buc", fagsak = "123", mottaker = "NAV", filtype = "virus.exe", korrelasjon = "111", vedlegg = "vedlegg";
+        SED sed = new SED();
+
+        server.expect(requestTo("/buc/sed/vedlegg?BuCType=" + buc + "&FagSakNummer=" + fagsak +
+            "&MottakerID=" + mottaker + "&FilType=" + filtype + "&KorrelasjonsId=" + korrelasjon))
+            .andRespond(withSuccess("SUKSESS123", MediaType.APPLICATION_JSON));
+
+        String resultat = euxConsumer.opprettBucOgSedMedVedlegg(buc, fagsak, mottaker, filtype, korrelasjon, sed, vedlegg);
+        assertNotNull(resultat);
+    }
+
+    @Test
+    public void finnRinaSaker_forventJson() throws MelosysException, JsonProcessingException {
         Map<String, Object> forventetRetur = Maps.newHashMap();
         forventetRetur.put("string", "value");
         forventetRetur.put("int", 1L);
@@ -174,7 +185,7 @@ public class EuxConsumerTest {
             bucType = "LA_BUC_04", status = "ferdig";
 
         //Må encode uri, da non-ascii blir escaped
-        String uri = UriComponentsBuilder.fromUriString("/RINASaker?Fødselsnummer=" + fnr + "&Fornavn=" + fornavn + "&Etternavn=" + etternavn +
+        String uri = UriComponentsBuilder.fromUriString("/rinasaker?Fødselsnummer=" + fnr + "&Fornavn=" + fornavn + "&Etternavn=" + etternavn +
             "&Fødselsdato=" + fødselsdato + "&RINASaksnummer=" + saksnummer + "&BuCType=" + bucType + "&Status=" + status).toUriString();
 
         server.expect(requestTo(uri))
@@ -194,7 +205,7 @@ public class EuxConsumerTest {
         assertNotNull(jsonUrl);
         String sed = IOUtils.toString(jsonUrl);
 
-        server.expect(requestTo("/SED?RINASaksnummer=" + id + "&DokumentID=" + dokumentId))
+        server.expect(requestTo("/buc/" + id + "/sed/" + dokumentId))
             .andRespond(withSuccess(sed, MediaType.APPLICATION_JSON));
 
         SED resultat = euxConsumer.hentSed(id, dokumentId);
@@ -213,7 +224,7 @@ public class EuxConsumerTest {
 
         String forventetRetur = "123321";
 
-        server.expect(requestTo("/SED?RINASaksnummer=" + id + "&KorrelasjonsID=" + korrelasjonId))
+        server.expect(requestTo("/buc/" + id + "/sed?KorrelasjonsId=" + korrelasjonId))
             .andRespond(withSuccess(forventetRetur, MediaType.APPLICATION_JSON));
 
         String resultat = euxConsumer.opprettSed(id, korrelasjonId, sed);
@@ -224,14 +235,13 @@ public class EuxConsumerTest {
     public void oppdaterSed_ingenRetur() throws MelosysException {
         String id = "123";
         String korrelasjonId = "312";
-        String sedType = "LA_BUC_04";
         String dokumentId = "1111";
         SED sed = new SED();
 
-        server.expect(requestTo("/SED?RINASaksnummer=" + id + "&KorrelasjonsID=" + korrelasjonId + "&SEDType=" + sedType))
+        server.expect(requestTo("/buc/" + id + "/sed/" + dokumentId + "?KorrelasjonsId=" + korrelasjonId))
             .andRespond(withSuccess());
 
-        euxConsumer.oppdaterSed(id, korrelasjonId, sedType, dokumentId, sed);
+        euxConsumer.oppdaterSed(id, korrelasjonId, dokumentId, sed);
     }
 
     @Test
@@ -239,7 +249,7 @@ public class EuxConsumerTest {
         String id = "123";
         String dokumentId = "1122233";
 
-        server.expect(requestTo("/SED?RINASaksnummer=" + id + "&DokumentID=" + dokumentId))
+        server.expect(requestTo("/buc/" + id + "/sed/" + dokumentId))
             .andRespond(withSuccess());
 
         euxConsumer.slettSed(id, dokumentId);
@@ -251,7 +261,7 @@ public class EuxConsumerTest {
         String korrelasjonsId = "111";
         String dokumentId = "22";
 
-        server.expect(requestTo("/SendSED?RINASaksnummer=" + id + "&KorrelasjonsID=" + korrelasjonsId +  "&DokumentID=" + dokumentId))
+        server.expect(requestTo("/buc/" + id + "/sed/"+ dokumentId + "/send?KorrelasjonsId=" + korrelasjonsId))
             .andRespond(withSuccess());
 
         euxConsumer.sendSed(id, korrelasjonsId, dokumentId);
@@ -263,7 +273,7 @@ public class EuxConsumerTest {
 
         List<String> forventetRetur = Lists.newArrayList("en", "to", "tre");
 
-        server.expect(requestTo("/TilgjengeligeSEDTyper?RINASaksnummer=" + id))
+        server.expect(requestTo("/buc/" + id + "/sedtyper"))
             .andRespond(withSuccess(objectMapper.writeValueAsString(forventetRetur), MediaType.APPLICATION_JSON));
 
         List<String> resultat = euxConsumer.hentTilgjengeligeSedTyper(id);
@@ -278,7 +288,7 @@ public class EuxConsumerTest {
 
         byte[] forventetRetur = "returverdi".getBytes();
 
-        server.expect(requestTo("/Vedlegg?RINASaksnummer=" + id + "&DokumentID=" + dokumentId + "&VedleggID=" + vedleggId))
+        server.expect(requestTo("/buc/" + id + "/sed/" + dokumentId + "/vedlegg/" + vedleggId))
             .andRespond(withSuccess(forventetRetur, MediaType.APPLICATION_OCTET_STREAM));
 
         byte[] resultat = euxConsumer.hentVedlegg(id, dokumentId, vedleggId);
@@ -293,7 +303,7 @@ public class EuxConsumerTest {
 
         String forventetRetur = "returverdi#123";
 
-        server.expect(requestTo("/Vedlegg?RINASaksnummer=" + id + "&DokumentID=" + dokumentId + "&Filtype=" + filtype))
+        server.expect(requestTo("/buc/" + id + "/sed/" + dokumentId + "/vedlegg?Filtype=" + filtype))
             .andRespond(withSuccess(forventetRetur, MediaType.APPLICATION_JSON));
 
         String resultat = euxConsumer.leggTilVedlegg(id, dokumentId, filtype, "vedlegg");
@@ -306,7 +316,7 @@ public class EuxConsumerTest {
         String dokumentId = "123321";
         String vedleggId = "2222";
 
-        server.expect(requestTo("/Vedlegg?RINASaksnummer=" + id + "&DokumentID=" + dokumentId + "&VedleggID=" + vedleggId))
+        server.expect(requestTo("/buc/" + id + "/sed/" + dokumentId + "/vedlegg/" + vedleggId))
             .andRespond(withSuccess());
 
         euxConsumer.slettVedlegg(id, dokumentId, vedleggId);
@@ -318,7 +328,7 @@ public class EuxConsumerTest {
         String dokumentId = "123321";
         String vedleggId = "2222";
 
-        server.expect(requestTo("/Vedlegg?RINASaksnummer=" + id + "&DokumentID=" + dokumentId + "&VedleggID=" + vedleggId))
+        server.expect(requestTo("/buc/" + id + "/sed/" + dokumentId + "/vedlegg/" + vedleggId))
             .andRespond(withBadRequest());
 
         euxConsumer.slettVedlegg(id, dokumentId, vedleggId);
