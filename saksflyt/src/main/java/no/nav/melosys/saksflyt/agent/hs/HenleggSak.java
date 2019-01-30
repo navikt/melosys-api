@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.henleggsak;
+package no.nav.melosys.saksflyt.agent.hs;
 
 import java.util.Map;
 
@@ -16,14 +16,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.HENLEGGELSESBREV;
-import static no.nav.melosys.domain.ProsessSteg.HENLEGG_SAK;
+import static no.nav.melosys.domain.ProsessSteg.HS_HENLEGG_SAK;
+import static no.nav.melosys.domain.ProsessSteg.HS_SEND_BREV;
 
 /**
  * Henlegger Sak
  *
  * Transisjoner:
- * HENLEGG_SAK -> HENLEGGELSESBREV eller FEILET_MASKINELT hvis feil
+ * HS_HENLEGG_SAK -> HS_SEND_BREV eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class HenleggSak extends AbstraktStegBehandler {
@@ -40,7 +40,7 @@ public class HenleggSak extends AbstraktStegBehandler {
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return HENLEGG_SAK;
+        return HS_HENLEGG_SAK;
     }
 
     @Override
@@ -61,6 +61,6 @@ public class HenleggSak extends AbstraktStegBehandler {
         behandlingRepo.save(behandling);
 
         log.info("Satt sak til henlagt for prosessinstans {}", prosessinstans.getId());
-        prosessinstans.setSteg(HENLEGGELSESBREV);
+        prosessinstans.setSteg(HS_SEND_BREV);
     }
 }

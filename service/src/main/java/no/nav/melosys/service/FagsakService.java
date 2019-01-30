@@ -99,11 +99,7 @@ public class FagsakService {
 
         lagre(fagsak);
 
-        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, behandlingstype);
-
-        behandling.setInitierendeJournalpostId(initierendeJournalpostId);
-        behandling.setInitierendeDokumentId(initierendeDokumentId);
-
+        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
         return fagsak;
@@ -129,12 +125,12 @@ public class FagsakService {
             throw new TekniskException(begrunnelseKodeString.toUpperCase() + " er ingen gyldig henleggelsesgrunn");
         }
 
-        Behandling sisteIkkeAvsluttedeBehandling = getSisteIkkeAvsluttedeBehandlingBehandling(fagsak);
+        Behandling sisteIkkeAvsluttedeBehandling = getSisteIkkeAvsluttedeBehandling(fagsak);
 
         prosessinstansService.opprettProsessinstansHenleggSak(sisteIkkeAvsluttedeBehandling, begrunnelseKode, fritekst);
     }
 
-    private Behandling getSisteIkkeAvsluttedeBehandlingBehandling(Fagsak fagsak) {
+    private Behandling getSisteIkkeAvsluttedeBehandling(Fagsak fagsak) {
         return fagsak.getBehandlinger()
             .stream()
             .filter(behandling -> behandling.getStatus() != Behandlingsstatus.AVSLUTTET)

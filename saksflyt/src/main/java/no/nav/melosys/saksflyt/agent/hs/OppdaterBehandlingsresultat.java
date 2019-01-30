@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.henleggsak;
+package no.nav.melosys.saksflyt.agent.hs;
 
 import java.util.Map;
 
@@ -15,15 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.ProsessSteg.HENLEGG_SAK;
+import static no.nav.melosys.domain.ProsessSteg.HS_HENLEGG_SAK;
 
 /**
  * Oppdaterer behandlingsresultat
  *
  * Transisjoner:
- * OPPDATER_RESULTAT_HENLEGG_SAK -> HENLEGG_SAK eller FEILET_MASKINELT hvis feil
+ * HS_OPPDATER_RESULTAT -> HENLEGG_SAK eller FEILET_MASKINELT hvis feil
  */
-@Component
+@Component("HenleggSakOppdaterBehandlingsresultat")
 public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterBehandlingsresultat.class);
 
@@ -37,7 +37,7 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.OPPDATER_RESULTAT_HENLEGG_SAK;
+        return ProsessSteg.HS_OPPDATER_RESULTAT;
     }
 
     @Override
@@ -55,9 +55,11 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke oppdatere behandlingsresultatet for henleggelsen fordi behandling " + behandlingID + " ikke finnes."));
         behandlingsresultat.setType(BehandlingsresultatType.HENLEGGELSE);
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
+        behandlingsresultat.setHenleggelsesgrunn(prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Henleggelsesgrunner.class));
+        behandlingsresultat.setHenleggelseFritekst(prosessinstans.getData(ProsessDataKey.FRITEKST));
         behandlingsresultatRepository.save(behandlingsresultat);
 
         log.info("Oppdatert behandlingsresultat for prosessinstans {}. Satt til henleggelse", prosessinstans.getId());
-        prosessinstans.setSteg(HENLEGG_SAK);
+        prosessinstans.setSteg(HS_HENLEGG_SAK);
     }
 }

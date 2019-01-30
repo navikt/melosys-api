@@ -77,8 +77,9 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('IV_SEND_BREV', 'Send brev etter i
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_AVSLUTT_BEHANDLING', 'Avslutt fagsak og aktiv behandling');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_STATUS_BEH_AVSL', 'Oppdater Sak og Behandling ved lukking av behandling');
 
-INSERT INTO prosess_steg (kode, navn) VALUES ('HENLEGG_SAK', 'Henlegg en sak');
-INSERT INTO prosess_steg (kode, navn) VALUES ('HENLEGGELSESBREV', 'Opprett henleggelsesbrev');
+INSERT INTO prosess_steg (kode, navn) VALUES ('HS_OPPDATER_RESULTAT', 'Oppdatering av behandlingsresultat');
+INSERT INTO prosess_steg (kode, navn) VALUES ('HS_HENLEGG_SAK', 'Henlegg en sak');
+INSERT INTO prosess_steg (kode, navn) VALUES ('HS_SEND_BREV', 'Opprett henleggelsesbrev');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('MANGELBREV', 'Opprett mangelbrev');
 

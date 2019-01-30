@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.ProsessSteg.OPPDATER_RESULTAT_HENLEGG_SAK;
+import static no.nav.melosys.domain.ProsessSteg.HS_OPPDATER_RESULTAT;
 
 @Service
 public class ProsessinstansService {
@@ -79,7 +79,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, begrunnelseKode);
         prosessinstans.setData(ProsessDataKey.FRITEKST, begrunnelseKode == Henleggelsesgrunner.ANNET ? fritekst : null);
 
-        prosessinstans.setSteg(OPPDATER_RESULTAT_HENLEGG_SAK);
+        prosessinstans.setSteg(HS_OPPDATER_RESULTAT);
 
         prosessinstansRepo.save(prosessinstans);
         binge.leggTil(prosessinstans);

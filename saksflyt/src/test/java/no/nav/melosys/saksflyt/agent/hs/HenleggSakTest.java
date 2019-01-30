@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.henleggsak;
+package no.nav.melosys.saksflyt.agent.hs;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
@@ -38,7 +38,7 @@ public class HenleggSakTest {
 
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
         assertThat(fagsak.getStatus()).isEqualTo(Fagsaksstatus.HENLAGT);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.HENLEGGELSESBREV);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.HS_SEND_BREV);
         verify(fagsakRepository).save(fagsak);
         verify(behandlingRepository).save(behandling);
     }

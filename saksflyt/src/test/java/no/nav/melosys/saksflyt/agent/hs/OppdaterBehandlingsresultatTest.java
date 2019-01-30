@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.henleggsak;
+package no.nav.melosys.saksflyt.agent.hs;
 
 import java.util.Optional;
 
@@ -15,7 +15,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessSteg.HENLEGG_SAK;
+import static no.nav.melosys.domain.ProsessSteg.HS_HENLEGG_SAK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -49,6 +49,10 @@ public class OppdaterBehandlingsresultatTest {
         String testbruker = "Z097";
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, testbruker);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.HENLEGGELSE.getKode());
+        Henleggelsesgrunner henleggelsesgrunn = Henleggelsesgrunner.ANNET;
+        prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, henleggelsesgrunn);
+        String henleggelsesfritekst = "henleggelsesfritekst";
+        prosessinstans.setData(ProsessDataKey.FRITEKST, henleggelsesfritekst);
 
         Optional<Behandlingsresultat> behandlingsresultat = Optional.of(new Behandlingsresultat());
         doReturn(behandlingsresultat).when(behandlingsresultatRepository).findById(behandlingId);
@@ -59,7 +63,10 @@ public class OppdaterBehandlingsresultatTest {
         Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
         assertThat(capture.getType()).isEqualTo(BehandlingsresultatType.HENLEGGELSE);
         assertThat(capture.getEndretAv()).isEqualTo(testbruker);
-        assertThat(prosessinstans.getSteg()).isEqualTo(HENLEGG_SAK);
+        assertThat(capture.getHenleggelsesgrunn()).isEqualTo(henleggelsesgrunn);
+        assertThat(capture.getHenleggelseFritekst()).isEqualTo(henleggelsesfritekst);
+        assertThat(capture.getEndretAv()).isEqualTo(testbruker);
+        assertThat(prosessinstans.getSteg()).isEqualTo(HS_HENLEGG_SAK);
     }
 
     @Test

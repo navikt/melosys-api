@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.Collections;
-import java.util.Properties;
 
 import no.nav.melosys.audit.AuditorProvider;
 import no.nav.melosys.domain.*;
@@ -16,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationEventPublisher;
 
+import static no.nav.melosys.domain.ProsessDataKey.DOKUMENT_ID;
+import static no.nav.melosys.domain.ProsessDataKey.JOURNALPOST_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -46,17 +47,15 @@ public class OpprettFagsakOgBehandlingTest {
     public void utførSteg_typeJfrNySak_tilStegJfrOpprettSøknad() {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
-        Properties properties = new Properties();
         String aktørId = "FJERNET93";
         String journalpostId = "44553";
-        String dokuemntId = "222221";
+        String dokumentId = "222221";
         String arbeidsgiver = "104568393";
-        properties.setProperty(ProsessDataKey.AKTØR_ID.getKode(), aktørId);
-        properties.setProperty(ProsessDataKey.ARBEIDSGIVER.getKode(), arbeidsgiver);
-        properties.setProperty(ProsessDataKey.JOURNALPOST_ID.getKode(), journalpostId);
-        properties.setProperty(ProsessDataKey.DOKUMENT_ID.getKode(), dokuemntId);
+        p.setData(ProsessDataKey.AKTØR_ID, aktørId);
+        p.setData(ProsessDataKey.ARBEIDSGIVER, arbeidsgiver);
+        p.setData(ProsessDataKey.JOURNALPOST_ID, journalpostId);
+        p.setData(ProsessDataKey.DOKUMENT_ID, dokumentId);
 
-        p.setData(properties);
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
         fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
@@ -64,7 +63,7 @@ public class OpprettFagsakOgBehandlingTest {
 
         agent.utførSteg(p);
 
-        verify(fagsakService, times(1)).nyFagsakOgBehandling(aktørId, arbeidsgiver, null, Behandlingstype.SØKNAD, journalpostId, dokuemntId);
+        verify(fagsakService, times(1)).nyFagsakOgBehandling(aktørId, arbeidsgiver, null, Behandlingstype.SØKNAD, journalpostId, dokumentId);
         verify(applicationEventPublisher, times(1)).publishEvent(any(FagsakOpprettetEvent.class));
         verify(applicationEventPublisher, times(1)).publishEvent(any(BehandlingOpprettetEvent.class));
 
@@ -73,19 +72,24 @@ public class OpprettFagsakOgBehandlingTest {
 
     @Test
     public void utførSteg_typeJfrNyBehandling_tilStegStatusBehOppr() {
+        String initierendeJournalpostId = "234";
+        String initierendeDokumentId = "221234";
+
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
         p.setData(ProsessDataKey.SAKSNUMMER, "MELTEST-333");
+        p.setData(JOURNALPOST_ID, initierendeJournalpostId);
+        p.setData(DOKUMENT_ID, initierendeDokumentId);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
         when(fagsakService.hentFagsak("MELTEST-333")).thenReturn(fagsak);
-        when(behandlingService.nyBehandling(eq(fagsak), any(), any())).thenReturn(new Behandling());
+        when(behandlingService.nyBehandling(eq(fagsak), any(), any(), anyString(), anyString())).thenReturn(new Behandling());
 
         agent.utførSteg(p);
 
-        verify(behandlingService, times(1)).nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, Behandlingstype.SØKNAD);
+        verify(behandlingService, times(1)).nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, Behandlingstype.SØKNAD, initierendeJournalpostId, initierendeDokumentId);
         verify(applicationEventPublisher, times(0)).publishEvent(any(FagsakOpprettetEvent.class));
         verify(applicationEventPublisher, times(1)).publishEvent(any(BehandlingOpprettetEvent.class));
 

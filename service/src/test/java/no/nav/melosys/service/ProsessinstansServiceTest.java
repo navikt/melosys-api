@@ -103,7 +103,7 @@ public class ProsessinstansServiceTest {
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.HENLEGG_SAK);
-        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.OPPDATER_RESULTAT_HENLEGG_SAK);
+        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.HS_OPPDATER_RESULTAT);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
     }
 }

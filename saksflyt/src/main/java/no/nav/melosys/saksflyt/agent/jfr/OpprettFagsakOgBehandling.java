@@ -81,7 +81,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             String saksnummer = prosessinstans.getData(SAKSNUMMER);
             Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
             Behandlingstype behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstype.class);
-            Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype);
+            Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
             prosessinstans.setBehandling(behandling);
 
             applicationEventPublisher.publishEvent(new BehandlingOpprettetEvent(behandling, endretAv));

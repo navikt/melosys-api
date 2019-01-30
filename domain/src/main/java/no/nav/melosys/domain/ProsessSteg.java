@@ -53,9 +53,9 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     MANGELBREV("MANGELBREV", "Opprett mangelbrev"),
 
     //Henlegg sak
-    OPPDATER_RESULTAT_HENLEGG_SAK("OPPDATER_RESULTAT_HENLEGG_SAK", "Oppdater behandlingsresultat og send videre til henlegg sak"),
-    HENLEGG_SAK("HENLEGG_SAK", "Henlegg en sak"),
-    HENLEGGELSESBREV("HENLEGGELSESBREV", "Opprett henleggelsesbrev");
+    HS_OPPDATER_RESULTAT("HS_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
+    HS_HENLEGG_SAK("HS_HENLEGG_SAK", "Henlegg en sak"),
+    HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev");
 
 
     private String kode;
