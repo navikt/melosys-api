@@ -11,7 +11,7 @@ interface EuxConsumer extends RestConsumer {
 
     void setSakSensitiv(String rinaSaksnummer) throws MelosysException;
 
-    void fjernSensitivPaaSak(String rinaSaksnummer) throws MelosysException;
+    void fjernSakSensitiv(String rinaSaksnummer) throws MelosysException;
 
     String opprettBucOgSedMedVedlegg(String bucType, String fagSakNummer, String mottakerId, String filType, String korrelasjonsId, SED sed, Object vedlegg) throws MelosysException;
 

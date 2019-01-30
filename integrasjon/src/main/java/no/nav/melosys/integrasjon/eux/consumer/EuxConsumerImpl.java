@@ -327,7 +327,7 @@ public class EuxConsumerImpl implements EuxConsumer {
      * @throws MelosysException
      */
     @Override
-    public void fjernSensitivPaaSak(String rinaSaksnummer) throws MelosysException {
+    public void fjernSakSensitiv(String rinaSaksnummer) throws MelosysException {
         log.info("Fjerner 'sensitiv sak' på sak {}", rinaSaksnummer);
         String uri = String.format(BUC_PATH, rinaSaksnummer) + "/sensitivsak";
 
