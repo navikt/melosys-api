@@ -7,7 +7,7 @@ import no.nav.melosys.eux.model.nav.SED;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 
-interface EuxConsumer extends RestConsumer {
+public interface EuxConsumer extends RestConsumer {
 
     List<String> hentInstitusjoner(String bucType, String landkode) throws MelosysException;
 

@@ -34,6 +34,9 @@ public class Fagsak extends RegistreringsInfo {
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Behandling> behandlinger;
 
+    @Column(name = "rina_saksnummer")
+    private String rinasaksnummer;
+
     public Long getGsakSaksnummer() {
         return gsakSaksnummer;
     }
@@ -116,6 +119,14 @@ public class Fagsak extends RegistreringsInfo {
 
     public void setSaksnummer(String saksnummer) {
         this.saksnummer = saksnummer;
+    }
+
+    public String getRinasaksnummer() {
+        return rinasaksnummer;
+    }
+
+    public void setRinasaksnummer(String rinasaksnummer) {
+        this.rinasaksnummer = rinasaksnummer;
     }
 
     @Override

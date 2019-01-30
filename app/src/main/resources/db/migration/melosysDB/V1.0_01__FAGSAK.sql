@@ -7,6 +7,7 @@ CREATE TABLE fagsak (
     endret_dato     TIMESTAMP     NOT NULL,
     registrert_av   VARCHAR2(99)  NULL,
     endret_av       VARCHAR2(99)  NULL,
+    rina_saksnummer VARCHAR2(99)  NULL,
     CONSTRAINT pk_fagsak PRIMARY KEY (saksnummer)
 );
 

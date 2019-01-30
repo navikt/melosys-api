@@ -6,10 +6,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -28,6 +25,8 @@ public abstract class AbstraktSedDataBygger extends AbstraktDokumentDataBygger {
         this.registerOppslagService = registerOppslagService;
 
     }
+
+    public abstract AbstraktSedData lag(Behandling behandling) throws TekniskException, FunksjonellException;
 
     public <T extends AbstraktSedData> T lag(Behandling behandling, T sedData)
         throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {

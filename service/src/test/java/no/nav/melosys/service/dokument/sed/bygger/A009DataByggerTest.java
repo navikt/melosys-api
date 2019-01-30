@@ -50,7 +50,7 @@ public class A009DataByggerTest {
 
     @Test
     public void lagA009DataObjekt_forventLovvalgBestemmelse12_1() throws FunksjonellException, TekniskException {
-        A009Data a009Data = a009DataBygger.lag(behandling);
+        A009Data a009Data = (A009Data) a009DataBygger.lag(behandling);
         assertNotNull(a009Data.getLovvalgsperiode());
         assertEquals(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1, a009Data.getLovvalgsperiode().getBestemmelse());
 
