@@ -18,8 +18,7 @@ public class SedUtils {
             }
         }
 
-        //TODO:FIXME :)
-        throw new RuntimeException();
+        throw new RuntimeException("Lovvalgsbestemmelse " + bestemmelse.name() + " er ikke støttet enda!");
     }
 
     public static BucType hentBucFraLovvalgsBestemmelse(LovvalgBestemmelse bestemmelse) {
@@ -31,6 +30,6 @@ public class SedUtils {
                     return BucType.LA_BUC_04;
             }
         }
-        throw new RuntimeException();
+        throw new RuntimeException("Lovvalgsbestemmelse " + bestemmelse.name() + " er ikke støttet enda!");
     }
 }

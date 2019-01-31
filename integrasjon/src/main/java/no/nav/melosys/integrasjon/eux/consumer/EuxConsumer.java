@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.eux.consumer;
 
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.melosys.eux.model.nav.SED;
@@ -13,7 +14,7 @@ public interface EuxConsumer extends RestConsumer {
 
     void fjernSakSensitiv(String rinaSaksnummer) throws MelosysException;
 
-    String opprettBucOgSedMedVedlegg(String bucType, String fagSakNummer, String mottakerId, String filType, String korrelasjonsId, SED sed, Object vedlegg) throws MelosysException;
+    Map<String, String> opprettBucOgSedMedVedlegg(String bucType, String fagSakNummer, String mottakerId, String filType, String korrelasjonsId, SED sed, Object vedlegg) throws MelosysException;
 
     List<String> hentInstitusjoner(String bucType, String landkode) throws MelosysException;
 
@@ -31,7 +32,7 @@ public interface EuxConsumer extends RestConsumer {
 
     JsonNode hentMuligeAksjoner(String rinaSaksnummer) throws MelosysException;
 
-    String opprettBucOgSed(String bucType, String mottakerId, SED sed) throws MelosysException;
+    Map<String, String> opprettBucOgSed(String bucType, String mottakerId, SED sed) throws MelosysException;
 
     JsonNode finnRinaSaker(String fnr, String fornavn, String etternavn, String fødselsdato, String rinaSaksnummer, String bucType, String status) throws MelosysException;
 

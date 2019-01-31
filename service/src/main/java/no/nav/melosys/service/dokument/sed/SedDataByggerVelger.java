@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument.sed;
 
+import javax.validation.constraints.NotNull;
+
 import no.nav.melosys.eux.model.SedType;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
@@ -32,13 +34,14 @@ public class SedDataByggerVelger {
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
 
-    public AbstraktSedDataBygger hent(SedType sedType) {
+    public AbstraktSedDataBygger hent(@NotNull SedType sedType) {
         switch (sedType) {
             case A009:
                 return new A009DataBygger(kodeverkService,registerOppslagService,
                     lovvalgsperiodeService,avklartefaktaService);
         }
 
-        throw new RuntimeException(); //TODO:FIXME :)
+        //Kaster runtime exception til resten av
+        throw new RuntimeException("Sed-type: " + sedType.name() + " er ikke implementert enda");
     }
 }

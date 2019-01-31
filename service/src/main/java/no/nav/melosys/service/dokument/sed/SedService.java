@@ -18,6 +18,7 @@ import no.nav.melosys.service.dokument.sed.bygger.AbstraktSedDataBygger;
 import no.nav.melosys.service.dokument.sed.mapper.AbstraktSedMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,13 +30,12 @@ public class SedService {
     private final SedDataByggerVelger sedDataByggerVelger;
     private final FagsakRepository fagsakRepository;
 
-    public SedService(EuxConsumer euxConsumer, SedDataByggerVelger sedDataByggerVelger, FagsakRepository fagsakRepository) {
+    public SedService(@Qualifier("system") EuxConsumer euxConsumer, SedDataByggerVelger sedDataByggerVelger, FagsakRepository fagsakRepository) {
         this.euxConsumer = euxConsumer;
         this.sedDataByggerVelger = sedDataByggerVelger;
         this.fagsakRepository = fagsakRepository;
     }
 
-    @SuppressWarnings("unchecked")
     public void opprettOgSendSed(Behandling behandling, Behandlingsresultat behandlingsresultat) throws MelosysException {
 
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.getLovvalgsperioder().iterator().next(); //TODO: flere lovvalgsperioder
@@ -49,14 +49,13 @@ public class SedService {
 
         AbstraktSedMapper abstraktSedMapper = DokumentDataMapperRuter.sedMapper(sedType);
 
-        //For kall til eux
         SED sed = abstraktSedMapper.mapTilSed(sedData);
         BucType bucType = SedUtils.hentBucFraLovvalgsBestemmelse(lovvalgBestemmelse);
         String fagsaknummer = behandling.getFagsak().getSaksnummer();
         String mottakerId = hentFørsteInstitusjonId(euxConsumer.hentInstitusjoner(bucType.name(), lovvalgsLand.getKode()));
 
         log.info("Oppretter buc {} og sed {} for behandling {}, fagsak {}", bucType, sedType, behandling.getId(), fagsaknummer);
-        Map<String,String> rinaSakInfo = (Map)(Object)euxConsumer.opprettBucOgSed(bucType.name(), fagsaknummer, mottakerId, null, null, sed, null);
+        Map<String,String> rinaSakInfo = euxConsumer.opprettBucOgSed(bucType.name(), mottakerId, sed);
         String rinaSaksnummer = rinaSakInfo.get("caseId");
         String dokumentId = rinaSakInfo.get("documentId"); //brukes til journalføring
 
@@ -69,7 +68,7 @@ public class SedService {
         //TODO: journalfør
     }
 
-    //TODO: Lovvalg skal kun ha EN instutisjon i hvert medlemsland. Skal bli lagt inn egen liste i kodeverk(?), følg opp.
+    //Lovvalg skal kun ha en institusjon i hvert medlemsland.
     private String hentFørsteInstitusjonId(List<String> institusjoner) throws FunksjonellException, TekniskException {
         if (institusjoner == null || institusjoner.isEmpty()) throw new FunksjonellException("Liste av institusjoner er tom!");
         String institusjon = institusjoner.get(0);

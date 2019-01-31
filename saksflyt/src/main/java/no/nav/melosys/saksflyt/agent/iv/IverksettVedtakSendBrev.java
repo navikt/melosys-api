@@ -18,7 +18,6 @@ import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +26,8 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.ProduserbartDokument.ATTEST_A1;
 import static no.nav.melosys.domain.ProduserbartDokument.INNVILGELSE_YRKESAKTIV;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.ProsessSteg.IV_AVSLUTT_BEHANDLING;
 import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
+import static no.nav.melosys.domain.ProsessSteg.IV_SEND_SED;
 
 /**
  * Sende ulike brev basert på lovvalgsbestemmelse.
@@ -91,7 +90,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
                 dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
 
                 log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
-                prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
+                prosessinstans.setSteg(IV_SEND_SED);
             } else {
                 log.warn("Innvilgelsesbrev kan ikke sendes for behandling {} i "
                         + "prosessinstansen {}.",
