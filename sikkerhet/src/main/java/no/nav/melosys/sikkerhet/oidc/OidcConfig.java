@@ -71,7 +71,7 @@ public class OidcConfig {
             final SecurityFilter securityFilter = new SecurityFilter(config, OIDC_CLIENT_NAME);
             final CallbackFilter callbackFilter = new CallbackFilter(config);
             callbackFilter.setSuffix(CALLBACKURI);
-            http
+            http.cors().and()
                 .authorizeRequests().antMatchers(CALLBACKURI).permitAll()
                 .and()
                 .addFilterBefore(callbackFilter, BasicAuthenticationFilter.class)
