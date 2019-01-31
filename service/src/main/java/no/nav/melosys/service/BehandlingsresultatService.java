@@ -1,6 +1,9 @@
 package no.nav.melosys.service;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,5 +31,10 @@ public class BehandlingsresultatService {
             behandlingsresultat.getVilkaarsresultater().clear();
             behandlingsresultatRepository.save(behandlingsresultat);
         }
+    }
+
+    public Behandlingsresultat hentBehandlingsresultat(long behandlingsid) throws IkkeFunnetException {
+        Optional<Behandlingsresultat> resultat = behandlingsresultatRepository.findById(behandlingsid);
+        return resultat.orElseThrow(() -> new IkkeFunnetException("Behandlingsresultat ikke funnet for behandlingsid " + behandlingsid));
     }
 }
