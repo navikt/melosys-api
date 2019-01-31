@@ -1,0 +1,14 @@
+package no.nav.melosys.tjenester.gui.dto;
+
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Henleggelsesgrunner;
+
+public class BehandlingsresultatDto {
+    public Henleggelsesgrunner henleggelsegrunn;
+    public String henleggelseFritekst;
+
+    public BehandlingsresultatDto(Behandlingsresultat behandlingsresultat) {
+        henleggelsegrunn = behandlingsresultat.getHenleggelsesgrunn();
+        henleggelseFritekst = behandlingsresultat.getHenleggelseFritekst();
+    }
+}
