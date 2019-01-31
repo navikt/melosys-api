@@ -72,7 +72,7 @@ public class BehandlingService {
      * - Oppretter tom behandlingsresultat.
      */
     @Transactional
-    public Behandling nyBehandling(Fagsak fagsak, Behandlingsstatus behandlingsstatus, Behandlingstype behandlingstype) {
+    public Behandling nyBehandling(Fagsak fagsak, Behandlingsstatus behandlingsstatus, Behandlingstype behandlingstype, String initierendeJournalpostId, String initierendeDokumentId) {
         Instant nå = Instant.now();
 
         Behandling behandling = new Behandling();
@@ -83,6 +83,8 @@ public class BehandlingService {
 
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
+        behandling.setInitierendeJournalpostId(initierendeJournalpostId);
+        behandling.setInitierendeDokumentId(initierendeDokumentId);
         behandlingRepository.save(behandling);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();

@@ -136,9 +136,13 @@ public class BehandlingServiceTest {
 
     @Test
     public void nyBehandling() {
-        Behandling behandling = behandlingService.nyBehandling(new Fagsak(), Behandlingsstatus.OPPRETTET, Behandlingstype.SØKNAD);
+        String initierendeJournalpostId = "234";
+        String initierendeDokumentId = "221234";
+        Behandling behandling = behandlingService.nyBehandling(new Fagsak(), Behandlingsstatus.OPPRETTET, Behandlingstype.SØKNAD, initierendeJournalpostId, initierendeDokumentId);
         verify(behandlingRepo).save(any(Behandling.class));
         assertThat(behandling.getType()).isEqualTo(Behandlingstype.SØKNAD);
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
+        assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
+        assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);
     }
 }
