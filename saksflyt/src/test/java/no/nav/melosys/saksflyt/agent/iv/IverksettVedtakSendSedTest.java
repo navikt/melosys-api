@@ -46,6 +46,7 @@ public class IverksettVedtakSendSedTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
         behandlingsresultat.setType(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
