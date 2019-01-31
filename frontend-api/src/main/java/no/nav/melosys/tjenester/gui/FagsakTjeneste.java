@@ -1,10 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
@@ -46,6 +44,8 @@ public class FagsakTjeneste extends RestTjeneste {
     
     private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
 
+    private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
+
     private final FagsakService fagsakService;
 
     private ModelMapper modelMapper;
@@ -55,6 +55,7 @@ public class FagsakTjeneste extends RestTjeneste {
     @Autowired
     public FagsakTjeneste(FagsakService fagsakService, Tilgang tilgang) {
         this.fagsakService = fagsakService;
+
         this.tilgang = tilgang;
 
         this.modelMapper = new ModelMapper();
@@ -130,39 +131,49 @@ public class FagsakTjeneste extends RestTjeneste {
             fagsakOppsummeringDto.setSakstype(fagsak.getType());
             fagsakOppsummeringDto.setSaksstatus(fagsak.getStatus());
             fagsakOppsummeringDto.setOpprettetDato(fagsak.getRegistrertDato());
-            fagsakOppsummeringDto.setBehandlingoppsummeringer(new ArrayList<>());
 
             List<Behandling> behandlinger = fagsak.getBehandlinger();
-            behandlinger.stream()
+
+            List<BehandlingOversiktDto> behandlingOversiktDtoer = behandlinger.stream()
                 .filter(Objects::nonNull)
-                .forEach(behandling -> tilBehandlingOppsummeringDto(fagsakOppsummeringDto, behandling));
+                .sorted(Comparator.comparing(RegistreringsInfo::getRegistrertDato).reversed())
+                .map(this::tilBehandlingOversiktDto)
+                .collect(Collectors.toList());
+
+            setSammensattNavn(fagsakOppsummeringDto, behandlinger.get(0));
+            fagsakOppsummeringDto.setBehandlingOversikter(behandlingOversiktDtoer);
             fagsakListe.add(fagsakOppsummeringDto);
         }
         return fagsakListe;
     }
 
-    private void tilBehandlingOppsummeringDto(FagsakOppsummeringDto fagsakOppsummeringDto, Behandling behandling) {
-        BehandlingOppsummeringDto oppsummeringDto = new BehandlingOppsummeringDto();
+    private BehandlingOversiktDto tilBehandlingOversiktDto(Behandling behandling) {
+        BehandlingOversiktDto behandlingOversiktDto = new BehandlingOversiktDto();
         if (behandling != null) {
-            oppsummeringDto.setBehandlingID(behandling.getId());
-            oppsummeringDto.setBehandlingsstatus(behandling.getStatus());
-            oppsummeringDto.setBehandlingstype(behandling.getType());
-            oppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
-            Optional<SaksopplysningDokument> opt = hentDokument(behandling, SaksopplysningType.SØKNAD);
-            if (opt.isPresent()) {
-                SoeknadDokument soeknadDokument = (SoeknadDokument) opt.get();
-                oppsummeringDto.setLand(hentLand(soeknadDokument));
-                Periode periode = hentPeriode(soeknadDokument);
-                oppsummeringDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
-            }
+            behandlingOversiktDto.setBehandlingID(behandling.getId());
+            behandlingOversiktDto.setBehandlingsstatus(behandling.getStatus());
+            behandlingOversiktDto.setBehandlingstype(behandling.getType());
+            behandlingOversiktDto.setOpprettetDato(behandling.getRegistrertDato());
 
-            hentDokument(behandling, SaksopplysningType.PERSONOPPLYSNING).ifPresent(
+            hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(
                 saksopplysningDokument -> {
-                    PersonDokument personDokument = (PersonDokument) saksopplysningDokument;
-                    fagsakOppsummeringDto.setSammensattNavn(personDokument.sammensattNavn);
+                    SoeknadDokument soeknadDokument = (SoeknadDokument) saksopplysningDokument;
+                    behandlingOversiktDto.setLand(hentLand(soeknadDokument));
+                    Periode periode = hentPeriode(soeknadDokument);
+                    behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
                 });
+            }
+        return behandlingOversiktDto;
+    }
 
-            fagsakOppsummeringDto.getBehandlingoppsummeringer().add(oppsummeringDto);
+    private void setSammensattNavn(FagsakOppsummeringDto fagsakOppsummeringDto, Behandling behandling) {
+        Optional<SaksopplysningDokument> saksopplysningDokumentPerson = hentDokument(behandling, SaksopplysningType.PERSONOPPLYSNING);
+
+        if( saksopplysningDokumentPerson.isPresent()) {
+                PersonDokument personDokument = (PersonDokument) saksopplysningDokumentPerson.get();
+                fagsakOppsummeringDto.setSammensattNavn(personDokument.sammensattNavn);
+        } else {
+            fagsakOppsummeringDto.setSammensattNavn(UKJENT_SAMMENSATT_NAVN);
         }
     }
 }

@@ -13,6 +13,7 @@ public class FagsakOppsummeringDto {
     private Fagsakstype sakstype;
     private Fagsaksstatus saksstatus;
     private Instant opprettetDato;
+    private List<BehandlingOversiktDto> behandlingOversikter;
 
     public String getSaksnummer() {
         return saksnummer;
@@ -53,4 +54,13 @@ public class FagsakOppsummeringDto {
     public void setOpprettetDato(Instant opprettetDato) {
         this.opprettetDato = opprettetDato;
     }
+
+    public List<BehandlingOversiktDto> getBehandlingOversikter() {
+        return behandlingOversikter;
+    }
+
+    public void setBehandlingOversikter(List<BehandlingOversiktDto> behandlingOversikter) {
+        this.behandlingOversikter = behandlingOversikter;
+    }
+
 }

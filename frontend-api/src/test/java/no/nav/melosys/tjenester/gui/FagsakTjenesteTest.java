@@ -1,9 +1,13 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
@@ -13,8 +17,7 @@ import io.github.benas.randombeans.EnhancedRandomBuilder;
 import io.github.benas.randombeans.FieldDefinitionBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import io.github.benas.randombeans.api.Randomizer;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.RolleType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
@@ -23,6 +26,9 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
@@ -105,9 +111,10 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
 
     @Test
     public void fagsakSøkSchemaValidering() throws IOException, JSONException {
-        List<BehandlingOppsummeringDto> oppsummeringDtos = random.randomListOf(1, BehandlingOppsummeringDto.class);
         List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.randomListOf(1, FagsakOppsummeringDto.class);
-      //  fagsakOppsummeringDtoList.get(0).setBehandlingoppsummeringer(oppsummeringDtos);
+        List<BehandlingOversiktDto> behandlingOversiktDtoer = random.randomListOf(1, BehandlingOversiktDto.class);
+        behandlingOversiktDtoer.get(0).setLand(Collections.singletonList("NO"));
+        fagsakOppsummeringDtoList.get(0).setBehandlingOversikter(behandlingOversiktDtoer);
 
         schemaType = SOK_FAGSAKER_SCHEMA;
         validerListe(fagsakOppsummeringDtoList, log);
@@ -139,6 +146,7 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
     @Test
     public final void hentFagsakerGirIkkeTomListe() throws Exception {
         Fagsak fagsak = lagFagsak();
+        fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         List<FagsakOppsummeringDto> resultat = instans.hentFagsaker(FNR);
         List<FagsakOppsummeringDto> forventet = Collections.singletonList(lagFagsakOppsummeringDto());
@@ -195,6 +203,47 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
         verify(fagsakService, never()).henleggFagsak(anyString(), anyString(), anyString());
     }
 
+    @Test
+    public final void fagsakogbehandling_tilFagsakOppsummeringOgBehandlingOversiktDtoer() throws Exception {
+        Fagsak fagsak = fagsakMedBehandlinger(Behandlingsstatus.UNDER_BEHANDLING,
+            Behandlingsstatus.AVSLUTTET,
+            Behandlingsstatus.AVSLUTTET);
+
+        fagsak.setSaksnummer("MEL-13");
+        fagsak.setType(Fagsakstype.EU_EØS);
+        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
+        Instant reqDateInstant = new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-01").toInstant();
+        Instant endretDateInstant = new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-01").toInstant();
+
+        fagsak.setRegistrertDato(reqDateInstant);
+        fagsak.setEndretDato(endretDateInstant);
+
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+        List<FagsakOppsummeringDto> fagsakOppsummeringDtoer = instans.hentFagsaker(FNR);
+        assertThat(fagsakOppsummeringDtoer.size()).isEqualTo(1);
+        FagsakOppsummeringDto fagsakOppsummeringDto = fagsakOppsummeringDtoer.get(0);
+        assertThat(fagsakOppsummeringDto.getBehandlingOversikter().size()).isEqualTo(3);
+
+        assertThat(fagsakOppsummeringDto.getSaksnummer()).isEqualTo("MEL-13");
+        assertThat(fagsakOppsummeringDto.getOpprettetDato()).isEqualTo(reqDateInstant);
+        assertThat(fagsakOppsummeringDto.getOpprettetDato()).isEqualTo(endretDateInstant);
+        assertThat(fagsakOppsummeringDto.getOpprettetDato()).isEqualTo(endretDateInstant);
+        assertThat(fagsakOppsummeringDto.getSammensattNavn()).isEqualTo("Joe Moe");
+
+        BehandlingOversiktDto behandlingFørst = fagsakOppsummeringDto.getBehandlingOversikter().get(0);
+        assertThat(behandlingFørst.getBehandlingID()).isEqualTo(1L);
+        assertThat(behandlingFørst.getBehandlingsstatus().getKode()).isEqualTo("UNDER_BEHANDLING");
+        assertThat(behandlingFørst.getBehandlingstype().getKode()).isEqualTo("SOEKNAD");
+        assertThat(behandlingFørst.getOpprettetDato()).isEqualTo(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-11").toInstant());
+        assertThat(behandlingFørst.getLand().get(0)).isEqualTo("NO");
+
+        assertThat(behandlingFørst.getSoknadsperiode().getFom().compareTo(LocalDate.of(2019,01,01)))
+            .isEqualTo(0);
+
+        assertThat(behandlingFørst.getSoknadsperiode().getTom().compareTo(LocalDate.of(2019,02,01)))
+            .isEqualTo(0);
+    }
+
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
         tilgang = mock(Tilgang.class);
         fagsakService = mock(FagsakService.class);
@@ -202,13 +251,15 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
         ArrayList<Fagsak> fagsaker = new ArrayList<>();
         fagsaker.add(fagsak);
         doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(eq(RolleType.BRUKER), eq(FNR));
-        FagsakTjeneste instans = new FagsakTjeneste(fagsakService, tilgang);
-        return instans;
+        return new FagsakTjeneste(fagsakService, tilgang);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto() {
         FagsakOppsummeringDto result = new FagsakOppsummeringDto();
-        result.setBehandlingoppsummeringer(new ArrayList<>());
+        result.setSammensattNavn("UKJENT");
+        BehandlingOversiktDto behandlingOversiktDto = new BehandlingOversiktDto();
+        behandlingOversiktDto.setBehandlingID(0L);
+        result.setBehandlingOversikter(Collections.singletonList(behandlingOversiktDto));
         return result;
     }
 
@@ -216,6 +267,64 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setBehandlinger(Collections.emptyList());
         return fagsak;
+    }
+
+    private Fagsak fagsakMedBehandlinger(Behandlingsstatus behandlingsstatusFørst,
+                                         Behandlingsstatus BehandlingsstatusAndre,
+                                         Behandlingsstatus BehandlingsstatusTredje
+    ) throws ParseException {
+        ArrayList<Behandling> behandlinger = new ArrayList<>();
+        Fagsak fagsak = new Fagsak();
+        Behandling b1 = new Behandling();
+        b1.setId(1L);
+        b1.setType(Behandlingstype.SØKNAD);
+        b1.setRegistrertDato(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-11").toInstant());
+        b1.setStatus(behandlingsstatusFørst);
+
+        HashSet<Saksopplysning> saksopplysninger = new HashSet<>();
+        saksopplysninger.add(lagPersonSaksopplysning());
+        saksopplysninger.add(lagSøknadOpplysning());
+
+        b1.setSaksopplysninger(saksopplysninger);
+
+        Behandling b2 = new Behandling();
+        b2.setId(2L);
+        b2.setStatus(BehandlingsstatusAndre);
+        b2.setRegistrertDato(new SimpleDateFormat("yyyy-MM-dd").parse("2018-11-11").toInstant());
+
+        Behandling b3 = new Behandling();
+        b2.setId(3L);
+        b3.setStatus(BehandlingsstatusTredje);
+        b3.setRegistrertDato(new SimpleDateFormat("yyyy-MM-dd").parse("2018-09-11").toInstant());
+
+        behandlinger.add(b1);
+        behandlinger.add(b2);
+        behandlinger.add(b3);
+        fagsak.setBehandlinger(behandlinger);
+        return fagsak;
+    }
+
+    private Saksopplysning lagPersonSaksopplysning() {
+        Saksopplysning saksopplysningPerson = new Saksopplysning();
+        saksopplysningPerson.setType(SaksopplysningType.PERSONOPPLYSNING);
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.sammensattNavn = "Joe Moe";
+        saksopplysningPerson.setDokument(personDokument);
+        return saksopplysningPerson;
+    }
+
+    private Saksopplysning lagSøknadOpplysning() {
+        SoeknadDokument soeknadDokument = new SoeknadDokument();
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+        arbeidUtland.adresse.landKode = "NO";
+        soeknadDokument.arbeidUtland = new ArrayList<>();
+        soeknadDokument.arbeidUtland.add(arbeidUtland);
+        soeknadDokument.oppholdUtland.oppholdsPeriode = new no.nav.melosys.domain.dokument.soeknad.Periode(
+            LocalDate.of(2019,01,01), LocalDate.of(2019,02,01));
+        Saksopplysning saksopplysningSøknad = new Saksopplysning();
+        saksopplysningSøknad.setType(SaksopplysningType.SØKNAD);
+        saksopplysningSøknad.setDokument(soeknadDokument);
+        return saksopplysningSøknad;
     }
 
     private static FagsakDto lagFagsakDto(Fagsak fagsak) {
