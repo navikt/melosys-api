@@ -4,11 +4,11 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Henleggelsesgrunner;
 
 public class BehandlingsresultatDto {
-    public Henleggelsesgrunner henleggelsegrunn;
+    public Henleggelsesgrunner henleggelsegrunnKode;
     public String henleggelseFritekst;
 
     public BehandlingsresultatDto(Behandlingsresultat behandlingsresultat) {
-        henleggelsegrunn = behandlingsresultat.getHenleggelsesgrunn();
+        henleggelsegrunnKode = behandlingsresultat.getHenleggelsesgrunn();
         henleggelseFritekst = behandlingsresultat.getHenleggelseFritekst();
     }
 }
