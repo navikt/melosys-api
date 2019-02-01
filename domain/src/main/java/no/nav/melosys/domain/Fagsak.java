@@ -20,6 +20,9 @@ public class Fagsak extends RegistreringsInfo {
     @Column(name = "gsak_saksnummer")
     private Long gsakSaksnummer;
 
+    @Column(name = "rina_saksnummer")
+    private String rinasaksnummer;
+
     @Column(name = "fagsak_type")
     @Convert(converter = Fagsakstype.DbKonverterer.class)
     private Fagsakstype type;
@@ -34,8 +37,6 @@ public class Fagsak extends RegistreringsInfo {
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Behandling> behandlinger;
 
-    @Column(name = "rina_saksnummer")
-    private String rinasaksnummer;
 
     public Long getGsakSaksnummer() {
         return gsakSaksnummer;
