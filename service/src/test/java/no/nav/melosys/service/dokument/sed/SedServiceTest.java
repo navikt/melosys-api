@@ -6,18 +6,19 @@ import java.util.Map;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import io.github.benas.randombeans.EnhancedRandomBuilder;
-import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.eux.model.SedType;
 import no.nav.melosys.eux.model.nav.SED;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eux.consumer.EuxConsumer;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.dokument.sed.bygger.A009DataBygger;
 import no.nav.melosys.service.dokument.sed.mapper.SedDataStub;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -45,15 +46,11 @@ public class SedServiceTest {
     private Behandling behandling;
     private Behandlingsresultat behandlingsresultat;
 
-    private EnhancedRandom random;
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setup() throws Exception {
-
-        random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
-            .overrideDefaultInitialization(true)
-            .collectionSizeRange(1, 4)
-            .build();
 
         behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
@@ -91,10 +88,18 @@ public class SedServiceTest {
         verify(euxConsumer, times(1)).sendSed(eq("3333"), any(), eq("aaa"));
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void opprettOgSendSed_ikkeStøttetBestemmelse_forventException() throws Exception {
+        expectedException.expect(RuntimeException.class);
         behandlingsresultat.getLovvalgsperioder().iterator().next().setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_3E);
         sedService.opprettOgSendSed(behandling, behandlingsresultat);
     }
 
+    @Test
+    public void opprettOgSendSed_ingenLovvalgsperiode_forventException() throws Exception {
+        expectedException.expect(TekniskException.class);
+        expectedException.expectMessage("Finner ingen lovvalgsperiode!");
+        behandlingsresultat.setLovvalgsperioder(Sets.newHashSet());
+        sedService.opprettOgSendSed(behandling, behandlingsresultat);
+    }
 }

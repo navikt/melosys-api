@@ -162,7 +162,6 @@ public class EuxConsumerTest {
             .andRespond(withSuccess(objectMapper.writeValueAsString(forventetResultat), MediaType.APPLICATION_JSON));
 
         Map resultat = euxConsumer.opprettBucOgSed(buc, mottaker, sed);
-        assertNotNull(resultat);
         assertEquals(forventetResultat, resultat);
     }
 
@@ -181,7 +180,6 @@ public class EuxConsumerTest {
             .andRespond(withSuccess(objectMapper.writeValueAsString(forventetResultat), MediaType.APPLICATION_JSON));
 
         Map resultat = euxConsumer.opprettBucOgSedMedVedlegg(buc, fagsak, mottaker, filtype, korrelasjon, sed, vedlegg);
-        assertNotNull(resultat);
         assertEquals(forventetResultat, resultat);
     }
 

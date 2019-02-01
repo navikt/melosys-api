@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class SedService {
@@ -38,7 +39,8 @@ public class SedService {
 
     public void opprettOgSendSed(Behandling behandling, Behandlingsresultat behandlingsresultat) throws MelosysException {
 
-        Lovvalgsperiode lovvalgsperiode = behandlingsresultat.getLovvalgsperioder().iterator().next(); //TODO: flere lovvalgsperioder
+        Lovvalgsperiode lovvalgsperiode = behandlingsresultat.getLovvalgsperioder().stream()
+            .findFirst().orElseThrow(() -> new TekniskException("Finner ingen lovvalgsperiode!")); //TODO: flere lovvalgsperioder
         Landkoder lovvalgsLand = lovvalgsperiode.getLovvalgsland();
 
         LovvalgBestemmelse lovvalgBestemmelse = lovvalgsperiode.getBestemmelse();
@@ -70,10 +72,18 @@ public class SedService {
 
     //Lovvalg skal kun ha en institusjon i hvert medlemsland.
     private String hentFørsteInstitusjonId(List<String> institusjoner) throws FunksjonellException, TekniskException {
-        if (institusjoner == null || institusjoner.isEmpty()) throw new FunksjonellException("Liste av institusjoner er tom!");
+
+        if (CollectionUtils.isEmpty(institusjoner)){
+            throw new FunksjonellException("Liste av institusjoner er tom!");
+        }
+
         String institusjon = institusjoner.get(0);
         String[] splittetInstitusjon =  institusjon.split(":");
-        if (splittetInstitusjon.length == 2) return splittetInstitusjon[1];
-        else throw new TekniskException("Kan ikke hente ut instutisjonnavn fra string: \""+ institusjon + "\"");
+
+        if (splittetInstitusjon.length == 2){
+            return splittetInstitusjon[1];
+        }
+
+         throw new TekniskException("Kan ikke hente ut instutisjonnavn fra string: \""+ institusjon + "\"");
     }
 }

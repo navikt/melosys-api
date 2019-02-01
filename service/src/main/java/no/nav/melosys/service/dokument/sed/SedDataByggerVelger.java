@@ -41,7 +41,7 @@ public class SedDataByggerVelger {
                     lovvalgsperiodeService,avklartefaktaService);
         }
 
-        //Kaster runtime exception til resten av
+        //Kaster runtime exception til resten av SED'er er implementert
         throw new RuntimeException("Sed-type: " + sedType.name() + " er ikke implementert enda");
     }
 }

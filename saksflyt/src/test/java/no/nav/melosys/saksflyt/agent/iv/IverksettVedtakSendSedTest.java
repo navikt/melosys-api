@@ -55,7 +55,7 @@ public class IverksettVedtakSendSedTest {
     @Test
     public void utførSteg_suksessfull_ingenRetur() throws Exception{
         iverksettVedtakSendSed.utfør(prosessinstans);
-        verify(sedService, times(1)).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
+        verify(sedService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_AVSLUTT_BEHANDLING));
     }
 

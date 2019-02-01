@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
 import java.util.Map;
-import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -76,7 +75,7 @@ public class IverksettVedtakSendSed extends AbstraktStegBehandler {
     }
 
     private Behandlingsresultat hentBehandlingsresultat(Behandling behandling) throws TekniskException {
-        Optional<Behandlingsresultat> resultat = behandlingsResultatRepo.findById(behandling.getId());
-        return resultat.orElseThrow(() -> new TekniskException("Kan ikke finne behandlingsresultat for behandling: " + behandling.getId()));
+        return behandlingsResultatRepo.findById(behandling.getId())
+            .orElseThrow(() -> new TekniskException("Kan ikke finne behandlingsresultat for behandling: " + behandling.getId()));
     }
 }
