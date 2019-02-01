@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -153,7 +154,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.avklartefakta = avklartefakta;
     }
 
-    public Optional<Avklartefakta> finnAvklartFaktum(AvklartefaktaType type) {
+    public Optional<Avklartefakta> finnAvklartFaktum(Avklartefaktatype type) {
         return getAvklartefakta().stream()
             .filter(f -> f.getType() == type && f.getFakta().equals("TRUE"))
             .findFirst();

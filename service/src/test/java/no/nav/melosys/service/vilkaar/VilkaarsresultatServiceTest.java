@@ -41,7 +41,7 @@ public class VilkaarsresultatServiceTest {
         long behandlingID = 1L;
         List<Vilkaarsresultat> vilkaarsresultatListe = new ArrayList<>();
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-        vilkaarsresultat.setVilkaar(Vilkaar.ART12_1_FORUTGÅENDE_MEDLEMSKAP);
+        vilkaarsresultat.setVilkaar(Vilkaar.ART12_1_FORUTGAAENDE_MEDLEMSKAP);
         vilkaarsresultat.setOppfylt(true);
         vilkaarsresultat.setBegrunnelseFritekst("begrunnelse");
         Set<VilkaarBegrunnelse> beggrunnelser = new HashSet<>();

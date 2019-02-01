@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.agent.aou;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.ProduserbartDokument;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -71,7 +71,7 @@ public class SendBrevTest {
     @Test
     public void utførStegAntallSendteBrev() throws FunksjonellException, TekniskException {
         agent.utførSteg(p);
-        verify(dokService, times(1)).produserDokument(anyLong(), eq(ProduserbartDokument.ORIENTERING_ANMODNING_UNNTAK), any());
-        verify(dokService, times(1)).produserDokument(anyLong(), eq(ProduserbartDokument.SED_A001), any());
+        verify(dokService, times(1)).produserDokument(anyLong(), eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), any());
+        verify(dokService, times(1)).produserDokument(anyLong(), eq(Produserbaredokumenter.ANMODNING_UNNTAK), any());
     }
 }

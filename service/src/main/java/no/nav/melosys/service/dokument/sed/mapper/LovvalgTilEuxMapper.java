@@ -35,9 +35,6 @@ public class LovvalgTilEuxMapper {
                 return "11_3_b";
             case FO_883_2004_ART11_3C:
                 return "11_3_c";
-            //FIXME : endring i kodeverk template fil
-            /*case FO_883_2004_ART11_3D:
-                return "11_3_d";*/
             case FO_883_2004_ART11_3E:
                 return "11_3_e";
             case FO_883_2004_ART11_4_2:
@@ -50,12 +47,12 @@ public class LovvalgTilEuxMapper {
                 return "13_1_a";
             case FO_883_2004_ART13_1B1:
                 return "13_1_b_i";
-         /*   case FO_883_2004_ART13_1B2:
+            case FO_883_2004_ART13_1_B2:
                 return "13_1_b_ii";
-            case FO_883_2004_ART13_1B3:
+            case FO_883_2004_ART13_1_B3:
                 return "13_1_b_iii";
-            case FO_883_2004_ART13_1B4:
-                return "13_1_b_iv";*/
+            case FO_883_2004_ART13_1_B4:
+                return "13_1_b_iv";
             case FO_883_2004_ART13_2A:
                 return "13_2_a";
             case FO_883_2004_ART13_2B:

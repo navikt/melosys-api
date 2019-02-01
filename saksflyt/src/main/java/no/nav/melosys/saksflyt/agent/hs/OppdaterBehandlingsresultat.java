@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.agent.hs;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -53,7 +55,7 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke oppdatere behandlingsresultatet for henleggelsen fordi behandling " + behandlingID + " ikke finnes."));
-        behandlingsresultat.setType(BehandlingsresultatType.HENLEGGELSE);
+        behandlingsresultat.setType(Behandlingsresultattyper.HENLEGGELSE);
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
         behandlingsresultat.setHenleggelsesgrunn(prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Henleggelsesgrunner.class));
         behandlingsresultat.setHenleggelseFritekst(prosessinstans.getData(ProsessDataKey.FRITEKST));

@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.kodeverk.ProduserbartDokument;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.TekniskException;
 
 /**
@@ -9,7 +9,7 @@ import no.nav.melosys.exception.TekniskException;
 public enum DokumenttypeIdMapper {
     INSTANS;
 
-    static String hentID(ProduserbartDokument produserbartDokument) throws TekniskException {
+    static String hentID(Produserbaredokumenter produserbartDokument) throws TekniskException {
         switch (produserbartDokument) {
             case ATTEST_A1:
                 return "000116";
@@ -24,7 +24,7 @@ public enum DokumenttypeIdMapper {
                 return "000072";
             case MELDING_MANGLENDE_OPPLYSNINGER:
                 return "000074";
-            case SED_A001:
+            case ANMODNING_UNNTAK:
                 return "000116"; // Attestene bruker samme dokumentmal med ulikt innhold
             default:
                 throw new TekniskException("Fant ikke dokumentTypeID for produserbartDokument " + produserbartDokument);

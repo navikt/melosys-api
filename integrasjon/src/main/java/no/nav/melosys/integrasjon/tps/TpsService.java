@@ -14,7 +14,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.domain.kodeverk.Aktoerroller;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -256,7 +256,7 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public String hentFagsakIdentMedRolleType(Fagsak fagsak, Aktoerroller rolleType) throws TekniskException {
+    public String hentFagsakIdentMedRolleType(Fagsak fagsak, Aktoersroller rolleType) throws TekniskException {
         Aktoer aktør = fagsak.hentAktørMedRolleType(rolleType);
 
         if (aktør == null) {

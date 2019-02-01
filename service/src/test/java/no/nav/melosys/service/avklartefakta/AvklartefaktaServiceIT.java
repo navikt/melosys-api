@@ -71,7 +71,7 @@ public class AvklartefaktaServiceIT {
         rad.setBehandlingsresultat(behandlingsresultat);
         rad.setFakta("test test");
         rad.setReferanse("referanse");
-        rad.setType(Avklartefaktatype.BOSTEDSLAND);
+        rad.setType(Avklartefaktatype.ARBEIDSLAND);
         return rad;
     }
 

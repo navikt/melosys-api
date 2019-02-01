@@ -2,7 +2,12 @@ package no.nav.melosys.saksflyt.agent.hs;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -18,10 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProduserbartDokument.MELDING_HENLAGT_SAK;
 import static no.nav.melosys.domain.ProsessDataKey.*;
 import static no.nav.melosys.domain.ProsessSteg.HS_SEND_BREV;
 import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
+import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.MELDING_HENLAGT_SAK;
 
 /**
  * Sender henleggelsesbrev til bruker og arbeidsgiver
@@ -63,15 +68,15 @@ public class SendHenleggelsesbrev extends AbstraktStegBehandler {
 
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(MELDING_HENLAGT_SAK);
         BrevData brevdata = brevDataBygger.lag(behandling, saksbehandler);
-        brevdata.mottaker = RolleType.BRUKER;
+        brevdata.mottaker = Aktoersroller.BRUKER;
         brevdata.begrunnelseKode = prosessinstans.getData(BEGRUNNELSEKODE, Henleggelsesgrunner.class).getKode();
         brevdata.fritekst = prosessinstans.getData(FRITEKST);
         dokumentService.produserDokument(behandling.getId(), MELDING_HENLAGT_SAK, brevdata);
         log.info("Send henleggelsesbrev til bruker for prosess {}.", prosessinstans.getId());
 
-        Aktoer fullmektig = behandling.getFagsak().hentAktørMedRolleType(RolleType.REPRESENTANT);
+        Aktoer fullmektig = behandling.getFagsak().hentAktørMedRolleType(Aktoersroller.REPRESENTANT);
         if (fullmektig != null) {
-            brevdata.mottaker = RolleType.REPRESENTANT;
+            brevdata.mottaker = Aktoersroller.REPRESENTANT;
 //            dokumentService.produserDokument(behandling.getId(), MELDING_HENLAGT_SAK, brevdata);
             log.info("HENLEGGELSESBREV FOR REPRESENTANT ER FORELØPIG IKKE STØTTET: prosess {}.", prosessinstans.getId());
         }

@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
 import java.util.Map;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
@@ -11,6 +12,7 @@ import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
+import no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -23,10 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
-import static no.nav.melosys.domain.ProsessSteg.IV_SEND_SED;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokument.ATTEST_A1;
-import static no.nav.melosys.domain.kodeverk.ProduserbartDokument.INNVILGELSE_YRKESAKTIV;
+import static no.nav.melosys.domain.ProsessSteg.*;
+import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.AVSLAG_YRKESAKTIV;
+import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.INNVILGELSE_YRKESAKTIV;
+import static no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator.avslagsbrevSkalSendes;
+import static no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator.validerLovvalgsperiode;
 
 /**
  * Sende ulike brev basert på lovvalgsbestemmelse.
@@ -79,7 +82,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
 
         Behandlingsresultat resultat = behandlingsResultatRepo.findById(behandling.getId())
             .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat " + behandling.getId()));
-        BehandlingsresultatType behandlingsresultatType = resultat.getType();
+        Behandlingsresultattyper behandlingsresultatType = resultat.getType();
         Lovvalgsperiode lovvalgsperiode = validerLovvalgsperiode(resultat.getLovvalgsperioder());
         log.info("Behandler lovvalgsperiode: {}", lovvalgsperiode);
 
@@ -94,15 +97,15 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
 
                 log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
                 prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
-            } else if (innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
+            } else if (SendBrevValidator.innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
                 BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(INNVILGELSE_YRKESAKTIV);
                 BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
-                brevData.mottaker = Aktoerroller.BRUKER;
+                brevData.mottaker = Aktoersroller.BRUKER;
                 dokumentService.produserDokument(behandling.getId(), INNVILGELSE_YRKESAKTIV, brevData);
-                dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
 
-                brevData.mottaker = Aktoerroller.MYNDIGHET;
-                dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
+                // FIXME Myndigheter støttes ikke.
+                //brevData.mottaker = RolleType.MYNDIGHET;
+                //dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
 
                 log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
                 prosessinstans.setSteg(IV_SEND_SED);

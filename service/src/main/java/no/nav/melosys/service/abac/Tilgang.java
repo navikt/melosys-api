@@ -3,7 +3,7 @@ package no.nav.melosys.service.abac;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Aktoerroller;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -31,7 +31,7 @@ public class Tilgang {
             .orElseThrow(() -> new IkkeFunnetException(String.format("Klarte ikke å finne behandlingen med id %s.", behandlingsId)));
 
         Fagsak fagsak = behandling.getFagsak();
-        Aktoer aktør = fagsak.hentAktørMedRolleType(Aktoerroller.BRUKER);
+        Aktoer aktør = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
         if (aktør != null) {
             pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
         }
@@ -39,7 +39,7 @@ public class Tilgang {
 
     // Fagsak
     public void sjekkSak(Fagsak fagsak) throws SikkerhetsbegrensningException, TekniskException {
-        Aktoer aktør = fagsak.hentAktørMedRolleType(Aktoerroller.BRUKER);
+        Aktoer aktør = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
         if (aktør != null) {
             pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
         }

@@ -1,7 +1,8 @@
 package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Aktoerroller;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -58,7 +59,7 @@ public class BrevDataByggerVedleggTest {
         Behandling behandling = mock(Behandling.class);
 
         BrevbestillingDto brevbestilling = new BrevbestillingDto();
-        brevbestilling.mottaker = Aktoerroller.BRUKER;
+        brevbestilling.mottaker = Aktoersroller.BRUKER;
         brevbestilling.fritekst = "FRITEKST";
         brevbestilling.begrunnelseKode = "tom";
 

@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.kodeverk.Aktoerroller;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -100,9 +100,9 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     /**
-     * Returnerer en aktør med angitt {@link Aktoerroller} knyttet til saken eller {@code null} hvis ingen finnes.
+     * Returnerer en aktør med angitt {@link Aktoersroller} knyttet til saken eller {@code null} hvis ingen finnes.
      */
-    public Aktoer hentAktørMedRolleType(Aktoerroller rolleType) throws TekniskException {
+    public Aktoer hentAktørMedRolleType(Aktoersroller rolleType) throws TekniskException {
         if (rolleType == null || aktører == null || aktører.isEmpty()) {
             return null;
         }

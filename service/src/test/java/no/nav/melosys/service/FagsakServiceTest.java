@@ -3,9 +3,10 @@ package no.nav.melosys.service;
 import java.time.Instant;
 import java.util.Arrays;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -60,8 +61,8 @@ public class FagsakServiceTest {
     @Test
     public void hentFagsakerMedAktør() throws IkkeFunnetException {
         when(tps.hentAktørIdForIdent(any())).thenReturn("AKTOER_ID");
-        fagsakService.hentFagsakerMedAktør(Aktoerroller.BRUKER, "FNR");
-        verify(fagsakRepo).findByRolleAndAktør(eq(Aktoerroller.BRUKER), eq("AKTOER_ID"));
+        fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, "FNR");
+        verify(fagsakRepo).findByRolleAndAktør(eq(Aktoersroller.BRUKER), eq("AKTOER_ID"));
     }
 
     @Test

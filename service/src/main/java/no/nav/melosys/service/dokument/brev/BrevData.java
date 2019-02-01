@@ -1,12 +1,12 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.kodeverk.Aktoerroller;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 
 public class BrevData {
     public String saksbehandler;
 
-    public Aktoerroller mottaker;
+    public Aktoersroller mottaker;
 
     public String fritekst;
 

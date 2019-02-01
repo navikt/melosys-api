@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.Aktoerroller;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -69,7 +69,7 @@ public class OppdaterStatusBehandlingAvsluttetTest {
     public void utførSteg_ingenAktørID_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         Behandling b = lagBehandling();
-        b.getFagsak().hentAktørMedRolleType(Aktoerroller.BRUKER).setAktørId(null);
+        b.getFagsak().hentAktørMedRolleType(Aktoersroller.BRUKER).setAktørId(null);
         p.setBehandling(b);
 
         expectedException.expect(FunksjonellException.class);
@@ -93,7 +93,7 @@ public class OppdaterStatusBehandlingAvsluttetTest {
     }
 
     private static Aktoer lagAktørBruker() {
-        Aktoerroller type = Aktoerroller.BRUKER;
+        Aktoersroller type = Aktoersroller.BRUKER;
         Aktoer aktør = new Aktoer();
         aktør.setAktørId(type.name());
         aktør.setAktørId("123");

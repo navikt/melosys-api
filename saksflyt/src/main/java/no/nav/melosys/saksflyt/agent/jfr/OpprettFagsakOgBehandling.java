@@ -75,23 +75,14 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
             String saksnummer = prosessinstans.getData(SAKSNUMMER);
             Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-<<<<<<< HEAD
-            Behandlingstype behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstype.class);
-            Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
-=======
             Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
-            Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype);
->>>>>>> 1647f5e... Erstattet melosys internt kodeverk fra artifakt "melosys-internt-kodeverk"
+            Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
             prosessinstans.setBehandling(behandling);
 
             prosessinstans.setSteg(STATUS_BEH_OPPR);
             log.info("Opprettet behandling {} for prosessinstans {}", behandling.getId(), prosessinstans.getId());
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
-<<<<<<< HEAD
-            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, arbeidsgiver, representant, Behandlingstype.SØKNAD, initierendeJournalpostId, initierendeDokumentId);
-=======
-            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, arbeidsgiver, representant, Behandlingstyper.SOEKNAD);
->>>>>>> 1647f5e... Erstattet melosys internt kodeverk fra artifakt "melosys-internt-kodeverk"
+            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, arbeidsgiver, representant, Behandlingstyper.SOEKNAD, initierendeJournalpostId, initierendeDokumentId);
             prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
             prosessinstans.setBehandling(fagsak.getBehandlinger().get(0));
 

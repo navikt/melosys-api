@@ -43,7 +43,6 @@ public class OppdaterBehandlingsresultatTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         p.setBehandling(behandling);
-        p.setBehandling(new Behandling());
         p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
         String testbruker = "Z097";

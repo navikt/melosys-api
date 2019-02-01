@@ -5,7 +5,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.kodeverk.ProduserbartDokument;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.doksys.DokSysFasade;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
@@ -87,7 +87,7 @@ public class DokumentService {
     // være påkrevd for Hibernate å finne en sesjon via Spring-transaksjonen
     // for å kunne laste lazy collections i objektgrafen.
     @Transactional
-    public byte[] produserUtkast(long behandlingID, ProduserbartDokument produserbartDokument, BrevbestillingDto brevbestillingDto)
+    public byte[] produserUtkast(long behandlingID, Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto)
         throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingID);
         if (behandling == null) {
@@ -106,7 +106,7 @@ public class DokumentService {
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(long behandlingID, ProduserbartDokument produserbartDokument, BrevData brevData)
+    public void produserDokument(long behandlingID, Produserbaredokumenter produserbartDokument, BrevData brevData)
         throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke"));
@@ -118,7 +118,7 @@ public class DokumentService {
     }
 
     @Transactional
-    public void produserDokumentISaksflyt(long behandlingID, ProduserbartDokument produserbartDokument, BrevbestillingDto brevbestillingDto) throws FunksjonellException {
+    public void produserDokumentISaksflyt(long behandlingID, Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto) throws FunksjonellException {
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke"));
 
@@ -131,7 +131,7 @@ public class DokumentService {
                 prosessinstans.setSteg(ProsessSteg.MANGELBREV);
                 break;
             default:
-                throw new FunksjonellException("ProduserbartDokument " + produserbartDokument + " er ikke støttet.");
+                throw new FunksjonellException("Produserbaredokumenter " + produserbartDokument + " er ikke støttet.");
         }
 
         if (brevbestillingDto != null) {

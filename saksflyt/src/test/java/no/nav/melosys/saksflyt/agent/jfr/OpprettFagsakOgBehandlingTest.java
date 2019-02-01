@@ -59,11 +59,11 @@ public class OpprettFagsakOgBehandlingTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
         fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
-        when(fagsakService.nyFagsakOgBehandling(anyString(), anyString(), any(), eq(Behandlingstype.SØKNAD), any(), any())).thenReturn(fagsak);
+        when(fagsakService.nyFagsakOgBehandling(anyString(), anyString(), any(), eq(Behandlingstyper.SOEKNAD), any(), any())).thenReturn(fagsak);
 
         agent.utførSteg(p);
 
-        verify(fagsakService).nyFagsakOgBehandling(aktørId, arbeidsgiver, null, Behandlingstype.SØKNAD, journalpostId, dokumentId);
+        verify(fagsakService).nyFagsakOgBehandling(aktørId, arbeidsgiver, null, Behandlingstyper.SOEKNAD, journalpostId, dokumentId);
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SØKNAD);
     }
@@ -87,7 +87,7 @@ public class OpprettFagsakOgBehandlingTest {
 
         agent.utførSteg(p);
 
-        verify(behandlingService).nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, Behandlingstype.SØKNAD, initierendeJournalpostId, initierendeDokumentId);
+        verify(behandlingService).nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, Behandlingstyper.SOEKNAD, initierendeJournalpostId, initierendeDokumentId);
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
     }

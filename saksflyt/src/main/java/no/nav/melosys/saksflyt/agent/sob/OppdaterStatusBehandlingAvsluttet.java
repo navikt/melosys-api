@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
-import static no.nav.melosys.domain.kodeverk.Aktoerroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
 /**
  * Steget sørger for å skrive til Sak og Behandling når en behandling avsluttes

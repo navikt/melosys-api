@@ -60,7 +60,7 @@ public class OppdaterMedlTest {
         String aktørID = "12345678912";
         aktør.setAktørId(aktørID);
         aktør.setFagsak(fagsak);
-        aktør.setRolle(Aktoerroller.BRUKER);
+        aktør.setRolle(Aktoersroller.BRUKER);
         aktører.add(aktør);
 
         Behandling behandling = new Behandling();

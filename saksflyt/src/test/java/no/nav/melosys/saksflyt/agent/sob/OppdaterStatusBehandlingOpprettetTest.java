@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.Aktoerroller;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.TekniskException;
@@ -65,7 +65,7 @@ public class OppdaterStatusBehandlingOpprettetTest {
     }
 
     private static Aktoer lagAktørBruker() {
-        Aktoerroller type = Aktoerroller.BRUKER;
+        Aktoersroller type = Aktoersroller.BRUKER;
         Aktoer aktør = new Aktoer();
         aktør.setAktørId(type.name());
         aktør.setAktørId("123");

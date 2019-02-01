@@ -47,7 +47,7 @@ public class FagsakService {
         return fagsakRepository.findBySaksnummer(saksnummer);
     }
 
-    public List<Fagsak> hentFagsakerMedAktør(Aktoerroller rolleType, String ident) throws IkkeFunnetException {
+    public List<Fagsak> hentFagsakerMedAktør(Aktoersroller rolleType, String ident) throws IkkeFunnetException {
         String aktørID = tpsFasade.hentAktørIdForIdent(ident);
         return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
     }
@@ -75,14 +75,14 @@ public class FagsakService {
         Aktoer aktør = new Aktoer();
         aktør.setAktørId(aktørID);
         aktør.setFagsak(fagsak);
-        aktør.setRolle(Aktoerroller.BRUKER);
+        aktør.setRolle(Aktoersroller.BRUKER);
         aktører.add(aktør);
 
         if (arbeidsgiver != null) {
             Aktoer aktørArbeidsgiver = new Aktoer();
             aktørArbeidsgiver.setOrgnr(arbeidsgiver);
             aktørArbeidsgiver.setFagsak(fagsak);
-            aktørArbeidsgiver.setRolle(Aktoerroller.ARBEIDSGIVER);
+            aktørArbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
             aktører.add(aktørArbeidsgiver);
         }
 
@@ -90,7 +90,7 @@ public class FagsakService {
             Aktoer aktørRepresentant = new Aktoer();
             aktørRepresentant.setOrgnr(representant);
             aktørRepresentant.setFagsak(fagsak);
-            aktørRepresentant.setRolle(Aktoerroller.REPRESENTANT);
+            aktørRepresentant.setRolle(Aktoersroller.REPRESENTANT);
             aktører.add(aktørRepresentant);
         }
 

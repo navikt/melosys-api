@@ -8,9 +8,8 @@ import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.begrunnelse.Artikkel12_1;
-import no.nav.melosys.domain.begrunnelse.Artikkel16_1_Avslag;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
@@ -39,7 +38,7 @@ public class AvslagMapperTest {
 
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
-        fagsak.setType(Fagsakstype.EU_EØS);
+        fagsak.setType(Sakstyper.EU_EOS);
         behandling.setFagsak(fagsak);
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -58,22 +57,22 @@ public class AvslagMapperTest {
         resultat.setVilkaarsresultater(new HashSet<>());
 
         Vilkaarsresultat vilkaarsresultat12_1 = new Vilkaarsresultat();
-        vilkaarsresultat12_1.setVilkaar(VilkaarType.FO_883_2004_ART12_1);
+        vilkaarsresultat12_1.setVilkaar(Vilkaar.FO_883_2004_ART12_1);
         VilkaarBegrunnelse begrunnelse12_1 = new VilkaarBegrunnelse();
-        begrunnelse12_1.setKode(Artikkel12_1.IKKE_VESENTLIG_VIRKSOMHET.getKode());
+        begrunnelse12_1.setKode(Art12_1_Begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.getKode());
         vilkaarsresultat12_1.setBegrunnelser(Collections.singleton(begrunnelse12_1));
         resultat.getVilkaarsresultater().add(vilkaarsresultat12_1);
 
         Vilkaarsresultat vilkaarsresultat12_2 = new Vilkaarsresultat();
-        vilkaarsresultat12_2.setVilkaar(VilkaarType.FO_883_2004_ART12_2);
+        vilkaarsresultat12_2.setVilkaar(Vilkaar.FO_883_2004_ART12_2);
         resultat.getVilkaarsresultater().add(vilkaarsresultat12_2);
 
         Vilkaarsresultat vilkaarsresultat16_1 = new Vilkaarsresultat();
-        vilkaarsresultat16_1.setVilkaar(VilkaarType.FO_883_2004_ART16_1);
+        vilkaarsresultat16_1.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
         VilkaarBegrunnelse a_begrunnelse_16_1 = new VilkaarBegrunnelse();
-        a_begrunnelse_16_1.setKode(Artikkel16_1_Avslag.FORLENGELSE_SAMLET_OVER_5_AAR.getKode());
+        a_begrunnelse_16_1.setKode(Art16_1_Avslag__Begrunnelser.FORLENGELSE_SAMLET_OVER_5_AAR.getKode());
         VilkaarBegrunnelse b_begrunnelse_16_1 = new VilkaarBegrunnelse();
-        b_begrunnelse_16_1.setKode(Artikkel16_1_Avslag.SOEKT_FOR_SENT.getKode());
+        b_begrunnelse_16_1.setKode(Art16_1_Avslag__Begrunnelser.SOEKT_FOR_SENT.getKode());
 
         Set<VilkaarBegrunnelse> begrunnelser_16_1 = new HashSet<>();
         begrunnelser_16_1.add(a_begrunnelse_16_1);

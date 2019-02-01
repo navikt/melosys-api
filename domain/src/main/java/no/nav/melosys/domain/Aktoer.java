@@ -3,7 +3,7 @@ package no.nav.melosys.domain;
 import java.util.Objects;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.kodeverk.Aktoerroller;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
 @Entity
 @Table(name = "aktoer")
@@ -24,8 +24,8 @@ public class Aktoer {
     private String orgnr;
     
     @Column(name = "rolle", nullable = false, updatable = false)
-    @Convert(converter = Aktoerroller.DbKonverterer.class)
-    private Aktoerroller rolle;
+    @Convert(converter = Aktoersroller.DbKonverterer.class)
+    private Aktoersroller rolle;
 
     @Column(name = "utenlandsk_id")
     private String utenlandskId;
@@ -58,11 +58,11 @@ public class Aktoer {
         this.orgnr = orgnr;
     }
 
-    public Aktoerroller getRolle() {
+    public Aktoersroller getRolle() {
         return rolle;
     }
 
-    public void setRolle(Aktoerroller rolle) {
+    public void setRolle(Aktoersroller rolle) {
         this.rolle = rolle;
     }
 

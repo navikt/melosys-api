@@ -5,8 +5,8 @@ import java.util.Map;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.Aktoerroller;
-import no.nav.melosys.domain.kodeverk.ProduserbartDokument;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -25,8 +25,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.AOU_SEND_BREV;
-import static no.nav.melosys.domain.kodeverk.ProduserbartDokument.ORIENTERING_ANMODNING_UNNTAK;
-import static no.nav.melosys.domain.kodeverk.ProduserbartDokument.SED_A001;
+import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 
 /**
  * Sende ulike brev basert på lovvalgsbestemmelse.
@@ -76,14 +75,14 @@ public class SendBrev extends AbstraktStegBehandler {
         }
 
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-        sendBrev(behandling, saksbehandler, ORIENTERING_ANMODNING_UNNTAK, Aktoerroller.BRUKER);
-        sendBrev(behandling, saksbehandler, SED_A001, Aktoerroller.MYNDIGHET);
+        sendBrev(behandling, saksbehandler, ORIENTERING_ANMODNING_UNNTAK, Aktoersroller.BRUKER);
+        sendBrev(behandling, saksbehandler, ANMODNING_UNNTAK, Aktoersroller.MYNDIGHET);
 
         log.info("Sendt alle brev for anmodning om unntak. Prosessinstans {}", prosessinstans.getId());
         prosessinstans.setSteg(null);
     }
 
-    public void sendBrev(Behandling behandling, String saksbehandler, ProduserbartDokument dokumentType, Aktoerroller mottaker) throws TekniskException, FunksjonellException {
+    public void sendBrev(Behandling behandling, String saksbehandler, Produserbaredokumenter dokumentType, Aktoersroller mottaker) throws TekniskException, FunksjonellException {
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(dokumentType);
         BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
         brevData.mottaker = mottaker;

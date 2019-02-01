@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.integrasjon.joark.JoarkService;
-import no.nav.melosys.domain.kodeverk.ProduserbartDokument;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -41,11 +41,11 @@ public class BrevDataByggerVelger {
     }
 
     // For brevbygging i saksflyt
-    public BrevDataBygger hent(ProduserbartDokument produserbartDokument) {
+    public BrevDataBygger hent(Produserbaredokumenter produserbartDokument) {
         return hent(produserbartDokument, new BrevbestillingDto());
     }
 
-    public BrevDataBygger hent(ProduserbartDokument produserbartDokument, BrevbestillingDto brevbestillingDto) {
+    public BrevDataBygger hent(Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto) {
         switch (produserbartDokument) {
             case ATTEST_A1: {
                 BrevDataByggerA1 a1Bygger =
@@ -59,7 +59,7 @@ public class BrevDataByggerVelger {
                 return new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService,
                     registerOppslagService);
             }
-            case SED_A001: {
+            case ANMODNING_UNNTAK: {
                 BrevDataByggerA001 a001Bygger =
                     new BrevDataByggerA001(avklartefaktaService,
                         registerOppslagService,

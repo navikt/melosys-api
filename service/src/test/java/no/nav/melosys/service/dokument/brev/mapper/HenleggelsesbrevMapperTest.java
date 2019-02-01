@@ -11,7 +11,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.RolleType;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.service.dokument.brev.BrevDataHenleggelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
@@ -56,7 +56,7 @@ public class HenleggelsesbrevMapperTest {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = LagMelosysNAVFelles();
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.mottaker = RolleType.BRUKER;
+        brevbestillingDto.mottaker = Aktoersroller.BRUKER;
         brevbestillingDto.begrunnelseKode = "ANNET";
         brevbestillingDto.fritekst = "something";
 

@@ -94,8 +94,8 @@ public class OppgaveServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setStatus(Saksstatuser.OPPRETTET);
-        List<Behandling> behandlinger = hentBehandlinger();
-
+        List<Behandling> behandlinger = new ArrayList<>();
+        behandlinger.add(lagBehandling());
         fagsak.setBehandlinger(behandlinger);
         when(fagsakRepository.findBySaksnummer(any(String.class))).thenReturn(fagsak);
         when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(lagBehandling());

@@ -122,14 +122,14 @@ public class InnvilgelsesbrevMapperTest {
     private static Behandlingsresultat lagBehandlingsresultat() {
         Set<Avklartefakta> fakta = new HashSet<>(Arrays.asList(
                 lagAvklarteFakta(Avklartefaktatype.AVKLARTE_ARBEIDSGIVER, "123456789"),
-                lagAvklarteFakta(Avklartefaktatype.AG_FORRETNINGSLAND, "SE")));
+                lagAvklarteFakta(Avklartefaktatype.ARBEIDSLAND, "SE")));
         return lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()), fakta);
     }
 
     private static Behandlingsresultat lagBehandlingsresultat(Set<Lovvalgsperiode> perioder) {
         Set<Avklartefakta> fakta = new HashSet<>(Arrays.asList(
                 lagAvklarteFakta(Avklartefaktatype.AVKLARTE_ARBEIDSGIVER, "123456789"),
-                lagAvklarteFakta(Avklartefaktatype.AG_FORRETNINGSLAND, "SE")));
+                lagAvklarteFakta(Avklartefaktatype.ARBEIDSLAND, "SE")));
         return lagBehandlingsresultat(perioder, fakta);
     }
 

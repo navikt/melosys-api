@@ -73,7 +73,7 @@ public class VilkaarsresultatService {
 
         vilkaarsresultat.setBegrunnelseFritekst(vilkaarDto.getBegrunnelseFritekst());
         vilkaarsresultat.setBehandlingsresultat(behandlingsresultat);
-        vilkaarsresultat.setVilkaar(Vilkaar.forKode(vilkaarDto.getVilkaar()));
+        vilkaarsresultat.setVilkaar(Vilkaar.valueOf(vilkaarDto.getVilkaar()));
         vilkaarsresultat.setOppfylt(vilkaarDto.isOppfylt());
         return vilkaarsresultat;
     }

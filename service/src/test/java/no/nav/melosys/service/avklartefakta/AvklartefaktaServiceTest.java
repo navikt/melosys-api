@@ -52,7 +52,7 @@ public class AvklartefaktaServiceTest {
         String referanse = "Referenase";
         String subjektID = "SubjektID";
         String fakta = "NO";
-        Avklartefaktatype type = Avklartefaktatype.BOSTEDSLAND;
+        Avklartefaktatype type = Avklartefaktatype.ARBEIDSLAND;
         String begrunnelsekode = "Begrunnelse";
         String begrunnelsefritekst = "Fritekst";
 

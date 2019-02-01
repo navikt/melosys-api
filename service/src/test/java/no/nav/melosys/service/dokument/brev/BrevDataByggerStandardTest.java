@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.kodeverk.Aktoerroller;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
 import org.junit.Test;
 
@@ -13,7 +13,7 @@ public class BrevDataByggerStandardTest {
     @Test
     public void lagBrevData() {
         BrevbestillingDto bestilling = new BrevbestillingDto();
-        bestilling.mottaker = Aktoerroller.BRUKER;
+        bestilling.mottaker = Aktoersroller.BRUKER;
         bestilling.fritekst = "FRITEKST";
         brevDataByggerStandard = new BrevDataByggerStandard(bestilling);
 

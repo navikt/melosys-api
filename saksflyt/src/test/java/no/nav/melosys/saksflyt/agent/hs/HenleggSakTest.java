@@ -1,6 +1,8 @@
 package no.nav.melosys.saksflyt.agent.hs;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -37,7 +39,7 @@ public class HenleggSakTest {
         henleggSak.utfør(prosessinstans);
 
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
-        assertThat(fagsak.getStatus()).isEqualTo(Fagsaksstatus.HENLAGT);
+        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.HENLAGT);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.HS_SEND_BREV);
         verify(fagsakRepository).save(fagsak);
         verify(behandlingRepository).save(behandling);
