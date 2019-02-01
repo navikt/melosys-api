@@ -1,13 +1,11 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
-import java.util.Optional;
-
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.SedService;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +24,7 @@ import static org.mockito.Mockito.*;
 public class IverksettVedtakSendSedTest {
 
     @Mock
-    private BehandlingsresultatRepository behandlingsResultatRepo;
+    private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private BehandlingRepository behandlingRepository;
     @Mock
@@ -47,9 +45,10 @@ public class IverksettVedtakSendSedTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
-        when(behandlingsResultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
-
+        behandlingsresultat.setType(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
     }
 
     @Test

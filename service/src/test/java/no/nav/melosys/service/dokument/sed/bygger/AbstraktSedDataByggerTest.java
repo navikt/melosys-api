@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@RunWith(MockitoJUnitRunner.class)
 public class AbstraktSedDataByggerTest {
 
     private AbstraktSedDataBygger dataBygger;

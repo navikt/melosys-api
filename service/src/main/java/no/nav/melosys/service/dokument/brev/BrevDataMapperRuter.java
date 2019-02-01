@@ -1,19 +1,15 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument.brev;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import no.nav.melosys.domain.ProduserbartDokument;
-import no.nav.melosys.eux.model.SedType;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.mapper.*;
-import no.nav.melosys.service.dokument.sed.mapper.A009Mapper;
-import no.nav.melosys.service.dokument.sed.mapper.AbstraktSedMapper;
 
-public class DokumentDataMapperRuter {
+public class BrevDataMapperRuter {
 
     static Map<ProduserbartDokument, Class<? extends BrevDataMapper>> mappere = new HashMap<>();
-    static Map<SedType, Class<? extends AbstraktSedMapper>> sedMappere = new HashMap<>();
 
     static {
         mappere.put(ProduserbartDokument.ATTEST_A1, AttestMapper.class);
@@ -25,11 +21,7 @@ public class DokumentDataMapperRuter {
         mappere.put(ProduserbartDokument.SED_A001, AttestMapper.class);
     }
 
-    static {
-        sedMappere.put(SedType.A009, A009Mapper.class);
-    }
-
-    private DokumentDataMapperRuter() {
+    private BrevDataMapperRuter() {
     }
 
     public static BrevDataMapper brevDataMapper(ProduserbartDokument type) throws TekniskException {
@@ -38,17 +30,6 @@ public class DokumentDataMapperRuter {
         }
         try {
             return mappere.get(type).newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new TekniskException(e);
-        }
-    }
-
-    public static AbstraktSedMapper sedMapper(SedType sedType) throws TekniskException {
-        if (!sedMappere.containsKey(sedType)) {
-            throw new TekniskException("Sed-type " + sedType.name() + " støttes ikke");
-        }
-        try {
-            return sedMappere.get(sedType).newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             throw new TekniskException(e);
         }

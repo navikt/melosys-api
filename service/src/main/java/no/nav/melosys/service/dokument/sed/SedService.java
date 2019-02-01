@@ -13,7 +13,6 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eux.consumer.EuxConsumer;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.service.dokument.DokumentDataMapperRuter;
 import no.nav.melosys.service.dokument.sed.bygger.AbstraktSedDataBygger;
 import no.nav.melosys.service.dokument.sed.mapper.AbstraktSedMapper;
 import org.slf4j.Logger;
@@ -49,7 +48,7 @@ public class SedService {
         AbstraktSedDataBygger sedDataBygger = sedDataByggerVelger.hent(sedType);
         AbstraktSedData sedData = sedDataBygger.lag(behandling);
 
-        AbstraktSedMapper abstraktSedMapper = DokumentDataMapperRuter.sedMapper(sedType);
+        AbstraktSedMapper abstraktSedMapper = SedDataMapperRuter.sedMapper(sedType);
 
         SED sed = abstraktSedMapper.mapTilSed(sedData);
         BucType bucType = SedUtils.hentBucFraLovvalgsBestemmelse(lovvalgBestemmelse);

@@ -1,20 +1,20 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
 import java.util.Map;
+import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.SedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,15 +26,15 @@ public class IverksettVedtakSendSed extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(IverksettVedtakSendSed.class);
 
-    private final BehandlingsresultatRepository behandlingsResultatRepo;
     private final BehandlingRepository behandlingRepository;
     private final SedService sedService;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
-    public IverksettVedtakSendSed(BehandlingsresultatRepository behandlingsResultatRepo, BehandlingRepository behandlingRepository, SedService sedService) {
-        this.behandlingsResultatRepo = behandlingsResultatRepo;
+    public IverksettVedtakSendSed(BehandlingRepository behandlingRepository, SedService sedService, BehandlingsresultatService behandlingsresultatService) {
         this.behandlingRepository = behandlingRepository;
         this.sedService = sedService;
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @Override
@@ -54,28 +54,49 @@ public class IverksettVedtakSendSed extends AbstraktStegBehandler {
         if (behandling == null) {
             throw new TekniskException(String.format("Finner ikke behandlingen %s.", prosessinstans.getBehandling().getId()));
         }
-        Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandling);
 
         try {
-            if (skalSendeSed(behandlingsresultat)) {
+            Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+            if (sedSkalSendes(behandlingsresultat.getType(), validerLovvalgsperiode(behandlingsresultat.getLovvalgsperioder()))) {
                 sedService.opprettOgSendSed(behandling, behandlingsresultat);
             }
             prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
         } catch (MelosysException ex) {
-            log.error("Kan ikke opprette og sende sed for behandling {}", behandling.getId());
+            log.error("Kan ikke opprette og sende sed for behandling {}", behandling.getId(), ex);
             prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
         }
     }
 
-    private boolean skalSendeSed(Behandlingsresultat behandlingsresultat) {
-        //OBS: Denne sjekken gjelder kun for LA_BUC_04/A009 per nå.
-        return behandlingsresultat.getLovvalgsperioder().stream().anyMatch(lovvalgsperiode ->
-            lovvalgsperiode.getBestemmelse() == LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1
-            || lovvalgsperiode.getBestemmelse() == LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2);
+    private Lovvalgsperiode validerLovvalgsperiode(Set<Lovvalgsperiode> lovvalgsperioder) throws FunksjonellException {
+        if (lovvalgsperioder.size() == 0) {
+            throw new FunksjonellException("Lovvalgsperiode mangler");
+        }
+
+        if (lovvalgsperioder.size() > 1) {
+            throw new UnsupportedOperationException("Flere enn en"
+                + " lovvalgsperiode er ikke støttet i første leveranse");
+        }
+
+        return lovvalgsperioder.iterator().next();
     }
 
-    private Behandlingsresultat hentBehandlingsresultat(Behandling behandling) throws TekniskException {
-        return behandlingsResultatRepo.findById(behandling.getId())
-            .orElseThrow(() -> new TekniskException("Kan ikke finne behandlingsresultat for behandling: " + behandling.getId()));
+    /**
+     * Finn ut om SED skal sendes.
+     * <p>
+     * Innvilgelsesbrev skal sendes dersom behandlingen har resultert i:
+     * <ul>
+     * <li>Lovvalgsland er avklart</li>
+     * <li>Innvilget lovvalgsland er Norge</li>
+     * <li>Lovvalgbestemmelsen er 12.1 eller 12.2</li>
+     */
+    private boolean sedSkalSendes(BehandlingsresultatType behandlingsresultatType, Lovvalgsperiode lovvalgsperiode) {
+        return behandlingsresultatType == BehandlingsresultatType.FASTSATT_LOVVALGSLAND
+            && lovvalgsperiode.getLovvalgsland() == Landkoder.NO
+            && erGyldigBestemmelse(lovvalgsperiode.getBestemmelse());
+    }
+
+    private static boolean erGyldigBestemmelse(LovvalgBestemmelse bestemmelse) {
+        return bestemmelse == LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1
+            || bestemmelse == LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2;
     }
 }

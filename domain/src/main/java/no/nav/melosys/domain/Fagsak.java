@@ -37,7 +37,6 @@ public class Fagsak extends RegistreringsInfo {
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Behandling> behandlinger;
 
-
     public Long getGsakSaksnummer() {
         return gsakSaksnummer;
     }
