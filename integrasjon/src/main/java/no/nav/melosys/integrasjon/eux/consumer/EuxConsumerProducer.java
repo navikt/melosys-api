@@ -26,7 +26,8 @@ public class EuxConsumerProducer {
         return new EuxConsumerImpl(euxRestTemplate, restStsClient, false);
     }
 
-    @Bean(name = "system")
+    @Bean
+    @Qualifier("system")
     public EuxConsumer euxConsumerSystem() {
         return new EuxConsumerImpl(euxRestTemplate, restStsClient, true);
     }

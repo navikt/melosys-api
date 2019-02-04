@@ -14,7 +14,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eux.consumer.EuxConsumer;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.dokument.sed.bygger.AbstraktSedDataBygger;
-import no.nav.melosys.service.dokument.sed.mapper.AbstraktSedMapper;
+import no.nav.melosys.service.dokument.sed.mapper.SedMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -48,9 +48,9 @@ public class SedService {
         AbstraktSedDataBygger sedDataBygger = sedDataByggerVelger.hent(sedType);
         AbstraktSedData sedData = sedDataBygger.lag(behandling);
 
-        AbstraktSedMapper abstraktSedMapper = SedDataMapperRuter.sedMapper(sedType);
+        SedMapper sedMapper = SedDataMapperRuter.sedMapper(sedType);
 
-        SED sed = abstraktSedMapper.mapTilSed(sedData);
+        SED sed = sedMapper.mapTilSed(sedData);
         BucType bucType = SedUtils.hentBucFraLovvalgsBestemmelse(lovvalgBestemmelse);
         String fagsaknummer = behandling.getFagsak().getSaksnummer();
         String mottakerId = hentFørsteInstitusjonId(euxConsumer.hentInstitusjoner(bucType.name(), lovvalgsLand.getKode()));

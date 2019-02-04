@@ -6,11 +6,11 @@ import java.util.Map;
 import no.nav.melosys.eux.model.SedType;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.sed.mapper.A009Mapper;
-import no.nav.melosys.service.dokument.sed.mapper.AbstraktSedMapper;
+import no.nav.melosys.service.dokument.sed.mapper.SedMapper;
 
 public class SedDataMapperRuter {
 
-    static Map<SedType, Class<? extends AbstraktSedMapper>> sedMappere = new HashMap<>();
+    static Map<SedType, Class<? extends SedMapper>> sedMappere = new HashMap<>();
 
     static {
         sedMappere.put(SedType.A009, A009Mapper.class);
@@ -19,7 +19,7 @@ public class SedDataMapperRuter {
     private SedDataMapperRuter() {
     }
 
-    public static AbstraktSedMapper sedMapper(SedType sedType) throws TekniskException {
+    public static SedMapper sedMapper(SedType sedType) throws TekniskException {
         if (!sedMappere.containsKey(sedType)) {
             throw new TekniskException("Sed-type " + sedType.name() + " støttes ikke");
         }
