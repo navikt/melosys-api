@@ -25,20 +25,20 @@ import static no.nav.melosys.domain.dokument.person.Familierelasjon.FARA;
 import static no.nav.melosys.domain.dokument.person.Familierelasjon.MORA;
 
 /**
- * Felles mapper-klasse for alle typer SED. Mapper NAV-objektet i NAV-SED,
+ * Felles mapper-interface for alle typer SED. Mapper NAV-objektet i NAV-SED,
  * som brukes av eux for å plukke ut nødvendig informasjon for en angitt SED.
  */
-public abstract class AbstraktSedMapper<T extends Medlemskap, S extends AbstraktSedData> {
+public interface SedMapper<T extends Medlemskap, S extends AbstraktSedData> {
 
-    protected final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     //Versjonen til SED'en. Generasjon og versjon (SED_G_VER.SED_VER = 4.1)
-    private final String SED_G_VER = "4";
-    private final String SED_VER = "1";
+    String SED_G_VER = "4";
+    String SED_VER = "1";
 
     //Hvis det skulle trenges noen spesifikke endringer av NAV-objektet for enkelte SED'er,
     // bør denne metoden overrides.
-    public SED mapTilSed(S sedData) throws TekniskException, FunksjonellException {
+    default SED mapTilSed(S sedData) throws TekniskException, FunksjonellException {
         SED sed = new SED();
 
         sed.setNav(prefillNav(sedData));
@@ -50,11 +50,11 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
         return sed;
     }
 
-    protected abstract T hentMedlemskap(S sedData) throws TekniskException, FunksjonellException;
+    T hentMedlemskap(S sedData) throws TekniskException, FunksjonellException;
 
-    protected abstract SedType getSedType();
+    SedType getSedType();
 
-    private Nav prefillNav(AbstraktSedData sedData) throws TekniskException {
+    default Nav prefillNav(AbstraktSedData sedData) throws TekniskException {
         Nav nav = new Nav();
 
         nav.setBruker(hentBruker(sedData.getPersonDokument(), sedData.getSøknadDokument(), sedData.getBostedsadresse()));
@@ -68,7 +68,7 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
         return nav;
     }
 
-    private Bruker hentBruker(PersonDokument personDokument, SoeknadDokument søknadDokument, Bostedsadresse bostedsadresse)
+    default Bruker hentBruker(PersonDokument personDokument, SoeknadDokument søknadDokument, Bostedsadresse bostedsadresse)
         throws TekniskException {
         Bruker bruker = new Bruker();
 
@@ -79,7 +79,7 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
         return bruker;
     }
 
-    private Person hentPerson(PersonDokument personDokument, SoeknadDokument søknadDokument) {
+    default Person hentPerson(PersonDokument personDokument, SoeknadDokument søknadDokument) {
         Person person = new Person();
 
         person.setFornavn(personDokument.fornavn);
@@ -98,7 +98,7 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
         return person;
     }
 
-    private List<Pin> hentPin(PersonDokument personDokument, SoeknadDokument søknadDokument) {
+    default List<Pin> hentPin(PersonDokument personDokument, SoeknadDokument søknadDokument) {
         List<Pin> pins = Lists.newArrayList();
 
         pins.add(new Pin(
@@ -111,7 +111,7 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
         return pins;
     }
 
-    private List<Adresse> hentAdresser(Bostedsadresse bostedsadresse) {
+    default List<Adresse> hentAdresser(Bostedsadresse bostedsadresse) {
 
         Adresse adresse = new Adresse();
         adresse.setBy(bostedsadresse.getPoststed());
@@ -122,7 +122,7 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
         return Collections.singletonList(adresse);
     }
 
-    private void setFamiliemedlemmer(PersonDokument personDokument, Bruker bruker) {
+    default void setFamiliemedlemmer(PersonDokument personDokument, Bruker bruker) {
 
         //Splitter per nå navnet etter første mellomrom
         Optional<Familiemedlem> optionalFar = personDokument.familiemedlemmer.stream()
@@ -154,7 +154,7 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
         }
     }
 
-    private List<Arbeidssted> hentArbeidssted(List<no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted> avklarteArbeidssteder) {
+    default List<Arbeidssted> hentArbeidssted(List<no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted> avklarteArbeidssteder) {
 
         //Skal bare være èn ved Lev1
         return avklarteArbeidssteder.stream().map(avklartArb -> {
@@ -169,7 +169,7 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
         }).collect(Collectors.toList()); //TODO: må tilrettelegge for maritime arbeidssteder når dette blir avklart.ref: BrevByggerBase:hentIkkeFysiskeArbeidssteder()
     }
 
-    List<Arbeidsgiver> hentArbeidsGiver(List<Virksomhet> arbeidsGivendeVirksomheter) {
+    default List<Arbeidsgiver> hentArbeidsGiver(List<Virksomhet> arbeidsGivendeVirksomheter) {
 
         return arbeidsGivendeVirksomheter.stream().map(virksomhet -> {
             Arbeidsgiver arbeidsgiver = new Arbeidsgiver();
@@ -185,7 +185,7 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
         }).collect(Collectors.toList());
     }
 
-    private Selvstendig hentSelvStendig(List<Virksomhet> virksomheter) {
+    default Selvstendig hentSelvStendig(List<Virksomhet> virksomheter) {
         Selvstendig selvstendig = new Selvstendig();
 
         selvstendig.setArbeidsgiver(
@@ -214,17 +214,17 @@ public abstract class AbstraktSedMapper<T extends Medlemskap, S extends Abstrakt
         return selvstendig;
     }
 
-    protected String formaterDato(LocalDate dato) {
+    default String formaterDato(LocalDate dato) {
         return dateTimeFormatter.format(dato);
     }
 
-    private String[] splitFulltNavn(String navn) {
+    default  String[] splitFulltNavn(String navn) {
         if (navn == null || navn.isEmpty()) return new String[2];
         else if (!navn.contains(" ")) return new String[] {navn, null};
         else return navn.split(" ", 2);
     }
 
-    private Adresse hentAdresseFraStrukturertAdresse(StrukturertAdresse sAdresse) {
+    default Adresse hentAdresseFraStrukturertAdresse(StrukturertAdresse sAdresse) {
         Adresse adresse = new Adresse();
         adresse.setGate(sAdresse.gatenavn);
         adresse.setPostnummer(sAdresse.postnummer);

@@ -23,7 +23,7 @@ import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.dokument.sed.AbstraktSedData;
 
-class SedDataStub {
+public class SedDataStub {
 
     public static <T extends AbstraktSedData> T hent(T sedData) throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();

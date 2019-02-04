@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.eux.consumer;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -13,28 +14,25 @@ import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-@Service
 public class EuxConsumerImpl implements EuxConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(EuxConsumerImpl.class);
 
     private final RestTemplate euxRestTemplate;
     private final RestStsClient restSTSClient;
+    private final boolean isSystem;
 
     private final String RINA_SAKSNUMMER = "RINASaksnummer";
     private final String KORRELASJONS_ID = "KorrelasjonsId";
@@ -47,10 +45,10 @@ public class EuxConsumerImpl implements EuxConsumer {
     private final String DOKUMENTMAL_PATH = "/buc/%s/dokumentmal";
     private final String MULIGEAKSJONER_PATH = "/buc/%s/muligeaksjoner";
 
-    @Autowired
-    public EuxConsumerImpl(@Qualifier("euxRestTemplate") RestTemplate restTemplate, RestStsClient restSTSClient) {
+    EuxConsumerImpl(RestTemplate restTemplate, RestStsClient restSTSClient, boolean isSystem) {
         this.euxRestTemplate = restTemplate;
         this.restSTSClient = restSTSClient;
+        this.isSystem = isSystem;
     }
 
     /**
@@ -66,7 +64,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         log.info("Henter buc: {}", rinaSaksnummer);
         String uri = String.format(BUC_PATH, rinaSaksnummer);
 
-        return exchange(uri, HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+        return exchange(uri, HttpMethod.GET, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<JsonNode>() {});
     }
 
@@ -82,7 +80,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/buc")
                 .queryParam(BUC_TYPE, bucType);
 
-        return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(getDefaultHeaders(false)),
+        return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(getDefaultHeaders()),
                 new ParameterizedTypeReference<String>() {});
     }
 
@@ -96,7 +94,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         log.info("Sletter buc: {}", rinaSaksnummer);
         String uri = String.format(BUC_PATH, rinaSaksnummer);
 
-        exchange(uri, HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders(false)),
+        exchange(uri, HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<Void>() {});
     }
 
@@ -114,7 +112,7 @@ public class EuxConsumerImpl implements EuxConsumer {
             .fromPath(String.format(BUCDELTAKERE_PATH, rinaSaksnummer))
             .queryParam("MottakerId", mottakerId);
 
-        exchange(builder.toUriString(), HttpMethod.PUT, new HttpEntity<>(getDefaultHeaders(false)),
+        exchange(builder.toUriString(), HttpMethod.PUT, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<Void>() {});
     }
 
@@ -130,7 +128,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         log.info("Henter deltakere til sak {}", rinaSaksnummer);
         String uri = String.format(BUCDELTAKERE_PATH, rinaSaksnummer);
 
-        return exchange(uri, HttpMethod.PUT, new HttpEntity<>(getDefaultHeaders(false)),
+        return exchange(uri, HttpMethod.PUT, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<List<String>>() {});
     }
 
@@ -145,7 +143,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         log.info("Henter mulige aksjoner for sak {}", rinaSaksnummer);
         String uri = String.format(MULIGEAKSJONER_PATH, rinaSaksnummer);
 
-        return exchange(uri, HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+        return exchange(uri, HttpMethod.GET, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<JsonNode>() {});
     }
 
@@ -164,7 +162,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         String uri = UriComponentsBuilder.fromPath(String.format("/buc/%s/sed", rinaSaksnummer))
             .queryParam(KORRELASJONS_ID, korrelasjonsId).toUriString();
 
-        return exchange(uri, HttpMethod.POST, new HttpEntity<>(sed, getDefaultHeaders(false)),
+        return exchange(uri, HttpMethod.POST, new HttpEntity<>(sed, getDefaultHeaders()),
             new ParameterizedTypeReference<String>() {});
     }
 
@@ -179,7 +177,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         log.info("Henter sed med id {}, fra sak {}", dokumentId, rinaSaksnummer);
         String uri = String.format(SED_PATH, rinaSaksnummer, dokumentId);
 
-        return exchange(uri, HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+        return exchange(uri, HttpMethod.GET, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<SED>() {});
     }
 
@@ -198,7 +196,7 @@ public class EuxConsumerImpl implements EuxConsumer {
             .queryParam(KORRELASJONS_ID, korrelasjonsId).toUriString();
 
 
-        exchange(uri, HttpMethod.PUT, new HttpEntity<>(sed, getDefaultHeaders(false)),
+        exchange(uri, HttpMethod.PUT, new HttpEntity<>(sed, getDefaultHeaders()),
             new ParameterizedTypeReference<Void>() {});
     }
 
@@ -213,7 +211,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         log.info("Sletter sed {} på sak {}", dokumentId, rinaSaksnummer);
         String uri = String.format(SED_PATH, rinaSaksnummer, dokumentId);
 
-        exchange(uri, HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders(false)),
+        exchange(uri, HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<Void>() {});
     }
 
@@ -231,7 +229,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         String uri = UriComponentsBuilder.fromPath(String.format(SED_PATH, rinaSaksnummer, dokumentId) + "/send")
             .queryParam(KORRELASJONS_ID, korrelasjonsId).toUriString();
 
-        exchange(uri, HttpMethod.POST, new HttpEntity<>(getDefaultHeaders(false)),
+        exchange(uri, HttpMethod.POST, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<Void>() {});
     }
 
@@ -250,7 +248,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         String uri = UriComponentsBuilder.fromPath(String.format(VEDLEGG_PATH, rinaSaksnummer, dokumentId))
             .queryParam("Filtype", filType).toUriString();
 
-        return exchange(uri, HttpMethod.POST, new HttpEntity<>(vedlegg, getDefaultHeaders(false)),
+        return exchange(uri, HttpMethod.POST, new HttpEntity<>(vedlegg, getDefaultHeaders()),
             new ParameterizedTypeReference<String>() {});
     }
 
@@ -270,7 +268,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_OCTET_STREAM));
-        headers.add(HttpHeaders.AUTHORIZATION, getAuth()); //TODO; denne må endres om det viser seg at det trengs automatisering på dette steget - gitt at eux støtter dette da
+        headers.add(HttpHeaders.AUTHORIZATION, getOidcAuth());
 
         return exchange(uri, HttpMethod.GET, new HttpEntity<>(headers),
             new ParameterizedTypeReference<byte[]>() {});
@@ -289,7 +287,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         log.info("Sletter vedlegg {} på sak {} og dokument {}", vedleggId, rinaSaksnummer, dokumentId);
         String uri = String.format(VEDLEGG_PATH, rinaSaksnummer, dokumentId) + "/" + vedleggId;
 
-        exchange(uri, HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders(false)),
+        exchange(uri, HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<Void>() {});
     }
 
@@ -304,7 +302,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         log.info("Henter tilgjenglige sed-typer for sak {}", rinaSaksnummer);
         String uri = String.format(BUC_PATH, rinaSaksnummer) + "/sedtyper";
 
-        return exchange(uri, HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+        return exchange(uri, HttpMethod.GET, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<List<String>>() {});
     }
 
@@ -318,7 +316,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         log.info("Setter sak {} sensitiv", rinaSaksnummer);
         String uri = String.format(BUC_PATH, rinaSaksnummer) + "/sensitivsak";
 
-        exchange(uri, HttpMethod.PUT, new HttpEntity<>(getDefaultHeaders(false)),
+        exchange(uri, HttpMethod.PUT, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<Void>() {});
     }
     /**
@@ -331,7 +329,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         log.info("Fjerner 'sensitiv sak' på sak {}", rinaSaksnummer);
         String uri = String.format(BUC_PATH, rinaSaksnummer) + "/sensitivsak";
 
-        exchange(uri, HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders(false)),
+        exchange(uri, HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<Void>() {});
     }
 
@@ -339,18 +337,18 @@ public class EuxConsumerImpl implements EuxConsumer {
      * Oppretter en BuC med en tilhørende SED
      * @param bucType Hvilken type buc som skal opprettes. Eks LA_BUC_04
      * @param mottakerId Mottaker sin Rina-id
-     * @return id til rina-sak som ble opprettet
+     * @return id til rina-sak og id til dokument som ble opprettet. Nøkler: caseId og documentId
      * @throws MelosysException
      */
     @Override
-    public String opprettBucOgSed(String bucType, String mottakerId, SED sed) throws MelosysException {
+    public Map<String, String> opprettBucOgSed(String bucType, String mottakerId, SED sed) throws MelosysException {
         log.info("Oppretter buc {}, med sed {}, med mottaker {}", bucType, sed.getSed(), mottakerId);
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/buc/sed")
             .queryParam("BucType", bucType)
             .queryParam("MottakerId", mottakerId);
 
-        return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(sed, getDefaultHeaders(false)),
-            new ParameterizedTypeReference<String>() {});
+        return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(sed, getDefaultHeaders()),
+            new ParameterizedTypeReference<Map<String, String>>() {});
     }
 
     /**
@@ -362,11 +360,11 @@ public class EuxConsumerImpl implements EuxConsumer {
      * @param korrelasjonsId Optional, ikke brukt av eux per nå
      * @param sed sed'en som skal opprettes
      * @param vedlegg vedlegget som skal legges til saken
-     * @return id til rina-sak som ble opprettet
+     * @return @return id til rina-sak, id til dokument og id til vedlegg som ble opprettet. Nøkler: caseId, documentId og attachmentId
      * @throws MelosysException
      */
     @Override
-    public String opprettBucOgSedMedVedlegg(String bucType, String fagSakNummer, String mottakerId, String filType, String korrelasjonsId, SED sed, Object vedlegg) throws MelosysException {
+    public Map<String, String> opprettBucOgSedMedVedlegg(String bucType, String fagSakNummer, String mottakerId, String filType, String korrelasjonsId, SED sed, Object vedlegg) throws MelosysException {
         log.info("Oppretter buc {}, med sed {}, med mottaker {} og legger til vedlegg", bucType, sed.getSed(), mottakerId);
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/buc/sed/vedlegg")
             .queryParam(BUC_TYPE, bucType)
@@ -378,7 +376,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        headers.add(HttpHeaders.AUTHORIZATION, getAuth());
+        headers.add(HttpHeaders.AUTHORIZATION, getOidcAuth());
 
         byte[] documentBytes, attachmentBytes;
         try {
@@ -406,7 +404,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         map.add("attachment", attachment);
 
         return exchange(builder.toUriString(), HttpMethod.POST, new HttpEntity<>(map, headers),
-            new ParameterizedTypeReference<String>() {});
+            new ParameterizedTypeReference<Map<String, String>>() {});
     }
 
     /**
@@ -417,7 +415,7 @@ public class EuxConsumerImpl implements EuxConsumer {
     @Override
     public List<String> bucTypePerSektor() throws MelosysException {
         log.info("Henter buctyper per sektor");
-        return exchange("/buctypepersektor", HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+        return exchange("/buctypepersektor", HttpMethod.GET, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<List<String>>() {});
     }
 
@@ -435,7 +433,7 @@ public class EuxConsumerImpl implements EuxConsumer {
             .queryParam(BUC_TYPE, bucType)
             .queryParam("LandKode", landkode);
 
-        return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+        return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<List<String>>() {});
     }
 
@@ -451,7 +449,7 @@ public class EuxConsumerImpl implements EuxConsumer {
         UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/kodeverk")
             .queryParam("Kodeverk", kodeverk);
 
-        return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+        return exchange(builder.toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<JsonNode>() {});
     }
 
@@ -480,7 +478,7 @@ public class EuxConsumerImpl implements EuxConsumer {
             .queryParam("Status", status);
 
         //Må vurdere å endre returverdi til en POJO om denne integrasjonen faktisk tas i bruk
-        return exchange(builder.build(false).toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders(false)),
+        return exchange(builder.build(false).toUriString(), HttpMethod.GET, new HttpEntity<>(getDefaultHeaders()),
             new ParameterizedTypeReference<JsonNode>() {});
     }
 
@@ -491,16 +489,19 @@ public class EuxConsumerImpl implements EuxConsumer {
             throw ExceptionMapper.springExTilMelosysEx(e);
         }
     }
-
-    private HttpHeaders getDefaultHeaders(boolean systemAuth) throws MelosysException {
+    
+    private HttpHeaders getDefaultHeaders() throws MelosysException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        headers.add(HttpHeaders.AUTHORIZATION, systemAuth ? getSystemOidcAuth() : getAuth());
+        headers.add(HttpHeaders.AUTHORIZATION, getOidcAuth());
         return headers;
     }
 
-    // I tilfelle noe automatisering ønskes.
+    private String getOidcAuth() throws MelosysException {
+        return isSystem() ? getSystemOidcAuth() : getAuth();
+    }
+
     // Henter token for autentisering ved systembruker, srvmelosys, da eux krever oidc
     private String getSystemOidcAuth() throws MelosysException {
         return "Bearer " + restSTSClient.collectToken();
@@ -508,6 +509,6 @@ public class EuxConsumerImpl implements EuxConsumer {
 
     @Override
     public boolean isSystem() {
-        return false;
+        return this.isSystem;
     }
 }

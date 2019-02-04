@@ -21,15 +21,15 @@ import static org.junit.Assert.assertNotNull;
 @RunWith(MockitoJUnitRunner.class)
 public class SedMapperTest {
 
-    protected class SedMapperImpl extends AbstraktSedMapper<MedlemskapA009, SedDataImpl> {
+    protected class SedMapperImpl implements SedMapper<MedlemskapA009, SedDataImpl> {
 
         @Override
-        protected MedlemskapA009 hentMedlemskap(SedDataImpl sedData) {
+        public MedlemskapA009 hentMedlemskap(SedDataImpl sedData) {
             return new MedlemskapA009();
         }
 
         @Override
-        protected SedType getSedType() {
+        public SedType getSedType() {
             return SedType.A009;
         }
     }

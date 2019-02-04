@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -20,7 +17,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@RunWith(MockitoJUnitRunner.class)
 public class AbstraktSedDataByggerTest {
 
     private AbstraktSedDataBygger dataBygger;
@@ -33,6 +30,11 @@ public class AbstraktSedDataByggerTest {
                                   LovvalgsperiodeService lovvalgsperiodeService,
                                   AvklartefaktaService avklartefaktaService) {
             super(kodeverkService, registerOppslagService, lovvalgsperiodeService, avklartefaktaService);
+        }
+
+        @Override
+        public AbstraktSedData lag(Behandling behandling) throws TekniskException, FunksjonellException {
+            return null;
         }
     }
 

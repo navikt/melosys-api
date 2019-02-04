@@ -13,10 +13,10 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.sed.A009Data;
 
-public class A009Mapper extends AbstraktSedMapper<MedlemskapA009, A009Data> {
+public class A009Mapper implements SedMapper<MedlemskapA009, A009Data> {
 
     @Override
-    protected MedlemskapA009 hentMedlemskap(A009Data sedData) throws TekniskException, FunksjonellException {
+    public MedlemskapA009 hentMedlemskap(A009Data sedData) throws TekniskException, FunksjonellException {
 
         final MedlemskapA009 medlemskap = new MedlemskapA009();
 
@@ -68,7 +68,7 @@ public class A009Mapper extends AbstraktSedMapper<MedlemskapA009, A009Data> {
         return utsendingsland;
     }
 
-    protected SedType getSedType() {
+    public SedType getSedType() {
         return SedType.A009;
     }
 }

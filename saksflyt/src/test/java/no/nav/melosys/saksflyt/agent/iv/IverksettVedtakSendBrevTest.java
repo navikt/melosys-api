@@ -14,11 +14,9 @@ import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
-
 import org.junit.Test;
 
 import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.ArgumentMatchers.any;
@@ -178,7 +176,7 @@ public class IverksettVedtakSendBrevTest {
     public final void utførStegPåInnvilgelsesBrevBestemtAv16_1GårTilGsakAvsluttOppgave() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(INNVILGET_BEHANDLINGSID);
         agent.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
     }
 
     @Test
@@ -186,7 +184,7 @@ public class IverksettVedtakSendBrevTest {
         Prosessinstans prosessinstans = lagProsessinstans(INNVILGET_BEHANDLINGSID_12_1);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(INNVILGET_BEHANDLINGSID_12_1));
         instans.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
     }
 
     @Test
@@ -194,7 +192,7 @@ public class IverksettVedtakSendBrevTest {
         Prosessinstans prosessinstans = lagProsessinstans(INNVILGET_BEHANDLINGSID_12_2);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(INNVILGET_BEHANDLINGSID_12_2));
         instans.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
     }
 
     @Test

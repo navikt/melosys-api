@@ -19,7 +19,6 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -42,7 +41,6 @@ public class EuxConsumerTest {
     @Mock
     private RestStsClient restStsClient;
 
-    @InjectMocks
     private EuxConsumerImpl euxConsumer;
 
     private MockRestServiceServer server;
@@ -51,6 +49,7 @@ public class EuxConsumerTest {
 
     @Before
     public void setup() {
+        euxConsumer = new EuxConsumerImpl(restTemplate, restStsClient, true);
         server = MockRestServiceServer.createServer(restTemplate);
     }
 
@@ -151,28 +150,37 @@ public class EuxConsumerTest {
     }
 
     @Test
-    public void opprettBucOgSed_forventString() throws MelosysException {
+    public void opprettBucOgSed_forventString() throws MelosysException, JsonProcessingException {
         String buc = "buc", mottaker = "NAV";
         SED sed = new SED();
 
-        server.expect(requestTo("/buc/sed?BucType=" + buc + "&MottakerId=" + mottaker))
-            .andRespond(withSuccess("SUKSESS123", MediaType.APPLICATION_JSON));
+        Map<String, String> forventetResultat = Maps.newHashMap();
+        forventetResultat.put("documentId","123ewq123ewq");
+        forventetResultat.put("caseId", "rewf24");
 
-        String resultat = euxConsumer.opprettBucOgSed(buc, mottaker, sed);
-        assertNotNull(resultat);
+        server.expect(requestTo("/buc/sed?BucType=" + buc + "&MottakerId=" + mottaker))
+            .andRespond(withSuccess(objectMapper.writeValueAsString(forventetResultat), MediaType.APPLICATION_JSON));
+
+        Map resultat = euxConsumer.opprettBucOgSed(buc, mottaker, sed);
+        assertEquals(forventetResultat, resultat);
     }
 
     @Test
-    public void opprettBucOgSedMedVedlegg_forventString() throws MelosysException {
+    public void opprettBucOgSedMedVedlegg_forventString() throws MelosysException, JsonProcessingException {
         String buc = "buc", fagsak = "123", mottaker = "NAV", filtype = "virus.exe", korrelasjon = "111", vedlegg = "vedlegg";
         SED sed = new SED();
 
+        Map<String, String> forventetResultat = Maps.newHashMap();
+        forventetResultat.put("documentId","123ewq123ewq");
+        forventetResultat.put("caseId", "rewf24");
+        forventetResultat.put("attachmentId", "ffrewf24");
+
         server.expect(requestTo("/buc/sed/vedlegg?BuCType=" + buc + "&FagSakNummer=" + fagsak +
             "&MottakerID=" + mottaker + "&FilType=" + filtype + "&KorrelasjonsId=" + korrelasjon))
-            .andRespond(withSuccess("SUKSESS123", MediaType.APPLICATION_JSON));
+            .andRespond(withSuccess(objectMapper.writeValueAsString(forventetResultat), MediaType.APPLICATION_JSON));
 
-        String resultat = euxConsumer.opprettBucOgSedMedVedlegg(buc, fagsak, mottaker, filtype, korrelasjon, sed, vedlegg);
-        assertNotNull(resultat);
+        Map resultat = euxConsumer.opprettBucOgSedMedVedlegg(buc, fagsak, mottaker, filtype, korrelasjon, sed, vedlegg);
+        assertEquals(forventetResultat, resultat);
     }
 
     @Test

@@ -20,6 +20,9 @@ public class Fagsak extends RegistreringsInfo {
     @Column(name = "gsak_saksnummer")
     private Long gsakSaksnummer;
 
+    @Column(name = "rina_saksnummer")
+    private String rinasaksnummer;
+
     @Column(name = "fagsak_type")
     @Convert(converter = Fagsakstype.DbKonverterer.class)
     private Fagsakstype type;
@@ -116,6 +119,14 @@ public class Fagsak extends RegistreringsInfo {
 
     public void setSaksnummer(String saksnummer) {
         this.saksnummer = saksnummer;
+    }
+
+    public String getRinasaksnummer() {
+        return rinasaksnummer;
+    }
+
+    public void setRinasaksnummer(String rinasaksnummer) {
+        this.rinasaksnummer = rinasaksnummer;
     }
 
     @Override
