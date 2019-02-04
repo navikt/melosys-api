@@ -25,7 +25,7 @@ import static no.nav.melosys.domain.dokument.person.Familierelasjon.FARA;
 import static no.nav.melosys.domain.dokument.person.Familierelasjon.MORA;
 
 /**
- * Felles mapper-klasse for alle typer SED. Mapper NAV-objektet i NAV-SED,
+ * Felles mapper-interface for alle typer SED. Mapper NAV-objektet i NAV-SED,
  * som brukes av eux for å plukke ut nødvendig informasjon for en angitt SED.
  */
 public interface SedMapper<T extends Medlemskap, S extends AbstraktSedData> {
