@@ -78,11 +78,13 @@ public class FagsakServiceTest {
     @Test
     public void nyFagsakOgBehandling() {
         Behandling behandling = mock(Behandling.class);
-        doReturn(behandling).when(behandlingService).nyBehandling(any(), any(), any());
+        String initierendeJournalpostId = "234";
+        String initierendeDokumentId = "221234";
+        doReturn(behandling).when(behandlingService).nyBehandling(any(), any(), any(), anyString(), anyString());
 
-        Fagsak fagsak = fagsakService.nyFagsakOgBehandling("AKTOER_ID", "123456789", "", Behandlingstype.SØKNAD);
+        Fagsak fagsak = fagsakService.nyFagsakOgBehandling("AKTOER_ID", "123456789", "", Behandlingstype.SØKNAD, initierendeJournalpostId, initierendeDokumentId);
         verify(fagsakRepo).save(any(Fagsak.class));
-        verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstype.SØKNAD));
+        verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstype.SØKNAD), eq(initierendeJournalpostId), eq(initierendeDokumentId));
         assertThat(fagsak.getBehandlinger()).isNotEmpty();
     }
 

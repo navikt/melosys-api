@@ -19,9 +19,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_SAK_OG_BEH;
-import static no.nav.melosys.domain.ProsessSteg.JFR_OPPRETT_SØKNAD;
-import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_OPPR;
+import static no.nav.melosys.domain.ProsessSteg.*;
 
 /**
  * Oppretter en sak og en behandling i Melosys.
@@ -75,13 +73,15 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         String arbeidsgiver = prosessinstans.getData(ARBEIDSGIVER);
         String representant = prosessinstans.getData(REPRESENTANT);
         String endretAv = prosessinstans.getData(SAKSBEHANDLER);
+        String initierendeJournalpostId = prosessinstans.getData(JOURNALPOST_ID);
+        String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
         auditorAware.setSaksbehanlderID(endretAv);
 
         if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
             String saksnummer = prosessinstans.getData(SAKSNUMMER);
             Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
             Behandlingstype behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstype.class);
-            Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype);
+            Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
             prosessinstans.setBehandling(behandling);
 
             applicationEventPublisher.publishEvent(new BehandlingOpprettetEvent(behandling, endretAv));
@@ -89,7 +89,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             prosessinstans.setSteg(STATUS_BEH_OPPR);
             log.info("Opprettet behandling {} for prosessinstans {}", behandling.getId(), prosessinstans.getId());
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
-            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, arbeidsgiver, representant, Behandlingstype.SØKNAD);
+            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, arbeidsgiver, representant, Behandlingstype.SØKNAD, initierendeJournalpostId, initierendeDokumentId);
             prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
             prosessinstans.setBehandling(fagsak.getBehandlinger().get(0));
 
@@ -102,7 +102,6 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             String feilmelding = "ProsessType " + prosessinstans.getType() + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
-            return;
         }
     }
 }

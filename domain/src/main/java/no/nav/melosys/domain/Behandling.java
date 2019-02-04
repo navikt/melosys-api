@@ -35,6 +35,12 @@ public class Behandling extends RegistreringsInfo {
     @Column(name = "dokumentasjon_svarfrist_dato")
     private Instant dokumentasjonSvarfristDato;
 
+    @Column(name = "initierende_journalpost_id")
+    private String initierendeJournalpostId;
+
+    @Column(name = "initierende_dokument_id")
+    private String initierendeDokumentId;
+
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
 
@@ -107,6 +113,22 @@ public class Behandling extends RegistreringsInfo {
 
     public boolean erAktiv() {
         return !status.equals(Behandlingsstatus.AVSLUTTET);
+    }
+
+    public String getInitierendeJournalpostId() {
+        return initierendeJournalpostId;
+    }
+
+    public void setInitierendeJournalpostId(String initierendeJournalpostId) {
+        this.initierendeJournalpostId = initierendeJournalpostId;
+    }
+
+    public String getInitierendeDokumentId() {
+        return initierendeDokumentId;
+    }
+
+    public void setInitierendeDokumentId(String initierendeDokumentId) {
+        this.initierendeDokumentId = initierendeDokumentId;
     }
 
     @Override
