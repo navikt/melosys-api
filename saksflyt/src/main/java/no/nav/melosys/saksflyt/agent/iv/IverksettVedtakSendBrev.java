@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProduserbartDokument.ATTEST_A1;
 import static no.nav.melosys.domain.ProduserbartDokument.INNVILGELSE_YRKESAKTIV;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
@@ -86,8 +85,9 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
                 brevData.mottaker = RolleType.BRUKER;
                 dokumentService.produserDokument(behandling.getId(), INNVILGELSE_YRKESAKTIV, brevData);
 
-                brevData.mottaker = RolleType.MYNDIGHET;
-                dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
+                // FIXME Myndigheter støttes ikke.
+                //brevData.mottaker = RolleType.MYNDIGHET;
+                //dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
 
                 log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
                 prosessinstans.setSteg(IV_SEND_SED);
