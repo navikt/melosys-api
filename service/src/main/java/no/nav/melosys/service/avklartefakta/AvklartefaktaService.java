@@ -42,7 +42,7 @@ public class AvklartefaktaService {
     }
 
     public Set<Avklartefakta> hentAlleAvklarteArbeidsland(long behandlingsid) {
-        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, AvklartefaktaType.BOSTEDSLAND);
+        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, AvklartefaktaType.ARBEIDSLAND);
     }
 
     public Set<String> hentAvklarteOrganisasjoner(long behandlingsid) {
