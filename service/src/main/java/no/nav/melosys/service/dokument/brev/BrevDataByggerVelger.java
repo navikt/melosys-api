@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.ProduserbartDokument;
+import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -20,6 +21,7 @@ public class BrevDataByggerVelger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
+    private final JoarkService joarkService;
 
     @Autowired
     public BrevDataByggerVelger(AvklartefaktaService avklartefaktaService,
@@ -27,13 +29,15 @@ public class BrevDataByggerVelger {
                                 KodeverkService kodeverkService,
                                 LovvalgsperiodeService lovvalgsperiodeService,
                                 UtenlandskMyndighetRepository utenlandskMyndighetRepository,
-                                VilkaarsresultatRepository vilkaarsresultatRepository) {
+                                VilkaarsresultatRepository vilkaarsresultatRepository,
+                                JoarkService joarkService) {
         this.avklartefaktaService = avklartefaktaService;
         this.registerOppslagService = registerOppslagService;
         this.kodeverkService = kodeverkService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
+        this.joarkService = joarkService;
     }
 
     // For brevbygging i saksflyt
@@ -71,6 +75,9 @@ public class BrevDataByggerVelger {
                         registerOppslagService,
                         kodeverkService);
                 return new BrevDataByggerVedlegg(a1Bygger, brevbestillingDto);
+            }
+            case MELDING_HENLAGT_SAK: {
+                return new BrevDataByggerHenleggelse(joarkService, brevbestillingDto);
             }
             default:
                 return new BrevDataByggerStandard(brevbestillingDto);

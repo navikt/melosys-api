@@ -101,8 +101,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.henleggelsesgrunn = henleggelsesgrunn;
     }
 
-    public String getHenleggelseFritekst() {
-        return henleggelseFritekst;
+    /**
+     * Returnerer henleggelsesfritekst bare hvis hendelsesgrunn er ANNET. Ellers returneres NULL
+     */
+    public String hentHenleggelseFritekstHvisHenleggelsesgrunnANNET() {
+        return Henleggelsesgrunner.ANNET == henleggelsesgrunn ? henleggelseFritekst : null;
     }
 
     public void setHenleggelseFritekst(String henleggelseFritekst) {

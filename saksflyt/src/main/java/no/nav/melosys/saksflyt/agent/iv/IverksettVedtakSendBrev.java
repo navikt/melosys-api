@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.BehandlingsresultatType.FASTSATT_LOVVALGSLAND;
 import static no.nav.melosys.domain.ProduserbartDokument.ATTEST_A1;
 import static no.nav.melosys.domain.ProduserbartDokument.INNVILGELSE_YRKESAKTIV;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
@@ -128,7 +129,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
                     + "Melosys (behandlingsid %s).", behandling.getId()));
         }
         LovvalgBestemmelse bestemmelse = resultat.getLovvalgsperioder().iterator().next().getBestemmelse();
-        return resultat.getType() == BehandlingsresultatType.FASTSATT_LOVVALGSLAND &&
+        return resultat.getType() == FASTSATT_LOVVALGSLAND &&
                 resultat.getFastsattAvLand() == Landkoder.NO &&
                 bestemmelseKanInnvilges(bestemmelse);
     }
