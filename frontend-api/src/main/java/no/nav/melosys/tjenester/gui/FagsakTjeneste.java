@@ -1,9 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
@@ -12,10 +11,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.FagsakService;
@@ -45,7 +44,9 @@ public class FagsakTjeneste extends RestTjeneste {
     
     private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
 
-    private FagsakService fagsakService;
+    private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
+
+    private final FagsakService fagsakService;
 
     private ModelMapper modelMapper;
 
@@ -54,6 +55,7 @@ public class FagsakTjeneste extends RestTjeneste {
     @Autowired
     public FagsakTjeneste(FagsakService fagsakService, Tilgang tilgang) {
         this.fagsakService = fagsakService;
+
         this.tilgang = tilgang;
 
         this.modelMapper = new ModelMapper();
@@ -90,7 +92,7 @@ public class FagsakTjeneste extends RestTjeneste {
         notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."),
         response = FagsakOppsummeringDto.class,
         responseContainer = "List")
-    public List<FagsakOppsummeringDto> hentFagsaker(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.") String fnr) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public List<FagsakOppsummeringDto> hentFagsaker(@QueryParam("fnr") @ApiParam("Fødselsnummer eller D-nummer.") String fnr) throws FunksjonellException {
         Iterable<Fagsak> saker;
         if (fnr == null) {
             throw new BadRequestException();
@@ -121,9 +123,8 @@ public class FagsakTjeneste extends RestTjeneste {
         return fagsakDto;
     }
 
-    private List<FagsakOppsummeringDto> tilDtoer(Iterable<Fagsak> saker) throws TekniskException {
+    private List<FagsakOppsummeringDto> tilDtoer(Iterable<Fagsak> saker) {
         List<FagsakOppsummeringDto> fagsakListe = new ArrayList<>();
-
         for (Fagsak fagsak : saker) {
             FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
             fagsakOppsummeringDto.setSaksnummer(fagsak.getSaksnummer());
@@ -131,24 +132,47 @@ public class FagsakTjeneste extends RestTjeneste {
             fagsakOppsummeringDto.setSaksstatus(fagsak.getStatus());
             fagsakOppsummeringDto.setOpprettetDato(fagsak.getRegistrertDato());
 
-            Behandling behandling = fagsak.getAktivBehandling();
-            if (behandling != null) {
-                fagsakOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
-                fagsakOppsummeringDto.setBehandlingstype(behandling.getType());
+            List<Behandling> behandlinger = fagsak.getBehandlinger();
 
-                Optional<SaksopplysningDokument> opt = hentDokument(behandling, SaksopplysningType.SØKNAD);
-                if (opt.isPresent()) {
-                    SoeknadDokument soeknadDokument = (SoeknadDokument) opt.get();
-                    fagsakOppsummeringDto.setLand(hentLand(soeknadDokument));
+            List<BehandlingOversiktDto> behandlingOversiktDtoer = behandlinger.stream()
+                .sorted(Comparator.comparing(RegistreringsInfo::getRegistrertDato).reversed())
+                .map(this::tilBehandlingOversiktDto)
+                .collect(Collectors.toList());
 
-                    Periode periode = hentPeriode(soeknadDokument);
-                    fagsakOppsummeringDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
-                }
-            }
-
+            setSammensattNavn(fagsakOppsummeringDto, behandlinger.get(0));
+            fagsakOppsummeringDto.setBehandlingOversikter(behandlingOversiktDtoer);
             fagsakListe.add(fagsakOppsummeringDto);
         }
-
         return fagsakListe;
+    }
+
+    private BehandlingOversiktDto tilBehandlingOversiktDto(Behandling behandling) {
+        BehandlingOversiktDto behandlingOversiktDto = new BehandlingOversiktDto();
+        if (behandling != null) {
+            behandlingOversiktDto.setBehandlingID(behandling.getId());
+            behandlingOversiktDto.setBehandlingsstatus(behandling.getStatus());
+            behandlingOversiktDto.setBehandlingstype(behandling.getType());
+            behandlingOversiktDto.setOpprettetDato(behandling.getRegistrertDato());
+
+            hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(
+                saksopplysningDokument -> {
+                    SoeknadDokument soeknadDokument = (SoeknadDokument) saksopplysningDokument;
+                    behandlingOversiktDto.setLand(hentLand(soeknadDokument));
+                    Periode periode = hentPeriode(soeknadDokument);
+                    behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                });
+            }
+        return behandlingOversiktDto;
+    }
+
+    private void setSammensattNavn(FagsakOppsummeringDto fagsakOppsummeringDto, Behandling behandling) {
+        Optional<SaksopplysningDokument> saksopplysningDokumentPerson = hentDokument(behandling, SaksopplysningType.PERSONOPPLYSNING);
+
+        if( saksopplysningDokumentPerson.isPresent()) {
+                PersonDokument personDokument = (PersonDokument) saksopplysningDokumentPerson.get();
+                fagsakOppsummeringDto.setSammensattNavn(personDokument.sammensattNavn);
+        } else {
+            fagsakOppsummeringDto.setSammensattNavn(UKJENT_SAMMENSATT_NAVN);
+        }
     }
 }
