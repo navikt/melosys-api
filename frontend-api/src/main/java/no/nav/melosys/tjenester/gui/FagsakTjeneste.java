@@ -135,7 +135,6 @@ public class FagsakTjeneste extends RestTjeneste {
             List<Behandling> behandlinger = fagsak.getBehandlinger();
 
             List<BehandlingOversiktDto> behandlingOversiktDtoer = behandlinger.stream()
-                .filter(Objects::nonNull)
                 .sorted(Comparator.comparing(RegistreringsInfo::getRegistrertDato).reversed())
                 .map(this::tilBehandlingOversiktDto)
                 .collect(Collectors.toList());

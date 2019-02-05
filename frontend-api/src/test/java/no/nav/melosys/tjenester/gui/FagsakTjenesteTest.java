@@ -226,8 +226,6 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
 
         assertThat(fagsakOppsummeringDto.getSaksnummer()).isEqualTo("MEL-13");
         assertThat(fagsakOppsummeringDto.getOpprettetDato()).isEqualTo(reqDateInstant);
-        assertThat(fagsakOppsummeringDto.getOpprettetDato()).isEqualTo(endretDateInstant);
-        assertThat(fagsakOppsummeringDto.getOpprettetDato()).isEqualTo(endretDateInstant);
         assertThat(fagsakOppsummeringDto.getSammensattNavn()).isEqualTo("Joe Moe");
 
         BehandlingOversiktDto behandlingFørst = fagsakOppsummeringDto.getBehandlingOversikter().get(0);
@@ -237,11 +235,8 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
         assertThat(behandlingFørst.getOpprettetDato()).isEqualTo(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-11").toInstant());
         assertThat(behandlingFørst.getLand().get(0)).isEqualTo("NO");
 
-        assertThat(behandlingFørst.getSoknadsperiode().getFom().compareTo(LocalDate.of(2019,01,01)))
-            .isEqualTo(0);
-
-        assertThat(behandlingFørst.getSoknadsperiode().getTom().compareTo(LocalDate.of(2019,02,01)))
-            .isEqualTo(0);
+        assertThat(behandlingFørst.getSoknadsperiode().getFom()).isEqualTo(LocalDate.of(2019,01,01));
+        assertThat(behandlingFørst.getSoknadsperiode().getTom()).isEqualTo(LocalDate.of(2019,02,01));
     }
 
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
