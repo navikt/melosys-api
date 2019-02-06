@@ -11,15 +11,11 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import no.nav.melosys.service.datavarehus.BehandlingAvsluttetEvent;
-import no.nav.melosys.service.datavarehus.FagsakAvsluttetEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.IV_AVSLUTT_BEHANDLING;
 import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
 
@@ -37,16 +33,13 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
 
     private final BehandlingRepository behandlingRepository;
     private final FagsakRepository fagsakRepository;
-    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
     public AvsluttFagsakOgBehandling(BehandlingRepository behandlingRepository,
-                                     FagsakRepository fagsakRepository,
-                                     ApplicationEventPublisher applicationEventPublisher) {
+                                     FagsakRepository fagsakRepository) {
         log.info("IverksetteVedtakAvsluttBehandling initialisert");
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
-        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -64,16 +57,12 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
-        String endretAv = prosessinstans.getData(SAKSBEHANDLER);
 
         Fagsak fagsak = behandling.getFagsak();
         fagsak.setStatus(Fagsaksstatus.AVSLUTTET);
         fagsakRepository.save(fagsak);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
-
-        applicationEventPublisher.publishEvent(new FagsakAvsluttetEvent(fagsak, endretAv));
-        applicationEventPublisher.publishEvent(new BehandlingAvsluttetEvent(behandling, endretAv));
 
         prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
     }
