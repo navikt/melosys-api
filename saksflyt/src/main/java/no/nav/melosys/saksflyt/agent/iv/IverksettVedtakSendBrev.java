@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.BehandlingsresultatType.FASTSATT_LOVVALGSLAND;
-import static no.nav.melosys.domain.ProduserbartDokument.ATTEST_A1;
 import static no.nav.melosys.domain.ProduserbartDokument.INNVILGELSE_YRKESAKTIV;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;

@@ -33,7 +33,7 @@ public class HenleggelsesbrevMapper implements BrevDataMapper {
         XMLGregorianCalendar datoMottatt = convertToXMLGregorianCalendarRemoveTimezone(brevDataHenleggelse.initierendeJournalpostForsendelseMottattTidspunkt);
         HenleggelseGrunnType henleggelseGrunn = HenleggelseGrunnType.builder()
             .withHenleggelseGrunn(HenleggelseGrunnKode.fromValue(resultat.getHenleggelsesgrunn().getKode()))
-            .withFritekstBegrunnelse(resultat.hentHenleggelseFritekstHvisHenleggelsesgrunnANNET())
+            .withFritekstBegrunnelse(resultat.hentHenleggelseFritekstHvisGrunnANNET())
             .build();
         return Fag.builder()
             .withAvsender(AvsenderType.builder()
