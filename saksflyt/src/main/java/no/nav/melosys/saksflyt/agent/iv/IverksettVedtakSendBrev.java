@@ -68,7 +68,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
+        log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
         // Henter ut behandling på nytt for å få med saksopplysninger
         Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
         if (behandling == null) {

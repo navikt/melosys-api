@@ -35,6 +35,8 @@ public class IverksettVedtakSendSed extends AbstraktStegBehandler {
         this.behandlingRepository = behandlingRepository;
         this.sedService = sedService;
         this.behandlingsresultatService = behandlingsresultatService;
+
+        log.info("IverksettVedtakSendSed initialisert");
     }
 
     @Override
@@ -49,6 +51,7 @@ public class IverksettVedtakSendSed extends AbstraktStegBehandler {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException {
+        log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
         if (behandling == null) {
@@ -58,7 +61,8 @@ public class IverksettVedtakSendSed extends AbstraktStegBehandler {
         try {
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
             if (sedSkalSendes(behandlingsresultat.getType(), validerLovvalgsperiode(behandlingsresultat.getLovvalgsperioder()))) {
-                sedService.opprettOgSendSed(behandling, behandlingsresultat);
+                log.info("Starter sending av SED for behandling {}", behandling.getId());
+                sedService.opprettOgSendSed();
             }
             prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
         } catch (MelosysException ex) {
