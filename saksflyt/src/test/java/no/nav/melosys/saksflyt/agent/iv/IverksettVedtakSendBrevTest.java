@@ -13,14 +13,15 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.*;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntakOgAvslag;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import org.junit.Test;
 
+import static no.nav.melosys.domain.ProduserbartDokument.AVSLAG_YRKESAKTIV;
+import static no.nav.melosys.domain.ProduserbartDokument.INNVILGELSE_YRKESAKTIV;
 import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.AdditionalMatchers.or;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,27 +29,36 @@ public class IverksettVedtakSendBrevTest {
 
     private final IverksettVedtakSendBrev agent;
     private static final long BEHANDLINGSID = 42L;
+    private static final long IKKE_EKSISTERENDE_BEHANDLINGSID = -42L;
+    private static final long BEHANDLINGSID_UTEN_PERIODER = -43L;
     private static final long BEHANDLINGSID_MED_FLERE_PERIODER = 43L;
-    private static final long INNVILGET_BEHANDLINGSID = 44L;
+    private static final long ART16_1_INNVILGET_BEHANDLINGSID = 44L;
     private static final long BEHANDLINGSID_UTENLANDSK_LOVVALG = 45L;
     private static final long BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE = 46L;
-    private static final long INNVILGET_BEHANDLINGSID_12_1 = 47L;
-    private static final long INNVILGET_BEHANDLINGSID_12_2 = 48L;
+    private static final long ART12_1_INNVILGET_BEHANDLINGSID = 47L;
+    private static final long ART12_2_INNVILGET_BEHANDLINGSID = 48L;
+    private static final long ART12_1_AVSLÅTT_BEHANDLINGSID = 49L;
 
     public IverksettVedtakSendBrevTest() throws Exception {
-        agent = lagStegbehandler(lagBehandling(INNVILGET_BEHANDLINGSID));
+        agent = lagStegbehandler(lagBehandling(ART16_1_INNVILGET_BEHANDLINGSID));
     }
 
     private static IverksettVedtakSendBrev lagStegbehandler(Behandling behandling) throws Exception {
         BehandlingsresultatRepository behandlingsresultatRepo = mockBehandlingsresultatRepository();
+
+        String saksbehandler = "Z123456";
         BrevDataA1 brevdata = new BrevDataA1();
-        BrevDataVedlegg brevdataVedlegg = new BrevDataVedlegg("Z123456");
+        BrevDataVedlegg brevdataVedlegg = new BrevDataVedlegg(saksbehandler);
         brevdataVedlegg.brevDataA1 = brevdata;
         BrevDataByggerVedlegg brevDataByggerVedlegg = mock(BrevDataByggerVedlegg.class);
         when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(brevdataVedlegg);
+        BrevDataByggerAnmodningUnntakOgAvslag brevDataByggerAvslag = mock(BrevDataByggerAnmodningUnntakOgAvslag.class);
+        BrevDataAnmodningUnntakOgAvslag brevdataAvslag = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
+        when(brevDataByggerAvslag.lag(any(), any())).thenReturn(brevdataAvslag);
 
         BrevDataByggerVelger byggerVelger = mock(BrevDataByggerVelger.class);
-        when(byggerVelger.hent(any())).thenReturn(brevDataByggerVedlegg);
+        when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV))).thenReturn(brevDataByggerVedlegg);
+        when(byggerVelger.hent(eq(AVSLAG_YRKESAKTIV))).thenReturn(brevDataByggerAvslag);
 
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
         when(behandlingRepository.findWithSaksopplysningerById(eq(behandling.getId()))).thenReturn(behandling);
@@ -61,10 +71,8 @@ public class IverksettVedtakSendBrevTest {
         Fagsak fagsak = lagFagsak();
         Behandling behandling = lagBehandling(fagsak);
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
-        when(behandlingRepository.findById(or(or(eq(INNVILGET_BEHANDLINGSID),
-                eq(INNVILGET_BEHANDLINGSID_12_1)),
-                eq(INNVILGET_BEHANDLINGSID_12_2))))
-                    .thenReturn(Optional.of(behandling));
+        List<Long> behandlingReferanser = Arrays.asList(ART16_1_INNVILGET_BEHANDLINGSID, ART12_1_INNVILGET_BEHANDLINGSID, ART12_1_AVSLÅTT_BEHANDLINGSID, ART12_2_INNVILGET_BEHANDLINGSID);
+        when(behandlingRepository.findById(argThat(behandlingReferanser::contains))).thenReturn(Optional.of(behandling));
         return behandlingRepository;
     }
 
@@ -80,22 +88,26 @@ public class IverksettVedtakSendBrevTest {
 
     private static BehandlingsresultatRepository mockBehandlingsresultatRepository() {
         BehandlingsresultatRepository behandlingsresultatRepo = mock(BehandlingsresultatRepository.class);
-        Lovvalgsperiode periode = lagLovvalgsperiode();
+        Lovvalgsperiode periode = lagLovvalgsperiodeArt16_1();
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(periode, Landkoder.AT, BehandlingsresultatType.IKKE_FASTSATT);
         when(behandlingsresultatRepo.findById(BEHANDLINGSID)).thenReturn(Optional.of(behandlingsresultat));
-        Lovvalgsperiode periode2 = lagLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1, LocalDate.now().plusDays(30));
-        Behandlingsresultat behandlingsresultatMedFlerePerioder = lagBehandlingsresultat(new HashSet<Lovvalgsperiode>(Arrays.asList(periode, periode2)), null, BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        Lovvalgsperiode periode2 = lagLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1, LocalDate.now().plusDays(30), Landkoder.DK, false);
+        Behandlingsresultat behandlingsresultatMedFlerePerioder = lagBehandlingsresultat(new HashSet<>(Arrays.asList(periode, periode2)), null, BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
         assertThat(behandlingsresultatMedFlerePerioder.getLovvalgsperioder().size()).isGreaterThan(1);
         when(behandlingsresultatRepo.findById(BEHANDLINGSID_MED_FLERE_PERIODER)).thenReturn(Optional.of(behandlingsresultatMedFlerePerioder));
-        Behandlingsresultat innvilgetBehandlingsResultat = lagBehandlingsresultat(periode, Landkoder.NO);
-        when(behandlingsresultatRepo.findById(INNVILGET_BEHANDLINGSID)).thenReturn(Optional.of(innvilgetBehandlingsResultat));
-        Behandlingsresultat innvilgetResultat12_1 = lagBehandlingsresultat(lagLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1), Landkoder.NO);
-        when(behandlingsresultatRepo.findById(INNVILGET_BEHANDLINGSID_12_1)).thenReturn(Optional.of(innvilgetResultat12_1));
-        Behandlingsresultat innvilgetResultat12_2 = lagBehandlingsresultat(lagLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2), Landkoder.NO);
-        when(behandlingsresultatRepo.findById(INNVILGET_BEHANDLINGSID_12_2)).thenReturn(Optional.of(innvilgetResultat12_2));
+        Behandlingsresultat behandlingsresultatUtenPerioder = lagBehandlingsresultatUtenPerioder();
+        when(behandlingsresultatRepo.findById(BEHANDLINGSID_UTEN_PERIODER)).thenReturn(Optional.of(behandlingsresultatUtenPerioder));
+        Behandlingsresultat innvilgetBehandlingsResultat = lagBehandlingsresultat(periode);
+        when(behandlingsresultatRepo.findById(ART16_1_INNVILGET_BEHANDLINGSID)).thenReturn(Optional.of(innvilgetBehandlingsResultat));
+        Behandlingsresultat innvilgetResultat12_1 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1));
+        when(behandlingsresultatRepo.findById(ART12_1_INNVILGET_BEHANDLINGSID)).thenReturn(Optional.of(innvilgetResultat12_1));
+        Behandlingsresultat avslåttResultat12_1 = lagBehandlingsresultat(lagLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1, LocalDate.now(), Landkoder.HR, false));
+        when(behandlingsresultatRepo.findById(ART12_1_AVSLÅTT_BEHANDLINGSID)).thenReturn(Optional.of(avslåttResultat12_1));
+        Behandlingsresultat innvilgetResultat12_2 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2));
+        when(behandlingsresultatRepo.findById(ART12_2_INNVILGET_BEHANDLINGSID)).thenReturn(Optional.of(innvilgetResultat12_2));
         Behandlingsresultat utenlandskLovvalgResultat = lagBehandlingsresultat(periode, Landkoder.BE);
         when(behandlingsresultatRepo.findById(BEHANDLINGSID_UTENLANDSK_LOVVALG)).thenReturn(Optional.of(utenlandskLovvalgResultat));
-        Behandlingsresultat norskLovvalgUtenInnvilgetBestemmelse = lagBehandlingsresultat(lagLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ANNET), Landkoder.NO);
+        Behandlingsresultat norskLovvalgUtenInnvilgetBestemmelse = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ANNET));
         when(behandlingsresultatRepo.findById(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE)).thenReturn(Optional.of(norskLovvalgUtenInnvilgetBestemmelse));
         return behandlingsresultatRepo;
     }
@@ -118,21 +130,30 @@ public class IverksettVedtakSendBrevTest {
         return fagsak;
     }
 
-    private static Lovvalgsperiode lagLovvalgsperiode() {
-        return lagLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART16_1, LocalDate.now());
+    private static Lovvalgsperiode lagLovvalgsperiodeArt16_1() {
+        return lagInnvilgetLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART16_1);
     }
 
-    private static Lovvalgsperiode lagLovvalgsperiode(LovvalgBestemmelse_883_2004 bestemmelse) {
-        return lagLovvalgsperiode(bestemmelse, LocalDate.now());
+    private static Lovvalgsperiode lagInnvilgetLovvalgsperiode(LovvalgBestemmelse_883_2004 bestemmelse) {
+        return lagLovvalgsperiode(bestemmelse, LocalDate.now(), Landkoder.NO, true);
     }
 
-    private static Lovvalgsperiode lagLovvalgsperiode(LovvalgBestemmelse_883_2004 bestemmelse, LocalDate fom) {
+    private static Lovvalgsperiode lagLovvalgsperiode(LovvalgBestemmelse_883_2004 bestemmelse, LocalDate fom, Landkoder land, boolean innvilget) {
         Lovvalgsperiode periode = new Lovvalgsperiode();
         periode.setFom(fom);
         periode.setTom(fom.plusDays(1));
-        periode.setLovvalgsland(Landkoder.AT);
+        periode.setLovvalgsland(land);
         periode.setBestemmelse(bestemmelse);
+        if (innvilget) {
+            periode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        } else {
+            periode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
+        }
         return periode;
+    }
+
+    private static Behandlingsresultat lagBehandlingsresultat(Lovvalgsperiode periode) {
+        return lagBehandlingsresultat(Collections.singleton(periode), Landkoder.NO, BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
     }
 
     private static Behandlingsresultat lagBehandlingsresultat(Lovvalgsperiode periode, Landkoder land) {
@@ -151,6 +172,10 @@ public class IverksettVedtakSendBrevTest {
         return utenlandskLovvalgResultat;
     }
 
+    private static Behandlingsresultat lagBehandlingsresultatUtenPerioder() {
+        return lagBehandlingsresultat(Collections.emptySet(), Landkoder.NO, BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+    }
+
     @Test
     public void utfoerSteg() throws Exception {
         Prosessinstans p = new Prosessinstans();
@@ -165,7 +190,7 @@ public class IverksettVedtakSendBrevTest {
     }
 
     @Test
-    public final void utførStegIIverksettVedtakMedFlereLovvalgsperioderGirUnntak() throws Exception {
+    public final void utførSteg_MedFlereLovvalgsperioder_GirUnntak() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_MED_FLERE_PERIODER);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_MED_FLERE_PERIODER));
         instans.utførSteg(prosessinstans);
@@ -173,25 +198,41 @@ public class IverksettVedtakSendBrevTest {
     }
 
     @Test
-    public final void utførStegPåInnvilgelsesBrevBestemtAv16_1GårTilGsakAvsluttOppgave() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(INNVILGET_BEHANDLINGSID);
+    public final void utførSteg_MedIngenLovvalgsperioder_GirUnntak() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_UTEN_PERIODER);
+        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_UTEN_PERIODER));
+        instans.utførSteg(prosessinstans);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+    }
+
+    @Test
+    public final void utførStegPåInnvilgelsesBrevBestemtAv12_1_TilSendSed() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(ART12_1_INNVILGET_BEHANDLINGSID));
+        instans.utførSteg(prosessinstans);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
+    }
+
+    @Test
+    public final void utførSteg_Avslag12_1_TilAvsluttBehandling() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_AVSLÅTT_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(ART12_1_AVSLÅTT_BEHANDLINGSID));
+        instans.utførSteg(prosessinstans);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
+    }    
+
+    @Test
+    public final void utførStegPåInnvilgelsesBrevBestemtAv12_2_TilSendSed() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_2_INNVILGET_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(ART12_2_INNVILGET_BEHANDLINGSID));
+        instans.utførSteg(prosessinstans);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
+    }
+
+    @Test
+    public final void utførStegPåInnvilgelsesBrevBestemtAv16_1_TilSendSed() {
+        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
         agent.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
-    }
-
-    @Test
-    public final void utførStegPåInnvilgelsesBrevBestemtAv12_1GårTilGsakAvsluttOppgave() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(INNVILGET_BEHANDLINGSID_12_1);
-        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(INNVILGET_BEHANDLINGSID_12_1));
-        instans.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
-    }
-
-    @Test
-    public final void utførStegPåInnvilgelsesBrevBestemtAv12_2GårTilGsakAvsluttOppgave() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(INNVILGET_BEHANDLINGSID_12_2);
-        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(INNVILGET_BEHANDLINGSID_12_2));
-        instans.utførSteg(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
     }
 
@@ -212,15 +253,15 @@ public class IverksettVedtakSendBrevTest {
     }
 
     @Test
-    public final void utførStegPåUkjentProsesstypeFeiler() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(INNVILGET_BEHANDLINGSID, ProsessType.JFR_KNYTT);
+    public final void utførStegPåUkjentProsesstypeFeiler() {
+        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID, ProsessType.JFR_KNYTT);
         agent.utførSteg(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
     }
 
     @Test
     public final void utførStegPåIkkeEksisterendeBehandlingFeiler() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(~INNVILGET_BEHANDLINGSID);
+        Prosessinstans prosessinstans = lagProsessinstans(IKKE_EKSISTERENDE_BEHANDLINGSID);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE));
         instans.utførSteg(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
