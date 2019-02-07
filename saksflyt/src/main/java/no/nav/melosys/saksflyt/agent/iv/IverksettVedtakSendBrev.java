@@ -87,8 +87,9 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
                 brevData.mottaker = RolleType.BRUKER;
                 dokumentService.produserDokument(behandling.getId(), INNVILGELSE_YRKESAKTIV, brevData);
 
-                brevData.mottaker = RolleType.MYNDIGHET;
-                dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
+                // FIXME Myndigheter støttes ikke.
+                //brevData.mottaker = RolleType.MYNDIGHET;
+                //dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
 
                 log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
                 prosessinstans.setSteg(IV_SEND_SED);

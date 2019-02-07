@@ -99,7 +99,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         joarkFasade.oppdaterJounalpost(journalpostID, dokumentID, gsakSakID, brukerID, avsenderID, avsenderNavn, tittel, medDokumentkategori);
 
         prosessinstans.setSteg(JFR_FERDIGSTILL_JOURNALPOST);
-        log.info("Oppdatert journalpost for prosessinstans {}", prosessinstans.getId());
+        log.info("Prosessinstans {} har oppdatert journalpost {}. SakId: {}", prosessinstans.getId(), journalpostID, gsakSakID);
     }
 }
 

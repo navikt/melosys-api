@@ -6,8 +6,6 @@ import no.nav.melosys.audit.AuditorProvider;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.FagsakService;
-import no.nav.melosys.service.datavarehus.BehandlingOpprettetEvent;
-import no.nav.melosys.service.datavarehus.FagsakOpprettetEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +38,7 @@ public class OpprettFagsakOgBehandlingTest {
     public void setUp() {
         applicationEventPublisher = mock(ApplicationEventPublisher.class);
         AuditorProvider auditorAware = mock(AuditorProvider.class);
-        agent = new OpprettFagsakOgBehandling(fagsakService, behandlingService, applicationEventPublisher, auditorAware);
+        agent = new OpprettFagsakOgBehandling(fagsakService, behandlingService, auditorAware);
     }
 
     @Test
@@ -63,9 +61,7 @@ public class OpprettFagsakOgBehandlingTest {
 
         agent.utførSteg(p);
 
-        verify(fagsakService, times(1)).nyFagsakOgBehandling(aktørId, arbeidsgiver, null, Behandlingstype.SØKNAD, journalpostId, dokumentId);
-        verify(applicationEventPublisher, times(1)).publishEvent(any(FagsakOpprettetEvent.class));
-        verify(applicationEventPublisher, times(1)).publishEvent(any(BehandlingOpprettetEvent.class));
+        verify(fagsakService).nyFagsakOgBehandling(aktørId, arbeidsgiver, null, Behandlingstype.SØKNAD, journalpostId, dokumentId);
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SØKNAD);
     }
@@ -89,9 +85,7 @@ public class OpprettFagsakOgBehandlingTest {
 
         agent.utførSteg(p);
 
-        verify(behandlingService, times(1)).nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, Behandlingstype.SØKNAD, initierendeJournalpostId, initierendeDokumentId);
-        verify(applicationEventPublisher, times(0)).publishEvent(any(FagsakOpprettetEvent.class));
-        verify(applicationEventPublisher, times(1)).publishEvent(any(BehandlingOpprettetEvent.class));
+        verify(behandlingService).nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, Behandlingstype.SØKNAD, initierendeJournalpostId, initierendeDokumentId);
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
     }

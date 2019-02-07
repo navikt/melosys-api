@@ -10,12 +10,9 @@ import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.FagsakService;
-import no.nav.melosys.service.datavarehus.BehandlingOpprettetEvent;
-import no.nav.melosys.service.datavarehus.FagsakOpprettetEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
@@ -39,18 +36,14 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
     private final BehandlingService behandlingService;
 
-    private final ApplicationEventPublisher applicationEventPublisher;
-
     private final AuditorProvider auditorAware;
 
     @Autowired
     public OpprettFagsakOgBehandling(FagsakService fagsakService,
                                      BehandlingService behandlingService,
-                                     ApplicationEventPublisher applicationEventPublisher,
                                      AuditorProvider auditorAware) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
-        this.applicationEventPublisher = applicationEventPublisher;
         this.auditorAware = auditorAware;
         log.info("OpprettSak initialisert");
     }
@@ -84,17 +77,12 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
             prosessinstans.setBehandling(behandling);
 
-            applicationEventPublisher.publishEvent(new BehandlingOpprettetEvent(behandling, endretAv));
-
             prosessinstans.setSteg(STATUS_BEH_OPPR);
             log.info("Opprettet behandling {} for prosessinstans {}", behandling.getId(), prosessinstans.getId());
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
             Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, arbeidsgiver, representant, Behandlingstype.SØKNAD, initierendeJournalpostId, initierendeDokumentId);
             prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
             prosessinstans.setBehandling(fagsak.getBehandlinger().get(0));
-
-            applicationEventPublisher.publishEvent(new FagsakOpprettetEvent(fagsak, endretAv));
-            applicationEventPublisher.publishEvent(new BehandlingOpprettetEvent(fagsak.getBehandlinger().get(0), endretAv));
 
             prosessinstans.setSteg(JFR_OPPRETT_SØKNAD);
             log.info("Opprettet fagsak {} for prosessinstans {}", fagsak.getSaksnummer(), prosessinstans.getId());

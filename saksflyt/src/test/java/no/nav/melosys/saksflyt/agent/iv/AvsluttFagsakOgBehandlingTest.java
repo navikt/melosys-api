@@ -3,8 +3,6 @@ package no.nav.melosys.saksflyt.agent.iv;
 import java.util.Collections;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
@@ -12,7 +10,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.context.ApplicationEventPublisher;
 
 import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,17 +25,14 @@ public class AvsluttFagsakOgBehandlingTest {
     @Mock
     private FagsakRepository fagsakRepository;
 
-    @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
-
 
     @Before
     public void setUp() {
-        agent = new AvsluttFagsakOgBehandling(behandlingRepository, fagsakRepository, applicationEventPublisher);
+        agent = new AvsluttFagsakOgBehandling(behandlingRepository, fagsakRepository);
     }
 
     @Test
-    public void utfoerSteg() throws FunksjonellException, TekniskException {
+    public void utfoerSteg() {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setType(Behandlingstype.SØKNAD);
