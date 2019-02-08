@@ -1,25 +1,24 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import no.nav.dok.melosysbrev._000108.BrevdataType;
-import no.nav.dok.melosysbrev._000108.Fag;
-import no.nav.dok.melosysbrev._000108.LovvalgsperiodeType;
-import no.nav.dok.melosysbrev._000108.ObjectFactory;
-import no.nav.dok.melosysbrev._000108.SakstypeKode;
-import no.nav.dok.melosysbrev.felles.melosys_felles.*;
+import no.nav.dok.melosysbrev._000108.*;
+import no.nav.dok.melosysbrev.felles.melosys_felles.BehandlingstypeKode;
+import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsbestemmelseKode;
+import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -56,8 +55,8 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
         Virksomhet arbeidsgiver = brevdata.norskeVirksomheter.iterator().next();
         fag.setArbeidsgiver(arbeidsgiver.navn);
-        // Slå opp arbeidsland i avklartefakte, fall tilbake på søknaden (kan overkjøres av saksbehandler for sokkel/skip).
-        String arbeidsland = finnAvklartFaktum(resultat, ARBEIDSLAND).map(Avklartefakta::getSubjekt)
+        // Slå opp arbeidsland i avklartefakta, fall tilbake på søknaden (kan overkjøres av saksbehandler for sokkel/skip).
+        String arbeidsland = resultat.finnAvklartFaktum(ARBEIDSLAND).map(Avklartefakta::getSubjekt)
             .orElseGet(() -> hentArbeidslandFraSøknaden(behandling));
         fag.setArbeidsland(arbeidsland);
         Set<Lovvalgsperiode> perioder = resultat.getLovvalgsperioder();
@@ -81,16 +80,12 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
     private static String hentArbeidslandFraSøknaden(Behandling behandling) {
         try {
-            return SaksopplysningerUtils.hentSøknadDokument(behandling).arbeidUtland.iterator().next().adresse.landKode;
+            SoeknadDokument soeknadDokument = SaksopplysningerUtils.hentSøknadDokument(behandling);
+            ArbeidUtland arbeidUtland = soeknadDokument.arbeidUtland.stream().findFirst().orElseThrow(() -> new IllegalArgumentException("arbeidUtland mangler"));
+            return arbeidUtland.adresse.landKode;
         } catch (TekniskException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    private static Optional<Avklartefakta> finnAvklartFaktum(Behandlingsresultat resultat, AvklartefaktaType type) {
-        return resultat.getAvklartefakta().stream()
-            .filter(f -> f.getType() == type && f.getFakta().equals("TRUE"))
-            .findFirst();
     }
 
     private static XMLGregorianCalendar lagXmlDato(LocalDate dato) {

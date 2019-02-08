@@ -3,10 +3,12 @@ package no.nav.melosys.domain;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -147,6 +149,12 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setAvklartefakta(Set<Avklartefakta> avklartefakta) {
         this.avklartefakta = avklartefakta;
+    }
+
+    public Optional<Avklartefakta> finnAvklartFaktum(AvklartefaktaType type) {
+        return getAvklartefakta().stream()
+            .filter(f -> f.getType() == type && f.getFakta().equals("TRUE"))
+            .findFirst();
     }
 
     @Override
