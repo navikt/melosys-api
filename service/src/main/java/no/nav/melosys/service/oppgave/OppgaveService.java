@@ -20,9 +20,10 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.oppgave.dto.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentLand;
@@ -30,6 +31,8 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 
 @Service
 public class OppgaveService {
+
+    private static final Logger log = LoggerFactory.getLogger(OppgaveService.class);
 
     private final GsakFasade gsakFasade;
     private final FagsakRepository fagsakRepository;
@@ -47,13 +50,11 @@ public class OppgaveService {
         this.saksopplysningerService = saksopplysningerService;
     }
 
-    @Transactional
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException, FunksjonellException {
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
-    @Transactional
     public void ferdigstillOppgaverforAnsvarlig(String ansvarligID) throws TekniskException, FunksjonellException {
         List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedAnsvarlig(ansvarligID);
         for (Oppgave oppgave : oppgaverFraDomain) {
@@ -61,34 +62,21 @@ public class OppgaveService {
         }
     }
 
-    @Transactional
     public void ferdigstillOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
+        log.info("Ferdigstiller oppgave: {}" + oppgaveID);
         gsakFasade.ferdigstillOppgave(oppgaveID);
     }
 
-    @Transactional
     public void ferdigstillOppgaveMedSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
         Oppgave oppgave = hentOppgaveMedFagSaksnummer(fagSaksnummer);
         ferdigstillOppgave(oppgave.getOppgaveId());
     }
 
-    @Transactional
     public void leggTilbakeOppgaveMedSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
         Oppgave oppgave = hentOppgaveMedFagSaksnummer(fagSaksnummer);
         gsakFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
     }
 
-    @Transactional
-    public List<OppgaveDto> hentOppgaverMedBruker(String brukerIdent) throws TekniskException, FunksjonellException {
-        String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
-        if (aktørId == null) {
-            throw new IkkeFunnetException("Finnes ikke aktørId for FNR " + brukerIdent);
-        }
-        List<Oppgave> oppgaverFraDomain = gsakFasade.finnOppgaveListeMedBruker(aktørId);
-        return oppgaverTilDtoer(oppgaverFraDomain);
-    }
-
-    @Transactional
     public List<BehandlingsoppgaveDto> hentBehandlingsoppgaverMedBruker(String brukerIdent) throws FunksjonellException, TekniskException {
         String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
         if (aktørId == null) {
@@ -100,7 +88,7 @@ public class OppgaveService {
                 .collect(Collectors.toList());
     }
 
-    public Oppgave hentOppgaveMedFagSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
+    private Oppgave hentOppgaveMedFagSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
         return  gsakFasade.finnOppgaveMedSaksnummer(fagSaksnummer);
     }
 
