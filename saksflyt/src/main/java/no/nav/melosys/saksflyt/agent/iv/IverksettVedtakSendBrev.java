@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.BehandlingsresultatType.FASTSATT_LOVVALGSLAND;
+import static no.nav.melosys.domain.ProduserbartDokument.AVSLAG_YRKESAKTIV;
 import static no.nav.melosys.domain.ProduserbartDokument.INNVILGELSE_YRKESAKTIV;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.*;
