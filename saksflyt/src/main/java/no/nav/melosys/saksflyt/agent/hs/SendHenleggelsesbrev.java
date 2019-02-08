@@ -63,10 +63,16 @@ public class SendHenleggelsesbrev extends AbstraktStegBehandler {
 
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(MELDING_HENLAGT_SAK);
         BrevData brevdata = brevDataBygger.lag(behandling, saksbehandler);
-        Aktoer fullmektig = behandling.getFagsak().hentAktørMedRolleType(RolleType.REPRESENTANT);
-        brevdata.mottaker = fullmektig != null ? RolleType.REPRESENTANT : RolleType.BRUKER;
+        brevdata.mottaker = RolleType.BRUKER;
         dokumentService.produserDokument(behandling.getId(), MELDING_HENLAGT_SAK, brevdata);
-        log.info("Send henleggelsesbrev for prosess {}.", prosessinstans.getId());
+        log.info("Send henleggelsesbrev til bruker for prosess {}.", prosessinstans.getId());
+
+        Aktoer fullmektig = behandling.getFagsak().hentAktørMedRolleType(RolleType.REPRESENTANT);
+        if (fullmektig != null) {
+            brevdata.mottaker = RolleType.REPRESENTANT;
+            dokumentService.produserDokument(behandling.getId(), MELDING_HENLAGT_SAK, brevdata);
+            log.info("Send henleggelsesbrev til representant for prosess {}.", prosessinstans.getId());
+        }
 
         prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
     }

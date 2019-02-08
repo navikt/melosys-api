@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
@@ -34,10 +35,12 @@ public class BrevDataByggerHenleggelse implements BrevDataBygger {
     }
 
     private Instant hentInitierendeJournalpostMottattTidspunktFraFørsteBehandling(Behandling behandling) throws FunksjonellException, IntegrasjonException {
-        String initierendeJournalpostId = behandling.getFagsak().getBehandlinger()
+        final Fagsak fagsak = behandling.getFagsak();
+        String initierendeJournalpostId = fagsak.getBehandlinger()
             .stream()
             .min(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
-            .map(Behandling::getInitierendeJournalpostId).get();
+            .map(Behandling::getInitierendeJournalpostId)
+            .orElseThrow(() -> new IkkeFunnetException("Initierende behandling for " + fagsak.getSaksnummer() + " har ingen initierendeJournalpostId"));
 
         Journalpost journalpost = Optional.of(joarkService.hentJournalpost(initierendeJournalpostId))
             .orElseThrow(() -> new IkkeFunnetException("Journalpost " + initierendeJournalpostId + " finnes ikke."));
