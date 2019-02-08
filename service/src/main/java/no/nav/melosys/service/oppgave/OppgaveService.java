@@ -63,7 +63,7 @@ public class OppgaveService {
     }
 
     public void ferdigstillOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
-        log.info("Ferdigstiller oppgave: {}" + oppgaveID);
+        log.info("Ferdigstiller oppgave {}", oppgaveID);
         gsakFasade.ferdigstillOppgave(oppgaveID);
     }
 
