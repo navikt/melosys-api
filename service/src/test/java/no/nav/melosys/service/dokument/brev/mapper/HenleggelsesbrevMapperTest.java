@@ -17,7 +17,6 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 
 public class HenleggelsesbrevMapperTest {
 
@@ -31,15 +30,6 @@ public class HenleggelsesbrevMapperTest {
     @Test
     public void mapTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml();
-    }
-
-    @Test
-    public void mapTilBrevUtenHenleggelsesgrunnGirUnntak() throws Exception {
-        Behandlingsresultat resultat = lagBehandlingsresultat();
-        resultat.setHenleggelsesgrunn(null);
-        Throwable unntak = catchThrowable(() -> testMapTilBrevXml(resultat));
-        assertThat(unntak).isInstanceOf(NullPointerException.class)
-            .hasNoCause();
     }
 
     private void testMapTilBrevXml() throws Exception {
