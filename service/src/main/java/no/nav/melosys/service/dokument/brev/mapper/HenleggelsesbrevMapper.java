@@ -23,17 +23,17 @@ public class HenleggelsesbrevMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
-        Fag fag = mapFag(resultat, brevData);
+        Fag fag = mapFag(brevData);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private static Fag mapFag(Behandlingsresultat resultat, BrevData brevData) {
+    private static Fag mapFag(BrevData brevData) {
         BrevDataHenleggelse brevDataHenleggelse = (BrevDataHenleggelse) brevData;
         XMLGregorianCalendar datoMottatt = convertToXMLGregorianCalendarRemoveTimezone(brevDataHenleggelse.initierendeJournalpostForsendelseMottattTidspunkt);
         HenleggelseGrunnType henleggelseGrunn = HenleggelseGrunnType.builder()
-            .withHenleggelseGrunn(HenleggelseGrunnKode.fromValue(resultat.getHenleggelsesgrunn().getKode()))
-            .withFritekstBegrunnelse(resultat.hentHenleggelseFritekstHvisGrunnANNET())
+            .withHenleggelseGrunn(HenleggelseGrunnKode.fromValue(brevData.begrunnelseKode))
+            .withFritekstBegrunnelse(brevData.fritekst)
             .build();
         return Fag.builder()
             .withAvsender(AvsenderType.builder()
