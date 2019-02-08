@@ -134,4 +134,23 @@ public class OpprettOppgaveDto {
     public void setPrioritet(String prioritet) {
         this.prioritet = prioritet;
     }
+
+    @Override
+    public String toString() {
+        return "OpprettOppgaveDto{" +
+            "aktørId='" + aktørId + '\'' +
+            ", tilordnetRessurs='" + tilordnetRessurs + '\'' +
+            ", tema='" + tema + '\'' +
+            ", oppgavetype='" + oppgavetype + '\'' +
+            ", journalpostId='" + journalpostId + '\'' +
+            ", aktivDato=" + aktivDato +
+            ", fristFerdigstillelse=" + fristFerdigstillelse +
+            ", prioritet='" + prioritet + '\'' +
+            ", saksreferanse='" + saksreferanse + '\'' +
+            ", behandlingstype='" + behandlingstype + '\'' +
+            ", behandlingstema='" + behandlingstema + '\'' +
+            ", temagruppe='" + temagruppe + '\'' +
+            ", tildeltEnhetsnr='" + tildeltEnhetsnr + '\'' +
+            '}';
+    }
 }

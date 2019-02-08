@@ -31,4 +31,13 @@ public class OppgaveDto extends OpprettOppgaveDto {
     public void setVersjon(int versjon) {
         this.versjon = versjon;
     }
+
+    @Override
+    public String toString() {
+        return "OppgaveDto{" +
+            "id='" + id + '\'' +
+            ", status='" + status + '\'' +
+            ", versjon=" + versjon +
+            "} " + super.toString();
+    }
 }
