@@ -71,7 +71,7 @@ public class BingeImpl implements Binge {
 
     @Override
     public synchronized Prosessinstans fjernFørsteProsessinstans(Predicate<Prosessinstans> predikat, Comparator<Prosessinstans> rekkefølge) {
-        Prosessinstans prosessinstans = prosessinstanser.values().stream().filter(predikat).sorted(rekkefølge).findFirst().orElse(null);
+        Prosessinstans prosessinstans = prosessinstanser.values().stream().filter(predikat).min(rekkefølge).orElse(null);
         if (prosessinstans != null) {
             prosessinstanser.remove(prosessinstans.getId());
         }

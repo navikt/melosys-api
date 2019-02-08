@@ -14,13 +14,18 @@ import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class JournalfoeringService {
+
+    private static final Logger log = LoggerFactory.getLogger(JournalfoeringService.class);
 
     private final JoarkFasade joarkFasade;
 
@@ -29,8 +34,7 @@ public class JournalfoeringService {
     private final ProsessinstansService prosessinstansService;
 
     @Autowired
-    public JournalfoeringService(
-                                 JoarkFasade joarkFasade,
+    public JournalfoeringService(JoarkFasade joarkFasade,
                                  OppgaveService oppgaveService,
                                  ProsessinstansService prosessinstansService) {
         this.joarkFasade = joarkFasade;
@@ -44,19 +48,16 @@ public class JournalfoeringService {
 
     @Transactional
     public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException, TekniskException {
+        log.info("{} oppretter ny sak etter journalføring av journalpost {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID());
+
         valider(journalfoeringDto);
         validerOpprettSakFelter(journalfoeringDto);
         
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalfoeringDto.getJournalpostID());
-        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringDto.getDokumentID());
-        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringDto.getOppgaveID());
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringDto.getBrukerID());
-        prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
-        prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringDto.getAvsenderNavn());
-        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
+        setFellesData(prosessinstans,journalfoeringDto);
+
         //FIXME MELOSYS-1283 vedlegg
         // Land trenges av regelmodulen får å vurdere inngangsvilkår
         prosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, journalfoeringDto.getFagsak().getLand());
@@ -76,6 +77,9 @@ public class JournalfoeringService {
 
     @Transactional
     public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException, TekniskException {
+        String saksnummer = journalfoeringDto.getSaksnummer();
+        log.info("{} knytter journalpost {} til sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
+
         valider(journalfoeringDto);
         if (StringUtils.isEmpty(journalfoeringDto.getSaksnummer())) {
             throw new FunksjonellException("Saksnummer mangler");
@@ -84,6 +88,19 @@ public class JournalfoeringService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_KNYTT);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
+        setFellesData(prosessinstans, journalfoeringDto);
+
+        //FIXME MELOSYS-1283 vedlegg
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+        if (journalfoeringDto.getBehandlingstype() != null) {
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, journalfoeringDto.getBehandlingstype());
+        }
+
+        prosessinstansService.lagreProsessinstans(prosessinstans);
+        oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
+    }
+
+    private void setFellesData(Prosessinstans prosessinstans, JournalfoeringDto journalfoeringDto) {
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalfoeringDto.getJournalpostID());
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringDto.getDokumentID());
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringDto.getOppgaveID());
@@ -91,14 +108,6 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringDto.getAvsenderNavn());
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
-        //FIXME MELOSYS-1283 vedlegg
-        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, journalfoeringDto.getSaksnummer());
-        if (journalfoeringDto.getBehandlingstype() != null) {
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, journalfoeringDto.getBehandlingstype());
-        }
-
-        prosessinstansService.lagreProsessinstans(prosessinstans);
-        oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
     // Denne er package-visible kun for at det skal være lettere å teste den isolert

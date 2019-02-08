@@ -16,7 +16,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -46,6 +45,7 @@ public class IverksettVedtakSendSedTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
         behandlingsresultat.setType(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
@@ -54,13 +54,13 @@ public class IverksettVedtakSendSedTest {
     @Test
     public void utførSteg_suksessfull_ingenRetur() throws Exception{
         iverksettVedtakSendSed.utfør(prosessinstans);
-        verify(sedService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
+        verify(sedService).opprettOgSendSed();
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_AVSLUTT_BEHANDLING));
     }
 
     @Test
     public void utførSteg_feilIMetode_settFeiletSteg() throws Exception {
-        doThrow(new TekniskException("feil")).when(sedService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
+        doThrow(new TekniskException("feil")).when(sedService).opprettOgSendSed();
         iverksettVedtakSendSed.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.FEILET_MASKINELT));
     }

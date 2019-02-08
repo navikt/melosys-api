@@ -36,6 +36,10 @@ public class SedService {
         this.fagsakRepository = fagsakRepository;
     }
 
+    // SED-er sendes ikke i Lev. 1
+    public void opprettOgSendSed() throws MelosysException {
+    }
+
     public void opprettOgSendSed(Behandling behandling, Behandlingsresultat behandlingsresultat) throws MelosysException {
 
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.getLovvalgsperioder().stream()

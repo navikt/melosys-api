@@ -207,7 +207,7 @@ public class Prosessinstans {
     
     @Override
     public int hashCode() {
-        return Long.hashCode(id);
+        return 31;
     }
 
     @Override
@@ -215,7 +215,7 @@ public class Prosessinstans {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Prosessinstans)) { // Implisitt nullsjekk
+        if (!(o instanceof Prosessinstans)) {
             return false;
         }
         Prosessinstans that = (Prosessinstans) o;

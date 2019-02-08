@@ -1,11 +1,8 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
 import java.util.Map;
-import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -18,6 +15,7 @@ import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntakOgAvslag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +24,8 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.BehandlingsresultatType.FASTSATT_LOVVALGSLAND;
 import static no.nav.melosys.domain.ProduserbartDokument.INNVILGELSE_YRKESAKTIV;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
-import static no.nav.melosys.domain.ProsessSteg.IV_SEND_SED;
+import static no.nav.melosys.domain.ProsessSteg.*;
+import static no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator.*;
 
 /**
  * Sende ulike brev basert på lovvalgsbestemmelse.
@@ -71,17 +69,31 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
+        log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
         // Henter ut behandling på nytt for å få med saksopplysninger
         Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
         if (behandling == null) {
             throw new TekniskException(String.format("Finner ikke behandlingen %s.", prosessinstans.getBehandling().getId()));
         }
-        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+
+        Behandlingsresultat resultat = behandlingsResultatRepo.findById(behandling.getId())
+            .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat " + behandling.getId()));
+        BehandlingsresultatType behandlingsresultatType = resultat.getType();
+        Lovvalgsperiode lovvalgsperiode = validerLovvalgsperiode(resultat.getLovvalgsperioder());
+
         ProsessType prosessType = prosessinstans.getType();
         if (ProsessType.IVERKSETT_VEDTAK == prosessType) {
-            if (innvilgelsesbrevSkalSendes(behandling)) {
-                BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(ProduserbartDokument.INNVILGELSE_YRKESAKTIV);
+            String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+
+            if (avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
+                BrevDataByggerAnmodningUnntakOgAvslag brevDataBygger = (BrevDataByggerAnmodningUnntakOgAvslag) brevDataByggerVelger.hent(AVSLAG_YRKESAKTIV);
+                BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
+                dokumentService.produserDokument(behandling.getId(), AVSLAG_YRKESAKTIV, brevData);
+
+                log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
+                prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
+            } else if (innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
+                BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(INNVILGELSE_YRKESAKTIV);
                 BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
                 brevData.mottaker = RolleType.BRUKER;
                 dokumentService.produserDokument(behandling.getId(), INNVILGELSE_YRKESAKTIV, brevData);
@@ -103,40 +115,5 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
         }
-    }
-
-    /**
-     * Finn ut om innvilgelsesbrev skal sendes.
-     * 
-     * Innvilgelsesbrev skal sendes dersom behandlingen har resultert i:
-     * <ul>
-     * <li>Lovvalgsland er avklart</li>
-     * <li>Lovvalgsland er Norge</li>
-     * <li>Lovvalgbestemmelsen er 12.1, 12.2 eller 16.1</li>
-     * 
-     * </ul>
-     * 
-     * @param behandling
-     *            en behandling å sjekke.
-     * @return <code>true</code> hvis innvilgelsesbrev skal sendes, ellers <code>false</code>.
-     */
-    private boolean innvilgelsesbrevSkalSendes(Behandling behandling) {
-        Behandlingsresultat resultat = behandlingsResultatRepo.findById(behandling.getId()).orElse(null);
-        Set<Lovvalgsperiode> lovvalgsperioder = resultat.getLovvalgsperioder();
-        if (lovvalgsperioder.size() > 1) {
-            throw new UnsupportedOperationException(String.format("Flere enn en"
-                    + " lovvalgsperiode er ikke støttet i første leveranse av "
-                    + "Melosys (behandlingsid %s).", behandling.getId()));
-        }
-        LovvalgBestemmelse bestemmelse = resultat.getLovvalgsperioder().iterator().next().getBestemmelse();
-        return resultat.getType() == FASTSATT_LOVVALGSLAND &&
-                resultat.getFastsattAvLand() == Landkoder.NO &&
-                bestemmelseKanInnvilges(bestemmelse);
-    }
-
-    private static boolean bestemmelseKanInnvilges(LovvalgBestemmelse bestemmelse) {
-        return bestemmelse == LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1 ||
-                bestemmelse == LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2 ||
-                bestemmelse == LovvalgBestemmelse_883_2004.FO_883_2004_ART16_1;
     }
 }
