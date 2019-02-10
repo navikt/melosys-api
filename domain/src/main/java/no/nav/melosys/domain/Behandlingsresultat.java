@@ -18,7 +18,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     // Populeres av Hibernate med behandling.id
     @Id
-    private long id; 
+    private Long id;
 
     @MapsId
     @OneToOne(fetch=FetchType.EAGER, optional = false)
@@ -59,7 +59,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Vilkaarsresultat> vilkaarsresultater;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

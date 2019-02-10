@@ -15,7 +15,7 @@ public class Behandling extends RegistreringsInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "saksnummer", nullable = false, updatable = false)
@@ -47,7 +47,7 @@ public class Behandling extends RegistreringsInfo {
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<BehandlingHistorikk> behandlingshistorikk = new HashSet<>(1);
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -85,14 +85,6 @@ public class Behandling extends RegistreringsInfo {
 
     public void setSaksopplysninger(Set<Saksopplysning> saksopplysninger) {
         this.saksopplysninger = saksopplysninger;
-    }
-
-    public Set<BehandlingHistorikk> getBehandlingshistorikk() {
-        return behandlingshistorikk;
-    }
-
-    public void setBehandlingshistorikk(Set<BehandlingHistorikk> behandlingshistorikk) {
-        this.behandlingshistorikk = behandlingshistorikk;
     }
 
     public Instant getSistOpplysningerHentetDato() {
@@ -141,7 +133,7 @@ public class Behandling extends RegistreringsInfo {
         }
         Behandling that = (Behandling) o;
         if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
-            return this.id == that.id;
+            return this.id.equals(that.getId());
         }
         return Objects.equals(registrertDato, that.registrertDato)
             && Objects.equals(this.fagsak, that.fagsak);

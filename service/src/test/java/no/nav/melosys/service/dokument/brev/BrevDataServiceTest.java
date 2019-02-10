@@ -201,6 +201,7 @@ public class BrevDataServiceTest {
         fagsak.setAktører(new HashSet<>(Arrays.asList(bruker, arbeidsgiver)));
 
         Behandling behandling = new Behandling();
+        behandling.setId(1L);
         behandling.setRegistrertDato(Instant.now());
         behandling.setType(Behandlingstype.SØKNAD);
         behandling.setFagsak(fagsak);

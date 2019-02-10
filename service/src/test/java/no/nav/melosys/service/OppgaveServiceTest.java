@@ -123,6 +123,7 @@ public class OppgaveServiceTest {
 
         List<Behandling> behandlinger = new ArrayList<>();
         Behandling behandling = new Behandling();
+        behandling.setId(1L);
         behandling.setEndretDato(Instant.now());
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.setStatus(Behandlingsstatus.OPPRETTET);

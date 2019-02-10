@@ -32,15 +32,17 @@ public class SendMangelbrevTest {
     @Test
     public void utførSteg() throws TekniskException, FunksjonellException {
         Prosessinstans p = new Prosessinstans();
-        p.setBehandling(new Behandling());
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        p.setBehandling(behandling);
 
         BrevData brevData = new BrevData("Z123456");
         p.setData(ProsessDataKey.BREVDATA, brevData);
 
         agent.utførSteg(p);
 
-        verify(dokumentService, times(1)).produserDokument(anyLong(), any(ProduserbartDokument.class), any(BrevData.class));
-        verify(behandlingRepo, times(1)).save(any(Behandling.class));
+        verify(dokumentService).produserDokument(anyLong(), any(ProduserbartDokument.class), any(BrevData.class));
+        verify(behandlingRepo).save(any(Behandling.class));
 
         assertThat(p.getSteg()).isNull();
     }

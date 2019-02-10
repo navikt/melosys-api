@@ -14,7 +14,7 @@ public class Vilkaarsresultat extends RegistreringsInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)

@@ -25,7 +25,7 @@ public class OppdaterBehandlingsresultatTest {
     @Mock
     BehandlingsresultatRepository behandlingsresultatRepository;
 
-    OppdaterBehandlingsresultat oppdaterBehandlingsresultat;
+    private OppdaterBehandlingsresultat oppdaterBehandlingsresultat;
 
     @Captor
     private ArgumentCaptor<Behandlingsresultat> behandlingsresultatArgumentCaptor;
@@ -38,7 +38,9 @@ public class OppdaterBehandlingsresultatTest {
     @Test
     public void utfør() {
         Prosessinstans p = new Prosessinstans();
-        p.setBehandling(new Behandling());
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        p.setBehandling(behandling);
         p.getBehandling().setType(Behandlingstype.SØKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
         String testbruker = "Z097";

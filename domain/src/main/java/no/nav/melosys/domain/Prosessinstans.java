@@ -23,7 +23,7 @@ public class Prosessinstans {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "prosess_type", nullable = false, updatable = false)
     @Convert(converter = ProsessType.DbKonverterer.class)
@@ -61,7 +61,7 @@ public class Prosessinstans {
     
     private static ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -223,7 +223,23 @@ public class Prosessinstans {
             // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
             throw new RuntimeException("Prosessinstans.equals ble kalt før prosessinstans har fått saksnummer");
         }
-        return this.id == that.id;
+        return this.id.equals(that.id);
     }
 
+    @Override
+    public String toString() {
+        return "Prosessinstans{" +
+            "id=" + id +
+            ", type=" + type +
+            ", behandling=" + behandling +
+            ", data=" + data +
+            ", steg=" + steg +
+            ", registrertDato=" + registrertDato +
+            ", antallRetry=" + antallRetry +
+            ", sistForsøkt=" + sistForsøkt +
+            ", soverTil=" + soverTil +
+            ", endretDato=" + endretDato +
+            ", hendelser=" + hendelser +
+            '}';
+    }
 }

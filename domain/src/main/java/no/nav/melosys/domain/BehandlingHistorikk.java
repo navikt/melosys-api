@@ -19,7 +19,7 @@ public class BehandlingHistorikk {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
@@ -38,7 +38,7 @@ public class BehandlingHistorikk {
     @Column(name = "kommentar", nullable = false, updatable = false)
     private String kommentar;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -92,7 +92,7 @@ public class BehandlingHistorikk {
         }
         BehandlingHistorikk that = (BehandlingHistorikk) o;
         if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
-            return this.id == that.id;
+            return this.id .equals(that.getId());
         }
         return Objects.equals(this.behandling, that.behandling)
             && Objects.equals(this.dato, that.dato)

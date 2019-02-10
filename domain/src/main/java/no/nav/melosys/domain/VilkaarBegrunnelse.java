@@ -12,7 +12,7 @@ public class VilkaarBegrunnelse extends RegistreringsInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "vilkaar_resultat_id", nullable = false, updatable = false)

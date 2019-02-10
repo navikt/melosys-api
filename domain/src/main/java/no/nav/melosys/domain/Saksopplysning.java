@@ -16,7 +16,7 @@ public class Saksopplysning {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
@@ -55,7 +55,7 @@ public class Saksopplysning {
     public Saksopplysning() {
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -141,7 +141,7 @@ public class Saksopplysning {
         }
         Saksopplysning that = (Saksopplysning) o;
         if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
-            return this.id == that.id;
+            return this.id.equals(that.getId());
         }
         return Objects.equals(this.behandling, that.behandling)
             && Objects.equals(this.registrertDato, that.registrertDato)

@@ -5,8 +5,6 @@ import no.nav.melosys.domain.ProduserbartDokument;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -18,7 +16,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SendForvaltningsmeldingTest {
@@ -28,20 +27,22 @@ public class SendForvaltningsmeldingTest {
     private DokumentSystemService dokumentService;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         dokumentService = mock(DokumentSystemService.class);
         agent = new SendForvaltningsmelding(dokumentService);
     }
 
     @Test
-    public void utfoerSteg() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException {
+    public void utfoerSteg() throws TekniskException, FunksjonellException {
         Prosessinstans p = new Prosessinstans();
-        p.setBehandling(new Behandling());
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        p.setBehandling(behandling);
         p.setData(ProsessDataKey.SAKSBEHANDLER, "TEST");
 
         agent.utførSteg(p);
 
-        verify(dokumentService, times(1)).produserDokument(anyLong(), any(ProduserbartDokument.class), any(BrevData.class));
+        verify(dokumentService).produserDokument(anyLong(), any(ProduserbartDokument.class), any(BrevData.class));
 
         assertThat(p.getSteg()).isNull();
     }

@@ -32,7 +32,9 @@ public class OppdaterBehandlingsresultatTest {
     @Test
     public void utfør() throws IkkeFunnetException {
         Prosessinstans p = new Prosessinstans();
-        p.setBehandling(new Behandling());
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        p.setBehandling(behandling);
         p.getBehandling().setType(Behandlingstype.SØKNAD);
         p.setType(ProsessType.ANMODNING_OM_UNNTAK);
         String testbruker = "Z097";

@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentLand;
@@ -74,7 +75,8 @@ public class SaksopplysningerService {
      * Metoden sjekker om en behandling med ID {@code behandlingID} har en oppfrisking i gang.
      * Oppfrisking betyr å hente saksopplysninger på nytt for en gitt behandling.
      */
-    public boolean harAktivOppfrisking(long behandlingID) {
+    public boolean harAktivOppfrisking(Long behandlingID) {
+        Assert.notNull(behandlingID, "behandlingID må ikke være null");
         Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType.OPPFRISKNING, ProsessSteg.FEILET_MASKINELT, behandlingID);
         if (aktivProsessinstans.isPresent()) {
             log.debug("Behandling {} er under oppfrisking.", behandlingID);

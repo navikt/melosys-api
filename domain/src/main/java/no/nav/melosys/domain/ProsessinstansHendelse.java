@@ -11,7 +11,7 @@ public class ProsessinstansHendelse {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "prosessinstans_id", nullable = false, updatable = false)
@@ -24,7 +24,7 @@ public class ProsessinstansHendelse {
     @Convert(converter = ProsessSteg.DbKonverterer.class)
     private ProsessSteg steg;
 
-    @Column(name = "type", nullable = true, updatable = false)
+    @Column(name = "type", updatable = false)
     private String type;
     
     @Column(name = "melding", nullable = false, updatable = false)
@@ -41,7 +41,7 @@ public class ProsessinstansHendelse {
         this.melding = melding;
     }
     
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

@@ -18,7 +18,7 @@ public class Aktoer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     
     @ManyToOne(optional = false)
     @JoinColumn(name="saksnummer", updatable = false)
@@ -37,7 +37,7 @@ public class Aktoer {
     @Column(name = "utenlandsk_id")
     private String utenlandskId;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

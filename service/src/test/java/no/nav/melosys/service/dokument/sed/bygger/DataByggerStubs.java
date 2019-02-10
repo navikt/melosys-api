@@ -27,6 +27,7 @@ public class DataByggerStubs {
 
     public static Behandling hentBehandlingStub() {
         Behandling behandling = new Behandling();
+        behandling.setId(1L);
 
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
         behandling.setSaksopplysninger(saksopplysninger);

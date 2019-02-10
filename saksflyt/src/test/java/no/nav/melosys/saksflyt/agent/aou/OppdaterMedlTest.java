@@ -65,6 +65,7 @@ public class OppdaterMedlTest {
         aktører.add(aktør);
 
         Behandling behandling = new Behandling();
+        behandling.setId(1L);
         behandling.setFagsak(fagsak);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
