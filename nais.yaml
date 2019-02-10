@@ -79,3 +79,5 @@ fasitResources:
     resourceType: baseurl
   - alias: abac.pdp.endpoint
     resourceType: restservice
+  - alias: melosys-eessi-apikey
+    resourceType: credential

@@ -12,11 +12,11 @@ import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.*;
+import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
-import no.nav.melosys.service.dokument.sed.dto.*;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
@@ -30,8 +30,6 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         this.registerOppslagService = registerOppslagService;
 
     }
-
-    //public abstract AbstraktSedData lag(Behandling behandling) throws TekniskException, FunksjonellException;
 
     public SedDataDto lag(Behandling behandling) throws TekniskException, FunksjonellException {
         this.behandling = behandling;

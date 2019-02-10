@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument.sed.dto;
+package no.nav.melosys.integrasjon.eessi.dto;
 
 
 public class Ident {

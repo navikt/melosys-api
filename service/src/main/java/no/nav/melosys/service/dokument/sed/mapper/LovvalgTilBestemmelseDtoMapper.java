@@ -3,7 +3,7 @@ package no.nav.melosys.service.dokument.sed.mapper;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_987_2009;
-import no.nav.melosys.service.dokument.sed.dto.Bestemmelse;
+import no.nav.melosys.integrasjon.eessi.dto.Bestemmelse;
 
 public class LovvalgTilBestemmelseDtoMapper {
 
