@@ -1,0 +1,174 @@
+package no.nav.melosys.service.dokument.sed.bygger;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.Familierelasjon;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
+import no.nav.melosys.exception.*;
+import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.RegisterOppslagService;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
+import no.nav.melosys.service.dokument.sed.dto.*;
+import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
+import no.nav.melosys.service.kodeverk.KodeverkService;
+
+public class SedDataBygger extends AbstraktDokumentDataBygger {
+
+    private RegisterOppslagService registerOppslagService;
+
+    public SedDataBygger(KodeverkService kodeverkService, RegisterOppslagService registerOppslagService,
+                         LovvalgsperiodeService lovvalgsperiodeService, AvklartefaktaService avklartefaktaService) {
+        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
+        this.registerOppslagService = registerOppslagService;
+
+    }
+
+    //public abstract AbstraktSedData lag(Behandling behandling) throws TekniskException, FunksjonellException;
+
+    public SedDataDto lag(Behandling behandling) throws TekniskException, FunksjonellException {
+        this.behandling = behandling;
+        this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
+        this.avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
+
+        SedDataDto sedDataDto = new SedDataDto();
+
+        sedDataDto.setArbeidsgivendeVirksomheter(hentNorskeAvklarteVirksomheter());
+        sedDataDto.setArbeidssteder(hentArbeidssteder().stream().map(arb -> {
+                Arbeidssted arbeidssted = new Arbeidssted();
+                arbeidssted.setNavn(arb.navn);
+                arbeidssted.setFysisk(arb.erFysisk());
+                if (arb.erFysisk()) {
+                    arbeidssted.setFysisk(true);
+                    arbeidssted.setHjemmebase(null); //TODO ved ikke fysiske
+                }else {
+                    arbeidssted.setFysisk(false);
+                    arbeidssted.setAdresse(fraStrukturertAdresse(arb.adresse));
+                }
+                return arbeidssted;
+            }).collect(Collectors.toList())
+        );
+
+        Bostedsadresse bostedsadresse = hentBostedsadresse();
+        Adresse adresse = new Adresse();
+        adresse.setPoststed(bostedsadresse.getPoststed());
+        adresse.setPostnr(bostedsadresse.getPostnr());
+        adresse.setLand(bostedsadresse.getLand().getKode());
+        adresse.setGateadresse(bostedsadresse.getGateadresse().getGatenavn() + " " + bostedsadresse.getGateadresse().getGatenummer() +
+            bostedsadresse.getGateadresse().getHusbokstav());
+
+        sedDataDto.setBostedsadresse(adresse);
+
+
+        sedDataDto.setBruker(hentBrukerFraPersonDokument(this.person));
+        sedDataDto.setEgenAnsatt(this.person.erEgenAnsatt);
+        sedDataDto.setFamilieMedlem(this.person.familiemedlemmer.stream()
+            .filter(f -> f.familierelasjon.equals(Familierelasjon.FARA) || f.familierelasjon.equals(Familierelasjon.MORA))
+            .map(f -> {
+                FamilieMedlem familieMedlem = new FamilieMedlem();
+                String[] navn = splitFulltNavn(f.navn);
+                familieMedlem.setFornavn(navn[0]);
+                familieMedlem.setEtternavn(navn[1]);
+                familieMedlem.setRelasjon(f.familierelasjon.equals(Familierelasjon.FARA) ? "FAR" : "MOR");
+                return familieMedlem;
+            }).collect(Collectors.toList())
+        );
+
+        sedDataDto.setLovvalgsperioder(Collections.singletonList(hentLovvalgsperiodeDto()));
+        if (this.person.erEgenAnsatt) {
+            sedDataDto.setSelvstendigeVirksomheter(hentAvklarteSelvstendigeForetak());
+        }
+
+        sedDataDto.setUtenlandskeVirksomheter(hentUtenlandskeVirksomheter().stream().map(uVirksomhet -> {
+                Virksomhet virksomhet = new Virksomhet();
+                virksomhet.setNavn(uVirksomhet.navn);
+                virksomhet.setOrgnr(uVirksomhet.orgnr);
+                virksomhet.setType("registrering"); //TODO - riktig?
+                virksomhet.setAdresse(fraStrukturertAdresse((StrukturertAdresse) uVirksomhet.adresse));
+                return virksomhet;
+            }).collect(Collectors.toList())
+        );
+
+        sedDataDto.setUtenlandskIdent(this.søknad.personOpplysninger.utenlandskIdent.stream().map(ui -> {
+                Ident ident = new Ident();
+                ident.setIdent(ui.ident);
+                ident.setLandkode(ui.landKode);
+                return ident;
+            }).collect(Collectors.toList())
+        );
+
+        return sedDataDto;
+    }
+
+    private Bruker hentBrukerFraPersonDokument(PersonDokument personDokument) {
+        Bruker bruker = new Bruker();
+        bruker.setEtternavn(personDokument.etternavn);
+        bruker.setFornavn(personDokument.fornavn);
+        bruker.setFnr(personDokument.fnr);
+        bruker.setFoedseldato(personDokument.fødselsdato);
+        bruker.setKjoenn(personDokument.kjønn.getKode());
+        bruker.setStatsborgerskap(personDokument.statsborgerskap.getKode());
+
+        return bruker;
+
+    }
+
+    protected List<Virksomhet> hentNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        return registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner).stream()
+            .map(org -> {
+                Virksomhet virksomhet = new Virksomhet();
+                virksomhet.setNavn(org.lagSammenslåttNavn());
+                virksomhet.setOrgnr(org.getOrgnummer());
+                virksomhet.setType("registrering");
+                virksomhet.setAdresse(fraStrukturertAdresse(org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse()));
+
+                return virksomhet;
+            })
+            .collect(Collectors.toList());
+    }
+
+    protected List<Virksomhet> hentAvklarteSelvstendigeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        Set<String> organisasjonsnumre = hentAvklarteSelvstendigeForetakOrgnumre();
+        return registerOppslagService.hentOrganisasjoner(organisasjonsnumre).stream()
+            .map(org -> {
+                Virksomhet virksomhet = new Virksomhet();
+                virksomhet.setNavn(org.lagSammenslåttNavn());
+                virksomhet.setOrgnr(org.getOrgnummer());
+                virksomhet.setAdresse(fraStrukturertAdresse(org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse()));
+                return virksomhet;
+            }).collect(Collectors.toList());
+    }
+
+    private Adresse fraStrukturertAdresse(StrukturertAdresse strukturertAdresse) {
+        Adresse adresse = new Adresse();
+        adresse.setGateadresse(strukturertAdresse.gatenavn + " " + strukturertAdresse.husnummer + " ");
+        adresse.setLand(strukturertAdresse.landKode);
+        adresse.setPostnr(strukturertAdresse.postnummer);
+        adresse.setPoststed(strukturertAdresse.poststed);
+        return adresse;
+    }
+
+    private Lovvalgsperiode hentLovvalgsperiodeDto() throws FunksjonellException {
+        no.nav.melosys.domain.Lovvalgsperiode l = hentLovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(l.getFom());
+        lovvalgsperiode.setTom(l.getTom());
+        lovvalgsperiode.setLandkode(l.getLovvalgsland().getKode());
+        lovvalgsperiode.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(l.getBestemmelse()));
+        return lovvalgsperiode;
+    }
+
+    private String[] splitFulltNavn(String navn) {
+        if (navn == null || navn.isEmpty()) return new String[2];
+        else if (!navn.contains(" ")) return new String[]{navn, null};
+        else return navn.split(" ", 2);
+    }
+}

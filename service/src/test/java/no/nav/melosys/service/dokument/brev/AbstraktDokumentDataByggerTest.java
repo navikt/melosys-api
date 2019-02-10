@@ -57,11 +57,6 @@ public class AbstraktDokumentDataByggerTest {
             this.behandling = mock(Behandling.class);
         }
 
-        @Override
-        protected List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() {
-            return null;
-        }
-
         public Bostedsadresse hentBostedsadresse() {
             return super.hentBostedsadresse();
         }

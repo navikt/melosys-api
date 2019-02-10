@@ -1,23 +1,20 @@
 package no.nav.melosys.service.dokument.sed;
 
 import java.util.List;
-import java.util.Map;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Landkoder;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
-import no.nav.melosys.eux.BucType;
-import no.nav.melosys.eux.model.SedType;
-import no.nav.melosys.eux.model.nav.SED;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.eux.consumer.EuxConsumer;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.service.dokument.sed.bygger.AbstraktSedDataBygger;
-import no.nav.melosys.service.dokument.sed.mapper.SedMapper;
+import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
+import no.nav.melosys.service.dokument.sed.dto.SedDataDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -26,12 +23,10 @@ public class SedService {
 
     private static final Logger log = LoggerFactory.getLogger(SedService.class);
 
-    private final EuxConsumer euxConsumer;
     private final SedDataByggerVelger sedDataByggerVelger;
     private final FagsakRepository fagsakRepository;
 
-    public SedService(@Qualifier("system") EuxConsumer euxConsumer, SedDataByggerVelger sedDataByggerVelger, FagsakRepository fagsakRepository) {
-        this.euxConsumer = euxConsumer;
+    public SedService(SedDataByggerVelger sedDataByggerVelger, FagsakRepository fagsakRepository) {
         this.sedDataByggerVelger = sedDataByggerVelger;
         this.fagsakRepository = fagsakRepository;
     }
@@ -47,14 +42,13 @@ public class SedService {
         Landkoder lovvalgsLand = lovvalgsperiode.getLovvalgsland();
 
         LovvalgBestemmelse lovvalgBestemmelse = lovvalgsperiode.getBestemmelse();
-        SedType sedType = SedUtils.hentSedTypeFraLovvalgsBestemmelse(lovvalgBestemmelse);
 
-        AbstraktSedDataBygger sedDataBygger = sedDataByggerVelger.hent(sedType);
-        AbstraktSedData sedData = sedDataBygger.lag(behandling);
+        SedDataBygger sedDataBygger = sedDataByggerVelger.hent(lovvalgsperiode.getBestemmelse());
+        SedDataDto sedData = sedDataBygger.lag(behandling);
 
-        SedMapper sedMapper = SedDataMapperRuter.sedMapper(sedType);
+        //SedMapper sedMapper = SedDataMapperRuter.sedMapper(sedType);
 
-        SED sed = sedMapper.mapTilSed(sedData);
+        /*SED sed = sedMapper.mapTilSed(sedData);
         BucType bucType = SedUtils.hentBucFraLovvalgsBestemmelse(lovvalgBestemmelse);
         String fagsaknummer = behandling.getFagsak().getSaksnummer();
         String mottakerId = hentFørsteInstitusjonId(euxConsumer.hentInstitusjoner(bucType.name(), lovvalgsLand.getKode()));
@@ -68,7 +62,7 @@ public class SedService {
         fagsak.setRinasaksnummer(rinaSaksnummer);
         fagsakRepository.save(fagsak);
 
-        euxConsumer.sendSed(rinaSaksnummer, null, dokumentId);
+        euxConsumer.sendSed(rinaSaksnummer, null, dokumentId);*/ //Flyttet til Melosys-eessi
 
         //TODO: journalfør
     }

@@ -1,15 +1,14 @@
 package no.nav.melosys.service.dokument.sed;
 
-import javax.validation.constraints.NotNull;
-
-import no.nav.melosys.eux.model.SedType;
+import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
+import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_987_2009;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.sed.bygger.A009DataBygger;
-import no.nav.melosys.service.dokument.sed.bygger.AbstraktSedDataBygger;
+import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.springframework.stereotype.Service;
 
@@ -34,14 +33,44 @@ public class SedDataByggerVelger {
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
 
-    public AbstraktSedDataBygger hent(@NotNull SedType sedType) {
-        switch (sedType) {
-            case A009:
-                return new A009DataBygger(kodeverkService,registerOppslagService,
-                    lovvalgsperiodeService,avklartefaktaService);
-        }
+    public SedDataBygger hent(LovvalgBestemmelse lovvalgBestemmelse) {
 
+        if (lovvalgBestemmelse instanceof LovvalgBestemmelse_883_2004) {
+            LovvalgBestemmelse_883_2004 lovvalgBestemmelse_883_2004 = (LovvalgBestemmelse_883_2004) lovvalgBestemmelse;
+            switch ((LovvalgBestemmelse_883_2004) lovvalgBestemmelse) {
+
+                case FO_883_2004_ART12_1:
+                case FO_883_2004_ART12_2:
+                case FO_883_2004_ART16_1:
+                case FO_883_2004_ART16_2:
+                    return new SedDataBygger(kodeverkService, registerOppslagService,
+                        lovvalgsperiodeService, avklartefaktaService);
+                //art 12 og 16 trenger samme data
+                //SedDatabygger settes for nå til flere SED'er er implementert og mer informasjon trengs
+                case FO_883_2004_ART11_1:
+                case FO_883_2004_ART11_3A:
+                case FO_883_2004_ART11_3B:
+                case FO_883_2004_ART11_3C:
+                case FO_883_2004_ART11_3D:
+                case FO_883_2004_ART11_3E:
+                case FO_883_2004_ART11_4_2:
+                case FO_883_2004_ART13_1A:
+                case FO_883_2004_ART13_1B1:
+                case FO_883_2004_ART13_1B2:
+                case FO_883_2004_ART13_1B3:
+                case FO_883_2004_ART13_1B4:
+                case FO_883_2004_ART13_2A:
+                case FO_883_2004_ART13_2B:
+                case FO_883_2004_ART13_3:
+                case FO_883_2004_ART13_4:
+            }
+        } else if (lovvalgBestemmelse instanceof LovvalgBestemmelse_987_2009) {
+            switch ((LovvalgBestemmelse_987_2009) lovvalgBestemmelse) {
+                case FO_987_2009_ART14_11:
+            }
+        }
         //Kaster runtime exception til resten av SED'er er implementert
-        throw new RuntimeException("Sed-type: " + sedType.name() + " er ikke implementert enda");
+        throw new RuntimeException("Støtte for å sende sed for lovvalgsbestemmelse "
+            + lovvalgBestemmelse.name() + " er ikke implementert enda");
     }
 }
