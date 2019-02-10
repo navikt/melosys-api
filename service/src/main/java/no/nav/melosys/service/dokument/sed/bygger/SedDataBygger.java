@@ -46,10 +46,10 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
                 arbeidssted.setFysisk(arb.erFysisk());
                 if (arb.erFysisk()) {
                     arbeidssted.setFysisk(true);
-                    arbeidssted.setHjemmebase(null); //TODO ved ikke fysiske
+                    arbeidssted.setAdresse(fraStrukturertAdresse(arb.adresse));
                 }else {
                     arbeidssted.setFysisk(false);
-                    arbeidssted.setAdresse(fraStrukturertAdresse(arb.adresse));
+                    arbeidssted.setHjemmebase(null); //TODO ved ikke fysiske
                 }
                 return arbeidssted;
             }).collect(Collectors.toList())

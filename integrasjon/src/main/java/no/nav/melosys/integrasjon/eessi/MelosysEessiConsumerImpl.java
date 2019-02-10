@@ -24,7 +24,7 @@ public class MelosysEessiConsumerImpl implements MelosysEessiConsumer {
 
     @Override
     public Map<String, String> opprettOgSendSed(SedDataDto sedDataDto) throws MelosysException {
-        return exchange("/createAndSend", HttpMethod.POST, new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<Map<String, String>>() {});
+        return exchange("/sed/createAndSend", HttpMethod.POST, new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<Map<String, String>>() {});
     }
 
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType) throws MelosysException {
