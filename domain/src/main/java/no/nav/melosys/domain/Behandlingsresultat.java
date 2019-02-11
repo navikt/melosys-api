@@ -101,7 +101,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.henleggelsesgrunn = henleggelsesgrunn;
     }
 
-    public String hentHenleggelseFritekst() {
+    public String getHenleggelseFritekst() {
         return henleggelseFritekst;
     }
 
