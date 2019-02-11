@@ -80,6 +80,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat " + behandling.getId()));
         BehandlingsresultatType behandlingsresultatType = resultat.getType();
         Lovvalgsperiode lovvalgsperiode = validerLovvalgsperiode(resultat.getLovvalgsperioder());
+        log.info("Behandler lovvalgsperiode: {}", lovvalgsperiode);
 
         ProsessType prosessType = prosessinstans.getType();
         if (ProsessType.IVERKSETT_VEDTAK == prosessType) {

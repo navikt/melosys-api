@@ -209,4 +209,22 @@ public class Lovvalgsperiode implements ErPeriode {
         return Objects.hash(behandlingsresultat, fom);
     }
 
+    @Override
+    public String toString() {
+        return "Lovvalgsperiode{" +
+            "id=" + id +
+            ", behandlingsresultat=" + behandlingsresultat +
+            ", fom=" + fom +
+            ", tom=" + tom +
+            ", lovvalgsland=" + lovvalgsland +
+            ", bestemmelse=" + bestemmelse +
+            ", tilleggsbestemmelse=" + tilleggsbestemmelse +
+            ", unntakFraLovvalgsland=" + unntakFraLovvalgsland +
+            ", unntakFraBestemmelse=" + unntakFraBestemmelse +
+            ", innvilgelsesresultat=" + innvilgelsesresultat +
+            ", medlemskapstype=" + medlemskapstype +
+            ", dekning=" + dekning +
+            ", medlPeriodeID=" + medlPeriodeID +
+            '}';
+    }
 }
