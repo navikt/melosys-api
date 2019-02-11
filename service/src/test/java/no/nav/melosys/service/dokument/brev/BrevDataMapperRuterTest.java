@@ -8,7 +8,9 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.ProduserbartDokument;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.dokument.brev.mapper.AnmodningUnntakMapper;
 import no.nav.melosys.service.dokument.brev.mapper.BrevDataMapper;
+import no.nav.melosys.service.dokument.brev.mapper.HenleggelsesbrevMapper;
 import no.nav.melosys.service.dokument.brev.mapper.InnvilgelsesbrevMapper;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -37,9 +39,19 @@ public class BrevDataMapperRuterTest {
     }
 
     @Test
+    public void oppslagAvHenvendesebrevGirHenvendelsesbrevMapper() throws Exception {
+        BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(ProduserbartDokument.MELDING_HENLAGT_SAK);
+        assertThat(resultat).isInstanceOf(HenleggelsesbrevMapper.class);
+    }
+
+    @Test
     public void oppslagAvUkjentDoktypeKasterUnntak() {
+        BrevDataMapperRuter.mappere.remove(ProduserbartDokument.MELDING_HENLAGT_SAK); //Fjerner mapperen for å kunne teste på mapper ikke funnet
+
         Throwable unntak = catchThrowable(() -> BrevDataMapperRuter.brevDataMapper(ProduserbartDokument.MELDING_HENLAGT_SAK));
         assertThat(unntak).isInstanceOf(TekniskException.class).hasNoCause().hasMessageMatching("ProduserbartDokument .* støttes ikke");
+
+        BrevDataMapperRuter.mappere.put(ProduserbartDokument.MELDING_HENLAGT_SAK, AnmodningUnntakMapper.class); //Legger til mapperen igjen slik at andre tester virker.
     }
 
     @Test

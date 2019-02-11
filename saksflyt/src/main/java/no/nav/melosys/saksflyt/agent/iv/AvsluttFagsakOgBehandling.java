@@ -20,7 +20,7 @@ import static no.nav.melosys.domain.ProsessSteg.IV_AVSLUTT_BEHANDLING;
 import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
 
 /**
- * Avslutter en fagsak og Behanlding i Melosys.
+ * Avslutter en fagsak og Behandling i Melosys.
  *
  * Transisjoner:
  * ProsessType.IVERKSETT_VEDTAK

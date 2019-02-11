@@ -27,6 +27,7 @@ import no.nav.melosys.integrasjon.doksys.DokSysFasade;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -265,8 +266,9 @@ public final class DokumentServiceTest {
         LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
+        JoarkService joarkService = mock(JoarkService.class);
         BrevDataByggerVelger brevdatabyggervelger = new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, lovvalgsperiodeService, utenlandskMyndighetRepository,
-                vilkaarsresultatRepository);
+                vilkaarsresultatRepository, joarkService);
         return brevdatabyggervelger;
     }
 

@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.RolleType;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -36,7 +37,7 @@ public class BrevDataByggerVedleggTest {
     }
 
     @Test
-    public void testByggA1() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void testByggA1() throws FunksjonellException, TekniskException {
         Behandling behandling = mock(Behandling.class);
 
         BrevDataBygger brevDataByggerVedlegg = new BrevDataByggerVedlegg(brevDatabyggerA1, null);
@@ -45,7 +46,7 @@ public class BrevDataByggerVedleggTest {
     }
 
     @Test
-    public void testByggA001() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void testByggA001() throws FunksjonellException, TekniskException {
         Behandling behandling = mock(Behandling.class);
 
         BrevDataBygger brevDataByggerVedlegg = new BrevDataByggerVedlegg(brevDatabyggerA001, null);
@@ -54,7 +55,7 @@ public class BrevDataByggerVedleggTest {
     }
 
     @Test
-    public void testByggA1FraForhåndsvisning() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void testByggA1FraForhåndsvisning() throws FunksjonellException, TekniskException {
         Behandling behandling = mock(Behandling.class);
 
         BrevbestillingDto brevbestilling = new BrevbestillingDto();

@@ -17,6 +17,7 @@ public class BrevDataMapperRuter {
         mappere.put(ProduserbartDokument.INNVILGELSE_YRKESAKTIV, InnvilgelsesbrevMapper.class);
         mappere.put(ProduserbartDokument.ORIENTERING_ANMODNING_UNNTAK, AnmodningUnntakMapper.class);
         mappere.put(ProduserbartDokument.MELDING_FORVENTET_SAKSBEHANDLINGSTID, ForvaltningsmeldingMapper.class);
+        mappere.put(ProduserbartDokument.MELDING_HENLAGT_SAK, HenleggelsesbrevMapper.class);
         mappere.put(ProduserbartDokument.MELDING_MANGLENDE_OPPLYSNINGER, MangelbrevMapper.class);
         mappere.put(ProduserbartDokument.SED_A001, AttestMapper.class);
     }
