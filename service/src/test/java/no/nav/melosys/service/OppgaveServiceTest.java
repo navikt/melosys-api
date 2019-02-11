@@ -18,6 +18,7 @@ import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
@@ -42,6 +43,9 @@ public class OppgaveServiceTest {
     private FagsakRepository fagsakRepository;
 
     @Mock
+    private BehandlingRepository behandlingRepository;
+
+    @Mock
     private GsakFasade gsakFasade;
 
     @Mock
@@ -55,6 +59,7 @@ public class OppgaveServiceTest {
         this.oppgaveService = new OppgaveService(
                 gsakFasade,
                 fagsakRepository,
+                behandlingRepository,
                 tpsFasade,
             saksopplysningerService);
     }
@@ -83,9 +88,11 @@ public class OppgaveServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Fagsakstype.EU_EØS);
         fagsak.setStatus(Fagsaksstatus.OPPRETTET);
-        List<Behandling> behandlinger = hentBehandlinger();
+        List<Behandling> behandlinger = new ArrayList<>();
+        behandlinger.add(lagBehandling());
         fagsak.setBehandlinger(behandlinger);
         when(fagsakRepository.findBySaksnummer(any(String.class))).thenReturn(fagsak);
+        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(lagBehandling());
 
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12345678901");
         assertThat(mineSaker.size()).isEqualTo(1);
@@ -96,7 +103,7 @@ public class OppgaveServiceTest {
         assertThat(mineSaker.size()).isEqualTo(0);
     }
 
-    private List<Behandling> hentBehandlinger() {
+    private static Behandling lagBehandling() {
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
         PersonDokument personDokument = new PersonDokument();
         personDokument.fnr = "111111111111";
@@ -121,13 +128,11 @@ public class OppgaveServiceTest {
         saksopplysning.setDokument(soeknadDokument);
         saksopplysninger.add(saksopplysning);
 
-        List<Behandling> behandlinger = new ArrayList<>();
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setEndretDato(Instant.now());
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        behandlinger.add(behandling);
-        return behandlinger;
+        return behandling;
     }
 }

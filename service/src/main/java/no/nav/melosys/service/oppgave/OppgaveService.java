@@ -17,6 +17,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.oppgave.dto.*;
@@ -36,16 +37,19 @@ public class OppgaveService {
 
     private final GsakFasade gsakFasade;
     private final FagsakRepository fagsakRepository;
+    private final BehandlingRepository behandlingRepository;
     private final TpsFasade tpsFasade;
     private final SaksopplysningerService saksopplysningerService;
 
     @Autowired
     public OppgaveService(GsakFasade gsakFasade,
                           FagsakRepository fagsakRepository,
+                          BehandlingRepository behandlingRepository,
                           TpsFasade tpsFasade,
                           SaksopplysningerService saksopplysningerService) {
         this.gsakFasade = gsakFasade;
         this.fagsakRepository = fagsakRepository;
+        this.behandlingRepository = behandlingRepository;
         this.tpsFasade = tpsFasade;
         this.saksopplysningerService = saksopplysningerService;
     }
@@ -121,6 +125,9 @@ public class OppgaveService {
             if (behandling == null) {
                 throw new TekniskException("Det finnes ingen aktiv behandling for " + fagsak.getSaksnummer() + ".");
             }
+            // Henter saksopplysninger
+            behandling = behandlingRepository.findWithSaksopplysningerById(behandling.getId());
+
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 
             hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
