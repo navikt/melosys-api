@@ -28,6 +28,9 @@ public class BingeImpl implements Binge {
 
     @Override
     public synchronized boolean leggTil(Prosessinstans prosessinstans) {
+        if (prosessinstans.getId() == null) {
+            throw new IllegalStateException("Forsøk på å legge inn prosessinstans uten ID i Bingen!");
+        }
         if (prosessinstanser.containsKey(prosessinstans.getId())) {
             logger.error("Forsøk på å legge inn prosessinstans som allerede finnes i Bingen. prosessinstansId={}", prosessinstans.getId());
             return false;
