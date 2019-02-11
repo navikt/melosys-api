@@ -64,7 +64,7 @@ public class OppdaterBehandlingsresultatTest {
         assertThat(capture.getType()).isEqualTo(BehandlingsresultatType.HENLEGGELSE);
         assertThat(capture.getEndretAv()).isEqualTo(testbruker);
         assertThat(capture.getHenleggelsesgrunn()).isEqualTo(henleggelsesgrunn);
-        assertThat(capture.hentHenleggelseFritekstHvisGrunnANNET()).isEqualTo(henleggelsesfritekst);
+        assertThat(capture.hentHenleggelseFritekst()).isEqualTo(henleggelsesfritekst);
         assertThat(capture.getEndretAv()).isEqualTo(testbruker);
         assertThat(prosessinstans.getSteg()).isEqualTo(HS_HENLEGG_SAK);
     }
