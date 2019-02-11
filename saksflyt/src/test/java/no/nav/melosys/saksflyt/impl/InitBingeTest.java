@@ -1,22 +1,21 @@
 package no.nav.melosys.saksflyt.impl;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.api.Binge;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InitBingeTest {
@@ -43,7 +42,7 @@ public class InitBingeTest {
         testBehandlinger.add(pi1);
         testBehandlinger.add(pi2);
 
-        when(prosessinstansRepo.findAll()).thenReturn(testBehandlinger);
+        when(prosessinstansRepo.findByStegIsNot(any())).thenReturn(testBehandlinger);
         when(binge.leggTil(any(Prosessinstans.class))).thenReturn(true);
 
         initBinge.afterPropertiesSet();

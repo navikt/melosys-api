@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.impl;
 
+import no.nav.melosys.domain.ProsessSteg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -28,7 +29,7 @@ public class InitBinge implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
 
-        Iterable<Prosessinstans> alleProsessinstanser = prosessinstansRepo.findAll();
+        Iterable<Prosessinstans> alleProsessinstanser = prosessinstansRepo.findByStegIsNot(ProsessSteg.FEILET_MASKINELT);
 
         int teller = 0;
 
