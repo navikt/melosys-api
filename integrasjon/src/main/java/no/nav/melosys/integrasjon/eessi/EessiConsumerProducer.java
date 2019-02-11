@@ -10,18 +10,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 @Configuration
-public class MelosysEessiConsumerProducer {
+public class EessiConsumerProducer {
 
     private final String url;
     private final String apiKeyHeader;
     private final String apiKeyValue;
     private final Environment environment;
 
+    private final static String NAIS_PROFIL = "nais";
+
     @Autowired
-    public MelosysEessiConsumerProducer(Environment environment,
-                                        @Value("${MelosysEessi.url}") String url,
-                                        @Value("${MelosysEessi.apiHeader:}") String apiKeyHeader,
-                                        @Value("${MelosysEessi.apiKey:}") String apiKeyValue) {
+    public EessiConsumerProducer(Environment environment,
+                                 @Value("${MelosysEessi.url}") String url,
+                                 @Value("${MelosysEessi.apiHeader:}") String apiKeyHeader,
+                                 @Value("${MelosysEessi.apiKey:}") String apiKeyValue) {
         this.environment = environment;
         this.url = url;
         this.apiKeyHeader = apiKeyHeader;
@@ -34,8 +36,8 @@ public class MelosysEessiConsumerProducer {
             .rootUri(url);
 
         String[] aktiveProfiler = environment.getActiveProfiles();
-        if (Arrays.asList(aktiveProfiler).contains("nais")) {
-            builder.interceptors(new MelosysEessiRequestInterceptor(apiKeyHeader, apiKeyValue));
+        if (Arrays.asList(aktiveProfiler).contains(NAIS_PROFIL)) {
+            builder.interceptors(new EessiRequestInterceptor(apiKeyHeader, apiKeyValue));
         }
         return new EessiConsumerImpl(builder.build());
     }

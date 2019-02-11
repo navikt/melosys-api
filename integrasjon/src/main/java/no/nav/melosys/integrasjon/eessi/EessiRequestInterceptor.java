@@ -8,12 +8,12 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 
-public class MelosysEessiRequestInterceptor implements ClientHttpRequestInterceptor {
+public class EessiRequestInterceptor implements ClientHttpRequestInterceptor {
 
     private final String apiKeyHeader;
     private final String apiKeyValue;
 
-    public MelosysEessiRequestInterceptor(String apiKeyHeader, String apiKeyValue) {
+    public EessiRequestInterceptor(String apiKeyHeader, String apiKeyValue) {
         this.apiKeyHeader = apiKeyHeader;
         this.apiKeyValue = apiKeyValue;
     }
