@@ -29,7 +29,7 @@ public class MelosysEessiConsumerProducer {
     }
 
     @Bean
-    public MelosysEessiConsumer melosysEessiConsumer() {
+    public EessiConsumer melosysEessiConsumer() {
         RestTemplateBuilder builder = new RestTemplateBuilder()
             .rootUri(url);
 
@@ -37,6 +37,6 @@ public class MelosysEessiConsumerProducer {
         if (Arrays.asList(aktiveProfiler).contains("nais")) {
             builder.interceptors(new MelosysEessiRequestInterceptor(apiKeyHeader, apiKeyValue));
         }
-        return new MelosysEessiConsumerImpl(builder.build());
+        return new EessiConsumerImpl(builder.build());
     }
 }

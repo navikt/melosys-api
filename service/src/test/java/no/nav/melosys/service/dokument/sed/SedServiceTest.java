@@ -5,7 +5,8 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.eessi.MelosysEessiConsumer;
+import no.nav.melosys.integrasjon.eessi.EessiConsumer;
+import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.junit.Before;
@@ -19,6 +20,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -29,7 +31,7 @@ public class SedServiceTest {
     @Mock
     private SedDataByggerVelger sedDataByggerVelger;
     @Mock
-    private MelosysEessiConsumer melosysEessiConsumer;
+    private EessiConsumer eessiConsumer;
 
     @InjectMocks
     private SedService sedService;
@@ -56,11 +58,13 @@ public class SedServiceTest {
 
         SedDataBygger dataBygger = Mockito.mock(SedDataBygger.class);
         when(sedDataByggerVelger.hent(any(LovvalgBestemmelse.class))).thenReturn(dataBygger);
+        when(dataBygger.lag(any(Behandling.class))).thenReturn(new SedDataDto());
     }
 
     @Test
     public void opprettOgSendSed_verifiserKorrektSedType() throws Exception {
         sedService.opprettOgSendSed(behandling, behandlingsresultat);
+        verify(eessiConsumer).opprettOgSendSed(any(SedDataDto.class));
     }
 
     @Test

@@ -14,11 +14,11 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-public class MelosysEessiConsumerImpl implements MelosysEessiConsumer {
+public class EessiConsumerImpl implements EessiConsumer {
 
     private final RestTemplate restTemplate;
 
-    public MelosysEessiConsumerImpl(RestTemplate restTemplate) {
+    public EessiConsumerImpl(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 

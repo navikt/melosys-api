@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.eessi.MelosysEessiConsumer;
+import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
@@ -24,12 +24,12 @@ public class SedService {
 
     private final SedDataByggerVelger sedDataByggerVelger;
     private final FagsakRepository fagsakRepository;
-    private final MelosysEessiConsumer melosysEessiConsumer;
+    private final EessiConsumer eessiConsumer;
 
-    public SedService(SedDataByggerVelger sedDataByggerVelger, FagsakRepository fagsakRepository, MelosysEessiConsumer melosysEessiConsumer) {
+    public SedService(SedDataByggerVelger sedDataByggerVelger, FagsakRepository fagsakRepository, EessiConsumer eessiConsumer) {
         this.sedDataByggerVelger = sedDataByggerVelger;
         this.fagsakRepository = fagsakRepository;
-        this.melosysEessiConsumer = melosysEessiConsumer;
+        this.eessiConsumer = eessiConsumer;
     }
 
     // SED-er sendes ikke i Lev. 1
@@ -49,7 +49,7 @@ public class SedService {
         Fagsak fagsak = behandling.getFagsak();
 
         log.info("Oppretter buc og sed med artikkelt {} for fagsak {}", lovvalgBestemmelse.getKode(), fagsak.getSaksnummer());
-        Map<String,String> rinaSakInfo = melosysEessiConsumer.opprettOgSendSed(sedData);
+        Map<String,String> rinaSakInfo = eessiConsumer.opprettOgSendSed(sedData);
         String rinaSaksnummer = rinaSakInfo.get("rinaCaseId");
 
         fagsak.setRinasaksnummer(rinaSaksnummer);

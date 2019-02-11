@@ -8,8 +8,10 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.soeknad.UtenlandskIdent;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.eessi.dto.*;
@@ -40,70 +42,63 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         SedDataDto sedDataDto = new SedDataDto();
 
         sedDataDto.setArbeidsgivendeVirksomheter(hentNorskeAvklarteVirksomheter());
-        sedDataDto.setArbeidssteder(hentArbeidssteder().stream().map(arb -> {
-                Arbeidssted arbeidssted = new Arbeidssted();
-                arbeidssted.setNavn(arb.navn);
-                arbeidssted.setFysisk(arb.erFysisk());
-                if (arb.erFysisk()) {
-                    arbeidssted.setFysisk(true);
-                    arbeidssted.setAdresse(fraStrukturertAdresse(arb.adresse));
-                }else {
-                    arbeidssted.setFysisk(false);
-                    arbeidssted.setHjemmebase(null); //TODO ved ikke fysiske
-                }
-                return arbeidssted;
-            }).collect(Collectors.toList())
-        );
 
-        Bostedsadresse bostedsadresse = hentBostedsadresse();
-        Adresse adresse = new Adresse();
-        adresse.setPoststed(bostedsadresse.getPoststed());
-        adresse.setPostnr(bostedsadresse.getPostnr());
-        adresse.setLand(bostedsadresse.getLand().getKode());
-        adresse.setGateadresse(bostedsadresse.getGateadresse().getGatenavn() + " " + bostedsadresse.getGateadresse().getGatenummer() +
-            bostedsadresse.getGateadresse().getHusbokstav());
+        sedDataDto.setArbeidssteder(hentArbeidssteder().stream()
+            .map(this::mapArbeidssted).collect(Collectors.toList()));
 
-        sedDataDto.setBostedsadresse(adresse);
-
+        sedDataDto.setBostedsadresse(fraBostedsadresse(hentBostedsadresse()));
 
         sedDataDto.setBruker(hentBrukerFraPersonDokument(this.person));
+
         sedDataDto.setEgenAnsatt(this.person.erEgenAnsatt);
+
         sedDataDto.setFamilieMedlem(this.person.familiemedlemmer.stream()
             .filter(f -> f.familierelasjon.equals(Familierelasjon.FARA) || f.familierelasjon.equals(Familierelasjon.MORA))
-            .map(f -> {
-                FamilieMedlem familieMedlem = new FamilieMedlem();
-                String[] navn = splitFulltNavn(f.navn);
-                familieMedlem.setFornavn(navn[0]);
-                familieMedlem.setEtternavn(navn[1]);
-                familieMedlem.setRelasjon(f.familierelasjon.equals(Familierelasjon.FARA) ? "FAR" : "MOR");
-                return familieMedlem;
-            }).collect(Collectors.toList())
-        );
+            .map(this::hentFamilieMedlem).collect(Collectors.toList()));
 
         sedDataDto.setLovvalgsperioder(Collections.singletonList(hentLovvalgsperiodeDto()));
+
         if (this.person.erEgenAnsatt) {
             sedDataDto.setSelvstendigeVirksomheter(hentAvklarteSelvstendigeForetak());
         }
 
-        sedDataDto.setUtenlandskeVirksomheter(hentUtenlandskeVirksomheter().stream().map(uVirksomhet -> {
-                Virksomhet virksomhet = new Virksomhet();
-                virksomhet.setNavn(uVirksomhet.navn);
-                virksomhet.setOrgnr(uVirksomhet.orgnr);
-                virksomhet.setType("registrering"); //TODO - riktig?
-                virksomhet.setAdresse(fraStrukturertAdresse((StrukturertAdresse) uVirksomhet.adresse));
-                return virksomhet;
-            }).collect(Collectors.toList())
-        );
+        sedDataDto.setUtenlandskeVirksomheter(hentUtenlandskeVirksomheter().stream().map(
+            this::tilUtenlandsVirksomhetDto).collect(Collectors.toList()));//TODO - riktig?
 
-        sedDataDto.setUtenlandskIdent(this.søknad.personOpplysninger.utenlandskIdent.stream().map(ui -> {
-                Ident ident = new Ident();
-                ident.setIdent(ui.ident);
-                ident.setLandkode(ui.landKode);
-                return ident;
-            }).collect(Collectors.toList())
-        );
+        sedDataDto.setUtenlandskIdent(this.søknad.personOpplysninger.utenlandskIdent.stream()
+            .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));
 
         return sedDataDto;
+    }
+
+    private Adresse fraBostedsadresse(Bostedsadresse bostedsadresse) {
+        Adresse adresse = new Adresse();
+        adresse.setPoststed(bostedsadresse.getPoststed());
+        adresse.setPostnr(bostedsadresse.getPostnr());
+        adresse.setLand(bostedsadresse.getLand().getKode());
+        adresse.setGateadresse(bostedsadresse.getGateadresse().getGatenavn() + " " +
+            bostedsadresse.getGateadresse().getGatenummer() +
+            bostedsadresse.getGateadresse().getHusbokstav());
+        return adresse;
+    }
+
+    private static Ident tilUtenlandskIdentDto(UtenlandskIdent ui) {
+        Ident ident = new Ident();
+        ident.setIdent(ui.ident);
+        ident.setLandkode(ui.landKode);
+        return ident;
+    }
+
+    private Arbeidssted mapArbeidssted(no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted arb) {
+        Arbeidssted arbeidssted = new Arbeidssted();
+        arbeidssted.setNavn(arb.navn);
+        arbeidssted.setFysisk(arb.erFysisk());
+        if (arb.erFysisk()) {
+            arbeidssted.setAdresse(fraStrukturertAdresse(arb.adresse));
+        }else {
+            arbeidssted.setHjemmebase(null); //TODO ved ikke fysiske
+        }
+        return arbeidssted;
     }
 
     private Bruker hentBrukerFraPersonDokument(PersonDokument personDokument) {
@@ -155,18 +150,36 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
     }
 
     private Lovvalgsperiode hentLovvalgsperiodeDto() throws FunksjonellException {
-        no.nav.melosys.domain.Lovvalgsperiode l = hentLovvalgsperiode();
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(l.getFom());
-        lovvalgsperiode.setTom(l.getTom());
-        lovvalgsperiode.setLandkode(l.getLovvalgsland().getKode());
-        lovvalgsperiode.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(l.getBestemmelse()));
-        return lovvalgsperiode;
+        no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode = hentLovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
+        lovvalgsperiodeDto.setFom(lovvalgsperiode.getFom());
+        lovvalgsperiodeDto.setTom(lovvalgsperiode.getTom());
+        lovvalgsperiodeDto.setLandkode(lovvalgsperiode.getLovvalgsland().getKode());
+        lovvalgsperiodeDto.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(lovvalgsperiode.getBestemmelse()));
+        return lovvalgsperiodeDto;
     }
 
     private String[] splitFulltNavn(String navn) {
         if (navn == null || navn.isEmpty()) return new String[2];
         else if (!navn.contains(" ")) return new String[]{navn, null};
         else return navn.split(" ", 2);
+    }
+
+    private FamilieMedlem hentFamilieMedlem(Familiemedlem f) {
+        FamilieMedlem familieMedlem = new FamilieMedlem();
+        String[] navn = splitFulltNavn(f.navn);
+        familieMedlem.setFornavn(navn[0]);
+        familieMedlem.setEtternavn(navn[1]);
+        familieMedlem.setRelasjon(f.familierelasjon.equals(Familierelasjon.FARA) ? "FAR" : "MOR");
+        return familieMedlem;
+    }
+
+    private Virksomhet tilUtenlandsVirksomhetDto(no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet uVirksomhet) {
+        Virksomhet virksomhet = new Virksomhet();
+        virksomhet.setNavn(uVirksomhet.navn);
+        virksomhet.setOrgnr(uVirksomhet.orgnr);
+        virksomhet.setType("registrering"); //TODO - riktig?
+        virksomhet.setAdresse(fraStrukturertAdresse((StrukturertAdresse) uVirksomhet.adresse));
+        return virksomhet;
     }
 }

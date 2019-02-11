@@ -20,36 +20,35 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MelosysEessiConsumerTest {
+public class EessiConsumerTest {
 
     @Spy
     private RestTemplate restTemplate;
-    private MelosysEessiConsumer melosysEessiConsumer;
+    private EessiConsumer eessiConsumer;
     private MockRestServiceServer server;
 
     private SedDataDto sedDataDto;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         server = MockRestServiceServer.createServer(restTemplate);
-        melosysEessiConsumer = new MelosysEessiConsumerImpl(restTemplate);
+        eessiConsumer = new EessiConsumerImpl(restTemplate);
         sedDataDto = new SedDataDto();
     }
 
     @Test
     public void opprettOgSend_forventMap() throws Exception {
-        server.expect(requestTo("/createAndSend"))
+        server.expect(requestTo("/sed/createAndSend"))
             .andRespond(withSuccess("{\"rinaCaseId\":\"123132\"}", MediaType.APPLICATION_JSON));
-        Map<String, String> resultat = melosysEessiConsumer.opprettOgSendSed(sedDataDto);
+        Map<String, String> resultat = eessiConsumer.opprettOgSendSed(sedDataDto);
         assertThat(resultat.get("rinaCaseId"), is("123132"));
     }
 
     @Test(expected = MelosysException.class)
     public void opprettOgSend_forventException() throws Exception {
-        server.expect(requestTo("/createAndSend"))
+        server.expect(requestTo("/sed/createAndSend"))
             .andRespond(withBadRequest());
-        Map<String, String> resultat = melosysEessiConsumer.opprettOgSendSed(sedDataDto);
-        assertThat(resultat.get("rinaCaseId"), is("123132"));
+        eessiConsumer.opprettOgSendSed(sedDataDto);
     }
 
 }
