@@ -77,7 +77,9 @@ public class ProsessinstansService {
 
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
         prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, begrunnelseKode);
-        prosessinstans.setData(ProsessDataKey.FRITEKST, begrunnelseKode == Henleggelsesgrunner.ANNET ? fritekst : null);
+        if (begrunnelseKode == Henleggelsesgrunner.ANNET) {
+            prosessinstans.setData(ProsessDataKey.FRITEKST, fritekst);
+        }
 
         prosessinstans.setSteg(HS_OPPDATER_RESULTAT);
 

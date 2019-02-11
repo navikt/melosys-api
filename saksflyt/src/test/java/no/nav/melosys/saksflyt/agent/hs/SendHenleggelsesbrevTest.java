@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.ProduserbartDokument.MELDING_HENLAGT_SAK;
+import static no.nav.melosys.domain.ProsessDataKey.BEGRUNNELSEKODE;
+import static no.nav.melosys.domain.ProsessDataKey.FRITEKST;
 import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
@@ -53,6 +55,8 @@ public class SendHenleggelsesbrevTest {
         Fagsak fagsak = new Fagsak();
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.HENLEGG_SAK);
+        prosessinstans.setData(BEGRUNNELSEKODE, Henleggelsesgrunner.ANNET);
+        prosessinstans.setData(FRITEKST, "fritekst");
         Behandling behandling = new Behandling();
         behandling.setId(behandlingId);
         behandling.setFagsak(fagsak);

@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProduserbartDokument.MELDING_HENLAGT_SAK;
-import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
+import static no.nav.melosys.domain.ProsessDataKey.*;
 import static no.nav.melosys.domain.ProsessSteg.HS_SEND_BREV;
 import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
 
@@ -64,14 +64,16 @@ public class SendHenleggelsesbrev extends AbstraktStegBehandler {
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(MELDING_HENLAGT_SAK);
         BrevData brevdata = brevDataBygger.lag(behandling, saksbehandler);
         brevdata.mottaker = RolleType.BRUKER;
+        brevdata.begrunnelseKode = prosessinstans.getData(BEGRUNNELSEKODE, Henleggelsesgrunner.class).getKode();
+        brevdata.fritekst = prosessinstans.getData(FRITEKST);
         dokumentService.produserDokument(behandling.getId(), MELDING_HENLAGT_SAK, brevdata);
         log.info("Send henleggelsesbrev til bruker for prosess {}.", prosessinstans.getId());
 
         Aktoer fullmektig = behandling.getFagsak().hentAktørMedRolleType(RolleType.REPRESENTANT);
         if (fullmektig != null) {
             brevdata.mottaker = RolleType.REPRESENTANT;
-            dokumentService.produserDokument(behandling.getId(), MELDING_HENLAGT_SAK, brevdata);
-            log.info("Send henleggelsesbrev til representant for prosess {}.", prosessinstans.getId());
+//            dokumentService.produserDokument(behandling.getId(), MELDING_HENLAGT_SAK, brevdata);
+            log.info("HENLEGGELSESBREV FOR REPRESENTANT ER FORELØPIG IKKE STØTTET: prosess {}.", prosessinstans.getId());
         }
 
         prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
