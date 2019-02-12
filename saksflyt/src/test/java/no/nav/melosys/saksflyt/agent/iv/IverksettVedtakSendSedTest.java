@@ -54,13 +54,13 @@ public class IverksettVedtakSendSedTest {
     @Test
     public void utførSteg_suksessfull_ingenRetur() throws Exception{
         iverksettVedtakSendSed.utfør(prosessinstans);
-        verify(sedService).opprettOgSendSed();
+        verify(sedService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_AVSLUTT_BEHANDLING));
     }
 
     @Test
     public void utførSteg_feilIMetode_settFeiletSteg() throws Exception {
-        doThrow(new TekniskException("feil")).when(sedService).opprettOgSendSed();
+        doThrow(new TekniskException("feil")).when(sedService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
         iverksettVedtakSendSed.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.FEILET_MASKINELT));
     }

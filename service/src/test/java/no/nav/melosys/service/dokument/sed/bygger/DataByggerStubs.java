@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,14 +10,12 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
-import no.nav.melosys.domain.dokument.soeknad.SelvstendigArbeid;
-import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.dokument.person.*;
+import no.nav.melosys.domain.dokument.soeknad.*;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -45,6 +44,11 @@ public class DataByggerStubs {
         selvstendigForetak.orgnr = "12312312";
         søknadDokument.selvstendigArbeid.selvstendigForetak = Collections.singletonList(selvstendigForetak);
         søknadDokument.selvstendigArbeid.erSelvstendig = true;
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+        arbeidUtland.adresse = hentStrukturertAddresseStub();
+        arbeidUtland.foretakNavn = "foretaknavn";
+        arbeidUtland.foretakOrgnr = "32132133";
+        søknadDokument.arbeidUtland = Collections.singletonList(arbeidUtland);
         saksopplysning.setDokument(søknadDokument);
         saksopplysning.setType(SaksopplysningType.SØKNAD);
         saksopplysninger.add(saksopplysning);
@@ -54,9 +58,32 @@ public class DataByggerStubs {
         saksopplysning.setDokument(new ArbeidsforholdDokument());
         saksopplysninger.add(saksopplysning);
 
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.erEgenAnsatt = true;
+        personDokument.fødselsdato = LocalDate.now();
+        Bostedsadresse bostedsadresse = new Bostedsadresse();
+        bostedsadresse.setLand(new Land(Land.NORGE));
+        bostedsadresse.setPoststed("1212");
+        bostedsadresse.setGateadresse(new Gateadresse());
+        personDokument.bostedsadresse = bostedsadresse;
+
+        Familiemedlem familiemedlem = new Familiemedlem();
+        familiemedlem.navn = "farnavn";
+        familiemedlem.fnr = "111111111";
+        familiemedlem.familierelasjon = Familierelasjon.FARA;
+        personDokument.familiemedlemmer = Collections.singletonList(familiemedlem);
+
+        KjoennsType kjønn = new KjoennsType();
+        kjønn.setKode("M");
+        personDokument.kjønn = kjønn;
+
+        personDokument.fornavn = "Mrfornavn";
+        personDokument.etternavn = "Spock";
+        personDokument.statsborgerskap = new Land(Land.NORGE);
+
         saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.PERSONOPPLYSNING);
-        saksopplysning.setDokument(new PersonDokument());
+        saksopplysning.setDokument(personDokument);
         saksopplysninger.add(saksopplysning);
 
         return behandling;

@@ -1,13 +1,12 @@
 package no.nav.melosys.service.dokument.sed;
 
-import no.nav.melosys.eux.model.SedType;
+import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.sed.bygger.A009DataBygger;
-import no.nav.melosys.service.dokument.sed.bygger.AbstraktSedDataBygger;
+import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,13 +39,13 @@ public class SedDataByggerVelgerTest {
 
     @Test
     public void hentDatabygger_forventA009DataBygger() {
-        AbstraktSedDataBygger bygger = sedDataByggerVelger.hent(SedType.A009);
+        SedDataBygger bygger = sedDataByggerVelger.hent(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2);
         assertThat(bygger, is(notNullValue()));
-        assertThat(bygger, is(instanceOf(A009DataBygger.class)));
+        assertThat(bygger, is(instanceOf(SedDataBygger.class)));
     }
 
     @Test(expected = RuntimeException.class)
     public void hentDatabygger_ikkeImplementert_forventException() {
-        sedDataByggerVelger.hent(SedType.A008);
+        sedDataByggerVelger.hent(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_1);
     }
 }

@@ -2,7 +2,10 @@ package no.nav.melosys.saksflyt.agent.iv;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -62,7 +65,7 @@ public class IverksettVedtakSendSed extends AbstraktStegBehandler {
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
             if (sedSkalSendes(behandlingsresultat.getType(), validerLovvalgsperiode(behandlingsresultat.getLovvalgsperioder()))) {
                 log.info("Starter sending av SED for behandling {}", behandling.getId());
-                sedService.opprettOgSendSed();
+                sedService.opprettOgSendSed(behandling, behandlingsresultat);
             }
             prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
         } catch (MelosysException ex) {
