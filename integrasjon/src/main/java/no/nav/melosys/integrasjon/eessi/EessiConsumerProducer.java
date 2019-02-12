@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.eessi;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +9,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class EessiConsumerProducer {
@@ -32,13 +34,12 @@ public class EessiConsumerProducer {
 
     @Bean
     public EessiConsumer melosysEessiConsumer() {
-        RestTemplateBuilder builder = new RestTemplateBuilder()
-            .rootUri(url);
+        RestTemplate restTemplate = new RestTemplateBuilder().rootUri(url).build();
 
         String[] aktiveProfiler = environment.getActiveProfiles();
         if (Arrays.asList(aktiveProfiler).contains(NAIS_PROFIL)) {
-            builder.interceptors(new EessiRequestInterceptor(apiKeyHeader, apiKeyValue));
+            restTemplate.setInterceptors(Collections.singletonList(new EessiRequestInterceptor(apiKeyHeader, apiKeyValue)));
         }
-        return new EessiConsumerImpl(builder.build());
+        return new EessiConsumerImpl(restTemplate);
     }
 }
