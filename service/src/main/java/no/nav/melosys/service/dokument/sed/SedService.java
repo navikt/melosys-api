@@ -32,28 +32,34 @@ public class SedService {
         this.eessiConsumer = eessiConsumer;
     }
 
-    // SED-er sendes ikke i Lev. 1
-    public void opprettOgSendSed() throws MelosysException {
-    }
-
     public void opprettOgSendSed(Behandling behandling, Behandlingsresultat behandlingsresultat) throws MelosysException {
 
-        Lovvalgsperiode lovvalgsperiode = behandlingsresultat.getLovvalgsperioder().stream()
-            .findFirst().orElseThrow(() -> new TekniskException("Finner ingen lovvalgsperiode!")); //TODO: flere lovvalgsperioder
+        try {
+            Lovvalgsperiode lovvalgsperiode = behandlingsresultat.getLovvalgsperioder().stream()
+                .findFirst().orElseThrow(() -> new TekniskException("Finner ingen lovvalgsperiode!")); //TODO: flere lovvalgsperioder
 
-        LovvalgBestemmelse lovvalgBestemmelse = lovvalgsperiode.getBestemmelse();
+            LovvalgBestemmelse lovvalgBestemmelse = lovvalgsperiode.getBestemmelse();
 
-        SedDataBygger sedDataBygger = sedDataByggerVelger.hent(lovvalgsperiode.getBestemmelse());
-        SedDataDto sedData = sedDataBygger.lag(behandling);
+            SedDataBygger sedDataBygger = sedDataByggerVelger.hent(lovvalgsperiode.getBestemmelse());
+            SedDataDto sedData = sedDataBygger.lag(behandling);
 
-        Fagsak fagsak = behandling.getFagsak();
+            Fagsak fagsak = behandling.getFagsak();
 
-        log.info("Oppretter buc og sed med artikkelt {} for fagsak {}", lovvalgBestemmelse.getKode(), fagsak.getSaksnummer());
-        Map<String,String> rinaSakInfo = eessiConsumer.opprettOgSendSed(sedData);
-        String rinaSaksnummer = rinaSakInfo.get("rinaCaseId");
+            log.info("Oppretter buc og sed med artikkelt {} for fagsak {}", lovvalgBestemmelse.getKode(), fagsak.getSaksnummer());
+            Map<String, String> rinaSakInfo = eessiConsumer.opprettOgSendSed(sedData);
+            String rinaSaksnummer = rinaSakInfo.get("rinaCaseId");
 
-        fagsak.setRinasaksnummer(rinaSaksnummer);
-        fagsakRepository.save(fagsak);
+            fagsak.setRinasaksnummer(rinaSaksnummer);
+            fagsakRepository.save(fagsak);
+            log.info("Buc opprettet med id {} for behandling {}", rinaSakInfo, behandling.getId());
+        } catch (Exception e) {
+            log.error(
+                "Feil ved opprettelse av SED: \n" +
+                "Behandling {}\n" +
+                "Behandlingsresultat {}\n" +
+                "Fagsak {}\n",
+                behandling.getId(), behandlingsresultat.getId(), behandling.getFagsak().getSaksnummer(), e);
+        }
 
     }
 }
