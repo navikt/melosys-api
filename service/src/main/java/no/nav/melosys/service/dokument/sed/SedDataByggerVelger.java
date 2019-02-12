@@ -1,8 +1,8 @@
 package no.nav.melosys.service.dokument.sed;
 
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_987_2009;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_987_2009;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -35,9 +35,9 @@ public class SedDataByggerVelger {
 
     public SedDataBygger hent(LovvalgBestemmelse lovvalgBestemmelse) {
 
-        if (lovvalgBestemmelse instanceof LovvalgBestemmelse_883_2004) {
-            LovvalgBestemmelse_883_2004 lovvalgBestemmelse_883_2004 = (LovvalgBestemmelse_883_2004) lovvalgBestemmelse;
-            switch ((LovvalgBestemmelse_883_2004) lovvalgBestemmelse) {
+        if (lovvalgBestemmelse instanceof LovvalgsBestemmelser_883_2004) {
+            LovvalgsBestemmelser_883_2004 lovvalgBestemmelse_883_2004 = (LovvalgsBestemmelser_883_2004) lovvalgBestemmelse;
+            switch ((LovvalgsBestemmelser_883_2004) lovvalgBestemmelse) {
 
                 case FO_883_2004_ART12_1:
                 case FO_883_2004_ART12_2:
@@ -51,21 +51,20 @@ public class SedDataByggerVelger {
                 case FO_883_2004_ART11_3A:
                 case FO_883_2004_ART11_3B:
                 case FO_883_2004_ART11_3C:
-                case FO_883_2004_ART11_3D:
                 case FO_883_2004_ART11_3E:
                 case FO_883_2004_ART11_4_2:
                 case FO_883_2004_ART13_1A:
                 case FO_883_2004_ART13_1B1:
-                case FO_883_2004_ART13_1B2:
-                case FO_883_2004_ART13_1B3:
-                case FO_883_2004_ART13_1B4:
+                case FO_883_2004_ART13_1_B2:
+                case FO_883_2004_ART13_1_B3:
+                case FO_883_2004_ART13_1_B4:
                 case FO_883_2004_ART13_2A:
                 case FO_883_2004_ART13_2B:
                 case FO_883_2004_ART13_3:
                 case FO_883_2004_ART13_4:
             }
-        } else if (lovvalgBestemmelse instanceof LovvalgBestemmelse_987_2009) {
-            switch ((LovvalgBestemmelse_987_2009) lovvalgBestemmelse) {
+        } else if (lovvalgBestemmelse instanceof LovvalgsBestemmelser_987_2009) {
+            switch ((LovvalgsBestemmelser_987_2009) lovvalgBestemmelse) {
                 case FO_987_2009_ART14_11:
             }
         }

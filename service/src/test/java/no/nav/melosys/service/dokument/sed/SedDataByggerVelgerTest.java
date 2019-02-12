@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.sed;
 
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -39,13 +39,13 @@ public class SedDataByggerVelgerTest {
 
     @Test
     public void hentDatabygger_forventA009DataBygger() {
-        SedDataBygger bygger = sedDataByggerVelger.hent(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2);
+        SedDataBygger bygger = sedDataByggerVelger.hent(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_2);
         assertThat(bygger, is(notNullValue()));
         assertThat(bygger, is(instanceOf(SedDataBygger.class)));
     }
 
     @Test(expected = RuntimeException.class)
     public void hentDatabygger_ikkeImplementert_forventException() {
-        sedDataByggerVelger.hent(LovvalgBestemmelse_883_2004.FO_883_2004_ART11_1);
+        sedDataByggerVelger.hent(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_1);
     }
 }

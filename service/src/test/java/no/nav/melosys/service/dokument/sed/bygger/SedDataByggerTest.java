@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Landkoder;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -45,7 +45,7 @@ public class SedDataByggerTest {
         lovvalgsperiode.setLovvalgsland(Landkoder.SE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1L));
-        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(lovvalgsperiode));
 
         behandling = DataByggerStubs.hentBehandlingStub();
