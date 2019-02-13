@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
@@ -20,6 +21,7 @@ import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
+import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBeskrivelseMapper;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class SedDataBygger extends AbstraktDokumentDataBygger {
@@ -158,7 +160,30 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         lovvalgsperiodeDto.setTom(lovvalgsperiode.getTom());
         lovvalgsperiodeDto.setLandkode(lovvalgsperiode.getLovvalgsland().getKode());
         lovvalgsperiodeDto.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(lovvalgsperiode.getBestemmelse()));
+        lovvalgsperiodeDto.setBeskrivelse(hentBeskrivelse(lovvalgsperiode));
+        lovvalgsperiodeDto.setUnntakFraBestemmelse(
+            LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(lovvalgsperiode.getUnntakFraBestemmelse()));
         return lovvalgsperiodeDto;
+    }
+
+    private String hentBeskrivelse(no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode) {
+        Set<Vilkaarsresultat> vilkaarsresultater = lovvalgsperiode.getBehandlingsresultat().getVilkaarsresultater();
+
+        Set<String> beskrivelser = vilkaarsresultater.stream()
+            .map(VilkaarsresultatTilBeskrivelseMapper::mapVilkaarsresultatTilBeskrivelseString)
+            .collect(Collectors.toSet());
+
+        // Bygg string fra beskrivelser
+        StringBuilder stringBuilder = new StringBuilder();
+
+        if (beskrivelser.size() > 0) {
+            beskrivelser.forEach(beskrivelse ->
+                stringBuilder
+                    .append(beskrivelse)
+                    .append("\n\n"));
+        }
+
+        return stringBuilder.toString();
     }
 
     private String[] splitFulltNavn(String navn) {

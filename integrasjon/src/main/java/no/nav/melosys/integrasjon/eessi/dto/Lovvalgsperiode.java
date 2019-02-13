@@ -24,6 +24,10 @@ public class Lovvalgsperiode {
     @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate tom;
 
+    private String beskrivelse;
+
+    private Bestemmelse unntakFraBestemmelse;
+
     public String getLandkode() {
         return landkode;
     }
@@ -54,5 +58,21 @@ public class Lovvalgsperiode {
 
     public void setTom(LocalDate tom) {
         this.tom = tom;
+    }
+
+    public String getBeskrivelse() {
+        return beskrivelse;
+    }
+
+    public void setBeskrivelse(String beskrivelse) {
+        this.beskrivelse = beskrivelse;
+    }
+
+    public Bestemmelse getUnntakFraBestemmelse() {
+        return unntakFraBestemmelse;
+    }
+
+    public void setUnntakFraBestemmelse(Bestemmelse unntakFraBestemmelse) {
+        this.unntakFraBestemmelse = unntakFraBestemmelse;
     }
 }
