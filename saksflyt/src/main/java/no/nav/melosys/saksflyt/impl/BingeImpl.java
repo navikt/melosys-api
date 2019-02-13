@@ -1,9 +1,6 @@
 package no.nav.melosys.saksflyt.impl;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -24,7 +21,7 @@ public class BingeImpl implements Binge {
 
     private static Logger logger = LoggerFactory.getLogger(BingeImpl.class);
 
-    private HashMap<Long, Prosessinstans> prosessinstanser = new HashMap<>();
+    private HashMap<UUID, Prosessinstans> prosessinstanser = new HashMap<>();
 
     @Override
     public synchronized boolean leggTil(Prosessinstans prosessinstans) {

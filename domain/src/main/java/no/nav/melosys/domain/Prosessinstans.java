@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hibernate.annotations.GenericGenerator;
 
 /**
  * Arbeidstabell for saksflyt.
@@ -22,8 +24,10 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 public class Prosessinstans {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(name = "uuid")
+    private UUID id;
 
     @Column(name = "prosess_type", nullable = false, updatable = false)
     @Convert(converter = ProsessType.DbKonverterer.class)
@@ -61,7 +65,7 @@ public class Prosessinstans {
     
     private static ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
@@ -219,7 +223,7 @@ public class Prosessinstans {
             return false;
         }
         Prosessinstans that = (Prosessinstans) o;
-        if (this.id == 0) {
+        if (this.id == null) {
             // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
             throw new RuntimeException("Prosessinstans.equals ble kalt før prosessinstans har fått saksnummer");
         }
