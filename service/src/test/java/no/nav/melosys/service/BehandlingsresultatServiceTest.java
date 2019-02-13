@@ -8,6 +8,8 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,5 +48,21 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultat.getAvklartefakta()).isEmpty();
         assertThat(behandlingsresultat.getLovvalgsperioder()).isEmpty();
         assertThat(behandlingsresultat.getVilkaarsresultater()).isEmpty();
+    }
+
+    @Test(expected = IkkeFunnetException.class)
+    public void hentBehandlingsresultat_medTomtResultat_forventerException() throws IkkeFunnetException {
+        when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.empty());
+        behandlingsresultatService.hentBehandlingsresultat(4L);
+    }
+
+    @Test
+    public void hentBehandlingsresultat_returnererBehandlingsresultat() throws IkkeFunnetException {
+        Behandlingsresultat resultat = new Behandlingsresultat();
+        resultat.setHenleggelsesgrunn(Henleggelsesgrunner.ANNET);
+        when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(resultat));
+
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(4L);
+        assertThat(behandlingsresultat.getHenleggelsesgrunn()).isEqualTo(Henleggelsesgrunner.ANNET);
     }
 }
