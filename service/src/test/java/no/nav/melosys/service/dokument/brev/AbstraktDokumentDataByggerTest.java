@@ -1,6 +1,9 @@
 package no.nav.melosys.service.dokument.brev;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -111,20 +114,6 @@ public class AbstraktDokumentDataByggerTest {
                 brevDatabyggerbase.hentAvklarteSelvstendigeForetakOrgnumre();
 
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly("12345678910");
-    }
-
-    @Test
-    public void hentFysiskeArbeidsstederMedForetaketsNavn()  {
-        ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.orgnr = "12345678910";
-        foretakUtland.navn = "Jarlsberg INTERNATIONAL";
-        søknad.foretakUtland.add(foretakUtland);
-
-        søknad.arbeidUtland = Collections.emptyList();//= Arrays.asList(arbeidUtland, arbeidUtland1);
-
-        List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
-        assertThat(arbeidssteder.stream().map(arbeidssted -> arbeidssted.navn))
-                .contains(foretakUtland.navn);
     }
 
     @Test
