@@ -1,8 +1,8 @@
 package no.nav.melosys.service.dokument;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,7 +15,8 @@ import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
@@ -57,6 +58,14 @@ public abstract class AbstraktDokumentDataBygger {
     }
 
     protected List<Arbeidssted> hentArbeidssteder() throws TekniskException {
+
+        List<Arbeidssted> arbeidssteder = hentFysiskearbeidsstederMedNavn();
+        arbeidssteder.addAll(hentIkkeFysiskeArbeidssteder());
+
+        if (!arbeidssteder.isEmpty()) {
+            return arbeidssteder;
+        }
+
         List<Virksomhet> utenlandskeVirksomheter = hentUtenlandskeVirksomheter();
         if (utenlandskeVirksomheter.size() != 1) {
             throw new TekniskException("Krever utsendelse til én og kun én virksomhet i utlandet");
@@ -66,15 +75,9 @@ public abstract class AbstraktDokumentDataBygger {
         // Det er derfor ok å bruke dette navnet på fysisk arbeidssted
         Virksomhet utenlandskVirksomhet = utenlandskeVirksomheter.get(0);
 
-        List<Arbeidssted> arbeidssteder = hentFysiskearbeidsstederMedNavn(utenlandskVirksomhet.navn);
-        arbeidssteder.addAll(hentIkkeFysiskeArbeidssteder());
-
-        if (!arbeidssteder.isEmpty()) {
-            return arbeidssteder;
-        }
 
         // Brevet krever alltid minst et arbeidssted - selv når det ikke er oppgitt i søknad
-        return Arrays.asList(utledArbeidsstedFraVirksomhet(utenlandskVirksomhet));
+        return Collections.singletonList(utledArbeidsstedFraVirksomhet(utenlandskVirksomhet));
     }
 
     protected List<Virksomhet> hentUtenlandskeVirksomheter() {
@@ -85,9 +88,9 @@ public abstract class AbstraktDokumentDataBygger {
                 .collect(Collectors.toList());
     }
 
-    private List<Arbeidssted> hentFysiskearbeidsstederMedNavn(String navnPåTilhørendeVirksomhet) {
+    private List<Arbeidssted> hentFysiskearbeidsstederMedNavn() {
         return søknad.arbeidUtland.stream()
-                .map(au -> new Arbeidssted(navnPåTilhørendeVirksomhet, au.adresse))
+                .map(au -> new Arbeidssted(au.foretakNavn, au.adresse))
                 .collect(Collectors.toList());
     }
 
