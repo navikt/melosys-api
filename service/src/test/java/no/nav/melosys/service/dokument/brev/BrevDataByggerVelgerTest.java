@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.ProduserbartDokument;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
@@ -40,44 +40,44 @@ public class BrevDataByggerVelgerTest {
 
     @Test
     public void hent_medAttestA1_girVedleggBygger() {
-        testHent(ProduserbartDokument.ATTEST_A1, BrevDataByggerVedlegg.class);
+        testHent(Produserbaredokumenter.ATTEST_A1, BrevDataByggerVedlegg.class);
     }
 
     @Test
     public void hent_medSEDA001_girVedleggBygger() {
-        testHent(ProduserbartDokument.SED_A001, BrevDataByggerVedlegg.class);
+        testHent(Produserbaredokumenter.ANMODNING_UNNTAK, BrevDataByggerVedlegg.class);
     }
 
     @Test
     public final void hent_InnvilelsesYrksaktiv_girVedleggBygger() {
-        testHent(ProduserbartDokument.INNVILGELSE_YRKESAKTIV, BrevDataByggerVedlegg.class);
+        testHent(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, BrevDataByggerVedlegg.class);
     }
 
     @Test
     public final void hent_Avslag_girBrevDataByggerAvslagOgAnmodningUnntak() {
-        testHent(ProduserbartDokument.AVSLAG_YRKESAKTIV, BrevDataByggerAnmodningUnntakOgAvslag.class);
+        testHent(Produserbaredokumenter.AVSLAG_YRKESAKTIV, BrevDataByggerAnmodningUnntakOgAvslag.class);
     }
 
     @Test
     public final void hent_medDokumentTypeAnmodningUnntak_girBrevDataByggerAvslagOgAnmodningUnntak() {
-        testHent(ProduserbartDokument.ORIENTERING_ANMODNING_UNNTAK, BrevDataByggerAnmodningUnntakOgAvslag.class);
+        testHent(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK, BrevDataByggerAnmodningUnntakOgAvslag.class);
     }
 
     @Test
     public void testMangelbrev() {
         BrevbestillingDto bestilling = new BrevbestillingDto();
-        BrevDataBygger bygger = brevDataByggerVelger.hent(ProduserbartDokument.MELDING_MANGLENDE_OPPLYSNINGER, bestilling);
+        BrevDataBygger bygger = brevDataByggerVelger.hent(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER, bestilling);
         assertThat(bygger).isInstanceOf(BrevDataByggerStandard.class);
     }
 
     @Test
     public void testForvaltningsmelding() {
         BrevbestillingDto bestilling = new BrevbestillingDto();
-        BrevDataBygger bygger = brevDataByggerVelger.hent(ProduserbartDokument.MELDING_FORVENTET_SAKSBEHANDLINGSTID, bestilling);
+        BrevDataBygger bygger = brevDataByggerVelger.hent(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, bestilling);
         assertThat(bygger).isInstanceOf(BrevDataByggerStandard.class);
     }
 
-    private void testHent(ProduserbartDokument type, Class<? extends BrevDataBygger> forventetKlasse) {
+    private void testHent(Produserbaredokumenter type, Class<? extends BrevDataBygger> forventetKlasse) {
         BrevDataBygger resultat = brevDataByggerVelger.hent(type);
         assertThat(resultat).isInstanceOf(forventetKlasse);
     }

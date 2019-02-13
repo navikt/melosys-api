@@ -4,7 +4,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
@@ -63,7 +69,7 @@ public class OppdaterStatusBehandlingAvsluttetTest {
     public void utførSteg_ingenAktørID_feiler() throws FunksjonellException, TekniskException {
         Prosessinstans p = new Prosessinstans();
         Behandling b = lagBehandling();
-        b.getFagsak().hentAktørMedRolleType(RolleType.BRUKER).setAktørId(null);
+        b.getFagsak().hentAktørMedRolleType(Aktoersroller.BRUKER).setAktørId(null);
         p.setBehandling(b);
 
         expectedException.expect(FunksjonellException.class);
@@ -77,17 +83,17 @@ public class OppdaterStatusBehandlingAvsluttetTest {
         Fagsak fagsak = new Fagsak();
         Set<Aktoer> aktører = new HashSet<>(Collections.singleton(lagAktørBruker()));
         fagsak.setAktører(aktører);
-        fagsak.setType(Fagsakstype.EU_EØS);
+        fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setSaksnummer("123");
         behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstype.KLAGE);
+        behandling.setType(Behandlingstyper.KLAGE);
         behandling.setId(123L);
 
         return behandling;
     }
 
     private static Aktoer lagAktørBruker() {
-        RolleType type = RolleType.BRUKER;
+        Aktoersroller type = Aktoersroller.BRUKER;
         Aktoer aktør = new Aktoer();
         aktør.setAktørId(type.name());
         aktør.setAktørId("123");

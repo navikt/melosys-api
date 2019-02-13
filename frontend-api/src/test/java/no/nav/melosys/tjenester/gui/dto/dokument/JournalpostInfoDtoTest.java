@@ -5,6 +5,7 @@ import java.time.Instant;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
+import no.nav.melosys.domain.kodeverk.Mottaksretning;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

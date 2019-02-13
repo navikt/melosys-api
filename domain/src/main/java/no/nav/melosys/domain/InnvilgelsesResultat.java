@@ -1,5 +1,7 @@
 package no.nav.melosys.domain;
 
+import no.nav.melosys.domain.kodeverk.Kodeverk;
+
 public enum InnvilgelsesResultat implements Kodeverk {
 
     INNVILGET("INNVILGET", "Innvilget"),

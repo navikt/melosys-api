@@ -9,6 +9,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -76,7 +77,7 @@ public class SaksopplysningerServiceTest {
         Fagsak fagsak = new Fagsak();
         Aktoer aktør = new Aktoer();
         aktør.setAktørId("123");
-        aktør.setRolle(RolleType.BRUKER);
+        aktør.setRolle(Aktoersroller.BRUKER);
         HashSet<Aktoer> aktører = new HashSet<>();
         aktører.add(aktør);
         fagsak.setAktører(aktører);

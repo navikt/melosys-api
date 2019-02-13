@@ -1,16 +1,16 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import no.nav.melosys.domain.BehandlingsresultatType;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 
 public class VedtakDto {
 
-    private BehandlingsresultatType behandlingsresultattype;
+    private Behandlingsresultattyper behandlingsresultattype;
 
-    public BehandlingsresultatType getBehandlingsresultattype() {
+    public Behandlingsresultattyper getBehandlingsresultattype() {
         return behandlingsresultattype;
     }
 
-    public void setBehandlingsresultattype(BehandlingsresultatType behandlingsresultattype) {
+    public void setBehandlingsresultattype(Behandlingsresultattyper behandlingsresultattype) {
         this.behandlingsresultattype = behandlingsresultattype;
     }
 }

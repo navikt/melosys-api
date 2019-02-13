@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -127,7 +128,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
 
         // Sett sakstype...
         Fagsak fagsak = behandling.getFagsak();
-        Fagsakstype nyFagsakstype = res.kvalifisererForEf883_2004 ? Fagsakstype.EU_EØS : Fagsakstype.FOLKETRYGD; // Fikses når inngangsvilkårsvurdering også kvalifiserer for avtaler.
+        Sakstyper nyFagsakstype = res.kvalifisererForEf883_2004 ? Sakstyper.EU_EOS : Sakstyper.FTRL; // Fikses når inngangsvilkårsvurdering også kvalifiserer for avtaler.
         if (fagsak.getType() != null && fagsak.getType() != nyFagsakstype) {
             log.error("Avbryter behandling av prosessinstans {}: Forsøk på å endre fagsakType fra {} til {}", prosessinstans.getId(), fagsak.getType(), nyFagsakstype);
             håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Forsøk på å endre fagsakType fra " + fagsak.getType() + " til " + nyFagsakstype, null);

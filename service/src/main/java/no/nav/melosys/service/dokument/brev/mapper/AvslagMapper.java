@@ -7,12 +7,12 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.Art161AvslagBegrunnelse;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.begrunnelse.Artikkel16_1_Avslag;
+import no.nav.melosys.domain.kodeverk.Art16_1_Avslag__Begrunnelser;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
 
-import static no.nav.melosys.domain.VilkaarType.FO_883_2004_ART16_1;
+import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
 
 public class AvslagMapper extends AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
 
@@ -28,7 +28,7 @@ public class AvslagMapper extends AbstraktAnmodningUnntakOgAvslagMapper implemen
         Set<VilkaarBegrunnelse> art161Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART16_1);
         Art161AvslagBegrunnelse art161AvslagBegrunnelser = lagArt161AvslagBegrunnelse();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : art161Begrunnelser) {
-            Artikkel16_1_Avslag artikkel161AvslagKode = Artikkel16_1_Avslag.valueOf(vilkaarBegrunnelse.getKode());
+            Art16_1_Avslag__Begrunnelser artikkel161AvslagKode = Art16_1_Avslag__Begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
             switch (artikkel161AvslagKode) {
                 case ERSTATTER_EN_ANNEN_SAMLET_OVER_5_AAR:
                     art161AvslagBegrunnelser.setOver5Aar(JA);

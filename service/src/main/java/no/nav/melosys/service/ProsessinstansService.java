@@ -3,6 +3,8 @@ package no.nav.melosys.service;
 import java.time.LocalDateTime;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -27,7 +29,7 @@ public class ProsessinstansService {
         this.prosessinstansRepo = prosessinstansRepo;
     }
 
-    public void opprettProsessinstansIverksettVedtak(Behandling behandling, BehandlingsresultatType behandlingsresultatType) {
+    public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
         prosessinstans.setSteg(ProsessSteg.IV_VALIDERING);

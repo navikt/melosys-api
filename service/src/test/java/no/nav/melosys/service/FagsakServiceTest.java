@@ -3,7 +3,10 @@ package no.nav.melosys.service;
 import java.time.Instant;
 import java.util.Arrays;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -58,16 +61,16 @@ public class FagsakServiceTest {
     @Test
     public void hentFagsakerMedAktør() throws IkkeFunnetException {
         when(tps.hentAktørIdForIdent(any())).thenReturn("AKTOER_ID");
-        fagsakService.hentFagsakerMedAktør(RolleType.BRUKER, "FNR");
-        verify(fagsakRepo).findByRolleAndAktør(eq(RolleType.BRUKER), eq("AKTOER_ID"));
+        fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, "FNR");
+        verify(fagsakRepo).findByRolleAndAktør(eq(Aktoersroller.BRUKER), eq("AKTOER_ID"));
     }
 
     @Test
     public void lagre() {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(123L);
-        fagsak.setStatus(Fagsaksstatus.OPPRETTET);
-        fagsak.setType(Fagsakstype.EU_EØS);
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+        fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setRegistrertDato(Instant.now());
         fagsakService.lagre(fagsak);
         verify(fagsakRepo).save(fagsak);
@@ -82,9 +85,9 @@ public class FagsakServiceTest {
         String initierendeDokumentId = "221234";
         doReturn(behandling).when(behandlingService).nyBehandling(any(), any(), any(), anyString(), anyString());
 
-        Fagsak fagsak = fagsakService.nyFagsakOgBehandling("AKTOER_ID", "123456789", "", Behandlingstype.SØKNAD, initierendeJournalpostId, initierendeDokumentId);
+        Fagsak fagsak = fagsakService.nyFagsakOgBehandling("AKTOER_ID", "123456789", "", Behandlingstyper.SOEKNAD, initierendeJournalpostId, initierendeDokumentId);
         verify(fagsakRepo).save(any(Fagsak.class));
-        verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstype.SØKNAD), eq(initierendeJournalpostId), eq(initierendeDokumentId));
+        verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstyper.SOEKNAD), eq(initierendeJournalpostId), eq(initierendeDokumentId));
         assertThat(fagsak.getBehandlinger()).isNotEmpty();
     }
 

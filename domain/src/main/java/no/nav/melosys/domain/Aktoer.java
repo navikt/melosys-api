@@ -1,16 +1,9 @@
 package no.nav.melosys.domain;
 
 import java.util.Objects;
+import javax.persistence.*;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
 @Entity
 @Table(name = "aktoer")
@@ -31,8 +24,8 @@ public class Aktoer {
     private String orgnr;
     
     @Column(name = "rolle", nullable = false, updatable = false)
-    @Convert(converter = RolleType.DbKonverterer.class)
-    private RolleType rolle;
+    @Convert(converter = Aktoersroller.DbKonverterer.class)
+    private Aktoersroller rolle;
 
     @Column(name = "utenlandsk_id")
     private String utenlandskId;
@@ -65,11 +58,11 @@ public class Aktoer {
         this.orgnr = orgnr;
     }
 
-    public RolleType getRolle() {
+    public Aktoersroller getRolle() {
         return rolle;
     }
 
-    public void setRolle(RolleType rolle) {
+    public void setRolle(Aktoersroller rolle) {
         this.rolle = rolle;
     }
 

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
@@ -60,7 +60,7 @@ public class OppdaterMedlTest {
         String aktørID = "12345678912";
         aktør.setAktørId(aktørID);
         aktør.setFagsak(fagsak);
-        aktør.setRolle(RolleType.BRUKER);
+        aktør.setRolle(Aktoersroller.BRUKER);
         aktører.add(aktør);
 
         Behandling behandling = new Behandling();
@@ -68,18 +68,18 @@ public class OppdaterMedlTest {
         behandling.setFagsak(fagsak);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.CH);
-        lovvalgsperiode.setDekning(TrygdeDekning.UTEN_DEKNING);
+        lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
 
         behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setType(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
         p.setBehandling(behandling);
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
     }
 
@@ -113,7 +113,7 @@ public class OppdaterMedlTest {
     @Test
     public void erPeriodeEndelig() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setType(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);

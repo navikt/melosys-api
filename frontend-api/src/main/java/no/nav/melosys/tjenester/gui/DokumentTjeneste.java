@@ -9,7 +9,7 @@ import javax.ws.rs.core.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import no.nav.melosys.domain.ProduserbartDokument;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
@@ -70,7 +70,7 @@ public class DokumentTjeneste extends RestTjeneste {
     @Path("utkast/pdf/{behandlingID}/{produserbartDokument}")
     @Produces({ "application/pdf", MediaType.APPLICATION_JSON + "; charset=UTF-8" })
     public Response produserUtkast(@PathParam("behandlingID") long behandlingID,
-                                   @PathParam("produserbartDokument") ProduserbartDokument produserbartDokument,
+                                   @PathParam("produserbartDokument") Produserbaredokumenter produserbartDokument,
             BrevbestillingDto brevBestillingDto) throws TekniskException, FunksjonellException {
         byte[] dokument;
         tilgang.sjekk(behandlingID);
@@ -85,7 +85,7 @@ public class DokumentTjeneste extends RestTjeneste {
     @Path("opprett/{behandlingID}/{produserbartDokument}")
     public Response produserDokument(@Context UriInfo uriInfo,
                                      @PathParam("behandlingID") long behandlingID,
-                                     @PathParam("produserbartDokument") ProduserbartDokument produserbartDokument,
+                                     @PathParam("produserbartDokument") Produserbaredokumenter produserbartDokument,
             BrevbestillingDto brevBestillingDto) throws FunksjonellException, TekniskException {
         tilgang.sjekk(behandlingID);
         dokumentService.produserDokumentISaksflyt(behandlingID, produserbartDokument, brevBestillingDto);

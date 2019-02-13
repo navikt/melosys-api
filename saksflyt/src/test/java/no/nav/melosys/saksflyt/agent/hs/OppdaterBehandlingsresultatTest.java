@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.agent.hs;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
@@ -48,7 +50,7 @@ public class OppdaterBehandlingsresultatTest {
         prosessinstans.setType(ProsessType.HENLEGG_SAK);
         String testbruker = "Z097";
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, testbruker);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, BehandlingsresultatType.HENLEGGELSE.getKode());
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, Behandlingsresultattyper.HENLEGGELSE.getKode());
         Henleggelsesgrunner henleggelsesgrunn = Henleggelsesgrunner.ANNET;
         prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, henleggelsesgrunn);
         String henleggelsesfritekst = "henleggelsesfritekst";
@@ -61,7 +63,7 @@ public class OppdaterBehandlingsresultatTest {
 
         verify(behandlingsresultatRepository).save(behandlingsresultatArgumentCaptor.capture());
         Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
-        assertThat(capture.getType()).isEqualTo(BehandlingsresultatType.HENLEGGELSE);
+        assertThat(capture.getType()).isEqualTo(Behandlingsresultattyper.HENLEGGELSE);
         assertThat(capture.getEndretAv()).isEqualTo(testbruker);
         assertThat(capture.getHenleggelsesgrunn()).isEqualTo(henleggelsesgrunn);
         assertThat(capture.getHenleggelseFritekst()).isEqualTo(henleggelsesfritekst);

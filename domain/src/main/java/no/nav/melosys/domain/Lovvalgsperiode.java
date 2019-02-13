@@ -4,10 +4,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_987_2009;
-import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse_883_2004;
+import no.nav.melosys.domain.kodeverk.*;
 
 @Entity
 @Table(name = "lovvalg_periode")
@@ -26,16 +23,16 @@ public class Lovvalgsperiode implements ErPeriode {
                 return null;
             }
             try {
-                return LovvalgBestemmelse_883_2004.valueOf(dbData);
+                return LovvalgsBestemmelser_883_2004.valueOf(dbData);
             } catch (IllegalArgumentException e) {
                 // Bevisst NOOP for å fortsette oppslaget i andre oppramstyper.
             }
             try {
-                return LovvalgBestemmelse_987_2009.valueOf(dbData);
+                return LovvalgsBestemmelser_987_2009.valueOf(dbData);
             } catch (IllegalArgumentException e) {
                 // Bevisst NOOP for å fortsette oppslaget i andre oppramstyper.
             }
-            return TilleggBestemmelse_883_2004.valueOf(dbData);
+            return TilleggsBestemmelser_883_2004.valueOf(dbData);
         }
 
     }
@@ -80,11 +77,11 @@ public class Lovvalgsperiode implements ErPeriode {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "medlemskapstype", nullable = false, updatable = false)
-    private Medlemskapstype medlemskapstype;
+    private Medlemskapstyper medlemskapstype;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trygde_dekning")
-    private TrygdeDekning dekning;
+    private Trygdedekninger dekning;
 
     @Column(name = "medlperiode_id")
     private long medlPeriodeID;
@@ -167,19 +164,19 @@ public class Lovvalgsperiode implements ErPeriode {
         this.innvilgelsesresultat = innvilgelsesresultat;
     }
 
-    public Medlemskapstype getMedlemskapstype() {
+    public Medlemskapstyper getMedlemskapstype() {
         return medlemskapstype;
     }
 
-    public void setMedlemskapstype(Medlemskapstype medlemskapstype) {
+    public void setMedlemskapstype(Medlemskapstyper medlemskapstype) {
         this.medlemskapstype = medlemskapstype;
     }
 
-    public TrygdeDekning getDekning() {
+    public Trygdedekninger getDekning() {
         return dekning;
     }
 
-    public void setDekning(TrygdeDekning dekning) {
+    public void setDekning(Trygdedekninger dekning) {
         this.dekning = dekning;
     }
 

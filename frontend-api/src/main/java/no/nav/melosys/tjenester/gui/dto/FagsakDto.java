@@ -4,15 +4,15 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.melosys.domain.Fagsaksstatus;
-import no.nav.melosys.domain.Fagsakstype;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 
 public class FagsakDto {
 
     private String saksnummer;
     private Long gsakSaksnummer;
-    private Fagsakstype sakstype;
-    private Fagsaksstatus saksstatus;
+    private Sakstyper sakstype;
+    private Saksstatuser saksstatus;
     private Instant registrertDato;
     private Instant endretDato;
     private List<BehandlingDto> behandlinger;
@@ -37,19 +37,19 @@ public class FagsakDto {
         this.gsakSaksnummer = gsakSaksnummer;
     }
 
-    public Fagsakstype getSakstype() {
+    public Sakstyper getSakstype() {
         return sakstype;
     }
 
-    public void setSakstype(Fagsakstype sakstype) {
+    public void setSakstype(Sakstyper sakstype) {
         this.sakstype = sakstype;
     }
 
-    public Fagsaksstatus getSaksstatus() {
+    public Saksstatuser getSaksstatus() {
         return saksstatus;
     }
 
-    public void setSaksstatus(Fagsaksstatus saksstatus) {
+    public void setSaksstatus(Saksstatuser saksstatus) {
         this.saksstatus = saksstatus;
     }
 

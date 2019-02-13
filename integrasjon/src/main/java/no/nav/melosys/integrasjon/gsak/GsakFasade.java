@@ -2,11 +2,11 @@ package no.nav.melosys.integrasjon.gsak;
 
 import java.util.List;
 
-import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.Fagsakstype;
 import no.nav.melosys.domain.Tema;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.exception.*;
 
 public interface GsakFasade {
@@ -20,10 +20,10 @@ public interface GsakFasade {
      * Finner aktive og utildelte oppgaver som svarer til noen gitt kriterier.
      * GSAK sorterer oppgavene stigende etter frist.
      */
-    List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype,
+    List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetyper oppgavetype,
                                                   Tema tema,
-                                                  List<Fagsakstype> sakstyper,
-                                                  List<Behandlingstype> behandlingstyper
+                                                  List<Sakstyper> sakstyper,
+                                                  List<Behandlingstyper> behandlingstyper
     ) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
 
     /**
@@ -67,7 +67,7 @@ public interface GsakFasade {
     /**
      * Oppretter en sak i GSAK
      */
-    Long opprettSak(String saksnummer, Behandlingstype behandlingstype, String aktørId) throws TekniskException, IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException;
+    Long opprettSak(String saksnummer, Behandlingstyper behandlingstype, String aktørId) throws TekniskException, IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException;
 
     /**
      * Tildeler en oppgaver til en saksbehandler

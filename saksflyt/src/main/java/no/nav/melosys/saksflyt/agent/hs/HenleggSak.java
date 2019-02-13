@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.agent.hs;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -55,7 +57,7 @@ public class HenleggSak extends AbstraktStegBehandler {
         Behandling behandling = prosessinstans.getBehandling();
 
         Fagsak fagsak = behandling.getFagsak();
-        fagsak.setStatus(Fagsaksstatus.HENLAGT);
+        fagsak.setStatus(Saksstatuser.HENLAGT);
         fagsakRepo.save(fagsak);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepo.save(behandling);

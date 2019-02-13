@@ -1,22 +1,19 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import static no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto.enumVerdiEllerNull;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.time.LocalDate;
 import java.util.Map;
 
-import no.nav.melosys.domain.bestemmelse.TilleggBestemmelse_883_2004;
+import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import no.nav.melosys.domain.InnvilgelsesResultat;
-import no.nav.melosys.domain.Landkoder;
-import no.nav.melosys.domain.Medlemskapstype;
-import no.nav.melosys.domain.TrygdeDekning;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.kodeverk.*;
+import org.junit.Test;
+
+import static no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto.enumVerdiEllerNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class LovvalgsperiodeDtoTest {
 
@@ -48,14 +45,14 @@ public class LovvalgsperiodeDtoTest {
     private static LovvalgsperiodeDto lagLovvalgsperiodeDtoFraMap(Map<String, String> json) {
         LovvalgsperiodeDto forventet = new LovvalgsperiodeDto(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
             LocalDate.parse(json.get("tomDato"))),
-            LovvalgBestemmelse_883_2004.valueOf(json.get("lovvalgBestemmelse")),
-            TilleggBestemmelse_883_2004.valueOf(json.get("tilleggBestemmelse")),
+            LovvalgsBestemmelser_883_2004.valueOf(json.get("lovvalgBestemmelse")),
+            TilleggsBestemmelser_883_2004.valueOf(json.get("tilleggBestemmelse")),
             Landkoder.valueOf(json.get("lovvalgsland")),
-            enumVerdiEllerNull(LovvalgBestemmelse_883_2004.class, json.get("unntakFraBestemmelse")),
+            enumVerdiEllerNull(LovvalgsBestemmelser_883_2004.class, json.get("unntakFraBestemmelse")),
             enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
             InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
-            enumVerdiEllerNull(TrygdeDekning.class, json.get("trygdeDekning")),
-            Medlemskapstype.valueOf(json.get("medlemskapstype")));
+            enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
+            Medlemskapstyper.valueOf(json.get("medlemskapstype")));
         return forventet;
     }
 

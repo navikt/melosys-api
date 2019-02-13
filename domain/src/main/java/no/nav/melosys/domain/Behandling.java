@@ -6,6 +6,8 @@ import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
 
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -26,8 +28,8 @@ public class Behandling extends RegistreringsInfo {
     private Behandlingsstatus status;
 
     @Column(name = "beh_type", nullable = false, updatable = false)
-    @Convert(converter = Behandlingstype.DbKonverterer.class)
-    private Behandlingstype type;
+    @Convert(converter = Behandlingstyper.DbKonverterer.class)
+    private Behandlingstyper type;
 
     @Column(name = "siste_opplysninger_hentet_dato")
     private Instant sisteOpplysningerHentetDato;
@@ -71,11 +73,11 @@ public class Behandling extends RegistreringsInfo {
         this.status = status;
     }
 
-    public Behandlingstype getType() {
+    public Behandlingstyper getType() {
         return type;
     }
 
-    public void setType(Behandlingstype type) {
+    public void setType(Behandlingstyper type) {
         this.type = type;
     }
     

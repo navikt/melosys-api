@@ -3,26 +3,19 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 
-import no.nav.melosys.domain.Behandlingsstatus;
-import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.Fagsaksstatus;
-import no.nav.melosys.domain.Fagsakstype;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 
 public class FagsakOppsummeringDto {
     private String saksnummer;
-    private Fagsakstype sakstype;
-    private Fagsaksstatus saksstatus;
-    private Behandlingstype behandlingstype;
-    private Behandlingsstatus behandlingsstatus;
+    private String sammensattNavn;
+    private Sakstyper sakstype;
+    private Saksstatuser saksstatus;
     private Instant opprettetDato;
-    private PeriodeDto soknadsperiode;
-    private List<String> land;
-
-    public FagsakOppsummeringDto() {
-        this.soknadsperiode = new PeriodeDto();
-        this.land = new ArrayList<>();
-    }
+    private List<BehandlingOversiktDto> behandlingOversikter;
 
     public String getSaksnummer() {
         return saksnummer;
@@ -32,36 +25,28 @@ public class FagsakOppsummeringDto {
         this.saksnummer = saksnummer;
     }
 
-    public Fagsakstype getSakstype() {
+    public String getSammensattNavn() {
+        return sammensattNavn;
+    }
+
+    public void setSammensattNavn(String sammensattNavn) {
+        this.sammensattNavn = sammensattNavn;
+    }
+
+    public Sakstyper getSakstype() {
         return sakstype;
     }
 
-    public void setSakstype(Fagsakstype sakstype) {
+    public void setSakstype(Sakstyper sakstype) {
         this.sakstype = sakstype;
     }
 
-    public Fagsaksstatus getSaksstatus() {
+    public Saksstatuser getSaksstatus() {
         return saksstatus;
     }
 
-    public void setSaksstatus(Fagsaksstatus saksstatus) {
+    public void setSaksstatus(Saksstatuser saksstatus) {
         this.saksstatus = saksstatus;
-    }
-
-    public Behandlingstype getBehandlingstype() {
-        return behandlingstype;
-    }
-
-    public void setBehandlingstype(Behandlingstype behandlingstype) {
-        this.behandlingstype = behandlingstype;
-    }
-
-    public Behandlingsstatus getBehandlingsstatus() {
-        return behandlingsstatus;
-    }
-
-    public void setBehandlingsstatus(Behandlingsstatus behandlingsstatus) {
-        this.behandlingsstatus = behandlingsstatus;
     }
 
     public Instant getOpprettetDato() {
@@ -72,19 +57,12 @@ public class FagsakOppsummeringDto {
         this.opprettetDato = opprettetDato;
     }
 
-    public PeriodeDto getSoknadsperiode() {
-        return soknadsperiode;
+    public List<BehandlingOversiktDto> getBehandlingOversikter() {
+        return behandlingOversikter;
     }
 
-    public void setSoknadsperiode(PeriodeDto søknadsperiode) {
-        this.soknadsperiode = søknadsperiode;
+    public void setBehandlingOversikter(List<BehandlingOversiktDto> behandlingOversikter) {
+        this.behandlingOversikter = behandlingOversikter;
     }
 
-    public List<String> getLand() {
-        return land;
-    }
-
-    public void setLand(List<String> land) {
-        this.land = land;
-    }
 }

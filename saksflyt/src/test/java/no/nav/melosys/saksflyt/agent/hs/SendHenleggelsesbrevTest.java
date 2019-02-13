@@ -1,6 +1,8 @@
 package no.nav.melosys.saksflyt.agent.hs;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.DokumentSystemService;
@@ -15,10 +17,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProduserbartDokument.MELDING_HENLAGT_SAK;
 import static no.nav.melosys.domain.ProsessDataKey.BEGRUNNELSEKODE;
 import static no.nav.melosys.domain.ProsessDataKey.FRITEKST;
 import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
+import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.MELDING_HENLAGT_SAK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -66,7 +68,7 @@ public class SendHenleggelsesbrevTest {
 
         sendHenleggelsesbrev.utfør(prosessinstans);
 
-        assertThat(brevDataHenleggelse.mottaker).isEqualTo(RolleType.BRUKER);
+        assertThat(brevDataHenleggelse.mottaker).isEqualTo(Aktoersroller.BRUKER);
         verify(dokumentService).produserDokument(behandlingId, MELDING_HENLAGT_SAK, brevDataHenleggelse);
         assertThat(prosessinstans.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
     }

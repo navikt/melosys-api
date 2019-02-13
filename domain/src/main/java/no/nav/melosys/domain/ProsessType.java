@@ -2,6 +2,8 @@ package no.nav.melosys.domain;
 
 import javax.persistence.Converter;
 
+import no.nav.melosys.domain.kodeverk.InterntKodeverkTabell;
+
 public enum ProsessType implements InterntKodeverkTabell<ProsessType> {
 
     //alfabetisk rekkefølge

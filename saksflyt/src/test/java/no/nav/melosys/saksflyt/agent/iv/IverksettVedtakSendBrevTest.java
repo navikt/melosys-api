@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.integrasjon.doksys.DokSysFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -17,9 +17,9 @@ import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntak
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import org.junit.Test;
 
-import static no.nav.melosys.domain.ProduserbartDokument.AVSLAG_YRKESAKTIV;
-import static no.nav.melosys.domain.ProduserbartDokument.INNVILGELSE_YRKESAKTIV;
 import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
+import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.AVSLAG_YRKESAKTIV;
+import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.INNVILGELSE_YRKESAKTIV;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
@@ -89,25 +89,25 @@ public class IverksettVedtakSendBrevTest {
     private static BehandlingsresultatRepository mockBehandlingsresultatRepository() {
         BehandlingsresultatRepository behandlingsresultatRepo = mock(BehandlingsresultatRepository.class);
         Lovvalgsperiode periode = lagLovvalgsperiodeArt16_1();
-        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(periode, Landkoder.AT, BehandlingsresultatType.IKKE_FASTSATT);
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(periode, Landkoder.AT, Behandlingsresultattyper.IKKE_FASTSATT);
         when(behandlingsresultatRepo.findById(BEHANDLINGSID)).thenReturn(Optional.of(behandlingsresultat));
-        Lovvalgsperiode periode2 = lagLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1, LocalDate.now().plusDays(30), Landkoder.DK, false);
-        Behandlingsresultat behandlingsresultatMedFlerePerioder = lagBehandlingsresultat(new HashSet<>(Arrays.asList(periode, periode2)), null, BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        Lovvalgsperiode periode2 = lagLovvalgsperiode(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1, LocalDate.now().plusDays(30), Landkoder.DK, false);
+        Behandlingsresultat behandlingsresultatMedFlerePerioder = lagBehandlingsresultat(new HashSet<>(Arrays.asList(periode, periode2)), null, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         assertThat(behandlingsresultatMedFlerePerioder.getLovvalgsperioder().size()).isGreaterThan(1);
         when(behandlingsresultatRepo.findById(BEHANDLINGSID_MED_FLERE_PERIODER)).thenReturn(Optional.of(behandlingsresultatMedFlerePerioder));
         Behandlingsresultat behandlingsresultatUtenPerioder = lagBehandlingsresultatUtenPerioder();
         when(behandlingsresultatRepo.findById(BEHANDLINGSID_UTEN_PERIODER)).thenReturn(Optional.of(behandlingsresultatUtenPerioder));
         Behandlingsresultat innvilgetBehandlingsResultat = lagBehandlingsresultat(periode);
         when(behandlingsresultatRepo.findById(ART16_1_INNVILGET_BEHANDLINGSID)).thenReturn(Optional.of(innvilgetBehandlingsResultat));
-        Behandlingsresultat innvilgetResultat12_1 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1));
+        Behandlingsresultat innvilgetResultat12_1 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1));
         when(behandlingsresultatRepo.findById(ART12_1_INNVILGET_BEHANDLINGSID)).thenReturn(Optional.of(innvilgetResultat12_1));
-        Behandlingsresultat avslåttResultat12_1 = lagBehandlingsresultat(lagLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_1, LocalDate.now(), Landkoder.HR, false));
+        Behandlingsresultat avslåttResultat12_1 = lagBehandlingsresultat(lagLovvalgsperiode(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1, LocalDate.now(), Landkoder.HR, false));
         when(behandlingsresultatRepo.findById(ART12_1_AVSLÅTT_BEHANDLINGSID)).thenReturn(Optional.of(avslåttResultat12_1));
-        Behandlingsresultat innvilgetResultat12_2 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART12_2));
+        Behandlingsresultat innvilgetResultat12_2 = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_2));
         when(behandlingsresultatRepo.findById(ART12_2_INNVILGET_BEHANDLINGSID)).thenReturn(Optional.of(innvilgetResultat12_2));
         Behandlingsresultat utenlandskLovvalgResultat = lagBehandlingsresultat(periode, Landkoder.BE);
         when(behandlingsresultatRepo.findById(BEHANDLINGSID_UTENLANDSK_LOVVALG)).thenReturn(Optional.of(utenlandskLovvalgResultat));
-        Behandlingsresultat norskLovvalgUtenInnvilgetBestemmelse = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ANNET));
+        Behandlingsresultat norskLovvalgUtenInnvilgetBestemmelse = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(LovvalgsBestemmelser_883_2004.FO_883_2004_ANNET));
         when(behandlingsresultatRepo.findById(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE)).thenReturn(Optional.of(norskLovvalgUtenInnvilgetBestemmelse));
         return behandlingsresultatRepo;
     }
@@ -115,30 +115,30 @@ public class IverksettVedtakSendBrevTest {
     private static Behandling lagBehandling(Fagsak fagsak) {
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         return behandling;
     }
 
     private static Fagsak lagFagsak() {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(1234L);
-        fagsak.setType(Fagsakstype.EU_EØS);
+        fagsak.setType(Sakstyper.EU_EOS);
         Aktoer aktør = new Aktoer();
         aktør.setAktørId("1");
-        aktør.setRolle(RolleType.BRUKER);
+        aktør.setRolle(Aktoersroller.BRUKER);
         fagsak.setAktører(Collections.singleton(aktør));
         return fagsak;
     }
 
     private static Lovvalgsperiode lagLovvalgsperiodeArt16_1() {
-        return lagInnvilgetLovvalgsperiode(LovvalgBestemmelse_883_2004.FO_883_2004_ART16_1);
+        return lagInnvilgetLovvalgsperiode(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1);
     }
 
-    private static Lovvalgsperiode lagInnvilgetLovvalgsperiode(LovvalgBestemmelse_883_2004 bestemmelse) {
+    private static Lovvalgsperiode lagInnvilgetLovvalgsperiode(LovvalgsBestemmelser_883_2004 bestemmelse) {
         return lagLovvalgsperiode(bestemmelse, LocalDate.now(), Landkoder.NO, true);
     }
 
-    private static Lovvalgsperiode lagLovvalgsperiode(LovvalgBestemmelse_883_2004 bestemmelse, LocalDate fom, Landkoder land, boolean innvilget) {
+    private static Lovvalgsperiode lagLovvalgsperiode(LovvalgsBestemmelser_883_2004 bestemmelse, LocalDate fom, Landkoder land, boolean innvilget) {
         Lovvalgsperiode periode = new Lovvalgsperiode();
         periode.setFom(fom);
         periode.setTom(fom.plusDays(1));
@@ -153,18 +153,18 @@ public class IverksettVedtakSendBrevTest {
     }
 
     private static Behandlingsresultat lagBehandlingsresultat(Lovvalgsperiode periode) {
-        return lagBehandlingsresultat(Collections.singleton(periode), Landkoder.NO, BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        return lagBehandlingsresultat(Collections.singleton(periode), Landkoder.NO, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
 
     private static Behandlingsresultat lagBehandlingsresultat(Lovvalgsperiode periode, Landkoder land) {
-        return lagBehandlingsresultat(Collections.singleton(periode), land, BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        return lagBehandlingsresultat(Collections.singleton(periode), land, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
 
-    private static Behandlingsresultat lagBehandlingsresultat(Lovvalgsperiode periode, Landkoder land, BehandlingsresultatType type) {
+    private static Behandlingsresultat lagBehandlingsresultat(Lovvalgsperiode periode, Landkoder land, Behandlingsresultattyper type) {
         return lagBehandlingsresultat(Collections.singleton(periode), land, type);
     }
 
-    private static Behandlingsresultat lagBehandlingsresultat(Set<Lovvalgsperiode> perioder, Landkoder land, BehandlingsresultatType type) {
+    private static Behandlingsresultat lagBehandlingsresultat(Set<Lovvalgsperiode> perioder, Landkoder land, Behandlingsresultattyper type) {
         Behandlingsresultat utenlandskLovvalgResultat = new Behandlingsresultat();
         utenlandskLovvalgResultat.setLovvalgsperioder(perioder);
         utenlandskLovvalgResultat.setType(type);
@@ -173,7 +173,7 @@ public class IverksettVedtakSendBrevTest {
     }
 
     private static Behandlingsresultat lagBehandlingsresultatUtenPerioder() {
-        return lagBehandlingsresultat(Collections.emptySet(), Landkoder.NO, BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        return lagBehandlingsresultat(Collections.emptySet(), Landkoder.NO, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
 
     @Test
@@ -181,7 +181,7 @@ public class IverksettVedtakSendBrevTest {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(new Behandling());
         p.getBehandling().setId(BEHANDLINGSID);
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID));
         instans.utførSteg(p);
@@ -278,7 +278,7 @@ public class IverksettVedtakSendBrevTest {
         resultat.setBehandling(behandling);
         resultat.setType(type);
         BrevData brevdata = new BrevData();
-        brevdata.mottaker = RolleType.BRUKER;
+        brevdata.mottaker = Aktoersroller.BRUKER;
         resultat.setData(ProsessDataKey.BREVDATA, brevdata);
         return resultat;
     }
@@ -286,7 +286,7 @@ public class IverksettVedtakSendBrevTest {
     private static Behandling lagBehandling(long behandlingsid) {
         Behandling behandling = new Behandling();
         behandling.setId(behandlingsid);
-        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         return behandling;
     }
 }

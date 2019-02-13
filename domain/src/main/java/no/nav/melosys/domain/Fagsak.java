@@ -5,6 +5,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.*;
 
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -24,12 +28,12 @@ public class Fagsak extends RegistreringsInfo {
     private String rinasaksnummer;
 
     @Column(name = "fagsak_type")
-    @Convert(converter = Fagsakstype.DbKonverterer.class)
-    private Fagsakstype type;
+    @Convert(converter = Sakstyper.DbKonverterer.class)
+    private Sakstyper type;
 
     @Column(name = "status", nullable = false)
-    @Convert(converter = Fagsaksstatus.DbKonverterer.class)
-    private Fagsaksstatus status;
+    @Convert(converter = Saksstatuser.DbKonverterer.class)
+    private Saksstatuser status;
 
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Aktoer> aktører;
@@ -45,19 +49,19 @@ public class Fagsak extends RegistreringsInfo {
         this.gsakSaksnummer = gsakSaksnummer;
     }
 
-    public Fagsakstype getType() {
+    public Sakstyper getType() {
         return type;
     }
 
-    public void setType(Fagsakstype type) {
+    public void setType(Sakstyper type) {
         this.type = type;
     }
 
-    public Fagsaksstatus getStatus() {
+    public Saksstatuser getStatus() {
         return status;
     }
 
-    public void setStatus(Fagsaksstatus status) {
+    public void setStatus(Saksstatuser status) {
         this.status = status;
     }
 
@@ -96,9 +100,9 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     /**
-     * Returnerer en aktør med angitt {@link RolleType} knyttet til saken eller {@code null} hvis ingen finnes.
+     * Returnerer en aktør med angitt {@link Aktoersroller} knyttet til saken eller {@code null} hvis ingen finnes.
      */
-    public Aktoer hentAktørMedRolleType(RolleType rolleType) throws TekniskException {
+    public Aktoer hentAktørMedRolleType(Aktoersroller rolleType) throws TekniskException {
         if (rolleType == null || aktører == null || aktører.isEmpty()) {
             return null;
         }

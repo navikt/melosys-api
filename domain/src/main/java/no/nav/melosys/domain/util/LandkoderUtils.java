@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.util;
 
-import no.nav.melosys.domain.Landkoder;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.exception.TekniskException;
 

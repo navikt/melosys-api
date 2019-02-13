@@ -3,9 +3,12 @@ package no.nav.melosys.service.avklartefakta;
 import java.time.Instant;
 import java.util.HashSet;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsmaate;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -68,7 +71,7 @@ public class AvklartefaktaServiceIT {
         rad.setBehandlingsresultat(behandlingsresultat);
         rad.setFakta("test test");
         rad.setReferanse("referanse");
-        rad.setType(AvklartefaktaType.BOSTEDSLAND);
+        rad.setType(Avklartefaktatype.ARBEIDSLAND);
         return rad;
     }
 
@@ -80,7 +83,7 @@ public class AvklartefaktaServiceIT {
         behandlingsresultat.setRegistrertAv("Avregistrerer");
         behandlingsresultat.setRegistrertDato(ENDRET_DATO);
         behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.AUTOMATISERT);
-        behandlingsresultat.setType(BehandlingsresultatType.FASTSATT_LOVVALGSLAND);
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         return behandlingsresultat;
     }
 
@@ -90,7 +93,7 @@ public class AvklartefaktaServiceIT {
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(ENDRET_DATO);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling.setType(Behandlingstype.KLAGE);
+        behandling.setType(Behandlingstyper.KLAGE);
         return behandling;
     }
 
@@ -99,7 +102,7 @@ public class AvklartefaktaServiceIT {
         fagsak.setSaksnummer("123");
         fagsak.setEndretDato(ENDRET_DATO);
         fagsak.setRegistrertDato(ENDRET_DATO);
-        fagsak.setStatus(Fagsaksstatus.AVSLUTTET);
+        fagsak.setStatus(Saksstatuser.AVSLUTTET);
         return fagsak;
     }
 

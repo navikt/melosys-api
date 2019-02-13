@@ -1,6 +1,8 @@
 package no.nav.melosys.service;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -77,7 +79,7 @@ public class ProsessinstansServiceTest {
     @Test
     public void opprettProsessinstansIverksettVedtak_medBehandlingOgBehandlingsresultat() {
         Behandling behandling = new Behandling();
-        BehandlingsresultatType resultatType = BehandlingsresultatType.FASTSATT_LOVVALGSLAND;
+        Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         service.opprettProsessinstansIverksettVedtak(behandling, resultatType);
 
         verify(prosessinstansRepo, times(1)).save(piCaptor.capture());
@@ -86,7 +88,7 @@ public class ProsessinstansServiceTest {
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK);
         assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.IV_VALIDERING);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
-        assertThat(BehandlingsresultatType.valueOf(lagretInstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE))).isEqualTo(resultatType);
+        assertThat(Behandlingsresultattyper.valueOf(lagretInstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE))).isEqualTo(resultatType);
     }
 
     @Test

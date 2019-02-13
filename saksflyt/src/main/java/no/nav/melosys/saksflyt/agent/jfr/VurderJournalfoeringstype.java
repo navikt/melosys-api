@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -78,7 +79,7 @@ public class VurderJournalfoeringstype extends AbstraktStegBehandler {
 
     private void knyttEllerNyBehandling(Prosessinstans prosessinstans) throws TekniskException {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
-        Behandlingstype nyBehandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.class);
+        Behandlingstyper nyBehandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
 
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
         Behandling aktivBehandling = fagsak.getAktivBehandling();

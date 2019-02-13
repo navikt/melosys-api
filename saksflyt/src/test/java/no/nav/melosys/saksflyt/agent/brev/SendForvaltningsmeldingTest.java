@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.agent.brev;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProduserbartDokument;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -42,7 +42,7 @@ public class SendForvaltningsmeldingTest {
 
         agent.utførSteg(p);
 
-        verify(dokumentService).produserDokument(anyLong(), any(ProduserbartDokument.class), any(BrevData.class));
+        verify(dokumentService).produserDokument(anyLong(), any(Produserbaredokumenter.class), any(BrevData.class));
 
         assertThat(p.getSteg()).isNull();
     }

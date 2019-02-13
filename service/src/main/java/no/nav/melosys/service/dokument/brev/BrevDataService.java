@@ -15,6 +15,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
@@ -30,8 +31,8 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.domain.RolleType.BRUKER;
-import static no.nav.melosys.domain.RolleType.REPRESENTANT;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 /**
@@ -58,7 +59,7 @@ public class BrevDataService {
     /**
      * Genererer metada til doksys angående dokumentbestillingen.
      */
-    public DokumentbestillingMetadata lagBestillingMetadata(ProduserbartDokument produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
+    public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
         Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument");
 
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
@@ -79,7 +80,7 @@ public class BrevDataService {
                 break;
             }
             case ATTEST_A1:
-            case SED_A001:
+            case ANMODNING_UNNTAK:
             case INNVILGELSE_YRKESAKTIV:
             case MELDING_MANGLENDE_OPPLYSNINGER:
             case MELDING_HENLAGT_SAK: {
@@ -90,7 +91,7 @@ public class BrevDataService {
                 break;
             }
             default:
-                throw new TekniskException("ProduserbartDokument ikke støttet");
+                throw new TekniskException("Produserbaredokumenter ikke støttet");
         }
 
         metadata.dokumenttypeID = DokumenttypeIdMapper.hentID(produserbartDokument);
@@ -108,7 +109,7 @@ public class BrevDataService {
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
     @Transactional(propagation = Propagation.MANDATORY)
-    public Element lagBrevXML(ProduserbartDokument produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
+    public Element lagBrevXML(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
             .orElseThrow(() -> new TekniskException("Finner ingen behandlingsresultat for behandlingid"));
 

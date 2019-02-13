@@ -13,6 +13,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+
 @Entity
 @Table(name = "behandling_historikk")
 public class BehandlingHistorikk {

@@ -10,6 +10,8 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.regler.api.lovvalg.rep.Feilmelding;
 import no.nav.melosys.regler.api.lovvalg.rep.Kategori;
 import no.nav.melosys.regler.api.lovvalg.rep.VurderInngangsvilkaarReply;
@@ -64,7 +66,7 @@ public class VurderInngangsvilkaarTest {
         verify(fagsakRepository, times(1)).save(any(Fagsak.class));
         
         assertNull(p.getHendelser());
-        assertEquals(Fagsakstype.EU_EØS, p.getBehandling().getFagsak().getType());
+        assertEquals(Sakstyper.EU_EOS, p.getBehandling().getFagsak().getType());
         assertEquals(ProsessSteg.HENT_ARBF_OPPL, p.getSteg());
     }
 
@@ -131,7 +133,7 @@ public class VurderInngangsvilkaarTest {
         verify(fagsakRepository, times(1)).save(any(Fagsak.class));
 
         assertNull(p.getHendelser());
-        assertEquals(Fagsakstype.EU_EØS, p.getBehandling().getFagsak().getType());
+        assertEquals(Sakstyper.EU_EOS, p.getBehandling().getFagsak().getType());
         assertEquals(ProsessSteg.HENT_ARBF_OPPL, p.getSteg());
     }
 

@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.agent.aou;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +23,7 @@ public class ValideringTest {
 
         p = new Prosessinstans();
         p.setBehandling(new Behandling());
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.ANMODNING_OM_UNNTAK);
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
     }
@@ -44,7 +45,7 @@ public class ValideringTest {
     public void utfoerSteg_manglerSaksbehandler_feiler() {
         p = new Prosessinstans();
         p.setBehandling(new Behandling());
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
         p.setType(ProsessType.ANMODNING_OM_UNNTAK);
 
         agent.utførSteg(p);

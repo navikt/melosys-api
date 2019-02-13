@@ -6,13 +6,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.Fagsakstype;
 import no.nav.melosys.domain.Tema;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.domain.oppgave.PrioritetType;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
@@ -20,13 +23,13 @@ import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OpprettOppgaveDto;
 import no.nav.melosys.integrasjon.gsak.sak.SakConsumer;
 import no.nav.melosys.integrasjon.gsak.sak.dto.SakDto;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.kodeverk.Behandlingstyper.SOEKNAD;
 import static no.nav.melosys.domain.util.KodeverkUtils.erGyldigKode;
 import static no.nav.melosys.domain.util.KodeverkUtils.hentAlleKoder;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
@@ -54,10 +57,10 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public Long opprettSak(String saksnummer, Behandlingstype behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
+    public Long opprettSak(String saksnummer, Behandlingstyper behandlingstype, String aktørId) throws FunksjonellException, TekniskException {
         SakDto sakDto = new SakDto();
 
-        if (behandlingstype.equals(Behandlingstype.SØKNAD)) {
+        if (behandlingstype.equals(SOEKNAD)) {
             sakDto.setTema(Tema.MED.getKode());
         } else {
             throw new TekniskException("Behandlingtype " + behandlingstype.getBeskrivelse() + " er ikke støttet.");
@@ -88,11 +91,11 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetype oppgavetype, Tema tema, List<Fagsakstype> sakstyper, List<Behandlingstype> behandlingstyper)
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetyper oppgavetype, Tema tema, List<Sakstyper> sakstyper, List<Behandlingstyper> behandlingstyper)
         throws FunksjonellException, TekniskException {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(new String[]{oppgavetype.getKode()})
-            .medBehandlingsTyper(behandlingstyper.stream().map(Behandlingstype::hentFellesKode).toArray(String[]::new))
+            .medBehandlingsTyper(behandlingstyper.stream().map(this::hentFellesKode).toArray(String[]::new))
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .medTildeltRessurs(false);
@@ -122,7 +125,7 @@ public class GsakService implements GsakFasade {
         OpprettOppgaveDto oppgaveDto = new OpprettOppgaveDto();
         oppgaveDto.setAktivDato(idag);
         oppgaveDto.setAktørId(oppgave.getAktørId());
-        oppgaveDto.setBehandlingstype(oppgave.getBehandlingstype().hentFellesKode());
+        oppgaveDto.setBehandlingstype(hentFellesKode(oppgave.getBehandlingstype()));
         if (oppgave.erJournalFøring()) {
             oppgaveDto.setFristFerdigstillelse(idag.plusDays(FRIST_JFR_DAGER));
         } else if (oppgave.erBehandling()) {
@@ -156,7 +159,7 @@ public class GsakService implements GsakFasade {
     public List<Oppgave> finnOppgaveListeMedAnsvarlig(String tilordnetRessurs) throws FunksjonellException, TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medTilordnetRessurs(tilordnetRessurs)
-            .medOppgaveTyper(hentAlleKoder(Oppgavetype.class))
+            .medOppgaveTyper(hentAlleKoder(Oppgavetyper.class))
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
@@ -188,8 +191,8 @@ public class GsakService implements GsakFasade {
             log.error("Fikk uventet Tema: {} for OppgaveID: {}", oppgave.getTema(), oppgave.getId());
         }
 
-        if (oppgave.getOppgavetype() != null && erGyldigKode(Oppgavetype.class, oppgave.getOppgavetype())) {
-            domainOppgave.setOppgavetype(no.nav.melosys.domain.oppgave.Oppgavetype.valueOf(oppgave.getOppgavetype()));
+        if (oppgave.getOppgavetype() != null && erGyldigKode(Oppgavetyper.class, oppgave.getOppgavetype())) {
+            domainOppgave.setOppgavetype(no.nav.melosys.domain.kodeverk.Oppgavetyper.valueOf(oppgave.getOppgavetype()));
         } else {
             log.error("Fikk uventet oppgaveType: {} for OppgaveID: {}", oppgave.getOppgavetype(), oppgave.getId());
         }
@@ -203,7 +206,7 @@ public class GsakService implements GsakFasade {
     public List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws FunksjonellException, TekniskException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medAktørId(aktørId)
-            .medOppgaveTyper(hentAlleKoder(Oppgavetype.class))
+            .medOppgaveTyper(hentAlleKoder(Oppgavetyper.class))
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
@@ -220,7 +223,7 @@ public class GsakService implements GsakFasade {
 
     @Override
     public List<Oppgave> finnBehandlingsoppgaverMedBruker(String aktørId) throws FunksjonellException, TekniskException {
-        String[] oppgaveTyper = {Oppgavetype.BEH_SAK.getKode()};
+        String[] oppgaveTyper = {Oppgavetyper.BEH_SAK.getKode()};
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medAktørId(aktørId)
             .medOppgaveTyper(oppgaveTyper)
@@ -238,7 +241,7 @@ public class GsakService implements GsakFasade {
     public Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
-            .medOppgaveTyper(new String[]{Oppgavetype.BEH_SAK.getKode()})
+            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK.getKode()})
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 
@@ -263,5 +266,17 @@ public class GsakService implements GsakFasade {
         }
         oppgave.setTilordnetRessurs(saksbehandlerID);
         oppgaveConsumer.oppdaterOppgave(oppgave);
+    }
+
+    /**
+     * Henter koder fra felleskodeverk: Behandlingstyper.
+     */
+    private String hentFellesKode(Behandlingstyper behandlingstyper) {
+        switch (behandlingstyper) {
+            case SOEKNAD: return "ae0034";
+            case KLAGE: return  "ae0058";
+            case NY_VURDERING: return "ae0028";
+            default: throw new RuntimeException(this + " er ikke implementert i felleskodeverk.");
+        }
     }
 }

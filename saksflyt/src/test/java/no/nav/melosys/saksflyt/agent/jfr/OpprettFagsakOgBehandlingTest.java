@@ -4,6 +4,8 @@ import java.util.Collections;
 
 import no.nav.melosys.audit.AuditorProvider;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.FagsakService;
 import org.junit.Before;
@@ -57,11 +59,11 @@ public class OpprettFagsakOgBehandlingTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
         fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
-        when(fagsakService.nyFagsakOgBehandling(anyString(), anyString(), any(), eq(Behandlingstype.SØKNAD), any(), any())).thenReturn(fagsak);
+        when(fagsakService.nyFagsakOgBehandling(anyString(), anyString(), any(), eq(Behandlingstyper.SOEKNAD), any(), any())).thenReturn(fagsak);
 
         agent.utførSteg(p);
 
-        verify(fagsakService).nyFagsakOgBehandling(aktørId, arbeidsgiver, null, Behandlingstype.SØKNAD, journalpostId, dokumentId);
+        verify(fagsakService).nyFagsakOgBehandling(aktørId, arbeidsgiver, null, Behandlingstyper.SOEKNAD, journalpostId, dokumentId);
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SØKNAD);
     }
@@ -73,7 +75,7 @@ public class OpprettFagsakOgBehandlingTest {
 
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.SAKSNUMMER, "MELTEST-333");
         p.setData(JOURNALPOST_ID, initierendeJournalpostId);
         p.setData(DOKUMENT_ID, initierendeDokumentId);
@@ -85,7 +87,7 @@ public class OpprettFagsakOgBehandlingTest {
 
         agent.utførSteg(p);
 
-        verify(behandlingService).nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, Behandlingstype.SØKNAD, initierendeJournalpostId, initierendeDokumentId);
+        verify(behandlingService).nyBehandling(fagsak, Behandlingsstatus.VURDER_DOKUMENT, Behandlingstyper.SOEKNAD, initierendeJournalpostId, initierendeDokumentId);
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
     }
@@ -94,7 +96,7 @@ public class OpprettFagsakOgBehandlingTest {
     public void utførSteg_ukjentType_feiler() {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.SAKSNUMMER, "MELTEST-333");
 
         agent.utførSteg(p);

@@ -8,7 +8,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.oppgave.PrioritetType;
@@ -20,7 +24,6 @@ import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +31,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -97,10 +103,10 @@ public class OppgaveplukkerTest {
         when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(Fagsakstype.EU_EØS.getKode());
+        sakstyper.add(Sakstyper.EU_EOS.getKode());
 
         List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(Behandlingstype.SØKNAD.getKode());
+        behandlingstyper.add(Behandlingstyper.SOEKNAD.getKode());
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
         plukkOppgaveInnDto.setOppgavetype("BEH_SAK");
@@ -111,7 +117,7 @@ public class OppgaveplukkerTest {
         Fagsak fagsak = new Fagsak();
 
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
 
         behandling.setFagsak(fagsak);
@@ -146,10 +152,10 @@ public class OppgaveplukkerTest {
         when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(Fagsakstype.EU_EØS.getKode());
+        sakstyper.add(Sakstyper.EU_EOS.getKode());
 
         List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(Behandlingstype.SØKNAD.getKode());
+        behandlingstyper.add(Behandlingstyper.SOEKNAD.getKode());
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
         plukkOppgaveInnDto.setOppgavetype("BEH_SAK");
@@ -160,7 +166,7 @@ public class OppgaveplukkerTest {
         Fagsak fagsak = new Fagsak();
 
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
         behandling.setDokumentasjonSvarfristDato(Instant.now().minus(Duration.ofDays(1)));
         behandling.setFagsak(fagsak);
@@ -201,7 +207,7 @@ public class OppgaveplukkerTest {
         Fagsak fagsak = new Fagsak();
 
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
 
         behandling.setFagsak(fagsak);
@@ -216,10 +222,10 @@ public class OppgaveplukkerTest {
         when(oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(anyString(), eq("1"))).thenReturn(tilbakelagt);
 
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(Fagsakstype.FOLKETRYGD.getKode());
+        sakstyper.add(Sakstyper.FTRL.getKode());
 
         List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(Behandlingstype.NY_VURDERING.getKode());
+        behandlingstyper.add(Behandlingstyper.NY_VURDERING.getKode());
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
         plukkOppgaveInnDto.setOppgavetype("BEH_SAK");
@@ -260,7 +266,7 @@ public class OppgaveplukkerTest {
         Fagsak fagsak = new Fagsak();
 
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
 
         behandling.setFagsak(fagsak);
@@ -275,10 +281,10 @@ public class OppgaveplukkerTest {
         when(oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(anyString(), anyString())).thenReturn(tilbakelagt);
 
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(Fagsakstype.FOLKETRYGD.getKode());
+        sakstyper.add(Sakstyper.FTRL.getKode());
 
         List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(Behandlingstype.SØKNAD.getKode());
+        behandlingstyper.add(Behandlingstyper.SOEKNAD.getKode());
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
         plukkOppgaveInnDto.setOppgavetype("BEH_SAK");

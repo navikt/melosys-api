@@ -2,7 +2,11 @@ package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.Properties;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
@@ -46,14 +50,14 @@ public class OpprettGsakSakTest {
         String aktørID = "FJERNET93";
         properties.setProperty(ProsessDataKey.AKTØR_ID.getKode(), aktørID);
         p.setData(properties);
-        when(gsakFasade.opprettSak(anyString(), eq(Behandlingstype.SØKNAD), anyString())).thenReturn(123L);
+        when(gsakFasade.opprettSak(anyString(), eq(Behandlingstyper.SOEKNAD), anyString())).thenReturn(123L);
 
         Fagsak fagsak = new Fagsak();
         when(fagsakRepository.findBySaksnummer(any())).thenReturn(fagsak);
 
         agent.utførSteg(p);
 
-        verify(gsakFasade, times(1)).opprettSak(saksnummer, Behandlingstype.SØKNAD, aktørID);
+        verify(gsakFasade, times(1)).opprettSak(saksnummer, Behandlingstyper.SOEKNAD, aktørID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.STATUS_BEH_OPPR);
         Assert.notNull(fagsak.getGsakSaksnummer(), "Fagsak skal ha fått Gsak saksnummert");
     }

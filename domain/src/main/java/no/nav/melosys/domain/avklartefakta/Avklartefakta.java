@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 
 @Entity
 @Table(name = "avklartefakta")
@@ -21,7 +22,7 @@ public class Avklartefakta {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    private AvklartefaktaType type;
+    private Avklartefaktatype type;
 
     @Column(name = "referanse")
     private String referanse;
@@ -46,11 +47,11 @@ public class Avklartefakta {
         this.behandlingsresultat = behandlingsresultat;
     }
 
-    public AvklartefaktaType getType() {
+    public Avklartefaktatype getType() {
         return type;
     }
 
-    public void setType(AvklartefaktaType type) {
+    public void setType(Avklartefaktatype type) {
         this.type = type;
     }
 

@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.agent.reg;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -32,7 +33,7 @@ public class OppfriskSaksopplysningerTest {
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
         p.setBehandling(behandling);
-        p.getBehandling().setType(Behandlingstype.SØKNAD);
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
 
         agent.utførSteg(p);
 

@@ -16,6 +16,10 @@
             <groupId>no.nav.melosys</groupId>
             <artifactId>feil</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-internt-kodeverk</artifactId>
+        </dependency>
     
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -69,7 +73,6 @@
             <artifactId>spring-boot-starter-logging</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
 </project>

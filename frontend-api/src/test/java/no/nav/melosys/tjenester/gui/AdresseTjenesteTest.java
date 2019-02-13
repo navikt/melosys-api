@@ -2,11 +2,10 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.Arrays;
 import java.util.List;
-
 import javax.ws.rs.core.Response;
 
-import no.nav.melosys.domain.Landkoder;
 import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import org.junit.Before;
 import org.junit.Test;

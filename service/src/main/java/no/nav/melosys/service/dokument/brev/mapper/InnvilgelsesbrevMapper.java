@@ -19,6 +19,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -28,7 +29,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.domain.avklartefakta.AvklartefaktaType.ARBEIDSLAND;
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatype.ARBEIDSLAND;
 
 public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 

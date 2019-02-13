@@ -1,18 +1,19 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.Instant;
+import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 
-public class BehandlingOppsummeringDto {
 
+public class BehandlingOversiktDto {
     private Long behandlingID;
     private Behandlingsstatus behandlingsstatus;
     private Behandlingstyper behandlingstype;
-    private Instant registrertDato;
-    private Instant endretDato;
-    private Instant sisteOpplysningerHentetDato;
+    private PeriodeDto soknadsperiode;
+    private List<String> land;
+    private Instant opprettetDato;
 
     public Long getBehandlingID() {
         return behandlingID;
@@ -38,27 +39,29 @@ public class BehandlingOppsummeringDto {
         this.behandlingstype = behandlingstype;
     }
 
-    public Instant getRegistrertDato() {
-        return registrertDato;
+        public PeriodeDto getSoknadsperiode() {
+        return soknadsperiode;
     }
 
-    public void setRegistrertDato(Instant registrertDato) {
-        this.registrertDato = registrertDato;
+    public void setSoknadsperiode(PeriodeDto søknadsperiode) {
+        this.soknadsperiode = søknadsperiode;
     }
 
-    public Instant getEndretDato() {
-        return endretDato;
+    public List<String> getLand() {
+        return land;
     }
 
-    public void setEndretDato(Instant endretDato) {
-        this.endretDato = endretDato;
+    public void setLand(List<String> land) {
+        this.land = land;
     }
 
-    public Instant getSisteOpplysningerHentetDato() {
-        return sisteOpplysningerHentetDato;
+    public Instant getOpprettetDato() {
+        return opprettetDato;
     }
 
-    public void setSisteOpplysningerHentetDato(Instant sisteOpplysningerHentetDato) {
-        this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
+    public void setOpprettetDato(Instant opprettetDato) {
+        this.opprettetDato = opprettetDato;
     }
+
+
 }

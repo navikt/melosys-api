@@ -3,8 +3,9 @@ package no.nav.melosys.domain.oppgave;
 import java.time.LocalDate;
 import java.util.Comparator;
 
-import no.nav.melosys.domain.Behandlingstype;
 import no.nav.melosys.domain.Tema;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 
 /**
  * Denne klassen mapper Oppgaver fra GSAK og er derfor ikke en @Entity
@@ -14,23 +15,23 @@ public class Oppgave {
     private String saksnummer;
     private LocalDate fristFerdigstillelse;
     private Tema tema;
-    private Oppgavetype oppgavetype;
+    private Oppgavetyper oppgavetype;
     private PrioritetType prioritet;
     private String journalpostId;
     private String tilordnetRessurs;
     private int versjon;
     private String aktørId;
-    private Behandlingstype behandlingstype;
+    private Behandlingstyper behandlingstype;
     private Behandlingstema behandlingstema;
 
     public Oppgave() {
     }
 
-    public Behandlingstype getBehandlingstype() {
+    public Behandlingstyper getBehandlingstype() {
         return behandlingstype;
     }
 
-    public void setBehandlingstype(Behandlingstype behandlingstype) {
+    public void setBehandlingstype(Behandlingstyper behandlingstype) {
         this.behandlingstype = behandlingstype;
     }
 
@@ -59,11 +60,11 @@ public class Oppgave {
     }
 
     public boolean erBehandling() {
-        return oppgavetype == Oppgavetype.BEH_SAK;
+        return oppgavetype == Oppgavetyper.BEH_SAK;
     }
 
     public boolean erJournalFøring() {
-        return oppgavetype == Oppgavetype.JFR;
+        return oppgavetype == Oppgavetyper.JFR;
     }
 
     public String getOppgaveId() {
@@ -82,11 +83,11 @@ public class Oppgave {
         this.fristFerdigstillelse = fristFerdigstillelse;
     }
 
-    public Oppgavetype getOppgavetype() {
+    public Oppgavetyper getOppgavetype() {
         return oppgavetype;
     }
 
-    public void setOppgavetype(Oppgavetype oppgavetype) {
+    public void setOppgavetype(Oppgavetyper oppgavetype) {
         this.oppgavetype = oppgavetype;
     }
 

@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.avklartefakta;
 
-import no.nav.melosys.domain.YrkesgruppeType;
+import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.exception.TekniskException;
 
 public enum AvklartYrkesgruppeType {
@@ -10,14 +10,14 @@ public enum AvklartYrkesgruppeType {
     IKKE_YRKESAKTIV,
     KONTANTYTELSEMOTTAKER;
 
-    public YrkesgruppeType tilYrkesgruppeType() throws TekniskException {
+    public Yrkesgrupper tilYrkesgruppeType() throws TekniskException {
         switch(this) {
             case ORDINAER:
-                return YrkesgruppeType.ORDINAER;
+                return Yrkesgrupper.ORDINAER;
             case FLYENDE_PERSONELL:
-                return YrkesgruppeType.FLYENDE_PERSONELL;
+                return Yrkesgrupper.FLYENDE_PERSONELL;
             case SOKKEL_ELLER_SKIP:
-                return YrkesgruppeType.SOKKEL_ELLER_SKIP;
+                return Yrkesgrupper.SOKKEL_ELLER_SKIP;
             default:
                 throw new TekniskException("Finner ingen yrkesgruppe fra avklarte fakta");
         }

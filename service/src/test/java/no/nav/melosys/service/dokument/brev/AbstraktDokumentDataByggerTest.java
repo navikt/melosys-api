@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.YrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaType;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
@@ -17,6 +15,8 @@ import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -159,7 +159,7 @@ public class AbstraktDokumentDataByggerTest {
     public void hentArbeidsstederForMartimtArbeid_listMedArbeidssteder() throws TekniskException {
         this.søknad.foretakUtland.add(new ForetakUtland());
         Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setType(AvklartefaktaType.ARBEIDSLAND);
+        avklartefakta.setType(Avklartefaktatype.ARBEIDSLAND);
         avklartefakta.setFakta("BG");
         avklartefakta.setReferanse("INSTALLASJON_ARBEIDSLAND");
         avklartefakta.setSubjekt("Dunfjæder");
@@ -172,6 +172,6 @@ public class AbstraktDokumentDataByggerTest {
         Arbeidssted arbeidssted = arbeidSteder.get(0);
         assertThat(arbeidssted.navn).isEqualTo("Dunfjæder");
         assertThat(arbeidssted.landKode).isEqualTo("BG");
-        assertThat(arbeidssted.yrkesgruppe.getKode()).isEqualTo(YrkesgruppeType.SOKKEL_ELLER_SKIP.getKode());
+        assertThat(arbeidssted.yrkesgruppe.getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
     }
 }

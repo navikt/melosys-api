@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
@@ -72,7 +73,7 @@ public class VilkaarsresultatService {
 
         vilkaarsresultat.setBegrunnelseFritekst(vilkaarDto.getBegrunnelseFritekst());
         vilkaarsresultat.setBehandlingsresultat(behandlingsresultat);
-        vilkaarsresultat.setVilkaar(VilkaarType.forKode(vilkaarDto.getVilkaar()));
+        vilkaarsresultat.setVilkaar(Vilkaar.valueOf(vilkaarDto.getVilkaar()));
         vilkaarsresultat.setOppfylt(vilkaarDto.isOppfylt());
         return vilkaarsresultat;
     }

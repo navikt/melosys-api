@@ -8,7 +8,13 @@ import java.util.Optional;
 import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
 import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon;
 import no.nav.dok.brevdata.felles.v1.navfelles.Person;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
@@ -21,7 +27,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.w3c.dom.Element;
 
-import static no.nav.melosys.domain.ProduserbartDokument.*;
+import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -70,13 +76,13 @@ public class BrevDataServiceTest {
 
         Aktoer representant = new Aktoer();
         representant.setAktørId("Representant");
-        representant.setRolle(RolleType.REPRESENTANT);
+        representant.setRolle(Aktoersroller.REPRESENTANT);
 
         Behandling behandling = lagBehandling();
         behandling.getFagsak().getAktører().add(representant);
         BrevData brevData = new BrevData("Z123456");
 
-        when(tpsFasade.hentFagsakIdentMedRolleType(behandling.getFagsak(), RolleType.REPRESENTANT)).thenReturn(REPRESENTANT);
+        when(tpsFasade.hentFagsakIdentMedRolleType(behandling.getFagsak(), Aktoersroller.REPRESENTANT)).thenReturn(REPRESENTANT);
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling, brevData);
 
@@ -92,7 +98,7 @@ public class BrevDataServiceTest {
     public void lagMangelbrevXml_mottakerErBruker() throws TekniskException {
         Behandling behandling = lagBehandling();
         BrevData brevData = new BrevData("Z123456");
-        brevData.mottaker = RolleType.BRUKER;
+        brevData.mottaker = Aktoersroller.BRUKER;
         brevData.fritekst = "Test";
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
@@ -116,7 +122,7 @@ public class BrevDataServiceTest {
     public void lagMangelbrevXml_mottakerErArbeidsgiver() throws TekniskException {
         Behandling behandling = lagBehandling();
         BrevData brevData = new BrevData("Z123456");
-        brevData.mottaker = RolleType.ARBEIDSGIVER;
+        brevData.mottaker = Aktoersroller.ARBEIDSGIVER;
         brevData.fritekst = "Test";
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
@@ -159,13 +165,13 @@ public class BrevDataServiceTest {
             .hasNoCause();
     }
 
-    private void testLagDokumentMetadata(ProduserbartDokument doktype) throws Exception {
+    private void testLagDokumentMetadata(Produserbaredokumenter doktype) throws Exception {
         DokumentbestillingMetadata resultat = service.lagBestillingMetadata(doktype, lagBehandling(), lagBrevData());
         DokumentbestillingMetadata forventet = lagDokumentbestillingMetadata(doktype);
         assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
     }
 
-    private static DokumentbestillingMetadata lagDokumentbestillingMetadata(ProduserbartDokument doktype) throws TekniskException {
+    private static DokumentbestillingMetadata lagDokumentbestillingMetadata(Produserbaredokumenter doktype) throws TekniskException {
         DokumentbestillingMetadata forventet = new DokumentbestillingMetadata();
         forventet.bruker = FNR;
         forventet.mottaker = ORGNR;
@@ -180,7 +186,7 @@ public class BrevDataServiceTest {
     private static BrevData lagBrevData() {
         BrevData brevDataDto = new BrevData();
         brevDataDto.saksbehandler = "TEST";
-        brevDataDto.mottaker = RolleType.ARBEIDSGIVER;
+        brevDataDto.mottaker = Aktoersroller.ARBEIDSGIVER;
         brevDataDto.fritekst = "Test";
         return brevDataDto;
     }
@@ -192,18 +198,18 @@ public class BrevDataServiceTest {
 
         Aktoer bruker = new Aktoer();
         bruker.setAktørId("Aktør-Id");
-        bruker.setRolle(RolleType.BRUKER);
+        bruker.setRolle(Aktoersroller.BRUKER);
 
         Aktoer arbeidsgiver = new Aktoer();
         arbeidsgiver.setOrgnr(ORGNR);
-        arbeidsgiver.setRolle(RolleType.ARBEIDSGIVER);
+        arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
 
         fagsak.setAktører(new HashSet<>(Arrays.asList(bruker, arbeidsgiver)));
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setRegistrertDato(Instant.now());
-        behandling.setType(Behandlingstype.SØKNAD);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setFagsak(fagsak);
 
         return behandling;

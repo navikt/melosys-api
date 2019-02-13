@@ -1,13 +1,16 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import javax.ws.rs.core.Response;
 
-import no.nav.melosys.domain.Behandlingstype;
-import no.nav.melosys.domain.Fagsakstype;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -94,16 +97,16 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
         innData.setOppgavetype("BEH_SAK");
 
         List<String> sakstyper = new ArrayList<>();
-        sakstyper.add(Fagsakstype.EU_EØS.getKode());
+        sakstyper.add(Sakstyper.EU_EOS.getKode());
         innData.setSakstyper(sakstyper);
 
         List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(Behandlingstype.SØKNAD.getKode());
+        behandlingstyper.add(Behandlingstyper.SOEKNAD.getKode());
         innData.setBehandlingstyper(behandlingstyper);
 
         Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId("1");
-        oppgave.setOppgavetype(Oppgavetype.BEH_SAK);
+        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK);
         Optional<Oppgave> plukket = Optional.of(oppgave);
 
         when(oppgaveplukker.plukkOppgave(anyString(), eq(innData))).thenReturn(plukket);

@@ -12,8 +12,8 @@ import javax.ws.rs.core.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.Oppgavetype;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -61,10 +61,10 @@ public class OppgaveTjeneste extends RestTjeneste {
 
             dto.setOppgaveID(oppgave.getOppgaveId());
             if (oppgave.erBehandling()) {
-                dto.setOppgavetype(Oppgavetype.BEH_SAK.getKode());
+                dto.setOppgavetype(Oppgavetyper.BEH_SAK.getKode());
                 dto.setSaksnummer(oppgave.getSaksnummer());
             } else if (oppgave.erJournalFøring()) {
-                dto.setOppgavetype(Oppgavetype.JFR.getKode());
+                dto.setOppgavetype(Oppgavetyper.JFR.getKode());
             }
             dto.setJournalpostID(oppgave.getJournalpostId());
 

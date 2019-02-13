@@ -6,7 +6,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
-import no.nav.melosys.domain.Landkoder;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
@@ -14,6 +13,7 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class OrganisasjonsDetaljer {

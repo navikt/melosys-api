@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.bestemmelse.LovvalgBestemmelse_883_2004;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -122,7 +122,7 @@ public class LovvalgsperiodeServiceTest {
         Collection<Lovvalgsperiode> lovvalgsperioder = instanse.hentTidligereLovvalgsperioder(behandling);
         AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(lp -> lp.getMedlPeriodeID())).containsOnly(medlemsperiode.id);
         AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream()
-                .map(lp -> lp.getBestemmelse())).containsOnly(LovvalgBestemmelse_883_2004.FO_883_2004_ANNET);
+                .map(lp -> lp.getBestemmelse())).containsOnly(LovvalgsBestemmelser_883_2004.FO_883_2004_ANNET);
     }
 
     private Behandling lagBehandlingMedMedlOpplysning(MedlemskapDokument medlDokument) {

@@ -9,7 +9,8 @@ import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 
-import static no.nav.melosys.domain.VilkaarType.FO_883_2004_ART16_1;
+import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
+
 
 public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
 

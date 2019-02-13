@@ -38,8 +38,9 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.frontend.version>0.17.0-386</melosys.frontend.version>
-        <melosys.jsonschema.version>0.13.0-148</melosys.jsonschema.version>
+        <melosys.frontend.version>0.17.0-391</melosys.frontend.version>
+        <melosys.jsonschema.version>0.15.0-160</melosys.jsonschema.version>
+        <melosys.internt.kodeverk.version>1.2.1</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
@@ -173,7 +174,11 @@
                 <version>${melosys.frontend.version}</version>
                 <type>zip</type>
             </dependency>
-
+            <dependency>
+                <groupId>no.nav.melosys</groupId>
+                <artifactId>melosys-internt-kodeverk</artifactId>
+                <version>${melosys.internt.kodeverk.version}</version>
+            </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>

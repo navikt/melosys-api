@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.Collections;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
 import org.junit.Rule;
@@ -65,7 +67,7 @@ public class VurderJournalfoeringstypeTest {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
     }
@@ -84,7 +86,7 @@ public class VurderJournalfoeringstypeTest {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstype.SØKNAD);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         agent.utførSteg(p);
         assertThat(p.getType()).isEqualTo(ProsessType.JFR_NY_BEHANDLING);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);

@@ -2,7 +2,7 @@ package no.nav.melosys.domain.dokument.arbeidsforhold;
 
 import javax.xml.bind.annotation.XmlEnumValue;
 
-import no.nav.melosys.domain.Kodeverk;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 
 public enum Fartsomraade implements Kodeverk {
 

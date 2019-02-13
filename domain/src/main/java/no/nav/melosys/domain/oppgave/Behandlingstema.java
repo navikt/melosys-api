@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.oppgave;
 
-import no.nav.melosys.domain.Kodeverk;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 
 public enum Behandlingstema implements Kodeverk {
     ARB_AA("ab0387", "Arbeidstakere annen avtale"),

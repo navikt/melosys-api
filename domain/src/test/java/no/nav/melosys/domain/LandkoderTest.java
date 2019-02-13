@@ -1,5 +1,6 @@
 package no.nav.melosys.domain;
 
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

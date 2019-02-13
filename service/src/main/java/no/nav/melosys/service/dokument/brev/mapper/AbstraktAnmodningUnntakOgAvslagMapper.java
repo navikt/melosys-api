@@ -10,11 +10,8 @@ import no.nav.dok.melosysbrev._000081.Fag;
 import no.nav.dok.melosysbrev._000081.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.begrunnelse.Artikkel12_1;
-import no.nav.melosys.domain.begrunnelse.Artikkel12_2;
-import no.nav.melosys.domain.begrunnelse.ForutgaaendeMedlemskap;
-import no.nav.melosys.domain.begrunnelse.NormaltDriverVirksomhet;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -22,7 +19,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
 import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.domain.VilkaarType.*;
+import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.AvslagOgAnmodningTypeFactory.*;
 
 /**
@@ -47,7 +44,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
     Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntakOgAvslag brevData) throws TekniskException {
         Fag fag = new Fag();
 
-        if (behandling.getFagsak().getType() == Fagsakstype.EU_EØS) {
+        if (behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
             // Respons fra regelmodulen skiller ikke mellom begrunnelser for 883/2004 (MELOSYS-1863)
             fag.setInngangsvilkårBegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
         } else {
@@ -68,7 +65,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
         Set<VilkaarBegrunnelse> art121Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_1);
         fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
 
-        Set<VilkaarBegrunnelse> art121ForutgåendeBegrunnelser = hentVilkaarbegrunnelser(resultat, ART12_1_FORUTGÅENDE_MEDLEMSKAP);
+        Set<VilkaarBegrunnelse> art121ForutgåendeBegrunnelser = hentVilkaarbegrunnelser(resultat, ART12_1_FORUTGAAENDE_MEDLEMSKAP);
         fag.setArt121ForutgåendeBegrunnelse(mapArt121ForutgaaendeBegrunnelseType(art121ForutgåendeBegrunnelser));
 
         Set<VilkaarBegrunnelse> art122Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_2);
@@ -80,7 +77,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
         return fag;
     }
 
-    Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Behandlingsresultat resultat, VilkaarType vilkaarType) {
+    Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Behandlingsresultat resultat, Vilkaar vilkaarType) {
         return resultat.getVilkaarsresultater().stream()
             .filter(vr -> vr.getVilkaar() == vilkaarType)
             .flatMap(vr -> vr.getBegrunnelser().stream())
@@ -96,7 +93,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
     private Art121BegrunnelseType mapArt121BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
         Art121BegrunnelseType art121BegrunnelseType = lagArt121BegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Artikkel12_1 artikkel12_1 = Artikkel12_1.valueOf(vilkaarBegrunnelse.getKode());
+            Art12_1_Begrunnelser artikkel12_1 = Art12_1_Begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
             switch (artikkel12_1) {
                 case UTSENDELSE_OVER_24_MN:
                     art121BegrunnelseType.setUtsendelseOver24Mn(JA);
@@ -127,7 +124,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
         Art121ForutgaaendeBegrunnelseType art121ForutgaaendeBegrunnelseType = lagArt121ForutgaaendeBegrunnelseType();
 
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            ForutgaaendeMedlemskap forutgaaendeMedlemskap = ForutgaaendeMedlemskap.valueOf(vilkaarBegrunnelse.getKode());
+            Art12_1_Forutgaaende_Medl_Begrunnelse forutgaaendeMedlemskap = Art12_1_Forutgaaende_Medl_Begrunnelse.valueOf(vilkaarBegrunnelse.getKode());
             switch (forutgaaendeMedlemskap) {
                 case UNNTATT_MEDLEMSKAP:
                     art121ForutgaaendeBegrunnelseType.setUntattMedlemskap(JA);
@@ -148,7 +145,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
     private Art122BegrunnelseType mapArt122BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
         Art122BegrunnelseType art122BegrunnelseType = lagArt122BegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Artikkel12_2 artikkel12_2 = Artikkel12_2.valueOf(vilkaarBegrunnelse.getKode());
+            Art12_2_Begrunnelser artikkel12_2 = Art12_2_Begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
             switch (artikkel12_2) {
                 case UTSENDELSE_OVER_24_MN:
                     art122BegrunnelseType.setUtsendelseOver24Mn(JA);
@@ -169,7 +166,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
     private Art122NormalVirksomhetBegrunnelseType mapArt122NormalVirksomhetBegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
         Art122NormalVirksomhetBegrunnelseType art122NormalVirksomhetBegrunnelseType = lagArt122NormalVirksomhetBegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            NormaltDriverVirksomhet normaltDriverVirksomhet = NormaltDriverVirksomhet.valueOf(vilkaarBegrunnelse.getKode());
+            Normaltdrivervirksomhet normaltDriverVirksomhet = Normaltdrivervirksomhet.valueOf(vilkaarBegrunnelse.getKode());
             switch (normaltDriverVirksomhet) {
                 case IKKE_FORUTGAAENDE_DRIFT:
                     art122NormalVirksomhetBegrunnelseType.setIkkeForutgåendeDrift(JA);
