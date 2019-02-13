@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -63,7 +62,7 @@ public class AbstraktDokumentDataByggerTest {
         public Set<String> hentAvklarteSelvstendigeForetakOrgnumre() {
             return super.hentAvklarteSelvstendigeForetakOrgnumre();
         }
-        public List<Arbeidssted> hentArbeidssteder() throws TekniskException {
+        public List<Arbeidssted> hentArbeidssteder() {
             return super.hentArbeidssteder();
         }
         public List<Virksomhet> hentUtenlandskeVirksomheter() {
@@ -118,26 +117,7 @@ public class AbstraktDokumentDataByggerTest {
     }
 
     @Test
-    public void hentFysiskeArbeidsstederMedForetaketsNavn() throws TekniskException {
-        ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.orgnr = "12345678910";
-        foretakUtland.navn = "Jarlsberg INTERNATIONAL";
-        søknad.foretakUtland.add(foretakUtland);
-
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse = new StrukturertAdresse();
-
-        ArbeidUtland arbeidUtland1 = new ArbeidUtland();
-        arbeidUtland1.adresse = new StrukturertAdresse();
-        søknad.arbeidUtland = Arrays.asList(arbeidUtland, arbeidUtland1);
-
-        List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
-        assertThat(arbeidssteder.stream().map(arbeidssted -> arbeidssted.navn))
-                .containsOnly(foretakUtland.navn);
-    }
-
-    @Test
-    public void hentFysiskeArbeidsstedFraForetaketsAdresse() throws TekniskException {
+    public void hentFysiskeArbeidsstedFraForetaketsAdresse() {
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.orgnr = "12345678910";
         foretakUtland.navn = "Jarlsberg INTERNATIONAL";
@@ -146,13 +126,8 @@ public class AbstraktDokumentDataByggerTest {
         søknad.foretakUtland.add(foretakUtland);
 
         List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
-        assertThat(arbeidssteder.get(0).navn).isEqualTo(foretakUtland.navn);
-        assertThat(arbeidssteder.get(0).landKode).isEqualTo(foretakUtland.adresse.landKode);
-    }
-
-    @Test(expected = TekniskException.class)
-    public void hentArbeidsstederKreverUtenlandskVirksomhet() throws TekniskException {
-        brevDatabyggerbase.hentArbeidssteder();
+        assertThat(foretakUtland.navn).isEqualTo(foretakUtland.navn);
+        assertThat(foretakUtland.adresse.landKode).isEqualTo(foretakUtland.adresse.landKode);
     }
 
     @Test

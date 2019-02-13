@@ -138,14 +138,6 @@ public class BrevDataByggerA1Test {
                 .collect(Collectors.toList())).containsOnly(orgnr1, orgnr2);
     }
 
-    @Test(expected = TekniskException.class)
-    public void testForetakiUtlandetSkalKasteException() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        avklarteOrganisasjoner.add(orgnr1);
-        søknad.foretakUtland.clear();
-
-        brevDataByggerA1.lag(behandling, saksbehandler);
-    }
-
     @Test
     public void testIngenAvklarteforetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         SelvstendigForetak foretak = new SelvstendigForetak();

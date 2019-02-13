@@ -76,9 +76,11 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         adresse.setPoststed(bostedsadresse.getPoststed());
         adresse.setPostnr(bostedsadresse.getPostnr());
         adresse.setLand(bostedsadresse.getLand().getKode());
-        adresse.setGateadresse(bostedsadresse.getGateadresse().getGatenavn() + " " +
-            bostedsadresse.getGateadresse().getGatenummer() +
-            bostedsadresse.getGateadresse().getHusbokstav());
+        adresse.setGateadresse(
+            bostedsadresse.getGateadresse().getGatenavn() + " " +
+                (bostedsadresse.getGateadresse().getGatenummer() == null ? "" : bostedsadresse.getGateadresse().getGatenummer()) +
+                (bostedsadresse.getGateadresse().getHusbokstav() == null ? "" : bostedsadresse.getGateadresse().getHusbokstav())
+        );
         return adresse;
     }
 
@@ -95,7 +97,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         arbeidssted.setFysisk(arb.erFysisk());
         if (arb.erFysisk()) {
             arbeidssted.setAdresse(fraStrukturertAdresse(arb.adresse));
-        }else {
+        } else {
             arbeidssted.setHjemmebase(null); //TODO ved ikke fysiske
         }
         return arbeidssted;

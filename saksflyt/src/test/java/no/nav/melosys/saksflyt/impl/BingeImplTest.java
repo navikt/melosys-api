@@ -1,18 +1,15 @@
 package no.nav.melosys.saksflyt.impl;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.saksflyt.impl.BingeImpl;
-import no.nav.melosys.saksflyt.impl.Utils;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static no.nav.melosys.domain.ProsessSteg.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static no.nav.melosys.domain.ProsessSteg.JFR_AKTØR_ID;
+import static no.nav.melosys.domain.ProsessSteg.JFR_HENT_PERS_OPPL;
+import static org.junit.Assert.*;
 
 public class BingeImplTest {
 
@@ -23,8 +20,8 @@ public class BingeImplTest {
     public void testGrunnleggendeFunksjonalitet() {
         BingeImpl binge = new BingeImpl();
         Prosessinstans pi1 = new Prosessinstans(), pi2 = new Prosessinstans();
-        ReflectionTestUtils.setField(pi1, "id", 1L);
-        ReflectionTestUtils.setField(pi2, "id", 2L);
+        ReflectionTestUtils.setField(pi1, "id", UUID.randomUUID());
+        ReflectionTestUtils.setField(pi2, "id", UUID.randomUUID());
         pi1.setRegistrertDato(LocalDateTime.of(2017, 1, 2, 0, 0));
         pi2.setRegistrertDato(LocalDateTime.of(2017, 1, 1, 0, 0));
         pi1.setSteg(JFR_AKTØR_ID);

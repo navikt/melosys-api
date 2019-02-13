@@ -1,6 +1,6 @@
 -- Arbeidstabell for saksflyt
 CREATE TABLE prosessinstans (
-    id              NUMBER(19) GENERATED ALWAYS AS IDENTITY,
+    uuid            RAW(16) NOT NULL,
     prosess_type    VARCHAR2(99)   NOT NULL,
     behandling_id   NUMBER(19)     NULL,
     data            VARCHAR2(4000) NULL,
@@ -10,7 +10,7 @@ CREATE TABLE prosessinstans (
     antall_retry    INTEGER        DEFAULT 0 NOT NULL,
     sist_forsoekt   TIMESTAMP      NULL,
     sover_til       TIMESTAMP      NULL,
-    CONSTRAINT pk_prosessinstans PRIMARY KEY (id)
+    CONSTRAINT pk_prosessinstans PRIMARY KEY (uuid)
 );
 
 CREATE INDEX idx_prosessinstans_behandling ON prosessinstans(behandling_id);
@@ -86,7 +86,7 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('MANGELBREV', 'Opprett mangelbrev'
 
 CREATE TABLE prosessinstans_hendelser (
     id                  NUMBER(19) GENERATED ALWAYS AS IDENTITY,
-    prosessinstans_id   NUMBER(19)     NOT NULL,
+    prosessinstans_id   RAW(16)     NOT NULL,
     registrert_dato     TIMESTAMP      NOT NULL,
     steg                VARCHAR2(99)   NOT NULL,
     type                VARCHAR2(99)   NULL,
