@@ -142,7 +142,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
 
     private Adresse fraStrukturertAdresse(StrukturertAdresse strukturertAdresse) {
         Adresse adresse = new Adresse();
-        adresse.setGateadresse(strukturertAdresse.gatenavn + " " + strukturertAdresse.husnummer + " ");
+        adresse.setGateadresse(strukturertAdresse.gatenavn + (strukturertAdresse.husnummer == null ? "" : " " + strukturertAdresse.husnummer + " "));
         adresse.setLand(strukturertAdresse.landKode);
         adresse.setPostnr(strukturertAdresse.postnummer);
         adresse.setPoststed(strukturertAdresse.poststed);

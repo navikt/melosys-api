@@ -23,6 +23,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -62,6 +63,7 @@ public class SedServiceTest {
         SedDataBygger dataBygger = Mockito.mock(SedDataBygger.class);
         when(sedDataByggerVelger.hent(any(LovvalgBestemmelse.class))).thenReturn(dataBygger);
         when(dataBygger.lag(any(Behandling.class))).thenReturn(new SedDataDto());
+        when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(behandling.getFagsak());
     }
 
     @Test

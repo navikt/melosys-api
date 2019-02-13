@@ -16,6 +16,7 @@ import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SedService {
@@ -32,6 +33,7 @@ public class SedService {
         this.eessiConsumer = eessiConsumer;
     }
 
+    @Transactional
     public void opprettOgSendSed(Behandling behandling, Behandlingsresultat behandlingsresultat) throws MelosysException {
 
         try {
@@ -43,15 +45,15 @@ public class SedService {
             SedDataBygger sedDataBygger = sedDataByggerVelger.hent(lovvalgsperiode.getBestemmelse());
             SedDataDto sedData = sedDataBygger.lag(behandling);
 
-            Fagsak fagsak = behandling.getFagsak();
+            Fagsak fagsak = fagsakRepository.findBySaksnummer(behandling.getFagsak().getSaksnummer());
 
-            log.info("Oppretter buc og sed med artikkelt {} for fagsak {}", lovvalgBestemmelse.getKode(), fagsak.getSaksnummer());
+            log.info("Oppretter buc og sed med artikkel {} for fagsak {}", lovvalgBestemmelse.getKode(), fagsak.getSaksnummer());
             Map<String, String> rinaSakInfo = eessiConsumer.opprettOgSendSed(sedData);
             String rinaSaksnummer = rinaSakInfo.get("rinaCaseId");
 
             fagsak.setRinasaksnummer(rinaSaksnummer);
             fagsakRepository.save(fagsak);
-            log.info("Buc opprettet med id {} for behandling {}", rinaSakInfo, behandling.getId());
+            log.info("Buc opprettet med id {} for behandling {}", rinaSaksnummer, behandling.getId());
         } catch (Exception e) {
             log.error(
                 "Feil ved opprettelse av SED: \n" +
