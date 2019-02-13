@@ -57,9 +57,9 @@ public abstract class AbstraktDokumentDataBygger {
         return organisasjonsnumre;
     }
 
-    protected List<Arbeidssted> hentArbeidssteder() throws TekniskException {
+    protected List<Arbeidssted> hentArbeidssteder() {
 
-        List<Arbeidssted> arbeidssteder = hentFysiskearbeidsstederMedNavn();
+        List<Arbeidssted> arbeidssteder = hentFysiskearbeidssteder();
         arbeidssteder.addAll(hentIkkeFysiskeArbeidssteder());
 
         if (!arbeidssteder.isEmpty()) {
@@ -68,7 +68,7 @@ public abstract class AbstraktDokumentDataBygger {
 
         List<Virksomhet> utenlandskeVirksomheter = hentUtenlandskeVirksomheter();
         if (utenlandskeVirksomheter.size() != 1) {
-            throw new TekniskException("Krever utsendelse til én og kun én virksomhet i utlandet");
+            return Collections.emptyList();
         }
 
         // I Lev1 er det kun én utenlandsk arbeidsgiver.
@@ -88,7 +88,7 @@ public abstract class AbstraktDokumentDataBygger {
                 .collect(Collectors.toList());
     }
 
-    private List<Arbeidssted> hentFysiskearbeidsstederMedNavn() {
+    private List<Arbeidssted> hentFysiskearbeidssteder() {
         return søknad.arbeidUtland.stream()
                 .map(au -> new Arbeidssted(au.foretakNavn, au.adresse))
                 .collect(Collectors.toList());
