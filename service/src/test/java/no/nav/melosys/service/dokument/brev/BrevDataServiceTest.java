@@ -158,8 +158,13 @@ public class BrevDataServiceTest {
         testLagDokumentMetadata(MELDING_HENLAGT_SAK, Aktoersroller.BRUKER);
     }
 
+
+    public void lagMetadataForInnvilgelseArbeidsgiverBrevAngirDokTypeLikArbeidsgiver() throws Exception {
+        testLagDokumentMetadata(INNVILGELSE_ARBEIDSGIVER);
+    }
+
     @Test
-    public void lagMetadataUtenMottakerKasterUnntak() {
+    public void lagMetadataUtenMottakerKasterUnntak() throws Exception {
         Throwable unntak = catchThrowable(() -> service.lagBestillingMetadata(INNVILGELSE_YRKESAKTIV, lagBehandling(), new BrevData()));
         assertThat(unntak).isInstanceOf(TekniskException.class)
             .hasMessageContaining("finnes ingen mottaker")

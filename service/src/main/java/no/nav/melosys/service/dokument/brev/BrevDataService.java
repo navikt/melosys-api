@@ -96,6 +96,8 @@ public class BrevDataService {
             case ATTEST_A1:
             case ANMODNING_UNNTAK:
             case INNVILGELSE_YRKESAKTIV:
+            case INNVILGELSE_ARBEIDSGIVER:
+                //Avklaring av brev mottaker blir utført i MELOSYS-2248
             case MELDING_MANGLENDE_OPPLYSNINGER:
             case MELDING_HENLAGT_SAK: {
                 if (brevData.mottaker == null) {
