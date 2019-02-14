@@ -1,10 +1,10 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
 import java.util.Map;
-import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -120,40 +120,5 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
         }
-    }
-
-    /**
-     * Finn ut om innvilgelsesbrev skal sendes.
-     * 
-     * Innvilgelsesbrev skal sendes dersom behandlingen har resultert i:
-     * <ul>
-     * <li>Lovvalgsland er avklart</li>
-     * <li>Lovvalgsland er Norge</li>
-     * <li>Lovvalgbestemmelsen er 12.1, 12.2 eller 16.1</li>
-     * 
-     * </ul>
-     * 
-     * @param behandling
-     *            en behandling å sjekke.
-     * @return <code>true</code> hvis innvilgelsesbrev skal sendes, ellers <code>false</code>.
-     */
-    private boolean innvilgelsesbrevSkalSendes(Behandling behandling) {
-        Behandlingsresultat resultat = behandlingsResultatRepo.findById(behandling.getId()).orElse(null);
-        Set<Lovvalgsperiode> lovvalgsperioder = resultat.getLovvalgsperioder();
-        if (lovvalgsperioder.size() > 1) {
-            throw new UnsupportedOperationException(String.format("Flere enn en"
-                    + " lovvalgsperiode er ikke støttet i første leveranse av "
-                    + "Melosys (behandlingsid %s).", behandling.getId()));
-        }
-        LovvalgBestemmelse bestemmelse = resultat.getLovvalgsperioder().iterator().next().getBestemmelse();
-        return resultat.getType() == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND &&
-                resultat.getFastsattAvLand() == Landkoder.NO &&
-                bestemmelseKanInnvilges(bestemmelse);
-    }
-
-    private static boolean bestemmelseKanInnvilges(LovvalgBestemmelse bestemmelse) {
-        return bestemmelse == LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1 ||
-                bestemmelse == LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_2 ||
-                bestemmelse == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1;
     }
 }
