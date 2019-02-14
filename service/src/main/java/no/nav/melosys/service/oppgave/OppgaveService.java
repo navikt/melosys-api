@@ -92,7 +92,7 @@ public class OppgaveService {
                 .collect(Collectors.toList());
     }
 
-    private Oppgave hentOppgaveMedFagSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
+    public Oppgave hentOppgaveMedFagSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
         return  gsakFasade.finnOppgaveMedSaksnummer(fagSaksnummer);
     }
 
