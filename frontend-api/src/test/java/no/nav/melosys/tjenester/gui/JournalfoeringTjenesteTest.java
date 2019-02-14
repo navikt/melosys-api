@@ -13,7 +13,6 @@ import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import org.json.JSONException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -76,7 +75,6 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTest {
         valider(journalpostDto);
     }
 
-    @Ignore // FIXME: "behandlingstype" må legges til i JSON-schema (MELOSYS-1975)
     @Test
     public void journalføringTilordneSchemaValidering() throws IOException, JSONException {
         JournalfoeringTilordneDto journalfoeringDto = random.nextObject(JournalfoeringTilordneDto.class);

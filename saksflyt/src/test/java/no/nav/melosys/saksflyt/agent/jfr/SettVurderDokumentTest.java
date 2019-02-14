@@ -57,6 +57,7 @@ public class SettVurderDokumentTest {
         Prosessinstans p = new Prosessinstans();
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isNull();
         verify(behandlingRepository).save(behandlingArgumentCaptor.capture());
@@ -68,6 +69,18 @@ public class SettVurderDokumentTest {
         Prosessinstans p = new Prosessinstans();
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
+        agent.utførSteg(p);
+        assertThat(p.getSteg()).isNull();
+        verify(behandlingRepository, never()).save(any(Behandling.class));
+    }
+
+    @Test
+    public void utførSteg_ingenVurdering_ingenStatusEndring() {
+        Prosessinstans p = new Prosessinstans();
+        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        p.setData(ProsessDataKey.JFR_INGEN_VURDERING, true);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isNull();
         verify(behandlingRepository, never()).save(any(Behandling.class));
@@ -78,6 +91,7 @@ public class SettVurderDokumentTest {
         Prosessinstans p = new Prosessinstans();
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_FINNES_IKKE);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
         assertThat(p.getHendelser()).isNotEmpty();

@@ -7,13 +7,13 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.context.ApplicationEventPublisher;
 
 import static no.nav.melosys.domain.ProsessDataKey.DOKUMENT_ID;
 import static no.nav.melosys.domain.ProsessDataKey.JOURNALPOST_ID;
@@ -33,12 +33,9 @@ public class OpprettFagsakOgBehandlingTest {
 
     private OpprettFagsakOgBehandling agent;
 
-    private ApplicationEventPublisher applicationEventPublisher;
-
 
     @Before
     public void setUp() {
-        applicationEventPublisher = mock(ApplicationEventPublisher.class);
         AuditorProvider auditorAware = mock(AuditorProvider.class);
         agent = new OpprettFagsakOgBehandling(fagsakService, behandlingService, auditorAware);
     }
@@ -59,11 +56,11 @@ public class OpprettFagsakOgBehandlingTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
         fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
-        when(fagsakService.nyFagsakOgBehandling(anyString(), anyString(), any(), eq(Behandlingstyper.SOEKNAD), any(), any())).thenReturn(fagsak);
+        when(fagsakService.nyFagsakOgBehandling(any(OpprettSakRequest.class))).thenReturn(fagsak);
 
         agent.utførSteg(p);
 
-        verify(fagsakService).nyFagsakOgBehandling(aktørId, arbeidsgiver, null, Behandlingstyper.SOEKNAD, journalpostId, dokumentId);
+        verify(fagsakService).nyFagsakOgBehandling(any());
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SØKNAD);
     }

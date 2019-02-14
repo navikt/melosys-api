@@ -1,4 +1,4 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.sak;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -15,6 +15,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.ProsessinstansService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,18 +68,19 @@ public class FagsakService {
      * - Oppretter tom behandlingsresultat.
      */
     @Transactional
-    public Fagsak nyFagsakOgBehandling(String aktørID, String arbeidsgiver, String representant, Behandlingstyper behandlingstype, String initierendeJournalpostId, String initierendeDokumentId) {
+    public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(hentNesteSaksnummer());
 
         HashSet<Aktoer> aktører = new HashSet<>();
 
         Aktoer aktør = new Aktoer();
-        aktør.setAktørId(aktørID);
+        aktør.setAktørId(opprettSakRequest.getAktørID());
         aktør.setFagsak(fagsak);
         aktør.setRolle(Aktoersroller.BRUKER);
         aktører.add(aktør);
 
+        String arbeidsgiver = opprettSakRequest.getArbeidsgiver();
         if (arbeidsgiver != null) {
             Aktoer aktørArbeidsgiver = new Aktoer();
             aktørArbeidsgiver.setOrgnr(arbeidsgiver);
@@ -86,11 +89,13 @@ public class FagsakService {
             aktører.add(aktørArbeidsgiver);
         }
 
+        String representant = opprettSakRequest.getRepresentant();
         if (representant != null) {
             Aktoer aktørRepresentant = new Aktoer();
             aktørRepresentant.setOrgnr(representant);
             aktørRepresentant.setFagsak(fagsak);
             aktørRepresentant.setRolle(Aktoersroller.REPRESENTANT);
+            aktørRepresentant.setKontaktperson(opprettSakRequest.getRepresentantKontaktperson());
             aktører.add(aktørRepresentant);
         }
 
@@ -103,6 +108,9 @@ public class FagsakService {
 
         lagre(fagsak);
 
+        Behandlingstyper behandlingstype = opprettSakRequest.getBehandlingstype();
+        String initierendeJournalpostId = opprettSakRequest.getInitierendeJournalpostId();
+        String initierendeDokumentId = opprettSakRequest.getInitierendeDokumentId();
         Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
@@ -139,6 +147,6 @@ public class FagsakService {
             .stream()
             .filter(behandling -> behandling.getStatus() != Behandlingsstatus.AVSLUTTET)
             .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
-            .get();
+            .orElseThrow(() -> new IllegalStateException("Sak " + fagsak.getSaksnummer() + " har ingen behandlinger eller bare avsluttede behandlinger."));
     }
 }

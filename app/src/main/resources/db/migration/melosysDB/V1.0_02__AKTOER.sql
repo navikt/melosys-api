@@ -5,6 +5,7 @@ CREATE TABLE aktoer (
     orgnr           VARCHAR2(99) NULL,
     utenlandsk_id   VARCHAR2(99) NULL,
     rolle           VARCHAR2(99) NOT NULL,
+    kontaktperson   VARCHAR2(999) NULL,
     CONSTRAINT pk_bruker PRIMARY KEY (id)
 );
 

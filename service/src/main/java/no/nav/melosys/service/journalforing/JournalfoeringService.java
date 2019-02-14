@@ -5,6 +5,7 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
@@ -58,7 +59,6 @@ public class JournalfoeringService {
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
         setFellesData(prosessinstans,journalfoeringDto);
 
-        //FIXME MELOSYS-1283 vedlegg
         // Land trenges av regelmodulen får å vurdere inngangsvilkår
         prosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, journalfoeringDto.getFagsak().getLand());
         // Perioden trenges for å hente saksopplysninger
@@ -69,6 +69,10 @@ public class JournalfoeringService {
 
         if (!StringUtils.isEmpty(journalfoeringDto.getRepresentantID())) {
             prosessinstans.setData(ProsessDataKey.REPRESENTANT, journalfoeringDto.getRepresentantID());
+        }
+
+        if (!StringUtils.isEmpty(journalfoeringDto.getRepresentantKontaktPerson())) {
+            prosessinstans.setData(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, journalfoeringDto.getRepresentantKontaktPerson());
         }
 
         prosessinstansService.lagreProsessinstans(prosessinstans);
@@ -90,17 +94,17 @@ public class JournalfoeringService {
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
         setFellesData(prosessinstans, journalfoeringDto);
 
-        //FIXME MELOSYS-1283 vedlegg
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
-        if (journalfoeringDto.getBehandlingstype() != null) {
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, journalfoeringDto.getBehandlingstype());
-        }
+        prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
 
         prosessinstansService.lagreProsessinstans(prosessinstans);
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
     private void setFellesData(Prosessinstans prosessinstans, JournalfoeringDto journalfoeringDto) {
+        if (!StringUtils.isEmpty(journalfoeringDto.getBehandlingstypeKode())) {
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()));
+        }
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalfoeringDto.getJournalpostID());
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringDto.getDokumentID());
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringDto.getOppgaveID());
