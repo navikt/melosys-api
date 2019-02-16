@@ -135,17 +135,24 @@ public class FagsakTjeneste extends RestTjeneste {
         modelMapper.map(fagsak, fagsakDto);
         fagsakDto.setSaksnummer(fagsak.getSaksnummer());
 
-        Oppgave oppgave = oppgaveService.hentOppgaveMedFagSaksnummer(fagsak.getSaksnummer());
+        Optional<Oppgave> oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(fagsak.getSaksnummer());
 
         Behandling behandling = fagsak.getAktivBehandling();
 
-        if(oppgave != null && behandling != null && ident.equalsIgnoreCase(oppgave.getTilordnetRessurs())) {
+        if(erBehandlingRedigerbar(ident, oppgave, behandling)) {
             fagsakDto.getBehandlinger().stream()
                 .filter(behandlingDto -> behandlingDto.getOppsummering().getBehandlingID().equals(behandling.getId()))
                 .findAny()
                 .ifPresent(behandlingDto -> behandlingDto.setRedigerbart(true));
         }
         return fagsakDto;
+    }
+
+    public boolean erBehandlingRedigerbar(String ident, Optional<Oppgave> oppgave, Behandling behandling) {
+        return behandling != null
+            && oppgave.isPresent()
+            && oppgave.filter(oppgave1 -> ident.equalsIgnoreCase(oppgave1.getTilordnetRessurs())).isPresent()
+            && behandling.erRedigerbar();
     }
 
     private List<FagsakOppsummeringDto> tilDtoer(Iterable<Fagsak> saker) {

@@ -109,6 +109,29 @@ public class OppgaveServiceTest {
         assertThat(mineSaker.size()).isEqualTo(0);
     }
 
+    @Test
+    public void testHentOppgaveForFagsaksnummer() throws MelosysException {
+        Oppgave oppgave1 = new Oppgave();
+        oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK);
+        oppgave1.setSaksnummer("MEL-12345");
+
+        when(gsakFasade.finnOppgaveMedSaksnummer(anyString())).
+            thenAnswer((Answer<Optional<Oppgave>>) invocation -> {
+                String string = invocation.getArgument(0);
+                if (string.equals("MEL-12345")) {
+                    return Optional.of(oppgave1);
+                } else {
+                    return Optional.empty();
+                }
+            });
+
+        Optional<Oppgave> oppgave = oppgaveService.hentOppgaveMedFagsaksnummer("MEL-12345");
+        assertThat(oppgave.filter(Oppgave::erBehandling).isPresent()).isEqualTo(true);
+
+        oppgave = oppgaveService.hentOppgaveMedFagsaksnummer("MEL-12346");
+        assertThat(oppgave.isPresent()).isEqualTo(false);
+    }
+
     private static Behandling lagBehandling() {
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
         PersonDokument personDokument = new PersonDokument();

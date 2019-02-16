@@ -306,7 +306,7 @@ public class OppgaveplukkerTest {
         final String saksbehandlerID = "test";
         final String begrunnelse = "Oppgaven er kjedelig";
 
-        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgave);
+        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(Optional.of(oppgave));
 
         when(oppgaveTilbakkeleggingRepo.save(any(OppgaveTilbakelegging.class))).then(arguments -> {
             OppgaveTilbakelegging oppgaveTilbakelegging = arguments.getArgument(0);
@@ -333,7 +333,7 @@ public class OppgaveplukkerTest {
         oppgave.setPrioritet(PrioritetType.valueOf("HOY"));
         final String saksbehandlerID = "test";
 
-        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgave);
+        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(Optional.of(oppgave));
 
         TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
         tilbakelegging.setBehandlingID(BEHANDLING_ID);

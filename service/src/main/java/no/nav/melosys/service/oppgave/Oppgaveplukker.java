@@ -132,7 +132,9 @@ public class Oppgaveplukker {
             .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandling med behandlingID " + tilbakelegging.getBehandlingID()));
 
         Fagsak fagsak = behandling.getFagsak();
-        Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(fagsak.getSaksnummer());
+        Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(fagsak.getSaksnummer())
+            .orElseThrow(() -> new IkkeFunnetException("Fant ingen oppgave for fagsak " + fagsak.getSaksnummer()));
+
         String oppgaveId = oppgave.getOppgaveId();
         gsakFasade.leggTilbakeOppgave(oppgaveId);
 

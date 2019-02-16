@@ -3,6 +3,7 @@ package no.nav.melosys.service.oppgave;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -72,12 +73,14 @@ public class OppgaveService {
     }
 
     public void ferdigstillOppgaveMedSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
-        Oppgave oppgave = hentOppgaveMedFagSaksnummer(fagSaksnummer);
+        Oppgave oppgave = hentOppgaveMedFagsaksnummer(fagSaksnummer).
+            orElseThrow(() -> new TekniskException("Ingen oppgave funnet for fagsak " + fagSaksnummer));
         ferdigstillOppgave(oppgave.getOppgaveId());
     }
 
     public void leggTilbakeOppgaveMedSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
-        Oppgave oppgave = hentOppgaveMedFagSaksnummer(fagSaksnummer);
+        Oppgave oppgave = hentOppgaveMedFagsaksnummer(fagSaksnummer).
+            orElseThrow(() -> new TekniskException("Ingen oppgave funnet for fagsak " + fagSaksnummer));
         gsakFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
     }
 
@@ -92,8 +95,8 @@ public class OppgaveService {
                 .collect(Collectors.toList());
     }
 
-    public Oppgave hentOppgaveMedFagSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
-        return  gsakFasade.finnOppgaveMedSaksnummer(fagSaksnummer);
+    public Optional<Oppgave> hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
+        return  gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) throws TekniskException {
