@@ -19,7 +19,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -56,10 +56,13 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
         Virksomhet arbeidsgiver = brevdata.norskeVirksomheter.iterator().next();
         fag.setArbeidsgiver(arbeidsgiver.navn);
+
         // Slå opp arbeidsland i avklartefakta, fall tilbake på søknaden (kan overkjøres av saksbehandler for sokkel/skip).
-        String arbeidsland = resultat.finnAvklartFaktum(ARBEIDSLAND).map(Avklartefakta::getSubjekt)
+        String arbeidslandSomTekst = resultat.finnAvklartFaktum(ARBEIDSLAND).map(Avklartefakta::getSubjekt)
             .orElseGet(() -> hentArbeidslandFraSøknaden(behandling));
-        fag.setArbeidsland(arbeidsland);
+        Landkoder arbeidsland = Landkoder.valueOf(arbeidslandSomTekst);
+        fag.setArbeidsland(arbeidsland.getBeskrivelse());
+
         Set<Lovvalgsperiode> perioder = resultat.getLovvalgsperioder();
         if (perioder.size() != 1) {
             throw new UnsupportedOperationException(String.format("Antall lovvalgsperioder (%s) ulik 1 støttes ikke i første versjon av Melosys.",

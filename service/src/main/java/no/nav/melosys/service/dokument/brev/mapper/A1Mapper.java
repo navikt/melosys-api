@@ -45,7 +45,7 @@ public class A1Mapper {
 
         a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevData.yrkesgruppe.name()));
 
-        List<Virksomhet> virksomheter = brevData.norskeVirksomheter;
+        List<Virksomhet> virksomheter = new ArrayList<>(brevData.norskeVirksomheter);
         if (virksomheter.isEmpty()) {
             throw new TekniskException("Trenger minst en valgt norsk virksomhet for ART12.1");
         }
