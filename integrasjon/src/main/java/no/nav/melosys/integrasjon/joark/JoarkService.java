@@ -138,6 +138,9 @@ public class JoarkService implements JoarkFasade {
         // Tjenesten mangler opplysninger (tittel og vedleggstitler) tilgjengelige i nye REST tjenester (https://jira.adeo.no/browse/PK-51497).
         arkivDokument.setTittel("");
         journalpost.setHoveddokument(arkivDokument);
+        if (inngaaendeJournalpost.getArkivSak() != null) {
+            journalpost.setArkivSakId(inngaaendeJournalpost.getArkivSak().getArkivSakId());
+        }
 
         return journalpost;
     }
@@ -216,7 +219,7 @@ public class JoarkService implements JoarkFasade {
 
         ArkivSak arkivSak = new ArkivSak();
         arkivSak.setArkivSakId(Long.toString(gsakSaksnummer));
-        arkivSak.setArkivSakSystem(Fagsystem.GSAK.getKode());
+        arkivSak.setArkivSakSystem(Fagsystem.GSAK_I_JOARK.getKode());
         journalpost.setArkivSak(arkivSak);
 
         no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Person bruker = new no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Person();

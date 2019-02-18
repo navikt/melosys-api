@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.Kodeverk;
  */
 public enum Fagsystem implements Kodeverk {
 
-    GSAK("FS19", "GSAK"),
     // GSAK brukes som referanse til sakstilhørende fagsystem, men av historiske årsaker har det feil kode i Joark.
     GSAK_I_JOARK("FS22", "GSAK i Joark"), // Bruker Gosys appID
     MELOSYS("FS38", "Melosys");
