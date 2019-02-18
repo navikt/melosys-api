@@ -10,15 +10,26 @@ import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.saksflyt.api.StegBehandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE;
 
 
 /**
  * En arbeidertråd som schedulerer arbeid som utføres av de maskinelle stegene.
  * Klassen er ikke en bønne håndtert av Spring, og får allse sine bønne-avhengigheter i konstruktøren.
+ *
+ * Konfigurasjon:
+ *      melosys.saksflyt.arbeider.oppholdMellomSteg – Hvor mange millisekunder trådene skal sove mellom hvert steg som aktiveres (default 47)
  */
+@Component
+@Scope(SCOPE_PROTOTYPE)
 public class ArbeiderTraad extends Thread {
-
-    private static final long TIMEOUT_FOR_Å_STOPPE_EN_TRÅD = 60000;
 
     private static final Logger logger = LoggerFactory.getLogger(ArbeiderTraad.class);
 
@@ -34,36 +45,17 @@ public class ArbeiderTraad extends Thread {
 
     private volatile Prosessinstans aktivProsessinstans;
 
-    @SuppressWarnings("unused")
-    private ArbeiderTraad() {} // Skal ikke håndteres av Spring
-    
-    ArbeiderTraad(Binge binge, ProsessinstansRepository prosessinstansRepo, List<StegBehandler> stegBehandlere, long oppholdMellomSteg) {
+    @Autowired
+    ArbeiderTraad(
+        Binge binge,
+        ProsessinstansRepository prosessinstansRepo,
+        List<StegBehandler> stegBehandlere,
+        @Value("${melosys.saksflyt.arbeider.oppholdMellomSteg:47}") long oppholdMellomSteg
+    ) {
         this.binge = binge;
         this.prosessinstansRepo = prosessinstansRepo;
         this.stegBehandlere = stegBehandlere;
         this.oppholdMellomSteg = oppholdMellomSteg;
-    }
-
-    // Kalles av Arbeider når konteksten tas ned
-    void stoppArbeider() {
-        // ADVARSEL: IKKE rør denne metoden med mindre du vet nøyaktig hva du gjør (og har god kompetanse på hvordan tråder fungerer i Java) 
-        if (!isAlive()) {
-            return;
-        }
-        interrupt(); // Merk: ikke kjørende tråd sin interrupt som kalles
-        try {
-            join(TIMEOUT_FOR_Å_STOPPE_EN_TRÅD);
-        } catch (InterruptedException e) {
-            // Vi er her bare hvis tråden som forsøker å ta ned arbeiderne blir interrupted.
-            // Disse interruptene kan skape problemer hvis det blir for mange av dem, siden vi avbryter venting på at en tråd stopper.
-            logger.error("Forsøk på å vente på en tråds død ble avbrutt.");
-            Thread.currentThread().interrupt(); // Resetter interrupted-statusen til kallende tråd
-        }
-        if (isAlive()) {
-            logger.error("Klarte ikke å stoppe tråden i løpet av {} millisekunder", TIMEOUT_FOR_Å_STOPPE_EN_TRÅD);
-            logger.error("StegBehandler som ikke lot seg stoppe: {}", aktivStegBehandler.getClass().getName());
-            logger.error("Prosessinstans som kanskje må ryddes opp i: {}", aktivProsessinstans.getId());
-        }
     }
 
     @Override
@@ -102,7 +94,8 @@ public class ArbeiderTraad extends Thread {
         }
     }
 
-    private void finnProsessinstansOgUtførSteg(StegBehandler stegBehandler) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    void finnProsessinstansOgUtførSteg(StegBehandler stegBehandler) {
         Prosessinstans pi = binge.fjernFørsteProsessinstans(stegBehandler.inngangsvilkår());
         if (pi == null) {
             return;
