@@ -1,17 +1,18 @@
 package no.nav.melosys.service.dokument.sed.mapper;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import org.junit.Test;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
-public class VilkaarsresultatTilBeskrivelseMapperTest {
+public class VilkaarsresultatTilBegrunnelseMapperTest {
 
     @Test
-    public void mapVilkaarsresultatTilBeskrivelseString_forventSøktForSentBeskrivelse() {
+    public void mapVilkaarsresultatTilBegrunnelseString_forventSøktForSentBeskrivelse() {
         VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
         vilkaarBegrunnelse.setKode("SOEKT_FOR_SENT");
 
@@ -21,12 +22,12 @@ public class VilkaarsresultatTilBeskrivelseMapperTest {
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         vilkaarsresultat.setBegrunnelser(vilkaarBegrunnelser);
 
-        assertThat(VilkaarsresultatTilBeskrivelseMapper.mapVilkaarsresultatTilBeskrivelseString(vilkaarsresultat),
+        assertThat(VilkaarsresultatTilBegrunnelseMapper.mapVilkaarsresultatTilBegrunnelseString(vilkaarsresultat),
                 is("Søkt mer enn ett år etter perioden startet"));
     }
 
     @Test
-    public void mapVilkaarsresultatTilBeskrivelseString_forventFritekst() {
+    public void mapVilkaarsresultatTilBegrunnelseString_forventFritekst() {
         VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
         vilkaarBegrunnelse.setKode("SAERLIG_AVSLAGSGRUNN");
 
@@ -37,12 +38,12 @@ public class VilkaarsresultatTilBeskrivelseMapperTest {
         vilkaarsresultat.setBegrunnelser(vilkaarBegrunnelser);
         vilkaarsresultat.setBegrunnelseFritekst("Fritekst som beskriver avslagsgrunn");
 
-        assertThat(VilkaarsresultatTilBeskrivelseMapper.mapVilkaarsresultatTilBeskrivelseString(vilkaarsresultat),
+        assertThat(VilkaarsresultatTilBegrunnelseMapper.mapVilkaarsresultatTilBegrunnelseString(vilkaarsresultat),
             is("Fritekst som beskriver avslagsgrunn"));
     }
 
     @Test
-    public void mapVilkaarsresultatTilBeskrivelseString_medFlereBegrunnelser_forventSammensattBegrunnelse() {
+    public void mapVilkaarsresultatTilBegrunnelseString_medFlereBegrunnelser_forventSammensattBegrunnelse() {
         VilkaarBegrunnelse vilkaarBegrunnelseForSent = new VilkaarBegrunnelse();
         vilkaarBegrunnelseForSent.setKode("SOEKT_FOR_SENT");
         VilkaarBegrunnelse vilkaarBegrunnelseErstatter = new VilkaarBegrunnelse();
@@ -56,12 +57,12 @@ public class VilkaarsresultatTilBeskrivelseMapperTest {
         vilkaarsresultat.setBegrunnelser(vilkaarBegrunnelser);
         vilkaarsresultat.setBegrunnelseFritekst("Fritekst som ikke skal vises");
 
-        assertThat(VilkaarsresultatTilBeskrivelseMapper.mapVilkaarsresultatTilBeskrivelseString(vilkaarsresultat),
+        assertThat(VilkaarsresultatTilBegrunnelseMapper.mapVilkaarsresultatTilBegrunnelseString(vilkaarsresultat),
             is("Erstatter en annen utsendt person, samlet periode mer enn 5 år\nSøkt mer enn ett år etter perioden startet"));
     }
 
     @Test
-    public void mapVilkaarsresultatTilBeskrivelseString_medFlereBegrunnelserOgFritekst_forventFritekst() {
+    public void mapVilkaarsresultatTilBegrunnelseString_medFlereBegrunnelserOgFritekst_forventFritekst() {
         VilkaarBegrunnelse vilkaarBegrunnelseForSent = new VilkaarBegrunnelse();
         vilkaarBegrunnelseForSent.setKode("SOEKT_FOR_SENT");
         VilkaarBegrunnelse vilkaarBegrunnelseErstatter = new VilkaarBegrunnelse();
@@ -78,7 +79,7 @@ public class VilkaarsresultatTilBeskrivelseMapperTest {
         vilkaarsresultat.setBegrunnelser(vilkaarBegrunnelser);
         vilkaarsresultat.setBegrunnelseFritekst("Fritekst som skal vises");
 
-        assertThat(VilkaarsresultatTilBeskrivelseMapper.mapVilkaarsresultatTilBeskrivelseString(vilkaarsresultat),
+        assertThat(VilkaarsresultatTilBegrunnelseMapper.mapVilkaarsresultatTilBegrunnelseString(vilkaarsresultat),
             is("Fritekst som skal vises"));
     }
 }

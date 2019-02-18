@@ -7,9 +7,9 @@ import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.kodeverk.Art16_1_Avslag__Begrunnelser;
 
-public class VilkaarsresultatTilBeskrivelseMapper {
+public class VilkaarsresultatTilBegrunnelseMapper {
 
-    public static String mapVilkaarsresultatTilBeskrivelseString(Vilkaarsresultat vilkaarsresultat) {
+    public static String mapVilkaarsresultatTilBegrunnelseString(Vilkaarsresultat vilkaarsresultat) {
 
         Set<String> begrunnelser = vilkaarsresultat.getBegrunnelser().stream()
             .map(VilkaarBegrunnelse::getKode)

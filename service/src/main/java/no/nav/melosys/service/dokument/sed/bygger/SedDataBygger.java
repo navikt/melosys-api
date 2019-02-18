@@ -21,7 +21,7 @@ import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
-import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBeskrivelseMapper;
+import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class SedDataBygger extends AbstraktDokumentDataBygger {
@@ -169,21 +169,9 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
     private String hentBeskrivelse(no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode) {
         Set<Vilkaarsresultat> vilkaarsresultater = lovvalgsperiode.getBehandlingsresultat().getVilkaarsresultater();
 
-        Set<String> beskrivelser = vilkaarsresultater.stream()
-            .map(VilkaarsresultatTilBeskrivelseMapper::mapVilkaarsresultatTilBeskrivelseString)
-            .collect(Collectors.toSet());
-
-        // Bygg string fra beskrivelser
-        StringBuilder stringBuilder = new StringBuilder();
-
-        if (beskrivelser.size() > 0) {
-            beskrivelser.forEach(beskrivelse ->
-                stringBuilder
-                    .append(beskrivelse)
-                    .append("\n\n"));
-        }
-
-        return stringBuilder.toString();
+        return vilkaarsresultater.stream()
+            .map(VilkaarsresultatTilBegrunnelseMapper::mapVilkaarsresultatTilBegrunnelseString)
+            .collect(Collectors.joining("\n\n"));
     }
 
     private String[] splitFulltNavn(String navn) {
