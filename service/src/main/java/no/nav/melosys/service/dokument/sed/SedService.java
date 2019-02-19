@@ -42,18 +42,15 @@ public class SedService {
 
             LovvalgBestemmelse lovvalgBestemmelse = lovvalgsperiode.getBestemmelse();
 
+            Fagsak fagsak = fagsakRepository.findBySaksnummer(behandling.getFagsak().getSaksnummer());
             SedDataBygger sedDataBygger = sedDataByggerVelger.hent(lovvalgsperiode.getBestemmelse());
             SedDataDto sedData = sedDataBygger.lag(behandling);
-
-            Fagsak fagsak = fagsakRepository.findBySaksnummer(behandling.getFagsak().getSaksnummer());
+            sedData.setGsakId(fagsak.getGsakSaksnummer());
 
             log.info("Oppretter buc og sed med artikkel {} for fagsak {}", lovvalgBestemmelse.getKode(), fagsak.getSaksnummer());
             Map<String, String> rinaSakInfo = eessiConsumer.opprettOgSendSed(sedData);
-            String rinaSaksnummer = rinaSakInfo.get("rinaCaseId");
 
-            fagsak.setRinasaksnummer(rinaSaksnummer);
-            fagsakRepository.save(fagsak);
-            log.info("Buc opprettet med id {} for behandling {}", rinaSaksnummer, behandling.getId());
+            log.info("Buc opprettet med id {} for behandling {}", rinaSakInfo.get("rinaCaseId"), behandling.getId());
         } catch (Exception e) {
             log.error(
                 "Feil ved opprettelse av SED: \n" +

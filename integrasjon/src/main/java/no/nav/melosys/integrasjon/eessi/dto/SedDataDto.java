@@ -19,6 +19,8 @@ public class SedDataDto {
     private List<Arbeidssted> arbeidssteder;
     private List<Virksomhet> utenlandskeVirksomheter;
 
+    private Long gsakId;
+
     //Lovvalg
     private List<Lovvalgsperiode> lovvalgsperioder;
 
@@ -100,5 +102,13 @@ public class SedDataDto {
 
     public void setLovvalgsperioder(List<Lovvalgsperiode> lovvalgsperioder) {
         this.lovvalgsperioder = lovvalgsperioder;
+    }
+
+    public Long getGsakId() {
+        return gsakId;
+    }
+
+    public void setGsakId(Long gsakId) {
+        this.gsakId = gsakId;
     }
 }
