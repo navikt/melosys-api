@@ -12,6 +12,8 @@ import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -33,6 +35,9 @@ public class OpprettFagsakOgBehandlingTest {
 
     private OpprettFagsakOgBehandling agent;
 
+    @Captor
+    private ArgumentCaptor<OpprettSakRequest> opprettSakRequestArgumentCaptor;
+
 
     @Before
     public void setUp() {
@@ -48,10 +53,14 @@ public class OpprettFagsakOgBehandlingTest {
         String journalpostId = "44553";
         String dokumentId = "222221";
         String arbeidsgiver = "104568393";
+        String representant = "rep";
+        String representantKontaktperson = "kontaktperson";
         p.setData(ProsessDataKey.AKTØR_ID, aktørId);
         p.setData(ProsessDataKey.ARBEIDSGIVER, arbeidsgiver);
         p.setData(ProsessDataKey.JOURNALPOST_ID, journalpostId);
         p.setData(ProsessDataKey.DOKUMENT_ID, dokumentId);
+        p.setData(ProsessDataKey.REPRESENTANT, representant);
+        p.setData(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, representantKontaktperson);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
@@ -60,7 +69,13 @@ public class OpprettFagsakOgBehandlingTest {
 
         agent.utførSteg(p);
 
-        verify(fagsakService).nyFagsakOgBehandling(any());
+        verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getAktørID()).isEqualTo(aktørId);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getArbeidsgiver()).isEqualTo(arbeidsgiver);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getInitierendeJournalpostId()).isEqualTo(journalpostId);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getInitierendeDokumentId()).isEqualTo(dokumentId);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getRepresentant()).isEqualTo(representant);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getRepresentantKontaktperson()).isEqualTo(representantKontaktperson);
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SØKNAD);
     }
