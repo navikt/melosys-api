@@ -1,11 +1,9 @@
 package no.nav.melosys.service.journalforing;
 
 import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
@@ -54,10 +52,7 @@ public class JournalfoeringService {
         valider(journalfoeringDto);
         validerOpprettSakFelter(journalfoeringDto);
         
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.JFR_NY_SAK);
-        prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
-        setFellesData(prosessinstans,journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
 
         // Land trenges av regelmodulen får å vurdere inngangsvilkår
         prosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, journalfoeringDto.getFagsak().getLand());
@@ -75,7 +70,7 @@ public class JournalfoeringService {
             prosessinstans.setData(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, journalfoeringDto.getRepresentantKontaktPerson());
         }
 
-        prosessinstansService.lagreProsessinstans(prosessinstans);
+        prosessinstansService.lagreOgSettIBingen(prosessinstans);
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
@@ -89,29 +84,13 @@ public class JournalfoeringService {
             throw new FunksjonellException("Saksnummer mangler");
         }
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.JFR_KNYTT);
-        prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
-        setFellesData(prosessinstans, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto);
 
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
 
-        prosessinstansService.lagreProsessinstans(prosessinstans);
+        prosessinstansService.lagreOgSettIBingen(prosessinstans);
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
-    }
-
-    private void setFellesData(Prosessinstans prosessinstans, JournalfoeringDto journalfoeringDto) {
-        if (!StringUtils.isEmpty(journalfoeringDto.getBehandlingstypeKode())) {
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()));
-        }
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalfoeringDto.getJournalpostID());
-        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringDto.getDokumentID());
-        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringDto.getOppgaveID());
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringDto.getBrukerID());
-        prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
-        prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringDto.getAvsenderNavn());
-        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
     }
 
     // Denne er package-visible kun for at det skal være lettere å teste den isolert
