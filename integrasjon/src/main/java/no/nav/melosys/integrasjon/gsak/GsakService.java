@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.domain.kodeverk.Behandlingstyper.SOEKNAD;
 import static no.nav.melosys.domain.util.KodeverkUtils.erGyldigKode;
@@ -253,7 +252,7 @@ public class GsakService implements GsakFasade {
             .map(GsakService::oppgaveMappingDtoTilDomain)
             .collect(Collectors.toList());
 
-        if (!CollectionUtils.isEmpty(oppgaver)) {
+        if (!oppgaver.isEmpty()) {
             if (oppgaver.size() > 1) {
                 throw new TekniskException("Det finnes flere aktive behandlingsoppgaver for sak " + saksnummer);
             }

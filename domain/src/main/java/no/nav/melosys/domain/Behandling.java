@@ -147,9 +147,8 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean erRedigerbar() {
-        return !(status == Behandlingsstatus.IVERKSETTER_VEDTAK ||
-            status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT ||
-            status == Behandlingsstatus.AVSLUTTET
-        );
+        return !(status == Behandlingsstatus.IVERKSETTER_VEDTAK
+                    || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT
+                    || status == Behandlingsstatus.AVSLUTTET);
     }
 }

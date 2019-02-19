@@ -23,12 +23,10 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
@@ -59,16 +57,13 @@ public class FagsakTjeneste extends RestTjeneste {
 
     private final FagsakService fagsakService;
 
-    private OppgaveService oppgaveService;
-
     private ModelMapper modelMapper;
 
     private final Tilgang tilgang;
 
     @Autowired
-    public FagsakTjeneste(FagsakService fagsakService, OppgaveService oppgaveService, Tilgang tilgang) {
+    public FagsakTjeneste(FagsakService fagsakService, Tilgang tilgang) {
         this.fagsakService = fagsakService;
-        this.oppgaveService = oppgaveService;
         this.tilgang = tilgang;
 
         this.modelMapper = new ModelMapper();
@@ -135,24 +130,16 @@ public class FagsakTjeneste extends RestTjeneste {
         modelMapper.map(fagsak, fagsakDto);
         fagsakDto.setSaksnummer(fagsak.getSaksnummer());
 
-        Optional<Oppgave> oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(fagsak.getSaksnummer());
+        Optional<Behandling> behandling = fagsakService.finnRedigerbarBehandling(ident, fagsak);
 
-        Behandling behandling = fagsak.getAktivBehandling();
-
-        if(erBehandlingRedigerbar(ident, oppgave, behandling)) {
+        behandling.ifPresent(aktivBehandling -> {
             fagsakDto.getBehandlinger().stream()
-                .filter(behandlingDto -> behandlingDto.getOppsummering().getBehandlingID().equals(behandling.getId()))
+                .filter(behandlingDto -> behandlingDto.getOppsummering().getBehandlingID().equals(aktivBehandling.getId()))
                 .findAny()
                 .ifPresent(behandlingDto -> behandlingDto.setRedigerbart(true));
-        }
-        return fagsakDto;
-    }
+        });
 
-    public boolean erBehandlingRedigerbar(String ident, Optional<Oppgave> oppgave, Behandling behandling) {
-        return behandling != null
-            && oppgave.isPresent()
-            && oppgave.filter(oppgave1 -> ident.equalsIgnoreCase(oppgave1.getTilordnetRessurs())).isPresent()
-            && behandling.erRedigerbar();
+        return fagsakDto;
     }
 
     private List<FagsakOppsummeringDto> tilDtoer(Iterable<Fagsak> saker) {

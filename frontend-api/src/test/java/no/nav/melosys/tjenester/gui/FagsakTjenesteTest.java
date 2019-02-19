@@ -31,7 +31,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import org.json.JSONException;
 import org.junit.Before;
@@ -243,12 +242,11 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
         tilgang = mock(Tilgang.class);
         fagsakService = mock(FagsakService.class);
-        OppgaveService oppgaveService = mock(OppgaveService.class);
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         ArrayList<Fagsak> fagsaker = new ArrayList<>();
         fagsaker.add(fagsak);
         doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(eq(Aktoersroller.BRUKER), eq(FNR));
-        return new FagsakTjeneste(fagsakService, oppgaveService, tilgang);
+        return new FagsakTjeneste(fagsakService, tilgang);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto() {
