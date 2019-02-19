@@ -83,9 +83,11 @@ public class AnmodningUnntakMapperTest {
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
         brevData.hovedvirksomhet = new Virksomhet("Test AS", null, null);
+        brevData.hovedvirksomhet.setSelvstendigForetak(true);
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 
         assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
+        assertThat("<ns3:yrkesaktivitet>SELVSTENDIG</ns3:yrkesaktivitet>").isSubstringOf(xml);
     }
 }

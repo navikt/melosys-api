@@ -9,10 +9,10 @@ import no.nav.dok.melosysbrev._000081.BrevdataType;
 import no.nav.dok.melosysbrev._000081.Fag;
 import no.nav.dok.melosysbrev._000081.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
@@ -52,9 +52,8 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
         }
 
         fag.setForetakNavn(brevData.hovedvirksomhet.navn);
-        SoeknadDokument soeknadDokument = SaksopplysningerUtils.hentSøknadDokument(behandling);
         // Frilansaktivitet håndteres ikke i Lev 1
-        if (soeknadDokument.selvstendigArbeid.erSelvstendig) {
+        if (brevData.hovedvirksomhet.isSelvstendigForetak()) {
             fag.setYrkesaktivitet(YrkesaktivitetsKode.SELVSTENDIG);
         } else {
             fag.setYrkesaktivitet(YrkesaktivitetsKode.LOENNET_ARBEID);
