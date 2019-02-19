@@ -7,11 +7,9 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,28 +22,26 @@ public class SedService {
     private static final Logger log = LoggerFactory.getLogger(SedService.class);
 
     private final SedDataByggerVelger sedDataByggerVelger;
-    private final FagsakRepository fagsakRepository;
     private final EessiConsumer eessiConsumer;
 
-    public SedService(SedDataByggerVelger sedDataByggerVelger, FagsakRepository fagsakRepository, EessiConsumer eessiConsumer) {
+    public SedService(SedDataByggerVelger sedDataByggerVelger, EessiConsumer eessiConsumer) {
         this.sedDataByggerVelger = sedDataByggerVelger;
-        this.fagsakRepository = fagsakRepository;
         this.eessiConsumer = eessiConsumer;
     }
 
     @Transactional
-    public void opprettOgSendSed(Behandling behandling, Behandlingsresultat behandlingsresultat) throws MelosysException {
+    public void opprettOgSendSed(Behandling behandling, Behandlingsresultat behandlingsresultat) {
 
         try {
             Lovvalgsperiode lovvalgsperiode = behandlingsresultat.getLovvalgsperioder().stream()
                 .findFirst().orElseThrow(() -> new TekniskException("Finner ingen lovvalgsperiode!")); //TODO: flere lovvalgsperioder
 
             LovvalgBestemmelse lovvalgBestemmelse = lovvalgsperiode.getBestemmelse();
+            Fagsak fagsak = behandling.getFagsak();
 
-            Fagsak fagsak = fagsakRepository.findBySaksnummer(behandling.getFagsak().getSaksnummer());
             SedDataBygger sedDataBygger = sedDataByggerVelger.hent(lovvalgsperiode.getBestemmelse());
             SedDataDto sedData = sedDataBygger.lag(behandling);
-            sedData.setGsakId(fagsak.getGsakSaksnummer());
+            sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
             log.info("Oppretter buc og sed med artikkel {} for fagsak {}", lovvalgBestemmelse.getKode(), fagsak.getSaksnummer());
             Map<String, String> rinaSakInfo = eessiConsumer.opprettOgSendSed(sedData);

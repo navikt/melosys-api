@@ -19,7 +19,7 @@ public class SedDataDto {
     private List<Arbeidssted> arbeidssteder;
     private List<Virksomhet> utenlandskeVirksomheter;
 
-    private Long gsakId;
+    private Long gsakSaksnummer;
 
     //Lovvalg
     private List<Lovvalgsperiode> lovvalgsperioder;
@@ -104,11 +104,11 @@ public class SedDataDto {
         this.lovvalgsperioder = lovvalgsperioder;
     }
 
-    public Long getGsakId() {
-        return gsakId;
+    public Long getGsakSaksnummer() {
+        return gsakSaksnummer;
     }
 
-    public void setGsakId(Long gsakId) {
-        this.gsakId = gsakId;
+    public void setGsakSaksnummer(Long gsakSaksnummer) {
+        this.gsakSaksnummer = gsakSaksnummer;
     }
 }
