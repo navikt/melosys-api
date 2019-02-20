@@ -30,6 +30,9 @@ public class Aktoer {
     @Column(name = "utenlandsk_id")
     private String utenlandskId;
 
+    @Column(name = "kontaktperson")
+    private String kontaktperson;
+
     public Long getId() {
         return id;
     }
@@ -72,6 +75,14 @@ public class Aktoer {
 
     public void setUtenlandskId(String utenlandskId) {
         this.utenlandskId = utenlandskId;
+    }
+
+    public String getKontaktperson() {
+        return kontaktperson;
+    }
+
+    public void setKontaktperson(String kontaktperson) {
+        this.kontaktperson = kontaktperson;
     }
 
     @Override

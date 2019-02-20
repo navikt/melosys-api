@@ -3,6 +3,7 @@ package no.nav.melosys.service.journalforing.dto;
 import java.util.List;
 
 public class JournalfoeringDto {
+    private String behandlingstypeKode;
     private String journalpostID;
     private String oppgaveID;
     private String brukerID;
@@ -11,6 +12,14 @@ public class JournalfoeringDto {
     private String dokumentID;
     private String hoveddokumentTittel;
     private List<DokumentDto> vedlegg;
+
+    public String getBehandlingstypeKode() {
+        return behandlingstypeKode;
+    }
+
+    public void setBehandlingstypeKode(String behandlingstypeKode) {
+        this.behandlingstypeKode = behandlingstypeKode;
+    }
 
     public String getJournalpostID() {
         return journalpostID;

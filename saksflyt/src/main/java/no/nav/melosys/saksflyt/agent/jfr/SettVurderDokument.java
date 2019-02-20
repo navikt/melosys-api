@@ -62,12 +62,13 @@ public class SettVurderDokument extends AbstraktStegBehandler {
         }
 
         Behandling behandling = fagsak.getAktivBehandling();
-        if (behandling != null) {
+        boolean ingenVurdering = prosessinstans.getData(ProsessDataKey.JFR_INGEN_VURDERING, Boolean.class);
+        if (behandling != null && !ingenVurdering) {
             behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
             behandlingRepository.save(behandling);
             log.info("Prosessinstans {} har endret status av behandling {} til {}", prosessinstans.getId(), behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
         } else {
-            log.debug("Prosessinstans {}: ingen endring for sak {}", prosessinstans.getId(), saksnummer);
+            log.info("I prosessinstans {}. Nytt dokument krever ingen vurdering ({}) eller ingen aktiv behandling for sak {}.", prosessinstans.getId(), ingenVurdering, saksnummer);
         }
 
         prosessinstans.setSteg(null);

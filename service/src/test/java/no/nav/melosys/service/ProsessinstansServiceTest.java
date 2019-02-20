@@ -43,7 +43,7 @@ public class ProsessinstansServiceTest {
     public void lagreProsessinstans_medSaksbehandler() {
         Prosessinstans prosessinstans = mock(Prosessinstans.class);
         String saksbehandler = "Z123456";
-        service.lagreProsessinstans(prosessinstans, saksbehandler);
+        service.lagreOgSettIBingen(prosessinstans, saksbehandler);
 
         verify(prosessinstans, times(1)).setEndretDato(any());
         verify(prosessinstans, times(1)).setRegistrertDato(any());
@@ -58,7 +58,7 @@ public class ProsessinstansServiceTest {
         when(subjectHandler.getUserID()).thenReturn(saksbehandler);
 
         Prosessinstans prosessinstans = mock(Prosessinstans.class);
-        service.lagreProsessinstans(prosessinstans);
+        service.lagreOgSettIBingen(prosessinstans);
 
         verify(prosessinstans, times(1)).setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
     }

@@ -34,7 +34,7 @@ import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.tjenester.gui.dto.*;
 import org.json.JSONException;

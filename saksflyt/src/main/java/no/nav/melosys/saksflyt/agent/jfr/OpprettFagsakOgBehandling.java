@@ -11,7 +11,8 @@ import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +68,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         String aktørId = prosessinstans.getData(AKTØR_ID);
         String arbeidsgiver = prosessinstans.getData(ARBEIDSGIVER);
         String representant = prosessinstans.getData(REPRESENTANT);
+        String representantKontakperson = prosessinstans.getData(REPRESENTANT_KONTAKTPERSON);
         String endretAv = prosessinstans.getData(SAKSBEHANDLER);
         String initierendeJournalpostId = prosessinstans.getData(JOURNALPOST_ID);
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
@@ -82,7 +84,11 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             prosessinstans.setSteg(STATUS_BEH_OPPR);
             log.info("Opprettet behandling {} for prosessinstans {}", behandling.getId(), prosessinstans.getId());
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
-            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(aktørId, arbeidsgiver, representant, Behandlingstyper.SOEKNAD, initierendeJournalpostId, initierendeDokumentId);
+            OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID(aktørId).medArbeidsgiver(arbeidsgiver)
+                .medRepresentant(representant).medRepresentantKontaktperson(representantKontakperson)
+                .medBehandlingstype(Behandlingstyper.SOEKNAD).medInitierendeJournalpostId(initierendeJournalpostId)
+                .medInitierendeDokumentId(initierendeDokumentId).build();
+            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
             prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
             prosessinstans.setBehandling(fagsak.getBehandlinger().get(0));
 

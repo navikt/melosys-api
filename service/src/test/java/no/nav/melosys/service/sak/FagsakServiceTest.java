@@ -1,4 +1,4 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.sak;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -11,6 +11,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -85,7 +87,9 @@ public class FagsakServiceTest {
         String initierendeDokumentId = "221234";
         doReturn(behandling).when(behandlingService).nyBehandling(any(), any(), any(), anyString(), anyString());
 
-        Fagsak fagsak = fagsakService.nyFagsakOgBehandling("AKTOER_ID", "123456789", "", Behandlingstyper.SOEKNAD, initierendeJournalpostId, initierendeDokumentId);
+        OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID("AKTOER_ID").medAktørID("123456789")
+            .medBehandlingstype(Behandlingstyper.SOEKNAD).medInitierendeJournalpostId(initierendeJournalpostId).medInitierendeDokumentId(initierendeDokumentId).build();
+        Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
         verify(fagsakRepo).save(any(Fagsak.class));
         verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstyper.SOEKNAD), eq(initierendeJournalpostId), eq(initierendeDokumentId));
         assertThat(fagsak.getBehandlinger()).isNotEmpty();

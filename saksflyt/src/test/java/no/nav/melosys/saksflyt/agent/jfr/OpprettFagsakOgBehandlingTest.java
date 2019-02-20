@@ -7,13 +7,15 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.FagsakService;
+import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.context.ApplicationEventPublisher;
 
 import static no.nav.melosys.domain.ProsessDataKey.DOKUMENT_ID;
 import static no.nav.melosys.domain.ProsessDataKey.JOURNALPOST_ID;
@@ -33,12 +35,12 @@ public class OpprettFagsakOgBehandlingTest {
 
     private OpprettFagsakOgBehandling agent;
 
-    private ApplicationEventPublisher applicationEventPublisher;
+    @Captor
+    private ArgumentCaptor<OpprettSakRequest> opprettSakRequestArgumentCaptor;
 
 
     @Before
     public void setUp() {
-        applicationEventPublisher = mock(ApplicationEventPublisher.class);
         AuditorProvider auditorAware = mock(AuditorProvider.class);
         agent = new OpprettFagsakOgBehandling(fagsakService, behandlingService, auditorAware);
     }
@@ -51,19 +53,29 @@ public class OpprettFagsakOgBehandlingTest {
         String journalpostId = "44553";
         String dokumentId = "222221";
         String arbeidsgiver = "104568393";
+        String representant = "rep";
+        String representantKontaktperson = "kontaktperson";
         p.setData(ProsessDataKey.AKTØR_ID, aktørId);
         p.setData(ProsessDataKey.ARBEIDSGIVER, arbeidsgiver);
         p.setData(ProsessDataKey.JOURNALPOST_ID, journalpostId);
         p.setData(ProsessDataKey.DOKUMENT_ID, dokumentId);
+        p.setData(ProsessDataKey.REPRESENTANT, representant);
+        p.setData(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, representantKontaktperson);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
         fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
-        when(fagsakService.nyFagsakOgBehandling(anyString(), anyString(), any(), eq(Behandlingstyper.SOEKNAD), any(), any())).thenReturn(fagsak);
+        when(fagsakService.nyFagsakOgBehandling(any(OpprettSakRequest.class))).thenReturn(fagsak);
 
         agent.utførSteg(p);
 
-        verify(fagsakService).nyFagsakOgBehandling(aktørId, arbeidsgiver, null, Behandlingstyper.SOEKNAD, journalpostId, dokumentId);
+        verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getAktørID()).isEqualTo(aktørId);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getArbeidsgiver()).isEqualTo(arbeidsgiver);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getInitierendeJournalpostId()).isEqualTo(journalpostId);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getInitierendeDokumentId()).isEqualTo(dokumentId);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getRepresentant()).isEqualTo(representant);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getRepresentantKontaktperson()).isEqualTo(representantKontaktperson);
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SØKNAD);
     }
