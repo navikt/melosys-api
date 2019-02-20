@@ -59,11 +59,4 @@ public class IverksettVedtakSendSedTest {
         verify(sedService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_AVSLUTT_BEHANDLING));
     }
-
-    @Test
-    public void utførSteg_feilIMetode_settFeiletSteg() throws Exception {
-        doThrow(new TekniskException("feil")).when(sedService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
-        iverksettVedtakSendSed.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg(), is(ProsessSteg.FEILET_MASKINELT));
-    }
 }
