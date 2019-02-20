@@ -23,9 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator.validerLovvalgsperiode;
-import static no.nav.melosys.saksflyt.agent.iv.validering.SendSedValidator.sedSkalSendes;
-
 
 @Component
 public class IverksettVedtakSendSed extends AbstraktStegBehandler {
@@ -107,6 +104,8 @@ public class IverksettVedtakSendSed extends AbstraktStegBehandler {
 
     private static boolean erGyldigBestemmelse(LovvalgBestemmelse bestemmelse) {
         return bestemmelse == LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1
-            || bestemmelse == LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_2;
+            || bestemmelse == LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_2
+            || bestemmelse == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1
+            || bestemmelse == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2;
     }
 }
