@@ -25,6 +25,8 @@ import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 public class A1Mapper {
 
     private static final int MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV = 3;
+    private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1 = 13;
+    private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 15;
 
     private Behandlingsresultat resultat;
 
@@ -55,8 +57,7 @@ public class A1Mapper {
         Virksomhet hovedvirksomhet = virksomheter.remove(0);
         a1.setHovedvirksomhet(mapHovedvirksomhet(hovedvirksomhet));
 
-        virksomheter.addAll(brevData.utenlandskeVirksomheter);
-        a1.setBivirksomhetListe(mapBivirksomheter(virksomheter));
+        a1.setBivirksomhetListe(mapBivirksomheter(brevData.arbeidssteder));
 
         if (harIkkeFysiskArbeidssted(brevData.arbeidssteder)) {
             a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(Collections.emptyList()));
@@ -137,36 +138,21 @@ public class A1Mapper {
         return hovedvirksomhetBrev;
     }
 
-    private BivirksomhetListeType mapBivirksomheter(List<Virksomhet> virksomheter) {
-        virksomheter = fyllMinimumAntallBivirksomheterMedDummyVerdier(virksomheter);
+    private BivirksomhetListeType mapBivirksomheter(List<Arbeidssted> arbeidssteder) {
+        arbeidssteder = fyllMinimumAntallArbeidsstederMedDummyVerdier(arbeidssteder, ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1);
 
         BivirksomhetListeType bivirksomheterBrev = new BivirksomhetListeType();
-        for (Virksomhet virksomhet : virksomheter) {
+        for (Arbeidssted arbeidssted : arbeidssteder) {
             BivirksomhetType bivirksomhetType = new BivirksomhetType();
-            bivirksomhetType.setNavn(virksomhet.navn);
-            bivirksomhetType.setOrgnummer(virksomhet.orgnr);
+            bivirksomhetType.setNavn(arbeidssted.navn);
+            bivirksomhetType.setOrgnummer(arbeidssted.orgnummer);
             bivirksomheterBrev.getBivirksomhet().add(bivirksomhetType);
         }
         return bivirksomheterBrev;
     }
 
-    /**
-     * Brevtjenesten trenger et fast antall enheter i listen.
-     * Fyller derfor opp med tomme elementer for resterende felter
-     */
-    private List<Virksomhet> fyllMinimumAntallBivirksomheterMedDummyVerdier(List<Virksomhet> arbeidssteder) {
-        List<Virksomhet> utfylltListe = new ArrayList<>(arbeidssteder);
-        final int minimumAntallAdresserIListe = 15;
-        int antallAdresserIListe = arbeidssteder.size();
-        int gjenståendeAdresser = minimumAntallAdresserIListe - antallAdresserIListe;
-        for (int i = 0; i < gjenståendeAdresser; i++) {
-            utfylltListe.add(new Virksomhet("", "", null));
-        }
-        return utfylltListe;
-    }
-
     private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(List<Arbeidssted> arbeidssteder) {
-        arbeidssteder = fyllMinimumAntallAdresserMedDummyVerdier(arbeidssteder);
+        arbeidssteder = fyllMinimumAntallArbeidsstederMedDummyVerdier(arbeidssteder, ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2);
 
         FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
         for (Arbeidssted arbeidssted : arbeidssteder) {
@@ -184,13 +170,12 @@ public class A1Mapper {
      * Brevtjenesten trenger et fast antall enheter i listen.
      * Fyller derfor opp med tomme elementer for resterende felter
      */
-    private List<Arbeidssted> fyllMinimumAntallAdresserMedDummyVerdier(List<Arbeidssted> arbeidssteder) {
+    private List<Arbeidssted> fyllMinimumAntallArbeidsstederMedDummyVerdier(List<Arbeidssted> arbeidssteder, int forventetAntall) {
         List<Arbeidssted> utfylltListe = new ArrayList<>(arbeidssteder);
-        final int minimumAntallAdresserIListe = 13;
         int antallAdresserIListe = arbeidssteder.size();
-        int gjenståendeAdresser = minimumAntallAdresserIListe - antallAdresserIListe;
+        int gjenståendeAdresser = forventetAntall - antallAdresserIListe;
         for (int i = 0; i < gjenståendeAdresser; i++) {
-            utfylltListe.add(new Arbeidssted("", ""));
+            utfylltListe.add(new Arbeidssted("", "", ""));
         }
         return utfylltListe;
     }

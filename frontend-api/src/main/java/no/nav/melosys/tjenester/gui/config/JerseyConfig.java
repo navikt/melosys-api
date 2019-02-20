@@ -7,7 +7,6 @@ import no.nav.melosys.tjenester.gui.unntakshandtering.FunksjonellExceptionMapper
 import no.nav.melosys.tjenester.gui.unntakshandtering.IkkeFunnetExceptionMapper;
 import no.nav.melosys.tjenester.gui.unntakshandtering.SikkerhetsbegrensningExceptionMapper;
 import no.nav.melosys.tjenester.gui.unntakshandtering.TekniskExceptionMapper;
-
 import org.glassfish.jersey.CommonProperties;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +25,7 @@ public class JerseyConfig extends ResourceConfig {
         register(AvklartefaktaTjeneste.class);
         register(ArbeidsforholdHistorikkTjeneste.class);
         register(BehandlingTjeneste.class);
+        register(BehandlingsresultatTjeneste.class);
         register(DokumentTjeneste.class);
         register(FagsakTjeneste.class);
         register(FrontendLoggingTjeneste.class);

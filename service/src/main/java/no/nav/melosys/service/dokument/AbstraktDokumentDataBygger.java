@@ -90,7 +90,7 @@ public abstract class AbstraktDokumentDataBygger {
 
     private List<Arbeidssted> hentFysiskearbeidssteder() {
         return søknad.arbeidUtland.stream()
-                .map(au -> new Arbeidssted(au.foretakNavn, au.adresse))
+                .map(au -> new Arbeidssted(au.foretakNavn, au.foretakOrgnr, au.adresse))
                 .collect(Collectors.toList());
     }
 
@@ -103,7 +103,7 @@ public abstract class AbstraktDokumentDataBygger {
     }
 
     private Arbeidssted utledArbeidsstedFraVirksomhet(Virksomhet virksomhet) {
-        return new Arbeidssted(virksomhet.navn, virksomhet.adresse.landKode);
+        return new Arbeidssted(virksomhet.navn, virksomhet.orgnr, virksomhet.adresse.landKode);
     }
 
     protected Collection<Lovvalgsperiode> hentLovvalgsperioder() throws TekniskException {

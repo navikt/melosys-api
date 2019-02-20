@@ -107,7 +107,7 @@ public class AttestMapperTest {
                                                          "123456789",
                                                          strukturertAdresse);
 
-        Arbeidssted fysiskArbeidssted = new Arbeidssted("JARLSBERG INTERNATIONAL", strukturertAdresse);
+        Arbeidssted fysiskArbeidssted = new Arbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
         Arbeidssted ikkeFysiskArbeidssted = new Arbeidssted("Seven Kestrel", "GB", Yrkesgrupper.SOKKEL_ELLER_SKIP);
 
         BrevDataA1 a1Data = new BrevDataA1();

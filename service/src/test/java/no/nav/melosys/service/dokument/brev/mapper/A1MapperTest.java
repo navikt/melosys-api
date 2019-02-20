@@ -108,7 +108,7 @@ public class A1MapperTest {
                                                          "123456789",
                                                          strukturertAdresse);
 
-        Arbeidssted fysiskArbeidssted = new Arbeidssted("JARLSBERG INTERNATIONAL", strukturertAdresse);
+        Arbeidssted fysiskArbeidssted = new Arbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
         Arbeidssted maritimtArbeidssted = new Arbeidssted("Dunfjæder", "GB", Yrkesgrupper.SOKKEL_ELLER_SKIP);
 
         brevData = new BrevDataA1();
