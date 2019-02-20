@@ -14,7 +14,6 @@ import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SedService {
@@ -29,7 +28,6 @@ public class SedService {
         this.eessiConsumer = eessiConsumer;
     }
 
-    @Transactional
     public void opprettOgSendSed(Behandling behandling, Behandlingsresultat behandlingsresultat) {
 
         try {
