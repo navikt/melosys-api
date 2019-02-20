@@ -10,7 +10,6 @@ import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.junit.Before;
 import org.junit.Rule;
@@ -23,15 +22,12 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SedServiceTest {
 
-    @Mock
-    private FagsakRepository fagsakRepository;
     @Mock
     private SedDataByggerVelger sedDataByggerVelger;
     @Mock
@@ -63,7 +59,6 @@ public class SedServiceTest {
         SedDataBygger dataBygger = Mockito.mock(SedDataBygger.class);
         when(sedDataByggerVelger.hent(any(LovvalgBestemmelse.class))).thenReturn(dataBygger);
         when(dataBygger.lag(any(Behandling.class))).thenReturn(new SedDataDto());
-        when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(behandling.getFagsak());
     }
 
     @Test
