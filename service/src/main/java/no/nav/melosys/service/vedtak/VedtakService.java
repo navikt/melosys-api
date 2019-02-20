@@ -7,7 +7,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.service.ProsessinstansService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

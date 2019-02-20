@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -200,8 +201,8 @@ public class Prosessinstans {
     public void leggTilHendelse(String type, String melding, Throwable t) {
         if (t != null) {
             String loggMelding = melding + " - " + ExceptionUtils.getStackTrace(t);
-            if (loggMelding.getBytes().length > VARCHAR2_MAX_BYTES) {
-                loggMelding = new String(loggMelding.getBytes(), 0, VARCHAR2_MAX_BYTES);
+            if (loggMelding.getBytes(StandardCharsets.UTF_8).length > VARCHAR2_MAX_BYTES) {
+                loggMelding = new String(loggMelding.getBytes(StandardCharsets.UTF_8), 0, VARCHAR2_MAX_BYTES, StandardCharsets.UTF_8);
             }
             leggTilHendelse(type, loggMelding);
         } else {

@@ -17,6 +17,6 @@
     <logger name="no.nav.melosys.frontendlogg" level="WARN"/>
     <logger name="no.nav.melosys.integrasjon.felles.RestClientLoggingFilter" level="DEBUG"/>
     <logger name="no.nav.melosys.saksflyt.agent.jfr.VurderInngangsvilkaar" level="DEBUG"/>
-    <logger name="no.nav.melosys.service.ProsessinstansService" level="DEBUG"/>
+    <logger name="no.nav.melosys.service.saksflyt.ProsessinstansService" level="DEBUG"/>
     <logger name="no.nav.melosys.sikkerhet.abac" level="WARN"/>
 </included>

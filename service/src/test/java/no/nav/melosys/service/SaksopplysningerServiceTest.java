@@ -3,7 +3,6 @@ package no.nav.melosys.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
@@ -16,8 +15,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,8 +25,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SaksopplysningerServiceTest {
@@ -42,7 +40,7 @@ public class SaksopplysningerServiceTest {
     private AaregFasade aaregFasade;
 
     @Mock
-    private ProsessinstansRepository prosessinstansRepository;
+    private ProsessinstansService prosessinstansService;
 
     @Mock
     private BehandlingRepository behandlingRepo;
@@ -50,12 +48,9 @@ public class SaksopplysningerServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
-    @Mock
-    private Binge binge;
-
     @Before
     public void setUp() {
-        saksopplysningerService = new SaksopplysningerService(tpsFasade, aaregFasade, prosessinstansRepository, binge, behandlingRepo, behandlingsresultatService);
+        saksopplysningerService = new SaksopplysningerService(tpsFasade, aaregFasade, prosessinstansService, behandlingRepo, behandlingsresultatService);
 
         ReflectionTestUtils.setField(saksopplysningerService, "arbeidsforholdhistorikkAntallMåneder", 6);
         ReflectionTestUtils.setField(saksopplysningerService, "inntektshistorikkAntallMåneder", 6);
@@ -104,7 +99,7 @@ public class SaksopplysningerServiceTest {
 
         behandling.setSaksopplysninger(saksopplysninger);
 
-        when(prosessinstansRepository.findByStegIsNotNullAndStegIsNotAndBehandling_Id(eq(ProsessSteg.FEILET_MASKINELT), anyLong())).thenReturn(Optional.empty());
+        when(prosessinstansService.harAktivProsessinstans(anyLong())).thenReturn(false);
         when(behandlingRepo.findWithSaksopplysningerById(anyLong())).thenReturn(behandling);
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("12345");
 
@@ -112,18 +107,6 @@ public class SaksopplysningerServiceTest {
 
         assertThat(behandling.getSaksopplysninger().size()).isEqualTo(1);
         assertThat(behandling.getSaksopplysninger().stream().findFirst().get().getType()).isEqualTo(SaksopplysningType.SØKNAD);
-        verify(behandlingsresultatService, times(1)).tømBehandlingsresultat(anyLong());
-        verify(binge, times(1)).leggTil(any());
+        verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
     }
-
-    @Test
-    public void sjekkStatusBehandlingForOppfrisking() {
-        when(prosessinstansRepository.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType.OPPFRISKNING, ProsessSteg.FEILET_MASKINELT, 111L)).thenReturn(Optional.empty());
-        assertThat(saksopplysningerService.harAktivOppfrisking(111L)).isFalse();
-
-        Prosessinstans process = mock(Prosessinstans.class);
-        when(prosessinstansRepository.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType.OPPFRISKNING, ProsessSteg.FEILET_MASKINELT, 111L)).thenReturn(Optional.of(process));
-        assertThat(saksopplysningerService.harAktivOppfrisking(111L)).isTrue();
-    }
-
 }
