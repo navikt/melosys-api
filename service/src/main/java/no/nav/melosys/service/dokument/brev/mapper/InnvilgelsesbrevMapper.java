@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -16,11 +17,10 @@ import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
+import no.nav.melosys.domain.util.SoeknadUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
@@ -28,8 +28,6 @@ import no.nav.melosys.service.dokument.brev.BrevDataUtils;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.xml.sax.SAXException;
-
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatype.ARBEIDSLAND;
 
 public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
@@ -58,8 +56,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setArbeidsgiver(arbeidsgiver.navn);
 
         // Slå opp arbeidsland i avklartefakta, fall tilbake på søknaden (kan overkjøres av saksbehandler for sokkel/skip).
-        String arbeidslandSomTekst = resultat.finnAvklartFaktum(ARBEIDSLAND).map(Avklartefakta::getSubjekt)
-            .orElseGet(() -> hentArbeidslandFraSøknaden(behandling));
+        String arbeidslandSomTekst = hentLandFraSøknaden(behandling);
         Landkoder arbeidsland = Landkoder.valueOf(arbeidslandSomTekst);
         fag.setArbeidsland(arbeidsland.getBeskrivelse());
 
@@ -82,11 +79,14 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         return fag;
     }
 
-    private static String hentArbeidslandFraSøknaden(Behandling behandling) {
+    private static String hentLandFraSøknaden(Behandling behandling) {
         try {
             SoeknadDokument soeknadDokument = SaksopplysningerUtils.hentSøknadDokument(behandling);
-            ArbeidUtland arbeidUtland = soeknadDokument.arbeidUtland.stream().findFirst().orElseThrow(() -> new IllegalArgumentException("arbeidUtland mangler"));
-            return arbeidUtland.adresse.landKode;
+            List<String> land = SoeknadUtils.hentLand(soeknadDokument);
+            if (land.isEmpty()) {
+                throw new TekniskException("Ingen land funnet");
+            }
+            return land.get(0);
         } catch (TekniskException e) {
             throw new IllegalStateException(e);
         }

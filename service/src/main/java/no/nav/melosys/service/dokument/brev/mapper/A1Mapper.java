@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -55,10 +56,10 @@ public class A1Mapper {
         a1.setHovedvirksomhet(mapHovedvirksomhet(hovedvirksomhet));
 
         virksomheter.addAll(brevData.utenlandskeVirksomheter);
-        if (!virksomheter.isEmpty()) {
-            a1.setBivirksomhetListe(mapBivirksomheter(virksomheter));
-        }
+        a1.setBivirksomhetListe(mapBivirksomheter(virksomheter));
+
         if (harIkkeFysiskArbeidssted(brevData.arbeidssteder)) {
+            a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(Collections.emptyList()));
             a1.setIkkeFysiskArbeidssted("true");
         }
         else {
@@ -137,6 +138,8 @@ public class A1Mapper {
     }
 
     private BivirksomhetListeType mapBivirksomheter(List<Virksomhet> virksomheter) {
+        virksomheter = fyllMinimumAntallBivirksomheterMedDummyVerdier(virksomheter);
+
         BivirksomhetListeType bivirksomheterBrev = new BivirksomhetListeType();
         for (Virksomhet virksomhet : virksomheter) {
             BivirksomhetType bivirksomhetType = new BivirksomhetType();
@@ -147,7 +150,24 @@ public class A1Mapper {
         return bivirksomheterBrev;
     }
 
+    /**
+     * Brevtjenesten trenger et fast antall enheter i listen.
+     * Fyller derfor opp med tomme elementer for resterende felter
+     */
+    private List<Virksomhet> fyllMinimumAntallBivirksomheterMedDummyVerdier(List<Virksomhet> arbeidssteder) {
+        List<Virksomhet> utfylltListe = new ArrayList<>(arbeidssteder);
+        final int minimumAntallAdresserIListe = 15;
+        int antallAdresserIListe = arbeidssteder.size();
+        int gjenståendeAdresser = minimumAntallAdresserIListe - antallAdresserIListe;
+        for (int i = 0; i < gjenståendeAdresser; i++) {
+            utfylltListe.add(new Virksomhet("", "", null));
+        }
+        return utfylltListe;
+    }
+
     private FysiskArbeidsstedAdresseListeType mapFysiskeAdresser(List<Arbeidssted> arbeidssteder) {
+        arbeidssteder = fyllMinimumAntallAdresserMedDummyVerdier(arbeidssteder);
+
         FysiskArbeidsstedAdresseListeType fysiskeAdresserBrev = new FysiskArbeidsstedAdresseListeType();
         for (Arbeidssted arbeidssted : arbeidssteder) {
             if (arbeidssted.erFysisk()) {
@@ -158,6 +178,21 @@ public class A1Mapper {
             }
         }
         return fysiskeAdresserBrev;
+    }
+
+    /**
+     * Brevtjenesten trenger et fast antall enheter i listen.
+     * Fyller derfor opp med tomme elementer for resterende felter
+     */
+    private List<Arbeidssted> fyllMinimumAntallAdresserMedDummyVerdier(List<Arbeidssted> arbeidssteder) {
+        List<Arbeidssted> utfylltListe = new ArrayList<>(arbeidssteder);
+        final int minimumAntallAdresserIListe = 13;
+        int antallAdresserIListe = arbeidssteder.size();
+        int gjenståendeAdresser = minimumAntallAdresserIListe - antallAdresserIListe;
+        for (int i = 0; i < gjenståendeAdresser; i++) {
+            utfylltListe.add(new Arbeidssted("", ""));
+        }
+        return utfylltListe;
     }
 
     private AdresseType mapFysiskArbeidssted(Arbeidssted fysiskArbeidssted) {
