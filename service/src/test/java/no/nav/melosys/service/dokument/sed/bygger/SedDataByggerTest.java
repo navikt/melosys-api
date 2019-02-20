@@ -2,9 +2,9 @@ package no.nav.melosys.service.dokument.sed.bygger;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashSet;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.exception.*;
@@ -17,7 +17,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -46,7 +45,16 @@ public class SedDataByggerTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1L));
         lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setUnntakFraBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1);
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(lovvalgsperiode));
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
+        vilkaarBegrunnelse.setKode("SOEKT_FOR_SENT");
+        vilkaarsresultat.setBegrunnelser(new HashSet<>(Collections.singletonList(vilkaarBegrunnelse)));
+        behandlingsresultat.setVilkaarsresultater(Collections.singleton(vilkaarsresultat));
+        lovvalgsperiode.setBehandlingsresultat(behandlingsresultat);
 
         behandling = DataByggerStubs.hentBehandlingStub();
 
