@@ -161,15 +161,19 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         lovvalgsperiodeDto.setLandkode(lovvalgsperiode.getLovvalgsland().getKode());
         lovvalgsperiodeDto.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(lovvalgsperiode.getBestemmelse()));
         lovvalgsperiodeDto.setBeskrivelse(hentBeskrivelse(lovvalgsperiode));
-        lovvalgsperiodeDto.setUnntakFraBestemmelse(
-            LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(lovvalgsperiode.getUnntakFraBestemmelse()));
+
+        if (lovvalgsperiode.getUnntakFraBestemmelse() != null) {
+            lovvalgsperiodeDto.setUnntakFraBestemmelse(LovvalgTilBestemmelseDtoMapper
+                .mapMelosysLovvalgTilBestemmelseDto(lovvalgsperiode.getUnntakFraBestemmelse()));
+        }
+
         return lovvalgsperiodeDto;
     }
 
     private String hentBeskrivelse(no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode) {
         Set<Vilkaarsresultat> vilkaarsresultater = lovvalgsperiode.getBehandlingsresultat().getVilkaarsresultater();
 
-        return vilkaarsresultater.stream()
+        return vilkaarsresultater == null ? null : vilkaarsresultater.stream()
             .map(VilkaarsresultatTilBegrunnelseMapper::mapVilkaarsresultatTilBegrunnelseString)
             .collect(Collectors.joining("\n\n"));
     }
