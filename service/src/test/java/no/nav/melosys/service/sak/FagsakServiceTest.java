@@ -2,17 +2,22 @@ package no.nav.melosys.service.sak;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.ProsessinstansService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -39,6 +44,9 @@ public class FagsakServiceTest {
     private BehandlingService behandlingService;
 
     @Mock
+    private OppgaveService oppgaveService;
+
+    @Mock
     private TpsFasade tps;
 
     @Mock
@@ -47,10 +55,12 @@ public class FagsakServiceTest {
     @InjectMocks
     private FagsakService fagsakService;
 
+    private static final String SAKSBEHANDLER = "Z990007";
+
 
     @Before
     public void setUp() {
-        fagsakService = new FagsakService(fagsakRepo, behandlingService, tps, prosessinstansService);
+        fagsakService = new FagsakService(fagsakRepo, behandlingService, oppgaveService, tps, prosessinstansService);
     }
 
     @Test
@@ -157,5 +167,39 @@ public class FagsakServiceTest {
         fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
 
         doReturn(fagsak).when(fagsakRepo).findBySaksnummer(saksnummer);
+    }
+
+    @Test
+    public final void testErBehandlingRedigerBar() throws FunksjonellException, TekniskException {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("12345678901");
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+
+        Oppgave oppgave = new Oppgave();
+        oppgave.setTilordnetRessurs(SAKSBEHANDLER);
+
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.of(oppgave));
+        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak).filter(behandling1 -> behandling1 == behandling).isPresent())
+            .isEqualTo(true);
+
+        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
+        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
+
+        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
+
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        assertThat(fagsakService.finnRedigerbarBehandling("", fagsak)).isEqualTo(Optional.empty());
+
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.empty());
+        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
+
+        fagsak.setBehandlinger(null);
+        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
+
+
     }
 }

@@ -1,7 +1,10 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -21,10 +24,10 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
 import org.modelmapper.ModelMapper;
@@ -61,7 +64,6 @@ public class FagsakTjeneste extends RestTjeneste {
     @Autowired
     public FagsakTjeneste(FagsakService fagsakService, Tilgang tilgang) {
         this.fagsakService = fagsakService;
-
         this.tilgang = tilgang;
 
         this.modelMapper = new ModelMapper();
@@ -81,13 +83,14 @@ public class FagsakTjeneste extends RestTjeneste {
     @GET
     @Path("{saksnr}")
     @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."), response = Fagsak.class)
-    public Response hentFagsak(@ApiParam @PathParam("saksnr") String saksnummer) throws SikkerhetsbegrensningException, TekniskException {
+    public Response hentFagsak(@ApiParam @PathParam("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
+        String ident = SubjectHandler.getInstance().getUserID();
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         if (sak == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         tilgang.sjekkSak(sak);
-        FagsakDto fagsakDto = tilDto(sak);
+        FagsakDto fagsakDto = tilDto(sak, ident);
         return Response.ok(fagsakDto).build();
     }
 
@@ -122,10 +125,20 @@ public class FagsakTjeneste extends RestTjeneste {
         return Response.ok().build();
     }
 
-    private FagsakDto tilDto(Fagsak fagsak) {
+    private FagsakDto tilDto(Fagsak fagsak, String ident) throws FunksjonellException, TekniskException {
         FagsakDto fagsakDto = new FagsakDto();
         modelMapper.map(fagsak, fagsakDto);
         fagsakDto.setSaksnummer(fagsak.getSaksnummer());
+
+        Optional<Behandling> behandling = fagsakService.finnRedigerbarBehandling(ident, fagsak);
+
+        behandling.ifPresent(aktivBehandling -> {
+            fagsakDto.getBehandlinger().stream()
+                .filter(behandlingDto -> behandlingDto.getOppsummering().getBehandlingID().equals(aktivBehandling.getId()))
+                .findAny()
+                .ifPresent(behandlingDto -> behandlingDto.setRedigerbart(true));
+        });
+
         return fagsakDto;
     }
 

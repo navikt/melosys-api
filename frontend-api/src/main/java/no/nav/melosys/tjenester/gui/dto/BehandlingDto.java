@@ -10,6 +10,8 @@ public class BehandlingDto {
 
     private List<BehandlingHistorikkDto> behandlingshistorikk;
 
+    private boolean redigerbart = false;
+
     public BehandlingOppsummeringDto getOppsummering() {
         return oppsummering;
     }
@@ -32,6 +34,14 @@ public class BehandlingDto {
 
     public void setBehandlingshistorikk(List<BehandlingHistorikkDto> behandlingshistorikk) {
         this.behandlingshistorikk = behandlingshistorikk;
+    }
+
+    public boolean isRedigerbart() {
+        return redigerbart;
+    }
+
+    public void setRedigerbart(boolean redigerbart) {
+        this.redigerbart = redigerbart;
     }
 
 }

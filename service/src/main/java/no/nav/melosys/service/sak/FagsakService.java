@@ -1,22 +1,22 @@
 package no.nav.melosys.service.sak;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.ProsessinstansService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +30,8 @@ public class FagsakService {
 
     private final BehandlingService behandlingService;
 
+    private OppgaveService oppgaveService;
+
     private final TpsFasade tpsFasade;
 
     private final ProsessinstansService prosessinstansService;
@@ -37,10 +39,12 @@ public class FagsakService {
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository,
                          BehandlingService behandlingService,
+                         OppgaveService oppgaveService,
                          TpsFasade tpsFasade,
                          ProsessinstansService prosessinstansService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
+        this.oppgaveService = oppgaveService;
         this.tpsFasade = tpsFasade;
         this.prosessinstansService = prosessinstansService;
     }
@@ -148,5 +152,22 @@ public class FagsakService {
             .filter(behandling -> behandling.getStatus() != Behandlingsstatus.AVSLUTTET)
             .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
             .orElseThrow(() -> new IllegalStateException("Sak " + fagsak.getSaksnummer() + " har ingen behandlinger eller bare avsluttede behandlinger."));
+    }
+
+    public Optional<Behandling> finnRedigerbarBehandling(String ident, Fagsak fagsak) throws FunksjonellException, TekniskException {
+        Behandling behandling = fagsak.getAktivBehandling();
+        if (behandling == null) {
+            return Optional.empty();
+        }
+
+        Optional<Oppgave> oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+
+        if (oppgave.isPresent()
+            && oppgave.filter(oppgave1 -> ident.equalsIgnoreCase(oppgave1.getTilordnetRessurs())).isPresent()
+            && behandling.erRedigerbar()) {
+            return Optional.of(behandling);
+        } else {
+            return Optional.empty();
+        }
     }
 }

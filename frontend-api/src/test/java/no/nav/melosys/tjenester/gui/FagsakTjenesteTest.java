@@ -1,13 +1,10 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
@@ -19,8 +16,6 @@ import io.github.benas.randombeans.api.EnhancedRandom;
 import io.github.benas.randombeans.api.Randomizer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
@@ -29,10 +24,10 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
@@ -47,6 +42,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory.fagsakMedBehandlinger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.eq;
@@ -236,11 +232,11 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
         assertThat(behandlingFørst.getBehandlingID()).isEqualTo(1L);
         assertThat(behandlingFørst.getBehandlingsstatus().getKode()).isEqualTo("UNDER_BEHANDLING");
         assertThat(behandlingFørst.getBehandlingstype().getKode()).isEqualTo("SOEKNAD");
-        assertThat(behandlingFørst.getOpprettetDato()).isEqualTo(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-11").toInstant());
+        assertThat(behandlingFørst.getOpprettetDato()).isEqualTo(Instant.parse("2019-01-10T10:37:30.00Z"));
         assertThat(behandlingFørst.getLand().get(0)).isEqualTo("NO");
 
-        assertThat(behandlingFørst.getSoknadsperiode().getFom()).isEqualTo(LocalDate.of(2019,01,01));
-        assertThat(behandlingFørst.getSoknadsperiode().getTom()).isEqualTo(LocalDate.of(2019,02,01));
+        assertThat(behandlingFørst.getSoknadsperiode().getFom()).isEqualTo(LocalDate.of(2019,1,1));
+        assertThat(behandlingFørst.getSoknadsperiode().getTom()).isEqualTo(LocalDate.of(2019,2,1));
     }
 
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
@@ -265,64 +261,6 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setBehandlinger(Collections.emptyList());
         return fagsak;
-    }
-
-    private Fagsak fagsakMedBehandlinger(Behandlingsstatus behandlingsstatusFørst,
-                                         Behandlingsstatus BehandlingsstatusAndre,
-                                         Behandlingsstatus BehandlingsstatusTredje
-    ) throws ParseException {
-        ArrayList<Behandling> behandlinger = new ArrayList<>();
-        Fagsak fagsak = new Fagsak();
-        Behandling b1 = new Behandling();
-        b1.setId(1L);
-        b1.setType(Behandlingstyper.SOEKNAD);
-        b1.setRegistrertDato(new SimpleDateFormat("yyyy-MM-dd").parse("2019-01-11").toInstant());
-        b1.setStatus(behandlingsstatusFørst);
-
-        HashSet<Saksopplysning> saksopplysninger = new HashSet<>();
-        saksopplysninger.add(lagPersonSaksopplysning());
-        saksopplysninger.add(lagSøknadOpplysning());
-
-        b1.setSaksopplysninger(saksopplysninger);
-
-        Behandling b2 = new Behandling();
-        b2.setId(2L);
-        b2.setStatus(BehandlingsstatusAndre);
-        b2.setRegistrertDato(new SimpleDateFormat("yyyy-MM-dd").parse("2018-11-11").toInstant());
-
-        Behandling b3 = new Behandling();
-        b2.setId(3L);
-        b3.setStatus(BehandlingsstatusTredje);
-        b3.setRegistrertDato(new SimpleDateFormat("yyyy-MM-dd").parse("2018-09-11").toInstant());
-
-        behandlinger.add(b1);
-        behandlinger.add(b2);
-        behandlinger.add(b3);
-        fagsak.setBehandlinger(behandlinger);
-        return fagsak;
-    }
-
-    private Saksopplysning lagPersonSaksopplysning() {
-        Saksopplysning saksopplysningPerson = new Saksopplysning();
-        saksopplysningPerson.setType(SaksopplysningType.PERSONOPPLYSNING);
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.sammensattNavn = "Joe Moe";
-        saksopplysningPerson.setDokument(personDokument);
-        return saksopplysningPerson;
-    }
-
-    private Saksopplysning lagSøknadOpplysning() {
-        SoeknadDokument soeknadDokument = new SoeknadDokument();
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse.landKode = "NO";
-        soeknadDokument.arbeidUtland = new ArrayList<>();
-        soeknadDokument.arbeidUtland.add(arbeidUtland);
-        soeknadDokument.oppholdUtland.oppholdsPeriode = new no.nav.melosys.domain.dokument.soeknad.Periode(
-            LocalDate.of(2019,01,01), LocalDate.of(2019,02,01));
-        Saksopplysning saksopplysningSøknad = new Saksopplysning();
-        saksopplysningSøknad.setType(SaksopplysningType.SØKNAD);
-        saksopplysningSøknad.setDokument(soeknadDokument);
-        return saksopplysningSøknad;
     }
 
     private static FagsakDto lagFagsakDto(Fagsak fagsak) {

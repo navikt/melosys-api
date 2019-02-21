@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Tema;
@@ -238,7 +239,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
+    public Optional<Oppgave> finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
             .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK.getKode()})
@@ -251,10 +252,14 @@ public class GsakService implements GsakFasade {
             .map(GsakService::oppgaveMappingDtoTilDomain)
             .collect(Collectors.toList());
 
-        if (oppgaver.size() > 1) {
-            throw new TekniskException("Det finnes flere aktive behandlingsoppgaver for sak " + saksnummer);
+        if (!oppgaver.isEmpty()) {
+            if (oppgaver.size() > 1) {
+                throw new TekniskException("Det finnes flere aktive behandlingsoppgaver for sak " + saksnummer);
+            }
+            return Optional.ofNullable(oppgaver.get(0));
+        } else {
+            return Optional.empty();
         }
-        return oppgaver.get(0);
     }
 
     @Override
