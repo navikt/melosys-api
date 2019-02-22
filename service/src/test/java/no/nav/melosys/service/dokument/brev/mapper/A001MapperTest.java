@@ -134,7 +134,7 @@ public class A001MapperTest {
                                                "123456789",
                                                 adresse);
 
-        Arbeidssted fysiskArbeidssted = new Arbeidssted("JARLSBERG INTERNATIONAL", strukturertAdresse);
+        Arbeidssted fysiskArbeidssted = new Arbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
         Arbeidssted maritimtArbeidssted = new Arbeidssted("Seven Kestrel", "GB", Yrkesgrupper.SOKKEL_ELLER_SKIP);
 
         UtenlandskMyndighet myndighet = new UtenlandskMyndighet();

@@ -60,14 +60,13 @@ public class InnvilgelsesbrevMapperTest {
     }
 
     @Test
-    public void mapTilBrevXmlUtenArbeidslandISøknadGirUnntak() throws Exception {
+    public void mapTilBrevXmlUtenArbeidslandISøknadGirUnntak() {
         Behandling behandlingUtenSaksopplysninger = lagBehandling(lagFagsak(), Collections.emptySet());
         Behandlingsresultat behandlingsresultatUtenAvklartArbeidsland = lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
                 Collections.singleton(lagAvklarteFakta(Avklartefaktatype.AVKLARTE_ARBEIDSGIVER, "123456789")));
         Throwable unntak = catchThrowable(() -> testMapTilBrevXml(behandlingUtenSaksopplysninger,
                 behandlingsresultatUtenAvklartArbeidsland));
-        assertThat(unntak).isInstanceOf(IllegalStateException.class)
-            .hasCauseInstanceOf(TekniskException.class)
+        assertThat(unntak).isInstanceOf(TekniskException.class)
             .hasMessageContaining("Finner ikke søknaddokument");
     }
 

@@ -204,6 +204,7 @@ public final class DokumentServiceTest {
         dok.foretakUtland.add(foretakUtland);
         dok.juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
         dok.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = Collections.singletonList(ORGNR);
+        dok.oppholdUtland.oppholdslandKoder.add("DK");
         Saksopplysning søknad = lagSaksopplysning(SaksopplysningType.SØKNAD, dok);
         Saksopplysning personopplysninger = lagSaksopplysning(SaksopplysningType.PERSONOPPLYSNING, lagPersonDokument());
         behandling.setSaksopplysninger(new HashSet<>(Arrays.asList(søknad, personopplysninger)));
