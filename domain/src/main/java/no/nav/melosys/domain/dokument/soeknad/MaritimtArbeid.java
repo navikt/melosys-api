@@ -5,4 +5,5 @@ public class MaritimtArbeid {
     public String fartsomradeKode;
     public String flaggLandKode;
     public String installasjonsLandKode;
+    public String territorialfarvann;
 }
