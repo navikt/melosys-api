@@ -57,10 +57,10 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setArbeidsgiver(arbeidsgiver.navn);
 
         // Henter ut Landkode fra Arbeidssteder(Fysiske og Maritime) og Oppholdsland
-        String arbeidslandSomTekst = hentLandFraArbeidsstederOgOppholdsland(behandling, brevdata);
+        String arbeidslandSomTekst = hentArbeidslandFraArbeidsstederOgOppholdsland(behandling, brevdata);
 
-        Landkoder arbeidsland = Landkoder.valueOf(arbeidslandSomTekst);
-        fag.setArbeidsland(arbeidsland.getBeskrivelse());
+        Landkoder arbeidslandKode = Landkoder.valueOf(arbeidslandSomTekst);
+        fag.setArbeidsland(arbeidslandKode.getBeskrivelse());
 
         Set<Lovvalgsperiode> perioder = resultat.getLovvalgsperioder();
         if (perioder.size() != 1) {
@@ -81,7 +81,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         return fag;
     }
 
-    private static String hentLandFraArbeidsstederOgOppholdsland(Behandling behandling, BrevDataA1 brevdata) throws TekniskException {
+    private static String hentArbeidslandFraArbeidsstederOgOppholdsland(Behandling behandling, BrevDataA1 brevdata) throws TekniskException {
         String arbeidslandSomTekst;
         if (!brevdata.arbeidssteder.isEmpty()) {
             Arbeidssted arbeidssted = brevdata.arbeidssteder.iterator().next();
