@@ -26,6 +26,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataUtils;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
+import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.xml.sax.SAXException;
 
@@ -48,15 +49,16 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataA1 brevdata) {
+    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataA1 brevdata) throws TekniskException {
         Fag fag = new Fag();
         fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
         Virksomhet arbeidsgiver = brevdata.norskeVirksomheter.iterator().next();
         fag.setArbeidsgiver(arbeidsgiver.navn);
 
-        // Slå opp arbeidsland i avklartefakta, fall tilbake på søknaden (kan overkjøres av saksbehandler for sokkel/skip).
-        String arbeidslandSomTekst = hentLandFraSøknaden(behandling);
+        // Henter ut Landkode fra Arbeidssteder(Fysiske og Maritime) og Oppholdsland
+        String arbeidslandSomTekst = hentLandFraArbeidsstederOgOppholdsland(behandling, brevdata);
+
         Landkoder arbeidsland = Landkoder.valueOf(arbeidslandSomTekst);
         fag.setArbeidsland(arbeidsland.getBeskrivelse());
 
@@ -79,17 +81,21 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         return fag;
     }
 
-    private static String hentLandFraSøknaden(Behandling behandling) {
-        try {
+    private static String hentLandFraArbeidsstederOgOppholdsland(Behandling behandling, BrevDataA1 brevdata) throws TekniskException {
+        String arbeidslandSomTekst;
+        if (!brevdata.arbeidssteder.isEmpty()) {
+            Arbeidssted arbeidssted = brevdata.arbeidssteder.iterator().next();
+            arbeidslandSomTekst = arbeidssted.landKode;
+        }
+        else {
             SoeknadDokument soeknadDokument = SaksopplysningerUtils.hentSøknadDokument(behandling);
             List<String> land = SoeknadUtils.hentLand(soeknadDokument);
             if (land.isEmpty()) {
                 throw new TekniskException("Ingen land funnet");
             }
-            return land.get(0);
-        } catch (TekniskException e) {
-            throw new IllegalStateException(e);
+            arbeidslandSomTekst = land.get(0);
         }
+        return arbeidslandSomTekst;
     }
 
     private static XMLGregorianCalendar lagXmlDato(LocalDate dato) {
