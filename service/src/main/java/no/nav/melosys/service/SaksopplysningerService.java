@@ -1,9 +1,10 @@
 package no.nav.melosys.service;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -15,8 +16,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
-import static no.nav.melosys.domain.util.SoeknadUtils.hentLand;
-import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 
 @Service
 public class SaksopplysningerService {
@@ -48,9 +46,7 @@ public class SaksopplysningerService {
 
     private final AaregFasade aaregFasade;
 
-    private final ProsessinstansRepository prosessinstansRepository;
-
-    private final Binge binge;
+    private final ProsessinstansService prosessinstansService;
 
     private final BehandlingRepository behandlingRepository;
 
@@ -59,14 +55,12 @@ public class SaksopplysningerService {
     @Autowired
     public SaksopplysningerService(TpsFasade tpsFasade,
                                    AaregFasade aaregFasade,
-                                   ProsessinstansRepository prosessinstansRepository,
-                                   Binge binge,
+                                   ProsessinstansService prosessinstansService,
                                    BehandlingRepository behandlingRepository,
                                    BehandlingsresultatService behandlingsresultatService) {
         this.tpsFasade = tpsFasade;
         this.aaregFasade = aaregFasade;
-        this.prosessinstansRepository = prosessinstansRepository;
-        this.binge = binge;
+        this.prosessinstansService = prosessinstansService;
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatService = behandlingsresultatService;
 
@@ -78,13 +72,7 @@ public class SaksopplysningerService {
      */
     public boolean harAktivOppfrisking(Long behandlingID) {
         Assert.notNull(behandlingID, "behandlingID må ikke være null");
-        Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType.OPPFRISKNING, ProsessSteg.FEILET_MASKINELT, behandlingID);
-        if (aktivProsessinstans.isPresent()) {
-            log.debug("Behandling {} er under oppfrisking.", behandlingID);
-            return true;
-        }
-        log.debug("Behandling {} er ikke under oppfrisking", behandlingID);
-        return false;
+        return prosessinstansService.erUnderOppfriskning(behandlingID);
     }
 
     public ArbeidsforholdDokument hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws SikkerhetsbegrensningException, IntegrasjonException, IkkeFunnetException {
@@ -93,19 +81,18 @@ public class SaksopplysningerService {
     }
 
     @Transactional
-    public void oppfriskSaksopplysning(long behandlingsid) throws IkkeFunnetException, TekniskException {
-        log.info("Starter oppfrisking av behandlingsid: {} ", behandlingsid);
+    public void oppfriskSaksopplysning(long behandlingID) throws IkkeFunnetException, TekniskException {
+        log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);
 
-        Optional<Prosessinstans> aktivProsessinstans = prosessinstansRepository.findByStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessSteg.FEILET_MASKINELT, behandlingsid);
-        if (aktivProsessinstans.isPresent()) {
+        if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
             log.warn("Aktiv prosessinstans finnes allerede. Ikke mulig å oppfriske saksopplysning.");
             return;
         }
 
-        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingsid);
+        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingID);
         if (behandling == null) {
-            log.error("Behandling ikke funnet med behandlingsid {}", behandlingsid);
-            throw new IkkeFunnetException("Behandling ikke funnet med behandlingsid: " + behandlingsid);
+            log.error("Behandling ikke funnet med behandlingID {}", behandlingID);
+            throw new IkkeFunnetException("Behandling ikke funnet med behandlingID: " + behandlingID);
         }
 
         SoeknadDokument søknadDokument;
@@ -119,30 +106,15 @@ public class SaksopplysningerService {
         behandling.getSaksopplysninger().removeIf(saksopplysning -> saksopplysning.getType() != SaksopplysningType.SØKNAD);
         behandlingRepository.save(behandling);
 
-        behandlingsresultatService.tømBehandlingsresultat(behandlingsid);
+        behandlingsresultatService.tømBehandlingsresultat(behandlingID);
 
         opprettOppfriskningsprosess(behandling, søknadDokument);
     }
 
-    private void opprettOppfriskningsprosess(Behandling behandling, SoeknadDokument søknadDokument) throws TekniskException, IkkeFunnetException {
-        Prosessinstans nyprosessinstans = new Prosessinstans();
-        nyprosessinstans.setBehandling(behandling);
-        nyprosessinstans.setType(ProsessType.OPPFRISKNING);
-
-        String aktør_Id = behandling.getFagsak().hentAktørMedRolleType(Aktoersroller.BRUKER).getAktørId();
-        nyprosessinstans.setData(ProsessDataKey.AKTØR_ID, aktør_Id);
-        nyprosessinstans.setData(ProsessDataKey.BRUKER_ID, tpsFasade.hentIdentForAktørId(aktør_Id));
-
-        nyprosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, hentPeriode(søknadDokument));
-        nyprosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, hentLand(søknadDokument));
-
-        nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
-
-        LocalDateTime nå = LocalDateTime.now();
-        nyprosessinstans.setRegistrertDato(nå);
-        nyprosessinstans.setEndretDato(nå);
-
-        prosessinstansRepository.save(nyprosessinstans);
-        binge.leggTil(nyprosessinstans);
+    private void opprettOppfriskningsprosess(Behandling behandling, SoeknadDokument søknadDokument) throws IkkeFunnetException, TekniskException {
+        String aktørID = behandling.getFagsak().hentAktørMedRolleType(Aktoersroller.BRUKER).getAktørId();
+        String brukerID = tpsFasade.hentIdentForAktørId(aktørID);
+        prosessinstansService.opprettProsessinstansOppfriskning(behandling, aktørID, brukerID, søknadDokument);
     }
+
 }

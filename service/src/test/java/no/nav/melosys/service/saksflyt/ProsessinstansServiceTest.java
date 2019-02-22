@@ -1,10 +1,12 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.saksflyt;
+
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.junit.Before;
@@ -14,20 +16,20 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProsessinstansServiceTest {
 
     @Mock
-    private Binge binge;
+    private ProsessinstansRepository prosessinstansRepo;
 
     @Mock
-    private ProsessinstansRepository prosessinstansRepo;
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Captor
     private ArgumentCaptor<Prosessinstans> piCaptor;
@@ -36,18 +38,33 @@ public class ProsessinstansServiceTest {
 
     @Before
     public void setUp() {
-        service = new ProsessinstansService(binge, prosessinstansRepo);
+        service = new ProsessinstansService(prosessinstansRepo, applicationEventPublisher);
+    }
+
+    @Test
+    public void erUnderOppfriskning() {
+        when(prosessinstansRepo.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(eq(ProsessType.OPPFRISKNING), eq(ProsessSteg.FEILET_MASKINELT), anyLong()))
+            .thenReturn(Optional.of(new Prosessinstans()));
+        assertThat(service.erUnderOppfriskning(1L)).isTrue();
+    }
+
+    @Test
+    public void harAktivProsessinstans() {
+        when(prosessinstansRepo.findByStegIsNotNullAndStegIsNotAndBehandling_Id(eq(ProsessSteg.FEILET_MASKINELT), anyLong()))
+            .thenReturn(Optional.of(new Prosessinstans()));
+        assertThat(service.harAktivProsessinstans(1L)).isTrue();
     }
 
     @Test
     public void lagreProsessinstans_medSaksbehandler() {
         Prosessinstans prosessinstans = mock(Prosessinstans.class);
         String saksbehandler = "Z123456";
-        service.lagreOgSettIBingen(prosessinstans, saksbehandler);
+        service.lagre(prosessinstans, saksbehandler);
 
-        verify(prosessinstans, times(1)).setEndretDato(any());
-        verify(prosessinstans, times(1)).setRegistrertDato(any());
-        verify(prosessinstans, times(1)).setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
+        verify(prosessinstans).setEndretDato(any());
+        verify(prosessinstans).setRegistrertDato(any());
+        verify(prosessinstans).setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
+        verify(applicationEventPublisher).publishEvent(any(ProsessinstansOpprettetEvent.class));
     }
 
     @Test
@@ -58,9 +75,10 @@ public class ProsessinstansServiceTest {
         when(subjectHandler.getUserID()).thenReturn(saksbehandler);
 
         Prosessinstans prosessinstans = mock(Prosessinstans.class);
-        service.lagreOgSettIBingen(prosessinstans);
+        service.lagre(prosessinstans);
 
-        verify(prosessinstans, times(1)).setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
+        verify(prosessinstans).setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
+        verify(applicationEventPublisher).publishEvent(any(ProsessinstansOpprettetEvent.class));
     }
 
     @Test
@@ -68,7 +86,7 @@ public class ProsessinstansServiceTest {
         Behandling behandling = new Behandling();
         service.opprettProsessinstansAnmodningOmUnntak(behandling);
 
-        verify(prosessinstansRepo, times(1)).save(piCaptor.capture());
+        verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK);
@@ -82,7 +100,7 @@ public class ProsessinstansServiceTest {
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         service.opprettProsessinstansIverksettVedtak(behandling, resultatType);
 
-        verify(prosessinstansRepo, times(1)).save(piCaptor.capture());
+        verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK);
@@ -101,11 +119,26 @@ public class ProsessinstansServiceTest {
         Behandling behandling = new Behandling();
         service.opprettProsessinstansHenleggSak(behandling, Henleggelsesgrunner.ANNET, "");
 
-        verify(prosessinstansRepo, times(1)).save(piCaptor.capture());
+        verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.HENLEGG_SAK);
         assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.HS_OPPDATER_RESULTAT);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
+    }
+
+    @Test
+    public void opprettProsessinstansOppfriskning() {
+        Behandling behandling = new Behandling();
+        String aktørID = "aktørID";
+        String brukerID = "br";
+        SoeknadDokument soeknadDokument = new SoeknadDokument();
+        service.opprettProsessinstansOppfriskning(behandling, aktørID, brukerID, soeknadDokument);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans lagretInstans = piCaptor.getValue();
+        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.OPPFRISKNING);
+        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_PERS_OPPL);
     }
 }

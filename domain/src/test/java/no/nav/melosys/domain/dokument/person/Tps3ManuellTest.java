@@ -16,12 +16,11 @@ import org.junit.Test;
 
 import static no.nav.melosys.domain.dokument.person.Tps3PersonKonverteringTest.TPS_PERSON_3_0_MOCK;
 import static no.nav.melosys.domain.dokument.person.Tps3PersonKonverteringTest.TPS_PERSON_3_0_XSLT;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-
+// Bruk denne testen for å se hva xslt gjør
 public class Tps3ManuellTest {
-    
-    // Bruk denne testen for å se hva xslt gjør
+
     @Ignore
     @Test
     public void testTpsTilXml() throws Exception {
@@ -30,7 +29,7 @@ public class Tps3ManuellTest {
         Transformer t = TransformerFactory.newInstance().newTransformer(new StreamSource(xslt));
         StreamSource xmlSource = new StreamSource(inputXml);
         t.transform(xmlSource, new StreamResult(System.out));
-        assertTrue(false); // Manuell test. Ikke sjekk inn med @Ignore utkommentert.
+        fail(); // Manuell test. Ikke sjekk inn med @Ignore utkommentert.
     }
     
     @Ignore
@@ -55,9 +54,9 @@ public class Tps3ManuellTest {
         PersonDokument p2 = (PersonDokument) um.unmarshal(bais);
 
         // Sett breakpoint her for å inspisere p2
-        assertTrue(p2.diskresjonskode.getKode() == "MILI");
-        
-        assertTrue(false); // Manuell test. Ikke sjekk inn med @Ignore utkommentert.
+        assertSame(p2.diskresjonskode.getKode(), "MILI");
+
+        fail(); // Manuell test. Ikke sjekk inn med @Ignore utkommentert.
     }
     
 }

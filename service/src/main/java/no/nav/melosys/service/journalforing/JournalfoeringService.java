@@ -8,7 +8,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.service.ProsessinstansService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
@@ -52,7 +52,7 @@ public class JournalfoeringService {
         valider(journalfoeringDto);
         validerOpprettSakFelter(journalfoeringDto);
         
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
+        Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
 
         // Land trenges av regelmodulen får å vurdere inngangsvilkår
         prosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, journalfoeringDto.getFagsak().getLand());
@@ -70,7 +70,7 @@ public class JournalfoeringService {
             prosessinstans.setData(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, journalfoeringDto.getRepresentantKontaktPerson());
         }
 
-        prosessinstansService.lagreOgSettIBingen(prosessinstans);
+        prosessinstansService.lagre(prosessinstans);
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
@@ -84,12 +84,12 @@ public class JournalfoeringService {
             throw new FunksjonellException("Saksnummer mangler");
         }
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto);
+        Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto);
 
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
 
-        prosessinstansService.lagreOgSettIBingen(prosessinstans);
+        prosessinstansService.lagre(prosessinstans);
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 

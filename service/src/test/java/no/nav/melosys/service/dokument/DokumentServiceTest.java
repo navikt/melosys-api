@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -32,7 +31,6 @@ import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.*;
-import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
@@ -41,6 +39,7 @@ import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Test;
 import org.pac4j.oidc.profile.OidcProfile;
 import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
@@ -113,27 +112,27 @@ public final class DokumentServiceTest {
     }
 
     @Test
-    public final void produserInnvilgelsesbrevISaksflytUtenBehandlingKasterUnntak() throws Exception {
+    public final void produserInnvilgelsesbrevISaksflytUtenBehandlingKasterUnntak() {
         Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(~BEHANDLINGSID,
                 Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, lagBrevBestillingDto(Aktoersroller.BRUKER)));
         assertThat(unntak).isInstanceOfAny(IkkeFunnetException.class).hasNoCause().hasMessageContaining("finnes ikke");
     }
 
     @Test
-    public final void produserUkjentDokumenttypeISaksflytKasterUnntak() throws Exception {
+    public final void produserUkjentDokumenttypeISaksflytKasterUnntak() {
         Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(BEHANDLINGSID,
                 Produserbaredokumenter.MELDING_HENLAGT_SAK, lagBrevBestillingDto(Aktoersroller.BRUKER)));
         assertThat(unntak).isInstanceOfAny(FunksjonellException.class).hasNoCause().hasMessageContaining("er ikke støttet");
     }
 
     @Test
-    public final void produserDokumentUtenBehandlingKasterUnntak() throws Exception {
+    public final void produserDokumentUtenBehandlingKasterUnntak() {
         Throwable unntak = catchThrowable(() -> instans.produserDokument(~BEHANDLINGSID, Produserbaredokumenter.ATTEST_A1, lagBrevData(Aktoersroller.ARBEIDSGIVER)));
         assertThat(unntak).isInstanceOf(IkkeFunnetException.class).hasNoCause().hasMessageContaining("finnes ikke");
     }
 
     @Test
-    public final void produserDokumentUtenDokumenttypeKasterUnntak() throws Exception {
+    public final void produserDokumentUtenDokumenttypeKasterUnntak() {
         Throwable unntak = catchThrowable(() -> instans.produserDokument(BEHANDLINGSID, null, lagBrevData(Aktoersroller.ARBEIDSGIVER)));
         assertThat(unntak).isInstanceOf(IllegalArgumentException.class).hasNoCause().hasMessageContaining("Ingen gyldig");
     }
@@ -182,8 +181,8 @@ public final class DokumentServiceTest {
         }
 
         BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository);
-        return new DokumentService(behandlingRepository, mock(FagsakRepository.class), brevDataService, dokSysFasade, mock(JoarkFasade.class), mock(Binge.class),
-                mock(ProsessinstansRepository.class), brevdatabyggervelger);
+        return new DokumentService(behandlingRepository, mock(FagsakRepository.class), brevDataService, dokSysFasade, mock(JoarkFasade.class),
+                mock(ProsessinstansService.class), brevdatabyggervelger);
     }
 
     private static Behandling lagBehandling() {

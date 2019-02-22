@@ -12,12 +12,13 @@ import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
-import no.nav.melosys.service.dokument.brev.*;
+import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
+import no.nav.melosys.service.dokument.brev.BrevDataService;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -37,9 +38,7 @@ public class DokumentService {
 
     private final JoarkFasade joarkFasade;
 
-    private final Binge binge;
-
-    private final ProsessinstansRepository prosessinstansRepo;
+    private final ProsessinstansService prosessinstansService;
 
     private final BrevDataByggerVelger brevDataByggerVelger;
 
@@ -48,15 +47,13 @@ public class DokumentService {
                     FagsakRepository fagsakRepository,
                     BrevDataService brevDataService,
                     DokSysFasade dokSysFasade, JoarkFasade joarkFasade,
-                    Binge binge, ProsessinstansRepository prosessinstansRepo,
-                    BrevDataByggerVelger brevDataByggerVelger) {
+                    ProsessinstansService prosessinstansService, BrevDataByggerVelger brevDataByggerVelger) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.brevDataService = brevDataService;
         this.joarkFasade = joarkFasade;
         this.dokSysFasade = dokSysFasade;
-        this.binge = binge;
-        this.prosessinstansRepo = prosessinstansRepo;
+        this.prosessinstansService = prosessinstansService;
         this.brevDataByggerVelger = brevDataByggerVelger;
     }
 
@@ -143,7 +140,6 @@ public class DokumentService {
         prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
 
-        prosessinstansRepo.save(prosessinstans);
-        binge.leggTil(prosessinstans);
+        prosessinstansService.lagre(prosessinstans);
     }
 }

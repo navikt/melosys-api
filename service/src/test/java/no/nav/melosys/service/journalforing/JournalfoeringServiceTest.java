@@ -7,14 +7,12 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
-import no.nav.melosys.service.ProsessinstansService;
 import no.nav.melosys.service.journalforing.dto.FagsakDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,20 +21,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JournalfoeringServiceTest {
 
     @Mock
-    private Binge binge;
-
-    @Mock
     private JoarkFasade joarkFasade;
 
     @Mock
-    private ProsessinstansRepository prosessinstansRepo;
+    private ProsessinstansService prosessinstansService;
 
    @Mock
     private OppgaveService oppgaveService;
@@ -49,7 +43,6 @@ public class JournalfoeringServiceTest {
 
     @Before
     public void setup() {
-        ProsessinstansService prosessinstansService = new ProsessinstansService(binge, prosessinstansRepo);
         this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService);
         JournalfoeringOpprettDto opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
@@ -84,9 +77,8 @@ public class JournalfoeringServiceTest {
         opprettDto.setFagsak(fagsakDto);
         journalfoeringService.opprettSakOgJournalfør(opprettDto);
 
-        verify(prosessinstansRepo, times(1)).save(any(Prosessinstans.class));
-        verify(binge, times(1)).leggTil(any(Prosessinstans.class));
-        verify(oppgaveService, times(1)).ferdigstillOppgave(anyString());
+        verify(prosessinstansService).lagre(any(Prosessinstans.class));
+        verify(oppgaveService).ferdigstillOppgave(anyString());
 
     }
 
@@ -101,9 +93,8 @@ public class JournalfoeringServiceTest {
         tilordneDto.setSaksnummer("MEL-0123");
         journalfoeringService.tilordneSakOgJournalfør(tilordneDto);
 
-        verify(prosessinstansRepo, times(1)).save(any(Prosessinstans.class));
-        verify(binge, times(1)).leggTil(any(Prosessinstans.class));
-        verify(oppgaveService, times(1)).ferdigstillOppgave(anyString());
+        verify(prosessinstansService).lagre(any(Prosessinstans.class));
+        verify(oppgaveService).ferdigstillOppgave(anyString());
 
     }
 
