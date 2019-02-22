@@ -12,9 +12,9 @@ import static org.junit.Assert.assertThat;
 public class VilkaarsresultatTilBegrunnelseMapperTest {
 
     @Test
-    public void mapVilkaarsresultatTilBegrunnelseString_forventSøktForSentBeskrivelse() {
+    public void mapVilkaarsresultatTilBegrunnelseString_medArt12_1_forventUtsendelseOver24MndBeskrivelse() {
         VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
-        vilkaarBegrunnelse.setKode("SOEKT_FOR_SENT");
+        vilkaarBegrunnelse.setKode("UTSENDELSE_OVER_24_MN");
 
         Set<VilkaarBegrunnelse> vilkaarBegrunnelser = new HashSet<>();
         vilkaarBegrunnelser.add(vilkaarBegrunnelse);
@@ -23,56 +23,71 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
         vilkaarsresultat.setBegrunnelser(vilkaarBegrunnelser);
 
         assertThat(VilkaarsresultatTilBegrunnelseMapper.mapVilkaarsresultatTilBegrunnelseString(vilkaarsresultat),
-                is("Søkt mer enn ett år etter perioden startet"));
+            is("Utsendelseperioden overskrider 24 måneder"));
+    }
+
+    @Test
+    public void mapVilkaarsresultatTilBegrunnelseString_medArt16_1_forventUtsendelseMellom24MndOg5AarBeskrivelse() {
+        VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
+        vilkaarBegrunnelse.setKode("UTSENDELSE_MELLOM_24_MN_OG_5_AAR");
+
+        Set<VilkaarBegrunnelse> vilkaarBegrunnelser = new HashSet<>();
+        vilkaarBegrunnelser.add(vilkaarBegrunnelse);
+
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setBegrunnelser(vilkaarBegrunnelser);
+
+        assertThat(VilkaarsresultatTilBegrunnelseMapper.mapVilkaarsresultatTilBegrunnelseString(vilkaarsresultat),
+                is("Utsendelseperioden er mellom 2 og 5 år"));
     }
 
     @Test
     public void mapVilkaarsresultatTilBegrunnelseString_forventFritekst() {
         VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
-        vilkaarBegrunnelse.setKode("SAERLIG_AVSLAGSGRUNN");
+        vilkaarBegrunnelse.setKode("SAERLIG_GRUNN");
 
         Set<VilkaarBegrunnelse> vilkaarBegrunnelser = new HashSet<>();
         vilkaarBegrunnelser.add(vilkaarBegrunnelse);
 
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         vilkaarsresultat.setBegrunnelser(vilkaarBegrunnelser);
-        vilkaarsresultat.setBegrunnelseFritekst("Fritekst som beskriver avslagsgrunn");
+        vilkaarsresultat.setBegrunnelseFritekst("Fritekst som beskriver anmodning om unntak");
 
         assertThat(VilkaarsresultatTilBegrunnelseMapper.mapVilkaarsresultatTilBegrunnelseString(vilkaarsresultat),
-            is("Fritekst som beskriver avslagsgrunn"));
+            is("Fritekst som beskriver anmodning om unntak"));
     }
 
     @Test
     public void mapVilkaarsresultatTilBegrunnelseString_medFlereBegrunnelser_forventSammensattBegrunnelse() {
-        VilkaarBegrunnelse vilkaarBegrunnelseForSent = new VilkaarBegrunnelse();
-        vilkaarBegrunnelseForSent.setKode("SOEKT_FOR_SENT");
-        VilkaarBegrunnelse vilkaarBegrunnelseErstatter = new VilkaarBegrunnelse();
-        vilkaarBegrunnelseErstatter.setKode("ERSTATTER_EN_ANNEN_SAMLET_OVER_5_AAR");
+        VilkaarBegrunnelse vilkaarBegrunnelseUtsendelse = new VilkaarBegrunnelse();
+        vilkaarBegrunnelseUtsendelse.setKode("UTSENDELSE_OVER_24_MN");
+        VilkaarBegrunnelse vilkaarBegrunnelseIdeellOrganisasjon = new VilkaarBegrunnelse();
+        vilkaarBegrunnelseIdeellOrganisasjon.setKode("IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK");
 
         Set<VilkaarBegrunnelse> vilkaarBegrunnelser = new HashSet<>();
-        vilkaarBegrunnelser.add(vilkaarBegrunnelseForSent);
-        vilkaarBegrunnelser.add(vilkaarBegrunnelseErstatter);
+        vilkaarBegrunnelser.add(vilkaarBegrunnelseUtsendelse);
+        vilkaarBegrunnelser.add(vilkaarBegrunnelseIdeellOrganisasjon);
 
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         vilkaarsresultat.setBegrunnelser(vilkaarBegrunnelser);
         vilkaarsresultat.setBegrunnelseFritekst("Fritekst som ikke skal vises");
 
         assertThat(VilkaarsresultatTilBegrunnelseMapper.mapVilkaarsresultatTilBegrunnelseString(vilkaarsresultat),
-            is("Erstatter en annen utsendt person, samlet periode mer enn 5 år\nSøkt mer enn ett år etter perioden startet"));
+            is("Utsendelseperioden overskrider 24 måneder\nArbeider for ideell organisasjon som ikke har vesentlig virksomhet i Norge"));
     }
 
     @Test
-    public void mapVilkaarsresultatTilBegrunnelseString_medFlereBegrunnelserOgFritekst_forventFritekst() {
-        VilkaarBegrunnelse vilkaarBegrunnelseForSent = new VilkaarBegrunnelse();
-        vilkaarBegrunnelseForSent.setKode("SOEKT_FOR_SENT");
-        VilkaarBegrunnelse vilkaarBegrunnelseErstatter = new VilkaarBegrunnelse();
-        vilkaarBegrunnelseErstatter.setKode("ERSTATTER_EN_ANNEN_SAMLET_OVER_5_AAR");
+    public void mapVilkaarsresultatTilBegrunnelseString_medFlereBegrunnelserOgFritekst_forventSammensattBegrunnelseOgFritekst() {
+        VilkaarBegrunnelse vilkaarBegrunnelseUtsendelse = new VilkaarBegrunnelse();
+        vilkaarBegrunnelseUtsendelse.setKode("UTSENDELSE_OVER_24_MN");
+        VilkaarBegrunnelse vilkaarBegrunnelseIdeellOrganisasjon = new VilkaarBegrunnelse();
+        vilkaarBegrunnelseIdeellOrganisasjon.setKode("IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK");
         VilkaarBegrunnelse vilkaarBegrunnelseSærlig = new VilkaarBegrunnelse();
-        vilkaarBegrunnelseSærlig.setKode("SAERLIG_AVSLAGSGRUNN");
+        vilkaarBegrunnelseSærlig.setKode("SAERLIG_GRUNN");
 
         Set<VilkaarBegrunnelse> vilkaarBegrunnelser = new HashSet<>();
-        vilkaarBegrunnelser.add(vilkaarBegrunnelseForSent);
-        vilkaarBegrunnelser.add(vilkaarBegrunnelseErstatter);
+        vilkaarBegrunnelser.add(vilkaarBegrunnelseUtsendelse);
+        vilkaarBegrunnelser.add(vilkaarBegrunnelseIdeellOrganisasjon);
         vilkaarBegrunnelser.add(vilkaarBegrunnelseSærlig);
 
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
@@ -80,6 +95,21 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
         vilkaarsresultat.setBegrunnelseFritekst("Fritekst som skal vises");
 
         assertThat(VilkaarsresultatTilBegrunnelseMapper.mapVilkaarsresultatTilBegrunnelseString(vilkaarsresultat),
-            is("Fritekst som skal vises"));
+            is("Utsendelseperioden overskrider 24 måneder\nFritekst som skal vises\nArbeider for ideell organisasjon som ikke har vesentlig virksomhet i Norge"));
+    }
+
+    @Test
+    public void mapVilkaarsresultatTilBegrunnelseString_medKodeSomIkkeFinnes_forventSammeKode() {
+        VilkaarBegrunnelse vilkaarBegrunnelse= new VilkaarBegrunnelse();
+        vilkaarBegrunnelse.setKode("EN_KODE_SOM_IKKE_FINNES_I_KODEVERK");
+
+        Set<VilkaarBegrunnelse> vilkaarBegrunnelser = new HashSet<>();
+        vilkaarBegrunnelser.add(vilkaarBegrunnelse);
+
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setBegrunnelser(vilkaarBegrunnelser);
+
+        assertThat(VilkaarsresultatTilBegrunnelseMapper.mapVilkaarsresultatTilBegrunnelseString(vilkaarsresultat),
+            is("EN_KODE_SOM_IKKE_FINNES_I_KODEVERK"));
     }
 }
