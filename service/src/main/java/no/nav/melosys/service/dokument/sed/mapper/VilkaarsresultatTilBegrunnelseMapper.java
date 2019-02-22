@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.sed.mapper;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.VilkaarBegrunnelse;
@@ -16,6 +17,7 @@ public class VilkaarsresultatTilBegrunnelseMapper {
         List<String> begrunnelser = vilkaarsresultat.getBegrunnelser().stream()
             .map(VilkaarBegrunnelse::getKode)
             .map(VilkaarsresultatTilBegrunnelseMapper::getBeskrivelse)
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
         // Særlig grunn blir byttet ut med verdi i fritekst-felt
@@ -36,7 +38,7 @@ public class VilkaarsresultatTilBegrunnelseMapper {
         } else if (isArt16_1_Anmodning_Begrunnelse(kode)) {
             return Art16_1_Anmodning_Begrunnelser.valueOf(kode).getBeskrivelse();
         } else {
-            return kode;
+            return null;
         }
     }
 

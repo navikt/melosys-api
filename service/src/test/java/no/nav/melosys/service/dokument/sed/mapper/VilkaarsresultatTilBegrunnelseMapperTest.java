@@ -58,7 +58,7 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
     }
 
     @Test
-    public void mapVilkaarsresultatTilBegrunnelseString_medFlereBegrunnelser_forventSammensattBegrunnelse() {
+    public void mapVilkaarsresultatTilBegrunnelseString_medFlereBegrunnelser_forventSammensattBeskrivelse() {
         VilkaarBegrunnelse vilkaarBegrunnelseUtsendelse = new VilkaarBegrunnelse();
         vilkaarBegrunnelseUtsendelse.setKode("UTSENDELSE_OVER_24_MN");
         VilkaarBegrunnelse vilkaarBegrunnelseIdeellOrganisasjon = new VilkaarBegrunnelse();
@@ -77,7 +77,7 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
     }
 
     @Test
-    public void mapVilkaarsresultatTilBegrunnelseString_medFlereBegrunnelserOgFritekst_forventSammensattBegrunnelseOgFritekst() {
+    public void mapVilkaarsresultatTilBegrunnelseString_medFlereBegrunnelserOgFritekst_forventSammensattBeskrivelseOgFritekst() {
         VilkaarBegrunnelse vilkaarBegrunnelseUtsendelse = new VilkaarBegrunnelse();
         vilkaarBegrunnelseUtsendelse.setKode("UTSENDELSE_OVER_24_MN");
         VilkaarBegrunnelse vilkaarBegrunnelseIdeellOrganisasjon = new VilkaarBegrunnelse();
@@ -99,8 +99,8 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
     }
 
     @Test
-    public void mapVilkaarsresultatTilBegrunnelseString_medKodeSomIkkeFinnes_forventSammeKode() {
-        VilkaarBegrunnelse vilkaarBegrunnelse= new VilkaarBegrunnelse();
+    public void mapVilkaarsresultatTilBegrunnelseString_medKodeSomIkkeFinnes_forventTomString() {
+        VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
         vilkaarBegrunnelse.setKode("EN_KODE_SOM_IKKE_FINNES_I_KODEVERK");
 
         Set<VilkaarBegrunnelse> vilkaarBegrunnelser = new HashSet<>();
@@ -110,6 +110,27 @@ public class VilkaarsresultatTilBegrunnelseMapperTest {
         vilkaarsresultat.setBegrunnelser(vilkaarBegrunnelser);
 
         assertThat(VilkaarsresultatTilBegrunnelseMapper.mapVilkaarsresultatTilBegrunnelseString(vilkaarsresultat),
-            is("EN_KODE_SOM_IKKE_FINNES_I_KODEVERK"));
+            is(""));
+    }
+
+    @Test
+    public void mapVilkaarsresultatTilBegrunnelseString_medKodeSomIkkeFinnesOgAndreBegrunnelser_forventBeskrivelser() {
+        VilkaarBegrunnelse vilkaarBegrunnelseUtsendelse = new VilkaarBegrunnelse();
+        vilkaarBegrunnelseUtsendelse.setKode("UTSENDELSE_OVER_24_MN");
+        VilkaarBegrunnelse vilkaarBegrunnelseFinnesIkke = new VilkaarBegrunnelse();
+        vilkaarBegrunnelseFinnesIkke.setKode("EN_KODE_SOM_IKKE_FINNES_I_KODEVERK");
+        VilkaarBegrunnelse vilkaarBegrunnelseIdeellOrganisasjon = new VilkaarBegrunnelse();
+        vilkaarBegrunnelseIdeellOrganisasjon.setKode("IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK");
+
+        Set<VilkaarBegrunnelse> vilkaarBegrunnelser = new HashSet<>();
+        vilkaarBegrunnelser.add(vilkaarBegrunnelseUtsendelse);
+        vilkaarBegrunnelser.add(vilkaarBegrunnelseFinnesIkke);
+        vilkaarBegrunnelser.add(vilkaarBegrunnelseIdeellOrganisasjon);
+
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setBegrunnelser(vilkaarBegrunnelser);
+
+        assertThat(VilkaarsresultatTilBegrunnelseMapper.mapVilkaarsresultatTilBegrunnelseString(vilkaarsresultat),
+            is("Utsendelseperioden overskrider 24 måneder\nArbeider for ideell organisasjon som ikke har vesentlig virksomhet i Norge"));
     }
 }
