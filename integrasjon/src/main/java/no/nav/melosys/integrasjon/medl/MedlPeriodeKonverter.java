@@ -6,9 +6,9 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
@@ -39,6 +39,9 @@ public class MedlPeriodeKonverter {
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_2B, GrunnlagMedl.FO_13_2_B);
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_3, GrunnlagMedl.FO_13_3);
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_4, GrunnlagMedl.FO_13_4);
+        // Article 16
+        tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1, GrunnlagMedl.FO_1408_16_1);
+        tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2, GrunnlagMedl.FO_1408_16_2);
         lovvalgsbestemmelseTilGrunnlagMedlTabell = tbl;
     }
 
