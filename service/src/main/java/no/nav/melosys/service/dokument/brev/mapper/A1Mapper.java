@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Set;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.melosysbrev._000067.*;
 import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
+import no.nav.dok.melosysbrev._000067.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -48,14 +48,7 @@ public class A1Mapper {
 
         a1.setYrkesgruppe(YrkesgruppeKode.valueOf(brevData.yrkesgruppe.name()));
 
-        List<Virksomhet> virksomheter = new ArrayList<>(brevData.norskeVirksomheter);
-        if (virksomheter.isEmpty()) {
-            throw new TekniskException("Trenger minst en valgt norsk virksomhet for ART12.1");
-        }
-
-        // Lev1 kun norske virksomheter som hovedvirksomhet (og kun én)
-        Virksomhet hovedvirksomhet = virksomheter.remove(0);
-        a1.setHovedvirksomhet(mapHovedvirksomhet(hovedvirksomhet));
+        a1.setHovedvirksomhet(mapHovedvirksomhet(brevData.hovedvirksomhet));
 
         a1.setBivirksomhetListe(mapBivirksomheter(brevData.arbeidssteder));
 
@@ -128,8 +121,7 @@ public class A1Mapper {
         hovedvirksomhetBrev.setPoststed(adresse.poststed);
         hovedvirksomhetBrev.setLandkode(adresse.landKode);
 
-        boolean selvstendigForetak = brevData.selvstendigeForetak.contains(virksomhet.orgnr);
-        if (selvstendigForetak) {
+        if (virksomhet.isSelvstendigForetak()) {
             hovedvirksomhetBrev.setYrkesaktivitet(YrkesaktivitetsKode.SELVSTENDIG);
         }
         else {

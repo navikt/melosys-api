@@ -19,8 +19,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
@@ -32,7 +30,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,9 +40,6 @@ public class BrevDataByggerA1Test {
 
     @Mock
     private AvklartefaktaService avklartefaktaService;
-
-    @Mock
-    private EregFasade ereg;
 
     @Mock
     private Behandling behandling;
@@ -61,10 +57,11 @@ public class BrevDataByggerA1Test {
 
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(TpsFasade.class));
-
+        RegisterOppslagSystemService registerOppslagService = mock(RegisterOppslagSystemService.class);
         avklarteOrganisasjoner = new HashSet<>();
-        when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong())).thenReturn(avklarteOrganisasjoner);
+
+        when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong()))
+            .thenReturn(avklarteOrganisasjoner);
 
         søknad = new SoeknadDokument();
         Saksopplysning soeknad = new Saksopplysning();
@@ -84,16 +81,21 @@ public class BrevDataByggerA1Test {
         OrganisasjonsDetaljer detaljer = mock(OrganisasjonsDetaljer.class);
         when(detaljer.hentStrukturertForretningsadresse()).thenReturn(new StrukturertAdresse());
 
-        leggTilTestorganisasjon("navn1", orgnr1, detaljer);
-        leggTilTestorganisasjon("navn2", orgnr2, detaljer);
+        Set<OrganisasjonDokument> organisasjonDokumenter = new HashSet<>();
+
+        organisasjonDokumenter.add(leggTilTestorganisasjon("navn1", orgnr1, detaljer));
+        organisasjonDokumenter.add(leggTilTestorganisasjon("navn2", orgnr2, detaljer));
 
         KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
 
+        when(registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner))
+            .thenReturn(organisasjonDokumenter);
+
         brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, registerOppslagService, kodeverkService);
     }
 
-    private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    private OrganisasjonDokument leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
         OrganisasjonDokument org = new OrganisasjonDokument();
         org.setOrgnummer(orgnummer);
         org.setOrganisasjonDetaljer(detaljer);
@@ -101,7 +103,7 @@ public class BrevDataByggerA1Test {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ORGANISASJON);
         saksopplysning.setDokument(org);
-        when(ereg.hentOrganisasjon(eq(orgnummer))).thenReturn(saksopplysning);
+        return org;
     }
 
     @Test

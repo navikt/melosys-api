@@ -148,6 +148,7 @@ public final class DokumentServiceTest {
         brevDataA1.utenlandskeVirksomheter = Collections.emptyList();
         brevDataA1.person = lagPersonDokument();
         brevDataA1.arbeidssteder = new ArrayList<>();
+        brevDataA1.hovedvirksomhet = arbeidsgiver;
         BrevDataVedlegg vedlegg = new BrevDataVedlegg("Saksbehandler");
         vedlegg.mottaker = mottakerRolle;
         vedlegg.brevDataA1 = brevDataA1;

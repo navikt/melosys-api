@@ -118,6 +118,7 @@ public class AttestMapperTest {
         a1Data.bostedsadresse = boAdresse;
         a1Data.arbeidssteder = Arrays.asList(fysiskArbeidssted, ikkeFysiskArbeidssted);
         a1Data.person = person;
+        a1Data.hovedvirksomhet = virksomhet;
 
         brevData = new BrevDataVedlegg("Z1234567");
         brevData.brevDataA1 = a1Data;

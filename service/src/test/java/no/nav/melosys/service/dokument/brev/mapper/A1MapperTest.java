@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -21,7 +22,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -76,7 +76,7 @@ public class A1MapperTest {
 
         behandlingsresultat = mock(Behandlingsresultat.class);
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());
-        when(behandlingsresultat.getLovvalgsperioder()).thenReturn(new HashSet<>(Arrays.asList(lovvalgsperiode)));
+        when(behandlingsresultat.getLovvalgsperioder()).thenReturn(new HashSet<>(Collections.singletonList(lovvalgsperiode)));
 
         Bostedsadresse boAdresse = new Bostedsadresse();
         boAdresse.getGateadresse().setGatenavn("Gatenavn");
@@ -97,9 +97,6 @@ public class A1MapperTest {
         strukturertAdresse.region = "Region";
         strukturertAdresse.landKode = "Land";
 
-        OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
-        when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(strukturertAdresse);
-
         Virksomhet virksomhet = new Virksomhet("JARLSBERG INTERNATIONAL",
                                                "123456789",
                                                 strukturertAdresse);
@@ -113,12 +110,13 @@ public class A1MapperTest {
 
         brevData = new BrevDataA1();
         brevData.yrkesgruppe = Yrkesgrupper.ORDINAER;
-        brevData.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
+        brevData.norskeVirksomheter = new ArrayList<>(Collections.singletonList(virksomhet));   // Hovedvirksomhet
         brevData.selvstendigeForetak = new HashSet<>();
-        brevData.utenlandskeVirksomheter = new ArrayList<>(Arrays.asList(utenlandksVirksomhet));
+        brevData.utenlandskeVirksomheter = new ArrayList<>(Collections.singletonList(utenlandksVirksomhet));
         brevData.bostedsadresse = boAdresse;
         brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidssted));
         brevData.person = lagPersonDokument();
+        brevData.hovedvirksomhet = virksomhet;
     }
 
     public static PersonDokument lagPersonDokument() {

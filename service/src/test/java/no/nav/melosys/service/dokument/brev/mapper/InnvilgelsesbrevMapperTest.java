@@ -89,9 +89,11 @@ public class InnvilgelsesbrevMapperTest {
         brevdataA1.selvstendigeForetak = Collections.emptySet();
         brevdataA1.utenlandskeVirksomheter = Collections.emptyList();
         brevdataA1.person = lagPersonDokument();
+        brevdataA1.hovedvirksomhet = virksomhet;
         brevdataA1.arbeidssteder = new ArrayList<>();
         BrevDataVedlegg brevVedlegg = new BrevDataVedlegg("SAKSBEHANDLER");
         brevVedlegg.brevDataA1 = brevdataA1;
+
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevVedlegg);
         // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
         // grundig mot forventninger.

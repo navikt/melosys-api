@@ -44,7 +44,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
     }
 
     @Test
-    public void lag_annmodningUntakkBrev_setterForendelseMottatt() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void lag_annmodningUntakkBrev_avklarVirksomhetSomSelvstendigForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         Fagsak fagsak = new Fagsak();
@@ -76,6 +76,5 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
 
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
         assertThat(brevData.hovedvirksomhet.isSelvstendigForetak()).isEqualTo(true);
-
     }
 }
