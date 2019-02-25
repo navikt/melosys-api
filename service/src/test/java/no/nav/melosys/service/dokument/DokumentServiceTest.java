@@ -80,7 +80,7 @@ public final class DokumentServiceTest {
         when(oidcProfile.getSubject()).thenReturn("testbruker");
         Pac4jAuthenticationToken auth = new Pac4jAuthenticationToken(Collections.singletonList(oidcProfile));
         SecurityContextHolder.getContext().setAuthentication(auth);
-        BrevbestillingDto brevbestilling = lagBrevBestillingDto(Aktoersroller.BRUKER);
+        BrevbestillingDto brevbestilling = lagBrevBestillingDto();
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(dokSysFasade, lagBrevdatabyggerVelgerMock(brevbestilling));
         byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, brevbestilling);
@@ -96,13 +96,13 @@ public final class DokumentServiceTest {
 
     @Test
     public final void produserMangelbrevISaksflyt() throws Exception {
-        BrevbestillingDto brevbestilling = lagBrevBestillingDto(Aktoersroller.BRUKER);
+        BrevbestillingDto brevbestilling = lagBrevBestillingDto();
         instans.produserDokumentISaksflyt(BEHANDLINGSID, Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER, brevbestilling);
     }
 
-    private static BrevbestillingDto lagBrevBestillingDto(Aktoersroller rolle) {
+    private static BrevbestillingDto lagBrevBestillingDto() {
         BrevbestillingDto brevbestilling = new BrevbestillingDto();
-        brevbestilling.mottaker = rolle;
+        brevbestilling.mottaker = Aktoersroller.BRUKER;
         return brevbestilling;
     }
 
@@ -114,14 +114,14 @@ public final class DokumentServiceTest {
     @Test
     public final void produserInnvilgelsesbrevISaksflytUtenBehandlingKasterUnntak() {
         Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(~BEHANDLINGSID,
-                Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, lagBrevBestillingDto(Aktoersroller.BRUKER)));
+                Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, lagBrevBestillingDto()));
         assertThat(unntak).isInstanceOfAny(IkkeFunnetException.class).hasNoCause().hasMessageContaining("finnes ikke");
     }
 
     @Test
     public final void produserUkjentDokumenttypeISaksflytKasterUnntak() {
         Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(BEHANDLINGSID,
-                Produserbaredokumenter.MELDING_HENLAGT_SAK, lagBrevBestillingDto(Aktoersroller.BRUKER)));
+                Produserbaredokumenter.MELDING_HENLAGT_SAK, lagBrevBestillingDto()));
         assertThat(unntak).isInstanceOfAny(FunksjonellException.class).hasNoCause().hasMessageContaining("er ikke støttet");
     }
 
@@ -148,6 +148,7 @@ public final class DokumentServiceTest {
         brevDataA1.utenlandskeVirksomheter = Collections.emptyList();
         brevDataA1.person = lagPersonDokument();
         brevDataA1.arbeidssteder = new ArrayList<>();
+        brevDataA1.hovedvirksomhet = arbeidsgiver;
         BrevDataVedlegg vedlegg = new BrevDataVedlegg("Saksbehandler");
         vedlegg.mottaker = mottakerRolle;
         vedlegg.brevDataA1 = brevDataA1;
@@ -212,7 +213,7 @@ public final class DokumentServiceTest {
 
     private static PersonDokument lagPersonDokument() {
         PersonDokument resultat = new PersonDokument();
-        resultat.kjønn = lagKjoennsType("K");
+        resultat.kjønn = lagKjoennsType();
         resultat.statsborgerskap = new Land(Land.BELGIA);
         resultat.fornavn = "For";
         resultat.etternavn = "Etter";
@@ -221,9 +222,9 @@ public final class DokumentServiceTest {
         return resultat;
     }
 
-    private static KjoennsType lagKjoennsType(String kode) {
+    private static KjoennsType lagKjoennsType() {
         KjoennsType kjønn = new KjoennsType();
-        kjønn.setKode(kode);
+        kjønn.setKode("K");
         return kjønn;
     }
 
@@ -267,12 +268,11 @@ public final class DokumentServiceTest {
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         JoarkService joarkService = mock(JoarkService.class);
-        BrevDataByggerVelger brevdatabyggervelger = new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, lovvalgsperiodeService, utenlandskMyndighetRepository,
+        return new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, lovvalgsperiodeService, utenlandskMyndighetRepository,
                 vilkaarsresultatRepository, joarkService);
-        return brevdatabyggervelger;
     }
 
-    public BrevDataByggerVelger lagBrevdatabyggerVelgerMock(BrevbestillingDto bestillingDto) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    private BrevDataByggerVelger lagBrevdatabyggerVelgerMock(BrevbestillingDto bestillingDto) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         BrevDataByggerVedlegg brevDataByggerVedlegg = mock(BrevDataByggerVedlegg.class);
 
         BrevDataByggerVelger brevdatabyggervelger = mock(BrevDataByggerVelger.class);
@@ -299,7 +299,7 @@ public final class DokumentServiceTest {
         adresse.setPostnr("1234");
         Periode gyldighetsperiode = new Periode(LocalDate.now().minusYears(10), LocalDate.now().plusYears(10));
         adresse.setGyldighetsperiode(gyldighetsperiode);
-        organisasjonDetaljer.forretningsadresse = Arrays.asList(adresse);
+        organisasjonDetaljer.forretningsadresse = Collections.singletonList(adresse);
         orgDok.setOrganisasjonDetaljer(organisasjonDetaljer);
         orgDok.setOrgnummer(ORGNR);
         when(eregFasade.hentOrganisasjon(ORGNR)).thenReturn(lagSaksopplysning(SaksopplysningType.ORGANISASJON, orgDok));
@@ -321,7 +321,7 @@ public final class DokumentServiceTest {
         periode.setFom(LocalDate.now());
         periode.setTom(LocalDate.now());
         periode.setLovvalgsland(Landkoder.NO);
-        List<Lovvalgsperiode> perioder = Arrays.asList(periode);
+        List<Lovvalgsperiode> perioder = Collections.singletonList(periode);
         behandlingsresultat.setLovvalgsperioder(new HashSet<>(perioder));
         return behandlingsresultat;
     }

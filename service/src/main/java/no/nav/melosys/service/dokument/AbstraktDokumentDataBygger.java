@@ -24,9 +24,9 @@ import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public abstract class AbstraktDokumentDataBygger {
-    final protected KodeverkService kodeverkService;
-    final protected LovvalgsperiodeService lovvalgsperiodeService;
-    final protected AvklartefaktaService avklartefaktaService;
+    protected final KodeverkService kodeverkService;
+    protected final LovvalgsperiodeService lovvalgsperiodeService;
+    protected final AvklartefaktaService avklartefaktaService;
 
     protected PersonDokument person;
     protected SoeknadDokument søknad;
@@ -51,7 +51,7 @@ public abstract class AbstraktDokumentDataBygger {
 
     protected Set<String> hentAvklarteSelvstendigeForetakOrgnumre() {
         Set<String> organisasjonsnumre = søknad.selvstendigArbeid.hentAlleOrganisasjonsnumre()
-                .collect(Collectors.toSet());
+            .collect(Collectors.toSet());
 
         organisasjonsnumre.retainAll(avklarteOrganisasjoner);
         return organisasjonsnumre;
@@ -84,14 +84,14 @@ public abstract class AbstraktDokumentDataBygger {
         // For nå har alltid kun et utenlandsk foretak.
         // Det er derfor ikke nødvendig med filtrering av avklarte foretak
         return søknad.foretakUtland.stream()
-                .map(Virksomhet::new)
-                .collect(Collectors.toList());
+            .map(Virksomhet::new)
+            .collect(Collectors.toList());
     }
 
     private List<Arbeidssted> hentFysiskearbeidssteder() {
         return søknad.arbeidUtland.stream()
-                .map(au -> new Arbeidssted(au.foretakNavn, au.foretakOrgnr, au.adresse))
-                .collect(Collectors.toList());
+            .map(au -> new Arbeidssted(au.foretakNavn, au.foretakOrgnr, au.adresse))
+            .collect(Collectors.toList());
     }
 
     private List<Arbeidssted> hentIkkeFysiskeArbeidssteder() {
@@ -123,5 +123,14 @@ public abstract class AbstraktDokumentDataBygger {
         }
 
         return lovvalgsperioder.iterator().next();
+    }
+
+    protected void avklarSelvstendigForetakVirksomhet(Virksomhet hovedvirksomhet) {
+        Set<String> avklarteSelvstendigeForetakOrgnumre = hentAvklarteSelvstendigeForetakOrgnumre();
+
+        boolean erSelvstendigForetak = avklarteSelvstendigeForetakOrgnumre.stream()
+            .anyMatch(orgnummer -> orgnummer.equalsIgnoreCase(hovedvirksomhet.orgnr));
+
+        hovedvirksomhet.setSelvstendigForetak(erSelvstendigForetak);
     }
 }

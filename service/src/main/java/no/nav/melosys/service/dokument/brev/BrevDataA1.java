@@ -15,6 +15,7 @@ public class BrevDataA1 extends BrevData {
     public Set<String> selvstendigeForetak;
     public Yrkesgrupper yrkesgruppe;
     public PersonDokument person;
+    public Virksomhet hovedvirksomhet;
 
     public List<Arbeidssted> arbeidssteder;
 

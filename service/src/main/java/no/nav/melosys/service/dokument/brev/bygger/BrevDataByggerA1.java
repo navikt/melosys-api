@@ -48,6 +48,13 @@ public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements Brev
         brevData.arbeidssteder = hentArbeidssteder();
         brevData.person = person;
 
+        if (brevData.norskeVirksomheter.isEmpty()) {
+            throw new TekniskException("Trenger minst en valgt norsk virksomhet for ART12.1");
+        }
+
+        // Lev1 kun norske virksomheter som hovedvirksomhet (og kun én)
+        brevData.hovedvirksomhet = brevData.norskeVirksomheter.get(0);
+        avklarSelvstendigForetakVirksomhet(brevData.hovedvirksomhet);
         return brevData;
     }
 

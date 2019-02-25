@@ -46,7 +46,7 @@ public class InnvilgelsesbrevMapperTest {
     }
 
     @Test
-    public final void mapTilBrevXmlMedFlereLovvalgsperioderFeiler() throws Exception {
+    public final void mapTilBrevXmlMedFlereLovvalgsperioderFeiler() {
         Set<Lovvalgsperiode> perioder = new HashSet<>(Arrays.asList(lagLovvalgsperiode(LocalDate.MIN), lagLovvalgsperiode(LocalDate.now())));
         Throwable unntak = catchThrowable(() -> testMapTilBrevXml(lagBehandlingsresultat(perioder)));
         assertThat(unntak).isInstanceOf(UnsupportedOperationException.class)
@@ -70,15 +70,15 @@ public class InnvilgelsesbrevMapperTest {
             .hasMessageContaining("Finner ikke søknaddokument");
     }
 
-    public void testMapTilBrevXml() throws Exception {
+    private void testMapTilBrevXml() throws Exception {
         testMapTilBrevXml(lagBehandlingsresultat());
     }
 
-    public void testMapTilBrevXml(Behandlingsresultat behandlingsresultat) throws Exception {
+    private void testMapTilBrevXml(Behandlingsresultat behandlingsresultat) throws Exception {
         testMapTilBrevXml(lagBehandling(lagFagsak()), behandlingsresultat);
     }
 
-    public void testMapTilBrevXml(Behandling behandling, Behandlingsresultat behandlingsresultat) throws Exception {
+    private void testMapTilBrevXml(Behandling behandling, Behandlingsresultat behandlingsresultat) throws Exception {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = LagMelosysNAVFelles();
         BrevDataA1 brevdataA1 = new BrevDataA1();
@@ -89,9 +89,11 @@ public class InnvilgelsesbrevMapperTest {
         brevdataA1.selvstendigeForetak = Collections.emptySet();
         brevdataA1.utenlandskeVirksomheter = Collections.emptyList();
         brevdataA1.person = lagPersonDokument();
+        brevdataA1.hovedvirksomhet = virksomhet;
         brevdataA1.arbeidssteder = new ArrayList<>();
         BrevDataVedlegg brevVedlegg = new BrevDataVedlegg("SAKSBEHANDLER");
         brevVedlegg.brevDataA1 = brevdataA1;
+
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevVedlegg);
         // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
         // grundig mot forventninger.
@@ -154,13 +156,9 @@ public class InnvilgelsesbrevMapperTest {
     }
 
     private static Avklartefakta lagAvklarteFakta(Avklartefaktatype type, String verdi) {
-        return lagAvklarteFakta(type, verdi, "TRUE");
-    }
-
-    private static Avklartefakta lagAvklarteFakta(Avklartefaktatype type, String verdi, String status) {
         Avklartefakta faktum = new Avklartefakta();
         faktum.setType(type);
-        faktum.setFakta(status);
+        faktum.setFakta("TRUE");
         faktum.setSubjekt(verdi);
         return faktum;
     }
@@ -192,7 +190,7 @@ public class InnvilgelsesbrevMapperTest {
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = new StrukturertAdresse();
         arbeidUtland.adresse.landKode = Landkoder.AT.getKode();
-        dokument.arbeidUtland = Arrays.asList(arbeidUtland);
+        dokument.arbeidUtland = Collections.singletonList(arbeidUtland);
         return dokument;
     }
 
@@ -212,10 +210,9 @@ public class InnvilgelsesbrevMapperTest {
     }
 
     private static FellesType lagFellesType() {
-        FellesType fellesType = FellesType.builder()
+        return FellesType.builder()
             .withFagsaksnummer("Sak 1")
             .build();
-        return fellesType;
     }
 
     private static MelosysNAVFelles LagMelosysNAVFelles() {
@@ -241,18 +238,17 @@ public class InnvilgelsesbrevMapperTest {
     }
 
     private static Saksbehandler lagSaksbehandler(NavEnhet navEnhet) {
-        Saksbehandler saksbehandler = Saksbehandler.builder()
+        return Saksbehandler.builder()
             .withNavAnsatt(NavAnsatt.builder()
                 .withAnsattId("Saksbehandler 1")
                 .withNavn("Saksbehandler En")
                 .build())
             .withNavEnhet(navEnhet)
             .build();
-        return saksbehandler;
     }
 
     private static Person lagPerson() {
-        Person person = Person.builder()
+        return Person.builder()
             .withId("2")
             .withTypeKode(AktoerType.PERSON)
             .withNavn("Nevn Navnet")
@@ -264,6 +260,5 @@ public class InnvilgelsesbrevMapperTest {
                 .withPoststed("Poststed")
                 .build())
             .build();
-        return person;
     }
 }
