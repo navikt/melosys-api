@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 
 public class BrevData {

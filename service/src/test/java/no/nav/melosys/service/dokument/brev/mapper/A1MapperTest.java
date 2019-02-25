@@ -119,7 +119,7 @@ public class A1MapperTest {
         brevData.hovedvirksomhet = virksomhet;
     }
 
-    public static PersonDokument lagPersonDokument() {
+    protected static PersonDokument lagPersonDokument() {
         PersonDokument person = new PersonDokument();
         person.kjønn = new KjoennsType();
         person.kjønn.setKode("K");
@@ -157,7 +157,7 @@ public class A1MapperTest {
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    public Fag mapFag() {
+    private Fag mapFag() {
         Fag fag = new Fag();
         fag.setVedleggA1("true");
         return fag;

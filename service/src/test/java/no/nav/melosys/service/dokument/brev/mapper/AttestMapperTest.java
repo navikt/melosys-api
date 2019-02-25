@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 
 import io.github.benas.randombeans.api.EnhancedRandom;
@@ -63,7 +64,7 @@ public class AttestMapperTest {
 
         behandlingsresultat = mock(Behandlingsresultat.class);
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());
-        when(behandlingsresultat.getLovvalgsperioder()).thenReturn(new HashSet<>(Arrays.asList(lovvalgsperiode)));
+        when(behandlingsresultat.getLovvalgsperioder()).thenReturn(new HashSet<>(Collections.singletonList(lovvalgsperiode)));
 
         Bostedsadresse boAdresse = new Bostedsadresse();
         boAdresse.getGateadresse().setGatenavn("Gatenavn");
@@ -112,9 +113,9 @@ public class AttestMapperTest {
 
         BrevDataA1 a1Data = new BrevDataA1();
         a1Data.yrkesgruppe = Yrkesgrupper.ORDINAER;
-        a1Data.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
+        a1Data.norskeVirksomheter = new ArrayList<>(Collections.singletonList(virksomhet));   // Hovedvirksomhet
         a1Data.selvstendigeForetak = new HashSet<>();
-        a1Data.utenlandskeVirksomheter = new ArrayList<>(Arrays.asList(utenlandksVirksomhet));
+        a1Data.utenlandskeVirksomheter = new ArrayList<>(Collections.singletonList(utenlandksVirksomhet));
         a1Data.bostedsadresse = boAdresse;
         a1Data.arbeidssteder = Arrays.asList(fysiskArbeidssted, ikkeFysiskArbeidssted);
         a1Data.person = person;

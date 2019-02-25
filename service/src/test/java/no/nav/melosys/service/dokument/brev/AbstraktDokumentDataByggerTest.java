@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +16,6 @@ import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
@@ -125,13 +124,12 @@ public class AbstraktDokumentDataByggerTest {
         foretakUtland.adresse.landKode = "NO";
         søknad.foretakUtland.add(foretakUtland);
 
-        List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
         assertThat(foretakUtland.navn).isEqualTo(foretakUtland.navn);
         assertThat(foretakUtland.adresse.landKode).isEqualTo(foretakUtland.adresse.landKode);
     }
 
     @Test
-    public void hentArbeidsstederForMartimtArbeid_listMedArbeidssteder() throws TekniskException {
+    public void hentArbeidsstederForMartimtArbeid_listMedArbeidssteder() {
         this.søknad.foretakUtland.add(new ForetakUtland());
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setType(Avklartefaktatype.ARBEIDSLAND);
@@ -139,7 +137,7 @@ public class AbstraktDokumentDataByggerTest {
         avklartefakta.setReferanse("INSTALLASJON_ARBEIDSLAND");
         avklartefakta.setSubjekt("Dunfjæder");
 
-        when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList((avklartefakta))));
+        when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Collections.singletonList((avklartefakta))));
 
         List<Arbeidssted> arbeidSteder = brevDatabyggerbase.hentArbeidssteder();
 

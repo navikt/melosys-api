@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -99,7 +100,7 @@ public class BrevDataByggerA1Test {
         OrganisasjonDokument org = new OrganisasjonDokument();
         org.setOrgnummer(orgnummer);
         org.setOrganisasjonDetaljer(detaljer);
-        org.setNavn(Arrays.asList(navn));
+        org.setNavn(Collections.singletonList(navn));
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ORGANISASJON);
         saksopplysning.setDokument(org);
