@@ -17,7 +17,7 @@ public class JuridiskArbeidsgiverNorge {
     public BigDecimal andelOmsetningINorge;
     public BigDecimal andelOppdragINorge;
     public BigDecimal andelKontrakterINorge;
-    public String arbeidstakereRekruttert;
+    public String arbeidstakereRekruttertILand;
     public String oppdragsKontrakterIHovedsakInngaattILand;
     public List<String> ekstraArbeidsgivere = new ArrayList<>();
 
