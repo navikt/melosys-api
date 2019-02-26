@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
+import no.nav.melosys.integrasjon.doksys.MottakerType;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +32,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 /**
@@ -73,9 +73,11 @@ public class BrevDataService {
             case AVSLAG_YRKESAKTIV:
             case ORIENTERING_ANMODNING_UNNTAK: {
                 if (representant != null) {
-                    metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, REPRESENTANT);
+                    metadata.mottakerType = MottakerType.ORGANISASJON;
+                    metadata.mottakerID = tpsFasade.hentFagsakIdentMedRolleType(fagsak, REPRESENTANT);
                 } else {
-                    metadata.mottaker = metadata.bruker;
+                    metadata.mottakerType = MottakerType.PERSON;
+                    metadata.mottakerID = metadata.bruker;
                 }
                 break;
             }
@@ -87,7 +89,14 @@ public class BrevDataService {
                 if (brevData.mottaker == null) {
                     throw new TekniskException("Det finnes ingen mottaker på sak " + fagsak.getSaksnummer());
                 }
-                metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevData.mottaker);
+                if (brevData.mottaker == BRUKER) {
+                    metadata.mottakerType = MottakerType.PERSON;
+                } else if (brevData.mottaker == REPRESENTANT || brevData.mottaker == ARBEIDSGIVER) {
+                    metadata.mottakerType = MottakerType.ORGANISASJON;
+                } else {
+                    throw new TekniskException(brevData.mottaker + " er ikke støttet.");
+                }
+                metadata.mottakerID = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevData.mottaker);
                 break;
             }
             default:

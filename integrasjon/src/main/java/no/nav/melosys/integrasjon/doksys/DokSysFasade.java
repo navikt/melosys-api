@@ -5,7 +5,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 
 public interface DokSysFasade {
 
-    byte[] produserDokumentutkast(DokumentbestillingMetadata request, Object brevdata) throws IntegrasjonException;
+    byte[] produserDokumentutkast(DokumentbestillingMetadata metadata, Object brevdata) throws IntegrasjonException;
 
-    DokumentbestillingResponse produserIkkeredigerbartDokument(DokumentbestillingMetadata request, Object brevdata) throws SikkerhetsbegrensningException, IntegrasjonException;
+    DokumentbestillingResponse produserIkkeredigerbartDokument(DokumentbestillingMetadata metadata, Object brevdata) throws SikkerhetsbegrensningException, IntegrasjonException;
 }

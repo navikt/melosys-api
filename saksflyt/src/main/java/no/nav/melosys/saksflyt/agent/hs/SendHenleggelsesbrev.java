@@ -77,7 +77,7 @@ public class SendHenleggelsesbrev extends AbstraktStegBehandler {
         Aktoer fullmektig = behandling.getFagsak().hentAktørMedRolleType(Aktoersroller.REPRESENTANT);
         if (fullmektig != null) {
             brevdata.mottaker = Aktoersroller.REPRESENTANT;
-//            dokumentService.produserDokument(behandling.getId(), MELDING_HENLAGT_SAK, brevdata);
+            dokumentService.produserDokument(behandling.getId(), MELDING_HENLAGT_SAK, brevdata);
             log.info("HENLEGGELSESBREV FOR REPRESENTANT ER FORELØPIG IKKE STØTTET: prosess {}.", prosessinstans.getId());
         }
 
