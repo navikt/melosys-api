@@ -81,3 +81,7 @@ fasitResources:
     resourceType: restservice
   - alias: melosys-eessi-apikey
     resourceType: credential
+  - alias: kafka-brokers
+    resourceType: baseurl
+  - alias: kafka-schema-registry
+    resourceType: baseurl
