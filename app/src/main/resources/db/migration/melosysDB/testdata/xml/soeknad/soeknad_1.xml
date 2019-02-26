@@ -36,11 +36,11 @@
         <erSelvstendig>false</erSelvstendig>
     </selvstendigArbeid>
     <juridiskArbeidsgiverNorge>
-        <erBemanningsbyra>false</erBemanningsbyra>
         <utsendteNeste12Mnd>0</utsendteNeste12Mnd>
         <antallAdmAnsatte>0</antallAdmAnsatte>
-        <antallAdminAnsatteEØS>0</antallAdminAnsatteEØS>
-        <utsendtFortsetterArbeidsforholdIUtlandet>false</utsendtFortsetterArbeidsforholdIUtlandet>
+        <antallAnsatte>0</antallAnsatte>
+        <arbeidstakereRekruttertILand>SE</arbeidstakereRekruttertILand>
+        <oppdragsKontrakterIHovedsakInngaattILand>NO</oppdragsKontrakterIHovedsakInngaattILand>
         <ekstraArbeidsgivere>982683955</ekstraArbeidsgivere>
     </juridiskArbeidsgiverNorge>
     <arbeidsinntekt>

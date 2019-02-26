@@ -70,13 +70,14 @@
     "fullmektigLandKode": "NO"
   },
   "juridiskArbeidsgiverNorge": {
-    "erBemanningsbyra": false,
     "utsendteNeste12Mnd": 10,
     "antallAdmAnsatte": 350,
-    "antallAdminAnsatteEOS": 75,
+    "antallAnsatte": 75,
     "andelOmsetningINorge": 78.5,
+    "andelOppdragINorge": 78.5,
     "andelKontrakterINorge": 50.5,
-    "utsendtFortsetterArbeidsforholdIUtlandet": true
+    "arbeidstakereRekruttertILand": "SE",
+    "oppdragsKontrakterIHovedsakInngaattILand": "NO"
   },
   "arbeidsinntekt": {
     "inntektNorskIPerioden": 5500,
