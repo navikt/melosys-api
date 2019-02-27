@@ -14,12 +14,9 @@ import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 
 public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataBygger implements BrevDataBygger {
 
-    private final RegisterOppslagService registerOppslagService;
-
     public BrevDataByggerAnmodningUnntakOgAvslag(AvklartefaktaService avklartefaktaService,
                                                  RegisterOppslagService registerOppslagService) {
-        super(null, null, avklartefaktaService);
-        this.registerOppslagService = registerOppslagService;
+        super(null, null, avklartefaktaService, registerOppslagService);
     }
 
     @Override

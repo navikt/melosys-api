@@ -25,8 +25,8 @@ import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 public class A1Mapper {
 
     private static final int MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV = 3;
-    private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1 = 13;
-    private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 15;
+    private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1 = 15;
+    private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 13;
 
     private Behandlingsresultat resultat;
 

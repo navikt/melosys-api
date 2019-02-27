@@ -56,8 +56,7 @@ public class BrevDataByggerVelger {
             }
             case AVSLAG_YRKESAKTIV:
             case ORIENTERING_ANMODNING_UNNTAK: {
-                return new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService,
-                    registerOppslagService);
+                return new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, registerOppslagService);
             }
             case ANMODNING_UNNTAK: {
                 BrevDataByggerA001 a001Bygger =

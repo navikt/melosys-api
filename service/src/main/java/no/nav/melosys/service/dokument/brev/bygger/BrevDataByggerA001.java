@@ -1,7 +1,10 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import no.nav.melosys.domain.Behandling;
@@ -9,12 +12,13 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.felles.Adresse;
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
@@ -25,13 +29,10 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements BrevDataBygger {
 
-    private final RegisterOppslagSystemService registerOppslagService;
-    private final LovvalgsperiodeService lovvalgsperiodeService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
 
@@ -41,12 +42,12 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
                               LovvalgsperiodeService lovvalgsperiodeService,
                               UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                               VilkaarsresultatRepository vilkaarsresultatRepository) {
-        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
-        this.registerOppslagService = registerOppslagService;
-        this.lovvalgsperiodeService = lovvalgsperiodeService;
+        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService, registerOppslagService);
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
+
+    protected Function<OrganisasjonDokument, Adresse> adresseformaterer = org -> org.getOrganisasjonDetaljer().hentUstrukturertForretningsadresse();
 
     @Override
     public BrevData lag(Behandling behandling, String saksbehandler) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
@@ -61,8 +62,8 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
         BrevDataA001 brevData = new BrevDataA001();
         brevData.personDokument = this.person;
         brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
-        brevData.arbeidsgivendeVirkomsheter = hentAlleNorskeAvklarteVirksomheter();
-        brevData.selvstendigeVirksomheter = hentAvklarteSelvstendigeForetak();
+        brevData.arbeidsgivendeVirkomsheter = hentAlleNorskeAvklarteVirksomheter(adresseformaterer);
+        brevData.selvstendigeVirksomheter = hentAvklarteSelvstendigeForetak(adresseformaterer);
 
         brevData.bostedsadresse = hentBostedsadresse();
         brevData.arbeidssteder = hentArbeidssteder();
@@ -97,19 +98,6 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
             throw new TekniskException("Brevet A001 trenger en begrunnelsekode for ART16_1");
         }
         return resultat;
-    }
-
-    private List<Virksomhet> hentAvklarteSelvstendigeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        Set<String> organisasjonsnumre = hentAvklarteSelvstendigeForetakOrgnumre();
-        return registerOppslagService.hentOrganisasjoner(organisasjonsnumre).stream()
-                .map(org -> new Virksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), org.getOrganisasjonDetaljer().hentUstrukturertForretningsadresse()))
-                .collect(Collectors.toList());
-    }
-
-    protected List<Virksomhet> hentAlleNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        return registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner).stream()
-                .map(org -> new Virksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), org.getOrganisasjonDetaljer().hentUstrukturertForretningsadresse()))
-                .collect(Collectors.toList());
     }
 
     private Optional<String> hentUtenlandskIdent(Landkoder landKode) {

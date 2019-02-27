@@ -1,0 +1,66 @@
+package no.nav.melosys.service.dokument.brev.mapper;
+
+import java.util.Set;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+
+import no.nav.dok.melosysbrev._000109.BrevdataType;
+import no.nav.dok.melosysbrev._000109.Fag;
+import no.nav.dok.melosysbrev._000109.ObjectFactory;
+import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.VilkaarBegrunnelse;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
+import org.xml.sax.SAXException;
+
+import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagLovvalgsperiodeType;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapArt121BegrunnelseType;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapArt121VesentligVirksomhetBegrunnelse;
+
+public class AvslagArbeidsgiverMapper implements BrevDataMapper {
+
+    private static final String XSD_LOCATION = "melosysbrev/melosys_000109.xsd";
+
+    @Override
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
+        BrevDataAvslagArbeidsgiver brevDataAvslagArbeidsgiver = (BrevDataAvslagArbeidsgiver) brevData;
+        Fag fag = mapFag(brevDataAvslagArbeidsgiver);
+
+        JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
+        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+    }
+
+    Fag mapFag(BrevDataAvslagArbeidsgiver brevData) throws TekniskException {
+        Fag fag = new Fag();
+
+        fag.setNavn(brevData.person.sammensattNavn);
+
+        fag.setArbeidsland("IKKE IMPLEMENTERT");
+
+        fag.setJuridiskEnhet(brevData.hovedvirksomhet.navn);
+
+        fag.setLovvalgsperiode(lagLovvalgsperiodeType(brevData.lovvalgsperiode));
+
+        Set<VilkaarBegrunnelse> art121Begrunnelser = brevData.vilkårbegrunnelser121;
+        fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
+
+        Set<VilkaarBegrunnelse> art121VesentligVirksomhetBegrunnelser = brevData.vilkårbegrunnelser121VesentligVirksomhet;
+        fag.setArt121VesentligVirksomhetBegrunnelse(mapArt121VesentligVirksomhetBegrunnelse(art121VesentligVirksomhetBegrunnelser));
+
+        return fag;
+    }
+
+    @SuppressWarnings("Duplicates")
+    private JAXBElement<BrevdataType> mapintoBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag) {
+        ObjectFactory factory = new ObjectFactory();
+        BrevdataType brevdataType = factory.createBrevdataType();
+        brevdataType.setFelles(fellesType);
+        brevdataType.setNAVFelles(navFelles);
+        brevdataType.setFag(fag);
+        return factory.createBrevdata(brevdataType);
+    }
+}

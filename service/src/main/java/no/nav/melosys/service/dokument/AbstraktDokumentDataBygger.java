@@ -5,19 +5,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.dokument.felles.Adresse;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
@@ -27,6 +30,7 @@ public abstract class AbstraktDokumentDataBygger {
     protected final KodeverkService kodeverkService;
     protected final LovvalgsperiodeService lovvalgsperiodeService;
     protected final AvklartefaktaService avklartefaktaService;
+    protected final RegisterOppslagService registerOppslagService;
 
     protected PersonDokument person;
     protected SoeknadDokument søknad;
@@ -37,24 +41,18 @@ public abstract class AbstraktDokumentDataBygger {
 
     protected AbstraktDokumentDataBygger(KodeverkService kodeverkService,
                                          LovvalgsperiodeService lovvalgsperiodeService,
-                                         AvklartefaktaService avklartefaktaService) {
+                                         AvklartefaktaService avklartefaktaService,
+                                         RegisterOppslagService registerOppslagService) {
         this.kodeverkService = kodeverkService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
+        this.registerOppslagService = registerOppslagService;
     }
 
     protected Bostedsadresse hentBostedsadresse() {
         Bostedsadresse adresse = person.bostedsadresse;
         adresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.getPostnr(), LocalDate.now()));
         return adresse;
-    }
-
-    protected Set<String> hentAvklarteSelvstendigeForetakOrgnumre() {
-        Set<String> organisasjonsnumre = søknad.selvstendigArbeid.hentAlleOrganisasjonsnumre()
-            .collect(Collectors.toSet());
-
-        organisasjonsnumre.retainAll(avklarteOrganisasjoner);
-        return organisasjonsnumre;
     }
 
     protected List<Arbeidssted> hentArbeidssteder() {
@@ -132,5 +130,26 @@ public abstract class AbstraktDokumentDataBygger {
             .anyMatch(orgnummer -> orgnummer.equalsIgnoreCase(hovedvirksomhet.orgnr));
 
         hovedvirksomhet.setSelvstendigForetak(erSelvstendigForetak);
+    }
+
+    protected Set<String> hentAvklarteSelvstendigeForetakOrgnumre() {
+        Set<String> organisasjonsnumre = søknad.selvstendigArbeid.hentAlleOrganisasjonsnumre()
+            .collect(Collectors.toSet());
+
+        organisasjonsnumre.retainAll(avklarteOrganisasjoner);
+        return organisasjonsnumre;
+    }
+
+    protected List<Virksomhet> hentAvklarteSelvstendigeForetak(Function<OrganisasjonDokument, Adresse> adressekoverterer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        Set<String> organisasjonsnumre = hentAvklarteSelvstendigeForetakOrgnumre();
+        return registerOppslagService.hentOrganisasjoner(organisasjonsnumre).stream()
+            .map(org -> new Virksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekoverterer.apply(org)))
+            .collect(Collectors.toList());
+    }
+
+    protected List<Virksomhet> hentAlleNorskeAvklarteVirksomheter(Function<OrganisasjonDokument, Adresse> adressekoverterer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        return registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner).stream()
+            .map(org -> new Virksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekoverterer.apply(org)))
+            .collect(Collectors.toList());
     }
 }

@@ -56,7 +56,8 @@ public class AnmodningUnntakMapperTest {
         Behandlingsresultat resultat = new Behandlingsresultat();
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.DE);
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.DE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
         resultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));

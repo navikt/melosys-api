@@ -26,12 +26,9 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class SedDataBygger extends AbstraktDokumentDataBygger {
 
-    private RegisterOppslagService registerOppslagService;
-
     public SedDataBygger(KodeverkService kodeverkService, RegisterOppslagService registerOppslagService,
                          LovvalgsperiodeService lovvalgsperiodeService, AvklartefaktaService avklartefaktaService) {
-        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
-        this.registerOppslagService = registerOppslagService;
+        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService, registerOppslagService);
 
     }
 

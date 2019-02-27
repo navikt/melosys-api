@@ -11,7 +11,6 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
 
-
 public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
 
     @Override
