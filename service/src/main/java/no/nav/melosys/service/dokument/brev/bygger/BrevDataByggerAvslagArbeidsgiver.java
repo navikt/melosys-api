@@ -20,10 +20,10 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
-import no.nav.melosys.service.dokument.AvklarteVirksomheter;
+import no.nav.melosys.service.dokument.felles.AvklarteVirksomheter;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+import no.nav.melosys.service.dokument.felles.AvklartVirksomhet;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
@@ -54,7 +54,7 @@ public class BrevDataByggerAvslagArbeidsgiver extends AbstraktDokumentDataBygger
         brevData.mottaker = Aktoersroller.BRUKER;
         brevData.person = person;
 
-        List<Virksomhet> norskeVirksomheter = avklarteVirksomheter.hentAlleNorskeAvklarteVirksomheter(utenAdresse);
+        List<AvklartVirksomhet> norskeVirksomheter = avklarteVirksomheter.hentAlleNorskeVirksomheter(utenAdresse);
         brevData.hovedvirksomhet = norskeVirksomheter.iterator().next();
         brevData.lovvalgsperiode = hentLovvalgsperiode();
 

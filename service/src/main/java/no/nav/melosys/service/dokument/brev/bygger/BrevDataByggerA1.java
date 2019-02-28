@@ -15,7 +15,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
-import no.nav.melosys.service.dokument.AvklarteVirksomheter;
+import no.nav.melosys.service.dokument.felles.AvklarteVirksomheter;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -31,14 +31,6 @@ public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements Brev
         this.registerOppslagService = registerOppslagService;
     }
 
-    protected Function<OrganisasjonDokument, Adresse> adresseformaterer = this::utfyllManglendeAdressefelter;
-
-    private StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
-        StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
-        adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
-        return adresse;
-    }
-
     @Override
     public BrevData lag(Behandling behandling, String saksbehandler) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         this.behandling = behandling;
@@ -49,8 +41,8 @@ public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements Brev
         BrevDataA1 brevData = new BrevDataA1();
         brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandling.getId());
         brevData.utenlandskeVirksomheter = hentUtenlandskeVirksomheter();
-        brevData.norskeVirksomheter = avklarteVirksomheter.hentAlleNorskeAvklarteVirksomheter(adresseformaterer);
-        brevData.selvstendigeForetak = avklarteVirksomheter.hentAvklarteSelvstendigeForetakOrgnumre();
+        brevData.norskeVirksomheter = avklarteVirksomheter.hentAlleNorskeVirksomheter(adresseformaterer);
+        brevData.selvstendigeForetak = avklarteVirksomheter.hentSelvstendigeForetakOrgnumre();
 
         brevData.bostedsadresse = hentBostedsadresse();
         brevData.arbeidssteder = hentArbeidssteder();
@@ -62,7 +54,14 @@ public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements Brev
 
         // Lev1 kun norske virksomheter som hovedvirksomhet (og kun én)
         brevData.hovedvirksomhet = brevData.norskeVirksomheter.get(0);
-        avklarteVirksomheter.avklarSelvstendigForetakVirksomhet(brevData.hovedvirksomhet);
         return brevData;
+    }
+
+    Function<OrganisasjonDokument, Adresse> adresseformaterer = this::utfyllManglendeAdressefelter;
+
+    private StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
+        StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
+        adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
+        return adresse;
     }
 }

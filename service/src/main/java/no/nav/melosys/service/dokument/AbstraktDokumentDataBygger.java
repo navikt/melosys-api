@@ -20,7 +20,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+import no.nav.melosys.service.dokument.felles.AvklartVirksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public abstract class AbstraktDokumentDataBygger {
@@ -55,24 +55,24 @@ public abstract class AbstraktDokumentDataBygger {
             return arbeidssteder;
         }
 
-        List<Virksomhet> utenlandskeVirksomheter = hentUtenlandskeVirksomheter();
+        List<AvklartVirksomhet> utenlandskeVirksomheter = hentUtenlandskeVirksomheter();
         if (utenlandskeVirksomheter.size() != 1) {
             return Collections.emptyList();
         }
 
         // I Lev1 er det kun én utenlandsk arbeidsgiver.
         // Det er derfor ok å bruke dette navnet på fysisk arbeidssted
-        Virksomhet utenlandskVirksomhet = utenlandskeVirksomheter.get(0);
+        AvklartVirksomhet utenlandskVirksomhet = utenlandskeVirksomheter.get(0);
 
         // Brevet krever alltid minst et arbeidssted - selv når det ikke er oppgitt i søknad
         return Collections.singletonList(utledArbeidsstedFraVirksomhet(utenlandskVirksomhet));
     }
 
-    protected List<Virksomhet> hentUtenlandskeVirksomheter() {
+    protected List<AvklartVirksomhet> hentUtenlandskeVirksomheter() {
         // For nå har alltid kun et utenlandsk foretak.
         // Det er derfor ikke nødvendig med filtrering av avklarte foretak
         return søknad.foretakUtland.stream()
-            .map(Virksomhet::new)
+            .map(AvklartVirksomhet::new)
             .collect(Collectors.toList());
     }
 
@@ -90,7 +90,7 @@ public abstract class AbstraktDokumentDataBygger {
             .collect(Collectors.toList());
     }
 
-    private Arbeidssted utledArbeidsstedFraVirksomhet(Virksomhet virksomhet) {
+    private Arbeidssted utledArbeidsstedFraVirksomhet(AvklartVirksomhet virksomhet) {
         return new Arbeidssted(virksomhet.navn, virksomhet.orgnr, virksomhet.adresse.landKode);
     }
 

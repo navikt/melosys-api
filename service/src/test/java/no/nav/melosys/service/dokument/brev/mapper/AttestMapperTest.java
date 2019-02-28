@@ -20,11 +20,12 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+import no.nav.melosys.service.dokument.felles.AvklartVirksomhet;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -100,13 +101,15 @@ public class AttestMapperTest {
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(strukturertAdresse);
 
-        Virksomhet virksomhet = new Virksomhet("JARLSBERG INTERNATIONAL",
-                                               "123456789",
-                                                strukturertAdresse);
+        AvklartVirksomhet virksomhet = new AvklartVirksomhet("JARLSBERG INTERNATIONAL",
+                                                           "123456789",
+                                                            strukturertAdresse,
+                                                            Yrkesaktivitetstyper.LOENNET_ARBEID);
 
-        Virksomhet utenlandksVirksomhet = new Virksomhet("Jarlsberg",
-                                                         "123456789",
-                                                         strukturertAdresse);
+        AvklartVirksomhet utenlandksVirksomhet = new AvklartVirksomhet("Jarlsberg",
+                                                                        "123456789",
+                                                                        strukturertAdresse,
+                                                                        Yrkesaktivitetstyper.LOENNET_ARBEID);
 
         Arbeidssted fysiskArbeidssted = new Arbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
         Arbeidssted ikkeFysiskArbeidssted = new Arbeidssted("Seven Kestrel", "GB", Yrkesgrupper.SOKKEL_ELLER_SKIP);

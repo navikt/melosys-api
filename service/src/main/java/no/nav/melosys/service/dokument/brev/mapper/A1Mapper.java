@@ -18,7 +18,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+import no.nav.melosys.service.dokument.felles.AvklartVirksomhet;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
@@ -111,7 +111,7 @@ public class A1Mapper {
         return brevPeriode;
     }
 
-    private HovedvirksomhetType mapHovedvirksomhet(Virksomhet virksomhet) {
+    private HovedvirksomhetType mapHovedvirksomhet(AvklartVirksomhet virksomhet) {
         HovedvirksomhetType hovedvirksomhetBrev = new HovedvirksomhetType();
         StrukturertAdresse adresse = (StrukturertAdresse) virksomhet.adresse;
         hovedvirksomhetBrev.setOrgnummer(virksomhet.orgnr);
@@ -120,13 +120,7 @@ public class A1Mapper {
         hovedvirksomhetBrev.setPostnr(adresse.postnummer);
         hovedvirksomhetBrev.setPoststed(adresse.poststed);
         hovedvirksomhetBrev.setLandkode(adresse.landKode);
-
-        if (virksomhet.isSelvstendigForetak()) {
-            hovedvirksomhetBrev.setYrkesaktivitet(YrkesaktivitetsKode.SELVSTENDIG);
-        }
-        else {
-            hovedvirksomhetBrev.setYrkesaktivitet(YrkesaktivitetsKode.LOENNET_ARBEID);
-        }
+        hovedvirksomhetBrev.setYrkesaktivitet(YrkesaktivitetsKode.valueOf(virksomhet.yrkesaktivitet.getKode()));
         return hovedvirksomhetBrev;
     }
 

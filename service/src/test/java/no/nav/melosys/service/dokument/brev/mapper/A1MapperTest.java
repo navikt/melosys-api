@@ -25,15 +25,12 @@ import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+import no.nav.melosys.service.dokument.felles.AvklartVirksomhet;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -97,13 +94,15 @@ public class A1MapperTest {
         strukturertAdresse.region = "Region";
         strukturertAdresse.landKode = "Land";
 
-        Virksomhet virksomhet = new Virksomhet("JARLSBERG INTERNATIONAL",
-                                               "123456789",
-                                                strukturertAdresse);
+        AvklartVirksomhet virksomhet = new AvklartVirksomhet("JARLSBERG INTERNATIONAL",
+                                                           "123456789",
+                                                            strukturertAdresse,
+                                                            Yrkesaktivitetstyper.LOENNET_ARBEID);
 
-        Virksomhet utenlandksVirksomhet = new Virksomhet("Jarlsberg",
-                                                         "123456789",
-                                                         strukturertAdresse);
+        AvklartVirksomhet utenlandskVirksomhet = new AvklartVirksomhet("Jarlsberg",
+                                                                        "123456789",
+                                                                        strukturertAdresse,
+                                                                        Yrkesaktivitetstyper.LOENNET_ARBEID);
 
         Arbeidssted fysiskArbeidssted = new Arbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
         Arbeidssted maritimtArbeidssted = new Arbeidssted("Dunfjæder", "GB", Yrkesgrupper.SOKKEL_ELLER_SKIP);
@@ -112,7 +111,7 @@ public class A1MapperTest {
         brevData.yrkesgruppe = Yrkesgrupper.ORDINAER;
         brevData.norskeVirksomheter = new ArrayList<>(Collections.singletonList(virksomhet));   // Hovedvirksomhet
         brevData.selvstendigeForetak = new HashSet<>();
-        brevData.utenlandskeVirksomheter = new ArrayList<>(Collections.singletonList(utenlandksVirksomhet));
+        brevData.utenlandskeVirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));
         brevData.bostedsadresse = boAdresse;
         brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidssted));
         brevData.person = lagPersonDokument();

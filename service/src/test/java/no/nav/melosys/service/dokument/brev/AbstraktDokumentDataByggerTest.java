@@ -19,7 +19,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+import no.nav.melosys.service.dokument.felles.AvklartVirksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +58,7 @@ public class AbstraktDokumentDataByggerTest {
         public List<Arbeidssted> hentArbeidssteder() {
             return super.hentArbeidssteder();
         }
-        public List<Virksomhet> hentUtenlandskeVirksomheter() {
+        public List<AvklartVirksomhet> hentUtenlandskeVirksomheter() {
             return super.hentUtenlandskeVirksomheter();
         }
     }

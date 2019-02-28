@@ -2,15 +2,13 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -24,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.service.dokument.AvklarteVirksomheterTest.lagSøknadOgArbeidsforholdOpplysninger;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -44,27 +43,24 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
     }
 
     @Test
-    public void lag_annmodningUntakkBrev_avklarVirksomhetSomSelvstendigForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
         behandling.setFagsak(fagsak);
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        SoeknadDokument soeknadDokument = new SoeknadDokument();
-        soeknadDokument.selvstendigArbeid.erSelvstendig = true;
-        SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
-        selvstendigForetak.orgnr = "999";
-        soeknadDokument.selvstendigArbeid.selvstendigForetak = Collections.singletonList(selvstendigForetak);
+        List<String> selvstendigeForetak = Collections.singletonList("987654321");
+        List<String> arbeidsgivereRegister = Collections.singletonList("123456789");
 
-        saksopplysning.setDokument(soeknadDokument);
-        saksopplysning.setType(SaksopplysningType.SØKNAD);
-        behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
+        Set<Saksopplysning> saksopplysninger =
+            lagSøknadOgArbeidsforholdOpplysninger(selvstendigeForetak, Collections.emptyList(), arbeidsgivereRegister);
+
+        behandling.setSaksopplysninger(saksopplysninger);
 
         String saksbehandler = "saksbehandler";
 
-        Set<String> orgSet = new HashSet<>(Collections.singletonList("999"));
+        Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
         when(avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId())).thenReturn(orgSet);
 
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();

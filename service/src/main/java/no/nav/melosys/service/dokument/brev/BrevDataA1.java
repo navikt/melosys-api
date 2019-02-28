@@ -7,15 +7,15 @@ import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+import no.nav.melosys.service.dokument.felles.AvklartVirksomhet;
 
 public class BrevDataA1 extends BrevData {
-    public List<Virksomhet> utenlandskeVirksomheter;
-    public List<Virksomhet> norskeVirksomheter;
+    public List<AvklartVirksomhet> utenlandskeVirksomheter;
+    public List<AvklartVirksomhet> norskeVirksomheter;
     public Set<String> selvstendigeForetak;
     public Yrkesgrupper yrkesgruppe;
     public PersonDokument person;
-    public Virksomhet hovedvirksomhet;
+    public AvklartVirksomhet hovedvirksomhet;
 
     public List<Arbeidssted> arbeidssteder;
 

@@ -9,13 +9,17 @@ import java.util.Set;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Art12_1_Begrunnelser;
+import no.nav.melosys.domain.kodeverk.Art12_1_Vesentlig_Virksomhet_Begrunnelser;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.AvklarteVirksomheterTest;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,13 +60,19 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
 
-        Saksopplysning saksopplysning = new Saksopplysning();
         PersonDokument personDokument = new PersonDokument();
         personDokument.sammensattNavn = "Navn Navnesen";
+        Saksopplysning person = new Saksopplysning();
+        person.setDokument(personDokument);
+        person.setType(SaksopplysningType.PERSONOPPLYSNING);
 
-        saksopplysning.setDokument(personDokument);
-        saksopplysning.setType(SaksopplysningType.PERSONOPPLYSNING);
-        behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
+        Set<Saksopplysning> saksopplysninger =
+        AvklarteVirksomheterTest.lagSøknadOgArbeidsforholdOpplysninger(Arrays.asList("987654321"),
+                                                                       Collections.emptyList(),
+                                                                       Arrays.asList("123456789"));
+
+        saksopplysninger.add(person);
+        behandling.setSaksopplysninger(saksopplysninger);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Landkoder.DE);
@@ -70,11 +80,11 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         lovvalgsperiode.setTom(LocalDate.now());
         when(lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId())).thenReturn(Collections.singletonList(lovvalgsperiode));
 
-        Set<String> orgSet = new HashSet<>(Collections.singletonList("999"));
+        Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
         when(avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId())).thenReturn(orgSet);
 
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.setOrgnummer("999");
+        organisasjonDokument.setOrgnummer("987654321");
         when(registerOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
 
         Vilkaarsresultat vilkaarsresultatArt121 = lagVilkårresultat(Vilkaar.FO_883_2004_ART12_1, Art12_1_Begrunnelser.IKKE_OMFATTET_LENGE_NOK_I_NORGE_FOER.getKode());
@@ -84,7 +94,7 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
 
         String saksbehandler = "saksbehandler";
         BrevDataAvslagArbeidsgiver brevData = (BrevDataAvslagArbeidsgiver) brevDataByggerAvslagArbeidsgiver.lag(behandling, saksbehandler);
-        assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
+        assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("987654321");
     }
 
     private Vilkaarsresultat lagVilkårresultat(Vilkaar vilkaarType, String vilkårbegrunnelseKode) {

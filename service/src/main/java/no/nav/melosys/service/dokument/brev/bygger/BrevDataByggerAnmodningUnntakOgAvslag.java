@@ -1,10 +1,6 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.function.Function;
-
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.dokument.felles.Adresse;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -12,9 +8,11 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
-import no.nav.melosys.service.dokument.AvklarteVirksomheter;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
+import no.nav.melosys.service.dokument.felles.AvklarteVirksomheter;
+
+import static no.nav.melosys.service.dokument.felles.AvklarteVirksomheter.ingenAdresse;
 
 public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataBygger implements BrevDataBygger {
 
@@ -25,8 +23,6 @@ public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataB
         super(null, null, avklartefaktaService);
         this.registerOppslagService = registerOppslagService;
     }
-
-    Function<OrganisasjonDokument, Adresse> adresseformaterer = org -> null;
 
     @Override
     public BrevData lag(Behandling behandling, String saksbehandler) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
@@ -40,8 +36,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataB
             throw new TekniskException("Trenger minst en norsk virksomhet for avslag og ART16.1");
         }
 
-        brevData.hovedvirksomhet = avklarteVirksomheter.hentAlleNorskeAvklarteVirksomheter(adresseformaterer).iterator().next();
-        avklarteVirksomheter.avklarSelvstendigForetakVirksomhet(brevData.hovedvirksomhet);
+        brevData.hovedvirksomhet = avklarteVirksomheter.hentAlleNorskeVirksomheter(ingenAdresse).iterator().next();
         return brevData;
     }
 }
