@@ -20,23 +20,27 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
+import no.nav.melosys.service.dokument.AvklarteVirksomheter;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class SedDataBygger extends AbstraktDokumentDataBygger {
 
+    private final RegisterOppslagService registerOppslagService;
+    private AvklarteVirksomheter avklarteVirksomheter;
+
     public SedDataBygger(KodeverkService kodeverkService, RegisterOppslagService registerOppslagService,
                          LovvalgsperiodeService lovvalgsperiodeService, AvklartefaktaService avklartefaktaService) {
-        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService, registerOppslagService);
-
+        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
+        this.registerOppslagService = registerOppslagService;
     }
 
     public SedDataDto lag(Behandling behandling) throws TekniskException, FunksjonellException {
         this.behandling = behandling;
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
-        this.avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
+        this.avklarteVirksomheter = new AvklarteVirksomheter(avklartefaktaService, registerOppslagService, behandling);
 
         SedDataDto sedDataDto = new SedDataDto();
 
@@ -116,7 +120,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
     }
 
     protected List<Virksomhet> hentNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        return registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner).stream()
+        return registerOppslagService.hentOrganisasjoner(avklarteVirksomheter.getAvklarteOrgnumre()).stream()
             .map(org -> {
                 Virksomhet virksomhet = new Virksomhet();
                 virksomhet.setNavn(org.lagSammenslåttNavn());
@@ -129,8 +133,8 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
             .collect(Collectors.toList());
     }
 
-    protected List<Virksomhet> hentAvklarteSelvstendigeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        Set<String> organisasjonsnumre = hentAvklarteSelvstendigeForetakOrgnumre();
+    protected List<Virksomhet> hentAvklarteSelvstendigeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        Set<String> organisasjonsnumre = avklarteVirksomheter.hentAvklarteSelvstendigeForetakOrgnumre();
         return registerOppslagService.hentOrganisasjoner(organisasjonsnumre).stream()
             .map(org -> {
                 Virksomhet virksomhet = new Virksomhet();

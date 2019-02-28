@@ -27,14 +27,17 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
+import no.nav.melosys.service.dokument.AvklarteVirksomheter;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements BrevDataBygger {
 
+    private final RegisterOppslagSystemService registerOppslagService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
+    private AvklarteVirksomheter avklarteVirksomheter;
 
     public BrevDataByggerA001(AvklartefaktaService avklartefaktaService,
                               RegisterOppslagSystemService registerOppslagService,
@@ -42,7 +45,8 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
                               LovvalgsperiodeService lovvalgsperiodeService,
                               UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                               VilkaarsresultatRepository vilkaarsresultatRepository) {
-        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService, registerOppslagService);
+        super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
+        this.registerOppslagService = registerOppslagService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
@@ -54,7 +58,7 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
         this.behandling = behandling;
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
-        this.avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
+        this.avklarteVirksomheter = new AvklarteVirksomheter(avklartefaktaService, registerOppslagService, behandling);
 
         Collection<Lovvalgsperiode> lovvalgsperioder = hentLovvalgsperioder();
         Landkoder landkode = lovvalgsperioder.iterator().next().getUnntakFraLovvalgsland();
@@ -62,8 +66,8 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
         BrevDataA001 brevData = new BrevDataA001();
         brevData.personDokument = this.person;
         brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
-        brevData.arbeidsgivendeVirkomsheter = hentAlleNorskeAvklarteVirksomheter(adresseformaterer);
-        brevData.selvstendigeVirksomheter = hentAvklarteSelvstendigeForetak(adresseformaterer);
+        brevData.arbeidsgivendeVirkomsheter = avklarteVirksomheter.hentAlleNorskeAvklarteVirksomheter(adresseformaterer);
+        brevData.selvstendigeVirksomheter = avklarteVirksomheter.hentAvklarteSelvstendigeForetak(adresseformaterer);
 
         brevData.bostedsadresse = hentBostedsadresse();
         brevData.arbeidssteder = hentArbeidssteder();
@@ -132,11 +136,11 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
     private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {
         ArbeidsforholdDokument arbeidsforholdDok = SaksopplysningerUtils.hentArbeidsforholdDokument(behandling);
 
-        if (avklarteOrganisasjoner.size() != 1) {
+        if (avklarteVirksomheter.antall() != 1) {
             throw new TekniskException("Kan ikke avgjøre ansettelsesperiode ved flere arbeidsforhold");
         }
         Stream<Periode> avklarteAnsettelsesPerioder =
-                arbeidsforholdDok.hentAnsettelsesperioder(avklarteOrganisasjoner).stream();
+                arbeidsforholdDok.hentAnsettelsesperioder(avklarteVirksomheter.getAvklarteOrgnumre()).stream();
 
         // Usikkert hva som er formålet med feltet i brevet.
         // Bestemt å bruke den seneste datoen for avklart arbeidsgiver inntil vi vet mer
