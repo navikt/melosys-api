@@ -79,9 +79,7 @@ public class DokSysService implements DokSysFasade {
         bruker.setIdent(metadata.bruker);
         info.setBruker(bruker);
 
-        Person mottaker = objectFactory.createPerson();
-        mottaker.setIdent(metadata.mottaker);
-        info.setMottaker(mottaker);
+        info.setMottaker(lagMottaker(metadata.mottakerType, metadata.mottakerID));
 
         info.setJournalsakId(metadata.journalsakID);
 
@@ -113,5 +111,34 @@ public class DokSysService implements DokSysFasade {
             log.error("Produksjon av dokument feilet", e);
             throw new IntegrasjonException(e);
         }
+    }
+
+    private Aktoer lagMottaker(MottakerType mottakerType, String mottakerID) {
+        if (mottakerType == null) {
+            log.warn("MottakerType er null. PERSON brukes som standard.");
+            return lagPerson(mottakerID);
+        }
+
+        switch (mottakerType) {
+            case PERSON:
+                return lagPerson(mottakerID);
+            case ORGANISASJON:
+                Organisasjon organisasjon = objectFactory.createOrganisasjon();
+                organisasjon.setOrgnummer(mottakerID);
+                return organisasjon;
+            case UTENLANDSK_MYNDIGHET:
+                Organisasjon myndighet = objectFactory.createOrganisasjon();
+                myndighet.setOrgnummer("???"); // FIXME Ikke støttet av tjenesten?
+                return myndighet;
+            default:
+                log.warn("MottakerType {} er ukjent. PERSON brukes som standard.", mottakerType);
+                return lagPerson(mottakerID);
+        }
+    }
+
+    private Aktoer lagPerson(String mottakerID) {
+        Person person = objectFactory.createPerson();
+        person.setIdent(mottakerID);
+        return person;
     }
 }

@@ -18,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
+import no.nav.melosys.integrasjon.doksys.MottakerType;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -64,7 +65,7 @@ public class BrevDataServiceTest {
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling, brevData);
 
         assertThat(metadata.bruker).isEqualTo(FNR);
-        assertThat(metadata.mottaker).isEqualTo(FNR);
+        assertThat(metadata.mottakerID).isEqualTo(FNR);
 
         Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, lagBehandling(), brevData);
 
@@ -72,7 +73,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagForvaltningsmelding_representantIkkeNull_tilRepresentant() throws TekniskException, IkkeFunnetException {
+    public void lagForvaltningsmelding_representantIkkeNull_tilRepresentant() throws TekniskException {
 
         Aktoer representant = new Aktoer();
         representant.setAktørId("Representant");
@@ -87,7 +88,7 @@ public class BrevDataServiceTest {
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling, brevData);
 
         assertThat(metadata.bruker).isEqualTo(FNR);
-        assertThat(metadata.mottaker).isEqualTo(REPRESENTANT);
+        assertThat(metadata.mottakerID).isEqualTo(REPRESENTANT);
 
         Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, lagBehandling(), brevData);
 
@@ -104,7 +105,7 @@ public class BrevDataServiceTest {
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
         assertThat(metadata.bruker).isEqualTo(FNR);
-        assertThat(metadata.mottaker).isEqualTo(FNR);
+        assertThat(metadata.mottakerID).isEqualTo(FNR);
 
         doAnswer(answer -> {
             Mottaker mottaker = (Mottaker) answer.callRealMethod();
@@ -128,7 +129,7 @@ public class BrevDataServiceTest {
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
         assertThat(metadata.bruker).isEqualTo(FNR);
-        assertThat(metadata.mottaker).isEqualTo(ORGNR);
+        assertThat(metadata.mottakerID).isEqualTo(ORGNR);
 
         doAnswer(answer -> {
             Mottaker mottaker = (Mottaker) answer.callRealMethod();
@@ -158,7 +159,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagMetadataUtenMottakerKasterUnntak() throws Exception {
+    public void lagMetadataUtenMottakerKasterUnntak() {
         Throwable unntak = catchThrowable(() -> service.lagBestillingMetadata(INNVILGELSE_YRKESAKTIV, lagBehandling(), new BrevData()));
         assertThat(unntak).isInstanceOf(TekniskException.class)
             .hasMessageContaining("finnes ingen mottaker")
@@ -174,7 +175,8 @@ public class BrevDataServiceTest {
     private static DokumentbestillingMetadata lagDokumentbestillingMetadata(Produserbaredokumenter doktype) throws TekniskException {
         DokumentbestillingMetadata forventet = new DokumentbestillingMetadata();
         forventet.bruker = FNR;
-        forventet.mottaker = ORGNR;
+        forventet.mottakerType = MottakerType.ORGANISASJON;
+        forventet.mottakerID = ORGNR;
         forventet.dokumenttypeID = DokumenttypeIdMapper.hentID(doktype);
         forventet.fagområde = "MED";
         forventet.journalsakID = "123";
