@@ -14,10 +14,12 @@ import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntakOgAvslag;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import org.junit.Test;
 
 import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
+import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.AVSLAG_ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.AVSLAG_YRKESAKTIV;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.INNVILGELSE_YRKESAKTIV;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,9 +58,14 @@ public class IverksettVedtakSendBrevTest {
         BrevDataAnmodningUnntakOgAvslag brevdataAvslag = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
         when(brevDataByggerAvslag.lag(any(), any())).thenReturn(brevdataAvslag);
 
+        BrevDataAvslagArbeidsgiver brevDataAvslagArbeidsgiver = new BrevDataAvslagArbeidsgiver(saksbehandler);
+        BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver = mock(BrevDataByggerAvslagArbeidsgiver.class);
+        when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(brevDataAvslagArbeidsgiver);
+
         BrevDataByggerVelger byggerVelger = mock(BrevDataByggerVelger.class);
         when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV))).thenReturn(brevDataByggerVedlegg);
         when(byggerVelger.hent(eq(AVSLAG_YRKESAKTIV))).thenReturn(brevDataByggerAvslag);
+        when(byggerVelger.hent(eq(AVSLAG_ARBEIDSGIVER))).thenReturn(brevDataByggerAvslag);
 
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
         when(behandlingRepository.findWithSaksopplysningerById(eq(behandling.getId()))).thenReturn(behandling);
