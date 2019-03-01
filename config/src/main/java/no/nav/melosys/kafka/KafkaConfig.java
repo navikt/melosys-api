@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
-import no.nav.melosys.eessi.avro.MelosysEessiBehandling;
+import no.nav.melosys.eessi.avro.MelosysEessiMelding;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -25,7 +25,7 @@ public class KafkaConfig {
         Map<String, Object> props = new HashMap<>();
         //Without this, the consumer will receive GenericData records.
         props.put("specific.avro.reader", true);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "melosys-eessi-eessiBehandling");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "melosys-eessi-eessiMelding");
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 100);
@@ -37,12 +37,12 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, MelosysEessiBehandling>> eessiBehandlingListenerContainerFactory(
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, MelosysEessiMelding>> eessiBehandlingListenerContainerFactory(
         KafkaProperties kafkaProperties) {
         Map<String, Object> props = kafkaProperties.buildConsumerProperties();
         props.putAll(consumerConfig());
-        DefaultKafkaConsumerFactory<String, MelosysEessiBehandling> defaultKafkaConsumerFactory = new DefaultKafkaConsumerFactory<>(props);
-        ConcurrentKafkaListenerContainerFactory<String, MelosysEessiBehandling> factory;
+        DefaultKafkaConsumerFactory<String, MelosysEessiMelding> defaultKafkaConsumerFactory = new DefaultKafkaConsumerFactory<>(props);
+        ConcurrentKafkaListenerContainerFactory<String, MelosysEessiMelding> factory;
         factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(defaultKafkaConsumerFactory);
         return factory;
