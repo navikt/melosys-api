@@ -145,17 +145,17 @@ public class BrevDataServiceTest {
 
     @Test
     public void lagMetadataForInnvilgelsesbrevAngirDokTypeLikInnvilgelseYrkesaktiv() throws Exception {
-        testLagDokumentMetadata(INNVILGELSE_YRKESAKTIV);
+        testLagDokumentMetadata(INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER);
     }
 
     @Test
     public void lagMetadataForMangelbrevAngirDokTypeLikMangelbrev() throws Exception {
-        testLagDokumentMetadata(MELDING_MANGLENDE_OPPLYSNINGER);
+        testLagDokumentMetadata(MELDING_MANGLENDE_OPPLYSNINGER, Aktoersroller.ARBEIDSGIVER);
     }
 
     @Test
     public void lagMetadataForMangelbrevAngirDokTypeLikHenleggelse() throws Exception {
-        testLagDokumentMetadata(MELDING_HENLAGT_SAK);
+        testLagDokumentMetadata(MELDING_HENLAGT_SAK, Aktoersroller.BRUKER);
     }
 
     @Test
@@ -166,29 +166,35 @@ public class BrevDataServiceTest {
             .hasNoCause();
     }
 
-    private void testLagDokumentMetadata(Produserbaredokumenter doktype) throws Exception {
-        DokumentbestillingMetadata resultat = service.lagBestillingMetadata(doktype, lagBehandling(), lagBrevData());
-        DokumentbestillingMetadata forventet = lagDokumentbestillingMetadata(doktype);
+    private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoersroller rolle) throws Exception {
+        DokumentbestillingMetadata resultat = service.lagBestillingMetadata(doktype, lagBehandling(), lagBrevData(rolle));
+        DokumentbestillingMetadata forventet = lagDokumentbestillingMetadata(doktype, rolle);
         assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
     }
 
-    private static DokumentbestillingMetadata lagDokumentbestillingMetadata(Produserbaredokumenter doktype) throws TekniskException {
+    private static DokumentbestillingMetadata lagDokumentbestillingMetadata(Produserbaredokumenter doktype, Aktoersroller rolle) throws TekniskException {
         DokumentbestillingMetadata forventet = new DokumentbestillingMetadata();
         forventet.bruker = FNR;
-        forventet.mottakerType = MottakerType.ORGANISASJON;
-        forventet.mottakerID = ORGNR;
+        forventet.mottakersRolle = rolle;
+        if (rolle == Aktoersroller.BRUKER) {
+            forventet.mottakerType = MottakerType.PERSON;
+            forventet.mottakerID = FNR;
+        } else {
+            forventet.mottakerType = MottakerType.ORGANISASJON;
+            forventet.mottakerID = ORGNR;
+        }
+
         forventet.dokumenttypeID = DokumenttypeIdMapper.hentID(doktype);
         forventet.fagområde = "MED";
         forventet.journalsakID = "123";
         forventet.saksbehandler = "TEST";
-        forventet.utledRegisterInfo = true;
         return forventet;
     }
 
-    private static BrevData lagBrevData() {
+    private static BrevData lagBrevData(Aktoersroller rolle) {
         BrevData brevDataDto = new BrevData();
         brevDataDto.saksbehandler = "TEST";
-        brevDataDto.mottaker = Aktoersroller.ARBEIDSGIVER;
+        brevDataDto.mottaker = rolle;
         brevDataDto.fritekst = "Test";
         return brevDataDto;
     }
