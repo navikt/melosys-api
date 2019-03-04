@@ -72,6 +72,7 @@ public class IverksettVedtakSendBrevTest {
         when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV))).thenReturn(brevDataByggerVedlegg);
         when(byggerVelger.hent(eq(AVSLAG_YRKESAKTIV))).thenReturn(brevDataByggerAvslagYrkesaktiv);
         when(byggerVelger.hent(eq(AVSLAG_ARBEIDSGIVER))).thenReturn(brevDataByggerAvslagArbeidsgiver);
+        when(byggerVelger.hent(eq(INNVILGELSE_ARBEIDSGIVER))).thenReturn(brevDataByggerStandard);
 
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
         when(behandlingRepository.findWithSaksopplysningerById(eq(behandling.getId()))).thenReturn(behandling);

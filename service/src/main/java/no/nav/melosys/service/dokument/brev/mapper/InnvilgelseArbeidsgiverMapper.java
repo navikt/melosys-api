@@ -12,9 +12,13 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import org.xml.sax.SAXException;
 
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatype.ARBEIDSLAND;
+import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentSammensattNavn;
+import static no.nav.melosys.domain.util.SoeknadUtils.hentArbeidslandFraSøknaden;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.*;
 
 public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
@@ -61,4 +65,11 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
             .build();
         return factory.createBrevdata(brevdataType);
     }
+
+    // Slå opp arbeidsland i avklartefakta, fall tilbake på søknaden (kan overkjøres av saksbehandler for sokkel/skip).
+    public static String hentArbeidsLand(Behandling behandling, Behandlingsresultat resultat) {
+        return resultat.finnAvklartFaktum(ARBEIDSLAND).map(Avklartefakta::getSubjekt)
+            .orElseGet(() -> hentArbeidslandFraSøknaden(behandling));
+    }
+
 }

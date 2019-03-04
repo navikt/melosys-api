@@ -27,7 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.*;
 
 /**
