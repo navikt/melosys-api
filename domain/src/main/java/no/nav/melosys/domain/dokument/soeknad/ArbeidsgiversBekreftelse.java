@@ -7,12 +7,12 @@ import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
 public class ArbeidsgiversBekreftelse {
 
-    public boolean arbeidsgiverBekrefterUtsendelse;
-    public boolean arbeidstakerAnsattUnderUtsendelsen;
-    public boolean erstatterArbeidstakerenUtsendte;
-    public boolean arbeidstakerTidligereUtsendt24Mnd;
-    public boolean arbeidsgiverBetalerArbeidsgiveravgift;
-    public boolean trygdeavgiftTrukketGjennomSkatt;
+    public Boolean arbeidsgiverBekrefterUtsendelse;
+    public Boolean arbeidstakerAnsattUnderUtsendelsen;
+    public Boolean erstatterArbeidstakerenUtsendte;
+    public Boolean arbeidstakerTidligereUtsendt24Mnd;
+    public Boolean arbeidsgiverBetalerArbeidsgiveravgift;
+    public Boolean trygdeavgiftTrukketGjennomSkatt;
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
     public LocalDate trygdeavgiftTrukketGjennomSkattDato;
 }

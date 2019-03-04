@@ -12,6 +12,6 @@ public class Arbeidsinntekt {
     public int inntektUtenlandskIPerioden;
     public int inntektNaeringIPerioden;
     public List<String> inntektNaturalYtelser = new ArrayList<>();
-    public boolean inntektErInnrapporteringspliktig;
-    public boolean inntektTrygdeavgiftBlirTrukket;
+    public Boolean inntektErInnrapporteringspliktig;
+    public Boolean inntektTrygdeavgiftBlirTrukket;
 }

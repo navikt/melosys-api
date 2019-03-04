@@ -15,9 +15,9 @@ public class OppholdUtland implements HarPeriode {
     public Periode oppholdsPeriode = new Periode();
     public String studentFinansieringKode;
     public String studentSemester;
-    public boolean ektefelleEllerBarnINorge;
-    public boolean forutgaendeBostedINorge;
-    public boolean sammeAdresseSomArbeidsgiver;
+    public Boolean ektefelleEllerBarnINorge;
+    public Boolean forutgaendeBostedINorge;
+    public Boolean sammeAdresseSomArbeidsgiver;
 
     @Override
     @JsonIgnore
