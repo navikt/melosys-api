@@ -30,7 +30,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.felles.AvklartVirksomhet;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

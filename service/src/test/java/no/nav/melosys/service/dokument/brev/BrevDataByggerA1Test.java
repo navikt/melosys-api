@@ -20,6 +20,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.RegisterOppslagSystemService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -29,7 +30,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.service.dokument.AvklarteVirksomheterTest.lagArbeidsforholdOpplysning;
+import static no.nav.melosys.service.dokument.AvklarteVirksomheterServiceTest.lagArbeidsforholdOpplysning;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -96,7 +97,8 @@ public class BrevDataByggerA1Test {
         when(registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner))
             .thenReturn(organisasjonDokumenter);
 
-        brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, registerOppslagService, kodeverkService);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService);
     }
 
     private OrganisasjonDokument leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {

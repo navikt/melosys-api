@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
@@ -18,27 +19,27 @@ import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.UtenlandskIdent;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.RegisterOppslagService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
-import no.nav.melosys.service.dokument.felles.AvklartVirksomhet;
-import no.nav.melosys.service.dokument.felles.AvklarteVirksomheter;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class SedDataBygger extends AbstraktDokumentDataBygger {
 
-    private final RegisterOppslagService registerOppslagService;
-    private AvklarteVirksomheter avklarteVirksomheter;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
 
-    public SedDataBygger(KodeverkService kodeverkService, RegisterOppslagService registerOppslagService,
-                         LovvalgsperiodeService lovvalgsperiodeService, AvklartefaktaService avklartefaktaService) {
+    public SedDataBygger(KodeverkService kodeverkService,
+                         LovvalgsperiodeService lovvalgsperiodeService,
+                         AvklartefaktaService avklartefaktaService,
+                         AvklarteVirksomheterService avklarteVirksomheterService) {
         super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
-        this.registerOppslagService = registerOppslagService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
 
     Function<OrganisasjonDokument, no.nav.melosys.domain.dokument.felles.Adresse> adresseformaterer = this::utfyllManglendeAdressefelter;
@@ -52,11 +53,10 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         this.behandling = behandling;
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
-        this.avklarteVirksomheter = new AvklarteVirksomheter(avklartefaktaService, registerOppslagService, behandling);
 
         SedDataDto sedDataDto = new SedDataDto();
 
-        sedDataDto.setArbeidsgivendeVirksomheter(map(avklarteVirksomheter.hentArbeidsgivere(adresseformaterer)));
+        sedDataDto.setArbeidsgivendeVirksomheter(map(avklarteVirksomheterService.hentArbeidsgivere(behandling, adresseformaterer)));
 
         sedDataDto.setArbeidssteder(hentArbeidssteder().stream()
             .map(this::mapArbeidssted).collect(Collectors.toList()));
@@ -73,7 +73,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
 
         sedDataDto.setLovvalgsperioder(Collections.singletonList(hentLovvalgsperiodeDto()));
 
-        sedDataDto.setSelvstendigeVirksomheter(map(avklarteVirksomheter.hentSelvstendigeForetak(adresseformaterer)));
+        sedDataDto.setSelvstendigeVirksomheter(map(avklarteVirksomheterService.hentSelvstendigeForetak(behandling, adresseformaterer)));
 
         sedDataDto.setUtenlandskeVirksomheter(hentUtenlandskeVirksomheter().stream().map(
             this::tilUtenlandsVirksomhetDto).collect(Collectors.toList()));//TODO - riktig?

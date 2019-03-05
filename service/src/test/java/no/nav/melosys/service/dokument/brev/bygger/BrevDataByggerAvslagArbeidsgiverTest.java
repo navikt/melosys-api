@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -18,8 +15,9 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.AvklarteVirksomheterTest;
+import no.nav.melosys.service.dokument.AvklarteVirksomheterServiceTest;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,8 +25,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.kodeverk.Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET;
+import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,8 +50,9 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
 
     @Before
     public void setUp() {
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
         brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(avklartefaktaService,
-                                                                                registerOppslagService,
+                                                                                avklarteVirksomheterService,
                                                                                 lovvalgsperiodeService,
                                                                                 vilkaarsresultatRepository);
     }
@@ -67,7 +69,7 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         person.setType(SaksopplysningType.PERSONOPPLYSNING);
 
         Set<Saksopplysning> saksopplysninger =
-        AvklarteVirksomheterTest.lagSøknadOgArbeidsforholdOpplysninger(Arrays.asList("987654321"),
+        AvklarteVirksomheterServiceTest.lagSøknadOgArbeidsforholdOpplysninger(Arrays.asList("987654321"),
                                                                        Collections.emptyList(),
                                                                        Arrays.asList("123456789"));
 
@@ -90,7 +92,8 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         Vilkaarsresultat vilkaarsresultatArt121 = lagVilkårresultat(Vilkaar.FO_883_2004_ART12_1, Art12_1_Begrunnelser.IKKE_OMFATTET_LENGE_NOK_I_NORGE_FOER.getKode());
         Vilkaarsresultat vesentligVirksomhet = lagVilkårresultat(Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET, Art12_1_Vesentlig_Virksomhet_Begrunnelser.FOR_LITE_KONTRAKTER_NORGE.getKode());
 
-        when(vilkaarsresultatRepository.findByBehandlingsresultatId(anyLong())).thenReturn(Arrays.asList(vilkaarsresultatArt121, vesentligVirksomhet));
+        when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(FO_883_2004_ART12_1))).thenReturn(Optional.of(vilkaarsresultatArt121));
+        when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(ART12_1_VESENTLIG_VIRKSOMHET))).thenReturn(Optional.of(vesentligVirksomhet));
 
         String saksbehandler = "saksbehandler";
         BrevDataAvslagArbeidsgiver brevData = (BrevDataAvslagArbeidsgiver) brevDataByggerAvslagArbeidsgiver.lag(behandling, saksbehandler);

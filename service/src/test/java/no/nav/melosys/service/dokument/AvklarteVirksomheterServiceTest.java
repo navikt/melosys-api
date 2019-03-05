@@ -1,12 +1,14 @@
 package no.nav.melosys.service.dokument;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.felles.Adresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
@@ -17,14 +19,13 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.felles.AvklarteVirksomheter;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.service.dokument.felles.AvklarteVirksomheter.ingenAdresse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,7 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AvklarteVirksomheterTest {
+public class AvklarteVirksomheterServiceTest {
 
     @Mock
     AvklartefaktaService avklartefaktaService;
@@ -43,18 +44,20 @@ public class AvklarteVirksomheterTest {
     @Mock
     Behandling behandling;
 
-    AvklarteVirksomheter avklarteVirksomheter;
+    AvklarteVirksomheterService avklarteVirksomheterService;
 
     String orgnr1 = "111111111";
     String orgnr2 = "222222222";
     String orgnr3 = "333333333";
+
+    Function<OrganisasjonDokument, Adresse> ingenAdresse = org -> null;
 
     @Before
     public void setUp() {
         when(behandling.getId()).thenReturn(1L);
         when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong())).thenReturn(new HashSet<>(Arrays.asList(orgnr1)));
 
-        avklarteVirksomheter = new AvklarteVirksomheter(avklartefaktaService, registerOppslagService, behandling);
+        avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
     }
 
     @Test
@@ -63,7 +66,7 @@ public class AvklarteVirksomheterTest {
         Saksopplysning søknad = lagSøknadOpplysning(selvstendigeForetak, Collections.emptyList());
         when(behandling.getSaksopplysninger()).thenReturn(Collections.singleton(søknad));
 
-        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheter.hentSelvstendigeForetakOrgnumre();
+        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentSelvstendigeForetakOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
     }
 
@@ -74,7 +77,7 @@ public class AvklarteVirksomheterTest {
             lagSøknadOgArbeidsforholdOpplysninger(Collections.emptyList(), arbeidgivendeEkstraOrgnumre, Collections.emptyList());
         when(behandling.getSaksopplysninger()).thenReturn(saksopplysninger);
 
-        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheter.hentArbeidsgivendeOrgnumre();
+        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
     }
 
@@ -85,7 +88,7 @@ public class AvklarteVirksomheterTest {
             lagSøknadOgArbeidsforholdOpplysninger(Collections.emptyList(), Collections.emptyList(), arbeidgivendeOrgnumreEkstra);
         when(behandling.getSaksopplysninger()).thenReturn(saksopplysninger);
 
-        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheter.hentArbeidsgivendeOrgnumre();
+        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
     }
 
@@ -106,8 +109,8 @@ public class AvklarteVirksomheterTest {
 
         leggTilIRegisterOppslag(Arrays.asList(orgnr2, orgnr3));
 
-        AvklarteVirksomheter avklarteVirksomheter = new AvklarteVirksomheter(avklartefaktaService, registerOppslagService, behandling);
-        assertThat(avklarteVirksomheter.hentAlleNorskeVirksomheter(ingenAdresse).stream()
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ingenAdresse).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr2, orgnr3);
     }
@@ -128,8 +131,8 @@ public class AvklarteVirksomheterTest {
 
         leggTilIRegisterOppslag(selvstendigeForetak);
 
-        AvklarteVirksomheter avklarteVirksomheter = new AvklarteVirksomheter(avklartefaktaService, registerOppslagService, behandling);
-        assertThat(avklarteVirksomheter.hentAlleNorskeVirksomheter(ingenAdresse).stream()
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ingenAdresse).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr1);
     }

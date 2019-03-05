@@ -14,7 +14,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
 
-public class AvslagBrukerMapper extends AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
+public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
 
     @Override
     Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntakOgAvslag brevData) throws TekniskException {

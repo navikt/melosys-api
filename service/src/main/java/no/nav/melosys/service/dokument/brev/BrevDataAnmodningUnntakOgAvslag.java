@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.service.dokument.felles.AvklartVirksomhet;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 
 public class BrevDataAnmodningUnntakOgAvslag extends BrevData {
 

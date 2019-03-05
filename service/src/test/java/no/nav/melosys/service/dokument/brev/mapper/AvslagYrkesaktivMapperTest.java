@@ -12,7 +12,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
-import no.nav.melosys.service.dokument.felles.AvklartVirksomhet;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.xml.sax.SAXException;
@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
-public class AvslagMapperTest {
+public class AvslagYrkesaktivMapperTest {
 
     @Test
     public void mapTilBrevXML() throws JAXBException, SAXException, TekniskException {
@@ -84,7 +84,7 @@ public class AvslagMapperTest {
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID);
 
-        AvslagBrukerMapper spy = Mockito.spy(new AvslagBrukerMapper());
+        AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
         String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 
         assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");

@@ -1,9 +1,7 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import no.nav.melosys.domain.Behandling;
@@ -11,7 +9,9 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.felles.Adresse;
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
@@ -21,41 +21,38 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.RegisterOppslagSystemService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
-import no.nav.melosys.service.dokument.felles.AvklarteVirksomheter;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-
-import static no.nav.melosys.service.dokument.felles.AvklarteVirksomheter.ustrukturertForretningsadresse;
 
 public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements BrevDataBygger {
 
-    private final RegisterOppslagSystemService registerOppslagService;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
-    private AvklarteVirksomheter avklarteVirksomheter;
 
     public BrevDataByggerA001(AvklartefaktaService avklartefaktaService,
-                              RegisterOppslagSystemService registerOppslagService,
+                              AvklarteVirksomheterService avklarteVirksomheterService,
                               KodeverkService kodeverkService,
                               LovvalgsperiodeService lovvalgsperiodeService,
                               UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                               VilkaarsresultatRepository vilkaarsresultatRepository) {
         super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
-        this.registerOppslagService = registerOppslagService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
+
+    Function<OrganisasjonDokument, Adresse> ustrukturertForretningsadresse = org -> org.getOrganisasjonDetaljer().hentUstrukturertForretningsadresse();
 
     @Override
     public BrevData lag(Behandling behandling, String saksbehandler) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         this.behandling = behandling;
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
-        this.avklarteVirksomheter = new AvklarteVirksomheter(avklartefaktaService, registerOppslagService, behandling);
 
         Collection<Lovvalgsperiode> lovvalgsperioder = hentLovvalgsperioder();
         Landkoder landkode = lovvalgsperioder.iterator().next().getUnntakFraLovvalgsland();
@@ -63,8 +60,8 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
         BrevDataA001 brevData = new BrevDataA001();
         brevData.personDokument = this.person;
         brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
-        brevData.arbeidsgivendeVirkomsheter = avklarteVirksomheter.hentAlleNorskeVirksomheter(ustrukturertForretningsadresse);
-        brevData.selvstendigeVirksomheter = avklarteVirksomheter.hentSelvstendigeForetak(ustrukturertForretningsadresse);
+        brevData.arbeidsgivendeVirkomsheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ustrukturertForretningsadresse);
+        brevData.selvstendigeVirksomheter = avklarteVirksomheterService.hentSelvstendigeForetak(behandling, ustrukturertForretningsadresse);
 
         brevData.bostedsadresse = hentBostedsadresse();
         brevData.arbeidssteder = hentArbeidssteder();
@@ -87,12 +84,8 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
     }
 
     private Vilkaarsresultat hentVilkårsresultat() throws TekniskException {
-        List<Vilkaarsresultat> vilkaarresultater = vilkaarsresultatRepository.findByBehandlingsresultatId(behandling.getId());
-        Optional<Vilkaarsresultat> vilkårsresultat161 = vilkaarresultater.stream()
-                .filter(vilkaarsresultat -> vilkaarsresultat.getVilkaar() == Vilkaar.FO_883_2004_ART16_1)
-                .findFirst();
-
-        Vilkaarsresultat resultat = vilkårsresultat161.orElseThrow(() ->
+        Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandling.getId(),Vilkaar.FO_883_2004_ART16_1);
+        Vilkaarsresultat resultat = vilkårsresultat.orElseThrow(() ->
                 new TekniskException("Fant ingen vilkårbegrunnelse for FO_883_2004_ART16_1"));
 
         if (resultat.getBegrunnelser().isEmpty()) {
@@ -133,11 +126,13 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
     private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {
         ArbeidsforholdDokument arbeidsforholdDok = SaksopplysningerUtils.hentArbeidsforholdDokument(behandling);
 
-        if (avklarteVirksomheter.antall() != 1) {
+        Set<String> avklarteOrgnumre = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
+        if (avklarteOrgnumre.size() != 1) {
             throw new TekniskException("Kan ikke avgjøre ansettelsesperiode ved flere arbeidsforhold");
         }
+
         Stream<Periode> avklarteAnsettelsesPerioder =
-                arbeidsforholdDok.hentAnsettelsesperioder(avklarteVirksomheter.getAvklarteOrgnumre()).stream();
+                arbeidsforholdDok.hentAnsettelsesperioder(avklarteOrgnumre).stream();
 
         // Usikkert hva som er formålet med feltet i brevet.
         // Bestemt å bruke den seneste datoen for avklart arbeidsgiver inntil vi vet mer

@@ -12,23 +12,22 @@ import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.RegisterOppslagSystemService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
-import no.nav.melosys.service.dokument.felles.AvklarteVirksomheter;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements BrevDataBygger {
 
-    private final RegisterOppslagSystemService registerOppslagService;
+    private AvklarteVirksomheterService avklarteVirksomheterService;
 
     public BrevDataByggerA1(AvklartefaktaService avklartefaktaService,
-                            RegisterOppslagSystemService registerOppslagService,
+                            AvklarteVirksomheterService avklarteVirksomheterService,
                             KodeverkService kodeverkService) {
         super(kodeverkService, null, avklartefaktaService);
-        this.registerOppslagService = registerOppslagService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
 
     @Override
@@ -36,13 +35,12 @@ public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements Brev
         this.behandling = behandling;
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
-        AvklarteVirksomheter avklarteVirksomheter = new AvklarteVirksomheter(avklartefaktaService, registerOppslagService, behandling);
 
         BrevDataA1 brevData = new BrevDataA1();
         brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandling.getId());
         brevData.utenlandskeVirksomheter = hentUtenlandskeVirksomheter();
-        brevData.norskeVirksomheter = avklarteVirksomheter.hentAlleNorskeVirksomheter(adresseformaterer);
-        brevData.selvstendigeForetak = avklarteVirksomheter.hentSelvstendigeForetakOrgnumre();
+        brevData.norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, adresseformaterer);
+        brevData.selvstendigeForetak = avklarteVirksomheterService.hentSelvstendigeForetakOrgnumre(behandling);
 
         brevData.bostedsadresse = hentBostedsadresse();
         brevData.arbeidssteder = hentArbeidssteder();

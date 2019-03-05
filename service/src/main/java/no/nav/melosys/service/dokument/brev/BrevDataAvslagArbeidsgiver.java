@@ -5,7 +5,7 @@ import java.util.Set;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.service.dokument.felles.AvklartVirksomhet;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 
 
 public class BrevDataAvslagArbeidsgiver extends BrevData {

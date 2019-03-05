@@ -54,9 +54,9 @@ public class IverksettVedtakSendBrevTest {
         brevdataVedlegg.brevDataA1 = brevdata;
         BrevDataByggerVedlegg brevDataByggerVedlegg = mock(BrevDataByggerVedlegg.class);
         when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(brevdataVedlegg);
-        BrevDataByggerAnmodningUnntakOgAvslag brevDataByggerAvslag = mock(BrevDataByggerAnmodningUnntakOgAvslag.class);
+        BrevDataByggerAnmodningUnntakOgAvslag brevDataByggerAvslagYrkesaktiv = mock(BrevDataByggerAnmodningUnntakOgAvslag.class);
         BrevDataAnmodningUnntakOgAvslag brevdataAvslag = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
-        when(brevDataByggerAvslag.lag(any(), any())).thenReturn(brevdataAvslag);
+        when(brevDataByggerAvslagYrkesaktiv.lag(any(), any())).thenReturn(brevdataAvslag);
 
         BrevDataAvslagArbeidsgiver brevDataAvslagArbeidsgiver = new BrevDataAvslagArbeidsgiver(saksbehandler);
         BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver = mock(BrevDataByggerAvslagArbeidsgiver.class);
@@ -64,8 +64,8 @@ public class IverksettVedtakSendBrevTest {
 
         BrevDataByggerVelger byggerVelger = mock(BrevDataByggerVelger.class);
         when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV))).thenReturn(brevDataByggerVedlegg);
-        when(byggerVelger.hent(eq(AVSLAG_YRKESAKTIV))).thenReturn(brevDataByggerAvslag);
-        when(byggerVelger.hent(eq(AVSLAG_ARBEIDSGIVER))).thenReturn(brevDataByggerAvslag);
+        when(byggerVelger.hent(eq(AVSLAG_YRKESAKTIV))).thenReturn(brevDataByggerAvslagYrkesaktiv);
+        when(byggerVelger.hent(eq(AVSLAG_ARBEIDSGIVER))).thenReturn(brevDataByggerAvslagArbeidsgiver);
 
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
         when(behandlingRepository.findWithSaksopplysningerById(eq(behandling.getId()))).thenReturn(behandling);

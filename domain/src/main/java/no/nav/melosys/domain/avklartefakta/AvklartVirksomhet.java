@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument.felles;
+package no.nav.melosys.domain.avklartefakta;
 
 import no.nav.melosys.domain.dokument.felles.Adresse;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;

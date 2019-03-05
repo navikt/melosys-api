@@ -13,7 +13,7 @@ public class BrevDataMapperRuter {
 
     static {
         mappere.put(Produserbaredokumenter.ATTEST_A1, AttestMapper.class);
-        mappere.put(Produserbaredokumenter.AVSLAG_YRKESAKTIV, AvslagBrukerMapper.class);
+        mappere.put(Produserbaredokumenter.AVSLAG_YRKESAKTIV, AvslagYrkesaktivMapper.class);
         mappere.put(Produserbaredokumenter.AVSLAG_ARBEIDSGIVER, AvslagArbeidsgiverMapper.class);
         mappere.put(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, InnvilgelsesbrevMapper.class);
         mappere.put(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK, AnmodningUnntakMapper.class);
