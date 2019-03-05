@@ -1,11 +1,12 @@
 CREATE TABLE aktoer (
     id              NUMBER(19) GENERATED ALWAYS AS IDENTITY,
-    saksnummer      VARCHAR2(99) NOT NULL,
     aktoer_id       VARCHAR2(99) NULL,
-    orgnr           VARCHAR2(99) NULL,
-    utenlandsk_id   VARCHAR2(99) NULL,
+    institusjon_id  VARCHAR2(99) NULL,
     rolle           VARCHAR2(99) NOT NULL,
-    kontaktperson   VARCHAR2(999) NULL,
+    orgnr           VARCHAR2(99) NULL,
+    saksnummer      VARCHAR2(99) NOT NULL,
+    utenlandsk_person_id  VARCHAR2(99) NULL,
+    representerer  VARCHAR2(99) NULL,
     CONSTRAINT pk_bruker PRIMARY KEY (id)
 );
 
@@ -24,3 +25,4 @@ INSERT INTO rolle_type (kode, navn) VALUES ('REPRESENTANT', 'Aktøren represente
 INSERT INTO rolle_type (kode, navn) VALUES ('MYNDIGHET', 'Myndigheten det sendes til og/eller mottas dokumentasjon fra i saken.');
 
 ALTER TABLE aktoer ADD CONSTRAINT fk_aktoer_rolle FOREIGN KEY (rolle) REFERENCES rolle_type;
+ALTER TABLE aktoer ADD CONSTRAINT fk_aktoer_fagsak FOREIGN KEY (saksnummer) REFERENCES fagsak;

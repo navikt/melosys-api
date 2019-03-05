@@ -30,7 +30,7 @@ public class FagsakService {
 
     private final BehandlingService behandlingService;
 
-    private OppgaveService oppgaveService;
+    private final OppgaveService oppgaveService;
 
     private final TpsFasade tpsFasade;
 
@@ -99,7 +99,6 @@ public class FagsakService {
             aktørRepresentant.setOrgnr(representant);
             aktørRepresentant.setFagsak(fagsak);
             aktørRepresentant.setRolle(Aktoersroller.REPRESENTANT);
-            aktørRepresentant.setKontaktperson(opprettSakRequest.getRepresentantKontaktperson());
             aktører.add(aktørRepresentant);
         }
 
