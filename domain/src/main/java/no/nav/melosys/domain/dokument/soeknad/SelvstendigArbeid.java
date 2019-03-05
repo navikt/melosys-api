@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class SelvstendigArbeid {
-    public boolean erSelvstendig;
+    public Boolean erSelvstendig;
     public List<SelvstendigForetak> selvstendigForetak = new ArrayList<>();
 
     public Stream<String> hentAlleOrganisasjonsnumre() {

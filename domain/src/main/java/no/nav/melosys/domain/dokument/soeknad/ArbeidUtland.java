@@ -10,6 +10,6 @@ import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 public class ArbeidUtland {
     public String foretakNavn;
     public String foretakOrgnr;
-    public boolean arbeidUtlandHjemmekontor;
+    public Boolean arbeidUtlandHjemmekontor;
     public StrukturertAdresse adresse = new StrukturertAdresse();
 }
