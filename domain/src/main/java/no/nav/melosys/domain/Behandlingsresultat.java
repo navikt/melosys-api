@@ -2,6 +2,7 @@ package no.nav.melosys.domain;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -54,13 +55,13 @@ public class Behandlingsresultat extends RegistreringsInfo {
     private LocalDate vedtakKlagefrist;
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Avklartefakta> avklartefakta;
+    private Set<Avklartefakta> avklartefakta = new HashSet<>(1);
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<Lovvalgsperiode> lovvalgsperioder;
+    private Set<Lovvalgsperiode> lovvalgsperioder = new HashSet<>(1);
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<Vilkaarsresultat> vilkaarsresultater;
+    private Set<Vilkaarsresultat> vilkaarsresultater = new HashSet<>(1);
 
     public Long getId() {
         return id;

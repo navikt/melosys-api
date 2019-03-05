@@ -1,16 +1,17 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
+import java.util.Optional;
+
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
@@ -23,13 +24,20 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class IverksettVedtakValideringTest {
 
+    @Mock
+    private BehandlingsresultatRepository behandlingsresultatRepository;
+
     private IverksettVedtakValidering agent;
 
     private Prosessinstans p;
 
     @Before
     public void setUp() {
-        agent = new IverksettVedtakValidering();
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.getLovvalgsperioder().add(new Lovvalgsperiode());
+        when(behandlingsresultatRepository.findById(any())).thenReturn(Optional.of(behandlingsresultat));
+
+        agent = new IverksettVedtakValidering(behandlingsresultatRepository);
 
         p = new Prosessinstans();
         p.setBehandling(new Behandling());
@@ -73,7 +81,7 @@ public class IverksettVedtakValideringTest {
 
         agent.utførSteg(p);
 
-        verify(mockAppender, times(3)).doAppend(argThat(o -> ((LoggingEvent)o).getFormattedMessage().contains("behandlingsResultatType er ikke oppgitt")));
+        verify(mockAppender, times(2)).doAppend(argThat(o -> ((LoggingEvent)o).getFormattedMessage().contains("behandlingsResultatType er ikke oppgitt")));
         assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
