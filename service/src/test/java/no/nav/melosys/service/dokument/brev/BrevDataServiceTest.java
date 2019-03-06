@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
-import no.nav.melosys.integrasjon.doksys.MottakerType;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -182,10 +181,8 @@ public class BrevDataServiceTest {
         forventet.bruker = FNR;
         forventet.mottakersRolle = rolle;
         if (rolle == Aktoersroller.BRUKER) {
-            forventet.mottakerType = MottakerType.PERSON;
             forventet.mottakerID = FNR;
         } else {
-            forventet.mottakerType = MottakerType.ORGANISASJON;
             forventet.mottakerID = ORGNR;
         }
 
