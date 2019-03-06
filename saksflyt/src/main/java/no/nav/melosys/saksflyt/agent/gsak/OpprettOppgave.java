@@ -90,6 +90,9 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         if (behandlingstype == Behandlingstyper.SOEKNAD) {
             oppgave.setBehandlingstype(Behandlingstyper.SOEKNAD);
             oppgave.setOppgavetype(Oppgavetyper.BEH_SAK);
+        } else if(behandlingstype == Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP) {
+            oppgave.setBehandlingstype(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
+            oppgave.setOppgavetype(Oppgavetyper.BEH_SAK);
         } else {
             String feilmelding = "Behandlingstype " + behandlingstype + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
@@ -106,7 +109,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
         if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
             prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
-        } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
+        } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING || prosessinstans.getType() == ProsessType.REGISTRERING_UNNTAK) {
             prosessinstans.setSteg(null);
         } else {
             String feilmelding = "ProsessType " + prosessinstans.getType() + " er ikke støttet";

@@ -58,7 +58,11 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     //Henlegg sak
     HS_OPPDATER_RESULTAT("HS_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
     HS_HENLEGG_SAK("HS_HENLEGG_SAK", "Henlegg en sak"),
-    HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev");
+    HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev"),
+
+    //Unntak medlemskap
+    OPPRETT_SEDINFO("OPPRETT_SEDINFO", "Oppretter sedinfo dokument"),
+    VALIDER_UNNTAK("VALIDER_UNNTAK", "Validerer tidligere perioder, inntekt og arbeidsforhold");
 
 
     private String kode;

@@ -71,7 +71,7 @@ public class HentInntektopplysninger extends AbstraktStegBehandler {
         if (periode.getTom().isAfter(LocalDate.now())) {
             tom = YearMonth.now();
         } else {
-            tom = YearMonth.from(periode.getTom());
+            tom = YearMonth.from(periode.getTom()); //todo: fra/når hva?
         }
         Instant nå = Instant.now();
         Behandling behandling = prosessinstans.getBehandling();

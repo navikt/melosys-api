@@ -60,7 +60,7 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
         joarkFasade.ferdigstillJournalføring(journalpostID);
 
-        if (type == ProsessType.JFR_NY_SAK || type == ProsessType.JFR_NY_BEHANDLING) {
+        if (type == ProsessType.JFR_NY_SAK || type == ProsessType.JFR_NY_BEHANDLING || type == ProsessType.REGISTRERING_UNNTAK) {
             prosessinstans.setSteg(JFR_HENT_PERS_OPPL);
         } else if (type == ProsessType.JFR_KNYTT) {
             prosessinstans.setSteg(JFR_SETT_VURDER_DOKUMENT);

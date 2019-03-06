@@ -1,16 +1,14 @@
 package no.nav.melosys.service.dokument.sed.mapper;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_987_2009;
 import no.nav.melosys.integrasjon.eessi.dto.Bestemmelse;
 
 public class LovvalgTilBestemmelseDtoMapper {
 
-    private static final Map<LovvalgBestemmelse, Bestemmelse> mapper = new HashMap<>();
+    private static final BiMap<LovvalgBestemmelse, Bestemmelse> mapper = HashBiMap.create();
 
     static {
         mapper.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_1, Bestemmelse.ART_11_1);
@@ -35,5 +33,17 @@ public class LovvalgTilBestemmelseDtoMapper {
         }
 
         throw new RuntimeException("Støtte for kode: " + lovvalgBestemmelse.getKode() + " er ikke implementert");
+    }
+
+    public static LovvalgBestemmelse mapBestemmelseDtoTilMelosysLovvalgBestemmelse(String bestemmelse) {
+        return mapBestemmelseDtoTilMelosysLovvalgBestemmelse(Bestemmelse.valueOf(bestemmelse));
+    }
+
+    public static LovvalgBestemmelse mapBestemmelseDtoTilMelosysLovvalgBestemmelse(Bestemmelse bestemmelse) {
+        if (bestemmelse != null && mapper.inverse().containsKey(bestemmelse)) {
+            return mapper.inverse().get(bestemmelse);
+        }
+
+        throw new RuntimeException("Støtte for kode: " + bestemmelse + " er ikke implementert");
     }
 }
