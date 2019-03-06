@@ -63,6 +63,7 @@ public class BrevDataService {
         Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument");
 
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
+        metadata.mottakersRolle = brevData.mottaker;
 
         Fagsak fagsak = behandling.getFagsak();
         metadata.bruker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, BRUKER);
@@ -107,8 +108,6 @@ public class BrevDataService {
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
         metadata.fagområde = Tema.MED.getKode();
-        // Default=true i DOKKAT, men kan settes til false for å ikke utlede, eller berik=false for å overstyre enkeltelementer
-        metadata.utledRegisterInfo = true;
         metadata.saksbehandler = brevData.saksbehandler;
 
         return metadata;

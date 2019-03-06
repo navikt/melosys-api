@@ -1,7 +1,11 @@
 package no.nav.melosys.integrasjon.doksys;
 
+import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.*;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.*;
@@ -26,6 +30,8 @@ public class DokSysService implements DokSysFasade {
 
     private static final Logger log = LoggerFactory.getLogger(DokSysService.class);
 
+    private static final String FALSK_MOTTAKER_ID = "11111111111";
+
     private final DokumentproduksjonConsumer dokumentproduksjonConsumer;
 
     private ObjectFactory objectFactory;
@@ -41,7 +47,7 @@ public class DokSysService implements DokSysFasade {
     public byte[] produserDokumentutkast(DokumentbestillingMetadata metadata, Object brevdata) throws IntegrasjonException {
         ProduserDokumentutkastRequest wsRequest = new ProduserDokumentutkastRequest();
 
-        wsRequest.setUtledRegisterInfo(metadata.utledRegisterInfo);
+        wsRequest.setUtledRegisterInfo(dokprodUtlederRegisterInfo(metadata));
         wsRequest.setDokumenttypeId(metadata.dokumenttypeID);
         wsRequest.setBrevdata(brevdata);
 
@@ -55,13 +61,15 @@ public class DokSysService implements DokSysFasade {
     }
 
     @Override
-    public DokumentbestillingResponse produserIkkeredigerbartDokument(DokumentbestillingMetadata metadata, Object brevdata) 
-        throws SikkerhetsbegrensningException, IntegrasjonException {
+    public DokumentbestillingResponse produserIkkeredigerbartDokument(DokumentbestillingMetadata metadata, Object brevdata)
+        throws FunksjonellException, TekniskException {
         ProduserIkkeredigerbartDokumentRequest wsRequest = new ProduserIkkeredigerbartDokumentRequest();
         Dokumentbestillingsinformasjon info = new Dokumentbestillingsinformasjon();
 
         info.setDokumenttypeId(metadata.dokumenttypeID);
-        info.setUtledRegisterInfo(metadata.utledRegisterInfo);
+        // Parameter som settes for å angi om registerInfo skal utledes i Dokprod for dokumentet som bestilles.
+        boolean adresseUtledes = dokprodUtlederRegisterInfo(metadata);
+        info.setUtledRegisterInfo(adresseUtledes);
         // Hvis vedlegg skal sendes, må denne settes først når vedleggene har blitt sendt
         info.setFerdigstillForsendelse(true);
 
@@ -79,7 +87,7 @@ public class DokSysService implements DokSysFasade {
         bruker.setIdent(metadata.bruker);
         info.setBruker(bruker);
 
-        info.setMottaker(lagMottaker(metadata.mottakerType, metadata.mottakerID));
+        info.setMottaker(lagMottaker(metadata));
 
         info.setJournalsakId(metadata.journalsakID);
 
@@ -90,6 +98,10 @@ public class DokSysService implements DokSysFasade {
 
         info.setJournalfoerendeEnhet(Integer.toString(MELOSYS_ENHET_ID));
         info.setSaksbehandlernavn(metadata.saksbehandler);
+
+        if (!adresseUtledes) {
+            info.setAdresse(lagAdresse(metadata));
+        }
 
         wsRequest.setDokumentbestillingsinformasjon(info);
         wsRequest.setBrevdata(brevdata);
@@ -113,32 +125,63 @@ public class DokSysService implements DokSysFasade {
         }
     }
 
-    private Aktoer lagMottaker(MottakerType mottakerType, String mottakerID) {
-        if (mottakerType == null) {
-            log.warn("MottakerType er null. PERSON brukes som standard.");
-            return lagPerson(mottakerID);
+    // Dokprod kan utlede registerinfo når Melosys ikke trenger å sette adressen sammen.
+    // Melosys setter adressen sammen for kontaktpersoner og utelandske myndigheter.
+    private boolean dokprodUtlederRegisterInfo(DokumentbestillingMetadata metadata) {
+        return Aktoersroller.MYNDIGHET != metadata.mottakersRolle;
+    }
+
+    private Adresse lagAdresse(DokumentbestillingMetadata metadata) throws TekniskException {
+
+        if (Aktoersroller.MYNDIGHET == metadata.mottakersRolle) {
+            return lagUtenlandskAdresse(metadata.utenlandskMyndighet);
+        } else {
+            throw new TekniskException("Det er ikke planlagt å lage en adresse for mottakersRolle: " + metadata.mottakersRolle);
+        }
+    }
+
+    private UtenlandskPostadresse lagUtenlandskAdresse(UtenlandskMyndighet utenlandskMyndighet) {
+        UtenlandskPostadresse utenlandskPostadresse = new UtenlandskPostadresse();
+        utenlandskPostadresse.setAdresselinje1(utenlandskMyndighet.gateadresse);
+        utenlandskPostadresse.setAdresselinje2(utenlandskMyndighet.postnummer + " " + utenlandskMyndighet.poststed);
+        utenlandskPostadresse.setLand(new Landkoder().withValue(utenlandskMyndighet.landkode.getKode()));
+        return utenlandskPostadresse;
+    }
+
+    private Aktoer lagMottaker(DokumentbestillingMetadata metadata) throws FunksjonellException {
+        Aktoersroller mottakersRolle = metadata.mottakersRolle;
+        String mottakerID = metadata.mottakerID;
+
+        if (mottakersRolle == null) {
+            throw new FunksjonellException("Brev kan ikke sendes, mottakersRolle er ikke satt.");
         }
 
-        switch (mottakerType) {
-            case PERSON:
+        switch (mottakersRolle) {
+            case BRUKER:
                 return lagPerson(mottakerID);
-            case ORGANISASJON:
+            case ARBEIDSGIVER:
+            case REPRESENTANT:
                 Organisasjon organisasjon = objectFactory.createOrganisasjon();
                 organisasjon.setOrgnummer(mottakerID);
                 return organisasjon;
-            case UTENLANDSK_MYNDIGHET:
-                Organisasjon myndighet = objectFactory.createOrganisasjon();
-                myndighet.setOrgnummer("???"); // FIXME Ikke støttet av tjenesten?
-                return myndighet;
+            case MYNDIGHET:
+                // Dokprod støtter ikke utenlandske myndigheter så vi lager en falsk person
+                // med mottakerId="11111111111" og dermed blir AvsendMottakId i Joark tom.
+                return lagPerson(FALSK_MOTTAKER_ID, metadata.utenlandskMyndighet.navn);
             default:
-                log.warn("MottakerType {} er ukjent. PERSON brukes som standard.", mottakerType);
+                log.warn("MottakersRolle {} er ukjent. PERSON brukes som standard.", mottakersRolle);
                 return lagPerson(mottakerID);
         }
     }
 
-    private Aktoer lagPerson(String mottakerID) {
+    private Aktoer lagPerson(String personID) {
+        return lagPerson(personID, null);
+    }
+
+    private Aktoer lagPerson(String personID, String navn) {
         Person person = objectFactory.createPerson();
-        person.setIdent(mottakerID);
+        person.setIdent(personID);
+        person.setNavn(navn);
         return person;
     }
 }
