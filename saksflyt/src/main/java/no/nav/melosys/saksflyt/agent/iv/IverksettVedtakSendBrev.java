@@ -18,7 +18,6 @@ import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntakOgAvslag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +25,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.*;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.AVSLAG_YRKESAKTIV;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.INNVILGELSE_YRKESAKTIV;
+import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 import static no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator.avslagsbrevSkalSendes;
 import static no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator.validerLovvalgsperiode;
 
@@ -91,9 +89,13 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
 
             if (avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
-                BrevDataByggerAnmodningUnntakOgAvslag brevDataBygger = (BrevDataByggerAnmodningUnntakOgAvslag) brevDataByggerVelger.hent(AVSLAG_YRKESAKTIV);
+                BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(AVSLAG_YRKESAKTIV);
                 BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
                 dokumentService.produserDokument(behandling.getId(), AVSLAG_YRKESAKTIV, brevData);
+
+                BrevDataBygger brevDataByggerAvslag = brevDataByggerVelger.hent(AVSLAG_ARBEIDSGIVER);
+                BrevData brevDataAvslag = brevDataByggerAvslag.lag(behandling, saksbehandler);
+                dokumentService.produserDokument(behandling.getId(), AVSLAG_ARBEIDSGIVER, brevDataAvslag);
 
                 log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
                 prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);

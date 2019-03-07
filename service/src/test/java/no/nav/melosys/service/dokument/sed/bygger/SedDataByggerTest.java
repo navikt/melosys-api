@@ -11,6 +11,7 @@ import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
@@ -58,7 +59,8 @@ public class SedDataByggerTest {
 
         behandling = DataByggerStubs.hentBehandlingStub();
 
-        dataBygger = new SedDataBygger(kodeverkService, registerOppslagService, lovvalgsperiodeService, avklartefaktaService);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        dataBygger = new SedDataBygger(kodeverkService, lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
     }
 
     @Test

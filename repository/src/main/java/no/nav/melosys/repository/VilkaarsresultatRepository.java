@@ -1,9 +1,11 @@
 package no.nav.melosys.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -14,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 public interface VilkaarsresultatRepository extends CrudRepository<Vilkaarsresultat, Long> {
 
     List<Vilkaarsresultat> findByBehandlingsresultatId(long ID);
+
+    Optional<Vilkaarsresultat> findByBehandlingsresultatIdAndVilkaar(long ID, Vilkaar vilkaar);
 
     // Må her bruke ett skreddersydd query p.g.a. en bug i Spring Data og/eller
     // JPA/Hibernate. Den automatisk genererte metoden (uten @Query) blir ikke

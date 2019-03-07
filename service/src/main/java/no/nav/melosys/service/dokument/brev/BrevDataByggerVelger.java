@@ -6,6 +6,7 @@ import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.*;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -16,12 +17,12 @@ import org.springframework.stereotype.Component;
 public class BrevDataByggerVelger {
 
     private final AvklartefaktaService avklartefaktaService;
-    private final RegisterOppslagSystemService registerOppslagService;
     private final KodeverkService kodeverkService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
     private final JoarkService joarkService;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     @Autowired
     public BrevDataByggerVelger(AvklartefaktaService avklartefaktaService,
@@ -32,12 +33,12 @@ public class BrevDataByggerVelger {
                                 VilkaarsresultatRepository vilkaarsresultatRepository,
                                 JoarkService joarkService) {
         this.avklartefaktaService = avklartefaktaService;
-        this.registerOppslagService = registerOppslagService;
         this.kodeverkService = kodeverkService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.joarkService = joarkService;
+        this.avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
     }
 
     // For brevbygging i saksflyt
@@ -50,19 +51,23 @@ public class BrevDataByggerVelger {
             case ATTEST_A1: {
                 BrevDataByggerA1 a1Bygger =
                     new BrevDataByggerA1(avklartefaktaService,
-                        registerOppslagService,
+                        avklarteVirksomheterService,
                         kodeverkService);
                 return new BrevDataByggerVedlegg(a1Bygger, brevbestillingDto);
             }
+            case AVSLAG_ARBEIDSGIVER:
+                return new BrevDataByggerAvslagArbeidsgiver(avklartefaktaService,
+                                                            avklarteVirksomheterService,
+                                                            lovvalgsperiodeService,
+                                                            vilkaarsresultatRepository);
             case AVSLAG_YRKESAKTIV:
             case ORIENTERING_ANMODNING_UNNTAK: {
-                return new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService,
-                    registerOppslagService);
+                return new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService);
             }
             case ANMODNING_UNNTAK: {
                 BrevDataByggerA001 a001Bygger =
                     new BrevDataByggerA001(avklartefaktaService,
-                        registerOppslagService,
+                        avklarteVirksomheterService,
                         kodeverkService,
                         lovvalgsperiodeService,
                         utenlandskMyndighetRepository,
@@ -72,7 +77,7 @@ public class BrevDataByggerVelger {
             case INNVILGELSE_YRKESAKTIV: {
                 BrevDataByggerA1 a1Bygger =
                     new BrevDataByggerA1(avklartefaktaService,
-                        registerOppslagService,
+                        avklarteVirksomheterService,
                         kodeverkService);
                 return new BrevDataByggerVedlegg(a1Bygger, brevbestillingDto);
             }

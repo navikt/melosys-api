@@ -27,7 +27,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataUtils;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import org.xml.sax.SAXException;
 
 public final class InnvilgelsesbrevMapper implements BrevDataMapper {
@@ -53,7 +53,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         Fag fag = new Fag();
         fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
-        Virksomhet arbeidsgiver = brevdata.norskeVirksomheter.iterator().next();
+        AvklartVirksomhet arbeidsgiver = brevdata.norskeVirksomheter.iterator().next();
         fag.setArbeidsgiver(arbeidsgiver.navn);
 
         // Henter ut Landkode fra Arbeidssteder(Fysiske og Maritime) og Oppholdsland

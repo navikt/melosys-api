@@ -7,6 +7,7 @@ import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -20,6 +21,7 @@ public class SedDataByggerVelger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     public SedDataByggerVelger(AvklartefaktaService avklartefaktaService, RegisterOppslagSystemService registerOppslagService,
                                KodeverkService kodeverkService, LovvalgsperiodeService lovvalgsperiodeService,
@@ -31,6 +33,7 @@ public class SedDataByggerVelger {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
+        this.avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
     }
 
     public SedDataBygger hent(LovvalgBestemmelse lovvalgBestemmelse) {
@@ -43,8 +46,8 @@ public class SedDataByggerVelger {
                 case FO_883_2004_ART12_2:
                 case FO_883_2004_ART16_1:
                 case FO_883_2004_ART16_2:
-                    return new SedDataBygger(kodeverkService, registerOppslagService,
-                        lovvalgsperiodeService, avklartefaktaService);
+                    return new SedDataBygger(kodeverkService,
+                        lovvalgsperiodeService, avklartefaktaService, avklarteVirksomheterService);
                 //art 12 og 16 trenger samme data
                 //SedDatabygger settes for nå til flere SED'er er implementert og mer informasjon trengs
                 case FO_883_2004_ART11_1:

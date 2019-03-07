@@ -82,6 +82,17 @@ public class BrevDataService {
                 }
                 break;
             }
+            case AVSLAG_ARBEIDSGIVER: {
+                if (representant != null) {
+                    metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, REPRESENTANT);
+                } else {
+                    if (brevData.mottaker == null) {
+                        throw new TekniskException("Det finnes ingen mottaker på sak " + fagsak.getSaksnummer());
+                    }
+                    metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevData.mottaker);
+                }
+                break;
+            }
             case ATTEST_A1:
             case ANMODNING_UNNTAK:
             case INNVILGELSE_YRKESAKTIV:

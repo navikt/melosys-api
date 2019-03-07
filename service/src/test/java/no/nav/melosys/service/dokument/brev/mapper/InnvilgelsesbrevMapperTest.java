@@ -24,7 +24,7 @@ import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import org.junit.Test;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
@@ -82,7 +82,7 @@ public class InnvilgelsesbrevMapperTest {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = LagMelosysNAVFelles();
         BrevDataA1 brevdataA1 = new BrevDataA1();
-        Virksomhet virksomhet = new Virksomhet("Virker ikke", "123456789", lagStrukturertAdresse());
+        AvklartVirksomhet virksomhet = new AvklartVirksomhet("Virker ikke", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
         brevdataA1.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet, virksomhet));
         brevdataA1.bostedsadresse = lagBostedsadresse();
         brevdataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;

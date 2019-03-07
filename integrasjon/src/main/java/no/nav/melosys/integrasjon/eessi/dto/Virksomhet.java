@@ -8,6 +8,14 @@ public class Virksomhet {
     private String orgnr;
     private String type; //Trenger kanskje ikke denne?
 
+    public Virksomhet() {};
+
+    public Virksomhet(String navn, String orgnr, Adresse adresse) {
+        this.navn = navn;
+        this.orgnr = orgnr;
+        this.adresse = adresse;
+    }
+
     public String getNavn() {
         return navn;
     }

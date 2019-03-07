@@ -8,14 +8,10 @@ import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Art12_1_Begrunnelser;
-import no.nav.melosys.domain.kodeverk.Art16_1_Anmodning_Begrunnelser;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,7 +52,8 @@ public class AnmodningUnntakMapperTest {
         Behandlingsresultat resultat = new Behandlingsresultat();
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.DE);
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.DE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
         resultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
@@ -82,8 +79,7 @@ public class AnmodningUnntakMapperTest {
         resultat.getVilkaarsresultater().add(vilkaarsresultat16_1);
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
-        brevData.hovedvirksomhet = new Virksomhet("Test AS", null, null);
-        brevData.hovedvirksomhet.setSelvstendigForetak(true);
+        brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG);
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 

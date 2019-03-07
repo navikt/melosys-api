@@ -11,7 +11,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.BostedsadresseType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.PersonnavnType;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -70,6 +72,17 @@ public final class BrevDataUtils {
             DatatypeConstants.FIELD_UNDEFINED,
             DatatypeConstants.FIELD_UNDEFINED
         );
+    }
+
+    public static LovvalgsperiodeType lagLovvalgsperiodeType(Lovvalgsperiode lovvalgsperiode)  {
+        LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
+        try {
+            lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
+            lovvalgsperiodeType.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));
+        } catch (DatatypeConfigurationException e) {
+            e.printStackTrace();
+        }
+        return lovvalgsperiodeType;
     }
 
     // Adresse-stubs
