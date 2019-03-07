@@ -95,9 +95,9 @@ node {
                     sh "git push origin HEAD:develop"
                 }
 
-                GString message = ":clap: Siste commit på ${branch} bygd og deployet OK.\nCommit: ${commit}"
-                sendSlackMessage("good", message)
             }
+            GString message = ":clap: Siste commit på ${branch} bygd og deployet OK til miljø ${environment}.\nCommit: ${commit}"
+            sendSlackMessage("good", message)
         }
     } catch (e) {
         println("[ERROR] " + e)
