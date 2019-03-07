@@ -17,13 +17,13 @@ import org.springframework.stereotype.Component;
 public class BrevDataByggerVelger {
 
     private final AvklartefaktaService avklartefaktaService;
-    private final RegisterOppslagSystemService registerOppslagService;
     private final KodeverkService kodeverkService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
     private final JoarkService joarkService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
+
     @Autowired
     public BrevDataByggerVelger(AvklartefaktaService avklartefaktaService,
                                 RegisterOppslagSystemService registerOppslagService,
@@ -33,7 +33,6 @@ public class BrevDataByggerVelger {
                                 VilkaarsresultatRepository vilkaarsresultatRepository,
                                 JoarkService joarkService) {
         this.avklartefaktaService = avklartefaktaService;
-        this.registerOppslagService = registerOppslagService;
         this.kodeverkService = kodeverkService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;

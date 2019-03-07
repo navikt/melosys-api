@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.avklartefakta;
 
 import java.util.*;
 import java.util.function.Function;
@@ -18,8 +18,6 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.RegisterOppslagService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

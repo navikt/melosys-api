@@ -30,7 +30,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.service.dokument.AvklarteVirksomheterServiceTest.lagArbeidsforholdOpplysning;
+import static no.nav.melosys.service.avklartefakta.AvklarteVirksomheterServiceTest.lagArbeidsforholdOpplysning;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;

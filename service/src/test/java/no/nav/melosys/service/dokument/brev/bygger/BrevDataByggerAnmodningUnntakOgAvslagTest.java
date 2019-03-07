@@ -23,7 +23,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.service.dokument.AvklarteVirksomheterServiceTest.lagSøknadOgArbeidsforholdOpplysninger;
+import static no.nav.melosys.service.avklartefakta.AvklarteVirksomheterServiceTest.lagSøknadOgArbeidsforholdOpplysninger;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.when;
 

@@ -17,7 +17,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.AvklarteVirksomheterServiceTest;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterServiceTest;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import org.junit.Before;
 import org.junit.Test;
