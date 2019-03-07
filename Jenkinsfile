@@ -24,7 +24,7 @@ node {
     def environment = "${params.ENV}".toString()
     def namespace
     def mvnSettings = "navMavenSettingsUtenProxy"
-    def branchName, commit, releaseVersion, isSnapshot, imageVersion
+    def branchName, commit, commitId, imageVersion
     def application = "melosys", springProfiles = "nais"
 
     if (environment == 'prod') {
@@ -43,29 +43,22 @@ node {
             scmInfo = checkout scm
 
             branchName = scmInfo.GIT_LOCAL_BRANCH
+            commitId = scmInfo.GIT_COMMIT
 
             commit = sh(script: "git log -1 --oneline", returnStdout: true)
-            currentVersion = readMavenPom().version
-            isSnapshot = currentVersion.contains("-SNAPSHOT")
-            releaseVersion = currentVersion.tokenize("-")[0]
-            timeStamp = new Date().format("YYYYMMddHHmmss")
-            imageVersion = releaseVersion + "-" + timeStamp
+            imageVersion = "${branchName}-${commitId}"
         }
 
         stage("Build application") {
             configFileProvider([configFile(fileId: "$mvnSettings", variable: "MAVEN_SETTINGS")]) {
-                sh "mvn versions:set -B -DnewVersion=${releaseVersion} -DgenerateBackupPoms=false -s $MAVEN_SETTINGS"
                 sh "mvn clean package -B -e -U -s $MAVEN_SETTINGS"
             }
         }
 
         stage("Build & publish Docker image") {
+            sh "docker build --build-arg JAR_FILE=${application}-${imageVersion}.jar --build-arg SPRING_PROFILES=${springProfiles} -t ${dockerRepo}/${application}:${imageVersion} ."
+            sh "docker push ${dockerRepo}/${application}:${imageVersion}"
 
-            configFileProvider([configFile(fileId: "$mvnSettings", variable: "MAVEN_SETTINGS")]) {
-                sh "mvn clean package -DskipTests -B -s $MAVEN_SETTINGS"
-                sh "docker build --build-arg JAR_FILE=${application}-${imageVersion}.jar --build-arg SPRING_PROFILES=${springProfiles} -t ${dockerRepo}/${application}:${imageVersion} --rm=true ."
-                sh "docker push ${dockerRepo}/${application}:${imageVersion}"
-            }
         }
 
         stage("Deploy to NAIS") {
@@ -82,25 +75,23 @@ node {
             }
         }
 
-        stage("New dev version") {
-            if (branchName == "develop") {
-                def nextVersion = resolveNextSnapshotVersionFrom(releaseVersion)
-                setVersion(nextVersion)
+        if (namespace == 'q1' || namespace == 'prod') {
 
-                sh "git config user.name srvEESSI2"
-                sh "git config user.email srvEESSI2@nav.no"
-                sh "git commit -am \"Updated to snapshot version ${nextVersion} \""
-
-                sshagent([BITBUCKET_SSH]) {
-                    sh "git push origin HEAD:develop"
+            stage("Publish to Nexus") {
+                configFileProvider([configFile(fileId: "$mvnSettings", variable: "MAVEN_SETTINGS")]) {
+                    sh "mvn -DskipTests -DdeployAtEnd=true -DretryFailedDeploymentCount=5 --settings $MAVEN_SETTINGS deploy"
                 }
-
             }
+        }
+
+        stage ("Send Slack-message") {
             GString message = ":clap: Siste commit på ${branch} bygd og deployet OK til miljø ${environment}.\nCommit: ${commit}"
             sendSlackMessage("good", message)
         }
+
     } catch (e) {
-        println("[ERROR] " + e)
+        GString message = ":crying_cat_face: \n Siste commit på ${branch} kunne ikke deployes til ${environment}. Se logg for mer info ${env.BUILD_URL}\nCommit ${commit}"
+        sendSlackMessage("danger", message)
         throw e
     }
 }
@@ -149,19 +140,4 @@ def sendSlackMessage(String color, String message) {
     } catch (Exception exception) {
         echo("Failed to send message to Slack: ${exception.getMessage()}")
     }
-}
-
-def setVersion(String versionNumber) {
-    configFileProvider([configFile(fileId: "navMavenSettingsUtenProxy", variable: "MAVEN_SETTINGS")]) {
-        sh "mvn org.codehaus.mojo:versions-maven-plugin:2.5:set -B -DnewVersion=${versionNumber} -DgenerateBackupPoms=false --settings $MAVEN_SETTINGS"
-    }
-
-    currentBuild.displayName = "#${env.BUILD_ID} - $versionNumber"
-}
-
-def resolveNextSnapshotVersionFrom(String currentReleaseVersion) {
-    def newSnapshotVersionComponents = currentReleaseVersion.tokenize(".")
-    newSnapshotVersionComponents[1] = (newSnapshotVersionComponents[1] as Integer) + 1
-    newSnapshotVersionComponents[2] = "0"
-    return newSnapshotVersionComponents.join(".") + "-SNAPSHOT"
 }
