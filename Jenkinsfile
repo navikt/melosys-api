@@ -109,9 +109,9 @@ def getBuildUser(defaultUser) {
     }
 }
 
-def prepareNaisYaml(naiseratorFile, version, namespace, cluster) {
+def prepareNaisYaml(naiseratorFile, imageVersion, namespace, cluster) {
     // set version in yaml-file:
-    replaceInFile('@@RELEASE_VERSION@@', version, naiseratorFile)
+    replaceInFile('@@IMAGE_VERSION@@', imageVersion, naiseratorFile)
 
     def domain
     if (cluster == "prod-fss") {

@@ -6,7 +6,7 @@ metadata:
   labels:
     team: teammelosys
 spec:
-  image: docker.adeo.no:5000/melosys/melosys:@@RELEASE_VERSION@@
+  image: docker.adeo.no:5000/melosys/melosys:@@IMAGE_VERSION@@
   port: 8080
   replicas:
     min: 1
