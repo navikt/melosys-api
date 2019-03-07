@@ -25,15 +25,17 @@ node {
     def namespace
     def mvnSettings = "navMavenSettingsUtenProxy"
     def branchName, commit, releaseVersion, isSnapshot, imageVersion
-    def application = "melosys", springProfiles = "nais,test"
+    def application = "melosys", springProfiles = "nais"
 
     if (environment == 'prod') {
         namespace = 'default'
         cluster = 'prod-fss'
     } else if (environment == 'q1') {
         namespace = 'default'
+        springProfiles += ",test"
     } else {
         namespace = environment
+        springProfiles += ",test"
     }
 
     try {
@@ -53,7 +55,7 @@ node {
         stage("Build application") {
             configFileProvider([configFile(fileId: "$mvnSettings", variable: "MAVEN_SETTINGS")]) {
                 sh "mvn versions:set -B -DnewVersion=${releaseVersion} -DgenerateBackupPoms=false -s $MAVEN_SETTINGS"
-                sh "mvn clean package -Pcoverage -B -e -U -s $MAVEN_SETTINGS"
+                sh "mvn clean package -B -e -U -s $MAVEN_SETTINGS"
             }
         }
 
