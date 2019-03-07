@@ -1,0 +1,44 @@
+package no.nav.melosys.domain;
+
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "kontaktopplysning")
+public class Kontaktopplysning {
+
+    @EmbeddedId
+    private KontaktopplysningID kontaktopplysningID;
+
+    @Column(name = "kontakt_navn")
+    private String kontaktNavn;
+
+    @Column(name = "kontakt_orgnr")
+    private String kontaktOrgnr;
+
+    public KontaktopplysningID getKontaktopplysningID() {
+        return kontaktopplysningID;
+    }
+
+    public void setKontaktopplysningID(KontaktopplysningID kontaktopplysningID) {
+        this.kontaktopplysningID = kontaktopplysningID;
+    }
+
+    public String getKontaktNavn() {
+        return kontaktNavn;
+    }
+
+    public void setKontaktNavn(String kontaktNavn) {
+        this.kontaktNavn = kontaktNavn;
+    }
+
+    public String getKontaktOrgnr() {
+        return kontaktOrgnr;
+    }
+
+    public void setKontaktOrgnr(String kontaktOrgnr) {
+        this.kontaktOrgnr = kontaktOrgnr;
+    }
+}
