@@ -1,12 +1,9 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.dok.melosysbrev._000108.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.BehandlingstypeKode;
@@ -24,11 +21,13 @@ import no.nav.melosys.domain.util.SoeknadUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
-import no.nav.melosys.service.dokument.brev.BrevDataUtils;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import org.xml.sax.SAXException;
+
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.validerLovvalgsperioder;
 
 public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
@@ -63,10 +62,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setArbeidsland(arbeidslandKode.getBeskrivelse());
 
         Set<Lovvalgsperiode> perioder = resultat.getLovvalgsperioder();
-        if (perioder.size() != 1) {
-            throw new UnsupportedOperationException(String.format("Antall lovvalgsperioder (%s) ulik 1 støttes ikke i første versjon av Melosys.",
-                perioder.size()));
-        }
+        validerLovvalgsperioder(perioder);
         Lovvalgsperiode periode = perioder.iterator().next();
         fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(periode.getBestemmelse().getKode()));
         fag.setLovvalgsperiode(LovvalgsperiodeType.builder().withFomDato(lagXmlDato(periode.getFom()))
@@ -96,14 +92,6 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             arbeidslandSomTekst = land.get(0);
         }
         return arbeidslandSomTekst;
-    }
-
-    private static XMLGregorianCalendar lagXmlDato(LocalDate dato) {
-        try {
-            return BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone(dato);
-        } catch (DatatypeConfigurationException e) {
-            throw new IllegalStateException("Kan ikke lage DatatypeConverterFactory.", e);
-        }
     }
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag, VedleggType vedlegg) {

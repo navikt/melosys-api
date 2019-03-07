@@ -1,13 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.BostedsadresseType;
@@ -19,6 +12,7 @@ import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataService.*;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 public final class BrevDataUtils {
 
@@ -40,39 +34,6 @@ public final class BrevDataUtils {
         return navEnhet;
     }
 
-    public static XMLGregorianCalendar convertToXMLGregorianCalendarRemoveTimezone(Instant instant) {
-        if (instant == null) {
-            return null;
-        }
-        try {
-            return convertToXMLGregorianCalendarRemoveTimezone(LocalDateTime.ofInstant(instant, ZoneOffset.UTC));
-        } catch (DatatypeConfigurationException e) {
-            throw new RuntimeException("Feil ved konvertering av Instant til XmlGregorianCalendar");
-        }
-    }
-
-    public static XMLGregorianCalendar convertToXMLGregorianCalendarRemoveTimezone(LocalDateTime localDateTime) throws DatatypeConfigurationException {
-        if (localDateTime == null) {
-            return null;
-        }
-        return convertToXMLGregorianCalendarRemoveTimezone(localDateTime.toLocalDate());
-    }
-
-    public static XMLGregorianCalendar convertToXMLGregorianCalendarRemoveTimezone(LocalDate localDate) throws DatatypeConfigurationException {
-        if (localDate == null) {
-            return null;
-        }
-        return DatatypeFactory.newInstance().newXMLGregorianCalendar(
-            localDate.getYear(),
-            localDate.getMonthValue(),
-            localDate.getDayOfMonth(),
-            DatatypeConstants.FIELD_UNDEFINED,
-            DatatypeConstants.FIELD_UNDEFINED,
-            DatatypeConstants.FIELD_UNDEFINED,
-            DatatypeConstants.FIELD_UNDEFINED,
-            DatatypeConstants.FIELD_UNDEFINED
-        );
-    }
 
     public static LovvalgsperiodeType lagLovvalgsperiodeType(Lovvalgsperiode lovvalgsperiode)  {
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();

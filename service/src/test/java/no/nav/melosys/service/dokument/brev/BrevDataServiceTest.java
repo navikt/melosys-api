@@ -159,6 +159,11 @@ public class BrevDataServiceTest {
     }
 
     @Test
+    public void lagMetadataForInnvilgelseArbeidsgiverBrevAngirDokTypeLikArbeidsgiver() throws Exception {
+        testLagDokumentMetadata(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER);
+    }
+
+    @Test
     public void lagMetadataUtenMottakerKasterUnntak() {
         Throwable unntak = catchThrowable(() -> service.lagBestillingMetadata(INNVILGELSE_YRKESAKTIV, lagBehandling(), new BrevData()));
         assertThat(unntak).isInstanceOf(TekniskException.class)

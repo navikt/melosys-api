@@ -21,6 +21,7 @@ import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 public class A1Mapper {
 

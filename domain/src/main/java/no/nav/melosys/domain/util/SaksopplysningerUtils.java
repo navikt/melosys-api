@@ -53,4 +53,13 @@ public final class SaksopplysningerUtils {
         return (ArbeidsforholdDokument) saksopplysning
                 .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
     }
+
+    public static String hentSammensattNavn(Behandling behandling) {
+        try {
+            PersonDokument personDokument = hentPersonDokument(behandling);
+            return personDokument.sammensattNavn;
+        } catch (TekniskException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 }

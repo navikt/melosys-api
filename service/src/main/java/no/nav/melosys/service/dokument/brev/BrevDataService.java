@@ -82,20 +82,23 @@ public class BrevDataService {
                 }
                 break;
             }
+            case INNVILGELSE_ARBEIDSGIVER:
             case AVSLAG_ARBEIDSGIVER: {
+                metadata.mottakerType = MottakerType.ORGANISASJON;
                 if (representant != null) {
-                    metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, REPRESENTANT);
+                    metadata.mottakerID = tpsFasade.hentFagsakIdentMedRolleType(fagsak, REPRESENTANT);
                 } else {
                     if (brevData.mottaker == null) {
                         throw new TekniskException("Det finnes ingen mottaker på sak " + fagsak.getSaksnummer());
                     }
-                    metadata.mottaker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevData.mottaker);
+                    metadata.mottakerID = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevData.mottaker);
                 }
                 break;
             }
             case ATTEST_A1:
             case ANMODNING_UNNTAK:
             case INNVILGELSE_YRKESAKTIV:
+                //Avklaring av brev mottaker blir utført i MELOSYS-2248
             case MELDING_MANGLENDE_OPPLYSNINGER:
             case MELDING_HENLAGT_SAK: {
                 if (brevData.mottaker == null) {

@@ -5,6 +5,7 @@ import java.util.Map;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -100,11 +101,8 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
                 log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
                 prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
             } else if (SendBrevValidator.innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
-                BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(INNVILGELSE_YRKESAKTIV);
-                BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
-                brevData.mottaker = Aktoersroller.BRUKER;
-                dokumentService.produserDokument(behandling.getId(), INNVILGELSE_YRKESAKTIV, brevData);
-
+                produserInnvilgelse(behandling, saksbehandler, INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER);
+                produserInnvilgelse(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER);
                 // FIXME Myndigheter støttes ikke.
                 //brevData.mottaker = Aktoersroller.MYNDIGHET;
                 //dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
@@ -122,5 +120,15 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
         }
+    }
+
+    private void produserInnvilgelse(Behandling behandling,
+                                  String saksbehandler,
+                                  Produserbaredokumenter produserbaredokumenter,
+                                  Aktoersroller aktoersroller) throws FunksjonellException, TekniskException {
+        BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(produserbaredokumenter);
+        BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
+        brevData.mottaker = aktoersroller;
+        dokumentService.produserDokument(behandling.getId(), produserbaredokumenter, brevData);
     }
 }
