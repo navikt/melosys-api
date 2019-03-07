@@ -181,7 +181,8 @@ public final class DokumentServiceTest {
             brevdatabyggervelger = lagBrevdataByggerVelger(tpsFasade, avklarteFaktaRepository, behandlingsresultatRepository);
         }
 
-        BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository);
+        UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
+        BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository);
         return new DokumentService(behandlingRepository, mock(FagsakRepository.class), brevDataService, dokSysFasade, mock(JoarkFasade.class),
                 mock(ProsessinstansService.class), brevdatabyggervelger);
     }

@@ -77,7 +77,8 @@ public class AvklarMyndighetTest {
 
         steg.utfør(p);
 
-        verify(fagsakService).leggTilAktør(eq("saksnr"), eq(Aktoersroller.MYNDIGHET), eq(utenlandskMyndighet.institusjonskode));
+        String forventetID = utenlandskMyndighet.land + ":" + utenlandskMyndighet.institusjonskode;
+        verify(fagsakService).leggTilAktør(eq("saksnr"), eq(Aktoersroller.MYNDIGHET), eq(forventetID));
     }
 
     @Test

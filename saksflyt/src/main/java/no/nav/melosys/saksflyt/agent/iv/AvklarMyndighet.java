@@ -82,7 +82,8 @@ public class AvklarMyndighet extends AbstraktStegBehandler {
                 if (myndighetPart == null) {
                     Landkoder landkode = avklarLand(behandlingsresultatID);
                     UtenlandskMyndighet myndighet = utenlandskMyndighetRepository.findByLandkode(landkode);
-                    fagsakService.leggTilAktør(saksnummer, Aktoersroller.MYNDIGHET, myndighet.institusjonskode);
+                    String institusjonsID = landkode.getKode() + ":" + myndighet.institusjonskode;
+                    fagsakService.leggTilAktør(saksnummer, Aktoersroller.MYNDIGHET, institusjonsID);
                     log.info("Avklart landkode {} og myndighet {} for sak {}.", landkode, myndighet.institusjonskode, saksnummer);
                 } else {
                     log.debug("Sak {} har allerede en myndighet med kode {}", saksnummer, myndighetPart.getUtenlandskId()); // FIXME institusjonsID

@@ -68,7 +68,7 @@ public class SendBrev extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        // Henter ut behandling på nytt for å få med saksopplysninger
+        // Henter ut behandling for å få med saksopplysninger
         Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
         if (behandling == null) {
             throw new TekniskException(String.format("Finner ikke behandlingen %s.", prosessinstans.getBehandling().getId()));
@@ -82,7 +82,7 @@ public class SendBrev extends AbstraktStegBehandler {
         prosessinstans.setSteg(null);
     }
 
-    public void sendBrev(Behandling behandling, String saksbehandler, Produserbaredokumenter dokumentType, Aktoersroller mottaker) throws TekniskException, FunksjonellException {
+    private void sendBrev(Behandling behandling, String saksbehandler, Produserbaredokumenter dokumentType, Aktoersroller mottaker) throws TekniskException, FunksjonellException {
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(dokumentType);
         BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
         brevData.mottaker = mottaker;
