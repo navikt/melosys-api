@@ -42,7 +42,7 @@ node {
         stage("Checkout") {
             scmInfo = checkout scm
 
-            branchName = scmInfo.GIT_LOCAL_BRANCH
+            branchName = scmInfo.BRANCH_NAME
             commitId = scmInfo.GIT_COMMIT
 
             commit = sh(script: "git log -1 --oneline", returnStdout: true)
@@ -85,12 +85,12 @@ node {
         }
 
         stage ("Send Slack-message") {
-            GString message = ":clap: Siste commit på ${branch} bygd og deployet OK til miljø ${environment}.\nCommit: ${commit}"
+            GString message = ":clap: Siste commit på ${branchName} bygd og deployet OK til miljø ${environment}.\nCommit: ${commit}"
             sendSlackMessage("good", message)
         }
 
     } catch (e) {
-        GString message = ":crying_cat_face: \n Siste commit på ${branch} kunne ikke deployes til ${environment}. Se logg for mer info ${env.BUILD_URL}\nCommit ${commit}"
+        GString message = ":crying_cat_face: \n Siste commit på ${branchName} kunne ikke deployes til ${environment}. Se logg for mer info ${env.BUILD_URL}\nCommit ${commit}"
         sendSlackMessage("danger", message)
         throw e
     }
