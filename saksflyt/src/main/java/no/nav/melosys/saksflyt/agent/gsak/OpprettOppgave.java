@@ -31,7 +31,7 @@ import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
  * Oppretter en oppgave i GSAK.
  *
  * Transisjoner:
- * 1) ProsessType.JFR_NY_SAK:
+ * 1) ProsessType.JFR_NY_SAK eller Behandlingstyper.ENDRET_PERIODE:
  *      GSAK_OPPRETT_OPPGAVE -> SEND_FORVALTNINGSMELDING eller FEILET_MASKINELT hvis feil
  * 2) ProsessType.JFR_NY_BEHANDLING:
  *      GSAK_OPPRETT_OPPGAVE -> null eller FEILET_MASKINELT hvis feil
@@ -87,7 +87,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
             return;
         }
 
-        if (behandlingstype == Behandlingstyper.SOEKNAD) {
+        if (behandlingstype == Behandlingstyper.SOEKNAD || behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
             oppgave.setBehandlingstype(Behandlingstyper.SOEKNAD);
             oppgave.setOppgavetype(Oppgavetyper.BEH_SAK);
         } else {
@@ -104,12 +104,12 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
         String oppgaveId = gsakFasade.opprettOppgave(oppgave);
 
-        if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
+        if (prosessinstans.getType() == ProsessType.JFR_NY_SAK || behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
             prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
             prosessinstans.setSteg(null);
         } else {
-            String feilmelding = "ProsessType " + prosessinstans.getType() + " er ikke støttet";
+            String feilmelding = "ProsessType " + prosessinstans.getType() + " er ikke støttet med mindre behandlingstypen er ENDRET_PERIODE";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
             return;

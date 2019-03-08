@@ -54,6 +54,7 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_FERDIGSTILL_JOURNALPOST', 'Fe
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_SETT_VURDER_DOKUMENT', 'Setter status til VURDER_DOKUMENT');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_HENT_PERS_OPPL', 'Hent personopplysninger fra TPS');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_VURDER_INNGANGSVILKÅR', 'Vurderer inngangsvilkår');
+INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_REPLIKER_BEHANDLING', 'Replikerer behandling');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_ARBF_OPPL', 'Hent arbeidsforholdopplysninger fra AAREG');
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_INNT_OPPL', 'Hent inntektopplysninger fra INNTK');

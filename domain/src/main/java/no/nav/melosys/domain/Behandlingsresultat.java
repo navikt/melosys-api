@@ -66,6 +66,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Behandling getBehandling() {
         return behandling;
     }
@@ -177,5 +181,5 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public int hashCode() {
         return Objects.hash(type, behandling);
     }
-    
+
 }

@@ -16,7 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.*;
+import static no.nav.melosys.domain.ProsessSteg.JFR_AKTØR_ID;
+import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
 
 /**
  * Journalføring av nytt dokument på eksisterende sak.
@@ -31,6 +32,9 @@ import static no.nav.melosys.domain.ProsessSteg.*;
  *  JFR_VURDER_JOURNALFOERINGSTYPE → JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
  *  c) Saken har ikke aktiv behandling og skal behandles:
  *  JFR_VURDER_JOURNALFOERINGSTYPE → JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
+ *  d) Saken har en avsluttet behandling og et fattet vedtak, men det er journalført inn et dokument
+ *  som tilsier at perioden har blitt kortere enn den det tidligere har blitt innvilget vedtak på.
+ *  JFR_KOPIER_BEHANDLINGSINFORMASJON
  */
 @Component
 public class VurderJournalfoeringstype extends AbstraktStegBehandler {
@@ -64,7 +68,7 @@ public class VurderJournalfoeringstype extends AbstraktStegBehandler {
                 prosessinstans.setSteg(JFR_AKTØR_ID);
                 break;
             case JFR_KNYTT:
-                knyttEllerNyBehandling(prosessinstans);
+                knyttEllerNyBehandlingEllerReplikerBehandling(prosessinstans);
                 break;
             default:
                 String feilmelding = "Ukjent prosesstype: " + prosessinstans.getType();
@@ -77,20 +81,30 @@ public class VurderJournalfoeringstype extends AbstraktStegBehandler {
         log.debug("Neste steg blir: {}", prosessinstans.getSteg());
     }
 
-    private void knyttEllerNyBehandling(Prosessinstans prosessinstans) throws TekniskException {
+    private void knyttEllerNyBehandlingEllerReplikerBehandling(Prosessinstans prosessinstans) throws TekniskException {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         Behandlingstyper nyBehandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
 
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
         Behandling aktivBehandling = fagsak.getAktivBehandling();
-        if (aktivBehandling == null && nyBehandlingstype != null) {
+        Behandling tidligsteInaktiveBehandling = fagsak.getTidligsteInaktiveBehandling();
+
+        if (nyBehandlingstype != null && nyBehandlingstype.equals(Behandlingstyper.ENDRET_PERIODE)) {
+            if (aktivBehandling == null && tidligsteInaktiveBehandling != null) {
+                prosessinstans.setSteg(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
+            }
+            else {
+                String feilmelding = "Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som har en aktiv behandling eller mangler en inaktiv behandling";
+                log.error("{}: {}", prosessinstans.getId(), feilmelding);
+                håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);            }
+        }
+        else if (aktivBehandling == null && nyBehandlingstype != null) {
             // Ny behandling trenges.
             prosessinstans.setType(ProsessType.JFR_NY_BEHANDLING);
             prosessinstans.setSteg(ProsessSteg.JFR_AKTØR_ID);
         } else {
             // Dokumentet journalføres direkte.
             prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
-
         }
     }
 }

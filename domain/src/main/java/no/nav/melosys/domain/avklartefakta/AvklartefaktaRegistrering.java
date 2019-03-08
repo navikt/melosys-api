@@ -13,7 +13,7 @@ public class AvklartefaktaRegistrering extends RegistreringsInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "avklartefakta_id ", nullable = false, updatable = false)
@@ -21,6 +21,14 @@ public class AvklartefaktaRegistrering extends RegistreringsInfo {
 
     @Column(name = "begrunnelse")
     private String begrunnelseKode;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Avklartefakta getAvklartefakta() {
         return avklartefakta;
