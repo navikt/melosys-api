@@ -42,7 +42,7 @@ node {
         stage("Checkout") {
             scmInfo = checkout scm
 
-            branchName = scmInfo.GIT_BRANCH
+            branchName = resolveBranchName(scmInfo.GIT_BRANCH.toString())
             commitId = scmInfo.GIT_COMMIT
 
             commit = sh(script: "git log -1 --oneline", returnStdout: true)
@@ -140,4 +140,13 @@ def sendSlackMessage(String color, String message) {
     } catch (Exception exception) {
         echo("Failed to send message to Slack: ${exception.getMessage()}")
     }
+}
+
+def resolveBranchName(String branchName) {
+    if (branchName.contains('/')) {
+        split = branchName.split('/')
+        branchName = split[split.length - 1]
+    }
+
+    return branchName
 }
