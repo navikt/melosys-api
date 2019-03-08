@@ -42,7 +42,7 @@ node {
         stage("Checkout") {
             scmInfo = checkout scm
 
-            branchName = scmInfo.BRANCH_NAME
+            branchName = scmInfo.GIT_BRANCH
             commitId = scmInfo.GIT_COMMIT
 
             commit = sh(script: "git log -1 --oneline", returnStdout: true)
