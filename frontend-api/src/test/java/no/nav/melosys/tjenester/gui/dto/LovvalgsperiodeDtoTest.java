@@ -3,9 +3,6 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.time.LocalDate;
 import java.util.Map;
 
-import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
-import org.junit.Test;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.InnvilgelsesResultat;
@@ -42,17 +39,29 @@ public class LovvalgsperiodeDtoTest {
         assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
     }
 
+    @Test
+    public void mapKonstruktørLagerSammeObjektSomOrdinærKonstruktørUtenLandkodeUtenMedlemskapstype() throws Exception {
+        Map<String, String> json = new ObjectMapper().readValue(JSON_EKSEMPEL, new TypeReference<Map<String, String>>() {
+        });
+        json.remove("lovvalgsland");
+        json.remove("medlemskapstype");
+
+        LovvalgsperiodeDto resultat = new LovvalgsperiodeDto(json);
+        LovvalgsperiodeDto forventet = lagLovvalgsperiodeDtoFraMap(json);
+        assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
+    }
+
     private static LovvalgsperiodeDto lagLovvalgsperiodeDtoFraMap(Map<String, String> json) {
         LovvalgsperiodeDto forventet = new LovvalgsperiodeDto(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
             LocalDate.parse(json.get("tomDato"))),
             LovvalgsBestemmelser_883_2004.valueOf(json.get("lovvalgBestemmelse")),
             TilleggsBestemmelser_883_2004.valueOf(json.get("tilleggBestemmelse")),
-            Landkoder.valueOf(json.get("lovvalgsland")),
+            json.containsKey("lovvalgsland") ? Landkoder.valueOf(json.get("lovvalgsland")) : null,
             enumVerdiEllerNull(LovvalgsBestemmelser_883_2004.class, json.get("unntakFraBestemmelse")),
             enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
             InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
             enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
-            Medlemskapstyper.valueOf(json.get("medlemskapstype")));
+            json.containsKey("medlemskapstype") ? Medlemskapstyper.valueOf(json.get("medlemskapstype")) : null);
         return forventet;
     }
 

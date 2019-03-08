@@ -40,12 +40,12 @@ public final class LovvalgsperiodeDto {
         this.periode = periode;
         this.lovvalgBestemmelse = lovvalgBestemmelse.name();
         this.tilleggBestemmelse = tilleggBestemmelse != null ? tilleggBestemmelse.name() : null;
-        this.lovvalgsland = lovvalgsland.name();
+        this.lovvalgsland = lovvalgsland != null ? lovvalgsland.name() : null;
         this.unntakFraBestemmelse = unntakFraBestemmelse != null ? unntakFraBestemmelse.name() : null;
         this.unntakFraLovvalgsland = unntakFraLovvalgsland != null ? unntakFraLovvalgsland.name() : null;
         this.innvilgelsesResultat = innvilgelsesResultat.name();
         this.trygdeDekning = trygdeDekning != null ? trygdeDekning.name() : null;
-        this.medlemskapstype = medlemskapstype.name();
+        this.medlemskapstype = medlemskapstype != null ? medlemskapstype.name() : null;
     }
 
     @JsonCreator
@@ -54,12 +54,12 @@ public final class LovvalgsperiodeDto {
                 LocalDate.parse(json.get("tomDato"))),
                 konverterLovvalgsBestemmelse(json.get("lovvalgBestemmelse")),
                 konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
-                Landkoder.valueOf(json.get("lovvalgsland")),
+                json.containsKey("lovvalgsland") ? Landkoder.valueOf(json.get("lovvalgsland")) : null,
                 konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
                 enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
                 InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
                 enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
-                Medlemskapstyper.valueOf(json.get("medlemskapstype")));
+                json.containsKey("medlemskapstype") ? Medlemskapstyper.valueOf(json.get("medlemskapstype")) : null);
     }
 
     /**
@@ -90,7 +90,7 @@ public final class LovvalgsperiodeDto {
         Lovvalgsperiode resultat = new Lovvalgsperiode();
         resultat.setFom(periode.getFom());
         resultat.setTom(periode.getTom());
-        resultat.setLovvalgsland(Landkoder.valueOf(lovvalgsland));
+        resultat.setLovvalgsland(enumVerdiEllerNull(Landkoder.class, lovvalgsland));
         resultat.setBestemmelse(konverterer.convertToEntityAttribute(lovvalgBestemmelse));
         resultat.setUnntakFraBestemmelse(konverterer.convertToEntityAttribute(unntakFraBestemmelse));
         resultat.setTilleggsbestemmelse(konverterer.convertToEntityAttribute(tilleggBestemmelse));

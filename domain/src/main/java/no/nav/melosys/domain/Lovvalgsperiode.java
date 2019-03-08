@@ -52,7 +52,7 @@ public class Lovvalgsperiode implements ErPeriode {
     private LocalDate tom;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "lovvalgsland", nullable = false, updatable = false)
+    @Column(name = "lovvalgsland", updatable = false)
     private Landkoder lovvalgsland;
 
     @Column(name = "lovvalg_bestemmelse", nullable = false, updatable = false)
@@ -76,7 +76,7 @@ public class Lovvalgsperiode implements ErPeriode {
     private InnvilgelsesResultat innvilgelsesresultat;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "medlemskapstype", nullable = false, updatable = false)
+    @Column(name = "medlemskapstype", updatable = false)
     private Medlemskapstyper medlemskapstype;
 
     @Enumerated(EnumType.STRING)
