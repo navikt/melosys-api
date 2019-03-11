@@ -119,7 +119,7 @@ public class FagsakService {
                 aktør.setOrgnr(ID);
                 break;
             case MYNDIGHET:
-                aktør.setUtenlandskId(ID); //FIXME
+                aktør.setInstitusjonId(ID);
                 break;
             default:
                 throw new IllegalStateException(aktørsrolle + " støttes ikke.");

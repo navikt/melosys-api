@@ -265,8 +265,8 @@ public class TpsService implements TpsFasade {
             }
         } else if (aktør.getOrgnr() != null) {
             return aktør.getOrgnr();
-        } else if (rolleType == Aktoersroller.MYNDIGHET && aktør.getUtenlandskId() != null) { //FIXME
-            return aktør.getUtenlandskId();
+        } else if (rolleType == Aktoersroller.MYNDIGHET && aktør.getInstitusjonId() != null) {
+            return aktør.getInstitusjonId();
         }else {
             throw new TekniskException("Det finnes ingen ident for " + rolleType + " på sak " + fagsak.getSaksnummer());
         }

@@ -128,8 +128,8 @@ public class BrevDataService {
 
     UtenlandskMyndighet lagMyndighet(Fagsak fagsak) throws TekniskException {
         Aktoer myndighet = fagsak.hentAktørMedRolleType(MYNDIGHET);
-        String[] split = myndighet.getUtenlandskId().split(":");
-        return utenlandskMyndighetRepository.findByLandkode(Landkoder.valueOf(split[0])); //FIXME
+        String[] split = myndighet.getInstitusjonId().split(":");
+        return utenlandskMyndighetRepository.findByLandkode(Landkoder.valueOf(split[0]));
     }
 
     /**
@@ -218,10 +218,12 @@ public class BrevDataService {
             mottaker = new Organisasjon();
             mottaker.setTypeKode(AktoerType.ORGANISASJON);
             mottaker.setId(aktør.getOrgnr());
-        } else if (aktør.getUtenlandskId() != null) { //FIXME
+        } else if (aktør.getInstitusjonId() != null) {
             mottaker = new Organisasjon();
             mottaker.setTypeKode(AktoerType.ORGANISASJON);
-            mottaker.setId(aktør.getUtenlandskId());
+            mottaker.setId(aktør.getInstitusjonId());
+            //FIXME mangler utenlandsk adresse
+            //return mottaker;
         } else {
             throw ingenAktør;
         }

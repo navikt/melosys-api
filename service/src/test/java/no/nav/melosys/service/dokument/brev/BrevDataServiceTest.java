@@ -84,7 +84,7 @@ public class BrevDataServiceTest {
     private Aktoer lagAktoerMyndighet(String institusjonID) {
         Aktoer myndighet = new Aktoer();
         myndighet.setRolle(Aktoersroller.MYNDIGHET);
-        myndighet.setUtenlandskId(institusjonID);
+        myndighet.setInstitusjonId(institusjonID);
         return myndighet;
     }
 
