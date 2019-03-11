@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -25,6 +25,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.service.avklartefakta.AvklarteVirksomheterServiceTest.lagSøknadOgArbeidsforholdOpplysninger;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -35,22 +36,29 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
     @Mock
     RegisterOppslagService registerOppslagService;
 
+    @Mock
+    BehandlingsresultatService behandlingsresultatService;
+
     private BrevDataByggerAnmodningUnntakOgAvslag brevDataByggerAnmodningUnntakOgAvslag;
 
 
     @Before
     public void setUp() {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        brevDataByggerAnmodningUnntakOgAvslag = new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService);
+        brevDataByggerAnmodningUnntakOgAvslag = new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, behandlingsresultatService);
     }
 
     @Test
-    public void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() throws Exception {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
         behandling.setFagsak(fagsak);
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setVilkaarsresultater(new HashSet<>());
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         List<String> selvstendigeForetak = Collections.singletonList("987654321");
         List<String> arbeidsgivereRegister = Collections.singletonList("123456789");
@@ -74,5 +82,6 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
 
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
         assertThat(brevData.hovedvirksomhet.isSelvstendigForetak()).isEqualTo(true);
+        assertThat(brevData.arbeidsland).isEqualByComparingTo(Landkoder.DE);
     }
 }

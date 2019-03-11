@@ -11,6 +11,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Adresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -156,6 +157,10 @@ public class AvklarteVirksomheterServiceTest {
             søknad.selvstendigArbeid.selvstendigForetak.add(selvstendigForetak);
         }
 
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+        arbeidUtland.adresse.landKode = "DE";
+        søknad.arbeidUtland = new ArrayList<>();
+        søknad.arbeidUtland.add(arbeidUtland);
         søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.addAll(ekstraArbeidsgivere);
 
         Saksopplysning saksopplysning = new Saksopplysning();
