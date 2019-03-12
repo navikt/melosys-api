@@ -59,7 +59,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(avklartVirksomhet.yrkesaktivitet.getKode()));
 
         fag.setInngangsvilkårbegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
-        fag.setTrygdemyndighetsland("TRYGDEMYNDIGHETSLAND");
+        fag.setTrygdemyndighetsland("TRYGDEMYNDIGHETSLAND"); // TODO: Fylles inn med mottakerland
 
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
 
