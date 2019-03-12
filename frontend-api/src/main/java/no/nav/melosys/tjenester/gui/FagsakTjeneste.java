@@ -25,8 +25,8 @@ import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
@@ -138,6 +138,8 @@ public class FagsakTjeneste extends RestTjeneste {
                 .findAny()
                 .ifPresent(behandlingDto -> behandlingDto.setRedigerbart(true));
         });
+        //Vi ønsker å ha redigerbare behandlinger først, fordi GUI henter bare ut det første behandlingselementet
+        fagsakDto.getBehandlinger().sort(Comparator.comparing(BehandlingDto::isRedigerbart).reversed());
 
         return fagsakDto;
     }

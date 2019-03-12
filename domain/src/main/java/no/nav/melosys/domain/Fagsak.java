@@ -1,5 +1,6 @@
 package no.nav.melosys.domain;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -94,6 +95,16 @@ public class Fagsak extends RegistreringsInfo {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Returnerer den inaktive behandlingen knyttet til saken eller {@code null} hvis den ikke finnes.
+     */
+    public Behandling getTidligsteInaktiveBehandling() {
+        return getBehandlinger().stream()
+            .filter(b -> b.getStatus().equals(Behandlingsstatus.AVSLUTTET))
+            .min(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
+            .orElse(null);
     }
 
     /**

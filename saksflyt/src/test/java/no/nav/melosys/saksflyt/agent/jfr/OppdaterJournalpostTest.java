@@ -3,17 +3,16 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -29,10 +28,11 @@ public class OppdaterJournalpostTest {
     private JoarkFasade joarkFasade;
 
     private OppdaterJournalpost agent;
+    private FagsakRepository fagsakRepository;
 
     @Before
-    public void setUp() throws Exception {
-        FagsakRepository fagsakRepository = mock(FagsakRepository.class);
+    public void setUp() {
+        fagsakRepository = mock(FagsakRepository.class);
         agent = new OppdaterJournalpost(joarkFasade, fagsakRepository);
     }
 
@@ -62,5 +62,25 @@ public class OppdaterJournalpostTest {
         verify(joarkFasade, times(1)).utledJournalfoeringsbehov(any());
         verify(joarkFasade, times(1)).oppdaterJounalpost(any(), any(), any(), any(), any(), any(), any(), eq(true));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST);
+    }
+
+    @Test
+    public void utfoerSteg_hentGsakFraEksisterendeSakHvisEndretPeriode() throws MelosysException {
+        Fagsak fagsak = new Fagsak();
+        long gsakSaksnummer = 10L;
+        String saksnummer = "saksnummer";
+        fagsak.setGsakSaksnummer(gsakSaksnummer);
+        doReturn(fagsak).when(fagsakRepository).findBySaksnummer(saksnummer);
+        Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.JFR_NY_BEHANDLING);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
+        p.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+        agent.utførSteg(p);
+
+        ArgumentCaptor<Long> gsakSaksnummerCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(joarkFasade).utledJournalfoeringsbehov(any());
+        verify(joarkFasade).oppdaterJounalpost(any(), any(), gsakSaksnummerCaptor.capture(), any(), any(), any(), any(), eq(false));
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST);
+        assertThat(gsakSaksnummerCaptor.getValue()).isEqualTo(gsakSaksnummer);
     }
 }
