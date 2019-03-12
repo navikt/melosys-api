@@ -157,7 +157,7 @@ public class AvklarMyndighetTest {
         assertThat(landkode).isEqualTo(Landkoder.SE);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void avklarLand_11_4_1_uten_11_3A__brukerFlaggLand() throws FunksjonellException, TekniskException {
         Behandling behandling = lagBehandling(new Fagsak());
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
@@ -168,11 +168,11 @@ public class AvklarMyndighetTest {
 
         Avklartefakta avklartLand = new Avklartefakta();
         avklartLand.setFakta("ES");
-        //FIXME when(avklartefaktaService.hentAvklarteFakta(anyLong(), eq(Avklartefaktatype.FLAGGLAND))).thenReturn(avklartLand);
+        when(avklartefaktaService.hentAvklarteFakta(anyLong(), eq(Avklartefaktatype.FLAGGLAND))).thenReturn(avklartLand);
 
         Landkoder landkode = steg.avklarLand(behandling, behandlingsresultat);
 
-        assertThat(landkode).isEqualTo("trenger FLAGGLAND");
+        assertThat(landkode).isEqualTo(Landkoder.ES);
     }
 
     @Test

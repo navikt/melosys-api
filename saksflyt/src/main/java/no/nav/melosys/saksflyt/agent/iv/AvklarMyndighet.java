@@ -112,8 +112,7 @@ public class AvklarMyndighet extends AbstraktStegBehandler {
                 return Landkoder.valueOf(avklarteFaktaService.hentAvklarteFakta(behandlingsresultatID, Avklartefaktatype.BOSTEDSLAND).getFakta());
             } else {
                 // Bruker FLAGGLAND
-                //return Landkoder.valueOf(avklarteFaktaService.hentAvklarteFakta(behandlingsresultatID, Avklartefaktatype.FLAGGLAND).getFakta());
-                return Landkoder.valueOf("trenger FLAGGLAND");
+                return Landkoder.valueOf(avklarteFaktaService.hentAvklarteFakta(behandlingsresultatID, Avklartefaktatype.FLAGGLAND).getFakta());
             }
         }
 
