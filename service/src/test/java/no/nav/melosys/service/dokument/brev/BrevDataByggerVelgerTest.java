@@ -7,10 +7,7 @@ import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntakOgAvslag;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
+import no.nav.melosys.service.dokument.brev.bygger.*;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,8 +46,8 @@ public class BrevDataByggerVelgerTest {
     }
 
     @Test
-    public final void hent_InnvilelsesYrksaktiv_girVedleggBygger() {
-        testHent(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, BrevDataByggerVedlegg.class);
+    public final void hent_InnvilgelsesYrksaktiv_girInnvilgelseBygger() {
+        testHent(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, BrevDataByggerInnvilgelse.class);
     }
 
     @Test
