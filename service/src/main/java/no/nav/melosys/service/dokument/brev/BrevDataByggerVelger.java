@@ -76,10 +76,11 @@ public class BrevDataByggerVelger {
             }
             case INNVILGELSE_YRKESAKTIV: {
                 BrevDataByggerA1 a1Bygger =
-                    new BrevDataByggerA1(avklartefaktaService,
-                        avklarteVirksomheterService,
-                        kodeverkService);
-                return new BrevDataByggerVedlegg(a1Bygger, brevbestillingDto);
+                    new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService);
+                return new BrevDataByggerInnvilgelse(a1Bygger,
+                                                    avklartefaktaService,
+                                                    lovvalgsperiodeService,
+                                                    brevbestillingDto);
             }
             case MELDING_HENLAGT_SAK: {
                 return new BrevDataByggerHenleggelse(joarkService, brevbestillingDto);

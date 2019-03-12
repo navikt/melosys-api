@@ -103,10 +103,10 @@ public abstract class AbstraktDokumentDataBygger {
         return lovvalgsperioder;
     }
 
-    protected Lovvalgsperiode hentLovvalgsperiode() throws FunksjonellException {
-        Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(behandling.getId());
+    protected Lovvalgsperiode hentLovvalgsperiode() throws FunksjonellException, TekniskException {
+        Collection<Lovvalgsperiode> lovvalgsperioder = hentLovvalgsperioder();
 
-        if (lovvalgsperioder == null || lovvalgsperioder.size() != 1) {
+        if (lovvalgsperioder.size() > 1) {
             throw new FunksjonellException("Forventer kun en lovvalgsperiode!");
         }
 

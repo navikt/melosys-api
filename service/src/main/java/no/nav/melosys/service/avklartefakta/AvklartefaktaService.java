@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
@@ -59,10 +60,16 @@ public class AvklartefaktaService {
         Optional<Avklartefakta> avklartefaktaOpt =
                 avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.YRKESGRUPPE);
 
-        Avklartefakta avklartefakta = avklartefaktaOpt.orElseThrow(() -> new TekniskException("Finner ingen avklartefakta for yrkesgruppe"));
+        Avklartefakta avklartefakta = avklartefaktaOpt.orElseThrow(() -> new TekniskException("Finner ingen avklartefakta for YRKESGRUPPE"));
         AvklartYrkesgruppeType aktivitetType = AvklartYrkesgruppeType.valueOf(avklartefakta.getFakta());
 
         return aktivitetType.tilYrkesgruppeType();
+    }
+
+    public Optional<AvklartInnstallasjonsType>  hentInnstallasjonsType(long behandlingsid) throws TekniskException {
+        Optional<Avklartefakta> avklartefaktaOpt =
+            avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.SOKKEL_ELLER_SKIP);
+        return avklartefaktaOpt.map(af -> AvklartInnstallasjonsType.valueOf(af.getFakta()));
     }
 
     @Transactional
