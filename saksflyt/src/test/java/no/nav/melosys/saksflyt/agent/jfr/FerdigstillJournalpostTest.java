@@ -68,13 +68,13 @@ public class FerdigstillJournalpostTest {
     @Test
     public void utførSteg_typeJfrKnyttOgEndretPeriode_tilStegJfrReplikerBehandling() throws MelosysException {
         String journalpostID = "Journal_ID";
-        Prosessinstans p = nyProsessinstans(ProsessType.JFR_KNYTT, journalpostID);
+        Prosessinstans p = nyProsessinstans(ProsessType.JFR_NY_BEHANDLING, journalpostID);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
 
         agent.utførSteg(p);
 
         verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_REPLIKER_BEHANDLING);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.REPLIKER_BEHANDLING);
     }
 
     @Test

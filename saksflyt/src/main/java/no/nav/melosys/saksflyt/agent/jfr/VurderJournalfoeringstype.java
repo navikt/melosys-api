@@ -68,7 +68,7 @@ public class VurderJournalfoeringstype extends AbstraktStegBehandler {
                 prosessinstans.setSteg(JFR_AKTØR_ID);
                 break;
             case JFR_KNYTT:
-                knyttEllerNyBehandlingEllerReplikerBehandling(prosessinstans);
+                knyttDokumentTilEksisterendeBehandlingEllerOpprettNyBehandling(prosessinstans);
                 break;
             default:
                 String feilmelding = "Ukjent prosesstype: " + prosessinstans.getType();
@@ -81,24 +81,19 @@ public class VurderJournalfoeringstype extends AbstraktStegBehandler {
         log.debug("Neste steg blir: {}", prosessinstans.getSteg());
     }
 
-    private void knyttEllerNyBehandlingEllerReplikerBehandling(Prosessinstans prosessinstans) throws TekniskException {
+    private void knyttDokumentTilEksisterendeBehandlingEllerOpprettNyBehandling(Prosessinstans prosessinstans) throws TekniskException {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         Behandlingstyper nyBehandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
 
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
         Behandling aktivBehandling = fagsak.getAktivBehandling();
-        Behandling tidligsteInaktiveBehandling = fagsak.getTidligsteInaktiveBehandling();
 
         if (nyBehandlingstype != null && nyBehandlingstype.equals(Behandlingstyper.ENDRET_PERIODE)) {
-            if (aktivBehandling == null && tidligsteInaktiveBehandling != null) {
-                prosessinstans.setSteg(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
-            }
-            else {
-                String feilmelding = "Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som har en aktiv behandling eller mangler en inaktiv behandling";
-                log.error("{}: {}", prosessinstans.getId(), feilmelding);
-                håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);            }
+            // Repliker en tidligere behandling
+            prosessinstans.setType(ProsessType.JFR_NY_BEHANDLING);
+            prosessinstans.setSteg(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
         }
-        else if (aktivBehandling == null && nyBehandlingstype != null) {
+        else if (nyBehandlingstype != null && aktivBehandling == null) {
             // Ny behandling trenges.
             prosessinstans.setType(ProsessType.JFR_NY_BEHANDLING);
             prosessinstans.setSteg(ProsessSteg.JFR_AKTØR_ID);

@@ -21,14 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
-import static no.nav.melosys.domain.ProsessSteg.JFR_REPLIKER_BEHANDLING;
+import static no.nav.melosys.domain.ProsessSteg.REPLIKER_BEHANDLING;
 
 
 /**
  * Ferdigstiller en journalpost i Joark.
  *
  * Transisjoner:
- *     JFR_REPLIKER_BEHANDLING -> EN NY FLOTT GREIE eller FEILET_MASKINELT hvis feil
+ *     REPLIKER_BEHANDLING -> EN NY FLOTT GREIE eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class ReplikerBehandling extends AbstraktStegBehandler {
@@ -47,7 +47,7 @@ public class ReplikerBehandling extends AbstraktStegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return JFR_REPLIKER_BEHANDLING;
+        return REPLIKER_BEHANDLING;
     }
 
     @Override
@@ -63,9 +63,9 @@ public class ReplikerBehandling extends AbstraktStegBehandler {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
 
         Behandling behandling;
-        if (fagsak == null || fagsak.getTidligsteInaktiveBehandling() != null) {
+        if (fagsak.getTidligsteInaktiveBehandling() != null) {
             try {
-                behandling = behandlingService.replikerBehandlingOgBehandlingsresultat(fagsak.getTidligsteInaktiveBehandling(), Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.ENDRET_PERIODE);
+                behandling = behandlingService.replikerBehandlingOgBehandlingsresultat(fagsak.getTidligsteInaktiveBehandling(), Behandlingsstatus.OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
 
             } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
                 throw new TekniskException("Klarte ikke replikere tidligste inaktive behandling for fagsak: " + fagsak.getSaksnummer(), e);

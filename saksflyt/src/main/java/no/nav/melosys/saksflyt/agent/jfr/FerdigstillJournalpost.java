@@ -31,7 +31,7 @@ import static no.nav.melosys.domain.ProsessSteg.*;
  * 2) ProsessType.JFR_KNYTT:
  *     JFR_FERDIGSTILL_JOURNALPOST -> JFR_SETT_VURDER_DOKUMENT eller FEILET_MASKINELT hvis feil
  * 3) ProsessType.JFR_KNYTT && Behandlingstyper.ENDRET_PERIODE:
- *     JFR_FERDIGSTILL_JOURNALPOST -> JFR_REPLIKER_BEHANDLING eller FEILET_MASKINELT hvis feil
+ *     JFR_FERDIGSTILL_JOURNALPOST -> REPLIKER_BEHANDLING eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class FerdigstillJournalpost extends AbstraktStegBehandler {
@@ -67,10 +67,10 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
 
         joarkFasade.ferdigstillJournalføring(journalpostID);
 
-        if (type == ProsessType.JFR_NY_SAK || type == ProsessType.JFR_NY_BEHANDLING) {
+        if (type == ProsessType.JFR_NY_BEHANDLING && behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
+            prosessinstans.setSteg(REPLIKER_BEHANDLING);
+        } else if (type == ProsessType.JFR_NY_SAK || type == ProsessType.JFR_NY_BEHANDLING) {
             prosessinstans.setSteg(JFR_HENT_PERS_OPPL);
-        } else if (type == ProsessType.JFR_KNYTT && behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
-            prosessinstans.setSteg(JFR_REPLIKER_BEHANDLING);
         } else if (type == ProsessType.JFR_KNYTT) {
             prosessinstans.setSteg(JFR_SETT_VURDER_DOKUMENT);
         } else {

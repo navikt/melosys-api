@@ -88,7 +88,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         }
 
         if (behandlingstype == Behandlingstyper.SOEKNAD || behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
-            oppgave.setBehandlingstype(Behandlingstyper.SOEKNAD);
+            oppgave.setBehandlingstype(behandlingstype);
             oppgave.setOppgavetype(Oppgavetyper.BEH_SAK);
         } else {
             String feilmelding = "Behandlingstype " + behandlingstype + " er ikke støttet";
@@ -104,12 +104,12 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
         String oppgaveId = gsakFasade.opprettOppgave(oppgave);
 
-        if (prosessinstans.getType() == ProsessType.JFR_NY_SAK || behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
+        if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
             prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
             prosessinstans.setSteg(null);
         } else {
-            String feilmelding = "ProsessType " + prosessinstans.getType() + " er ikke støttet med mindre behandlingstypen er ENDRET_PERIODE";
+            String feilmelding = "ProsessType " + prosessinstans.getType() + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
             return;

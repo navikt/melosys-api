@@ -25,7 +25,6 @@ public class VurderJournalfoeringstypeTest {
 
     private final static String SAKSNUMMER_UTEN_BEHANDLING = "MELTEST-1";
     private final static String SAKSNUMMER_MED_AKTIV_BEHANDLING = "MELTEST-2";
-    private final static String SAKSNUMMER_MED_AKTIV_BEHANDLING_OG_INAKTIV_BEHANDLING = "MELTEST-3";
     private final static String SAKSNUMMER_UTEN_AKTIV_BEHANDLING_OG_MED_INAKTIV_BEHANDLING = "MELTEST-4";
 
     @Rule
@@ -52,7 +51,6 @@ public class VurderJournalfoeringstypeTest {
 
         when(fagsakRepository.findBySaksnummer(SAKSNUMMER_UTEN_BEHANDLING)).thenReturn(fagsak);
         when(fagsakRepository.findBySaksnummer(SAKSNUMMER_MED_AKTIV_BEHANDLING)).thenReturn(fagsakMedAktivBehandling);
-        when(fagsakRepository.findBySaksnummer(SAKSNUMMER_MED_AKTIV_BEHANDLING_OG_INAKTIV_BEHANDLING)).thenReturn(fagsakMedInaktivOgAktivBehandling);
         when(fagsakRepository.findBySaksnummer(SAKSNUMMER_UTEN_AKTIV_BEHANDLING_OG_MED_INAKTIV_BEHANDLING)).thenReturn(fagsakMedInaktivBehandling);
     }
 
@@ -102,42 +100,6 @@ public class VurderJournalfoeringstypeTest {
         agent.utførSteg(p);
         assertThat(p.getType()).isEqualTo(ProsessType.JFR_NY_BEHANDLING);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
-    }
-
-    @Test
-    public void knyttTilFagsakMedEndretPeriodeUtenAktivBehandlingOgUtenInaktivBehandling_feiler() {
-        Prosessinstans p = new Prosessinstans();
-        p.setType(ProsessType.JFR_KNYTT);
-        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
-        agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        assertThat(p.getHendelser()).isNotEmpty();
-        assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som har en aktiv behandling eller mangler en inaktiv behandling");
-    }
-
-    @Test
-    public void knyttTilFagsakMedEndretPeriodeMedAktivBehandling_feiler() {
-        Prosessinstans p = new Prosessinstans();
-        p.setType(ProsessType.JFR_KNYTT);
-        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_AKTIV_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
-        agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        assertThat(p.getHendelser()).isNotEmpty();
-        assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som har en aktiv behandling eller mangler en inaktiv behandling");
-    }
-
-    @Test
-    public void knyttTilFagsakMedEndretPeriodeMedInaktivOgMedAktivBehandling_feiler() {
-        Prosessinstans p = new Prosessinstans();
-        p.setType(ProsessType.JFR_KNYTT);
-        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_AKTIV_BEHANDLING_OG_INAKTIV_BEHANDLING);
-        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
-        agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
-        assertThat(p.getHendelser()).isNotEmpty();
-        assertThat(p.getHendelser().get(0).getMelding()).isEqualTo("Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som har en aktiv behandling eller mangler en inaktiv behandling");
     }
 
     @Test

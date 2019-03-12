@@ -8,8 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
@@ -127,7 +125,7 @@ public class BehandlingService {
 
     public Behandling replikerBehandlingOgBehandlingsresultat(Behandling tidligsteInaktiveBehandling, Behandlingsstatus behandlingsstatus, Behandlingstyper behandlingstype) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IkkeFunnetException, TekniskException {
         Behandling behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingsstatus, behandlingstype);
-        replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
+        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
         return behandlingsreplika;
     }
 
@@ -147,62 +145,5 @@ public class BehandlingService {
         }
         behandlingRepository.save(behandlingsreplika);
         return behandlingsreplika;
-    }
-
-    @Transactional
-    void replikerBehandlingsresultat(Behandling tidligsteInaktiveBehandling, Behandling behandlingsreplika) throws IkkeFunnetException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, TekniskException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.getId());
-
-        Behandlingsresultat behandlingsresultatsreplika = (Behandlingsresultat) BeanUtils.cloneBean(behandlingsresultat);
-        behandlingsresultatsreplika.setBehandling(behandlingsreplika);
-        behandlingsresultatsreplika.setId(null);
-
-        replikerAvklartefakta(behandlingsresultat, behandlingsresultatsreplika);
-        replikerLovvalgsperioder(behandlingsresultat, behandlingsresultatsreplika);
-        replikerVilkaarsresultat(behandlingsresultat, behandlingsresultatsreplika);
-
-        behandlingsresultatRepository.save(behandlingsresultatsreplika);
-    }
-
-    private void replikerVilkaarsresultat(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
-        behandlingsresultatsreplika.setVilkaarsresultater(new HashSet<>());
-        for (Vilkaarsresultat vilkaarsresultatOrig : behandlingsresultat.getVilkaarsresultater()) {
-            Vilkaarsresultat vilkaarsresultatreplika = (Vilkaarsresultat) BeanUtils.cloneBean(vilkaarsresultatOrig);
-            vilkaarsresultatreplika.setBehandlingsresultat(behandlingsresultatsreplika);
-            vilkaarsresultatreplika.setId(null);
-            vilkaarsresultatreplika.setBegrunnelser(new HashSet<>());
-            for (VilkaarBegrunnelse vilkaarBegrunnelseOrig : vilkaarsresultatOrig.getBegrunnelser()) {
-                VilkaarBegrunnelse vilkaarBegrunnelsesreplika = (VilkaarBegrunnelse) BeanUtils.cloneBean(vilkaarBegrunnelseOrig);
-                vilkaarBegrunnelsesreplika.setId(null);
-                vilkaarsresultatreplika.getBegrunnelser().add(vilkaarBegrunnelsesreplika);
-            }
-            behandlingsresultatsreplika.getVilkaarsresultater().add(vilkaarsresultatreplika);
-        }
-    }
-
-    private void replikerLovvalgsperioder(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
-        behandlingsresultatsreplika.setLovvalgsperioder(new HashSet<>());
-        for (Lovvalgsperiode lovvalgsperiodeOrig : behandlingsresultat.getLovvalgsperioder()) {
-            Lovvalgsperiode lovvalgsperiodereplika = (Lovvalgsperiode) BeanUtils.cloneBean(lovvalgsperiodeOrig);
-            lovvalgsperiodereplika.setBehandlingsresultat(behandlingsresultatsreplika);
-            lovvalgsperiodereplika.setId(null);
-            behandlingsresultatsreplika.getLovvalgsperioder().add(lovvalgsperiodereplika);
-        }
-    }
-
-    private void replikerAvklartefakta(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
-        behandlingsresultatsreplika.setAvklartefakta(new HashSet<>());
-        for (Avklartefakta avklartefaktaOrig : behandlingsresultat.getAvklartefakta()) {
-            Avklartefakta avklartefaktareplika = (Avklartefakta) BeanUtils.cloneBean(avklartefaktaOrig);
-            avklartefaktareplika.setBehandlingsresultat(behandlingsresultatsreplika);
-            avklartefaktareplika.setId(null);
-            avklartefaktareplika.setRegistreringer(new HashSet<>());
-            for (AvklartefaktaRegistrering avklartefaktaRegistreringOrig : avklartefaktaOrig.getRegistreringer()) {
-                AvklartefaktaRegistrering avklartefaktaRegistreringreplika = (AvklartefaktaRegistrering) BeanUtils.cloneBean(avklartefaktaRegistreringOrig);
-                avklartefaktaRegistreringreplika.setId(null);
-                avklartefaktareplika.getRegistreringer().add(avklartefaktaRegistreringreplika);
-            }
-            behandlingsresultatsreplika.getAvklartefakta().add(avklartefaktareplika);
-        }
     }
 }

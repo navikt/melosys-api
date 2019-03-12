@@ -66,7 +66,7 @@ public class ReplikerBehandlingTest {
         fagsak.getBehandlinger().add(behandling);
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(11L);
-        doReturn(replikertBehandling).when(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling,  Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.ENDRET_PERIODE);
+        doReturn(replikertBehandling).when(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling,  Behandlingsstatus.OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
 
         agent.utfør(p);
 

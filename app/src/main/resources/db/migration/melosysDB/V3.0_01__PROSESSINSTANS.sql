@@ -40,6 +40,7 @@ CREATE TABLE prosess_steg (
 
 --Logisk rekkefølge
 INSERT INTO prosess_steg (kode, navn) VALUES ('GSAK_OPPRETT_OPPGAVE', 'Oppretter oppgave i GSAK');
+INSERT INTO prosess_steg (kode, navn) VALUES ('REPLIKER_BEHANDLING', 'Replikerer behandling');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('MOT_VURDER_AUTOMATISK_JFR', 'Vurder om journalføring kan skje automatisk');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_VALIDERING', 'Grunnleggende validering');
@@ -54,7 +55,6 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_FERDIGSTILL_JOURNALPOST', 'Fe
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_SETT_VURDER_DOKUMENT', 'Setter status til VURDER_DOKUMENT');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_HENT_PERS_OPPL', 'Hent personopplysninger fra TPS');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_VURDER_INNGANGSVILKÅR', 'Vurderer inngangsvilkår');
-INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_REPLIKER_BEHANDLING', 'Replikerer behandling');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_ARBF_OPPL', 'Hent arbeidsforholdopplysninger fra AAREG');
 INSERT INTO prosess_steg (kode, navn) VALUES ('HENT_INNT_OPPL', 'Hent inntektopplysninger fra INNTK');

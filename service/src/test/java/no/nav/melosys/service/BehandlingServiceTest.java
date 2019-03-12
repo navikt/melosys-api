@@ -2,11 +2,14 @@ package no.nav.melosys.service;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -18,7 +21,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -156,10 +158,10 @@ public class BehandlingServiceTest {
     @Test
     public void replikerBehandling_replikererObjekterOgCollections() throws NoSuchMethodException, TekniskException, InstantiationException, IkkeFunnetException, IllegalAccessException, InvocationTargetException {
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
-        Behandling replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.ENDRET_PERIODE);
+        Behandling replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
 
         assertThat(replikertBehandling.getId()).isNull();
-        assertThat(replikertBehandling.getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
+        assertThat(replikertBehandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
         assertThat(replikertBehandling.getDokumentasjonSvarfristDato()).isEqualTo(tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato());
         assertThat(replikertBehandling.getInitierendeJournalpostId()).isEqualTo(tidligsteInaktiveBehandling.getInitierendeJournalpostId());
 
@@ -195,105 +197,5 @@ public class BehandlingServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(665L);
         return behandling;
-    }
-
-    private Behandlingsresultat opprettTomtBehandlingsresultatMedId() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(667L);
-        return behandlingsresultat;
-    }
-
-    @Test
-    public void replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections() throws NoSuchMethodException, TekniskException, InstantiationException, IkkeFunnetException, IllegalAccessException, InvocationTargetException {
-        Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
-        Behandlingsresultat behandlingsresultat = opprettBehandlingsresultatMedData();
-
-        Avklartefakta avklartefakta = opprettAvklartefakta();
-        behandlingsresultat.getAvklartefakta().add(avklartefakta);
-
-        Vilkaarsresultat vilkaarsresultat = opprettVilkaarsresultat();
-        behandlingsresultat.getVilkaarsresultater().add(vilkaarsresultat);
-
-        Lovvalgsperiode lovvalgsperiode = opprettLovvalgsperiode();
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-
-        doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(tidligsteInaktiveBehandling.getId());
-
-        Behandling behandlingsreplika = behandlingService.replikerBehandlingOgBehandlingsresultat(tidligsteInaktiveBehandling, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.ENDRET_PERIODE);
-
-        ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
-        verify(behandlingsresultatRepository).save(captor.capture());
-        Behandlingsresultat behandlingsresultatreplika = captor.getValue();
-
-        assertThat(behandlingsresultatreplika.getId()).isNull();
-        assertThat(behandlingsresultatreplika.getBehandling()).isEqualTo(behandlingsreplika);
-        assertThat(behandlingsresultatreplika.getBehandlingsmåte()).isEqualTo(behandlingsresultat.getBehandlingsmåte());
-        assertThat(behandlingsresultatreplika.getType()).isEqualTo(behandlingsresultat.getType());
-        assertThat(behandlingsresultatreplika.getVedtaksdato()).isEqualTo(behandlingsresultat.getVedtaksdato());
-
-        assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getId() == null);
-        assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getBehandlingsresultat() == behandlingsresultatreplika);
-        assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
-        assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getUnntakFraLovvalgsland().equals(Landkoder.BE));
-
-        assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getId() == null);
-        assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
-        assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getFakta().equals("fakta"));
-        assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getType().equals(Avklartefaktatype.ARBEIDSLAND));
-
-        assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getId() == null);
-        assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getBehandlingsresultat() == behandlingsresultatreplika);
-        assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getBegrunnelseFritekst().equals("fritekst"));
-        VilkaarBegrunnelse vilkaarBegrunnelse = behandlingsresultatreplika.getVilkaarsresultater().stream().findFirst().get().getBegrunnelser().stream().findFirst().get();
-        assertThat(vilkaarBegrunnelse.getId()).isNull();
-        assertThat(vilkaarBegrunnelse.getKode()).isEqualTo("kode");
-    }
-
-    private Lovvalgsperiode opprettLovvalgsperiode() {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setId(32L);
-        lovvalgsperiode.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
-        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
-        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.BE);
-        return lovvalgsperiode;
-    }
-
-    private Avklartefakta opprettAvklartefakta() {
-        Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setId(32L);
-        avklartefakta.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
-        avklartefakta.setFakta("fakta");
-        avklartefakta.setType(Avklartefaktatype.ARBEIDSLAND);
-        return avklartefakta;
-    }
-
-    private Vilkaarsresultat opprettVilkaarsresultat() {
-        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-        vilkaarsresultat.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
-        vilkaarsresultat.setId(32L);
-        vilkaarsresultat.setBegrunnelseFritekst("fritekst");
-
-        HashSet<VilkaarBegrunnelse> begrunnelser = new HashSet<>();
-        VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
-        vilkaarBegrunnelse.setId(2222L);
-        vilkaarBegrunnelse.setKode("kode");
-        begrunnelser.add(vilkaarBegrunnelse);
-        vilkaarsresultat.setBegrunnelser(begrunnelser);
-        return vilkaarsresultat;
-    }
-
-    private Behandlingsresultat opprettBehandlingsresultatMedData() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(30L);
-        behandlingsresultat.setBehandling(opprettTomBehandlingMedId());
-        behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.MANUELT);
-        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        behandlingsresultat.setVedtaksdato(Instant.parse("2002-02-11T09:37:30Z"));
-
-        behandlingsresultat.setAvklartefakta(new LinkedHashSet<>());
-        behandlingsresultat.setLovvalgsperioder(new LinkedHashSet<>());
-        behandlingsresultat.setVilkaarsresultater(new LinkedHashSet<>());
-
-        return behandlingsresultat;
     }
 }

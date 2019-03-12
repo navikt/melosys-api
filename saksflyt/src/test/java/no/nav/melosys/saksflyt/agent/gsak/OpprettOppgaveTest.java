@@ -75,7 +75,7 @@ public class OpprettOppgaveTest {
     }
 
     @Test
-    public void utfoerSteg_endretPeriode_sendForvaltningsmelding() throws FunksjonellException, TekniskException {
+    public void utfoerSteg_endretPeriode_ikkeSendForvaltningsmelding() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);
@@ -89,7 +89,7 @@ public class OpprettOppgaveTest {
         p.setBehandling(behandling);
 
         p.getBehandling().setType(Behandlingstyper.ENDRET_PERIODE);
-        p.setType(ProsessType.JFR_KNYTT);
+        p.setType(ProsessType.JFR_NY_BEHANDLING);
 
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
@@ -99,7 +99,7 @@ public class OpprettOppgaveTest {
 
         assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
         assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(null);
-        assertThat(p.getSteg()).isEqualTo(SEND_FORVALTNINGSMELDING);
+        assertThat(p.getSteg()).isEqualTo(null);
     }
 
     @Test

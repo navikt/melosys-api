@@ -144,8 +144,7 @@ public class Saksopplysning {
             return false;
         }
         Saksopplysning that = (Saksopplysning) o;
-
-        if (this.id != null && that.id != null && this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
+        if (this.id != null && that.id != null) { // Begge entiteter er persistert. True hvis samme rad i db.
             return this.id.equals(that.getId());
         }
         return Objects.equals(this.behandling, that.behandling)
