@@ -3,11 +3,9 @@ package no.nav.melosys.saksflyt.agent.jfr;
 import java.util.List;
 import java.util.Map;
 
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -68,8 +66,9 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
             medDokumentkategori = true;
         }
 
+        Behandlingstyper behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
         Long gsakSakID = null;
-        if (prosessinstans.getType() == ProsessType.JFR_KNYTT) {
+        if (prosessinstans.getType() == ProsessType.JFR_KNYTT || Behandlingstyper.ENDRET_PERIODE.equals(behandlingstype)) {
             Fagsak sak = fagsakRepo.findBySaksnummer(prosessinstans.getData(SAKSNUMMER));
             if (sak != null) {
                 gsakSakID = sak.getGsakSaksnummer();
