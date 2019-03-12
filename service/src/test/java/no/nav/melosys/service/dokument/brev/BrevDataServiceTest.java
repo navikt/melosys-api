@@ -68,6 +68,9 @@ public class BrevDataServiceTest {
         BrevDataVedlegg brevData = new BrevDataVedlegg("Z123456");
         brevData.mottaker = Aktoersroller.MYNDIGHET;
         UtenlandskMyndighet myndighet = new UtenlandskMyndighet();
+        myndighet.navn = "navn";
+        myndighet.gateadresse = "gateadresse 123";
+        myndighet.land = "HR";
         when(utenlandskMyndighetRepository.findByLandkode(Landkoder.HR)).thenReturn(myndighet);
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(ATTEST_A1, behandling, brevData);
@@ -96,7 +99,7 @@ public class BrevDataServiceTest {
         tyskMyndighet.institusjonskode = "TEST";
         when(utenlandskMyndighetRepository.findByLandkode(Landkoder.DE)).thenReturn(tyskMyndighet);
 
-        UtenlandskMyndighet utenlandskMyndighet = service.lagMyndighet(fagsak);
+        UtenlandskMyndighet utenlandskMyndighet = service.hentMyndighetFraSak(fagsak);
 
         assertThat(utenlandskMyndighet.institusjonskode).isEqualTo(tyskMyndighet.institusjonskode);
     }

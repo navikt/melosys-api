@@ -7,6 +7,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.BostedsadresseType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.PersonnavnType;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -33,7 +34,6 @@ public final class BrevDataUtils {
         navEnhet.setEnhetsNavn(PLASSHOLDER_TEKST);
         return navEnhet;
     }
-
 
     public static LovvalgsperiodeType lagLovvalgsperiodeType(Lovvalgsperiode lovvalgsperiode)  {
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
@@ -65,6 +65,13 @@ public final class BrevDataUtils {
         adresse.setPoststed(PLASSHOLDER_TEKST);
         adresse.setLand(PLASSHOLDER_TEKST);
         return adresse;
+    }
+
+    public static UtenlandskPostadresse lagUtendlanskAdresse(UtenlandskMyndighet utenlandskMyndighet) {
+        return UtenlandskPostadresse.builder().withAdresselinje1(utenlandskMyndighet.gateadresse)
+            .withAdresselinje2(utenlandskMyndighet.postnummer + " " + utenlandskMyndighet.poststed)
+            .withAdresselinje3("")
+            .withLand(utenlandskMyndighet.land).build();
     }
 
     private static <T extends AdresseEnhet> T lagAdresse(T adresse, NorskPostadresse postadresse) {

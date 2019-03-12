@@ -121,12 +121,12 @@ public class BrevDataService {
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
         metadata.fagområde = Tema.MED.getKode();
         metadata.saksbehandler = brevData.saksbehandler;
-        metadata.utenlandskMyndighet = (brevData.mottaker == Aktoersroller.MYNDIGHET) ? lagMyndighet(fagsak) : null;
+        metadata.utenlandskMyndighet = (brevData.mottaker == Aktoersroller.MYNDIGHET) ? hentMyndighetFraSak(fagsak) : null;
 
         return metadata;
     }
 
-    UtenlandskMyndighet lagMyndighet(Fagsak fagsak) throws TekniskException {
+    UtenlandskMyndighet hentMyndighetFraSak(Fagsak fagsak) throws TekniskException {
         Aktoer myndighet = fagsak.hentAktørMedRolleType(MYNDIGHET);
         String[] split = myndighet.getInstitusjonId().split(":");
         return utenlandskMyndighetRepository.findByLandkode(Landkoder.valueOf(split[0]));
@@ -222,8 +222,13 @@ public class BrevDataService {
             mottaker = new Organisasjon();
             mottaker.setTypeKode(AktoerType.ORGANISASJON);
             mottaker.setId(aktør.getInstitusjonId());
-            //FIXME mangler utenlandsk adresse
-            //return mottaker;
+
+            UtenlandskMyndighet utenlandskMyndighet = hentMyndighetFraSak(behandling.getFagsak());
+            mottaker.setNavn(utenlandskMyndighet.navn);
+            mottaker.setKortNavn(PLASSHOLDER_TEKST);
+            mottaker.setSpraakkode(Spraakkode.NB);
+            mottaker.setMottakeradresse(lagUtendlanskAdresse(utenlandskMyndighet));
+            return mottaker;
         } else {
             throw ingenAktør;
         }
