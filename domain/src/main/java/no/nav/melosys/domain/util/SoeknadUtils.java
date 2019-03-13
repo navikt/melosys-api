@@ -9,6 +9,7 @@ import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.FunksjonellException;
 
 /**
  * Metoder for å trekke ut opplysninger fra et {@code SoeknadDokument}.
@@ -17,6 +18,17 @@ public final class SoeknadUtils {
 
     private SoeknadUtils() {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Henter arbeidsland (landkode).
+     */
+    public static String hentArbeidsLand(SoeknadDokument soeknad) throws FunksjonellException {
+        if (soeknad.arbeidUtland.isEmpty()) {
+            throw new FunksjonellException("ArbeidUtland finnes ikke.");
+        } else {
+            return soeknad.arbeidUtland.get(0).adresse.landKode;
+        }
     }
 
     /**

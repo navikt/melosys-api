@@ -8,23 +8,21 @@ import java.util.Optional;
 import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
 import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon;
 import no.nav.dok.brevdata.felles.v1.navfelles.Person;
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
-import no.nav.melosys.integrasjon.doksys.MottakerType;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.w3c.dom.Element;
 
@@ -38,23 +36,72 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class BrevDataServiceTest {
 
+    @Mock
+    private TpsService tpsService;
+
+    @Mock
+    BehandlingsresultatRepository behandlingsresultatRepository;
+
+    @Mock
+    UtenlandskMyndighetRepository utenlandskMyndighetRepository;
+
     private BrevDataService service;
 
     private static final String FNR = "Fnr";
     private static final String ORGNR = "Org-Nr";
     private static final String REPRESENTANT = "Representant";
 
-    private TpsFasade tpsFasade;
-
     @Before
     public void setUp() throws IkkeFunnetException, TekniskException {
-        BehandlingsresultatRepository behandlingsresultatRepository = mock(BehandlingsresultatRepository.class);
-        tpsFasade = mock(TpsService.class);
-        service = spy(new BrevDataService(tpsFasade, behandlingsresultatRepository));
+        service = spy(new BrevDataService(tpsService, behandlingsresultatRepository, utenlandskMyndighetRepository));
 
-        when(tpsFasade.hentFagsakIdentMedRolleType(any(), any())).thenCallRealMethod();
-        when(tpsFasade.hentIdentForAktørId(any())).thenReturn(FNR);
+        when(tpsService.hentFagsakIdentMedRolleType(any(), any())).thenCallRealMethod();
+        when(tpsService.hentIdentForAktørId(any())).thenReturn(FNR);
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(new Behandlingsresultat()));
+    }
+
+    @Test
+    public void lagA1_tilUtenlandskMyndighet() throws TekniskException {
+        Behandling behandling = lagBehandling();
+        String institusjonID = "HR:Zxcd";
+        behandling.getFagsak().getAktører().add(lagAktoerMyndighet(institusjonID));
+        BrevDataVedlegg brevData = new BrevDataVedlegg("Z123456");
+        brevData.mottaker = Aktoersroller.MYNDIGHET;
+        UtenlandskMyndighet myndighet = new UtenlandskMyndighet();
+        myndighet.navn = "navn";
+        myndighet.gateadresse = "gateadresse 123";
+        myndighet.land = "HR";
+        when(utenlandskMyndighetRepository.findByLandkode(Landkoder.HR)).thenReturn(myndighet);
+
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(ATTEST_A1, behandling, brevData);
+
+        assertThat(metadata.bruker).isEqualTo(FNR);
+        assertThat(metadata.mottakerID).isEqualTo(institusjonID);
+        assertThat(metadata.utenlandskMyndighet).isEqualTo(myndighet);
+
+        Element element = service.lagBrevXML(ATTEST_A1, behandling, brevData);
+
+        assertThat(element).isNotNull();
+    }
+
+    private Aktoer lagAktoerMyndighet(String institusjonID) {
+        Aktoer myndighet = new Aktoer();
+        myndighet.setRolle(Aktoersroller.MYNDIGHET);
+        myndighet.setInstitusjonId(institusjonID);
+        return myndighet;
+    }
+
+    @Test
+    public void lagMyndighet() throws TekniskException {
+        Fagsak fagsak = new Fagsak();
+        fagsak.getAktører().add(lagAktoerMyndighet("DE:TEST"));
+        UtenlandskMyndighet tyskMyndighet = new UtenlandskMyndighet();
+        tyskMyndighet.institusjonskode = "TEST";
+        when(utenlandskMyndighetRepository.findByLandkode(Landkoder.DE)).thenReturn(tyskMyndighet);
+
+        UtenlandskMyndighet utenlandskMyndighet = service.hentMyndighetFraSak(fagsak);
+
+        assertThat(utenlandskMyndighet.institusjonskode).isEqualTo(tyskMyndighet.institusjonskode);
     }
 
     @Test
@@ -83,7 +130,7 @@ public class BrevDataServiceTest {
         behandling.getFagsak().getAktører().add(representant);
         BrevData brevData = new BrevData("Z123456");
 
-        when(tpsFasade.hentFagsakIdentMedRolleType(behandling.getFagsak(), Aktoersroller.REPRESENTANT)).thenReturn(REPRESENTANT);
+        when(tpsService.hentFagsakIdentMedRolleType(behandling.getFagsak(), Aktoersroller.REPRESENTANT)).thenReturn(REPRESENTANT);
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling, brevData);
 
@@ -182,10 +229,8 @@ public class BrevDataServiceTest {
         forventet.bruker = FNR;
         forventet.mottakersRolle = rolle;
         if (rolle == Aktoersroller.BRUKER) {
-            forventet.mottakerType = MottakerType.PERSON;
             forventet.mottakerID = FNR;
         } else {
-            forventet.mottakerType = MottakerType.ORGANISASJON;
             forventet.mottakerID = ORGNR;
         }
 

@@ -1,8 +1,7 @@
 package no.nav.melosys.domain;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.*;
 
@@ -34,10 +33,10 @@ public class Fagsak extends RegistreringsInfo {
     private Saksstatuser status;
 
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<Aktoer> aktører;
+    private Set<Aktoer> aktører = new HashSet<>(1);
 
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Behandling> behandlinger;
+    private List<Behandling> behandlinger = new ArrayList<>(1);
 
     public Long getGsakSaksnummer() {
         return gsakSaksnummer;
@@ -116,7 +115,7 @@ public class Fagsak extends RegistreringsInfo {
         }
         List<Aktoer> kandidater = aktører.stream().filter(a -> rolleType.equals(a.getRolle())).collect(Collectors.toList());
 
-        if (kandidater == null || kandidater.isEmpty()) {
+        if (kandidater.isEmpty()) {
             return null;
         } else if (kandidater.size() > 1) {
             throw new TekniskException("Det finnes mer enn en aktør med rollen " + rolleType.getBeskrivelse() + " for sak " + saksnummer);

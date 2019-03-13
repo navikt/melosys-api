@@ -11,6 +11,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
@@ -44,6 +45,11 @@ public class AvklartefaktaService {
 
     public Set<Avklartefakta> hentAlleAvklarteArbeidsland(long behandlingsid) {
         return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.ARBEIDSLAND);
+    }
+
+    public Avklartefakta hentAvklarteFakta(long behandlingsresultatID, Avklartefaktatype type) throws FunksjonellException {
+        return avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsresultatID, type)
+            .orElseThrow(() -> new FunksjonellException("Avklartefakta " + type + " mangler for behandlingsresultat " + behandlingsresultatID));
     }
 
     public Set<String> hentAvklarteOrganisasjoner(long behandlingsid) {

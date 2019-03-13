@@ -18,16 +18,14 @@ import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgi
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.AVSLAG_ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.AVSLAG_YRKESAKTIV;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.INNVILGELSE_YRKESAKTIV;
+
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class IverksettVedtakSendBrevTest {
 
@@ -42,6 +40,8 @@ public class IverksettVedtakSendBrevTest {
     private static final long ART12_1_INNVILGET_BEHANDLINGSID = 47L;
     private static final long ART12_2_INNVILGET_BEHANDLINGSID = 48L;
     private static final long ART12_1_AVSLÅTT_BEHANDLINGSID = 49L;
+
+    private static DokumentSystemService dokService;
 
     public IverksettVedtakSendBrevTest() throws Exception {
         agent = lagStegbehandler(lagBehandling(ART16_1_INNVILGET_BEHANDLINGSID));
@@ -69,6 +69,8 @@ public class IverksettVedtakSendBrevTest {
         when(brevDataByggerStandard.lag(any(), any())).thenReturn(standardBrevData);
 
         BrevDataByggerVelger byggerVelger = mock(BrevDataByggerVelger.class);
+        when(byggerVelger.hent(eq(ANMODNING_UNNTAK))).thenReturn(brevDataByggerVedlegg);
+        when(byggerVelger.hent(eq(ATTEST_A1))).thenReturn(brevDataByggerVedlegg);
         when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV))).thenReturn(brevDataByggerVedlegg);
         when(byggerVelger.hent(eq(AVSLAG_YRKESAKTIV))).thenReturn(brevDataByggerAvslagYrkesaktiv);
         when(byggerVelger.hent(eq(AVSLAG_ARBEIDSGIVER))).thenReturn(brevDataByggerAvslagArbeidsgiver);
@@ -77,7 +79,7 @@ public class IverksettVedtakSendBrevTest {
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
         when(behandlingRepository.findWithSaksopplysningerById(eq(behandling.getId()))).thenReturn(behandling);
 
-        DokumentSystemService dokService = lagDokumentService(byggerVelger);
+        dokService = Mockito.spy(lagDokumentService(byggerVelger));
         return new IverksettVedtakSendBrev(dokService, byggerVelger, behandlingRepository, behandlingsresultatRepo);
     }
 
@@ -225,6 +227,17 @@ public class IverksettVedtakSendBrevTest {
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(ART12_1_INNVILGET_BEHANDLINGSID));
         instans.utførSteg(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
+    }
+
+    @Test
+    public void utførStegPåInnvilgelsesBrevBestemtAv12_1_vedtakOgA1Sendes() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(ART12_1_INNVILGET_BEHANDLINGSID));
+
+        instans.utførSteg(prosessinstans);
+
+        verify(dokService).produserDokument(anyLong(), eq(INNVILGELSE_YRKESAKTIV), any());
+        verify(dokService).produserDokument(anyLong(), eq(ATTEST_A1), any());
     }
 
     @Test

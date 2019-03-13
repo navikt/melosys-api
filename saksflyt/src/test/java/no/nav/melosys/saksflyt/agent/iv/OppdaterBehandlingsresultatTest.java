@@ -15,7 +15,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
+import static no.nav.melosys.domain.ProsessSteg.IV_AVKLAR_MYNDIGHET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
@@ -60,6 +60,6 @@ public class OppdaterBehandlingsresultatTest {
         assertThat(capture.getEndretAv()).isEqualTo(testbruker);
         assertThat(capture.getVedtaksdato()).isNotNull();
         assertThat(capture.getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));
-        assertThat(p.getSteg()).isEqualTo(IV_OPPDATER_MEDL);
+        assertThat(p.getSteg()).isEqualTo(IV_AVKLAR_MYNDIGHET);
     }
 }
