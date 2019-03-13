@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
 import java.util.Collections;
-import javax.ws.rs.core.Response;
+import java.util.List;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
@@ -12,14 +12,15 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,16 +41,19 @@ public class AktoerTjenesteTest extends JsonSchemaTest {
 
     private AktoerTjeneste aktoerTjeneste;
 
+    @Mock
+    private Tilgang tilgang;
+
+    @Mock
     private AktoerService aktoerService;
 
-    @Before
-    public void setUp() {
-        FagsakRepository fagsakRepository = mock(FagsakRepository.class);
-        Tilgang tilgang = mock(Tilgang.class);
+    @Mock
+    private FagsakService fagsakService;
 
-        aktoerService = mock(AktoerService.class);
-        aktoerTjeneste = new AktoerTjeneste(tilgang, aktoerService, fagsakRepository);
-        when(fagsakRepository.findBySaksnummer("MELTEST-1")).thenReturn(lagFagsak());
+    @Before
+    public void setUp() throws IkkeFunnetException {
+        aktoerTjeneste = new AktoerTjeneste(tilgang, aktoerService, fagsakService);
+        when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
     }
 
     @Override
@@ -103,18 +107,18 @@ public class AktoerTjenesteTest extends JsonSchemaTest {
         aktoerRep.setUtenlandskPersonId("UTL");
         aktoerRep.setRepresenterer(Representerer.BRUKER);
 
-        Aktoer aktoerMyd = new Aktoer();
-        aktoerMyd.setAktørId("1235");
-        aktoerMyd.setInstitusjonId("INST2");
-        aktoerMyd.setRolle(Aktoersroller.MYNDIGHET);
-        aktoerMyd.setOrgnr("100");
-        aktoerMyd.setFagsak(lagFagsak());
-        aktoerMyd.setUtenlandskPersonId("UTL");
+        Aktoer aktoerMyndighet = new Aktoer();
+        aktoerMyndighet.setAktørId("1235");
+        aktoerMyndighet.setInstitusjonId("INST2");
+        aktoerMyndighet.setRolle(Aktoersroller.MYNDIGHET);
+        aktoerMyndighet.setOrgnr("100");
+        aktoerMyndighet.setFagsak(lagFagsak());
+        aktoerMyndighet.setUtenlandskPersonId("UTL");
 
-        when(aktoerService.hentfagsakAktoerer(any(), any(), any())).thenReturn(aktoerMyd);
+        when(aktoerService.hentfagsakAktører(any(), any(), any())).thenReturn(Collections.singletonList(aktoerMyndighet));
 
-        Response response = aktoerTjeneste.hentAktoerer("MELTEST-1", "MYNDIGHET", null);
-        AktoerDto aktoerDto = (AktoerDto) response.getEntity();
+        List<AktoerDto> aktører = aktoerTjeneste.hentAktoerer("MELTEST-1", "MYNDIGHET", null);
+        AktoerDto aktoerDto = aktører.get(0);
 
         assertThat(aktoerDto.getAktoerID()).isEqualTo("1235");
         assertThat(aktoerDto.getInstitusjonsID()).isEqualTo("INST2");
@@ -122,16 +126,6 @@ public class AktoerTjenesteTest extends JsonSchemaTest {
         assertThat(aktoerDto.getOrgnr()).isEqualTo("100");
         assertThat(aktoerDto.getRepresentererKode()).isNull();
 
-        when(aktoerService.hentfagsakAktoerer(any(), any(), any())).thenReturn(aktoerRep);
-
-        response = aktoerTjeneste.hentAktoerer("MELTEST-1", "REPRESENTANT", "BRUKER");
-        aktoerDto = (AktoerDto) response.getEntity();
-
-        assertThat(aktoerDto.getAktoerID()).isEqualTo("1234");
-        assertThat(aktoerDto.getInstitusjonsID()).isEqualTo("INST1");
-        assertThat(aktoerDto.getRolleKode()).isEqualTo("REPRESENTANT");
-        assertThat(aktoerDto.getOrgnr()).isEqualTo("99");
-        assertThat(aktoerDto.getRepresentererKode()).isEqualTo("BRUKER");
 
     }
 

@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
@@ -8,18 +9,22 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
+
+import static java.util.stream.Collectors.toList;
 
 @Api(tags = {"fagsaker"})
 @Path("/fagsaker")
@@ -31,41 +36,49 @@ public class AktoerTjeneste extends RestTjeneste {
 
     private final AktoerService aktoerService;
 
-    private final FagsakRepository fagsakRepository;
+    private final FagsakService fagsakService;
 
     @Autowired
-    public AktoerTjeneste(Tilgang tilgang, AktoerService aktoerService, FagsakRepository fagsakRepository) {
+    public AktoerTjeneste(Tilgang tilgang, AktoerService aktoerService, FagsakService fagsakService) {
         this.tilgang = tilgang;
         this.aktoerService = aktoerService;
-        this.fagsakRepository = fagsakRepository;
+        this.fagsakService = fagsakService;
     }
 
     @GET
     @Path("{saksnummer}/aktoerer/")
     @ApiOperation(
-        value = "Henter aktører til en gitt saksnummer.",
+        value = "Henter aktører knyttet til et gitt saksnummer.",
         response = AktoerDto.class,
         responseContainer = "List")
-    public Response hentAktoerer(@PathParam("saksnummer") String saksnummer,
-                                 @QueryParam("aktoersrolle") String aktoersrolle,
-                                 @QueryParam("representerer") String representerer
-                                ) throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
+    public List<AktoerDto> hentAktoerer(@PathParam("saksnummer") String saksnummer,
+                                        @QueryParam("aktoersrolle") String aktoersrolle,
+                                        @QueryParam("representerer") String representerer)
+        throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
 
-        Fagsak fagsak = validerFagsak(saksnummer);
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgang.sjekkSak(fagsak);
 
-        Aktoer aktoer = aktoerService.hentfagsakAktoerer(fagsak, aktoersrolle, representerer);
-            return Response.ok(tilDto(aktoer)).build();
+        Aktoersroller rolle = null;
+        Representerer representantRepresenterer = null;
+        if (aktoersrolle != null) {
+            rolle = Aktoersroller.valueOf(aktoersrolle);
+        }
+        if (representerer != null) {
+            representantRepresenterer = Representerer.valueOf(representerer);
+        }
+
+        List<Aktoer> aktører = aktoerService.hentfagsakAktører(fagsak, rolle, representantRepresenterer);
+        return aktører.stream().map(this::tilDto).collect(toList());
     }
 
     @POST
     @Path("{saksnummer}/aktoerer/")
     @ApiOperation(
-        value = "lagrer/oppdaterer aktør informasjon til en gitt saksnummer.",
+        value = "Lagrer/oppdaterer aktør informasjon for et gitt saksnummer.",
         response = AktoerDto.class)
     public Response lagAktoerer(@PathParam("saksnummer") String saksnummer, @ApiParam AktoerDto aktoerDto) throws FunksjonellException, TekniskException {
-
-        Fagsak fagsak = validerFagsak(saksnummer);
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgang.sjekkSak(fagsak);
         aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
         return Response.ok().build();
@@ -78,17 +91,9 @@ public class AktoerTjeneste extends RestTjeneste {
         aktoerDto.setOrgnr(aktoer.getOrgnr());
         aktoerDto.setRolleKode(aktoer.getRolle().getKode());
         aktoerDto.setUtenlandskPersonID(aktoer.getUtenlandskPersonId());
-        if (aktoer.getRepresenterer() != null ) {
+        if (aktoer.getRepresenterer() != null) {
             aktoerDto.setRepresentererKode(aktoer.getRepresenterer().getKode());
         }
         return aktoerDto;
-    }
-
-    private Fagsak validerFagsak(String saksnummer) throws IkkeFunnetException {
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
-        if (fagsak == null) {
-            throw new IkkeFunnetException("Det finnes ingen fagsak med saksnummer : " + saksnummer);
-        }
-        return fagsak;
     }
 }

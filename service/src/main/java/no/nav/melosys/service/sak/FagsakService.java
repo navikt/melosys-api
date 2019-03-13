@@ -87,8 +87,12 @@ public class FagsakService {
         prosessinstansService.opprettProsessinstansHenleggSak(sisteIkkeAvsluttedeBehandling, begrunnelseKode, fritekst);
     }
 
-    public Fagsak hentFagsak(String saksnummer) {
-        return fagsakRepository.findBySaksnummer(saksnummer);
+    public Fagsak hentFagsak(String saksnummer) throws IkkeFunnetException {
+        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+        if (fagsak == null) {
+            throw new IkkeFunnetException("Det finnes ingen fagsak med saksnummer: " + saksnummer);
+        }
+        return fagsak;
     }
 
     public List<Fagsak> hentFagsakerMedAktør(Aktoersroller rolleType, String ident) throws IkkeFunnetException {

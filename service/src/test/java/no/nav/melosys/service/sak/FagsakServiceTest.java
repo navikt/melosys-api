@@ -64,8 +64,9 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void hentFagsak() {
+    public void hentFagsak() throws IkkeFunnetException {
         String saksnummer = "saksnummer";
+        when(fagsakRepo.findBySaksnummer(anyString())).thenReturn(new Fagsak());
         fagsakService.hentFagsak(saksnummer);
         verify(fagsakRepo).findBySaksnummer(eq(saksnummer));
     }
