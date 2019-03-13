@@ -28,16 +28,16 @@ import static org.mockito.Mockito.when;
 public class AktoerServiceTest {
 
     @Mock
-    private AktoerRepository aktoerRepository;
+    private AktoerRepository aktørRepository;
 
-    private AktoerService aktoerService;
+    private AktoerService aktørService;
 
     @Captor
     private ArgumentCaptor<Example> exampleCaptor;
 
     @Before
     public void setUp() {
-        aktoerService = new AktoerService(aktoerRepository);
+        aktørService = new AktoerService(aktørRepository);
     }
 
     @Test
@@ -46,9 +46,9 @@ public class AktoerServiceTest {
         aktoerDto.setAktoerID("1234");
         aktoerDto.setRolleKode("BRUKER");
 
-        when(aktoerRepository.findByFagsakAndRolleAndRepresenterer(any(), any(), any())).thenReturn(Optional.empty());
-        aktoerService.lagEllerOppdaterAktoer(lagFagsak(), aktoerDto);
-        verify(aktoerRepository).save(any(Aktoer.class));
+        when(aktørRepository.findByFagsakAndRolleAndRepresenterer(any(), any(), any())).thenReturn(Optional.empty());
+        aktørService.lagEllerOppdaterAktoer(lagFagsak(), aktoerDto);
+        verify(aktørRepository).save(any(Aktoer.class));
     }
 
     @Test
@@ -61,21 +61,21 @@ public class AktoerServiceTest {
         aktoer.setRolle(Aktoersroller.BRUKER);
         aktoer.setAktørId("1235");
 
-        when(aktoerRepository.findByFagsakAndRolleAndRepresenterer(any(), any(), any())).thenReturn(Optional.of(aktoer));
+        when(aktørRepository.findByFagsakAndRolleAndRepresenterer(any(), any(), any())).thenReturn(Optional.of(aktoer));
 
         Aktoer aktoerFraApiLag = new Aktoer();
         aktoerFraApiLag.setRolle(Aktoersroller.BRUKER);
-        aktoerService.lagEllerOppdaterAktoer(lagFagsak(), aktoerDto);
-        verify(aktoerRepository).deleteById(aktoer);
-        verify(aktoerRepository).save(any(Aktoer.class));
+        aktørService.lagEllerOppdaterAktoer(lagFagsak(), aktoerDto);
+        verify(aktørRepository).deleteById(aktoer);
+        verify(aktørRepository).save(any(Aktoer.class));
 
     }
 
     @Test
     public final void hentfagsakAktoerer() {
-        aktoerService.hentfagsakAktører(lagFagsak(), Aktoersroller.REPRESENTANT, Representerer.BRUKER);
+        aktørService.hentfagsakAktører(lagFagsak(), Aktoersroller.REPRESENTANT, Representerer.BRUKER);
 
-        verify(aktoerRepository).findAll(exampleCaptor.capture());
+        verify(aktørRepository).findAll(exampleCaptor.capture());
         Example aktørExample = exampleCaptor.getValue();
 
         Aktoer aktørProbe = (Aktoer) aktørExample.getProbe();
