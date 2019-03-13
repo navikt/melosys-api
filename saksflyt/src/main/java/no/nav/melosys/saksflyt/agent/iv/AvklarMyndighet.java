@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
-import no.nav.melosys.domain.util.SoeknadUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -116,14 +115,14 @@ public class AvklarMyndighet extends AbstraktStegBehandler {
             }
         }
 
-        SoeknadDokument soeknadDokument = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        SoeknadDokument søknadDokument = SaksopplysningerUtils.hentSøknadDokument(behandling);
         if (oppfylteVilkår.contains(FO_883_2004_ART11_3A) && !oppfylteVilkår.contains(FO_883_2004_ART11_4_1)) {
             // Bruker land fra adressen oppgitt i søknaden.
             // N.B. bør ikke komme fra bostedsvurdering.
-            return Landkoder.valueOf(soeknadDokument.bosted.oppgittAdresse.landKode);
-        } else {
-            // Bruker arbeidsland
-            return Landkoder.valueOf(SoeknadUtils.hentArbeidsLand(soeknadDokument));
+            return Landkoder.valueOf(søknadDokument.bosted.oppgittAdresse.landKode);
         }
+
+        // Bruker land oppgitt i søknaden
+        return Landkoder.valueOf(søknadDokument.oppholdUtland.oppholdslandKoder.get(0)); //FIXME må erstattes med søknadDokument.land (søknadsland).
     }
 }

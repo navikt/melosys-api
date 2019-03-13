@@ -71,8 +71,9 @@ public class AvklarMyndighetTest {
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
         SoeknadDokument søknadDokument = new SoeknadDokument();
+        søknadDokument.oppholdUtland.oppholdslandKoder.add("BE");
         ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse.landKode = "BE";
+        arbeidUtland.adresse.landKode = "HR";
         søknadDokument.arbeidUtland.add(arbeidUtland);
         søknadDokument.bosted.oppgittAdresse.landKode = "IT";
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -125,10 +126,44 @@ public class AvklarMyndighetTest {
     }
 
     @Test
-    public void avklarLand_arbeidsland() throws FunksjonellException, TekniskException {
+    public void avklarLand_12_1_brukerSøknadsland() throws FunksjonellException, TekniskException {
         Behandling behandling = lagBehandling(new Fagsak());
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(3L);
+        Vilkaarsresultat v1 = new Vilkaarsresultat();
+        v1.setOppfylt(true);
+        v1.setVilkaar(Vilkaar.FO_883_2004_ART12_1);
+        behandlingsresultat.getVilkaarsresultater().add(v1);
+
+        Landkoder landkode = steg.avklarLand(behandling, behandlingsresultat);
+
+        assertThat(landkode).isEqualTo(Landkoder.BE);
+    }
+
+    @Test
+    public void avklarLand_12_2_brukerSøknadsland() throws FunksjonellException, TekniskException {
+        Behandling behandling = lagBehandling(new Fagsak());
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(3L);
+        Vilkaarsresultat v1 = new Vilkaarsresultat();
+        v1.setOppfylt(true);
+        v1.setVilkaar(Vilkaar.FO_883_2004_ART12_2);
+        behandlingsresultat.getVilkaarsresultater().add(v1);
+
+        Landkoder landkode = steg.avklarLand(behandling, behandlingsresultat);
+
+        assertThat(landkode).isEqualTo(Landkoder.BE);
+    }
+
+    @Test
+    public void avklarLand_16_1_brukerSøknadsland() throws FunksjonellException, TekniskException {
+        Behandling behandling = lagBehandling(new Fagsak());
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(3L);
+        Vilkaarsresultat v1 = new Vilkaarsresultat();
+        v1.setOppfylt(true);
+        v1.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
+        behandlingsresultat.getVilkaarsresultater().add(v1);
 
         Landkoder landkode = steg.avklarLand(behandling, behandlingsresultat);
 
