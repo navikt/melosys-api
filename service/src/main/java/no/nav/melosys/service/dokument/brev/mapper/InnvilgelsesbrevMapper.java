@@ -14,6 +14,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -70,8 +71,12 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
         if (!søknad.maritimtArbeid.isEmpty()) {
             MaritimtArbeid maritimtArbeid = søknad.maritimtArbeid.iterator().next();
-            fag.setFlaggland(maritimtArbeid.flaggLandKode);
-            fag.setArbeidPåTerritorialfarvann(maritimtArbeid.territorialfarvann);
+            Landkoder flaggland = Landkoder.valueOf(maritimtArbeid.flaggLandKode);
+            fag.setFlaggland(flaggland.getBeskrivelse());
+
+            if (maritimtArbeid.fartsomradeKode == Fartsomraade.INNENRIKS.getKode().toUpperCase()) {
+                fag.setArbeidPåTerritorialfarvann(JA);
+            }
         }
 
         if (brevdataInnvilgelse.avklartSokkelEllerSkip == AvklartInnstallasjonsType.SKIP) {

@@ -12,6 +12,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
@@ -35,6 +36,9 @@ public class BrevDataByggerInnvilgelseTest {
     AvklartefaktaService avklartefaktaService;
 
     @Mock
+    AvklarteVirksomheterService avklarteVirksomheterService;
+
+    @Mock
     LovvalgsperiodeService lovvalgsperiodeService;
 
     @Mock
@@ -47,7 +51,6 @@ public class BrevDataByggerInnvilgelseTest {
     private Behandling behandling;
     private BrevDataByggerInnvilgelse brevDataByggerInnvilgelse;
 
-
     @Before
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         behandling = new Behandling();
@@ -57,10 +60,11 @@ public class BrevDataByggerInnvilgelseTest {
         Lovvalgsperiode periode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(periode));
 
-        brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(brevDataByggerA1,
-                                                                  avklartefaktaService,
+        brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(avklartefaktaService,
+                                                                  avklarteVirksomheterService,
                                                                   lovvalgsperiodeService,
                                                                   brevbestillingDto);
+        brevDataByggerInnvilgelse.setA1Bygger(brevDataByggerA1);
     }
 
     @Test
@@ -89,7 +93,8 @@ public class BrevDataByggerInnvilgelseTest {
         brevbestillingDto.fritekst = "FRITEKST";
 
         BrevDataByggerInnvilgelse brevDataByggerInnvilgelse =
-            new BrevDataByggerInnvilgelse(brevDataByggerA1, avklartefaktaService, lovvalgsperiodeService, brevbestillingDto);
+            new BrevDataByggerInnvilgelse(avklartefaktaService, avklarteVirksomheterService, lovvalgsperiodeService, brevbestillingDto);
+        brevDataByggerInnvilgelse.setA1Bygger(brevDataByggerA1);
 
         BrevData brevData = brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
         assertThat(brevbestillingDto).isEqualToComparingFieldByField(brevData);

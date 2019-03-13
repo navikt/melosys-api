@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.util.Set;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -8,18 +7,20 @@ import no.nav.dok.melosysbrev._000127.BrevdataType;
 import no.nav.dok.melosysbrev._000127.Fag;
 import no.nav.dok.melosysbrev._000127.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatype.ARBEIDSLAND;
-import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentSammensattNavn;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentArbeidslandFraSøknaden;
-import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.*;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
 
 public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
 
@@ -32,25 +33,25 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
                                 Behandlingsresultat resultat,
                                 BrevData brevdata) throws JAXBException, SAXException {
 
-        Fag fag = mapFag(behandling, resultat);
+        BrevDataInnvilgelse brevDataInnvilgelse = (BrevDataInnvilgelse) brevdata;
+        Fag fag = mapFag(behandling, resultat, brevDataInnvilgelse);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat) {
+    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelse brevDataInnvilgelse) {
         Fag fag = new Fag();
 
         fag.setArbeidsland(hentArbeidsLand(behandling, resultat));
-        Set<Lovvalgsperiode> perioder = resultat.getLovvalgsperioder();
-        validerLovvalgsperioder(perioder);
-        Lovvalgsperiode periode = perioder.iterator().next();
-        fag.setLovvalgsperiode(no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsperiodeType.builder()
+        Lovvalgsperiode periode = brevDataInnvilgelse.lovvalgsperiode;
+        fag.setLovvalgsperiode(LovvalgsperiodeType.builder()
             .withFomDato(lagXmlDato(periode.getFom()))
             .withTomDato(lagXmlDato(periode.getTom()))
             .build());
 
-        fag.setNavn(hentSammensattNavn(behandling));
+        AvklartVirksomhet utsendendeVirksomhet = brevDataInnvilgelse.norskeVirksomheter.iterator().next();
+        fag.setNavn(utsendendeVirksomhet.navn);
         return fag;
     }
 

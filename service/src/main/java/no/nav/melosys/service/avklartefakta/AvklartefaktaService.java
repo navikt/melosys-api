@@ -44,8 +44,8 @@ public class AvklartefaktaService {
         return avklartefakta.stream().map(AvklartefaktaDto::new).collect(Collectors.toSet());
     }
 
-    public Set<Avklartefakta> hentAlleAvklarteArbeidsland(long behandlingsid) {
-        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.ARBEIDSLAND);
+    public Set<Avklartefakta> hentAlleAvklarteFlaggland(long behandlingsid) {
+        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.FLAGGLAND);
     }
 
     public Avklartefakta hentAvklarteFakta(long behandlingsresultatID, Avklartefaktatype type) throws FunksjonellException {
