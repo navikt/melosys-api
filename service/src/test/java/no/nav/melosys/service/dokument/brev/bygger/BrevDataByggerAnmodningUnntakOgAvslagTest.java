@@ -23,7 +23,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.service.avklartefakta.AvklarteVirksomheterServiceTest.lagSøknadOgArbeidsforholdOpplysninger;
+import static no.nav.melosys.service.SaksopplysningStubs.lagSøknadOgArbeidsforholdOpplysninger;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -58,6 +58,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setVilkaarsresultater(new HashSet<>());
+
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         List<String> selvstendigeForetak = Collections.singletonList("987654321");

@@ -6,14 +6,8 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Adresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -25,10 +19,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.service.SaksopplysningStubs.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -138,53 +132,5 @@ public class AvklarteVirksomheterServiceTest {
 
     private void leggTilIRegisterOppslag(Collection<String> orgnumre) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         when(registerOppslagService.hentOrganisasjoner(eq(new HashSet<>(orgnumre)))).thenReturn(lagOrganisasjonDokumenter(orgnumre));
-    }
-
-    public static Saksopplysning lagArbeidsforholdOpplysning(List<String> registrereArbeidsgiverOrgnumre) {
-        ArbeidsforholdDokument arbeidsforholdDokument = mock(ArbeidsforholdDokument.class);
-        when(arbeidsforholdDokument.hentOrgnumre()).thenReturn(new HashSet<>(registrereArbeidsgiverOrgnumre));
-        Saksopplysning arbeidsforhold = new Saksopplysning();
-        arbeidsforhold.setDokument(arbeidsforholdDokument);
-        arbeidsforhold.setType(SaksopplysningType.ARBEIDSFORHOLD);
-        return arbeidsforhold;
-    }
-
-    public static Saksopplysning lagSøknadOpplysning(List<String> selvstendigeForetak, List<String> ekstraArbeidsgivere) {
-        SoeknadDokument søknad = new SoeknadDokument();
-        for (String orgnr : selvstendigeForetak) {
-            SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
-            selvstendigForetak.orgnr = orgnr;
-            søknad.selvstendigArbeid.selvstendigForetak.add(selvstendigForetak);
-        }
-
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse.landKode = "DE";
-        søknad.arbeidUtland = new ArrayList<>();
-        søknad.arbeidUtland.add(arbeidUtland);
-        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.addAll(ekstraArbeidsgivere);
-
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(søknad);
-        saksopplysning.setType(SaksopplysningType.SØKNAD);
-
-        return saksopplysning;
-    }
-
-    public static Set<Saksopplysning> lagSøknadOgArbeidsforholdOpplysninger(List<String> selvstendigeForetak, List<String> ekstraArbeidsgivere, List<String> registrerteArbeidsgivere) {
-        Saksopplysning søknad = lagSøknadOpplysning(selvstendigeForetak, ekstraArbeidsgivere);
-        Saksopplysning arbeidsforhold = lagArbeidsforholdOpplysning(registrerteArbeidsgivere);
-        return new HashSet<>(Arrays.asList(søknad, arbeidsforhold));
-    }
-
-    private static Set<OrganisasjonDokument> lagOrganisasjonDokumenter(Collection<String> organisasjonsnumre)  {
-        Set<OrganisasjonDokument> organisasjonDokumenter = new HashSet<>();
-        for (String orgnummer : organisasjonsnumre) {
-            OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-            organisasjonDokument.setOrgnummer(orgnummer);
-            organisasjonDokument.setNavn(Arrays.asList("Test:", orgnummer));
-            organisasjonDokument.setOrganisasjonDetaljer(new OrganisasjonsDetaljer());
-            organisasjonDokumenter.add(organisasjonDokument);
-        }
-        return organisasjonDokumenter;
     }
 }

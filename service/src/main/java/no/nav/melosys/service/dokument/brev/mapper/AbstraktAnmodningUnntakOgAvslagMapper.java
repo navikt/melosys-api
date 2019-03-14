@@ -18,6 +18,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.TekniskException;
@@ -103,7 +104,11 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
             .stream().findFirst().orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode funnet for behandlingsresultat"));
 
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
-        lovvalgsperiodeType.setUnntakFraLovvalgsland(lovvalgsperiode.getUnntakFraLovvalgsland().getKode());
+
+        Landkoder unntakFraLovvalgsland = lovvalgsperiode.getUnntakFraLovvalgsland();
+        if (unntakFraLovvalgsland != null) {
+            lovvalgsperiodeType.setUnntakFraLovvalgsland(unntakFraLovvalgsland.getKode());
+        }
         try {
             lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
             lovvalgsperiodeType.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));
