@@ -77,7 +77,6 @@ public class BrevDataByggerVelger {
             case INNVILGELSE_YRKESAKTIV: {
                 BrevDataByggerInnvilgelse innvilgelseBygger =
                     new BrevDataByggerInnvilgelse(avklartefaktaService,
-                                                avklarteVirksomheterService,
                                                 lovvalgsperiodeService,
                                                 brevbestillingDto);
                 innvilgelseBygger.setA1Bygger(new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService));
@@ -85,7 +84,6 @@ public class BrevDataByggerVelger {
             }
             case INNVILGELSE_ARBEIDSGIVER:
                 return new BrevDataByggerInnvilgelse(avklartefaktaService,
-                                                    avklarteVirksomheterService,
                                                     lovvalgsperiodeService,
                                                     brevbestillingDto);
             case MELDING_HENLAGT_SAK: {

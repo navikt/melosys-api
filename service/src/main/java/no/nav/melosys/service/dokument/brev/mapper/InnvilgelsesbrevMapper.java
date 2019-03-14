@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -19,12 +18,9 @@ import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
-import no.nav.melosys.domain.util.SoeknadUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
@@ -48,45 +44,42 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapFag(Behandling behandling, BrevDataInnvilgelse brevdataInnvilgelse) throws TekniskException {
-        BrevDataA1 brevdataA1 = brevdataInnvilgelse.vedleggA1;
-
+    private Fag mapFag(Behandling behandling, BrevDataInnvilgelse brevdata) throws TekniskException {
         Fag fag = new Fag();
         fag.setBehandlingstype(BehandlingstypeKode.valueOf(behandling.getType().getKode()));
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
 
-        AvklartVirksomhet avklartVirksomhet = brevdataA1.norskeVirksomheter.iterator().next();
+        AvklartVirksomhet avklartVirksomhet = brevdata.norskeVirksomheter.iterator().next();
         fag.setArbeidsgiver(avklartVirksomhet.navn);
         fag.setYrkesaktivitet(YrkesaktivitetsKode.fromValue(avklartVirksomhet.yrkesaktivitet.getKode()));
 
         fag.setInngangsvilkårbegrunnelse(InngangsvilkaarBegrunnelseKode.EOS_BORGER);
-        fag.setTrygdemyndighetsland("TRYGDEMYNDIGHETSLAND"); // TODO: Fylles inn med mottakerland
+
+        fag.setArbeidsland(brevdata.arbeidsland);
+        fag.setTrygdemyndighetsland(brevdata.trygdemyndighetsland);
 
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
-
-        // Henter ut Landkode fra Arbeidssteder(Fysiske og Maritime) og Oppholdsland
-        String arbeidslandSomTekst = hentArbeidslandFraArbeidsstederOgOppholdsland(søknad, brevdataA1);
-        Landkoder arbeidslandKode = Landkoder.valueOf(arbeidslandSomTekst);
-        fag.setArbeidsland(arbeidslandKode.getBeskrivelse());
-
         if (!søknad.maritimtArbeid.isEmpty()) {
             MaritimtArbeid maritimtArbeid = søknad.maritimtArbeid.iterator().next();
-            Landkoder flaggland = Landkoder.valueOf(maritimtArbeid.flaggLandKode);
-            fag.setFlaggland(flaggland.getBeskrivelse());
+            String flaggland = maritimtArbeid.flaggLandKode;
+            if (flaggland != null && !flaggland.isEmpty()) {
+                Landkoder flagglandKode = Landkoder.valueOf(maritimtArbeid.flaggLandKode);
+                fag.setFlaggland(flagglandKode.getBeskrivelse());
+            }
 
             if (maritimtArbeid.fartsomradeKode == Fartsomraade.INNENRIKS.getKode().toUpperCase()) {
                 fag.setArbeidPåTerritorialfarvann(JA);
             }
         }
 
-        if (brevdataInnvilgelse.avklartSokkelEllerSkip == AvklartInnstallasjonsType.SKIP) {
+        if (brevdata.avklartSokkelEllerSkip == AvklartInnstallasjonsType.SKIP) {
             fag.setArbeidPåSkip(JA);
         }
-        if (brevdataInnvilgelse.avklartSokkelEllerSkip == AvklartInnstallasjonsType.SOKKEL) {
+        if (brevdata.avklartSokkelEllerSkip == AvklartInnstallasjonsType.SOKKEL) {
             fag.setArbeidPåSokkel(JA);
         }
 
-        Lovvalgsperiode periode = brevdataInnvilgelse.lovvalgsperiode;
+        Lovvalgsperiode periode = brevdata.lovvalgsperiode;
         fag.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(periode.getBestemmelse().getKode()));
         fag.setLovvalgsperiode(LovvalgsperiodeType.builder()
             .withFomDato(lagXmlDato(periode.getFom()))
@@ -96,27 +89,11 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         if (periode.getTilleggsbestemmelse() != null) {
             fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(periode.getTilleggsbestemmelse().getKode()));
         }
-        if (brevdataInnvilgelse.begrunnelseKode != null) {
-            fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdataInnvilgelse.begrunnelseKode));
+        if (brevdata.begrunnelseKode != null) {
+            fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdata.begrunnelseKode));
         }
 
         return fag;
-    }
-
-    private static String hentArbeidslandFraArbeidsstederOgOppholdsland(SoeknadDokument søknad, BrevDataA1 brevdata) throws TekniskException {
-        String arbeidslandSomTekst;
-        if (!brevdata.arbeidssteder.isEmpty()) {
-            Arbeidssted arbeidssted = brevdata.arbeidssteder.iterator().next();
-            arbeidslandSomTekst = arbeidssted.landKode;
-        }
-        else {
-            List<String> land = SoeknadUtils.hentLand(søknad);
-            if (land.isEmpty()) {
-                throw new TekniskException("Ingen land funnet");
-            }
-            arbeidslandSomTekst = land.get(0);
-        }
-        return arbeidslandSomTekst;
     }
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag, VedleggType vedlegg) {

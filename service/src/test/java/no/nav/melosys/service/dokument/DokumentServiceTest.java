@@ -152,8 +152,11 @@ public final class DokumentServiceTest {
         brevDataA1.hovedvirksomhet = arbeidsgiver;
         BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse("SAKSBEHANDLER", new BrevbestillingDto());
         brevdataInnvilgelse.vedleggA1 = brevDataA1;
+        brevdataInnvilgelse.norskeVirksomheter = brevDataA1.norskeVirksomheter;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartSokkelEllerSkip = AvklartInnstallasjonsType.SKIP;
+        brevdataInnvilgelse.arbeidsland = "Norway";
+        brevdataInnvilgelse.trygdemyndighetsland = "Denmark";
         brevdataInnvilgelse.mottaker = mottakerRolle;
 
         return brevdataInnvilgelse;

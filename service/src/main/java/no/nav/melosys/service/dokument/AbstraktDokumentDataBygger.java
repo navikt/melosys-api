@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -15,6 +12,9 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -92,6 +92,59 @@ public abstract class AbstraktDokumentDataBygger {
 
     private Arbeidssted utledArbeidsstedFraVirksomhet(AvklartVirksomhet virksomhet) {
         return new Arbeidssted(virksomhet.navn, virksomhet.orgnr, virksomhet.adresse.landKode);
+    }
+
+    public String hentArbeidsland(Lovvalgsperiode periode) throws FunksjonellException {
+        // Artikklene 12.1, 12.2, 16.1 bruker oppholdsland
+        Landkoder arbeidsland = Landkoder.valueOf(søknad.oppholdUtland.oppholdslandKoder.get(0));
+
+        if (periode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1 &&
+            periode.getTilleggsbestemmelse() == TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1) {
+                Optional<Landkoder> avklarteFlaggland = avklartefaktaService.hentFlaggland(behandling.getId());
+                arbeidsland = avklarteFlaggland.orElseThrow(() -> new FunksjonellException("ART12_1 + ART11_4_1: Trenger flaggland"));
+        }
+
+        if (periode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3A) {
+            if (periode.getBestemmelse() == TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1) {
+                Optional<Landkoder> avklarteFlaggland = avklartefaktaService.hentFlaggland(behandling.getId());
+                arbeidsland = avklarteFlaggland.orElseThrow(() -> new FunksjonellException("ART11_3A + ART11_4_1: Trenger bostedsland"));
+            } else {
+                if (søknad.maritimtArbeid.isEmpty()) {
+                    throw new FunksjonellException("ART11_3A: Trenger Maritimt arbeid fra søknad");
+                }
+                arbeidsland = Landkoder.valueOf(søknad.maritimtArbeid.get(0).territorialfarvann);
+            }
+        }
+
+        if (periode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_4_2) {
+            Optional<Landkoder> avklarteFlaggland = avklartefaktaService.hentFlaggland(behandling.getId());
+            arbeidsland = avklarteFlaggland.orElseThrow(() -> new FunksjonellException("ART11_4_2: Trenger flaggland"));
+        }
+
+        return arbeidsland.getBeskrivelse();
+    }
+
+    public String hentTrygdemyndighetsland(Lovvalgsperiode periode) throws FunksjonellException {
+        // Artikklene 12.1, 12.2, 16.1 bruker oppholdsland
+        Landkoder trygdemyndighetsland = Landkoder.valueOf(søknad.oppholdUtland.oppholdslandKoder.get(0));
+
+        if (periode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1 &&
+            periode.getTilleggsbestemmelse() == TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1) {
+            Optional<Landkoder> avklarteFlaggland = avklartefaktaService.hentFlaggland(behandling.getId());
+            trygdemyndighetsland = avklarteFlaggland.orElseThrow(() -> new FunksjonellException("ART12_1 + ART11_4_1: Trenger bostedsland"));
+        }
+
+        if (periode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3A ||
+            periode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_4_2) {
+            trygdemyndighetsland = hentBostedsland();
+        }
+
+        return trygdemyndighetsland.getBeskrivelse();
+    }
+
+    public Landkoder hentBostedsland() {
+        Optional<Landkoder> bostedslandOpt = avklartefaktaService.hentBostedland(behandling.getId());
+        return bostedslandOpt.orElseGet(() -> Landkoder.valueOf(søknad.bosted.oppgittAdresse.landKode));
     }
 
     protected Collection<Lovvalgsperiode> hentLovvalgsperioder() throws TekniskException {

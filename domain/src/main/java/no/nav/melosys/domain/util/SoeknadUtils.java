@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.FunksjonellException;
@@ -49,13 +48,13 @@ public final class SoeknadUtils {
         return soeknadDokument.oppholdUtland.oppholdsPeriode;
     }
 
-    public static String hentArbeidslandFraSøknaden(Behandling behandling) {
-        try {
-            SoeknadDokument soeknadDokument = SaksopplysningerUtils.hentSøknadDokument(behandling);
-            ArbeidUtland arbeidUtland = soeknadDokument.arbeidUtland.stream().findFirst().orElseThrow(() -> new IllegalArgumentException("arbeidUtland mangler"));
-            return arbeidUtland.adresse.landKode;
-        } catch (TekniskException e) {
-            throw new IllegalStateException(e);
+    /**
+     * Benytter kun første element til å vurdere maritimt arbeid i Leveranse 1
+     */
+    public static MaritimtArbeid hentMaritimeArbeid(SoeknadDokument søknad) throws FunksjonellException {
+        if (søknad.maritimtArbeid.isEmpty()) {
+            throw new FunksjonellException("Søknad manger detaljer om Maritimt Arbeid");
         }
+        return søknad.maritimtArbeid.get(0);
     }
 }

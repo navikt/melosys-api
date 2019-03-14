@@ -89,6 +89,10 @@ public class InnvilgelsesbrevMapperTest {
         brevdataInnvilgelse.vedleggA1 = brevdataA1;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartSokkelEllerSkip = AvklartInnstallasjonsType.SKIP;
+        brevdataInnvilgelse.norskeVirksomheter = brevdataA1.norskeVirksomheter;
+        brevdataInnvilgelse.arbeidsland = "Sverige";
+        brevdataInnvilgelse.trygdemyndighetsland = "Sverige";
+
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
         // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
         // grundig mot forventninger.
