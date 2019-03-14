@@ -153,7 +153,8 @@ public class DokSysService implements DokSysFasade {
         String mottakerID = metadata.mottakerID;
 
         if (mottakersRolle == null) {
-            throw new FunksjonellException("Brev kan ikke sendes, mottakersRolle er ikke satt.");
+            log.error("Brev bør ikke sendes, mottakersRolle er ikke satt.");
+            metadata.mottakersRolle = Aktoersroller.BRUKER;
         }
 
         switch (mottakersRolle) {
