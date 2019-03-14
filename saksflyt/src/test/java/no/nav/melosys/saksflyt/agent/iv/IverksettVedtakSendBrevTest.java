@@ -11,6 +11,7 @@ import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.felles.BrevBestiller;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntakOgAvslag;
@@ -80,7 +81,8 @@ public class IverksettVedtakSendBrevTest {
         when(behandlingRepository.findWithSaksopplysningerById(eq(behandling.getId()))).thenReturn(behandling);
 
         dokService = Mockito.spy(lagDokumentService(byggerVelger));
-        return new IverksettVedtakSendBrev(dokService, byggerVelger, behandlingRepository, behandlingsresultatRepo);
+        BrevBestiller brevBestiller = new BrevBestiller(dokService, byggerVelger);
+        return new IverksettVedtakSendBrev(brevBestiller, behandlingRepository, behandlingsresultatRepo);
     }
 
     private static BehandlingRepository mockBehandlingRepository() {
