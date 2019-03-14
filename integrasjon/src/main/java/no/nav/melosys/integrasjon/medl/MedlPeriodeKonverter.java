@@ -26,6 +26,7 @@ public class MedlPeriodeKonverter {
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3B, GrunnlagMedl.FO_11_3_B);
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3C, GrunnlagMedl.FO_11_3_C);
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3E, GrunnlagMedl.FO_11_3_E);
+        tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_4_2, GrunnlagMedl.FO_11_4);
         // Article 12
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1, GrunnlagMedl.FO_12_1);
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_2, GrunnlagMedl.FO_12_2);
