@@ -58,7 +58,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataB
         return brevData;
     }
 
-    Landkoder avklarArbeidsLand(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException, TekniskException {
+    private Landkoder avklarArbeidsLand(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException, TekniskException {
         final Long behandlingsresultatID = behandlingsresultat.getId();
         List<Vilkaar> oppfylteVilkår = behandlingsresultat.getVilkaarsresultater().stream()
             .filter(Vilkaarsresultat::isOppfylt).map(Vilkaarsresultat::getVilkaar).collect(Collectors.toList());
@@ -68,8 +68,8 @@ public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataB
             return Landkoder.valueOf(avklartefaktaService.hentAvklarteFakta(behandlingsresultatID, Avklartefaktatype.FLAGGLAND).getFakta());
         } else {
             SoeknadDokument soeknadDokument = SaksopplysningerUtils.hentSøknadDokument(behandling);
-            if (soeknadDokument.arbeidUtland != null && !soeknadDokument.arbeidUtland.isEmpty()) {
-                return Landkoder.valueOf(soeknadDokument.arbeidUtland.get(0).adresse.landKode);
+            if (!soeknadDokument.oppholdUtland.oppholdslandKoder.isEmpty()) {
+                return Landkoder.valueOf(soeknadDokument.oppholdUtland.oppholdslandKoder.get(0)); //FIXME må erstattes med søknadDokument.land (søknadsland).
             }
         }
         throw new TekniskException("Kunne ikke hente ut arbeidsland for behandlingsresultat " + behandlingsresultat.getId());
