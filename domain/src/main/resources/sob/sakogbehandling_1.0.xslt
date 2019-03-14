@@ -22,9 +22,9 @@
         <behandlingskjede>
             <xsl:apply-templates/>
         </behandlingskjede>
-        <xsl:if test="../sakstema/text() = $SAKSTEMA_BARNETRYGD
-                      and behandlingskjedetype/text() = $BEHANDLINGSKJEDETYPE_BEHANDLE_SAK
-                      and behandlingstema/text() = $BEHANDLINGSTEMA_BARNETRYGD_EØS">
+        <xsl:if test="../sakstema = $SAKSTEMA_BARNETRYGD
+                      and behandlingskjedetype = $BEHANDLINGSKJEDETYPE_BEHANDLE_SAK
+                      and behandlingstema = $BEHANDLINGSTEMA_BARNETRYGD_EØS">
             <xsl:element name="eøsBarnetrygd">true</xsl:element>
         </xsl:if>
     </xsl:template>
