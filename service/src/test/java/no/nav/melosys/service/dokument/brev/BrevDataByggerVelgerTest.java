@@ -32,9 +32,8 @@ public class BrevDataByggerVelgerTest {
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         JoarkService joarkService = mock(JoarkService.class);
-        BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
 
-        brevDataByggerVelger = new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, lovvalgsperiodeService, utenlandskMyndighetRepository, vilkaarsresultatRepository, joarkService, behandlingsresultatService);
+        brevDataByggerVelger = new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, lovvalgsperiodeService, utenlandskMyndighetRepository, vilkaarsresultatRepository, joarkService);
     }
 
     @Test

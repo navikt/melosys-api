@@ -24,7 +24,6 @@ public class BrevDataByggerVelger {
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
     private final JoarkService joarkService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
-    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
     public BrevDataByggerVelger(AvklartefaktaService avklartefaktaService,
@@ -33,7 +32,7 @@ public class BrevDataByggerVelger {
                                 LovvalgsperiodeService lovvalgsperiodeService,
                                 UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                                 VilkaarsresultatRepository vilkaarsresultatRepository,
-                                JoarkService joarkService, BehandlingsresultatService behandlingsresultatService) {
+                                JoarkService joarkService) {
         this.avklartefaktaService = avklartefaktaService;
         this.kodeverkService = kodeverkService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
@@ -41,7 +40,6 @@ public class BrevDataByggerVelger {
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.joarkService = joarkService;
         this.avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     // For brevbygging i saksflyt
@@ -65,7 +63,7 @@ public class BrevDataByggerVelger {
                                                             vilkaarsresultatRepository);
             case AVSLAG_YRKESAKTIV:
             case ORIENTERING_ANMODNING_UNNTAK: {
-                return new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, behandlingsresultatService);
+                return new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, vilkaarsresultatRepository);
             }
             case ANMODNING_UNNTAK: {
                 BrevDataByggerA001 a001Bygger =

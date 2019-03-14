@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -37,7 +38,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
     RegisterOppslagService registerOppslagService;
 
     @Mock
-    BehandlingsresultatService behandlingsresultatService;
+    VilkaarsresultatRepository vilkaarsresultatRepository;
 
     private BrevDataByggerAnmodningUnntakOgAvslag brevDataByggerAnmodningUnntakOgAvslag;
 
@@ -45,7 +46,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
     @Before
     public void setUp() {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        brevDataByggerAnmodningUnntakOgAvslag = new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, behandlingsresultatService);
+        brevDataByggerAnmodningUnntakOgAvslag = new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, vilkaarsresultatRepository);
     }
 
     @Test
@@ -56,10 +57,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
         fagsak.setType(Sakstyper.EU_EOS);
         behandling.setFagsak(fagsak);
 
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setVilkaarsresultater(new HashSet<>());
-
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        when(vilkaarsresultatRepository.findByBehandlingsresultatId(anyLong())).thenReturn(Collections.emptyList());
 
         List<String> selvstendigeForetak = Collections.singletonList("987654321");
         List<String> arbeidsgivereRegister = Collections.singletonList("123456789");

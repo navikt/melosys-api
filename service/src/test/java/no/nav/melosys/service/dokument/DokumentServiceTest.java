@@ -274,9 +274,8 @@ public final class DokumentServiceTest {
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         JoarkService joarkService = mock(JoarkService.class);
-        BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
         return new BrevDataByggerVelger(avklartefaktaService, registerOppslagService, kodeverkService, lovvalgsperiodeService, utenlandskMyndighetRepository,
-                vilkaarsresultatRepository, joarkService, behandlingsresultatService);
+                vilkaarsresultatRepository, joarkService);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock(BrevbestillingDto bestillingDto) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
