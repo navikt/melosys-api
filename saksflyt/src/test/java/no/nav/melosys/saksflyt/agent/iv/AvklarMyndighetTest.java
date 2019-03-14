@@ -63,7 +63,7 @@ public class AvklarMyndighetTest {
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
-        when(behandlingsresultatRepository.findById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
@@ -91,7 +91,7 @@ public class AvklarMyndighetTest {
         when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.BE))).thenReturn(utenlandskMyndighet);
 
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
-        when(behandlingsresultatRepository.findById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
 
         steg.utfør(p);
 

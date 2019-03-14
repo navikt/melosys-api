@@ -79,7 +79,7 @@ public class AvklarMyndighet extends AbstraktStegBehandler {
 
         Behandling behandling = prosessinstans.getBehandling();
         Long behandlingID = prosessinstans.getBehandling().getId();
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findWithSaksbehandlingById(behandlingID)
             .orElseThrow(() -> new TekniskException("Behandlingsresultat " + behandlingID + " finnes ikke."));
 
         if (SendBrevValidator.innvilgelsesbrevSkalSendes(behandlingsresultat.getType(), behandlingsresultat.getLovvalgsperioder().iterator().next())) {
