@@ -6,7 +6,11 @@ CREATE TABLE aktoer (
     orgnr           VARCHAR2(99) NULL,
     saksnummer      VARCHAR2(99) NOT NULL,
     utenlandsk_person_id  VARCHAR2(99) NULL,
-    representerer  VARCHAR2(99) NULL,
+    representerer  VARCHAR2(99)  NULL,
+    registrert_dato TIMESTAMP    NOT NULL,
+    endret_dato     TIMESTAMP    NOT NULL,
+    registrert_av   VARCHAR2(99) NULL,
+    endret_av       VARCHAR2(99) NULL,
     CONSTRAINT pk_bruker PRIMARY KEY (id)
 );
 

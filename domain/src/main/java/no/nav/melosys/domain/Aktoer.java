@@ -5,10 +5,12 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "aktoer")
-public class Aktoer {
+@EntityListeners(AuditingEntityListener.class)
+public class Aktoer extends RegistreringsInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
