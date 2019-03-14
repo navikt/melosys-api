@@ -11,6 +11,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Adresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
@@ -64,7 +65,7 @@ public class BrevDataByggerAnmodningUnntakOgAvslag extends AbstraktDokumentDataB
 
         if (oppfylteVilkår.contains(FO_883_2004_ART11_4_1)) {
             // Bruker FLAGGLAND
-//            return Landkoder.valueOf(avklartefaktaService.hentAvklarteFakta(behandlingsresultatID, Avklartefaktatype.FLAGGLAND).getFakta());
+            return Landkoder.valueOf(avklartefaktaService.hentAvklarteFakta(behandlingsresultatID, Avklartefaktatype.FLAGGLAND).getFakta());
         } else {
             SoeknadDokument soeknadDokument = SaksopplysningerUtils.hentSøknadDokument(behandling);
             if (soeknadDokument.arbeidUtland != null && !soeknadDokument.arbeidUtland.isEmpty()) {
