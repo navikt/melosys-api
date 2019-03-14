@@ -1,6 +1,9 @@
 package no.nav.melosys.saksflyt.agent.aou;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
@@ -21,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SendBrevTest {
@@ -71,7 +73,7 @@ public class SendBrevTest {
     @Test
     public void utførStegAntallSendteBrev() throws FunksjonellException, TekniskException {
         agent.utførSteg(p);
-        verify(dokService, times(1)).produserDokument(anyLong(), eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), any());
-        verify(dokService, times(1)).produserDokument(anyLong(), eq(Produserbaredokumenter.ANMODNING_UNNTAK), any());
+        verify(dokService).produserDokument(anyLong(), eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), any());
+        verify(dokService).produserDokument(anyLong(), eq(Produserbaredokumenter.ANMODNING_UNNTAK), any());
     }
 }

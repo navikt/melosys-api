@@ -10,6 +10,8 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -23,8 +25,8 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
-import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
@@ -43,14 +45,6 @@ public class InnvilgelsesbrevMapperTest {
     @Test
     public void mapTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml();
-    }
-
-    @Test
-    public final void mapTilBrevXmlMedFlereLovvalgsperioderFeiler() {
-        Set<Lovvalgsperiode> perioder = new HashSet<>(Arrays.asList(lagLovvalgsperiode(LocalDate.MIN), lagLovvalgsperiode(LocalDate.now())));
-        Throwable unntak = catchThrowable(() -> testMapTilBrevXml(lagBehandlingsresultat(perioder)));
-        assertThat(unntak).isInstanceOf(UnsupportedOperationException.class)
-            .hasMessageContaining("perioder (2) ulik 1 støttes ikke");
     }
 
     @Test
@@ -91,10 +85,11 @@ public class InnvilgelsesbrevMapperTest {
         brevdataA1.person = lagPersonDokument();
         brevdataA1.hovedvirksomhet = virksomhet;
         brevdataA1.arbeidssteder = new ArrayList<>();
-        BrevDataVedlegg brevVedlegg = new BrevDataVedlegg("SAKSBEHANDLER");
-        brevVedlegg.brevDataA1 = brevdataA1;
-
-        String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevVedlegg);
+        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse("SAKSBEHANDLER", new BrevbestillingDto());
+        brevdataInnvilgelse.vedleggA1 = brevdataA1;
+        brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
+        brevdataInnvilgelse.avklartSokkelEllerSkip = AvklartInnstallasjonsType.SKIP;
+        String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
         // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
         // grundig mot forventninger.
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
@@ -127,13 +122,6 @@ public class InnvilgelsesbrevMapperTest {
         return lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()), fakta);
     }
 
-    private static Behandlingsresultat lagBehandlingsresultat(Set<Lovvalgsperiode> perioder) {
-        Set<Avklartefakta> fakta = new HashSet<>(Arrays.asList(
-                lagAvklarteFakta(Avklartefaktatype.AVKLARTE_ARBEIDSGIVER, "123456789"),
-                lagAvklarteFakta(Avklartefaktatype.ARBEIDSLAND, "SE")));
-        return lagBehandlingsresultat(perioder, fakta);
-    }
-
     private static Behandlingsresultat lagBehandlingsresultat(Set<Lovvalgsperiode> perioder, Set<Avklartefakta> fakta) {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setAvklartefakta(fakta);
@@ -148,10 +136,10 @@ public class InnvilgelsesbrevMapperTest {
     private static Lovvalgsperiode lagLovvalgsperiode(LocalDate fom) {
         Lovvalgsperiode periode = new Lovvalgsperiode();
         periode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
-        // periode.setFom(LocalDate.now());
         periode.setFom(fom);
         periode.setTom(LocalDate.now());
         periode.setLovvalgsland(Landkoder.AT);
+        periode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1);
         return periode;
     }
 

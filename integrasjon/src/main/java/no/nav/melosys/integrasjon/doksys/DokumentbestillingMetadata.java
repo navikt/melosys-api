@@ -16,9 +16,6 @@ public class DokumentbestillingMetadata {
 
     public Aktoersroller mottakersRolle;
 
-    // Kan være organisasjon, person, osv.
-    public MottakerType mottakerType;
-
     // SakID som dokument skal journalføres mot  (forskjellig fra fagsaksnummer)
     public String journalsakID;
 

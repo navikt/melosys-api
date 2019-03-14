@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -150,10 +151,13 @@ public final class DokumentServiceTest {
         brevDataA1.person = lagPersonDokument();
         brevDataA1.arbeidssteder = new ArrayList<>();
         brevDataA1.hovedvirksomhet = arbeidsgiver;
-        BrevDataVedlegg vedlegg = new BrevDataVedlegg("Saksbehandler");
-        vedlegg.mottaker = mottakerRolle;
-        vedlegg.brevDataA1 = brevDataA1;
-        return vedlegg;
+        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse("SAKSBEHANDLER", new BrevbestillingDto());
+        brevdataInnvilgelse.vedleggA1 = brevDataA1;
+        brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
+        brevdataInnvilgelse.avklartSokkelEllerSkip = AvklartInnstallasjonsType.SKIP;
+        brevdataInnvilgelse.mottaker = mottakerRolle;
+
+        return brevdataInnvilgelse;
     }
 
     private static StrukturertAdresse lagStrukturertAdresse() {
@@ -182,7 +186,8 @@ public final class DokumentServiceTest {
             brevdatabyggervelger = lagBrevdataByggerVelger(tpsFasade, avklarteFaktaRepository, behandlingsresultatRepository);
         }
 
-        BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository);
+        UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
+        BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository);
         return new DokumentService(behandlingRepository, mock(FagsakRepository.class), brevDataService, dokSysFasade, mock(JoarkFasade.class),
                 mock(ProsessinstansService.class), brevdatabyggervelger);
     }
@@ -318,14 +323,20 @@ public final class DokumentServiceTest {
     private static Behandlingsresultat lagBehandlingsresultat(List<Avklartefakta> faktaliste) {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setAvklartefakta(new HashSet<>(faktaliste));
+        Lovvalgsperiode periode = lagLovvalgsperiode();
+        List<Lovvalgsperiode> perioder = Collections.singletonList(periode);
+        behandlingsresultat.setLovvalgsperioder(new HashSet<>(perioder));
+        return behandlingsresultat;
+    }
+
+    private static Lovvalgsperiode lagLovvalgsperiode() {
         Lovvalgsperiode periode = new Lovvalgsperiode();
         periode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setFom(LocalDate.now());
         periode.setTom(LocalDate.now());
         periode.setLovvalgsland(Landkoder.NO);
-        List<Lovvalgsperiode> perioder = Collections.singletonList(periode);
-        behandlingsresultat.setLovvalgsperioder(new HashSet<>(perioder));
-        return behandlingsresultat;
+        periode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1);
+        return periode;
     }
 
     private static BehandlingsresultatRepository mockBehandlingsresultatRepo(Behandlingsresultat behandlingsresultat) {

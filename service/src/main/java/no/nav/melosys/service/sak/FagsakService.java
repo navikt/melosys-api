@@ -30,7 +30,7 @@ public class FagsakService {
 
     private final BehandlingService behandlingService;
 
-    private OppgaveService oppgaveService;
+    private final OppgaveService oppgaveService;
 
     private final TpsFasade tpsFasade;
 
@@ -49,8 +49,50 @@ public class FagsakService {
         this.prosessinstansService = prosessinstansService;
     }
 
-    public Fagsak hentFagsak(String saksnummer) {
-        return fagsakRepository.findBySaksnummer(saksnummer);
+    public Optional<Behandling> finnRedigerbarBehandling(String ident, Fagsak fagsak) throws FunksjonellException, TekniskException {
+        Behandling behandling = fagsak.getAktivBehandling();
+        if (behandling == null) {
+            return Optional.empty();
+        }
+
+        Optional<Oppgave> oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+
+        if (oppgave.isPresent()
+            && oppgave.filter(oppgave1 -> ident.equalsIgnoreCase(oppgave1.getTilordnetRessurs())).isPresent()
+            && behandling.erRedigerbar()) {
+            return Optional.of(behandling);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Transactional
+    public void henleggFagsak(String saksnummer, String begrunnelseKodeString, String fritekst) throws TekniskException {
+        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+
+        if (fagsak.getBehandlinger().isEmpty()) {
+            throw new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen tilknyttede behandlinger.");
+        }
+
+        Henleggelsesgrunner begrunnelseKode;
+        try {
+            begrunnelseKode = Henleggelsesgrunner.valueOf(begrunnelseKodeString.toUpperCase());
+        }
+        catch (java.lang.IllegalArgumentException iae) {
+            throw new TekniskException(begrunnelseKodeString.toUpperCase() + " er ingen gyldig henleggelsesgrunn");
+        }
+
+        Behandling sisteIkkeAvsluttedeBehandling = getSisteIkkeAvsluttedeBehandling(fagsak);
+
+        prosessinstansService.opprettProsessinstansHenleggSak(sisteIkkeAvsluttedeBehandling, begrunnelseKode, fritekst);
+    }
+
+    public Fagsak hentFagsak(String saksnummer) throws IkkeFunnetException {
+        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+        if (fagsak == null) {
+            throw new IkkeFunnetException("Det finnes ingen fagsak med saksnummer: " + saksnummer);
+        }
+        return fagsak;
     }
 
     public List<Fagsak> hentFagsakerMedAktør(Aktoersroller rolleType, String ident) throws IkkeFunnetException {
@@ -64,6 +106,31 @@ public class FagsakService {
             sak.setSaksnummer(hentNesteSaksnummer());
         }
         fagsakRepository.save(sak);
+    }
+
+    @Transactional
+    public void leggTilAktør(String saksnummer, Aktoersroller aktørsrolle, String ID) {
+        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+
+        Aktoer aktør = new Aktoer();
+        aktør.setRolle(aktørsrolle);
+        switch (aktørsrolle) {
+            case BRUKER:
+                aktør.setAktørId(ID);
+                break;
+            case ARBEIDSGIVER:
+            case REPRESENTANT:
+                aktør.setOrgnr(ID);
+                break;
+            case MYNDIGHET:
+                aktør.setInstitusjonId(ID);
+                break;
+            default:
+                throw new IllegalStateException(aktørsrolle + " støttes ikke.");
+        }
+
+        fagsak.getAktører().add(aktør);
+        fagsakRepository.save(fagsak);
     }
 
     /**
@@ -99,7 +166,6 @@ public class FagsakService {
             aktørRepresentant.setOrgnr(representant);
             aktørRepresentant.setFagsak(fagsak);
             aktørRepresentant.setRolle(Aktoersroller.REPRESENTANT);
-            aktørRepresentant.setKontaktperson(opprettSakRequest.getRepresentantKontaktperson());
             aktører.add(aktørRepresentant);
         }
 
@@ -125,49 +191,11 @@ public class FagsakService {
         return FAGSAKID_PREFIX + fagsakRepository.hentNesteSekvensVerdi();
     }
 
-    @Transactional
-    public void henleggFagsak(String saksnummer, String begrunnelseKodeString, String fritekst) throws TekniskException {
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
-
-        if (fagsak.getBehandlinger().isEmpty()) {
-            throw new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen tilknyttede behandlinger.");
-        }
-
-        Henleggelsesgrunner begrunnelseKode;
-        try {
-            begrunnelseKode = Henleggelsesgrunner.valueOf(begrunnelseKodeString.toUpperCase());
-        }
-        catch (java.lang.IllegalArgumentException iae) {
-            throw new TekniskException(begrunnelseKodeString.toUpperCase() + " er ingen gyldig henleggelsesgrunn");
-        }
-
-        Behandling sisteIkkeAvsluttedeBehandling = getSisteIkkeAvsluttedeBehandling(fagsak);
-
-        prosessinstansService.opprettProsessinstansHenleggSak(sisteIkkeAvsluttedeBehandling, begrunnelseKode, fritekst);
-    }
-
     private Behandling getSisteIkkeAvsluttedeBehandling(Fagsak fagsak) {
         return fagsak.getBehandlinger()
             .stream()
             .filter(behandling -> behandling.getStatus() != Behandlingsstatus.AVSLUTTET)
             .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
             .orElseThrow(() -> new IllegalStateException("Sak " + fagsak.getSaksnummer() + " har ingen behandlinger eller bare avsluttede behandlinger."));
-    }
-
-    public Optional<Behandling> finnRedigerbarBehandling(String ident, Fagsak fagsak) throws FunksjonellException, TekniskException {
-        Behandling behandling = fagsak.getAktivBehandling();
-        if (behandling == null) {
-            return Optional.empty();
-        }
-
-        Optional<Oppgave> oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
-
-        if (oppgave.isPresent()
-            && oppgave.filter(oppgave1 -> ident.equalsIgnoreCase(oppgave1.getTilordnetRessurs())).isPresent()
-            && behandling.erRedigerbar()) {
-            return Optional.of(behandling);
-        } else {
-            return Optional.empty();
-        }
     }
 }

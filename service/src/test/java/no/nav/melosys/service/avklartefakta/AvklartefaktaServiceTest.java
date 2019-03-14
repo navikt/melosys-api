@@ -6,10 +6,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
+import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
@@ -49,7 +50,7 @@ public class AvklartefaktaServiceTest {
 
     @Test
     public void hentAvklartefakta() {
-        String referanse = "Referenase";
+        String referanse = "Referanse";
         String subjektID = "SubjektID";
         String fakta = "NO";
         Avklartefaktatype type = Avklartefaktatype.ARBEIDSLAND;
@@ -98,7 +99,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void testYrkesgruppeOrdinær() throws TekniskException {
+    public void hentYrkesgruppe_forventerOrdinær() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("ORDINAER");
         Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
@@ -109,7 +110,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void testYrkesgruppeFlyende() throws TekniskException {
+    public void hentYrkesgruppe_forventerFlyende() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("FLYENDE_PERSONELL");
         Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
@@ -120,24 +121,46 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void testYrkesgruppeSokkelSkip() throws TekniskException {
+    public void hentYrkesgruppe_forventerSokkelSkip() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SOKKEL_ELLER_SKIP");
-        Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
+        Optional<Avklartefakta> avklartefaktaFraDb = Optional.ofNullable(avklartefakta);
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
         Yrkesgrupper yrkesgruppeType = avklartefaktaService.hentYrkesGruppe(1L);
         assertThat(yrkesgruppeType).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP);
     }
 
     @Test(expected = TekniskException.class)
-    public void testYrkesgruppeAnnet() throws TekniskException {
+    public void hentYrkesgruppe_utenYrkesgruppe_forventerFeil() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("IKKE_YRKESAKTIV");
-        Optional<Avklartefakta> avklartefaktaSet = Optional.ofNullable(avklartefakta);
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaSet);
+        Optional<Avklartefakta> avklartefaktaFraDb = Optional.ofNullable(avklartefakta);
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
         avklartefaktaService.hentYrkesGruppe(1L);
+    }
+
+    @Test
+    public void hentInnstallasjonsType_medSokkelTekst_foventerSokkelType() throws TekniskException {
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setFakta("SOKKEL");
+        Optional<Avklartefakta> avklartefaktaFraDb = Optional.ofNullable(avklartefakta);
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
+
+        Optional<AvklartInnstallasjonsType> innstallasjonsType = avklartefaktaService.hentInnstallasjonsType(1L);
+        assertThat(innstallasjonsType).isEqualTo(innstallasjonsType);
+    }
+
+    @Test
+    public void hentInnstallasjonsType_medSkipTekst_foventerSkipType() throws TekniskException {
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setFakta("SKIP");
+        Optional<Avklartefakta> avklartefaktaFraDb = Optional.ofNullable(avklartefakta);
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
+
+        Optional<AvklartInnstallasjonsType> innstallasjonsType = avklartefaktaService.hentInnstallasjonsType(1L);
+        assertThat(innstallasjonsType).isEqualTo(innstallasjonsType);
     }
 
     @Test

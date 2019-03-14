@@ -40,6 +40,7 @@ CREATE TABLE prosess_steg (
 
 --Logisk rekkefølge
 INSERT INTO prosess_steg (kode, navn) VALUES ('GSAK_OPPRETT_OPPGAVE', 'Oppretter oppgave i GSAK');
+INSERT INTO prosess_steg (kode, navn) VALUES ('REPLIKER_BEHANDLING', 'Replikerer behandling');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('MOT_VURDER_AUTOMATISK_JFR', 'Vurder om journalføring kan skje automatisk');
 INSERT INTO prosess_steg (kode, navn) VALUES ('JFR_VALIDERING', 'Grunnleggende validering');
@@ -72,6 +73,7 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_SEND_BREV', 'Send orientering
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_VALIDERING', 'Validerer iverksett vedtak');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_RESULTAT', 'Oppdatering av behandlingsresultat');
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_AVKLAR_MYNDIGHET', 'Avklaring av utenlandsk trygdemyndighet');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_MEDL', 'Oppdatering av medlemskap');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_SEND_BREV', 'Send brev etter iverksett vedtak');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_SEND_SED', 'Send SED etter iverksett vedtak');

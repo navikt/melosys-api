@@ -4,6 +4,7 @@ import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Representerer;
 
 @Entity
 @Table(name = "aktoer")
@@ -20,6 +21,9 @@ public class Aktoer {
     @Column(name = "aktoer_id", updatable = false)
     private String aktørId;
 
+    @Column(name = "institusjon_id", updatable = false)
+    private String institusjonId;
+
     @Column(name = "orgnr")
     private String orgnr;
     
@@ -27,11 +31,12 @@ public class Aktoer {
     @Convert(converter = Aktoersroller.DbKonverterer.class)
     private Aktoersroller rolle;
 
-    @Column(name = "utenlandsk_id")
-    private String utenlandskId;
+    @Column(name = "utenlandsk_person_id")
+    private String utenlandskPersonId;
 
-    @Column(name = "kontaktperson")
-    private String kontaktperson;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "representerer")
+    private Representerer representerer;
 
     public Long getId() {
         return id;
@@ -69,20 +74,28 @@ public class Aktoer {
         this.rolle = rolle;
     }
 
-    public String getUtenlandskId() {
-        return utenlandskId;
+    public String getInstitusjonId() {
+        return institusjonId;
     }
 
-    public void setUtenlandskId(String utenlandskId) {
-        this.utenlandskId = utenlandskId;
+    public void setInstitusjonId(String institusjonId) {
+        this.institusjonId = institusjonId;
     }
 
-    public String getKontaktperson() {
-        return kontaktperson;
+    public String getUtenlandskPersonId() {
+        return utenlandskPersonId;
     }
 
-    public void setKontaktperson(String kontaktperson) {
-        this.kontaktperson = kontaktperson;
+    public void setUtenlandskPersonId(String utenlandskPersonId) {
+        this.utenlandskPersonId = utenlandskPersonId;
+    }
+
+    public Representerer getRepresenterer() {
+        return representerer;
+    }
+
+    public void setRepresenterer(Representerer representerer) {
+        this.representerer = representerer;
     }
 
     @Override
@@ -97,13 +110,13 @@ public class Aktoer {
         return Objects.equals(this.fagsak, that.fagsak)
             && Objects.equals(this.aktørId, that.aktørId)
             && Objects.equals(this.orgnr, that.orgnr)
-            && Objects.equals(this.utenlandskId, that.utenlandskId)
+            && Objects.equals(this.institusjonId, that.institusjonId)
+            && Objects.equals(this.utenlandskPersonId, that.utenlandskPersonId)
             && Objects.equals(this.rolle, that.rolle);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fagsak, aktørId, orgnr, utenlandskId, rolle);
+        return Objects.hash(fagsak, aktørId, orgnr, utenlandskPersonId, rolle, institusjonId);
     }
-    
 }

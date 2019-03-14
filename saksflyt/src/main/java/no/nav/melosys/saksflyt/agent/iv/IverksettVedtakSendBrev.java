@@ -13,7 +13,6 @@ import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
-import no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -26,9 +25,10 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.*;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
-import static no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator.avslagsbrevSkalSendes;
-import static no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator.validerLovvalgsperiode;
+import static no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator.*;
+
 
 /**
  * Sende ulike brev basert på lovvalgsbestemmelse.
@@ -73,7 +73,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        // Henter ut behandling på nytt for å få med saksopplysninger
+        // Henter ut behandling med saksopplysninger
         Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
         if (behandling == null) {
             throw new TekniskException(String.format("Finner ikke behandlingen %s.", prosessinstans.getBehandling().getId()));
@@ -90,22 +90,15 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
 
             if (avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
-                BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(AVSLAG_YRKESAKTIV);
-                BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
-                dokumentService.produserDokument(behandling.getId(), AVSLAG_YRKESAKTIV, brevData);
-
-                BrevDataBygger brevDataByggerAvslag = brevDataByggerVelger.hent(AVSLAG_ARBEIDSGIVER);
-                BrevData brevDataAvslag = brevDataByggerAvslag.lag(behandling, saksbehandler);
-                dokumentService.produserDokument(behandling.getId(), AVSLAG_ARBEIDSGIVER, brevDataAvslag);
+                sendBrev(behandling, saksbehandler, AVSLAG_YRKESAKTIV, BRUKER);
+                sendBrev(behandling, saksbehandler, AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER);
 
                 log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
                 prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
-            } else if (SendBrevValidator.innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
-                produserInnvilgelse(behandling, saksbehandler, INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER);
-                produserInnvilgelse(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER);
-                // FIXME Myndigheter støttes ikke.
-                //brevData.mottaker = Aktoersroller.MYNDIGHET;
-                //dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
+            } else if (innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
+                sendBrev(behandling, saksbehandler, INNVILGELSE_YRKESAKTIV, BRUKER);
+                sendBrev(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, ARBEIDSGIVER);
+                sendBrev(behandling, saksbehandler, ATTEST_A1, MYNDIGHET);
 
                 log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
                 prosessinstans.setSteg(IV_SEND_SED);
@@ -122,10 +115,10 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         }
     }
 
-    private void produserInnvilgelse(Behandling behandling,
-                                  String saksbehandler,
-                                  Produserbaredokumenter produserbaredokumenter,
-                                  Aktoersroller aktoersroller) throws FunksjonellException, TekniskException {
+    private void sendBrev(Behandling behandling,
+                          String saksbehandler,
+                          Produserbaredokumenter produserbaredokumenter,
+                          Aktoersroller aktoersroller) throws FunksjonellException, TekniskException {
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(produserbaredokumenter);
         BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
         brevData.mottaker = aktoersroller;

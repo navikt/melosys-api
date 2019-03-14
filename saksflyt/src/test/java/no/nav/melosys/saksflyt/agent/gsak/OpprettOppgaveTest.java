@@ -75,6 +75,34 @@ public class OpprettOppgaveTest {
     }
 
     @Test
+    public void utfoerSteg_endretPeriode_ikkeSendForvaltningsmelding() throws FunksjonellException, TekniskException {
+        Fagsak fagsak = new Fagsak();
+        String saksnummer = "MEL-TESTx";
+        fagsak.setSaksnummer(saksnummer);
+        fagsak.setType(Sakstyper.EU_EOS);
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setType(Behandlingstyper.ENDRET_PERIODE);
+        behandling.setFagsak(fagsak);
+
+        Prosessinstans p = new Prosessinstans();
+        p.setBehandling(behandling);
+
+        p.getBehandling().setType(Behandlingstyper.ENDRET_PERIODE);
+        p.setType(ProsessType.JFR_NY_BEHANDLING);
+
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
+
+        agent.utførSteg(p);
+
+        verify(gsakFasade, times(1)).opprettOppgave(oppgave.capture());
+
+        assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
+        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(null);
+        assertThat(p.getSteg()).isEqualTo(null);
+    }
+
+    @Test
     public void utfoerSteg_nyBehandling_tilNull() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";

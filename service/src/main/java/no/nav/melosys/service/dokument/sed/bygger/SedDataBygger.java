@@ -144,7 +144,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         return adresse;
     }
 
-    private Lovvalgsperiode hentLovvalgsperiodeDto() throws FunksjonellException {
+    private Lovvalgsperiode hentLovvalgsperiodeDto() throws FunksjonellException, TekniskException {
         no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode = hentLovvalgsperiode();
         Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
         lovvalgsperiodeDto.setFom(lovvalgsperiode.getFom());

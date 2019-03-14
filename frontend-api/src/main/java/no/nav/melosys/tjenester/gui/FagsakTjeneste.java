@@ -25,8 +25,8 @@ import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
@@ -86,9 +86,6 @@ public class FagsakTjeneste extends RestTjeneste {
     public Response hentFagsak(@ApiParam @PathParam("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
         String ident = SubjectHandler.getInstance().getUserID();
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
-        if (sak == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
         tilgang.sjekkSak(sak);
         FagsakDto fagsakDto = tilDto(sak, ident);
         return Response.ok(fagsakDto).build();
@@ -116,9 +113,6 @@ public class FagsakTjeneste extends RestTjeneste {
     @ApiOperation(value = "Henlegger en fagsak")
     public Response henleggFagsak(@ApiParam @PathParam("saksnr") String saksnummer, @ApiParam("henleggelseDto") HenleggelseDto henleggelseDto) throws FunksjonellException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
-        if (sak == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
         tilgang.sjekkSak(sak);
 
         fagsakService.henleggFagsak(saksnummer, henleggelseDto.getBegrunnelseKode(), henleggelseDto.getFritekst());
@@ -138,6 +132,8 @@ public class FagsakTjeneste extends RestTjeneste {
                 .findAny()
                 .ifPresent(behandlingDto -> behandlingDto.setRedigerbart(true));
         });
+        //Vi ønsker å ha redigerbare behandlinger først, fordi GUI henter bare ut det første behandlingselementet
+        fagsakDto.getBehandlinger().sort(Comparator.comparing(BehandlingDto::isRedigerbart).reversed());
 
         return fagsakDto;
     }

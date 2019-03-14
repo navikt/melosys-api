@@ -7,6 +7,7 @@ import javax.ws.rs.core.Response.Status;
 
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -37,7 +38,7 @@ public class FagsakTjenesteReadOnlyBehandlingTest {
     FagsakService fagsakService;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IkkeFunnetException {
         SpringSubjectHandler.set(new TestSubjectHandler());
         fagsak = fagsakMedBehandlinger(
             Behandlingsstatus.UNDER_BEHANDLING,
@@ -47,7 +48,7 @@ public class FagsakTjenesteReadOnlyBehandlingTest {
         instans = lagFagsakTjeneste(fagsak);
     }
 
-    private FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) {
+    private FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws IkkeFunnetException {
         Tilgang tilgang = mock(Tilgang.class);
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         return new FagsakTjeneste(fagsakService, tilgang);

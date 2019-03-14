@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.agent.jfr;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import no.nav.melosys.domain.*;
@@ -23,7 +24,8 @@ public class VurderJournalfoeringstypeTest {
     private VurderJournalfoeringstype agent;
 
     private final static String SAKSNUMMER_UTEN_BEHANDLING = "MELTEST-1";
-    private final static String SAKSNUMMER_MED_BEHANDLING = "MELTEST-2";
+    private final static String SAKSNUMMER_MED_AKTIV_BEHANDLING = "MELTEST-2";
+    private final static String SAKSNUMMER_UTEN_AKTIV_BEHANDLING_OG_MED_INAKTIV_BEHANDLING = "MELTEST-4";
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -34,14 +36,22 @@ public class VurderJournalfoeringstypeTest {
         agent = new VurderJournalfoeringstype(fagsakRepository);
 
         Fagsak fagsak = new Fagsak();
+        fagsak.setBehandlinger(Collections.emptyList());
 
-        Fagsak fagsakMedBehandling = new Fagsak();
-        Behandling behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        fagsakMedBehandling.setBehandlinger(Collections.singletonList(behandling));
+        Fagsak fagsakMedAktivBehandling = new Fagsak();
+        Fagsak fagsakMedInaktivBehandling = new Fagsak();
+        Fagsak fagsakMedInaktivOgAktivBehandling = new Fagsak();
+        Behandling aktivBehandling = new Behandling();
+        aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        Behandling inaktivBehandling = new Behandling();
+        inaktivBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        fagsakMedAktivBehandling.setBehandlinger(Collections.singletonList(aktivBehandling));
+        fagsakMedInaktivBehandling.setBehandlinger(Collections.singletonList(inaktivBehandling));
+        fagsakMedInaktivOgAktivBehandling.setBehandlinger(Arrays.asList(aktivBehandling, inaktivBehandling));
 
         when(fagsakRepository.findBySaksnummer(SAKSNUMMER_UTEN_BEHANDLING)).thenReturn(fagsak);
-        when(fagsakRepository.findBySaksnummer(SAKSNUMMER_MED_BEHANDLING)).thenReturn(fagsakMedBehandling);
+        when(fagsakRepository.findBySaksnummer(SAKSNUMMER_MED_AKTIV_BEHANDLING)).thenReturn(fagsakMedAktivBehandling);
+        when(fagsakRepository.findBySaksnummer(SAKSNUMMER_UTEN_AKTIV_BEHANDLING_OG_MED_INAKTIV_BEHANDLING)).thenReturn(fagsakMedInaktivBehandling);
     }
 
     @Test
@@ -66,7 +76,7 @@ public class VurderJournalfoeringstypeTest {
     public void knyttTilFagsakMedAktivBehandling_tilOppdaterJournalpost() {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_KNYTT);
-        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
+        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_AKTIV_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
@@ -90,5 +100,15 @@ public class VurderJournalfoeringstypeTest {
         agent.utførSteg(p);
         assertThat(p.getType()).isEqualTo(ProsessType.JFR_NY_BEHANDLING);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
+    }
+
+    @Test
+    public void knyttTilFagsakMedEndretPeriodeMedInaktivOgUtenAktivBehandling_steg_jfrOppdaterJournalpost() {
+        Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.JFR_KNYTT);
+        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_AKTIV_BEHANDLING_OG_MED_INAKTIV_BEHANDLING);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
+        agent.utførSteg(p);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
     }
 }
