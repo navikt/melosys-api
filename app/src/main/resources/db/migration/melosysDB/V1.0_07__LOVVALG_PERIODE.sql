@@ -4,7 +4,7 @@ CREATE TABLE lovvalg_periode (
     fom_dato                DATE           NOT NULL,
     tom_dato                DATE           NOT NULL,
     lovvalgsland            VARCHAR2(99)   NULL,
-    lovvalg_bestemmelse     VARCHAR2(99)   NOT NULL,
+    lovvalg_bestemmelse     VARCHAR2(99)   NULL,
     tillegg_bestemmelse     VARCHAR(99)    NULL,
     unntak_fra_lovvalgsland VARCHAR(99)    NULL,
     unntak_fra_bestemmelse  VARCHAR(99)    NULL,

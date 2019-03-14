@@ -38,7 +38,7 @@ public final class LovvalgsperiodeDto {
             Trygdedekninger trygdeDekning,
             Medlemskapstyper medlemskapstype) {
         this.periode = periode;
-        this.lovvalgBestemmelse = lovvalgBestemmelse.name();
+        this.lovvalgBestemmelse = lovvalgBestemmelse != null ? lovvalgBestemmelse.name() : null;
         this.tilleggBestemmelse = tilleggBestemmelse != null ? tilleggBestemmelse.name() : null;
         this.lovvalgsland = lovvalgsland != null ? lovvalgsland.name() : null;
         this.unntakFraBestemmelse = unntakFraBestemmelse != null ? unntakFraBestemmelse.name() : null;
