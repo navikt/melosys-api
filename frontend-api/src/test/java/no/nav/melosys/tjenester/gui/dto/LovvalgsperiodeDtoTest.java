@@ -40,11 +40,12 @@ public class LovvalgsperiodeDtoTest {
     }
 
     @Test
-    public void mapKonstruktørLagerSammeObjektSomOrdinærKonstruktørUtenLandkodeUtenMedlemskapstype() throws Exception {
+    public void mapKonstruktørLagerSammeObjektSomOrdinærKonstruktørUtenLandkodeUtenMedlemskapstypeOgLovvalgsbestemmelse() throws Exception {
         Map<String, String> json = new ObjectMapper().readValue(JSON_EKSEMPEL, new TypeReference<Map<String, String>>() {
         });
         json.remove("lovvalgsland");
         json.remove("medlemskapstype");
+        json.remove("lovvalgBestemmelse");
 
         LovvalgsperiodeDto resultat = new LovvalgsperiodeDto(json);
         LovvalgsperiodeDto forventet = lagLovvalgsperiodeDtoFraMap(json);
@@ -52,16 +53,16 @@ public class LovvalgsperiodeDtoTest {
     }
 
     private static LovvalgsperiodeDto lagLovvalgsperiodeDtoFraMap(Map<String, String> json) {
-        LovvalgsperiodeDto forventet = new LovvalgsperiodeDto(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
-            LocalDate.parse(json.get("tomDato"))),
-            LovvalgsBestemmelser_883_2004.valueOf(json.get("lovvalgBestemmelse")),
+        LovvalgsperiodeDto forventet = new LovvalgsperiodeDto(
+            new PeriodeDto(LocalDate.parse(json.get("fomDato")), LocalDate.parse(json.get("tomDato"))),
+            enumVerdiEllerNull(LovvalgsBestemmelser_883_2004.class, json.get("lovvalgBestemmelse")),
             TilleggsBestemmelser_883_2004.valueOf(json.get("tilleggBestemmelse")),
-            json.containsKey("lovvalgsland") ? Landkoder.valueOf(json.get("lovvalgsland")) : null,
+            enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
             enumVerdiEllerNull(LovvalgsBestemmelser_883_2004.class, json.get("unntakFraBestemmelse")),
             enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
             InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
             enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
-            json.containsKey("medlemskapstype") ? Medlemskapstyper.valueOf(json.get("medlemskapstype")) : null);
+            enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")));
         return forventet;
     }
 
