@@ -9,6 +9,7 @@ import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.*;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ public class BrevDataByggerVelger {
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
     private final JoarkService joarkService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final LandvelgerService landvelgerService;
 
     @Autowired
     public BrevDataByggerVelger(AvklartefaktaService avklartefaktaService,
@@ -39,6 +41,7 @@ public class BrevDataByggerVelger {
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.joarkService = joarkService;
         this.avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        this.landvelgerService = new LandvelgerService(avklartefaktaService, lovvalgsperiodeService);
     }
 
     // For brevbygging i saksflyt
@@ -58,6 +61,7 @@ public class BrevDataByggerVelger {
             case AVSLAG_ARBEIDSGIVER:
                 return new BrevDataByggerAvslagArbeidsgiver(avklartefaktaService,
                                                             avklarteVirksomheterService,
+                                                            landvelgerService,
                                                             lovvalgsperiodeService,
                                                             vilkaarsresultatRepository);
             case AVSLAG_YRKESAKTIV:
@@ -77,6 +81,7 @@ public class BrevDataByggerVelger {
             case INNVILGELSE_YRKESAKTIV: {
                 BrevDataByggerInnvilgelse innvilgelseBygger =
                     new BrevDataByggerInnvilgelse(avklartefaktaService,
+                                                landvelgerService,
                                                 lovvalgsperiodeService,
                                                 brevbestillingDto);
                 innvilgelseBygger.setA1Bygger(new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService));
@@ -84,6 +89,7 @@ public class BrevDataByggerVelger {
             }
             case INNVILGELSE_ARBEIDSGIVER:
                 return new BrevDataByggerInnvilgelse(avklartefaktaService,
+                                                    landvelgerService,
                                                     lovvalgsperiodeService,
                                                     brevbestillingDto);
             case MELDING_HENLAGT_SAK: {

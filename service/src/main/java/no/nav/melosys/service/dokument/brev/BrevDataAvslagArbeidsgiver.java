@@ -16,6 +16,7 @@ public class BrevDataAvslagArbeidsgiver extends BrevData {
     public PersonDokument person;
     public AvklartVirksomhet hovedvirksomhet;
     public Lovvalgsperiode lovvalgsperiode;
+    public String arbeidsland;
 
     public Set<VilkaarBegrunnelse> vilkårbegrunnelser121;
     public Set<VilkaarBegrunnelse> vilkårbegrunnelser121VesentligVirksomhet;

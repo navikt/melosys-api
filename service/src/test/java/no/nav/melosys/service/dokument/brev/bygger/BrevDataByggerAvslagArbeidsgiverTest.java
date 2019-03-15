@@ -17,6 +17,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +39,9 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
     AvklartefaktaService avklartefaktaService;
 
     @Mock
+    LandvelgerService landvelgerService;
+
+    @Mock
     RegisterOppslagService registerOppslagService;
 
     @Mock
@@ -53,6 +57,7 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
         brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(avklartefaktaService,
             avklarteVirksomheterService,
+                                                                                landvelgerService,
             lovvalgsperiodeService,
             vilkaarsresultatRepository);
     }

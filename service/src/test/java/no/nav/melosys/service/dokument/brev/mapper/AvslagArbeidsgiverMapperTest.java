@@ -42,6 +42,8 @@ public class AvslagArbeidsgiverMapperTest {
         person.sammensattNavn = "Gunnar Granskau";
         brevData.person = person;
 
+        brevData.arbeidsland = "Denmark";
+
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", "123456789", null, Yrkesaktivitetstyper.SELVSTENDIG);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
