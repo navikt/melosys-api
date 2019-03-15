@@ -67,7 +67,7 @@ public class FagsakService {
     }
 
     @Transactional
-    public void henleggFagsak(String saksnummer, String begrunnelseKodeString, String fritekst) throws TekniskException {
+    public void henleggFagsak(String saksnummer, String begrunnelseKodeString, String fritekst) throws TekniskException, FunksjonellException {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
 
         if (fagsak.getBehandlinger().isEmpty()) {
@@ -85,6 +85,7 @@ public class FagsakService {
         Behandling sisteIkkeAvsluttedeBehandling = getSisteIkkeAvsluttedeBehandling(fagsak);
 
         prosessinstansService.opprettProsessinstansHenleggSak(sisteIkkeAvsluttedeBehandling, begrunnelseKode, fritekst);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(sisteIkkeAvsluttedeBehandling.getFagsak().getSaksnummer());
     }
 
     public Fagsak hentFagsak(String saksnummer) throws IkkeFunnetException {
