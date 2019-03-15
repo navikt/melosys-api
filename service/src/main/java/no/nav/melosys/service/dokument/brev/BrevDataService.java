@@ -50,6 +50,7 @@ public class BrevDataService {
 
     static final String MELOSYS_ENHET_ID = "4530";
 
+    private static final String FALSK_MOTTAKER_ID = "11111111111";
     static final String PLASSHOLDER_TEKST = "-";
     static final String PLASSHOLDER_POSTNUMMER = "0000";
 
@@ -234,13 +235,13 @@ public class BrevDataService {
             mottaker.setTypeKode(AktoerType.ORGANISASJON);
             mottaker.setId(aktør.getOrgnr());
         } else if (aktør.getInstitusjonId() != null) {
-            mottaker = new Organisasjon();
-            mottaker.setTypeKode(AktoerType.ORGANISASJON);
-            mottaker.setId(aktør.getInstitusjonId());
+            mottaker = new Person();
+            mottaker.setTypeKode(AktoerType.PERSON);
+            mottaker.setId(FALSK_MOTTAKER_ID);
 
             UtenlandskMyndighet utenlandskMyndighet = hentMyndighetFraSak(behandling.getFagsak());
             mottaker.setNavn(utenlandskMyndighet.navn);
-            mottaker.setKortNavn(PLASSHOLDER_TEKST);
+            mottaker.setKortNavn(aktør.getInstitusjonId());
             mottaker.setSpraakkode(Spraakkode.NB);
             mottaker.setMottakeradresse(lagUtendlanskAdresse(utenlandskMyndighet));
             return mottaker;
