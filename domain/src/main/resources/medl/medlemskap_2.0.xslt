@@ -28,16 +28,19 @@
         </medlemsperiode>
     </xsl:template>
 
-    <xsl:template match="grunnlagstype|trygdedekning">
+    <xsl:template match="grunnlagstype">
         <xsl:element name="{name()}">
             <xsl:value-of select="translate(., $smallCase, $upperCase)"/>
         </xsl:element>
     </xsl:template>
 
-    <xsl:template match="id|type|status|land|lovvalg|kildedokumenttype|kilde">
+    <xsl:template match="id|type|status|land|lovvalg|kildedokumenttype|kilde|trygdedekning">
         <xsl:element name="{name()}">
             <xsl:value-of select="."/>
         </xsl:element>
     </xsl:template>
+
+    <!-- Fjerner uønsket output (Tekst som ikke befinner seg i en tag) -->
+    <xsl:template match="text()"/>
 
 </xsl:stylesheet>

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.MedlemsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
@@ -31,7 +32,7 @@ public class MedlemsperiodeSerializer extends StdSerializer<Medlemsperiode> {
         medlemsperiodeDto.periode = getPeriode(periode);
         medlemsperiodeDto.land = kodeverkService.getKodeverdi(FellesKodeverk.LANDKODER, medlemsperiode.getLand());
         medlemsperiodeDto.grunnlagstype = kodeverkService.getKodeverdi(FellesKodeverk.GRUNNLAG_MEDL, medlemsperiode.getGrunnlagstype());
-        medlemsperiodeDto.kilde = kodeverkService.getKodeverdi(FellesKodeverk.KILDESYSTEM_MEDL, medlemsperiode.getKilde());
+        medlemsperiodeDto.kilde = new KodeDto(medlemsperiode.getKilde(), medlemsperiode.getKilde());
         medlemsperiodeDto.kildedokumenttype = kodeverkService.getKodeverdi(FellesKodeverk.KILDEDOKUMENT_MEDL, medlemsperiode.getKildedokumenttype());
         medlemsperiodeDto.lovvalg = kodeverkService.getKodeverdi(FellesKodeverk.LOVVALG_MEDL, medlemsperiode.getLovvalg());
         medlemsperiodeDto.status = kodeverkService.getKodeverdi(FellesKodeverk.PERIODESTATUS_MEDL, medlemsperiode.getStatus());
@@ -45,5 +46,5 @@ public class MedlemsperiodeSerializer extends StdSerializer<Medlemsperiode> {
         }
         return new PeriodeDto(periode.getFom(), periode.getTom());
     }
-    
+
 }
