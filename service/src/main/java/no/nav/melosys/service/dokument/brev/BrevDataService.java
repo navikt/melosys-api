@@ -27,6 +27,7 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,7 +58,7 @@ public class BrevDataService {
     private UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
     @Autowired
-    public BrevDataService(TpsFasade tpsFasade,
+    public BrevDataService(@Qualifier("system") TpsFasade tpsFasade,
                            BehandlingsresultatRepository behandlingsresultatRepository,
                            UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
         this.tpsFasade = tpsFasade;
