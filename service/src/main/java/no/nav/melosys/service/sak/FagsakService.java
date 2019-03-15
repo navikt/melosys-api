@@ -113,6 +113,7 @@ public class FagsakService {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
 
         Aktoer aktør = new Aktoer();
+        aktør.setFagsak(fagsak);
         aktør.setRolle(aktørsrolle);
         switch (aktørsrolle) {
             case BRUKER:
