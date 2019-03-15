@@ -26,7 +26,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -107,11 +106,14 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void henleggFagsakMedToBehandlingerHenterSisteBehandling() throws TekniskException {
+    public void henleggFagsakMedToBehandlingerHenterSisteBehandling() throws TekniskException, FunksjonellException {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "123456789";
         Behandling førsteBehandling = new Behandling();
         Behandling andreBehandling = new Behandling();
+        Fagsak andreBehandlingFagsak = new Fagsak();
+        andreBehandlingFagsak.setSaksnummer("987654321");
+        andreBehandling.setFagsak(andreBehandlingFagsak);
         long førsteBehandlingId = 999L;
         long andreBehandlingId = 234L;
         Behandlingsresultat behandlingsresultat = mock(Behandlingsresultat.class);
@@ -124,13 +126,18 @@ public class FagsakServiceTest {
         verify(prosessinstansService).opprettProsessinstansHenleggSak(andreBehandling, Henleggelsesgrunner.ANNET, fritekst);
 
         verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(eq(førsteBehandling), any(), anyString());
+
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(andreBehandlingFagsak.getSaksnummer()));
     }
 
     @Test
-    public void henleggFagsakMedToBehandlingerHenterFørsteBehandlingHvisSisteErAvsluttet() throws TekniskException {
+    public void henleggFagsakMedToBehandlingerHenterFørsteBehandlingHvisSisteErAvsluttet() throws TekniskException, FunksjonellException {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "123456789";
         Behandling førsteBehandling = new Behandling();
+        Fagsak førsteBehandlingFagsak = new Fagsak();
+        førsteBehandlingFagsak.setSaksnummer("987654321");
+        førsteBehandling.setFagsak(førsteBehandlingFagsak);
         Behandling andreBehandling = new Behandling();
         andreBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
         long førsteBehandlingId = 999L;
@@ -145,10 +152,12 @@ public class FagsakServiceTest {
         verify(prosessinstansService).opprettProsessinstansHenleggSak(førsteBehandling, Henleggelsesgrunner.ANNET, fritekst);
 
         verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(eq(andreBehandling), any(), anyString());
+
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(førsteBehandlingFagsak.getSaksnummer()));
     }
 
     @Test
-    public void henleggFagsakMedToBehandlingerKasterExceptionNårIkkeGyldigHenleggelsesgrunn() throws TekniskException {
+    public void henleggFagsakMedToBehandlingerKasterExceptionNårIkkeGyldigHenleggelsesgrunn() throws TekniskException, FunksjonellException {
         String saksnummer = "123456789";
         initierFagsakMedToBehandlinger(new Fagsak(), saksnummer, new Behandling(), new Behandling(), 999L, 234L, mock(Behandlingsresultat.class));
 
@@ -157,6 +166,8 @@ public class FagsakServiceTest {
         fagsakService.henleggFagsak(saksnummer, "UGYLDIGKODE", "Fri tale");
 
         verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(any(), any(), anyString());
+
+        verify(oppgaveService, never()).ferdigstillOppgaveMedSaksnummer(anyString());
     }
 
     private void initierFagsakMedToBehandlinger(Fagsak fagsak, String saksnummer, Behandling førsteBehandling, Behandling andreBehandling, long førsteBehandlingId, long andreBehandlingId, Behandlingsresultat behandlingsresultat) {
