@@ -45,13 +45,13 @@ public class LandvelgerService {
         if (periode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1 &&
             periode.getTilleggsbestemmelse() == TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1) {
             Optional<Landkoder> avklarteFlaggland = avklartefaktaService.hentFlaggland(behandling.getId());
-            arbeidsland = avklarteFlaggland.orElseThrow(() -> new FunksjonellException("ART12_1 + ART11_4_1: Trenger flaggland"));
+            arbeidsland = avklarteFlaggland.orElseThrow(() -> new FunksjonellException("ART12_1 + ART11_4_1: Trenger avklart flaggland"));
         }
 
         if (periode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3A) {
             if (periode.getTilleggsbestemmelse() == TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1) {
                 Optional<Landkoder> avklarteFlaggland = avklartefaktaService.hentFlaggland(behandling.getId());
-                arbeidsland = avklarteFlaggland.orElseThrow(() -> new FunksjonellException("ART11_3A + ART11_4_1: Trenger bostedsland"));
+                arbeidsland = avklarteFlaggland.orElseThrow(() -> new FunksjonellException("ART11_3A + ART11_4_1: Trenger avklart flaggland"));
             } else {
                 arbeidsland = Landkoder.valueOf(hentMaritimeArbeid(søknad).territorialfarvann);
             }
@@ -59,7 +59,7 @@ public class LandvelgerService {
 
         if (periode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_4_2) {
             Optional<Landkoder> avklarteFlaggland = avklartefaktaService.hentFlaggland(behandling.getId());
-            arbeidsland = avklarteFlaggland.orElseThrow(() -> new FunksjonellException("ART11_4_2: Trenger flaggland"));
+            arbeidsland = avklarteFlaggland.orElseThrow(() -> new FunksjonellException("ART11_4_2: Trenger Avklart flaggland"));
         }
 
         return arbeidsland.getBeskrivelse();
@@ -75,7 +75,7 @@ public class LandvelgerService {
         if (periode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1 &&
             periode.getTilleggsbestemmelse() == TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1) {
             Optional<Landkoder> avklarteFlaggland = avklartefaktaService.hentFlaggland(behandling.getId());
-            trygdemyndighetsland = avklarteFlaggland.orElseThrow(() -> new FunksjonellException("ART12_1 + ART11_4_1: Trenger bostedsland"));
+            trygdemyndighetsland = avklarteFlaggland.orElseThrow(() -> new FunksjonellException("ART12_1 + ART11_4_1: Trenger avklart flaggland"));
         }
 
         if (periode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3A ||

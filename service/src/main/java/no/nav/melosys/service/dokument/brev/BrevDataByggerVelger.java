@@ -8,8 +8,8 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.brev.bygger.*;
 import no.nav.melosys.service.dokument.LandvelgerService;
+import no.nav.melosys.service.dokument.brev.bygger.*;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -66,7 +66,7 @@ public class BrevDataByggerVelger {
                                                             vilkaarsresultatRepository);
             case AVSLAG_YRKESAKTIV:
             case ORIENTERING_ANMODNING_UNNTAK: {
-                return new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, vilkaarsresultatRepository);
+                return new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, landvelgerService);
             }
             case ANMODNING_UNNTAK: {
                 BrevDataByggerA001 a001Bygger =

@@ -68,7 +68,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
             fag.setYrkesaktivitet(YrkesaktivitetsKode.LOENNET_ARBEID);
         }
 
-        fag.setArbeidsland(brevData.arbeidsland.getBeskrivelse());
+        fag.setArbeidsland(brevData.arbeidsland);
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat));
 
         Set<VilkaarBegrunnelse> art121Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_1);

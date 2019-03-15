@@ -11,10 +11,10 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +24,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.service.SaksopplysningStubs.lagSøknadOgArbeidsforholdOpplysninger;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -36,15 +36,14 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
     RegisterOppslagService registerOppslagService;
 
     @Mock
-    VilkaarsresultatRepository vilkaarsresultatRepository;
+    LandvelgerService landvelgerService;
 
     private BrevDataByggerAnmodningUnntakOgAvslag brevDataByggerAnmodningUnntakOgAvslag;
-
 
     @Before
     public void setUp() {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        brevDataByggerAnmodningUnntakOgAvslag = new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, vilkaarsresultatRepository);
+        brevDataByggerAnmodningUnntakOgAvslag = new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, landvelgerService);
     }
 
     @Test
@@ -54,8 +53,6 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
         behandling.setFagsak(fagsak);
-
-        when(vilkaarsresultatRepository.findByBehandlingsresultatId(anyLong())).thenReturn(Collections.emptyList());
 
         List<String> selvstendigeForetak = Collections.singletonList("987654321");
         List<String> arbeidsgivereRegister = Collections.singletonList("123456789");
@@ -70,6 +67,8 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
         when(avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId())).thenReturn(orgSet);
 
+        when(landvelgerService.hentArbeidsland(any())).thenReturn("Tyskland");
+
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.setOrgnummer("999");
 
@@ -79,6 +78,6 @@ public class BrevDataByggerAnmodningUnntakOgAvslagTest {
 
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
         assertThat(brevData.hovedvirksomhet.isSelvstendigForetak()).isEqualTo(true);
-        assertThat(brevData.arbeidsland).isEqualByComparingTo(Landkoder.DE);
+        assertThat(brevData.arbeidsland).isEqualTo(Landkoder.DE.getBeskrivelse());
     }
 }

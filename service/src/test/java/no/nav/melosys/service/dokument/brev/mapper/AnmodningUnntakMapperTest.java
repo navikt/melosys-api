@@ -91,7 +91,7 @@ public class AnmodningUnntakMapperTest {
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG);
-        brevData.arbeidsland = Landkoder.AT;
+        brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 

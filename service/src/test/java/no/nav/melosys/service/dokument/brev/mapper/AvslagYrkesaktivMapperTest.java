@@ -96,7 +96,7 @@ public class AvslagYrkesaktivMapperTest {
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevData.arbeidsland = Landkoder.AT;
+        brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
 
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
         String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
