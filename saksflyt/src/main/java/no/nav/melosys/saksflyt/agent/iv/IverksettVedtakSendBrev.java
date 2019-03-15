@@ -83,13 +83,15 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
 
             if (avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
                 brevBestiller.bestill(behandling, saksbehandler, AVSLAG_YRKESAKTIV, BRUKER);
-                brevBestiller.bestill(behandling, saksbehandler, AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER);
+                // FIXME Støtte for arbeidsgivere mangler.
+                //brevBestiller.bestill(behandling, saksbehandler, AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER);
 
                 log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
                 prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
             } else if (innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
                 brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_YRKESAKTIV, BRUKER);
-                brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, ARBEIDSGIVER);
+                // FIXME Støtte for arbeidsgivere mangler.
+                //brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, ARBEIDSGIVER);
                 brevBestiller.bestill(behandling, saksbehandler, ATTEST_A1, MYNDIGHET);
 
                 log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
