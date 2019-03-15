@@ -1,9 +1,10 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -62,7 +63,7 @@ public class BrevDataByggerVelger {
                                                             vilkaarsresultatRepository);
             case AVSLAG_YRKESAKTIV:
             case ORIENTERING_ANMODNING_UNNTAK: {
-                return new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService);
+                return new BrevDataByggerAnmodningUnntakOgAvslag(avklartefaktaService, avklarteVirksomheterService, vilkaarsresultatRepository);
             }
             case ANMODNING_UNNTAK: {
                 BrevDataByggerA001 a001Bygger =
