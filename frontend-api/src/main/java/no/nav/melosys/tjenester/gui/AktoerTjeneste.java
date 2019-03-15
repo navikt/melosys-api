@@ -19,6 +19,7 @@ import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.sak.FagsakService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -61,10 +62,10 @@ public class AktoerTjeneste extends RestTjeneste {
 
         Aktoersroller rolle = null;
         Representerer representantRepresenterer = null;
-        if (aktoersrolle != null) {
+        if (!StringUtils.isEmpty(aktoersrolle)) {
             rolle = Aktoersroller.valueOf(aktoersrolle);
         }
-        if (representerer != null) {
+        if (!StringUtils.isEmpty(representerer)) {
             representantRepresenterer = Representerer.valueOf(representerer);
         }
 
