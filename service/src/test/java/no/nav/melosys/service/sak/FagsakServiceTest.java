@@ -60,7 +60,6 @@ public class FagsakServiceTest {
     @Before
     public void setUp() throws FunksjonellException, TekniskException {
         fagsakService = new FagsakService(fagsakRepo, behandlingService, oppgaveService, tps, prosessinstansService);
-        doNothing().when(oppgaveService).ferdigstillOppgaveMedSaksnummer(anyString());
     }
 
     @Test
@@ -127,6 +126,8 @@ public class FagsakServiceTest {
         verify(prosessinstansService).opprettProsessinstansHenleggSak(andreBehandling, Henleggelsesgrunner.ANNET, fritekst);
 
         verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(eq(førsteBehandling), any(), anyString());
+
+        verify(oppgaveService, times(1)).ferdigstillOppgaveMedSaksnummer(eq(andreBehandlingFagsak.getSaksnummer()));
     }
 
     @Test
@@ -151,6 +152,8 @@ public class FagsakServiceTest {
         verify(prosessinstansService).opprettProsessinstansHenleggSak(førsteBehandling, Henleggelsesgrunner.ANNET, fritekst);
 
         verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(eq(andreBehandling), any(), anyString());
+
+        verify(oppgaveService, times(1)).ferdigstillOppgaveMedSaksnummer(eq(førsteBehandlingFagsak.getSaksnummer()));
     }
 
     @Test
@@ -163,6 +166,8 @@ public class FagsakServiceTest {
         fagsakService.henleggFagsak(saksnummer, "UGYLDIGKODE", "Fri tale");
 
         verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(any(), any(), anyString());
+
+        verify(oppgaveService, never()).ferdigstillOppgaveMedSaksnummer(anyString());
     }
 
     private void initierFagsakMedToBehandlinger(Fagsak fagsak, String saksnummer, Behandling førsteBehandling, Behandling andreBehandling, long førsteBehandlingId, long andreBehandlingId, Behandlingsresultat behandlingsresultat) {
