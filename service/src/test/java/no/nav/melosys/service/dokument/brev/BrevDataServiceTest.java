@@ -9,11 +9,13 @@ import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
 import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon;
 import no.nav.dok.brevdata.felles.v1.navfelles.Person;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsService;
@@ -61,7 +63,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagA1_tilUtenlandskMyndighet() throws TekniskException {
+    public void lagA1_tilUtenlandskMyndighet() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         Behandling behandling = lagBehandling();
         String institusjonID = "HR:Zxcd";
         behandling.getFagsak().getAktører().add(lagAktoerMyndighet(institusjonID));
@@ -72,10 +74,15 @@ public class BrevDataServiceTest {
         myndighet.gateadresse = "gateadresse 123";
         myndighet.land = "HR";
         when(utenlandskMyndighetRepository.findByLandkode(Landkoder.HR)).thenReturn(myndighet);
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.sammensattNavn = "Alf Berg";
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(personDokument);
+        when(tpsService.hentPerson(anyString())).thenReturn(saksopplysning);
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(ATTEST_A1, behandling, brevData);
 
-        assertThat(metadata.bruker).isEqualTo(FNR);
+        assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo(institusjonID);
         assertThat(metadata.utenlandskMyndighet).isEqualTo(myndighet);
 
@@ -105,13 +112,13 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagForvaltningsmelding_representantErNull_tilBruker() throws TekniskException {
+    public void lagForvaltningsmelding_representantErNull_tilBruker() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         Behandling behandling = lagBehandling();
         BrevData brevData = new BrevData("Z123456");
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling, brevData);
 
-        assertThat(metadata.bruker).isEqualTo(FNR);
+        assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo(FNR);
 
         Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, lagBehandling(), brevData);
@@ -120,7 +127,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagForvaltningsmelding_representantIkkeNull_tilRepresentant() throws TekniskException {
+    public void lagForvaltningsmelding_representantIkkeNull_tilRepresentant() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
 
         Aktoer representant = new Aktoer();
         representant.setAktørId("Representant");
@@ -134,7 +141,7 @@ public class BrevDataServiceTest {
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling, brevData);
 
-        assertThat(metadata.bruker).isEqualTo(FNR);
+        assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo(REPRESENTANT);
 
         Element element = service.lagBrevXML(MELDING_FORVENTET_SAKSBEHANDLINGSTID, lagBehandling(), brevData);
@@ -143,7 +150,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagMangelbrevXml_mottakerErBruker() throws TekniskException {
+    public void lagMangelbrevXml_mottakerErbrukerID() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         Behandling behandling = lagBehandling();
         BrevData brevData = new BrevData("Z123456");
         brevData.mottaker = Aktoersroller.BRUKER;
@@ -151,7 +158,7 @@ public class BrevDataServiceTest {
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
-        assertThat(metadata.bruker).isEqualTo(FNR);
+        assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo(FNR);
 
         doAnswer(answer -> {
@@ -167,7 +174,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagMangelbrevXml_mottakerErArbeidsgiver() throws TekniskException {
+    public void lagMangelbrevXml_mottakerErArbeidsgiver() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         Behandling behandling = lagBehandling();
         BrevData brevData = new BrevData("Z123456");
         brevData.mottaker = Aktoersroller.ARBEIDSGIVER;
@@ -175,7 +182,7 @@ public class BrevDataServiceTest {
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
-        assertThat(metadata.bruker).isEqualTo(FNR);
+        assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo(ORGNR);
 
         doAnswer(answer -> {
@@ -226,18 +233,24 @@ public class BrevDataServiceTest {
 
     private static DokumentbestillingMetadata lagDokumentbestillingMetadata(Produserbaredokumenter doktype, Aktoersroller rolle) throws TekniskException {
         DokumentbestillingMetadata forventet = new DokumentbestillingMetadata();
-        forventet.bruker = FNR;
+        forventet.brukerID = FNR;
         forventet.mottakersRolle = rolle;
         if (rolle == Aktoersroller.BRUKER) {
             forventet.mottakerID = FNR;
+            forventet.utledRegisterInfo = true;
+        } else if (rolle == Aktoersroller.ARBEIDSGIVER) {
+            forventet.mottakerID = ORGNR;
+            forventet.utledRegisterInfo = true;
         } else {
             forventet.mottakerID = ORGNR;
+            forventet.utledRegisterInfo = false;
         }
 
         forventet.dokumenttypeID = DokumenttypeIdMapper.hentID(doktype);
         forventet.fagområde = "MED";
         forventet.journalsakID = "123";
         forventet.saksbehandler = "TEST";
+
         return forventet;
     }
 

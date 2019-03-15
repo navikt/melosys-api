@@ -15,10 +15,12 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -66,7 +68,7 @@ public class BrevDataService {
     /**
      * Genererer metada til doksys angående dokumentbestillingen.
      */
-    public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
+    public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument");
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer();
@@ -75,7 +77,7 @@ public class BrevDataService {
         metadata.dokumenttypeID = DokumenttypeIdMapper.hentID(produserbartDokument);
         metadata.mottakersRolle = brevData.mottaker;
 
-        metadata.bruker = tpsFasade.hentFagsakIdentMedRolleType(fagsak, BRUKER);
+        metadata.brukerID = tpsFasade.hentFagsakIdentMedRolleType(fagsak, BRUKER);
         Aktoer representant = fagsak.hentAktørMedRolleType(REPRESENTANT);
 
         switch (produserbartDokument) {
@@ -85,7 +87,7 @@ public class BrevDataService {
                 if (representant != null) {
                     metadata.mottakerID = tpsFasade.hentFagsakIdentMedRolleType(fagsak, REPRESENTANT);
                 } else {
-                    metadata.mottakerID = metadata.bruker;
+                    metadata.mottakerID = metadata.brukerID;
                 }
                 break;
             }
@@ -122,7 +124,13 @@ public class BrevDataService {
         metadata.fagområde = Tema.MED.getKode();
         metadata.saksbehandler = brevData.saksbehandler;
         metadata.utenlandskMyndighet = (brevData.mottaker == Aktoersroller.MYNDIGHET) ? hentMyndighetFraSak(fagsak) : null;
+        metadata.utledRegisterInfo = dokprodUtlederRegisterInfo(metadata);
 
+        if (!metadata.utledRegisterInfo) {
+            Saksopplysning tpsOpplysning = tpsFasade.hentPerson(metadata.brukerID);
+            PersonDokument tpsDokument = (PersonDokument) tpsOpplysning.getDokument();
+            metadata.brukerNavn = tpsDokument.sammensattNavn;
+        }
         return metadata;
     }
 
@@ -130,6 +138,12 @@ public class BrevDataService {
         Aktoer myndighet = fagsak.hentAktørMedRolleType(MYNDIGHET);
         String[] split = myndighet.getInstitusjonId().split(":");
         return utenlandskMyndighetRepository.findByLandkode(Landkoder.valueOf(split[0]));
+    }
+
+    // Dokprod kan utlede registerinfo når Melosys ikke trenger å sette adressen sammen.
+    // Melosys setter adressen sammen for kontaktpersoner og utelandske myndigheter.
+    private boolean dokprodUtlederRegisterInfo(DokumentbestillingMetadata metadata) {
+        return Aktoersroller.MYNDIGHET != metadata.mottakersRolle;
     }
 
     /**

@@ -62,6 +62,7 @@ public class DokSysServiceTest {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
         metadata.dokumenttypeID = "dok_1234";
         metadata.mottakersRolle = Aktoersroller.BRUKER;
+        metadata.utledRegisterInfo = true;
         Object brevdata = new Object();
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 

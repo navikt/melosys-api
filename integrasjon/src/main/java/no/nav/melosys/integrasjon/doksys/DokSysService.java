@@ -47,7 +47,7 @@ public class DokSysService implements DokSysFasade {
     public byte[] produserDokumentutkast(DokumentbestillingMetadata metadata, Object brevdata) throws IntegrasjonException {
         ProduserDokumentutkastRequest wsRequest = new ProduserDokumentutkastRequest();
 
-        wsRequest.setUtledRegisterInfo(dokprodUtlederRegisterInfo(metadata));
+        wsRequest.setUtledRegisterInfo(metadata.utledRegisterInfo);
         wsRequest.setDokumenttypeId(metadata.dokumenttypeID);
         wsRequest.setBrevdata(brevdata);
 
@@ -67,9 +67,7 @@ public class DokSysService implements DokSysFasade {
         Dokumentbestillingsinformasjon info = new Dokumentbestillingsinformasjon();
 
         info.setDokumenttypeId(metadata.dokumenttypeID);
-        // Parameter som settes for å angi om registerInfo skal utledes i Dokprod for dokumentet som bestilles.
-        boolean adresseUtledes = dokprodUtlederRegisterInfo(metadata);
-        info.setUtledRegisterInfo(adresseUtledes);
+        info.setUtledRegisterInfo(metadata.utledRegisterInfo);
         // Hvis vedlegg skal sendes, må denne settes først når vedleggene har blitt sendt
         info.setFerdigstillForsendelse(true);
 
@@ -84,7 +82,10 @@ public class DokSysService implements DokSysFasade {
         info.setSakstilhoerendeFagsystem(sakstilhørendeFagsystem);
 
         Person bruker = objectFactory.createPerson();
-        bruker.setIdent(metadata.bruker);
+        if (!metadata.utledRegisterInfo) {
+            bruker.setNavn(metadata.brukerNavn);
+        }
+        bruker.setIdent(metadata.brukerID);
         info.setBruker(bruker);
 
         info.setMottaker(lagMottaker(metadata));
@@ -99,7 +100,7 @@ public class DokSysService implements DokSysFasade {
         info.setJournalfoerendeEnhet(Integer.toString(MELOSYS_ENHET_ID));
         info.setSaksbehandlernavn(metadata.saksbehandler);
 
-        if (!adresseUtledes) {
+        if (!metadata.utledRegisterInfo) {
             info.setAdresse(lagAdresse(metadata));
         }
 
@@ -123,12 +124,6 @@ public class DokSysService implements DokSysFasade {
             log.error("Produksjon av dokument feilet", e);
             throw new IntegrasjonException(e);
         }
-    }
-
-    // Dokprod kan utlede registerinfo når Melosys ikke trenger å sette adressen sammen.
-    // Melosys setter adressen sammen for kontaktpersoner og utelandske myndigheter.
-    private boolean dokprodUtlederRegisterInfo(DokumentbestillingMetadata metadata) {
-        return Aktoersroller.MYNDIGHET != metadata.mottakersRolle;
     }
 
     private Adresse lagAdresse(DokumentbestillingMetadata metadata) throws TekniskException {
