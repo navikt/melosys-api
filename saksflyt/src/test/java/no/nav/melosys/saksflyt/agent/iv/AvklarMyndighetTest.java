@@ -9,6 +9,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -31,6 +32,9 @@ public class AvklarMyndighetTest {
     private AvklartefaktaService avklartefaktaService;
 
     @Mock
+    private BehandlingRepository behandlingRepository;
+
+    @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Mock
@@ -45,14 +49,15 @@ public class AvklarMyndighetTest {
 
     @Before
     public void setUp() {
-        steg = new AvklarMyndighet(avklartefaktaService, behandlingsresultatRepository, fagsakService, utenlandskMyndighetRepository);
+        steg = new AvklarMyndighet(avklartefaktaService, behandlingRepository, behandlingsresultatRepository, fagsakService, utenlandskMyndighetRepository);
 
         p = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("saksnr");
 
-        p.setBehandling(lagBehandling(fagsak));
-        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
+        Behandling behandling = lagBehandling(fagsak);
+        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(behandling);
+        p.setBehandling(behandling);
         p.setType(ProsessType.IVERKSETT_VEDTAK);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -70,6 +75,7 @@ public class AvklarMyndighetTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         SoeknadDokument søknadDokument = new SoeknadDokument();
         søknadDokument.oppholdUtland.oppholdslandKoder.add("BE");
         ArbeidUtland arbeidUtland = new ArbeidUtland();

@@ -14,6 +14,7 @@ import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
@@ -45,6 +46,8 @@ public class AvklarMyndighet extends AbstraktStegBehandler {
 
     private final AvklartefaktaService avklarteFaktaService;
 
+    private final BehandlingRepository behandlingRepository;
+
     private final BehandlingsresultatRepository behandlingsresultatRepository;
 
     private final FagsakService fagsakService;
@@ -53,10 +56,12 @@ public class AvklarMyndighet extends AbstraktStegBehandler {
 
     @Autowired
     public AvklarMyndighet(AvklartefaktaService avklarteFaktaService,
+                           BehandlingRepository behandlingRepository,
                            BehandlingsresultatRepository behandlingsresultatRepository,
                            FagsakService fagsakService,
                            UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
         this.avklarteFaktaService = avklarteFaktaService;
+        this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.fagsakService = fagsakService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
@@ -77,8 +82,9 @@ public class AvklarMyndighet extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandling behandling = prosessinstans.getBehandling();
         Long behandlingID = prosessinstans.getBehandling().getId();
+        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingID);
+
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findWithSaksbehandlingById(behandlingID)
             .orElseThrow(() -> new TekniskException("Behandlingsresultat " + behandlingID + " finnes ikke."));
 
