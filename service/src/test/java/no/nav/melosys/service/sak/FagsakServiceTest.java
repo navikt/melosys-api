@@ -58,7 +58,7 @@ public class FagsakServiceTest {
 
 
     @Before
-    public void setUp() throws FunksjonellException, TekniskException {
+    public void setUp() {
         fagsakService = new FagsakService(fagsakRepo, behandlingService, oppgaveService, tps, prosessinstansService);
     }
 
