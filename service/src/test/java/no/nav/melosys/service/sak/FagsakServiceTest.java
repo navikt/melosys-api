@@ -127,7 +127,7 @@ public class FagsakServiceTest {
 
         verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(eq(førsteBehandling), any(), anyString());
 
-        verify(oppgaveService, times(1)).ferdigstillOppgaveMedSaksnummer(eq(andreBehandlingFagsak.getSaksnummer()));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(andreBehandlingFagsak.getSaksnummer()));
     }
 
     @Test
@@ -153,7 +153,7 @@ public class FagsakServiceTest {
 
         verify(prosessinstansService, never()).opprettProsessinstansHenleggSak(eq(andreBehandling), any(), anyString());
 
-        verify(oppgaveService, times(1)).ferdigstillOppgaveMedSaksnummer(eq(førsteBehandlingFagsak.getSaksnummer()));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(førsteBehandlingFagsak.getSaksnummer()));
     }
 
     @Test
