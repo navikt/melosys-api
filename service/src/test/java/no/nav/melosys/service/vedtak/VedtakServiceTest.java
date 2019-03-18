@@ -72,7 +72,6 @@ public class VedtakServiceTest {
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
 
         Optional<Behandling> behandling = behandlingRepository.findById(behandlingID);
-        assertThat(behandling.isPresent()).isTrue();
         assertThat(behandling.get().getStatus()).isEqualTo(Behandlingsstatus.IVERKSETTER_VEDTAK);
     }
 
