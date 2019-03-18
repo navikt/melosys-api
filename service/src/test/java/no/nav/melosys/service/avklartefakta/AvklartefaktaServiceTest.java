@@ -6,10 +6,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -142,25 +142,25 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentInnstallasjonsType_medSokkelTekst_foventerSokkelType() throws TekniskException {
+    public void hentMaritimType_medSokkelTekst_foventerSokkelType() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SOKKEL");
         Optional<Avklartefakta> avklartefaktaFraDb = Optional.ofNullable(avklartefakta);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
-        Optional<AvklartInnstallasjonsType> innstallasjonsType = avklartefaktaService.hentInnstallasjonsType(1L);
-        assertThat(innstallasjonsType).isEqualTo(innstallasjonsType);
+        Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(1L);
+        assertThat(maritimType).isEqualTo(maritimType);
     }
 
     @Test
-    public void hentInnstallasjonsType_medSkipTekst_foventerSkipType() throws TekniskException {
+    public void hentMaritimType_medSkipTekst_foventerSkipType() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SKIP");
         Optional<Avklartefakta> avklartefaktaFraDb = Optional.ofNullable(avklartefakta);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
-        Optional<AvklartInnstallasjonsType> innstallasjonsType = avklartefaktaService.hentInnstallasjonsType(1L);
-        assertThat(innstallasjonsType).isEqualTo(innstallasjonsType);
+        Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(1L);
+        assertThat(maritimType).isEqualTo(maritimType);
     }
 
     @Test

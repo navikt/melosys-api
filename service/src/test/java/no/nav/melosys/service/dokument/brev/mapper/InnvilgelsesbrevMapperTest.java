@@ -10,7 +10,6 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -88,7 +87,7 @@ public class InnvilgelsesbrevMapperTest {
         BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse("SAKSBEHANDLER", new BrevbestillingDto());
         brevdataInnvilgelse.vedleggA1 = brevdataA1;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
-        brevdataInnvilgelse.avklartSokkelEllerSkip = AvklartInnstallasjonsType.SKIP;
+        brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
         brevdataInnvilgelse.norskeVirksomheter = brevdataA1.norskeVirksomheter;
         brevdataInnvilgelse.arbeidsland = "Sverige";
         brevdataInnvilgelse.trygdemyndighetsland = "Sverige";

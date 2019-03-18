@@ -40,9 +40,9 @@ public final class SoeknadUtils {
     /**
      * Benytter kun første element til å vurdere maritimt arbeid i Leveranse 1
      */
-    public static MaritimtArbeid hentMaritimeArbeid(SoeknadDokument søknad) throws FunksjonellException {
+    public static MaritimtArbeid hentMaritimtArbeid(SoeknadDokument søknad) throws FunksjonellException {
         if (søknad.maritimtArbeid.isEmpty()) {
-            throw new FunksjonellException("Søknad manger detaljer om Maritimt Arbeid");
+            throw new FunksjonellException("Søknad mangler detaljer om Maritimt Arbeid");
         }
         return søknad.maritimtArbeid.get(0);
     }

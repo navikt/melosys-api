@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -17,9 +17,9 @@ import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 
 public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implements BrevDataBygger {
-    private BrevDataByggerA1 a1Bygger;
     private LandvelgerService landVelgerService;
     private BrevbestillingDto brevbestillingDto;
+    private BrevDataByggerA1 brevbyggerA1;
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
                                      LandvelgerService landVelgerService,
@@ -30,8 +30,15 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
         this.brevbestillingDto = brevbestillingDto;
     }
 
-    public void setA1Bygger(BrevDataByggerA1 a1Bygger) {
-        this.a1Bygger = a1Bygger;
+    public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
+                                     LandvelgerService landVelgerService,
+                                     LovvalgsperiodeService lovvalgsperiodeService,
+                                     BrevbestillingDto brevbestillingDto,
+                                     BrevDataByggerA1 brevbyggerA1) {
+        super(null, lovvalgsperiodeService, avklartefaktaService);
+        this.landVelgerService = landVelgerService;
+        this.brevbestillingDto = brevbestillingDto;
+        this.brevbyggerA1 = brevbyggerA1;
     }
 
     @Override
@@ -39,7 +46,7 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
         this.behandling = behandling;
 
         BrevDataInnvilgelse brevdata;
-        if (a1Bygger != null) {
+        if (brevbyggerA1 != null) {
             brevdata = lagInnvilgelseBrevdataMedA1(behandling, saksbehandler);
         }
         else {
@@ -51,8 +58,8 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
         brevdata.arbeidsland = landVelgerService.hentArbeidsland(behandling);
         brevdata.trygdemyndighetsland = landVelgerService.hentTrygdemyndighetsland(behandling);
 
-        Optional<AvklartInnstallasjonsType> innstallasjonsType = avklartefaktaService.hentInnstallasjonsType(behandling.getId());
-        innstallasjonsType.ifPresent(innstallasjon -> brevdata.avklartSokkelEllerSkip = innstallasjon);
+        Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandling.getId());
+        maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
 
         return brevdata;
     }
@@ -60,7 +67,7 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
     private BrevDataInnvilgelse lagInnvilgelseBrevdataMedA1(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
         BrevDataInnvilgelse brevdata = new BrevDataInnvilgelse(saksbehandler, brevbestillingDto);
 
-        BrevDataA1 vedleggA1 = (BrevDataA1) a1Bygger.lag(behandling, saksbehandler);
+        BrevDataA1 vedleggA1 = (BrevDataA1) brevbyggerA1.lag(behandling, saksbehandler);
         brevdata.vedleggA1 = vedleggA1;
         brevdata.norskeVirksomheter = vedleggA1.norskeVirksomheter;
         return brevdata;

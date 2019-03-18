@@ -4,10 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -40,15 +37,15 @@ public class LandvelgerServiceTest {
     @Mock
     Behandling behandling;
 
-    SoeknadDokument søknad;
-    Lovvalgsperiode lovvalgsperiode;
-    LandvelgerService landvelgerService;
+    private SoeknadDokument søknad;
+    private Lovvalgsperiode lovvalgsperiode;
+    private LandvelgerService landvelgerService;
 
-    Landkoder oppholdsland = Landkoder.NO;
-    Landkoder flaggland = Landkoder.DK;
-    Landkoder bostedsland = Landkoder.SE;
-    Landkoder avklartBostedsland = Landkoder.FI;
-    Landkoder territorialfarvannLand = Landkoder.GB;
+    private Landkoder oppholdsland = Landkoder.NO;
+    private Landkoder flaggland = Landkoder.DK;
+    private Landkoder bostedsland = Landkoder.SE;
+    private Landkoder avklartBostedsland = Landkoder.FI;
+    private Landkoder territorialfarvannLand = Landkoder.GB;
 
     @Before
     public void setUp() {
@@ -121,6 +118,19 @@ public class LandvelgerServiceTest {
         lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_4_2);
         String land = landvelgerService.hentArbeidsland(behandling);
         assertThat(land).isEqualTo(flaggland.getBeskrivelse());
+    }
+
+    @Test
+    public void hentArbeidsland_utenBestemmelseMedAvslag_girOppholdsland() throws FunksjonellException, TekniskException {
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
+        String land = landvelgerService.hentArbeidsland(behandling);
+        assertThat(land).isEqualTo(oppholdsland.getBeskrivelse());
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void hentArbeidsland_utenBestemmelse_girUnntak() throws FunksjonellException, TekniskException {
+        String land = landvelgerService.hentArbeidsland(behandling);
+        assertThat(land).isEqualTo(oppholdsland.getBeskrivelse());
     }
 
 

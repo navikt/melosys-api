@@ -5,9 +5,9 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -66,26 +66,26 @@ public class BrevDataByggerInnvilgelseTest {
         brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(avklartefaktaService,
                                                                   landVelgerService,
                                                                   lovvalgsperiodeService,
-                                                                  brevbestillingDto);
-        brevDataByggerInnvilgelse.setA1Bygger(brevDataByggerA1);
+                                                                  brevbestillingDto,
+                                                                  brevDataByggerA1);
     }
 
     @Test
-    public void lag_medSokkel_setterInnstallasjonstypeSokkel() throws FunksjonellException, TekniskException {
-        AvklartInnstallasjonsType innstallasjonsType = AvklartInnstallasjonsType.SOKKEL;
-        when(avklartefaktaService.hentInnstallasjonsType(anyLong())).thenReturn(Optional.of(innstallasjonsType));
+    public void lag_medSokkel_setterMaritimtypeSokkel() throws FunksjonellException, TekniskException {
+        Maritimtyper maritimType = Maritimtyper.SOKKEL;
+        when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.of(maritimType));
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
-        assertThat(brevData.avklartSokkelEllerSkip).isEqualTo(AvklartInnstallasjonsType.SOKKEL);
+        assertThat(brevData.avklartMaritimType).isEqualTo(Maritimtyper.SOKKEL);
     }
 
     @Test
-    public void lag_utenMaritimtArbeid_setterInnstallasjonsTypeTilNull() throws FunksjonellException, TekniskException {
-        when(avklartefaktaService.hentInnstallasjonsType(anyLong())).thenReturn(Optional.empty());
+    public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() throws FunksjonellException, TekniskException {
+        when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.empty());
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
-        assertThat(brevData.avklartSokkelEllerSkip).isNull();
+        assertThat(brevData.avklartMaritimType).isNull();
     }
 
     @Test
@@ -96,8 +96,7 @@ public class BrevDataByggerInnvilgelseTest {
         brevbestillingDto.fritekst = "FRITEKST";
 
         BrevDataByggerInnvilgelse brevDataByggerInnvilgelse =
-            new BrevDataByggerInnvilgelse(avklartefaktaService, landVelgerService, lovvalgsperiodeService, brevbestillingDto);
-        brevDataByggerInnvilgelse.setA1Bygger(brevDataByggerA1);
+            new BrevDataByggerInnvilgelse(avklartefaktaService, landVelgerService, lovvalgsperiodeService, brevbestillingDto,brevDataByggerA1);
 
         BrevData brevData = brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
         assertThat(brevbestillingDto).isEqualToComparingFieldByField(brevData);

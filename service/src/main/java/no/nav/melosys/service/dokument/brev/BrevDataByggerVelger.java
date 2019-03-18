@@ -79,13 +79,14 @@ public class BrevDataByggerVelger {
                 return new BrevDataByggerVedlegg(a001Bygger, brevbestillingDto);
             }
             case INNVILGELSE_YRKESAKTIV: {
-                BrevDataByggerInnvilgelse innvilgelseBygger =
-                    new BrevDataByggerInnvilgelse(avklartefaktaService,
+                BrevDataByggerA1 brevbyggerA1 =
+                    new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService);
+
+                return new BrevDataByggerInnvilgelse(avklartefaktaService,
                                                 landvelgerService,
                                                 lovvalgsperiodeService,
-                                                brevbestillingDto);
-                innvilgelseBygger.setA1Bygger(new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService));
-                return innvilgelseBygger;
+                                                brevbestillingDto,
+                                                brevbyggerA1);
             }
             case INNVILGELSE_ARBEIDSGIVER:
                 return new BrevDataByggerInnvilgelse(avklartefaktaService,

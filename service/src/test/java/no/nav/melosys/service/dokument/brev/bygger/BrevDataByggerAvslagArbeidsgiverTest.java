@@ -56,10 +56,10 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
     public void setUp() {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
         brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(avklartefaktaService,
-            avklarteVirksomheterService,
+                                                                                avklarteVirksomheterService,
                                                                                 landvelgerService,
-            lovvalgsperiodeService,
-            vilkaarsresultatRepository);
+                                                                                lovvalgsperiodeService,
+                                                                                vilkaarsresultatRepository);
     }
 
     @Test

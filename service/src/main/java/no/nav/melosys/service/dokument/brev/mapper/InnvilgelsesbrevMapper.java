@@ -11,16 +11,17 @@ import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
+import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
@@ -62,7 +63,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         if (!søknad.maritimtArbeid.isEmpty()) {
             MaritimtArbeid maritimtArbeid = søknad.maritimtArbeid.iterator().next();
             String flaggland = maritimtArbeid.flaggLandKode;
-            if (flaggland != null && !flaggland.isEmpty()) {
+            if (!StringUtils.isEmpty(flaggland)) {
                 Landkoder flagglandKode = Landkoder.valueOf(maritimtArbeid.flaggLandKode);
                 fag.setFlaggland(flagglandKode.getBeskrivelse());
             }
@@ -72,10 +73,10 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             }
         }
 
-        if (brevdata.avklartSokkelEllerSkip == AvklartInnstallasjonsType.SKIP) {
+        if (brevdata.avklartMaritimType == Maritimtyper.SKIP) {
             fag.setArbeidPåSkip(JA);
         }
-        if (brevdata.avklartSokkelEllerSkip == AvklartInnstallasjonsType.SOKKEL) {
+        if (brevdata.avklartMaritimType == Maritimtyper.SOKKEL) {
             fag.setArbeidPåSokkel(JA);
         }
 
@@ -106,5 +107,4 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             .build();
         return factory.createBrevdata(brevdataType);
     }
-
 }
