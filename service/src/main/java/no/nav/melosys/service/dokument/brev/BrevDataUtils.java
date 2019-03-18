@@ -6,12 +6,17 @@ import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.BostedsadresseType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.PersonnavnType;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.exception.TekniskException;
 
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 import static no.nav.melosys.service.dokument.brev.BrevDataService.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
@@ -100,6 +105,12 @@ public final class BrevDataUtils {
         navn.setMellomnavn(personDokument.mellomnavn);
         navn.setEtternavn(personDokument.etternavn);
         return navn;
+    }
+
+    public static Landkoder hentMyndighetFraFagsak(Fagsak fagsak) throws TekniskException {
+        Aktoer myndighet = fagsak.hentAktørMedRolleType(MYNDIGHET);
+        String[] split = myndighet.getInstitusjonId().split(":");
+        return Landkoder.valueOf(split[0]);
     }
 
 }

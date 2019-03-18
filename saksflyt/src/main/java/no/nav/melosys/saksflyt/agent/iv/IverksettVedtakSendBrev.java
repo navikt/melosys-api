@@ -9,10 +9,12 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.saksflyt.felles.BrevBestiller;
+import no.nav.melosys.service.dokument.brev.BrevDataUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +22,8 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.*;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 import static no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator.*;
 
@@ -40,14 +43,17 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
     private final BrevBestiller brevBestiller;
     private final BehandlingRepository behandlingRepository;
     private final BehandlingsresultatRepository behandlingsResultatRepo;
+    private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
     @Autowired
     public IverksettVedtakSendBrev(BrevBestiller brevBestiller,
-            BehandlingRepository behandlingRepository,
-            BehandlingsresultatRepository behandlingsResultatRepo) {
+                                   BehandlingRepository behandlingRepository,
+                                   BehandlingsresultatRepository behandlingsResultatRepo,
+                                   UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
         this.brevBestiller = brevBestiller;
         this.behandlingRepository = behandlingRepository;
         this.behandlingsResultatRepo = behandlingsResultatRepo;
+        this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
 
         log.info("IverksetteVedtakSendBrev initialisert");
     }
@@ -92,7 +98,9 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
                 brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_YRKESAKTIV, BRUKER);
                 // FIXME Støtte for arbeidsgivere mangler.
                 //brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, ARBEIDSGIVER);
-                brevBestiller.bestill(behandling, saksbehandler, ATTEST_A1, MYNDIGHET);
+                if (myndighetØnskerInnvilgelsesbrev(behandling)) {
+                    brevBestiller.bestill(behandling, saksbehandler, ATTEST_A1, MYNDIGHET);
+                }
 
                 log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
                 prosessinstans.setSteg(IV_SEND_SED);
@@ -109,4 +117,9 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         }
     }
 
+    private boolean myndighetØnskerInnvilgelsesbrev(Behandling behandling) throws TekniskException {
+        return !utenlandskMyndighetRepository.
+            findByLandkode(BrevDataUtils.hentMyndighetFraFagsak(behandling.getFagsak()))
+            .reservertMotInnvilgelsesInfo;
+    }
 }
