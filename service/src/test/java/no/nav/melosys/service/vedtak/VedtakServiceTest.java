@@ -5,6 +5,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -19,7 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -69,6 +70,10 @@ public class VedtakServiceTest {
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType));
 
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
+
+        Optional<Behandling> behandling = behandlingRepository.findById(behandlingID);
+        assertThat(behandling.isPresent()).isTrue();
+        assertThat(behandling.get().getStatus()).isEqualTo(Behandlingsstatus.IVERKSETTER_VEDTAK);
     }
 
     @Test
