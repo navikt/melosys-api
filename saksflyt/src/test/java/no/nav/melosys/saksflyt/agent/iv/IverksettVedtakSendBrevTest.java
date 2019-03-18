@@ -84,11 +84,12 @@ public class IverksettVedtakSendBrevTest {
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
         when(behandlingRepository.findWithSaksopplysningerById(eq(behandling.getId()))).thenReturn(behandling);
 
+        Preferanse reservertMotA1Preferanse = new Preferanse(1L, Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
+
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.reservertMotInnvilgelsesInfo = false;
 
         UtenlandskMyndighet utenlandskMyndighetReservert = new UtenlandskMyndighet();
-        utenlandskMyndighetReservert.reservertMotInnvilgelsesInfo = true;
+        utenlandskMyndighetReservert.preferanser.add(reservertMotA1Preferanse);
 
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.SE))).thenReturn(utenlandskMyndighet);

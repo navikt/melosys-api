@@ -7,7 +7,9 @@ import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.TekniskException;
+import org.assertj.core.util.Sets;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -144,5 +146,18 @@ public class FagsakTest {
         Aktoer bruker = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
 
         assertThat(bruker).isEqualTo(a1);
+    }
+
+    @Test
+    public void hentMyndighetLandkode_forventGyldigLandkode() throws Exception {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.MYNDIGHET);
+        aktoer.setInstitusjonId("SE:gfr");
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(Sets.newLinkedHashSet(aktoer));
+
+        Landkoder resultat = fagsak.hentMyndighetLandkode();
+        assertThat(resultat).isEqualByComparingTo(Landkoder.SE);
     }
 }

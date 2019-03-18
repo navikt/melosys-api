@@ -137,7 +137,7 @@ public class BrevDataService {
     }
 
     UtenlandskMyndighet hentMyndighetFraSak(Fagsak fagsak) throws TekniskException {
-        return utenlandskMyndighetRepository.findByLandkode(BrevDataUtils.hentMyndighetFraFagsak(fagsak));
+        return utenlandskMyndighetRepository.findByLandkode(fagsak.hentMyndighetLandkode());
     }
 
     // Dokprod kan utlede registerinfo når Melosys ikke trenger å sette adressen sammen.

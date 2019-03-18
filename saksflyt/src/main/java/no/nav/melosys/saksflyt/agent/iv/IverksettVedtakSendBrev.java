@@ -14,7 +14,6 @@ import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.saksflyt.felles.BrevBestiller;
-import no.nav.melosys.service.dokument.brev.BrevDataUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,8 +117,9 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
     }
 
     private boolean myndighetØnskerInnvilgelsesbrev(Behandling behandling) throws TekniskException {
-        return !utenlandskMyndighetRepository.
-            findByLandkode(BrevDataUtils.hentMyndighetFraFagsak(behandling.getFagsak()))
-            .reservertMotInnvilgelsesInfo;
+        return utenlandskMyndighetRepository.
+            findByLandkode(behandling.getFagsak().hentMyndighetLandkode())
+            .preferanser.stream().map(Preferanse::getPreferanse)
+            .noneMatch(p -> p.equals(Preferanse.PreferanseEnum.RESERVERT_FRA_A1));
     }
 }
