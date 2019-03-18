@@ -10,6 +10,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -84,5 +85,20 @@ public class AvklartefaktaService {
             .collect(Collectors.toList());
 
         avklarteFaktaRepository.saveAll(avklartefaktaList);
+    }
+
+    @Transactional
+    public void leggTilEndretPeriodeAvklarteFakta(long behandlingsid, Endretperioder endretperiode) throws IkkeFunnetException {
+        Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
+            .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandlingsresultat for behandlingsid: " + behandlingsid));
+
+        Set<Avklartefakta> avklartefaktaSet = avklarteFaktaRepository.findByBehandlingsresultatId(behandlingsid);
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setBehandlingsresultat(resultat);
+        avklartefakta.setType(Avklartefaktatype.AARSAK_ENDRING_PERIODE);
+        avklartefakta.setFakta(endretperiode.getKode());
+        avklartefakta.setReferanse(Avklartefaktatype.AARSAK_ENDRING_PERIODE.getKode());
+        avklartefaktaSet.add(avklartefakta);
+        avklarteFaktaRepository.saveAll(avklartefaktaSet);
     }
 }

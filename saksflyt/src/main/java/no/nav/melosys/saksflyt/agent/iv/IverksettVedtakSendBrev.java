@@ -5,6 +5,7 @@ import java.util.Map;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -86,7 +87,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         log.info("Behandler lovvalgsperiode: {}", lovvalgsperiode);
 
         ProsessType prosessType = prosessinstans.getType();
-        if (ProsessType.IVERKSETT_VEDTAK == prosessType) {
+        if (ProsessType.IVERKSETT_VEDTAK == prosessType || ProsessType.IVERKSETT_VEDTAK_ENDRET_PERIODE == prosessType) {
             String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
 
             if (avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
@@ -101,8 +102,9 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
                 log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
                 prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
             } else if (SendBrevValidator.innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
-                produserInnvilgelse(behandling, saksbehandler, INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER);
-                produserInnvilgelse(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER);
+                Endretperioder endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class);
+                produserInnvilgelse(behandling, saksbehandler, INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER, endretPeriodeBegrunnelseKode);
+                produserInnvilgelse(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, endretPeriodeBegrunnelseKode);
                 // FIXME Myndigheter støttes ikke.
                 //brevData.mottaker = Aktoersroller.MYNDIGHET;
                 //dokumentService.produserDokument(behandling.getId(), ATTEST_A1, brevData);
@@ -123,12 +125,16 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
     }
 
     private void produserInnvilgelse(Behandling behandling,
-                                  String saksbehandler,
-                                  Produserbaredokumenter produserbaredokumenter,
-                                  Aktoersroller aktoersroller) throws FunksjonellException, TekniskException {
+                                     String saksbehandler,
+                                     Produserbaredokumenter produserbaredokumenter,
+                                     Aktoersroller aktoersroller,
+                                     Endretperioder endretPeriodeBegrunnelseKode) throws FunksjonellException, TekniskException {
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(produserbaredokumenter);
         BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
         brevData.mottaker = aktoersroller;
+        if (endretPeriodeBegrunnelseKode != null) {
+            brevData.begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
+        }
         dokumentService.produserDokument(behandling.getId(), produserbaredokumenter, brevData);
     }
 }

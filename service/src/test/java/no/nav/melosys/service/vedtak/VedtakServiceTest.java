@@ -5,6 +5,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -87,5 +88,15 @@ public class VedtakServiceTest {
     public void fattVedtak_behandlingIkkeFunnet() throws FunksjonellException, TekniskException {
         long behandlingID = 0L;
         vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+    }
+
+
+    @Test
+    public void endreVedtak_fungerer() throws FunksjonellException, TekniskException {
+        vedtakService.endreVedtak(behandlingID, Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
+
+        verify(behandlingRepository).findById(behandlingID);
+        verify(prosessinstansService).opprettProsessinstansOppdaterAvklarteFakta(any(Behandling.class), eq(Endretperioder.ENDRINGER_ARBEIDSSITUASJON));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 }

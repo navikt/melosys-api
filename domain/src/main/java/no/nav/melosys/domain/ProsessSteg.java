@@ -53,6 +53,7 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     IV_SEND_SED("IV_SEND_SED", "Send SED etter et eller annet"),
     IV_AVSLUTT_BEHANDLING("IV_AVSLUTT_BEHANDLING", "Avslutt fagsak og aktiv behandling"),
     IV_STATUS_BEH_AVSL("IV_STATUS_BEH_AVSL", "Oppdater Sak og Behandling ved lukking av behandling"),
+    OPPDATER_AVKLARTE_FAKTA_ENDRETPERIODE_BEGRUNNELSE("OPPDATER_AVKLARTE_FAKTA_ENDRETPERIODE_BEGRUNNELSE", "Legger til endringsgrunn i AVKLARTEFAKTA"),
 
     MANGELBREV("MANGELBREV", "Opprett mangelbrev"),
 

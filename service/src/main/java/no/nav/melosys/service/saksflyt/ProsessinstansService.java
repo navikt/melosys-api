@@ -6,6 +6,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
@@ -134,6 +135,24 @@ public class ProsessinstansService {
         nyprosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, hentLand(søknadDokument));
 
         nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
+
+        LocalDateTime nå = LocalDateTime.now();
+        nyprosessinstans.setRegistrertDato(nå);
+        nyprosessinstans.setEndretDato(nå);
+
+        lagre(nyprosessinstans);
+    }
+
+    public void opprettProsessinstansOppdaterAvklarteFakta(Behandling behandling, Endretperioder endretperiode) {
+        Prosessinstans nyprosessinstans = new Prosessinstans();
+
+        String saksbehandler = SubjectHandler.getInstance().getUserID();
+        nyprosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
+
+        nyprosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiode);
+        nyprosessinstans.setBehandling(behandling);
+        nyprosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_ENDRET_PERIODE);
+        nyprosessinstans.setSteg(ProsessSteg.OPPDATER_AVKLARTE_FAKTA_ENDRETPERIODE_BEGRUNNELSE);
 
         LocalDateTime nå = LocalDateTime.now();
         nyprosessinstans.setRegistrertDato(nå);

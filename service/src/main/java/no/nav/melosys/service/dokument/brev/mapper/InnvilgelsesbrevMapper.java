@@ -4,9 +4,9 @@ import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-import no.nav.dok.melosysbrev._000108.*;
 import no.nav.dok.melosysbrev._000108.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000108.ObjectFactory;
+import no.nav.dok.melosysbrev._000108.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
@@ -90,6 +90,9 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
         if (periode.getTilleggsbestemmelse() != null) {
             fag.setTilleggsbestemmelse(TilleggsbestemmelseKode.fromValue(periode.getTilleggsbestemmelse().getKode()));
+        }
+        if (brevdataInnvilgelse.begrunnelseKode != null) {
+            fag.setEndretPeriodeBegrunnelse(EndretPeriodeBegrunnelseKode.fromValue(brevdataInnvilgelse.begrunnelseKode));
         }
 
         return fag;

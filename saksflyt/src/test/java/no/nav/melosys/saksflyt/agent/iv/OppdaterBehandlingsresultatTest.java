@@ -18,8 +18,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterBehandlingsresultatTest {
@@ -57,6 +56,33 @@ public class OppdaterBehandlingsresultatTest {
         verify(behandlingsresultatRepository).save(behandlingsresultatArgumentCaptor.capture());
         Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
         assertThat(capture.getType()).isEqualTo(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        assertThat(capture.getEndretAv()).isEqualTo(testbruker);
+        assertThat(capture.getVedtaksdato()).isNotNull();
+        assertThat(capture.getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));
+        assertThat(p.getSteg()).isEqualTo(IV_OPPDATER_MEDL);
+    }
+
+    @Test
+    public void utfør_annenProsesstypeEnnIverksettVedtak_setterIkkeResultattypeOgLand() {
+        Prosessinstans p = new Prosessinstans();
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        p.setBehandling(behandling);
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
+        p.setType(ProsessType.IVERKSETT_VEDTAK_ENDRET_PERIODE);
+        String testbruker = "Z097";
+        p.setData(ProsessDataKey.SAKSBEHANDLER, testbruker);
+
+        Behandlingsresultat behandlingsresultat = spy(new Behandlingsresultat());
+        when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
+
+        oppdaterBehandlingsresultat.utfør(p);
+
+        verify(behandlingsresultat, never()).setType(any());
+        verify(behandlingsresultat, never()).setFastsattAvLand(any());
+
+        verify(behandlingsresultatRepository).save(behandlingsresultatArgumentCaptor.capture());
+        Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
         assertThat(capture.getEndretAv()).isEqualTo(testbruker);
         assertThat(capture.getVedtaksdato()).isNotNull();
         assertThat(capture.getVedtakKlagefrist()).isEqualTo(LocalDate.now().plusWeeks(OppdaterBehandlingsresultat.FRIST_KLAGE_UKER));

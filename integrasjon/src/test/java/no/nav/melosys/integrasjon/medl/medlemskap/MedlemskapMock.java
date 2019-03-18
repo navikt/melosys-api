@@ -14,6 +14,8 @@ import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Medlemsperiode;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeRequest;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeResponse;
+import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeRequest;
+import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -48,5 +50,14 @@ public class MedlemskapMock implements MedlemskapConsumer {
         } catch (JAXBException | ParserConfigurationException | SAXException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public HentPeriodeResponse hentPeriode(HentPeriodeRequest req) {
+        HentPeriodeResponse hentPeriodeResponse = new HentPeriodeResponse();
+        Medlemsperiode medlemsperiode = new Medlemsperiode();
+        medlemsperiode.setVersjon(0);
+        hentPeriodeResponse.setPeriode(medlemsperiode);
+        return hentPeriodeResponse;
     }
 }

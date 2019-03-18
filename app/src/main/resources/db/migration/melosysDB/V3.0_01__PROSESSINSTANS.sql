@@ -27,6 +27,7 @@ CREATE TABLE prosess_type (
 INSERT INTO prosess_type (kode, navn) VALUES ('ANMODNING_OM_UNNTAK', 'Anmodning om unntak');
 INSERT INTO prosess_type (kode, navn) VALUES ('HENLEGG_SAK', 'Henlegg en sak');
 INSERT INTO prosess_type (kode, navn) VALUES ('IVERKSETT_VEDTAK', 'Iverksett vedtak');
+INSERT INTO prosess_type (kode, navn) VALUES ('IVERKSETT_VEDTAK_ENDRET_PERIODE', 'Iverksett nytt vedtak etter lovvalgsperioden har blitt forkortet');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_KNYTT', 'Journalføring på eksisterende sak');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_NY_SAK', 'Journalføring med ny sak og søknad');
 INSERT INTO prosess_type (kode, navn) VALUES ('OPPFRISKNING', 'Oppfriskning av saksopplysninger');
@@ -72,6 +73,7 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_OPPDATER_MEDL', 'Oppdatering 
 INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_SEND_BREV', 'Send orienteringsbrev og A001 for anmodning om unntak');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_VALIDERING', 'Validerer iverksett vedtak');
+INSERT INTO prosess_steg (kode, navn) VALUES ('OPPDATER_AVKLARTE_FAKTA_ENDRETPERIODE_BEGRUNNELSE', 'Legg til i AvklarteFakta begrunnelse for forkorting av lovvalgsperiode');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_RESULTAT', 'Oppdatering av behandlingsresultat');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_MEDL', 'Oppdatering av medlemskap');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_SEND_BREV', 'Send brev etter iverksett vedtak');

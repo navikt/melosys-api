@@ -59,9 +59,12 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         Long behandlingID = prosessinstans.getBehandling().getId();
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID).orElse(null);
-        behandlingsresultat.setType(Behandlingsresultattyper.valueOf(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE)));
 
-        behandlingsresultat.setFastsattAvLand(Landkoder.NO);
+        if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK) {
+            behandlingsresultat.setType(Behandlingsresultattyper.valueOf(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE)));
+            behandlingsresultat.setFastsattAvLand(Landkoder.NO);
+        }
+
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
         behandlingsresultat.setVedtaksdato(Instant.now());
         LocalDate klagefrist = LocalDate.now().plusWeeks(FRIST_KLAGE_UKER);

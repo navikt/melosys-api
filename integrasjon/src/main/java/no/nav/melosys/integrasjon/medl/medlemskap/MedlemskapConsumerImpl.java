@@ -5,6 +5,8 @@ import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeRequest;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeResponse;
+import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeRequest;
+import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeResponse;
 
 public class MedlemskapConsumerImpl implements MedlemskapConsumer {
 
@@ -17,5 +19,10 @@ public class MedlemskapConsumerImpl implements MedlemskapConsumer {
     @Override
     public HentPeriodeListeResponse hentPeriodeListe(HentPeriodeListeRequest req) throws PersonIkkeFunnet, Sikkerhetsbegrensning {
         return port.hentPeriodeListe(req);
+    }
+
+    @Override
+    public HentPeriodeResponse hentPeriode(HentPeriodeRequest req) throws Sikkerhetsbegrensning {
+        return port.hentPeriode(req);
     }
 }
