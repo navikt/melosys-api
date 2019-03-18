@@ -6,7 +6,7 @@ import java.util.*;
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.integrasjon.doksys.DokSysFasade;
+import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -113,7 +113,7 @@ public class IverksettVedtakSendBrevTest {
         BehandlingRepository behandlingRepository = mockBehandlingRepository();
         FagsakRepository fagsakRepository = mock(FagsakRepository.class);
         BrevDataService brevDataService = mock(BrevDataService.class);
-        DokSysFasade dokSysFasade = mock(DokSysFasade.class);
+        DoksysFasade dokSysFasade = mock(DoksysFasade.class);
         JoarkFasade joarkFasade = mock(JoarkFasade.class);
         return new DokumentSystemService(behandlingRepository, fagsakRepository,
                 brevDataService, dokSysFasade, joarkFasade, brevDataByggerVelger);

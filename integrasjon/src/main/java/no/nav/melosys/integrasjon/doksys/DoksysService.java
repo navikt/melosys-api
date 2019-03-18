@@ -26,9 +26,9 @@ import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
 @Primary
-public class DokSysService implements DokSysFasade {
+public class DoksysService implements DoksysFasade {
 
-    private static final Logger log = LoggerFactory.getLogger(DokSysService.class);
+    private static final Logger log = LoggerFactory.getLogger(DoksysService.class);
 
     private static final String FALSK_MOTTAKER_ID = "11111111111";
 
@@ -37,7 +37,7 @@ public class DokSysService implements DokSysFasade {
     private ObjectFactory objectFactory;
 
     @Autowired
-    public DokSysService(DokumentproduksjonConsumer dokumentproduksjonConsumer) {
+    public DoksysService(DokumentproduksjonConsumer dokumentproduksjonConsumer) {
         this.dokumentproduksjonConsumer = dokumentproduksjonConsumer;
 
         this.objectFactory = new ObjectFactory();
@@ -108,6 +108,7 @@ public class DokSysService implements DokSysFasade {
         wsRequest.setBrevdata(brevdata);
 
         try {
+            log.debug("Bestiller dokument:{} {}", System.lineSeparator(), wsRequest.toString());
             ProduserIkkeredigerbartDokumentResponse wsResponse = dokumentproduksjonConsumer.produserIkkeredigerbartDokument(wsRequest);
 
             DokumentbestillingResponse response = new DokumentbestillingResponse();

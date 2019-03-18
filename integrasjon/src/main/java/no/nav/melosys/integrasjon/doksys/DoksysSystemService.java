@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Qualifier("system")
-public class DokSysSystemService extends DokSysService implements DokSysFasade {
+public class DoksysSystemService extends DoksysService implements DoksysFasade {
 
     @Autowired
-    DokSysSystemService(@Qualifier("system") DokumentproduksjonConsumer dokumentproduksjonConsumer) {
+    DoksysSystemService(@Qualifier("system") DokumentproduksjonConsumer dokumentproduksjonConsumer) {
         super(dokumentproduksjonConsumer);
     }
 }
