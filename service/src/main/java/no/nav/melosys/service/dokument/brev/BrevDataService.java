@@ -236,6 +236,7 @@ public class BrevDataService {
             mottaker.setId(aktør.getOrgnr());
         } else if (aktør.getInstitusjonId() != null) {
             mottaker = new Person();
+            mottaker.setBerik(false);
             mottaker.setTypeKode(AktoerType.PERSON);
             mottaker.setId(FALSK_MOTTAKER_ID);
 
