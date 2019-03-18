@@ -1,5 +1,6 @@
 package no.nav.melosys.domain;
 
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -40,5 +41,18 @@ public class Kontaktopplysning {
 
     public void setKontaktOrgnr(String kontaktOrgnr) {
         this.kontaktOrgnr = kontaktOrgnr;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Kontaktopplysning)) return false;
+        Kontaktopplysning that = (Kontaktopplysning) o;
+        return Objects.equals(getKontaktopplysningID(), that.getKontaktopplysningID());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getKontaktopplysningID());
     }
 }
