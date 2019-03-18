@@ -33,11 +33,11 @@ public class DokSysServiceTest {
     @Mock
     private DokumentproduksjonConsumer dokumentproduksjonConsumer;
 
-    private DokSysService dokSysService;
+    private DoksysService dokSysService;
 
     @Before
     public void setUp() {
-        dokSysService = new DokSysService(dokumentproduksjonConsumer);
+        dokSysService = new DoksysService(dokumentproduksjonConsumer);
     }
 
     @Test
