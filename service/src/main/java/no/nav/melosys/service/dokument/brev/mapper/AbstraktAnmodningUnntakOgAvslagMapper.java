@@ -107,7 +107,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
 
         Landkoder unntakFraLovvalgsland = lovvalgsperiode.getUnntakFraLovvalgsland();
         if (unntakFraLovvalgsland != null) {
-            lovvalgsperiodeType.setUnntakFraLovvalgsland(unntakFraLovvalgsland.getKode());
+            lovvalgsperiodeType.setUnntakFraLovvalgsland(unntakFraLovvalgsland.getBeskrivelse());
         }
         try {
             lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));

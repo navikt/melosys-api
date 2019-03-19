@@ -59,7 +59,7 @@ public class BrevDataByggerAvslagArbeidsgiver extends AbstraktDokumentDataBygger
         List<AvklartVirksomhet> norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, utenAdresse);
         brevData.hovedvirksomhet = norskeVirksomheter.iterator().next();
         brevData.lovvalgsperiode = hentLovvalgsperiode();
-        brevData.arbeidsland =landvelgerService.hentArbeidsland(behandling);
+        brevData.arbeidsland =landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
 
         brevData.vilkårbegrunnelser121 = hentVilkaarbegrunnelser(FO_883_2004_ART12_1);
         brevData.vilkårbegrunnelser121VesentligVirksomhet = hentVilkaarbegrunnelser(ART12_1_VESENTLIG_VIRKSOMHET);

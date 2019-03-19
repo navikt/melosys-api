@@ -41,7 +41,7 @@ public class BrevDataByggerVelger {
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.joarkService = joarkService;
         this.avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        this.landvelgerService = new LandvelgerService(avklartefaktaService, lovvalgsperiodeService);
+        this.landvelgerService = new LandvelgerService(avklartefaktaService, vilkaarsresultatRepository);
     }
 
     // For brevbygging i saksflyt

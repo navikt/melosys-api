@@ -55,8 +55,8 @@ public class BrevDataByggerInnvilgelse extends AbstraktDokumentDataBygger implem
 
         Lovvalgsperiode lovvalgsperiode = hentLovvalgsperiode();
         brevdata.lovvalgsperiode = lovvalgsperiode;
-        brevdata.arbeidsland = landVelgerService.hentArbeidsland(behandling);
-        brevdata.trygdemyndighetsland = landVelgerService.hentTrygdemyndighetsland(behandling);
+        brevdata.arbeidsland = landVelgerService.hentArbeidsland(behandling).getBeskrivelse();
+        brevdata.trygdemyndighetsland = landVelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
 
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(behandling.getId());
         maritimType.ifPresent(mt -> brevdata.avklartMaritimType = mt);
