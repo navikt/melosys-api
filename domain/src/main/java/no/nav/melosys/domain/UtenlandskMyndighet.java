@@ -1,8 +1,8 @@
 package no.nav.melosys.domain;
 
 import java.util.HashSet;
-import java.util.Set;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -29,7 +29,7 @@ public class UtenlandskMyndighet {
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
-        name = "utenlandsk_myndighet_preferanse",
+        name = "utenlandsk_myndighet_pref",
         joinColumns = @JoinColumn(name = "utenlandsk_myndighet_id", updatable = false),
         inverseJoinColumns = @JoinColumn(name = "preferanse_id", updatable = false)
     )
