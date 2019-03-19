@@ -86,7 +86,7 @@ CREATE TABLE preferanse(
 
 INSERT INTO preferanse(id, kode) VALUES(1, 'RESERVERT_FRA_A1');
 
-CREATE TABLE utenlandsk_myndighet_preferanse(
+CREATE TABLE utenlandsk_myndighet_pref(
     utenlandsk_myndighet_id NUMBER(19),
     preferanse_id           NUMBER(19),
     CONSTRAINT fk_utenlandsk_myndighet FOREIGN KEY (utenlandsk_myndighet_id) REFERENCES utenlandsk_myndighet,
