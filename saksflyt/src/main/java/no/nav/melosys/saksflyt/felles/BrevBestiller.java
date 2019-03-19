@@ -32,9 +32,17 @@ public class BrevBestiller {
                         String saksbehandler,
                         Produserbaredokumenter dokumentType,
                         Aktoersroller aktoersroller) throws FunksjonellException, TekniskException {
+        bestill(behandling, saksbehandler, dokumentType, aktoersroller, null);
+    }
+
+    public void bestill(Behandling behandling,
+                        String saksbehandler,
+                        Produserbaredokumenter dokumentType,
+                        Aktoersroller aktoersroller, String begrunnelseKode) throws FunksjonellException, TekniskException {
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(dokumentType);
         BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
         brevData.mottaker = aktoersroller;
+        brevData.begrunnelseKode = begrunnelseKode;
         dokumentService.produserDokument(behandling.getId(), dokumentType, brevData);
         log.info("Sendt brevet '{}', for behandling {}", dokumentType, behandling.getId());
     }

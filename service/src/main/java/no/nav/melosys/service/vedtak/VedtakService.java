@@ -3,6 +3,7 @@ package no.nav.melosys.service.vedtak;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -52,6 +53,17 @@ public class VedtakService {
 
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+    }
+
+    @Transactional
+    public void endreVedtak(Long behandlingID, Endretperioder endretperiode) throws FunksjonellException, TekniskException {
+        log.info("Endrer vedtak for behandling: {}", behandlingID);
+
+        Behandling behandling = behandlingRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Kan ikke endre vedtak fordi behandling " + behandlingID + " ikke finnes."));
+
+        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, endretperiode);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 }

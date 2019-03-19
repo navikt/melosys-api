@@ -4,10 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
 
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.feil.Feilkategori;
@@ -20,7 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.*;
+import static no.nav.melosys.domain.ProsessSteg.IV_AVKLAR_MYNDIGHET;
+import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_RESULTAT;
 
 /**
  * Oppdaterer behandlingsresultat med vedtaksdato og klagefrist.
@@ -59,9 +57,12 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         Long behandlingID = prosessinstans.getBehandling().getId();
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID).orElse(null);
-        behandlingsresultat.setType(Behandlingsresultattyper.valueOf(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE)));
 
-        behandlingsresultat.setFastsattAvLand(Landkoder.NO);
+        if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK) {
+            behandlingsresultat.setType(Behandlingsresultattyper.valueOf(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE)));
+            behandlingsresultat.setFastsattAvLand(Landkoder.NO);
+        }
+
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
         behandlingsresultat.setVedtaksdato(Instant.now());
         LocalDate klagefrist = LocalDate.now().plusWeeks(FRIST_KLAGE_UKER);

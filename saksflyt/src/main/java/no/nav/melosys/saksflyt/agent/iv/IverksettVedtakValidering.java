@@ -59,7 +59,7 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         ProsessType prosessType = prosessinstans.getType();
-        if (prosessType != ProsessType.IVERKSETT_VEDTAK) {
+        if (prosessType != ProsessType.IVERKSETT_VEDTAK && prosessType != ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE) {
             String feilmelding = "ProsessType " + prosessType + " er ikke støttet.";
             håndterUnntak(TEKNISK_FEIL, prosessinstans, feilmelding, null);
             return;
@@ -93,7 +93,7 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
         }
 
         String behandlingsResultatType = prosessinstans.getData(BEHANDLINGSRESULTATTYPE);
-        if (behandlingsResultatType == null) {
+        if (behandlingsResultatType == null && prosessType == ProsessType.IVERKSETT_VEDTAK) {
             håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "behandlingsResultatType er ikke oppgitt.", null);
             return;
         }

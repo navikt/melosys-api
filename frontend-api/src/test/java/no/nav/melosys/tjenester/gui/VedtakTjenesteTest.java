@@ -4,22 +4,29 @@ import java.io.IOException;
 import javax.ws.rs.BadRequestException;
 
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.vedtak.VedtakService;
-import no.nav.melosys.tjenester.gui.dto.VedtakDto;
+import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VedtakTjenesteTest extends JsonSchemaTest {
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private VedtakService vedtakService;
@@ -31,7 +38,8 @@ public class VedtakTjenesteTest extends JsonSchemaTest {
 
     private static final String schemaType = "vedtak-post-schema.json";
 
-    private VedtakDto vedtakDto;
+    private FattVedtakDto fattVedtakDto;
+    private EndreVedtakDto endreVedtakDto;
 
     private long behandlingID;
 
@@ -43,37 +51,57 @@ public class VedtakTjenesteTest extends JsonSchemaTest {
     @Before
     public void setUp() {
         vedtakTjeneste = new VedtakTjeneste(vedtakService, tilgang);
-        vedtakDto = new VedtakDto();
+        fattVedtakDto = new FattVedtakDto();
+        endreVedtakDto = new EndreVedtakDto();
         behandlingID = 3;
     }
 
     @Test
     public void fattVedtak_henleggelse_fungerer() throws FunksjonellException, TekniskException, IOException {
-        vedtakDto.setBehandlingsresultattype(Behandlingsresultattyper.HENLEGGELSE);
-        vedtakTjeneste.fattVedtak(behandlingID, vedtakDto);
+        fattVedtakDto.setBehandlingsresultattype(Behandlingsresultattyper.HENLEGGELSE);
+        vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
-        verify(tilgang, times(1)).sjekk(behandlingID);
-        verify(vedtakService, times(1)).fattVedtak(behandlingID, vedtakDto.getBehandlingsresultattype());
+        verify(tilgang).sjekk(behandlingID);
+        verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultattype());
 
-        valider(vedtakDto);
+        valider(fattVedtakDto);
     }
 
     @Test
     public void fattVedtak_anmodningOmUnntak_fungerer() throws FunksjonellException, TekniskException, IOException {
-        vedtakDto.setBehandlingsresultattype(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
-        vedtakTjeneste.fattVedtak(behandlingID, vedtakDto);
+        fattVedtakDto.setBehandlingsresultattype(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
+        vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
-        verify(tilgang, times(1)).sjekk(behandlingID);
-        verify(vedtakService, times(1)).anmodningOmUnntak(behandlingID);
+        verify(tilgang).sjekk(behandlingID);
+        verify(vedtakService).anmodningOmUnntak(behandlingID);
 
-        valider(vedtakDto);
+        valider(fattVedtakDto);
     }
 
     @Test(expected = BadRequestException.class)
     public void fattVedtak_dtoManglerBehandlingresultat_girException() throws FunksjonellException, TekniskException, IOException {
-        vedtakTjeneste.fattVedtak(behandlingID, vedtakDto);
+        vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
-        verify(tilgang, times(1)).sjekk(behandlingID);
-        valider(vedtakDto);
+        verify(tilgang).sjekk(behandlingID);
+        valider(fattVedtakDto);
+    }
+
+    @Test
+    public void endreVedtak_fungerer() throws FunksjonellException, TekniskException, IOException {
+        endreVedtakDto.setBegrunnelseKode(Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
+        vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
+
+        verify(tilgang).sjekk(behandlingID);
+        verify(vedtakService).endreVedtak(behandlingID, Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
+
+        valider(fattVedtakDto);
+    }
+
+    public void endreVedtak_dtoManglerBehandlingresultat_girException() throws FunksjonellException, TekniskException, IOException {
+        expectedException.expect(BadRequestException.class);
+        vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
+
+        verify(tilgang, never()).sjekk(behandlingID);
+        valider(fattVedtakDto);
     }
 }

@@ -7,21 +7,20 @@ import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.medl.behandle.BehandleMedlemskapConsumer;
+import no.nav.melosys.integrasjon.medl.behandle.BehandleMedlemskapConsumerImpl;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.PersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.Sikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.UgyldigInput;
+import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.*;
+import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OppdaterPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeResponse;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
@@ -35,11 +34,15 @@ public class MedlServiceTest {
     private Lovvalgsperiode lovvalgsperiode;
 
     private MedlService medlServiceSpy;
+    private BehandleMedlemskapConsumerImpl behandleMedlemskapConsumer;
+    private BehandleMedlemskapV2 behandleMedlemskapV2;
 
     @Before
     public void setUp() throws PersonIkkeFunnet, UgyldigInput, Sikkerhetsbegrensning {
         MedlemskapMock medlemskapMock = new MedlemskapMock();
-        BehandleMedlemskapConsumer behandleMedlemskapConsumer = mock(BehandleMedlemskapConsumer.class);
+        behandleMedlemskapV2 = mock(BehandleMedlemskapV2.class);
+        behandleMedlemskapConsumer = new BehandleMedlemskapConsumerImpl(behandleMedlemskapV2);
+        BehandleMedlemskapConsumer behandleMedlemskapConsumer = this.behandleMedlemskapConsumer;
         DokumentFactory dokumentFactory = new DokumentFactory(new JaxbConfig().jaxb2Marshaller(), new XsltTemplatesFactory());
         medlService = new MedlService(medlemskapMock, behandleMedlemskapConsumer, dokumentFactory);
 
@@ -75,14 +78,30 @@ public class MedlServiceTest {
     }
 
     @Test
-    public void opprettPeriodeSomEndelig() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, PersonIkkeFunnet, UgyldigInput, Sikkerhetsbegrensning {
+    public void opprettPeriodeSomEndelig() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         medlServiceSpy.opprettPeriodeEndelig(fnr, lovvalgsperiode);
-        verify(medlServiceSpy, times(1)).opprettPeriode(same(fnr), same(lovvalgsperiode), same(PeriodestatusMedl.GYLD), same(LovvalgMedl.ENDL));
+        verify(medlServiceSpy).opprettPeriode(same(fnr), same(lovvalgsperiode), same(PeriodestatusMedl.GYLD), same(LovvalgMedl.ENDL));
     }
 
     @Test
-    public void opprettPeriodeSomUnderAvklaring() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, PersonIkkeFunnet, UgyldigInput, Sikkerhetsbegrensning {
+    public void opprettPeriodeSomUnderAvklaring() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         medlServiceSpy.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode);
-        verify(medlServiceSpy, times(1)).opprettPeriode(same(fnr), same(lovvalgsperiode), same(PeriodestatusMedl.UAVK), same(LovvalgMedl.UAVK));
+        verify(medlServiceSpy).opprettPeriode(same(fnr), same(lovvalgsperiode), same(PeriodestatusMedl.UAVK), same(LovvalgMedl.UAVK));
+    }
+
+    @Test
+    public void oppdaterPeriodeSomEndelig_lagerRequestMedRiktigInformasjon() throws FunksjonellException, TekniskException, PeriodeIkkeFunnet, PeriodeUtdatert, UgyldigInput, Sikkerhetsbegrensning, no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning {
+        long periodeId = 10L;
+        lovvalgsperiode.setMedlPeriodeID(periodeId);
+
+        ArgumentCaptor<OppdaterPeriodeRequest> captor = ArgumentCaptor.forClass(OppdaterPeriodeRequest.class);
+
+        medlServiceSpy.oppdaterPeriodeEndelig(lovvalgsperiode);
+        verify(behandleMedlemskapV2).oppdaterPeriode(captor.capture());
+
+        OppdaterPeriodeRequest oppdaterPeriodeRequest = captor.getValue();
+
+        assertThat(oppdaterPeriodeRequest.getPeriodeId()).isEqualTo(periodeId);
+        assertThat(oppdaterPeriodeRequest.getVersjon()).isEqualTo(0);
     }
 }

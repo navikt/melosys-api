@@ -12,7 +12,9 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
+import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Medlemsperiode;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.kodeverk.*;
+import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OppdaterPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
 
 public class MedlPeriodeKonverter {
@@ -87,7 +89,31 @@ public class MedlPeriodeKonverter {
         no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Foedselsnummer ident = new no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Foedselsnummer();
         ident.setValue(fnr);
 
-        no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Medlemsperiode periode = new no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Medlemsperiode();
+        Medlemsperiode periode = opprettPeriode(lovvalgsperiode, periodestatusMedl, lovvalgMedl);
+
+        request.setIdent(ident);
+        request.setPeriode(periode);
+
+        return request;
+    }
+
+    public static OppdaterPeriodeRequest konverterTilOppdaterPeriodeRequest(Lovvalgsperiode lovvalgsperiode,
+                                                                            PeriodestatusMedl periodestatusMedl,
+                                                                            LovvalgMedl lovvalgMedl, int versjon) throws TekniskException {
+        OppdaterPeriodeRequest request = new OppdaterPeriodeRequest();
+
+        request.setPeriodeId(lovvalgsperiode.getMedlPeriodeID());
+        request.setVersjon(versjon);
+
+        Medlemsperiode periode = opprettPeriode(lovvalgsperiode, periodestatusMedl, lovvalgMedl);
+
+        request.setPeriode(periode);
+
+        return request;
+    }
+
+    private static Medlemsperiode opprettPeriode(Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl) throws TekniskException {
+        Medlemsperiode periode = new Medlemsperiode();
         try {
             periode.setFraOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(lovvalgsperiode.getFom()));
             periode.setTilOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(lovvalgsperiode.getTom()));
@@ -117,10 +143,6 @@ public class MedlPeriodeKonverter {
             GrunnlagMedl grunnlagMedl = tilGrunnlagMedltype(lovvalgsperiode.getBestemmelse());
             periode.setGrunnlagstype(new Grunnlagstype().withValue(grunnlagMedl.getKode()));
         }
-
-        request.setIdent(ident);
-        request.setPeriode(periode);
-
-        return request;
+        return periode;
     }
 }

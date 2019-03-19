@@ -14,7 +14,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.vedtak.VedtakService;
-import no.nav.melosys.tjenester.gui.dto.VedtakDto;
+import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -39,17 +40,31 @@ public class VedtakTjeneste extends RestTjeneste {
     @POST
     @Path("{behandlingID}")
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
-    public Response fattVedtak(@PathParam("behandlingID") long behandlingID, @ApiParam("vedtakDto") VedtakDto vedtakDto) throws FunksjonellException, TekniskException {
-        if (vedtakDto == null || vedtakDto.getBehandlingsresultattype() == null) {
+    public Response fattVedtak(@PathParam("behandlingID") long behandlingID, @ApiParam("fattVedtakDto") FattVedtakDto fattVedtakDto) throws FunksjonellException, TekniskException {
+        if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultattype() == null) {
             throw new BadRequestException();
         }
 
         tilgang.sjekk(behandlingID);
-        if (vedtakDto.getBehandlingsresultattype() == Behandlingsresultattyper.ANMODNING_OM_UNNTAK) {
+        if (fattVedtakDto.getBehandlingsresultattype() == Behandlingsresultattyper.ANMODNING_OM_UNNTAK) {
             vedtakService.anmodningOmUnntak(behandlingID);
         } else {
-            vedtakService.fattVedtak(behandlingID, vedtakDto.getBehandlingsresultattype());
+            vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultattype());
         }
+        return Response.ok().build();
+    }
+
+    @POST
+    @Path("/endre/{behandlingID}")
+    @ApiOperation(value = "Endrer et vedtak for en gitt behandling")
+    public Response endreVedtak(@PathParam("behandlingID") long behandlingID, @ApiParam("endreVedtakDto") EndreVedtakDto endreVedtakDto) throws FunksjonellException, TekniskException {
+        if (endreVedtakDto.getBegrunnelseKode() == null) {
+            throw new BadRequestException("Mangler BegrunnelseKode");
+        }
+        tilgang.sjekk(behandlingID);
+
+        vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode());
+
         return Response.ok().build();
     }
 }
