@@ -95,7 +95,6 @@ public class VedtakServiceTest {
         vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
     }
 
-
     @Test
     public void endreVedtak_fungerer() throws FunksjonellException, TekniskException {
         vedtakService.endreVedtak(behandlingID, Endretperioder.ENDRINGER_ARBEIDSSITUASJON);

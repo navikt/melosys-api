@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.felles;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -39,13 +38,11 @@ public class BrevBestiller {
     public void bestill(Behandling behandling,
                         String saksbehandler,
                         Produserbaredokumenter dokumentType,
-                        Aktoersroller aktoersroller, Endretperioder endretPeriodeBegrunnelseKode) throws FunksjonellException, TekniskException {
+                        Aktoersroller aktoersroller, String begrunnelseKode) throws FunksjonellException, TekniskException {
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(dokumentType);
         BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
         brevData.mottaker = aktoersroller;
-        if (endretPeriodeBegrunnelseKode != null) {
-            brevData.begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
-        }
+        brevData.begrunnelseKode = begrunnelseKode;
         dokumentService.produserDokument(behandling.getId(), dokumentType, brevData);
         log.info("Sendt brevet '{}', for behandling {}", dokumentType, behandling.getId());
     }

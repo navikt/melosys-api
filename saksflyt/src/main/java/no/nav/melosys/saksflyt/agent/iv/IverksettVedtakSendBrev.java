@@ -94,11 +94,15 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
         } else if (innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
             Endretperioder endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class);
-            brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_YRKESAKTIV, BRUKER, endretPeriodeBegrunnelseKode);
+            String begrunnelseKode = null;
+            if (endretPeriodeBegrunnelseKode != null) {
+                begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
+            }
+            brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_YRKESAKTIV, BRUKER, begrunnelseKode);
             // FIXME Støtte for arbeidsgivere mangler.
             //brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, ARBEIDSGIVER);
             if (myndighetØnskerInnvilgelsesbrev(behandling)) {
-                brevBestiller.bestill(behandling, saksbehandler, ATTEST_A1, MYNDIGHET, endretPeriodeBegrunnelseKode);
+                brevBestiller.bestill(behandling, saksbehandler, ATTEST_A1, MYNDIGHET, begrunnelseKode);
             }
 
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());

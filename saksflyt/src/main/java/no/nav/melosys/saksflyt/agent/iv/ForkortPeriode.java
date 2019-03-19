@@ -39,7 +39,7 @@ public class ForkortPeriode extends AbstraktStegBehandler {
     @Autowired
     public ForkortPeriode(AvklartefaktaService avklartefaktaService) {
         this.avklartefakteService = avklartefaktaService;
-        log.info("OppdaterAvlklarteFakta initialisert");
+        log.info("ForkortPeriode initialisert");
     }
 
     @Override
