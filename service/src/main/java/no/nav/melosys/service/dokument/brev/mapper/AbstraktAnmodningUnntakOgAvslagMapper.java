@@ -18,6 +18,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.TekniskException;
@@ -67,6 +68,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
             fag.setYrkesaktivitet(YrkesaktivitetsKode.LOENNET_ARBEID);
         }
 
+        fag.setArbeidsland(brevData.arbeidsland.getBeskrivelse());
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat));
 
         Set<VilkaarBegrunnelse> art121Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_1);
@@ -99,10 +101,14 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
 
     private LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
         Lovvalgsperiode lovvalgsperiode = resultat.getLovvalgsperioder()
-            .stream().findFirst().orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode funnet for behandlingsresultat"));
+            .stream().findFirst().orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode funnet for behandlingsresultat" + resultat.getId()));
 
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
-        lovvalgsperiodeType.setUnntakFraLovvalgsland(lovvalgsperiode.getUnntakFraLovvalgsland().getKode());
+
+        Landkoder unntakFraLovvalgsland = lovvalgsperiode.getUnntakFraLovvalgsland();
+        if (unntakFraLovvalgsland != null) {
+            lovvalgsperiodeType.setUnntakFraLovvalgsland(unntakFraLovvalgsland.getKode());
+        }
         try {
             lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
             lovvalgsperiodeType.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));

@@ -7,19 +7,22 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.Example;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AktoerServiceTest {
@@ -29,20 +32,30 @@ public class AktoerServiceTest {
 
     private AktoerService aktoerService;
 
+    @Captor
+    private ArgumentCaptor<Example> exampleCaptor;
+
     @Before
     public void setUp() {
-        aktoerService = Mockito.spy(new AktoerService(aktoerRepository));
+        aktoerService = new AktoerService(aktoerRepository);
     }
 
     @Test
-    public final void lagOppdaterAktoer() throws FunksjonellException {
-        AktoerDto aktoerRepDto = new AktoerDto();
-        aktoerRepDto.setAktoerID("1234");
-        aktoerRepDto.setRolleKode("BRUKER");
+    public final void lagEllerOppdater_nyAktoer() throws FunksjonellException {
+        AktoerDto aktoerDto = new AktoerDto();
+        aktoerDto.setAktoerID("1234");
+        aktoerDto.setRolleKode("BRUKER");
 
         when(aktoerRepository.findByFagsakAndRolleAndRepresenterer(any(), any(), any())).thenReturn(Optional.empty());
-        aktoerService.lagEllerOppdaterAktoer(lagFagsak(), aktoerRepDto);
-        verify(aktoerRepository, atLeast(1)).save(any());
+        aktoerService.lagEllerOppdaterAktoer(lagFagsak(), aktoerDto);
+        verify(aktoerRepository).save(any(Aktoer.class));
+    }
+
+    @Test
+    public final void lagEllerOppdater_oppdaterAktoer() throws FunksjonellException {
+        AktoerDto aktoerDto = new AktoerDto();
+        aktoerDto.setAktoerID("1234");
+        aktoerDto.setRolleKode("BRUKER");
 
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
@@ -52,26 +65,23 @@ public class AktoerServiceTest {
 
         Aktoer aktoerFraApiLag = new Aktoer();
         aktoerFraApiLag.setRolle(Aktoersroller.BRUKER);
-        aktoerService.lagEllerOppdaterAktoer(lagFagsak(), aktoerRepDto);
-        verify(aktoerRepository, atLeast(1)).deleteById(aktoer);
-        verify(aktoerRepository, atLeast(1)).save(any());
+        aktoerService.lagEllerOppdaterAktoer(lagFagsak(), aktoerDto);
+        verify(aktoerRepository).deleteById(aktoer);
+        verify(aktoerRepository).save(any(Aktoer.class));
 
     }
 
     @Test
-    public final void hentfagsakAktoerer() throws IkkeFunnetException {
+    public final void hentfagsakAktoerer() {
+        aktoerService.hentfagsakAktører(lagFagsak(), Aktoersroller.REPRESENTANT, Representerer.BRUKER);
 
-        Aktoer aktoer = new Aktoer();
+        verify(aktoerRepository).findAll(exampleCaptor.capture());
+        Example aktørExample = exampleCaptor.getValue();
 
-        when(aktoerRepository.findByFagsakAndRolleAndRepresenterer(any(), any(), any())).thenReturn(Optional.of( aktoer));
-
-        aktoerService.hentfagsakAktoerer(lagFagsak(), "MYNDIGHET", null);
-
-        verify(aktoerRepository).findByFagsakAndRolleAndRepresenterer(eq(lagFagsak()), eq(Aktoersroller.MYNDIGHET), eq(null));
-
-        aktoerService.hentfagsakAktoerer(lagFagsak(), "REPRESENTANT", "BRUKER");
-
-        verify(aktoerRepository).findByFagsakAndRolleAndRepresenterer(eq(lagFagsak()), eq(Aktoersroller.REPRESENTANT), eq(Representerer.BRUKER));
+        Aktoer aktørProbe = (Aktoer) aktørExample.getProbe();
+        assertThat(aktørProbe.getFagsak()).isEqualTo(lagFagsak());
+        assertThat(aktørProbe.getRolle()).isEqualTo(Aktoersroller.REPRESENTANT);
+        assertThat(aktørProbe.getRepresenterer()).isEqualTo(Representerer.BRUKER);
     }
 
     private static Fagsak lagFagsak() {

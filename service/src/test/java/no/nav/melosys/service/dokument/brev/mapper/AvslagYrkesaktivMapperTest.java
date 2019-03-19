@@ -1,18 +1,23 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import javax.xml.bind.JAXBException;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.xml.sax.SAXException;
@@ -41,8 +46,16 @@ public class AvslagYrkesaktivMapperTest {
         fagsak.setType(Sakstyper.EU_EOS);
         behandling.setFagsak(fagsak);
 
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+        arbeidUtland.adresse = new StrukturertAdresse();
+        arbeidUtland.adresse.landKode = "NO";
+
+        SoeknadDokument soeknadDokument = new SoeknadDokument();
+        soeknadDokument.arbeidUtland = new ArrayList<>();
+        soeknadDokument.arbeidUtland.add(arbeidUtland);
+
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(new SoeknadDokument());
+        saksopplysning.setDokument(soeknadDokument);
         saksopplysning.setType(SaksopplysningType.SØKNAD);
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
 
@@ -83,6 +96,7 @@ public class AvslagYrkesaktivMapperTest {
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID);
+        brevData.arbeidsland = Landkoder.AT;
 
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
         String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);

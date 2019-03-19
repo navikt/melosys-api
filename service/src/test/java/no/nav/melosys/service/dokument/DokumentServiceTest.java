@@ -5,6 +5,7 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -23,7 +24,7 @@ import no.nav.melosys.domain.dokument.soeknad.JuridiskArbeidsgiverNorge;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.doksys.DokSysFasade;
+import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -38,7 +39,6 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Test;
@@ -61,10 +61,10 @@ public final class DokumentServiceTest {
 
     private static long idTeller = 1;
     private final DokumentService instans;
-    private final DokSysFasade dokSysFasade;
+    private final DoksysFasade dokSysFasade;
 
     public DokumentServiceTest() throws Exception {
-        this.dokSysFasade = mock(DokSysFasade.class);
+        this.dokSysFasade = mock(DoksysFasade.class);
         this.instans = lagDokumentService(dokSysFasade, null);
     }
 
@@ -169,7 +169,7 @@ public final class DokumentServiceTest {
         return sadr;
     }
 
-    private static DokumentService lagDokumentService(DokSysFasade dokSysFasade, BrevDataByggerVelger brevdatabyggervelger) throws Exception {
+    private static DokumentService lagDokumentService(DoksysFasade dokSysFasade, BrevDataByggerVelger brevdatabyggervelger) throws Exception {
         Aktoer aktør = lagAktør(Aktoersroller.BRUKER);
         Behandling behandling = lagBehandling();
         BehandlingRepository behandlingRepository = mockBehandlingRepository(behandling);
@@ -185,7 +185,8 @@ public final class DokumentServiceTest {
             brevdatabyggervelger = lagBrevdataByggerVelger(tpsFasade, avklarteFaktaRepository, behandlingsresultatRepository);
         }
 
-        BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository);
+        UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
+        BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository);
         return new DokumentService(behandlingRepository, mock(FagsakRepository.class), brevDataService, dokSysFasade, mock(JoarkFasade.class),
                 mock(ProsessinstansService.class), brevdatabyggervelger);
     }

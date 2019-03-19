@@ -5,14 +5,14 @@ import java.util.Map;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import no.nav.melosys.service.dokument.DokumentSystemService;
-import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.saksflyt.felles.BrevBestiller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +33,11 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(SendForvaltningsmelding.class);
 
-    private final DokumentSystemService dokumentService;
+    private final BrevBestiller brevBestiller;
 
     @Autowired
-    public SendForvaltningsmelding(DokumentSystemService dokumentService) {
-        this.dokumentService = dokumentService;
+    public SendForvaltningsmelding(BrevBestiller brevBestiller) {
+        this.brevBestiller = brevBestiller;
     }
 
     @Override
@@ -55,8 +55,8 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
-        BrevData brevData = new BrevData(prosessinstans.getData(SAKSBEHANDLER));
-        dokumentService.produserDokument(behandling.getId(), MELDING_FORVENTET_SAKSBEHANDLINGSTID, brevData);
+        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+        brevBestiller.bestill(behandling, saksbehandler, MELDING_FORVENTET_SAKSBEHANDLINGSTID, Aktoersroller.BRUKER);
 
         prosessinstans.setSteg(null);
         log.info("Sendt forvaltningsmelding for prosessinstans {}", prosessinstans.getId());

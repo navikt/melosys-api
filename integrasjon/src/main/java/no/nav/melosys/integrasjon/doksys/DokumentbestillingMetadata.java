@@ -9,15 +9,15 @@ public class DokumentbestillingMetadata {
     public String dokumenttypeID;
 
     // Fødselsnummer/tss id/ org.nr. til personen/organisasjonen som er sakspart.
-    public String bruker;
+    public String brukerID;
+
+    // Brukernavn må settes hvis dokprod ikke utleder registerInfo
+    public String brukerNavn;
 
     // Fødselsnummer/tss id/ org.nr. til personen/ organisasjonen som er mottaker av dokumentet.
     public String mottakerID;
 
     public Aktoersroller mottakersRolle;
-
-    // Kan være organisasjon, person, osv.
-    public MottakerType mottakerType;
 
     // SakID som dokument skal journalføres mot  (forskjellig fra fagsaksnummer)
     public String journalsakID;
@@ -28,5 +28,8 @@ public class DokumentbestillingMetadata {
     public String saksbehandler;
 
     public UtenlandskMyndighet utenlandskMyndighet;
+
+    // Parameter som settes for å angi om registerInfo skal utledes for dokumentet som bestilles. Default false.
+    public boolean utledRegisterInfo;
 
 }

@@ -38,7 +38,7 @@ public final class LovvalgsperiodeDto {
             Trygdedekninger trygdeDekning,
             Medlemskapstyper medlemskapstype) {
         this.periode = periode;
-        this.lovvalgBestemmelse = lovvalgBestemmelse.name();
+        this.lovvalgBestemmelse = lovvalgBestemmelse != null ? lovvalgBestemmelse.name() : null;
         this.tilleggBestemmelse = tilleggBestemmelse != null ? tilleggBestemmelse.name() : null;
         this.lovvalgsland = lovvalgsland != null ? lovvalgsland.name() : null;
         this.unntakFraBestemmelse = unntakFraBestemmelse != null ? unntakFraBestemmelse.name() : null;
@@ -54,12 +54,12 @@ public final class LovvalgsperiodeDto {
                 LocalDate.parse(json.get("tomDato"))),
                 konverterLovvalgsBestemmelse(json.get("lovvalgBestemmelse")),
                 konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
-                json.containsKey("lovvalgsland") ? Landkoder.valueOf(json.get("lovvalgsland")) : null,
+                enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
                 konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
                 enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
                 InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
                 enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
-                json.containsKey("medlemskapstype") ? Medlemskapstyper.valueOf(json.get("medlemskapstype")) : null);
+                enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")));
     }
 
     /**

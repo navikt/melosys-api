@@ -8,16 +8,11 @@ import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
-import no.nav.melosys.exception.FunksjonellException;
 
 public enum SendBrevValidator {
     INSTANCE;
 
-    public static Lovvalgsperiode validerLovvalgsperiode(Set<Lovvalgsperiode> lovvalgsperioder) throws FunksjonellException {
-        if (lovvalgsperioder.isEmpty()) {
-            throw new FunksjonellException("Lovvalgsperiode mangler");
-        }
-
+    public static Lovvalgsperiode validerLovvalgsperiode(Set<Lovvalgsperiode> lovvalgsperioder) {
         if (lovvalgsperioder.size() > 1) {
             throw new UnsupportedOperationException("Flere enn en"
                 + " lovvalgsperiode er ikke støttet i første leveranse");

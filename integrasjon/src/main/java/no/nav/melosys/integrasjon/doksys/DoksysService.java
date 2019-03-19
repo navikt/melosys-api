@@ -8,8 +8,8 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.*;
-import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.*;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.ObjectFactory;
+import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.*;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastRequest;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastResponse;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest;
@@ -26,9 +26,9 @@ import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
 @Primary
-public class DokSysService implements DokSysFasade {
+public class DoksysService implements DoksysFasade {
 
-    private static final Logger log = LoggerFactory.getLogger(DokSysService.class);
+    private static final Logger log = LoggerFactory.getLogger(DoksysService.class);
 
     private static final String FALSK_MOTTAKER_ID = "11111111111";
 
@@ -37,7 +37,7 @@ public class DokSysService implements DokSysFasade {
     private ObjectFactory objectFactory;
 
     @Autowired
-    public DokSysService(DokumentproduksjonConsumer dokumentproduksjonConsumer) {
+    public DoksysService(DokumentproduksjonConsumer dokumentproduksjonConsumer) {
         this.dokumentproduksjonConsumer = dokumentproduksjonConsumer;
 
         this.objectFactory = new ObjectFactory();
@@ -47,7 +47,7 @@ public class DokSysService implements DokSysFasade {
     public byte[] produserDokumentutkast(DokumentbestillingMetadata metadata, Object brevdata) throws IntegrasjonException {
         ProduserDokumentutkastRequest wsRequest = new ProduserDokumentutkastRequest();
 
-        wsRequest.setUtledRegisterInfo(dokprodUtlederRegisterInfo(metadata));
+        wsRequest.setUtledRegisterInfo(metadata.utledRegisterInfo);
         wsRequest.setDokumenttypeId(metadata.dokumenttypeID);
         wsRequest.setBrevdata(brevdata);
 
@@ -67,9 +67,7 @@ public class DokSysService implements DokSysFasade {
         Dokumentbestillingsinformasjon info = new Dokumentbestillingsinformasjon();
 
         info.setDokumenttypeId(metadata.dokumenttypeID);
-        // Parameter som settes for å angi om registerInfo skal utledes i Dokprod for dokumentet som bestilles.
-        boolean adresseUtledes = dokprodUtlederRegisterInfo(metadata);
-        info.setUtledRegisterInfo(adresseUtledes);
+        info.setUtledRegisterInfo(metadata.utledRegisterInfo);
         // Hvis vedlegg skal sendes, må denne settes først når vedleggene har blitt sendt
         info.setFerdigstillForsendelse(true);
 
@@ -84,7 +82,10 @@ public class DokSysService implements DokSysFasade {
         info.setSakstilhoerendeFagsystem(sakstilhørendeFagsystem);
 
         Person bruker = objectFactory.createPerson();
-        bruker.setIdent(metadata.bruker);
+        if (!metadata.utledRegisterInfo) {
+            bruker.setNavn(metadata.brukerNavn);
+        }
+        bruker.setIdent(metadata.brukerID);
         info.setBruker(bruker);
 
         info.setMottaker(lagMottaker(metadata));
@@ -99,7 +100,7 @@ public class DokSysService implements DokSysFasade {
         info.setJournalfoerendeEnhet(Integer.toString(MELOSYS_ENHET_ID));
         info.setSaksbehandlernavn(metadata.saksbehandler);
 
-        if (!adresseUtledes) {
+        if (!metadata.utledRegisterInfo) {
             info.setAdresse(lagAdresse(metadata));
         }
 
@@ -107,6 +108,7 @@ public class DokSysService implements DokSysFasade {
         wsRequest.setBrevdata(brevdata);
 
         try {
+            log.debug("Bestiller dokument:{} {}", System.lineSeparator(), wsRequest.toString());
             ProduserIkkeredigerbartDokumentResponse wsResponse = dokumentproduksjonConsumer.produserIkkeredigerbartDokument(wsRequest);
 
             DokumentbestillingResponse response = new DokumentbestillingResponse();
@@ -123,12 +125,6 @@ public class DokSysService implements DokSysFasade {
             log.error("Produksjon av dokument feilet", e);
             throw new IntegrasjonException(e);
         }
-    }
-
-    // Dokprod kan utlede registerinfo når Melosys ikke trenger å sette adressen sammen.
-    // Melosys setter adressen sammen for kontaktpersoner og utelandske myndigheter.
-    private boolean dokprodUtlederRegisterInfo(DokumentbestillingMetadata metadata) {
-        return Aktoersroller.MYNDIGHET != metadata.mottakersRolle;
     }
 
     private Adresse lagAdresse(DokumentbestillingMetadata metadata) throws TekniskException {
@@ -153,7 +149,8 @@ public class DokSysService implements DokSysFasade {
         String mottakerID = metadata.mottakerID;
 
         if (mottakersRolle == null) {
-            throw new FunksjonellException("Brev kan ikke sendes, mottakersRolle er ikke satt.");
+            log.error("Brev bør ikke sendes, mottakersRolle er ikke satt.");
+            metadata.mottakersRolle = Aktoersroller.BRUKER;
         }
 
         switch (mottakersRolle) {

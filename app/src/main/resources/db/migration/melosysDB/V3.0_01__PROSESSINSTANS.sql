@@ -75,6 +75,7 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_SEND_BREV', 'Send orientering
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_VALIDERING', 'Validerer iverksett vedtak');
 INSERT INTO prosess_steg (kode, navn) VALUES ('OPPDATER_AVKLARTE_FAKTA_ENDRETPERIODE_BEGRUNNELSE', 'Legg til i AvklarteFakta begrunnelse for forkorting av lovvalgsperiode');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_RESULTAT', 'Oppdatering av behandlingsresultat');
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_AVKLAR_MYNDIGHET', 'Avklaring av utenlandsk trygdemyndighet');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_MEDL', 'Oppdatering av medlemskap');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_SEND_BREV', 'Send brev etter iverksett vedtak');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_SEND_SED', 'Send SED etter iverksett vedtak');

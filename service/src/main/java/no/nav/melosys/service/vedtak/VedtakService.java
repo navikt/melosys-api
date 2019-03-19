@@ -51,6 +51,7 @@ public class VedtakService {
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + " ikke finnes."));
 
+        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }

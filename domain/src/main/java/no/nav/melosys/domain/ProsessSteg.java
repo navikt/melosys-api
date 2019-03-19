@@ -48,6 +48,7 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     //Iverksett Vedtak
     IV_VALIDERING("IV_VALIDERING", "Validere iverksett vedtak"),
     IV_OPPDATER_RESULTAT("IV_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
+    IV_AVKLAR_MYNDIGHET("IV_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     IV_OPPDATER_MEDL("IV_OPPDATER_MEDL", "Oppdatering av medlemskap"),
     IV_SEND_BREV("IV_SEND_BREV", "Send brev etter iverksett vedtak"),
     IV_SEND_SED("IV_SEND_SED", "Send SED etter et eller annet"),

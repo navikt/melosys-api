@@ -55,7 +55,7 @@ public class Lovvalgsperiode implements ErPeriode {
     @Column(name = "lovvalgsland", updatable = false)
     private Landkoder lovvalgsland;
 
-    @Column(name = "lovvalg_bestemmelse", nullable = false, updatable = false)
+    @Column(name = "lovvalg_bestemmelse", updatable = false)
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
     private LovvalgBestemmelse bestemmelse;
 

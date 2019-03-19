@@ -1,16 +1,17 @@
 package no.nav.melosys.saksflyt.agent.aou;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.service.dokument.DokumentSystemService;
-import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
+import no.nav.melosys.saksflyt.felles.BrevBestiller;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,22 +22,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SendBrevTest {
-    private class MockBrevDataBygger implements BrevDataBygger {
-        @Override
-        public BrevData lag(Behandling behandling, String saksbehandler) {
-            return new BrevData();
-        }
-    }
 
     @Mock
-    private DokumentSystemService dokService;
-
-    @Mock
-    private BrevDataByggerVelger byggerVelger;
+    private BrevBestiller brevBestiller;
 
     @Mock
     private BehandlingRepository behandlingRepository;
@@ -51,7 +42,6 @@ public class SendBrevTest {
         behandling.setId(1L);
 
         when(behandlingRepository.findWithSaksopplysningerById(any())).thenReturn(behandling);
-        when(byggerVelger.hent(any())).thenReturn(new MockBrevDataBygger());
 
         p = new Prosessinstans();
         p.setBehandling(behandling);
@@ -59,7 +49,7 @@ public class SendBrevTest {
         p.setData(ProsessDataKey.SAKSBEHANDLER, "Z999");
         p.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, Behandlingsresultattyper.ANMODNING_OM_UNNTAK.getKode());
 
-        agent = new SendBrev(dokService, byggerVelger, behandlingRepository);
+        agent = new SendBrev(brevBestiller, behandlingRepository);
     }
 
     @Test
@@ -71,7 +61,7 @@ public class SendBrevTest {
     @Test
     public void utførStegAntallSendteBrev() throws FunksjonellException, TekniskException {
         agent.utførSteg(p);
-        verify(dokService, times(1)).produserDokument(anyLong(), eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), any());
-        verify(dokService, times(1)).produserDokument(anyLong(), eq(Produserbaredokumenter.ANMODNING_UNNTAK), any());
+        verify(brevBestiller).bestill(any(Behandling.class), anyString(), eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), eq(Aktoersroller.BRUKER));
+        verify(brevBestiller).bestill(any(Behandling.class), anyString(), eq(Produserbaredokumenter.ANMODNING_UNNTAK), eq(Aktoersroller.MYNDIGHET));
     }
 }

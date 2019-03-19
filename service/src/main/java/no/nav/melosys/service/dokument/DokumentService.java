@@ -7,7 +7,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.doksys.DokSysFasade;
+import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -34,7 +34,7 @@ public class DokumentService {
 
     private final BrevDataService brevDataService;
 
-    private final DokSysFasade dokSysFasade;
+    private final DoksysFasade dokSysFasade;
 
     private final JoarkFasade joarkFasade;
 
@@ -44,10 +44,10 @@ public class DokumentService {
 
     @Autowired
     public DokumentService(BehandlingRepository behandlingRepository,
-                    FagsakRepository fagsakRepository,
-                    BrevDataService brevDataService,
-                    DokSysFasade dokSysFasade, JoarkFasade joarkFasade,
-                    ProsessinstansService prosessinstansService, BrevDataByggerVelger brevDataByggerVelger) {
+                           FagsakRepository fagsakRepository,
+                           BrevDataService brevDataService,
+                           DoksysFasade dokSysFasade, JoarkFasade joarkFasade,
+                           ProsessinstansService prosessinstansService, BrevDataByggerVelger brevDataByggerVelger) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.brevDataService = brevDataService;

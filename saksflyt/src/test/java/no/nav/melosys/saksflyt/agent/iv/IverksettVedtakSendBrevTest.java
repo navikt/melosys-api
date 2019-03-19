@@ -5,12 +5,13 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.integrasjon.doksys.DokSysFasade;
+import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.felles.BrevBestiller;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntakOgAvslag;
@@ -19,6 +20,7 @@ import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
@@ -67,6 +69,8 @@ public class IverksettVedtakSendBrevTest {
         when(brevDataByggerStandard.lag(any(), any())).thenReturn(standardBrevData);
 
         BrevDataByggerVelger byggerVelger = mock(BrevDataByggerVelger.class);
+        when(byggerVelger.hent(eq(ANMODNING_UNNTAK))).thenReturn(brevDataByggerVedlegg);
+        when(byggerVelger.hent(eq(ATTEST_A1))).thenReturn(brevDataByggerVedlegg);
         when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV))).thenReturn(brevDataByggerVedlegg);
         when(byggerVelger.hent(eq(AVSLAG_YRKESAKTIV))).thenReturn(brevDataByggerAvslagYrkesaktiv);
         when(byggerVelger.hent(eq(AVSLAG_ARBEIDSGIVER))).thenReturn(brevDataByggerAvslagArbeidsgiver);
@@ -75,8 +79,9 @@ public class IverksettVedtakSendBrevTest {
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
         when(behandlingRepository.findWithSaksopplysningerById(eq(behandling.getId()))).thenReturn(behandling);
 
-        dokService = lagDokumentService(byggerVelger);
-        return new IverksettVedtakSendBrev(dokService, byggerVelger, behandlingRepository, behandlingsresultatRepo);
+        dokService = Mockito.spy(lagDokumentService(byggerVelger));
+        BrevBestiller brevBestiller = new BrevBestiller(dokService, byggerVelger);
+        return new IverksettVedtakSendBrev(brevBestiller, behandlingRepository, behandlingsresultatRepo);
     }
 
     private static BehandlingRepository mockBehandlingRepository() {
@@ -92,7 +97,7 @@ public class IverksettVedtakSendBrevTest {
         BehandlingRepository behandlingRepository = mockBehandlingRepository();
         FagsakRepository fagsakRepository = mock(FagsakRepository.class);
         BrevDataService brevDataService = mock(BrevDataService.class);
-        DokSysFasade dokSysFasade = mock(DokSysFasade.class);
+        DoksysFasade dokSysFasade = mock(DoksysFasade.class);
         JoarkFasade joarkFasade = mock(JoarkFasade.class);
         return spy(new DokumentSystemService(behandlingRepository, fagsakRepository,
             brevDataService, dokSysFasade, joarkFasade, brevDataByggerVelger));
@@ -223,6 +228,17 @@ public class IverksettVedtakSendBrevTest {
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(ART12_1_INNVILGET_BEHANDLINGSID));
         instans.utførSteg(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
+    }
+
+    @Test
+    public void utførStegPåInnvilgelsesBrevBestemtAv12_1_vedtakOgA1Sendes() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(ART12_1_INNVILGET_BEHANDLINGSID));
+
+        instans.utførSteg(prosessinstans);
+
+        verify(dokService).produserDokument(anyLong(), eq(INNVILGELSE_YRKESAKTIV), any());
+        verify(dokService).produserDokument(anyLong(), eq(ATTEST_A1), any());
     }
 
     @Test

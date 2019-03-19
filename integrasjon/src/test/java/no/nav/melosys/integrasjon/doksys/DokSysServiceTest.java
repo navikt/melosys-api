@@ -33,11 +33,11 @@ public class DokSysServiceTest {
     @Mock
     private DokumentproduksjonConsumer dokumentproduksjonConsumer;
 
-    private DokSysService dokSysService;
+    private DoksysService dokSysService;
 
     @Before
     public void setUp() {
-        dokSysService = new DokSysService(dokumentproduksjonConsumer);
+        dokSysService = new DoksysService(dokumentproduksjonConsumer);
     }
 
     @Test
@@ -62,6 +62,7 @@ public class DokSysServiceTest {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
         metadata.dokumenttypeID = "dok_1234";
         metadata.mottakersRolle = Aktoersroller.BRUKER;
+        metadata.utledRegisterInfo = true;
         Object brevdata = new Object();
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 

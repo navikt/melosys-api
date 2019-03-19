@@ -17,7 +17,6 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterServiceTest;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
+import static no.nav.melosys.service.SaksopplysningStubs.lagSøknadOgArbeidsforholdOpplysninger;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -52,9 +52,9 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
     public void setUp() {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
         brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(avklartefaktaService,
-                                                                                avklarteVirksomheterService,
-                                                                                lovvalgsperiodeService,
-                                                                                vilkaarsresultatRepository);
+            avklarteVirksomheterService,
+            lovvalgsperiodeService,
+            vilkaarsresultatRepository);
     }
 
     @Test
@@ -68,10 +68,9 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         person.setDokument(personDokument);
         person.setType(SaksopplysningType.PERSONOPPLYSNING);
 
-        Set<Saksopplysning> saksopplysninger =
-        AvklarteVirksomheterServiceTest.lagSøknadOgArbeidsforholdOpplysninger(Arrays.asList("987654321"),
-                                                                       Collections.emptyList(),
-                                                                       Arrays.asList("123456789"));
+        Set<Saksopplysning> saksopplysninger = lagSøknadOgArbeidsforholdOpplysninger(Arrays.asList("987654321"),
+            Collections.emptyList(),
+            Arrays.asList("123456789"));
 
         saksopplysninger.add(person);
         behandling.setSaksopplysninger(saksopplysninger);
