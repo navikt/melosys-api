@@ -5,12 +5,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 
 @Entity
 @Table(name = "fagsak")
@@ -122,6 +121,12 @@ public class Fagsak extends RegistreringsInfo {
         } else {
             return kandidater.get(0);
         }
+    }
+
+    public Landkoder hentMyndighetLandkode() throws TekniskException {
+        Aktoer myndighet = hentAktørMedRolleType(MYNDIGHET);
+        String[] split = myndighet.getInstitusjonId().split(":");
+        return Landkoder.valueOf(split[0]);
     }
 
     public String getSaksnummer() {
