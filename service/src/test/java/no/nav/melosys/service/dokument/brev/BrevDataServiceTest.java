@@ -163,7 +163,7 @@ public class BrevDataServiceTest {
             assertThat(mottaker).isNotNull();
             assertThat(mottaker).isInstanceOf(Person.class);
             return mottaker;
-        }).when(service).lagMottaker(any(), any());
+        }).when(service).lagMottaker(any(Produserbaredokumenter.class), any(), any());
 
         Element element = service.lagBrevXML(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
@@ -187,7 +187,7 @@ public class BrevDataServiceTest {
             assertThat(mottaker).isNotNull();
             assertThat(mottaker).isInstanceOf(Organisasjon.class);
             return mottaker;
-        }).when(service).lagMottaker(any(), any());
+        }).when(service).lagMottaker(any(Produserbaredokumenter.class), any(), any());
 
         Element element = service.lagBrevXML(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
