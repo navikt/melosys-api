@@ -101,7 +101,7 @@ public class VedtakServiceTest {
         vedtakService.endreVedtak(behandlingID, Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
 
         verify(behandlingRepository).findById(behandlingID);
-        verify(prosessinstansService).opprettProsessinstansOppdaterAvklarteFakta(any(Behandling.class), eq(Endretperioder.ENDRINGER_ARBEIDSSITUASJON));
+        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperioder.ENDRINGER_ARBEIDSSITUASJON));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 }

@@ -46,6 +46,7 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     AOU_SEND_BREV("AOU_SEND_BREV", "Send orienteringsbrev og A001 for anmodning om unntak"),
 
     //Iverksett Vedtak
+    IV_FORKORT_PERIODE("IV_FORKORT_PERIODE", "Legger til endringsgrunn i AVKLARTEFAKTA for hvorfor perioden er forkortet"),
     IV_VALIDERING("IV_VALIDERING", "Validere iverksett vedtak"),
     IV_OPPDATER_RESULTAT("IV_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
     IV_AVKLAR_MYNDIGHET("IV_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
@@ -54,7 +55,6 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     IV_SEND_SED("IV_SEND_SED", "Send SED etter et eller annet"),
     IV_AVSLUTT_BEHANDLING("IV_AVSLUTT_BEHANDLING", "Avslutt fagsak og aktiv behandling"),
     IV_STATUS_BEH_AVSL("IV_STATUS_BEH_AVSL", "Oppdater Sak og Behandling ved lukking av behandling"),
-    OPPDATER_AVKLARTE_FAKTA_ENDRETPERIODE_BEGRUNNELSE("OPPDATER_AVKLARTE_FAKTA_ENDRETPERIODE_BEGRUNNELSE", "Legger til endringsgrunn i AVKLARTEFAKTA"),
 
     MANGELBREV("MANGELBREV", "Opprett mangelbrev"),
 

@@ -69,7 +69,7 @@ public class OppdaterBehandlingsresultatTest {
         behandling.setId(1L);
         p.setBehandling(behandling);
         p.getBehandling().setType(Behandlingstyper.SOEKNAD);
-        p.setType(ProsessType.IVERKSETT_VEDTAK_ENDRET_PERIODE);
+        p.setType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
         String testbruker = "Z097";
         p.setData(ProsessDataKey.SAKSBEHANDLER, testbruker);
 

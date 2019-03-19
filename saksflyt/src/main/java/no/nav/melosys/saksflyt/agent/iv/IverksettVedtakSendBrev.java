@@ -83,38 +83,31 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         Lovvalgsperiode lovvalgsperiode = validerLovvalgsperiode(resultat.getLovvalgsperioder());
         log.info("Behandler lovvalgsperiode: {}", lovvalgsperiode);
 
-        ProsessType prosessType = prosessinstans.getType();
-        if (ProsessType.IVERKSETT_VEDTAK == prosessType || ProsessType.IVERKSETT_VEDTAK_ENDRET_PERIODE == prosessType) {
-            String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+        String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
 
-            if (avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
-                brevBestiller.bestill(behandling, saksbehandler, AVSLAG_YRKESAKTIV, BRUKER);
-                // FIXME Støtte for arbeidsgivere mangler.
-                //brevBestiller.bestill(behandling, saksbehandler, AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER);
+        if (avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
+            brevBestiller.bestill(behandling, saksbehandler, AVSLAG_YRKESAKTIV, BRUKER);
+            // FIXME Støtte for arbeidsgivere mangler.
+            //brevBestiller.bestill(behandling, saksbehandler, AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER);
 
-                log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
-                prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
-            } else if (innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
-                Endretperioder endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class);
-                brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_YRKESAKTIV, BRUKER, endretPeriodeBegrunnelseKode);
-                // FIXME Støtte for arbeidsgivere mangler.
-                //brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, ARBEIDSGIVER);
-                if (myndighetØnskerInnvilgelsesbrev(behandling)) {
-                    brevBestiller.bestill(behandling, saksbehandler, ATTEST_A1, MYNDIGHET, endretPeriodeBegrunnelseKode);
-                }
-
-                log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
-                prosessinstans.setSteg(IV_SEND_SED);
-            } else {
-                log.warn("Innvilgelsesbrev kan ikke sendes for behandling {} i "
-                        + "prosessinstansen {}.",
-                        behandling.getId(), prosessinstans.getId());
-                prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
+            log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
+            prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
+        } else if (innvilgelsesbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
+            Endretperioder endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class);
+            brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_YRKESAKTIV, BRUKER, endretPeriodeBegrunnelseKode);
+            // FIXME Støtte for arbeidsgivere mangler.
+            //brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, ARBEIDSGIVER);
+            if (myndighetØnskerInnvilgelsesbrev(behandling)) {
+                brevBestiller.bestill(behandling, saksbehandler, ATTEST_A1, MYNDIGHET, endretPeriodeBegrunnelseKode);
             }
+
+            log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
+            prosessinstans.setSteg(IV_SEND_SED);
         } else {
-            String feilmelding = "Ukjent prosess type: " + prosessType;
-            log.error("{}: {}", prosessinstans.getId(), feilmelding);
-            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
+            log.warn("Innvilgelsesbrev kan ikke sendes for behandling {} i "
+                    + "prosessinstansen {}.",
+                behandling.getId(), prosessinstans.getId());
+            prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
         }
     }
 

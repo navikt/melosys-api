@@ -63,7 +63,7 @@ public class VedtakService {
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke endre vedtak fordi behandling " + behandlingID + " ikke finnes."));
 
-        prosessinstansService.opprettProsessinstansOppdaterAvklarteFakta(behandling, endretperiode);
+        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, endretperiode);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 }

@@ -138,17 +138,17 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
-    public void opprettProsessinstansOppdaterAvklarteFakta() {
+    public void opprettProsessinstansForkortPeriode() {
         String saksbehandler = settInnloggetSaksbehandler();
 
         Behandling behandling = new Behandling();
-        service.opprettProsessinstansOppdaterAvklarteFakta(behandling, Endretperioder.RETURNERT_NORGE);
+        service.opprettProsessinstansForkortPeriode(behandling, Endretperioder.RETURNERT_NORGE);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
-        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK_ENDRET_PERIODE);
-        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.OPPDATER_AVKLARTE_FAKTA_ENDRETPERIODE_BEGRUNNELSE);
+        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
+        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.IV_FORKORT_PERIODE);
         assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
         assertThat(lagretInstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class)).isEqualTo(Endretperioder.RETURNERT_NORGE);
     }

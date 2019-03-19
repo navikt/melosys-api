@@ -20,31 +20,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_RESULTAT;
-import static no.nav.melosys.domain.ProsessSteg.OPPDATER_AVKLARTE_FAKTA_ENDRETPERIODE_BEGRUNNELSE;
+import static no.nav.melosys.domain.ProsessSteg.IV_FORKORT_PERIODE;
+import static no.nav.melosys.domain.ProsessSteg.IV_VALIDERING;
 
 /**
  * Legger til avklarte fakta med informasjon om endringsbegrunnelse.
  *
  * Transisjoner:
- * OPPDATER_AVKLARTE_FAKTA_ENDRETPERIODE_BEGRUNNELSE -> IV_OPPDATER_RESULTAT eller FEILET_MASKINELT hvis feil
+ * IV_FORKORT_PERIODE -> IV_VALIDERING eller FEILET_MASKINELT hvis feil
  */
 @Component
-public class OppdaterAvklarteFaktaEndretPeriodeBegrunnelse extends AbstraktStegBehandler {
+public class ForkortPeriode extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OppdaterAvklarteFaktaEndretPeriodeBegrunnelse.class);
+    private static final Logger log = LoggerFactory.getLogger(ForkortPeriode.class);
 
     private AvklartefaktaService avklartefakteService;
 
     @Autowired
-    public OppdaterAvklarteFaktaEndretPeriodeBegrunnelse(AvklartefaktaService avklartefaktaService) {
+    public ForkortPeriode(AvklartefaktaService avklartefaktaService) {
         this.avklartefakteService = avklartefaktaService;
         log.info("OppdaterAvlklarteFakta initialisert");
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return OPPDATER_AVKLARTE_FAKTA_ENDRETPERIODE_BEGRUNNELSE;
+        return IV_FORKORT_PERIODE;
     }
 
     @Override
@@ -60,9 +60,9 @@ public class OppdaterAvklarteFaktaEndretPeriodeBegrunnelse extends AbstraktStegB
         Behandling behandling = prosessinstans.getBehandling();
         Endretperioder endretperiode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class);
 
-        avklartefakteService.leggTilEndretPeriodeAvklarteFakta(behandling.getId(), endretperiode);
+        avklartefakteService.leggTilÅrsakEndringPeriode(behandling.getId(), endretperiode);
 
-        prosessinstans.setSteg(IV_OPPDATER_RESULTAT);
+        prosessinstans.setSteg(IV_VALIDERING);
         log.info("Oppdatert avklarteFakta for prosessinstans {}.", prosessinstans.getId());
     }
 }

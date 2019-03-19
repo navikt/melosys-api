@@ -122,11 +122,7 @@ public class MedlService implements MedlFasade {
     }
 
     @Override
-    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException {
-        oppdaterPeriode(lovvalgsperiode);
-    }
-
-    public void oppdaterPeriode(Lovvalgsperiode lovvalgsperiode) throws TekniskException, FunksjonellException {
+    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode) throws TekniskException, FunksjonellException {
         try {
             HentPeriodeResponse hentPeriodeResponse = medlemskapConsumer.hentPeriode(lagHentPeriodeRequest(lovvalgsperiode.getMedlPeriodeID()));
             Medlemsperiode periode = hentPeriodeResponse.getPeriode();

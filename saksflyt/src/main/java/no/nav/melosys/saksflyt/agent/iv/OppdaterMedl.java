@@ -24,7 +24,7 @@ import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
  * Oppdaterer medlemskap periode i MEDL.
  *
  * Transisjoner:
- * ProsessType.IVERKSETT_VEDTAK og ProsessType.IVERKSETT_VEDTAK_ENDRET_PERIODE
+ * ProsessType.IVERKSETT_VEDTAK og ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE
  *  IV_OPPDATER_MEDL -> IV_SEND_BREV eller FEILET_MASKINELT hvis feil
  */
 @Component
@@ -62,7 +62,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         Lovvalgsperiode lovvalgsperiode = felles.hentLovvalgsperiode(behandling);
 
         Behandlingsresultat behandlingsresultat = felles.hentBehandlingsresultat(behandling);
-        if (ProsessType.IVERKSETT_VEDTAK_ENDRET_PERIODE == prosessType) {
+        if (ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE == prosessType) {
             medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode);
         } else if (erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)) {
             Long medlPeriodeID = medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode);

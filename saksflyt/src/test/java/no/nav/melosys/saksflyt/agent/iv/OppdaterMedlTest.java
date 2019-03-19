@@ -125,7 +125,7 @@ public class OppdaterMedlTest {
 
     @Test
     public void erProsesstypeEndretPeriode_oppdaterPeriodeEndelig() throws FunksjonellException, TekniskException {
-        p.setType(ProsessType.IVERKSETT_VEDTAK_ENDRET_PERIODE);
+        p.setType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
         agent.utfør(p);
 
         verify(medlFasade).oppdaterPeriodeEndelig(lovvalgsperiode);

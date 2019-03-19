@@ -94,7 +94,7 @@ public class AvklartefaktaService {
     }
 
     @Transactional
-    public void leggTilEndretPeriodeAvklarteFakta(long behandlingsid, Endretperioder endretperiode) throws IkkeFunnetException {
+    public void leggTilÅrsakEndringPeriode(long behandlingsid, Endretperioder endretperiode) throws IkkeFunnetException {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandlingsresultat for behandlingsid: " + behandlingsid));
 

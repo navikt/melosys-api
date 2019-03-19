@@ -143,7 +143,7 @@ public class ProsessinstansService {
         lagre(nyprosessinstans);
     }
 
-    public void opprettProsessinstansOppdaterAvklarteFakta(Behandling behandling, Endretperioder endretperiode) {
+    public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperioder endretperiode) {
         Prosessinstans nyprosessinstans = new Prosessinstans();
 
         String saksbehandler = SubjectHandler.getInstance().getUserID();
@@ -151,8 +151,8 @@ public class ProsessinstansService {
 
         nyprosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiode);
         nyprosessinstans.setBehandling(behandling);
-        nyprosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_ENDRET_PERIODE);
-        nyprosessinstans.setSteg(ProsessSteg.OPPDATER_AVKLARTE_FAKTA_ENDRETPERIODE_BEGRUNNELSE);
+        nyprosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
+        nyprosessinstans.setSteg(ProsessSteg.IV_FORKORT_PERIODE);
 
         LocalDateTime nå = LocalDateTime.now();
         nyprosessinstans.setRegistrertDato(nå);

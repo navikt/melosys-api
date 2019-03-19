@@ -87,7 +87,7 @@ public class VedtakTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public void endreVedtak_anmodningOmUnntak_fungerer() throws FunksjonellException, TekniskException, IOException {
+    public void endreVedtak_fungerer() throws FunksjonellException, TekniskException, IOException {
         endreVedtakDto.setBegrunnelseKode(Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 

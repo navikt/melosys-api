@@ -10,20 +10,20 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.Before;
 import org.junit.Test;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_RESULTAT;
+import static no.nav.melosys.domain.ProsessSteg.IV_VALIDERING;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class OppdaterAvklarteFaktaEndretPeriodeBegrunnelseTest {
+public class ForkortPeriodeTest {
 
-    private OppdaterAvklarteFaktaEndretPeriodeBegrunnelse oppdaterAvklarteFaktaEndretPeriodeBegrunnelse;
+    private ForkortPeriode forkortPeriode;
     private AvklartefaktaService avklartefaktaService;
 
     @Before
     public void setUp() {
         avklartefaktaService = mock(AvklartefaktaService.class);
-        oppdaterAvklarteFaktaEndretPeriodeBegrunnelse = new OppdaterAvklarteFaktaEndretPeriodeBegrunnelse(avklartefaktaService);
+        forkortPeriode = new ForkortPeriode(avklartefaktaService);
     }
 
     @Test
@@ -37,9 +37,9 @@ public class OppdaterAvklarteFaktaEndretPeriodeBegrunnelseTest {
         p.setBehandling(behandling);
         p.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiodeKode);
 
-        oppdaterAvklarteFaktaEndretPeriodeBegrunnelse.utfør(p);
+        forkortPeriode.utfør(p);
 
-        verify(avklartefaktaService).leggTilEndretPeriodeAvklarteFakta(behandlingId, endretperiodeKode);
-        assertThat(p.getSteg()).isEqualTo(IV_OPPDATER_RESULTAT);
+        verify(avklartefaktaService).leggTilÅrsakEndringPeriode(behandlingId, endretperiodeKode);
+        assertThat(p.getSteg()).isEqualTo(IV_VALIDERING);
     }
 }
