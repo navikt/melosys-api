@@ -101,5 +101,4 @@ public final class BrevDataUtils {
         navn.setEtternavn(personDokument.etternavn);
         return navn;
     }
-
 }

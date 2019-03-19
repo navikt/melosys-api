@@ -10,6 +10,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
@@ -42,14 +43,17 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
     private final BrevBestiller brevBestiller;
     private final BehandlingRepository behandlingRepository;
     private final BehandlingsresultatRepository behandlingsResultatRepo;
+    private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
     @Autowired
     public IverksettVedtakSendBrev(BrevBestiller brevBestiller,
-            BehandlingRepository behandlingRepository,
-            BehandlingsresultatRepository behandlingsResultatRepo) {
+                                   BehandlingRepository behandlingRepository,
+                                   BehandlingsresultatRepository behandlingsResultatRepo,
+                                   UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
         this.brevBestiller = brevBestiller;
         this.behandlingRepository = behandlingRepository;
         this.behandlingsResultatRepo = behandlingsResultatRepo;
+        this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
 
         log.info("IverksetteVedtakSendBrev initialisert");
     }
@@ -94,8 +98,10 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
                 Endretperioder endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class);
                 brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_YRKESAKTIV, BRUKER, endretPeriodeBegrunnelseKode);
                 // FIXME Støtte for arbeidsgivere mangler.
-                //brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, ARBEIDSGIVER, endretPeriodeBegrunnelseKode);
-                brevBestiller.bestill(behandling, saksbehandler, ATTEST_A1, MYNDIGHET, endretPeriodeBegrunnelseKode);
+                //brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, ARBEIDSGIVER);
+                if (myndighetØnskerInnvilgelsesbrev(behandling)) {
+                    brevBestiller.bestill(behandling, saksbehandler, ATTEST_A1, MYNDIGHET, endretPeriodeBegrunnelseKode);
+                }
 
                 log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
                 prosessinstans.setSteg(IV_SEND_SED);
@@ -110,5 +116,12 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
         }
+    }
+
+    private boolean myndighetØnskerInnvilgelsesbrev(Behandling behandling) throws TekniskException {
+        return utenlandskMyndighetRepository.
+            findByLandkode(behandling.getFagsak().hentMyndighetLandkode())
+            .preferanser.stream().map(Preferanse::getPreferanse)
+            .noneMatch(p -> p.equals(Preferanse.PreferanseEnum.RESERVERT_FRA_A1));
     }
 }

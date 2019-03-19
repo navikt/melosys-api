@@ -17,7 +17,6 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -37,7 +36,8 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 /**
@@ -137,9 +137,7 @@ public class BrevDataService {
     }
 
     UtenlandskMyndighet hentMyndighetFraSak(Fagsak fagsak) throws TekniskException {
-        Aktoer myndighet = fagsak.hentAktørMedRolleType(MYNDIGHET);
-        String[] split = myndighet.getInstitusjonId().split(":");
-        return utenlandskMyndighetRepository.findByLandkode(Landkoder.valueOf(split[0]));
+        return utenlandskMyndighetRepository.findByLandkode(fagsak.hentMyndighetLandkode());
     }
 
     // Dokprod kan utlede registerinfo når Melosys ikke trenger å sette adressen sammen.
