@@ -141,6 +141,8 @@ public class GsakService implements GsakFasade {
         oppgaveDto.setSaksreferanse(oppgave.getSaksnummer());
         oppgaveDto.setTema(oppgave.getTema().getKode());
         oppgaveDto.setTildeltEnhetsnr(Integer.toString(MELOSYS_ENHET_ID));
+        oppgaveDto.setBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode());
+
         oppgaveDto.setTilordnetRessurs(oppgave.getTilordnetRessurs());
 
         return oppgaveConsumer.opprettOppgave(oppgaveDto);

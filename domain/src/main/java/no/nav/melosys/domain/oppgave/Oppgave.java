@@ -23,6 +23,7 @@ public class Oppgave {
     private String aktørId;
     private Behandlingstyper behandlingstype;
     private Behandlingstema behandlingstema;
+    private String behandlesAvApplikasjon;
 
     public Oppgave() {
     }
@@ -129,6 +130,14 @@ public class Oppgave {
 
     public void setVersjon(int versjon) {
         this.versjon = versjon;
+    }
+
+    public String getBehandlesAvApplikasjon() {
+        return behandlesAvApplikasjon;
+    }
+
+    public void setBehandlesAvApplikasjon(String behandlesAvApplikasjon) {
+        this.behandlesAvApplikasjon = behandlesAvApplikasjon;
     }
 
     /**
