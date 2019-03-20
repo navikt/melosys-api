@@ -109,7 +109,7 @@ public class OppgaveplukkerTest {
         behandlingstyper.add(Behandlingstyper.SOEKNAD.getKode());
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
-        plukkOppgaveInnDto.setOppgavetype("BEH_SAK");
+        plukkOppgaveInnDto.setOppgavetype("BEH_SAK_MK");
         plukkOppgaveInnDto.setFagomrade("MED");
         plukkOppgaveInnDto.setSakstyper(sakstyper);
         plukkOppgaveInnDto.setBehandlingstyper(behandlingstyper);
@@ -158,7 +158,7 @@ public class OppgaveplukkerTest {
         behandlingstyper.add(Behandlingstyper.SOEKNAD.getKode());
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
-        plukkOppgaveInnDto.setOppgavetype("BEH_SAK");
+        plukkOppgaveInnDto.setOppgavetype("BEH_SAK_MK");
         plukkOppgaveInnDto.setFagomrade("MED");
         plukkOppgaveInnDto.setSakstyper(sakstyper);
         plukkOppgaveInnDto.setBehandlingstyper(behandlingstyper);
@@ -228,7 +228,7 @@ public class OppgaveplukkerTest {
         behandlingstyper.add(Behandlingstyper.NY_VURDERING.getKode());
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
-        plukkOppgaveInnDto.setOppgavetype("BEH_SAK");
+        plukkOppgaveInnDto.setOppgavetype("BEH_SAK_MK");
         plukkOppgaveInnDto.setSakstyper(sakstyper);
         plukkOppgaveInnDto.setBehandlingstyper(behandlingstyper);
 
@@ -287,7 +287,7 @@ public class OppgaveplukkerTest {
         behandlingstyper.add(Behandlingstyper.SOEKNAD.getKode());
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
-        plukkOppgaveInnDto.setOppgavetype("BEH_SAK");
+        plukkOppgaveInnDto.setOppgavetype("BEH_SAK_MK");
         plukkOppgaveInnDto.setSakstyper(sakstyper);
         plukkOppgaveInnDto.setBehandlingstyper(behandlingstyper);
 
