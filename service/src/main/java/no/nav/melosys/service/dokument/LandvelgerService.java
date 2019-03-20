@@ -76,10 +76,13 @@ public class LandvelgerService {
 
         List<Vilkaar> oppfylteVilkår = hentOppfylteVilkår(behandling);
 
-        if (oppfylteVilkår.contains(FO_883_2004_ART12_1) &&
-            oppfylteVilkår.contains(FO_883_2004_ART11_4_1)) {
+        if (oppfylteVilkår.contains(FO_883_2004_ART12_1) ||
+            oppfylteVilkår.contains(FO_883_2004_ART12_2) ||
+            oppfylteVilkår.contains(FO_883_2004_ART16_1)) {
+            if (oppfylteVilkår.contains(FO_883_2004_ART11_4_1)) {
                 Optional<Landkoder> avklarteFlaggland = avklartefaktaService.hentFlaggland(behandling.getId());
                 return avklarteFlaggland.orElseThrow(() -> new FunksjonellException("ART12_1 + ART11_4_1: Trenger avklart flaggland"));
+            }
         }
 
         if (oppfylteVilkår.contains(FO_883_2004_ART11_3A) || oppfylteVilkår.contains(FO_883_2004_ART11_4_2)) {
