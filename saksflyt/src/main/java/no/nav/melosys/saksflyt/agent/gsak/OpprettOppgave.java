@@ -6,6 +6,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
@@ -78,8 +79,8 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         oppgave.setTema(Tema.MED);
 
         if (fagsak.getType() == Sakstyper.EU_EOS) {
-            // FIXME MELOSYS-1401 Behandlingstema.ARB_EØS bør brukes men mappingen med underkategori er ikke definert og registrert.
-            oppgave.setBehandlingstema(null);
+            oppgave.setBehandlingstema(Behandlingstema.ARB_EØS);
+            oppgave.setBehandlingstype(null);
         } else {
             String feilmelding = "Sakstyper " + fagsak.getType() + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
@@ -87,9 +88,10 @@ public class OpprettOppgave extends AbstraktStegBehandler {
             return;
         }
 
-        if (behandlingstype == Behandlingstyper.SOEKNAD || behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
-            oppgave.setBehandlingstype(behandlingstype);
+        if (behandlingstype == Behandlingstyper.SOEKNAD) {
             oppgave.setOppgavetype(Oppgavetyper.BEH_SAK);
+        } else if (behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
+            oppgave.setOppgavetype(Oppgavetyper.VUR);
         } else {
             String feilmelding = "Behandlingstype " + behandlingstype + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
