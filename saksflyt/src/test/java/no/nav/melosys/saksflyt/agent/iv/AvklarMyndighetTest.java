@@ -1,9 +1,10 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
@@ -12,7 +13,9 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
+import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +23,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -32,6 +34,9 @@ public class AvklarMyndighetTest {
     private AvklartefaktaService avklartefaktaService;
 
     @Mock
+    private VilkaarsresultatRepository vilkaarsresultatRepository;
+
+    @Mock
     private BehandlingRepository behandlingRepository;
 
     @Mock
@@ -40,16 +45,23 @@ public class AvklarMyndighetTest {
     @Mock
     private FagsakService fagsakService;
 
+
     @Mock
     private UtenlandskMyndighetRepository utenlandskMyndighetRepository;
+
+    private LandvelgerService landvelgerService;
 
     private AvklarMyndighet steg;
 
     private Prosessinstans p;
 
+    private List<Vilkaarsresultat> vilkaar = new ArrayList<>();
+
+
     @Before
     public void setUp() {
-        steg = new AvklarMyndighet(avklartefaktaService, behandlingRepository, behandlingsresultatRepository, fagsakService, utenlandskMyndighetRepository);
+        landvelgerService = new LandvelgerService(avklartefaktaService, vilkaarsresultatRepository);
+        steg = new AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, fagsakService, landvelgerService, utenlandskMyndighetRepository);
 
         p = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
@@ -69,6 +81,8 @@ public class AvklarMyndighetTest {
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
         when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
+
+        when(vilkaarsresultatRepository.findByBehandlingsresultatId(anyLong())).thenReturn(vilkaar);
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
@@ -129,104 +143,5 @@ public class AvklarMyndighetTest {
         steg.utfør(p);
 
         verify(fagsakService, never()).leggTilAktør(any(), any(), any());
-    }
-
-    @Test
-    public void avklarLand_12_1_brukerSøknadsland() throws FunksjonellException, TekniskException {
-        Behandling behandling = lagBehandling(new Fagsak());
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(3L);
-        Vilkaarsresultat v1 = new Vilkaarsresultat();
-        v1.setOppfylt(true);
-        v1.setVilkaar(Vilkaar.FO_883_2004_ART12_1);
-        behandlingsresultat.getVilkaarsresultater().add(v1);
-
-        Landkoder landkode = steg.avklarLand(behandling, behandlingsresultat);
-
-        assertThat(landkode).isEqualTo(Landkoder.BE);
-    }
-
-    @Test
-    public void avklarLand_12_2_brukerSøknadsland() throws FunksjonellException, TekniskException {
-        Behandling behandling = lagBehandling(new Fagsak());
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(3L);
-        Vilkaarsresultat v1 = new Vilkaarsresultat();
-        v1.setOppfylt(true);
-        v1.setVilkaar(Vilkaar.FO_883_2004_ART12_2);
-        behandlingsresultat.getVilkaarsresultater().add(v1);
-
-        Landkoder landkode = steg.avklarLand(behandling, behandlingsresultat);
-
-        assertThat(landkode).isEqualTo(Landkoder.BE);
-    }
-
-    @Test
-    public void avklarLand_16_1_brukerSøknadsland() throws FunksjonellException, TekniskException {
-        Behandling behandling = lagBehandling(new Fagsak());
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(3L);
-        Vilkaarsresultat v1 = new Vilkaarsresultat();
-        v1.setOppfylt(true);
-        v1.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
-        behandlingsresultat.getVilkaarsresultater().add(v1);
-
-        Landkoder landkode = steg.avklarLand(behandling, behandlingsresultat);
-
-        assertThat(landkode).isEqualTo(Landkoder.BE);
-    }
-
-    @Test
-    public void avklarLand_11_4_1og11_3A__brukerBostedLand() throws FunksjonellException, TekniskException {
-        Behandling behandling = lagBehandling(new Fagsak());
-        Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
-        Vilkaarsresultat v1 = new Vilkaarsresultat();
-        v1.setOppfylt(true);
-        v1.setVilkaar(Vilkaar.FO_883_2004_ART11_4_1);
-        Vilkaarsresultat v2 = new Vilkaarsresultat();
-        v2.setOppfylt(true);
-        v2.setVilkaar(Vilkaar.FO_883_2004_ART11_3A);
-        behandlingsresultat.getVilkaarsresultater().add(v1);
-        behandlingsresultat.getVilkaarsresultater().add(v2);
-
-        Avklartefakta avklartLand = new Avklartefakta();
-        avklartLand.setFakta("SE");
-        when(avklartefaktaService.hentAvklarteFakta(anyLong(), eq(Avklartefaktatype.BOSTEDSLAND))).thenReturn(avklartLand);
-
-        Landkoder landkode = steg.avklarLand(behandling, behandlingsresultat);
-
-        assertThat(landkode).isEqualTo(Landkoder.SE);
-    }
-
-    @Test
-    public void avklarLand_11_4_1_uten_11_3A__brukerFlaggLand() throws FunksjonellException, TekniskException {
-        Behandling behandling = lagBehandling(new Fagsak());
-        Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
-        Vilkaarsresultat v1 = new Vilkaarsresultat();
-        v1.setOppfylt(true);
-        v1.setVilkaar(Vilkaar.FO_883_2004_ART11_4_1);
-        behandlingsresultat.getVilkaarsresultater().add(v1);
-
-        Avklartefakta avklartLand = new Avklartefakta();
-        avklartLand.setFakta("ES");
-        when(avklartefaktaService.hentAvklarteFakta(anyLong(), eq(Avklartefaktatype.FLAGGLAND))).thenReturn(avklartLand);
-
-        Landkoder landkode = steg.avklarLand(behandling, behandlingsresultat);
-
-        assertThat(landkode).isEqualTo(Landkoder.ES);
-    }
-
-    @Test
-    public void avklarLand_11_3A_uten_11_4_1_brukerAdresseLand() throws FunksjonellException, TekniskException {
-        Behandling behandling = lagBehandling(new Fagsak());
-        Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
-        Vilkaarsresultat v1 = new Vilkaarsresultat();
-        v1.setOppfylt(true);
-        v1.setVilkaar(Vilkaar.FO_883_2004_ART11_3A);
-        behandlingsresultat.getVilkaarsresultater().add(v1);
-
-        Landkoder landkode = steg.avklarLand(behandling, behandlingsresultat);
-
-        assertThat(landkode).isEqualTo(Landkoder.IT);
     }
 }

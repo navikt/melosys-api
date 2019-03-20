@@ -89,7 +89,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
         if (behandlingstype == Behandlingstyper.SOEKNAD || behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
             oppgave.setBehandlingstype(behandlingstype);
-            oppgave.setOppgavetype(Oppgavetyper.BEH_SAK);
+            oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         } else {
             String feilmelding = "Behandlingstype " + behandlingstype + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);

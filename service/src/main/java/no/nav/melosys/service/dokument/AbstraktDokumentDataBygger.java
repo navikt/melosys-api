@@ -83,7 +83,7 @@ public abstract class AbstraktDokumentDataBygger {
     }
 
     private List<Arbeidssted> hentIkkeFysiskeArbeidssteder() {
-        Set<Avklartefakta> avklartefaktaSet = avklartefaktaService.hentAlleAvklarteArbeidsland(behandling.getId());
+        Set<Avklartefakta> avklartefaktaSet = avklartefaktaService.hentAlleAvklarteFlaggland(behandling.getId());
 
         return avklartefaktaSet.stream()
             .map(avklartefakta -> new Arbeidssted(avklartefakta.getSubjekt(), avklartefakta.getFakta(), Yrkesgrupper.SOKKEL_ELLER_SKIP))
