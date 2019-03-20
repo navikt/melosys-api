@@ -1,5 +1,8 @@
 package no.nav.melosys.integrasjon.gsak;
 
+import java.util.Collections;
+import java.util.List;
+
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -9,6 +12,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.gsak.oppgave.OppgaveConsumer;
+import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveDto;
+import no.nav.melosys.integrasjon.gsak.oppgave.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.gsak.oppgave.dto.OpprettOppgaveDto;
 import no.nav.melosys.integrasjon.gsak.sak.SakConsumer;
 import org.junit.Before;
@@ -21,8 +26,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class GsakServiceTest {
@@ -33,6 +38,8 @@ public final class GsakServiceTest {
     private SakConsumer sakConsumer;
     @Captor
     private ArgumentCaptor<OpprettOppgaveDto> oppgaveDtoCaptor;
+    @Captor
+    private ArgumentCaptor<OppgaveSearchRequest> oppgaveSearchRequestCaptor;
 
     private GsakService instans;
 
@@ -69,6 +76,22 @@ public final class GsakServiceTest {
         assertThat(oppgaveDto.getTema()).isEqualTo(oppgave.getTema().getKode());
         assertThat(oppgaveDto.getTildeltEnhetsnr()).isEqualTo(Integer.toString(Konstanter.MELOSYS_ENHET_ID));
         assertThat(oppgaveDto.getTilordnetRessurs()).isEqualTo(oppgave.getTilordnetRessurs());
+    }
+
+    @Test
+    public void finnOppgaveListeMedAnsvarlig_gyldigOppgave_verifiserToKallMotOppgave() throws Exception {
+        OppgaveDto oppgaveDto = new OppgaveDto();
+        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class))).thenReturn(Collections.singletonList(oppgaveDto));
+
+        instans.finnOppgaveListeMedAnsvarlig("123");
+        verify(oppgaveConsumer, times(2)).hentOppgaveListe(oppgaveSearchRequestCaptor.capture());
+
+        List<OppgaveSearchRequest> requests = oppgaveSearchRequestCaptor.getAllValues();
+        assertThat(requests.size()).isEqualTo(2);
+        assertThat(requests.get(0).getOppgavetype()[0]).isEqualTo(Oppgavetyper.JFR.getKode());
+        assertThat(requests.get(0).getBehandlesAvApplikasjon()).isNullOrEmpty();
+        assertThat(requests.get(1).getOppgavetype()).contains(Oppgavetyper.BEH_SAK.getKode());
+        assertThat(requests.get(1).getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
     }
 
     private Oppgave lagOppgave() {

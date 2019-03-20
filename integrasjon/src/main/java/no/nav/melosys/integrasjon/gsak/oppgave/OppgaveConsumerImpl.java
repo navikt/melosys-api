@@ -13,7 +13,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
 import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
 import no.nav.melosys.integrasjon.felles.RestClientLoggingFilter;
@@ -85,7 +84,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
             .queryParam("tilordnetRessurs", oppgaveSearchRequest.getTilordnetRessurs())
             .queryParam("saksreferanse", oppgaveSearchRequest.getSaksreferanse())
             .queryParam("statuskategori", oppgaveSearchRequest.getStatusKategori())
-            .queryParam("behandlesAvApplikasjon", Fagsystem.MELOSYS.getKode());
+            .queryParam("behandlesAvApplikasjon", oppgaveSearchRequest.getBehandlesAvApplikasjon());
 
         lokalTarget = leggTilQueryParamSomArray(lokalTarget, "tema", oppgaveSearchRequest.getTema());
         lokalTarget = leggTilQueryParamSomArray(lokalTarget, "oppgavetype", oppgaveSearchRequest.getOppgavetype());
