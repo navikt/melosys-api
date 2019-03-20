@@ -17,6 +17,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +29,7 @@ import static no.nav.melosys.domain.kodeverk.Vilkaar.ART12_1_VESENTLIG_VIRKSOMHE
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
 import static no.nav.melosys.service.SaksopplysningStubs.lagSøknadOgArbeidsforholdOpplysninger;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -36,6 +38,9 @@ import static org.mockito.Mockito.when;
 public class BrevDataByggerAvslagArbeidsgiverTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
+
+    @Mock
+    LandvelgerService landvelgerService;
 
     @Mock
     RegisterOppslagService registerOppslagService;
@@ -49,12 +54,16 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
     private BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver;
 
     @Before
-    public void setUp() {
+    public void setUp() throws FunksjonellException, TekniskException {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+
+        when(landvelgerService.hentArbeidsland(any())).thenReturn(Landkoder.AT);
+
         brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(avklartefaktaService,
-            avklarteVirksomheterService,
-            lovvalgsperiodeService,
-            vilkaarsresultatRepository);
+                                                                                avklarteVirksomheterService,
+                                                                                landvelgerService,
+                                                                                lovvalgsperiodeService,
+                                                                                vilkaarsresultatRepository);
     }
 
     @Test

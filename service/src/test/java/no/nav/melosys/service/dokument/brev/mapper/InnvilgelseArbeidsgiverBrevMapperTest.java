@@ -22,6 +22,8 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
@@ -35,7 +37,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
         instans = new InnvilgelseArbeidsgiverMapper();
     }
 
-      @Test
+    @Test
     public void mapArbeidsLandSammensattNavnLovvalgsperiodeFraSøkandTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml(lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
                 Collections.singleton(lagAvklarteFakta())));
@@ -48,7 +50,10 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
     private void testMapTilBrevXml(Behandling behandling, Behandlingsresultat behandlingsresultat) throws Exception {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = LagMelosysNAVFelles();
-        String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, null);
+        BrevDataInnvilgelse brevDataInnvilgelse = new BrevDataInnvilgelse("Z123456", new BrevbestillingDto());
+        brevDataInnvilgelse.arbeidsland = "Sverige";
+        brevDataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
+        String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevDataInnvilgelse);
         // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
         // grundig mot forventninger.
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
