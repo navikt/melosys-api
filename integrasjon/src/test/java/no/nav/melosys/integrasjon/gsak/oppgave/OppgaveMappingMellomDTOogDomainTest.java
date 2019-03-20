@@ -35,7 +35,7 @@ public class OppgaveMappingMellomDTOogDomainTest {
         OppgaveDto oppgaveDto = new OppgaveDto();
         oppgaveDto.setId("1234");
         oppgaveDto.setSaksreferanse("456");
-        oppgaveDto.setOppgavetype("BEH_SAK");
+        oppgaveDto.setOppgavetype("BEH_SAK_MK");
         oppgaveDto.setTema("MED");
         oppgaveDto.setSaksreferanse("MEL-111");
 
@@ -43,7 +43,7 @@ public class OppgaveMappingMellomDTOogDomainTest {
         Oppgave oppgave = gsakFasade.hentOppgave("1234");
         assertThat(oppgave.getOppgaveId()).isEqualTo("1234");
         assertThat(oppgave.getSaksnummer()).isEqualTo("MEL-111");
-        assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetyper.valueOf("BEH_SAK"));
+        assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetyper.valueOf("BEH_SAK_MK"));
         assertThat(oppgave.getTema()).isEqualTo(Tema.valueOf("MED"));
     }
 }

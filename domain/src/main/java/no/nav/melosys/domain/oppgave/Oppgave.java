@@ -60,7 +60,7 @@ public class Oppgave {
     }
 
     public boolean erBehandling() {
-        return oppgavetype == Oppgavetyper.BEH_SAK;
+        return oppgavetype == Oppgavetyper.BEH_SAK_MK;
     }
 
     public boolean erJournalFøring() {

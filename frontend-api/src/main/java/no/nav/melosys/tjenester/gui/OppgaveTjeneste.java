@@ -61,7 +61,7 @@ public class OppgaveTjeneste extends RestTjeneste {
 
             dto.setOppgaveID(oppgave.getOppgaveId());
             if (oppgave.erBehandling()) {
-                dto.setOppgavetype(Oppgavetyper.BEH_SAK.getKode());
+                dto.setOppgavetype(Oppgavetyper.BEH_SAK_MK.getKode());
                 dto.setSaksnummer(oppgave.getSaksnummer());
             } else if (oppgave.erJournalFøring()) {
                 dto.setOppgavetype(Oppgavetyper.JFR.getKode());
