@@ -149,7 +149,7 @@ public class AvklartefaktaServiceTest {
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(1L);
-        assertThat(maritimType).isEqualTo(maritimType);
+        assertThat(maritimType.get()).isEqualTo(Maritimtyper.SOKKEL);
     }
 
     @Test
@@ -160,7 +160,7 @@ public class AvklartefaktaServiceTest {
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
         Optional<Maritimtyper> maritimType = avklartefaktaService.hentMaritimType(1L);
-        assertThat(maritimType).isEqualTo(maritimType);
+        assertThat(maritimType.get()).isEqualTo(Maritimtyper.SKIP);
     }
 
     @Test
