@@ -146,17 +146,11 @@ public class Fagsak extends RegistreringsInfo {
             return false;
         }
         Fagsak that = (Fagsak) o;
-        if (this.saksnummer == null) {
-            throw new RuntimeException("Fagsak.equals ble kalt før fagsak har fått saksnummer");
-        }
-        return this.saksnummer.equals(that.saksnummer);
+        return saksnummer != null && this.saksnummer.equals(that.saksnummer);
     }
 
     @Override
     public int hashCode() {
-        if (this.saksnummer == null) {
-            throw new RuntimeException("Fagsak.hashCode ble kalt før fagsak har fått saksnummer");
-        }
-        return saksnummer.hashCode();
+        return 31;
     }
 }
