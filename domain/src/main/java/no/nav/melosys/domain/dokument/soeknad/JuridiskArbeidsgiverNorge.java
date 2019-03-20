@@ -21,7 +21,7 @@ public class JuridiskArbeidsgiverNorge {
     public String oppdragsKontrakterIHovedsakInngaattILand;
     public List<String> ekstraArbeidsgivere = new ArrayList<>();
 
-    public Stream<String> hentAlleOrganisasjonsnumre() {
+    public Stream<String> hentManueltRegistrerteArbeidsgiverOrgnumre() {
         return ekstraArbeidsgivere.stream();
     }
 }

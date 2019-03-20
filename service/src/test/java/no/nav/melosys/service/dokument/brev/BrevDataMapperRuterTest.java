@@ -8,10 +8,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.dokument.brev.mapper.AnmodningUnntakMapper;
-import no.nav.melosys.service.dokument.brev.mapper.BrevDataMapper;
-import no.nav.melosys.service.dokument.brev.mapper.HenleggelsesbrevMapper;
-import no.nav.melosys.service.dokument.brev.mapper.InnvilgelsesbrevMapper;
+import no.nav.melosys.service.dokument.brev.mapper.*;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -29,7 +26,6 @@ public class BrevDataMapperRuterTest {
         public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
             throw new UnsupportedOperationException();
         }
-
     }
 
     @Test
@@ -39,9 +35,15 @@ public class BrevDataMapperRuterTest {
     }
 
     @Test
-    public void oppslagAvHenvendesebrevGirHenvendelsesbrevMapper() throws Exception {
+    public void oppslagAvHenleggelsebrevGirHenleggelsesbrevMapper() throws Exception {
         BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.MELDING_HENLAGT_SAK);
         assertThat(resultat).isInstanceOf(HenleggelsesbrevMapper.class);
+    }
+
+    @Test
+    public void oppslagAvAvslagArbeidsgiverbrevGirAvslagArbeidsgiverMapper() throws Exception {
+        BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.AVSLAG_ARBEIDSGIVER);
+        assertThat(resultat).isInstanceOf(AvslagArbeidsgiverMapper.class);
     }
 
     @Test

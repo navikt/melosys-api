@@ -19,11 +19,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.ProsessSteg.IV_SEND_BREV;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OppdaterMedlTest {
@@ -44,6 +46,7 @@ public class OppdaterMedlTest {
 
     private Prosessinstans p;
     private Behandlingsresultat behandlingsresultat;
+    private Lovvalgsperiode lovvalgsperiode;
 
     @Before
     public void setUp() {
@@ -67,7 +70,7 @@ public class OppdaterMedlTest {
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
 
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setLovvalgsland(Landkoder.CH);
         lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
@@ -118,5 +121,14 @@ public class OppdaterMedlTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         assertThat(agent.erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)).isTrue();
+    }
+
+    @Test
+    public void erProsesstypeEndretPeriode_oppdaterPeriodeEndelig() throws FunksjonellException, TekniskException {
+        p.setType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
+        agent.utfør(p);
+
+        verify(medlFasade).oppdaterPeriodeEndelig(lovvalgsperiode);
+        assertThat(p.getSteg()).isEqualTo(IV_SEND_BREV);
     }
 }

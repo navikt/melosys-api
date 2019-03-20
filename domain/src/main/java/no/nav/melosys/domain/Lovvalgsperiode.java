@@ -39,7 +39,7 @@ public class Lovvalgsperiode implements ErPeriode {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
@@ -52,10 +52,10 @@ public class Lovvalgsperiode implements ErPeriode {
     private LocalDate tom;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "lovvalgsland", nullable = false, updatable = false)
+    @Column(name = "lovvalgsland", updatable = false)
     private Landkoder lovvalgsland;
 
-    @Column(name = "lovvalg_bestemmelse", nullable = false, updatable = false)
+    @Column(name = "lovvalg_bestemmelse", updatable = false)
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
     private LovvalgBestemmelse bestemmelse;
 
@@ -76,7 +76,7 @@ public class Lovvalgsperiode implements ErPeriode {
     private InnvilgelsesResultat innvilgelsesresultat;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "medlemskapstype", nullable = false, updatable = false)
+    @Column(name = "medlemskapstype", updatable = false)
     private Medlemskapstyper medlemskapstype;
 
     @Enumerated(EnumType.STRING)
@@ -86,8 +86,12 @@ public class Lovvalgsperiode implements ErPeriode {
     @Column(name = "medlperiode_id")
     private long medlPeriodeID;
 
-    public long getId() {
+    public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Behandlingsresultat getBehandlingsresultat() {

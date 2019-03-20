@@ -14,7 +14,7 @@ public class Avklartefakta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name="beh_resultat_id")
@@ -38,6 +38,14 @@ public class Avklartefakta {
 
     @OneToMany(mappedBy = "avklartefakta", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AvklartefaktaRegistrering> registreringer = new HashSet<>();
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Behandlingsresultat getBehandlingsresultat() {
         return behandlingsresultat;

@@ -12,7 +12,6 @@ import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
-import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
@@ -20,7 +19,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,25 +45,20 @@ public class AbstraktDokumentDataByggerTest {
         protected BrevDatabyggerbaseImpl(KodeverkService kodeverkService,
                                          AvklartefaktaService avklartefaktaService,
                                          PersonDokument person,
-                                         SoeknadDokument søknad,
-                                         Set<String> avklarteOrganisasjoner) {
+                                         SoeknadDokument søknad) {
             super(kodeverkService, mock(LovvalgsperiodeService.class), avklartefaktaService);
             this.person = person;
             this.søknad = søknad;
-            this.avklarteOrganisasjoner = avklarteOrganisasjoner;
             this.behandling = mock(Behandling.class);
         }
 
         public Bostedsadresse hentBostedsadresse() {
             return super.hentBostedsadresse();
         }
-        public Set<String> hentAvklarteSelvstendigeForetakOrgnumre() {
-            return super.hentAvklarteSelvstendigeForetakOrgnumre();
-        }
         public List<Arbeidssted> hentArbeidssteder() {
             return super.hentArbeidssteder();
         }
-        public List<Virksomhet> hentUtenlandskeVirksomheter() {
+        public List<AvklartVirksomhet> hentUtenlandskeVirksomheter() {
             return super.hentUtenlandskeVirksomheter();
         }
     }
@@ -89,7 +83,7 @@ public class AbstraktDokumentDataByggerTest {
 
         avklarteOrganisasjoner.add("12345678910");
 
-        brevDatabyggerbase = new BrevDatabyggerbaseImpl(kodeverkService, avklartefaktaService, person, søknad, avklarteOrganisasjoner);
+        brevDatabyggerbase = new BrevDatabyggerbaseImpl(kodeverkService, avklartefaktaService, person, søknad);
     }
 
     @Test
@@ -97,22 +91,6 @@ public class AbstraktDokumentDataByggerTest {
         Bostedsadresse bostedsadresse = brevDatabyggerbase.hentBostedsadresse();
         assertThat(bostedsadresse).isEqualTo(person.bostedsadresse);
         assertThat(bostedsadresse.getPoststed()).isEqualTo("Oslo");
-    }
-
-    @Test
-    public void hentAvklarteSelvstendigeForetakOrgnumre() {
-        SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.orgnr = "12345678910";
-        søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
-
-        SelvstendigForetak foretak1 = new SelvstendigForetak();
-        foretak1.orgnr = "10987654321";
-        søknad.selvstendigArbeid.selvstendigForetak.add(foretak1);
-
-        Set<String> avklarteSelvstendigeOrgnumre =
-                brevDatabyggerbase.hentAvklarteSelvstendigeForetakOrgnumre();
-
-        assertThat(avklarteSelvstendigeOrgnumre).containsOnly("12345678910");
     }
 
     @Test
@@ -137,7 +115,7 @@ public class AbstraktDokumentDataByggerTest {
         avklartefakta.setReferanse("INSTALLASJON_ARBEIDSLAND");
         avklartefakta.setSubjekt("Dunfjæder");
 
-        when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Collections.singletonList((avklartefakta))));
+        when(avklartefaktaService.hentAlleAvklarteFlaggland(anyLong())).thenReturn(new HashSet<>(Collections.singletonList((avklartefakta))));
 
         List<Arbeidssted> arbeidSteder = brevDatabyggerbase.hentArbeidssteder();
 

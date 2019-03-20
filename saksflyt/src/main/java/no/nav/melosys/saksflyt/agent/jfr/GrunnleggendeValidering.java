@@ -2,19 +2,19 @@ package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
+import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
@@ -31,11 +31,17 @@ import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
 public class GrunnleggendeValidering extends AbstraktStegBehandler {
     
     private static final Logger log = LoggerFactory.getLogger(GrunnleggendeValidering.class);
+    private FagsakRepository fagsakRepository;
 
     public GrunnleggendeValidering() {
         log.info("GrunnleggendeValidering initialisert");
     }
 
+    @Autowired
+    public GrunnleggendeValidering(FagsakRepository fagsakRepository) {
+        this.fagsakRepository = fagsakRepository;
+        log.info("GrunnleggendeValidering initialisert");
+    }
 
     @Override
     protected ProsessSteg inngangsSteg() {
@@ -70,11 +76,28 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
 
         if (prosessType == ProsessType.JFR_KNYTT) {
             String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
-            if (StringUtils.isEmpty(saksnummer)) {
+            Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
+            if (StringUtils.isEmpty(saksnummer) || fagsak == null) {
                 String feilmelding = "Det finnes ingen fagsak med saksnummer " + saksnummer;
                 log.error(feilmelding);
                 håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
                 return;
+            }
+
+            Behandlingstyper behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
+            if (behandlingstype != null && behandlingstype.equals(Behandlingstyper.ENDRET_PERIODE)) {
+                Behandling aktivBehandling = fagsak.getAktivBehandling();
+                Behandling tidligsteInaktiveBehandling = fagsak.getTidligsteInaktiveBehandling();
+                if (aktivBehandling != null) {
+                    String feilmelding = "Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som har en aktiv behandling";
+                    log.error("{}: {}", prosessinstans.getId(), feilmelding);
+                    håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
+                }
+                if (tidligsteInaktiveBehandling == null) {
+                    String feilmelding = "Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som mangler en inaktiv behandling";
+                    log.error("{}: {}", prosessinstans.getId(), feilmelding);
+                    håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
+                }
             }
         }
 

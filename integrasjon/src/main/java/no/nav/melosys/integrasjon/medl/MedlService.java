@@ -11,23 +11,26 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.medl.behandle.BehandleMedlemskapConsumer;
 import no.nav.melosys.integrasjon.medl.medlemskap.HentPeriodeListeResponseWrapper;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumer;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumerConfig;
+import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.PeriodeIkkeFunnet;
+import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.PeriodeUtdatert;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.UgyldigInput;
+import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OppdaterPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeResponse;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Foedselsnummer;
+import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Medlemsperiode;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeRequest;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeResponse;
+import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeRequest;
+import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +120,32 @@ public class MedlService implements MedlFasade {
             throw new IntegrasjonException(e);
         }
     }
+
+    @Override
+    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode) throws TekniskException, FunksjonellException {
+        try {
+            HentPeriodeResponse hentPeriodeResponse = medlemskapConsumer.hentPeriode(lagHentPeriodeRequest(lovvalgsperiode.getMedlPeriodeID()));
+            Medlemsperiode periode = hentPeriodeResponse.getPeriode();
+            OppdaterPeriodeRequest request = MedlPeriodeKonverter.konverterTilOppdaterPeriodeRequest(lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, periode.getVersjon());
+            behandleMedlemskapConsumer.oppdaterPeriode(request);
+        } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.Sikkerhetsbegrensning | Sikkerhetsbegrensning e) {
+            throw new SikkerhetsbegrensningException(e);
+        } catch (UgyldigInput e) {
+            throw new IntegrasjonException(e);
+        } catch (PeriodeUtdatert e) {
+            throw new FunksjonellException(e);
+        } catch (PeriodeIkkeFunnet e) {
+            throw new IkkeFunnetException(e);
+        }
+
+    }
+
+    private HentPeriodeRequest lagHentPeriodeRequest(long medlPeriodeID) {
+        HentPeriodeRequest hentPeriodeRequest = new HentPeriodeRequest();
+        hentPeriodeRequest.setPeriodeId(medlPeriodeID);
+        return hentPeriodeRequest;
+    }
+
 
     private HentPeriodeListeResponse hentPeriodeListeResponse(String fnr, LocalDate fom, LocalDate tom) throws SikkerhetsbegrensningException, IkkeFunnetException {
         Foedselsnummer ident = new Foedselsnummer();

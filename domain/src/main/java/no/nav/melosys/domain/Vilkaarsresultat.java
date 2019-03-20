@@ -34,6 +34,14 @@ public class Vilkaarsresultat extends RegistreringsInfo {
     @Column(name = "begrunnelse_fritekst")
     private String begrunnelseFritekst;
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Behandlingsresultat getBehandlingsresultat() {
         return behandlingsresultat;
     }

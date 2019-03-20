@@ -4,15 +4,13 @@ import java.io.StringWriter;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -56,10 +54,6 @@ public class TpsService implements TpsFasade {
     private final AktoerIdCache aktørIdCache;
 
     private final JAXBContext jaxbContext;
-
-    // Endringstidspunkt sorteres fra nyest til eldst.
-    static final Comparator<StatsborgerskapPeriode> endringstidspunktKomparator =
-        (sp1, sp2) -> sp2.getEndringstidspunkt().compare(sp1.getEndringstidspunkt());
 
     @Autowired
     public TpsService(AktorConsumer aktorConsumer, PersonConsumer personConsumer, DokumentFactory dokumentFactory, AktoerIdCache aktørIdCache) {
@@ -133,7 +127,7 @@ public class TpsService implements TpsFasade {
         }
 
         // Kall til TPS
-        HentPersonResponse response = null;
+        HentPersonResponse response;
         try {
             response = personConsumer.hentPerson(request);
         } catch (HentPersonSikkerhetsbegrensning hentPersonSikkerhetsbegrensning) {
@@ -204,7 +198,7 @@ public class TpsService implements TpsFasade {
         request.setPeriode(periode);
 
         // Kall til TPS
-        HentPersonhistorikkResponse response = null;
+        HentPersonhistorikkResponse response;
         try {
             response = personConsumer.hentPersonhistorikk(request);
         } catch (HentPersonhistorikkSikkerhetsbegrensning hentPersonhistorikkSikkerhetsbegrensning) {
@@ -271,7 +265,9 @@ public class TpsService implements TpsFasade {
             }
         } else if (aktør.getOrgnr() != null) {
             return aktør.getOrgnr();
-        } else {
+        } else if (rolleType == Aktoersroller.MYNDIGHET && aktør.getInstitusjonId() != null) {
+            return aktør.getInstitusjonId();
+        }else {
             throw new TekniskException("Det finnes ingen ident for " + rolleType + " på sak " + fagsak.getSaksnummer());
         }
     }

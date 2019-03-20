@@ -31,7 +31,7 @@ import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
  * Oppretter en oppgave i GSAK.
  *
  * Transisjoner:
- * 1) ProsessType.JFR_NY_SAK:
+ * 1) ProsessType.JFR_NY_SAK eller Behandlingstyper.ENDRET_PERIODE:
  *      GSAK_OPPRETT_OPPGAVE -> SEND_FORVALTNINGSMELDING eller FEILET_MASKINELT hvis feil
  * 2) ProsessType.JFR_NY_BEHANDLING:
  *      GSAK_OPPRETT_OPPGAVE -> null eller FEILET_MASKINELT hvis feil
@@ -87,8 +87,8 @@ public class OpprettOppgave extends AbstraktStegBehandler {
             return;
         }
 
-        if (behandlingstype == Behandlingstyper.SOEKNAD) {
-            oppgave.setBehandlingstype(Behandlingstyper.SOEKNAD);
+        if (behandlingstype == Behandlingstyper.SOEKNAD || behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
+            oppgave.setBehandlingstype(behandlingstype);
             oppgave.setOppgavetype(Oppgavetyper.BEH_SAK);
         } else {
             String feilmelding = "Behandlingstype " + behandlingstype + " er ikke støttet";

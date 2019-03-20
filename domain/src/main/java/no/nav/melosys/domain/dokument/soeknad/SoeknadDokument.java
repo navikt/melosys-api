@@ -44,7 +44,7 @@ public class SoeknadDokument extends SaksopplysningDokument {
 
     public Set<String> hentAlleOrganisasjonsnumre() {
         return Stream.of(selvstendigArbeid.hentAlleOrganisasjonsnumre(),
-                         juridiskArbeidsgiverNorge.hentAlleOrganisasjonsnumre())
+                         juridiskArbeidsgiverNorge.hentManueltRegistrerteArbeidsgiverOrgnumre())
                 .flatMap(i -> i)
                 .filter(StringUtils::isNotEmpty)
                 .collect(Collectors.toSet());

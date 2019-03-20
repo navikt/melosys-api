@@ -4,10 +4,7 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 
 public interface MedlFasade {
 
@@ -16,4 +13,6 @@ public interface MedlFasade {
     Long opprettPeriodeEndelig(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
 
     Long opprettPeriodeUnderAvklaring(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
+
+    void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException;
 }

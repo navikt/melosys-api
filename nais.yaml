@@ -1,83 +1,36 @@
-name: melosys
-image: docker.adeo.no:5000/melosys
-team: teammelosys
-replicas:
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: melosys
+  namespace: @@NAMESPACE@@
+  labels:
+    team: teammelosys
+spec:
+  image: docker.adeo.no:5000/melosys/melosys:@@IMAGE_VERSION@@
+  port: 8080
+  replicas:
     min: 1
     max: 1
     cpuThresholdPercentage: 80
-port: 8080
-healthcheck:
-    liveness:
-      initialDelay: 240
-      path: internal/health
-    readiness:
-      initialDelay: 120
-      path: internal/health
-prometheus:
+  liveness:
+    path: internal/health
+    initialDelay: 240
+    timeout: 10
+  readiness:
+    path: internal/health
+    initialDelay: 120
+    timeout: 10
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1536Mi
+    requests:
+      cpu: 100m
+      memory: 768Mi
+  vault:
+    enabled: true
+  prometheus:
     enabled: true
     path: internal/prometheus
-resources:
-  requests:
-    cpu: 100m
-    memory: 768Mi
-  limits:
-    cpu: 1000m
-    memory: 1536Mi
-fasitResources:
-  used:
-  - alias: ldap
-    resourceType: ldap
-  - alias: srvmelosys
-    resourceType: credential
-  - alias: melosysDB
-    resourceType: datasource
-  - alias: melosys:regelmodul
-    resourceType: webserviceendpoint
-  - alias: kodeverk.rest-api
-    resourceType: restservice
-  - alias: oppgave.oppgaver
-    resourceType: restservice
-  - alias: sak.saker
-    resourceType: restservice
-  - alias: Aktoer_v2
-    resourceType: webserviceendpoint
-  - alias: BehandleInngaaendeJournal_v1
-    resourceType: webserviceendpoint
-  - alias: Dokumentproduksjon_v3
-    resourceType: webserviceendpoint
-  - alias: InngaaendeJournal_v1
-    resourceType: webserviceendpoint
-  - alias: Journal_v3
-    resourceType: webserviceendpoint
-  - alias: melosys_channel
-    resourceType: channel
-  - alias: mqgateway02
-    resourceType: queuemanager
-  - alias: sbeh_saksbehandling
-    resourceType: queue
-  - alias: virksomhet:Arbeidsforhold_v3
-    resourceType: webserviceendpoint
-  - alias: virksomhet:Inntekt_v3
-    resourceType: webserviceendpoint
-  - alias: virksomhet:Medlemskap_v2
-    resourceType: webserviceendpoint
-  - alias: virksomhet:BehandleMedlemskap_v2
-    resourceType: webserviceendpoint
-  - alias: virksomhet:Organisasjon_v4
-    resourceType: webserviceendpoint
-  - alias: virksomhet:Person_v3
-    resourceType: webserviceendpoint
-  - alias: SakOgBehandling
-    resourceType: webserviceendpoint
-  - alias: securityTokenService
-    resourceType: baseurl
-  - alias: security-token-service-token
-    resourceType: restservice
-  - alias: OpenIdConnectAgent
-    resourceType: credential
-  - alias: OpenIdConnect
-    resourceType: baseurl
-  - alias: abac.pdp.endpoint
-    resourceType: restservice
-  - alias: melosys-eessi-apikey
-    resourceType: credential
+  ingresses:
+  - "https://@@URL@@"

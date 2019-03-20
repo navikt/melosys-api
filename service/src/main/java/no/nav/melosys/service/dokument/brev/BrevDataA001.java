@@ -13,7 +13,7 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 
 /*
  * Alle feltene er resultatverdier fra funksjoner i brevbygger, som brukes direkte i mapper.
@@ -27,8 +27,8 @@ public class BrevDataA001 extends BrevData {
     public Bostedsadresse bostedsadresse;
     public Optional<String> utenlandskIdent;
 
-    public List<Virksomhet> arbeidsgivendeVirkomsheter;
-    public List<Virksomhet> selvstendigeVirksomheter;
+    public List<AvklartVirksomhet> arbeidsgivendeVirkomsheter;
+    public List<AvklartVirksomhet> selvstendigeVirksomheter;
 
     public List<Arbeidssted> arbeidssteder;
 

@@ -1,16 +1,15 @@
 package no.nav.melosys.domain;
 
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 
 @Entity
 @Table(name = "fagsak")
@@ -33,10 +32,10 @@ public class Fagsak extends RegistreringsInfo {
     private Saksstatuser status;
 
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<Aktoer> aktører;
+    private Set<Aktoer> aktører = new HashSet<>(1);
 
     @OneToMany(mappedBy = "fagsak", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Behandling> behandlinger;
+    private List<Behandling> behandlinger = new ArrayList<>(1);
 
     public Long getGsakSaksnummer() {
         return gsakSaksnummer;
@@ -97,6 +96,16 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     /**
+     * Returnerer den inaktive behandlingen knyttet til saken eller {@code null} hvis den ikke finnes.
+     */
+    public Behandling getTidligsteInaktiveBehandling() {
+        return getBehandlinger().stream()
+            .filter(b -> b.getStatus().equals(Behandlingsstatus.AVSLUTTET))
+            .min(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
+            .orElse(null);
+    }
+
+    /**
      * Returnerer en aktør med angitt {@link Aktoersroller} knyttet til saken eller {@code null} hvis ingen finnes.
      */
     public Aktoer hentAktørMedRolleType(Aktoersroller rolleType) throws TekniskException {
@@ -105,13 +114,19 @@ public class Fagsak extends RegistreringsInfo {
         }
         List<Aktoer> kandidater = aktører.stream().filter(a -> rolleType.equals(a.getRolle())).collect(Collectors.toList());
 
-        if (kandidater == null || kandidater.isEmpty()) {
+        if (kandidater.isEmpty()) {
             return null;
         } else if (kandidater.size() > 1) {
             throw new TekniskException("Det finnes mer enn en aktør med rollen " + rolleType.getBeskrivelse() + " for sak " + saksnummer);
         } else {
             return kandidater.get(0);
         }
+    }
+
+    public Landkoder hentMyndighetLandkode() throws TekniskException {
+        Aktoer myndighet = hentAktørMedRolleType(MYNDIGHET);
+        String[] split = myndighet.getInstitusjonId().split(":");
+        return Landkoder.valueOf(split[0]);
     }
 
     public String getSaksnummer() {
@@ -131,17 +146,11 @@ public class Fagsak extends RegistreringsInfo {
             return false;
         }
         Fagsak that = (Fagsak) o;
-        if (this.saksnummer == null) {
-            throw new RuntimeException("Fagsak.equals ble kalt før fagsak har fått saksnummer");
-        }
-        return this.saksnummer.equals(that.saksnummer);
+        return saksnummer != null && this.saksnummer.equals(that.saksnummer);
     }
 
     @Override
     public int hashCode() {
-        if (this.saksnummer == null) {
-            throw new RuntimeException("Fagsak.hashCode ble kalt før fagsak har fått saksnummer");
-        }
-        return saksnummer.hashCode();
+        return 31;
     }
 }

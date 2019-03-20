@@ -1,25 +1,27 @@
 package no.nav.melosys.service;
 
+import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BehandlingsresultatServiceTest {
@@ -31,7 +33,7 @@ public class BehandlingsresultatServiceTest {
     @Before
     public void setUp() {
         behandlingsresultatRepo = mock(BehandlingsresultatRepository.class);
-        behandlingsresultatService = new BehandlingsresultatService(behandlingsresultatRepo);
+        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo));
     }
 
     @Test
@@ -64,5 +66,109 @@ public class BehandlingsresultatServiceTest {
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(4L);
         assertThat(behandlingsresultat.getHenleggelsesgrunn()).isEqualTo(Henleggelsesgrunner.ANNET);
+    }
+
+    private Behandlingsresultat opprettTomtBehandlingsresultatMedId() {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(667L);
+        return behandlingsresultat;
+    }
+
+    @Test
+    public void replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections() throws NoSuchMethodException, TekniskException, InstantiationException, IkkeFunnetException, IllegalAccessException, InvocationTargetException {
+        Behandling tidligsteInaktiveBehandling = new Behandling();
+        tidligsteInaktiveBehandling.setId(1L);
+        Behandling behandlingsreplika = new Behandling();
+        behandlingsreplika.setId(2L);
+
+        Behandlingsresultat behandlingsresultat = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling);
+
+        Avklartefakta avklartefakta = opprettAvklartefakta();
+        behandlingsresultat.getAvklartefakta().add(avklartefakta);
+
+        Vilkaarsresultat vilkaarsresultat = opprettVilkaarsresultat();
+        behandlingsresultat.getVilkaarsresultater().add(vilkaarsresultat);
+
+        Lovvalgsperiode lovvalgsperiode = opprettLovvalgsperiode();
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+
+        doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
+
+        behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
+
+        ArgumentCaptor<Behandlingsresultat> captor = ArgumentCaptor.forClass(Behandlingsresultat.class);
+        verify(behandlingsresultatRepo).save(captor.capture());
+        Behandlingsresultat behandlingsresultatreplika = captor.getValue();
+
+        assertThat(behandlingsresultatreplika.getId()).isNull();
+        assertThat(behandlingsresultatreplika.getBehandling()).isEqualTo(behandlingsreplika);
+        assertThat(behandlingsresultatreplika.getBehandlingsmåte()).isEqualTo(behandlingsresultat.getBehandlingsmåte());
+        assertThat(behandlingsresultatreplika.getType()).isEqualTo(behandlingsresultat.getType());
+        assertThat(behandlingsresultatreplika.getVedtaksdato()).isEqualTo(behandlingsresultat.getVedtaksdato());
+
+        assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getId() == null);
+        assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getBehandlingsresultat() == behandlingsresultatreplika);
+        assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getDekning().equals(Trygdedekninger.FULL_DEKNING_EOSFO));
+        assertThat(behandlingsresultatreplika.getLovvalgsperioder()).allMatch(l -> l.getUnntakFraLovvalgsland().equals(Landkoder.BE));
+
+        assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getId() == null);
+        assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
+        assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getFakta().equals("fakta"));
+        assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getType().equals(Avklartefaktatype.ARBEIDSLAND));
+
+        assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getId() == null);
+        assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getBehandlingsresultat() == behandlingsresultatreplika);
+        assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getBegrunnelseFritekst().equals("fritekst"));
+        VilkaarBegrunnelse vilkaarBegrunnelse = behandlingsresultatreplika.getVilkaarsresultater().stream().findFirst().get().getBegrunnelser().stream().findFirst().get();
+        assertThat(vilkaarBegrunnelse.getId()).isNull();
+        assertThat(vilkaarBegrunnelse.getKode()).isEqualTo("kode");
+    }
+
+    private Lovvalgsperiode opprettLovvalgsperiode() {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setId(32L);
+        lovvalgsperiode.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
+        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
+        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.BE);
+        return lovvalgsperiode;
+    }
+
+    private Avklartefakta opprettAvklartefakta() {
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setId(32L);
+        avklartefakta.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
+        avklartefakta.setFakta("fakta");
+        avklartefakta.setType(Avklartefaktatype.ARBEIDSLAND);
+        return avklartefakta;
+    }
+
+    private Vilkaarsresultat opprettVilkaarsresultat() {
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
+        vilkaarsresultat.setId(32L);
+        vilkaarsresultat.setBegrunnelseFritekst("fritekst");
+
+        HashSet<VilkaarBegrunnelse> begrunnelser = new HashSet<>();
+        VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
+        vilkaarBegrunnelse.setId(2222L);
+        vilkaarBegrunnelse.setKode("kode");
+        begrunnelser.add(vilkaarBegrunnelse);
+        vilkaarsresultat.setBegrunnelser(begrunnelser);
+        return vilkaarsresultat;
+    }
+
+    private Behandlingsresultat opprettBehandlingsresultatMedData(Behandling tidligsteInaktiveBehandling) {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(30L);
+        behandlingsresultat.setBehandling(tidligsteInaktiveBehandling);
+        behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.MANUELT);
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        behandlingsresultat.setVedtaksdato(Instant.parse("2002-02-11T09:37:30Z"));
+
+        behandlingsresultat.setAvklartefakta(new LinkedHashSet<>());
+        behandlingsresultat.setLovvalgsperioder(new LinkedHashSet<>());
+        behandlingsresultat.setVilkaarsresultater(new LinkedHashSet<>());
+
+        return behandlingsresultat;
     }
 }

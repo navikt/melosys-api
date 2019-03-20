@@ -21,6 +21,14 @@ public class VilkaarBegrunnelse extends RegistreringsInfo {
     @Column(name = "kode")
     private String kode;
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Vilkaarsresultat getVilkaarsresultat() {
         return vilkaarsresultat;
     }

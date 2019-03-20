@@ -1,5 +1,8 @@
 package no.nav.melosys.domain;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -24,7 +27,28 @@ public class UtenlandskMyndighet {
 
     public String land;
 
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "utenlandsk_myndighet_pref",
+        joinColumns = @JoinColumn(name = "utenlandsk_myndighet_id", updatable = false),
+        inverseJoinColumns = @JoinColumn(name = "preferanse_id", updatable = false)
+    )
+    public Set<Preferanse> preferanser = new HashSet<>();
+
     @Convert(converter = Landkoder.DbKonverterer.class)
     public Landkoder landkode;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UtenlandskMyndighet)) return false;
+        UtenlandskMyndighet that = (UtenlandskMyndighet) o;
+        return institusjonskode.equals(that.institusjonskode) &&
+            land.equals(that.land);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(institusjonskode, land);
+    }
 }

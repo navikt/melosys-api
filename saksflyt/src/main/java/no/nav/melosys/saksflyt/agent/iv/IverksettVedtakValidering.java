@@ -1,13 +1,13 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
 import java.util.Map;
+import java.util.Set;
 
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
@@ -21,6 +21,7 @@ import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_RESULTAT;
 import static no.nav.melosys.domain.ProsessSteg.IV_VALIDERING;
 import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
+import static no.nav.melosys.feil.Feilkategori.TEKNISK_FEIL;
 
 /**
  * Validerer opplysning bli brukt for iverksett vedtak.
@@ -35,8 +36,11 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(IverksettVedtakValidering.class);
 
+    private final BehandlingsresultatRepository behandlingsresultatRepository;
+
     @Autowired
-    public IverksettVedtakValidering() {
+    public IverksettVedtakValidering(BehandlingsresultatRepository behandlingsresultatRepository) {
+        this.behandlingsresultatRepository = behandlingsresultatRepository;
         log.info("IverksetteVedtakValidering initialisert");
     }
 
@@ -55,23 +59,41 @@ public class IverksettVedtakValidering extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         ProsessType prosessType = prosessinstans.getType();
-        if (prosessType != ProsessType.IVERKSETT_VEDTAK) {
-            String feilmelding = "ProsessType " + prosessType + " er ikke støttet";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding);
-            håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
+        if (prosessType != ProsessType.IVERKSETT_VEDTAK && prosessType != ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE) {
+            String feilmelding = "ProsessType " + prosessType + " er ikke støttet.";
+            håndterUnntak(TEKNISK_FEIL, prosessinstans, feilmelding, null);
+            return;
+        }
+
+        Behandling behandling = prosessinstans.getBehandling();
+        if (behandling == null) {
+            String feilmelding = "Prosessinstans " + prosessinstans.getId() + " er ikke knyttet til en behandling.";
+            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
+            return;
+        }
+
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId()).orElse(null);
+        if (behandlingsresultat == null) {
+            String feilmelding = "Ingen behandlingsresultat knyttet til behandling " + behandling.getId();
+            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
+            return;
+        }
+
+        Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
+        if (lovvalgsperioder.isEmpty()) {
+            String feilmelding = "Lovvalgsperiode mangler for behandlingsresultat " + behandlingsresultat.getId();
+            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
             return;
         }
 
         String saksbehandlerID = prosessinstans.getData(SAKSBEHANDLER);
         if (saksbehandlerID == null) {
-            log.error("Funksjonell feil for prosessinstans {}: SaksbehandlerID er ikke oppgitt.", prosessinstans.getId());
-            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "saksbehandlerID er ikke oppgitt.", null);
+            håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "SaksbehandlerID er ikke oppgitt.", null);
             return;
         }
 
         String behandlingsResultatType = prosessinstans.getData(BEHANDLINGSRESULTATTYPE);
-        if (behandlingsResultatType == null) {
-            log.error("Funksjonell feil for prosessinstans {}: behandlingsResultatType er ikke oppgitt.", prosessinstans.getId());
+        if (behandlingsResultatType == null && prosessType == ProsessType.IVERKSETT_VEDTAK) {
             håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "behandlingsResultatType er ikke oppgitt.", null);
             return;
         }

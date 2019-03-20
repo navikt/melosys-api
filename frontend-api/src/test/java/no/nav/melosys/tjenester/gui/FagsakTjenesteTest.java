@@ -28,9 +28,10 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import org.json.JSONException;
 import org.junit.Before;
@@ -111,8 +112,8 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
 
     @Test
     public void fagsakSøkSchemaValidering() throws IOException, JSONException {
-        List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.randomListOf(1, FagsakOppsummeringDto.class);
-        List<BehandlingOversiktDto> behandlingOversiktDtoer = random.randomListOf(1, BehandlingOversiktDto.class);
+        List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = EnhancedRandom.randomListOf(1, FagsakOppsummeringDto.class);
+        List<BehandlingOversiktDto> behandlingOversiktDtoer = EnhancedRandom.randomListOf(1, BehandlingOversiktDto.class);
         behandlingOversiktDtoer.get(0).setLand(Collections.singletonList("NO"));
         fagsakOppsummeringDtoList.get(0).setBehandlingOversikter(behandlingOversiktDtoer);
 
@@ -124,11 +125,6 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
     public final void hentFagsakGir200OkOgDto() throws Exception {
         Fagsak fagsak = lagFagsak();
         testHentFagsak("123", Response.status(Status.OK).entity(lagFagsakDto(fagsak)).build());
-    }
-
-    @Test
-    public final void hentIngenFagsakGir404() throws Exception {
-        testHentFagsak(String.valueOf(Long.MAX_VALUE), Response.status(Status.NOT_FOUND).build());
     }
 
     private void testHentFagsak(String saksnr, Response forventning) throws Exception {
@@ -182,11 +178,12 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
     }
 
     @Test
-    public final void henleggFagsakReturnererIkkeFunnetNårIngenSakBlirFunnet() throws Exception {
+    public final void henleggFagsak_ingenSakFinnes_kasterIkkeFunnet() throws Exception {
         FagsakTjeneste instans = lagFagsakTjeneste(null);
-        Response resultat = instans.henleggFagsak("123", new HenleggelseDto());
+        expectedException.expect(IkkeFunnetException.class);
 
-        assertThat(resultat.getStatusInfo()).isEqualTo(Status.NOT_FOUND);
+        instans.henleggFagsak("Finnes ikke", new HenleggelseDto());
+
         verify(fagsakService, never()).henleggFagsak(anyString(), anyString(), anyString());
     }
 
@@ -243,6 +240,7 @@ public class FagsakTjenesteTest extends JsonSchemaTest {
         tilgang = mock(Tilgang.class);
         fagsakService = mock(FagsakService.class);
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
+        when(fagsakService.hentFagsak("Finnes ikke")).thenThrow(new IkkeFunnetException("Finnes ikke"));
         ArrayList<Fagsak> fagsaker = new ArrayList<>();
         fagsaker.add(fagsak);
         doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(eq(Aktoersroller.BRUKER), eq(FNR));

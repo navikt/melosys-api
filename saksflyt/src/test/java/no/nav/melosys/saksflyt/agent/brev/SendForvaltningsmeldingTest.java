@@ -1,22 +1,21 @@
 package no.nav.melosys.saksflyt.agent.brev;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.dokument.DokumentSystemService;
-import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.saksflyt.felles.BrevBestiller;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -24,12 +23,12 @@ public class SendForvaltningsmeldingTest {
 
     private SendForvaltningsmelding agent;
 
-    private DokumentSystemService dokumentService;
+    @Mock
+    private BrevBestiller brevBestiller;
 
     @Before
     public void setUp() {
-        dokumentService = mock(DokumentSystemService.class);
-        agent = new SendForvaltningsmelding(dokumentService);
+        agent = new SendForvaltningsmelding(brevBestiller);
     }
 
     @Test
@@ -42,7 +41,7 @@ public class SendForvaltningsmeldingTest {
 
         agent.utførSteg(p);
 
-        verify(dokumentService).produserDokument(anyLong(), any(Produserbaredokumenter.class), any(BrevData.class));
+        verify(brevBestiller).bestill(any(Behandling.class), anyString(), eq(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID), eq(Aktoersroller.BRUKER));
 
         assertThat(p.getSteg()).isNull();
     }

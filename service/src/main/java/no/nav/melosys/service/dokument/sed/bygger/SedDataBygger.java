@@ -1,23 +1,29 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.UtenlandskIdent;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.RegisterOppslagService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
@@ -26,24 +32,31 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class SedDataBygger extends AbstraktDokumentDataBygger {
 
-    private RegisterOppslagService registerOppslagService;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
 
-    public SedDataBygger(KodeverkService kodeverkService, RegisterOppslagService registerOppslagService,
-                         LovvalgsperiodeService lovvalgsperiodeService, AvklartefaktaService avklartefaktaService) {
+    public SedDataBygger(KodeverkService kodeverkService,
+                         LovvalgsperiodeService lovvalgsperiodeService,
+                         AvklartefaktaService avklartefaktaService,
+                         AvklarteVirksomheterService avklarteVirksomheterService) {
         super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
-        this.registerOppslagService = registerOppslagService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
+    }
 
+    Function<OrganisasjonDokument, no.nav.melosys.domain.dokument.felles.Adresse> adresseformaterer = this::utfyllManglendeAdressefelter;
+    private StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
+        StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
+        adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
+        return adresse;
     }
 
     public SedDataDto lag(Behandling behandling) throws TekniskException, FunksjonellException {
         this.behandling = behandling;
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
-        this.avklarteOrganisasjoner = avklartefaktaService.hentAvklarteOrganisasjoner(behandling.getId());
 
         SedDataDto sedDataDto = new SedDataDto();
 
-        sedDataDto.setArbeidsgivendeVirksomheter(hentNorskeAvklarteVirksomheter());
+        sedDataDto.setArbeidsgivendeVirksomheter(map(avklarteVirksomheterService.hentArbeidsgivere(behandling, adresseformaterer)));
 
         sedDataDto.setArbeidssteder(hentArbeidssteder().stream()
             .map(this::mapArbeidssted).collect(Collectors.toList()));
@@ -60,9 +73,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
 
         sedDataDto.setLovvalgsperioder(Collections.singletonList(hentLovvalgsperiodeDto()));
 
-        if (this.person.erEgenAnsatt) {
-            sedDataDto.setSelvstendigeVirksomheter(hentAvklarteSelvstendigeForetak());
-        }
+        sedDataDto.setSelvstendigeVirksomheter(map(avklarteVirksomheterService.hentSelvstendigeForetak(behandling, adresseformaterer)));
 
         sedDataDto.setUtenlandskeVirksomheter(hentUtenlandskeVirksomheter().stream().map(
             this::tilUtenlandsVirksomhetDto).collect(Collectors.toList()));//TODO - riktig?
@@ -71,6 +82,12 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
             .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));
 
         return sedDataDto;
+    }
+
+    private List<Virksomhet> map(List<AvklartVirksomhet> avklarteArbeidsgivere) {
+        return avklarteArbeidsgivere.stream()
+            .map(aa -> new Virksomhet(aa.navn, aa.orgnr, fraStrukturertAdresse((StrukturertAdresse) aa.adresse)))
+            .collect(Collectors.toList());
     }
 
     private Adresse fraBostedsadresse(Bostedsadresse bostedsadresse) {
@@ -118,32 +135,6 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
 
     }
 
-    protected List<Virksomhet> hentNorskeAvklarteVirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        return registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner).stream()
-            .map(org -> {
-                Virksomhet virksomhet = new Virksomhet();
-                virksomhet.setNavn(org.lagSammenslåttNavn());
-                virksomhet.setOrgnr(org.getOrgnummer());
-                virksomhet.setType("registrering");
-                virksomhet.setAdresse(fraStrukturertAdresse(org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse()));
-
-                return virksomhet;
-            })
-            .collect(Collectors.toList());
-    }
-
-    protected List<Virksomhet> hentAvklarteSelvstendigeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        Set<String> organisasjonsnumre = hentAvklarteSelvstendigeForetakOrgnumre();
-        return registerOppslagService.hentOrganisasjoner(organisasjonsnumre).stream()
-            .map(org -> {
-                Virksomhet virksomhet = new Virksomhet();
-                virksomhet.setNavn(org.lagSammenslåttNavn());
-                virksomhet.setOrgnr(org.getOrgnummer());
-                virksomhet.setAdresse(fraStrukturertAdresse(org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse()));
-                return virksomhet;
-            }).collect(Collectors.toList());
-    }
-
     private Adresse fraStrukturertAdresse(StrukturertAdresse strukturertAdresse) {
         Adresse adresse = new Adresse();
         adresse.setGateadresse(strukturertAdresse.gatenavn + (strukturertAdresse.husnummer == null ? "" : " " + strukturertAdresse.husnummer + " "));
@@ -153,7 +144,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         return adresse;
     }
 
-    private Lovvalgsperiode hentLovvalgsperiodeDto() throws FunksjonellException {
+    private Lovvalgsperiode hentLovvalgsperiodeDto() throws FunksjonellException, TekniskException {
         no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode = hentLovvalgsperiode();
         Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
         lovvalgsperiodeDto.setFom(lovvalgsperiode.getFom());
@@ -193,7 +184,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         return familieMedlem;
     }
 
-    private Virksomhet tilUtenlandsVirksomhetDto(no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet uVirksomhet) {
+    private Virksomhet tilUtenlandsVirksomhetDto(AvklartVirksomhet uVirksomhet) {
         Virksomhet virksomhet = new Virksomhet();
         virksomhet.setNavn(uVirksomhet.navn);
         virksomhet.setOrgnr(uVirksomhet.orgnr);

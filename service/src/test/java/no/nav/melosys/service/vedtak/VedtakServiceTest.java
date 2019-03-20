@@ -5,6 +5,8 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -20,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -69,6 +72,9 @@ public class VedtakServiceTest {
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType));
 
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
+
+        Optional<Behandling> behandling = behandlingRepository.findById(behandlingID);
+        assertThat(behandling.get().getStatus()).isEqualTo(Behandlingsstatus.IVERKSETTER_VEDTAK);
     }
 
     @Test
@@ -87,5 +93,14 @@ public class VedtakServiceTest {
     public void fattVedtak_behandlingIkkeFunnet() throws FunksjonellException, TekniskException {
         long behandlingID = 0L;
         vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+    }
+
+    @Test
+    public void endreVedtak_fungerer() throws FunksjonellException, TekniskException {
+        vedtakService.endreVedtak(behandlingID, Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
+
+        verify(behandlingRepository).findById(behandlingID);
+        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq(Endretperioder.ENDRINGER_ARBEIDSSITUASJON));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 }

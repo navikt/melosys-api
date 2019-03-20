@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
@@ -8,14 +9,12 @@ import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Art12_1_Begrunnelser;
-import no.nav.melosys.domain.kodeverk.Art16_1_Anmodning_Begrunnelser;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -48,15 +47,24 @@ public class AnmodningUnntakMapperTest {
         fagsak.setType(Sakstyper.EU_EOS);
         behandling.setFagsak(fagsak);
 
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+        arbeidUtland.adresse = new StrukturertAdresse();
+        arbeidUtland.adresse.landKode = "NO";
+
+        SoeknadDokument soeknadDokument = new SoeknadDokument();
+        soeknadDokument.arbeidUtland = new ArrayList<>();
+        soeknadDokument.arbeidUtland.add(arbeidUtland);
+
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(new SoeknadDokument());
+        saksopplysning.setDokument(soeknadDokument);
         saksopplysning.setType(SaksopplysningType.SØKNAD);
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
 
         Behandlingsresultat resultat = new Behandlingsresultat();
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.DE);
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.DE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
         resultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
@@ -82,12 +90,13 @@ public class AnmodningUnntakMapperTest {
         resultat.getVilkaarsresultater().add(vilkaarsresultat16_1);
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
-        brevData.hovedvirksomhet = new Virksomhet("Test AS", null, null);
-        brevData.hovedvirksomhet.setSelvstendigForetak(true);
+        brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG);
+        brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 
         assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
         assertThat("<ns3:yrkesaktivitet>SELVSTENDIG</ns3:yrkesaktivitet>").isSubstringOf(xml);
+        assertThat(Landkoder.AT.getBeskrivelse()).isSubstringOf(xml);
     }
 }

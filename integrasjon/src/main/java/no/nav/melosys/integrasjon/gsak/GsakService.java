@@ -279,8 +279,12 @@ public class GsakService implements GsakFasade {
     private String hentFellesKode(Behandlingstyper behandlingstyper) {
         switch (behandlingstyper) {
             case SOEKNAD: return "ae0034";
+            case ENDRET_PERIODE: return "ae0052";
+            case ANKE: return "ae0046";
             case KLAGE: return  "ae0058";
+            case NORGE_UTPEKT: return "ae0112";
             case NY_VURDERING: return "ae0028";
+            case PAASTAND_UTL: return "ae0113";
             default: throw new RuntimeException(this + " er ikke implementert i felleskodeverk.");
         }
     }

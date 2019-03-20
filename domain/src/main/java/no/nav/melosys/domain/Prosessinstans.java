@@ -30,7 +30,7 @@ public class Prosessinstans {
     @Column(name = "uuid")
     private UUID id;
 
-    @Column(name = "prosess_type", nullable = false, updatable = false)
+    @Column(name = "prosess_type", nullable = false)
     @Convert(converter = ProsessType.DbKonverterer.class)
     private ProsessType type;
 

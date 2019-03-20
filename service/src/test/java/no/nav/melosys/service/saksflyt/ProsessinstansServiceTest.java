@@ -5,6 +5,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -69,10 +70,7 @@ public class ProsessinstansServiceTest {
 
     @Test
     public void lagreProsessinstans_utenSaksbehandler_henterFraSubjectHandler() {
-        String saksbehandler = "Z123456";
-        SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
-        SubjectHandler.set(subjectHandler);
-        when(subjectHandler.getUserID()).thenReturn(saksbehandler);
+        String saksbehandler = settInnloggetSaksbehandler();
 
         Prosessinstans prosessinstans = mock(Prosessinstans.class);
         service.lagre(prosessinstans);
@@ -111,10 +109,7 @@ public class ProsessinstansServiceTest {
 
     @Test
     public void opprettProsessinstansHenleggeSak() {
-        String saksbehandler = "Z123456";
-        SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
-        SubjectHandler.set(subjectHandler);
-        when(subjectHandler.getUserID()).thenReturn(saksbehandler);
+        settInnloggetSaksbehandler();
 
         Behandling behandling = new Behandling();
         service.opprettProsessinstansHenleggSak(behandling, Henleggelsesgrunner.ANNET, "");
@@ -140,5 +135,29 @@ public class ProsessinstansServiceTest {
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.OPPFRISKNING);
         assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.JFR_HENT_PERS_OPPL);
+    }
+
+    @Test
+    public void opprettProsessinstansForkortPeriode() {
+        String saksbehandler = settInnloggetSaksbehandler();
+
+        Behandling behandling = new Behandling();
+        service.opprettProsessinstansForkortPeriode(behandling, Endretperioder.RETURNERT_NORGE);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans lagretInstans = piCaptor.getValue();
+        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
+        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.IV_FORKORT_PERIODE);
+        assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
+        assertThat(lagretInstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class)).isEqualTo(Endretperioder.RETURNERT_NORGE);
+    }
+
+    private String settInnloggetSaksbehandler() {
+        String saksbehandler = "Z123456";
+        SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
+        SubjectHandler.set(subjectHandler);
+        when(subjectHandler.getUserID()).thenReturn(saksbehandler);
+        return saksbehandler;
     }
 }
