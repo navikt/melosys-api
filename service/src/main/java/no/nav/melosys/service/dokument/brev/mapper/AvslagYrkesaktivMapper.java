@@ -30,10 +30,10 @@ public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMappe
         for (VilkaarBegrunnelse vilkaarBegrunnelse : art161Begrunnelser) {
             Art16_1_Avslag__Begrunnelser artikkel161AvslagKode = Art16_1_Avslag__Begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
             switch (artikkel161AvslagKode) {
-                case ERSTATTER_EN_ANNEN_SAMLET_OVER_5_AAR:
+                case OVER_12_MD_UTL_ARBEIDSGIVER:
                     art161AvslagBegrunnelser.setOver5Aar(JA);
                     break;
-                case FORLENGELSE_SAMLET_OVER_5_AAR:
+                case OVER_5_AAR:
                     art161AvslagBegrunnelser.setOver5Aar(JA);
                     break;
                 case INGEN_SPESIELLE_FORHOLD:

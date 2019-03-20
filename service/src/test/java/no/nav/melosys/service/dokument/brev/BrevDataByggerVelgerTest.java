@@ -51,6 +51,11 @@ public class BrevDataByggerVelgerTest {
     }
 
     @Test
+    public final void hent_InnvilgelsesArbeidsgiver_girInnvilgelseBygger() {
+        testHent(Produserbaredokumenter.INNVILGELSE_ARBEIDSGIVER, BrevDataByggerInnvilgelse.class);
+    }
+
+    @Test
     public final void hent_Avslag_girBrevDataByggerAvslagOgAnmodningUnntak() {
         testHent(Produserbaredokumenter.AVSLAG_YRKESAKTIV, BrevDataByggerAnmodningUnntakOgAvslag.class);
     }

@@ -84,7 +84,7 @@ public class AvslagYrkesaktivMapperTest {
         Vilkaarsresultat vilkaarsresultat16_1 = new Vilkaarsresultat();
         vilkaarsresultat16_1.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
         VilkaarBegrunnelse a_begrunnelse_16_1 = new VilkaarBegrunnelse();
-        a_begrunnelse_16_1.setKode(Art16_1_Avslag__Begrunnelser.FORLENGELSE_SAMLET_OVER_5_AAR.getKode());
+        a_begrunnelse_16_1.setKode(Art16_1_Avslag__Begrunnelser.OVER_5_AAR.getKode());
         VilkaarBegrunnelse b_begrunnelse_16_1 = new VilkaarBegrunnelse();
         b_begrunnelse_16_1.setKode(Art16_1_Avslag__Begrunnelser.SOEKT_FOR_SENT.getKode());
 
@@ -96,7 +96,7 @@ public class AvslagYrkesaktivMapperTest {
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevData.arbeidsland = Landkoder.AT;
+        brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
 
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
         String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);

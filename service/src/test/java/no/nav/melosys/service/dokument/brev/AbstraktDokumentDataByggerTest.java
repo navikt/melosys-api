@@ -115,7 +115,7 @@ public class AbstraktDokumentDataByggerTest {
         avklartefakta.setReferanse("INSTALLASJON_ARBEIDSLAND");
         avklartefakta.setSubjekt("Dunfjæder");
 
-        when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Collections.singletonList((avklartefakta))));
+        when(avklartefaktaService.hentAlleAvklarteFlaggland(anyLong())).thenReturn(new HashSet<>(Collections.singletonList((avklartefakta))));
 
         List<Arbeidssted> arbeidSteder = brevDatabyggerbase.hentArbeidssteder();
 
