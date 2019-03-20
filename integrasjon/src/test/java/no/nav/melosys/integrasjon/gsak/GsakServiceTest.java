@@ -90,7 +90,7 @@ public final class GsakServiceTest {
         assertThat(requests.size()).isEqualTo(2);
         assertThat(requests.get(0).getOppgavetype()[0]).isEqualTo(Oppgavetyper.JFR.getKode());
         assertThat(requests.get(0).getBehandlesAvApplikasjon()).isNullOrEmpty();
-        assertThat(requests.get(1).getOppgavetype()).contains(Oppgavetyper.BEH_SAK.getKode());
+        assertThat(requests.get(1).getOppgavetype()).contains(Oppgavetyper.BEH_SAK_MK.getKode());
         assertThat(requests.get(1).getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
     }
 
@@ -98,7 +98,7 @@ public final class GsakServiceTest {
         Oppgave oppgave = new Oppgave();
         oppgave.setAktørId("aktoer123");
         oppgave.setBehandlingstype(Behandlingstyper.SOEKNAD);
-        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK);
+        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         oppgave.setJournalpostId("journalpost123");
         oppgave.setSaksnummer("sak123");
         oppgave.setTema(Tema.MED);
