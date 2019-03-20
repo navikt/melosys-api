@@ -5,14 +5,15 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
+import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -38,47 +39,56 @@ public class BrevDataByggerInnvilgelseTest {
     LovvalgsperiodeService lovvalgsperiodeService;
 
     @Mock
+    LandvelgerService landVelgerService;
+
+    @Mock
     BrevDataByggerA1 brevDataByggerA1;
+
+    private Behandling behandling;
 
     @Mock
     private BrevbestillingDto brevbestillingDto;
 
+    private SoeknadDokument søknad;
     private String saksbehandler = "saksbehandler";
-    private Behandling behandling;
     private BrevDataByggerInnvilgelse brevDataByggerInnvilgelse;
 
-
     @Before
-    public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void setUp() throws FunksjonellException, TekniskException {
         behandling = new Behandling();
         behandling.setId(1L);
 
         when(brevDataByggerA1.lag(any(), any())).thenReturn(new BrevDataA1());
+
         Lovvalgsperiode periode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(periode));
 
-        brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(brevDataByggerA1,
-                                                                  avklartefaktaService,
+        when(landVelgerService.hentArbeidsland(any())).thenReturn(Landkoder.AT);
+        when(landVelgerService.hentTrygdemyndighetsland(any())).thenReturn(Landkoder.DE);
+
+        brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(avklartefaktaService,
+                                                                  landVelgerService,
                                                                   lovvalgsperiodeService,
-                                                                  brevbestillingDto);
+                                                                  brevbestillingDto,
+                                                                  brevDataByggerA1);
     }
 
     @Test
-    public void lag_medSokkel_setterInnstallasjonstypeSokkel() throws FunksjonellException, TekniskException {
-        AvklartInnstallasjonsType innstallasjonsType = AvklartInnstallasjonsType.SOKKEL;
-        when(avklartefaktaService.hentInnstallasjonsType(anyLong())).thenReturn(Optional.of(innstallasjonsType));
+    public void lag_medSokkel_setterMaritimtypeSokkel() throws FunksjonellException, TekniskException {
+        Maritimtyper maritimType = Maritimtyper.SOKKEL;
+        when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.of(maritimType));
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
-        assertThat(brevData.avklartSokkelEllerSkip).isEqualTo(AvklartInnstallasjonsType.SOKKEL);
+        assertThat(brevData.avklartMaritimType).isEqualTo(Maritimtyper.SOKKEL);
     }
 
     @Test
-    public void lag_utenMaritimtArbeid_setterInnstallasjonsTypeTilNull() throws FunksjonellException, TekniskException {
-        when(avklartefaktaService.hentInnstallasjonsType(anyLong())).thenReturn(Optional.empty());
+    public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() throws FunksjonellException, TekniskException {
+        when(avklartefaktaService.hentMaritimType(anyLong())).thenReturn(Optional.empty());
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
-        assertThat(brevData.avklartSokkelEllerSkip).isNull();
+        assertThat(brevData.avklartMaritimType).isNull();
     }
 
     @Test
@@ -89,7 +99,7 @@ public class BrevDataByggerInnvilgelseTest {
         brevbestillingDto.fritekst = "FRITEKST";
 
         BrevDataByggerInnvilgelse brevDataByggerInnvilgelse =
-            new BrevDataByggerInnvilgelse(brevDataByggerA1, avklartefaktaService, lovvalgsperiodeService, brevbestillingDto);
+            new BrevDataByggerInnvilgelse(avklartefaktaService, landVelgerService, lovvalgsperiodeService, brevbestillingDto,brevDataByggerA1);
 
         BrevData brevData = brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
         assertThat(brevbestillingDto).isEqualToComparingFieldByField(brevData);

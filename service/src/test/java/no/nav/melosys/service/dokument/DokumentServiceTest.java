@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -152,8 +151,11 @@ public final class DokumentServiceTest {
         brevDataA1.hovedvirksomhet = arbeidsgiver;
         BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse("SAKSBEHANDLER", new BrevbestillingDto());
         brevdataInnvilgelse.vedleggA1 = brevDataA1;
+        brevdataInnvilgelse.norskeVirksomheter = brevDataA1.norskeVirksomheter;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
-        brevdataInnvilgelse.avklartSokkelEllerSkip = AvklartInnstallasjonsType.SKIP;
+        brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
+        brevdataInnvilgelse.arbeidsland = "Norway";
+        brevdataInnvilgelse.trygdemyndighetsland = "Denmark";
         brevdataInnvilgelse.mottaker = mottakerRolle;
 
         return brevdataInnvilgelse;

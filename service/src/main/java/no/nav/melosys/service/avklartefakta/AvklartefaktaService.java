@@ -6,11 +6,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.avklartefakta.AvklartInnstallasjonsType;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Endretperioder;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -30,6 +31,8 @@ public class AvklartefaktaService {
 
     private final AvklartefaktaDtoKonverterer faktaKonverterer;
 
+    private final String valgtFakta = "TRUE";
+
     @Autowired
     public AvklartefaktaService(AvklarteFaktaRepository avklarteFaktaRepository, BehandlingsresultatRepository behandlingsresultatRepository, AvklartefaktaDtoKonverterer faktaKonverterer) {
         this.avklarteFaktaRepository = avklarteFaktaRepository;
@@ -44,20 +47,32 @@ public class AvklartefaktaService {
         return avklartefakta.stream().map(AvklartefaktaDto::new).collect(Collectors.toSet());
     }
 
-    public Set<Avklartefakta> hentAlleAvklarteArbeidsland(long behandlingsid) {
-        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.ARBEIDSLAND);
-    }
-
     public Avklartefakta hentAvklarteFakta(long behandlingsresultatID, Avklartefaktatype type) throws FunksjonellException {
         return avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsresultatID, type)
             .orElseThrow(() -> new FunksjonellException("Avklartefakta " + type + " mangler for behandlingsresultat " + behandlingsresultatID));
+    }
+
+    public Set<Avklartefakta> hentAlleAvklarteFlaggland(long behandlingsid) {
+        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.FLAGGLAND);
+    }
+
+    public Optional<Landkoder> hentFlaggland(long behandlingsid) {
+        return hentAlleAvklarteFlaggland(behandlingsid).stream()
+            .map(af -> Landkoder.valueOf(af.getFakta()))
+            .findFirst();
+    }
+
+    public Optional<Landkoder> hentBostedland(long behandlingsid) {
+        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.BOSTEDSLAND).stream()
+            .map(af -> Landkoder.valueOf(af.getFakta()))
+            .findFirst();
     }
 
     public Set<String> hentAvklarteOrganisasjoner(long behandlingsid) {
         Set<Avklartefakta> avklartefakta =
                 avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid,
                                                                                    Avklartefaktatype.AVKLARTE_ARBEIDSGIVER,
-                                                                            "TRUE");
+                                                                                   valgtFakta);
         return avklartefakta.stream()
                 .map(Avklartefakta::getSubjekt)
                 .collect(Collectors.toSet());
@@ -73,10 +88,10 @@ public class AvklartefaktaService {
         return aktivitetType.tilYrkesgruppeType();
     }
 
-    public Optional<AvklartInnstallasjonsType>  hentInnstallasjonsType(long behandlingsid) throws TekniskException {
+    public Optional<Maritimtyper> hentMaritimType(long behandlingsid) {
         Optional<Avklartefakta> avklartefaktaOpt =
             avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.SOKKEL_ELLER_SKIP);
-        return avklartefaktaOpt.map(af -> AvklartInnstallasjonsType.valueOf(af.getFakta()));
+        return avklartefaktaOpt.map(af -> Maritimtyper.valueOf(af.getFakta()));
     }
 
     @Transactional

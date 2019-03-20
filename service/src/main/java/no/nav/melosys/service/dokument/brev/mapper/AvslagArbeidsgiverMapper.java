@@ -39,7 +39,7 @@ public class AvslagArbeidsgiverMapper implements BrevDataMapper {
 
         fag.setNavn(brevData.person.sammensattNavn);
 
-        fag.setArbeidsland("IKKE IMPLEMENTERT");  //TODO: Ikke implementert
+        fag.setArbeidsland(brevData.arbeidsland);
 
         fag.setJuridiskEnhet(brevData.hovedvirksomhet.navn);
 
