@@ -25,8 +25,6 @@ public class OpprettOppgaveDto {
     private String saksreferanse;
     private String behandlingstype;
     private String behandlingstema;
-
-    //Brukes i fremtiden.
     private String temagruppe;
     private String tildeltEnhetsnr;
 
