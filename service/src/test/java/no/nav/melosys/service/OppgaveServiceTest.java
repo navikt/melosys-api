@@ -76,9 +76,8 @@ public class OppgaveServiceTest {
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave();
         oppgave1.setOppgaveId("1");
-        oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK);
+        oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         oppgave1.setPrioritet(PrioritetType.HOY);
-        oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK);
         oppgave1.setSaksnummer("MEL-12345");
         oppgave1.setTilordnetRessurs("12345678901");
         oppgaver.add(oppgave1);
@@ -112,7 +111,7 @@ public class OppgaveServiceTest {
     @Test
     public void testHentOppgaveForFagsaksnummer() throws MelosysException {
         Oppgave oppgave1 = new Oppgave();
-        oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK);
+        oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         oppgave1.setSaksnummer("MEL-12345");
 
         when(gsakFasade.finnOppgaveMedSaksnummer(anyString())).

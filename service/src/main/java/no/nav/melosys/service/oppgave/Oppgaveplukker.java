@@ -7,13 +7,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -72,7 +74,7 @@ public class Oppgaveplukker {
 
         List<Sakstyper> fagsakstypeListe = new ArrayList<>();
         List<Behandlingstyper> behandlingstypeListe = new ArrayList<>();
-        if (oppgavetype == Oppgavetyper.BEH_SAK) {
+        if (oppgavetype == Oppgavetyper.BEH_SAK_MK) {
 
             List<String> sakstyper = plukkDto.getSakstyper();
             for (String s : sakstyper) {
@@ -100,7 +102,7 @@ public class Oppgaveplukker {
             // Tildeler oppgaven
             gsakFasade.tildelOppgave(oppgave.getOppgaveId(), saksbehandlerID);
 
-            if (oppgavetype == Oppgavetyper.BEH_SAK) {
+            if (oppgavetype == Oppgavetyper.BEH_SAK_MK) {
                 settBehandlingsstatusUnderBehandling(oppgave.getSaksnummer());
             }
         }

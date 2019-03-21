@@ -89,7 +89,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         }
 
         if (behandlingstype == Behandlingstyper.SOEKNAD) {
-            oppgave.setOppgavetype(Oppgavetyper.BEH_SAK);
+            oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         } else if (behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
             oppgave.setOppgavetype(Oppgavetyper.VUR);
         } else {
