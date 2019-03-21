@@ -275,7 +275,7 @@ public class BrevDataServiceTest {
     private static DokumentbestillingMetadata lagDokumentbestillingMetadata(Produserbaredokumenter doktype, Aktoersroller rolle) throws TekniskException {
         DokumentbestillingMetadata forventet = new DokumentbestillingMetadata();
         forventet.brukerID = FNR;
-        forventet.mottakersRolle = rolle;
+        forventet.mottakerRolle = rolle;
         if (rolle == Aktoersroller.BRUKER) {
             forventet.mottakerID = FNR;
             forventet.utledRegisterInfo = true;

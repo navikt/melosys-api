@@ -129,10 +129,10 @@ public class DoksysService implements DoksysFasade {
 
     private Adresse lagAdresse(DokumentbestillingMetadata metadata) throws TekniskException {
 
-        if (Aktoersroller.MYNDIGHET == metadata.mottakersRolle) {
+        if (Aktoersroller.MYNDIGHET == metadata.mottakerRolle) {
             return lagUtenlandskAdresse(metadata.utenlandskMyndighet);
         } else {
-            throw new TekniskException("Det er ikke planlagt å lage en adresse for mottakersRolle: " + metadata.mottakersRolle);
+            throw new TekniskException("Det er ikke planlagt å lage en adresse for mottakerRolle: " + metadata.mottakerRolle);
         }
     }
 
@@ -145,12 +145,12 @@ public class DoksysService implements DoksysFasade {
     }
 
     private Aktoer lagMottaker(DokumentbestillingMetadata metadata) throws FunksjonellException {
-        Aktoersroller mottakersRolle = metadata.mottakersRolle;
+        Aktoersroller mottakersRolle = metadata.mottakerRolle;
         String mottakerID = metadata.mottakerID;
 
         if (mottakersRolle == null) {
-            log.error("Brev bør ikke sendes, mottakersRolle er ikke satt.");
-            metadata.mottakersRolle = Aktoersroller.BRUKER;
+            log.error("Brev bør ikke sendes, mottakerRolle er ikke satt.");
+            metadata.mottakerRolle = Aktoersroller.BRUKER;
         }
 
         switch (mottakersRolle) {

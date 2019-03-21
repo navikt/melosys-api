@@ -17,7 +17,7 @@ public class DokumentbestillingMetadata {
     // Fødselsnummer/tss id/ org.nr. til personen/ organisasjonen som er mottaker av dokumentet.
     public String mottakerID;
 
-    public Aktoersroller mottakersRolle;
+    public Aktoersroller mottakerRolle;
 
     // SakID som dokument skal journalføres mot  (forskjellig fra fagsaksnummer)
     public String journalsakID;

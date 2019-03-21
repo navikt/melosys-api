@@ -61,7 +61,7 @@ public class DokSysServiceTest {
         ProduserIkkeRedigerbartDokumentInputValideringFeilet, FunksjonellException, TekniskException {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
         metadata.dokumenttypeID = "dok_1234";
-        metadata.mottakersRolle = Aktoersroller.BRUKER;
+        metadata.mottakerRolle = Aktoersroller.BRUKER;
         metadata.utledRegisterInfo = true;
         Object brevdata = new Object();
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
@@ -79,7 +79,7 @@ public class DokSysServiceTest {
         ProduserIkkeredigerbartDokumentSikkerhetsbegrensning, ProduserIkkeredigerbartDokumentBrevdataValideringFeilet, ProduserIkkeredigerbartDokumentDokumentErVedlegg,
         ProduserIkkeRedigerbartDokumentInputValideringFeilet, FunksjonellException, TekniskException {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.mottakersRolle = Aktoersroller.MYNDIGHET;
+        metadata.mottakerRolle = Aktoersroller.MYNDIGHET;
         metadata.utenlandskMyndighet = new UtenlandskMyndighet();
         metadata.utenlandskMyndighet.gateadresse = "Stubenstrasse 77";
         metadata.utenlandskMyndighet.poststed = "0101";
