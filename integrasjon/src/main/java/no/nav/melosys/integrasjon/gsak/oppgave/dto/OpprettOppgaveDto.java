@@ -27,6 +27,7 @@ public class OpprettOppgaveDto {
     private String behandlingstema;
     private String temagruppe;
     private String tildeltEnhetsnr;
+    private String behandlesAvApplikasjon;
 
 
     public LocalDate getAktivDato() {
@@ -131,6 +132,14 @@ public class OpprettOppgaveDto {
 
     public void setPrioritet(String prioritet) {
         this.prioritet = prioritet;
+    }
+
+    public String getBehandlesAvApplikasjon() {
+        return behandlesAvApplikasjon;
+    }
+
+    public void setBehandlesAvApplikasjon(String behandlesAvApplikasjon) {
+        this.behandlesAvApplikasjon = behandlesAvApplikasjon;
     }
 
     @Override
