@@ -86,7 +86,7 @@ public class BrevDataService {
         Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument");
         Fagsak fagsak = behandling.getFagsak();
 
-        Aktoersroller mottakersRolle = brevData.mottaker != null ? brevData.mottaker : avklarMottakerRolleFraProduserbarDokument(produserbartDokument);
+        Aktoersroller mottakersRolle = brevData.mottaker != null ? brevData.mottaker : avklarMottakerRolleFraProduserbartdokument(produserbartDokument);
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
         metadata.dokumenttypeID = DokumenttypeIdMapper.hentID(produserbartDokument);
         metadata.mottakersRolle = mottakersRolle;
@@ -183,8 +183,8 @@ public class BrevDataService {
         return sakspart;
     }
 
-    Mottaker lagMottaker(Produserbaredokumenter produserbaredokument, Behandling behandling, BrevData brevData) throws TekniskException {
-        Aktoersroller mottakersRolle = brevData.mottaker != null ? brevData.mottaker : avklarMottakerRolleFraProduserbarDokument(produserbaredokument);
+    Mottaker lagMottaker(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
+        Aktoersroller mottakersRolle = brevData.mottaker != null ? brevData.mottaker : avklarMottakerRolleFraProduserbartdokument(produserbartDokument);
         Fagsak fagsak = behandling.getFagsak();
         Aktoer aktør = fagsak.hentAktørMedRolleType(mottakersRolle);
         TekniskException ingenAktør = new TekniskException("Det finnes ingen mottaker på sak " + behandling.getFagsak().getSaksnummer());
@@ -193,9 +193,8 @@ public class BrevDataService {
         }
 
         String mottakerID = avklarMottakerId(fagsak, mottakersRolle);
-        Optional<String> mottakerNavn = hentKontaktNavnForOrgnr(fagsak, mottakerID);
-
         Mottaker mottaker;
+
         if (mottakersRolle == BRUKER) {
             mottaker = new Person();
             mottaker.setTypeKode(AktoerType.PERSON);
@@ -220,6 +219,7 @@ public class BrevDataService {
             throw ingenAktør;
         }
 
+        Optional<String> mottakerNavn = hentKontaktNavnForOrgnr(fagsak, mottakerID);
         mottaker.setNavn(mottakerNavn.orElse(PLASSHOLDER_TEKST));
         mottaker.setKortNavn(PLASSHOLDER_TEKST);
         mottaker.setSpraakkode(Spraakkode.NB);
@@ -235,34 +235,34 @@ public class BrevDataService {
         return saksbehandler;
     }
 
-    private Aktoersroller avklarMottakerRolleFraProduserbarDokument(Produserbaredokumenter produserbaredokumenter) throws TekniskException {
-        Aktoersroller mottakRolle;
-        if (DOKUMENTER_TIL_BRUKER.contains(produserbaredokumenter)) {
-            mottakRolle = BRUKER;
-        } else if (produserbaredokumenter == INNVILGELSE_ARBEIDSGIVER || produserbaredokumenter == AVSLAG_ARBEIDSGIVER) {
-            mottakRolle = ARBEIDSGIVER;
-        } else if (produserbaredokumenter == ANMODNING_UNNTAK || produserbaredokumenter == ATTEST_A1) {
-            mottakRolle = MYNDIGHET;
+    private Aktoersroller avklarMottakerRolleFraProduserbartdokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
+        Aktoersroller mottakerRolle;
+        if (DOKUMENTER_TIL_BRUKER.contains(produserbartDokument)) {
+            mottakerRolle = BRUKER;
+        } else if (produserbartDokument == INNVILGELSE_ARBEIDSGIVER || produserbartDokument == AVSLAG_ARBEIDSGIVER) {
+            mottakerRolle = ARBEIDSGIVER;
+        } else if (produserbartDokument == ANMODNING_UNNTAK || produserbartDokument == ATTEST_A1) {
+            mottakerRolle = MYNDIGHET;
         } else {
-            throw new TekniskException("Produserbaredokumenter ikke støttet for å velge mottakrolle");
+            throw new TekniskException("Produserbartdokument ikke støttet for å velge mottakerRolle");
         }
-        return mottakRolle;
+        return mottakerRolle;
     }
 
-    private String avklarMottakerId(Fagsak fagsak, Aktoersroller mottakRolle) throws TekniskException {
+    private String avklarMottakerId(Fagsak fagsak, Aktoersroller mottakerRolle) throws TekniskException {
 
-        Aktoer mottaker = fagsak.hentAktørMedRolleType(mottakRolle);
+        Aktoer mottaker = fagsak.hentAktørMedRolleType(mottakerRolle);
         Aktoer representant = fagsak.hentAktørMedRolleType(REPRESENTANT); // FIXME MEL-2182 Det kan være flere representanter på en sak
 
         if (representant != null) {
             return kontaktopplysningRepository.findById(new KontaktopplysningID(fagsak.getSaksnummer(), representant.getOrgnr()))
                 .map(Kontaktopplysning::getKontaktOrgnr).orElse(representant.getOrgnr());
-        } else if (mottakRolle == ARBEIDSGIVER) {
+        } else if (mottakerRolle == ARBEIDSGIVER) {
             return kontaktopplysningRepository.findById(new KontaktopplysningID(fagsak.getSaksnummer(), mottaker.getOrgnr()))
                 .map(Kontaktopplysning::getKontaktOrgnr).orElse(mottaker.getOrgnr());
-        } else if (mottakRolle == MYNDIGHET) {
+        } else if (mottakerRolle == MYNDIGHET) {
             return mottaker.getInstitusjonId();
-        } else if (mottakRolle == BRUKER) {
+        } else if (mottakerRolle == BRUKER) {
             try {
                 return tpsFasade.hentIdentForAktørId(mottaker.getAktørId());
             } catch (IkkeFunnetException e) {

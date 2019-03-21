@@ -206,7 +206,6 @@ public class BrevDataServiceTest {
 
     @Test
     public void lagMetadataForMangelbrevAngirDokTypeLikHenleggelse() throws Exception {
-
         testLagDokumentMetadata(MELDING_HENLAGT_SAK, Aktoersroller.BRUKER);
     }
 
@@ -257,15 +256,13 @@ public class BrevDataServiceTest {
         brevData.mottaker = Aktoersroller.ARBEIDSGIVER;
         brevData.fritekst = "Test";
         when(kontaktopplysningRepository.findById(any())).thenReturn(Optional.of(kontaktopplysning));
-
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
-        when(kontaktopplysningRepository.findById(any())).thenReturn(Optional.of(kontaktopplysning));
         assertThat(metadata.mottakerID).isEqualTo("KONTAKTORG_999");
 
         when(kontaktopplysningRepository.findById(any())).thenReturn(Optional.empty());
-
         metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
+
         assertThat(metadata.mottakerID).isEqualTo(ORGNR);
     }
 
