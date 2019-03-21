@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.Optional;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.melosysbrev._000115.BostedsadresseType;
 import no.nav.dok.melosysbrev._000115.*;
+import no.nav.dok.melosysbrev._000115.BostedsadresseType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
@@ -24,8 +25,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
@@ -222,7 +221,7 @@ public class A001Mapper {
 
         BostedsadresseType bostedsadresse = new BostedsadresseType();
         bostedsadresse.setGatenavn(gateadresse.getGatenavn());
-        bostedsadresse.setHusnummer(gateadresse.getGatenummer() + " " + gateadresse.getHusbokstav());
+        bostedsadresse.setHusnummer(gateadresse.getHusnummer() + " " + gateadresse.getHusbokstav());
         bostedsadresse.setPostnummer(bosted.getPostnr());
         bostedsadresse.setPoststed(bosted.getPoststed());
         bostedsadresse.setLand(bosted.getLand().getKode());
