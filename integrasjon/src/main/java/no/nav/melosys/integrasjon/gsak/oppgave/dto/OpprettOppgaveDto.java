@@ -23,8 +23,6 @@ public class OpprettOppgaveDto {
     private LocalDate fristFerdigstillelse;
     private String prioritet;
     private String saksreferanse;
-
-    //Brukes i fremtiden.
     private String behandlingstype;
     private String behandlingstema;
     private String temagruppe;

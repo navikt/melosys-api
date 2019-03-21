@@ -68,6 +68,10 @@ public class Oppgave {
         return oppgavetype == Oppgavetyper.JFR;
     }
 
+    public boolean erVurderDokument() {
+        return oppgavetype == Oppgavetyper.VUR;
+    }
+
     public String getOppgaveId() {
         return oppgaveId;
     }
@@ -163,5 +167,4 @@ public class Oppgave {
         }
         return res;
     };
-
 }

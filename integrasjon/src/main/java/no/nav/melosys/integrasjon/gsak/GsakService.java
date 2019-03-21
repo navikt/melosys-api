@@ -39,6 +39,7 @@ public class GsakService implements GsakFasade {
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
 
     private static final int FRIST_JFR_DAGER = 1;
+    private static final int FRIST_VUR_DAGER = 1;
     private static final int FRIST_BEH_UKER = 12;
     private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
     private static final String SORTERINGSFELT = "FRIST";
@@ -126,14 +127,21 @@ public class GsakService implements GsakFasade {
         OpprettOppgaveDto oppgaveDto = new OpprettOppgaveDto();
         oppgaveDto.setAktivDato(idag);
         oppgaveDto.setAktørId(oppgave.getAktørId());
-        oppgaveDto.setBehandlingstype(hentFellesKode(oppgave.getBehandlingstype()));
+        if (oppgave.getBehandlingstype() != null) {
+            oppgaveDto.setBehandlingstype(hentFellesKode(oppgave.getBehandlingstype()));
+        }
         if (oppgave.erJournalFøring()) {
             oppgaveDto.setFristFerdigstillelse(idag.plusDays(FRIST_JFR_DAGER));
         } else if (oppgave.erBehandling()) {
             oppgaveDto.setFristFerdigstillelse(idag.plusWeeks(FRIST_BEH_UKER));
+        } else if (oppgave.erVurderDokument()) {
+            oppgaveDto.setFristFerdigstillelse(idag.plusWeeks(FRIST_VUR_DAGER));
         } else {
             // FristFerdigstillelse er påkrevd, opprettelsen vil feile.
             log.warn("Type " + oppgave.getOppgavetype().getKode() + " er ikke støttet.");
+        }
+        if (oppgave.getBehandlingstema() != null) {
+            oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema().getKode());
         }
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());
         oppgaveDto.setOppgavetype(oppgave.getOppgavetype().getKode());

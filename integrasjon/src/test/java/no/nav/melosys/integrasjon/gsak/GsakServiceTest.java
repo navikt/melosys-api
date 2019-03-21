@@ -6,8 +6,10 @@ import java.util.List;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
+
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.Konstanter;
@@ -55,6 +57,23 @@ public final class GsakServiceTest {
                 .isInstanceOf(IkkeFunnetException.class)
                 .hasMessageContaining("Feil")
                 .hasMessageContaining("oppgave 1 for saksbehandler 2");
+    }
+
+    @Test
+    public void opprettOppgave_vurderDokument_setterData() throws Exception {
+        Oppgave oppgave = new Oppgave();
+        oppgave.setOppgavetype(Oppgavetyper.VUR);
+        oppgave.setTema(Tema.MED);
+        oppgave.setBehandlingstema(Behandlingstema.ARB_EØS);
+        instans.opprettOppgave(oppgave);
+
+        ArgumentCaptor<OpprettOppgaveDto> captor = ArgumentCaptor.forClass(OpprettOppgaveDto.class);
+        verify(oppgaveConsumer).opprettOppgave(captor.capture());
+        OpprettOppgaveDto opprettOppgaveDto = captor.getValue();
+
+        assertThat(opprettOppgaveDto.getOppgavetype()).isEqualTo(Oppgavetyper.VUR.getKode());
+        assertThat(opprettOppgaveDto.getBehandlingstema()).isEqualTo(Behandlingstema.ARB_EØS.getKode());
+        assertThat(opprettOppgaveDto.getFristFerdigstillelse()).isNotNull();
     }
 
     @Test
@@ -106,5 +125,4 @@ public final class GsakServiceTest {
 
         return oppgave;
     }
-
 }
