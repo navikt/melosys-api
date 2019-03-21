@@ -11,7 +11,6 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-
 import static no.nav.melosys.service.dokument.brev.BrevDataService.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
@@ -86,7 +85,7 @@ public final class BrevDataUtils {
         Gateadresse gateadresse = bosted.getGateadresse();
         BostedsadresseType bostedAdresse = new BostedsadresseType();
         bostedAdresse.setGatenavn(gateadresse.getGatenavn());
-        bostedAdresse.setHusnummer(gateadresse.getGatenummer() + " " + gateadresse.getHusbokstav());
+        bostedAdresse.setHusnummer(gateadresse.getHusnummer() + " " + gateadresse.getHusbokstav());
         bostedAdresse.setPostnr(bosted.getPostnr());
         bostedAdresse.setPoststed(bosted.getPoststed());
         bostedAdresse.setLandkode(bosted.getLand().getKode());

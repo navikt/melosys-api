@@ -97,7 +97,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         adresse.setLand(bostedsadresse.getLand().getKode());
         adresse.setGateadresse(
             bostedsadresse.getGateadresse().getGatenavn() + " " +
-                (bostedsadresse.getGateadresse().getGatenummer() == null ? "" : bostedsadresse.getGateadresse().getGatenummer()) +
+                (bostedsadresse.getGateadresse().getHusnummer() == null ? "" : bostedsadresse.getGateadresse().getHusnummer()) +
                 (bostedsadresse.getGateadresse().getHusbokstav() == null ? "" : bostedsadresse.getGateadresse().getHusbokstav())
         );
         return adresse;
