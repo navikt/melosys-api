@@ -21,14 +21,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SaksflytSchedulerTest {
+public class SaksflytKontrollTest {
 
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
 
     private Binge binge = new BingeImpl();
 
-    private SaksflytScheduler saksflytScheduler;
+    private SaksflytKontroll saksflytKontroll;
 
     private final static int TOTAL_PROSESSINSTANSER = 10;
 
@@ -36,7 +36,7 @@ public class SaksflytSchedulerTest {
 
     @Before
     public void setup() {
-        saksflytScheduler = new SaksflytScheduler(binge, prosessinstansRepository);
+        saksflytKontroll = new SaksflytKontroll(binge, prosessinstansRepository);
         prosessinstanser = prosessInstanser();
         when(prosessinstansRepository.findAllByStegIsNotNullAndStegIsNot(any(ProsessSteg.class))).thenReturn(prosessinstanser);
     }
@@ -50,7 +50,7 @@ public class SaksflytSchedulerTest {
         }
         assertThat(binge.hentProsessinstanser().size()).isEqualTo(prosesinstanserIBinge);
 
-        saksflytScheduler.sjekkProsessinstansFinnesISaksflyt();
+        saksflytKontroll.sjekkProsessinstansFinnesISaksflyt();
 
         assertThat(binge.hentProsessinstanser().size()).isEqualTo(TOTAL_PROSESSINSTANSER);
     }
@@ -62,7 +62,7 @@ public class SaksflytSchedulerTest {
         int nåværendeStørrelse = binge.hentProsessinstanser().size();
         assertThat(nåværendeStørrelse).isEqualTo(TOTAL_PROSESSINSTANSER);
 
-        saksflytScheduler.sjekkProsessinstansFinnesISaksflyt();
+        saksflytKontroll.sjekkProsessinstansFinnesISaksflyt();
         assertThat(binge.hentProsessinstanser().size()).isEqualTo(TOTAL_PROSESSINSTANSER);
     }
 

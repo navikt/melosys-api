@@ -14,14 +14,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SaksflytScheduler {
+public class SaksflytKontroll {
 
-    private static final Logger log = LoggerFactory.getLogger(SaksflytScheduler.class);
+    private static final Logger log = LoggerFactory.getLogger(SaksflytKontroll.class);
 
     private final Binge binge;
     private final ProsessinstansRepository prosessinstansRepository;
 
-    public SaksflytScheduler(Binge binge, ProsessinstansRepository prosessinstansRepository) {
+    public SaksflytKontroll(Binge binge, ProsessinstansRepository prosessinstansRepository) {
         this.binge = binge;
         this.prosessinstansRepository = prosessinstansRepository;
     }

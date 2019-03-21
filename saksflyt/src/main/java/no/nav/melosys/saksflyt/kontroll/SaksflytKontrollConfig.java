@@ -8,7 +8,7 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 
 @Configuration
 @EnableScheduling
-public class SaksflytSchedulerConfig {
+public class SaksflytKontrollConfig {
 
     @Bean
     public TaskScheduler taskScheduler() {
