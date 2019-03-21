@@ -1,5 +1,9 @@
 package no.nav.melosys.integrasjon.doksys;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -21,6 +25,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,10 +50,9 @@ public class DokSysServiceTest {
     public void produserDokumentutkast() throws IntegrasjonException, ProduserDokumentutkastBrevdataValideringFeilet, ProduserDokumentutkastInputValideringFeilet {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
         metadata.dokumenttypeID = "dok_1234";
-        Object brevdata = new Object();
         when(dokumentproduksjonConsumer.produserDokumentutkast(any())).thenReturn(new ProduserDokumentutkastResponse());
 
-        dokSysService.produserDokumentutkast(metadata, brevdata);
+        dokSysService.produserDokumentutkast(metadata, lagBrevData());
 
         ArgumentCaptor<ProduserDokumentutkastRequest> captor = ArgumentCaptor.forClass(ProduserDokumentutkastRequest.class);
         verify(dokumentproduksjonConsumer).produserDokumentutkast(captor.capture());
@@ -63,10 +68,9 @@ public class DokSysServiceTest {
         metadata.dokumenttypeID = "dok_1234";
         metadata.mottakersRolle = Aktoersroller.BRUKER;
         metadata.utledRegisterInfo = true;
-        Object brevdata = new Object();
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 
-        dokSysService.produserIkkeredigerbartDokument(metadata, brevdata);
+        dokSysService.produserIkkeredigerbartDokument(metadata, lagBrevData());
 
         ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
         verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
@@ -86,10 +90,9 @@ public class DokSysServiceTest {
         metadata.utenlandskMyndighet.landkode = Landkoder.GL;
         metadata.utenlandskMyndighet.institusjonskode = "INST-023%zdf";
         metadata.dokumenttypeID = "dok_1234";
-        Object brevdata = new Object();
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 
-        dokSysService.produserIkkeredigerbartDokument(metadata, brevdata);
+        dokSysService.produserIkkeredigerbartDokument(metadata, lagBrevData());
 
         ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
         verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
@@ -101,5 +104,18 @@ public class DokSysServiceTest {
         assertThat(utenlandskPostadresse.getAdresselinje1()).isEqualTo(metadata.utenlandskMyndighet.gateadresse);
         assertThat(utenlandskPostadresse.getLand().getValue()).isEqualTo(metadata.utenlandskMyndighet.landkode.getKode());
 
+    }
+
+    private static Element lagBrevData() {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder;
+        try {
+            builder = dbf.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            throw new IllegalStateException(e);
+        }
+        Document doc = builder.newDocument();
+
+        return doc.createElement("brevData");
     }
 }

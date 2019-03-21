@@ -19,6 +19,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
 
 import static no.nav.melosys.integrasjon.Fagsystem.GSAK_I_JOARK;
 import static no.nav.melosys.integrasjon.Fagsystem.MELOSYS;
@@ -44,7 +49,7 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public byte[] produserDokumentutkast(DokumentbestillingMetadata metadata, Object brevdata) throws IntegrasjonException {
+    public byte[] produserDokumentutkast(DokumentbestillingMetadata metadata, Element brevdata) throws IntegrasjonException {
         ProduserDokumentutkastRequest wsRequest = new ProduserDokumentutkastRequest();
 
         wsRequest.setUtledRegisterInfo(metadata.utledRegisterInfo);
@@ -61,7 +66,7 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public DokumentbestillingResponse produserIkkeredigerbartDokument(DokumentbestillingMetadata metadata, Object brevdata)
+    public DokumentbestillingResponse produserIkkeredigerbartDokument(DokumentbestillingMetadata metadata, Element brevdata)
         throws FunksjonellException, TekniskException {
         ProduserIkkeredigerbartDokumentRequest wsRequest = new ProduserIkkeredigerbartDokumentRequest();
         Dokumentbestillingsinformasjon info = new Dokumentbestillingsinformasjon();
@@ -108,7 +113,8 @@ public class DoksysService implements DoksysFasade {
         wsRequest.setBrevdata(brevdata);
 
         try {
-            log.debug("Bestiller dokument:{} {}", System.lineSeparator(), wsRequest.toString());
+            log.debug("Sender request:{} {}", System.lineSeparator(), wsRequest.toString());
+            log.debug("Bestiller dokument:{} {}", System.lineSeparator(), xmlToString(brevdata));
             ProduserIkkeredigerbartDokumentResponse wsResponse = dokumentproduksjonConsumer.produserIkkeredigerbartDokument(wsRequest);
 
             DokumentbestillingResponse response = new DokumentbestillingResponse();
@@ -144,13 +150,13 @@ public class DoksysService implements DoksysFasade {
         return utenlandskPostadresse;
     }
 
-    private Aktoer lagMottaker(DokumentbestillingMetadata metadata) throws FunksjonellException {
+    private Aktoer lagMottaker(DokumentbestillingMetadata metadata) {
         Aktoersroller mottakersRolle = metadata.mottakersRolle;
         String mottakerID = metadata.mottakerID;
 
         if (mottakersRolle == null) {
             log.error("Brev bør ikke sendes, mottakersRolle er ikke satt.");
-            metadata.mottakersRolle = Aktoersroller.BRUKER;
+            mottakersRolle = Aktoersroller.BRUKER;
         }
 
         switch (mottakersRolle) {
@@ -180,5 +186,13 @@ public class DoksysService implements DoksysFasade {
         person.setIdent(personID);
         person.setNavn(navn);
         return person;
+    }
+
+    private static String xmlToString(Node node) {
+        Document document = node.getOwnerDocument();
+        DOMImplementationLS domImplLS = (DOMImplementationLS) document
+            .getImplementation();
+        LSSerializer serializer = domImplLS.createLSSerializer();
+        return serializer.writeToString(node);
     }
 }

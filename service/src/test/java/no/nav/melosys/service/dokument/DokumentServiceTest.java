@@ -44,6 +44,7 @@ import org.junit.Test;
 import org.pac4j.oidc.profile.OidcProfile;
 import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.w3c.dom.Element;
 
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatype.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,7 +72,7 @@ public final class DokumentServiceTest {
     public final void produserInnvilgelsesbrevFunker() throws Exception {
         BrevData brevData = lagBrevData(Aktoersroller.BRUKER);
         instans.produserDokument(BEHANDLINGSID, Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, brevData);
-        verify(dokSysFasade).produserIkkeredigerbartDokument(any(DokumentbestillingMetadata.class), any(Object.class));
+        verify(dokSysFasade).produserIkkeredigerbartDokument(any(DokumentbestillingMetadata.class), any(Element.class));
     }
 
     @Test
@@ -85,7 +86,7 @@ public final class DokumentServiceTest {
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(dokSysFasade, lagBrevdatabyggerVelgerMock(brevbestilling));
         byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, brevbestilling);
         assertThat(resultat).isNull();
-        verify(dokSysFasade).produserDokumentutkast(any(DokumentbestillingMetadata.class), any(Object.class));
+        verify(dokSysFasade).produserDokumentutkast(any(DokumentbestillingMetadata.class), any(Element.class));
     }
 
     @Test

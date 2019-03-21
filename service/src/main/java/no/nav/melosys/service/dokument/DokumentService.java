@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.Element;
 
 @Service
 @Primary
@@ -95,7 +96,7 @@ public class DokumentService {
         BrevData brevData = bygger.lag(behandling, SubjectHandler.getInstance().getUserID());
 
         DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(produserbartDokument, behandling, brevData);
-        Object brevinnhold = brevDataService.lagBrevXML(produserbartDokument, behandling, brevData);
+        Element brevinnhold = brevDataService.lagBrevXML(produserbartDokument, behandling, brevData);
 
         return dokSysFasade.produserDokumentutkast(request, brevinnhold);
     }
@@ -109,7 +110,7 @@ public class DokumentService {
             .orElseThrow(() -> new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke"));
 
         DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(produserbartDokument, behandling, brevData);
-        Object brevinnhold = brevDataService.lagBrevXML(produserbartDokument, behandling, brevData);
+        Element brevinnhold = brevDataService.lagBrevXML(produserbartDokument, behandling, brevData);
 
         dokSysFasade.produserIkkeredigerbartDokument(request, brevinnhold);
     }
