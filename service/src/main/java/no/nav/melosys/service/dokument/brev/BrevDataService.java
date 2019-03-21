@@ -152,11 +152,11 @@ public class BrevDataService {
         return fellesType;
     }
 
-    private MelosysNAVFelles mapNAVFelles(Produserbaredokumenter produserbaredokumenter, Behandling behandling, BrevData brevData) throws TekniskException {
+    private MelosysNAVFelles mapNAVFelles(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
         final MelosysNAVFelles navFelles = new MelosysNAVFelles();
 
         navFelles.setSakspart(lagSakspart(behandling));
-        navFelles.setMottaker(lagMottaker(produserbaredokumenter, behandling, brevData));
+        navFelles.setMottaker(lagMottaker(produserbartDokument, behandling, brevData));
         navFelles.setBehandlendeEnhet(lagNavEnhet());
         navFelles.setSignerendeSaksbehandler(lagSaksbehandler(brevData.saksbehandler));
         navFelles.setSignerendeBeslutter(lagSaksbehandler(brevData.saksbehandler));
