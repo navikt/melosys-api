@@ -9,7 +9,6 @@ import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
-
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.Konstanter;
@@ -81,7 +80,7 @@ public final class GsakServiceTest {
         Oppgave oppgave = lagOppgave();
 
         instans.opprettOppgave(oppgave);
-        verify(oppgaveConsumer, times(1)).opprettOppgave(oppgaveDtoCaptor.capture());
+        verify(oppgaveConsumer).opprettOppgave(oppgaveDtoCaptor.capture());
 
         OpprettOppgaveDto oppgaveDto = oppgaveDtoCaptor.getValue();
 
