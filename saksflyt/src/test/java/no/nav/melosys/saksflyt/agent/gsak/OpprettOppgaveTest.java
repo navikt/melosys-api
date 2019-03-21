@@ -23,6 +23,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
 import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
+import static no.nav.melosys.domain.oppgave.Behandlingstema.ARB_EØS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -70,7 +71,7 @@ public class OpprettOppgaveTest {
         verify(gsakFasade, times(1)).opprettOppgave(oppgave.capture());
 
         assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
-        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(null);
+        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(ARB_EØS);
         assertThat(p.getSteg()).isEqualTo(SEND_FORVALTNINGSMELDING);
     }
 
@@ -98,7 +99,7 @@ public class OpprettOppgaveTest {
         verify(gsakFasade, times(1)).opprettOppgave(oppgave.capture());
 
         assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
-        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(null);
+        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(ARB_EØS);
         assertThat(p.getSteg()).isEqualTo(null);
     }
 
@@ -124,7 +125,7 @@ public class OpprettOppgaveTest {
         verify(gsakFasade, times(1)).opprettOppgave(oppgave.capture());
 
         assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
-        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(null);
+        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(ARB_EØS);
         assertThat(p.getSteg()).isNull();
     }
 
