@@ -188,7 +188,7 @@ public final class DokumentServiceTest {
         }
 
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
-        BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository);
+        BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository, mock(KontaktopplysningRepository.class));
         return new DokumentService(behandlingRepository, mock(FagsakRepository.class), brevDataService, dokSysFasade, mock(JoarkFasade.class),
                 mock(ProsessinstansService.class), brevdatabyggervelger);
     }
@@ -347,7 +347,7 @@ public final class DokumentServiceTest {
 
     private static TpsFasade mockTpsFasade(Aktoer aktør) throws IkkeFunnetException {
         TpsFasade tpsFasade = mock(TpsFasade.class);
-        when(tpsFasade.hentIdentForAktørId(eq(aktør.getAktørId())))
+        when(tpsFasade.hentIdentForAktørId(anyString()))
             .thenReturn(String.format("IDENT%s", aktør.getAktørId()));
         return tpsFasade;
     }
@@ -382,6 +382,7 @@ public final class DokumentServiceTest {
         Aktoer aktør = new Aktoer();
         aktør.setAktørId(type.name() + idTeller++);
         aktør.setAktørId("123");
+        aktør.setOrgnr("999");
         aktør.setRolle(type);
         return aktør;
     }
