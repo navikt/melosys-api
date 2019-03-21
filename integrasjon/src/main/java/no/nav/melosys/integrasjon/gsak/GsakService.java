@@ -1,7 +1,10 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -182,13 +185,8 @@ public class GsakService implements GsakFasade {
         );
 
         // Henter oppgaver opprettet av melosys, hvor melosys har satt behandlesAvApplikasjon
-        String[] oppgaveTyperUtenJfr = Arrays.stream(Oppgavetyper.values())
-            .filter(o -> !o.equals(Oppgavetyper.JFR))
-            .map(Oppgavetyper::getKode)
-            .toArray(String[]::new);
-
         List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(
-            oppgaveSearchRequestBuilder.medOppgaveTyper(oppgaveTyperUtenJfr).medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode()).build()
+            oppgaveSearchRequestBuilder.medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode()).build()
         );
 
         return Stream.of(finnJfrOppgaveListeResponse, finnOppgaveListeResponse)

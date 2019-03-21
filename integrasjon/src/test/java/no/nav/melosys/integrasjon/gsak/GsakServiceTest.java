@@ -108,7 +108,6 @@ public final class GsakServiceTest {
         assertThat(requests.size()).isEqualTo(2);
         assertThat(requests.get(0).getOppgavetype()[0]).isEqualTo(Oppgavetyper.JFR.getKode());
         assertThat(requests.get(0).getBehandlesAvApplikasjon()).isNullOrEmpty();
-        assertThat(requests.get(1).getOppgavetype()).contains(Oppgavetyper.BEH_SAK_MK.getKode());
         assertThat(requests.get(1).getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
     }
 
