@@ -4,7 +4,7 @@ CREATE TABLE prosessinstans (
     prosess_type    VARCHAR2(99)   NOT NULL,
     behandling_id   NUMBER(19)     NULL,
     data            VARCHAR2(4000) NULL,
-    steg            VARCHAR2(99)   NULL,
+    steg            VARCHAR2(99)   NOT NULL,
     registrert_dato TIMESTAMP      NOT NULL,
     endret_dato     TIMESTAMP      NOT NULL,
     antall_retry    INTEGER        DEFAULT 0 NOT NULL,
