@@ -3,9 +3,9 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
+import no.nav.dok.melosysbrev._000108.*;
 import no.nav.dok.melosysbrev._000108.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000108.ObjectFactory;
-import no.nav.dok.melosysbrev._000108.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.Behandling;
@@ -15,13 +15,11 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
-import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
@@ -60,14 +58,9 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setTrygdemyndighetsland(brevdata.trygdemyndighetsland);
 
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        fag.setFlaggland(brevdata.arbeidsland);
         if (!søknad.maritimtArbeid.isEmpty()) {
             MaritimtArbeid maritimtArbeid = søknad.maritimtArbeid.iterator().next();
-            String flaggland = maritimtArbeid.flaggLandKode;
-            if (!StringUtils.isEmpty(flaggland)) {
-                Landkoder flagglandKode = Landkoder.valueOf(maritimtArbeid.flaggLandKode);
-                fag.setFlaggland(flagglandKode.getBeskrivelse());
-            }
-
             if (maritimtArbeid.fartsomradeKode == Fartsomraade.INNENRIKS.getKode().toUpperCase()) {
                 fag.setArbeidPåTerritorialfarvann(JA);
             }

@@ -7,8 +7,8 @@ import java.util.Objects;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 
 /**
  * Metoder for å trekke ut opplysninger fra et {@code SoeknadDokument}.
@@ -45,5 +45,12 @@ public final class SoeknadUtils {
             throw new FunksjonellException("Søknad mangler detaljer om Maritimt Arbeid");
         }
         return søknad.maritimtArbeid.get(0);
+    }
+
+    public static Landkoder hentSøknadsland(SoeknadDokument søknad) {
+        if (søknad.oppholdUtland.oppholdslandKoder.isEmpty()) {
+            throw new RuntimeException("Søknad mangler søknadsland");
+        }
+        return Landkoder.valueOf(søknad.oppholdUtland.oppholdslandKoder.get(0));
     }
 }
