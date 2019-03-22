@@ -188,9 +188,9 @@ public final class DokumentServiceTest {
         }
 
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
-        BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository, mock(KontaktopplysningRepository.class));
+        BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository);
         return new DokumentService(behandlingRepository, mock(FagsakRepository.class), brevDataService, dokSysFasade, mock(JoarkFasade.class),
-                mock(ProsessinstansService.class), brevdatabyggervelger);
+            mock(KontaktopplysningRepository.class), mock(ProsessinstansService.class), brevdatabyggervelger);
     }
 
     private static Behandling lagBehandling() {

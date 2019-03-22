@@ -8,10 +8,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
+import no.nav.melosys.repository.*;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.felles.BrevBestiller;
 import no.nav.melosys.service.dokument.DokumentSystemService;
@@ -112,8 +109,9 @@ public class IverksettVedtakSendBrevTest {
         BrevDataService brevDataService = mock(BrevDataService.class);
         DoksysFasade dokSysFasade = mock(DoksysFasade.class);
         JoarkFasade joarkFasade = mock(JoarkFasade.class);
+        KontaktopplysningRepository kontaktopplysningRepository = mock(KontaktopplysningRepository.class);
         return spy(new DokumentSystemService(behandlingRepository, fagsakRepository,
-            brevDataService, dokSysFasade, joarkFasade, brevDataByggerVelger));
+            brevDataService, dokSysFasade, joarkFasade, kontaktopplysningRepository, brevDataByggerVelger));
     }
 
     private static BehandlingsresultatRepository mockBehandlingsresultatRepository() {

@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.doksys;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -61,7 +62,7 @@ public class DokSysServiceTest {
         ProduserIkkeRedigerbartDokumentInputValideringFeilet, FunksjonellException, TekniskException {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
         metadata.dokumenttypeID = "dok_1234";
-        metadata.mottakerRolle = Aktoersroller.BRUKER;
+        metadata.mottaker = lagAktør(Aktoersroller.BRUKER);
         metadata.utledRegisterInfo = true;
         Object brevdata = new Object();
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
@@ -74,12 +75,25 @@ public class DokSysServiceTest {
         assertThat(dokumentRequest.getDokumentbestillingsinformasjon().getDokumenttypeId()).isEqualTo(metadata.dokumenttypeID);
     }
 
+    private Aktoer lagAktør(Aktoersroller rolle) {
+        Aktoer aktør = new Aktoer();
+        aktør.setRolle(rolle);
+        if (rolle == Aktoersroller.BRUKER) {
+            aktør.setAktørId("1234");
+        } else if (rolle == Aktoersroller.MYNDIGHET) {
+            aktør.setInstitusjonId("DK:234");
+        } else {
+            aktør.setOrgnr("98765");
+        }
+        return aktør;
+    }
+
     @Test
     public void produserIkkeredigerbartDokument_tilUtenlandskMyndighet() throws ProduserIkkeredigerbartDokumentDokumentErRedigerbart, ProduserIkkeRedigerbartDokumentJoarkForretningsmessigUnntak,
         ProduserIkkeredigerbartDokumentSikkerhetsbegrensning, ProduserIkkeredigerbartDokumentBrevdataValideringFeilet, ProduserIkkeredigerbartDokumentDokumentErVedlegg,
         ProduserIkkeRedigerbartDokumentInputValideringFeilet, FunksjonellException, TekniskException {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.mottakerRolle = Aktoersroller.MYNDIGHET;
+        metadata.mottaker = lagAktør(Aktoersroller.MYNDIGHET);
         metadata.utenlandskMyndighet = new UtenlandskMyndighet();
         metadata.utenlandskMyndighet.gateadresse = "Stubenstrasse 77";
         metadata.utenlandskMyndighet.poststed = "0101";

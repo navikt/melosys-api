@@ -128,11 +128,12 @@ public class DoksysService implements DoksysFasade {
     }
 
     private Adresse lagAdresse(DokumentbestillingMetadata metadata) throws TekniskException {
+        Aktoersroller mottakerRolle = metadata.mottaker.getRolle();
 
-        if (Aktoersroller.MYNDIGHET == metadata.mottakerRolle) {
+        if (mottakerRolle == Aktoersroller.MYNDIGHET) {
             return lagUtenlandskAdresse(metadata.utenlandskMyndighet);
         } else {
-            throw new TekniskException("Det er ikke planlagt å lage en adresse for mottakerRolle: " + metadata.mottakerRolle);
+            throw new TekniskException("Det er ikke planlagt å lage en adresse for mottakerRolle: " + mottakerRolle);
         }
     }
 
@@ -145,15 +146,14 @@ public class DoksysService implements DoksysFasade {
     }
 
     private Aktoer lagMottaker(DokumentbestillingMetadata metadata) throws FunksjonellException {
-        Aktoersroller mottakersRolle = metadata.mottakerRolle;
-        String mottakerID = metadata.mottakerID;
-
-        if (mottakersRolle == null) {
-            log.error("Brev bør ikke sendes, mottakerRolle er ikke satt.");
-            metadata.mottakerRolle = Aktoersroller.BRUKER;
+        if (metadata.mottaker == null) {
+            throw new FunksjonellException("Brev kan ikke sendes, mottaker er ikke satt.");
         }
 
-        switch (mottakersRolle) {
+        Aktoersroller mottakerRolle = metadata.mottaker.getRolle();
+        String mottakerID = metadata.mottakerID;
+
+        switch (mottakerRolle) {
             case BRUKER:
                 return lagPerson(mottakerID);
             case ARBEIDSGIVER:
@@ -166,7 +166,7 @@ public class DoksysService implements DoksysFasade {
                 // med mottakerId="11111111111" og dermed blir AvsendMottakId i Joark tom.
                 return lagPerson(FALSK_MOTTAKER_ID, metadata.utenlandskMyndighet.navn);
             default:
-                log.warn("MottakersRolle {} er ukjent. PERSON brukes som standard.", mottakersRolle);
+                log.warn("MottakersRolle {} er ukjent. PERSON brukes som standard.", mottakerRolle);
                 return lagPerson(mottakerID);
         }
     }

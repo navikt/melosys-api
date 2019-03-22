@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.doksys;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
 public class DokumentbestillingMetadata {
 
@@ -14,10 +14,10 @@ public class DokumentbestillingMetadata {
     // Brukernavn må settes hvis dokprod ikke utleder registerInfo
     public String brukerNavn;
 
+    public Aktoer mottaker;
+
     // Fødselsnummer/tss id/ org.nr. til personen/ organisasjonen som er mottaker av dokumentet.
     public String mottakerID;
-
-    public Aktoersroller mottakerRolle;
 
     // SakID som dokument skal journalføres mot  (forskjellig fra fagsaksnummer)
     public String journalsakID;
