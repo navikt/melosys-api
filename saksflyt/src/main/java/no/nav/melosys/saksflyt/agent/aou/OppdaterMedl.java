@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_MEDL;
 import static no.nav.melosys.domain.ProsessSteg.AOU_SEND_BREV;
+import static no.nav.melosys.domain.ProsessSteg.IV_AVKLAR_MYNDIGHET;
 
 /**
  * Oppdaterer medlemskap periode i MEDL.
@@ -65,6 +66,6 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         Long medlPeriodeID = medlFasade.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode);
         felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
 
-        prosessinstans.setSteg(AOU_SEND_BREV);
+        prosessinstans.setSteg(IV_AVKLAR_MYNDIGHET);
     }
 }

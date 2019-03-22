@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.ProsessSteg.AOU_SEND_BREV;
 import static no.nav.melosys.domain.ProsessSteg.IV_AVKLAR_MYNDIGHET;
 import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
 
@@ -95,6 +96,10 @@ public class AvklarMyndighet extends AbstraktStegBehandler {
             }
         }
 
-        prosessinstans.setSteg(IV_OPPDATER_MEDL);
+        if (prosessinstans.getType() == ProsessType.ANMODNING_OM_UNNTAK) {
+            prosessinstans.setSteg(AOU_SEND_BREV);
+        } else {
+            prosessinstans.setSteg(IV_OPPDATER_MEDL);
+        }
     }
 }
