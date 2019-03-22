@@ -16,7 +16,6 @@ import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentMaritimtArbeid;
 
@@ -95,6 +94,6 @@ public class LandvelgerService {
 
     private Landkoder hentBostedsland(Behandling behandling, SoeknadDokument søknad) {
         Optional<Landkoder> bostedslandOpt = avklartefaktaService.hentBostedland(behandling.getId());
-        return bostedslandOpt.orElseGet(() -> Landkoder.valueOf(søknad.bosted.oppgittAdresse.landKode));
+        return bostedslandOpt.orElseGet(() -> Landkoder.valueOf(søknad.soeknadsland.landKode));
     }
 }

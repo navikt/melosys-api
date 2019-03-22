@@ -6,7 +6,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.Vilkaarsresultat;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -20,7 +19,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -54,8 +52,7 @@ public class LandvelgerServiceTest {
         soeknad.setDokument(søknad);
         soeknad.setType(SaksopplysningType.SØKNAD);
         søknad.oppholdUtland.oppholdslandKoder.add(oppholdsland.getKode());
-        søknad.bosted.oppgittAdresse = new StrukturertAdresse();
-        søknad.bosted.oppgittAdresse.landKode = bostedsland.getKode();
+        søknad.soeknadsland.landKode = bostedsland.getKode();
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
         maritimtArbeid.territorialfarvann = territorialfarvannLand.getKode();
         søknad.maritimtArbeid.add(maritimtArbeid);
