@@ -18,6 +18,7 @@ import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import org.apache.commons.lang3.StringUtils;
 
 public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements BrevDataBygger {
 
@@ -59,6 +60,9 @@ public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements Brev
 
     private StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
         StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
+        if (StringUtils.isEmpty(adresse.postnummer) || StringUtils.isEmpty(adresse.gatenavn)) {
+            adresse = org.getOrganisasjonDetaljer().hentStrukturertPostadresse();
+        }
         adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
         return adresse;
     }
