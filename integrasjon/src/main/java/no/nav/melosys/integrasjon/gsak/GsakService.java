@@ -180,13 +180,15 @@ public class GsakService implements GsakFasade {
     }
 
     private List<Oppgave> hentOppgaverAlleTyper(OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder) throws FunksjonellException, TekniskException {
-        List<OppgaveDto> finnJfrOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(
-            oppgaveSearchRequestBuilder.medOppgaveTyper(Oppgavetyper.JFR.getKode()).build()
-        );
-
         // Henter oppgaver opprettet av melosys, hvor melosys har satt behandlesAvApplikasjon
         List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(
             oppgaveSearchRequestBuilder.medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode()).build()
+        );
+
+        // Henter journalføringsoppgaver. Disse er ikke opprettet av Melosys
+        List<OppgaveDto> finnJfrOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(
+            oppgaveSearchRequestBuilder.medOppgaveTyper(Oppgavetyper.JFR.getKode())
+                .medBehandlesAvApplikasjon(null).build()
         );
 
         return Stream.of(finnJfrOppgaveListeResponse, finnOppgaveListeResponse)
