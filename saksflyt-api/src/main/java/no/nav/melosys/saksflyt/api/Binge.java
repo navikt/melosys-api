@@ -24,42 +24,47 @@ public interface Binge {
      *
      * @return True hvis prosessinstansen ble lagt til
      */
-    public boolean leggTil(Prosessinstans prosessinstans);
+    boolean leggTil(Prosessinstans prosessinstans);
 
     /**
      * Henter en prosessinstans med en gitt id uten å fjerne den fra lageret.
      * 
      * @return Angitt prosessinstans, eller null hvis ingen slik prosessinstans i lageret.
      */
-    public Prosessinstans hentProsessinstans(long prosessinstansId);
+    Prosessinstans hentProsessinstans(long prosessinstansId);
+
+    /**
+     * Henter alle prosessinstanser
+     */
+    List<Prosessinstans> hentProsessinstanser();
 
     /**
      * Henter alle prosessinstanser som tilfredsstiller et predikat fra lageret (uten å fjerne dem fra lageret).
      */
-    public Collection<Prosessinstans> hentProsessinstanser(Predicate<Prosessinstans> predikat);
+    Collection<Prosessinstans> hentProsessinstanser(Predicate<Prosessinstans> predikat);
 
     /**
      * Henter alle prosessinstanser som tilfredsstiller et predikat fra lageret (uten å fjerne dem fra lageret). Listen sorteres etter et gitt kriterium.
      */
-    public List<Prosessinstans> hentProsessinstanser(Predicate<Prosessinstans> predikat, Comparator<Prosessinstans> rekkefølge);
+    List<Prosessinstans> hentProsessinstanser(Predicate<Prosessinstans> predikat, Comparator<Prosessinstans> rekkefølge);
 
     /**
      * Fjerner en prosessinstans med en gitt id fra lageret.
      * 
      * @return Angitt prosessinstans, eller null hvis ingen slik prosessinstans i lageret.
      */
-    public Prosessinstans fjernProsessinstans(long prosessinstansId);
+    Prosessinstans fjernProsessinstans(long prosessinstansId);
 
     /**
      * Fjerner og returnerer den første prosessinstansen som tilfredsstiller det gitte predikatet, eller null hvis ingen
      * prosessinstanser tilfredsstiller kriteriet.
      */
-    public Prosessinstans fjernFørsteProsessinstans(Predicate<Prosessinstans> predikat);
+    Prosessinstans fjernFørsteProsessinstans(Predicate<Prosessinstans> predikat);
 
     /**
      * Fjerner og returnerer den første prosessinstansen som tilfredsstiller det gitte predikatet, eller null hvis ingen
      * prosessinstanser tilfredsstiller kriteriet. Listen sorteres etter et gitt kriterium.
      */
-    public Prosessinstans fjernFørsteProsessinstans(Predicate<Prosessinstans> predikat, Comparator<Prosessinstans> rekkefølge);
+    Prosessinstans fjernFørsteProsessinstans(Predicate<Prosessinstans> predikat, Comparator<Prosessinstans> rekkefølge);
 
 }

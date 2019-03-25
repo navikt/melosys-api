@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.util.KodeverkUtils;
@@ -74,6 +75,7 @@ public class Oppgaveplukker {
 
         List<Sakstyper> fagsakstypeListe = new ArrayList<>();
         List<Behandlingstyper> behandlingstypeListe = new ArrayList<>();
+        List<Behandlingstema> behandlingstemaListe = new ArrayList<>();
         if (oppgavetype == Oppgavetyper.BEH_SAK_MK) {
 
             List<String> sakstyper = plukkDto.getSakstyper();
@@ -82,17 +84,21 @@ public class Oppgaveplukker {
             }
 
             List<String> behandlingstyper = plukkDto.getBehandlingstyper();
-            for (String b : behandlingstyper) {
-                // FIXME: Internt kodeverk må oppdateres i frontend.
-                if (b.equals("SKND")) {
-                    behandlingstypeListe.add(Behandlingstyper.SOEKNAD);
-                    continue;
+            if (behandlingstyper != null) {
+                for (String behandlingstype : behandlingstyper) {
+                    behandlingstypeListe.add(KodeverkUtils.dekod(Behandlingstyper.class, behandlingstype));
                 }
-                behandlingstypeListe.add(KodeverkUtils.dekod(Behandlingstyper.class, b));
+            }
+
+            List<String> behandlingstemaer = plukkDto.getBehandlingstema();
+            if (behandlingstemaer != null) {
+                for (String behandlingstema : behandlingstemaer) {
+                    behandlingstemaListe.add(Behandlingstema.valueOf(behandlingstema));
+                }
             }
         }
 
-        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakstypeListe, behandlingstypeListe);
+        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakstypeListe, behandlingstypeListe, behandlingstemaListe);
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);

@@ -13,6 +13,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.oppgave.PrioritetType;
@@ -27,6 +28,7 @@ import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -100,7 +102,7 @@ public class OppgaveplukkerTest {
         oppgave4.setSaksnummer("MEL-1234");
         oppgaver.add(oppgave4);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(Sakstyper.EU_EOS.getKode());
@@ -149,7 +151,7 @@ public class OppgaveplukkerTest {
         oppgave2.setSaksnummer("MEL-1");
         oppgaver.add(oppgave2);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(Sakstyper.EU_EOS.getKode());
@@ -215,7 +217,7 @@ public class OppgaveplukkerTest {
 
         when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
         tilbakelagt.add(new OppgaveTilbakelegging());
@@ -274,7 +276,7 @@ public class OppgaveplukkerTest {
 
         when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
         tilbakelagt.add(new OppgaveTilbakelegging());
@@ -342,5 +344,49 @@ public class OppgaveplukkerTest {
         oppgaveplukker.leggTilbakeOppgave(saksbehandlerID, tilbakelegging);
 
         verify(oppgaveTilbakkeleggingRepo, times(0)).save(any(OppgaveTilbakelegging.class));
+    }
+
+
+    @Test
+    public void plukkOppgave_brukerBehandlingstema_finnerOppgave() throws MelosysException {
+        List<Oppgave> oppgaver = new ArrayList<>();
+        Oppgave oppgave1 = new Oppgave();
+        oppgave1.setOppgaveId("1");
+        oppgave1.setPrioritet(PrioritetType.LAV);
+        oppgave1.setFristFerdigstillelse(LocalDate.of(2017, 8, 7));
+        oppgave1.setSaksnummer("MEL-1");
+        oppgaver.add(oppgave1);
+
+        List<String> sakstyper = new ArrayList<>();
+        sakstyper.add(Sakstyper.EU_EOS.getKode());
+
+        List<String> behandlingstemaer = new ArrayList<>();
+        behandlingstemaer.add(Behandlingstema.ARB_EØS.name());
+
+        ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), any(), captor.capture())).thenReturn(oppgaver);
+
+        PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
+        plukkOppgaveInnDto.setOppgavetype("BEH_SAK_MK");
+        plukkOppgaveInnDto.setFagomrade("MED");
+        plukkOppgaveInnDto.setSakstyper(sakstyper);
+        plukkOppgaveInnDto.setBehandlingstema(behandlingstemaer);
+
+        Fagsak fagsak = new Fagsak();
+
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+
+        behandling.setFagsak(fagsak);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+
+        when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
+
+        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
+
+        assertThat(oppgave.isPresent()).isTrue();
+        assertThat(captor.getValue()).containsExactly(Behandlingstema.ARB_EØS);
     }
 }

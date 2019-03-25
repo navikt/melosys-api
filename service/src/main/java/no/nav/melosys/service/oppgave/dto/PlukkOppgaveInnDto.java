@@ -8,6 +8,7 @@ public class PlukkOppgaveInnDto {
     private String fagomrade;
     private List<String> sakstyper;
     private List<String> behandlingstyper;
+    private List<String> behandlingstema;
 
     public String getOppgavetype() {
         return oppgavetype;
@@ -41,4 +42,11 @@ public class PlukkOppgaveInnDto {
         this.behandlingstyper = behandlingstyper;
     }
 
+    public List<String> getBehandlingstema() {
+        return behandlingstema;
+    }
+
+    public void setBehandlingstema(List<String> behandlingstema) {
+        this.behandlingstema = behandlingstema;
+    }
 }
