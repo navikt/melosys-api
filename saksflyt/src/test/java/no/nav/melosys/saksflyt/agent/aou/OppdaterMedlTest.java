@@ -86,7 +86,7 @@ public class OppdaterMedlTest {
     @Test
     public void sjekkNestSteg() {
         agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_AVKLAR_MYNDIGHET);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_AVKLAR_MYNDIGHET);
     }
 
     @Test

@@ -19,16 +19,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.ProsessSteg.AOU_AVKLAR_MYNDIGHET;
 import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_MEDL;
-import static no.nav.melosys.domain.ProsessSteg.AOU_SEND_BREV;
-import static no.nav.melosys.domain.ProsessSteg.IV_AVKLAR_MYNDIGHET;
+
 
 /**
  * Oppdaterer medlemskap periode i MEDL.
  *
  * Transisjoner:
  * ProsessType.ANMODNING_OM_UNNTAK
- *  AOU_OPPDATER_MEDL -> AOU_SEND_BREV eller FEILET_MASKINELT hvis feil
+ *  AOU_OPPDATER_MEDL -> AOU_AVKLAR_MYNDIGHET eller FEILET_MASKINELT hvis feil
  */
 @Component("AnmodningOmUnntakOppdaterMedl")
 public class OppdaterMedl extends AbstraktStegBehandler {
@@ -66,6 +66,6 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         Long medlPeriodeID = medlFasade.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode);
         felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
 
-        prosessinstans.setSteg(IV_AVKLAR_MYNDIGHET);
+        prosessinstans.setSteg(AOU_AVKLAR_MYNDIGHET);
     }
 }
