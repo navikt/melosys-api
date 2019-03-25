@@ -14,9 +14,6 @@ import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static no.nav.melosys.domain.ProsessSteg.AOU_SEND_BREV;
-import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
-
 public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(AbstraktAvklarMyndighet.class);
@@ -52,7 +49,9 @@ public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findWithSaksbehandlingById(behandlingID)
             .orElseThrow(() -> new TekniskException("Behandlingsresultat " + behandlingID + " finnes ikke."));
 
-        if (SendBrevValidator.innvilgelsesbrevSkalSendes(behandlingsresultat.getType(), behandlingsresultat.getLovvalgsperioder().iterator().next())) {
+        if (prosessinstans.getType() == ProsessType.ANMODNING_OM_UNNTAK ||
+                SendBrevValidator.innvilgelsesbrevSkalSendes(behandlingsresultat.getType(), behandlingsresultat.getLovvalgsperioder().iterator().next())) {
+
             Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
             String saksnummer = fagsak.getSaksnummer();
             Aktoer myndighetPart = fagsak.hentAktørMedRolleType(Aktoersroller.MYNDIGHET);
@@ -65,12 +64,6 @@ public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
             } else {
                 log.debug("Sak {} har allerede en myndighet med kode {}", saksnummer, myndighetPart.getInstitusjonId());
             }
-        }
-
-        if (prosessinstans.getType() == ProsessType.ANMODNING_OM_UNNTAK) {
-            prosessinstans.setSteg(AOU_SEND_BREV);
-        } else {
-            prosessinstans.setSteg(IV_OPPDATER_MEDL);
         }
     }
 }

@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessSteg.AOU_AVKLAR_MYNDIGHET;
-import static no.nav.melosys.domain.ProsessSteg.AOU_SEND_BREV;
+import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_MEDL;
 
 /**
  * Avklarer hvilken utenlandsk myndighet er part i saken.
@@ -59,6 +59,6 @@ public class AvklarMyndighet extends AbstraktAvklarMyndighet {
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         super.utfør(prosessinstans);
-        prosessinstans.setSteg(AOU_SEND_BREV);
+        prosessinstans.setSteg(AOU_OPPDATER_MEDL);
     }
 }

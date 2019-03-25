@@ -173,7 +173,7 @@ public class AvklarMyndighetTest {
         no.nav.melosys.saksflyt.agent.aou.AvklarMyndighet steg =
             new no.nav.melosys.saksflyt.agent.aou.AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, fagsakService, landvelgerService, utenlandskMyndighetRepository);
         steg.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_SEND_BREV);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_MEDL);
     }
 
 

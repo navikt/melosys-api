@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.AOU_AVKLAR_MYNDIGHET;
 import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_MEDL;
+import static no.nav.melosys.domain.ProsessSteg.AOU_SEND_BREV;
 
 
 /**
@@ -66,6 +66,6 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         Long medlPeriodeID = medlFasade.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode);
         felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
 
-        prosessinstans.setSteg(AOU_AVKLAR_MYNDIGHET);
+        prosessinstans.setSteg(AOU_SEND_BREV);
     }
 }
