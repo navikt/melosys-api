@@ -74,7 +74,7 @@ public class ArbeiderTraad extends Thread {
                         return;
                     }
                 } catch (RuntimeException e) {
-                    // Vi er her hvis en StegBehandler kastet en Exception 
+                    // Vi er her hvis en StegBehandler kastet en Exception
                     logger.error("Ubehandlet Exception! Arbeider stopper. Aktiv stegBehandler var: {}.", aktivStegBehandler.getClass().getSimpleName());
                     logger.error("Prosessinstans som kanskje må ryddes opp i: {}", aktivProsessinstans.getId(), e);
                     setAktivPiTilFeilet();
@@ -113,7 +113,7 @@ public class ArbeiderTraad extends Thread {
         pi.setEndretDato(LocalDateTime.now());
         prosessinstansRepo.save(pi); // Kan resultere i DataAccessException
 
-        if (pi.getSteg() != null && pi.getSteg() != ProsessSteg.FEILET_MASKINELT) {
+        if (pi.getSteg() != ProsessSteg.FERDIG && pi.getSteg() != ProsessSteg.FEILET_MASKINELT) {
             binge.leggTil(pi);
         }
     }

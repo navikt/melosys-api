@@ -109,7 +109,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
             prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
-            prosessinstans.setSteg(null);
+            prosessinstans.setSteg(ProsessSteg.FERDIG);
         } else {
             String feilmelding = "ProsessType " + prosessinstans.getType() + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);

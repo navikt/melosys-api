@@ -1,6 +1,9 @@
 package no.nav.melosys.saksflyt.agent.reg;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.ProsessType;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -49,6 +52,6 @@ public class OppfriskSaksopplysningerTest {
         p.setBehandling(behandling);
         agent.utførSteg(p);
 
-        assertThat(p.getSteg()).isNull();
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }
 }

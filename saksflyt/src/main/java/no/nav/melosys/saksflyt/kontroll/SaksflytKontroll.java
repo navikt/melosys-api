@@ -30,7 +30,7 @@ public class SaksflytKontroll {
         initialDelayString = "${melosys.saksflyt.kontroll.intervall}")
     public void sjekkProsessinstansFinnesISaksflyt() {
         log.info("Kjører kontroll for prosessinstanser");
-        Map<UUID, Prosessinstans> prosessinstanser = prosessinstansRepository.findAllByStegIsNotNullAndStegIsNot(ProsessSteg.FEILET_MASKINELT)
+        Map<UUID, Prosessinstans> prosessinstanser = prosessinstansRepository.findAllByStegIsNotAndStegIsNot(ProsessSteg.FERDIG, ProsessSteg.FEILET_MASKINELT)
             .stream().collect(Collectors.toMap(Prosessinstans::getId, p -> p));
 
         binge.hentProsessinstanser().forEach(p -> prosessinstanser.remove(p.getId()));

@@ -10,7 +10,7 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface ProsessinstansRepository extends CrudRepository<Prosessinstans, Long> {
     List<Prosessinstans> findByStegIsNot(ProsessSteg steg);
-    Optional<Prosessinstans> findByStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessSteg prosessSteg, long id);
-    Optional<Prosessinstans> findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType prosessType, ProsessSteg prosessSteg, long id);
-    List<Prosessinstans> findAllByStegIsNotNullAndStegIsNot(ProsessSteg prosessSteg);
+    Optional<Prosessinstans> findByBehandling_IdAndStegIsNotAndStegIsNot(long id, ProsessSteg prosessSteg1, ProsessSteg prosessSteg2);
+    Optional<Prosessinstans> findByTypeAndBehandling_IdAndStegIsNotAndStegIsNot(ProsessType prosessType, long id, ProsessSteg prosessSteg1, ProsessSteg prosessSteg2);
+    List<Prosessinstans> findAllByStegIsNotAndStegIsNot(ProsessSteg prosessSteg1, ProsessSteg prosessSteg2);
 }
