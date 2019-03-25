@@ -27,7 +27,7 @@ import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_MEDL;
  * Avklarer hvilken utenlandsk myndighet er part i saken.
  *
  * Transisjoner:
- *  AOU_AVKLAR_MYNDIGHET -> AOU_SEND_BREV eller FEILET_MASKINELT hvis feil
+ *  AOU_AVKLAR_MYNDIGHET -> AOU_OPPDATER_MEDL eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class AvklarMyndighet extends AbstraktAvklarMyndighet {

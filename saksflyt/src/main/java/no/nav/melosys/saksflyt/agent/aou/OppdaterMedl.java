@@ -28,7 +28,7 @@ import static no.nav.melosys.domain.ProsessSteg.AOU_SEND_BREV;
  *
  * Transisjoner:
  * ProsessType.ANMODNING_OM_UNNTAK
- *  AOU_OPPDATER_MEDL -> AOU_AVKLAR_MYNDIGHET eller FEILET_MASKINELT hvis feil
+ *  AOU_OPPDATER_MEDL -> AOU_SEND_BREV eller FEILET_MASKINELT hvis feil
  */
 @Component("AnmodningOmUnntakOppdaterMedl")
 public class OppdaterMedl extends AbstraktStegBehandler {
