@@ -36,7 +36,7 @@ public class SaksflytKontrollTest {
     public void setup() {
         saksflytKontroll = new SaksflytKontroll(binge, prosessinstansRepository);
         prosessinstanser = lagProsessInstanser();
-        when(prosessinstansRepository.findAllByStegIsNotNullAndStegIsNot(any(ProsessSteg.class))).thenReturn(prosessinstanser);
+        when(prosessinstansRepository.findAllByStegIsNotAndStegIsNot(any(ProsessSteg.class),any(ProsessSteg.class))).thenReturn(prosessinstanser);
     }
 
     @Test

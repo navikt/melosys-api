@@ -12,5 +12,5 @@ public interface ProsessinstansRepository extends CrudRepository<Prosessinstans,
     List<Prosessinstans> findByStegIsNot(ProsessSteg steg);
     Optional<Prosessinstans> findByBehandling_IdAndStegIsNotAndStegIsNot(long id, ProsessSteg prosessSteg1, ProsessSteg prosessSteg2);
     Optional<Prosessinstans> findByTypeAndBehandling_IdAndStegIsNotAndStegIsNot(ProsessType prosessType, long id, ProsessSteg prosessSteg1, ProsessSteg prosessSteg2);
-    List<Prosessinstans> findAllByStegIsNotNullAndStegIsNot(ProsessSteg prosessSteg);
+    List<Prosessinstans> findAllByStegIsNotAndStegIsNot(ProsessSteg prosessSteg1, ProsessSteg prosessSteg2);
 }
