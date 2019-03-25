@@ -29,7 +29,7 @@ import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
  * Transisjoner:
  *  IV_AVKLAR_MYNDIGHET -> IV_OPPDATER_MEDL eller FEILET_MASKINELT hvis feil
  */
-@Component
+@Component("IverksettVedtakAvklarMyndighet")
 public class AvklarMyndighet extends AbstraktAvklarMyndighet {
 
     private static final Logger log = LoggerFactory.getLogger(AvklarMyndighet.class);

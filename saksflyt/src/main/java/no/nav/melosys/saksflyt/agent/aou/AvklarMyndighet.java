@@ -29,7 +29,7 @@ import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_MEDL;
  * Transisjoner:
  *  AOU_AVKLAR_MYNDIGHET -> AOU_OPPDATER_MEDL eller FEILET_MASKINELT hvis feil
  */
-@Component
+@Component("AnmodningOmUnntakAvklarMyndighet")
 public class AvklarMyndighet extends AbstraktAvklarMyndighet {
 
     private static final Logger log = LoggerFactory.getLogger(AvklarMyndighet.class);
