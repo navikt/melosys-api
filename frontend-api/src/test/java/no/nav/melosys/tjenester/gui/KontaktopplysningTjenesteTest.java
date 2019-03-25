@@ -10,6 +10,7 @@ import no.nav.melosys.tjenester.gui.dto.KontaktInfoDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -91,5 +92,17 @@ public class KontaktopplysningTjenesteTest {
         Kontaktopplysning kontaktopplysningRes = (Kontaktopplysning) response.getEntity();
         assertThat(kontaktopplysningRes.getKontaktNavn()).isEqualTo("BB");
         assertThat(kontaktopplysningRes.getKontaktOrgnr()).isEqualTo("200");
+    }
+
+    @Test
+    public void slettKontaktopplysning_kallerDeleteByIdMedGittSaksnummerOgOrgNummer() {
+        kontaktopplysningTjeneste.slettKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
+
+        ArgumentCaptor<KontaktopplysningID> captor = ArgumentCaptor.forClass(KontaktopplysningID.class);
+        verify(kontaktopplysningRepo).deleteById(captor.capture());
+        KontaktopplysningID kontaktopplysningID = captor.getValue();
+
+        assertThat(kontaktopplysningID.getSaksnummer()).isEqualTo(SAK_NUMMER);
+        assertThat(kontaktopplysningID.getOrgnr()).isEqualTo(ORG_NUMMER);
     }
 }

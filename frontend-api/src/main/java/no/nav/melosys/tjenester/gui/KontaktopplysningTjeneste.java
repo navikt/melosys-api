@@ -1,10 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.Optional;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
@@ -15,6 +12,7 @@ import no.nav.melosys.repository.KontaktopplysningRepository;
 import no.nav.melosys.tjenester.gui.dto.KontaktInfoDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -64,5 +62,17 @@ public class KontaktopplysningTjeneste extends RestTjeneste {
         kontaktopplysningRepo.save(kontaktopplysning);
 
         return Response.ok(kontaktopplysning).build();
+    }
+
+    @DELETE
+    @Path("{saksnummer}/kontaktopplysninger/{orgnr}")
+    @ApiOperation(value = "Sletter kontaktopplysning på en fagsak med gitt orgnummer")
+    public Response slettKontaktopplysning(@PathParam("saksnummer") String saksnummer, @PathParam("orgnr") String orgnr) {
+        try {
+            kontaktopplysningRepo.deleteById(new KontaktopplysningID(saksnummer, orgnr));
+        } catch (EmptyResultDataAccessException e) {
+            throw new BadRequestException("Finner ingen kontaktopplysninger med gitt saksnummer/orgnummer");
+        }
+        return Response.ok().build();
     }
 }
