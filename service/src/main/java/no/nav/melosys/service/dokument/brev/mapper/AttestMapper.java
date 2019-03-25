@@ -40,7 +40,7 @@ public class AttestMapper implements BrevDataMapper {
             fag.setVedleggA1("true");
         }
         if (vedlegg.brevDataA001 != null) {
-            fag.setVedleggA1("true");
+            fag.setVedleggSEDA001("true");
         }
         return fag;
     }

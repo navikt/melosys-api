@@ -1,12 +1,15 @@
 package no.nav.melosys.domain;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.TekniskException;
+import org.assertj.core.util.Sets;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +37,29 @@ public class FagsakTest {
         Behandling aktivBehandling = fagsak.getAktivBehandling();
 
         assertThat(aktivBehandling).isEqualTo(b2);
+    }
+
+    @Test
+    public void getTidligsteInaktivBehandling_toInaktive() {
+        Fagsak fagsak = new Fagsak();
+        Behandling tidligsteInaktiveBehandling = new Behandling();
+        tidligsteInaktiveBehandling.setRegistrertDato(Instant.parse("2019-01-10T10:37:30.00Z"));
+        tidligsteInaktiveBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
+
+        Behandling aktivBehandling = new Behandling();
+        aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+
+        Behandling seinesteInaktiveBehandling = new Behandling();
+        seinesteInaktiveBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        seinesteInaktiveBehandling.setRegistrertDato(Instant.parse("2019-02-10T10:37:30.00Z"));
+
+        List<Behandling> behandlinger = new ArrayList<>();
+        behandlinger.add(tidligsteInaktiveBehandling);
+        behandlinger.add(aktivBehandling);
+        behandlinger.add(seinesteInaktiveBehandling);
+        fagsak.setBehandlinger(behandlinger);
+
+        assertThat(fagsak.getTidligsteInaktiveBehandling()).isEqualTo(tidligsteInaktiveBehandling);
     }
 
     @Test
@@ -120,5 +146,18 @@ public class FagsakTest {
         Aktoer bruker = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
 
         assertThat(bruker).isEqualTo(a1);
+    }
+
+    @Test
+    public void hentMyndighetLandkode_forventGyldigLandkode() throws Exception {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.MYNDIGHET);
+        aktoer.setInstitusjonId("SE:gfr");
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(Sets.newLinkedHashSet(aktoer));
+
+        Landkoder resultat = fagsak.hentMyndighetLandkode();
+        assertThat(resultat).isEqualByComparingTo(Landkoder.SE);
     }
 }

@@ -1,22 +1,19 @@
 package no.nav.melosys.service.dokument.brev;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.BostedsadresseType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.PersonnavnType;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataService.*;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 public final class BrevDataUtils {
 
@@ -38,38 +35,15 @@ public final class BrevDataUtils {
         return navEnhet;
     }
 
-    public static XMLGregorianCalendar convertToXMLGregorianCalendarRemoveTimezone(Instant instant) {
-        if (instant == null) {
-            return null;
-        }
+    public static LovvalgsperiodeType lagLovvalgsperiodeType(Lovvalgsperiode lovvalgsperiode)  {
+        LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
         try {
-            return convertToXMLGregorianCalendarRemoveTimezone(LocalDateTime.ofInstant(instant, ZoneOffset.UTC));
+            lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
+            lovvalgsperiodeType.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));
         } catch (DatatypeConfigurationException e) {
-            throw new RuntimeException("Feil ved konvertering av Instant til XmlGregorianCalendar");
+            e.printStackTrace();
         }
-    }
-
-    public static XMLGregorianCalendar convertToXMLGregorianCalendarRemoveTimezone(LocalDateTime localDateTime) throws DatatypeConfigurationException {
-        if (localDateTime == null) {
-            return null;
-        }
-        return convertToXMLGregorianCalendarRemoveTimezone(localDateTime.toLocalDate());
-    }
-
-    public static XMLGregorianCalendar convertToXMLGregorianCalendarRemoveTimezone(LocalDate localDate) throws DatatypeConfigurationException {
-        if (localDate == null) {
-            return null;
-        }
-        return DatatypeFactory.newInstance().newXMLGregorianCalendar(
-            localDate.getYear(),
-            localDate.getMonthValue(),
-            localDate.getDayOfMonth(),
-            DatatypeConstants.FIELD_UNDEFINED,
-            DatatypeConstants.FIELD_UNDEFINED,
-            DatatypeConstants.FIELD_UNDEFINED,
-            DatatypeConstants.FIELD_UNDEFINED,
-            DatatypeConstants.FIELD_UNDEFINED
-        );
+        return lovvalgsperiodeType;
     }
 
     // Adresse-stubs
@@ -91,6 +65,13 @@ public final class BrevDataUtils {
         adresse.setPoststed(PLASSHOLDER_TEKST);
         adresse.setLand(PLASSHOLDER_TEKST);
         return adresse;
+    }
+
+    public static UtenlandskPostadresse lagUtendlanskAdresse(UtenlandskMyndighet utenlandskMyndighet) {
+        return UtenlandskPostadresse.builder().withAdresselinje1(utenlandskMyndighet.gateadresse)
+            .withAdresselinje2(utenlandskMyndighet.postnummer + " " + utenlandskMyndighet.poststed)
+            .withAdresselinje3("")
+            .withLand(utenlandskMyndighet.land).build();
     }
 
     private static <T extends AdresseEnhet> T lagAdresse(T adresse, NorskPostadresse postadresse) {
@@ -120,5 +101,4 @@ public final class BrevDataUtils {
         navn.setEtternavn(personDokument.etternavn);
         return navn;
     }
-
 }

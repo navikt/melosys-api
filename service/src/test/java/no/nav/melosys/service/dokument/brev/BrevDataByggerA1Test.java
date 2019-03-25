@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
@@ -21,6 +20,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.RegisterOppslagSystemService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA1;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysning;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -77,7 +78,10 @@ public class BrevDataByggerA1Test {
         PersonDokument personDok = new PersonDokument();
         person.setDokument(personDok);
         person.setType(SaksopplysningType.PERSONOPPLYSNING);
-        when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(soeknad, person)));
+
+        Saksopplysning arbeidsforhold = lagArbeidsforholdOpplysning(Collections.singletonList(orgnr1));
+
+        when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(soeknad, person, arbeidsforhold)));
 
         OrganisasjonsDetaljer detaljer = mock(OrganisasjonsDetaljer.class);
         when(detaljer.hentStrukturertForretningsadresse()).thenReturn(new StrukturertAdresse());
@@ -93,7 +97,8 @@ public class BrevDataByggerA1Test {
         when(registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner))
             .thenReturn(organisasjonDokumenter);
 
-        brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, registerOppslagService, kodeverkService);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, avklarteVirksomheterService, kodeverkService);
     }
 
     private OrganisasjonDokument leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
@@ -123,23 +128,6 @@ public class BrevDataByggerA1Test {
         assertThat(brevDataDto.selvstendigeForetak).containsOnly(foretak.orgnr);
     }
 
-    @Test
-    public void testHentAvklarteNorskeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        avklarteOrganisasjoner.add(orgnr1);
-        avklarteOrganisasjoner.add(orgnr2);
-
-        SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.orgnr = orgnr1;
-        søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
-
-        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr2);
-
-        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(behandling, saksbehandler);
-        assertThat(brevDataDto.selvstendigeForetak).containsOnly(orgnr1);
-        assertThat(brevDataDto.norskeVirksomheter.stream()
-                .map(nv -> nv.orgnr)
-                .collect(Collectors.toList())).containsOnly(orgnr1, orgnr2);
-    }
 
     @Test
     public void testIngenAvklarteforetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {

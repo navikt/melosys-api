@@ -6,6 +6,7 @@ import no.nav.melosys.audit.AuditorProvider;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
@@ -81,7 +82,7 @@ public class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    public void utførSteg_typeJfrNyBehandling_tilStegStatusBehOppr() {
+    public void utførSteg_typeJfrNyBehandling_tilStegStatusBehOppr() throws IkkeFunnetException {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
 

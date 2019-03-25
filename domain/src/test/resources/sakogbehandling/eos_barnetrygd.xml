@@ -1,24 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone='yes'?>
 <ns2:finnSakOgBehandlingskjedeListeResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/sakOgBehandling/v1">
     <response>
         <sak>
             <saksId>sak1</saksId>
-            <sakstema kodeRef="Barnetrygd"/>
-            <opprettet>2018-01-01T12:00:00.000+02:00</opprettet>
+            <sakstema>BAR</sakstema>
+            <opprettet>2019-02-01T11:00:11.757+01:00</opprettet>
             <behandlingskjede>
                 <behandlingskjedeId>kjede1</behandlingskjedeId>
-                <behandlingskjedetype kodeRef="ad0003"/>
-                <behandlingstema kodeRef="ab0058"/>
-                <start>2018-01-01T12:00:00.000+02:00</start>
+                <behandlingskjedetype>ad0003</behandlingskjedetype>
+                <behandlingstema>ab0058</behandlingstema>
+                <start>2019-02-28T08:00:01.757+01:00</start>
                 <sisteBehandlingREF>ref1</sisteBehandlingREF>
-                <sisteBehandlingstype kodeRef="ae0002"/>
+                <sisteBehandlingstype>ae0014</sisteBehandlingstype>
+                <behandlingsListeRef>ref1</behandlingsListeRef>
+                <sisteBehandlingsoppdatering>2019-02-28T08:00:01.757+01:00</sisteBehandlingsoppdatering>
+                <sisteBehandlingsstatus>opprettet</sisteBehandlingsstatus>
             </behandlingskjede>
             <behandlingskjede>
                 <behandlingskjedeId>kjede2</behandlingskjedeId>
-                <behandlingskjedetype kodeRef="ad0003"/>
-                <behandlingstema kodeRef="ab0180"/>
-                <start>2018-02-01T12:00:00.000+02:00</start>
+                <behandlingskjedetype>ukjent</behandlingskjedetype>
+                <behandlingstema>ab0058</behandlingstema>
+                <start>2019-02-01T11:00:11.757+01:00</start>
                 <sisteBehandlingREF>ref2</sisteBehandlingREF>
-                <sisteBehandlingstype kodeRef="ae0002"/>
+                <sisteBehandlingstype>ad0003</sisteBehandlingstype>
+                <behandlingsListeRef>ref2</behandlingsListeRef>
+                <sisteBehandlingsoppdatering>2019-02-01T11:00:11.757+01:00</sisteBehandlingsoppdatering>
+                <sisteBehandlingsstatus>opprettet</sisteBehandlingsstatus>
             </behandlingskjede>
         </sak>
     </response>

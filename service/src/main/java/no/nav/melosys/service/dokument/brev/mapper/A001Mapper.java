@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Optional;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.melosysbrev._000115.*;
 import no.nav.dok.melosysbrev._000115.BostedsadresseType;
+import no.nav.dok.melosysbrev._000115.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.VilkaarBegrunnelse;
+import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
@@ -20,12 +23,11 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
-import no.nav.melosys.service.dokument.brev.BrevDataUtils;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 public class A001Mapper {
 
@@ -34,7 +36,7 @@ public class A001Mapper {
 
         seda001.setAntallVedlegg("0");
 
-        seda001.setDatoSendt(BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone(Instant.now()));
+        seda001.setDatoSendt(convertToXMLGregorianCalendarRemoveTimezone(Instant.now()));
 
         seda001.setLandkodeAvsender(Landkoder.NO.getKode());
 
@@ -43,10 +45,10 @@ public class A001Mapper {
         seda001.setPerson(mapPerson(brevData.personDokument, brevData.bostedsadresse, brevData.utenlandskIdent));
 
         // Foretakliste = Identifikasjon av arbeidsgiver (Kun arbeidsgivere)
-        List<Virksomhet> arbeidsgivendeVirksomheter = brevData.arbeidsgivendeVirkomsheter;
+        List<AvklartVirksomhet> arbeidsgivendeVirksomheter = brevData.arbeidsgivendeVirkomsheter;
         seda001.setForetakListe(mapForetakliste(arbeidsgivendeVirksomheter));
 
-        List<Virksomhet> selvstendigeVirksomheter = brevData.selvstendigeVirksomheter;
+        List<AvklartVirksomhet> selvstendigeVirksomheter = brevData.selvstendigeVirksomheter;
         seda001.setSelvstendigNæringsvirksomhetListe(mapSelvstendigvirksometliste(selvstendigeVirksomheter));
 
         seda001.setArbeidsstedListe(mapArbeidsstedliste(brevData.arbeidssteder));
@@ -89,8 +91,8 @@ public class A001Mapper {
         for (Lovvalgsperiode lovvalgsperiode : tidligerePerioder) {
             PeriodeType periode = new PeriodeType();
             try {
-                periode.setFomDato(BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
-                periode.setTomDato(BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));
+                periode.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
+                periode.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));
             } catch (DatatypeConfigurationException e) {
                 throw new TekniskException("Feil ved konvertering av dato for tidligere lovvalgsperiode");
             }
@@ -107,7 +109,7 @@ public class A001Mapper {
         for (LocalDate dato : tidligereAnmodningdatoer) {
             TidligereAnmodningType tidligereAnmodningType = new TidligereAnmodningType();
             try {
-                tidligereAnmodningType.setTidligereAnmodningsDato(BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone(dato));
+                tidligereAnmodningType.setTidligereAnmodningsDato(convertToXMLGregorianCalendarRemoveTimezone(dato));
             } catch (DatatypeConfigurationException e) {
                 throw new TekniskException("Feil ved konvertering av dato for tidligere anmodning");
             }
@@ -228,13 +230,13 @@ public class A001Mapper {
         return bostedsadresse;
     }
 
-    private ForetakListeType mapForetakliste(List<Virksomhet> arbeidsgivendeVirksomheter) {
+    private ForetakListeType mapForetakliste(List<AvklartVirksomhet> arbeidsgivendeVirksomheter) {
         ForetakListeType foretakListe = new ForetakListeType();
-        for (Virksomhet virksomhet : arbeidsgivendeVirksomheter) {
+        for (AvklartVirksomhet virksomhet : arbeidsgivendeVirksomheter) {
             ForetakType foretak = new ForetakType();
             foretak.setNavn(virksomhet.navn);
             foretak.setOrgnummer(virksomhet.orgnr);
-            foretak.setYrkesaktivitet(YrkesaktivitetsKode.LOENNET_ARBEID); // TODO: Frilanser ikke implementert
+            foretak.setYrkesaktivitet(YrkesaktivitetsKode.valueOf(virksomhet.yrkesaktivitet.getKode()));
             foretak.setHovedvirksomhet("true");  // Kun et foretak i Lev1
 
             UstrukturertAdresse adresse = (UstrukturertAdresse) virksomhet.adresse;
@@ -257,9 +259,9 @@ public class A001Mapper {
         return foretakListe;
     }
 
-    private SelvstendigNaeringsvirksomhetListeType mapSelvstendigvirksometliste(List<Virksomhet> virksomheter) {
+    private SelvstendigNaeringsvirksomhetListeType mapSelvstendigvirksometliste(List<AvklartVirksomhet> virksomheter) {
         SelvstendigNaeringsvirksomhetListeType selvstendigeVirksomheter = new SelvstendigNaeringsvirksomhetListeType();
-        for (Virksomhet virksomhet : virksomheter) {
+        for (AvklartVirksomhet virksomhet : virksomheter) {
             SelvstendigNaeringsvirksomhetType selvstendigVirksomhet = new SelvstendigNaeringsvirksomhetType();
             selvstendigVirksomhet.setNavn(virksomhet.navn);
             selvstendigVirksomhet.setOrgnummer(virksomhet.orgnr);
@@ -298,8 +300,8 @@ public class A001Mapper {
     private LovvalgsPeriodeType mapLovvalgsperiode(Lovvalgsperiode periode) throws TekniskException {
         LovvalgsPeriodeType lovvalgsperiodeBrev = new LovvalgsPeriodeType();
         try {
-            lovvalgsperiodeBrev.setFomDato(BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone(periode.getFom()));
-            lovvalgsperiodeBrev.setTomDato(BrevDataUtils.convertToXMLGregorianCalendarRemoveTimezone(periode.getTom()));
+            lovvalgsperiodeBrev.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(periode.getFom()));
+            lovvalgsperiodeBrev.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(periode.getTom()));
         } catch (DatatypeConfigurationException e) {
             throw new TekniskException("Feil ved konvertering");
         }

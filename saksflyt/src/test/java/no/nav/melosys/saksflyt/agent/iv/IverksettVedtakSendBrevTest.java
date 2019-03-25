@@ -3,27 +3,32 @@ package no.nav.melosys.saksflyt.agent.iv;
 import java.time.LocalDate;
 import java.util.*;
 
+import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.integrasjon.doksys.DokSysFasade;
+import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.felles.BrevBestiller;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntakOgAvslag;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.AVSLAG_YRKESAKTIV;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.INNVILGELSE_YRKESAKTIV;
+import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class IverksettVedtakSendBrevTest {
 
@@ -38,6 +43,7 @@ public class IverksettVedtakSendBrevTest {
     private static final long ART12_1_INNVILGET_BEHANDLINGSID = 47L;
     private static final long ART12_2_INNVILGET_BEHANDLINGSID = 48L;
     private static final long ART12_1_AVSLÅTT_BEHANDLINGSID = 49L;
+    private static DokumentSystemService dokService;
 
     public IverksettVedtakSendBrevTest() throws Exception {
         agent = lagStegbehandler(lagBehandling(ART16_1_INNVILGET_BEHANDLINGSID));
@@ -52,19 +58,43 @@ public class IverksettVedtakSendBrevTest {
         brevdataVedlegg.brevDataA1 = brevdata;
         BrevDataByggerVedlegg brevDataByggerVedlegg = mock(BrevDataByggerVedlegg.class);
         when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(brevdataVedlegg);
-        BrevDataByggerAnmodningUnntakOgAvslag brevDataByggerAvslag = mock(BrevDataByggerAnmodningUnntakOgAvslag.class);
+        BrevDataByggerAnmodningUnntakOgAvslag brevDataByggerAvslagYrkesaktiv = mock(BrevDataByggerAnmodningUnntakOgAvslag.class);
         BrevDataAnmodningUnntakOgAvslag brevdataAvslag = new BrevDataAnmodningUnntakOgAvslag(saksbehandler);
-        when(brevDataByggerAvslag.lag(any(), any())).thenReturn(brevdataAvslag);
+        when(brevDataByggerAvslagYrkesaktiv.lag(any(), any())).thenReturn(brevdataAvslag);
+
+        BrevDataAvslagArbeidsgiver brevDataAvslagArbeidsgiver = new BrevDataAvslagArbeidsgiver(saksbehandler);
+        BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver = mock(BrevDataByggerAvslagArbeidsgiver.class);
+        when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(brevDataAvslagArbeidsgiver);
+
+        BrevDataByggerStandard brevDataByggerStandard = mock(BrevDataByggerStandard.class);
+        BrevData standardBrevData = new BrevData();
+        when(brevDataByggerStandard.lag(any(), any())).thenReturn(standardBrevData);
 
         BrevDataByggerVelger byggerVelger = mock(BrevDataByggerVelger.class);
+        when(byggerVelger.hent(eq(ANMODNING_UNNTAK))).thenReturn(brevDataByggerVedlegg);
+        when(byggerVelger.hent(eq(ATTEST_A1))).thenReturn(brevDataByggerVedlegg);
         when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV))).thenReturn(brevDataByggerVedlegg);
-        when(byggerVelger.hent(eq(AVSLAG_YRKESAKTIV))).thenReturn(brevDataByggerAvslag);
+        when(byggerVelger.hent(eq(AVSLAG_YRKESAKTIV))).thenReturn(brevDataByggerAvslagYrkesaktiv);
+        when(byggerVelger.hent(eq(AVSLAG_ARBEIDSGIVER))).thenReturn(brevDataByggerAvslagArbeidsgiver);
+        when(byggerVelger.hent(eq(INNVILGELSE_ARBEIDSGIVER))).thenReturn(brevDataByggerStandard);
 
         BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
         when(behandlingRepository.findWithSaksopplysningerById(eq(behandling.getId()))).thenReturn(behandling);
 
-        DokumentSystemService dokService = lagDokumentService(byggerVelger);
-        return new IverksettVedtakSendBrev(dokService, byggerVelger, behandlingRepository, behandlingsresultatRepo);
+        Preferanse reservertMotA1Preferanse = new Preferanse(1L, Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
+
+        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
+
+        UtenlandskMyndighet utenlandskMyndighetReservert = new UtenlandskMyndighet();
+        utenlandskMyndighetReservert.preferanser.add(reservertMotA1Preferanse);
+
+        UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
+        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.SE))).thenReturn(utenlandskMyndighet);
+        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.CZ))).thenReturn(utenlandskMyndighetReservert);
+
+        dokService = Mockito.spy(lagDokumentService(byggerVelger));
+        BrevBestiller brevBestiller = new BrevBestiller(dokService, byggerVelger);
+        return new IverksettVedtakSendBrev(brevBestiller, behandlingRepository, behandlingsresultatRepo, utenlandskMyndighetRepository);
     }
 
     private static BehandlingRepository mockBehandlingRepository() {
@@ -80,10 +110,10 @@ public class IverksettVedtakSendBrevTest {
         BehandlingRepository behandlingRepository = mockBehandlingRepository();
         FagsakRepository fagsakRepository = mock(FagsakRepository.class);
         BrevDataService brevDataService = mock(BrevDataService.class);
-        DokSysFasade dokSysFasade = mock(DokSysFasade.class);
+        DoksysFasade dokSysFasade = mock(DoksysFasade.class);
         JoarkFasade joarkFasade = mock(JoarkFasade.class);
-        return new DokumentSystemService(behandlingRepository, fagsakRepository,
-                brevDataService, dokSysFasade, joarkFasade, brevDataByggerVelger);
+        return spy(new DokumentSystemService(behandlingRepository, fagsakRepository,
+            brevDataService, dokSysFasade, joarkFasade, brevDataByggerVelger));
     }
 
     private static BehandlingsresultatRepository mockBehandlingsresultatRepository() {
@@ -126,7 +156,13 @@ public class IverksettVedtakSendBrevTest {
         Aktoer aktør = new Aktoer();
         aktør.setAktørId("1");
         aktør.setRolle(Aktoersroller.BRUKER);
-        fagsak.setAktører(Collections.singleton(aktør));
+
+        Aktoer myndighet = new Aktoer();
+        myndighet.setAktørId("2");
+        myndighet.setRolle(Aktoersroller.MYNDIGHET);
+        myndighet.setInstitusjonId("SE:sesese123");
+
+        fagsak.setAktører(Sets.newHashSet(aktør, myndighet));
         return fagsak;
     }
 
@@ -192,7 +228,7 @@ public class IverksettVedtakSendBrevTest {
     @Test
     public final void utførSteg_MedFlereLovvalgsperioder_GirUnntak() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_MED_FLERE_PERIODER);
-        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_MED_FLERE_PERIODER));
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utførSteg(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
     }
@@ -200,7 +236,7 @@ public class IverksettVedtakSendBrevTest {
     @Test
     public final void utførSteg_MedIngenLovvalgsperioder_GirUnntak() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_UTEN_PERIODER);
-        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_UTEN_PERIODER));
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utførSteg(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
     }
@@ -208,23 +244,47 @@ public class IverksettVedtakSendBrevTest {
     @Test
     public final void utførStegPåInnvilgelsesBrevBestemtAv12_1_TilSendSed() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
-        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(ART12_1_INNVILGET_BEHANDLINGSID));
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utførSteg(prosessinstans);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
+    }
+
+    @Test
+    public void utførStegPåInnvilgelsesBrevBestemtAv12_1_vedtakOgA1Sendes() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+
+        instans.utførSteg(prosessinstans);
+
+        verify(dokService).produserDokument(anyLong(), eq(INNVILGELSE_YRKESAKTIV), any());
+        verify(dokService).produserDokument(anyLong(), eq(ATTEST_A1), any());
+    }
+
+    @Test
+    public final void utførStegPåInnvilgelsesBrevBestemtAv12_1_vedtakSendIkkeA1() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
+        prosessinstans.getBehandling().getFagsak().hentAktørMedRolleType(Aktoersroller.MYNDIGHET).setInstitusjonId("CZ:1e1");
+
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+        instans.utførSteg(prosessinstans);
+
+        verify(dokService).produserDokument(anyLong(), eq(INNVILGELSE_YRKESAKTIV), any());
+        verify(dokService, times(0)).produserDokument(anyLong(), eq(ATTEST_A1), any());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
     }
 
     @Test
     public final void utførSteg_Avslag12_1_TilAvsluttBehandling() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_AVSLÅTT_BEHANDLINGSID);
-        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(ART12_1_AVSLÅTT_BEHANDLINGSID));
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utførSteg(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_AVSLUTT_BEHANDLING);
-    }    
+    }
 
     @Test
     public final void utførStegPåInnvilgelsesBrevBestemtAv12_2_TilSendSed() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_2_INNVILGET_BEHANDLINGSID);
-        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(ART12_2_INNVILGET_BEHANDLINGSID));
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utførSteg(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
     }
@@ -239,7 +299,7 @@ public class IverksettVedtakSendBrevTest {
     @Test
     public final void utførStegPåFastsattLovvalgIUtlandetGårTilFeiletMaskinelt() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_UTENLANDSK_LOVVALG);
-        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_UTENLANDSK_LOVVALG));
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utførSteg(prosessinstans);        
         assertThat(prosessinstans.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
@@ -247,16 +307,9 @@ public class IverksettVedtakSendBrevTest {
     @Test
     public final void utførStegPåFastsattLovvalgINorgeUtenInnvilgetBestemmelseGårTilFeiletMaskinelt() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE);
-        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE));
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utførSteg(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(FEILET_MASKINELT);
-    }
-
-    @Test
-    public final void utførStegPåUkjentProsesstypeFeiler() {
-        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID, ProsessType.JFR_KNYTT);
-        agent.utførSteg(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
     }
 
     @Test
@@ -265,7 +318,21 @@ public class IverksettVedtakSendBrevTest {
         AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE));
         instans.utførSteg(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+    }
 
+
+    @Test
+    public final void utførStegPåInnvilgelsesBrev_medBegrunnelsekode_oppdatererBrevdata() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_2_INNVILGET_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(lagBehandling(ART12_2_INNVILGET_BEHANDLINGSID));
+        prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
+        ArgumentCaptor<BrevData> captor = ArgumentCaptor.forClass(BrevData.class);
+
+        instans.utførSteg(prosessinstans);
+
+        verify(dokService, atLeastOnce()).produserDokument(anyLong(), any(Produserbaredokumenter.class), captor.capture());
+        assertThat(captor.getValue().begrunnelseKode).isEqualTo(Endretperioder.ENDRINGER_ARBEIDSSITUASJON.getKode());
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
     }
 
     private static Prosessinstans lagProsessinstans(long behandlingsid) {
@@ -287,6 +354,7 @@ public class IverksettVedtakSendBrevTest {
         Behandling behandling = new Behandling();
         behandling.setId(behandlingsid);
         behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setFagsak(lagFagsak());
         return behandling;
     }
 }

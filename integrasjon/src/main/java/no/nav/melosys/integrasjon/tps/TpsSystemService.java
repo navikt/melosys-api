@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class TpsSystemService extends TpsService implements TpsFasade {
 
     @Autowired
-    public TpsSystemService(AktorConsumer aktorConsumer, @Qualifier("system")PersonConsumer personConsumer,
+    public TpsSystemService(AktorConsumer aktorConsumer, @Qualifier("system") PersonConsumer personConsumer,
                             DokumentFactory dokumentFactory, AktoerIdCache aktoerIdCache) {
         super(aktorConsumer, personConsumer, dokumentFactory, aktoerIdCache);
     }

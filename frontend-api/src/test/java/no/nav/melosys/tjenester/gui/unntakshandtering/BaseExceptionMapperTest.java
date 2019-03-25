@@ -6,7 +6,6 @@ import javax.ws.rs.ext.ExceptionMapper;
 
 import org.junit.Test;
 import org.slf4j.event.Level;
-
 import static org.junit.Assert.assertEquals;
 
 public final class BaseExceptionMapperTest {
@@ -24,7 +23,7 @@ public final class BaseExceptionMapperTest {
 
     static <T extends Throwable> void testToResponse(ExceptionMapper<T> oversetter, T unntak, Status forventetStatus) {
         Response resultat = oversetter.toResponse(unntak);
-        assertEquals(forventetStatus, resultat.getStatusInfo());
+        assertEquals(forventetStatus, resultat.getStatusInfo().toEnum());
     }
 
 }

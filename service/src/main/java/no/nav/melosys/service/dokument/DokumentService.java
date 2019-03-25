@@ -7,7 +7,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.doksys.DokSysFasade;
+import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.Element;
 
 @Service
 @Primary
@@ -34,7 +35,7 @@ public class DokumentService {
 
     private final BrevDataService brevDataService;
 
-    private final DokSysFasade dokSysFasade;
+    private final DoksysFasade dokSysFasade;
 
     private final JoarkFasade joarkFasade;
 
@@ -44,10 +45,10 @@ public class DokumentService {
 
     @Autowired
     public DokumentService(BehandlingRepository behandlingRepository,
-                    FagsakRepository fagsakRepository,
-                    BrevDataService brevDataService,
-                    DokSysFasade dokSysFasade, JoarkFasade joarkFasade,
-                    ProsessinstansService prosessinstansService, BrevDataByggerVelger brevDataByggerVelger) {
+                           FagsakRepository fagsakRepository,
+                           BrevDataService brevDataService,
+                           DoksysFasade dokSysFasade, JoarkFasade joarkFasade,
+                           ProsessinstansService prosessinstansService, BrevDataByggerVelger brevDataByggerVelger) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.brevDataService = brevDataService;
@@ -95,7 +96,7 @@ public class DokumentService {
         BrevData brevData = bygger.lag(behandling, SubjectHandler.getInstance().getUserID());
 
         DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(produserbartDokument, behandling, brevData);
-        Object brevinnhold = brevDataService.lagBrevXML(produserbartDokument, behandling, brevData);
+        Element brevinnhold = brevDataService.lagBrevXML(produserbartDokument, behandling, brevData);
 
         return dokSysFasade.produserDokumentutkast(request, brevinnhold);
     }
@@ -109,7 +110,7 @@ public class DokumentService {
             .orElseThrow(() -> new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke"));
 
         DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(produserbartDokument, behandling, brevData);
-        Object brevinnhold = brevDataService.lagBrevXML(produserbartDokument, behandling, brevData);
+        Element brevinnhold = brevDataService.lagBrevXML(produserbartDokument, behandling, brevData);
 
         dokSysFasade.produserIkkeredigerbartDokument(request, brevinnhold);
     }

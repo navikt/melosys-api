@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui.unntakshandtering;
 
 import java.util.Objects;
-
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -19,7 +18,7 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
 
     /**
      * Konstruer en unntaksoversetter.
-     * 
+     *
      * @param status
      *            HTTP-status å returnere (påkrevd).
      * @param loggnivå
@@ -44,7 +43,7 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
         } else if (loggnivå.equals(Level.WARN)) {
             logger.warn(melding, exception);
         }
-        return Response.status(status).build();
+        return Response.status(status.getStatusCode(), exception.getMessage()).build();
     }
 
 }

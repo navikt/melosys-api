@@ -1,18 +1,23 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import javax.xml.bind.JAXBException;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
-import no.nav.melosys.service.dokument.brev.mapper.felles.Virksomhet;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.xml.sax.SAXException;
@@ -24,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
-public class AvslagMapperTest {
+public class AvslagYrkesaktivMapperTest {
 
     @Test
     public void mapTilBrevXML() throws JAXBException, SAXException, TekniskException {
@@ -41,15 +46,24 @@ public class AvslagMapperTest {
         fagsak.setType(Sakstyper.EU_EOS);
         behandling.setFagsak(fagsak);
 
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+        arbeidUtland.adresse = new StrukturertAdresse();
+        arbeidUtland.adresse.landKode = "NO";
+
+        SoeknadDokument soeknadDokument = new SoeknadDokument();
+        soeknadDokument.arbeidUtland = new ArrayList<>();
+        soeknadDokument.arbeidUtland.add(arbeidUtland);
+
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(new SoeknadDokument());
+        saksopplysning.setDokument(soeknadDokument);
         saksopplysning.setType(SaksopplysningType.SØKNAD);
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
 
         Behandlingsresultat resultat = new Behandlingsresultat();
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.DE);
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.DE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
         resultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
@@ -70,7 +84,7 @@ public class AvslagMapperTest {
         Vilkaarsresultat vilkaarsresultat16_1 = new Vilkaarsresultat();
         vilkaarsresultat16_1.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
         VilkaarBegrunnelse a_begrunnelse_16_1 = new VilkaarBegrunnelse();
-        a_begrunnelse_16_1.setKode(Art16_1_Avslag__Begrunnelser.FORLENGELSE_SAMLET_OVER_5_AAR.getKode());
+        a_begrunnelse_16_1.setKode(Art16_1_Avslag__Begrunnelser.OVER_5_AAR.getKode());
         VilkaarBegrunnelse b_begrunnelse_16_1 = new VilkaarBegrunnelse();
         b_begrunnelse_16_1.setKode(Art16_1_Avslag__Begrunnelser.SOEKT_FOR_SENT.getKode());
 
@@ -81,9 +95,10 @@ public class AvslagMapperTest {
         resultat.getVilkaarsresultater().add(vilkaarsresultat16_1);
 
         BrevDataAnmodningUnntakOgAvslag brevData = new BrevDataAnmodningUnntakOgAvslag("Z999999");
-        brevData.hovedvirksomhet = new Virksomhet("Test AS", null, null);
+        brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.LOENNET_ARBEID);
+        brevData.arbeidsland = Landkoder.AT.getBeskrivelse();
 
-        AvslagMapper spy = Mockito.spy(new AvslagMapper());
+        AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
         String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 
         assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");

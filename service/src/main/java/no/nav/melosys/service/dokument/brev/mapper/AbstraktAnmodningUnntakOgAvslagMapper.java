@@ -4,15 +4,23 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.melosysbrev._000081.BrevdataType;
 import no.nav.dok.melosysbrev._000081.Fag;
+import no.nav.dok.melosysbrev._000081.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000081.ObjectFactory;
-import no.nav.dok.melosysbrev.felles.melosys_felles.*;
+import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.InngangsvilkaarBegrunnelseKode;
+import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
+import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
@@ -20,7 +28,8 @@ import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
-import static no.nav.melosys.service.dokument.brev.mapper.felles.AvslagOgAnmodningTypeFactory.*;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
+import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.*;
 
 /**
  * Anmodning om unntak og avslag deler samme mal.
@@ -59,6 +68,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
             fag.setYrkesaktivitet(YrkesaktivitetsKode.LOENNET_ARBEID);
         }
 
+        fag.setArbeidsland(brevData.arbeidsland);
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(resultat));
 
         Set<VilkaarBegrunnelse> art121Begrunnelser = hentVilkaarbegrunnelser(resultat, FO_883_2004_ART12_1);
@@ -89,98 +99,23 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
         }
     }
 
-    private Art121BegrunnelseType mapArt121BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
-        Art121BegrunnelseType art121BegrunnelseType = lagArt121BegrunnelseType();
-        for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Art12_1_Begrunnelser artikkel12_1 = Art12_1_Begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
-            switch (artikkel12_1) {
-                case UTSENDELSE_OVER_24_MN:
-                    art121BegrunnelseType.setUtsendelseOver24Mn(JA);
-                    break;
-                case ERSTATTER_ANNEN:
-                    art121BegrunnelseType.setErstatterAnnen(JA);
-                    break;
-                case IKKE_UTSENDT_PAA_OPPDRAG_FOR_AG:
-                    art121BegrunnelseType.setIkkeUtsendtPåOppdragForAg(JA);
-                    break;
-                case IKKE_OMFATTET_LENGE_NOK_I_NORGE_FOER:
-                    art121BegrunnelseType.setIkkeOmfattetLengeNokINorgeFør(JA);
-                    break;
-                case UNDER_2_MN_SIDEN_FORRIGE_UTSENDING_TIL_SAMME_LAND:
-                    art121BegrunnelseType.setUnder2MnSidenForrigeUtsendingTilSammeLand(JA);
-                    break;
-                case IKKE_VESENTLIG_VIRKSOMHET:
-                    art121BegrunnelseType.setIkkeVesentligVirksomhet(JA);
-                    break;
-                default:
-                    throw new TekniskException(artikkel12_1 + " støttes ikke.");
-            }
-        }
-        return art121BegrunnelseType;
-    }
+    private LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
+        Lovvalgsperiode lovvalgsperiode = resultat.getLovvalgsperioder()
+            .stream().findFirst().orElseThrow(() -> new TekniskException("Ingen lovvalgsperiode funnet for behandlingsresultat" + resultat.getId()));
 
-    private Art121ForutgaaendeBegrunnelseType mapArt121ForutgaaendeBegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
-        Art121ForutgaaendeBegrunnelseType art121ForutgaaendeBegrunnelseType = lagArt121ForutgaaendeBegrunnelseType();
+        LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
 
-        for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Art12_1_Forutgaaende_Medl_Begrunnelse forutgaaendeMedlemskap = Art12_1_Forutgaaende_Medl_Begrunnelse.valueOf(vilkaarBegrunnelse.getKode());
-            switch (forutgaaendeMedlemskap) {
-                case UNNTATT_MEDLEMSKAP:
-                    art121ForutgaaendeBegrunnelseType.setUntattMedlemskap(JA);
-                    break;
-                case FOLKEREGISTRERT_IKKE_ARBEIDET_I_NORGE:
-                    art121ForutgaaendeBegrunnelseType.setFolkeregistrertIkkeArbeidetINorge(JA);
-                    break;
-                case IKKE_FOLKEREGISTRERT_ELLER_ARBEIDET_I_NORGE:
-                    art121ForutgaaendeBegrunnelseType.setIkkeFolkeregistrertEllerArbeidetINorge(JA);
-                    break;
-                default:
-                    throw new TekniskException(forutgaaendeMedlemskap + " støttes ikke.");
-            }
+        Landkoder unntakFraLovvalgsland = lovvalgsperiode.getUnntakFraLovvalgsland();
+        if (unntakFraLovvalgsland != null) {
+            lovvalgsperiodeType.setUnntakFraLovvalgsland(unntakFraLovvalgsland.getBeskrivelse());
         }
-        return art121ForutgaaendeBegrunnelseType;
-    }
-
-    private Art122BegrunnelseType mapArt122BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
-        Art122BegrunnelseType art122BegrunnelseType = lagArt122BegrunnelseType();
-        for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Art12_2_Begrunnelser artikkel12_2 = Art12_2_Begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
-            switch (artikkel12_2) {
-                case UTSENDELSE_OVER_24_MN:
-                    art122BegrunnelseType.setUtsendelseOver24Mn(JA);
-                    break;
-                case IKKE_LIGNENDE_VIRKSOMHET:
-                    art122BegrunnelseType.setIkkeLignendeVirksomhet(JA);
-                    break;
-                case NORMALT_IKKE_DRIFT_NORGE:
-                    art122BegrunnelseType.setNormaltIkkeDriftINorge(JA);
-                    break;
-                default:
-                    throw new TekniskException(artikkel12_2 + "  støttes ikke.");
-            }
+        try {
+            lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
+            lovvalgsperiodeType.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));
+        } catch (DatatypeConfigurationException e) {
+            e.printStackTrace();
         }
-        return art122BegrunnelseType;
-    }
-
-    private Art122NormalVirksomhetBegrunnelseType mapArt122NormalVirksomhetBegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
-        Art122NormalVirksomhetBegrunnelseType art122NormalVirksomhetBegrunnelseType = lagArt122NormalVirksomhetBegrunnelseType();
-        for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
-            Normaltdrivervirksomhet normaltDriverVirksomhet = Normaltdrivervirksomhet.valueOf(vilkaarBegrunnelse.getKode());
-            switch (normaltDriverVirksomhet) {
-                case IKKE_FORUTGAAENDE_DRIFT:
-                    art122NormalVirksomhetBegrunnelseType.setIkkeForutgåendeDrift(JA);
-                    break;
-                case HAR_IKKE_NØDVENDIG_INFRASTRUKTUR:
-                    art122NormalVirksomhetBegrunnelseType.setHarIkkeNødvendigInfrastruktur(JA);
-                    break;
-                case OPPRETTHOLDER_IKKE_LISENSER_AUTORISASJON:
-                    art122NormalVirksomhetBegrunnelseType.setOpprettholderIkkeLisenserAutorisasjon(JA);
-                    break;
-                default:
-                    throw new TekniskException(normaltDriverVirksomhet + "  støttes ikke.");
-            }
-        }
-        return art122NormalVirksomhetBegrunnelseType;
+        return lovvalgsperiodeType;
     }
 
     @SuppressWarnings("Duplicates")

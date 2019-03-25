@@ -8,12 +8,13 @@ import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import io.swagger.annotations.ApiParam;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.tjenester.gui.dto.BehandlingsstatusDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,14 +42,14 @@ public class BehandlingTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("{behandlingID}/status/{statusKode}")
+    @Path("{behandlingID}/status")
     @ApiOperation("Oppdaterer status for en behandling. " +
         "Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.")
     public void oppdaterStatus(@PathParam("behandlingID") long behandlingID,
-                               @PathParam("statusKode") Behandlingsstatus status) throws FunksjonellException, TekniskException {
-        log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, status.getKode());
+                               @ApiParam("statusKode") BehandlingsstatusDto status) throws FunksjonellException, TekniskException {
+        log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, status.getBehandlingsstatus().getKode());
         tilgang.sjekk(behandlingID);
-        behandlingService.oppdaterStatus(behandlingID, status);
+        behandlingService.oppdaterStatus(behandlingID, status.getBehandlingsstatus());
     }
 
     @POST

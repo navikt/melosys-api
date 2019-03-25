@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
@@ -30,6 +31,7 @@ import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerA001;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -97,7 +99,7 @@ public class BrevDataByggerA001Test {
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         vilkaarsresultat.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
         vilkaarsresultat.setBegrunnelser(new HashSet<>(Arrays.asList(begrunnelse)));
-        when(vilkårRepo.findByBehandlingsresultatId(anyLong())).thenReturn(Arrays.asList(vilkaarsresultat));
+        when(vilkårRepo.findByBehandlingsresultatIdAndVilkaar(anyLong(), any())).thenReturn(Optional.of(vilkaarsresultat));
 
         søknad = new SoeknadDokument();
         Saksopplysning soeknad = new Saksopplysning();
@@ -136,7 +138,8 @@ public class BrevDataByggerA001Test {
 
         KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
-        brevDataByggerA001 = new BrevDataByggerA001(avklartefaktaService, registerOppslagService, kodeverkService, lovvalgsperiodeService, myndighetsRepo, vilkårRepo);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        brevDataByggerA001 = new BrevDataByggerA001(avklartefaktaService, avklarteVirksomheterService, kodeverkService, lovvalgsperiodeService, myndighetsRepo, vilkårRepo);
     }
 
     private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
@@ -204,7 +207,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void testAnsettelsesperiode() throws TekniskException, NoSuchFieldException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public void testAnsettelsesperiode() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         avklarteOrganisasjoner.add(orgnr1);
 
         lagArbeidsforhold(orgnr1,

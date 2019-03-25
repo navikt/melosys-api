@@ -88,6 +88,22 @@ public class SaksopplysningerUtilsTest {
     }
 
     @Test
+    public void hentSammensattNavn() {
+        Behandling behandling = new Behandling();
+        Set<Saksopplysning> saksopplysninger = new HashSet<>();
+        behandling.setSaksopplysninger(saksopplysninger);
+
+        PersonDokument personDok = new PersonDokument();
+        personDok.sammensattNavn = "FØRST SISTE";
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(personDok);
+        saksopplysning.setType(SaksopplysningType.PERSONOPPLYSNING);
+        saksopplysninger.add(saksopplysning);
+
+        assertThat(SaksopplysningerUtils.hentSammensattNavn(behandling)).isEqualTo("FØRST SISTE");
+    }
+
+    @Test
     public void hentMedlemskapsDokument() throws TekniskException {
         Behandling behandling = new Behandling();
         Set<Saksopplysning> saksopplysninger = new HashSet<>();

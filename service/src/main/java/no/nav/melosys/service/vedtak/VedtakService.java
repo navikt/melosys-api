@@ -1,14 +1,15 @@
 package no.nav.melosys.service.vedtak;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +51,19 @@ public class VedtakService {
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + " ikke finnes."));
 
+        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+    }
+
+    @Transactional
+    public void endreVedtak(Long behandlingID, Endretperioder endretperiode) throws FunksjonellException, TekniskException {
+        log.info("Endrer vedtak for behandling: {}", behandlingID);
+
+        Behandling behandling = behandlingRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Kan ikke endre vedtak fordi behandling " + behandlingID + " ikke finnes."));
+
+        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, endretperiode);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 }

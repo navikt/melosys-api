@@ -6,6 +6,7 @@ import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import org.junit.Before;
@@ -62,6 +63,18 @@ public class FerdigstillJournalpostTest {
 
         verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_SETT_VURDER_DOKUMENT);
+    }
+
+    @Test
+    public void utførSteg_typeJfrKnyttOgEndretPeriode_tilStegJfrReplikerBehandling() throws MelosysException {
+        String journalpostID = "Journal_ID";
+        Prosessinstans p = nyProsessinstans(ProsessType.JFR_NY_BEHANDLING, journalpostID);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
+
+        agent.utførSteg(p);
+
+        verify(joarkFasade, times(1)).ferdigstillJournalføring(journalpostID);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.REPLIKER_BEHANDLING);
     }
 
     @Test

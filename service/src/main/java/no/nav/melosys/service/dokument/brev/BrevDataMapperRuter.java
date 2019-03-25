@@ -12,14 +12,16 @@ public class BrevDataMapperRuter {
     static Map<Produserbaredokumenter, Class<? extends BrevDataMapper>> mappere = new HashMap<>();
 
     static {
+        mappere.put(Produserbaredokumenter.ANMODNING_UNNTAK, AttestMapper.class);
         mappere.put(Produserbaredokumenter.ATTEST_A1, AttestMapper.class);
-        mappere.put(Produserbaredokumenter.AVSLAG_YRKESAKTIV, AvslagMapper.class);
+        mappere.put(Produserbaredokumenter.AVSLAG_YRKESAKTIV, AvslagYrkesaktivMapper.class);
+        mappere.put(Produserbaredokumenter.AVSLAG_ARBEIDSGIVER, AvslagArbeidsgiverMapper.class);
         mappere.put(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, InnvilgelsesbrevMapper.class);
-        mappere.put(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK, AnmodningUnntakMapper.class);
+        mappere.put(Produserbaredokumenter.INNVILGELSE_ARBEIDSGIVER, InnvilgelseArbeidsgiverMapper.class);
         mappere.put(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, ForvaltningsmeldingMapper.class);
         mappere.put(Produserbaredokumenter.MELDING_HENLAGT_SAK, HenleggelsesbrevMapper.class);
         mappere.put(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER, MangelbrevMapper.class);
-        mappere.put(Produserbaredokumenter.ANMODNING_UNNTAK, AttestMapper.class);
+        mappere.put(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK, AnmodningUnntakMapper.class);
     }
 
     private BrevDataMapperRuter() {
