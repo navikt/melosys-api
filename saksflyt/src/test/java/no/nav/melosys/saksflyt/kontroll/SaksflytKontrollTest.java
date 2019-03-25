@@ -7,26 +7,24 @@ import java.util.UUID;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.api.Binge;
 import no.nav.melosys.saksflyt.impl.BingeImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SaksflytKontrollTest {
 
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
-
-    private Binge binge = new BingeImpl();
+    @Spy
+    private BingeImpl binge;
 
     private SaksflytKontroll saksflytKontroll;
 
@@ -37,36 +35,32 @@ public class SaksflytKontrollTest {
     @Before
     public void setup() {
         saksflytKontroll = new SaksflytKontroll(binge, prosessinstansRepository);
-        prosessinstanser = prosessInstanser();
+        prosessinstanser = lagProsessInstanser();
         when(prosessinstansRepository.findAllByStegIsNotNullAndStegIsNot(any(ProsessSteg.class))).thenReturn(prosessinstanser);
     }
 
     @Test
     public void sjekkProsessinstansFinnesISaksFlyt_leggTilProsessinstanserSomIkkeFinnes() {
 
-        int prosesinstanserIBinge = 5;
-        for (int i = 0; i < prosesinstanserIBinge; i++) {
+        for (int i = 0; i < 5; i++) {
             binge.leggTil(prosessinstanser.get(i));
         }
-        assertThat(binge.hentProsessinstanser().size()).isEqualTo(prosesinstanserIBinge);
+        clearInvocations(binge);
 
         saksflytKontroll.sjekkProsessinstansFinnesISaksflyt();
-
-        assertThat(binge.hentProsessinstanser().size()).isEqualTo(TOTAL_PROSESSINSTANSER);
+        verify(binge, times(5)).leggTil(any(Prosessinstans.class));
     }
 
     @Test
     public void sjekkProsessinstansFinnesISaksFlyt_ingenSkalLeggesTil_bingeSinStørrelseIkkeEndret() {
         prosessinstanser.forEach(binge::leggTil);
-
-        int nåværendeStørrelse = binge.hentProsessinstanser().size();
-        assertThat(nåværendeStørrelse).isEqualTo(TOTAL_PROSESSINSTANSER);
+        clearInvocations(binge);
 
         saksflytKontroll.sjekkProsessinstansFinnesISaksflyt();
-        assertThat(binge.hentProsessinstanser().size()).isEqualTo(TOTAL_PROSESSINSTANSER);
+        verify(binge, times(0)).leggTil(any(Prosessinstans.class));
     }
 
-    private List<Prosessinstans> prosessInstanser() {
+    private List<Prosessinstans> lagProsessInstanser() {
         List<Prosessinstans> prosessinstanser = new ArrayList<>();
         for (int i = 0; i < TOTAL_PROSESSINSTANSER; i++) {
             Prosessinstans prosessinstans = mock(Prosessinstans.class);
