@@ -22,7 +22,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -95,7 +94,7 @@ public class AvklarMyndighetTest {
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse.landKode = "HR";
         søknadDokument.arbeidUtland.add(arbeidUtland);
-        søknadDokument.bosted.oppgittAdresse.landKode = "IT";
+        søknadDokument.soeknadsland.landKode = "IT";
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SØKNAD);
         saksopplysning.setDokument(søknadDokument);
@@ -139,7 +138,7 @@ public class AvklarMyndighetTest {
         myndighet.setRolle(Aktoersroller.MYNDIGHET);
         fagsakMedMyndighet.getAktører().add(myndighet);
         p.getBehandling().setFagsak(fagsakMedMyndighet);
-        
+
         steg.utfør(p);
 
         verify(fagsakService, never()).leggTilAktør(any(), any(), any());
