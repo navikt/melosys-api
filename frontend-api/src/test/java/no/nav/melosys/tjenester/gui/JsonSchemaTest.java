@@ -25,15 +25,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class JsonSchemaTest {
 
     private static final Logger log = LoggerFactory.getLogger(JsonSchemaTest.class);
-
-    private static final String ROOT = "schema/";
 
     protected static final String FEILMELDING = "Schemavalidering feilet for schema {}";
 
@@ -76,7 +73,7 @@ public class JsonSchemaTest {
     }
 
     protected Schema hentSchema(String schemaNavn) throws IOException, JSONException {
-        String schemaString = JsonResourceLoader.load(new DefaultResourceLoader(), ROOT + schemaNavn);
+        String schemaString = JsonResourceLoader.load(new DefaultResourceLoader(), schemaNavn);
         return lastSchema(schemaString);
     }
 
@@ -154,7 +151,7 @@ public class JsonSchemaTest {
     private class ClasspathSchemaClient implements SchemaClient {
         public InputStream get(String url) {
             try {
-                url = url.replace("http://melosys.nav.no/schemas", "schema");
+                url = url.replace("http://melosys.nav.no/schemas", "");
                 return new ClassPathResource(url).getInputStream();
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
