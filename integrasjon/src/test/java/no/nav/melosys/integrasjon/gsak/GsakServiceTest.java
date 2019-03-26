@@ -63,7 +63,7 @@ public final class GsakServiceTest {
         Oppgave oppgave = new Oppgave();
         oppgave.setOppgavetype(Oppgavetyper.VUR);
         oppgave.setTema(Tema.MED);
-        oppgave.setBehandlingstema(Behandlingstema.ARB_EØS);
+        oppgave.setBehandlingstema(Behandlingstema.EU_EOS);
         instans.opprettOppgave(oppgave);
 
         ArgumentCaptor<OpprettOppgaveDto> captor = ArgumentCaptor.forClass(OpprettOppgaveDto.class);
@@ -71,7 +71,7 @@ public final class GsakServiceTest {
         OpprettOppgaveDto opprettOppgaveDto = captor.getValue();
 
         assertThat(opprettOppgaveDto.getOppgavetype()).isEqualTo(Oppgavetyper.VUR.getKode());
-        assertThat(opprettOppgaveDto.getBehandlingstema()).isEqualTo(Behandlingstema.ARB_EØS.getKode());
+        assertThat(opprettOppgaveDto.getBehandlingstema()).isEqualTo(Behandlingstema.EU_EOS.getKode());
         assertThat(opprettOppgaveDto.getFristFerdigstillelse()).isNotNull();
     }
 

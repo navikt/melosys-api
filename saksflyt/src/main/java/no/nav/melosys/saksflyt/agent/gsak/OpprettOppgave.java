@@ -79,7 +79,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         oppgave.setTema(Tema.MED);
 
         if (fagsak.getType() == Sakstyper.EU_EOS) {
-            oppgave.setBehandlingstema(Behandlingstema.ARB_EØS);
+            oppgave.setBehandlingstema(Behandlingstema.EU_EOS);
             oppgave.setBehandlingstype(null);
         } else {
             String feilmelding = "Sakstyper " + fagsak.getType() + " er ikke støttet";
