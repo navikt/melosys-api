@@ -94,7 +94,7 @@ public class AvklarMyndighetTest {
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse.landKode = "HR";
         søknadDokument.arbeidUtland.add(arbeidUtland);
-        søknadDokument.soeknadsland.landKode = "IT";
+        søknadDokument.bosted.oppgittAdresse.landKode = "IT";
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SØKNAD);
         saksopplysning.setDokument(søknadDokument);

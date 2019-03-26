@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -51,7 +52,8 @@ public class LandvelgerServiceTest {
         soeknad.setDokument(søknad);
         soeknad.setType(SaksopplysningType.SØKNAD);
         søknad.oppholdUtland.oppholdslandKoder.add(oppholdsland.getKode());
-        søknad.soeknadsland.landKode = bostedsland.getKode();
+        søknad.bosted.oppgittAdresse = new StrukturertAdresse();
+        søknad.bosted.oppgittAdresse.landKode = bostedsland.getKode();
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
         maritimtArbeid.territorialfarvann = territorialfarvannLand.getKode();
         søknad.maritimtArbeid.add(maritimtArbeid);

@@ -57,6 +57,6 @@ public class LandvelgerService {
 
     private Landkoder hentBostedsland(Behandling behandling, SoeknadDokument søknad) {
         Optional<Landkoder> bostedslandOpt = avklartefaktaService.hentBostedland(behandling.getId());
-        return bostedslandOpt.orElseGet(() -> Landkoder.valueOf(søknad.soeknadsland.landKode));
+        return bostedslandOpt.orElseGet(() -> Landkoder.valueOf(søknad.bosted.oppgittAdresse.landKode));
     }
 }
