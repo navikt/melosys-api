@@ -88,6 +88,8 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('HS_SEND_BREV', 'Opprett henleggel
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('MANGELBREV', 'Opprett mangelbrev');
 
+INSERT INTO prosess_steg (kode, navn) VALUES ('FERDIG', 'Prosessen er ferdig');
+
 CREATE TABLE prosessinstans_hendelser (
     id                  NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     prosessinstans_id   RAW(16)     NOT NULL,

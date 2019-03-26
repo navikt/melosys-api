@@ -42,6 +42,8 @@ public class SoeknadDokument extends SaksopplysningDokument {
 
     public Bosted bosted = new Bosted();
 
+    public Soeknadsland soeknadsland = new Soeknadsland();
+
     public Set<String> hentAlleOrganisasjonsnumre() {
         return Stream.of(selvstendigArbeid.hentAlleOrganisasjonsnumre(),
                          juridiskArbeidsgiverNorge.hentManueltRegistrerteArbeidsgiverOrgnumre())
