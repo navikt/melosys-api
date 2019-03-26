@@ -394,6 +394,4 @@ public class OppgaveplukkerTest {
 
         assertThat(behandlingstemaList).containsExactlyInAnyOrder(Behandlingstema.values());
     }
-
-
 }
