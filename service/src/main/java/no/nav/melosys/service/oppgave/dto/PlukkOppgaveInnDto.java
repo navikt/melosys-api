@@ -8,7 +8,6 @@ public class PlukkOppgaveInnDto {
     private String fagomrade;
     private List<String> sakstyper;
     private List<String> behandlingstyper;
-    private List<String> behandlingstema;
 
     public String getOppgavetype() {
         return oppgavetype;
