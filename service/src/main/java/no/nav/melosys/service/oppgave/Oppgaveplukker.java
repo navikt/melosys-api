@@ -2,10 +2,8 @@ package no.nav.melosys.service.oppgave;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -89,13 +87,7 @@ public class Oppgaveplukker {
                     behandlingstypeListe.add(KodeverkUtils.dekod(Behandlingstyper.class, behandlingstype));
                 }
             }
-
-            List<String> behandlingstemaer = plukkDto.getBehandlingstema();
-            if (behandlingstemaer != null) {
-                for (String behandlingstema : behandlingstemaer) {
-                    behandlingstemaListe.add(Behandlingstema.valueOf(behandlingstema));
-                }
-            }
+            behandlingstemaListe.addAll(hentBehandlingstema(fagsakstypeListe));
         }
 
         List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakstypeListe, behandlingstypeListe, behandlingstemaListe);
@@ -113,6 +105,12 @@ public class Oppgaveplukker {
             }
         }
         return valg;
+    }
+
+    List<Behandlingstema> hentBehandlingstema(List<Sakstyper> fagsakstypeListe) {
+        return fagsakstypeListe.stream()
+            .map(sakstyper -> Behandlingstema.valueOf(sakstyper.name()))
+            .collect(Collectors.toList());
     }
 
     private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) throws TekniskException {

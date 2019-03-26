@@ -41,12 +41,4 @@ public class PlukkOppgaveInnDto {
     public void setBehandlingstyper(List<String> behandlingstyper) {
         this.behandlingstyper = behandlingstyper;
     }
-
-    public List<String> getBehandlingstema() {
-        return behandlingstema;
-    }
-
-    public void setBehandlingstema(List<String> behandlingstema) {
-        this.behandlingstema = behandlingstema;
-    }
 }
