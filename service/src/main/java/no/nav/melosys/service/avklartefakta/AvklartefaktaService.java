@@ -52,12 +52,12 @@ public class AvklartefaktaService {
             .orElseThrow(() -> new FunksjonellException("Avklartefakta " + type + " mangler for behandlingsresultat " + behandlingsresultatID));
     }
 
-    public Set<Avklartefakta> hentAlleAvklarteFlaggland(long behandlingsid) {
-        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.FLAGGLAND);
+    public Set<Avklartefakta> hentAlleAvklarteArbeidsland(long behandlingsid) {
+        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.ARBEIDSLAND);
     }
 
-    public Optional<Landkoder> hentFlaggland(long behandlingsid) {
-        return hentAlleAvklarteFlaggland(behandlingsid).stream()
+    public Optional<Landkoder> hentArbeidsland(long behandlingsid) {
+        return hentAlleAvklarteArbeidsland(behandlingsid).stream()
             .map(af -> Landkoder.valueOf(af.getFakta()))
             .findFirst();
     }
@@ -71,7 +71,7 @@ public class AvklartefaktaService {
     public Set<String> hentAvklarteOrganisasjoner(long behandlingsid) {
         Set<Avklartefakta> avklartefakta =
                 avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid,
-                                                                                   Avklartefaktatype.AVKLARTE_ARBEIDSGIVER,
+                                                                                   Avklartefaktatype.VIRKSOMHET,
                                                                                    valgtFakta);
         return avklartefakta.stream()
                 .map(Avklartefakta::getSubjekt)

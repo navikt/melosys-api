@@ -10,7 +10,6 @@ import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -40,7 +39,7 @@ public class LandvelgerServiceTest {
     private List<Vilkaarsresultat> vilkaar = new ArrayList<>();
 
     private Landkoder oppholdsland = Landkoder.NO;
-    private Landkoder flaggland = Landkoder.DK;
+    private Landkoder avklartArbeidsland = Landkoder.DK;
     private Landkoder bostedsland = Landkoder.SE;
     private Landkoder avklartBostedsland = Landkoder.FI;
     private Landkoder territorialfarvannLand = Landkoder.GB;
@@ -57,8 +56,6 @@ public class LandvelgerServiceTest {
         maritimtArbeid.territorialfarvann = territorialfarvannLand.getKode();
         søknad.maritimtArbeid.add(maritimtArbeid);
 
-        when(avklartefaktaService.hentFlaggland(anyLong())).thenReturn(Optional.of(flaggland));
-
         when(vilkaarsresultatRepository.findByBehandlingsresultatId(anyLong())).thenReturn(vilkaar);
         when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(soeknad)));
 
@@ -73,105 +70,43 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentArbeidsland_medArt121_girOppholdsland() throws FunksjonellException, TekniskException {
+    public void hentArbeidsland_utenAvklartArbeidsland_girOppholdsland() throws TekniskException {
+        String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
+        assertThat(land).isEqualTo(oppholdsland.getBeskrivelse());
+    }
+
+    @Test
+    public void hentArbeidsland_medAvklartArbeidsland_girAvklartArbeidsland() throws TekniskException {
+        when(avklartefaktaService.hentArbeidsland(anyLong())).thenReturn(Optional.of(avklartArbeidsland));
+
+        String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
+        assertThat(land).isEqualTo(avklartArbeidsland.getBeskrivelse());
+    }
+
+    @Test
+    public void hentTrygdemyndighetsland_medArt121_girOppholdsland() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART12_1);
-        String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(oppholdsland.getBeskrivelse());
-    }
-
-    @Test
-    public void hentArbeidsland_medArt121Og1141_girFlaggland() throws FunksjonellException, TekniskException {
-        oppfyll(Vilkaar.FO_883_2004_ART12_1);
-        oppfyll(Vilkaar.FO_883_2004_ART11_4_1);
-        String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(flaggland.getBeskrivelse());
-    }
-
-    @Test
-    public void hentArbeidsland_medArt122_girOppholdsland() throws FunksjonellException, TekniskException {
-        oppfyll(Vilkaar.FO_883_2004_ART12_2);
-        String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(oppholdsland.getBeskrivelse());
-    }
-
-    @Test
-    public void hentArbeidsland_medArt122Og1141_girFlaggland() throws FunksjonellException, TekniskException {
-        oppfyll(Vilkaar.FO_883_2004_ART12_2);
-        oppfyll(Vilkaar.FO_883_2004_ART11_4_1);
-        String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(flaggland.getBeskrivelse());
-    }
-
-    @Test
-    public void hentArbeidsland_medArt161_girOppholdsland() throws FunksjonellException, TekniskException {
-        oppfyll(Vilkaar.FO_883_2004_ART16_1);
-        String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(oppholdsland.getBeskrivelse());
-    }
-
-    @Test
-    public void hentArbeidsland_medArt16Og1141_girFlaggland() throws FunksjonellException, TekniskException {
-        oppfyll(Vilkaar.FO_883_2004_ART16_1);
-        oppfyll(Vilkaar.FO_883_2004_ART11_4_1);
-        String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(flaggland.getBeskrivelse());
-    }
-
-    @Test
-    public void hentArbeidsland_medArt113A_girTerritorialfarvannsLand() throws FunksjonellException, TekniskException {
-        oppfyll(Vilkaar.FO_883_2004_ART11_3A);
-        String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(territorialfarvannLand.getBeskrivelse());
-    }
-
-    @Test
-    public void hentArbeidsland_medArt113AOgArt1141_girFlaggLand() throws FunksjonellException, TekniskException {
-        oppfyll(Vilkaar.FO_883_2004_ART11_3A);
-        oppfyll(Vilkaar.FO_883_2004_ART11_4_1);
-        String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(flaggland.getBeskrivelse());
-    }
-
-    @Test
-    public void hentArbeidsland_medArt1142_girFlaggland() throws FunksjonellException, TekniskException {
-        oppfyll(Vilkaar.FO_883_2004_ART11_4_2);
-        String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(flaggland.getBeskrivelse());
-    }
-
-    @Test
-    public void hentArbeidsland_utenOppfyltVilkaar_girOppholdsland() throws FunksjonellException, TekniskException {
-        String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(oppholdsland.getBeskrivelse());
-    }
-
-    @Test
-    public void hentTrygdemyndighetsland_medArt121_girOppholdsland() throws FunksjonellException, TekniskException {
-        oppfyll(Vilkaar.FO_883_2004_ART12_1);
-
         String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
         assertThat(land).isEqualTo(oppholdsland.getBeskrivelse());
     }
 
     @Test
-    public void hentTrygdemyndighetsland_medArt121OgArt1141_girFlaggland() throws FunksjonellException, TekniskException {
+    public void hentTrygdemyndighetsland_medArt121AvklartArbeidsland_girAvklartArbeidsland() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART12_1);
-        oppfyll(Vilkaar.FO_883_2004_ART11_4_1);
-
+        when(avklartefaktaService.hentArbeidsland(anyLong())).thenReturn(Optional.of(avklartArbeidsland));
         String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(flaggland.getBeskrivelse());
+        assertThat(land).isEqualTo(avklartArbeidsland.getBeskrivelse());
     }
 
     @Test
-    public void hentTrygdemyndighetsland_medArt122_girOppholdsland() throws FunksjonellException, TekniskException {
+    public void hentTrygdemyndighetsland_medArt122_girOppholdsland() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART12_2);
-
         String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
         assertThat(land).isEqualTo(oppholdsland.getBeskrivelse());
     }
 
     @Test
-    public void hentTrygdemyndighetsland_medArt161_girOppholdsland() throws FunksjonellException, TekniskException {
+    public void hentTrygdemyndighetsland_medArt161_girOppholdsland() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART16_1);
 
         String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
@@ -179,7 +114,7 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentTrygdemyndighetsland_medArt1142_girBostedsland() throws FunksjonellException, TekniskException {
+    public void hentTrygdemyndighetsland_medArt1142_girBostedsland() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART11_4_2);
 
         String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
@@ -187,7 +122,7 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentTrygdemyndighetsland_medArt1142OgAvklartBostedsland_girAvklartBostedsland() throws FunksjonellException, TekniskException {
+    public void hentTrygdemyndighetsland_medArt1142OgAvklartBostedsland_girAvklartBostedsland() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART11_4_2);
         when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(avklartBostedsland));
 
@@ -196,7 +131,7 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentTrygdemyndighetsland_medArt113A_girAvklartBosted() throws FunksjonellException, TekniskException {
+    public void hentTrygdemyndighetsland_medArt113A_girAvklartBosted() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART11_3A);
         oppfyll(Vilkaar.FO_883_2004_ART11_4_1);
 
@@ -205,7 +140,7 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentTrygdemyndighetsland_medArt113AOgAvklartBosted_overstyrerOppgittBosted() throws FunksjonellException, TekniskException {
+    public void hentTrygdemyndighetsland_medArt113AOgAvklartBosted_overstyrerOppgittBosted() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART11_3A);
         oppfyll(Vilkaar.FO_883_2004_ART11_4_1);
         when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(avklartBostedsland));
