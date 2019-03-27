@@ -4,7 +4,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -20,8 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 import static no.nav.melosys.domain.ProsessSteg.MANGELBREV;
+import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 
 /**
  * Sender mangelbrev til søker/arbeidsgiver
@@ -69,7 +72,7 @@ public class SendMangelbrev extends AbstraktStegBehandler {
         behandling.setDokumentasjonSvarfristDato(LocalDateTime.now().plusWeeks(DOKUMENTASJON_SVARFRIST_UKER).toInstant(ZoneOffset.UTC));
         behandlingRepo.save(behandling);
 
-        prosessinstans.setSteg(null);
+        prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Sendt mangelbrev for prosessinstans {}", prosessinstans.getId());
     }
 }

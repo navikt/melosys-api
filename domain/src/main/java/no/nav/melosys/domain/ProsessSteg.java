@@ -42,6 +42,7 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     //Anmodning om unntak
     AOU_VALIDERING("AOU_VALIDERING", "Validering av data for anmodning om unntak"),
     AOU_OPPDATER_RESULTAT("AOU_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat for anmodning om unntak"),
+    AOU_AVKLAR_MYNDIGHET("IV_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     AOU_OPPDATER_MEDL("AOU_OPPDATER_MEDL", "Oppdatering av medlemskap med anmodning om unntak"),
     AOU_SEND_BREV("AOU_SEND_BREV", "Send orienteringsbrev og A001 for anmodning om unntak"),
 
@@ -61,7 +62,9 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     //Henlegg sak
     HS_OPPDATER_RESULTAT("HS_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
     HS_HENLEGG_SAK("HS_HENLEGG_SAK", "Henlegg en sak"),
-    HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev");
+    HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev"),
+
+    FERDIG("FERDIG", "Prosessen er ferdig");
 
 
     private String kode;

@@ -12,7 +12,6 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +70,7 @@ public class SettVurderDokument extends AbstraktStegBehandler {
             log.info("I prosessinstans {}. Nytt dokument krever ingen vurdering ({}) eller ingen aktiv behandling for sak {}.", prosessinstans.getId(), ingenVurdering, saksnummer);
         }
 
-        prosessinstans.setSteg(null);
+        prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
 }
 

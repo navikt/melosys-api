@@ -1,12 +1,9 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service.oppgave;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -361,7 +358,7 @@ public class OppgaveplukkerTest {
         sakstyper.add(Sakstyper.EU_EOS.getKode());
 
         List<String> behandlingstemaer = new ArrayList<>();
-        behandlingstemaer.add(Behandlingstema.ARB_EØS.name());
+        behandlingstemaer.add(Behandlingstema.EU_EOS.name());
 
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
 
@@ -371,7 +368,6 @@ public class OppgaveplukkerTest {
         plukkOppgaveInnDto.setOppgavetype("BEH_SAK_MK");
         plukkOppgaveInnDto.setFagomrade("MED");
         plukkOppgaveInnDto.setSakstyper(sakstyper);
-        plukkOppgaveInnDto.setBehandlingstema(behandlingstemaer);
 
         Fagsak fagsak = new Fagsak();
 
@@ -387,6 +383,15 @@ public class OppgaveplukkerTest {
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
         assertThat(oppgave.isPresent()).isTrue();
-        assertThat(captor.getValue()).containsExactly(Behandlingstema.ARB_EØS);
+        assertThat(captor.getValue()).containsExactly(Behandlingstema.EU_EOS);
+    }
+
+    @Test
+    public void hentBehandlingstema_støtterAlleSakstyper() {
+        List<Sakstyper> sakstyper = Arrays.asList(Sakstyper.EU_EOS, Sakstyper.TRYGDEAVTALE, Sakstyper.FTRL);
+
+        List<Behandlingstema> behandlingstemaList = oppgaveplukker.hentBehandlingstema(sakstyper);
+
+        assertThat(behandlingstemaList).containsExactlyInAnyOrder(Behandlingstema.values());
     }
 }

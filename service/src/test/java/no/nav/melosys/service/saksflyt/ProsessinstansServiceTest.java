@@ -44,14 +44,14 @@ public class ProsessinstansServiceTest {
 
     @Test
     public void erUnderOppfriskning() {
-        when(prosessinstansRepo.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(eq(ProsessType.OPPFRISKNING), eq(ProsessSteg.FEILET_MASKINELT), anyLong()))
+        when(prosessinstansRepo.findByTypeAndBehandling_IdAndStegIsNotAndStegIsNot(eq(ProsessType.OPPFRISKNING), anyLong(), eq(ProsessSteg.FEILET_MASKINELT), eq(ProsessSteg.FERDIG)))
             .thenReturn(Optional.of(new Prosessinstans()));
         assertThat(service.erUnderOppfriskning(1L)).isTrue();
     }
 
     @Test
     public void harAktivProsessinstans() {
-        when(prosessinstansRepo.findByStegIsNotNullAndStegIsNotAndBehandling_Id(eq(ProsessSteg.FEILET_MASKINELT), anyLong()))
+        when(prosessinstansRepo.findByBehandling_IdAndStegIsNotAndStegIsNot(anyLong(), eq(ProsessSteg.FEILET_MASKINELT), eq(ProsessSteg.FERDIG)))
             .thenReturn(Optional.of(new Prosessinstans()));
         assertThat(service.harAktivProsessinstans(1L)).isTrue();
     }

@@ -73,7 +73,7 @@ public class SendBrev extends AbstraktStegBehandler {
         brevBestiller.bestill(behandling, saksbehandler, ANMODNING_UNNTAK, Aktoersroller.MYNDIGHET);
 
         log.info("Sendt alle brev for anmodning om unntak. Prosessinstans {}", prosessinstans.getId());
-        prosessinstans.setSteg(null);
+        prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
 
 }

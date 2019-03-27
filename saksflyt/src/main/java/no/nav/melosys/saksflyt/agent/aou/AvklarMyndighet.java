@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.iv;
+package no.nav.melosys.saksflyt.agent.aou;
 
 import java.util.Map;
 
@@ -20,16 +20,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.IV_AVKLAR_MYNDIGHET;
-import static no.nav.melosys.domain.ProsessSteg.IV_OPPDATER_MEDL;
+import static no.nav.melosys.domain.ProsessSteg.AOU_AVKLAR_MYNDIGHET;
+import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_MEDL;
 
 /**
  * Avklarer hvilken utenlandsk myndighet er part i saken.
  *
  * Transisjoner:
- *  IV_AVKLAR_MYNDIGHET -> IV_OPPDATER_MEDL eller FEILET_MASKINELT hvis feil
+ *  AOU_AVKLAR_MYNDIGHET -> AOU_OPPDATER_MEDL eller FEILET_MASKINELT hvis feil
  */
-@Component("IverksettVedtakAvklarMyndighet")
+@Component("AnmodningOmUnntakAvklarMyndighet")
 public class AvklarMyndighet extends AbstraktAvklarMyndighet {
 
     private static final Logger log = LoggerFactory.getLogger(AvklarMyndighet.class);
@@ -47,7 +47,7 @@ public class AvklarMyndighet extends AbstraktAvklarMyndighet {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return IV_AVKLAR_MYNDIGHET;
+        return AOU_AVKLAR_MYNDIGHET;
     }
 
     @Override
@@ -59,6 +59,6 @@ public class AvklarMyndighet extends AbstraktAvklarMyndighet {
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         super.utfør(prosessinstans);
-        prosessinstans.setSteg(IV_OPPDATER_MEDL);
+        prosessinstans.setSteg(AOU_OPPDATER_MEDL);
     }
 }

@@ -79,7 +79,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         oppgave.setTema(Tema.MED);
 
         if (fagsak.getType() == Sakstyper.EU_EOS) {
-            oppgave.setBehandlingstema(Behandlingstema.ARB_EØS);
+            oppgave.setBehandlingstema(Behandlingstema.EU_EOS);
             oppgave.setBehandlingstype(null);
         } else {
             String feilmelding = "Sakstyper " + fagsak.getType() + " er ikke støttet";
@@ -109,7 +109,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
             prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
-            prosessinstans.setSteg(null);
+            prosessinstans.setSteg(ProsessSteg.FERDIG);
         } else {
             String feilmelding = "ProsessType " + prosessinstans.getType() + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);

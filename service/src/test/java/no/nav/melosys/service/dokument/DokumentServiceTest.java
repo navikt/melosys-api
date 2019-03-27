@@ -176,7 +176,7 @@ public final class DokumentServiceTest {
         Behandling behandling = lagBehandling();
         BehandlingRepository behandlingRepository = mockBehandlingRepository(behandling);
         TpsFasade tpsFasade = mockTpsFasade(aktør);
-        Avklartefakta arbeidsgiverFaktum = lagAvklarteFakta(AVKLARTE_ARBEIDSGIVER, ORGNR);
+        Avklartefakta arbeidsgiverFaktum = lagAvklarteFakta(VIRKSOMHET, ORGNR);
         Avklartefakta yrkesgruppeFaktum = lagAvklarteFakta(YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name(), null);
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(Arrays.asList(arbeidsgiverFaktum,
                 lagAvklarteFakta(ARBEIDSLAND, "SE"),
@@ -258,7 +258,7 @@ public final class DokumentServiceTest {
         AvklarteFaktaRepository avklarteFaktaRepository = mock(AvklarteFaktaRepository.class);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(BEHANDLINGSID, YRKESGRUPPE)).thenReturn(Optional.of(yrkesgruppeFaktum));
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(BEHANDLINGSID,
-                AVKLARTE_ARBEIDSGIVER,
+                VIRKSOMHET,
                 "TRUE")).thenReturn(Collections.singleton(arbeidsgiverFaktum));
         return avklarteFaktaRepository;
     }
