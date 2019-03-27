@@ -20,10 +20,15 @@ public enum SendSedValidator {
      * <li>Lovvalgbestemmelsen er 12.1 eller 12.2</li>
      */
     public static boolean sedSkalSendes(Behandlingsresultattyper behandlingsresultatType, Lovvalgsperiode lovvalgsperiode) {
-        return behandlingsresultatType == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            && lovvalgsperiode.getInnvilgelsesresultat().equals(InnvilgelsesResultat.INNVILGET)
+        return lovvalgsperiode.getInnvilgelsesresultat().equals(InnvilgelsesResultat.INNVILGET)
             && lovvalgsperiode.getLovvalgsland() == Landkoder.NO
-            && erGyldigBestemmelse(lovvalgsperiode.getBestemmelse());
+            && erGyldigBestemmelse(lovvalgsperiode.getBestemmelse())
+            && erGyldigBehandlingsresultatType(behandlingsresultatType);
+    }
+
+    private static boolean erGyldigBehandlingsresultatType(Behandlingsresultattyper behandlingsresultattype) {
+        return behandlingsresultattype == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            || behandlingsresultattype == Behandlingsresultattyper.ANMODNING_OM_UNNTAK;
     }
 
     public static boolean erGyldigBestemmelse(LovvalgBestemmelse bestemmelse) {
