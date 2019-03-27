@@ -4,19 +4,18 @@ import java.util.Optional;
 import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.KontaktopplysningID;
-import no.nav.melosys.repository.KontaktopplysningRepository;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.tjenester.gui.dto.KontaktInfoDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KontaktopplysningTjenesteTest {
@@ -24,85 +23,50 @@ public class KontaktopplysningTjenesteTest {
     private KontaktopplysningTjeneste kontaktopplysningTjeneste;
 
     @Mock
-    private KontaktopplysningRepository kontaktopplysningRepo;
-
-    private Kontaktopplysning kontaktopplysning;
+    private KontaktopplysningService kontaktopplysningService;
 
     private static final String SAK_NUMMER = "MEL-1";
     private static final String ORG_NUMMER = "999";
 
     @Before
     public void setUp() {
-        kontaktopplysningTjeneste = new KontaktopplysningTjeneste(kontaktopplysningRepo);
-        kontaktopplysning = new Kontaktopplysning();
-        kontaktopplysning.setKontaktopplysningID(new KontaktopplysningID(SAK_NUMMER, ORG_NUMMER));
-        kontaktopplysning.setKontaktNavn("JOHN MAN");
-        kontaktopplysning.setKontaktOrgnr("1000");
+        kontaktopplysningTjeneste = new KontaktopplysningTjeneste(kontaktopplysningService);
     }
 
     @Test
-    public void hentKontaktopplysning_gjeldig() {
-        when(kontaktopplysningRepo.findById(new KontaktopplysningID(SAK_NUMMER, ORG_NUMMER))).thenReturn(Optional.of(kontaktopplysning));
+    public void hentKontaktopplysning_kallerPåService_objektFinnes() {
+        doReturn(Optional.of(Kontaktopplysning.class)).when(kontaktopplysningService).hentKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
+
         Response response = kontaktopplysningTjeneste.hentKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
-        assertThat(response).isNotNull();
-        assertThat(response.getEntity()).isNotNull();
-        assertThat(response.getEntity()).isInstanceOf(Kontaktopplysning.class);
 
-        Kontaktopplysning kontaktopplysning = (Kontaktopplysning) response.getEntity();
-        assertThat(kontaktopplysning.getKontaktOrgnr()).isEqualTo("1000");
-        assertThat(kontaktopplysning.getKontaktNavn()).isEqualTo("JOHN MAN");
-    }
-
-    @Test
-    public void hentKontaktopplysning_ikkeGjeldig() {
-        Response response = kontaktopplysningTjeneste.hentKontaktopplysning(null, null);
-        assertThat(response).isNotNull();
-        assertThat(response.getEntity()).isNull();
-    }
-
-    @Test
-    public void lagKontaktopplysning_ny() {
-        KontaktInfoDto kontaktInfoDto = new KontaktInfoDto();
-        kontaktInfoDto.kontaktnavn = "AA";
-        kontaktInfoDto.kontaktorgnr = "100";
-        when(kontaktopplysningRepo.findById(new KontaktopplysningID(SAK_NUMMER, ORG_NUMMER))).thenReturn(Optional.empty());
-        Response response = kontaktopplysningTjeneste.lagKontaktopplysning(SAK_NUMMER, ORG_NUMMER, kontaktInfoDto);
-        assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(200);
-        verify(kontaktopplysningRepo).save(ArgumentMatchers.any(Kontaktopplysning.class));
-        Kontaktopplysning kontaktopplysningRes = (Kontaktopplysning) response.getEntity();
-
-        assertThat(kontaktopplysningRes.getKontaktopplysningID().getSaksnummer()).isEqualTo(SAK_NUMMER);
-        assertThat(kontaktopplysningRes.getKontaktopplysningID().getOrgnr()).isEqualTo(ORG_NUMMER);
-        assertThat(kontaktopplysningRes.getKontaktNavn()).isEqualTo("AA");
-        assertThat(kontaktopplysningRes.getKontaktOrgnr()).isEqualTo("100");
     }
 
     @Test
-    public void lagKontaktopplysning_oppdatering() {
+    public void hentKontaktopplysning_kallerPåService_objektFinnesIkke() {
+        Response response = kontaktopplysningTjeneste.hentKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
+
+        verify(kontaktopplysningService).hentKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
+
+        assertThat(response.getStatus()).isEqualTo(404);
+    }
+
+    @Test
+    public void lagKontaktopplysning_kallerPåService() {
         KontaktInfoDto kontaktInfoDto = new KontaktInfoDto();
-        kontaktInfoDto.kontaktnavn = "BB";
-        kontaktInfoDto.kontaktorgnr = "200";
-        when(kontaktopplysningRepo.findById(new KontaktopplysningID(SAK_NUMMER, ORG_NUMMER))).thenReturn(Optional.of(kontaktopplysning));
+        kontaktInfoDto.setKontaktnavn("kontaktnavn");
+        kontaktInfoDto.setKontaktorgnr("kontaktorgnr");
         Response response = kontaktopplysningTjeneste.lagKontaktopplysning(SAK_NUMMER, ORG_NUMMER, kontaktInfoDto);
-        assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(200);
-        verify(kontaktopplysningRepo).save(ArgumentMatchers.any(Kontaktopplysning.class));
 
-        Kontaktopplysning kontaktopplysningRes = (Kontaktopplysning) response.getEntity();
-        assertThat(kontaktopplysningRes.getKontaktNavn()).isEqualTo("BB");
-        assertThat(kontaktopplysningRes.getKontaktOrgnr()).isEqualTo("200");
+        verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, kontaktInfoDto.getKontaktorgnr(), kontaktInfoDto.getKontaktnavn());
+        assertThat(response.getStatus()).isEqualTo(200);
     }
 
     @Test
-    public void slettKontaktopplysning_kallerDeleteByIdMedGittSaksnummerOgOrgNummer() {
-        kontaktopplysningTjeneste.slettKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
+    public void slettKontaktopplysning_kallerPåService() throws FunksjonellException {
+        Response response = kontaktopplysningTjeneste.slettKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
 
-        ArgumentCaptor<KontaktopplysningID> captor = ArgumentCaptor.forClass(KontaktopplysningID.class);
-        verify(kontaktopplysningRepo).deleteById(captor.capture());
-        KontaktopplysningID kontaktopplysningID = captor.getValue();
-
-        assertThat(kontaktopplysningID.getSaksnummer()).isEqualTo(SAK_NUMMER);
-        assertThat(kontaktopplysningID.getOrgnr()).isEqualTo(ORG_NUMMER);
+        verify(kontaktopplysningService).slettKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
+        assertThat(response.getStatus()).isEqualTo(200);
     }
 }
