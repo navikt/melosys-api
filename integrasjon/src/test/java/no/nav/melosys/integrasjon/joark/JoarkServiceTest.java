@@ -1,16 +1,22 @@
 package no.nav.melosys.integrasjon.joark;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import javax.xml.datatype.DatatypeConfigurationException;
 
+import no.nav.dok.tjenester.journalfoerinngaaende.PostLogiskVedleggRequest;
+import no.nav.dok.tjenester.journalfoerinngaaende.PutDokumentRequest;
+import no.nav.dok.tjenester.journalfoerinngaaende.PutJournalpostRequest;
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
+import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
+import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.DokumentInformasjonMangler;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Journalfoeringsbehov;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.JournalpostMangler;
@@ -24,12 +30,15 @@ import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostList
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JoarkServiceTest {
@@ -37,11 +46,21 @@ public class JoarkServiceTest {
     private JoarkService joarkService;
 
     @Mock
+    private InngaaendeJournalConsumer inngaaendeJournalConsumer;
+    @Mock
     private JournalConsumer journalConsumer;
+    @Mock
+    private JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer;
+    @Captor
+    private ArgumentCaptor<PutJournalpostRequest> oppdaterJournalpostCaptor;
+    @Captor
+    private ArgumentCaptor<PutDokumentRequest> oppdaterDokumentCaptor;
+    @Captor
+    private ArgumentCaptor<PostLogiskVedleggRequest> logiskVedleggCaptor;
 
     @Before
     public void setUp() {
-        this.joarkService = new JoarkService(null, null, journalConsumer);
+        this.joarkService = new JoarkService(inngaaendeJournalConsumer, journalConsumer, journalfoerInngaaendeConsumer);
     }
 
     @Test
@@ -115,5 +134,39 @@ public class JoarkServiceTest {
         assertThat(journalfoeringMangler).doesNotContain(JournalfoeringMangel.HOVEDDOKUMENT_TITTEL);
         assertThat(journalfoeringMangler).contains(JournalfoeringMangel.INNHOLD);
         assertThat(journalfoeringMangler).contains(JournalfoeringMangel.TEMA);
+    }
+
+    @Test
+    public void oppdaterJournalpost_påkrevdeVerdierUtfylt() throws Exception {
+
+        joarkService.oppdaterJournalpost("123", "1234", 1L, "12345",
+            "12", "321", "tittel", Arrays.asList("dok1", "dok2"), true);
+
+        verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), anyString());
+        PutJournalpostRequest request = oppdaterJournalpostCaptor.getValue();
+
+        assertThat(request).isNotNull();
+        assertThat(request.getAvsender()).isNotNull();
+        assertThat(request.getAvsender().getNavn()).isNotNull();
+
+        assertThat(request.getBruker()).isNotNull();
+        assertThat(request.getBruker().getIdentifikator()).isNotNull();
+        assertThat(request.getBruker().getBrukerType()).isNotNull();
+
+        assertThat(request.getArkivSak()).isNotNull();
+        assertThat(request.getArkivSak().getArkivSakId()).isNotNull();
+        assertThat(request.getArkivSak().getArkivSakSystem()).isNotNull();
+
+        verify(journalfoerInngaaendeConsumer).oppdaterDokument(oppdaterDokumentCaptor.capture(), anyString(), anyString());
+        PutDokumentRequest dokumentRequest = oppdaterDokumentCaptor.getValue();
+
+        assertThat(dokumentRequest).isNotNull();
+        assertThat(dokumentRequest.getDokumentKategori()).isNotNull();
+
+        verify(journalfoerInngaaendeConsumer, times(2)).leggTilLogiskVedlegg(logiskVedleggCaptor.capture(), anyString(), anyString());
+        List<PostLogiskVedleggRequest> logiskVedleggRequest = logiskVedleggCaptor.getAllValues();
+        assertThat(logiskVedleggRequest.size()).isEqualTo(2);
+        assertThat(logiskVedleggRequest.get(0).getTittel()).isEqualTo("dok1");
+        assertThat(logiskVedleggRequest.get(1).getTittel()).isEqualTo("dok2");
     }
 }
