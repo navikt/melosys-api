@@ -49,8 +49,10 @@ public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findWithSaksbehandlingById(behandlingID)
             .orElseThrow(() -> new TekniskException("Behandlingsresultat " + behandlingID + " finnes ikke."));
 
-        if (prosessinstans.getType() == ProsessType.ANMODNING_OM_UNNTAK ||
-                SendBrevValidator.innvilgelsesbrevSkalSendes(behandlingsresultat.getType(), behandlingsresultat.getLovvalgsperioder().iterator().next())) {
+        boolean innvilgelseEllerAnmodningUnntakSkalSendes = prosessinstans.getType() == ProsessType.ANMODNING_OM_UNNTAK ||
+            SendBrevValidator.innvilgelsesbrevSkalSendes(behandlingsresultat.getType(), behandlingsresultat.getLovvalgsperioder().iterator().next());
+
+        if (innvilgelseEllerAnmodningUnntakSkalSendes) {
 
             Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
             String saksnummer = fagsak.getSaksnummer();

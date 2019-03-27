@@ -164,7 +164,7 @@ public class AvklarMyndighetTest {
     }
 
     @Test
-    public void utfør_anmodningUnntakSjekkSteg_forventAouSendBrev() throws Exception {
+    public void utfør_anmodningUnntakSjekkSteg_forventAouOppdaterMedl() throws Exception {
         UtenlandskMyndighet utenlandskMyndighet = lagUtenlandskMyndighet();
         when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.BE))).thenReturn(utenlandskMyndighet);
 
