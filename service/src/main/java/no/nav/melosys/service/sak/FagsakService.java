@@ -174,6 +174,15 @@ public class FagsakService {
             aktører.add(aktørRepresentant);
         }
 
+        Instant nå = Instant.now();
+
+        fagsak.setAktører(aktører);
+        fagsak.setRegistrertDato(nå);
+        fagsak.setEndretDato(nå);
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+
+        lagre(fagsak);
+
         String representantKontaktperson = opprettSakRequest.getRepresentantKontaktperson();
         if (representantKontaktperson != null) {
             if (representant == null) {
@@ -185,15 +194,6 @@ public class FagsakService {
                 kontaktopplysningRepo.save(kontaktopplysning);
             }
         }
-
-        Instant nå = Instant.now();
-
-        fagsak.setAktører(aktører);
-        fagsak.setRegistrertDato(nå);
-        fagsak.setEndretDato(nå);
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
-
-        lagre(fagsak);
 
         Behandlingstyper behandlingstype = opprettSakRequest.getBehandlingstype();
         String initierendeJournalpostId = opprettSakRequest.getInitierendeJournalpostId();
