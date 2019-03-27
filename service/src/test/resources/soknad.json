@@ -106,7 +106,10 @@
       "flaggLandKode": "GB",
       "installasjonsLandKode": "GB"
     }
-  ]
+  ],
+  "soeknadsland": {
+    "landKode": "GB"
+  }
 }
 
 

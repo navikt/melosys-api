@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -83,7 +80,7 @@ public abstract class AbstraktDokumentDataBygger {
     }
 
     private List<Arbeidssted> hentIkkeFysiskeArbeidssteder() {
-        Set<Avklartefakta> avklartefaktaSet = avklartefaktaService.hentAlleAvklarteFlaggland(behandling.getId());
+        Set<Avklartefakta> avklartefaktaSet = avklartefaktaService.hentAlleAvklarteArbeidsland(behandling.getId());
 
         return avklartefaktaSet.stream()
             .map(avklartefakta -> new Arbeidssted(avklartefakta.getSubjekt(), avklartefakta.getFakta(), Yrkesgrupper.SOKKEL_ELLER_SKIP))

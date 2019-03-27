@@ -83,7 +83,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
 
     private static Avklartefakta lagAvklarteFakta() {
         Avklartefakta faktum = new Avklartefakta();
-        faktum.setType(Avklartefaktatype.AVKLARTE_ARBEIDSGIVER);
+        faktum.setType(Avklartefaktatype.VIRKSOMHET);
         faktum.setFakta("TRUE");
         faktum.setSubjekt("123456789");
         return faktum;

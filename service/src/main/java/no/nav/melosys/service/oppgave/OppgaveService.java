@@ -114,7 +114,7 @@ public class OppgaveService {
             JournalfoeringsoppgaveDto jfrOppgaveDto = new JournalfoeringsoppgaveDto();
             jfrOppgaveDto.setJournalpostID(oppgave.getJournalpostId());
             dest = jfrOppgaveDto;
-        } else if (oppgave.erBehandling()) {
+        } else if (oppgave.erBehandling() || oppgave.erVurderDokument()) {
             BehandlingsoppgaveDto behOppgaveDto = new BehandlingsoppgaveDto();
             Fagsak fagsak = fagsakRepository.findBySaksnummer(oppgave.getSaksnummer());
             if (fagsak == null) {

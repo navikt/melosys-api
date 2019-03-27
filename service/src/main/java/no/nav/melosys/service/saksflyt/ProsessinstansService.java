@@ -57,11 +57,11 @@ public class ProsessinstansService {
     }
 
     public boolean erUnderOppfriskning(Long behandlingID) {
-        return prosessinstansRepo.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessType.OPPFRISKNING, ProsessSteg.FEILET_MASKINELT, behandlingID).isPresent();
+        return prosessinstansRepo.findByTypeAndBehandling_IdAndStegIsNotAndStegIsNot(ProsessType.OPPFRISKNING, behandlingID, ProsessSteg.FEILET_MASKINELT, ProsessSteg.FERDIG).isPresent();
     }
 
     public boolean harAktivProsessinstans(Long behandlingID) {
-        return prosessinstansRepo.findByStegIsNotNullAndStegIsNotAndBehandling_Id(ProsessSteg.FEILET_MASKINELT, behandlingID).isPresent();
+        return prosessinstansRepo.findByBehandling_IdAndStegIsNotAndStegIsNot(behandlingID, ProsessSteg.FEILET_MASKINELT, ProsessSteg.FERDIG).isPresent();
     }
 
     public void lagre(Prosessinstans prosessinstans) {

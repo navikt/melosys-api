@@ -2,10 +2,8 @@ package no.nav.melosys.service.oppgave;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -14,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.util.KodeverkUtils;
@@ -74,6 +73,7 @@ public class Oppgaveplukker {
 
         List<Sakstyper> fagsakstypeListe = new ArrayList<>();
         List<Behandlingstyper> behandlingstypeListe = new ArrayList<>();
+        List<Behandlingstema> behandlingstemaListe = new ArrayList<>();
         if (oppgavetype == Oppgavetyper.BEH_SAK_MK) {
 
             List<String> sakstyper = plukkDto.getSakstyper();
@@ -82,17 +82,15 @@ public class Oppgaveplukker {
             }
 
             List<String> behandlingstyper = plukkDto.getBehandlingstyper();
-            for (String b : behandlingstyper) {
-                // FIXME: Internt kodeverk må oppdateres i frontend.
-                if (b.equals("SKND")) {
-                    behandlingstypeListe.add(Behandlingstyper.SOEKNAD);
-                    continue;
+            if (behandlingstyper != null) {
+                for (String behandlingstype : behandlingstyper) {
+                    behandlingstypeListe.add(KodeverkUtils.dekod(Behandlingstyper.class, behandlingstype));
                 }
-                behandlingstypeListe.add(KodeverkUtils.dekod(Behandlingstyper.class, b));
             }
+            behandlingstemaListe.addAll(hentBehandlingstema(fagsakstypeListe));
         }
 
-        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakstypeListe, behandlingstypeListe);
+        List<Oppgave> ufordelteOppgaver = gsakFasade.finnUtildelteOppgaverEtterFrist(oppgavetype, fagområde, fagsakstypeListe, behandlingstypeListe, behandlingstemaListe);
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);
@@ -107,6 +105,12 @@ public class Oppgaveplukker {
             }
         }
         return valg;
+    }
+
+    List<Behandlingstema> hentBehandlingstema(List<Sakstyper> fagsakstypeListe) {
+        return fagsakstypeListe.stream()
+            .map(sakstyper -> Behandlingstema.valueOf(sakstyper.name()))
+            .collect(Collectors.toList());
     }
 
     private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) throws TekniskException {

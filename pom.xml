@@ -39,9 +39,10 @@
 
         <!-- Melosys -->
         <melosys-eessi-avro.version>0.1-SNAPSHOT</melosys-eessi-avro.version>
-        <melosys.frontend.version>0.18.1-415</melosys.frontend.version>
-        <melosys.jsonschema.version>0.16.1-SNAPSHOT</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>1.2.6</melosys.internt.kodeverk.version>
+        <melosys.frontend.version>0.19.0-SNAPSHOT</melosys.frontend.version>
+        <melosys.jsonschema.version>1.3.1-8</melosys.jsonschema.version>
+        <melosys.frontendlogger.version>0.16.1-SNAPSHOT</melosys.frontendlogger.version>
+        <melosys.internt.kodeverk.version>1.2.7</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
@@ -97,7 +98,7 @@
 
     </properties>
 
-    <!-- Unngå å put scope i dependency management. Sett det heller der det 
+    <!-- Unngå å put scope i dependency management. Sett det heller der det
         brukes. -->
     <dependencyManagement>
         <dependencies>
@@ -174,7 +175,7 @@
             <dependency>
                 <groupId>no.nav.melosys</groupId>
                 <artifactId>melosys-frontendlogger</artifactId>
-                <version>${melosys.jsonschema.version}</version>
+                <version>${melosys.frontendlogger.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
@@ -433,25 +434,25 @@
                 <groupId>no.nav.tjenester</groupId>
                 <artifactId>nav-behandleMedlemskap-v2-tjenestespesifikasjon</artifactId>
                 <version>${behandle-medlemskap-v2.version}</version>
-            </dependency>                
+            </dependency>
             <!-- Dokumenthåndtering (DOKPROD) -->
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
                 <artifactId>melosysbrev</artifactId>
                 <version>${dokprod.melosysbrev.version}</version>
-            </dependency>            
+            </dependency>
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
                 <artifactId>melosysbrev</artifactId>
                 <classifier>jaxb</classifier>
-                <version>${dokprod.melosysbrev.version}</version>                
+                <version>${dokprod.melosysbrev.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
                 <artifactId>melosysbrev</artifactId>
                 <classifier>jaxb-sources</classifier>
-                <version>${dokprod.melosysbrev.version}</version>                
-            </dependency>            
+                <version>${dokprod.melosysbrev.version}</version>
+            </dependency>
 
             <!-- Test -->
             <dependency>

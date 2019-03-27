@@ -42,6 +42,11 @@ public class BingeImpl implements Binge {
     }
 
     @Override
+    public synchronized List<Prosessinstans> hentProsessinstanser() {
+        return new ArrayList<>(prosessinstanser.values());
+    }
+
+    @Override
     public synchronized Collection<Prosessinstans> hentProsessinstanser(Predicate<Prosessinstans> predikat) {
         return prosessinstanser.values().stream().filter(predikat).collect(Collectors.toList());
     }
