@@ -11,8 +11,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.repository.KontaktopplysningRepository;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class FagsakService {
 
     private final BehandlingService behandlingService;
 
-    private final KontaktopplysningRepository kontaktopplysningRepo;
+    private final KontaktopplysningService kontaktopplysningService;
 
     private final OppgaveService oppgaveService;
 
@@ -39,13 +39,13 @@ public class FagsakService {
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository,
                          BehandlingService behandlingService,
-                         KontaktopplysningRepository kontaktopplysningRepo,
+                         KontaktopplysningService kontaktopplysningService,
                          OppgaveService oppgaveService,
                          TpsFasade tpsFasade,
                          ProsessinstansService prosessinstansService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
-        this.kontaktopplysningRepo = kontaktopplysningRepo;
+        this.kontaktopplysningService = kontaktopplysningService;
         this.oppgaveService = oppgaveService;
         this.tpsFasade = tpsFasade;
         this.prosessinstansService = prosessinstansService;
@@ -188,10 +188,7 @@ public class FagsakService {
             if (representant == null) {
                 throw new FunksjonellException("Kontaktopplysninger kan ikke lagres uten orgnr.");
             } else {
-                Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
-                kontaktopplysning.setKontaktopplysningID(new KontaktopplysningID(saksnummer, representant));
-                kontaktopplysning.setKontaktNavn(representantKontaktperson);
-                kontaktopplysningRepo.save(kontaktopplysning);
+                kontaktopplysningService.lagEllerOppdaterKontaktopplysning(saksnummer, representant, null, representantKontaktperson);
             }
         }
 

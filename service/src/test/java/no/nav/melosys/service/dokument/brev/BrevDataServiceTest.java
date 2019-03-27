@@ -16,8 +16,8 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.repository.KontaktopplysningRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
+import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +44,7 @@ public class BrevDataServiceTest {
     UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
     @Mock
-    KontaktopplysningRepository kontaktopplysningRepository;
+    KontaktopplysningService kontaktopplysningService;
 
     private BrevDataService service;
 
@@ -55,7 +55,7 @@ public class BrevDataServiceTest {
 
     @Before
     public void setUp() throws IkkeFunnetException, TekniskException {
-        service = spy(new BrevDataService(tpsService, behandlingsresultatRepository, utenlandskMyndighetRepository, kontaktopplysningRepository));
+        service = spy(new BrevDataService(tpsService, behandlingsresultatRepository, utenlandskMyndighetRepository, kontaktopplysningService));
 
         when(tpsService.hentFagsakIdentMedRolleType(any(), any())).thenCallRealMethod();
         when(tpsService.hentIdentForAktørId(any())).thenReturn(FNR);
@@ -228,14 +228,14 @@ public class BrevDataServiceTest {
         BrevData brevData = new BrevData("Z123456");
         brevData.mottaker = Aktoersroller.REPRESENTANT;
         brevData.fritekst = "Test";
-        when(kontaktopplysningRepository.findById(any())).thenReturn(Optional.of(kontaktopplysning));
+        when(kontaktopplysningService.hentKontaktopplysning(anyString(), anyString())).thenReturn(Optional.of(kontaktopplysning));
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
         assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo("KONTAKTORG_999");
 
-        when(kontaktopplysningRepository.findById(any())).thenReturn(Optional.empty());
+        when(kontaktopplysningService.hentKontaktopplysning(anyString(), anyString())).thenReturn(Optional.empty());
         metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
         assertThat(metadata.brukerID).isEqualTo(FNR);
@@ -255,12 +255,12 @@ public class BrevDataServiceTest {
         BrevData brevData = new BrevData("Z123456");
         brevData.mottaker = Aktoersroller.ARBEIDSGIVER;
         brevData.fritekst = "Test";
-        when(kontaktopplysningRepository.findById(any())).thenReturn(Optional.of(kontaktopplysning));
+        when(kontaktopplysningService.hentKontaktopplysning(anyString(), anyString())).thenReturn(Optional.of(kontaktopplysning));
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
         assertThat(metadata.mottakerID).isEqualTo("KONTAKTORG_999");
 
-        when(kontaktopplysningRepository.findById(any())).thenReturn(Optional.empty());
+        when(kontaktopplysningService.hentKontaktopplysning(anyString(), anyString())).thenReturn(Optional.empty());
         metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, behandling, brevData);
 
         assertThat(metadata.mottakerID).isEqualTo(ORGNR);
