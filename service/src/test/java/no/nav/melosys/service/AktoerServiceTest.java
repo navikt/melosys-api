@@ -21,8 +21,7 @@ import org.springframework.data.domain.Example;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AktoerServiceTest {
@@ -38,6 +37,9 @@ public class AktoerServiceTest {
     @Before
     public void setUp() {
         aktørService = new AktoerService(aktørRepository);
+        Aktoer aktoer = new Aktoer();
+        aktoer.setId(234L);
+        doReturn(aktoer).when(aktørRepository).save(any());
     }
 
     @Test
