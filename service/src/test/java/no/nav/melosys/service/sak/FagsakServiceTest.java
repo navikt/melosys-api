@@ -8,7 +8,6 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -16,8 +15,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.repository.KontaktopplysningRepository;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
@@ -47,7 +46,7 @@ public class FagsakServiceTest {
     private BehandlingService behandlingService;
 
     @Mock
-    private KontaktopplysningRepository kontaktopplysningRepo;
+    private KontaktopplysningService kontaktopplysningService;
 
     @Mock
     private OppgaveService oppgaveService;
@@ -66,7 +65,7 @@ public class FagsakServiceTest {
 
     @Before
     public void setUp() {
-        fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningRepo, oppgaveService, tps, prosessinstansService);
+        fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService, tps, prosessinstansService);
     }
 
     @Test
@@ -119,11 +118,7 @@ public class FagsakServiceTest {
 
         fagsakService.nyFagsakOgBehandling(opprettSakRequest);
 
-        ArgumentCaptor<Kontaktopplysning> kontaktopplysningArgumentCaptor = ArgumentCaptor.forClass(Kontaktopplysning.class);
-        verify(kontaktopplysningRepo).save(kontaktopplysningArgumentCaptor.capture());
-        Kontaktopplysning kontaktopplysning = kontaktopplysningArgumentCaptor.getValue();
-        assertThat(kontaktopplysning.getKontaktNavn()).isEqualTo("Kontaktperson");
-        assertThat(kontaktopplysning.getKontaktopplysningID().getOrgnr()).isEqualTo("RepresentantOrgnr");
+        verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(any(), eq("RepresentantOrgnr"), eq(null), eq("Kontaktperson"));
     }
 
     @Test
