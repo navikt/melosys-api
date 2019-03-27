@@ -41,10 +41,11 @@ public class OppdaterJournalpostTest {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
         p.setData(ProsessDataKey.GSAK_SAK_ID, 123L);
+        p.setData(ProsessDataKey.AVSENDER_NAVN, "navn");
         agent.utførSteg(p);
 
-        verify(joarkFasade, times(1)).utledJournalfoeringsbehov(any());
-        verify(joarkFasade, times(1)).oppdaterJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), eq(false));
+        verify(joarkFasade).utledJournalfoeringsbehov(any());
+        verify(joarkFasade).oppdaterJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), eq(false));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST);
     }
 
@@ -56,11 +57,12 @@ public class OppdaterJournalpostTest {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
         p.setData(ProsessDataKey.GSAK_SAK_ID, 456L);
+        p.setData(ProsessDataKey.AVSENDER_NAVN, "navn");
 
         agent.utførSteg(p);
 
-        verify(joarkFasade, times(1)).utledJournalfoeringsbehov(any());
-        verify(joarkFasade, times(1)).oppdaterJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), eq(true));
+        verify(joarkFasade).utledJournalfoeringsbehov(any());
+        verify(joarkFasade).oppdaterJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), eq(true));
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_FERDIGSTILL_JOURNALPOST);
     }
 
@@ -75,6 +77,7 @@ public class OppdaterJournalpostTest {
         p.setType(ProsessType.JFR_NY_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
         p.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+        p.setData(ProsessDataKey.AVSENDER_NAVN, "navn");
         agent.utførSteg(p);
 
         ArgumentCaptor<Long> gsakSaksnummerCaptor = ArgumentCaptor.forClass(Long.class);

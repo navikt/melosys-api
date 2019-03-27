@@ -57,7 +57,7 @@ public class JoarkService implements JoarkFasade {
     public void ferdigstillJournalføring(String journalpostId) throws FunksjonellException, IntegrasjonException {
         PutJournalpostRequest journalpostRequest = new PutJournalpostRequest();
         journalpostRequest.setForsoekEndeligJF(true);
-        journalpostRequest.setJournalfEnhet(Fagsystem.MELOSYS.getKode());
+        journalpostRequest.setJournalfEnhet(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
         journalfoerInngaaendeConsumer.oppdaterJournalpost(journalpostRequest, journalpostId);
     }
 
@@ -203,7 +203,6 @@ public class JoarkService implements JoarkFasade {
         avsender.setNavn(avsenderNavn);
         journalpost.setAvsender(avsender);
 
-        journalpost.setJournalfEnhet(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
         journalpost.setForsoekEndeligJF(false);
 
         journalfoerInngaaendeConsumer.oppdaterJournalpost(journalpost, journalpostId);

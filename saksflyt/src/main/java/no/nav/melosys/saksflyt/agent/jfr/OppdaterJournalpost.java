@@ -88,6 +88,9 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         String avsenderID = prosessinstans.getData(AVSENDER_ID);
         String avsenderNavn = prosessinstans.getData(AVSENDER_NAVN);
         if (avsenderNavn == null) {
+            if (avsenderID == null) {
+                throw new FunksjonellException("Både avsenderID og AvsenderNavn er null. AvsenderNavn er påkrevd for å journalføre.");
+            }
             avsenderNavn = avsenderID; //Avsendernavn er påkrevd
         }
         String tittel = prosessinstans.getData(HOVEDDOKUMENT_TITTEL);
