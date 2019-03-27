@@ -6,6 +6,7 @@ import no.nav.melosys.audit.AuditorProvider;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -47,7 +48,7 @@ public class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    public void utførSteg_typeJfrNySak_tilStegJfrOpprettSøknad() {
+    public void utførSteg_typeJfrNySak_tilStegJfrOpprettSøknad() throws FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
         String aktørId = "FJERNET93";

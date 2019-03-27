@@ -3,10 +3,7 @@ package no.nav.melosys.service.sak;
 import java.time.Instant;
 import java.util.*;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.RegistreringsInfo;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -14,6 +11,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.repository.KontaktopplysningRepository;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -30,6 +28,8 @@ public class FagsakService {
 
     private final BehandlingService behandlingService;
 
+    private final KontaktopplysningRepository kontaktopplysningRepo;
+
     private final OppgaveService oppgaveService;
 
     private final TpsFasade tpsFasade;
@@ -39,11 +39,13 @@ public class FagsakService {
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository,
                          BehandlingService behandlingService,
+                         KontaktopplysningRepository kontaktopplysningRepo,
                          OppgaveService oppgaveService,
                          TpsFasade tpsFasade,
                          ProsessinstansService prosessinstansService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
+        this.kontaktopplysningRepo = kontaktopplysningRepo;
         this.oppgaveService = oppgaveService;
         this.tpsFasade = tpsFasade;
         this.prosessinstansService = prosessinstansService;
@@ -141,9 +143,10 @@ public class FagsakService {
      * - Oppretter tom behandlingsresultat.
      */
     @Transactional
-    public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) {
+    public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) throws FunksjonellException {
         Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(hentNesteSaksnummer());
+        String saksnummer = hentNesteSaksnummer();
+        fagsak.setSaksnummer(saksnummer);
 
         HashSet<Aktoer> aktører = new HashSet<>();
 
@@ -169,6 +172,18 @@ public class FagsakService {
             aktørRepresentant.setFagsak(fagsak);
             aktørRepresentant.setRolle(Aktoersroller.REPRESENTANT);
             aktører.add(aktørRepresentant);
+        }
+
+        String representantKontaktperson = opprettSakRequest.getRepresentantKontaktperson();
+        if (representantKontaktperson != null) {
+            if (representant == null) {
+                throw new FunksjonellException("Kontaktopplysninger kan ikke lagres uten orgnr.");
+            } else {
+                Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
+                kontaktopplysning.setKontaktopplysningID(new KontaktopplysningID(saksnummer, representant));
+                kontaktopplysning.setKontaktNavn(representantKontaktperson);
+                kontaktopplysningRepo.save(kontaktopplysning);
+            }
         }
 
         Instant nå = Instant.now();
