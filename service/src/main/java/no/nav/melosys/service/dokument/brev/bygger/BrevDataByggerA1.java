@@ -1,12 +1,9 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.time.LocalDate;
 import java.util.function.Function;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.dokument.felles.Adresse;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -55,11 +52,5 @@ public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements Brev
         return brevData;
     }
 
-    Function<OrganisasjonDokument, Adresse> adresseformaterer = this::utfyllManglendeAdressefelter;
-
-    private StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
-        StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
-        adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
-        return adresse;
-    }
+    private Function<OrganisasjonDokument, Adresse> adresseformaterer = this::utfyllManglendeAdressefelter;
 }

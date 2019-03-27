@@ -1,6 +1,9 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -46,7 +49,7 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
 
-    Function<OrganisasjonDokument, Adresse> ustrukturertForretningsadresse = org -> org.getOrganisasjonDetaljer().hentUstrukturertForretningsadresse();
+    private Function<OrganisasjonDokument, Adresse> adresseformaterer = this::utfyllManglendeAdressefelter;
 
     @Override
     public BrevData lag(Behandling behandling, String saksbehandler) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
@@ -60,8 +63,8 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
         BrevDataA001 brevData = new BrevDataA001();
         brevData.personDokument = this.person;
         brevData.utenlandskMyndighet = hentUtenlandsMyndighet(landkode);
-        brevData.arbeidsgivendeVirkomsheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ustrukturertForretningsadresse);
-        brevData.selvstendigeVirksomheter = avklarteVirksomheterService.hentSelvstendigeForetak(behandling, ustrukturertForretningsadresse);
+        brevData.arbeidsgivendeVirkomsheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, adresseformaterer);
+        brevData.selvstendigeVirksomheter = avklarteVirksomheterService.hentSelvstendigeForetak(behandling, adresseformaterer);
 
         brevData.bostedsadresse = hentBostedsadresse();
         brevData.arbeidssteder = hentArbeidssteder();

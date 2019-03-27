@@ -43,7 +43,8 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
     }
 
     Function<OrganisasjonDokument, no.nav.melosys.domain.dokument.felles.Adresse> adresseformaterer = this::utfyllManglendeAdressefelter;
-    private StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
+
+    protected StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
         StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
         adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
         return adresse;
