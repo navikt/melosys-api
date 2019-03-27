@@ -44,12 +44,13 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public byte[] produserDokumentutkast(DokumentbestillingMetadata metadata, Object brevdata) throws IntegrasjonException {
+    public byte[] produserDokumentutkast(Dokumentbestilling dokumentbestilling) throws IntegrasjonException {
         ProduserDokumentutkastRequest wsRequest = new ProduserDokumentutkastRequest();
+        DokumentbestillingMetadata metadata = dokumentbestilling.getMetadata();
 
         wsRequest.setUtledRegisterInfo(metadata.utledRegisterInfo);
         wsRequest.setDokumenttypeId(metadata.dokumenttypeID);
-        wsRequest.setBrevdata(brevdata);
+        wsRequest.setBrevdata(dokumentbestilling.getBrevData());
 
         try {
             ProduserDokumentutkastResponse wsResponse = dokumentproduksjonConsumer.produserDokumentutkast(wsRequest);
@@ -61,11 +62,12 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public DokumentbestillingResponse produserIkkeredigerbartDokument(DokumentbestillingMetadata metadata, Object brevdata)
+    public DokumentbestillingResponse produserIkkeredigerbartDokument(Dokumentbestilling dokumentbestilling)
         throws FunksjonellException, TekniskException {
         ProduserIkkeredigerbartDokumentRequest wsRequest = new ProduserIkkeredigerbartDokumentRequest();
         Dokumentbestillingsinformasjon info = new Dokumentbestillingsinformasjon();
 
+        DokumentbestillingMetadata metadata = dokumentbestilling.getMetadata();
         info.setDokumenttypeId(metadata.dokumenttypeID);
         info.setUtledRegisterInfo(metadata.utledRegisterInfo);
         // Hvis vedlegg skal sendes, må denne settes først når vedleggene har blitt sendt
@@ -105,7 +107,7 @@ public class DoksysService implements DoksysFasade {
         }
 
         wsRequest.setDokumentbestillingsinformasjon(info);
-        wsRequest.setBrevdata(brevdata);
+        wsRequest.setBrevdata(dokumentbestilling.getBrevData());
 
         try {
             log.debug("Bestiller dokument:{} {}", System.lineSeparator(), wsRequest.toString());

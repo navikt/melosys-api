@@ -24,7 +24,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
-import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
+import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JoarkService;
@@ -71,7 +71,7 @@ public final class DokumentServiceTest {
     public final void produserInnvilgelsesbrevFunker() throws Exception {
         BrevData brevData = lagBrevData(Aktoersroller.BRUKER);
         instans.produserDokument(BEHANDLINGSID, Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, brevData);
-        verify(dokSysFasade).produserIkkeredigerbartDokument(any(DokumentbestillingMetadata.class), any(Object.class));
+        verify(dokSysFasade).produserIkkeredigerbartDokument(any(Dokumentbestilling.class));
     }
 
     @Test
@@ -85,7 +85,7 @@ public final class DokumentServiceTest {
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(dokSysFasade, lagBrevdatabyggerVelgerMock(brevbestilling));
         byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, brevbestilling);
         assertThat(resultat).isNull();
-        verify(dokSysFasade).produserDokumentutkast(any(DokumentbestillingMetadata.class), any(Object.class));
+        verify(dokSysFasade).produserDokumentutkast(any(Dokumentbestilling.class));
     }
 
     @Test

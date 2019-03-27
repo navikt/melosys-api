@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
+import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -109,11 +110,8 @@ public class DokumentService {
 
         Aktoersroller mottakerRolle = brevData.mottaker != null ? brevData.mottaker : avklarMottakerRolleFraProduserbartDokument(produserbartDokument);
         Aktoer mottaker = behandling.getFagsak().hentAktørMedRolleType(mottakerRolle);
-        Kontaktopplysning kontaktopplysning = hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker);
-        DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
-        Object brevinnhold = brevDataService.lagBrevXML(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
 
-        return dokSysFasade.produserDokumentutkast(request, brevinnhold);
+        return dokSysFasade.produserDokumentutkast(lagDokumentbestilling(produserbartDokument, mottaker, behandling, brevData));
     }
 
     /**
@@ -174,12 +172,16 @@ public class DokumentService {
         }
     }
 
+    private Dokumentbestilling lagDokumentbestilling(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        Kontaktopplysning kontaktopplysning = hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker);
+        DokumentbestillingMetadata metadata = brevDataService.lagBestillingMetadata(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
+        Object brevinnhold = brevDataService.lagBrevXML(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
+        return new Dokumentbestilling(metadata, brevinnhold);
+    }
+
     private void produserIkkeredigerbartDokument(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData)
         throws FunksjonellException, TekniskException {
-        Kontaktopplysning kontaktopplysning = hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker);
-        DokumentbestillingMetadata request = brevDataService.lagBestillingMetadata(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
-        Object brevinnhold = brevDataService.lagBrevXML(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
-        dokSysFasade.produserIkkeredigerbartDokument(request, brevinnhold);
+        dokSysFasade.produserIkkeredigerbartDokument(lagDokumentbestilling(produserbartDokument, mottaker, behandling, brevData));
     }
 
     @Transactional

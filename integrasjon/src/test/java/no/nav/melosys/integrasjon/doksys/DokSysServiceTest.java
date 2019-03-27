@@ -48,7 +48,7 @@ public class DokSysServiceTest {
         Object brevdata = new Object();
         when(dokumentproduksjonConsumer.produserDokumentutkast(any())).thenReturn(new ProduserDokumentutkastResponse());
 
-        dokSysService.produserDokumentutkast(metadata, brevdata);
+        dokSysService.produserDokumentutkast(new Dokumentbestilling(metadata, brevdata));
 
         ArgumentCaptor<ProduserDokumentutkastRequest> captor = ArgumentCaptor.forClass(ProduserDokumentutkastRequest.class);
         verify(dokumentproduksjonConsumer).produserDokumentutkast(captor.capture());
@@ -67,7 +67,7 @@ public class DokSysServiceTest {
         Object brevdata = new Object();
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 
-        dokSysService.produserIkkeredigerbartDokument(metadata, brevdata);
+        dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, brevdata));
 
         ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
         verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
@@ -103,7 +103,7 @@ public class DokSysServiceTest {
         Object brevdata = new Object();
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 
-        dokSysService.produserIkkeredigerbartDokument(metadata, brevdata);
+        dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, brevdata));
 
         ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
         verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
