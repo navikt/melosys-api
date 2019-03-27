@@ -114,8 +114,6 @@ public class FagsakServiceTest {
 
     @Test
     public void nyFagsakOgBehandling_kontaktPersonFinnes_KontaktOpplysningOpprettes() throws FunksjonellException {
-        Behandling behandling = mock(Behandling.class);
-        doReturn(behandling).when(behandlingService).nyBehandling(any(), any(), any(), anyString(), anyString());
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID("AKTOER_ID").medAktørID("123456789")
             .medBehandlingstype(Behandlingstyper.SOEKNAD).medRepresentant("RepresentantOrgnr").medRepresentantKontaktperson("Kontaktperson").build();
 
