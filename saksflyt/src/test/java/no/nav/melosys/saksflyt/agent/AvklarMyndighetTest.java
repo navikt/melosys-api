@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.iv;
+package no.nav.melosys.saksflyt.agent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,7 @@ import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
+import no.nav.melosys.saksflyt.agent.iv.AvklarMyndighet;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -22,6 +23,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -104,9 +107,7 @@ public class AvklarMyndighetTest {
 
     @Test
     public void utfør_utenMyndighet_myndighetOpprettes() throws FunksjonellException, TekniskException {
-        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.land = "BE";
-        utenlandskMyndighet.institusjonskode = "zfga";
+        UtenlandskMyndighet utenlandskMyndighet = lagUtenlandskMyndighet();
         when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.BE))).thenReturn(utenlandskMyndighet);
 
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
@@ -130,6 +131,13 @@ public class AvklarMyndighetTest {
         return behandlingsresultat;
     }
 
+    private static UtenlandskMyndighet lagUtenlandskMyndighet() {
+        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
+        utenlandskMyndighet.land = "BE";
+        utenlandskMyndighet.institusjonskode = "zfga";
+        return utenlandskMyndighet;
+    }
+
     @Test
     public void utfør_medMyndighet_myndighetOpprettesIkke() throws FunksjonellException, TekniskException {
         Fagsak fagsakMedMyndighet = new Fagsak();
@@ -138,9 +146,35 @@ public class AvklarMyndighetTest {
         myndighet.setRolle(Aktoersroller.MYNDIGHET);
         fagsakMedMyndighet.getAktører().add(myndighet);
         p.getBehandling().setFagsak(fagsakMedMyndighet);
-
+        
         steg.utfør(p);
 
         verify(fagsakService, never()).leggTilAktør(any(), any(), any());
     }
+
+    @Test
+    public void utfør_iverksettVedtakSjekkSteg_forventIvOppdaterMedl() throws Exception {
+        UtenlandskMyndighet utenlandskMyndighet = lagUtenlandskMyndighet();
+        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.BE))).thenReturn(utenlandskMyndighet);
+
+        Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
+        when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
+        steg.utfør(p);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_MEDL);
+    }
+
+    @Test
+    public void utfør_anmodningUnntakSjekkSteg_forventAouOppdaterMedl() throws Exception {
+        UtenlandskMyndighet utenlandskMyndighet = lagUtenlandskMyndighet();
+        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.BE))).thenReturn(utenlandskMyndighet);
+
+        Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
+        when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
+        no.nav.melosys.saksflyt.agent.aou.AvklarMyndighet steg =
+            new no.nav.melosys.saksflyt.agent.aou.AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, fagsakService, landvelgerService, utenlandskMyndighetRepository);
+        steg.utfør(p);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_MEDL);
+    }
+
+
 }
