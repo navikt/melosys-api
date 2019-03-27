@@ -1,8 +1,8 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 public class KontaktInfoDto {
-    public String kontaktnavn;
-    public String kontaktorgnr;
+    private String kontaktnavn;
+    private String kontaktorgnr;
 
     public String getKontaktnavn() {
         return kontaktnavn;
