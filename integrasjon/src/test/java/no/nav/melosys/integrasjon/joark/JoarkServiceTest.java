@@ -2,17 +2,18 @@ package no.nav.melosys.integrasjon.joark;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.tjenester.journalfoerinngaaende.PostLogiskVedleggRequest;
-import no.nav.dok.tjenester.journalfoerinngaaende.PutDokumentRequest;
-import no.nav.dok.tjenester.journalfoerinngaaende.PutJournalpostRequest;
+import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
@@ -168,5 +169,57 @@ public class JoarkServiceTest {
         assertThat(logiskVedleggRequest.size()).isEqualTo(2);
         assertThat(logiskVedleggRequest.get(0).getTittel()).isEqualTo("dok1");
         assertThat(logiskVedleggRequest.get(1).getTittel()).isEqualTo("dok2");
+    }
+
+    @Test
+    public void hentJournalpost_forventJournalpost() throws Exception {
+        String arkivsakId = "123arkivsak";
+        GetJournalpostResponse getJournalpostResponse = new GetJournalpostResponse();
+        getJournalpostResponse.setArkivSak(new ArkivSakNoArkivsakSystemEnum());
+        getJournalpostResponse.getArkivSak().setArkivSakId(arkivsakId);
+
+        String brukerId = "123b";
+        Bruker bruker = new Bruker();
+        bruker.setBrukerType(Bruker.BrukerType.PERSON);
+        bruker.setIdentifikator(brukerId);
+        getJournalpostResponse.setBrukerListe(Collections.singletonList(bruker));
+
+        String avsenderId = "123avsender";
+        Date forsendelseMottatt = new Date();
+        Avsender avsender = new Avsender();
+        avsender.setIdentifikator(avsenderId);
+        getJournalpostResponse.setAvsender(avsender);
+        getJournalpostResponse.setForsendelseMottatt(forsendelseMottatt);
+
+        String dokumentTittel = "titteldok", dokumentId = "123dok";
+        Dokument dokument = new Dokument();
+        dokument.setTittel(dokumentTittel);
+        dokument.setDokumentId(dokumentId);
+        getJournalpostResponse.setDokumentListe(Collections.singletonList(dokument));
+
+        when(journalfoerInngaaendeConsumer.hentJournalpost(anyString())).thenReturn(getJournalpostResponse);
+
+        Journalpost journalpost = joarkService.hentJournalpost("1233321");
+
+        assertThat(journalpost).isNotNull();
+        assertThat(journalpost.getBrukerId()).isEqualTo(brukerId);
+        assertThat(journalpost.getAvsenderId()).isEqualTo(avsenderId);
+        assertThat(journalpost.getForsendelseMottatt()).isEqualTo(forsendelseMottatt.toInstant());
+        assertThat(journalpost.getHoveddokument().getDokumentId()).isEqualTo(dokumentId);
+        assertThat(journalpost.getHoveddokument().getTittel()).isEqualTo(dokumentTittel);
+        assertThat(journalpost.getArkivSakId()).isEqualTo(arkivsakId);
+    }
+
+    @Test
+    public void ferdigstillJournalpost_verifiserAttributterErSatt() throws Exception {
+        joarkService.ferdigstillJournalføring("123");
+
+        verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), eq("123"));
+
+        PutJournalpostRequest request = oppdaterJournalpostCaptor.getValue();
+
+        assertThat(request).isNotNull();
+        assertThat(request.isForsoekEndeligJF()).isTrue();
+        assertThat(request.getJournalfEnhet()).isEqualTo(Fagsystem.MELOSYS.getKode());
     }
 }

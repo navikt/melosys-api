@@ -52,13 +52,14 @@ public class JournalfoerInngaaendeConsumer {
         try {
             return restTemplate.exchange(uri, method, entity, clazz).getBody();
         } catch (RestClientException ex) {
-            switch (((HttpStatusCodeException)ex).getStatusCode()) {
-                case UNAUTHORIZED:
-                case FORBIDDEN:
-                    throw new SikkerhetsbegrensningException(ex);
-                default:
-                    throw new IntegrasjonException(ex);
+            if (ex instanceof HttpStatusCodeException) {
+                switch (((HttpStatusCodeException) ex).getStatusCode()) {
+                    case UNAUTHORIZED:
+                    case FORBIDDEN:
+                        throw new SikkerhetsbegrensningException(ex);
+                }
             }
+            throw new IntegrasjonException(ex);
         }
     }
 }
