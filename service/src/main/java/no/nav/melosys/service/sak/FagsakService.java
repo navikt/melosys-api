@@ -171,6 +171,7 @@ public class FagsakService {
             aktørRepresentant.setOrgnr(representant);
             aktørRepresentant.setFagsak(fagsak);
             aktørRepresentant.setRolle(Aktoersroller.REPRESENTANT);
+            aktørRepresentant.setRepresenterer(Representerer.BRUKER);
             aktører.add(aktørRepresentant);
         }
 
