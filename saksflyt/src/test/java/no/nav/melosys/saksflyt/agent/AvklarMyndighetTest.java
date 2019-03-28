@@ -153,14 +153,14 @@ public class AvklarMyndighetTest {
     }
 
     @Test
-    public void utfør_iverksettVedtakSjekkSteg_forventIvOppdaterMedl() throws Exception {
+    public void utfør_iverksettVedtakSjekkSteg_forventAvklarArbeidsgiver() throws Exception {
         UtenlandskMyndighet utenlandskMyndighet = lagUtenlandskMyndighet();
         when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.BE))).thenReturn(utenlandskMyndighet);
 
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
         when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
         steg.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_OPPDATER_MEDL);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.IV_AVKLAR_ARBEIDSGIVER);
     }
 
     @Test
@@ -175,6 +175,4 @@ public class AvklarMyndighetTest {
         steg.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_MEDL);
     }
-
-
 }

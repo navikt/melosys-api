@@ -17,6 +17,8 @@ public interface AktoerRepository extends JpaRepository<Aktoer, Long> {
 
     Optional<Aktoer> findByFagsakAndRolleAndRepresenterer(Fagsak fagsak, Aktoersroller aktoersroller, Representerer representerer);
 
+    void deleteByFagsakAndRolle(Fagsak fagsak, Aktoersroller aktoersroller);
+
     @Modifying
     @Query("delete from Aktoer a where a.id = ?#{#aktoerParam.id}")
     @Transactional(propagation = Propagation.REQUIRED)

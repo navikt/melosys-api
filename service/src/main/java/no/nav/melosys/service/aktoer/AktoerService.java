@@ -63,4 +63,22 @@ public class AktoerService {
         aktoer.setId(databaseID);
         aktørRepository.deleteById(aktoer);
     }
+
+    @Transactional
+    public void erstattEksisterendeArbeidsgiveraktører(Fagsak fagsak, List<String> org) {
+        aktørRepository.deleteByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER);
+
+        for (String orgnummer : org) {
+            lagArbeidsgiveraktør(fagsak, orgnummer);
+        }
+    }
+
+    private void lagArbeidsgiveraktør(Fagsak fagsak, String orgnummer) {
+        Aktoer aktør = new Aktoer();
+        aktør.setFagsak(fagsak);
+        aktør.setRolle(Aktoersroller.ARBEIDSGIVER);
+        aktør.setOrgnr(orgnummer);
+
+        aktørRepository.save(aktør);
+    }
 }

@@ -43,9 +43,8 @@ public class OppdaterMedlFelles {
     }
 
     public Behandlingsresultat hentBehandlingsresultat(Behandling behandling) throws IkkeFunnetException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
+        return behandlingsresultatRepository.findById(behandling.getId())
             .orElseThrow(() -> new IkkeFunnetException("Opprettelse av periode i MEDL feilet fordi behandlingsresultat med behandling ID " + behandling.getId() + " ikke finnes."));
-        return behandlingsresultat;
     }
 
     public void lagreMedlPeriodeId(Long medlPeriodeID, Lovvalgsperiode lovvalgsperiode, long behandlingID) throws FunksjonellException {
