@@ -1,10 +1,6 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.util.function.Function;
-
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.dokument.felles.Adresse;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -36,7 +32,7 @@ public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements Brev
         BrevDataA1 brevData = new BrevDataA1();
         brevData.yrkesgruppe = avklartefaktaService.hentYrkesGruppe(behandling.getId());
         brevData.utenlandskeVirksomheter = hentUtenlandskeVirksomheter();
-        brevData.norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, adresseformaterer);
+        brevData.norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, this::utfyllManglendeAdressefelter);
         brevData.selvstendigeForetak = avklarteVirksomheterService.hentSelvstendigeForetakOrgnumre(behandling);
 
         brevData.bostedsadresse = hentBostedsadresse();
@@ -51,6 +47,4 @@ public class BrevDataByggerA1 extends AbstraktDokumentDataBygger implements Brev
         brevData.hovedvirksomhet = brevData.norskeVirksomheter.get(0);
         return brevData;
     }
-
-    private Function<OrganisasjonDokument, Adresse> adresseformaterer = this::utfyllManglendeAdressefelter;
 }

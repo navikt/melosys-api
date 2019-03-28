@@ -306,7 +306,7 @@ public class A001Mapper {
     }
 
     //A001 krever ISO-3
-    private String hentIso3Landkode(String landkode) throws TekniskException {
+    private static String hentIso3Landkode(String landkode) throws TekniskException {
         return landkode.length() == 2 ? LandkoderUtils.tilIso3(landkode) : landkode;
     }
 }
