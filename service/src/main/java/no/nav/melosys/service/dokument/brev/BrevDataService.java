@@ -28,8 +28,8 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.repository.KontaktopplysningRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
+import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -66,17 +66,17 @@ public class BrevDataService {
 
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
-    private final KontaktopplysningRepository kontaktopplysningRepository;
+    private final KontaktopplysningService kontaktopplysningService;
 
     @Autowired
     public BrevDataService(@Qualifier("system") TpsFasade tpsFasade,
                            BehandlingsresultatRepository behandlingsresultatRepository,
                            UtenlandskMyndighetRepository utenlandskMyndighetRepository,
-                           KontaktopplysningRepository kontaktopplysningRepository) {
+                           KontaktopplysningService kontaktopplysningService) {
         this.tpsFasade = tpsFasade;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
-        this.kontaktopplysningRepository = kontaktopplysningRepository;
+        this.kontaktopplysningService = kontaktopplysningService;
     }
 
     /**
@@ -255,10 +255,10 @@ public class BrevDataService {
         Aktoer representant = fagsak.hentAktørMedRolleType(REPRESENTANT); // FIXME MEL-2182 Det kan være flere representanter på en sak
 
         if (representant != null) {
-            return kontaktopplysningRepository.findById(new KontaktopplysningID(fagsak.getSaksnummer(), representant.getOrgnr()))
+            return kontaktopplysningService.hentKontaktopplysning(fagsak.getSaksnummer(), representant.getOrgnr())
                 .map(Kontaktopplysning::getKontaktOrgnr).orElse(representant.getOrgnr());
         } else if (mottakerRolle == ARBEIDSGIVER) {
-            return kontaktopplysningRepository.findById(new KontaktopplysningID(fagsak.getSaksnummer(), mottaker.getOrgnr()))
+            return kontaktopplysningService.hentKontaktopplysning(fagsak.getSaksnummer(), mottaker.getOrgnr())
                 .map(Kontaktopplysning::getKontaktOrgnr).orElse(mottaker.getOrgnr());
         } else if (mottakerRolle == MYNDIGHET) {
             return mottaker.getInstitusjonId();
@@ -274,7 +274,7 @@ public class BrevDataService {
     }
 
     private Optional<String> hentKontaktNavnForOrgnr(Fagsak fagsak, String orgNr) {
-        return kontaktopplysningRepository.findById(new KontaktopplysningID(fagsak.getSaksnummer(), orgNr))
+        return kontaktopplysningService.hentKontaktopplysning(fagsak.getSaksnummer(), orgNr)
             .map(Kontaktopplysning::getKontaktNavn);
     }
 }
