@@ -186,12 +186,12 @@ public class DokumentService {
 
     @Transactional
     public void produserDokumentISaksflyt(long behandlingID, Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto) throws FunksjonellException {
+        Assert.notNull(brevbestillingDto, "BrevbestillingDto brukes til å bestille brev i saksflyt.");
         Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke"));
+            .orElseThrow(() -> new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke."));
 
         if (produserbartDokument == MELDING_MANGLENDE_OPPLYSNINGER) {
-            BrevData brevData = (brevbestillingDto == null) ? null : new BrevData(brevbestillingDto);
-            prosessinstansService.opprettProsessinstansMangelbrev(behandling, brevData);
+            prosessinstansService.opprettProsessinstansMangelbrev(behandling, new BrevData(brevbestillingDto));
         } else {
             throw new FunksjonellException("Produserbaredokumenter " + produserbartDokument + " er ikke støttet.");
         }

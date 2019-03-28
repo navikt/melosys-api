@@ -107,8 +107,10 @@ public final class DokumentServiceTest {
     }
 
     @Test
-    public final void produserMangelbrevISaksflytUtenBrevdata() throws Exception {
-        instans.produserDokumentISaksflyt(BEHANDLINGSID, Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER, null);
+    public final void produserMangelbrevISaksflyt_utenBrevdata_kasterUnntak() {
+        Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(BEHANDLINGSID,
+            Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER, null));
+        assertThat(unntak).isInstanceOfAny(IllegalArgumentException.class);
     }
 
     @Test
