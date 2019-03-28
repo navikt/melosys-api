@@ -14,7 +14,7 @@ import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.repository.KontaktopplysningRepository;
+import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
@@ -48,7 +48,7 @@ public class DokumentService {
 
     private final JoarkFasade joarkFasade;
 
-    private final KontaktopplysningRepository kontaktopplysningRepository;
+    private final KontaktopplysningService kontaktopplysningService;
 
     private final ProsessinstansService prosessinstansService;
 
@@ -59,13 +59,13 @@ public class DokumentService {
                            FagsakRepository fagsakRepository,
                            BrevDataService brevDataService,
                            DoksysFasade dokSysFasade, JoarkFasade joarkFasade,
-                           KontaktopplysningRepository kontaktopplysningRepository,
+                           KontaktopplysningService kontaktopplysningService,
                            ProsessinstansService prosessinstansService, BrevDataByggerVelger brevDataByggerVelger) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.brevDataService = brevDataService;
         this.joarkFasade = joarkFasade;
-        this.kontaktopplysningRepository = kontaktopplysningRepository;
+        this.kontaktopplysningService = kontaktopplysningService;
         this.dokSysFasade = dokSysFasade;
         this.prosessinstansService = prosessinstansService;
         this.brevDataByggerVelger = brevDataByggerVelger;
@@ -166,7 +166,7 @@ public class DokumentService {
         Aktoersroller mottakerRolle = mottaker.getRolle();
 
         if (mottakerRolle == ARBEIDSGIVER || mottakerRolle == REPRESENTANT) {
-            return kontaktopplysningRepository.findById(new KontaktopplysningID(saksnumner, mottaker.getOrgnr())).orElse(null);
+            return kontaktopplysningService.hentKontaktopplysning(saksnumner, mottaker.getOrgnr()).orElse(null);
         } else {
             return null;
         }
