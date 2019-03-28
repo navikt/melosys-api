@@ -69,8 +69,8 @@ public class SendBrev extends AbstraktStegBehandler {
         }
 
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-        brevBestiller.bestill(behandling, saksbehandler, ORIENTERING_ANMODNING_UNNTAK, Aktoersroller.BRUKER);
-        brevBestiller.bestill(behandling, saksbehandler, ANMODNING_UNNTAK, Aktoersroller.MYNDIGHET);
+        brevBestiller.bestill(ORIENTERING_ANMODNING_UNNTAK, saksbehandler, Aktoersroller.BRUKER, behandling);
+        brevBestiller.bestill(ANMODNING_UNNTAK, saksbehandler, Aktoersroller.MYNDIGHET, behandling);
 
         log.info("Sendt alle brev for anmodning om unntak. Prosessinstans {}", prosessinstans.getId());
         prosessinstans.setSteg(ProsessSteg.FERDIG);
