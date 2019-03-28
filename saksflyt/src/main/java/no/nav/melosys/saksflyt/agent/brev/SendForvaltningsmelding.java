@@ -56,7 +56,7 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
 
         Behandling behandling = prosessinstans.getBehandling();
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-        brevBestiller.bestill(behandling, saksbehandler, MELDING_FORVENTET_SAKSBEHANDLINGSTID, Aktoersroller.BRUKER);
+        brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, saksbehandler, Aktoersroller.BRUKER, behandling);
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Sendt forvaltningsmelding for prosessinstans {}", prosessinstans.getId());

@@ -58,7 +58,7 @@ public class SendBrevTest {
     @Test
     public void utførStegAntallSendteBrev() throws FunksjonellException, TekniskException {
         agent.utførSteg(p);
-        verify(brevBestiller).bestill(any(Behandling.class), anyString(), eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), eq(Aktoersroller.BRUKER));
-        verify(brevBestiller).bestill(any(Behandling.class), anyString(), eq(Produserbaredokumenter.ANMODNING_UNNTAK), eq(Aktoersroller.MYNDIGHET));
+        verify(brevBestiller).bestill(eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), anyString(), eq(Aktoersroller.BRUKER), any(Behandling.class));
+        verify(brevBestiller).bestill(eq(Produserbaredokumenter.ANMODNING_UNNTAK), anyString(), eq(Aktoersroller.MYNDIGHET), any(Behandling.class));
     }
 }
