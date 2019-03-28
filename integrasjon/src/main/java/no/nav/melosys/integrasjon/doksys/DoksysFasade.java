@@ -6,7 +6,7 @@ import no.nav.melosys.exception.TekniskException;
 
 public interface DoksysFasade {
 
-    byte[] produserDokumentutkast(DokumentbestillingMetadata metadata, Object brevdata) throws IntegrasjonException;
+    byte[] produserDokumentutkast(Dokumentbestilling dokumentbestilling) throws IntegrasjonException;
 
-    DokumentbestillingResponse produserIkkeredigerbartDokument(DokumentbestillingMetadata metadata, Object brevdata) throws FunksjonellException, TekniskException;
+    DokumentbestillingResponse produserIkkeredigerbartDokument(Dokumentbestilling dokumentbestilling) throws FunksjonellException, TekniskException;
 }

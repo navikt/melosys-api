@@ -44,12 +44,13 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public byte[] produserDokumentutkast(DokumentbestillingMetadata metadata, Object brevdata) throws IntegrasjonException {
+    public byte[] produserDokumentutkast(Dokumentbestilling dokumentbestilling) throws IntegrasjonException {
         ProduserDokumentutkastRequest wsRequest = new ProduserDokumentutkastRequest();
+        DokumentbestillingMetadata metadata = dokumentbestilling.getMetadata();
 
         wsRequest.setUtledRegisterInfo(metadata.utledRegisterInfo);
         wsRequest.setDokumenttypeId(metadata.dokumenttypeID);
-        wsRequest.setBrevdata(brevdata);
+        wsRequest.setBrevdata(dokumentbestilling.getBrevData());
 
         try {
             ProduserDokumentutkastResponse wsResponse = dokumentproduksjonConsumer.produserDokumentutkast(wsRequest);
@@ -61,11 +62,12 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public DokumentbestillingResponse produserIkkeredigerbartDokument(DokumentbestillingMetadata metadata, Object brevdata)
+    public DokumentbestillingResponse produserIkkeredigerbartDokument(Dokumentbestilling dokumentbestilling)
         throws FunksjonellException, TekniskException {
         ProduserIkkeredigerbartDokumentRequest wsRequest = new ProduserIkkeredigerbartDokumentRequest();
         Dokumentbestillingsinformasjon info = new Dokumentbestillingsinformasjon();
 
+        DokumentbestillingMetadata metadata = dokumentbestilling.getMetadata();
         info.setDokumenttypeId(metadata.dokumenttypeID);
         info.setUtledRegisterInfo(metadata.utledRegisterInfo);
         // Hvis vedlegg skal sendes, må denne settes først når vedleggene har blitt sendt
@@ -105,7 +107,7 @@ public class DoksysService implements DoksysFasade {
         }
 
         wsRequest.setDokumentbestillingsinformasjon(info);
-        wsRequest.setBrevdata(brevdata);
+        wsRequest.setBrevdata(dokumentbestilling.getBrevData());
 
         try {
             log.debug("Bestiller dokument:{} {}", System.lineSeparator(), wsRequest.toString());
@@ -128,11 +130,12 @@ public class DoksysService implements DoksysFasade {
     }
 
     private Adresse lagAdresse(DokumentbestillingMetadata metadata) throws TekniskException {
+        Aktoersroller mottakerRolle = metadata.mottaker.getRolle();
 
-        if (Aktoersroller.MYNDIGHET == metadata.mottakersRolle) {
+        if (mottakerRolle == Aktoersroller.MYNDIGHET) {
             return lagUtenlandskAdresse(metadata.utenlandskMyndighet);
         } else {
-            throw new TekniskException("Det er ikke planlagt å lage en adresse for mottakersRolle: " + metadata.mottakersRolle);
+            throw new TekniskException("Det er ikke planlagt å lage en adresse for mottakerRolle: " + mottakerRolle);
         }
     }
 
@@ -145,15 +148,14 @@ public class DoksysService implements DoksysFasade {
     }
 
     private Aktoer lagMottaker(DokumentbestillingMetadata metadata) throws FunksjonellException {
-        Aktoersroller mottakersRolle = metadata.mottakersRolle;
-        String mottakerID = metadata.mottakerID;
-
-        if (mottakersRolle == null) {
-            log.error("Brev bør ikke sendes, mottakersRolle er ikke satt.");
-            metadata.mottakersRolle = Aktoersroller.BRUKER;
+        if (metadata.mottaker == null) {
+            throw new FunksjonellException("Brev kan ikke sendes, mottaker er ikke satt.");
         }
 
-        switch (mottakersRolle) {
+        Aktoersroller mottakerRolle = metadata.mottaker.getRolle();
+        String mottakerID = metadata.mottakerID;
+
+        switch (mottakerRolle) {
             case BRUKER:
                 return lagPerson(mottakerID);
             case ARBEIDSGIVER:
@@ -166,7 +168,7 @@ public class DoksysService implements DoksysFasade {
                 // med mottakerId="11111111111" og dermed blir AvsendMottakId i Joark tom.
                 return lagPerson(FALSK_MOTTAKER_ID, metadata.utenlandskMyndighet.navn);
             default:
-                log.warn("MottakersRolle {} er ukjent. PERSON brukes som standard.", mottakersRolle);
+                log.warn("MottakersRolle {} er ukjent. PERSON brukes som standard.", mottakerRolle);
                 return lagPerson(mottakerID);
         }
     }
