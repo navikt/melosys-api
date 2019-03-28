@@ -52,7 +52,7 @@ public class SendBrevTest {
     @Test
     public void utfoerSteg() {
         agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_SEND_SED);
     }
 
     @Test
