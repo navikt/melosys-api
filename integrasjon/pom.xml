@@ -112,11 +112,6 @@
         <!--JOARK-->
         <dependency>
             <groupId>no.nav.tjenester</groupId>
-            <artifactId>nav-behandleInngaaendeJournal-v1-tjenestespesifikasjon</artifactId>
-            <classifier>jaxws</classifier>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.tjenester</groupId>
             <artifactId>nav-inngaaendeJournal-v1-tjenestespesifikasjon</artifactId>
             <classifier>jaxws</classifier>
         </dependency>
@@ -124,6 +119,10 @@
             <groupId>no.nav.tjenester</groupId>
             <artifactId>nav-journal-v3-tjenestespesifikasjon</artifactId>
             <classifier>jaxws</classifier>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.tjenester.fim</groupId>
+            <artifactId>no-nav-dok-tjenester-journalfoerinngaaende</artifactId>
         </dependency>
 
         <!--TPS-->

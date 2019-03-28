@@ -17,6 +17,7 @@ import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
+import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

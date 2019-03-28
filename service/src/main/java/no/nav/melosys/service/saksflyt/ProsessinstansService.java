@@ -1,6 +1,7 @@
 package no.nav.melosys.service.saksflyt;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -10,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.domain.ProsessSteg.HS_OPPDATER_RESULTAT;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentLand;
@@ -54,6 +57,11 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringDto.getAvsenderNavn());
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
+
+        if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
+            prosessinstans.setData(ProsessDataKey.VEDLEGG_TITTEL_LISTE, journalfoeringDto.getVedlegg().stream().map(DokumentDto::getTittel).collect(Collectors.toList()));
+        }
+
         return prosessinstans;
     }
 
