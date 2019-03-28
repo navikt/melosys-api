@@ -99,8 +99,39 @@ public class OpprettOppgaveTest {
         assertThat(p.getSteg()).isEqualTo(FERDIG);
     }
 
+
     @Test
-    public void utfoerSteg_nyBehandling_tilNull() throws FunksjonellException, TekniskException {
+    public void utfoerSteg_skalTilordnes_setterTilordnetRessurs() throws FunksjonellException, TekniskException {
+        Fagsak fagsak = new Fagsak();
+        String saksnummer = "MEL-TESTx";
+        fagsak.setSaksnummer(saksnummer);
+        fagsak.setType(Sakstyper.EU_EOS);
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setFagsak(fagsak);
+
+        Prosessinstans p = new Prosessinstans();
+        p.setBehandling(behandling);
+
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
+        p.setType(ProsessType.JFR_NY_SAK);
+
+        String bruker = "bruker";
+        p.setData(ProsessDataKey.SKAL_TILORDNES, true);
+        p.setData(ProsessDataKey.SAKSBEHANDLER, bruker);
+
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
+
+        agent.utførSteg(p);
+
+        verify(gsakFasade).opprettOppgave(oppgave.capture());
+
+        assertThat(oppgave.getValue().getTilordnetRessurs()).isEqualTo(bruker);
+    }
+
+    @Test
+    public void utfoerSteg_nyBehandling_tilFerdig() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);
