@@ -108,7 +108,7 @@ public class DokumentService {
         BrevDataBygger bygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
         BrevData brevData = bygger.lag(behandling, SubjectHandler.getInstance().getUserID());
 
-        Aktoersroller mottakerRolle = brevData.mottaker != null ? brevData.mottaker : avklarMottakerRolleFraProduserbartDokument(produserbartDokument);
+        Aktoersroller mottakerRolle = brevData.mottakerRolle != null ? brevData.mottakerRolle : avklarMottakerRolleFraProduserbartDokument(produserbartDokument);
         Aktoer mottaker = behandling.getFagsak().hentAktørMedRolleType(mottakerRolle);
 
         return dokSysFasade.produserDokumentutkast(lagDokumentbestilling(produserbartDokument, mottaker, behandling, brevData));
@@ -123,7 +123,7 @@ public class DokumentService {
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke"));
 
-        Aktoersroller mottakerRolle = brevData.mottaker != null ? brevData.mottaker : avklarMottakerRolleFraProduserbartDokument(produserbartDokument);
+        Aktoersroller mottakerRolle = brevData.mottakerRolle != null ? brevData.mottakerRolle : avklarMottakerRolleFraProduserbartDokument(produserbartDokument);
         Fagsak fagsak = behandling.getFagsak();
         if (mottakerRolle == BRUKER) {
             // Dokumenter sendes til både bruker og representant

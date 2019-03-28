@@ -41,7 +41,7 @@ public class BrevBestiller {
                         Aktoersroller aktoersroller, String begrunnelseKode) throws FunksjonellException, TekniskException {
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(dokumentType);
         BrevData brevData = brevDataBygger.lag(behandling, saksbehandler);
-        brevData.mottaker = aktoersroller;
+        brevData.mottakerRolle = aktoersroller;
         brevData.begrunnelseKode = begrunnelseKode;
         dokumentService.produserDokument(behandling.getId(), dokumentType, brevData);
         log.info("Sendt brevet '{}', for behandling {}", dokumentType, behandling.getId());

@@ -142,7 +142,7 @@ public final class DokumentServiceTest {
 
     private static BrevData lagBrevData(Aktoersroller mottakerRolle) {
         BrevDataA1 brevDataA1 = new BrevDataA1();
-        brevDataA1.mottaker = mottakerRolle;
+        brevDataA1.mottakerRolle = mottakerRolle;
         AvklartVirksomhet arbeidsgiver = new AvklartVirksomhet("Virker av og til", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
         brevDataA1.norskeVirksomheter = new ArrayList<>(Arrays.asList(arbeidsgiver, arbeidsgiver));
         brevDataA1.bostedsadresse = lagBostedsadresse();
@@ -159,7 +159,7 @@ public final class DokumentServiceTest {
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
         brevdataInnvilgelse.arbeidsland = "Norway";
         brevdataInnvilgelse.trygdemyndighetsland = "Denmark";
-        brevdataInnvilgelse.mottaker = mottakerRolle;
+        brevdataInnvilgelse.mottakerRolle = mottakerRolle;
 
         return brevdataInnvilgelse;
     }

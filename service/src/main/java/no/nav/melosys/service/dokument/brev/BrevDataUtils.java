@@ -51,7 +51,7 @@ public final class BrevDataUtils {
 
         kontaktinformasjon.setBesoksadresse(lagAdresse(new Besoksadresse(), lagNorskPostadresse()));
         kontaktinformasjon.setPostadresse(lagAdresse(new Postadresse(), lagNorskPostadresse()));
-        //Adressen skal benyttes dersom bruker/mottaker har behov for å kontakte NAV per post.
+        //Adressen skal benyttes dersom bruker/mottakerRolle har behov for å kontakte NAV per post.
         kontaktinformasjon.setReturadresse(lagAdresse(new Returadresse(), lagNorskPostadresse()));
 
         return kontaktinformasjon;

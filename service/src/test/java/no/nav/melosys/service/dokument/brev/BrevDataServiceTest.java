@@ -17,7 +17,6 @@ import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,7 +64,7 @@ public class BrevDataServiceTest {
         Aktoer aktoerMyndighet = lagAktoerMyndighet(institusjonID);
         behandling.getFagsak().getAktører().add(aktoerMyndighet);
         BrevDataVedlegg brevData = new BrevDataVedlegg("Z123456");
-        brevData.mottaker = Aktoersroller.MYNDIGHET;
+        brevData.mottakerRolle = Aktoersroller.MYNDIGHET;
         UtenlandskMyndighet myndighet = new UtenlandskMyndighet();
         myndighet.navn = "navn";
         myndighet.gateadresse = "gateadresse 123";
@@ -314,7 +313,7 @@ public class BrevDataServiceTest {
     private static BrevData lagBrevData(Aktoersroller rolle) {
         BrevData brevDataDto = new BrevData();
         brevDataDto.saksbehandler = "TEST";
-        brevDataDto.mottaker = rolle;
+        brevDataDto.mottakerRolle = rolle;
         brevDataDto.fritekst = "Test";
         return brevDataDto;
     }

@@ -344,7 +344,7 @@ public class IverksettVedtakSendBrevTest {
         resultat.setBehandling(behandling);
         resultat.setType(type);
         BrevData brevdata = new BrevData();
-        brevdata.mottaker = Aktoersroller.BRUKER;
+        brevdata.mottakerRolle = Aktoersroller.BRUKER;
         resultat.setData(ProsessDataKey.BREVDATA, brevdata);
         return resultat;
     }

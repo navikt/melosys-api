@@ -59,13 +59,13 @@ public class SendMangelbrevTest {
         p.setBehandling(new Behandling());
 
         BrevData brevData = new BrevData("Z123456");
-        brevData.mottaker = Aktoersroller.MYNDIGHET;
+        brevData.mottakerRolle = Aktoersroller.MYNDIGHET;
         brevData.fritekst = "Fritekst";
 
         p.setData(ProsessDataKey.BREVDATA, brevData);
 
         BrevData hentetBrevData = p.getData(ProsessDataKey.BREVDATA, BrevData.class);
-        assertThat(hentetBrevData.mottaker).isEqualTo(brevData.mottaker);
+        assertThat(hentetBrevData.mottakerRolle).isEqualTo(brevData.mottakerRolle);
         assertThat(hentetBrevData.fritekst).isEqualTo(brevData.fritekst);
         assertThat(hentetBrevData.saksbehandler).isEqualTo(brevData.saksbehandler);
 
