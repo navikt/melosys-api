@@ -2,8 +2,8 @@ package no.nav.melosys.integrasjon.joark;
 
 import java.util.List;
 
-import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -14,7 +14,7 @@ public interface JoarkFasade {
     /**
      * Ferdigstiller journalføring
      */
-    void ferdigstillJournalføring(String journalpostId) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
+    void ferdigstillJournalføring(String journalpostId) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, IntegrasjonException;
 
     /**
      * Henter et dokument fra Joark
@@ -35,8 +35,8 @@ public interface JoarkFasade {
      * Oppdaterer en journalpost i Joark
      * @param medDokumentkategori Om dokumentkategori skal oppdatteres med standardverdi "IS", Ikke tolkbart skjema
      */
-    void oppdaterJounalpost(String journalpostId, String dokumentID, Long gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, boolean medDokumentkategori)
-        throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
+    void oppdaterJournalpost(String journalpostId, String dokumentID, Long gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn,String tittel, List<String> vedleggTittelListe, boolean medDokumentkategori)
+        throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, IntegrasjonException;
 
     /**
      * Returnerer en liste av mangler i journalposten med den oppgitte IDen

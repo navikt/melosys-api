@@ -54,8 +54,9 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
     protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
         return FeilStrategi.standardFeilHåndtering();
     }
-    
+
     @Override
+    @SuppressWarnings("unchecked")
     public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, IkkeFunnetException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
@@ -86,16 +87,18 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
         String brukerID = prosessinstans.getData(BRUKER_ID);
         String avsenderID = prosessinstans.getData(AVSENDER_ID);
         String avsenderNavn = prosessinstans.getData(AVSENDER_NAVN);
-        if (avsenderID == null) {
-            avsenderID = avsenderNavn; //FIXME trenger en avklaring MELOSYS-1353
-        }
         if (avsenderNavn == null) {
-            avsenderNavn = avsenderID; //FIXME trenger en avklaring MELOSYS-1353
+            if (avsenderID == null) {
+                throw new FunksjonellException("Både avsenderID og AvsenderNavn er null. AvsenderNavn er påkrevd for å journalføre.");
+            }
+            avsenderNavn = avsenderID; //Avsendernavn er påkrevd
         }
         String tittel = prosessinstans.getData(HOVEDDOKUMENT_TITTEL);
         String dokumentID = prosessinstans.getData(DOKUMENT_ID);
 
-        joarkFasade.oppdaterJounalpost(journalpostID, dokumentID, gsakSakID, brukerID, avsenderID, avsenderNavn, tittel, medDokumentkategori);
+        List<String> vedleggTittelListe = prosessinstans.getData(VEDLEGG_TITTEL_LISTE, List.class);
+
+        joarkFasade.oppdaterJournalpost(journalpostID, dokumentID, gsakSakID, brukerID, avsenderID, avsenderNavn, tittel, vedleggTittelListe, medDokumentkategori);
 
         prosessinstans.setSteg(JFR_FERDIGSTILL_JOURNALPOST);
         log.info("Prosessinstans {} har oppdatert journalpost {}. SakId: {}", prosessinstans.getId(), journalpostID, gsakSakID);
