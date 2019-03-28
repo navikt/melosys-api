@@ -13,7 +13,7 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.Fagsystem;
+import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
@@ -220,6 +220,6 @@ public class JoarkServiceTest {
 
         assertThat(request).isNotNull();
         assertThat(request.isForsoekEndeligJF()).isTrue();
-        assertThat(request.getJournalfEnhet()).isEqualTo(Fagsystem.MELOSYS.getKode());
+        assertThat(request.getJournalfEnhet()).isEqualTo(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
     }
 }

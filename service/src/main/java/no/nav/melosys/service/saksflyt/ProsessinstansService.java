@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -57,7 +58,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
 
         if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
-            prosessinstans.setData(ProsessDataKey.VEDLEGG_TITTEL_LISTE, journalfoeringDto.getVedlegg().stream().map(v -> v.tittel).collect(Collectors.toList()));
+            prosessinstans.setData(ProsessDataKey.VEDLEGG_TITTEL_LISTE, journalfoeringDto.getVedlegg().stream().map(DokumentDto::getTittel).collect(Collectors.toList()));
         }
 
         return prosessinstans;
