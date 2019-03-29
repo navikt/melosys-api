@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.agent.gsak;
 
 import java.util.Map;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
@@ -103,6 +104,11 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         oppgave.setJournalpostId(journalpostID);
         oppgave.setPrioritet(PrioritetType.NORM);
         oppgave.setSaksnummer(saksnummer);
+
+        boolean skalTilordnes = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).orElse(false);
+        if (skalTilordnes) {
+            oppgave.setTilordnetRessurs(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
+        }
 
         String oppgaveId = gsakFasade.opprettOppgave(oppgave);
 
