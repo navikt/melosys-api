@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -23,6 +24,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -154,7 +157,7 @@ public class IverksettVedtakSendBrevTest {
         fagsak.setType(Sakstyper.EU_EOS);
         Aktoer aktør = new Aktoer();
         aktør.setAktørId("1");
-        aktør.setRolle(Aktoersroller.BRUKER);
+        aktør.setRolle(BRUKER);
 
         Aktoer myndighet = new Aktoer();
         myndighet.setAktørId("2");
@@ -255,8 +258,8 @@ public class IverksettVedtakSendBrevTest {
 
         instans.utførSteg(prosessinstans);
 
-        verify(dokService).produserDokument(anyLong(), eq(INNVILGELSE_YRKESAKTIV), any());
-        verify(dokService).produserDokument(anyLong(), eq(ATTEST_A1), any());
+        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(Mottaker.av(BRUKER)), anyLong(), any());
+        verify(dokService).produserDokument(eq(ATTEST_A1), eq(Mottaker.av(MYNDIGHET)), anyLong(), any());
     }
 
     @Test
@@ -267,8 +270,8 @@ public class IverksettVedtakSendBrevTest {
         AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utførSteg(prosessinstans);
 
-        verify(dokService).produserDokument(anyLong(), eq(INNVILGELSE_YRKESAKTIV), any());
-        verify(dokService, times(0)).produserDokument(anyLong(), eq(ATTEST_A1), any());
+        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(Mottaker.av(BRUKER)), anyLong(), any());
+        verify(dokService, never()).produserDokument(eq(ATTEST_A1), any(Mottaker.class), anyLong(), any());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
     }
 
@@ -329,7 +332,7 @@ public class IverksettVedtakSendBrevTest {
 
         instans.utførSteg(prosessinstans);
 
-        verify(dokService, atLeastOnce()).produserDokument(anyLong(), any(Produserbaredokumenter.class), captor.capture());
+        verify(dokService, atLeastOnce()).produserDokument(any(Produserbaredokumenter.class), any(Mottaker.class), anyLong(), captor.capture());
         assertThat(captor.getValue().begrunnelseKode).isEqualTo(Endretperioder.ENDRINGER_ARBEIDSSITUASJON.getKode());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_SED);
     }
@@ -344,7 +347,6 @@ public class IverksettVedtakSendBrevTest {
         resultat.setBehandling(behandling);
         resultat.setType(type);
         BrevData brevdata = new BrevData();
-        brevdata.mottakerRolle = Aktoersroller.BRUKER;
         resultat.setData(ProsessDataKey.BREVDATA, brevdata);
         return resultat;
     }

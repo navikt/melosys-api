@@ -3,15 +3,12 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.Instant;
 
 import io.github.benas.randombeans.api.EnhancedRandom;
-
 import no.nav.dok.melosysbrev._000074.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.dokument.brev.BrevData;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,7 +16,6 @@ import org.junit.rules.ExpectedException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MangelbrevMapperTest {
@@ -50,7 +46,6 @@ public class MangelbrevMapperTest {
         behandling.setRegistrertDato(Instant.now());
 
         BrevData BrevData = new BrevData("Z123456");
-        BrevData.mottakerRolle = Aktoersroller.BRUKER;
         BrevData.fritekst = "Test";
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, BrevData);

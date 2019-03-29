@@ -4,6 +4,7 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -108,7 +109,7 @@ public class DokumentService {
         BrevDataBygger bygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
         BrevData brevData = bygger.lag(behandling, SubjectHandler.getInstance().getUserID());
 
-        Aktoersroller mottakerRolle = brevData.mottakerRolle != null ? brevData.mottakerRolle : avklarMottakerRolleFraProduserbartDokument(produserbartDokument);
+        Aktoersroller mottakerRolle = avklarMottakerRolleFraDokument(produserbartDokument);
         Aktoer mottaker = behandling.getFagsak().hentAktørMedRolleType(mottakerRolle);
 
         return dokSysFasade.produserDokumentutkast(lagDokumentbestilling(produserbartDokument, mottaker, behandling, brevData));
@@ -117,13 +118,13 @@ public class DokumentService {
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(long behandlingID, Produserbaredokumenter produserbartDokument, BrevData brevData)
+    public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker, long behandlingID, BrevData brevData)
         throws TekniskException, FunksjonellException {
         Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument");
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke"));
 
-        Aktoersroller mottakerRolle = brevData.mottakerRolle != null ? brevData.mottakerRolle : avklarMottakerRolleFraProduserbartDokument(produserbartDokument);
+        Aktoersroller mottakerRolle = mottaker.getRolle();
         Fagsak fagsak = behandling.getFagsak();
         if (mottakerRolle == BRUKER) {
             // Dokumenter sendes til både bruker og representant
@@ -143,12 +144,12 @@ public class DokumentService {
                 produserIkkeredigerbartDokument(produserbartDokument, arbeidsgiver, behandling, brevData);
             }
         } else {
-            Aktoer mottaker = fagsak.hentAktørMedRolleType(mottakerRolle);
-            produserIkkeredigerbartDokument(produserbartDokument, mottaker, behandling, brevData);
+            Aktoer mottakerAktør = fagsak.hentAktørMedRolleType(mottakerRolle);
+            produserIkkeredigerbartDokument(produserbartDokument, mottakerAktør, behandling, brevData);
         }
     }
 
-    private Aktoersroller avklarMottakerRolleFraProduserbartDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
+    private Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
         Aktoersroller mottakerRolle;
         if (DOKUMENTER_TIL_BRUKER.contains(produserbartDokument)) {
             mottakerRolle = BRUKER;

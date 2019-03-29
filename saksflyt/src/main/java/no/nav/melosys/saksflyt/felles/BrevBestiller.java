@@ -33,7 +33,7 @@ public class BrevBestiller {
     public void bestill(Produserbaredokumenter dokumentType, String avsender, Aktoersroller mottakerRolle, Behandling behandling) throws FunksjonellException, TekniskException {
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(dokumentType)
             .medAvsender(avsender)
-            .medMottaker(new Mottaker(mottakerRolle))
+            .medMottaker(Mottaker.av(mottakerRolle))
             .medBehandling(behandling).build();
         bestill(brevbestilling);
     }
@@ -43,9 +43,9 @@ public class BrevBestiller {
         Behandling behandling = brevbestilling.getBehandling();
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(brevbestilling.getDokumentType());
         BrevData brevData = brevDataBygger.lag(behandling, brevbestilling.getAvsender());
-        brevData.mottakerRolle = brevbestilling.getMottaker().getRolle();
         brevData.begrunnelseKode = brevbestilling.getBegrunnelseKode();
-        dokumentService.produserDokument(behandling.getId(), dokumentType, brevData);
+        brevData.fritekst = brevbestilling.getFritekst();
+        dokumentService.produserDokument(dokumentType, brevbestilling.getMottaker(), behandling.getId(), brevData);
         log.info("Brevet '{}' er bestillt for sak {} og behandling {}", dokumentType, behandling.getFagsak().getSaksnummer(), behandling.getId());
     }
 }

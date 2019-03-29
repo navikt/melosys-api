@@ -105,7 +105,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             }
             Brevbestilling brevbestillingBruker = new Brevbestilling.Builder().medDokumentType(INNVILGELSE_YRKESAKTIV)
                 .medAvsender(saksbehandler)
-                .medMottaker(new Mottaker(BRUKER))
+                .medMottaker(Mottaker.av(BRUKER))
                 .medBehandling(behandling)
                 .medBegrunnelseKode(begrunnelseKode).build();
             brevBestiller.bestill(brevbestillingBruker);
@@ -116,7 +116,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             if (myndighetØnskerInnvilgelsesbrev(fagsak.hentMyndighetLandkode())) {
                 Brevbestilling brevbestillingMyndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
                     .medAvsender(saksbehandler)
-                    .medMottaker(new Mottaker(MYNDIGHET))
+                    .medMottaker(Mottaker.av(MYNDIGHET))
                     .medBehandling(behandling)
                     .medBegrunnelseKode(begrunnelseKode).build();
                 brevBestiller.bestill(brevbestillingMyndighet);
