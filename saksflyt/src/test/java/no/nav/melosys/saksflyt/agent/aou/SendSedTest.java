@@ -65,7 +65,7 @@ public class SendSedTest {
         sendSed.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
-        verify(sedService, times(0)).opprettOgSendSed(any(), any());
+        verify(sedService, never()).opprettOgSendSed(any(), any());
     }
 
     private static Behandlingsresultat hentBehandlingsresultat() {
