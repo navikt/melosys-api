@@ -1,18 +1,11 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
-import java.util.Map;
-
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
-import no.nav.melosys.saksflyt.agent.UnntakBehandler;
-import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import no.nav.melosys.saksflyt.agent.AbstraktSendSed;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.SedService;
 import org.slf4j.Logger;
@@ -25,20 +18,13 @@ import static no.nav.melosys.saksflyt.agent.iv.validering.SendSedValidator.sedSk
 
 
 @Component
-public class IverksettVedtakSendSed extends AbstraktStegBehandler {
+public class IverksettVedtakSendSed extends AbstraktSendSed {
 
     private static final Logger log = LoggerFactory.getLogger(IverksettVedtakSendSed.class);
 
-    private final BehandlingRepository behandlingRepository;
-    private final SedService sedService;
-    private final BehandlingsresultatService behandlingsresultatService;
-
     @Autowired
     public IverksettVedtakSendSed(BehandlingRepository behandlingRepository, SedService sedService, BehandlingsresultatService behandlingsresultatService) {
-        this.behandlingRepository = behandlingRepository;
-        this.sedService = sedService;
-        this.behandlingsresultatService = behandlingsresultatService;
-
+        super(behandlingRepository, sedService, behandlingsresultatService);
         log.info("IverksettVedtakSendSed initialisert");
     }
 
@@ -48,29 +34,18 @@ public class IverksettVedtakSendSed extends AbstraktStegBehandler {
     }
 
     @Override
-    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
-        return FeilStrategi.standardFeilHåndtering();
+    protected void utfør(Prosessinstans prosessinstans) throws TekniskException {
+        try {
+            super.utfør(prosessinstans);
+            prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
+        } catch (Exception ex) {
+            log.error("Kan ikke opprette og sende sed for behandling {}", prosessinstans.getBehandling().getId(), ex);
+            prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
+        }
     }
 
     @Override
-    protected void utfør(Prosessinstans prosessinstans) throws TekniskException {
-        log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
-
-        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
-        if (behandling == null) {
-            throw new TekniskException(String.format("Finner ikke behandlingen %s.", prosessinstans.getBehandling().getId()));
-        }
-
-        try {
-            Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-            if (sedSkalSendes(behandlingsresultat.getType(), validerLovvalgsperiode(behandlingsresultat.getLovvalgsperioder()))) {
-                log.info("Starter sending av SED for behandling {}", behandling.getId());
-                sedService.opprettOgSendSed(behandling, behandlingsresultat);
-            }
-            prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
-        } catch (MelosysException ex) {
-            log.error("Kan ikke opprette og sende sed for behandling {}", behandling.getId(), ex);
-            prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
-        }
+    protected boolean skalSendeSed(Behandlingsresultat behandlingsresultat) {
+        return sedSkalSendes(behandlingsresultat.getType(), validerLovvalgsperiode(behandlingsresultat.getLovvalgsperioder()));
     }
 }

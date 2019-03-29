@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -106,9 +107,6 @@ public class ProsessinstansService {
 
         prosessinstans.setBehandling(behandling);
         prosessinstans.setType(ProsessType.HENLEGG_SAK);
-        LocalDateTime nå = LocalDateTime.now();
-        prosessinstans.setEndretDato(nå);
-        prosessinstans.setRegistrertDato(nå);
 
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
         prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, begrunnelseKode);
@@ -131,6 +129,16 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    public void opprettProsessinstansMangelbrev(Behandling behandling, BrevData brevData) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setType(ProsessType.MANGELBREV);
+        prosessinstans.setSteg(ProsessSteg.MANGELBREV);
+        prosessinstans.setData(ProsessDataKey.BREVDATA, brevData);
+
+        lagre(prosessinstans);
+    }
+
     public void opprettProsessinstansOppfriskning(Behandling behandling, String aktørID, String brukerID, SoeknadDokument søknadDokument) {
         Prosessinstans nyprosessinstans = new Prosessinstans();
         nyprosessinstans.setBehandling(behandling);
@@ -143,10 +151,6 @@ public class ProsessinstansService {
         nyprosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, hentLand(søknadDokument));
 
         nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
-
-        LocalDateTime nå = LocalDateTime.now();
-        nyprosessinstans.setRegistrertDato(nå);
-        nyprosessinstans.setEndretDato(nå);
 
         lagre(nyprosessinstans);
     }
@@ -161,10 +165,6 @@ public class ProsessinstansService {
         nyprosessinstans.setBehandling(behandling);
         nyprosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
         nyprosessinstans.setSteg(ProsessSteg.IV_FORKORT_PERIODE);
-
-        LocalDateTime nå = LocalDateTime.now();
-        nyprosessinstans.setRegistrertDato(nå);
-        nyprosessinstans.setEndretDato(nå);
 
         lagre(nyprosessinstans);
     }

@@ -72,6 +72,7 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_OPPDATER_RESULTAT', 'Oppdater
 INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_AVKLAR_MYNDIGHET', 'Send orienteringsbrev og A001 for anmodning om unntak');
 INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_OPPDATER_MEDL', 'Oppdatering av medlemskap med anmodning om unntak');
 INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_SEND_BREV', 'Send orienteringsbrev og A001 for anmodning om unntak');
+INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_SEND_SED', 'Send elektronisk A001');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_FORKORT_PERIODE', 'Legg til i AvklarteFakta begrunnelse for forkorting av lovvalgsperiode');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_VALIDERING', 'Validerer iverksett vedtak');

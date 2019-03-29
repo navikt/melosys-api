@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.agent.iv;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.exception.FunksjonellException;
@@ -86,7 +88,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
 
         if (avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
-            brevBestiller.bestill(behandling, saksbehandler, AVSLAG_YRKESAKTIV, BRUKER);
+            brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, BRUKER, behandling);
             // FIXME Støtte for arbeidsgivere mangler.
             //brevBestiller.bestill(behandling, saksbehandler, AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER);
 
@@ -98,11 +100,21 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             if (endretPeriodeBegrunnelseKode != null) {
                 begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
             }
-            brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_YRKESAKTIV, BRUKER, begrunnelseKode);
+            Brevbestilling brevbestillingBruker = new Brevbestilling.Builder().medDokumentType(INNVILGELSE_YRKESAKTIV)
+                .medAvsender(saksbehandler)
+                .medMottaker(new Mottaker(BRUKER))
+                .medBehandling(behandling)
+                .medBegrunnelseKode(begrunnelseKode).build();
+            brevBestiller.bestill(brevbestillingBruker);
             // FIXME Støtte for arbeidsgivere mangler.
             //brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, ARBEIDSGIVER);
             if (myndighetØnskerInnvilgelsesbrev(behandling)) {
-                brevBestiller.bestill(behandling, saksbehandler, ATTEST_A1, MYNDIGHET, begrunnelseKode);
+                Brevbestilling brevbestillingMyndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
+                    .medAvsender(saksbehandler)
+                    .medMottaker(new Mottaker(MYNDIGHET))
+                    .medBehandling(behandling)
+                    .medBegrunnelseKode(begrunnelseKode).build();
+                brevBestiller.bestill(brevbestillingMyndighet);
             }
 
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());

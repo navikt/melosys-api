@@ -89,7 +89,6 @@ public class JoarkService implements JoarkFasade {
 
         Journalpost journalpost = new Journalpost(journalpostID);
         journalpost.setBrukerId(response.getBrukerListe().stream().map(Bruker::getIdentifikator).findFirst().orElse(null));
-        journalpost.setAvsenderId(response.getAvsender().getIdentifikator());
         journalpost.setForsendelseMottatt(response.getForsendelseMottatt().toInstant());
 
         if (response.getDokumentListe().size() > 1) {
@@ -102,6 +101,9 @@ public class JoarkService implements JoarkFasade {
 
         journalpost.setHoveddokument(arkivDokument);
 
+        if (response.getAvsender() != null) {
+            journalpost.setAvsenderId(response.getAvsender().getIdentifikator());
+        }
         if (response.getArkivSak() != null) {
             journalpost.setArkivSakId(response.getArkivSak().getArkivSakId());
         }

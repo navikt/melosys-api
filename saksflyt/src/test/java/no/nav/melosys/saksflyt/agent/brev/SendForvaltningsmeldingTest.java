@@ -42,7 +42,7 @@ public class SendForvaltningsmeldingTest {
 
         agent.utførSteg(p);
 
-        verify(brevBestiller).bestill(any(Behandling.class), anyString(), eq(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID), eq(Aktoersroller.BRUKER));
+        verify(brevBestiller).bestill(eq(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID), anyString(), eq(Aktoersroller.BRUKER), any(Behandling.class));
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }

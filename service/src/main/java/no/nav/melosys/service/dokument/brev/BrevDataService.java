@@ -2,10 +2,6 @@ package no.nav.melosys.service.dokument.brev;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Optional;
-import java.util.Set;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
@@ -29,20 +25,17 @@ import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 /**
@@ -51,54 +44,48 @@ import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 @Service
 public class BrevDataService {
 
-    private static final Set<Produserbaredokumenter> DOKUMENTER_TIL_BRUKER = Collections.unmodifiableSet(EnumSet.of(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
-        AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK, INNVILGELSE_YRKESAKTIV));
-
-    private final TpsFasade tpsFasade;
-
     static final String MELOSYS_ENHET_ID = "4530";
 
     private static final String FALSK_MOTTAKER_ID = "11111111111";
     static final String PLASSHOLDER_TEKST = "-";
     static final String PLASSHOLDER_POSTNUMMER = "0000";
 
+    private final TpsFasade tpsFasade;
+
     private final BehandlingsresultatRepository behandlingsresultatRepository;
 
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
-    private final KontaktopplysningService kontaktopplysningService;
-
     @Autowired
     public BrevDataService(@Qualifier("system") TpsFasade tpsFasade,
                            BehandlingsresultatRepository behandlingsresultatRepository,
-                           UtenlandskMyndighetRepository utenlandskMyndighetRepository,
-                           KontaktopplysningService kontaktopplysningService) {
+                           UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
         this.tpsFasade = tpsFasade;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
-        this.kontaktopplysningService = kontaktopplysningService;
     }
 
     /**
      * Genererer metada til doksys angående dokumentbestillingen.
      */
-    public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
-        Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument");
+    public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument,
+                                                            Aktoer mottaker, Kontaktopplysning kontaktopplysning,
+                                                            Behandling behandling, BrevData brevData)
+        throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         Fagsak fagsak = behandling.getFagsak();
 
-        Aktoersroller mottakersRolle = brevData.mottaker != null ? brevData.mottaker : avklarMottakerRolleFraProduserbartDokument(produserbartDokument);
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
         metadata.dokumenttypeID = DokumenttypeIdMapper.hentID(produserbartDokument);
-        metadata.mottakersRolle = mottakersRolle;
-        metadata.mottakerID = avklarMottakerId(fagsak, mottakersRolle);
-        metadata.brukerID = tpsFasade.hentFagsakIdentMedRolleType(fagsak, BRUKER);
+        metadata.mottaker = mottaker;
+        metadata.mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
+        metadata.brukerID = tpsFasade.hentIdentForAktørId(fagsak.hentAktørMedRolleType(BRUKER).getAktørId());
 
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
         metadata.fagområde = Tema.MED.getKode();
         metadata.saksbehandler = brevData.saksbehandler;
-        metadata.utenlandskMyndighet = (mottakersRolle == Aktoersroller.MYNDIGHET) ? hentMyndighetFraSak(fagsak) : null;
-        metadata.utledRegisterInfo = dokprodUtlederRegisterInfo(metadata);
+        metadata.utenlandskMyndighet = (mottaker.getRolle() == Aktoersroller.MYNDIGHET) ? hentMyndighetFraSak(fagsak) : null;
+        metadata.utledRegisterInfo = dokprodUtlederRegisterInfo(mottaker);
 
         if (!metadata.utledRegisterInfo) {
             Saksopplysning tpsOpplysning = tpsFasade.hentPerson(metadata.brukerID);
@@ -108,28 +95,46 @@ public class BrevDataService {
         return metadata;
     }
 
+    private String avklarMottakerId(Aktoer mottaker, Kontaktopplysning kontaktopplysning) throws TekniskException {
+        Aktoersroller mottakerRolle = mottaker.getRolle();
+
+        if (mottakerRolle == ARBEIDSGIVER || mottakerRolle == REPRESENTANT) {
+            return (kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null) ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
+        } else if (mottakerRolle == BRUKER) {
+            try {
+                return tpsFasade.hentIdentForAktørId(mottaker.getAktørId());
+            } catch (IkkeFunnetException e) {
+                throw new TekniskException(e);
+            }
+        } else if (mottakerRolle == MYNDIGHET) {
+            return mottaker.getInstitusjonId();
+        }
+
+        throw new TekniskException(mottakerRolle + " støttes ikke");
+    }
+
     UtenlandskMyndighet hentMyndighetFraSak(Fagsak fagsak) throws TekniskException {
         return utenlandskMyndighetRepository.findByLandkode(fagsak.hentMyndighetLandkode());
     }
 
     // Dokprod kan utlede registerinfo når Melosys ikke trenger å sette adressen sammen.
-    // Melosys setter adressen sammen for kontaktpersoner og utelandske myndigheter.
-    private boolean dokprodUtlederRegisterInfo(DokumentbestillingMetadata metadata) {
-        return Aktoersroller.MYNDIGHET != metadata.mottakersRolle;
+    // Melosys setter adressen sammen for utelandske myndigheter.
+    private boolean dokprodUtlederRegisterInfo(Aktoer mottaker) {
+        return mottaker.getRolle() != MYNDIGHET;
     }
 
     /**
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
     @Transactional(propagation = Propagation.MANDATORY)
-    public Element lagBrevXML(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
+    public Element lagBrevXML(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) throws TekniskException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
             .orElseThrow(() -> new TekniskException("Finner ingen behandlingsresultat for behandlingid"));
 
         Element brevXmlElement;
         try {
-            FellesType fellesType = mapFellesType(behandling);
-            MelosysNAVFelles navFelles = mapNAVFelles(produserbartDokument, behandling, brevData);
+            FellesType fellesType = mapFellesType(mottaker, kontaktopplysning, behandling);
+            MelosysNAVFelles navFelles = mapNAVFelles(mottaker, kontaktopplysning, behandling, brevData);
             String brevXml = BrevDataMapperRuter.brevDataMapper(produserbartDokument).mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -145,25 +150,78 @@ public class BrevDataService {
         return brevXmlElement;
     }
 
-    private FellesType mapFellesType(Behandling behandling) {
+    private FellesType mapFellesType(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling) {
         final FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer(behandling.getFagsak().getSaksnummer());
+        if (mottaker.getRolle() == REPRESENTANT) {
+            fellesType.setFullmektig(mottaker.getOrgnr());
+        }
+        if (kontaktopplysning != null) {
+            fellesType.setKontaktperson(kontaktopplysning.getKontaktNavn());
+        }
 
         return fellesType;
     }
 
-    private MelosysNAVFelles mapNAVFelles(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
+    private MelosysNAVFelles mapNAVFelles(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData)
+        throws TekniskException {
         final MelosysNAVFelles navFelles = new MelosysNAVFelles();
 
-        navFelles.setSakspart(lagSakspart(behandling));
-        navFelles.setMottaker(lagMottaker(produserbartDokument, behandling, brevData));
         navFelles.setBehandlendeEnhet(lagNavEnhet());
-        navFelles.setSignerendeSaksbehandler(lagSaksbehandler(brevData.saksbehandler));
-        navFelles.setSignerendeBeslutter(lagSaksbehandler(brevData.saksbehandler));
         navFelles.setKontaktinformasjon(BrevDataUtils.lagKontaktInformasjon());
+        navFelles.setMottaker(lagMottaker(mottaker, kontaktopplysning, behandling));
+        navFelles.setSakspart(lagSakspart(behandling));
+        navFelles.setSignerendeBeslutter(lagSaksbehandler(brevData.saksbehandler));
+        navFelles.setSignerendeSaksbehandler(lagSaksbehandler(brevData.saksbehandler));
 
         return navFelles;
     }
+
+    Mottaker lagMottaker(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling) throws TekniskException {
+        Aktoersroller mottakerRolle = mottaker.getRolle();
+        String mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
+
+        Mottaker mottakerBrev;
+
+        if (mottakerRolle == BRUKER) {
+            mottakerBrev = new Person();
+            mottakerBrev.setTypeKode(AktoerType.PERSON);
+            mottakerBrev.setId(mottakerID);
+        } else if (mottakerRolle == ARBEIDSGIVER || mottakerRolle == REPRESENTANT) {
+            mottakerBrev = new Organisasjon();
+            mottakerBrev.setTypeKode(AktoerType.ORGANISASJON);
+            mottakerBrev.setId(mottakerID);
+        } else if (mottakerRolle == MYNDIGHET) {
+            mottakerBrev = new Person();
+            mottakerBrev.setBerik(false);
+            mottakerBrev.setTypeKode(AktoerType.PERSON);
+            mottakerBrev.setId(FALSK_MOTTAKER_ID);
+
+            UtenlandskMyndighet utenlandskMyndighet = hentMyndighetFraSak(behandling.getFagsak());
+            mottakerBrev.setNavn(utenlandskMyndighet.navn);
+            mottakerBrev.setKortNavn(mottaker.getInstitusjonId());
+            mottakerBrev.setSpraakkode(Spraakkode.NB);
+            mottakerBrev.setMottakeradresse(lagUtendlanskAdresse(utenlandskMyndighet));
+            return mottakerBrev;
+        } else {
+            throw new TekniskException(mottakerRolle + " støttes ikke.");
+        }
+
+        mottakerBrev.setNavn(PLASSHOLDER_TEKST);
+        mottakerBrev.setMottakeradresse(lagNorskPostadresse());
+        mottakerBrev.setKortNavn(PLASSHOLDER_TEKST);
+        mottakerBrev.setSpraakkode(Spraakkode.NB);
+
+        return mottakerBrev;
+    }
+
+    private Saksbehandler lagSaksbehandler(String userId) {
+        Saksbehandler saksbehandler = new Saksbehandler();
+        saksbehandler.setNavEnhet(lagNavEnhet());
+        saksbehandler.setNavAnsatt(lagNavAnsatt(userId));
+        return saksbehandler;
+    }
+
 
     private Sakspart lagSakspart(Behandling behandling) throws TekniskException {
         Sakspart sakspart = new Sakspart();
@@ -181,100 +239,5 @@ public class BrevDataService {
         sakspart.setTypeKode(AktoerType.PERSON);
         sakspart.setNavn(PLASSHOLDER_TEKST);
         return sakspart;
-    }
-
-    Mottaker lagMottaker(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
-        Aktoersroller mottakersRolle = brevData.mottaker != null ? brevData.mottaker : avklarMottakerRolleFraProduserbartDokument(produserbartDokument);
-        Fagsak fagsak = behandling.getFagsak();
-        Aktoer aktør = fagsak.hentAktørMedRolleType(mottakersRolle);
-        TekniskException ingenAktør = new TekniskException("Det finnes ingen mottaker på sak " + behandling.getFagsak().getSaksnummer());
-        if (aktør == null) {
-            throw ingenAktør;
-        }
-
-        String mottakerID = avklarMottakerId(fagsak, mottakersRolle);
-        Mottaker mottaker;
-
-        if (mottakersRolle == BRUKER) {
-            mottaker = new Person();
-            mottaker.setTypeKode(AktoerType.PERSON);
-            mottaker.setId(mottakerID);
-        } else if (mottakersRolle == ARBEIDSGIVER || mottakersRolle == REPRESENTANT) {
-            mottaker = new Organisasjon();
-            mottaker.setTypeKode(AktoerType.ORGANISASJON);
-            mottaker.setId(mottakerID);
-        } else if (mottakersRolle == MYNDIGHET) {
-            mottaker = new Person();
-            mottaker.setBerik(false);
-            mottaker.setTypeKode(AktoerType.PERSON);
-            mottaker.setId(FALSK_MOTTAKER_ID);
-
-            UtenlandskMyndighet utenlandskMyndighet = hentMyndighetFraSak(behandling.getFagsak());
-            mottaker.setNavn(utenlandskMyndighet.navn);
-            mottaker.setKortNavn(aktør.getInstitusjonId());
-            mottaker.setSpraakkode(Spraakkode.NB);
-            mottaker.setMottakeradresse(lagUtendlanskAdresse(utenlandskMyndighet));
-            return mottaker;
-        } else {
-            throw ingenAktør;
-        }
-
-        Optional<String> mottakerNavn = hentKontaktNavnForOrgnr(fagsak, mottakerID);
-        mottaker.setNavn(mottakerNavn.orElse(PLASSHOLDER_TEKST));
-        mottaker.setKortNavn(PLASSHOLDER_TEKST);
-        mottaker.setSpraakkode(Spraakkode.NB);
-        mottaker.setMottakeradresse(lagNorskPostadresse());
-
-        return mottaker;
-    }
-
-    private Saksbehandler lagSaksbehandler(String userId) {
-        Saksbehandler saksbehandler = new Saksbehandler();
-        saksbehandler.setNavEnhet(lagNavEnhet());
-        saksbehandler.setNavAnsatt(lagNavAnsatt(userId));
-        return saksbehandler;
-    }
-
-    private Aktoersroller avklarMottakerRolleFraProduserbartDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
-        Aktoersroller mottakerRolle;
-        if (DOKUMENTER_TIL_BRUKER.contains(produserbartDokument)) {
-            mottakerRolle = BRUKER;
-        } else if (produserbartDokument == INNVILGELSE_ARBEIDSGIVER || produserbartDokument == AVSLAG_ARBEIDSGIVER) {
-            mottakerRolle = ARBEIDSGIVER;
-        } else if (produserbartDokument == ANMODNING_UNNTAK || produserbartDokument == ATTEST_A1) {
-            mottakerRolle = MYNDIGHET;
-        } else {
-            throw new TekniskException("Produserbartdokument ikke støttet for å velge mottakerRolle");
-        }
-        return mottakerRolle;
-    }
-
-    private String avklarMottakerId(Fagsak fagsak, Aktoersroller mottakerRolle) throws TekniskException {
-
-        Aktoer mottaker = fagsak.hentAktørMedRolleType(mottakerRolle);
-        Aktoer representant = fagsak.hentAktørMedRolleType(REPRESENTANT); // FIXME MEL-2182 Det kan være flere representanter på en sak
-
-        if (representant != null) {
-            return kontaktopplysningService.hentKontaktopplysning(fagsak.getSaksnummer(), representant.getOrgnr())
-                .map(Kontaktopplysning::getKontaktOrgnr).orElse(representant.getOrgnr());
-        } else if (mottakerRolle == ARBEIDSGIVER) {
-            return kontaktopplysningService.hentKontaktopplysning(fagsak.getSaksnummer(), mottaker.getOrgnr())
-                .map(Kontaktopplysning::getKontaktOrgnr).orElse(mottaker.getOrgnr());
-        } else if (mottakerRolle == MYNDIGHET) {
-            return mottaker.getInstitusjonId();
-        } else if (mottakerRolle == BRUKER) {
-            try {
-                return tpsFasade.hentIdentForAktørId(mottaker.getAktørId());
-            } catch (IkkeFunnetException e) {
-                throw new TekniskException(e);
-            }
-        }
-
-        throw new TekniskException("Det finnes ingen mottaker på sak " + fagsak.getSaksnummer());
-    }
-
-    private Optional<String> hentKontaktNavnForOrgnr(Fagsak fagsak, String orgNr) {
-        return kontaktopplysningService.hentKontaktopplysning(fagsak.getSaksnummer(), orgNr)
-            .map(Kontaktopplysning::getKontaktNavn);
     }
 }
