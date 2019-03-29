@@ -1,18 +1,14 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
@@ -42,13 +38,6 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
 
-    Function<OrganisasjonDokument, no.nav.melosys.domain.dokument.felles.Adresse> adresseformaterer = this::utfyllManglendeAdressefelter;
-    private StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
-        StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
-        adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
-        return adresse;
-    }
-
     public SedDataDto lag(Behandling behandling) throws TekniskException, FunksjonellException {
         this.behandling = behandling;
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
@@ -56,7 +45,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
 
         SedDataDto sedDataDto = new SedDataDto();
 
-        sedDataDto.setArbeidsgivendeVirksomheter(map(avklarteVirksomheterService.hentArbeidsgivere(behandling, adresseformaterer)));
+        sedDataDto.setArbeidsgivendeVirksomheter(map(avklarteVirksomheterService.hentArbeidsgivere(behandling, this::utfyllManglendeAdressefelter)));
 
         sedDataDto.setArbeidssteder(hentArbeidssteder().stream()
             .map(this::mapArbeidssted).collect(Collectors.toList()));
@@ -73,7 +62,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
 
         sedDataDto.setLovvalgsperioder(Collections.singletonList(hentLovvalgsperiodeDto()));
 
-        sedDataDto.setSelvstendigeVirksomheter(map(avklarteVirksomheterService.hentSelvstendigeForetak(behandling, adresseformaterer)));
+        sedDataDto.setSelvstendigeVirksomheter(map(avklarteVirksomheterService.hentSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter)));
 
         sedDataDto.setUtenlandskeVirksomheter(hentUtenlandskeVirksomheter().stream().map(
             this::tilUtenlandsVirksomhetDto).collect(Collectors.toList()));//TODO - riktig?

@@ -17,10 +17,9 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -31,7 +30,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -103,14 +101,6 @@ public class A001MapperTest {
         when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(saksopplysning)));
         when(behandling.getFagsak()).thenReturn(new Fagsak());
 
-        UstrukturertAdresse adresse = new UstrukturertAdresse();
-        adresse.landKode = "Land";
-        adresse.adresselinjer.add("Gatenavn");
-        adresse.adresselinjer.add("25");
-        adresse.adresselinjer.add("Postnummer");
-        adresse.adresselinjer.add("Poststed");
-        adresse.adresselinjer.add("Region");
-
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
         strukturertAdresse.husnummer = "25";
         strukturertAdresse.gatenavn = "Gatenavn";
@@ -124,12 +114,9 @@ public class A001MapperTest {
         SoeknadDokument søknad = new SoeknadDokument();
         søknad.arbeidUtland = Arrays.asList(arbeidUtland);
 
-        OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
-        when(organisasjonsDetaljer.hentUstrukturertForretningsadresse()).thenReturn(adresse);
-
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("JARLSBERG AS",
                                                "123456789",
-                                                adresse, Yrkesaktivitetstyper.LOENNET_ARBEID);
+                                                strukturertAdresse, Yrkesaktivitetstyper.LOENNET_ARBEID);
 
         Arbeidssted fysiskArbeidssted = new Arbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
         Arbeidssted maritimtArbeidssted = new Arbeidssted("Seven Kestrel", "GB", Yrkesgrupper.SOKKEL_ELLER_SKIP);
