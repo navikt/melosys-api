@@ -58,9 +58,6 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringDto.getAvsenderNavn());
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringDto.getHoveddokumentTittel());
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringDto.skalTilordnes());
-        if (journalfoeringDto.skalTilordnes()) {
-            prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SubjectHandler.getInstance().getUserID());
-        }
 
         if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
             prosessinstans.setData(ProsessDataKey.VEDLEGG_TITTEL_LISTE, journalfoeringDto.getVedlegg().stream().map(DokumentDto::getTittel).collect(Collectors.toList()));

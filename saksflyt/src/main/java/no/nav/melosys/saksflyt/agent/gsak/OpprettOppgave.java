@@ -107,9 +107,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
         boolean skalTilordnes = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).orElse(false);
         if (skalTilordnes) {
-            String saksbehandler = Optional.of(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER))
-                .orElseThrow(() -> new TekniskException("Forventer at saksbehandler er satt når oppgave skal tilordnes"));
-            oppgave.setTilordnetRessurs(saksbehandler);
+            oppgave.setTilordnetRessurs(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
         }
 
         String oppgaveId = gsakFasade.opprettOppgave(oppgave);

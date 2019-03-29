@@ -86,7 +86,6 @@ public class JournalfoeringDto {
         this.vedlegg = vedlegg;
     }
 
-
     public boolean skalTilordnes() {
         return skalTilordnes;
     }

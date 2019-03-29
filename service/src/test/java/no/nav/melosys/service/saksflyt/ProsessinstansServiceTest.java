@@ -155,7 +155,7 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
-    public void opprettProsessinstansJournalføring_skalTilordnesTrue_setterSaksbehandler() {
+    public void opprettProsessinstansJournalføring_skalTilordnesTrue_settesIProsessinstans() {
         settInnloggetSaksbehandler();
         JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
 
@@ -164,11 +164,10 @@ public class ProsessinstansServiceTest {
         Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isTrue();
-        assertThat(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo("Z123456");
     }
 
     @Test
-    public void opprettProsessinstansJournalføring_skalTilordnesFalse_setterIkkeSaksbehandler() {
+    public void opprettProsessinstansJournalføring_skalTilordnesFalse_settesIProsessinstans() {
         settInnloggetSaksbehandler();
         JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
 
@@ -177,7 +176,6 @@ public class ProsessinstansServiceTest {
         Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isFalse();
-        assertThat(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)).isNull();
     }
 
     private JournalfoeringDto lagJournalfoeringDTO() {
