@@ -24,6 +24,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import org.apache.commons.lang3.StringUtils;
 
 public abstract class AbstraktDokumentDataBygger {
     protected final KodeverkService kodeverkService;
@@ -80,6 +81,9 @@ public abstract class AbstraktDokumentDataBygger {
 
     protected StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
         StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
+        if (StringUtils.isEmpty(adresse.gatenavn) || StringUtils.isEmpty(adresse.postnummer)) {
+            adresse = org.getOrganisasjonDetaljer().hentStrukturertPostadresse();
+        }
         adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
         return adresse;
     }
