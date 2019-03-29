@@ -7,7 +7,7 @@ import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.felles.BrevBestiller;
+import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

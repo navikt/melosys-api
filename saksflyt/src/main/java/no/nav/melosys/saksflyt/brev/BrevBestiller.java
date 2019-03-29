@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.felles;
+package no.nav.melosys.saksflyt.brev;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Brevbestilling;

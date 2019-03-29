@@ -2,21 +2,32 @@ package no.nav.melosys.domain.brev;
 
 import java.util.Objects;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
 public final class Mottaker {
-    private final Aktoersroller rolle;
+    private final Aktoer aktør;
 
-    private Mottaker(Aktoersroller rolle) {
-        this.rolle = rolle;
+    private Mottaker(Aktoer aktør) {
+        this.aktør = aktør;
+    }
+
+    public static Mottaker av(Aktoer aktør) {
+        return new Mottaker(aktør);
     }
 
     public static Mottaker av(Aktoersroller rolle) {
-        return new Mottaker(rolle);
+        Aktoer aktør = new Aktoer();
+        aktør.setRolle(rolle);
+        return new Mottaker(aktør);
+    }
+
+    public Aktoer getAktør() {
+        return aktør;
     }
 
     public Aktoersroller getRolle() {
-        return rolle;
+        return aktør.getRolle();
     }
 
     @Override
@@ -24,11 +35,11 @@ public final class Mottaker {
         if (this == o) return true;
         if (!(o instanceof Mottaker)) return false;
         Mottaker mottaker = (Mottaker) o;
-        return getRolle() == mottaker.getRolle();
+        return aktør.equals(mottaker.aktør);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getRolle());
+        return Objects.hash(aktør);
     }
 }

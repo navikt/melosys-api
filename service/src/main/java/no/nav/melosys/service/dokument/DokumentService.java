@@ -115,6 +115,20 @@ public class DokumentService {
         return dokSysFasade.produserDokumentutkast(lagDokumentbestilling(produserbartDokument, mottaker, behandling, brevData));
     }
 
+    private Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
+        Aktoersroller mottakerRolle;
+        if (DOKUMENTER_TIL_BRUKER.contains(produserbartDokument)) {
+            mottakerRolle = BRUKER;
+        } else if (produserbartDokument == INNVILGELSE_ARBEIDSGIVER || produserbartDokument == AVSLAG_ARBEIDSGIVER) {
+            mottakerRolle = ARBEIDSGIVER;
+        } else if (produserbartDokument == ANMODNING_UNNTAK || produserbartDokument == ATTEST_A1) {
+            mottakerRolle = MYNDIGHET;
+        } else {
+            throw new TekniskException("Valg av mottakerRolle støtter ikke " + produserbartDokument);
+        }
+        return mottakerRolle;
+    }
+
     /**
      * Produserer et dokument i Doksys
      */
@@ -143,24 +157,18 @@ public class DokumentService {
             } else {
                 produserIkkeredigerbartDokument(produserbartDokument, arbeidsgiver, behandling, brevData);
             }
+        } else if (mottakerRolle == MYNDIGHET) {
+            Aktoer myndighet;
+            if (mottaker.getAktør().getOrgnr() != null) {
+                myndighet = mottaker.getAktør();
+            } else {
+                // Utenlandsk myndighet
+                myndighet = fagsak.hentAktørMedRolleType(mottakerRolle);
+            }
+            produserIkkeredigerbartDokument(produserbartDokument, myndighet, behandling, brevData);
         } else {
-            Aktoer mottakerAktør = fagsak.hentAktørMedRolleType(mottakerRolle);
-            produserIkkeredigerbartDokument(produserbartDokument, mottakerAktør, behandling, brevData);
+            throw new FunksjonellException(mottakerRolle + " støttes ikke.");
         }
-    }
-
-    private Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
-        Aktoersroller mottakerRolle;
-        if (DOKUMENTER_TIL_BRUKER.contains(produserbartDokument)) {
-            mottakerRolle = BRUKER;
-        } else if (produserbartDokument == INNVILGELSE_ARBEIDSGIVER || produserbartDokument == AVSLAG_ARBEIDSGIVER) {
-            mottakerRolle = ARBEIDSGIVER;
-        } else if (produserbartDokument == ANMODNING_UNNTAK || produserbartDokument == ATTEST_A1) {
-            mottakerRolle = MYNDIGHET;
-        } else {
-            throw new TekniskException("Valg av mottakerRolle støtter ikke " + produserbartDokument);
-        }
-        return mottakerRolle;
     }
 
     private Kontaktopplysning hentKontaktopplysning(String saksnumner, Aktoer mottaker) {

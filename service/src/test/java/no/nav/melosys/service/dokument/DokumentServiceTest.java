@@ -95,12 +95,6 @@ public final class DokumentServiceTest {
     }
 
     @Test
-    public final void produserInnvilgelsesbrevMedFullmektigFunker() throws Exception {
-        BrevData brevDataDto = lagBrevData();
-        instans.produserDokument(INNVILGELSE_YRKESAKTIV, Mottaker.av(REPRESENTANT), BEHANDLINGSID, brevDataDto);
-    }
-
-    @Test
     public final void produserMangelbrevISaksflyt() throws Exception {
         BrevbestillingDto brevbestilling = lagBrevBestillingDto();
         instans.produserDokumentISaksflyt(BEHANDLINGSID, Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER, brevbestilling);
