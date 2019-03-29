@@ -1,6 +1,9 @@
 package no.nav.melosys.saksflyt.agent.brev;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
@@ -14,7 +17,8 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class SendMangelbrevTest {
 
@@ -46,7 +50,7 @@ public class SendMangelbrevTest {
         verify(dokumentService).produserDokument(anyLong(), any(Produserbaredokumenter.class), any(BrevData.class));
         verify(behandlingRepo).save(any(Behandling.class));
 
-        assertThat(p.getSteg()).isNull();
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }
 
     @Test
@@ -55,13 +59,13 @@ public class SendMangelbrevTest {
         p.setBehandling(new Behandling());
 
         BrevData brevData = new BrevData("Z123456");
-        brevData.mottaker = Aktoersroller.MYNDIGHET;
+        brevData.mottakerRolle = Aktoersroller.MYNDIGHET;
         brevData.fritekst = "Fritekst";
 
         p.setData(ProsessDataKey.BREVDATA, brevData);
 
         BrevData hentetBrevData = p.getData(ProsessDataKey.BREVDATA, BrevData.class);
-        assertThat(hentetBrevData.mottaker).isEqualTo(brevData.mottaker);
+        assertThat(hentetBrevData.mottakerRolle).isEqualTo(brevData.mottakerRolle);
         assertThat(hentetBrevData.fritekst).isEqualTo(brevData.fritekst);
         assertThat(hentetBrevData.saksbehandler).isEqualTo(brevData.saksbehandler);
 

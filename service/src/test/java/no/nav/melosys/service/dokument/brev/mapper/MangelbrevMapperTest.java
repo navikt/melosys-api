@@ -50,7 +50,7 @@ public class MangelbrevMapperTest {
         behandling.setRegistrertDato(Instant.now());
 
         BrevData BrevData = new BrevData("Z123456");
-        BrevData.mottaker = Aktoersroller.BRUKER;
+        BrevData.mottakerRolle = Aktoersroller.BRUKER;
         BrevData.fritekst = "Test";
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, BrevData);

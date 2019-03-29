@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_MEDL;
+import static no.nav.melosys.domain.ProsessSteg.AOU_AVKLAR_MYNDIGHET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -49,6 +49,6 @@ public class OppdaterBehandlingsresultatTest {
 
         assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
         assertThat(behandlingsresultat.getEndretAv()).isEqualTo(testbruker);
-        assertThat(p.getSteg()).isEqualTo(AOU_OPPDATER_MEDL);
+        assertThat(p.getSteg()).isEqualTo(AOU_AVKLAR_MYNDIGHET);
     }
 }

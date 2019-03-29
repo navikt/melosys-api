@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
 import static no.nav.melosys.domain.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
+import static no.nav.melosys.domain.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
 
 /**
  * Oppdatere behandling med siste opplysninger hentet dato
@@ -63,7 +63,7 @@ public class OppfriskSaksopplysninger extends AbstraktStegBehandler {
         behandlingRepository.save(behandling);
 
         if (prosessinstans.getType() == ProsessType.OPPFRISKNING) {
-            prosessinstans.setSteg(null);
+            prosessinstans.setSteg(ProsessSteg.FERDIG);
             log.info("Oppfrisking av saksopplysninger er ferdig for prosessinstans {} og behandlingID {}.", prosessinstans.getId(), behandling.getId());
             return;
         } else {

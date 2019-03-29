@@ -56,7 +56,7 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
 
         sakOgBehandlingFasade.sendBehandlingAvsluttet(lagBehandlingStatusMapper(saksnummer, behandling.getId(), aktørID));
 
-        prosessinstans.setSteg(null);
+        prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Oppdatert sob-status til avsluttet for prosessinstans {}", prosessinstans.getId());
     }
 }

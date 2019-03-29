@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
@@ -93,11 +94,12 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetyper oppgavetype, Tema tema, List<Sakstyper> sakstyper, List<Behandlingstyper> behandlingstyper)
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetyper oppgavetype, Tema tema, List<Sakstyper> sakstyper, List<Behandlingstyper> behandlingstyper, List<Behandlingstema> behandlingstemaer)
         throws FunksjonellException, TekniskException {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(oppgavetype.getKode())
             .medBehandlingsTyper(behandlingstyper.stream().map(this::hentFellesKode).toArray(String[]::new))
+            .medBehandlingstema(behandlingstemaer.stream().map(Behandlingstema::getKode).toArray(String[]::new))
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .medTildeltRessurs(false);
@@ -180,13 +182,15 @@ public class GsakService implements GsakFasade {
     }
 
     private List<Oppgave> hentOppgaverAlleTyper(OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder) throws FunksjonellException, TekniskException {
-        List<OppgaveDto> finnJfrOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(
-            oppgaveSearchRequestBuilder.medOppgaveTyper(Oppgavetyper.JFR.getKode()).build()
-        );
-
         // Henter oppgaver opprettet av melosys, hvor melosys har satt behandlesAvApplikasjon
         List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(
             oppgaveSearchRequestBuilder.medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode()).build()
+        );
+
+        // Henter journalføringsoppgaver. Disse er ikke opprettet av Melosys
+        List<OppgaveDto> finnJfrOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(
+            oppgaveSearchRequestBuilder.medOppgaveTyper(Oppgavetyper.JFR.getKode())
+                .medBehandlesAvApplikasjon(null).build()
         );
 
         return Stream.of(finnJfrOppgaveListeResponse, finnOppgaveListeResponse)

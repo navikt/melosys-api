@@ -1,9 +1,6 @@
 package no.nav.melosys.saksflyt.agent.aou;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
@@ -55,13 +52,13 @@ public class SendBrevTest {
     @Test
     public void utfoerSteg() {
         agent.utførSteg(p);
-        assertThat(p.getSteg()).isNull();
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_SEND_SED);
     }
 
     @Test
     public void utførStegAntallSendteBrev() throws FunksjonellException, TekniskException {
         agent.utførSteg(p);
-        verify(brevBestiller).bestill(any(Behandling.class), anyString(), eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), eq(Aktoersroller.BRUKER));
-        verify(brevBestiller).bestill(any(Behandling.class), anyString(), eq(Produserbaredokumenter.ANMODNING_UNNTAK), eq(Aktoersroller.MYNDIGHET));
+        verify(brevBestiller).bestill(eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), anyString(), eq(Aktoersroller.BRUKER), any(Behandling.class));
+        verify(brevBestiller).bestill(eq(Produserbaredokumenter.ANMODNING_UNNTAK), anyString(), eq(Aktoersroller.MYNDIGHET), any(Behandling.class));
     }
 }

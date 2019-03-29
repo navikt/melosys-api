@@ -68,7 +68,7 @@ public class SendHenleggelsesbrevTest {
 
         sendHenleggelsesbrev.utfør(prosessinstans);
 
-        assertThat(brevDataHenleggelse.mottaker).isEqualTo(Aktoersroller.BRUKER);
+        assertThat(brevDataHenleggelse.mottakerRolle).isEqualTo(Aktoersroller.BRUKER);
         verify(dokumentService).produserDokument(behandlingId, MELDING_HENLAGT_SAK, brevDataHenleggelse);
         assertThat(prosessinstans.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
     }

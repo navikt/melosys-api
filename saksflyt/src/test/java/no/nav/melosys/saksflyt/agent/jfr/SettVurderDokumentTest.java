@@ -59,7 +59,7 @@ public class SettVurderDokumentTest {
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
         agent.utførSteg(p);
-        assertThat(p.getSteg()).isNull();
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
         verify(behandlingRepository).save(behandlingArgumentCaptor.capture());
         assertThat(behandlingArgumentCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.VURDER_DOKUMENT);
     }
@@ -71,7 +71,7 @@ public class SettVurderDokumentTest {
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
         agent.utførSteg(p);
-        assertThat(p.getSteg()).isNull();
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
         verify(behandlingRepository, never()).save(any(Behandling.class));
     }
 
@@ -82,7 +82,7 @@ public class SettVurderDokumentTest {
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.JFR_INGEN_VURDERING, true);
         agent.utførSteg(p);
-        assertThat(p.getSteg()).isNull();
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
         verify(behandlingRepository, never()).save(any(Behandling.class));
     }
 

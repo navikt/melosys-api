@@ -53,7 +53,7 @@ public class BrevDataByggerAvslagArbeidsgiver extends AbstraktDokumentDataBygger
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
 
         BrevDataAvslagArbeidsgiver brevData = new BrevDataAvslagArbeidsgiver(saksbehandler);
-        brevData.mottaker = Aktoersroller.ARBEIDSGIVER;
+        brevData.mottakerRolle = Aktoersroller.ARBEIDSGIVER;
         brevData.person = person;
 
         List<AvklartVirksomhet> norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, utenAdresse);

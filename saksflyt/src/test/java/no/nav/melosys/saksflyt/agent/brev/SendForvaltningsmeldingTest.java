@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.agent.brev;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
@@ -41,8 +42,8 @@ public class SendForvaltningsmeldingTest {
 
         agent.utførSteg(p);
 
-        verify(brevBestiller).bestill(any(Behandling.class), anyString(), eq(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID), eq(Aktoersroller.BRUKER));
+        verify(brevBestiller).bestill(eq(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID), anyString(), eq(Aktoersroller.BRUKER), any(Behandling.class));
 
-        assertThat(p.getSteg()).isNull();
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }
 }

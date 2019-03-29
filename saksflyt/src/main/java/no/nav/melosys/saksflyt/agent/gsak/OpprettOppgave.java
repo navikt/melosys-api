@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.agent.gsak;
 
 import java.util.Map;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
@@ -79,7 +80,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         oppgave.setTema(Tema.MED);
 
         if (fagsak.getType() == Sakstyper.EU_EOS) {
-            oppgave.setBehandlingstema(Behandlingstema.ARB_EØS);
+            oppgave.setBehandlingstema(Behandlingstema.EU_EOS);
             oppgave.setBehandlingstype(null);
         } else {
             String feilmelding = "Sakstyper " + fagsak.getType() + " er ikke støttet";
@@ -104,12 +105,17 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         oppgave.setPrioritet(PrioritetType.NORM);
         oppgave.setSaksnummer(saksnummer);
 
+        boolean skalTilordnes = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).orElse(false);
+        if (skalTilordnes) {
+            oppgave.setTilordnetRessurs(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
+        }
+
         String oppgaveId = gsakFasade.opprettOppgave(oppgave);
 
         if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
             prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
-            prosessinstans.setSteg(null);
+            prosessinstans.setSteg(ProsessSteg.FERDIG);
         } else {
             String feilmelding = "ProsessType " + prosessinstans.getType() + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);

@@ -68,7 +68,7 @@ public class SendHenleggelsesbrev extends AbstraktStegBehandler {
 
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(MELDING_HENLAGT_SAK);
         BrevData brevdata = brevDataBygger.lag(behandling, saksbehandler);
-        brevdata.mottaker = Aktoersroller.BRUKER;
+        brevdata.mottakerRolle = Aktoersroller.BRUKER;
         brevdata.begrunnelseKode = prosessinstans.getData(BEGRUNNELSEKODE, Henleggelsesgrunner.class).getKode();
         brevdata.fritekst = prosessinstans.getData(FRITEKST);
         dokumentService.produserDokument(behandling.getId(), MELDING_HENLAGT_SAK, brevdata);
@@ -76,7 +76,7 @@ public class SendHenleggelsesbrev extends AbstraktStegBehandler {
 
         Aktoer fullmektig = behandling.getFagsak().hentAktørMedRolleType(Aktoersroller.REPRESENTANT);
         if (fullmektig != null) {
-            brevdata.mottaker = Aktoersroller.REPRESENTANT;
+            brevdata.mottakerRolle = Aktoersroller.REPRESENTANT;
             dokumentService.produserDokument(behandling.getId(), MELDING_HENLAGT_SAK, brevdata);
             log.info("HENLEGGELSESBREV FOR REPRESENTANT ER FORELØPIG IKKE STØTTET: prosess {}.", prosessinstans.getId());
         }

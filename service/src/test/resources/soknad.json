@@ -83,10 +83,11 @@
     "inntektNorskIPerioden": 5500,
     "inntektUtenlandskIPerioden": 2000,
     "inntektNaeringIPerioden": 0,
-    "inntektNaturalYtelser": [
-      "Fri bolig",
-      "Fri bil"
-    ],
+    "inntektNaturalytelser": {
+      "friBolig": true,
+      "friBil": true,
+      "friAnnet": "Ubegrenset mengde kaffegrut fra bedriftens kaffemaskinen"
+    },
     "inntektErInnrapporteringspliktig": true,
     "inntektTrygdeavgiftBlirTrukket": true
   },
@@ -106,7 +107,10 @@
       "flaggLandKode": "GB",
       "installasjonsLandKode": "GB"
     }
-  ]
+  ],
+  "soeknadsland": {
+    "landKode": "GB"
+  }
 }
 
 

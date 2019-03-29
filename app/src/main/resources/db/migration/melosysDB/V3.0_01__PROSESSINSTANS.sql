@@ -4,7 +4,7 @@ CREATE TABLE prosessinstans (
     prosess_type    VARCHAR2(99)   NOT NULL,
     behandling_id   NUMBER(19)     NULL,
     data            VARCHAR2(4000) NULL,
-    steg            VARCHAR2(99)   NULL,
+    steg            VARCHAR2(99)   NOT NULL,
     registrert_dato TIMESTAMP      NOT NULL,
     endret_dato     TIMESTAMP      NOT NULL,
     antall_retry    INTEGER        DEFAULT 0 NOT NULL,
@@ -69,8 +69,10 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('FATTET_VEDTAK', 'Saksbehandler ha
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_VALIDERING', 'Validering av data for anmodning om unntak');
 INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_OPPDATER_RESULTAT', 'Oppdatering av behandlingsresultat for anmodning om unntak');
+INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_AVKLAR_MYNDIGHET', 'Send orienteringsbrev og A001 for anmodning om unntak');
 INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_OPPDATER_MEDL', 'Oppdatering av medlemskap med anmodning om unntak');
 INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_SEND_BREV', 'Send orienteringsbrev og A001 for anmodning om unntak');
+INSERT INTO prosess_steg (kode, navn) VALUES ('AOU_SEND_SED', 'Send elektronisk A001');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_FORKORT_PERIODE', 'Legg til i AvklarteFakta begrunnelse for forkorting av lovvalgsperiode');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_VALIDERING', 'Validerer iverksett vedtak');
@@ -87,6 +89,8 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('HS_HENLEGG_SAK', 'Henlegg en sak'
 INSERT INTO prosess_steg (kode, navn) VALUES ('HS_SEND_BREV', 'Opprett henleggelsesbrev');
 
 INSERT INTO prosess_steg (kode, navn) VALUES ('MANGELBREV', 'Opprett mangelbrev');
+
+INSERT INTO prosess_steg (kode, navn) VALUES ('FERDIG', 'Prosessen er ferdig');
 
 CREATE TABLE prosessinstans_hendelser (
     id                  NUMBER(19) GENERATED ALWAYS AS IDENTITY,

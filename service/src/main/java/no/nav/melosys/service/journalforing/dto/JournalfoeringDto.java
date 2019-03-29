@@ -12,6 +12,7 @@ public class JournalfoeringDto {
     private String dokumentID;
     private String hoveddokumentTittel;
     private List<DokumentDto> vedlegg;
+    private boolean skalTilordnes;
 
     public String getBehandlingstypeKode() {
         return behandlingstypeKode;
@@ -83,5 +84,13 @@ public class JournalfoeringDto {
 
     public void setVedlegg(List<DokumentDto> vedlegg) {
         this.vedlegg = vedlegg;
+    }
+
+    public boolean skalTilordnes() {
+        return skalTilordnes;
+    }
+
+    public void setSkalTilordnes(boolean skalTilordnes) {
+        this.skalTilordnes = skalTilordnes;
     }
 }

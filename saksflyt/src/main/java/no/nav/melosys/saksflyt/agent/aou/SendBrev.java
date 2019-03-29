@@ -29,7 +29,7 @@ import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.ORIENTERING_
  * <p>
  * Transisjoner:
  * ProsessType.ANMODNING_OM_UNNTAK
- *  AOU_SEND_BREV -> AOU_AVSLUTT_BEHANDLING eller FEILET_MASKINELT hvis feil
+ *  AOU_SEND_BREV -> AOU_SEND_SED eller FEILET_MASKINELT hvis feil
  */
 @Component("AnmodningOmUnntakSendBrev")
 public class SendBrev extends AbstraktStegBehandler {
@@ -69,11 +69,11 @@ public class SendBrev extends AbstraktStegBehandler {
         }
 
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-        brevBestiller.bestill(behandling, saksbehandler, ORIENTERING_ANMODNING_UNNTAK, Aktoersroller.BRUKER);
-        brevBestiller.bestill(behandling, saksbehandler, ANMODNING_UNNTAK, Aktoersroller.MYNDIGHET);
+        brevBestiller.bestill(ORIENTERING_ANMODNING_UNNTAK, saksbehandler, Aktoersroller.BRUKER, behandling);
+        brevBestiller.bestill(ANMODNING_UNNTAK, saksbehandler, Aktoersroller.MYNDIGHET, behandling);
 
         log.info("Sendt alle brev for anmodning om unntak. Prosessinstans {}", prosessinstans.getId());
-        prosessinstans.setSteg(null);
+        prosessinstans.setSteg(ProsessSteg.AOU_SEND_SED);
     }
 
 }

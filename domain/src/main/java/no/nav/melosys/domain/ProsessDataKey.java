@@ -33,8 +33,10 @@ public enum ProsessDataKey {
     REPRESENTANT_KONTAKTPERSON("representantKontakperson"),
     SAKSBEHANDLER("saksbehandler"),
     SAKSNUMMER("saksnummer"),
+    SKAL_TILORDNES("skalTilordnes"),
     SØKNADSPERIODE("søknadsperiode"),
-    TEMA("tema");
+    TEMA("tema"),
+    VEDLEGG_TITTEL_LISTE("vedleggTittelListe");
 
     private String kode;
 
