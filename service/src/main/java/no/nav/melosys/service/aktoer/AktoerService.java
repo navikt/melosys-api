@@ -65,10 +65,10 @@ public class AktoerService {
     }
 
     @Transactional
-    public void erstattEksisterendeArbeidsgiveraktører(Fagsak fagsak, List<String> org) {
-        aktørRepository.deleteByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER);
+    public void erstattEksisterendeArbeidsgiveraktører(Fagsak fagsak, List<String> orgnumre) {
+        aktørRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER);
 
-        for (String orgnummer : org) {
+        for (String orgnummer : orgnumre) {
             lagArbeidsgiveraktør(fagsak, orgnummer);
         }
     }

@@ -13,7 +13,7 @@ import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.agent.iv.AvklarArbeidsgiver;
 import no.nav.melosys.service.aktoer.AktoerService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,9 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AvklarArbeidsgiveraktoerTest {
@@ -41,7 +39,7 @@ public class AvklarArbeidsgiveraktoerTest {
     Behandling behandling;
 
     @Mock
-    AvklarteVirksomheterService avklarteVirksomheterService;
+    AvklarteVirksomheterSystemService avklarteVirksomheterService;
 
     private AvklarArbeidsgiver steg;
 
@@ -76,7 +74,7 @@ public class AvklarArbeidsgiveraktoerTest {
 
         steg.utfør(p);
 
-        verify(aktoerRepository).deleteByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
+        verify(aktoerRepository).deleteAllByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
 
         Aktoer aktoer = new Aktoer();
         aktoer.setFagsak(fagsak);
@@ -89,7 +87,7 @@ public class AvklarArbeidsgiveraktoerTest {
     public void utfør_utenAvklartNorskVirksomhet_arbeidsgiveraktorerSlettes() throws FunksjonellException, TekniskException {
         steg.utfør(p);
 
-        verify(aktoerRepository).deleteByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
+        verify(aktoerRepository).deleteAllByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
         verify(aktoerRepository, times(0)).save(any());
     }
 

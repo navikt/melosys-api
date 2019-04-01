@@ -15,6 +15,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,14 +25,14 @@ public abstract class AbstraktAvklarArbeidsgiveraktoer extends AbstraktStegBehan
 
     private final AktoerService aktoerService;
 
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final AvklarteVirksomheterService avklarteVirksomheterSystemService;
     private final BehandlingRepository behandlingRepository;
 
     public AbstraktAvklarArbeidsgiveraktoer(AktoerService aktoerService,
-                                            AvklarteVirksomheterService avklarteVirksomheterService,
+                                            AvklarteVirksomheterSystemService avklarteVirksomheterSystemService,
                                             BehandlingRepository behandlingRepository) {
         this.aktoerService = aktoerService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.avklarteVirksomheterSystemService = avklarteVirksomheterSystemService;
         this.behandlingRepository = behandlingRepository;
     }
 
@@ -44,7 +45,7 @@ public abstract class AbstraktAvklarArbeidsgiveraktoer extends AbstraktStegBehan
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer();
 
-        List<AvklartVirksomhet> avklarteNorskeArbeidsgivere = avklarteVirksomheterService.hentArbeidsgivere(behandling, ingenAdresse);
+        List<AvklartVirksomhet> avklarteNorskeArbeidsgivere = avklarteVirksomheterSystemService.hentArbeidsgivere(behandling, ingenAdresse);
         List<String> norskeOrgnumre = avklarteNorskeArbeidsgivere.stream()
             .map(avklartVirksomhet -> avklartVirksomhet.orgnr)
             .collect(Collectors.toList());

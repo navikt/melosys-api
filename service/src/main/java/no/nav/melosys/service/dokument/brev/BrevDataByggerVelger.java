@@ -5,8 +5,8 @@ import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.bygger.*;
@@ -28,7 +28,7 @@ public class BrevDataByggerVelger {
 
     @Autowired
     public BrevDataByggerVelger(AvklartefaktaService avklartefaktaService,
-                                RegisterOppslagSystemService registerOppslagService,
+                                AvklarteVirksomheterSystemService avklarteVirksomheterService,
                                 KodeverkService kodeverkService,
                                 LovvalgsperiodeService lovvalgsperiodeService,
                                 UtenlandskMyndighetRepository utenlandskMyndighetRepository,
@@ -40,7 +40,7 @@ public class BrevDataByggerVelger {
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.joarkService = joarkService;
-        this.avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.landvelgerService = new LandvelgerService(avklartefaktaService, vilkaarsresultatRepository);
     }
 

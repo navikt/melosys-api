@@ -18,15 +18,17 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.RegisterOppslagService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentArbeidsforholdDokument;
 import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentSøknadDokument;
 
 @Service
+@Primary
 public class AvklarteVirksomheterService {
-    private final AvklartefaktaService avklartefaktaService;
-    private final RegisterOppslagService registerOppslagService;
+    protected final AvklartefaktaService avklartefaktaService;
+    protected final RegisterOppslagService registerOppslagService;
 
     @Autowired
     public AvklarteVirksomheterService(AvklartefaktaService avklartefaktaService,

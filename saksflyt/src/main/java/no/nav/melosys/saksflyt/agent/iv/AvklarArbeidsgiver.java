@@ -13,7 +13,7 @@ import no.nav.melosys.saksflyt.agent.AbstraktAvklarArbeidsgiveraktoer;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.aktoer.AktoerService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class AvklarArbeidsgiver extends AbstraktAvklarArbeidsgiveraktoer {
 
     @Autowired
     public AvklarArbeidsgiver(AktoerService aktoerService,
-                              AvklarteVirksomheterService avklarteVirksomheterService,
+                              AvklarteVirksomheterSystemService avklarteVirksomheterService,
                               BehandlingRepository behandlingRepository) {
         super(aktoerService, avklarteVirksomheterService, behandlingRepository);
 

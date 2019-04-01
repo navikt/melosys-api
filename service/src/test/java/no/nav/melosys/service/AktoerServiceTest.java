@@ -94,7 +94,7 @@ public class AktoerServiceTest {
         Fagsak fagsak = lagFagsak();
         List<String> orgnumre = Collections.singletonList("123456789");
         aktørService.erstattEksisterendeArbeidsgiveraktører(fagsak, orgnumre);
-        verify(aktørRepository).deleteByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
+        verify(aktørRepository).deleteAllByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
 
         Aktoer aktoer = new Aktoer();
         aktoer.setFagsak(fagsak);
@@ -107,8 +107,8 @@ public class AktoerServiceTest {
     public void erstattEksisterendeArbeidsgiveraktører_utenNyeOrgnr() {
         Fagsak fagsak = lagFagsak();
         aktørService.erstattEksisterendeArbeidsgiveraktører(fagsak, Collections.emptyList());
-        verify(aktørRepository).deleteByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
-        verify(aktørRepository, times(0)).save(any());
+        verify(aktørRepository).deleteAllByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
+        verify(aktørRepository, never()).save(any());
     }
 
     private static Fagsak lagFagsak() {
