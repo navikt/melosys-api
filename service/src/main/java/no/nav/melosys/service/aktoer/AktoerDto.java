@@ -8,7 +8,7 @@ public class AktoerDto {
     private String rolleKode;
     private String utenlandskPersonID;
     private String representererKode;
-    private long databaseID;
+    private Long databaseID;
 
     public String getAktoerID() {
         return aktoerID;
@@ -58,11 +58,11 @@ public class AktoerDto {
         this.representererKode = representererKode;
     }
 
-    public long getDatabaseID() {
+    public Long getDatabaseID() {
         return databaseID;
     }
 
-    public void setDatabaseID(long databaseID) {
+    public void setDatabaseID(Long databaseID) {
         this.databaseID = databaseID;
     }
 }
