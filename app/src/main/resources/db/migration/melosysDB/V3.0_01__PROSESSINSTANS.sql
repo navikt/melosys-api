@@ -29,6 +29,7 @@ INSERT INTO prosess_type (kode, navn) VALUES ('HENLEGG_SAK', 'Henlegg en sak');
 INSERT INTO prosess_type (kode, navn) VALUES ('IVERKSETT_VEDTAK', 'Iverksett vedtak');
 INSERT INTO prosess_type (kode, navn) VALUES ('IVERKSETT_VEDTAK_FORKORT_PERIODE', 'Iverksett nytt vedtak etter lovvalgsperioden har blitt forkortet');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_KNYTT', 'Journalføring på eksisterende sak');
+INSERT INTO prosess_type (kode, navn) VALUES ('JFR_NY_BEHANDLING', 'Journalføring på eksisterende sak oppretter en ny behandling');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_NY_SAK', 'Journalføring med ny sak og søknad');
 INSERT INTO prosess_type (kode, navn) VALUES ('OPPFRISKNING', 'Oppfriskning av saksopplysninger');
 INSERT INTO prosess_type (kode, navn) VALUES ('MANGELBREV', 'Opprett mangelbrev');
