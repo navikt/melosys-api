@@ -5,10 +5,7 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 
 public interface TpsFasade {
 
@@ -29,4 +26,6 @@ public interface TpsFasade {
     int hentAntallPersonerSomBorPåBostedsadresse(String aktørId) throws IntegrasjonException, IkkeFunnetException, SikkerhetsbegrensningException;
 
     String hentFagsakIdentMedRolleType(Fagsak fagsak, Aktoersroller rolleType) throws TekniskException;
+
+    String hentSammensattNavn(String fnr) throws FunksjonellException, IntegrasjonException;
 }

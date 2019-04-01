@@ -22,6 +22,7 @@ import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.oppgave.dto.*;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +100,7 @@ public class OppgaveService {
         return  gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
     }
 
-    private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) throws TekniskException {
+    private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) throws TekniskException, FunksjonellException {
         List<OppgaveDto> res = new ArrayList<>();
         for (Oppgave o : oppgaverFraDomain) {
             res.add(tilOppgaveDto(o));
@@ -107,7 +108,7 @@ public class OppgaveService {
         return res;
     }
 
-    private OppgaveDto tilOppgaveDto(Oppgave oppgave) throws TekniskException {
+    private OppgaveDto tilOppgaveDto(Oppgave oppgave) throws TekniskException, FunksjonellException {
         OppgaveDto dest;
 
         if (oppgave.erJournalFøring()) {
@@ -155,6 +156,11 @@ public class OppgaveService {
         dest.setOppgaveID(oppgave.getOppgaveId());
         dest.setPrioritet(oppgave.getPrioritet());
         dest.setVersjon(oppgave.getVersjon());
+        String fnr = tpsFasade.hentIdentForAktørId(oppgave.getAktørId());
+        if (StringUtils.isNotEmpty(fnr)){
+            dest.setFnr(fnr);
+            dest.setSammensattNavn(tpsFasade.hentSammensattNavn(fnr));
+        }
 
         return dest;
     }

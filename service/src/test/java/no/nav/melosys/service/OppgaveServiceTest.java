@@ -38,6 +38,7 @@ import org.mockito.stubbing.Answer;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -80,6 +81,7 @@ public class OppgaveServiceTest {
         oppgave1.setPrioritet(PrioritetType.HOY);
         oppgave1.setSaksnummer("MEL-12345");
         oppgave1.setTilordnetRessurs("12345678901");
+        oppgave1.setAktørId("aktørid");
         oppgaver.add(oppgave1);
 
         when(gsakFasade.finnOppgaveListeMedAnsvarlig(anyString())).
@@ -89,6 +91,8 @@ public class OppgaveServiceTest {
                 });
 
         when(saksopplysningerService.harAktivOppfrisking(anyLong())).thenReturn(true);
+        doReturn("fnr").when(tpsFasade).hentIdentForAktørId("aktørid");
+        doReturn("sammensattNavn").when(tpsFasade).hentSammensattNavn("fnr");
 
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
@@ -103,6 +107,8 @@ public class OppgaveServiceTest {
         assertThat(mineSaker.size()).isEqualTo(1);
         assertThat(mineSaker.get(0).getOppgaveID()).isEqualTo("1");
         assertThat(((BehandlingsoppgaveDto)mineSaker.get(0)).getBehandling().isErUnderOppdatering()).isEqualTo(true);
+        assertThat(mineSaker.get(0).getFnr()).isEqualTo("fnr");
+        assertThat(mineSaker.get(0).getSammensattNavn()).isEqualTo("sammensattNavn");
 
         mineSaker = oppgaveService.hentOppgaverMedAnsvarlig("12346678902");
         assertThat(mineSaker.size()).isEqualTo(0);

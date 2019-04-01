@@ -145,6 +145,21 @@ public class TpsServiceTest {
         verify(aktorConsumer, times(1)).hentIdentForAktoerId(any());
     }
 
+    @Test
+    public void hentSammensattNavn() throws Exception {
+        service = spy(service);
+        PersonDokument personDokument = new PersonDokument();
+        String sammensattNavn = "sammensattNavn";
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(personDokument);
+        personDokument.sammensattNavn = sammensattNavn;
+
+        String fnr = "fnr";
+        doReturn(saksopplysning).when(service).hentPerson(fnr);
+
+        assertThat(service.hentSammensattNavn(fnr)).isEqualTo(sammensattNavn);
+    }
+
     private HentAktoerIdForIdentResponse hentAktørIdResponse() {
 
         // Feltet identHistorikk er protected, så vi utvider klassen med en setter for mocking

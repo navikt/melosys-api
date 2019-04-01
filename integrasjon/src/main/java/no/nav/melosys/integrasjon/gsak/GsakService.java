@@ -229,7 +229,7 @@ public class GsakService implements GsakFasade {
         domainOppgave.setJournalpostId(oppgave.getJournalpostId());
         domainOppgave.setTilordnetRessurs(oppgave.getTilordnetRessurs());
         domainOppgave.setBehandlesAvApplikasjon(oppgave.getBehandlesAvApplikasjon());
-
+        domainOppgave.setAktørId(oppgave.getAktørId());
         return domainOppgave;
     }
 
