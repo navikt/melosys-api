@@ -46,7 +46,6 @@ public class BrevDataService {
 
     static final String MELOSYS_ENHET_ID = "4530";
 
-    private static final String FALSK_MOTTAKER_ID = "11111111111";
     static final String PLASSHOLDER_TEKST = "-";
     static final String PLASSHOLDER_POSTNUMMER = "0000";
 
@@ -195,11 +194,11 @@ public class BrevDataService {
             mottakerBrev = new Person();
             mottakerBrev.setBerik(false);
             mottakerBrev.setTypeKode(AktoerType.PERSON);
-            mottakerBrev.setId(FALSK_MOTTAKER_ID);
 
             UtenlandskMyndighet utenlandskMyndighet = hentMyndighetFraSak(behandling.getFagsak());
+            mottakerBrev.setId(mottaker.getInstitusjonId());
             mottakerBrev.setNavn(utenlandskMyndighet.navn);
-            mottakerBrev.setKortNavn(mottaker.getInstitusjonId());
+            mottakerBrev.setKortNavn(utenlandskMyndighet.navn);
             mottakerBrev.setSpraakkode(Spraakkode.NB);
             mottakerBrev.setMottakeradresse(lagUtendlanskAdresse(utenlandskMyndighet));
             return mottakerBrev;
