@@ -32,8 +32,12 @@ public final class Mottaker {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Mottaker)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Mottaker)) {
+            return false;
+        }
         Mottaker mottaker = (Mottaker) o;
         return aktør.equals(mottaker.aktør);
     }

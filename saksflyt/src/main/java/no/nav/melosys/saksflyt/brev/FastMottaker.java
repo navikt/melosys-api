@@ -9,13 +9,13 @@ public enum FastMottaker {
     HELFO,
     SKATT;
 
-    private static final String HELFO_ORGN = "986965610";
+    private static final String HELFO_ORGNR = "986965610";
     private static final String SKATTEETATEN_ORGNR = "974761076";
 
     public static Mottaker av(FastMottaker mottaker) {
         Assert.notNull(mottaker, "FastMottaker trengs.");
         switch (mottaker) {
-            case HELFO: return Mottaker.av(lagAktør(HELFO_ORGN));
+            case HELFO: return Mottaker.av(lagAktør(HELFO_ORGNR));
             case SKATT: return Mottaker.av(lagAktør(SKATTEETATEN_ORGNR));
             default: throw new IllegalArgumentException(mottaker + " støttes ikke.");
         }

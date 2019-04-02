@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
 import java.util.Map;
+import javax.ws.rs.HEAD;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
@@ -118,13 +119,13 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             if (endretPeriodeBegrunnelseKode != null) {
                 begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
             }
-            Brevbestilling invvilgelseBruker = new Brevbestilling.Builder().medDokumentType(INNVILGELSE_YRKESAKTIV)
+            Brevbestilling innvilgelseBruker = new Brevbestilling.Builder().medDokumentType(INNVILGELSE_YRKESAKTIV)
                 .medAvsender(saksbehandler)
                 .medMottaker(Mottaker.av(BRUKER))
                 .medBehandling(behandling)
                 .medBegrunnelseKode(begrunnelseKode).build();
 
-            brevBestiller.bestill(invvilgelseBruker);
+            brevBestiller.bestill(innvilgelseBruker);
 
             if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
                 brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, ARBEIDSGIVER, behandling);
