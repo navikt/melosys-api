@@ -104,6 +104,10 @@ public class Aktoer extends RegistreringsInfo {
         this.representerer = representerer;
     }
 
+    public boolean erUtenlandskMyndighet() {
+        return Aktoersroller.MYNDIGHET == rolle && institusjonId != null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

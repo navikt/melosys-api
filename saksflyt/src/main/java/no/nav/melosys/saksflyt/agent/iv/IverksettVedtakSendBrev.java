@@ -17,7 +17,8 @@ import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import no.nav.melosys.saksflyt.felles.BrevBestiller;
+import no.nav.melosys.saksflyt.brev.BrevBestiller;
+import no.nav.melosys.saksflyt.brev.FastMottaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,8 @@ import static no.nav.melosys.domain.ProsessSteg.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 import static no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator.*;
+import static no.nav.melosys.saksflyt.brev.FastMottaker.HELFO;
+import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
 
 
 /**
@@ -89,11 +92,14 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         Fagsak fagsak = behandling.getFagsak();
 
         if (avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
-            brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, BRUKER, behandling);
+            brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, Mottaker.av(BRUKER), behandling);
 
             if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
-                brevBestiller.bestill(AVSLAG_ARBEIDSGIVER, saksbehandler, ARBEIDSGIVER, behandling);
+                brevBestiller.bestill(AVSLAG_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
             }
+
+            brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, FastMottaker.av(HELFO), behandling);
+            brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, FastMottaker.av(SKATT), behandling);
 
             log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
@@ -103,23 +109,24 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             if (endretPeriodeBegrunnelseKode != null) {
                 begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
             }
-            Brevbestilling brevbestillingBruker = new Brevbestilling.Builder().medDokumentType(INNVILGELSE_YRKESAKTIV)
+            Brevbestilling innvilgelseBruker = new Brevbestilling.Builder().medDokumentType(INNVILGELSE_YRKESAKTIV)
                 .medAvsender(saksbehandler)
-                .medMottaker(new Mottaker(BRUKER))
+                .medMottaker(Mottaker.av(BRUKER))
                 .medBehandling(behandling)
                 .medBegrunnelseKode(begrunnelseKode).build();
-            brevBestiller.bestill(brevbestillingBruker);
+
+            brevBestiller.bestill(innvilgelseBruker);
 
             if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
-                brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, ARBEIDSGIVER, behandling);
+                brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
             }
             if (myndighetØnskerInnvilgelsesbrev(fagsak.hentMyndighetLandkode())) {
-                Brevbestilling brevbestillingMyndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
+                Brevbestilling A1_Myndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
                     .medAvsender(saksbehandler)
-                    .medMottaker(new Mottaker(MYNDIGHET))
+                    .medMottaker(Mottaker.av(MYNDIGHET))
                     .medBehandling(behandling)
                     .medBegrunnelseKode(begrunnelseKode).build();
-                brevBestiller.bestill(brevbestillingMyndighet);
+                brevBestiller.bestill(A1_Myndighet);
             }
 
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());

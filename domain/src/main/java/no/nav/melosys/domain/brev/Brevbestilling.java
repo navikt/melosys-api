@@ -9,13 +9,20 @@ public final class Brevbestilling {
     private final Mottaker mottaker;
     private final Behandling behandling;
     private final String begrunnelseKode;
+    private final String fritekst;
 
-    private Brevbestilling(Produserbaredokumenter dokumentType, String avsender, Mottaker mottaker, Behandling behandling, String begrunnelseKode) {
+    private Brevbestilling(Produserbaredokumenter dokumentType,
+                           String avsender,
+                           Mottaker mottaker,
+                           Behandling behandling,
+                           String begrunnelseKode,
+                           String fritekst) {
         this.dokumentType = dokumentType;
         this.avsender = avsender;
         this.mottaker = mottaker;
         this.behandling = behandling;
         this.begrunnelseKode = begrunnelseKode;
+        this.fritekst = fritekst;
     }
 
     public static class Builder {
@@ -24,6 +31,7 @@ public final class Brevbestilling {
         private Mottaker mottaker;
         private Behandling behandling;
         private String begrunnelseKode;
+        private String fritekst;
 
         public Builder medDokumentType(Produserbaredokumenter dokumentType) {
             this.dokumentType = dokumentType;
@@ -50,8 +58,13 @@ public final class Brevbestilling {
             return this;
         }
 
+        public Builder medFritekst(String fritekst) {
+            this.fritekst = fritekst;
+            return this;
+        }
+
         public Brevbestilling build() {
-            return new Brevbestilling(dokumentType, avsender, mottaker, behandling, begrunnelseKode);
+            return new Brevbestilling(dokumentType, avsender, mottaker, behandling, begrunnelseKode, fritekst);
         }
     }
 
@@ -73,5 +86,9 @@ public final class Brevbestilling {
 
     public String getBegrunnelseKode() {
         return begrunnelseKode;
+    }
+
+    public String getFritekst() {
+        return fritekst;
     }
 }

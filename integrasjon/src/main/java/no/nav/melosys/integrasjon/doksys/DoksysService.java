@@ -130,12 +130,10 @@ public class DoksysService implements DoksysFasade {
     }
 
     private Adresse lagAdresse(DokumentbestillingMetadata metadata) throws TekniskException {
-        Aktoersroller mottakerRolle = metadata.mottaker.getRolle();
-
-        if (mottakerRolle == Aktoersroller.MYNDIGHET) {
+        if (metadata.mottaker.erUtenlandskMyndighet()) {
             return lagUtenlandskAdresse(metadata.utenlandskMyndighet);
         } else {
-            throw new TekniskException("Det er ikke planlagt å lage en adresse for mottakerRolle: " + mottakerRolle);
+            throw new TekniskException("Det er ikke planlagt å lage en adresse for mottakerRolle: " + metadata.mottaker.getRolle());
         }
     }
 
@@ -164,9 +162,15 @@ public class DoksysService implements DoksysFasade {
                 organisasjon.setOrgnummer(mottakerID);
                 return organisasjon;
             case MYNDIGHET:
-                // Dokprod støtter ikke utenlandske myndigheter så vi lager en falsk person
-                // med mottakerId="11111111111" og dermed blir AvsendMottakId i Joark tom.
-                return lagPerson(FALSK_MOTTAKER_ID, metadata.utenlandskMyndighet.navn);
+                if (metadata.mottaker.erUtenlandskMyndighet()) {
+                    // Dokprod støtter ikke utenlandske myndigheter så vi lager en falsk person
+                    // med mottakerId="11111111111" og dermed blir AvsendMottakId i Joark tom.
+                    return lagPerson(FALSK_MOTTAKER_ID, metadata.utenlandskMyndighet.navn);
+                } else {
+                    Organisasjon myndighet = objectFactory.createOrganisasjon();
+                    myndighet.setOrgnummer(mottakerID);
+                    return myndighet;
+                }
             default:
                 log.warn("MottakersRolle {} er ukjent. PERSON brukes som standard.", mottakerRolle);
                 return lagPerson(mottakerID);

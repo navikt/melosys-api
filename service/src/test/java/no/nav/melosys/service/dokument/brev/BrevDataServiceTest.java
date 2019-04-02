@@ -64,7 +64,6 @@ public class BrevDataServiceTest {
         Aktoer aktoerMyndighet = lagAktoerMyndighet(institusjonID);
         behandling.getFagsak().getAktører().add(aktoerMyndighet);
         BrevDataVedlegg brevData = new BrevDataVedlegg("Z123456");
-        brevData.mottakerRolle = Aktoersroller.MYNDIGHET;
         UtenlandskMyndighet myndighet = new UtenlandskMyndighet();
         myndighet.navn = "navn";
         myndighet.gateadresse = "gateadresse 123";
@@ -282,7 +281,7 @@ public class BrevDataServiceTest {
     }
 
     private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Aktoersroller rolle) throws Exception {
-        DokumentbestillingMetadata resultat = service.lagBestillingMetadata(doktype, mottaker, kontaktopplysning, lagBehandling(), lagBrevData(rolle));
+        DokumentbestillingMetadata resultat = service.lagBestillingMetadata(doktype, mottaker, kontaktopplysning, lagBehandling(), lagBrevData());
         DokumentbestillingMetadata forventet = lagDokumentbestillingMetadata(doktype, rolle);
         assertThat(resultat).isEqualToComparingFieldByFieldRecursively(forventet);
     }
@@ -310,10 +309,9 @@ public class BrevDataServiceTest {
         return forventet;
     }
 
-    private static BrevData lagBrevData(Aktoersroller rolle) {
+    private static BrevData lagBrevData() {
         BrevData brevDataDto = new BrevData();
         brevDataDto.saksbehandler = "TEST";
-        brevDataDto.mottakerRolle = rolle;
         brevDataDto.fritekst = "Test";
         return brevDataDto;
     }

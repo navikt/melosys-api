@@ -11,7 +11,6 @@ import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Adresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
@@ -53,7 +52,6 @@ public class BrevDataByggerAvslagArbeidsgiver extends AbstraktDokumentDataBygger
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
 
         BrevDataAvslagArbeidsgiver brevData = new BrevDataAvslagArbeidsgiver(saksbehandler);
-        brevData.mottakerRolle = Aktoersroller.ARBEIDSGIVER;
         brevData.person = person;
 
         List<AvklartVirksomhet> norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, utenAdresse);
