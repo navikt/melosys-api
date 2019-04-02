@@ -70,9 +70,6 @@ public class BrevDataByggerAvslagArbeidsgiver extends AbstraktDokumentDataBygger
         Vilkaarsresultat resultat = vilkårsresultat.orElseThrow(() ->
             new TekniskException("Fant ingen vilkårbegrunnelse for " + vilkaarType));
 
-        if (resultat.getBegrunnelser().isEmpty()) {
-            throw new TekniskException("Brevet Orientering til arbeidsgiver om avslag trenger en begrunnelsekode for " + vilkaarType);
-        }
         return resultat.getBegrunnelser();
     }
 }
