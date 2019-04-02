@@ -45,7 +45,6 @@ public class BrevDataService {
 
     static final String MELOSYS_ENHET_ID = "4530";
 
-    private static final String FALSK_MOTTAKER_ID = "11111111111";
     static final String PLASSHOLDER_TEKST = "-";
     static final String PLASSHOLDER_POSTNUMMER = "0000";
 
@@ -83,7 +82,7 @@ public class BrevDataService {
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
         metadata.fagområde = Tema.MED.getKode();
         metadata.saksbehandler = brevData.saksbehandler;
-        metadata.utenlandskMyndighet = (mottaker.getRolle() == Aktoersroller.MYNDIGHET) ? hentMyndighetFraSak(fagsak) : null;
+        metadata.utenlandskMyndighet = mottaker.erUtenlandskMyndighet() ? hentMyndighetFraSak(fagsak) : null;
         metadata.utledRegisterInfo = dokprodUtlederRegisterInfo(mottaker);
 
         if (!metadata.utledRegisterInfo) {
@@ -104,7 +103,12 @@ public class BrevDataService {
                 throw new TekniskException(e);
             }
         } else if (mottakerRolle == MYNDIGHET) {
-            return mottaker.getInstitusjonId();
+            if (mottaker.erUtenlandskMyndighet()) {
+                return mottaker.getInstitusjonId();
+            } else {
+                return mottaker.getOrgnr();
+            }
+
         }
 
         throw new TekniskException(mottakerRolle + " støttes ikke");
@@ -117,7 +121,7 @@ public class BrevDataService {
     // Dokprod kan utlede registerinfo når Melosys ikke trenger å sette adressen sammen.
     // Melosys setter adressen sammen for utelandske myndigheter.
     private boolean dokprodUtlederRegisterInfo(Aktoer mottaker) {
-        return mottaker.getRolle() != MYNDIGHET;
+        return !mottaker.erUtenlandskMyndighet();
     }
 
     /**
@@ -189,17 +193,23 @@ public class BrevDataService {
             mottakerBrev.setTypeKode(AktoerType.ORGANISASJON);
             mottakerBrev.setId(mottakerID);
         } else if (mottakerRolle == MYNDIGHET) {
-            mottakerBrev = new Person();
-            mottakerBrev.setBerik(false);
-            mottakerBrev.setTypeKode(AktoerType.PERSON);
-            mottakerBrev.setId(FALSK_MOTTAKER_ID);
+            if (mottaker.erUtenlandskMyndighet()) {
+                mottakerBrev = new Person();
+                mottakerBrev.setBerik(false);
+                mottakerBrev.setTypeKode(AktoerType.PERSON);
+                mottakerBrev.setId(mottaker.getInstitusjonId());
 
-            UtenlandskMyndighet utenlandskMyndighet = hentMyndighetFraSak(behandling.getFagsak());
-            mottakerBrev.setNavn(utenlandskMyndighet.navn);
-            mottakerBrev.setKortNavn(mottaker.getInstitusjonId());
-            mottakerBrev.setSpraakkode(Spraakkode.NB);
-            mottakerBrev.setMottakeradresse(lagUtendlanskAdresse(utenlandskMyndighet));
-            return mottakerBrev;
+                UtenlandskMyndighet utenlandskMyndighet = hentMyndighetFraSak(behandling.getFagsak());
+                mottakerBrev.setNavn(utenlandskMyndighet.navn);
+                mottakerBrev.setKortNavn(mottaker.getInstitusjonId());
+                mottakerBrev.setSpraakkode(Spraakkode.NB);
+                mottakerBrev.setMottakeradresse(lagUtendlanskAdresse(utenlandskMyndighet));
+                return mottakerBrev;
+            } else {
+                mottakerBrev = new Organisasjon();
+                mottakerBrev.setTypeKode(AktoerType.ORGANISASJON);
+                mottakerBrev.setId(mottakerID);
+            }
         } else {
             throw new TekniskException(mottakerRolle + " støttes ikke.");
         }

@@ -130,8 +130,12 @@ public class BrevDataByggerA001Test {
         person.setType(SaksopplysningType.PERSONOPPLYSNING);
         when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(soeknad, person, medl, aareg)));
 
+        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
+        strukturertAdresse.gatenavn = "gate 12";
+        strukturertAdresse.postnummer = "123";
+
         OrganisasjonsDetaljer detaljer = mock(OrganisasjonsDetaljer.class);
-        when(detaljer.hentStrukturertForretningsadresse()).thenReturn(new StrukturertAdresse());
+        when(detaljer.hentStrukturertForretningsadresse()).thenReturn(strukturertAdresse);
 
         leggTilTestorganisasjon("navn1", orgnr1, detaljer);
         leggTilTestorganisasjon("navn2", orgnr2, detaljer);

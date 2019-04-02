@@ -101,7 +101,6 @@ public class BrevDataByggerInnvilgelseTest {
 
         BrevData brevData = brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
         assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingDto, "begrunnelseKode", "fritekst");
-        assertThat(brevData.mottakerRolle).isEqualTo(brevbestillingDto.mottaker);
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
     }
 }

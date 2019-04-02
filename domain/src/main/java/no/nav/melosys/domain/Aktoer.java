@@ -43,6 +43,10 @@ public class Aktoer extends RegistreringsInfo {
     public Long getId() {
         return id;
     }
+    
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Fagsak getFagsak() {
         return fagsak;
@@ -98,6 +102,10 @@ public class Aktoer extends RegistreringsInfo {
 
     public void setRepresenterer(Representerer representerer) {
         this.representerer = representerer;
+    }
+
+    public boolean erUtenlandskMyndighet() {
+        return Aktoersroller.MYNDIGHET == rolle && institusjonId != null;
     }
 
     @Override

@@ -26,7 +26,8 @@ public class AvslagArbeidsgiverMapper implements BrevDataMapper {
     private static final String XSD_LOCATION = "melosysbrev/melosys_000109.xsd";
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData)
+        throws JAXBException, SAXException, TekniskException {
         BrevDataAvslagArbeidsgiver brevDataAvslagArbeidsgiver = (BrevDataAvslagArbeidsgiver) brevData;
         Fag fag = mapFag(brevDataAvslagArbeidsgiver);
 
@@ -46,10 +47,11 @@ public class AvslagArbeidsgiverMapper implements BrevDataMapper {
         fag.setLovvalgsperiode(lagLovvalgsperiodeType(brevData.lovvalgsperiode));
 
         Set<VilkaarBegrunnelse> art121Begrunnelser = brevData.vilkårbegrunnelser121;
-        fag.setArt121Begrunnelse(mapArt121BegrunnelseType(art121Begrunnelser));
+        fag.setArt121Begrunnelse(art121Begrunnelser.isEmpty() ? null : mapArt121BegrunnelseType(art121Begrunnelser));
 
         Set<VilkaarBegrunnelse> art121VesentligVirksomhetBegrunnelser = brevData.vilkårbegrunnelser121VesentligVirksomhet;
-        fag.setArt121VesentligVirksomhetBegrunnelse(mapArt121VesentligVirksomhetBegrunnelse(art121VesentligVirksomhetBegrunnelser));
+        fag.setArt121VesentligVirksomhetBegrunnelse(art121VesentligVirksomhetBegrunnelser.isEmpty() ? null
+            : mapArt121VesentligVirksomhetBegrunnelse(art121VesentligVirksomhetBegrunnelser));
 
         return fag;
     }

@@ -5,14 +5,14 @@ import java.util.Map;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import no.nav.melosys.saksflyt.felles.BrevBestiller;
+import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 
 /**
@@ -56,7 +57,7 @@ public class SendForvaltningsmelding extends AbstraktStegBehandler {
 
         Behandling behandling = prosessinstans.getBehandling();
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-        brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, saksbehandler, Aktoersroller.BRUKER, behandling);
+        brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, saksbehandler, Mottaker.av(BRUKER), behandling);
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Sendt forvaltningsmelding for prosessinstans {}", prosessinstans.getId());

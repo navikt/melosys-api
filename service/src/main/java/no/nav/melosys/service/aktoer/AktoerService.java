@@ -53,6 +53,32 @@ public class AktoerService {
         aktørRepository.findByFagsakAndRolleAndRepresenterer(fagsak, aktørFraDto.getRolle(), aktørFraDto.getRepresenterer())
             .ifPresent(aktørRepository::deleteById);
 
-        aktørRepository.save(aktørFraDto);
+        Aktoer aktoer = aktørRepository.save(aktørFraDto);
+        aktoerDto.setDatabaseID(aktoer.getId());
+    }
+
+    public void slettAktoer(long databaseID) {
+        //det virker ikke å slette direkte på id-en.
+        Aktoer aktoer = new Aktoer();
+        aktoer.setId(databaseID);
+        aktørRepository.deleteById(aktoer);
+    }
+
+    @Transactional
+    public void erstattEksisterendeArbeidsgiveraktører(Fagsak fagsak, List<String> orgnumre) {
+        aktørRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER);
+
+        for (String orgnummer : orgnumre) {
+            lagArbeidsgiveraktør(fagsak, orgnummer);
+        }
+    }
+
+    private void lagArbeidsgiveraktør(Fagsak fagsak, String orgnummer) {
+        Aktoer aktør = new Aktoer();
+        aktør.setFagsak(fagsak);
+        aktør.setRolle(Aktoersroller.ARBEIDSGIVER);
+        aktør.setOrgnr(orgnummer);
+
+        aktørRepository.save(aktør);
     }
 }

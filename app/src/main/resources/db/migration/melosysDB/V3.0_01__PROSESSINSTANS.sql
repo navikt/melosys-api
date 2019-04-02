@@ -29,6 +29,7 @@ INSERT INTO prosess_type (kode, navn) VALUES ('HENLEGG_SAK', 'Henlegg en sak');
 INSERT INTO prosess_type (kode, navn) VALUES ('IVERKSETT_VEDTAK', 'Iverksett vedtak');
 INSERT INTO prosess_type (kode, navn) VALUES ('IVERKSETT_VEDTAK_FORKORT_PERIODE', 'Iverksett nytt vedtak etter lovvalgsperioden har blitt forkortet');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_KNYTT', 'Journalføring på eksisterende sak');
+INSERT INTO prosess_type (kode, navn) VALUES ('JFR_NY_BEHANDLING', 'Journalføring på eksisterende sak oppretter en ny behandling');
 INSERT INTO prosess_type (kode, navn) VALUES ('JFR_NY_SAK', 'Journalføring med ny sak og søknad');
 INSERT INTO prosess_type (kode, navn) VALUES ('OPPFRISKNING', 'Oppfriskning av saksopplysninger');
 INSERT INTO prosess_type (kode, navn) VALUES ('MANGELBREV', 'Opprett mangelbrev');
@@ -78,6 +79,7 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('IV_FORKORT_PERIODE', 'Legg til i 
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_VALIDERING', 'Validerer iverksett vedtak');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_RESULTAT', 'Oppdatering av behandlingsresultat');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_AVKLAR_MYNDIGHET', 'Avklaring av utenlandsk trygdemyndighet');
+INSERT INTO prosess_steg (kode, navn) VALUES ('IV_AVKLAR_ARBEIDSGIVER', 'Avklaring av arbeidsgiveraktør');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_OPPDATER_MEDL', 'Oppdatering av medlemskap');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_SEND_BREV', 'Send brev etter iverksett vedtak');
 INSERT INTO prosess_steg (kode, navn) VALUES ('IV_SEND_SED', 'Send SED etter iverksett vedtak');

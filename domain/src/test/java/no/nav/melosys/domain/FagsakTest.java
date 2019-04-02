@@ -160,4 +160,26 @@ public class FagsakTest {
         Landkoder resultat = fagsak.hentMyndighetLandkode();
         assertThat(resultat).isEqualByComparingTo(Landkoder.SE);
     }
+
+    @Test
+    public void harAktørMedRolleTypeArbeidsgiver_arbeidsgiverFinnes_forventTrue() {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.ARBEIDSGIVER);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.getAktører().add(aktoer);
+
+        assertThat(fagsak.harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)).isTrue();
+    }
+
+    @Test
+    public void harAktørMedRolleTypeArbeidsgiver_kunBruker_forventFalse() {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.getAktører().add(aktoer);
+
+        assertThat(fagsak.harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)).isFalse();
+    }
 }
