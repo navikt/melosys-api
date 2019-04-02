@@ -125,6 +125,10 @@ public class Fagsak extends RegistreringsInfo {
         }
     }
 
+    public boolean harAktørMedRolleType(Aktoersroller rolleType) {
+        return aktører.stream().filter(a -> rolleType.equals(a.getRolle())).count() > 0;
+    }
+
     /**
      * Henter myndighetens landkode fra institusjonsID som har format landkode:institusjonskode.
      */

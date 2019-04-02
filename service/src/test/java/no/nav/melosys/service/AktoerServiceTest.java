@@ -1,5 +1,7 @@
 package no.nav.melosys.service;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Aktoer;
@@ -21,6 +23,7 @@ import org.springframework.data.domain.Example;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -84,6 +87,28 @@ public class AktoerServiceTest {
         assertThat(aktørProbe.getFagsak()).isEqualTo(lagFagsak());
         assertThat(aktørProbe.getRolle()).isEqualTo(Aktoersroller.REPRESENTANT);
         assertThat(aktørProbe.getRepresenterer()).isEqualTo(Representerer.BRUKER);
+    }
+
+    @Test
+    public void erstattEksisterendeArbeidsgiveraktører_medNyttOrgnr() {
+        Fagsak fagsak = lagFagsak();
+        List<String> orgnumre = Collections.singletonList("123456789");
+        aktørService.erstattEksisterendeArbeidsgiveraktører(fagsak, orgnumre);
+        verify(aktørRepository).deleteAllByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
+
+        Aktoer aktoer = new Aktoer();
+        aktoer.setFagsak(fagsak);
+        aktoer.setRolle(Aktoersroller.ARBEIDSGIVER);
+        aktoer.setOrgnr("123456789");
+        verify(aktørRepository).save(eq(aktoer));
+    }
+
+    @Test
+    public void erstattEksisterendeArbeidsgiveraktører_utenNyeOrgnr() {
+        Fagsak fagsak = lagFagsak();
+        aktørService.erstattEksisterendeArbeidsgiveraktører(fagsak, Collections.emptyList());
+        verify(aktørRepository).deleteAllByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
+        verify(aktørRepository, never()).save(any());
     }
 
     private static Fagsak lagFagsak() {

@@ -7,6 +7,7 @@ import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Endretperioder;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -24,8 +25,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.*;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 import static no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator.*;
 
@@ -86,11 +86,14 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         log.info("Behandler lovvalgsperiode: {}", lovvalgsperiode);
 
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+        Fagsak fagsak = behandling.getFagsak();
 
         if (avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
             brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, BRUKER, behandling);
-            // FIXME Støtte for arbeidsgivere mangler.
-            //brevBestiller.bestill(behandling, saksbehandler, AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER);
+
+            if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
+                brevBestiller.bestill(AVSLAG_ARBEIDSGIVER, saksbehandler, ARBEIDSGIVER, behandling);
+            }
 
             log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
@@ -106,9 +109,11 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
                 .medBehandling(behandling)
                 .medBegrunnelseKode(begrunnelseKode).build();
             brevBestiller.bestill(brevbestillingBruker);
-            // FIXME Støtte for arbeidsgivere mangler.
-            //brevBestiller.bestill(behandling, saksbehandler, INNVILGELSE_ARBEIDSGIVER, ARBEIDSGIVER);
-            if (myndighetØnskerInnvilgelsesbrev(behandling)) {
+
+            if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
+                brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, ARBEIDSGIVER, behandling);
+            }
+            if (myndighetØnskerInnvilgelsesbrev(fagsak.hentMyndighetLandkode())) {
                 Brevbestilling brevbestillingMyndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
                     .medAvsender(saksbehandler)
                     .medMottaker(new Mottaker(MYNDIGHET))
@@ -127,9 +132,8 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         }
     }
 
-    private boolean myndighetØnskerInnvilgelsesbrev(Behandling behandling) throws TekniskException {
-        return utenlandskMyndighetRepository.
-            findByLandkode(behandling.getFagsak().hentMyndighetLandkode())
+    private boolean myndighetØnskerInnvilgelsesbrev(Landkoder land) {
+        return utenlandskMyndighetRepository.findByLandkode(land)
             .preferanser.stream().map(Preferanse::getPreferanse)
             .noneMatch(p -> p.equals(Preferanse.PreferanseEnum.RESERVERT_FRA_A1));
     }
