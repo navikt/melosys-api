@@ -5,7 +5,7 @@ import java.util.Map;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -21,6 +21,8 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.ProsessSteg.AOU_SEND_BREV;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.ANMODNING_UNNTAK;
 import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK;
 
@@ -69,8 +71,8 @@ public class SendBrev extends AbstraktStegBehandler {
         }
 
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-        brevBestiller.bestill(ORIENTERING_ANMODNING_UNNTAK, saksbehandler, Aktoersroller.BRUKER, behandling);
-        brevBestiller.bestill(ANMODNING_UNNTAK, saksbehandler, Aktoersroller.MYNDIGHET, behandling);
+        brevBestiller.bestill(ORIENTERING_ANMODNING_UNNTAK, saksbehandler, Mottaker.av(BRUKER), behandling);
+        brevBestiller.bestill(ANMODNING_UNNTAK, saksbehandler, Mottaker.av(MYNDIGHET), behandling);
 
         log.info("Sendt alle brev for anmodning om unntak. Prosessinstans {}", prosessinstans.getId());
         prosessinstans.setSteg(ProsessSteg.AOU_SEND_SED);

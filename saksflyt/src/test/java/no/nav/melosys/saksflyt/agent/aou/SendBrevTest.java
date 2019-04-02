@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.agent.aou;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
@@ -58,7 +59,7 @@ public class SendBrevTest {
     @Test
     public void utførStegAntallSendteBrev() throws FunksjonellException, TekniskException {
         agent.utførSteg(p);
-        verify(brevBestiller).bestill(eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), anyString(), eq(Aktoersroller.BRUKER), any(Behandling.class));
-        verify(brevBestiller).bestill(eq(Produserbaredokumenter.ANMODNING_UNNTAK), anyString(), eq(Aktoersroller.MYNDIGHET), any(Behandling.class));
+        verify(brevBestiller).bestill(eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), anyString(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(Behandling.class));
+        verify(brevBestiller).bestill(eq(Produserbaredokumenter.ANMODNING_UNNTAK), anyString(), eq(Mottaker.av(Aktoersroller.MYNDIGHET)), any(Behandling.class));
     }
 }

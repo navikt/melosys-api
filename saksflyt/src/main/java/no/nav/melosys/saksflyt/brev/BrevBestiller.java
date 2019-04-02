@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.brev;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -30,10 +29,10 @@ public class BrevBestiller {
         this.brevDataByggerVelger = brevDataByggerVelger;
     }
 
-    public void bestill(Produserbaredokumenter dokumentType, String avsender, Aktoersroller mottakerRolle, Behandling behandling) throws FunksjonellException, TekniskException {
+    public void bestill(Produserbaredokumenter dokumentType, String avsender, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(dokumentType)
             .medAvsender(avsender)
-            .medMottaker(Mottaker.av(mottakerRolle))
+            .medMottaker(mottaker)
             .medBehandling(behandling).build();
         bestill(brevbestilling);
     }

@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
 import java.util.Map;
-import javax.ws.rs.HEAD;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
@@ -93,23 +92,14 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         Fagsak fagsak = behandling.getFagsak();
 
         if (avslagsbrevSkalSendes(behandlingsresultatType, lovvalgsperiode)) {
-            brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, BRUKER, behandling);
+            brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, Mottaker.av(BRUKER), behandling);
 
             if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
-                brevBestiller.bestill(AVSLAG_ARBEIDSGIVER, saksbehandler, ARBEIDSGIVER, behandling);
+                brevBestiller.bestill(AVSLAG_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
             }
 
-            Brevbestilling avslagHelfo = new Brevbestilling.Builder().medDokumentType(AVSLAG_YRKESAKTIV)
-                .medAvsender(saksbehandler)
-                .medMottaker(FastMottaker.av(HELFO))
-                .medBehandling(behandling).build();
-            brevBestiller.bestill(avslagHelfo);
-
-            Brevbestilling avslagSkatt = new Brevbestilling.Builder().medDokumentType(AVSLAG_YRKESAKTIV)
-                .medAvsender(saksbehandler)
-                .medMottaker(FastMottaker.av(SKATT))
-                .medBehandling(behandling).build();
-            brevBestiller.bestill(avslagSkatt);
+            brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, FastMottaker.av(HELFO), behandling);
+            brevBestiller.bestill(AVSLAG_YRKESAKTIV, saksbehandler, FastMottaker.av(SKATT), behandling);
 
             log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
             prosessinstans.setSteg(IV_AVSLUTT_BEHANDLING);
@@ -128,7 +118,7 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             brevBestiller.bestill(innvilgelseBruker);
 
             if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
-                brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, ARBEIDSGIVER, behandling);
+                brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);
             }
             if (myndighetØnskerInnvilgelsesbrev(fagsak.hentMyndighetLandkode())) {
                 Brevbestilling A1_Myndighet = new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
