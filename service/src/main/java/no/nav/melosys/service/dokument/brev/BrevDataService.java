@@ -15,11 +15,10 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -70,7 +69,7 @@ public class BrevDataService {
     public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument,
                                                             Aktoer mottaker, Kontaktopplysning kontaktopplysning,
                                                             Behandling behandling, BrevData brevData)
-        throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+        throws TekniskException, FunksjonellException {
         Fagsak fagsak = behandling.getFagsak();
 
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
@@ -87,9 +86,7 @@ public class BrevDataService {
         metadata.utledRegisterInfo = dokprodUtlederRegisterInfo(mottaker);
 
         if (!metadata.utledRegisterInfo) {
-            Saksopplysning tpsOpplysning = tpsFasade.hentPerson(metadata.brukerID);
-            PersonDokument tpsDokument = (PersonDokument) tpsOpplysning.getDokument();
-            metadata.brukerNavn = tpsDokument.sammensattNavn;
+            metadata.brukerNavn = tpsFasade.hentSammensattNavn(metadata.brukerID);
         }
         return metadata;
     }

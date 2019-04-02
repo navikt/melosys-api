@@ -9,7 +9,6 @@ public class BehandlingsoppgaveDto extends OppgaveDto {
     private List<String> land;
     private String saksnummer;
     private Sakstyper sakstype;
-    private String sammensattNavn;
     private PeriodeDto soknadsperiode;
 
     public BehandlingsoppgaveDto() {
@@ -47,14 +46,6 @@ public class BehandlingsoppgaveDto extends OppgaveDto {
 
     public void setSakstype(Sakstyper sakstype) {
         this.sakstype = sakstype;
-    }
-
-    public String getSammensattNavn() {
-        return sammensattNavn;
-    }
-
-    public void setSammensattNavn(String sammensattNavn) {
-        this.sammensattNavn = sammensattNavn;
     }
 
     public PeriodeDto getSoknadsperiode() {

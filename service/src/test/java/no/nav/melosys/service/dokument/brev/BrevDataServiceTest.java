@@ -8,10 +8,9 @@ import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
 import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon;
 import no.nav.dok.brevdata.felles.v1.navfelles.Person;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -58,7 +57,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagA1_tilUtenlandskMyndighet() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public void lagA1_tilUtenlandskMyndighet() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling();
         String institusjonID = "HR:Zxcd";
         Aktoer aktoerMyndighet = lagAktoerMyndighet(institusjonID);
@@ -70,13 +69,14 @@ public class BrevDataServiceTest {
         myndighet.land = "HR";
         when(utenlandskMyndighetRepository.findByLandkode(Landkoder.HR)).thenReturn(myndighet);
 
-        when(tpsFasade.hentPerson(anyString())).thenReturn(lagPersonOpplysninger());
-
+        String sammensattNavn = "ALTFOR SAMMENSATT";
+        when(tpsFasade.hentSammensattNavn(anyString())).thenReturn(sammensattNavn);
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(ATTEST_A1, aktoerMyndighet, null, behandling, brevData);
 
         assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo(institusjonID);
         assertThat(metadata.utenlandskMyndighet).isEqualTo(myndighet);
+        assertThat(metadata.brukerNavn).isEqualTo(sammensattNavn);
 
         Element element = service.lagBrevXML(ATTEST_A1, aktoerMyndighet, null, behandling, brevData);
 
@@ -88,14 +88,6 @@ public class BrevDataServiceTest {
         myndighet.setRolle(Aktoersroller.MYNDIGHET);
         myndighet.setInstitusjonId(institusjonID);
         return myndighet;
-    }
-
-    private static Saksopplysning lagPersonOpplysninger() {
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.sammensattNavn = "Alf Berg";
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(personDokument);
-        return saksopplysning;
     }
 
     @Test
@@ -112,7 +104,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagForvaltningsmelding_representantErNull_tilBruker() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public void lagForvaltningsmelding_representantErNull_tilBruker() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling();
         BrevData brevData = new BrevData("Z123456");
         Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
@@ -141,7 +133,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagForvaltningsmelding_representantIkkeNull_tilRepresentant() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public void lagForvaltningsmelding_representantIkkeNull_tilRepresentant() throws TekniskException, FunksjonellException {
 
         Behandling behandling = lagBehandling();
         behandling.getFagsak().getAktører().add(hentRepresentantAktør());
@@ -160,7 +152,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagMangelbrevXml_mottakerErbrukerID() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public void lagMangelbrevXml_mottakerErbrukerID() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling();
         BrevData brevData = new BrevData("Z123456");
         Aktoer mottakerAktør = lagAktør(Aktoersroller.BRUKER);
@@ -184,7 +176,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagMangelbrevXml_mottakerErArbeidsgiver() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public void lagMangelbrevXml_mottakerErArbeidsgiver() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling();
         BrevData brevData = new BrevData("Z123456");
         Aktoer mottakerAktør = lagAktør(Aktoersroller.ARBEIDSGIVER);
@@ -228,7 +220,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public final void avklarMottakerId_representantOgKontaktOpplysningFinnes_kontaktOpplysningForRepresentantBrukes() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public final void avklarMottakerId_representantOgKontaktOpplysningFinnes_kontaktOpplysningForRepresentantBrukes() throws TekniskException, FunksjonellException {
 
         Behandling behandling = lagBehandling();
         behandling.getFagsak().getAktører().add(hentRepresentantAktør());
@@ -254,7 +246,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public final void avklarMottakerId_ingenRepresentantForArbeidsgiverOgKontaktOpplysningFinnes_kontaktOpplysningBrukes() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public final void avklarMottakerId_ingenRepresentantForArbeidsgiverOgKontaktOpplysningFinnes_kontaktOpplysningBrukes() throws TekniskException, FunksjonellException {
 
         Behandling behandling = lagBehandling();
 

@@ -12,6 +12,7 @@ public class BehandlingDto {
     private Behandlingsstatus behandlingsstatus;
     private Instant sisteOpplysningerHentetDato;
     private boolean erUnderOppdatering;
+    private Instant registrertDato;
 
     public Long getBehandlingID() {
         return behandlingID;
@@ -51,5 +52,13 @@ public class BehandlingDto {
 
     public void setErUnderOppdatering(boolean erUnderOppdatering) {
         this.erUnderOppdatering = erUnderOppdatering;
+    }
+
+    public Instant getRegistrertDato() {
+        return registrertDato;
+    }
+
+    public void setRegistrertDato(Instant registrertDato) {
+        this.registrertDato = registrertDato;
     }
 }
