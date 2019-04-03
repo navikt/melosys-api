@@ -32,6 +32,10 @@ public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper
         if (erSærligGrunn) {
             validerFritekstbegrunnelse(vilkaarsresultat.getBegrunnelseFritekst());
             fag.setAnmodningFritekst(vilkaarsresultat.getBegrunnelseFritekst());
+            fag.setArt161AnmodningBegrunnelse(Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN);
+        } else {
+            fag.setArt161AnmodningBegrunnelse(Art161AnmodningBegrunnelseKode.valueOf(
+                vilkaarsresultat.getBegrunnelser().iterator().next().getKode()));
         }
 
         return fag;
