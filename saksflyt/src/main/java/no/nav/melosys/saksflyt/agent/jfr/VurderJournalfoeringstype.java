@@ -34,7 +34,7 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
  *  JFR_VURDER_JOURNALFOERINGSTYPE → JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
  *  d) Saken har en avsluttet behandling og et fattet vedtak, men det er journalført inn et dokument
  *  som tilsier at perioden har blitt kortere enn den det tidligere har blitt innvilget vedtak på.
- *  JFR_KOPIER_BEHANDLINGSINFORMASJON
+ *  JFR_VURDER_JOURNALFOERINGSTYPE → JFR_AKTØR_ID eller FEILET_MASKINELT hvis feil
  */
 @Component
 public class VurderJournalfoeringstype extends AbstraktStegBehandler {
@@ -81,17 +81,15 @@ public class VurderJournalfoeringstype extends AbstraktStegBehandler {
         log.debug("Neste steg blir: {}", prosessinstans.getSteg());
     }
 
-    private void knyttDokumentTilEksisterendeBehandlingEllerOpprettNyBehandling(Prosessinstans prosessinstans) throws TekniskException {
+    private void knyttDokumentTilEksisterendeBehandlingEllerOpprettNyBehandling(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         Behandlingstyper nyBehandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
 
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
         Behandling aktivBehandling = fagsak.getAktivBehandling();
 
-        if (nyBehandlingstype != null && nyBehandlingstype.equals(Behandlingstyper.ENDRET_PERIODE)) {
-            // Repliker en tidligere behandling
-            prosessinstans.setType(ProsessType.JFR_NY_BEHANDLING);
-            prosessinstans.setSteg(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
+        if (Behandlingstyper.ENDRET_PERIODE.equals(nyBehandlingstype) && aktivBehandling != null) {
+            throw new FunksjonellException("Man kan ikke endre lovvalgsperiode på en fagsak med en aktiv behandling");
         }
         else if (nyBehandlingstype != null && aktivBehandling == null) {
             // Ny behandling trenges.

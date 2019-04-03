@@ -91,8 +91,6 @@ public class OppgaveServiceTest {
                 });
 
         when(saksopplysningerService.harAktivOppfrisking(anyLong())).thenReturn(true);
-        doReturn("fnr").when(tpsFasade).hentIdentForAktørId("aktørid");
-        doReturn("sammensattNavn").when(tpsFasade).hentSammensattNavn("fnr");
 
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
@@ -140,7 +138,8 @@ public class OppgaveServiceTest {
     private static Behandling lagBehandling() {
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
         PersonDokument personDokument = new PersonDokument();
-        personDokument.fnr = "111111111111";
+        personDokument.fnr = "fnr";
+        personDokument.sammensattNavn = "sammensattNavn";
 
         Saksopplysning personOpplysning = new Saksopplysning();
         personOpplysning.setType(SaksopplysningType.PERSONOPPLYSNING);

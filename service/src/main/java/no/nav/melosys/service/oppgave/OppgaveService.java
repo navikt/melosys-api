@@ -42,6 +42,7 @@ public class OppgaveService {
     private final BehandlingRepository behandlingRepository;
     private final TpsFasade tpsFasade;
     private final SaksopplysningerService saksopplysningerService;
+    private static final String UKJENT = "UKJENT";
 
     @Autowired
     public OppgaveService(GsakFasade gsakFasade,
@@ -115,6 +116,16 @@ public class OppgaveService {
             JournalfoeringsoppgaveDto jfrOppgaveDto = new JournalfoeringsoppgaveDto();
             jfrOppgaveDto.setJournalpostID(oppgave.getJournalpostId());
             dest = jfrOppgaveDto;
+            String aktørId = oppgave.getAktørId();
+            String fnr = aktørId != null ? tpsFasade.hentIdentForAktørId(aktørId) : null;
+            if (StringUtils.isNotEmpty(fnr)){
+                dest.setFnr(fnr);
+                dest.setSammensattNavn(tpsFasade.hentSammensattNavn(fnr));
+            }
+            else {
+                dest.setFnr(UKJENT);
+                dest.setSammensattNavn(UKJENT);
+            }
         } else if (oppgave.erBehandling() || oppgave.erVurderDokument()) {
             BehandlingsoppgaveDto behOppgaveDto = new BehandlingsoppgaveDto();
             Fagsak fagsak = fagsakRepository.findBySaksnummer(oppgave.getSaksnummer());
@@ -143,6 +154,7 @@ public class OppgaveService {
                 saksopplysningDokument -> {
                     PersonDokument personDokument = (PersonDokument) saksopplysningDokument;
                     behOppgaveDto.setSammensattNavn(personDokument.sammensattNavn);
+                    behOppgaveDto.setFnr(personDokument.fnr);
                 }
             );
 
@@ -156,11 +168,6 @@ public class OppgaveService {
         dest.setOppgaveID(oppgave.getOppgaveId());
         dest.setPrioritet(oppgave.getPrioritet());
         dest.setVersjon(oppgave.getVersjon());
-        String fnr = tpsFasade.hentIdentForAktørId(oppgave.getAktørId());
-        if (StringUtils.isNotEmpty(fnr)){
-            dest.setFnr(fnr);
-            dest.setSammensattNavn(tpsFasade.hentSammensattNavn(fnr));
-        }
 
         return dest;
     }
