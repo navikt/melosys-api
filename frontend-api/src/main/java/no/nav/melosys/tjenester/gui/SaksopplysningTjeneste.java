@@ -12,7 +12,6 @@ import no.nav.melosys.service.SaksopplysningerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
@@ -21,7 +20,6 @@ import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 @Path("/saksopplysninger")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-@Transactional
 public class SaksopplysningTjeneste extends RestTjeneste {
 
     private final SaksopplysningerService saksopplysningerService;

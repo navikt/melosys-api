@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class VilkaarsresultatService {
         this.vilkaarsresultatRepo = vilkaarsresultatRepo;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<VilkaarDto> hentVilkaar(long behandlingID) {
         List<Vilkaarsresultat> vilkaarsresultatListe = vilkaarsresultatRepo.findByBehandlingsresultatId(behandlingID);
 
@@ -45,7 +46,7 @@ public class VilkaarsresultatService {
         return vilkaarDtoListe;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) throws IkkeFunnetException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Registrering av vilkår feilet fordi behandlingsresulat med ID " + behandlingID + " er ikke funnet."));
@@ -58,7 +59,7 @@ public class VilkaarsresultatService {
         }
     }
 
-    private Vilkaarsresultat lagNyVilkaarResultat(Behandlingsresultat behandlingsresultat, VilkaarDto vilkaarDto) throws IkkeFunnetException {
+    private Vilkaarsresultat lagNyVilkaarResultat(Behandlingsresultat behandlingsresultat, VilkaarDto vilkaarDto) {
 
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
 

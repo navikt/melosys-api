@@ -18,6 +18,7 @@ import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -60,7 +61,7 @@ public class Oppgaveplukker {
      * 4) Oppgaven tildeles til saksbehandleren.
      * 5) Behandlingen endrer status hvis oppgaven er en behandlingsoppgave.
      */
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
         String type = plukkDto.getOppgavetype();
         Oppgavetyper oppgavetype = KodeverkUtils.dekod(Oppgavetyper.class, type);
@@ -132,7 +133,7 @@ public class Oppgaveplukker {
         }
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public synchronized void leggTilbakeOppgave(String saksbehandlerID, TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingRepository.findById(tilbakelegging.getBehandlingID())
             .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandling med behandlingID " + tilbakelegging.getBehandlingID()));

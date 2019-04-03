@@ -74,11 +74,11 @@ public class ProsessinstansService {
         return prosessinstansRepo.findByBehandling_IdAndStegIsNotAndStegIsNot(behandlingID, ProsessSteg.FEILET_MASKINELT, ProsessSteg.FERDIG).isPresent();
     }
 
+    @Transactional
     public void lagre(Prosessinstans prosessinstans) {
         lagre(prosessinstans, SubjectHandler.getInstance().getUserID());
     }
 
-    @Transactional
     void lagre(Prosessinstans prosessinstans, String saksbehandler) {
 
         LocalDateTime nå = LocalDateTime.now();

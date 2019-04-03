@@ -25,14 +25,12 @@ import no.nav.melosys.tjenester.gui.dto.SoeknadTilleggsDataDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 @Api(tags = {"søknad"})
 @Path("/soknader")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-@Transactional
 public class SoeknadTjeneste extends RestTjeneste {
 
     private final SoeknadService soeknadService;
