@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import no.nav.dok.melosysbrev._000081.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.Art161AnmodningBegrunnelseKode;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -21,22 +22,18 @@ public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper
         Set<Vilkaarsresultat> vilkaarsresultater = resultat.getVilkaarsresultater().stream()
             .filter(v -> v.getVilkaar().equals(FO_883_2004_ART16_1)).collect(Collectors.toSet());
 
-        if (vilkaarsresultater.isEmpty() || vilkaarsresultater.iterator().next().getBegrunnelser().isEmpty()) {
-            throw new TekniskException("Ingen begrunnelse funnet for brev om Artikkel 16.1");
-        }
+        Vilkaarsresultat vilkaarsresultat = vilkaarsresultater.stream()
+            .findFirst().filter(v -> !v.getBegrunnelser().isEmpty()).orElseThrow(() -> new TekniskException("Ingen begrunnelse funnet for brev om Artikkel 16.1"));
 
-        Vilkaarsresultat vilkaarsresultat = vilkaarsresultater.iterator().next();
-        boolean erSærligGrunn = vilkaarsresultat.getBegrunnelser().stream()
-            .anyMatch(v -> Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN.value().equals(v.getKode()));
+        VilkaarBegrunnelse vilkaarBegrunnelse = vilkaarsresultat.getBegrunnelser().stream()
+            .filter(b -> Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN.value().equals(b.getKode()))
+            .findFirst().orElseGet(() -> vilkaarsresultat.getBegrunnelser().iterator().next());
 
-        if (erSærligGrunn) {
+        if (vilkaarBegrunnelse.getKode().equals(Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN.value())) {
             validerFritekstbegrunnelse(vilkaarsresultat.getBegrunnelseFritekst());
             fag.setAnmodningFritekst(vilkaarsresultat.getBegrunnelseFritekst());
-            fag.setArt161AnmodningBegrunnelse(Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN);
-        } else {
-            fag.setArt161AnmodningBegrunnelse(Art161AnmodningBegrunnelseKode.valueOf(
-                vilkaarsresultat.getBegrunnelser().iterator().next().getKode()));
         }
+        fag.setArt161AnmodningBegrunnelse(Art161AnmodningBegrunnelseKode.valueOf(vilkaarBegrunnelse.getKode()));
 
         return fag;
     }

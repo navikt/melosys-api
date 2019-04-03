@@ -103,7 +103,7 @@ public class AnmodningUnntakMapperTest {
     }
 
     @Test
-    public void mapArt16_vilkaarSaerligGrunn_forventFritekstErsatt() throws Exception {
+    public void mapArt16_vilkaarSaerligGrunn_forventFritekst() throws Exception {
         Behandlingsresultat resultat = new Behandlingsresultat();
         Vilkaarsresultat vilkaarsresultat16_1 = new Vilkaarsresultat();
         vilkaarsresultat16_1.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
@@ -117,7 +117,22 @@ public class AnmodningUnntakMapperTest {
         mapper.mapArt161(fag,resultat, new BrevDataAnmodningUnntakOgAvslag("Z111111"));
         assertThat(fag.getAnmodningFritekst()).isEqualTo("Fritekst");
         assertThat(fag.getArt161AnmodningBegrunnelse()).isEqualTo(Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN);
+    }
 
+    @Test
+    public void mapArt16_ikkeVilkaarSaerligGrunn_forventIkkeFritekst() throws Exception {
+        Behandlingsresultat resultat = new Behandlingsresultat();
+        Vilkaarsresultat vilkaarsresultat16_1 = new Vilkaarsresultat();
+        vilkaarsresultat16_1.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
+        vilkaarsresultat16_1.setBegrunnelseFritekst("Fritekst");
+        VilkaarBegrunnelse begrunnelse_16_1 = new VilkaarBegrunnelse();
+        begrunnelse_16_1.setKode(Art16_1_Anmodning_Begrunnelser.ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
+        vilkaarsresultat16_1.setBegrunnelser(Collections.singleton(begrunnelse_16_1));
+        resultat.getVilkaarsresultater().add(vilkaarsresultat16_1);
 
+        Fag fag = new Fag();
+        mapper.mapArt161(fag,resultat, new BrevDataAnmodningUnntakOgAvslag("Z111111"));
+        assertThat(fag.getAnmodningFritekst()).isNull();
+        assertThat(fag.getArt161AnmodningBegrunnelse()).isEqualTo(Art161AnmodningBegrunnelseKode.ERSTATTER_EN_ANNEN_UNDER_5_AAR);
     }
 }
