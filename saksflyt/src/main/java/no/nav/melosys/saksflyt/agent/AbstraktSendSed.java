@@ -1,5 +1,8 @@
 package no.nav.melosys.saksflyt.agent;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.TemporalAmount;
 import java.util.Map;
 
 import no.nav.melosys.domain.Behandling;
@@ -19,7 +22,7 @@ public abstract class AbstraktSendSed extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(AbstraktSendSed.class);
 
-    private final BehandlingRepository behandlingRepository;
+    protected final BehandlingRepository behandlingRepository;
     private final SedService sedService;
     private final BehandlingsresultatService behandlingsresultatService;
 
@@ -41,6 +44,14 @@ public abstract class AbstraktSendSed extends AbstraktStegBehandler {
             log.info("Starter sending av SED for behandling {}", behandling.getId());
             sedService.opprettOgSendSed(behandling, behandlingsresultat);
         }
+
+        TemporalAmount dokumentasjonSvarfrist = medDokumentasjonSvarfrist();
+        if (dokumentasjonSvarfrist != null) {
+            behandling.setDokumentasjonSvarfristDato(
+                LocalDateTime.now().plus(dokumentasjonSvarfrist).toInstant(ZoneOffset.UTC)
+            );
+            behandlingRepository.save(behandling);
+        }
     }
 
     @Override
@@ -49,4 +60,6 @@ public abstract class AbstraktSendSed extends AbstraktStegBehandler {
     }
 
     protected abstract boolean skalSendeSed(Behandlingsresultat behandlingsresultat);
+
+    protected abstract TemporalAmount medDokumentasjonSvarfrist();
 }

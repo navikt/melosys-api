@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.agent.aou;
 
+import java.time.Instant;
+
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
@@ -16,9 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -41,6 +41,7 @@ public class SendSedTest {
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(new Behandling());
         prosessinstans.getBehandling().setId(1L);
+        prosessinstans.getBehandling().setDokumentasjonSvarfristDato(Instant.now());
         when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(prosessinstans.getBehandling());
     }
 
@@ -61,10 +62,12 @@ public class SendSedTest {
         behandlingsresultat.getLovvalgsperioder().iterator().next().setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
         when(behandlingsresultatService.hentBehandlingsresultat(eq(2L))).thenReturn(behandlingsresultat);
         prosessinstans.getBehandling().setId(2L);
+        Instant nå = prosessinstans.getBehandling().getDokumentasjonSvarfristDato();
 
         sendSed.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
+        assertThat(nå).isBefore(prosessinstans.getBehandling().getDokumentasjonSvarfristDato());
         verify(sedService, never()).opprettOgSendSed(any(), any());
     }
 

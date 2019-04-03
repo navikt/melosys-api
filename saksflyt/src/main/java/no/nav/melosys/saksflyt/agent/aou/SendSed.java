@@ -1,5 +1,8 @@
 package no.nav.melosys.saksflyt.agent.aou;
 
+import java.time.Period;
+import java.time.temporal.TemporalAmount;
+
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.ProsessSteg;
@@ -61,5 +64,10 @@ public class SendSed extends AbstraktSendSed {
         return behandlingsresultat.getType() == Behandlingsresultattyper.ANMODNING_OM_UNNTAK
             && (lovvalgsperiode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1
             || lovvalgsperiode.getBestemmelse() == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2);
+    }
+
+    @Override
+    protected TemporalAmount medDokumentasjonSvarfrist() {
+        return Period.ofMonths(2);
     }
 }

@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.agent.iv;
 
+import java.time.temporal.TemporalAmount;
+
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
@@ -47,5 +49,10 @@ public class IverksettVedtakSendSed extends AbstraktSendSed {
     @Override
     protected boolean skalSendeSed(Behandlingsresultat behandlingsresultat) {
         return sedSkalSendes(behandlingsresultat.getType(), validerLovvalgsperiode(behandlingsresultat.getLovvalgsperioder()));
+    }
+
+    @Override
+    protected TemporalAmount medDokumentasjonSvarfrist() {
+        return null;
     }
 }
