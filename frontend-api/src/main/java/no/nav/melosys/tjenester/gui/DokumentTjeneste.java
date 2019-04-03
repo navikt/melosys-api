@@ -44,7 +44,7 @@ public class DokumentTjeneste extends RestTjeneste {
             throws SikkerhetsbegrensningException, IkkeFunnetException {
         byte[] dokument;
         dokument = dokumentService.hentDokument(journalpostID, dokumentID);
-        return lagResponseAvDokument(dokument, journalpostID);
+        return lagResponseAvDokument(dokument, String.format("journalpost-dok-%s.pdf", dokumentID));
     }
 
     @GET
@@ -68,7 +68,7 @@ public class DokumentTjeneste extends RestTjeneste {
         byte[] dokument;
         tilgang.sjekk(behandlingID);
         dokument = dokumentService.produserUtkast(behandlingID, produserbartDokument, brevBestillingDto);
-        return lagResponseAvDokument(dokument, produserbartDokument.getKode());
+        return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
     }
 
     @POST
@@ -85,11 +85,7 @@ public class DokumentTjeneste extends RestTjeneste {
     private static Response lagResponseAvDokument(byte[] dokument, String filnavn) {
         Response.ResponseBuilder ok = Response.ok(dokument);
         ok.header(HttpHeaders.CONTENT_LENGTH, dokument.length);
-        ok.header(HttpHeaders.CONTENT_DISPOSITION, "inline; attachment; filename=" + lagFilnavn(filnavn));
+        ok.header(HttpHeaders.CONTENT_DISPOSITION, "inline; attachment; filename=" + filnavn);
         return ok.build();
-    }
-
-    private static String lagFilnavn(String filnavn) {
-        return filnavn + "_utkast.pdf";
     }
 }
