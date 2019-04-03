@@ -43,8 +43,7 @@ public class MedlPeriodeKonverter {
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_3, GrunnlagMedl.FO_13_3);
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART13_4, GrunnlagMedl.FO_13_4);
         // Article 16
-        tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1, GrunnlagMedl.FO_1408_16_1);
-        tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2, GrunnlagMedl.FO_1408_16_2);
+        tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1, GrunnlagMedl.FO_16);
         lovvalgsbestemmelseTilGrunnlagMedlTabell = tbl;
     }
 
@@ -64,6 +63,11 @@ public class MedlPeriodeKonverter {
     }
 
     public static GrunnlagMedl tilGrunnlagMedltype(LovvalgBestemmelse bestemmelse) throws TekniskException {
+        //ART16_2 er pensjon og brukes foreløpig ikke i Melosys
+        //ART16_1 og ART16_2 mappes til samme GrunnlMedl
+        if (bestemmelse.equals(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2)) {
+            return GrunnlagMedl.FO_16;
+        }
         GrunnlagMedl grunnlagMedltype = lovvalgsbestemmelseTilGrunnlagMedlTabell.get(bestemmelse);
         if (grunnlagMedltype == null) {
             throw new TekniskException("Lovvalgsbestemmelse støttes ikke i MEDL. Kode: " + bestemmelse.getKode() + " Beskrivelse: " + bestemmelse.getBeskrivelse());
