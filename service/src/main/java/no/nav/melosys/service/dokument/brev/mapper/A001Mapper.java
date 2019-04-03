@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.melosysbrev._000115.*;
 import no.nav.dok.melosysbrev._000115.BostedsadresseType;
+import no.nav.dok.melosysbrev._000115.*;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
@@ -164,7 +164,11 @@ public class A001Mapper {
 
     private VilkaarBegrunnelseType mapVilkårBegrunnelse(Vilkaarsresultat resultat) {
         VilkaarBegrunnelseType vilkårbegrunnelse = new VilkaarBegrunnelseType();
-        VilkaarBegrunnelse begrunnelse = resultat.getBegrunnelser().iterator().next();
+
+        VilkaarBegrunnelse begrunnelse = resultat.getBegrunnelser().stream()
+            .filter(v -> Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN.value().equals(v.getKode()))
+            .findFirst().orElse(resultat.getBegrunnelser().iterator().next());
+
         Art161AnmodningBegrunnelseKode begrunnelseKode = Art161AnmodningBegrunnelseKode.fromValue(begrunnelse.getKode());
         vilkårbegrunnelse.setStandardBegrunnelse(begrunnelseKode);
         return vilkårbegrunnelse;
