@@ -39,7 +39,7 @@ public class LandvelgerServiceTest {
     private LandvelgerService landvelgerService;
     private List<Vilkaarsresultat> vilkaar = new ArrayList<>();
 
-    private Landkoder oppholdsland = Landkoder.NO;
+    private Landkoder søknadsland = Landkoder.NO;
     private Landkoder avklartArbeidsland = Landkoder.DK;
     private Landkoder bostedsland = Landkoder.SE;
     private Landkoder avklartBostedsland = Landkoder.FI;
@@ -51,7 +51,7 @@ public class LandvelgerServiceTest {
         Saksopplysning soeknad = new Saksopplysning();
         soeknad.setDokument(søknad);
         soeknad.setType(SaksopplysningType.SØKNAD);
-        søknad.oppholdUtland.oppholdslandKoder.add(oppholdsland.getKode());
+        søknad.soeknadsland.landKoder.add(søknadsland.getKode());
         søknad.bosted.oppgittAdresse = new StrukturertAdresse();
         søknad.bosted.oppgittAdresse.landKode = bostedsland.getKode();
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
@@ -74,7 +74,7 @@ public class LandvelgerServiceTest {
     @Test
     public void hentArbeidsland_utenAvklartArbeidsland_girOppholdsland() throws TekniskException {
         String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(oppholdsland.getBeskrivelse());
+        assertThat(land).isEqualTo(søknadsland.getBeskrivelse());
     }
 
     @Test
@@ -89,7 +89,7 @@ public class LandvelgerServiceTest {
     public void hentTrygdemyndighetsland_medArt121_girOppholdsland() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART12_1);
         String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(oppholdsland.getBeskrivelse());
+        assertThat(land).isEqualTo(søknadsland.getBeskrivelse());
     }
 
     @Test
@@ -104,7 +104,7 @@ public class LandvelgerServiceTest {
     public void hentTrygdemyndighetsland_medArt122_girOppholdsland() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART12_2);
         String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(oppholdsland.getBeskrivelse());
+        assertThat(land).isEqualTo(søknadsland.getBeskrivelse());
     }
 
     @Test
@@ -112,7 +112,7 @@ public class LandvelgerServiceTest {
         oppfyll(Vilkaar.FO_883_2004_ART16_1);
 
         String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
-        assertThat(land).isEqualTo(oppholdsland.getBeskrivelse());
+        assertThat(land).isEqualTo(søknadsland.getBeskrivelse());
     }
 
     @Test

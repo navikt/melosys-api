@@ -69,7 +69,7 @@ public class FagsakBehandlingFactory {
         arbeidUtland.adresse.landKode = "NO";
         soeknadDokument.arbeidUtland = new ArrayList<>();
         soeknadDokument.arbeidUtland.add(arbeidUtland);
-        soeknadDokument.oppholdUtland.oppholdsPeriode = new no.nav.melosys.domain.dokument.soeknad.Periode(
+        soeknadDokument.periode = new no.nav.melosys.domain.dokument.soeknad.Periode(
             LocalDate.of(2019,1,1), LocalDate.of(2019,2,1));
         Saksopplysning saksopplysningSøknad = new Saksopplysning();
         saksopplysningSøknad.setType(SaksopplysningType.SØKNAD);

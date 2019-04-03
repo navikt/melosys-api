@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone='yes'?>
 <soeknadDokument>
+    <periode>
+        <fom>2018-01-01</fom>
+        <tom>2018-12-01</tom>
+    </periode>
+    <soeknadsland>
+        <landKoder>AT</landKoder>
+    </soeknadsland>
     <personOpplysninger>
         <medfolgendeAndre>99999999994</medfolgendeAndre>
     </personOpplysninger>
     <oppholdUtland>
-        <oppholdslandKoder>AT</oppholdslandKoder>
-        <oppholdsPeriode>
-            <fom>2018-01-01</fom>
-            <tom>2018-12-01</tom>
-        </oppholdsPeriode>
-        <ektefelleEllerBarnINorge>false</ektefelleEllerBarnINorge>
-        <sammeAdresseSomArbeidsgiver>false</sammeAdresseSomArbeidsgiver>
+        <oppholdsPeriode/>
     </oppholdUtland>
     <arbeidNorge/>
     <arbeidUtland>

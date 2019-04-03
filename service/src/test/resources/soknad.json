@@ -109,7 +109,7 @@
     }
   ],
   "soeknadsland": {
-    "landKode": "GB"
+    "landKoder": ["GB"]
   }
 }
 

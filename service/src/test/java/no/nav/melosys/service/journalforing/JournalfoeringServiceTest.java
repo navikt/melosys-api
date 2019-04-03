@@ -73,7 +73,7 @@ public class JournalfoeringServiceTest {
         periode.setFom(LocalDate.MIN);
         periode.setTom(LocalDate.MAX);
         fagsakDto.setSoknadsperiode(periode);
-        fagsakDto.setLand(Arrays.asList("DK", "NO"));
+        fagsakDto.setLand(Arrays.asList("DK"));
         opprettDto.setFagsak(fagsakDto);
         journalfoeringService.opprettSakOgJournalfør(opprettDto);
 

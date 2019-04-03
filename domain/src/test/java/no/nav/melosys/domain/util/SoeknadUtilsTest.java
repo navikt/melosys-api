@@ -34,13 +34,21 @@ public class SoeknadUtilsTest {
     }
 
     @Test
+    public void hentLand_soeknadsland() {
+        SoeknadDokument soeknad = new SoeknadDokument();
+        soeknad.soeknadsland.landKoder = Arrays.asList(new Land(Land.BELGIA).getKode(), new Land(Land.BULGARIA).getKode());
+
+        List<String> strings = SoeknadUtils.hentLand(soeknad);
+        assertThat(strings).contains(Land.BELGIA, Land.BULGARIA);
+    }
+
+    @Test
     public void hentPeriode_opphold() {
         SoeknadDokument soeknad = new SoeknadDokument();
         leggTilArbeidUtland(soeknad);
 
-        soeknad.oppholdUtland = new OppholdUtland();
         Periode periode_2 = new Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX);
-        soeknad.oppholdUtland.oppholdsPeriode = periode_2;
+        soeknad.periode = periode_2;
 
         Periode res = SoeknadUtils.hentPeriode(soeknad);
         assertThat(res).isEqualTo(periode_2);

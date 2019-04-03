@@ -30,11 +30,14 @@ public final class SoeknadUtils {
         if (soeknad.oppholdUtland != null) {
             soeknad.oppholdUtland.oppholdslandKoder.stream().filter(Objects::nonNull).forEach(landkoder::add);
         }
+        if (soeknad.soeknadsland != null) {
+            soeknad.soeknadsland.landKoder.stream().filter(Objects::nonNull).forEach(landkoder::add);
+        }
         return landkoder;
     }
 
     public static Periode hentPeriode(SoeknadDokument soeknadDokument) {
-        return soeknadDokument.oppholdUtland.oppholdsPeriode;
+        return soeknadDokument.periode;
     }
 
     /**
@@ -48,9 +51,9 @@ public final class SoeknadUtils {
     }
 
     public static Landkoder hentSøknadsland(SoeknadDokument søknad) {
-        if (søknad.oppholdUtland.oppholdslandKoder.isEmpty()) {
+        if (søknad.soeknadsland.landKoder.isEmpty()) {
             throw new RuntimeException("Søknad mangler søknadsland");
         }
-        return Landkoder.valueOf(søknad.oppholdUtland.oppholdslandKoder.get(0));
+        return Landkoder.valueOf(søknad.soeknadsland.landKoder.get(0));
     }
 }
