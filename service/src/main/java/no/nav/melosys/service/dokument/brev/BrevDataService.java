@@ -201,7 +201,7 @@ public class BrevDataService {
 
                 UtenlandskMyndighet utenlandskMyndighet = hentMyndighetFraSak(behandling.getFagsak());
                 mottakerBrev.setNavn(utenlandskMyndighet.navn);
-                mottakerBrev.setKortNavn(mottaker.getInstitusjonId());
+                mottakerBrev.setKortNavn(utenlandskMyndighet.navn);
                 mottakerBrev.setSpraakkode(Spraakkode.NB);
                 mottakerBrev.setMottakeradresse(lagUtendlanskAdresse(utenlandskMyndighet));
                 return mottakerBrev;
