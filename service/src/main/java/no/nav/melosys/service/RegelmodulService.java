@@ -198,7 +198,7 @@ public class RegelmodulService {
         // FIXME: Vi sender soknadsland som oppholdsland og søknadsperiode som oppholdsperiode
         //  til regelmodulen inntil den er oppdatert med en nyere versjon av melosys
         for (String land : søknadsland) {
-            format.append("<oppholdslandKoder>").append(land).append("</oppholdslandKoder>");
+            format.append("<oppholdslandkoder>").append(land).append("</oppholdslandkoder>");
         }
 
         format.append("</oppholdUtland></soeknadDokument></FastsettLovvalgRequest>");

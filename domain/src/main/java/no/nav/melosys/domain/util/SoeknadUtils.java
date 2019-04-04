@@ -25,13 +25,13 @@ public final class SoeknadUtils {
     public static List<String> hentLand(SoeknadDokument soeknad) {
         List<String> landkoder = new ArrayList<>();
         if (soeknad.arbeidUtland != null) {
-            soeknad.arbeidUtland.stream().filter(Objects::nonNull).forEach(arbeidUtland -> landkoder.add(arbeidUtland.adresse.landKode));
+            soeknad.arbeidUtland.stream().filter(Objects::nonNull).forEach(arbeidUtland -> landkoder.add(arbeidUtland.adresse.landkode));
         }
         if (soeknad.oppholdUtland != null) {
-            soeknad.oppholdUtland.oppholdslandKoder.stream().filter(Objects::nonNull).forEach(landkoder::add);
+            soeknad.oppholdUtland.oppholdslandkoder.stream().filter(Objects::nonNull).forEach(landkoder::add);
         }
         if (soeknad.soeknadsland != null) {
-            soeknad.soeknadsland.landKoder.stream().filter(Objects::nonNull).forEach(landkoder::add);
+            soeknad.soeknadsland.landkoder.stream().filter(Objects::nonNull).forEach(landkoder::add);
         }
         return landkoder;
     }
@@ -51,9 +51,9 @@ public final class SoeknadUtils {
     }
 
     public static Landkoder hentSøknadsland(SoeknadDokument søknad) {
-        if (søknad.soeknadsland.landKoder.isEmpty()) {
+        if (søknad.soeknadsland.landkoder.isEmpty()) {
             throw new RuntimeException("Søknad mangler søknadsland");
         }
-        return Landkoder.valueOf(søknad.soeknadsland.landKoder.get(0));
+        return Landkoder.valueOf(søknad.soeknadsland.landkoder.get(0));
     }
 }

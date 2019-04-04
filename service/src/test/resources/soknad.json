@@ -3,7 +3,7 @@
     "utenlandskIdent": [
       {
         "ident": "123456789",
-        "landKode": "DK"
+        "landkode": "DK"
       }
     ]
   },
@@ -12,7 +12,7 @@
       "gatenavn": "Adresseveien 123",
       "postnummer": "1234",
       "poststed": "Poststedet",
-      "landKode": "DE"
+      "landkode": "DE"
     },
     "foretakNavn": "EQUINOR",
     "foretakOrgnr": "372384726",
@@ -26,12 +26,12 @@
         "gatenavn": "Deutschlandstrasse 123",
         "postnummer": "3388",
         "poststed": "Berlin",
-        "landKode": "DE"
+        "landkode": "DE"
       }
     }
   ],
   "oppholdUtland": {
-    "oppholdslandKoder": [
+    "oppholdslandkoder": [
       "DE"
     ],
     "oppholdsPeriode": {
@@ -45,14 +45,14 @@
   },
   "bosted": {
     "intensjonOmRetur": true,
-    "familiesBostedLandKode": "SE",
+    "familiesBostedLandkode": "SE",
     "antallMaanederINorge": 8,
     "adresseIUtlandet": true,
     "oppgittAdresse": {
       "gatenavn": "Gateadressen",
       "postnummer": "12345",
       "poststed": "Poststeder",
-      "landKode": "DE"
+      "landkode": "DE"
     }
   },
   "arbeidNorge": {
@@ -67,7 +67,7 @@
     "fullmektigPostnr": "1234",
     "fullmektigPoststed": "Byensvik",
     "fullmektigRegion": "Østlandsregionen",
-    "fullmektigLandKode": "NO"
+    "fullmektigLandkode": "NO"
   },
   "juridiskArbeidsgiverNorge": {
     "utsendteNeste12Mnd": 10,
@@ -104,12 +104,12 @@
     {
       "navn": "Navn på skipet",
       "fartsomradeKode": "INNENRIKS",
-      "flaggLandKode": "GB",
-      "installasjonsLandKode": "GB"
+      "flaggLandkode": "GB",
+      "installasjonsLandkode": "GB"
     }
   ],
   "soeknadsland": {
-    "landKoder": ["GB"]
+    "landkoder": ["GB"]
   }
 }
 

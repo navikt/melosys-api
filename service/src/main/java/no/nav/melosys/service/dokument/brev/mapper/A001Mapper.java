@@ -55,7 +55,7 @@ public class A001Mapper {
 
         seda001.setLovvalgsPeriodeListe(mapLovvalgsperioder(brevData.lovvalgsperioder));
 
-        // Alle lovvalgsperiodene må ha samme landKode
+        // Alle lovvalgsperiodene må ha samme landkode
         Lovvalgsperiode lovvalgsperiode = brevData.lovvalgsperioder.iterator().next();
         seda001.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getUnntakFraBestemmelse().getKode()));
         seda001.setLovvalgsLand(hentIso3Landkode(lovvalgsperiode.getLovvalgsland().getKode()));  // Alltid Norge
@@ -203,7 +203,7 @@ public class A001Mapper {
         adresseBrev.setPostnummer(adresse.postnummer);
         adresseBrev.setPossted(adresse.poststed);
         adresseBrev.setRegion(adresse.region);
-        adresseBrev.setLand(hentIso3Landkode(adresse.landKode));
+        adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
         arbeidsstedBrev.setAdresse(adresseBrev);
 
         return arbeidsstedBrev;
@@ -216,7 +216,7 @@ public class A001Mapper {
         arbeidsstedBrev.setYrkesgruppe(YrkesgruppeKode.fromValue(arbeidssted.yrkesgruppe.getKode()));
 
         AdresseType3 adresseBrev = new AdresseType3();
-        adresseBrev.setLand(hentIso3Landkode(arbeidssted.landKode));
+        adresseBrev.setLand(hentIso3Landkode(arbeidssted.landkode));
         arbeidsstedBrev.setAdresse(adresseBrev);
         return arbeidsstedBrev;
     }
@@ -246,7 +246,7 @@ public class A001Mapper {
             StrukturertAdresse adresse = (StrukturertAdresse) virksomhet.adresse;
             AdresseType adresseBrev = new AdresseType();
 
-            adresseBrev.setLand(hentIso3Landkode(adresse.landKode));
+            adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
             adresseBrev.setAdresselinje1(adresse.gatenavn);
             adresseBrev.setAdresselinje2(adresse.poststed);
             adresseBrev.setAdresselinje3(adresse.postnummer);
@@ -268,7 +268,7 @@ public class A001Mapper {
             AdresseType2 adresseBrev = new AdresseType2();
             StrukturertAdresse adresse = (StrukturertAdresse) virksomhet.adresse;
 
-            adresseBrev.setLand(hentIso3Landkode(adresse.landKode));
+            adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
             adresseBrev.setAdresselinje1(adresse.gatenavn);
             adresseBrev.setAdresselinje2(adresse.poststed);
             adresseBrev.setAdresselinje3(adresse.postnummer);

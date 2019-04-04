@@ -59,7 +59,7 @@ public class OpprettSoeknad extends AbstraktStegBehandler {
         Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         soeknadDokument.periode = periode;
-        soeknadDokument.soeknadsland.landKoder = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class);
+        soeknadDokument.soeknadsland.landkoder = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class);
 
         søknadService.registrerSøknad(behandlingID, soeknadDokument);
 

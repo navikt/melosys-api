@@ -111,7 +111,7 @@ public class OrganisasjonsDetaljer {
             if (sAdresse.getAdresselinje3() != null) {
                 ustrukturertAdresse.adresselinjer.add(sAdresse.getAdresselinje3());
             }
-            ustrukturertAdresse.landKode = sAdresse.getLandkode();
+            ustrukturertAdresse.landkode = sAdresse.getLandkode();
 
             if (!sAdresse.getLandkode().equals(Landkoder.NO.getKode())) {
                 ustrukturertAdresse.adresselinjer.add(sAdresse.getPoststedUtland());
@@ -150,9 +150,9 @@ public class OrganisasjonsDetaljer {
             String adresseLinje = stringBuilder.toString();
 
             strukturertAdresse.gatenavn = adresseLinje.replaceAll("\\s+", " ");
-            strukturertAdresse.landKode = sAdresse.getLandkode();
+            strukturertAdresse.landkode = sAdresse.getLandkode();
 
-            if (!strukturertAdresse.landKode.equals(Landkoder.NO.getKode())) {
+            if (!strukturertAdresse.landkode.equals(Landkoder.NO.getKode())) {
                 strukturertAdresse.postnummer = "";
                 strukturertAdresse.poststed = sAdresse.getPoststedUtland();
             } else {

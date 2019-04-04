@@ -51,9 +51,9 @@ public class LandvelgerServiceTest {
         Saksopplysning soeknad = new Saksopplysning();
         soeknad.setDokument(søknad);
         soeknad.setType(SaksopplysningType.SØKNAD);
-        søknad.soeknadsland.landKoder.add(søknadsland.getKode());
+        søknad.soeknadsland.landkoder.add(søknadsland.getKode());
         søknad.bosted.oppgittAdresse = new StrukturertAdresse();
-        søknad.bosted.oppgittAdresse.landKode = bostedsland.getKode();
+        søknad.bosted.oppgittAdresse.landkode = bostedsland.getKode();
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
         maritimtArbeid.territorialfarvann = territorialfarvannLand.getKode();
         søknad.maritimtArbeid.add(maritimtArbeid);

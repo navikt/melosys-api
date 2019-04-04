@@ -103,7 +103,7 @@ public abstract class AbstraktDokumentDataBygger {
     }
 
     private Arbeidssted utledArbeidsstedFraVirksomhet(AvklartVirksomhet virksomhet) {
-        return new Arbeidssted(virksomhet.navn, virksomhet.orgnr, virksomhet.adresse.landKode);
+        return new Arbeidssted(virksomhet.navn, virksomhet.orgnr, virksomhet.adresse.landkode);
     }
 
     protected Collection<Lovvalgsperiode> hentLovvalgsperioder() throws TekniskException {

@@ -120,7 +120,7 @@ public class A1Mapper {
         hovedvirksomhetBrev.setGatenavn(adresse.gatenavn);
         hovedvirksomhetBrev.setPostnr(adresse.postnummer);
         hovedvirksomhetBrev.setPoststed(adresse.poststed);
-        hovedvirksomhetBrev.setLandkode(adresse.landKode);
+        hovedvirksomhetBrev.setLandkode(adresse.landkode);
         hovedvirksomhetBrev.setYrkesaktivitet(YrkesaktivitetsKode.valueOf(virksomhet.yrkesaktivitet.getKode()));
         return hovedvirksomhetBrev;
     }
@@ -174,14 +174,14 @@ public class A1Mapper {
         adresseType.setAdresselinje1(adresse.gatenavn);
         adresseType.setAdresselinje2(adresse.postnummer);
         adresseType.setAdresselinje3(adresse.poststed);
-        adresseType.setLand(adresse.landKode);
+        adresseType.setLand(adresse.landkode);
         return adresseType;
     }
 
     private AdresseType mapIkkeFysiskArbeidssted(Arbeidssted ikkeFysiskArbeidssted) {
         AdresseType adresseType = new AdresseType();
         adresseType.setNavn(ikkeFysiskArbeidssted.navn);
-        adresseType.setLand(ikkeFysiskArbeidssted.landKode);
+        adresseType.setLand(ikkeFysiskArbeidssted.landkode);
         return adresseType;
     }
 

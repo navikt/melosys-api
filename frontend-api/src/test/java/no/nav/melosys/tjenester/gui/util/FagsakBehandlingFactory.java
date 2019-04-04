@@ -66,7 +66,7 @@ public class FagsakBehandlingFactory {
     private static Saksopplysning lagSøknadOpplysning() {
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse.landKode = "NO";
+        arbeidUtland.adresse.landkode = "NO";
         soeknadDokument.arbeidUtland = new ArrayList<>();
         soeknadDokument.arbeidUtland.add(arbeidUtland);
         soeknadDokument.periode = new no.nav.melosys.domain.dokument.soeknad.Periode(

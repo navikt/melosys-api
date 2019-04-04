@@ -4,5 +4,5 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Soeknadsland {
-    public List<String> landKoder = new ArrayList<>();
+    public List<String> landkoder = new ArrayList<>();
 }

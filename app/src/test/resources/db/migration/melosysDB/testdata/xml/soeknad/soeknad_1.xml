@@ -5,7 +5,7 @@
         <tom>2018-12-01</tom>
     </periode>
     <soeknadsland>
-        <landKoder>AT</landKoder>
+        <landkoder>AT</landkoder>
     </soeknadsland>
     <personOpplysninger>
         <medfolgendeAndre>99999999994</medfolgendeAndre>
@@ -20,7 +20,7 @@
             <husnummer>1</husnummer>
             <postnummer>0666</postnummer>
             <region/>
-            <landKode>NO</landKode>
+            <landkode>NO</landkode>
         </adresse>
     </arbeidUtland>
     <foretakUtland>
@@ -30,7 +30,7 @@
             <husnummer>1</husnummer>
             <postnummer>0666</postnummer>
             <region/>
-            <landKode>NO</landKode>
+            <landkode>NO</landkode>
         </adresse>
     </foretakUtland>
     <selvstendigArbeid>

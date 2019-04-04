@@ -27,7 +27,7 @@ public class SoeknadUtilsTest {
     public void hentLand_oppholdUtland() {
         SoeknadDokument soeknad = new SoeknadDokument();
         soeknad.oppholdUtland = new OppholdUtland();
-        soeknad.oppholdUtland.oppholdslandKoder = Arrays.asList(new Land(Land.BELGIA).getKode(), new Land(Land.BULGARIA).getKode());
+        soeknad.oppholdUtland.oppholdslandkoder = Arrays.asList(new Land(Land.BELGIA).getKode(), new Land(Land.BULGARIA).getKode());
 
         List<String> strings = SoeknadUtils.hentLand(soeknad);
         assertThat(strings).contains(Land.BELGIA, Land.BULGARIA);
@@ -36,7 +36,7 @@ public class SoeknadUtilsTest {
     @Test
     public void hentLand_soeknadsland() {
         SoeknadDokument soeknad = new SoeknadDokument();
-        soeknad.soeknadsland.landKoder = Arrays.asList(new Land(Land.BELGIA).getKode(), new Land(Land.BULGARIA).getKode());
+        soeknad.soeknadsland.landkoder = Arrays.asList(new Land(Land.BELGIA).getKode(), new Land(Land.BULGARIA).getKode());
 
         List<String> strings = SoeknadUtils.hentLand(soeknad);
         assertThat(strings).contains(Land.BELGIA, Land.BULGARIA);
@@ -57,7 +57,7 @@ public class SoeknadUtilsTest {
     private void leggTilArbeidUtland(SoeknadDokument soeknad) {
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = new StrukturertAdresse();
-        arbeidUtland.adresse.landKode = new Land(Land.BELGIA).getKode();
+        arbeidUtland.adresse.landkode = new Land(Land.BELGIA).getKode();
         soeknad.arbeidUtland = Collections.singletonList(arbeidUtland);
     }
 }

@@ -93,7 +93,7 @@ public class A1MapperTest {
         strukturertAdresse.postnummer = "0165";
         strukturertAdresse.poststed = "Poststed";
         strukturertAdresse.region = "Region";
-        strukturertAdresse.landKode = "Land";
+        strukturertAdresse.landkode = "Land";
 
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("JARLSBERG INTERNATIONAL",
                                                            "123456789",

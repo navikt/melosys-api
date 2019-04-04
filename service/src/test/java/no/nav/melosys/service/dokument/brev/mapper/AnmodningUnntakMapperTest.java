@@ -51,7 +51,7 @@ public class AnmodningUnntakMapperTest {
 
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = new StrukturertAdresse();
-        arbeidUtland.adresse.landKode = "NO";
+        arbeidUtland.adresse.landkode = "NO";
 
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         soeknadDokument.arbeidUtland = new ArrayList<>();
