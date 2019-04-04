@@ -6,6 +6,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -24,6 +25,8 @@ public class VedtakService {
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
 
+    private static final String IKKE_FINNES = " ikke finnes.";
+
     @Autowired
     public VedtakService(BehandlingRepository behandlingRepository, OppgaveService oppgaveService, ProsessinstansService prosessinstansService) {
         this.behandlingRepository = behandlingRepository;
@@ -31,37 +34,36 @@ public class VedtakService {
         this.prosessinstansService = prosessinstansService;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void anmodningOmUnntak(long behandlingID) throws FunksjonellException, TekniskException {
-        log.info("Anmodning om unntak for behandling: {}", behandlingID);
-
         Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Kan ikke sende andmodning om unntak fordi behandling " + behandlingID + " ikke finnes."));
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling);
-        oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+            .orElseThrow(() -> new IkkeFunnetException("Kan ikke sende andmodning om unntak fordi behandling " + behandlingID + IKKE_FINNES));
+        log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_UTL);
         behandlingRepository.save(behandling);
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling);
+
+        oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType) throws FunksjonellException, TekniskException {
-        log.info("Fatter vedtak for behandling: {}", behandlingID);
-
         Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + " ikke finnes."));
+            .orElseThrow(() -> new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + IKKE_FINNES));
+        log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
+        behandlingRepository.save(behandling);
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void endreVedtak(Long behandlingID, Endretperioder endretperiode) throws FunksjonellException, TekniskException {
-        log.info("Endrer vedtak for behandling: {}", behandlingID);
-
         Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Kan ikke endre vedtak fordi behandling " + behandlingID + " ikke finnes."));
+            .orElseThrow(() -> new IkkeFunnetException("Kan ikke endre vedtak fordi behandling " + behandlingID + IKKE_FINNES));
+        log.info("Endrer vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         prosessinstansService.opprettProsessinstansForkortPeriode(behandling, endretperiode);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
