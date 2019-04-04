@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.medl;
 
 import java.io.StringWriter;
 import java.time.LocalDate;
+import java.util.Optional;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -124,8 +125,13 @@ public class MedlService implements MedlFasade {
     @Override
     public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode) throws TekniskException, FunksjonellException {
         try {
-            HentPeriodeResponse hentPeriodeResponse = medlemskapConsumer.hentPeriode(lagHentPeriodeRequest(lovvalgsperiode.getMedlPeriodeID()));
-            Medlemsperiode periode = hentPeriodeResponse.getPeriode();
+            long medlPeriodeID = lovvalgsperiode.getMedlPeriodeID();
+            if (medlPeriodeID == 0) {
+                throw new TekniskException("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL");
+            }
+            HentPeriodeResponse hentPeriodeResponse = medlemskapConsumer.hentPeriode(lagHentPeriodeRequest(medlPeriodeID));
+            Medlemsperiode periode = Optional.ofNullable(hentPeriodeResponse.getPeriode())
+                .orElseThrow(() -> new TekniskException("Fant ingen eksisterende medlPeriode med id " + medlPeriodeID));
             OppdaterPeriodeRequest request = MedlPeriodeKonverter.konverterTilOppdaterPeriodeRequest(lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, periode.getVersjon());
             behandleMedlemskapConsumer.oppdaterPeriode(request);
         } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.Sikkerhetsbegrensning | Sikkerhetsbegrensning e) {

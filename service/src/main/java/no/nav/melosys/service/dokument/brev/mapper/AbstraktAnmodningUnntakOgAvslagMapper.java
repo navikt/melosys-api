@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
@@ -14,10 +15,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.InngangsvilkaarBegrunnelseKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.VilkaarBegrunnelse;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
@@ -86,11 +84,17 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
         return fag;
     }
 
-    Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Behandlingsresultat resultat, Vilkaar vilkaarType) {
+    private Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Behandlingsresultat resultat, Vilkaar vilkaarType) {
         return resultat.getVilkaarsresultater().stream()
             .filter(vr -> vr.getVilkaar() == vilkaarType)
             .flatMap(vr -> vr.getBegrunnelser().stream())
             .collect(Collectors.toSet());
+    }
+
+    Optional<Vilkaarsresultat> hentFørsteGyldigeVilkaarsresultat(Behandlingsresultat resultat, Vilkaar vilkaarType) {
+        return resultat.getVilkaarsresultater().stream()
+            .filter(v -> v.getVilkaar().equals(vilkaarType) && !v.getBegrunnelser().isEmpty())
+            .findFirst();
     }
 
     void validerFritekstbegrunnelse(String fritekst) throws TekniskException {

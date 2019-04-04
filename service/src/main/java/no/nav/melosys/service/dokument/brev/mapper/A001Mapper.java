@@ -142,7 +142,7 @@ public class A001Mapper {
         person.setBostedsadresse(mapBostedAdresse(adresse));
         person.setFødselsnummer(personDok.fnr);
         //Fødeland og Fødested skal ikke fylles ut
-        utenlandskIdent.ifPresent(utenlandskId -> person.setUtenlandskID(utenlandskId));
+        utenlandskIdent.ifPresent(person::setUtenlandskID);
         try {
             person.setFødselsdato(convertToXMLGregorianCalendarRemoveTimezone(personDok.fødselsdato));
         } catch (DatatypeConfigurationException e) {

@@ -1,8 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import no.nav.dok.melosysbrev._000081.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.Art161AnmodningBegrunnelseKode;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -19,11 +16,8 @@ public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper
     @Override
     Fag mapArt161(Fag fag, Behandlingsresultat resultat, BrevData brevData) throws TekniskException {
 
-        Set<Vilkaarsresultat> vilkaarsresultater = resultat.getVilkaarsresultater().stream()
-            .filter(v -> v.getVilkaar().equals(FO_883_2004_ART16_1)).collect(Collectors.toSet());
-
-        Vilkaarsresultat vilkaarsresultat = vilkaarsresultater.stream()
-            .findFirst().filter(v -> !v.getBegrunnelser().isEmpty()).orElseThrow(() -> new TekniskException("Ingen begrunnelse funnet for brev om Artikkel 16.1"));
+        Vilkaarsresultat vilkaarsresultat = hentFørsteGyldigeVilkaarsresultat(resultat, FO_883_2004_ART16_1)
+            .orElseThrow(() -> new TekniskException("Ingen begrunnelse funnet for brev om Artikkel 16.1"));
 
         VilkaarBegrunnelse vilkaarBegrunnelse = vilkaarsresultat.getBegrunnelser().stream()
             .filter(b -> Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN.value().equals(b.getKode()))

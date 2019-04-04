@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.impl;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -10,15 +11,17 @@ import org.springframework.test.util.ReflectionTestUtils;
 import static no.nav.melosys.domain.ProsessSteg.JFR_AKTØR_ID;
 import static no.nav.melosys.domain.ProsessSteg.JFR_HENT_PERS_OPPL;
 import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BingeImplTest {
+
+    private BingeImpl binge = new BingeImpl();
 
     /*
      * Tester at vi kan legge til saker, hente dem og fjerne dem.
      */
     @Test
     public void testGrunnleggendeFunksjonalitet() {
-        BingeImpl binge = new BingeImpl();
         Prosessinstans pi1 = new Prosessinstans(), pi2 = new Prosessinstans();
         ReflectionTestUtils.setField(pi1, "id", UUID.randomUUID());
         ReflectionTestUtils.setField(pi2, "id", UUID.randomUUID());
@@ -37,4 +40,19 @@ public class BingeImplTest {
         assertNull(binge.fjernFørsteProsessinstans((s) -> true, Utils.eldsteFørst())); // Alle sakene er hentet ut. Fjern skal returnere null
     }
 
+    @Test
+    public void leggTil_medStatusFeilet_funkerIkke() {
+        Prosessinstans pi = new Prosessinstans();
+        ReflectionTestUtils.setField(pi, "id", UUID.randomUUID());
+        pi.setSteg(ProsessSteg.FEILET_MASKINELT);
+        assertThat(binge.leggTil(pi)).isEqualTo(false);
+    }
+
+    @Test
+    public void leggTil_medStatusFerdig_funkerIkke() {
+        Prosessinstans pi = new Prosessinstans();
+        ReflectionTestUtils.setField(pi, "id", UUID.randomUUID());
+        pi.setSteg(ProsessSteg.FERDIG);
+        assertThat(binge.leggTil(pi)).isEqualTo(false);
+    }
 }

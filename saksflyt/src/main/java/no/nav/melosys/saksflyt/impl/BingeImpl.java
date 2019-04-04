@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.saksflyt.api.Binge;
 import org.slf4j.Logger;
@@ -28,8 +29,12 @@ public class BingeImpl implements Binge {
         if (prosessinstans.getId() == null) {
             throw new IllegalStateException("Forsøk på å legge inn prosessinstans uten ID i Bingen!");
         }
+        if (ProsessSteg.FEILET_MASKINELT.equals(prosessinstans.getSteg()) || ProsessSteg.FERDIG.equals(prosessinstans.getSteg())) {
+            logger.warn("Forsøk på å legge inn prosessinstans {} med ugyldig steg {} ", prosessinstans.getId(), prosessinstans.getSteg());
+            return false;
+        }
         if (prosessinstanser.containsKey(prosessinstans.getId())) {
-            logger.error("Forsøk på å legge inn prosessinstans som allerede finnes i Bingen. prosessinstansId={}", prosessinstans.getId());
+            logger.warn("Forsøk på å legge inn prosessinstans som allerede finnes i Bingen. prosessinstansId={}", prosessinstans.getId());
             return false;
         }
         prosessinstanser.put(prosessinstans.getId(), prosessinstans);
@@ -54,15 +59,6 @@ public class BingeImpl implements Binge {
     @Override
     public synchronized List<Prosessinstans> hentProsessinstanser(Predicate<Prosessinstans> predikat, Comparator<Prosessinstans> rekkefølge) {
         return prosessinstanser.values().stream().filter(predikat).sorted(rekkefølge).collect(Collectors.toList());
-    }
-
-    @Override
-    public synchronized Prosessinstans fjernProsessinstans(long prosessinstansId) {
-        Prosessinstans prosessinstans = prosessinstanser.remove(prosessinstansId);
-        if (prosessinstans == null) {
-            logger.error("Forsøk på å fjerne prosessinstans som ikke finnes i bingen. prosessinstansId={}", prosessinstansId);
-        }
-        return prosessinstans;
     }
 
     @Override
