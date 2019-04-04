@@ -18,8 +18,6 @@ import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkRequest;
 
-import static no.nav.melosys.integrasjon.aareg.AaregFasade.REGELVERK_A_ORDNINGEN;
-
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -39,7 +37,7 @@ public class AaregServiceTest {
 
     @Test
     public void getArbeidsforholdDokument() throws Exception {
-        Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker("99999999991", REGELVERK_A_ORDNINGEN, null, null);
+        Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker("99999999991", null, null);
         ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
         assertThat(arbeidsforholdDokument.getArbeidsforhold().size()).isGreaterThan(0);
     }

@@ -42,11 +42,13 @@ public class AaregService implements AaregFasade {
 
     private static final String ARBEIDSFORHOLD_VERSJON = "3.0";
 
-    private ArbeidsforholdConsumer arbeidsforholdConsumer;
+    private final ArbeidsforholdConsumer arbeidsforholdConsumer;
 
-    private DokumentFactory dokumentFactory;
+    private final DokumentFactory dokumentFactory;
 
-    final JAXBContext jaxbContext;
+    private final JAXBContext jaxbContext;
+
+    private static final String REGELVERK_A_ORDNINGEN = "A_ORDNINGEN";
 
     @Autowired
     public AaregService(ArbeidsforholdConsumer arbeidsforholdConsumer, DokumentFactory dokumentFactory) {
@@ -70,7 +72,7 @@ public class AaregService implements AaregFasade {
     }
 
     @Override
-    public Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, String regelverk, LocalDate fom, LocalDate tom) throws IntegrasjonException, TekniskException, SikkerhetsbegrensningException {
+    public Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, LocalDate fom, LocalDate tom) throws TekniskException, SikkerhetsbegrensningException {
         FinnArbeidsforholdPrArbeidstakerRequest request = new FinnArbeidsforholdPrArbeidstakerRequest();
 
         NorskIdent norskIdent = new NorskIdent();
@@ -90,7 +92,7 @@ public class AaregService implements AaregFasade {
             throw new IntegrasjonException(e);
         }
 
-        regelverker.setValue(regelverk);
+        regelverker.setValue(REGELVERK_A_ORDNINGEN);
         request.setRapportertSomRegelverk(regelverker);
         request.setArbeidsforholdIPeriode(periode);
 

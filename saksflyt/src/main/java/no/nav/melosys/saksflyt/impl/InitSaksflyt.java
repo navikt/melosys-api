@@ -32,8 +32,6 @@ public class InitSaksflyt {
 
     private int antallTråder;
 
-    private final ApplicationContext applicationContext;
-
     private final TaskExecutor taskExecutor;
 
     // Liste med arbeidstråder. Disse er prototype bønner med tilstand og tråd.
@@ -45,12 +43,11 @@ public class InitSaksflyt {
         @Qualifier("applicationTaskExecutor") TaskExecutor taskExecutor,
         @Value("${melosys.saksflyt.arbeider.antallTråder:1}") int antallTråder
     ) {
-        this.applicationContext = context;
         this.taskExecutor = taskExecutor;
         this.antallTråder = antallTråder;
         tråder = new ArbeiderTraad[antallTråder];
         for (int i = 0; i < antallTråder; i++) {
-            tråder[i] = applicationContext.getBean(ArbeiderTraad.class);
+            tråder[i] = context.getBean(ArbeiderTraad.class);
         }
     }
     
