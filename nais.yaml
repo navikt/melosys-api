@@ -13,7 +13,7 @@ spec:
     max: 1
     cpuThresholdPercentage: 80
   liveness:
-    path: internal/health
+    path: internal/isAlive
     initialDelay: 240
     timeout: 10
   readiness:

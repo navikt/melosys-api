@@ -1,5 +1,9 @@
 package no.nav.melosys.saksflyt.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Future;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +13,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
@@ -26,26 +30,29 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SING
  */
 @Component
 @Scope(SCOPE_SINGLETON)
-public class InitSaksflyt {
+public class Saksflyt {
 
-    private static final Logger logger = LoggerFactory.getLogger(InitSaksflyt.class);
+    private static final Logger logger = LoggerFactory.getLogger(Saksflyt.class);
 
     private int antallTråder;
 
-    private final TaskExecutor taskExecutor;
+    private final ThreadPoolTaskExecutor taskExecutor;
 
     // Liste med arbeidstråder. Disse er prototype bønner med tilstand og tråd.
-    private ArbeiderTraad[] tråder;
+    private final ArbeiderTraad[] tråder;
+
+    private final List<Future<?>> futures;
 
     @Autowired
-    public InitSaksflyt(
+    public Saksflyt(
         ApplicationContext context,
-        @Qualifier("applicationTaskExecutor") TaskExecutor taskExecutor,
+        @Qualifier("applicationTaskExecutor") ThreadPoolTaskExecutor taskExecutor,
         @Value("${melosys.saksflyt.arbeider.antallTråder:1}") int antallTråder
     ) {
         this.taskExecutor = taskExecutor;
         this.antallTråder = antallTråder;
         tråder = new ArbeiderTraad[antallTråder];
+        futures = new ArrayList<>();
         for (int i = 0; i < antallTråder; i++) {
             tråder[i] = context.getBean(ArbeiderTraad.class);
         }
@@ -57,9 +64,12 @@ public class InitSaksflyt {
     @EventListener
     public void start(ApplicationReadyEvent event) {
         for (int i = 0; i < antallTråder; i++) {
-            taskExecutor.execute(tråder[i]);
+            futures.add(taskExecutor.submit(tråder[i]));
         }
         logger.info("Startet {} arbeidertråder", antallTråder);
     }
 
+    public boolean saksflytLever() {
+        return !futures.isEmpty() && futures.stream().noneMatch(future -> future.isDone() || future.isCancelled());
+    }
 }
