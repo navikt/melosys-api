@@ -49,13 +49,6 @@ public interface Binge {
     List<Prosessinstans> hentProsessinstanser(Predicate<Prosessinstans> predikat, Comparator<Prosessinstans> rekkefølge);
 
     /**
-     * Fjerner en prosessinstans med en gitt id fra lageret.
-     * 
-     * @return Angitt prosessinstans, eller null hvis ingen slik prosessinstans i lageret.
-     */
-    Prosessinstans fjernProsessinstans(long prosessinstansId);
-
-    /**
      * Fjerner og returnerer den første prosessinstansen som tilfredsstiller det gitte predikatet, eller null hvis ingen
      * prosessinstanser tilfredsstiller kriteriet.
      */
