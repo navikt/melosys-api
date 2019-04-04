@@ -41,7 +41,7 @@ public class Saksflyt {
     // Liste med arbeidstråder. Disse er prototype bønner med tilstand og tråd.
     private final ArbeiderTraad[] tråder;
 
-    private final List<Future<?>> arbeidere;
+    private final List<Future<?>> futures;
 
     @Autowired
     public Saksflyt(
@@ -52,7 +52,7 @@ public class Saksflyt {
         this.taskExecutor = taskExecutor;
         this.antallTråder = antallTråder;
         tråder = new ArbeiderTraad[antallTråder];
-        arbeidere = new ArrayList<>();
+        futures = new ArrayList<>();
         for (int i = 0; i < antallTråder; i++) {
             tråder[i] = context.getBean(ArbeiderTraad.class);
         }
@@ -64,12 +64,12 @@ public class Saksflyt {
     @EventListener
     public void start(ApplicationReadyEvent event) {
         for (int i = 0; i < antallTråder; i++) {
-            arbeidere.add(taskExecutor.submit(tråder[i]));
+            futures.add(taskExecutor.submit(tråder[i]));
         }
         logger.info("Startet {} arbeidertråder", antallTråder);
     }
 
     public boolean saksflytLever() {
-        return !arbeidere.isEmpty() && arbeidere.stream().noneMatch(future -> future.isDone() || future.isCancelled());
+        return !futures.isEmpty() && futures.stream().noneMatch(future -> future.isDone() || future.isCancelled());
     }
 }
