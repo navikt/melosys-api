@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.kontroll;
 
-import no.nav.melosys.saksflyt.impl.InitSaksflyt;
+import no.nav.melosys.saksflyt.impl.Saksflyt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/internal")
 public class SaksflytStatus {
 
-    private final InitSaksflyt initSaksflyt;
+    private final Saksflyt saksflyt;
 
     @Autowired
-    public SaksflytStatus(InitSaksflyt initSaksflyt) {
-        this.initSaksflyt = initSaksflyt;
+    public SaksflytStatus(Saksflyt saksflyt) {
+        this.saksflyt = saksflyt;
     }
 
-    @GetMapping("/saksflyt")
+    @GetMapping("/isAlive")
     public ResponseEntity sjekkSaksflyt() {
-        return initSaksflyt.saksflytLever()
+        return saksflyt.saksflytLever()
             ? ResponseEntity.ok().build()
             : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }

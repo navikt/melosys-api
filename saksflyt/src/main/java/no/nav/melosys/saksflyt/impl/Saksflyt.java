@@ -30,9 +30,9 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SING
  */
 @Component
 @Scope(SCOPE_SINGLETON)
-public class InitSaksflyt {
+public class Saksflyt {
 
-    private static final Logger logger = LoggerFactory.getLogger(InitSaksflyt.class);
+    private static final Logger logger = LoggerFactory.getLogger(Saksflyt.class);
 
     private int antallTråder;
 
@@ -44,7 +44,7 @@ public class InitSaksflyt {
     private final List<Future<?>> arbeidere;
 
     @Autowired
-    public InitSaksflyt(
+    public Saksflyt(
         ApplicationContext context,
         @Qualifier("applicationTaskExecutor") ThreadPoolTaskExecutor taskExecutor,
         @Value("${melosys.saksflyt.arbeider.antallTråder:1}") int antallTråder
