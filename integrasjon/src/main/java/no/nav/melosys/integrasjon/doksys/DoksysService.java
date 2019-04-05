@@ -110,7 +110,9 @@ public class DoksysService implements DoksysFasade {
         wsRequest.setBrevdata(dokumentbestilling.getBrevData());
 
         try {
-            log.debug("Bestiller dokument:{} {}", System.lineSeparator(), wsRequest.toString());
+            if (log.isDebugEnabled()) {
+                log.debug("Bestiller dokument:{} {}", System.lineSeparator(), wsRequest);
+            }
             ProduserIkkeredigerbartDokumentResponse wsResponse = dokumentproduksjonConsumer.produserIkkeredigerbartDokument(wsRequest);
 
             DokumentbestillingResponse response = new DokumentbestillingResponse();

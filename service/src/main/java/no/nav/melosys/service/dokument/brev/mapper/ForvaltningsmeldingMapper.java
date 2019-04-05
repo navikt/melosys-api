@@ -42,7 +42,6 @@ public class ForvaltningsmeldingMapper implements BrevDataMapper {
         } catch (DatatypeConfigurationException e) {
             throw new TekniskException("Konverteringsfeil", e);
         }
-        // FIXME: Kan ikke utledes for behandling som ikke initieres av SED, og må registreres i journalføringen
         AvsenderType avsenderType = new AvsenderType();
         avsenderType.setRolle(RolleKode.BRUKER);
         fag.setAvsender(avsenderType);

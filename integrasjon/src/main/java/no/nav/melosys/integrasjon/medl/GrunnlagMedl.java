@@ -31,9 +31,4 @@ public enum GrunnlagMedl {
     public String getKode() {
         return kode;
     }
-
-    public void setKode(String kode) {
-        this.kode = kode;
-    }
-
 }

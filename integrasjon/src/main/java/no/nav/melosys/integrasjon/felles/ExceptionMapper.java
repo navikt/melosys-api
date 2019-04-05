@@ -1,17 +1,21 @@
 package no.nav.melosys.integrasjon.felles;
 
+import javax.ws.rs.*;
+
 import no.nav.melosys.exception.*;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 
-import javax.ws.rs.*;
-
 public final class ExceptionMapper {
+
+    private ExceptionMapper() {
+        throw new IllegalArgumentException("Utility");
+    }
 
     /**
      * WebTarget.get kan kaste ProcessingException eller WebApplicationException. Denne metoden kaster en MelosysException, basert på typen til parameteren.
      */
-    public static void JaxGetRuntimeExTilMelosysEx(RuntimeException e) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, TekniskException {
+    public static void JaxGetRuntimeExTilMelosysEx(RuntimeException e) throws FunksjonellException, TekniskException {
         if (e instanceof NotAuthorizedException || e instanceof ForbiddenException) {
             throw new SikkerhetsbegrensningException(e.getMessage());
         } else if (e instanceof NotFoundException) {

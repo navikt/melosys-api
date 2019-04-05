@@ -1,5 +1,10 @@
 package no.nav.melosys.domain.dokument.jaxb;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.xml.bind.helpers.DefaultValidationEventHandler;
+
 import no.nav.melosys.domain.dokument.Dokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
@@ -14,11 +19,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-
-import javax.xml.bind.helpers.DefaultValidationEventHandler;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 public class JaxbConfig {
@@ -37,12 +37,10 @@ public class JaxbConfig {
     }
 
     private static Class<?>[] getClassesToBeBound() {
-        List<Class<?>> klasser = new ArrayList<>();
+        List<Class<? extends Dokument>> dokumentKlasser =
+            Arrays.asList(ArbeidsforholdDokument.class, InntektDokument.class, MedlemskapDokument.class, OrganisasjonDokument.class, PersonDokument.class, PersonhistorikkDokument.class, SobSakDokument.class, SoeknadDokument.class);
 
-        List<Class<? extends Dokument>> dokumentKlasser = Arrays.asList(ArbeidsforholdDokument.class, InntektDokument.class, MedlemskapDokument.class, OrganisasjonDokument.class, PersonDokument.class, PersonhistorikkDokument.class, SobSakDokument.class, SoeknadDokument.class);
-        klasser.addAll(dokumentKlasser);
-
-        return klasser.toArray(new Class[0]);
+        return new ArrayList<>(dokumentKlasser).toArray(new Class[0]);
     }
 
 }
