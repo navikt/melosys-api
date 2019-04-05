@@ -81,7 +81,7 @@ public class IverksettVedtakValideringTest {
 
         agent.utførSteg(p);
 
-        verify(mockAppender, times(2)).doAppend(argThat(o -> ((LoggingEvent)o).getFormattedMessage().contains("behandlingsResultatType er ikke oppgitt")));
+        verify(mockAppender).doAppend(argThat(o -> ((LoggingEvent)o).getFormattedMessage().contains("behandlingsResultatType er ikke oppgitt")));
         assertThat(p.getSteg()).isEqualTo(FEILET_MASKINELT);
     }
 
