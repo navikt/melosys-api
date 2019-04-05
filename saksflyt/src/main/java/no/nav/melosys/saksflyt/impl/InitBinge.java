@@ -29,7 +29,7 @@ public class InitBinge implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
 
-        Iterable<Prosessinstans> alleProsessinstanser = prosessinstansRepo.findByStegIsNot(ProsessSteg.FEILET_MASKINELT);
+        Iterable<Prosessinstans> alleProsessinstanser = prosessinstansRepo.findAllByStegIsNotAndStegIsNot(ProsessSteg.FERDIG, ProsessSteg.FEILET_MASKINELT);
 
         int teller = 0;
 
