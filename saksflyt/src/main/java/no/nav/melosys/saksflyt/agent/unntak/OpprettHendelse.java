@@ -22,7 +22,7 @@ public class OpprettHendelse implements UnntakBehandler {
     
     @Override
     public void behandleUnntak(Prosessinstans prosessinstans, String melding, Throwable t) {
-        logger.info("Legger på hendelse på {}: {}", prosessinstans.getId(), melding, t);
+        logger.debug("Legger på hendelse på {}: {}", prosessinstans.getId(), melding);
         prosessinstans.leggTilHendelse(type, melding, t);
     }
 
