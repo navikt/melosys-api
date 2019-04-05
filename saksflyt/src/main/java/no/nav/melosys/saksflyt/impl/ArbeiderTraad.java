@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
 
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE;
 
@@ -44,12 +45,10 @@ public class ArbeiderTraad implements Runnable {
     private volatile Prosessinstans aktivProsessinstans;
 
     @Autowired
-    ArbeiderTraad(
-        Binge binge,
+    ArbeiderTraad(Binge binge,
         ProsessinstansRepository prosessinstansRepo,
         List<StegBehandler> stegBehandlere,
-        @Value("${melosys.saksflyt.arbeider.oppholdMellomSteg:47}") long oppholdMellomSteg
-    ) {
+        @Value("${melosys.saksflyt.arbeider.oppholdMellomSteg:47}") long oppholdMellomSteg) {
         this.binge = binge;
         this.prosessinstansRepo = prosessinstansRepo;
         this.stegBehandlere = stegBehandlere;
@@ -67,10 +66,22 @@ public class ArbeiderTraad implements Runnable {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } catch (RuntimeException e) {
-                    logger.error("Ubehandlet Exception! Aktiv stegBehandler: {}.", aktivStegBehandler.getClass().getSimpleName(), e);
+                    logger.error("Ubehandlet exception! Aktiv stegBehandler: {}.", ClassUtils.getUserClass(aktivStegBehandler.getClass()).getSimpleName(), e);
                     logger.error("Prosessinstans som må ryddes opp i: {}.", aktivProsessinstans.getId());
+                } finally {
+                    // Prosessinstanser som avbrytes må registreres som feilet.
+                    settTilFeilet();
                 }
             }
+        }
+    }
+
+    private void settTilFeilet() {
+        try {
+            aktivProsessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
+            prosessinstansRepo.save(aktivProsessinstans);
+        } catch (RuntimeException e) {
+            logger.error("Prosessinstans {} kunne ikke settes til feilet: ", aktivProsessinstans.getId(), e);
         }
     }
 
