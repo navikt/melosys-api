@@ -50,7 +50,7 @@ values ((select behandling.id from behandling where saksnummer = 'MELTEST-1' and
     <medfolgendeAndre>99999999994</medfolgendeAndre>
   </personOpplysninger>
   <oppholdUtland>
-    <oppholdslandKoder>AT</oppholdslandKoder>
+    <oppholdslandkoder>AT</oppholdslandkoder>
     <oppholdsPeriode>
       <fom>2018-01-01</fom>
       <tom>2018-12-01</tom>
@@ -65,7 +65,7 @@ values ((select behandling.id from behandling where saksnummer = 'MELTEST-1' and
       <husnummer>1</husnummer>
       <postnummer>0666</postnummer>
       <region/>
-      <landKode>NO</landKode>
+      <landkode>NO</landkode>
     </adresse>
   </arbeidUtland>
   <foretakUtland>
@@ -75,7 +75,7 @@ values ((select behandling.id from behandling where saksnummer = 'MELTEST-1' and
       <husnummer>1</husnummer>
       <postnummer>0666</postnummer>
       <region/>
-      <landKode>NO</landKode>
+      <landkode>NO</landkode>
     </adresse>
   </foretakUtland>
   <selvstendigArbeid>
@@ -120,7 +120,7 @@ values ((select behandling.id from behandling where saksnummer = 'MELTEST-1' and
     <medfolgendeAndre>99999999994</medfolgendeAndre>
   </personOpplysninger>
   <oppholdUtland>
-    <oppholdslandKoder>AT</oppholdslandKoder>
+    <oppholdslandkoder>AT</oppholdslandkoder>
     <oppholdsPeriode>
       <fom>2018-01-01</fom>
       <tom>2018-12-01</tom>
@@ -130,12 +130,12 @@ values ((select behandling.id from behandling where saksnummer = 'MELTEST-1' and
   </oppholdUtland>
   <arbeidNorge/>
     <arbeidUtland>
-    <adresse> 
+    <adresse>
       <gatenavn>NEDRE VARÅSEN</gatenavn>
       <husnummer>1</husnummer>
       <postnummer>0666</postnummer>
       <region/>
-      <landKode>NO</landKode>
+      <landkode>NO</landkode>
     </adresse>
   </arbeidUtland>
   <foretakUtland>
@@ -145,7 +145,7 @@ values ((select behandling.id from behandling where saksnummer = 'MELTEST-1' and
       <husnummer>1</husnummer>
       <postnummer>0666</postnummer>
       <region/>
-      <landKode>NO</landKode>
+      <landkode>NO</landkode>
     </adresse>
   </foretakUtland>
   <selvstendigArbeid>

@@ -116,7 +116,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
         SoeknadDokument dokument = new SoeknadDokument();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = new StrukturertAdresse();
-        arbeidUtland.adresse.landKode = Landkoder.AT.getKode();
+        arbeidUtland.adresse.landkode = Landkoder.AT.getKode();
         dokument.arbeidUtland = Collections.singletonList(arbeidUtland);
         return dokument;
     }

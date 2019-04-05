@@ -149,11 +149,11 @@ public class OppgaveServiceTest {
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = new StrukturertAdresse();
-        arbeidUtland.adresse.landKode = new Land(Land.NORGE).getKode();
+        arbeidUtland.adresse.landkode = new Land(Land.NORGE).getKode();
         soeknadDokument.arbeidUtland = Collections.singletonList(arbeidUtland);
 
         soeknadDokument.oppholdUtland = new OppholdUtland();
-        soeknadDokument.oppholdUtland.oppholdslandKoder = Collections.singletonList(new Land(Land.NORGE).getKode());
+        soeknadDokument.oppholdUtland.oppholdslandkoder = Collections.singletonList(new Land(Land.NORGE).getKode());
         soeknadDokument.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.of(2018, 12, 12));
 
         Saksopplysning saksopplysning = new Saksopplysning();

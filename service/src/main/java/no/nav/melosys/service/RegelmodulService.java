@@ -67,6 +67,7 @@ public class RegelmodulService {
 
     /**
      * Kall til regelmodulen med opplysninger knyttet til behandlingen med ID {@code behandlingID}.
+     *
      * @param behandlingID Database ID til den behandlingen som brukes for å konstruere requesten til regelmodulen.
      */
     public FastsettLovvalgReply fastsettLovvalg(long behandlingID) {
@@ -80,9 +81,9 @@ public class RegelmodulService {
             String fastsettLovvalgRequest = lagRequest(behandling);
 
             return ClientBuilder.newClient().target(regelmodulUrl)
-                    .path("/fastsettLovvalg")
-                    .request(LovvalgTjeneste.MEDIA_TYPE_CONSUMED)
-                    .post(Entity.entity(fastsettLovvalgRequest, LovvalgTjeneste.MEDIA_TYPE_CONSUMED), FastsettLovvalgReply.class);
+                .path("/fastsettLovvalg")
+                .request(LovvalgTjeneste.MEDIA_TYPE_CONSUMED)
+                .post(Entity.entity(fastsettLovvalgRequest, LovvalgTjeneste.MEDIA_TYPE_CONSUMED), FastsettLovvalgReply.class);
 
         } catch (ParserConfigurationException | TransformerException | IOException | SAXException e) {
             log.error("Uventet feil ved generering av inndata til Regelmodul", e);
@@ -162,25 +163,25 @@ public class RegelmodulService {
         document.adoptNode(node);
         return node;
     }
-    
+
     /**
      * Kaller regelmodulen for å kjøre inngangsvilkårsvurdering
-     * 
-     * @throws ProcessingException Hvis request- eller reply-prosessering feiler, eller hvis IO-feil ved kommunikasjon med regelmodulen
+     *
+     * @throws ProcessingException     Hvis request- eller reply-prosessering feiler, eller hvis IO-feil ved kommunikasjon med regelmodulen
      * @throws WebApplicationException Hvis regelmodulen returnerer noe annet enn HTTP 2xx
      */
-    public VurderInngangsvilkaarReply vurderInngangsvilkår(Land brukersStatsborgerskap, List<String> oppholdsland, Periode oppholdsPeriode) {
+    public VurderInngangsvilkaarReply vurderInngangsvilkår(Land brukersStatsborgerskap, List<String> søknadsland, Periode søknadsperiode) {
         Assert.notNull(brukersStatsborgerskap, "Tjenesten krever at brukersStatsborgerskap ikke er null");
-        Assert.notEmpty(oppholdsland, "Tjenesten krever at oppholdsland ikke er null eller tom");
-        Assert.notNull(oppholdsPeriode, "Tjenesten krever at oppholdsPeriode ikke er null");
-        Assert.notNull(oppholdsPeriode.getFom(), "Tjenesten krever at oppholdsPeriode har fom dato");
-        
-        String req = lagXMLRequest(brukersStatsborgerskap.getKode(), oppholdsPeriode.getFom().toString(), oppholdsPeriode.getTom().toString(), oppholdsland);
+        Assert.notEmpty(søknadsland, "Tjenesten krever at søknadsland ikke er null eller tom");
+        Assert.notNull(søknadsperiode, "Tjenesten krever at søknadsperiode ikke er null");
+        Assert.notNull(søknadsperiode.getFom(), "Tjenesten krever at søknadsperiode har fom dato");
+
+        String req = lagXMLRequest(brukersStatsborgerskap.getKode(), søknadsperiode.getFom().toString(), søknadsperiode.getTom().toString(), søknadsland);
 
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, LoggingFeature.Verbosity.PAYLOAD_ANY);
         clientConfig.register(new RestClientLoggingFilter());
-        
+
         return ClientBuilder.newClient(clientConfig)
             .target(regelmodulUrl)
             .path("/inngangsvilkaar") // FIXME property eller verdi i LovvalgTjeneste?
@@ -189,12 +190,14 @@ public class RegelmodulService {
     }
 
     // FIXME: Nille-variant i påvente av hva som skjer med regelmodulen.
-    private String lagXMLRequest(String statsborgerskap, String fom, String tom, List<String> oppholdsland) {
+    private String lagXMLRequest(String statsborgerskap, String fom, String tom, List<String> søknadsland) {
         StringBuilder format = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
             "<FastsettLovvalgRequest><personDokument xmlns:tps3=\"http://nav.no/tjeneste/virksomhet/person/v3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
             "<statsborgerskap><kode>%s</kode></statsborgerskap></personDokument><soeknadDokument><oppholdUtland><oppholdsPeriode><fom>%s</fom><tom>%s</tom></oppholdsPeriode>");
 
-        for (String land : oppholdsland) {
+        // FIXME: Vi sender soknadsland som oppholdsland og søknadsperiode som oppholdsperiode
+        //  til regelmodulen inntil den er oppdatert med en nyere versjon av melosys
+        for (String land : søknadsland) {
             format.append("<oppholdslandKoder>").append(land).append("</oppholdslandKoder>");
         }
 

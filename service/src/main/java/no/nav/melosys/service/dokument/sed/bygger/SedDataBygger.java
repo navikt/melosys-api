@@ -95,7 +95,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
     private static Ident tilUtenlandskIdentDto(UtenlandskIdent ui) {
         Ident ident = new Ident();
         ident.setIdent(ui.ident);
-        ident.setLandkode(ui.landKode);
+        ident.setLandkode(ui.landkode);
         return ident;
     }
 
@@ -127,7 +127,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
     private Adresse fraStrukturertAdresse(StrukturertAdresse strukturertAdresse) {
         Adresse adresse = new Adresse();
         adresse.setGateadresse(strukturertAdresse.gatenavn + (strukturertAdresse.husnummer == null ? "" : " " + strukturertAdresse.husnummer + " "));
-        adresse.setLand(strukturertAdresse.landKode);
+        adresse.setLand(strukturertAdresse.landkode);
         adresse.setPostnr(strukturertAdresse.postnummer);
         adresse.setPoststed(strukturertAdresse.poststed);
         return adresse;

@@ -112,7 +112,7 @@ public class InnvilgelsesbrevMapperTest {
     private static StrukturertAdresse lagStrukturertAdresse() {
         StrukturertAdresse vadr = new StrukturertAdresse();
         vadr.gatenavn = "Gate";
-        vadr.landKode = Land.BULGARIA;
+        vadr.landkode = Land.BULGARIA;
         vadr.poststed = "Sted";
         vadr.postnummer = "4321";
         return vadr;
@@ -180,7 +180,7 @@ public class InnvilgelsesbrevMapperTest {
         SoeknadDokument dokument = new SoeknadDokument();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = new StrukturertAdresse();
-        arbeidUtland.adresse.landKode = Landkoder.AT.getKode();
+        arbeidUtland.adresse.landkode = Landkoder.AT.getKode();
         dokument.arbeidUtland = Collections.singletonList(arbeidUtland);
         return dokument;
     }
