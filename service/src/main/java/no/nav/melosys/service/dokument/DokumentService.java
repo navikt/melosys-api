@@ -2,7 +2,10 @@ package no.nav.melosys.service.dokument;
 
 import java.util.*;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -15,6 +18,7 @@ import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.service.aktoer.AvklarMyndighetService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
@@ -55,13 +59,15 @@ public class DokumentService {
 
     private final BrevDataByggerVelger brevDataByggerVelger;
 
+    private final AvklarMyndighetService avklarMyndighetService;
+
     @Autowired
     public DokumentService(BehandlingRepository behandlingRepository,
                            FagsakRepository fagsakRepository,
                            BrevDataService brevDataService,
                            DoksysFasade dokSysFasade, JoarkFasade joarkFasade,
                            KontaktopplysningService kontaktopplysningService,
-                           ProsessinstansService prosessinstansService, BrevDataByggerVelger brevDataByggerVelger) {
+                           ProsessinstansService prosessinstansService, BrevDataByggerVelger brevDataByggerVelger, AvklarMyndighetService avklarMyndighetService) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.brevDataService = brevDataService;
@@ -70,6 +76,7 @@ public class DokumentService {
         this.dokSysFasade = dokSysFasade;
         this.prosessinstansService = prosessinstansService;
         this.brevDataByggerVelger = brevDataByggerVelger;
+        this.avklarMyndighetService = avklarMyndighetService;
     }
 
     /**
@@ -111,6 +118,10 @@ public class DokumentService {
 
         Aktoersroller mottakerRolle = avklarMottakerRolleFraDokument(produserbartDokument);
         Aktoer mottaker = behandling.getFagsak().hentAktørMedRolleType(mottakerRolle);
+        // Myndighet avklares ikke endelig før i Saksflyt
+        if (mottaker == null && MYNDIGHET.equals(mottakerRolle)) {
+            mottaker = avklarMyndighetService.avklarMyndighet(behandling);
+        }
 
         return dokSysFasade.produserDokumentutkast(lagDokumentbestilling(produserbartDokument, mottaker, behandling, brevData));
     }
@@ -172,6 +183,10 @@ public class DokumentService {
     }
 
     private Kontaktopplysning hentKontaktopplysning(String saksnumner, Aktoer mottaker) {
+        if (mottaker == null) {
+            return null;
+        }
+
         Aktoersroller mottakerRolle = mottaker.getRolle();
 
         if (mottakerRolle == ARBEIDSGIVER || mottakerRolle == REPRESENTANT) {

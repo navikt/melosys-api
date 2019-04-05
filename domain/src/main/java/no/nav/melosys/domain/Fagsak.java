@@ -133,9 +133,7 @@ public class Fagsak extends RegistreringsInfo {
      * Henter myndighetens landkode fra institusjonsID som har format landkode:institusjonskode.
      */
     public Landkoder hentMyndighetLandkode() throws TekniskException {
-        Aktoer myndighet = hentAktørMedRolleType(MYNDIGHET);
-        String[] split = myndighet.getInstitusjonId().split(":");
-        return Landkoder.valueOf(split[0]);
+        return hentAktørMedRolleType(MYNDIGHET).hentMyndighetLandkode();
     }
 
     /**

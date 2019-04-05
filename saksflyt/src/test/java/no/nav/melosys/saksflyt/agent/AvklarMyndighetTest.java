@@ -1,7 +1,5 @@
 package no.nav.melosys.saksflyt.agent;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
@@ -12,12 +10,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.saksflyt.agent.iv.AvklarMyndighet;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.LandvelgerService;
-import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.aktoer.AvklarMyndighetService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,37 +27,21 @@ import static org.mockito.Mockito.*;
 public class AvklarMyndighetTest {
 
     @Mock
-    private AvklartefaktaService avklartefaktaService;
-
-    @Mock
-    private VilkaarsresultatRepository vilkaarsresultatRepository;
-
-    @Mock
     private BehandlingRepository behandlingRepository;
 
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Mock
-    private FagsakService fagsakService;
-
-
-    @Mock
-    private UtenlandskMyndighetRepository utenlandskMyndighetRepository;
-
-    private LandvelgerService landvelgerService;
+    private AvklarMyndighetService avklarMyndighetService;
 
     private AvklarMyndighet steg;
 
     private Prosessinstans p;
 
-    private List<Vilkaarsresultat> vilkaar = new ArrayList<>();
-
-
     @Before
     public void setUp() {
-        landvelgerService = new LandvelgerService(avklartefaktaService, vilkaarsresultatRepository);
-        steg = new AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, fagsakService, landvelgerService, utenlandskMyndighetRepository);
+        steg = new AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, avklarMyndighetService);
 
         p = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
@@ -83,8 +61,6 @@ public class AvklarMyndighetTest {
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
         when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
-
-        when(vilkaarsresultatRepository.findByBehandlingsresultatId(anyLong())).thenReturn(vilkaar);
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
@@ -107,16 +83,13 @@ public class AvklarMyndighetTest {
 
     @Test
     public void utfør_utenMyndighet_myndighetOpprettes() throws FunksjonellException, TekniskException {
-        UtenlandskMyndighet utenlandskMyndighet = lagUtenlandskMyndighet();
-        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.BE))).thenReturn(utenlandskMyndighet);
 
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
         when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
 
         steg.utfør(p);
 
-        String forventetID = utenlandskMyndighet.land + ":" + utenlandskMyndighet.institusjonskode;
-        verify(fagsakService).leggTilAktør(eq("saksnr"), eq(Aktoersroller.MYNDIGHET), eq(forventetID));
+        verify(avklarMyndighetService).avklarMyndighetOgLagre(any(Behandling.class));
     }
 
     private static Behandlingsresultat lagBehandlingResultat() {
@@ -131,13 +104,6 @@ public class AvklarMyndighetTest {
         return behandlingsresultat;
     }
 
-    private static UtenlandskMyndighet lagUtenlandskMyndighet() {
-        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.land = "BE";
-        utenlandskMyndighet.institusjonskode = "zfga";
-        return utenlandskMyndighet;
-    }
-
     @Test
     public void utfør_medMyndighet_myndighetOpprettesIkke() throws FunksjonellException, TekniskException {
         Fagsak fagsakMedMyndighet = new Fagsak();
@@ -149,14 +115,11 @@ public class AvklarMyndighetTest {
         
         steg.utfør(p);
 
-        verify(fagsakService, never()).leggTilAktør(any(), any(), any());
+        verify(avklarMyndighetService, never()).avklarMyndighetOgLagre(any(Behandling.class));
     }
 
     @Test
     public void utfør_iverksettVedtakSjekkSteg_forventAvklarArbeidsgiver() throws Exception {
-        UtenlandskMyndighet utenlandskMyndighet = lagUtenlandskMyndighet();
-        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.BE))).thenReturn(utenlandskMyndighet);
-
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
         when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
         steg.utfør(p);
@@ -165,13 +128,10 @@ public class AvklarMyndighetTest {
 
     @Test
     public void utfør_anmodningUnntakSjekkSteg_forventAouOppdaterMedl() throws Exception {
-        UtenlandskMyndighet utenlandskMyndighet = lagUtenlandskMyndighet();
-        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.BE))).thenReturn(utenlandskMyndighet);
-
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
         when(behandlingsresultatRepository.findWithSaksbehandlingById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
         no.nav.melosys.saksflyt.agent.aou.AvklarMyndighet steg =
-            new no.nav.melosys.saksflyt.agent.aou.AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, fagsakService, landvelgerService, utenlandskMyndighetRepository);
+            new no.nav.melosys.saksflyt.agent.aou.AvklarMyndighet(behandlingRepository, behandlingsresultatRepository, avklarMyndighetService);
         steg.utfør(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.AOU_OPPDATER_MEDL);
     }

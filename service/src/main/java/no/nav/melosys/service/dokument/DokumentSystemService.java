@@ -19,6 +19,6 @@ public class DokumentSystemService extends DokumentService {
                                  FagsakRepository fagsakRepository, BrevDataService brevDataService,
                                  @Qualifier("system") DoksysFasade dokSysFasade, JoarkFasade joarkFasade,
                                  KontaktopplysningService kontaktopplysningService, BrevDataByggerVelger brevDataByggerVelger) {
-        super(behandlingRepository, fagsakRepository, brevDataService, dokSysFasade, joarkFasade, kontaktopplysningService, null, brevDataByggerVelger);
+        super(behandlingRepository, fagsakRepository, brevDataService, dokSysFasade, joarkFasade, kontaktopplysningService, null, brevDataByggerVelger, null);
     }
 }
