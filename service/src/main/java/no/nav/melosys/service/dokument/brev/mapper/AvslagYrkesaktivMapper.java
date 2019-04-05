@@ -15,8 +15,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
 
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
-
 public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
 
     @Override
@@ -28,7 +26,7 @@ public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMappe
 
     @Override
     Fag mapArt161(Fag fag, Behandlingsresultat resultat, BrevData brevData) throws TekniskException {
-        Optional<Vilkaarsresultat> vilkaarsresultat = hentFørsteGyldigeVilkaarsresultat(resultat, FO_883_2004_ART16_1);
+        Optional<Vilkaarsresultat> vilkaarsresultat = hentFørsteGyldigeVilkaarsresultatForArt16(resultat);
         Set<VilkaarBegrunnelse> art161Begrunnelser = vilkaarsresultat.map(Vilkaarsresultat::getBegrunnelser).orElse(Collections.emptySet());
         Art161AvslagBegrunnelse art161AvslagBegrunnelser = lagArt161AvslagBegrunnelse();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : art161Begrunnelser) {
@@ -43,8 +41,8 @@ public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMappe
                     break;
                 case SAERLIG_AVSLAGSGRUNN:
                     art161AvslagBegrunnelser.setSaerligAvslagsgrunn(JA);
-                    validerFritekstbegrunnelse(vilkaarsresultat.get().getBegrunnelseFritekst());
-                    fag.setBegrunnelseFritekst(vilkaarsresultat.get().getBegrunnelseFritekst());
+                    Vilkaarsresultat v = vilkaarsresultat.orElseThrow(IllegalStateException::new);
+                    fag.setBegrunnelseFritekst(validerFritekstbegrunnelse(v.getBegrunnelseFritekst()));
                     break;
                 case SOEKT_FOR_SENT:
                     art161AvslagBegrunnelser.setSoektForSent(JA);

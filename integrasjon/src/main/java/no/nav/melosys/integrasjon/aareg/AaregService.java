@@ -61,7 +61,7 @@ public class AaregService implements AaregFasade {
                     no.nav.tjeneste.virksomhet.arbeidsforhold.v3.HentArbeidsforholdHistorikkResponse.class);
         } catch (JAXBException e) {
             log.error("", e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -101,7 +101,7 @@ public class AaregService implements AaregFasade {
 
     private Saksopplysning finnArbeidsforholdPrArbeidstaker(FinnArbeidsforholdPrArbeidstakerRequest request) throws SikkerhetsbegrensningException, IntegrasjonException {
         // Kall til Aa-registret
-        FinnArbeidsforholdPrArbeidstakerResponse response = null;
+        FinnArbeidsforholdPrArbeidstakerResponse response;
         try {
             response = arbeidsforholdConsumer.finnArbeidsforholdPrArbeidstaker(request);
         } catch (FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning e) {
@@ -118,7 +118,7 @@ public class AaregService implements AaregFasade {
             jaxbContext.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (JAXBException e) {
             log.error("", e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -139,7 +139,7 @@ public class AaregService implements AaregFasade {
         request.setArbeidsforholdId(arbeidsforholdsID);
 
         // Kall til Aa-registret
-        HentArbeidsforholdHistorikkResponse response = null;
+        HentArbeidsforholdHistorikkResponse response;
         try {
             response = arbeidsforholdConsumer.hentArbeidsforholdHistorikk(request);
         } catch (HentArbeidsforholdHistorikkSikkerhetsbegrensning e) {

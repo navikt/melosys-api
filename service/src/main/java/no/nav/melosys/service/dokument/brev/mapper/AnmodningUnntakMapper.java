@@ -8,15 +8,13 @@ import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
-
 
 public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
 
     @Override
     Fag mapArt161(Fag fag, Behandlingsresultat resultat, BrevData brevData) throws TekniskException {
 
-        Vilkaarsresultat vilkaarsresultat = hentFørsteGyldigeVilkaarsresultat(resultat, FO_883_2004_ART16_1)
+        Vilkaarsresultat vilkaarsresultat = hentFørsteGyldigeVilkaarsresultatForArt16(resultat)
             .orElseThrow(() -> new TekniskException("Ingen begrunnelse funnet for brev om Artikkel 16.1"));
 
         VilkaarBegrunnelse vilkaarBegrunnelse = vilkaarsresultat.getBegrunnelser().stream()
@@ -24,8 +22,7 @@ public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper
             .findFirst().orElseGet(() -> vilkaarsresultat.getBegrunnelser().iterator().next());
 
         if (vilkaarBegrunnelse.getKode().equals(Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN.value())) {
-            validerFritekstbegrunnelse(vilkaarsresultat.getBegrunnelseFritekst());
-            fag.setAnmodningFritekst(vilkaarsresultat.getBegrunnelseFritekst());
+            fag.setAnmodningFritekst(validerFritekstbegrunnelse(vilkaarsresultat.getBegrunnelseFritekst()));
         }
         fag.setArt161AnmodningBegrunnelse(Art161AnmodningBegrunnelseKode.valueOf(vilkaarBegrunnelse.getKode()));
 

@@ -1,18 +1,18 @@
 package no.nav.melosys.sikkerhet.abac;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import no.nav.abac.xacml.NavAttributter;
-import no.nav.freg.abac.spring.config.AbacConfig;
-import no.nav.freg.abac.spring.config.AbacRestTemplateConfig;
 import no.nav.freg.abac.core.annotation.attribute.AbacAttributeLocator;
 import no.nav.freg.abac.core.annotation.attribute.ResolvingAbacAttributeLocator;
+import no.nav.freg.abac.spring.config.AbacConfig;
+import no.nav.freg.abac.spring.config.AbacRestTemplateConfig;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Configuration
 @Import({
@@ -49,11 +49,10 @@ public class AbacDefaultConfig {
 
     @Bean
     AbacAttributeLocator samlTokenLocator() {
-        return new ResolvingAbacAttributeLocator(NavAttributter.ENVIRONMENT_FELLES_OIDC_TOKEN_BODY,
-                () -> getOidcTokenBody() );
+        return new ResolvingAbacAttributeLocator(NavAttributter.ENVIRONMENT_FELLES_OIDC_TOKEN_BODY, this::getOidcTokenBody);
     }
 
-    public String getOidcTokenBody() {
+    private String getOidcTokenBody() {
         String token = SubjectHandler.getInstance().getOidcTokenString();
         if (token == null) {
             return "";

@@ -23,6 +23,8 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
@@ -33,6 +35,8 @@ import static no.nav.melosys.service.dokument.brev.mapper.felles.Vilkaarbegrunne
  * Anmodning om unntak og avslag deler samme mal.
  */
 abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
+
+    private static final Logger log = LoggerFactory.getLogger(AbstraktAnmodningUnntakOgAvslagMapper.class);
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000081.xsd";
 
@@ -91,16 +95,18 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
             .collect(Collectors.toSet());
     }
 
-    Optional<Vilkaarsresultat> hentFørsteGyldigeVilkaarsresultat(Behandlingsresultat resultat, Vilkaar vilkaarType) {
-        return resultat.getVilkaarsresultater().stream()
-            .filter(v -> v.getVilkaar().equals(vilkaarType) && !v.getBegrunnelser().isEmpty())
-            .findFirst();
-    }
-
-    void validerFritekstbegrunnelse(String fritekst) throws TekniskException {
-        if (StringUtils.isEmpty(fritekst)) {
+    static String validerFritekstbegrunnelse(String begrunnelse) throws TekniskException {
+        if (!StringUtils.isEmpty(begrunnelse)) {
+            return begrunnelse;
+        } else {
             throw new TekniskException("Ingen fritekstbegrunnelse satt for Artikkel 16.1");
         }
+    }
+
+    Optional<Vilkaarsresultat> hentFørsteGyldigeVilkaarsresultatForArt16(Behandlingsresultat resultat) {
+        return resultat.getVilkaarsresultater().stream()
+            .filter(v -> v.getVilkaar().equals(FO_883_2004_ART16_1) && !v.getBegrunnelser().isEmpty())
+            .findFirst();
     }
 
     private LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
@@ -117,7 +123,7 @@ abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
             lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
             lovvalgsperiodeType.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));
         } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
+            log.error("", e);
         }
         return lovvalgsperiodeType;
     }

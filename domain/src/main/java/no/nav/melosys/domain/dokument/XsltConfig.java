@@ -8,7 +8,11 @@ import no.nav.melosys.domain.SaksopplysningType;
  * XsltConfig inneholder informasjon om filstrukturen til xslt-filene som brukes til å konvertere eksterne
  * opplysninger fra registre til en intern dokumentmodell.
  */
-public class XsltConfig {
+public final class XsltConfig {
+
+    private XsltConfig() {
+        throw new IllegalStateException("Utility class");
+    }
 
     /* Mapper */
     public static final String AAREG_MAPPE = "aareg";
@@ -19,24 +23,24 @@ public class XsltConfig {
 
     public static final String MEDL_MAPPE = "medl";
 
-    public static final String SOB_MAPPE = "sob";
+    private static final String SOB_MAPPE = "sob";
 
     public static final String SØKNAD_MAPPE = "soeknad";
 
     public static final String TPS_MAPPE = "tps";
 
     /* Tjenester */
-    public static final String ARBEIDSFORHOLD_TJENESTE = "arbeidsforhold";
+    private static final String ARBEIDSFORHOLD_TJENESTE = "arbeidsforhold";
 
-    public static final String INNTEKT_TJENESTE = "inntekt";
+    private static final String INNTEKT_TJENESTE = "inntekt";
 
-    public static final String MEDLEMSKAP_TJENESTE = "medlemskap";
+    private static final String MEDLEMSKAP_TJENESTE = "medlemskap";
 
-    public static final String ORGANISASJON_TJENESTE = "organisasjon";
+    private static final String ORGANISASJON_TJENESTE = "organisasjon";
 
-    public static final String PERSON_TJENESTE = "person";
+    private static final String PERSON_TJENESTE = "person";
 
-    public static final String PERSONHISTORIKK_TJENESTE = "personhistorikk";
+    private static final String PERSONHISTORIKK_TJENESTE = "personhistorikk";
 
     private static final String SAKOGBEHANDLING_TJENESTE = "sakogbehandling";
 
@@ -49,7 +53,7 @@ public class XsltConfig {
      * @param versjon Versjonen av tjenesten som returnerer den xml som konverteres
      * @return en String som inneholder en sti til filen i resources
      */
-    public static String getXsltPath(SaksopplysningType type, String versjon) {
+    static String getXsltPath(SaksopplysningType type, String versjon) {
         Assert.notNull(type, "type må ikke være null");
         Assert.notNull(versjon, "versjon må ikke være null");
 
