@@ -34,11 +34,11 @@ public class SaksopplysningStubs {
         }
 
         ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse.landKode = "DE";
+        arbeidUtland.adresse.landkode = "DE";
         søknad.arbeidUtland = new ArrayList<>();
         søknad.arbeidUtland.add(arbeidUtland);
         søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.addAll(ekstraArbeidsgivere);
-        søknad.oppholdUtland.oppholdslandKoder.add("DE");
+        søknad.soeknadsland.landkoder.add("DE");
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(søknad);

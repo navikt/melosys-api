@@ -149,7 +149,7 @@ public class ProsessinstansService {
         nyprosessinstans.setData(ProsessDataKey.BRUKER_ID, brukerID);
 
         nyprosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, hentPeriode(søknadDokument));
-        nyprosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, hentLand(søknadDokument));
+        nyprosessinstans.setData(ProsessDataKey.SØKNADSLAND, hentLand(søknadDokument));
 
         nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
 

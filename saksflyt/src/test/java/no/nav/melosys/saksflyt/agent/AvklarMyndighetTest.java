@@ -93,11 +93,11 @@ public class AvklarMyndighetTest {
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.SOEKNAD);
         SoeknadDokument søknadDokument = new SoeknadDokument();
-        søknadDokument.oppholdUtland.oppholdslandKoder.add("BE");
+        søknadDokument.soeknadsland.landkoder.add("BE");
         ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse.landKode = "HR";
+        arbeidUtland.adresse.landkode = "HR";
         søknadDokument.arbeidUtland.add(arbeidUtland);
-        søknadDokument.bosted.oppgittAdresse.landKode = "IT";
+        søknadDokument.bosted.oppgittAdresse.landkode = "IT";
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SØKNAD);
         saksopplysning.setDokument(søknadDokument);
@@ -146,7 +146,7 @@ public class AvklarMyndighetTest {
         myndighet.setRolle(Aktoersroller.MYNDIGHET);
         fagsakMedMyndighet.getAktører().add(myndighet);
         p.getBehandling().setFagsak(fagsakMedMyndighet);
-        
+
         steg.utfør(p);
 
         verify(fagsakService, never()).leggTilAktør(any(), any(), any());

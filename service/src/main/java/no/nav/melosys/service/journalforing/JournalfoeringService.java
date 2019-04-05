@@ -51,11 +51,11 @@ public class JournalfoeringService {
 
         valider(journalfoeringDto);
         validerOpprettSakFelter(journalfoeringDto);
-        
+
         Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
 
         // Land trenges av regelmodulen får å vurdere inngangsvilkår
-        prosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, journalfoeringDto.getFagsak().getLand());
+        prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
         // Perioden trenges for å hente saksopplysninger
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
         if (!StringUtils.isEmpty(journalfoeringDto.getArbeidsgiverID())) {
@@ -135,7 +135,10 @@ public class JournalfoeringService {
             throw new FunksjonellException("Land mangler");
         }
         if (journalfoeringDto.getFagsak().getLand().contains(null)) {
-            throw new FunksjonellException("Et oppholdsland er null!");
+            throw new FunksjonellException("Et søknadsland er null!");
+        }
+        if (journalfoeringDto.getFagsak().getLand().size() > 1) { // Melosys støtter bare ett land i Leveranse 1.
+            throw new FunksjonellException("Kun ett land er støttet i denne versjonen av Melosys");
         }
     }
 }

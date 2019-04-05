@@ -35,10 +35,10 @@ public class VurderInngangsvilkaarTest {
 
     @Mock
     private RegelmodulService regelmodulService;
-    
+
     @Mock
     private FagsakRepository fagsakRepository;
-    
+
     @Mock
     private BehandlingRepository behandlingRepository;
 
@@ -53,18 +53,18 @@ public class VurderInngangsvilkaarTest {
     public void utfoerStegUtenFeil() {
         // Sett opp input...
         Prosessinstans p = lagProsessinstans();
-        
+
         // Sett opp regelmodulService til å alltid returnere EØS og ingen feil.
         VurderInngangsvilkaarReply res = new VurderInngangsvilkaarReply();
         res.feilmeldinger = Collections.emptyList();
         res.kvalifisererForEf883_2004 = true;
         when(regelmodulService.vurderInngangsvilkår(any(), any(), any())).thenReturn(res);
         when(behandlingRepository.findWithSaksopplysningerById(any())).thenReturn(p.getBehandling());
-        
+
         agent.utførSteg(p);
 
         verify(fagsakRepository, times(1)).save(any(Fagsak.class));
-        
+
         assertNull(p.getHendelser());
         assertEquals(Sakstyper.EU_EOS, p.getBehandling().getFagsak().getType());
         assertEquals(ProsessSteg.HENT_ARBF_OPPL, p.getSteg());
@@ -83,11 +83,11 @@ public class VurderInngangsvilkaarTest {
         res.feilmeldinger = Collections.singletonList(fm);
         when(regelmodulService.vurderInngangsvilkår(any(), any(), any())).thenReturn(res);
         when(behandlingRepository.findWithSaksopplysningerById(any())).thenReturn(p.getBehandling());
-        
+
         agent.utførSteg(p);
 
         verify(fagsakRepository, times(0)).save(any(Fagsak.class));
-        
+
         assertEquals(2, p.getHendelser().size());
         assertNull(p.getBehandling().getFagsak().getType());
         assertEquals(ProsessSteg.FEILET_MASKINELT, p.getSteg());
@@ -118,7 +118,7 @@ public class VurderInngangsvilkaarTest {
         saksopplysninger.add(historiskSopp);
 
         p.getBehandling().setSaksopplysninger(saksopplysninger);
-        p.setData(ProsessDataKey.OPPHOLDSLAND, Collections.singletonList(Landkoder.CH.getKode()));
+        p.setData(ProsessDataKey.SØKNADSLAND, Collections.singletonList(Landkoder.CH.getKode()));
         p.setData(ProsessDataKey.SØKNADSPERIODE, new PeriodeDto(LocalDate.now().minusMonths(6), null));
 
         // Sett opp regelmodulService til å alltid returnere EØS og ingen feil.
@@ -146,7 +146,7 @@ public class VurderInngangsvilkaarTest {
         Saksopplysning sopp = new Saksopplysning();
         sopp.setDokument(pDok);
         p.getBehandling().setSaksopplysninger(Collections.singleton(sopp));
-        p.setData(ProsessDataKey.OPPHOLDSLAND, Collections.singletonList(Landkoder.PL.getKode()));
+        p.setData(ProsessDataKey.SØKNADSLAND, Collections.singletonList(Landkoder.PL.getKode()));
         p.setData(ProsessDataKey.SØKNADSPERIODE, new PeriodeDto(LocalDate.now(), null));
         return p;
     }

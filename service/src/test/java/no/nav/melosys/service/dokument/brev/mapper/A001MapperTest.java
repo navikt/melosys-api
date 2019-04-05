@@ -107,7 +107,7 @@ public class A001MapperTest {
         strukturertAdresse.postnummer = "0165";
         strukturertAdresse.poststed = "Poststed";
         strukturertAdresse.region = "Region";
-        strukturertAdresse.landKode = "Land";
+        strukturertAdresse.landkode = "Land";
 
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = strukturertAdresse;

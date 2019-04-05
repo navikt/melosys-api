@@ -11,7 +11,7 @@ import no.nav.melosys.domain.HarPeriode;
  * Opplysninger om opphold i utland
  */
 public class OppholdUtland implements HarPeriode {
-    public List<String> oppholdslandKoder = new ArrayList<>();
+    public List<String> oppholdslandkoder = new ArrayList<>();
     public Periode oppholdsPeriode = new Periode();
     public String studentFinansieringKode;
     public String studentSemester;
