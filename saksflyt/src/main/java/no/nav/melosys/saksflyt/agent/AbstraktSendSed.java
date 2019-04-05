@@ -19,7 +19,7 @@ public abstract class AbstraktSendSed extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(AbstraktSendSed.class);
 
-    private final BehandlingRepository behandlingRepository;
+    protected final BehandlingRepository behandlingRepository;
     private final SedService sedService;
     private final BehandlingsresultatService behandlingsresultatService;
 

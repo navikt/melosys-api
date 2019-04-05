@@ -5,7 +5,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.SedService;
@@ -17,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -58,5 +58,6 @@ public class IverksettVedtakSendSedTest {
         iverksettVedtakSendSed.utfør(prosessinstans);
         verify(sedService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_AVSLUTT_BEHANDLING));
+        assertThat(prosessinstans.getBehandling().getDokumentasjonSvarfristDato(), is(nullValue()));
     }
 }

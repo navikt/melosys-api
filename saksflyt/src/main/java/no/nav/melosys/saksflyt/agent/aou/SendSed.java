@@ -1,9 +1,11 @@
 package no.nav.melosys.saksflyt.agent.aou;
 
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.ZoneOffset;
+import java.time.temporal.TemporalAmount;
+
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
@@ -45,6 +47,15 @@ public class SendSed extends AbstraktSendSed {
         try {
             super.utfør(prosessinstans);
             prosessinstans.setSteg(ProsessSteg.FERDIG);
+
+            Behandling behandling = prosessinstans.getBehandling();
+            TemporalAmount dokumentasjonSvarfrist = Period.ofMonths(2);
+            if (dokumentasjonSvarfrist != null) {
+                behandling.setDokumentasjonSvarfristDato(
+                    LocalDateTime.now().plus(dokumentasjonSvarfrist).toInstant(ZoneOffset.UTC)
+                );
+                behandlingRepository.save(behandling);
+            }
         } catch (Exception ex) {
             prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
             log.error("Kan ikke opprette og sende sed for behandling {}", prosessinstans.getBehandling().getId(), ex);
