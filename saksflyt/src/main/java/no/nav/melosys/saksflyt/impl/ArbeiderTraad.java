@@ -65,11 +65,11 @@ public class ArbeiderTraad implements Runnable {
                     Thread.sleep(oppholdMellomSteg);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                    // Prosessinstanser som avbrytes må registreres som feilet.
+                    settTilFeilet();
                 } catch (RuntimeException e) {
                     logger.error("Ubehandlet exception! Aktiv stegBehandler: {}.", ClassUtils.getUserClass(aktivStegBehandler.getClass()).getSimpleName(), e);
                     logger.error("Prosessinstans som må ryddes opp i: {}.", aktivProsessinstans.getId());
-                } finally {
-                    // Prosessinstanser som avbrytes må registreres som feilet.
                     settTilFeilet();
                 }
             }
