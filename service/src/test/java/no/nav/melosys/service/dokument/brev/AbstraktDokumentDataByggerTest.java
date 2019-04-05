@@ -102,8 +102,9 @@ public class AbstraktDokumentDataByggerTest {
         foretakUtland.adresse.landkode = "NO";
         søknad.foretakUtland.add(foretakUtland);
 
-        assertThat(foretakUtland.navn).isEqualTo(foretakUtland.navn);
-        assertThat(foretakUtland.adresse.landkode).isEqualTo(foretakUtland.adresse.landkode);
+        List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
+        assertThat(arbeidssteder.get(0).navn).isEqualTo(foretakUtland.navn);
+        assertThat(arbeidssteder.get(0).landkode).isEqualTo(foretakUtland.adresse.landkode);
     }
 
     @Test
