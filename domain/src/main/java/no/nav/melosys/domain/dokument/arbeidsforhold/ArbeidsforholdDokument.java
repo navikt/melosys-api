@@ -40,8 +40,8 @@ public class ArbeidsforholdDokument extends SaksopplysningDokument {
 
     public Set<Periode> hentAnsettelsesperioder(Collection<String> orgnummere) {
         return getArbeidsforhold().stream()
-                .filter(arbeidsforhold -> orgnummere.contains(arbeidsforhold.arbeidsgiverID))
-                .map(arbeidsforhold -> arbeidsforhold.getAnsettelsesPeriode())
+                .filter(a -> orgnummere.contains(a.arbeidsgiverID))
+                .map(a -> a.getAnsettelsesPeriode())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }

@@ -21,7 +21,7 @@ public final class BrevMapperUtils {
         try {
             return convertToXMLGregorianCalendarRemoveTimezone(dato);
         } catch (DatatypeConfigurationException e) {
-            throw new RuntimeException("Feil ved konvertering av Instant til XmlGregorianCalendar", e);
+            throw new IllegalStateException("Feil ved konvertering av Instant til XmlGregorianCalendar", e);
         }
     }
 
@@ -55,7 +55,7 @@ public final class BrevMapperUtils {
         try {
             return convertToXMLGregorianCalendarRemoveTimezone(LocalDate.from(LocalDateTime.ofInstant(instant, ZoneOffset.UTC)));
         } catch (DatatypeConfigurationException e) {
-            throw new RuntimeException("Feil ved konvertering av Instant til XmlGregorianCalendar", e);
+            throw new IllegalStateException("Feil ved konvertering av Instant til XmlGregorianCalendar", e);
         }
     }
 

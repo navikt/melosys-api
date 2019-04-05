@@ -55,7 +55,7 @@ public class AktoerIdCache {
     private class TømCacheScheduler extends Thread {
         @Override
         public void run() {
-            for (;;) {
+            for (; ; ) {
                 AktoerIdCacheElement element = utløpskø.poll();
                 while (element != null) {
                     if (isInterrupted()) {
@@ -63,7 +63,7 @@ public class AktoerIdCache {
                     }
                     String ident = element.hentNøkkel();
                     String aktørId = identTilAktørIdCache.get(ident);
-                    log.debug("Fjerner ident " + ident + " og aktørId " + aktørId + " fra cache");
+                    log.debug("Fjerner ident {} og aktørId {} fra cache", ident, aktørId);
                     identTilAktørIdCache.remove(ident);
                     aktørIdTilIdentCache.remove(aktørId);
                     element = utløpskø.poll();
@@ -71,7 +71,7 @@ public class AktoerIdCache {
                 try {
                     sleep(millisMellomVåkneOpp);
                 } catch (InterruptedException e) {
-                    return;
+                    Thread.currentThread().interrupt();
                 }
             }
         }

@@ -50,6 +50,7 @@ public class AvklarArbeidsgiver extends AbstraktAvklarArbeidsgiveraktoer {
         return FeilStrategi.standardFeilHåndtering();
     }
 
+    @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 

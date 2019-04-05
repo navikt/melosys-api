@@ -10,11 +10,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.core.JmsTemplate;
 
 @Configuration
-public class BehandlingstatusClientConfigTest {
+public class BehandlingstatusClientMockConfig {
 
     private DestinationManager destinationManager;
 
-    public BehandlingstatusClientConfigTest() {
+    public BehandlingstatusClientMockConfig() {
         destinationManager = new DestinationManager();
     }
 

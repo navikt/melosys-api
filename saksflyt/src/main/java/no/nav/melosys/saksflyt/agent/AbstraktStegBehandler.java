@@ -22,6 +22,8 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
     private Predicate<Prosessinstans> inngangsvilkår;
     
     private Map<Feilkategori, UnntakBehandler> unntakBehandlere;
+
+    private static final String PID_MELDING = "{}: {}";
     
     protected abstract ProsessSteg inngangsSteg();
     
@@ -55,23 +57,23 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
             utfør(prosessinstans);
         } catch (SikkerhetsbegrensningException e) {
             String feilmelding = "SikkerhetsbegrensningException ";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.INGEN_TILGANG, prosessinstans, feilmelding, e);
         } catch (IkkeFunnetException e) {
             String feilmelding = "IkkeFunnetException ";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.IKKE_FUNNET, prosessinstans, feilmelding, e);
         } catch (FunksjonellException e) {
             String feilmelding = "FunksjonellException ";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, e);
         } catch (TekniskException e) {
             String feilmelding = "TekniskException ";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, e);
         } catch (RuntimeException e) {
             String feilmelding = "RuntimeException ";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, e);
         }
     }

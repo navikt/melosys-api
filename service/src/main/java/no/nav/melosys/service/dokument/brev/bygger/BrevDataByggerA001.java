@@ -134,6 +134,6 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
 
         // Usikkert hva som er formålet med feltet i brevet.
         // Bestemt å bruke den seneste datoen for avklart arbeidsgiver inntil vi vet mer
-        return avklarteAnsettelsesPerioder.max(Comparator.comparing(p -> p.getFom()));
+        return avklarteAnsettelsesPerioder.max(Comparator.comparing(Periode::getFom));
     }
 }

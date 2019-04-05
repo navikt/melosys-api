@@ -33,7 +33,15 @@ public class BehandlingStatusMapper {
 
     private String ansvarligEnhetREF;
 
-    public BehandlingStatusMapper(String hendelsesId, String behandlingsID, String saksnummer, Applikasjoner hendelsesprodusentREF, XMLGregorianCalendar hendelsestidspunkt, Sakstemaer sakstema, Aktoer aktoerREF, String ansvarligEnhetREF) {
+    @SuppressWarnings("squid:S00107")
+    private BehandlingStatusMapper(String hendelsesId,
+                                  String behandlingsID,
+                                  String saksnummer,
+                                  Applikasjoner hendelsesprodusentREF,
+                                  XMLGregorianCalendar hendelsestidspunkt,
+                                  Sakstemaer sakstema,
+                                  Aktoer aktoerREF,
+                                  String ansvarligEnhetREF) {
         this.hendelsesId = hendelsesId;
         this.behandlingsID = behandlingsID;
         this.applikasjonSakREF = saksnummer;
@@ -80,6 +88,7 @@ public class BehandlingStatusMapper {
             try {
                 this.hendelsestidspunkt = KonverteringsUtils.localDateTimeToXMLGregorianCalendar(hendelsestidspunkt);
             } catch (DatatypeConfigurationException e) {
+                throw new IllegalStateException(e);
             }
             return this;
         }
@@ -106,11 +115,11 @@ public class BehandlingStatusMapper {
         }
     }
 
-    public BehandlingOpprettet tilBehandlingOpprettet() {
+    BehandlingOpprettet tilBehandlingOpprettet() {
         return utførMapping(new BehandlingOpprettet());
     }
 
-    public BehandlingAvsluttet tilBehandlingAvsluttet() {
+    BehandlingAvsluttet tilBehandlingAvsluttet() {
         return utførMapping(new BehandlingAvsluttet());
     }
 

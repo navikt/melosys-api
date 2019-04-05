@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
@@ -9,7 +9,7 @@ import no.nav.melosys.service.dokument.brev.mapper.*;
 
 public class BrevDataMapperRuter {
 
-    static Map<Produserbaredokumenter, Class<? extends BrevDataMapper>> mappere = new HashMap<>();
+    static Map<Produserbaredokumenter, Class<? extends BrevDataMapper>> mappere = new EnumMap<>(Produserbaredokumenter.class);
 
     static {
         mappere.put(Produserbaredokumenter.ANMODNING_UNNTAK, AttestMapper.class);

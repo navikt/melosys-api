@@ -19,7 +19,7 @@ import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils
 public final class BrevDataUtils {
 
     private BrevDataUtils() {
-
+        throw new IllegalStateException("Utility");
     }
 
     static NavAnsatt lagNavAnsatt(String ansattId) {
@@ -42,7 +42,7 @@ public final class BrevDataUtils {
             lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
             lovvalgsperiodeType.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));
         } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
         return lovvalgsperiodeType;
     }
