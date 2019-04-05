@@ -161,6 +161,18 @@ public class FagsakTest {
         assertThat(resultat).isEqualByComparingTo(Landkoder.SE);
     }
 
+    @Test(expected = TekniskException.class)
+    public void hentMyndighetLandkode_aktoerIkkeMyndighet_forventTekniskException() throws Exception {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        aktoer.setInstitusjonId("SE:gfr");
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(Sets.newLinkedHashSet(aktoer));
+
+        fagsak.hentMyndighetLandkode();
+    }
+
     @Test
     public void harAktørMedRolleTypeArbeidsgiver_arbeidsgiverFinnes_forventTrue() {
         Aktoer aktoer = new Aktoer();

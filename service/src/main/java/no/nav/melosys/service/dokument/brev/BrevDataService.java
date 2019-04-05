@@ -114,10 +114,6 @@ public class BrevDataService {
         throw new TekniskException(mottakerRolle + " støttes ikke");
     }
 
-    UtenlandskMyndighet hentMyndighetFraSak(Fagsak fagsak) throws TekniskException {
-        return utenlandskMyndighetRepository.findByLandkode(fagsak.hentMyndighetLandkode());
-    }
-
     UtenlandskMyndighet hentMyndighetFraAktoer(Aktoer aktoer) throws TekniskException {
         return utenlandskMyndighetRepository.findByLandkode(aktoer.hentMyndighetLandkode());
     }
