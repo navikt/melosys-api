@@ -64,12 +64,12 @@ public class ArbeiderTraad implements Runnable {
                     finnProsessinstansOgUtførSteg(stegBehandler);
                     Thread.sleep(oppholdMellomSteg);
                 } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
+                    logger.error("Stegbehandler {} ble avbryt!", lagStegNavn(aktivStegBehandler));
                     // Prosessinstanser som avbrytes må registreres som feilet.
                     settTilFeilet();
+                    Thread.currentThread().interrupt();
                 } catch (RuntimeException e) {
-                    logger.error("Ubehandlet exception! Aktiv stegBehandler: {}.", ClassUtils.getUserClass(aktivStegBehandler.getClass()).getSimpleName(), e);
-                    logger.error("Prosessinstans som må ryddes opp i: {}.", aktivProsessinstans.getId());
+                    logger.error("Ubehandlet exception! Aktiv stegBehandler: {}.", lagStegNavn(aktivStegBehandler), e);
                     settTilFeilet();
                 }
             }
@@ -77,11 +77,14 @@ public class ArbeiderTraad implements Runnable {
     }
 
     private void settTilFeilet() {
-        try {
-            aktivProsessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
-            prosessinstansRepo.save(aktivProsessinstans);
-        } catch (RuntimeException e) {
-            logger.error("Prosessinstans {} kunne ikke settes til feilet: ", aktivProsessinstans.getId(), e);
+        if (aktivProsessinstans != null) {
+            logger.error("Prosessinstans som må ryddes opp i: {}.", aktivProsessinstans.getId());
+            try {
+                aktivProsessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
+                prosessinstansRepo.save(aktivProsessinstans);
+            } catch (RuntimeException e) {
+                logger.error("Prosessinstans {} kunne ikke settes til feilet: ", aktivProsessinstans.getId(), e);
+            }
         }
     }
 
@@ -106,5 +109,9 @@ public class ArbeiderTraad implements Runnable {
         if (pi.getSteg() != ProsessSteg.FERDIG && pi.getSteg() != ProsessSteg.FEILET_MASKINELT) {
             binge.leggTil(pi);
         }
+    }
+
+    private static String lagStegNavn(StegBehandler stegBehandler) {
+        return ClassUtils.getUserClass(stegBehandler.getClass()).getSimpleName();
     }
 }
