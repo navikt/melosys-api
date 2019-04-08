@@ -109,6 +109,16 @@ public class VurderJournalfoeringstypeTest {
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_AKTIV_BEHANDLING_OG_MED_INAKTIV_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
         agent.utførSteg(p);
-        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
+    }
+
+    @Test
+    public void knyttTilFagsakMedEndretPeriodeMedAktivBehandling_kasterException() {
+        Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.JFR_KNYTT);
+        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_AKTIV_BEHANDLING);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
+        agent.utførSteg(p);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
     }
 }

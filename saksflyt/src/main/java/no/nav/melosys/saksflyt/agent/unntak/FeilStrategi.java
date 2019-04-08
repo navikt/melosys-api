@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.agent.unntak;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ public class FeilStrategi {
      * Returnerer standard strategi for feilhåndtering.
      */
     public static Map<Feilkategori, UnntakBehandler> standardFeilHåndtering() {
-        Map<Feilkategori, UnntakBehandler> res = new HashMap<>();
+        Map<Feilkategori, UnntakBehandler> res = new EnumMap<>(Feilkategori.class);
         res.put(TEKNISK_FEIL, 
             først(opprettHendelse("Teknisk feil")).
             så(settTilFeilet())

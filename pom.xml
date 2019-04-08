@@ -39,9 +39,10 @@
 
         <!-- Melosys -->
         <melosys-eessi-avro.version>0.1-SNAPSHOT</melosys-eessi-avro.version>
-        <melosys.frontend.version>0.18.1-415</melosys.frontend.version>
-        <melosys.jsonschema.version>0.16.1-172</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>1.2.5</melosys.internt.kodeverk.version>
+        <melosys.frontend.version>0.19.0-SNAPSHOT</melosys.frontend.version>
+        <melosys.jsonschema.version>1.15.0-1036</melosys.jsonschema.version>
+        <melosys.frontendlogger.version>0.16.1-SNAPSHOT</melosys.frontendlogger.version>
+        <melosys.internt.kodeverk.version>1.2.7</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
@@ -49,12 +50,12 @@
         <abac.spring.version>1.6.0</abac.spring.version>
         <behandle-medlemskap-v2.version>2.2.1</behandle-medlemskap-v2.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
-        <dokprod.melosysbrev.version>1.0.44</dokprod.melosysbrev.version>
+        <dokprod.melosysbrev.version>1.0.49</dokprod.melosysbrev.version>
         <doksys.dokumentproduksjon.version>3.3.0</doksys.dokumentproduksjon.version>
         <ereg.organisasjon.version>1.0.4</ereg.organisasjon.version>
         <inntekt-v3.version>2.0.0</inntekt-v3.version>
-        <joark.behandleinngaaendejournal.version>1.0.1</joark.behandleinngaaendejournal.version>
         <joark.inngaaendejournal.version>1.1.3</joark.inngaaendejournal.version>
+        <joark.journalfoerinngaaende.version>0.0.21</joark.journalfoerinngaaende.version>
         <joark.journal.version>3.1.2</joark.journal.version>
         <medl2-v2.version>2.0.6</medl2-v2.version>
         <sakogbehandling.version>1.0.0-alpha011</sakogbehandling.version>
@@ -97,7 +98,7 @@
 
     </properties>
 
-    <!-- Unngå å put scope i dependency management. Sett det heller der det 
+    <!-- Unngå å put scope i dependency management. Sett det heller der det
         brukes. -->
     <dependencyManagement>
         <dependencies>
@@ -174,7 +175,7 @@
             <dependency>
                 <groupId>no.nav.melosys</groupId>
                 <artifactId>melosys-frontendlogger</artifactId>
-                <version>${melosys.jsonschema.version}</version>
+                <version>${melosys.frontendlogger.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
@@ -363,10 +364,9 @@
                 <classifier>jaxws</classifier>
             </dependency>
             <dependency>
-                <groupId>no.nav.tjenester</groupId>
-                <artifactId>nav-behandleInngaaendeJournal-v1-tjenestespesifikasjon</artifactId>
-                <version>${joark.behandleinngaaendejournal.version}</version>
-                <classifier>jaxws</classifier>
+                <groupId>no.nav.tjenester.fim</groupId>
+                <artifactId>no-nav-dok-tjenester-journalfoerinngaaende</artifactId>
+                <version>${joark.journalfoerinngaaende.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.tjenester.fim</groupId>
@@ -433,25 +433,25 @@
                 <groupId>no.nav.tjenester</groupId>
                 <artifactId>nav-behandleMedlemskap-v2-tjenestespesifikasjon</artifactId>
                 <version>${behandle-medlemskap-v2.version}</version>
-            </dependency>                
+            </dependency>
             <!-- Dokumenthåndtering (DOKPROD) -->
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
                 <artifactId>melosysbrev</artifactId>
                 <version>${dokprod.melosysbrev.version}</version>
-            </dependency>            
+            </dependency>
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
                 <artifactId>melosysbrev</artifactId>
                 <classifier>jaxb</classifier>
-                <version>${dokprod.melosysbrev.version}</version>                
+                <version>${dokprod.melosysbrev.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
                 <artifactId>melosysbrev</artifactId>
                 <classifier>jaxb-sources</classifier>
-                <version>${dokprod.melosysbrev.version}</version>                
-            </dependency>            
+                <version>${dokprod.melosysbrev.version}</version>
+            </dependency>
 
             <!-- Test -->
             <dependency>

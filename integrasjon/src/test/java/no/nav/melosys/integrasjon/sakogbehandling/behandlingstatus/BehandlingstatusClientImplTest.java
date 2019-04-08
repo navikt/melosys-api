@@ -16,7 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = BehandlingstatusClientConfigTest.class)
+@ContextConfiguration(classes = BehandlingstatusClientMockConfig.class)
 public class BehandlingstatusClientImplTest {
 
     private BehandlingstatusClientImpl behandlingstatusClient;

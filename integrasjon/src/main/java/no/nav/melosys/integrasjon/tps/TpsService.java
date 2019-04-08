@@ -12,11 +12,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
@@ -270,5 +268,12 @@ public class TpsService implements TpsFasade {
         }else {
             throw new TekniskException("Det finnes ingen ident for " + rolleType + " på sak " + fagsak.getSaksnummer());
         }
+    }
+
+    @Override
+    public String hentSammensattNavn(String fnr) throws FunksjonellException, IntegrasjonException {
+        Saksopplysning tpsOpplysning = hentPerson(fnr);
+        PersonDokument personDokument = (PersonDokument) tpsOpplysning.getDokument();
+        return personDokument != null ? personDokument.sammensattNavn : null;
     }
 }

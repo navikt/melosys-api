@@ -3,18 +3,17 @@ package no.nav.melosys.service.sak;
 import java.time.Instant;
 import java.util.*;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.RegistreringsInfo;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +29,8 @@ public class FagsakService {
 
     private final BehandlingService behandlingService;
 
+    private final KontaktopplysningService kontaktopplysningService;
+
     private final OppgaveService oppgaveService;
 
     private final TpsFasade tpsFasade;
@@ -39,11 +40,13 @@ public class FagsakService {
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository,
                          BehandlingService behandlingService,
+                         KontaktopplysningService kontaktopplysningService,
                          OppgaveService oppgaveService,
                          TpsFasade tpsFasade,
                          ProsessinstansService prosessinstansService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
+        this.kontaktopplysningService = kontaktopplysningService;
         this.oppgaveService = oppgaveService;
         this.tpsFasade = tpsFasade;
         this.prosessinstansService = prosessinstansService;
@@ -66,7 +69,7 @@ public class FagsakService {
         }
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void henleggFagsak(String saksnummer, String begrunnelseKodeString, String fritekst) throws TekniskException, FunksjonellException {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
 
@@ -140,10 +143,11 @@ public class FagsakService {
      * - Oppretter bruker, arbeidsgiver og representanter.
      * - Oppretter tom behandlingsresultat.
      */
-    @Transactional
-    public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) {
+    @Transactional(rollbackFor = MelosysException.class)
+    public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) throws FunksjonellException {
         Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(hentNesteSaksnummer());
+        String saksnummer = hentNesteSaksnummer();
+        fagsak.setSaksnummer(saksnummer);
 
         HashSet<Aktoer> aktører = new HashSet<>();
 
@@ -168,6 +172,7 @@ public class FagsakService {
             aktørRepresentant.setOrgnr(representant);
             aktørRepresentant.setFagsak(fagsak);
             aktørRepresentant.setRolle(Aktoersroller.REPRESENTANT);
+            aktørRepresentant.setRepresenterer(Representerer.BRUKER);
             aktører.add(aktørRepresentant);
         }
 
@@ -179,6 +184,15 @@ public class FagsakService {
         fagsak.setStatus(Saksstatuser.OPPRETTET);
 
         lagre(fagsak);
+
+        String representantKontaktperson = opprettSakRequest.getRepresentantKontaktperson();
+        if (representantKontaktperson != null) {
+            if (representant == null) {
+                throw new FunksjonellException("Kontaktopplysninger kan ikke lagres uten orgnr.");
+            } else {
+                kontaktopplysningService.lagEllerOppdaterKontaktopplysning(saksnummer, representant, null, representantKontaktperson);
+            }
+        }
 
         Behandlingstyper behandlingstype = opprettSakRequest.getBehandlingstype();
         String initierendeJournalpostId = opprettSakRequest.getInitierendeJournalpostId();

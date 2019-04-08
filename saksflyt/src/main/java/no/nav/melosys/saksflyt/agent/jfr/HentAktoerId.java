@@ -2,8 +2,10 @@ package no.nav.melosys.saksflyt.agent.jfr;
 
 import java.util.Map;
 
+import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -23,6 +25,9 @@ import static no.nav.melosys.domain.ProsessSteg.JFR_AKTØR_ID;
  * Henter en aktørID
  *
  * Transisjoner:
+ *  a) Behandlingtypen er ENDRET_PERIODE.
+ * JFR_AKTOER_ID -> JFR_OPPDATER_JOURNALPOST eller FEILET_MASKINELT hvis feil
+ *  b) Ellers.
  * JFR_AKTOER_ID -> JFR_OPPRETT_SAK_OG_BEH eller FEILET_MASKINELT hvis feil
  */
 @Component
@@ -56,7 +61,13 @@ public class HentAktoerId extends AbstraktStegBehandler {
         String aktørId = tpsFasade.hentAktørIdForIdent(brukerId);
         prosessinstans.setData(AKTØR_ID, aktørId);
 
-        prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_SAK_OG_BEH);
+        Behandlingstyper behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
+        if (behandlingstype.equals(Behandlingstyper.ENDRET_PERIODE)) {
+            prosessinstans.setSteg(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
+        }
+        else {
+            prosessinstans.setSteg(ProsessSteg.JFR_OPPRETT_SAK_OG_BEH);
+        }
         log.info("Hentet aktørId for prosessinstans {}", prosessinstans.getId());
     }
 }

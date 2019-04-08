@@ -15,8 +15,6 @@ import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -27,8 +25,6 @@ import org.springframework.web.context.WebApplicationContext;
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class DokumentTjeneste extends RestTjeneste {
-
-    private static final Logger log = LoggerFactory.getLogger(DokumentTjeneste.class);
     
     private DokumentService dokumentService;
 
@@ -45,13 +41,10 @@ public class DokumentTjeneste extends RestTjeneste {
     @ApiOperation(value = "hent dokument knyttet til journalpost", response = byte[].class)
     @Produces({ "application/pdf", MediaType.APPLICATION_JSON + "; charset=UTF-8" })
     public Response hentDokument(@ApiParam @PathParam("journalpostID") String journalpostID, @ApiParam @PathParam("dokumentID") String dokumentID)
-            throws SikkerhetsbegrensningException, IntegrasjonException, IkkeFunnetException {
+            throws SikkerhetsbegrensningException, IkkeFunnetException {
         byte[] dokument;
         dokument = dokumentService.hentDokument(journalpostID, dokumentID);
-        Response.ResponseBuilder ok = Response.ok(dokument);
-        ok.header(HttpHeaders.CONTENT_LENGTH, dokument.length);
-        ok.header(HttpHeaders.CONTENT_DISPOSITION, "inline");
-        return ok.build();
+        return lagResponseAvDokument(dokument, String.format("journalpost-dok-%s.pdf", dokumentID));
     }
 
     @GET
@@ -61,8 +54,8 @@ public class DokumentTjeneste extends RestTjeneste {
         List<JournalpostInfoDto> dokumentListe = dokumentService.hentDokumenter(saksnummer)
             .stream()
             .map(JournalpostInfoDto::av)
+            .sorted(Comparator.comparing(JournalpostInfoDto::hentGjeldendeTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())))
             .collect(Collectors.toList());
-        dokumentListe.sort(Comparator.comparing(JournalpostInfoDto::hentGjeldendeTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())));
         return Response.ok(dokumentListe).build();
     }
 
@@ -75,10 +68,7 @@ public class DokumentTjeneste extends RestTjeneste {
         byte[] dokument;
         tilgang.sjekk(behandlingID);
         dokument = dokumentService.produserUtkast(behandlingID, produserbartDokument, brevBestillingDto);
-        Response.ResponseBuilder ok = Response.ok(dokument);
-        ok.header(HttpHeaders.CONTENT_LENGTH, dokument.length);
-        ok.header(HttpHeaders.CONTENT_DISPOSITION, "inline");
-        return ok.build();
+        return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
     }
 
     @POST
@@ -92,4 +82,10 @@ public class DokumentTjeneste extends RestTjeneste {
         return Response.noContent().build();
     }
 
+    private static Response lagResponseAvDokument(byte[] dokument, String filnavn) {
+        Response.ResponseBuilder ok = Response.ok(dokument);
+        ok.header(HttpHeaders.CONTENT_LENGTH, dokument.length);
+        ok.header(HttpHeaders.CONTENT_DISPOSITION, "inline; attachment; filename=" + filnavn);
+        return ok.build();
+    }
 }

@@ -65,6 +65,6 @@ public class BrevDataByggerVedleggTest {
 
         BrevDataBygger brevDataByggerVedlegg = new BrevDataByggerVedlegg(brevDatabyggerA001, brevbestilling);
         BrevDataVedlegg brevData = (BrevDataVedlegg) brevDataByggerVedlegg.lag(behandling, "Z123456");
-        assertThat(brevbestilling).isEqualToComparingFieldByFieldRecursively(brevData);
+        assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestilling, "begrunnelseKode", "fritekst");
     }
 }

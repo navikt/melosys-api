@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.*;
 
@@ -24,8 +25,9 @@ public interface GsakFasade {
     List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetyper oppgavetype,
                                                   Tema tema,
                                                   List<Sakstyper> sakstyper,
-                                                  List<Behandlingstyper> behandlingstyper
-    ) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
+                                                  List<Behandlingstyper> behandlingstyper,
+                                                  List<Behandlingstema> behandlingstemaer
+    ) throws TekniskException, FunksjonellException;
 
     /**
      * Finner Oppgaver basert på ansvarlig saksbehandler

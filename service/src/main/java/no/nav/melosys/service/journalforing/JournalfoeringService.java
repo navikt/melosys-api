@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
@@ -45,17 +46,17 @@ public class JournalfoeringService {
         return joarkFasade.hentJournalpost(journalpostID);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException, TekniskException {
         log.info("{} oppretter ny sak etter journalføring av journalpost {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID());
 
         valider(journalfoeringDto);
         validerOpprettSakFelter(journalfoeringDto);
-        
+
         Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
 
         // Land trenges av regelmodulen får å vurdere inngangsvilkår
-        prosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, journalfoeringDto.getFagsak().getLand());
+        prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
         // Perioden trenges for å hente saksopplysninger
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
         if (!StringUtils.isEmpty(journalfoeringDto.getArbeidsgiverID())) {
@@ -74,7 +75,7 @@ public class JournalfoeringService {
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException, TekniskException {
         String saksnummer = journalfoeringDto.getSaksnummer();
         log.info("{} knytter journalpost {} til sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
@@ -135,7 +136,10 @@ public class JournalfoeringService {
             throw new FunksjonellException("Land mangler");
         }
         if (journalfoeringDto.getFagsak().getLand().contains(null)) {
-            throw new FunksjonellException("Et oppholdsland er null!");
+            throw new FunksjonellException("Et søknadsland er null!");
+        }
+        if (journalfoeringDto.getFagsak().getLand().size() > 1) { // Melosys støtter bare ett land i Leveranse 1.
+            throw new FunksjonellException("Kun ett land er støttet i denne versjonen av Melosys");
         }
     }
 }

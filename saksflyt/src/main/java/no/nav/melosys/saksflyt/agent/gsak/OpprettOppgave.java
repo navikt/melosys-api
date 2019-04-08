@@ -1,11 +1,13 @@
 package no.nav.melosys.saksflyt.agent.gsak;
 
 import java.util.Map;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
@@ -78,8 +80,8 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         oppgave.setTema(Tema.MED);
 
         if (fagsak.getType() == Sakstyper.EU_EOS) {
-            // FIXME MELOSYS-1401 Behandlingstema.ARB_EØS bør brukes men mappingen med underkategori er ikke definert og registrert.
-            oppgave.setBehandlingstema(null);
+            oppgave.setBehandlingstema(Behandlingstema.EU_EOS);
+            oppgave.setBehandlingstype(null);
         } else {
             String feilmelding = "Sakstyper " + fagsak.getType() + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
@@ -87,9 +89,10 @@ public class OpprettOppgave extends AbstraktStegBehandler {
             return;
         }
 
-        if (behandlingstype == Behandlingstyper.SOEKNAD || behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
-            oppgave.setBehandlingstype(behandlingstype);
-            oppgave.setOppgavetype(Oppgavetyper.BEH_SAK);
+        if (behandlingstype == Behandlingstyper.SOEKNAD) {
+            oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        } else if (behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
+            oppgave.setOppgavetype(Oppgavetyper.VUR);
         } else {
             String feilmelding = "Behandlingstype " + behandlingstype + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);
@@ -102,12 +105,17 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         oppgave.setPrioritet(PrioritetType.NORM);
         oppgave.setSaksnummer(saksnummer);
 
+        boolean skalTilordnes = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).orElse(false);
+        if (skalTilordnes) {
+            oppgave.setTilordnetRessurs(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
+        }
+
         String oppgaveId = gsakFasade.opprettOppgave(oppgave);
 
         if (prosessinstans.getType() == ProsessType.JFR_NY_SAK) {
             prosessinstans.setSteg(SEND_FORVALTNINGSMELDING);
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
-            prosessinstans.setSteg(null);
+            prosessinstans.setSteg(ProsessSteg.FERDIG);
         } else {
             String feilmelding = "ProsessType " + prosessinstans.getType() + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);

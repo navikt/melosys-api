@@ -14,6 +14,8 @@ public class OppgaveSearchRequest {
     private String sorteringsfelt;
     private String statusKategori;
     private String[] saksreferanse;
+    private String behandlesAvApplikasjon;
+    private String[] behandlingstema;
 
     private OppgaveSearchRequest(Builder builder) {
         this.tildeltEnhetsnr = builder.enhetId;
@@ -26,6 +28,8 @@ public class OppgaveSearchRequest {
         this.sorteringsfelt = builder.sorteringsfelt;
         this.statusKategori = builder.statusKategori;
         this.saksreferanse = builder.saksreferanse;
+        this.behandlesAvApplikasjon = builder.behandlesAvApplikasjon;
+        this.behandlingstema = builder.behandlingstema;
     }
 
     public String[] getOppgavetype() {
@@ -68,6 +72,14 @@ public class OppgaveSearchRequest {
         return saksreferanse;
     }
 
+    public String getBehandlesAvApplikasjon() {
+        return behandlesAvApplikasjon;
+    }
+
+    public String[] getBehandlingstema() {
+        return behandlingstema;
+    }
+
     public static class Builder {
 
         private String enhetId;
@@ -80,6 +92,8 @@ public class OppgaveSearchRequest {
         private String sorteringsfelt;
         private String statusKategori;
         private String[] saksreferanse;
+        private String behandlesAvApplikasjon;
+        private String[] behandlingstema;
 
         public Builder(String enhetId ) {
             this.enhetId = enhetId;
@@ -95,7 +109,7 @@ public class OppgaveSearchRequest {
             return this;
         }
 
-        public Builder medOppgaveTyper(String[] oppgavetyper) {
+        public Builder medOppgaveTyper(String... oppgavetyper) {
             this.oppgavetype = oppgavetyper;
             return this;
         }
@@ -127,6 +141,16 @@ public class OppgaveSearchRequest {
 
         public Builder medSaksreferanse(String [] saksreferanse) {
             this.saksreferanse = saksreferanse;
+            return this;
+        }
+
+        public Builder medBehandlesAvApplikasjon(String behandlesAvApplikasjon) {
+            this.behandlesAvApplikasjon = behandlesAvApplikasjon;
+            return this;
+        }
+
+        public Builder medBehandlingstema(String [] behandlingstema) {
+            this.behandlingstema = behandlingstema;
             return this;
         }
 

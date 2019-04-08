@@ -1,30 +1,19 @@
 package no.nav.melosys.service.dokument.brev.mapper.felles;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
 
 public final class VilkaarbegrunnelseFactory {
 
-    static final String JA = "true";
+    private static final String JA = "true";
+    private static final String IKKE_STØTTET = "støttes ikke.";
 
     private VilkaarbegrunnelseFactory() {
-    }
-
-    public static Art121BegrunnelseType lagArt121BegrunnelseType() {
-        Art121BegrunnelseType art121BegrunnelseType = new Art121BegrunnelseType();
-        art121BegrunnelseType.setUtsendelseOver24Mn("");
-        art121BegrunnelseType.setErstatterAnnen("");
-        art121BegrunnelseType.setIkkeUtsendtPåOppdragForAg("");
-        art121BegrunnelseType.setIkkeOmfattetLengeNokINorgeFør("");
-        art121BegrunnelseType.setUnder2MnSidenForrigeUtsendingTilSammeLand("");
-        art121BegrunnelseType.setIkkeVesentligVirksomhet("");
-        return art121BegrunnelseType;
+        throw new IllegalStateException("Utility");
     }
 
     public static Art121BegrunnelseType mapArt121BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
@@ -51,18 +40,21 @@ public final class VilkaarbegrunnelseFactory {
                     art121BegrunnelseType.setIkkeVesentligVirksomhet(JA);
                     break;
                 default:
-                    throw new TekniskException(artikkel12_1 + " støttes ikke.");
+                    throw new TekniskException(artikkel12_1 + IKKE_STØTTET);
             }
         }
         return art121BegrunnelseType;
     }
 
-    public static Art121ForutgaaendeBegrunnelseType lagArt121ForutgaaendeBegrunnelseType() {
-        Art121ForutgaaendeBegrunnelseType art121ForutgaaendeBegrunnelseType = new Art121ForutgaaendeBegrunnelseType();
-        art121ForutgaaendeBegrunnelseType.setUntattMedlemskap("");
-        art121ForutgaaendeBegrunnelseType.setFolkeregistrertIkkeArbeidetINorge("");
-        art121ForutgaaendeBegrunnelseType.setIkkeFolkeregistrertEllerArbeidetINorge("");
-        return art121ForutgaaendeBegrunnelseType;
+    private static Art121BegrunnelseType lagArt121BegrunnelseType() {
+        Art121BegrunnelseType art121BegrunnelseType = new Art121BegrunnelseType();
+        art121BegrunnelseType.setUtsendelseOver24Mn("");
+        art121BegrunnelseType.setErstatterAnnen("");
+        art121BegrunnelseType.setIkkeUtsendtPåOppdragForAg("");
+        art121BegrunnelseType.setIkkeOmfattetLengeNokINorgeFør("");
+        art121BegrunnelseType.setUnder2MnSidenForrigeUtsendingTilSammeLand("");
+        art121BegrunnelseType.setIkkeVesentligVirksomhet("");
+        return art121BegrunnelseType;
     }
 
     public static Art121ForutgaaendeBegrunnelseType mapArt121ForutgaaendeBegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
@@ -81,22 +73,18 @@ public final class VilkaarbegrunnelseFactory {
                     art121ForutgaaendeBegrunnelseType.setIkkeFolkeregistrertEllerArbeidetINorge(JA);
                     break;
                 default:
-                    throw new TekniskException(forutgaaendeMedlemskap + " støttes ikke.");
+                    throw new TekniskException(forutgaaendeMedlemskap + IKKE_STØTTET);
             }
         }
         return art121ForutgaaendeBegrunnelseType;
     }
 
-    public static Art121VesentligVirksomhetBegrunnelse lagArt121VesentligVirksomhetBegrunnelseType() {
-        Art121VesentligVirksomhetBegrunnelse brevBegrunnelse = new Art121VesentligVirksomhetBegrunnelse();
-        brevBegrunnelse.setForLiteKontrakterNorge("");
-        brevBegrunnelse.setForLiteOmsetningNorge("");
-        brevBegrunnelse.setForLiteOppdragNorge("");
-        brevBegrunnelse.setForMangeAdminAnsatte("");
-        brevBegrunnelse.setKontrakterIkkeNorskLov("");
-        brevBegrunnelse.setKunAdminAnsatte("");
-        brevBegrunnelse.setRekruttererAnsatteUtl("");
-        return brevBegrunnelse;
+    private static Art121ForutgaaendeBegrunnelseType lagArt121ForutgaaendeBegrunnelseType() {
+        Art121ForutgaaendeBegrunnelseType art121ForutgaaendeBegrunnelseType = new Art121ForutgaaendeBegrunnelseType();
+        art121ForutgaaendeBegrunnelseType.setUntattMedlemskap("");
+        art121ForutgaaendeBegrunnelseType.setFolkeregistrertIkkeArbeidetINorge("");
+        art121ForutgaaendeBegrunnelseType.setIkkeFolkeregistrertEllerArbeidetINorge("");
+        return art121ForutgaaendeBegrunnelseType;
     }
 
     public static Art121VesentligVirksomhetBegrunnelse mapArt121VesentligVirksomhetBegrunnelse(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
@@ -126,18 +114,22 @@ public final class VilkaarbegrunnelseFactory {
                     brevBegrunnelse.setKontrakterIkkeNorskLov(JA);
                     break;
                 default:
-                    throw new TekniskException(vesentligVirksomhetBegrunnelse + " støttes ikke.");
+                    throw new TekniskException(vesentligVirksomhetBegrunnelse + IKKE_STØTTET);
             }
         }
         return brevBegrunnelse;
     }
 
-    public static Art122BegrunnelseType lagArt122BegrunnelseType() {
-        Art122BegrunnelseType art122BegrunnelseType = new Art122BegrunnelseType();
-        art122BegrunnelseType.setUtsendelseOver24Mn("");
-        art122BegrunnelseType.setIkkeLignendeVirksomhet("");
-        art122BegrunnelseType.setNormaltIkkeDriftINorge("");
-        return art122BegrunnelseType;
+    private static Art121VesentligVirksomhetBegrunnelse lagArt121VesentligVirksomhetBegrunnelseType() {
+        Art121VesentligVirksomhetBegrunnelse brevBegrunnelse = new Art121VesentligVirksomhetBegrunnelse();
+        brevBegrunnelse.setForLiteKontrakterNorge("");
+        brevBegrunnelse.setForLiteOmsetningNorge("");
+        brevBegrunnelse.setForLiteOppdragNorge("");
+        brevBegrunnelse.setForMangeAdminAnsatte("");
+        brevBegrunnelse.setKontrakterIkkeNorskLov("");
+        brevBegrunnelse.setKunAdminAnsatte("");
+        brevBegrunnelse.setRekruttererAnsatteUtl("");
+        return brevBegrunnelse;
     }
 
     public static Art122BegrunnelseType mapArt122BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
@@ -155,18 +147,18 @@ public final class VilkaarbegrunnelseFactory {
                     art122BegrunnelseType.setNormaltIkkeDriftINorge(JA);
                     break;
                 default:
-                    throw new TekniskException(artikkel12_2 + "  støttes ikke.");
+                    throw new TekniskException(artikkel12_2 + IKKE_STØTTET);
             }
         }
         return art122BegrunnelseType;
     }
 
-    public static Art122NormalVirksomhetBegrunnelseType lagArt122NormalVirksomhetBegrunnelseType() {
-        Art122NormalVirksomhetBegrunnelseType art122NormalVirksomhetBegrunnelseType = new Art122NormalVirksomhetBegrunnelseType();
-        art122NormalVirksomhetBegrunnelseType.setIkkeForutgåendeDrift("");
-        art122NormalVirksomhetBegrunnelseType.setHarIkkeNødvendigInfrastruktur("");
-        art122NormalVirksomhetBegrunnelseType.setOpprettholderIkkeLisenserAutorisasjon("");
-        return art122NormalVirksomhetBegrunnelseType;
+    private static Art122BegrunnelseType lagArt122BegrunnelseType() {
+        Art122BegrunnelseType art122BegrunnelseType = new Art122BegrunnelseType();
+        art122BegrunnelseType.setUtsendelseOver24Mn("");
+        art122BegrunnelseType.setIkkeLignendeVirksomhet("");
+        art122BegrunnelseType.setNormaltIkkeDriftINorge("");
+        return art122BegrunnelseType;
     }
 
     public static Art122NormalVirksomhetBegrunnelseType mapArt122NormalVirksomhetBegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
@@ -184,9 +176,17 @@ public final class VilkaarbegrunnelseFactory {
                     art122NormalVirksomhetBegrunnelseType.setOpprettholderIkkeLisenserAutorisasjon(JA);
                     break;
                 default:
-                    throw new TekniskException(normaltDriverVirksomhet + "  støttes ikke.");
+                    throw new TekniskException(normaltDriverVirksomhet + IKKE_STØTTET);
             }
         }
+        return art122NormalVirksomhetBegrunnelseType;
+    }
+
+    private static Art122NormalVirksomhetBegrunnelseType lagArt122NormalVirksomhetBegrunnelseType() {
+        Art122NormalVirksomhetBegrunnelseType art122NormalVirksomhetBegrunnelseType = new Art122NormalVirksomhetBegrunnelseType();
+        art122NormalVirksomhetBegrunnelseType.setIkkeForutgåendeDrift("");
+        art122NormalVirksomhetBegrunnelseType.setHarIkkeNødvendigInfrastruktur("");
+        art122NormalVirksomhetBegrunnelseType.setOpprettholderIkkeLisenserAutorisasjon("");
         return art122NormalVirksomhetBegrunnelseType;
     }
 }

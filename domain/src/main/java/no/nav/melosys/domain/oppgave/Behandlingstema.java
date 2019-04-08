@@ -3,9 +3,9 @@ package no.nav.melosys.domain.oppgave;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 
 public enum Behandlingstema implements Kodeverk {
-    ARB_AA("ab0387", "Arbeidstakere annen avtale"),
-    ARB_FOLK("ab0388", "Arbeidstakere folketrygdloven"),
-    ARB_EØS("ab0390", "Arbeidstakere innen EØS");
+    FTRL("ab0387", "Arbeidstakere annen avtale"),
+    TRYGDEAVTALE("ab0388", "Arbeidstakere folketrygdloven"),
+    EU_EOS("ab0390", "Arbeidstakere innen EØS");
 
     private final String kode;
     private final String beskrivelse;

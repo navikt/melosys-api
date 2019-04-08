@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.Binge;
@@ -13,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -34,7 +36,7 @@ public class InitBingeTest {
     }
 
     @Test
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         List<Prosessinstans> testBehandlinger = new ArrayList<>();
 
         Prosessinstans pi1 = new Prosessinstans(), pi2 = new Prosessinstans();
@@ -42,7 +44,7 @@ public class InitBingeTest {
         testBehandlinger.add(pi1);
         testBehandlinger.add(pi2);
 
-        when(prosessinstansRepo.findByStegIsNot(any())).thenReturn(testBehandlinger);
+        when(prosessinstansRepo.findAllByStegIsNotAndStegIsNot(eq(ProsessSteg.FERDIG), eq(ProsessSteg.FEILET_MASKINELT))).thenReturn(testBehandlinger);
         when(binge.leggTil(any(Prosessinstans.class))).thenReturn(true);
 
         initBinge.afterPropertiesSet();

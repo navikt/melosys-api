@@ -94,7 +94,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
     public void plukkOppgave() throws FunksjonellException, TekniskException {
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
-        innData.setOppgavetype("BEH_SAK");
+        innData.setOppgavetype("BEH_SAK_MK");
 
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(Sakstyper.EU_EOS.getKode());
@@ -106,7 +106,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTest {
 
         Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId("1");
-        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK);
+        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         Optional<Oppgave> plukket = Optional.of(oppgave);
 
         when(oppgaveplukker.plukkOppgave(anyString(), eq(innData))).thenReturn(plukket);

@@ -6,7 +6,6 @@ import java.util.Map;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -61,7 +60,7 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
     }
     
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, TekniskException, SikkerhetsbegrensningException {
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, SikkerhetsbegrensningException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
@@ -78,7 +77,7 @@ public class HentArbeidsforholdopplysninger extends AbstraktStegBehandler {
         }
 
         Instant nå = Instant.now();
-        Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(brukerId, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
+        Saksopplysning saksopplysning = aaregFasade.finnArbeidsforholdPrArbeidstaker(brukerId, fom, tom);
         saksopplysning.setBehandling(behandling);
         saksopplysning.setRegistrertDato(nå);
         saksopplysning.setEndretDato(nå);

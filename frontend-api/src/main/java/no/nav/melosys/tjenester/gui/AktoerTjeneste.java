@@ -82,6 +82,16 @@ public class AktoerTjeneste extends RestTjeneste {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgang.sjekkSak(fagsak);
         aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
+        return Response.ok(aktoerDto).build();
+    }
+
+    @DELETE
+    @Path("/aktoerer/{databaseID}")
+    @ApiOperation(
+        value = "Sletter aktøren med en gitt database-id.",
+        response = AktoerDto.class)
+    public Response slettAktoer(@PathParam("databaseID") long databaseID) {
+        aktoerService.slettAktoer(databaseID);
         return Response.ok().build();
     }
 
@@ -95,6 +105,7 @@ public class AktoerTjeneste extends RestTjeneste {
         if (aktoer.getRepresenterer() != null) {
             aktoerDto.setRepresentererKode(aktoer.getRepresenterer().getKode());
         }
+        aktoerDto.setDatabaseID(aktoer.getId());
         return aktoerDto;
     }
 }

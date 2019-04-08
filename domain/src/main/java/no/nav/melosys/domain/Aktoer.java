@@ -4,7 +4,9 @@ import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -42,6 +44,10 @@ public class Aktoer extends RegistreringsInfo {
 
     public Long getId() {
         return id;
+    }
+    
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Fagsak getFagsak() {
@@ -98,6 +104,18 @@ public class Aktoer extends RegistreringsInfo {
 
     public void setRepresenterer(Representerer representerer) {
         this.representerer = representerer;
+    }
+
+    public boolean erUtenlandskMyndighet() {
+        return Aktoersroller.MYNDIGHET == rolle && institusjonId != null;
+    }
+
+    public Landkoder hentMyndighetLandkode() throws TekniskException {
+        if (erUtenlandskMyndighet()) {
+            String[] split = institusjonId.split(":");
+            return Landkoder.valueOf(split[0]);
+        }
+        throw new TekniskException("Aktør " + id + " er ikke en utenlandsk myndighet");
     }
 
     @Override

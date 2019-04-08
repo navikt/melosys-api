@@ -19,10 +19,7 @@ public interface ErPeriode {
         if (getFom() != null && kandidat.isBefore(getFom())) {
             return false;
         }
-        if (getTom() != null && kandidat.isAfter(getTom())) {
-            return false;
-        }
-        return true;
+        return getTom() == null || !kandidat.isAfter(getTom());
     }
 
 }

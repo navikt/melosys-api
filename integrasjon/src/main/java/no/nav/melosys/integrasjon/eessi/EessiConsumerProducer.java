@@ -19,7 +19,7 @@ public class EessiConsumerProducer {
     private final String apiKeyValue;
     private final Environment environment;
 
-    private final static String NAIS_PROFIL = "nais";
+    private static final String NAIS_PROFIL = "nais";
 
     @Autowired
     public EessiConsumerProducer(Environment environment,

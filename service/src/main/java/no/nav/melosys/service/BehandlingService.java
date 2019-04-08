@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -45,7 +46,7 @@ public class BehandlingService {
     /**
      * Knytt medlemsperioder fra MEDL til behandlingen.
      */
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) throws FunksjonellException {
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingID + " finnes ikke."));
@@ -123,13 +124,13 @@ public class BehandlingService {
             || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public Behandling replikerBehandlingOgBehandlingsresultat(Behandling tidligsteInaktiveBehandling, Behandlingsstatus behandlingsstatus, Behandlingstyper behandlingstype) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IkkeFunnetException, TekniskException {
         Behandling behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingsstatus, behandlingstype);
         behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
         return behandlingsreplika;
     }
 
-    @Transactional
     Behandling replikerBehandling(Behandling tidligsteInaktiveBehandling, Behandlingsstatus behandlingsstatus, Behandlingstyper behandlingstype) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Behandling behandlingsreplika = (Behandling) BeanUtils.cloneBean(tidligsteInaktiveBehandling);
         behandlingsreplika.setId(null);

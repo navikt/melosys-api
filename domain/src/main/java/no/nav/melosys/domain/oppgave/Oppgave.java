@@ -23,6 +23,7 @@ public class Oppgave {
     private String aktørId;
     private Behandlingstyper behandlingstype;
     private Behandlingstema behandlingstema;
+    private String behandlesAvApplikasjon;
 
     public Oppgave() {
     }
@@ -57,14 +58,6 @@ public class Oppgave {
 
     public void setTilordnetRessurs(String tilordnetRessurs) {
         this.tilordnetRessurs = tilordnetRessurs;
-    }
-
-    public boolean erBehandling() {
-        return oppgavetype == Oppgavetyper.BEH_SAK;
-    }
-
-    public boolean erJournalFøring() {
-        return oppgavetype == Oppgavetyper.JFR;
     }
 
     public String getOppgaveId() {
@@ -131,6 +124,26 @@ public class Oppgave {
         this.versjon = versjon;
     }
 
+    public String getBehandlesAvApplikasjon() {
+        return behandlesAvApplikasjon;
+    }
+
+    public void setBehandlesAvApplikasjon(String behandlesAvApplikasjon) {
+        this.behandlesAvApplikasjon = behandlesAvApplikasjon;
+    }
+
+    public boolean erBehandling() {
+        return oppgavetype == Oppgavetyper.BEH_SAK_MK;
+    }
+
+    public boolean erJournalFøring() {
+        return oppgavetype == Oppgavetyper.JFR;
+    }
+
+    public boolean erVurderDokument() {
+        return oppgavetype == Oppgavetyper.VUR;
+    }
+
     /**
      * Sorter oppgaver basert på prioritet (først) og frist.
      */
@@ -154,5 +167,4 @@ public class Oppgave {
         }
         return res;
     };
-
 }

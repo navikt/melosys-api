@@ -22,6 +22,7 @@ import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.oppgave.dto.*;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ public class OppgaveService {
     private final BehandlingRepository behandlingRepository;
     private final TpsFasade tpsFasade;
     private final SaksopplysningerService saksopplysningerService;
+    private static final String UKJENT = "UKJENT";
 
     @Autowired
     public OppgaveService(GsakFasade gsakFasade,
@@ -99,7 +101,7 @@ public class OppgaveService {
         return  gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
     }
 
-    private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) throws TekniskException {
+    private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) throws TekniskException, FunksjonellException {
         List<OppgaveDto> res = new ArrayList<>();
         for (Oppgave o : oppgaverFraDomain) {
             res.add(tilOppgaveDto(o));
@@ -107,14 +109,24 @@ public class OppgaveService {
         return res;
     }
 
-    private OppgaveDto tilOppgaveDto(Oppgave oppgave) throws TekniskException {
+    private OppgaveDto tilOppgaveDto(Oppgave oppgave) throws TekniskException, FunksjonellException {
         OppgaveDto dest;
 
         if (oppgave.erJournalFøring()) {
             JournalfoeringsoppgaveDto jfrOppgaveDto = new JournalfoeringsoppgaveDto();
             jfrOppgaveDto.setJournalpostID(oppgave.getJournalpostId());
             dest = jfrOppgaveDto;
-        } else if (oppgave.erBehandling()) {
+            String aktørId = oppgave.getAktørId();
+            String fnr = aktørId != null ? tpsFasade.hentIdentForAktørId(aktørId) : null;
+            if (StringUtils.isNotEmpty(fnr)){
+                dest.setFnr(fnr);
+                dest.setSammensattNavn(tpsFasade.hentSammensattNavn(fnr));
+            }
+            else {
+                dest.setFnr(UKJENT);
+                dest.setSammensattNavn(UKJENT);
+            }
+        } else if (oppgave.erBehandling() || oppgave.erVurderDokument()) {
             BehandlingsoppgaveDto behOppgaveDto = new BehandlingsoppgaveDto();
             Fagsak fagsak = fagsakRepository.findBySaksnummer(oppgave.getSaksnummer());
             if (fagsak == null) {
@@ -142,6 +154,7 @@ public class OppgaveService {
                 saksopplysningDokument -> {
                     PersonDokument personDokument = (PersonDokument) saksopplysningDokument;
                     behOppgaveDto.setSammensattNavn(personDokument.sammensattNavn);
+                    behOppgaveDto.setFnr(personDokument.fnr);
                 }
             );
 

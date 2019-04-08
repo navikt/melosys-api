@@ -32,8 +32,6 @@ import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -50,8 +48,6 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 @Scope(value= WebApplicationContext.SCOPE_REQUEST)
 @Transactional
 public class FagsakTjeneste extends RestTjeneste {
-
-    private static final Logger log = LoggerFactory.getLogger(FagsakTjeneste.class);
 
     private static final String UKJENT_SAMMENSATT_NAVN = "UKJENT";
 
@@ -127,12 +123,11 @@ public class FagsakTjeneste extends RestTjeneste {
 
         Optional<Behandling> behandling = fagsakService.finnRedigerbarBehandling(ident, fagsak);
 
-        behandling.ifPresent(aktivBehandling -> {
-            fagsakDto.getBehandlinger().stream()
+        behandling.ifPresent(aktivBehandling -> fagsakDto.getBehandlinger().stream()
                 .filter(behandlingDto -> behandlingDto.getOppsummering().getBehandlingID().equals(aktivBehandling.getId()))
                 .findAny()
-                .ifPresent(behandlingDto -> behandlingDto.setRedigerbart(true));
-        });
+                .ifPresent(behandlingDto -> behandlingDto.setRedigerbart(true))
+        );
         //Vi ønsker å ha redigerbare behandlinger først, fordi GUI henter bare ut det første behandlingselementet
         fagsakDto.getBehandlinger().sort(Comparator.comparing(BehandlingDto::isRedigerbart).reversed());
 

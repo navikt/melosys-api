@@ -48,7 +48,7 @@ public class AvslagYrkesaktivMapperTest {
 
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = new StrukturertAdresse();
-        arbeidUtland.adresse.landKode = "NO";
+        arbeidUtland.adresse.landkode = "NO";
 
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         soeknadDokument.arbeidUtland = new ArrayList<>();
@@ -83,14 +83,18 @@ public class AvslagYrkesaktivMapperTest {
 
         Vilkaarsresultat vilkaarsresultat16_1 = new Vilkaarsresultat();
         vilkaarsresultat16_1.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
+        vilkaarsresultat16_1.setBegrunnelseFritekst("Fritekst");
         VilkaarBegrunnelse a_begrunnelse_16_1 = new VilkaarBegrunnelse();
         a_begrunnelse_16_1.setKode(Art16_1_Avslag__Begrunnelser.OVER_5_AAR.getKode());
         VilkaarBegrunnelse b_begrunnelse_16_1 = new VilkaarBegrunnelse();
         b_begrunnelse_16_1.setKode(Art16_1_Avslag__Begrunnelser.SOEKT_FOR_SENT.getKode());
+        VilkaarBegrunnelse c_begrunnelse_16_1 = new VilkaarBegrunnelse();
+        c_begrunnelse_16_1.setKode(Art16_1_Avslag__Begrunnelser.SAERLIG_AVSLAGSGRUNN.getKode());
 
         Set<VilkaarBegrunnelse> begrunnelser_16_1 = new HashSet<>();
         begrunnelser_16_1.add(a_begrunnelse_16_1);
         begrunnelser_16_1.add(b_begrunnelse_16_1);
+        begrunnelser_16_1.add(c_begrunnelse_16_1);
         vilkaarsresultat16_1.setBegrunnelser(begrunnelser_16_1);
         resultat.getVilkaarsresultater().add(vilkaarsresultat16_1);
 

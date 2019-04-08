@@ -35,8 +35,13 @@
         <bostedsadresse>
             <gateadresse>
                 <gatenavn><xsl:value-of select="strukturertAdresse/gatenavn"/></gatenavn>
-                <gatenummer><xsl:value-of select="strukturertAdresse/gatenummer"/></gatenummer>
-                <husnummer><xsl:value-of select="strukturertAdresse/husnummer"/></husnummer>
+                <!-- Dersom vi har et tomt nummer-felt blir den parset som 0, og ikke null -->
+                <xsl:if test="not(string(strukturertAdresse/gatenummer) = '')">
+                    <gatenummer><xsl:value-of select="strukturertAdresse/gatenummer"/></gatenummer>
+                </xsl:if>
+                <xsl:if test="not(string(strukturertAdresse/husnummer) = '')">
+                    <husnummer><xsl:value-of select="strukturertAdresse/husnummer"/></husnummer>
+                </xsl:if>
                 <husbokstav><xsl:value-of select="strukturertAdresse/husbokstav"/></husbokstav>
             </gateadresse>
             <postnr><xsl:value-of select="strukturertAdresse/poststed"/></postnr>
@@ -79,8 +84,12 @@
                     <tilleggsadresseType><xsl:value-of select="strukturertAdresse/tilleggsadresseType" /></tilleggsadresseType>
                     <gateadresse>
                         <gatenavn><xsl:value-of select="strukturertAdresse/gatenavn"/></gatenavn>
-                        <gatenummer><xsl:value-of select="strukturertAdresse/gatenummer"/></gatenummer>
-                        <husnummer><xsl:value-of select="strukturertAdresse/husnummer"/></husnummer>
+                        <xsl:if test="not(string(strukturertAdresse/gatenummer) = '')">
+                            <gatenummer><xsl:value-of select="strukturertAdresse/gatenummer"/></gatenummer>
+                        </xsl:if>
+                        <xsl:if test="not(string(strukturertAdresse/husnummer) = '')">
+                            <husnummer><xsl:value-of select="strukturertAdresse/husnummer"/></husnummer>
+                        </xsl:if>
                         <husbokstav><xsl:value-of select="strukturertAdresse/husbokstav"/></husbokstav>
                     </gateadresse>
                     <poststed><xsl:value-of select="strukturertAdresse/poststed"/></poststed>

@@ -1,28 +1,25 @@
 package no.nav.melosys.saksflyt.agent.hs;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.dokument.DokumentSystemService;
-import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
-import no.nav.melosys.service.dokument.brev.BrevDataHenleggelse;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
+import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessDataKey.BEGRUNNELSEKODE;
-import static no.nav.melosys.domain.ProsessDataKey.FRITEKST;
+import static no.nav.melosys.domain.ProsessDataKey.*;
 import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.MELDING_HENLAGT_SAK;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -30,21 +27,11 @@ public class SendHenleggelsesbrevTest {
     private SendHenleggelsesbrev sendHenleggelsesbrev;
 
     @Mock
-    DokumentSystemService dokumentService;
-
-    @Mock
-    BrevDataByggerVelger brevDataByggerVelger;
-
-    @Mock
-    BrevDataBygger brevDataBygger;
-
-    @Mock
-    BrevDataHenleggelse brevDataHenleggelse;
+    BrevBestiller brevBestiller;
 
     @Before
     public void setUp() {
-        sendHenleggelsesbrev = new SendHenleggelsesbrev(dokumentService, brevDataByggerVelger);
-        doReturn(brevDataBygger).when(brevDataByggerVelger).hent(MELDING_HENLAGT_SAK);
+        sendHenleggelsesbrev = new SendHenleggelsesbrev(brevBestiller);
     }
 
     @Rule
@@ -63,13 +50,17 @@ public class SendHenleggelsesbrevTest {
         behandling.setId(behandlingId);
         behandling.setFagsak(fagsak);
         prosessinstans.setBehandling(behandling);
-        doReturn(brevDataHenleggelse).when(brevDataBygger).lag(behandling, saksbehandler);
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
 
         sendHenleggelsesbrev.utfør(prosessinstans);
 
-        assertThat(brevDataHenleggelse.mottaker).isEqualTo(Aktoersroller.BRUKER);
-        verify(dokumentService).produserDokument(behandlingId, MELDING_HENLAGT_SAK, brevDataHenleggelse);
+        ArgumentCaptor<Brevbestilling> brevbestillingCaptor = ArgumentCaptor.forClass(Brevbestilling.class);
+        verify(brevBestiller).bestill(brevbestillingCaptor.capture());
+        Brevbestilling brevbestilling = brevbestillingCaptor.getValue();
+
+        assertThat(brevbestilling.getDokumentType()).isEqualTo(Produserbaredokumenter.MELDING_HENLAGT_SAK);
+        assertThat(brevbestilling.getMottaker().getRolle()).isEqualTo(Aktoersroller.BRUKER);
+
         assertThat(prosessinstans.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
     }
 }

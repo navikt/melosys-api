@@ -10,6 +10,8 @@ public class OppgaveDto {
     private String ansvarligID;
     private String oppgaveID;
     private PrioritetType prioritet;
+    private String sammensattNavn;
+    private String fnr;
     private int versjon;
 
     //Getter brukes av Jackson for å serialisere oppgave objekter til frontend i OppgaveTjeneste
@@ -51,5 +53,21 @@ public class OppgaveDto {
 
     public void setVersjon(int versjon) {
         this.versjon = versjon;
+    }
+
+    public String getSammensattNavn() {
+        return sammensattNavn;
+    }
+
+    public void setSammensattNavn(String sammensattNavn) {
+        this.sammensattNavn = sammensattNavn;
+    }
+
+    public String getFnr() {
+        return fnr;
+    }
+
+    public void setFnr(String fnr) {
+        this.fnr = fnr;
     }
 }

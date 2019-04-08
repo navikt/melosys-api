@@ -7,5 +7,5 @@ CREATE TABLE kontaktopplysning (
     CONSTRAINT pk_kontaktopplysning PRIMARY KEY (saksnummer, orgnr)
 );
 
-ALTER TABLE kontaktopplysning ADD CONSTRAINT fk_fagsak FOREIGN KEY (saksnummer) REFERENCES fagsak;
+ALTER TABLE kontaktopplysning ADD CONSTRAINT fk_kontakt_fagsak FOREIGN KEY (saksnummer) REFERENCES fagsak;
 

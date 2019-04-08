@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -49,7 +48,6 @@ public class BrevDataByggerInnvilgelseTest {
     @Mock
     private BrevbestillingDto brevbestillingDto;
 
-    private SoeknadDokument søknad;
     private String saksbehandler = "saksbehandler";
     private BrevDataByggerInnvilgelse brevDataByggerInnvilgelse;
 
@@ -67,10 +65,10 @@ public class BrevDataByggerInnvilgelseTest {
         when(landVelgerService.hentTrygdemyndighetsland(any())).thenReturn(Landkoder.DE);
 
         brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(avklartefaktaService,
-                                                                  landVelgerService,
-                                                                  lovvalgsperiodeService,
-                                                                  brevbestillingDto,
-                                                                  brevDataByggerA1);
+            landVelgerService,
+            lovvalgsperiodeService,
+            brevbestillingDto,
+            brevDataByggerA1);
     }
 
     @Test
@@ -99,10 +97,10 @@ public class BrevDataByggerInnvilgelseTest {
         brevbestillingDto.fritekst = "FRITEKST";
 
         BrevDataByggerInnvilgelse brevDataByggerInnvilgelse =
-            new BrevDataByggerInnvilgelse(avklartefaktaService, landVelgerService, lovvalgsperiodeService, brevbestillingDto,brevDataByggerA1);
+            new BrevDataByggerInnvilgelse(avklartefaktaService, landVelgerService, lovvalgsperiodeService, brevbestillingDto, brevDataByggerA1);
 
         BrevData brevData = brevDataByggerInnvilgelse.lag(behandling, saksbehandler);
-        assertThat(brevbestillingDto).isEqualToComparingFieldByField(brevData);
-        assertThat(saksbehandler).isEqualTo(brevData.saksbehandler);
+        assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingDto, "begrunnelseKode", "fritekst");
+        assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
     }
 }

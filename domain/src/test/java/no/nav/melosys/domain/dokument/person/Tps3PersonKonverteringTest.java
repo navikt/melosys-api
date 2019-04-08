@@ -12,7 +12,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
@@ -35,7 +34,7 @@ public class Tps3PersonKonverteringTest {
         t.transform(xmlSource, outputTarget);
         baos.flush();
         byte[] xmlBytes = baos.toByteArray();
-        
+
         // Unmarshal...
         ByteArrayInputStream bais = new ByteArrayInputStream(xmlBytes);
         JAXBContext ctx = JAXBContext.newInstance(PersonDokument.class);
@@ -46,6 +45,8 @@ public class Tps3PersonKonverteringTest {
         // Verifiser...
         assertEquals("MILI", p2.diskresjonskode.getKode());
         assertEquals(LocalDate.of(2011, 11, 11), p2.fødselsdato);
+        assertThat(p2.bostedsadresse.getGateadresse().getGatenummer()).isNull(); // tomt felt skal blir null, ikke 0
+        assertThat(p2.bostedsadresse.getGateadresse().getHusnummer()).isEqualTo(7);
     }
 
     @Test
@@ -88,6 +89,10 @@ public class Tps3PersonKonverteringTest {
 
         assertThat(dokument).isNotNull();
         assertThat(dokument.midlertidigPostadresse).isNotNull();
+
+        MidlertidigPostadresseNorge midlertidigPostadresseNorge = (MidlertidigPostadresseNorge) dokument.midlertidigPostadresse;
+        assertThat(midlertidigPostadresseNorge.gateadresse.getGatenummer()).isNull();
+        assertThat(midlertidigPostadresseNorge.gateadresse.getHusnummer()).isEqualTo(7);
     }
 
     private PersonDokument getPersonDokument(String kilde) throws Exception {

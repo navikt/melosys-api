@@ -15,11 +15,10 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -30,14 +29,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 /**
@@ -46,17 +43,16 @@ import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 @Service
 public class BrevDataService {
 
-    private TpsFasade tpsFasade;
-
     static final String MELOSYS_ENHET_ID = "4530";
 
-    private static final String FALSK_MOTTAKER_ID = "11111111111";
     static final String PLASSHOLDER_TEKST = "-";
     static final String PLASSHOLDER_POSTNUMMER = "0000";
 
-    private BehandlingsresultatRepository behandlingsresultatRepository;
+    private final TpsFasade tpsFasade;
 
-    private UtenlandskMyndighetRepository utenlandskMyndighetRepository;
+    private final BehandlingsresultatRepository behandlingsresultatRepository;
+
+    private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
     @Autowired
     public BrevDataService(@Qualifier("system") TpsFasade tpsFasade,
@@ -70,94 +66,76 @@ public class BrevDataService {
     /**
      * Genererer metada til doksys angående dokumentbestillingen.
      */
-    public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
-        Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument");
+    public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument,
+                                                            Aktoer mottaker, Kontaktopplysning kontaktopplysning,
+                                                            Behandling behandling, BrevData brevData)
+        throws TekniskException, FunksjonellException {
         Fagsak fagsak = behandling.getFagsak();
-        String saksnummer = fagsak.getSaksnummer();
 
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
         metadata.dokumenttypeID = DokumenttypeIdMapper.hentID(produserbartDokument);
-        metadata.mottakersRolle = brevData.mottaker;
-
-        metadata.brukerID = tpsFasade.hentFagsakIdentMedRolleType(fagsak, BRUKER);
-        Aktoer representant = fagsak.hentAktørMedRolleType(REPRESENTANT);
-
-        switch (produserbartDokument) {
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
-            case AVSLAG_YRKESAKTIV:
-            case ORIENTERING_ANMODNING_UNNTAK: {
-                if (representant != null) {
-                    metadata.mottakerID = tpsFasade.hentFagsakIdentMedRolleType(fagsak, REPRESENTANT);
-                } else {
-                    metadata.mottakerID = metadata.brukerID;
-                }
-                break;
-            }
-            case INNVILGELSE_ARBEIDSGIVER:
-            case AVSLAG_ARBEIDSGIVER: {
-                if (representant != null) {
-                    metadata.mottakerID = tpsFasade.hentFagsakIdentMedRolleType(fagsak, REPRESENTANT);
-                } else {
-                    if (brevData.mottaker == null) {
-                        throw new TekniskException("Det finnes ingen mottaker på sak " + fagsak.getSaksnummer());
-                    }
-                    metadata.mottakerID = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevData.mottaker);
-                }
-                break;
-            }
-            case ATTEST_A1:
-            case ANMODNING_UNNTAK:
-            case INNVILGELSE_YRKESAKTIV:
-                //Avklaring av brev mottaker blir utført i MELOSYS-2248
-            case MELDING_MANGLENDE_OPPLYSNINGER:
-            case MELDING_HENLAGT_SAK: {
-                if (brevData.mottaker == null) {
-                    throw new TekniskException("Det finnes ingen mottaker på sak " + saksnummer);
-                }
-                metadata.mottakerID = tpsFasade.hentFagsakIdentMedRolleType(fagsak, brevData.mottaker);
-                break;
-            }
-            default:
-                throw new TekniskException("Produserbaredokumenter ikke støttet");
-        }
+        metadata.mottaker = mottaker;
+        metadata.mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
+        metadata.brukerID = tpsFasade.hentIdentForAktørId(fagsak.hentAktørMedRolleType(BRUKER).getAktørId());
 
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
         metadata.fagområde = Tema.MED.getKode();
         metadata.saksbehandler = brevData.saksbehandler;
-        metadata.utenlandskMyndighet = (brevData.mottaker == Aktoersroller.MYNDIGHET) ? hentMyndighetFraSak(fagsak) : null;
-        metadata.utledRegisterInfo = dokprodUtlederRegisterInfo(metadata);
+        metadata.utenlandskMyndighet = mottaker.erUtenlandskMyndighet() ? hentMyndighetFraAktoer(mottaker) : null;
+        metadata.utledRegisterInfo = dokprodUtlederRegisterInfo(mottaker);
 
         if (!metadata.utledRegisterInfo) {
-            Saksopplysning tpsOpplysning = tpsFasade.hentPerson(metadata.brukerID);
-            PersonDokument tpsDokument = (PersonDokument) tpsOpplysning.getDokument();
-            metadata.brukerNavn = tpsDokument.sammensattNavn;
+            metadata.brukerNavn = tpsFasade.hentSammensattNavn(metadata.brukerID);
         }
         return metadata;
     }
 
-    UtenlandskMyndighet hentMyndighetFraSak(Fagsak fagsak) throws TekniskException {
-        return utenlandskMyndighetRepository.findByLandkode(fagsak.hentMyndighetLandkode());
+    private String avklarMottakerId(Aktoer mottaker, Kontaktopplysning kontaktopplysning) throws TekniskException {
+        Aktoersroller mottakerRolle = mottaker.getRolle();
+
+        if (mottakerRolle == ARBEIDSGIVER || mottakerRolle == REPRESENTANT) {
+            return (kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null) ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
+        } else if (mottakerRolle == BRUKER) {
+            try {
+                return tpsFasade.hentIdentForAktørId(mottaker.getAktørId());
+            } catch (IkkeFunnetException e) {
+                throw new TekniskException(e);
+            }
+        } else if (mottakerRolle == MYNDIGHET) {
+            if (mottaker.erUtenlandskMyndighet()) {
+                return mottaker.getInstitusjonId();
+            } else {
+                return mottaker.getOrgnr();
+            }
+
+        }
+
+        throw new TekniskException(mottakerRolle + " støttes ikke");
+    }
+
+    UtenlandskMyndighet hentMyndighetFraAktoer(Aktoer aktoer) throws TekniskException {
+        return utenlandskMyndighetRepository.findByLandkode(aktoer.hentMyndighetLandkode());
     }
 
     // Dokprod kan utlede registerinfo når Melosys ikke trenger å sette adressen sammen.
-    // Melosys setter adressen sammen for kontaktpersoner og utelandske myndigheter.
-    private boolean dokprodUtlederRegisterInfo(DokumentbestillingMetadata metadata) {
-        return Aktoersroller.MYNDIGHET != metadata.mottakersRolle;
+    // Melosys setter adressen sammen for utelandske myndigheter.
+    private boolean dokprodUtlederRegisterInfo(Aktoer mottaker) {
+        return !mottaker.erUtenlandskMyndighet();
     }
 
     /**
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
-    @Transactional(propagation = Propagation.MANDATORY)
-    public Element lagBrevXML(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws TekniskException {
+    @Transactional(propagation = Propagation.MANDATORY, readOnly = true)
+    public Element lagBrevXML(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) throws TekniskException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
             .orElseThrow(() -> new TekniskException("Finner ingen behandlingsresultat for behandlingid"));
 
         Element brevXmlElement;
         try {
-            FellesType fellesType = mapFellesType(behandling);
-            MelosysNAVFelles navFelles = mapNAVFelles(behandling, brevData);
+            FellesType fellesType = mapFellesType(mottaker, kontaktopplysning, behandling);
+            MelosysNAVFelles navFelles = mapNAVFelles(mottaker, kontaktopplysning, behandling, brevData);
             String brevXml = BrevDataMapperRuter.brevDataMapper(produserbartDokument).mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -173,25 +151,84 @@ public class BrevDataService {
         return brevXmlElement;
     }
 
-    private FellesType mapFellesType(Behandling behandling) {
+    private FellesType mapFellesType(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling) {
         final FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer(behandling.getFagsak().getSaksnummer());
+        if (mottaker.getRolle() == REPRESENTANT) {
+            fellesType.setFullmektig(mottaker.getOrgnr());
+        }
+        if (kontaktopplysning != null) {
+            fellesType.setKontaktperson(kontaktopplysning.getKontaktNavn());
+        }
 
         return fellesType;
     }
 
-    private MelosysNAVFelles mapNAVFelles(Behandling behandling, BrevData brevData) throws TekniskException {
+    private MelosysNAVFelles mapNAVFelles(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData)
+        throws TekniskException {
         final MelosysNAVFelles navFelles = new MelosysNAVFelles();
 
-        navFelles.setSakspart(lagSakspart(behandling));
-        navFelles.setMottaker(lagMottaker(behandling, brevData));
         navFelles.setBehandlendeEnhet(lagNavEnhet());
-        navFelles.setSignerendeSaksbehandler(lagSaksbehandler(brevData.saksbehandler));
-        navFelles.setSignerendeBeslutter(lagSaksbehandler(brevData.saksbehandler));
         navFelles.setKontaktinformasjon(BrevDataUtils.lagKontaktInformasjon());
+        navFelles.setMottaker(lagMottaker(mottaker, kontaktopplysning, behandling));
+        navFelles.setSakspart(lagSakspart(behandling));
+        navFelles.setSignerendeBeslutter(lagSaksbehandler(brevData.saksbehandler));
+        navFelles.setSignerendeSaksbehandler(lagSaksbehandler(brevData.saksbehandler));
 
         return navFelles;
     }
+
+    Mottaker lagMottaker(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling) throws TekniskException {
+        Aktoersroller mottakerRolle = mottaker.getRolle();
+        String mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
+
+        Mottaker mottakerBrev;
+
+        if (mottakerRolle == BRUKER) {
+            mottakerBrev = new Person();
+            mottakerBrev.setTypeKode(AktoerType.PERSON);
+            mottakerBrev.setId(mottakerID);
+        } else if (mottakerRolle == ARBEIDSGIVER || mottakerRolle == REPRESENTANT) {
+            mottakerBrev = new Organisasjon();
+            mottakerBrev.setTypeKode(AktoerType.ORGANISASJON);
+            mottakerBrev.setId(mottakerID);
+        } else if (mottakerRolle == MYNDIGHET) {
+            if (mottaker.erUtenlandskMyndighet()) {
+                mottakerBrev = new Person();
+                mottakerBrev.setBerik(false);
+                mottakerBrev.setTypeKode(AktoerType.PERSON);
+                mottakerBrev.setId(mottaker.getInstitusjonId());
+
+                UtenlandskMyndighet utenlandskMyndighet = hentMyndighetFraAktoer(mottaker);
+                mottakerBrev.setNavn(utenlandskMyndighet.navn);
+                mottakerBrev.setKortNavn(utenlandskMyndighet.navn);
+                mottakerBrev.setSpraakkode(Spraakkode.NB);
+                mottakerBrev.setMottakeradresse(lagUtendlanskAdresse(utenlandskMyndighet));
+                return mottakerBrev;
+            } else {
+                mottakerBrev = new Organisasjon();
+                mottakerBrev.setTypeKode(AktoerType.ORGANISASJON);
+                mottakerBrev.setId(mottakerID);
+            }
+        } else {
+            throw new TekniskException(mottakerRolle + " støttes ikke.");
+        }
+
+        mottakerBrev.setNavn(PLASSHOLDER_TEKST);
+        mottakerBrev.setMottakeradresse(lagNorskPostadresse());
+        mottakerBrev.setKortNavn(PLASSHOLDER_TEKST);
+        mottakerBrev.setSpraakkode(Spraakkode.NB);
+
+        return mottakerBrev;
+    }
+
+    private Saksbehandler lagSaksbehandler(String userId) {
+        Saksbehandler saksbehandler = new Saksbehandler();
+        saksbehandler.setNavEnhet(lagNavEnhet());
+        saksbehandler.setNavAnsatt(lagNavAnsatt(userId));
+        return saksbehandler;
+    }
+
 
     private Sakspart lagSakspart(Behandling behandling) throws TekniskException {
         Sakspart sakspart = new Sakspart();
@@ -210,57 +247,4 @@ public class BrevDataService {
         sakspart.setNavn(PLASSHOLDER_TEKST);
         return sakspart;
     }
-
-    Mottaker lagMottaker(Behandling behandling, BrevData brevData) throws TekniskException {
-        Aktoersroller mottakersRolle = brevData.mottaker != null ? brevData.mottaker : BRUKER;
-        Aktoer aktør = behandling.getFagsak().hentAktørMedRolleType(mottakersRolle);
-        TekniskException ingenAktør = new TekniskException("Det finnes ingen mottaker på sak " + behandling.getFagsak().getSaksnummer());
-        if (aktør == null) {
-            throw ingenAktør;
-        }
-
-        Mottaker mottaker;
-        if (aktør.getAktørId() != null) {
-            try {
-                mottaker = new Person();
-                mottaker.setTypeKode(AktoerType.PERSON);
-                mottaker.setId(tpsFasade.hentIdentForAktørId(aktør.getAktørId()));
-            } catch (IkkeFunnetException e) {
-                throw new TekniskException("Det finnes ingen ident for aktørID " + aktør.getAktørId());
-            }
-        } else if (aktør.getOrgnr() != null) {
-            mottaker = new Organisasjon();
-            mottaker.setTypeKode(AktoerType.ORGANISASJON);
-            mottaker.setId(aktør.getOrgnr());
-        } else if (aktør.getInstitusjonId() != null) {
-            mottaker = new Person();
-            mottaker.setBerik(false);
-            mottaker.setTypeKode(AktoerType.PERSON);
-            mottaker.setId(FALSK_MOTTAKER_ID);
-
-            UtenlandskMyndighet utenlandskMyndighet = hentMyndighetFraSak(behandling.getFagsak());
-            mottaker.setNavn(utenlandskMyndighet.navn);
-            mottaker.setKortNavn(aktør.getInstitusjonId());
-            mottaker.setSpraakkode(Spraakkode.NB);
-            mottaker.setMottakeradresse(lagUtendlanskAdresse(utenlandskMyndighet));
-            return mottaker;
-        } else {
-            throw ingenAktør;
-        }
-
-        mottaker.setNavn(PLASSHOLDER_TEKST);
-        mottaker.setKortNavn(PLASSHOLDER_TEKST);
-        mottaker.setSpraakkode(Spraakkode.NB);
-        mottaker.setMottakeradresse(lagNorskPostadresse());
-
-        return mottaker;
-    }
-
-    private Saksbehandler lagSaksbehandler(String userId) {
-        Saksbehandler saksbehandler = new Saksbehandler();
-        saksbehandler.setNavEnhet(lagNavEnhet());
-        saksbehandler.setNavAnsatt(lagNavAnsatt(userId));
-        return saksbehandler;
-    }
-
 }
