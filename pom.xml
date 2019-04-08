@@ -42,7 +42,7 @@
         <melosys.frontend.version>0.19.0-SNAPSHOT</melosys.frontend.version>
         <melosys.jsonschema.version>1.15.0-1036</melosys.jsonschema.version>
         <melosys.frontendlogger.version>0.16.1-SNAPSHOT</melosys.frontendlogger.version>
-        <melosys.internt.kodeverk.version>1.2.7</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>1.2.8</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>
 
         <!-- NAV -->
