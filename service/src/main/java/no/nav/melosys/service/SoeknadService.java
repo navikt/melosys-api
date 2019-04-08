@@ -10,6 +10,7 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
 
@@ -50,7 +51,7 @@ public class SoeknadService {
         return (SoeknadDokument) soeknad.getDokument();
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public SoeknadDokument registrerSøknad(long behandlingID, SoeknadDokument soeknadDokument) throws IkkeFunnetException {
         Behandling behandling = behandlingRepo.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Registrering av søknad feilet fordi behandling med ID " + behandlingID + " er ikke funnet"));

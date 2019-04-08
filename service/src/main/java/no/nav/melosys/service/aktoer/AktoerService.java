@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.AktoerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -31,7 +32,7 @@ public class AktoerService {
         return aktørRepository.findAll(Example.of(aktør));
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void lagEllerOppdaterAktoer(Fagsak fagsak, AktoerDto aktoerDto) throws FunksjonellException {
         if (aktoerDto.getRolleKode() == null) {
             throw new FunksjonellException("Kan ikke lagre aktør uten rolle. Saksnummer: " + fagsak.getSaksnummer());

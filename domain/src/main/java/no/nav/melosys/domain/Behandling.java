@@ -151,4 +151,8 @@ public class Behandling extends RegistreringsInfo {
                     || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT
                     || status == Behandlingsstatus.AVSLUTTET);
     }
+
+    public boolean erVenterForDokumentasjon() {
+        return status == Behandlingsstatus.AVVENT_DOK_PART || status == Behandlingsstatus.AVVENT_DOK_UTL;
+    }
 }

@@ -105,7 +105,7 @@ public class DokumentService {
     // selv om dataene som hentes ut egentlig er read-only. Det ser ut til å
     // være påkrevd for Hibernate å finne en sesjon via Spring-transaksjonen
     // for å kunne laste lazy collections i objektgrafen.
-    @Transactional
+    @Transactional(readOnly = true)
     public byte[] produserUtkast(long behandlingID, Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto)
         throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingID);
@@ -208,7 +208,7 @@ public class DokumentService {
         dokSysFasade.produserIkkeredigerbartDokument(lagDokumentbestilling(produserbartDokument, mottaker, behandling, brevData));
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void produserDokumentISaksflyt(long behandlingID, Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto) throws FunksjonellException {
         Assert.notNull(brevbestillingDto, "BrevbestillingDto brukes til å bestille brev i saksflyt.");
         Behandling behandling = behandlingRepository.findById(behandlingID)
