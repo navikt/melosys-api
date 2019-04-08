@@ -19,6 +19,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
 
 import static no.nav.melosys.integrasjon.Fagsystem.GSAK_I_JOARK;
 import static no.nav.melosys.integrasjon.Fagsystem.MELOSYS;
@@ -111,7 +115,8 @@ public class DoksysService implements DoksysFasade {
 
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Bestiller dokument:{} {}", System.lineSeparator(), wsRequest);
+                log.debug("Sender request:{} {}", System.lineSeparator(), wsRequest);
+                log.debug("Bestiller dokument:{} {}", System.lineSeparator(), xmlToString(dokumentbestilling.getBrevData()));
             }
             ProduserIkkeredigerbartDokumentResponse wsResponse = dokumentproduksjonConsumer.produserIkkeredigerbartDokument(wsRequest);
 
@@ -188,5 +193,13 @@ public class DoksysService implements DoksysFasade {
         person.setIdent(personID);
         person.setNavn(navn);
         return person;
+    }
+
+    private static String xmlToString(Node node) {
+        Document document = node.getOwnerDocument();
+        DOMImplementationLS domImplLS = (DOMImplementationLS) document
+            .getImplementation();
+        LSSerializer serializer = domImplLS.createLSSerializer();
+        return serializer.writeToString(node);
     }
 }

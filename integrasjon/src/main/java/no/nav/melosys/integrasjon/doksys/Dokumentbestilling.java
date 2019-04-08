@@ -1,19 +1,21 @@
 package no.nav.melosys.integrasjon.doksys;
 
+import org.w3c.dom.Element;
+
 public final class Dokumentbestilling {
     private final DokumentbestillingMetadata metadata;
-    private final Object brevData;
+    private final Element brevData;
 
-    public Dokumentbestilling(DokumentbestillingMetadata metadata, Object brevXml) {
+    public Dokumentbestilling(DokumentbestillingMetadata metadata, Element brevXml) {
         this.metadata = metadata;
         this.brevData = brevXml;
     }
 
-    public DokumentbestillingMetadata getMetadata() {
+    DokumentbestillingMetadata getMetadata() {
         return metadata;
     }
 
-    public Object getBrevData() {
+    public Element getBrevData() {
         return brevData;
     }
 }
