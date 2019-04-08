@@ -134,8 +134,10 @@ public class Fagsak extends RegistreringsInfo {
      */
     public Landkoder hentMyndighetLandkode() throws TekniskException {
         Aktoer myndighet = hentAktørMedRolleType(MYNDIGHET);
-        String[] split = myndighet.getInstitusjonId().split(":");
-        return Landkoder.valueOf(split[0]);
+        if (myndighet == null) {
+            throw new TekniskException("Finnes ingen aktør med rolle " + MYNDIGHET + " for fagsak" + saksnummer);
+        }
+        return myndighet.hentMyndighetLandkode();
     }
 
     /**

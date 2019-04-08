@@ -82,7 +82,7 @@ public class BrevDataService {
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
         metadata.fagområde = Tema.MED.getKode();
         metadata.saksbehandler = brevData.saksbehandler;
-        metadata.utenlandskMyndighet = mottaker.erUtenlandskMyndighet() ? hentMyndighetFraSak(fagsak) : null;
+        metadata.utenlandskMyndighet = mottaker.erUtenlandskMyndighet() ? hentMyndighetFraAktoer(mottaker) : null;
         metadata.utledRegisterInfo = dokprodUtlederRegisterInfo(mottaker);
 
         if (!metadata.utledRegisterInfo) {
@@ -114,8 +114,8 @@ public class BrevDataService {
         throw new TekniskException(mottakerRolle + " støttes ikke");
     }
 
-    UtenlandskMyndighet hentMyndighetFraSak(Fagsak fagsak) throws TekniskException {
-        return utenlandskMyndighetRepository.findByLandkode(fagsak.hentMyndighetLandkode());
+    UtenlandskMyndighet hentMyndighetFraAktoer(Aktoer aktoer) throws TekniskException {
+        return utenlandskMyndighetRepository.findByLandkode(aktoer.hentMyndighetLandkode());
     }
 
     // Dokprod kan utlede registerinfo når Melosys ikke trenger å sette adressen sammen.
@@ -199,7 +199,7 @@ public class BrevDataService {
                 mottakerBrev.setTypeKode(AktoerType.PERSON);
                 mottakerBrev.setId(mottaker.getInstitusjonId());
 
-                UtenlandskMyndighet utenlandskMyndighet = hentMyndighetFraSak(behandling.getFagsak());
+                UtenlandskMyndighet utenlandskMyndighet = hentMyndighetFraAktoer(mottaker);
                 mottakerBrev.setNavn(utenlandskMyndighet.navn);
                 mottakerBrev.setKortNavn(utenlandskMyndighet.navn);
                 mottakerBrev.setSpraakkode(Spraakkode.NB);

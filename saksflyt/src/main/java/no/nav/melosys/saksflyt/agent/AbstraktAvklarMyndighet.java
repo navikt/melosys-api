@@ -2,15 +2,12 @@ package no.nav.melosys.saksflyt.agent;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator;
-import no.nav.melosys.service.dokument.LandvelgerService;
-import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.aktoer.AvklarMyndighetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,22 +19,14 @@ public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
 
-    private final FagsakService fagsakService;
-
-    private final LandvelgerService landvelgerService;
-
-    private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
+    private final AvklarMyndighetService avklarMyndighetService;
 
     public AbstraktAvklarMyndighet(BehandlingRepository behandlingRepository,
-                           BehandlingsresultatRepository behandlingsresultatRepository,
-                           FagsakService fagsakService,
-                           LandvelgerService landvelgerService,
-                           UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
+                                   BehandlingsresultatRepository behandlingsresultatRepository,
+                                   AvklarMyndighetService avklarMyndighetService) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
-        this.fagsakService = fagsakService;
-        this.landvelgerService = landvelgerService;
-        this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
+        this.avklarMyndighetService = avklarMyndighetService;
     }
 
     @Override
@@ -58,11 +47,8 @@ public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
             String saksnummer = fagsak.getSaksnummer();
             Aktoer myndighetPart = fagsak.hentAktørMedRolleType(Aktoersroller.MYNDIGHET);
             if (myndighetPart == null) {
-                Landkoder landkode = landvelgerService.hentTrygdemyndighetsland(behandling);
-                UtenlandskMyndighet myndighet = utenlandskMyndighetRepository.findByLandkode(landkode);
-                String institusjonsID = landkode.getKode() + ":" + myndighet.institusjonskode;
-                fagsakService.leggTilAktør(saksnummer, Aktoersroller.MYNDIGHET, institusjonsID);
-                log.info("Avklart landkode {} og myndighet {} for sak {}.", landkode, myndighet.institusjonskode, saksnummer);
+                avklarMyndighetService.avklarMyndighetOgLagre(behandling);
+                log.info("Avklart myndighet for sak {}.", saksnummer);
             } else {
                 log.debug("Sak {} har allerede en myndighet med kode {}", saksnummer, myndighetPart.getInstitusjonId());
             }

@@ -91,14 +91,15 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagMyndighet() throws TekniskException {
-        Fagsak fagsak = new Fagsak();
-        fagsak.getAktører().add(lagAktoerMyndighet("DE:TEST"));
+    public void lagMyndighetFraAktoer() throws TekniskException {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.MYNDIGHET);
+        aktoer.setInstitusjonId("DE:TEST");
         UtenlandskMyndighet tyskMyndighet = new UtenlandskMyndighet();
         tyskMyndighet.institusjonskode = "TEST";
         when(utenlandskMyndighetRepository.findByLandkode(Landkoder.DE)).thenReturn(tyskMyndighet);
 
-        UtenlandskMyndighet utenlandskMyndighet = service.hentMyndighetFraSak(fagsak);
+        UtenlandskMyndighet utenlandskMyndighet = service.hentMyndighetFraAktoer(aktoer);
 
         assertThat(utenlandskMyndighet.institusjonskode).isEqualTo(tyskMyndighet.institusjonskode);
     }
