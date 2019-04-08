@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -12,19 +13,12 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.Fagsystem;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.joark.behandleinngaaendejournal.BehandleInngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
-import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.binding.*;
-import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.ArkivSak;
-import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Avsender;
-import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Dokumentkategori;
-import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.meldinger.FerdigstillJournalfoeringRequest;
-import no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.meldinger.OppdaterJournalpostRequest;
+import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.binding.*;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.*;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.meldinger.HentJournalpostRequest;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.meldinger.HentJournalpostResponse;
+import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Journalfoeringsbehov;
+import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.JournalpostMangler;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.meldinger.UtledJournalfoeringsbehovRequest;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.meldinger.UtledJournalfoeringsbehovResponse;
 import no.nav.tjeneste.virksomhet.journal.v3.*;
@@ -34,40 +28,37 @@ import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentRequest;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentResponse;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeRequest;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 import static no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journaltilstand.UTGAAR;
 
 @Service
 public class JoarkService implements JoarkFasade {
 
-    private BehandleInngaaendeJournalConsumer behandleInngåendeJournalConsumer;
+    private static Logger log = LoggerFactory.getLogger(JoarkService.class);
+
     private InngaaendeJournalConsumer inngåendeJournalConsumer;
     private JournalConsumer journalConsumer;
+    private final JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer;
 
     @Autowired
-    public JoarkService(BehandleInngaaendeJournalConsumer behandleInngåendeJournal, InngaaendeJournalConsumer inngåendeJournal, JournalConsumer journal) {
-        this.behandleInngåendeJournalConsumer = behandleInngåendeJournal;
+    public JoarkService(InngaaendeJournalConsumer inngåendeJournal, JournalConsumer journal, JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer) {
         this.inngåendeJournalConsumer = inngåendeJournal;
         this.journalConsumer = journal;
+        this.journalfoerInngaaendeConsumer = journalfoerInngaaendeConsumer;
     }
 
     @Override
-    public void ferdigstillJournalføring(String journalpostId) throws FunksjonellException {
-        FerdigstillJournalfoeringRequest request = new FerdigstillJournalfoeringRequest();
-        request.setJournalpostId(journalpostId);
-        request.setEnhetId(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
-        try {
-            behandleInngåendeJournalConsumer.ferdigstillJournalfoering(request);
-        } catch (FerdigstillJournalfoeringFerdigstillingIkkeMulig | FerdigstillJournalfoeringJournalpostIkkeInngaaende | FerdigstillJournalfoeringUgyldigInput e) {
-            throw new FunksjonellException(e);
-        } catch (FerdigstillJournalfoeringObjektIkkeFunnet e) {
-            throw new IkkeFunnetException(e.getMessage());
-        } catch (FerdigstillJournalfoeringSikkerhetsbegrensning e) {
-            throw new SikkerhetsbegrensningException(e);
-        }
+    public void ferdigstillJournalføring(String journalpostId) throws FunksjonellException, IntegrasjonException {
+        PutJournalpostRequest journalpostRequest = new PutJournalpostRequest();
+        journalpostRequest.setForsoekEndeligJF(true);
+        journalpostRequest.setJournalfEnhet(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
+        journalfoerInngaaendeConsumer.oppdaterJournalpost(journalpostRequest, journalpostId);
     }
 
     @Override
@@ -93,53 +84,28 @@ public class JoarkService implements JoarkFasade {
 
     @Override
     public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
-        HentJournalpostRequest request = new HentJournalpostRequest();
-        request.setJournalpostId(journalpostID);
 
-        HentJournalpostResponse hentJournalpostResponse;
-        try {
-            hentJournalpostResponse = inngåendeJournalConsumer.hentJournalpost(request);
-        } catch (HentJournalpostJournalpostIkkeFunnet e) {
-            throw new IkkeFunnetException(e);
-        } catch (HentJournalpostJournalpostIkkeInngaaende | HentJournalpostUgyldigInput e) {
-            throw new FunksjonellException(e);
-        } catch (HentJournalpostSikkerhetsbegrensning hentJournalpostSikkerhetsbegrensning) {
-            throw new SikkerhetsbegrensningException(hentJournalpostSikkerhetsbegrensning);
-        }
+        GetJournalpostResponse response = journalfoerInngaaendeConsumer.hentJournalpost(journalpostID);
 
-        InngaaendeJournalpost inngaaendeJournalpost = hentJournalpostResponse.getInngaaendeJournalpost();
         Journalpost journalpost = new Journalpost(journalpostID);
-        List<Aktoer> brukerListe = inngaaendeJournalpost.getBrukerListe();
-        if (!brukerListe.isEmpty()) {
-            if (brukerListe.size() > 1) {
-                // Vi antar at det er bare en bruker.
-                // Flere brukere på samme journalpost har ikke vært et behov.
-                throw new FunksjonellException("Det finnes flere brukere i journalpost " + journalpostID); 
-            } else {
-                Aktoer aktoer = brukerListe.get(0);
-                if (aktoer instanceof Person) {
-                    Person p = (Person) aktoer;
-                    journalpost.setBrukerId(p.getIdent());
-                } else if (aktoer instanceof Organisasjon) {
-                    throw new IntegrasjonException("Organisasjon i brukerlisten er ikke støttet");
-                } else {
-                    throw new IntegrasjonException(aktoer.getClass().getSimpleName() + " i brukerlisten er ikke støttet");
-                }
-            }
+        journalpost.setBrukerId(response.getBrukerListe().stream().map(Bruker::getIdentifikator).findFirst().orElse(null));
+        journalpost.setForsendelseMottatt(response.getForsendelseMottatt().toInstant());
+
+        if (response.getDokumentListe().size() > 1) {
+            log.warn("Journalpost {} inneholder flere dokumenter!", journalpostID);
         }
-        journalpost.setAvsenderId(inngaaendeJournalpost.getAvsenderId());
-        if (inngaaendeJournalpost.getForsendelseMottatt() != null) {
-            journalpost.setForsendelseMottatt(KonverteringsUtils.xmlGregorianCalendarToInstant(inngaaendeJournalpost.getForsendelseMottatt()));
-        }
-        Dokumentinformasjon hoveddokument = inngaaendeJournalpost.getHoveddokument();
+        Dokument dokument = response.getDokumentListe().get(0);
         ArkivDokument arkivDokument = new ArkivDokument();
-        arkivDokument.setDokumentId(hoveddokument.getDokumentId());
-        // FIXME MELOSYS-1416
-        // Tjenesten mangler opplysninger (tittel og vedleggstitler) tilgjengelige i nye REST tjenester (https://jira.adeo.no/browse/PK-51497).
-        arkivDokument.setTittel("");
+        arkivDokument.setDokumentId(dokument.getDokumentId());
+        arkivDokument.setTittel(dokument.getTittel());
+
         journalpost.setHoveddokument(arkivDokument);
-        if (inngaaendeJournalpost.getArkivSak() != null) {
-            journalpost.setArkivSakId(inngaaendeJournalpost.getArkivSak().getArkivSakId());
+
+        if (response.getAvsender() != null) {
+            journalpost.setAvsenderId(response.getAvsender().getIdentifikator());
+        }
+        if (response.getArkivSak() != null) {
+            journalpost.setArkivSakId(response.getArkivSak().getArkivSakId());
         }
 
         return journalpost;
@@ -210,49 +176,48 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void oppdaterJounalpost(String journalpostId, String dokumentID, Long gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, boolean medDokumentkategori)
-        throws FunksjonellException {
-        OppdaterJournalpostRequest request = new OppdaterJournalpostRequest();
-        no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.InngaaendeJournalpost journalpost =
-                new no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.InngaaendeJournalpost();
-        journalpost.setJournalpostId(journalpostId);
+    public void oppdaterJournalpost(String journalpostId, String dokumentID, Long gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, List<String> vedleggTittelListe, boolean medDokumentkategori) throws SikkerhetsbegrensningException, IntegrasjonException {
 
-        ArkivSak arkivSak = new ArkivSak();
-        arkivSak.setArkivSakId(Long.toString(gsakSaksnummer));
-        arkivSak.setArkivSakSystem(Fagsystem.GSAK_I_JOARK.getKode());
-        journalpost.setArkivSak(arkivSak);
+        oppdaterDokument(journalpostId, dokumentID, tittel, medDokumentkategori);
+        if (!CollectionUtils.isEmpty(vedleggTittelListe)) {
+            for (String vedleggTittel : vedleggTittelListe) {
+                PostLogiskVedleggRequest logiskVedleggRequest = new PostLogiskVedleggRequest();
+                logiskVedleggRequest.setTittel(vedleggTittel);
+                journalfoerInngaaendeConsumer.leggTilLogiskVedlegg(logiskVedleggRequest, journalpostId, dokumentID);
+            }
+        }
 
-        no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Person bruker = new no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Person();
-        bruker.setIdent(brukerID);
+        PutJournalpostRequest journalpost = new PutJournalpostRequest();
+
+        ArkivSakWithArkivsakSystemEnum arkivsak = new ArkivSakWithArkivsakSystemEnum();
+        arkivsak.setArkivSakId(Long.toString(gsakSaksnummer));
+        arkivsak.setArkivSakSystem(ArkivSakWithArkivsakSystemEnum.ArkivSakSystem.GSAK);
+        journalpost.setArkivSak(arkivsak);
+
+        Bruker bruker = new Bruker();
+        bruker.setIdentifikator(brukerID);
+        bruker.setBrukerType(Bruker.BrukerType.PERSON);
         journalpost.setBruker(bruker);
 
-        Avsender avsender = new Avsender();
-        avsender.setAvsenderId(avsenderID);
-        avsender.setAvsenderNavn(avsenderNavn);
+        no.nav.dok.tjenester.journalfoerinngaaende.Avsender avsender = new no.nav.dok.tjenester.journalfoerinngaaende.Avsender();
+        avsender.setAvsenderType(no.nav.dok.tjenester.journalfoerinngaaende.Avsender.AvsenderType.PERSON);
+        avsender.setIdentifikator(avsenderID);
+        avsender.setNavn(avsenderNavn);
         journalpost.setAvsender(avsender);
 
-        no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Dokumentinformasjon dokumentinfo =
-            new no.nav.tjeneste.virksomhet.behandleinngaaendejournal.v1.informasjon.Dokumentinformasjon();
-        if (medDokumentkategori) {
-            Dokumentkategori dokumentkategori = new Dokumentkategori();
-            dokumentkategori.setValue(DokumentKategoriKode.IS.getKode());
-            dokumentinfo.setDokumentkategori(dokumentkategori);
-        }
-        dokumentinfo.setDokumentId(dokumentID);
-        dokumentinfo.setTittel(tittel);
-        journalpost.setHoveddokument(dokumentinfo);
-        journalpost.setInnhold(tittel); // Innhold bruker titlen siden det ikke finnes andre grunnlag for det.
+        journalpost.setForsoekEndeligJF(false);
 
-        request.setInngaaendeJournalpost(journalpost);
-        try {
-            behandleInngåendeJournalConsumer.oppdaterJournalpost(request);
-        } catch (OppdaterJournalpostSikkerhetsbegrensning e) {
-            throw new SikkerhetsbegrensningException(e);
-        } catch (OppdaterJournalpostObjektIkkeFunnet e) {
-            throw new IkkeFunnetException(e.getMessage());
-        } catch (OppdaterJournalpostOppdateringIkkeMulig | OppdaterJournalpostUgyldigInput | OppdaterJournalpostJournalpostIkkeInngaaende e) {
-            throw new FunksjonellException(e);
+        journalfoerInngaaendeConsumer.oppdaterJournalpost(journalpost, journalpostId);
+    }
+
+    private void oppdaterDokument(String journalpostId, String dokumentID, String tittel, boolean medDokumentkategori) throws SikkerhetsbegrensningException, IntegrasjonException {
+        PutDokumentRequest dokumentRequest = new PutDokumentRequest();
+        if (medDokumentkategori) {
+            dokumentRequest.setDokumentKategori(DokumentKategoriKode.IS.getKode());
         }
+
+        dokumentRequest.setTittel(tittel);
+        journalfoerInngaaendeConsumer.oppdaterDokument(dokumentRequest, journalpostId, dokumentID);
     }
 
     @Override

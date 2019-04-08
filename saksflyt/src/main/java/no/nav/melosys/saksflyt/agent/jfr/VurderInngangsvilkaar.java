@@ -39,7 +39,7 @@ import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
  */
 @Component
 public class VurderInngangsvilkaar extends AbstraktStegBehandler {
-    
+
     private static final Logger log = LoggerFactory.getLogger(VurderInngangsvilkaar.class);
 
     private final RegelmodulService regelmodulService;
@@ -63,7 +63,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
     protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
         return FeilStrategi.standardFeilHåndtering();
     }
-    
+
     @Override
     @SuppressWarnings("unchecked")
     public void utfør(Prosessinstans prosessinstans) throws TekniskException {
@@ -100,14 +100,14 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         }
 
         // Kjør inngangsvilkår...
-        List<String> oppholdsland = prosessinstans.getData(ProsessDataKey.OPPHOLDSLAND, List.class);
-        oppholdsland = tilIso3Landkoder(oppholdsland);
+        List<String> søknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class);
+        søknadsland = tilIso3Landkoder(søknadsland);
 
         log.debug("Kaller regelmodul for prosessinstans {}", prosessinstans.getId());
         log.debug("satsborgerskap: {}", statsborgerskap.toString());
-        log.debug("oppholdsland: {}", String.join(" ", oppholdsland));
+        log.debug("søknadsland: {}", String.join(" ", søknadsland));
         log.debug("periode: {}", periode.toString());
-        VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(statsborgerskap, oppholdsland, periode);
+        VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(statsborgerskap, søknadsland, periode);
 
         // Legg på evt. feil og varsler...
         boolean detErMeldtFeil = false;
@@ -141,10 +141,10 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         log.info("Satt type på fagsak {} til {} for prosessinstans {}", fagsak.getSaksnummer(), nyFagsakstype, prosessinstans.getId());
     }
 
-    private static List<String> tilIso3Landkoder(List<String> oppholdsland) throws TekniskException {
+    private static List<String> tilIso3Landkoder(List<String> land) throws TekniskException {
         List<String> landkoder = new ArrayList<>();
-        
-        for (String l : oppholdsland) {
+
+        for (String l : land) {
             landkoder.add(LandkoderUtils.tilIso3(l));
         }
         return landkoder;

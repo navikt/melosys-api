@@ -12,7 +12,7 @@ import org.springframework.util.StringUtils;
 
 public class FellesKodeverkSerializer extends StdSerializer<KodeverkHjelper> {
 
-    private final KodeverkService kodeverkService;
+    private final transient KodeverkService kodeverkService;
 
     public FellesKodeverkSerializer(KodeverkService kodeverkService) {
         super(KodeverkHjelper.class);

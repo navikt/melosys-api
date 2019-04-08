@@ -14,8 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ClassUtils;
 
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE;
 
@@ -25,11 +24,11 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROT
  * Klassen er ikke en bønne håndtert av Spring, og får allse sine bønne-avhengigheter i konstruktøren.
  *
  * Konfigurasjon:
- *      melosys.saksflyt.arbeider.oppholdMellomSteg – Hvor mange millisekunder trådene skal sove mellom hvert steg som aktiveres (default 47)
+ * melosys.saksflyt.arbeider.oppholdMellomSteg – Hvor mange millisekunder trådene skal sove mellom hvert steg som aktiveres (default 47)
  */
 @Component
 @Scope(SCOPE_PROTOTYPE)
-public class ArbeiderTraad extends Thread {
+public class ArbeiderTraad implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ArbeiderTraad.class);
 
@@ -46,12 +45,10 @@ public class ArbeiderTraad extends Thread {
     private volatile Prosessinstans aktivProsessinstans;
 
     @Autowired
-    ArbeiderTraad(
-        Binge binge,
+    ArbeiderTraad(Binge binge,
         ProsessinstansRepository prosessinstansRepo,
         List<StegBehandler> stegBehandlere,
-        @Value("${melosys.saksflyt.arbeider.oppholdMellomSteg:47}") long oppholdMellomSteg
-    ) {
+        @Value("${melosys.saksflyt.arbeider.oppholdMellomSteg:47}") long oppholdMellomSteg) {
         this.binge = binge;
         this.prosessinstansRepo = prosessinstansRepo;
         this.stegBehandlere = stegBehandlere;
@@ -60,42 +57,35 @@ public class ArbeiderTraad extends Thread {
 
     @Override
     public void run() {
-        // ADVARSEL: IKKE rør denne metoden med mindre du vet nøyaktig hva du gjør (og har god kompetanse på hvordan tråder fungerer i Java) 
-        for (;;) {
+        //noinspection InfiniteLoopStatement
+        while (true) {
             for (StegBehandler stegBehandler : stegBehandlere) {
-                if (interrupted()) {
-                    return;
-                }
                 try {
                     finnProsessinstansOgUtførSteg(stegBehandler);
-                    try {
-                        sleep(oppholdMellomSteg);
-                    } catch (InterruptedException e) {
-                        return;
-                    }
+                    Thread.sleep(oppholdMellomSteg);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    // Prosessinstanser som avbrytes må registreres som feilet.
+                    settTilFeilet();
                 } catch (RuntimeException e) {
-                    // Vi er her hvis en StegBehandler kastet en Exception 
-                    logger.error("Ubehandlet Exception! Arbeider stopper. Aktiv stegBehandler var: {}.", aktivStegBehandler.getClass().getSimpleName());
-                    logger.error("Prosessinstans som kanskje må ryddes opp i: {}", aktivProsessinstans.getId(), e);
-                    setAktivPiTilFeilet();
-                    return;
+                    logger.error("Ubehandlet exception! Aktiv stegBehandler: {}.", ClassUtils.getUserClass(aktivStegBehandler.getClass()).getSimpleName(), e);
+                    logger.error("Prosessinstans som må ryddes opp i: {}.", aktivProsessinstans.getId());
+                    settTilFeilet();
                 }
             }
         }
     }
-    
-    private void setAktivPiTilFeilet() {
+
+    private void settTilFeilet() {
         try {
             aktivProsessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
             prosessinstansRepo.save(aktivProsessinstans);
-            logger.error("Prosessinstans {} ble satt til feilet", aktivProsessinstans.getId());
         } catch (RuntimeException e) {
-            logger.error("Kunne ikke sette prosessinstans {} til feilet", aktivProsessinstans.getId(), e);
+            logger.error("Prosessinstans {} kunne ikke settes til feilet: ", aktivProsessinstans.getId(), e);
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    void finnProsessinstansOgUtførSteg(StegBehandler stegBehandler) {
+    private void finnProsessinstansOgUtførSteg(StegBehandler stegBehandler) {
         Prosessinstans pi = binge.fjernFørsteProsessinstans(stegBehandler.inngangsvilkår());
         if (pi == null) {
             return;
@@ -113,9 +103,8 @@ public class ArbeiderTraad extends Thread {
         pi.setEndretDato(LocalDateTime.now());
         prosessinstansRepo.save(pi); // Kan resultere i DataAccessException
 
-        if (pi.getSteg() != null && pi.getSteg() != ProsessSteg.FEILET_MASKINELT) {
+        if (pi.getSteg() != ProsessSteg.FERDIG && pi.getSteg() != ProsessSteg.FEILET_MASKINELT) {
             binge.leggTil(pi);
         }
     }
-
 }

@@ -1,12 +1,9 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 
 public class BrevData {
     public String saksbehandler;
-
-    public Aktoersroller mottaker;
 
     public String fritekst;
 
@@ -18,7 +15,6 @@ public class BrevData {
 
     public BrevData(BrevbestillingDto brevbestillingDto, String saksbehandler) {
         this.saksbehandler = saksbehandler;
-        this.mottaker = brevbestillingDto.mottaker;
         this.fritekst = brevbestillingDto.fritekst;
         this.begrunnelseKode = brevbestillingDto.begrunnelseKode;
     }

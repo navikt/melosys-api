@@ -13,6 +13,10 @@ import org.apache.commons.lang3.StringUtils;
 @XmlRootElement
 public class SoeknadDokument extends SaksopplysningDokument {
 
+    public Periode periode = new Periode();
+
+    public Soeknadsland soeknadsland = new Soeknadsland();
+
     public OpplysningerOmBrukeren personOpplysninger = new OpplysningerOmBrukeren();
 
     // Opplysninger om arbeid i utlandet

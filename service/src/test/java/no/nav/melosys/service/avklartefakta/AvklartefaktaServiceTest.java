@@ -167,7 +167,7 @@ public class AvklartefaktaServiceTest {
     public void testAvklarteOrganisasjoner() {
         String orgnr1 = "12345678910";
         Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setType(Avklartefaktatype.AVKLARTE_ARBEIDSGIVER);
+        avklartefakta.setType(Avklartefaktatype.VIRKSOMHET);
         avklartefakta.setFakta("TRUE");
         avklartefakta.setSubjekt(orgnr1);
 

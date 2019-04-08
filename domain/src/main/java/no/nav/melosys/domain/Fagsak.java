@@ -8,8 +8,10 @@ import javax.persistence.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.util.Assert;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
 
 @Entity
 @Table(name = "fagsak")
@@ -84,12 +86,12 @@ public class Fagsak extends RegistreringsInfo {
         if (getBehandlinger() == null) {
             return null;
         }
-        List<Behandling> behandlinger = getBehandlinger().stream()
+        List<Behandling> behandlingListe = getBehandlinger().stream()
             .filter(b -> !b.getStatus().equals(Behandlingsstatus.AVSLUTTET)).collect(Collectors.toList());
-        if (behandlinger.size() > 1) {
-            throw new TekniskException("Det finnes mer enn en aktive behandlinger for sak " + saksnummer);
-        } else if (behandlinger.size() == 1) {
-            return behandlinger.get(0);
+        if (behandlingListe.size() > 1) {
+            throw new TekniskException("Det finnes mer enn en aktive behandling for sak " + saksnummer);
+        } else if (behandlingListe.size() == 1) {
+            return behandlingListe.get(0);
         } else {
             return null;
         }
@@ -109,7 +111,7 @@ public class Fagsak extends RegistreringsInfo {
      * Returnerer en aktør med angitt {@link Aktoersroller} knyttet til saken eller {@code null} hvis ingen finnes.
      */
     public Aktoer hentAktørMedRolleType(Aktoersroller rolleType) throws TekniskException {
-        if (rolleType == null || aktører == null || aktører.isEmpty()) {
+        if (rolleType == null) {
             return null;
         }
         List<Aktoer> kandidater = aktører.stream().filter(a -> rolleType.equals(a.getRolle())).collect(Collectors.toList());
@@ -123,10 +125,29 @@ public class Fagsak extends RegistreringsInfo {
         }
     }
 
+    public boolean harAktørMedRolleType(Aktoersroller rolleType) {
+        return aktører.stream().filter(a -> rolleType.equals(a.getRolle())).count() > 0;
+    }
+
+    /**
+     * Henter myndighetens landkode fra institusjonsID som har format landkode:institusjonskode.
+     */
     public Landkoder hentMyndighetLandkode() throws TekniskException {
         Aktoer myndighet = hentAktørMedRolleType(MYNDIGHET);
-        String[] split = myndighet.getInstitusjonId().split(":");
-        return Landkoder.valueOf(split[0]);
+        if (myndighet == null) {
+            throw new TekniskException("Finnes ingen aktør med rolle " + MYNDIGHET + " for fagsak" + saksnummer);
+        }
+        return myndighet.hentMyndighetLandkode();
+    }
+
+    /**
+     * Henter representanten som representerer angitt {@link Representerer} eller {@code null} hvis ingen finnes.
+     */
+    public Optional<Aktoer> hentRepresentant(Representerer representerer) {
+        Assert.notNull(representerer, "Representerer trengs for å hente representant.");
+        return aktører.stream().filter(a -> REPRESENTANT.equals(a.getRolle()))
+            .filter(a -> (representerer.equals(a.getRepresenterer()) || representerer.equals(Representerer.BEGGE)))
+            .findFirst();
     }
 
     public String getSaksnummer() {

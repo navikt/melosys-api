@@ -4,6 +4,7 @@ import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import org.junit.Before;
@@ -30,16 +31,32 @@ public class HentAktoerIdTest {
     }
 
     @Test
-    public void utfoerSteg() throws IkkeFunnetException {
+    public void utfoerSteg_BehadlingstypeSOEKNAD_nesteStegBlirJFR_OPPRETT_SAK_OG_BEH() throws IkkeFunnetException {
         Prosessinstans p = new Prosessinstans();
         p.setType(ProsessType.JFR_NY_SAK);
         String brukerID = "99999999991";
         p.setData(ProsessDataKey.BRUKER_ID, brukerID);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         when(tpsFasade.hentAktørIdForIdent(any())).thenReturn("FJERNET93");
 
         agent.utførSteg(p);
 
-        verify(tpsFasade, times(1)).hentAktørIdForIdent(brukerID);
+        verify(tpsFasade).hentAktørIdForIdent(brukerID);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPRETT_SAK_OG_BEH);
+    }
+
+    @Test
+    public void utfoerSteg_BehadlingstypeENDRET_PERIODE_nesteStegBlirJFR_OPPDATER_JOURNALPOST() throws IkkeFunnetException {
+        Prosessinstans p = new Prosessinstans();
+        p.setType(ProsessType.JFR_NY_SAK);
+        String brukerID = "99999999991";
+        p.setData(ProsessDataKey.BRUKER_ID, brukerID);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
+        when(tpsFasade.hentAktørIdForIdent(any())).thenReturn("FJERNET93");
+
+        agent.utførSteg(p);
+
+        verify(tpsFasade).hentAktørIdForIdent(brukerID);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_OPPDATER_JOURNALPOST);
     }
 }

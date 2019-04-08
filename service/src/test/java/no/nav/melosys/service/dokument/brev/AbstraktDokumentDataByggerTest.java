@@ -99,11 +99,12 @@ public class AbstraktDokumentDataByggerTest {
         foretakUtland.orgnr = "12345678910";
         foretakUtland.navn = "Jarlsberg INTERNATIONAL";
         foretakUtland.adresse = new StrukturertAdresse();
-        foretakUtland.adresse.landKode = "NO";
+        foretakUtland.adresse.landkode = "NO";
         søknad.foretakUtland.add(foretakUtland);
 
-        assertThat(foretakUtland.navn).isEqualTo(foretakUtland.navn);
-        assertThat(foretakUtland.adresse.landKode).isEqualTo(foretakUtland.adresse.landKode);
+        List<Arbeidssted> arbeidssteder = brevDatabyggerbase.hentArbeidssteder();
+        assertThat(arbeidssteder.get(0).navn).isEqualTo(foretakUtland.navn);
+        assertThat(arbeidssteder.get(0).landkode).isEqualTo(foretakUtland.adresse.landkode);
     }
 
     @Test
@@ -115,14 +116,14 @@ public class AbstraktDokumentDataByggerTest {
         avklartefakta.setReferanse("INSTALLASJON_ARBEIDSLAND");
         avklartefakta.setSubjekt("Dunfjæder");
 
-        when(avklartefaktaService.hentAlleAvklarteFlaggland(anyLong())).thenReturn(new HashSet<>(Collections.singletonList((avklartefakta))));
+        when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Collections.singletonList((avklartefakta))));
 
         List<Arbeidssted> arbeidSteder = brevDatabyggerbase.hentArbeidssteder();
 
         assertThat(arbeidSteder.size()).isEqualTo(1);
         Arbeidssted arbeidssted = arbeidSteder.get(0);
         assertThat(arbeidssted.navn).isEqualTo("Dunfjæder");
-        assertThat(arbeidssted.landKode).isEqualTo("BG");
+        assertThat(arbeidssted.landkode).isEqualTo("BG");
         assertThat(arbeidssted.yrkesgruppe.getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
     }
 }

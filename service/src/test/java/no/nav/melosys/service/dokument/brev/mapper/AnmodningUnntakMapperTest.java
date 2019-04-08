@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.HashSet;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
+import no.nav.dok.melosysbrev._000081.Fag;
+import no.nav.dok.melosysbrev.felles.melosys_felles.Art161AnmodningBegrunnelseKode;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
@@ -49,7 +51,7 @@ public class AnmodningUnntakMapperTest {
 
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = new StrukturertAdresse();
-        arbeidUtland.adresse.landKode = "NO";
+        arbeidUtland.adresse.landkode = "NO";
 
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         soeknadDokument.arbeidUtland = new ArrayList<>();
@@ -98,5 +100,39 @@ public class AnmodningUnntakMapperTest {
         assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
         assertThat("<ns3:yrkesaktivitet>SELVSTENDIG</ns3:yrkesaktivitet>").isSubstringOf(xml);
         assertThat(Landkoder.AT.getBeskrivelse()).isSubstringOf(xml);
+    }
+
+    @Test
+    public void mapArt16_vilkaarSaerligGrunn_forventFritekst() throws Exception {
+        Behandlingsresultat resultat = new Behandlingsresultat();
+        Vilkaarsresultat vilkaarsresultat16_1 = new Vilkaarsresultat();
+        vilkaarsresultat16_1.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
+        vilkaarsresultat16_1.setBegrunnelseFritekst("Fritekst");
+        VilkaarBegrunnelse begrunnelse_16_1 = new VilkaarBegrunnelse();
+        begrunnelse_16_1.setKode(Art16_1_Anmodning_Begrunnelser.SAERLIG_GRUNN.getKode());
+        vilkaarsresultat16_1.setBegrunnelser(Collections.singleton(begrunnelse_16_1));
+        resultat.getVilkaarsresultater().add(vilkaarsresultat16_1);
+
+        Fag fag = new Fag();
+        mapper.mapArt161(fag,resultat, new BrevDataAnmodningUnntakOgAvslag("Z111111"));
+        assertThat(fag.getAnmodningFritekst()).isEqualTo("Fritekst");
+        assertThat(fag.getArt161AnmodningBegrunnelse()).isEqualTo(Art161AnmodningBegrunnelseKode.SAERLIG_GRUNN);
+    }
+
+    @Test
+    public void mapArt16_ikkeVilkaarSaerligGrunn_forventIkkeFritekst() throws Exception {
+        Behandlingsresultat resultat = new Behandlingsresultat();
+        Vilkaarsresultat vilkaarsresultat16_1 = new Vilkaarsresultat();
+        vilkaarsresultat16_1.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
+        vilkaarsresultat16_1.setBegrunnelseFritekst("Fritekst");
+        VilkaarBegrunnelse begrunnelse_16_1 = new VilkaarBegrunnelse();
+        begrunnelse_16_1.setKode(Art16_1_Anmodning_Begrunnelser.ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
+        vilkaarsresultat16_1.setBegrunnelser(Collections.singleton(begrunnelse_16_1));
+        resultat.getVilkaarsresultater().add(vilkaarsresultat16_1);
+
+        Fag fag = new Fag();
+        mapper.mapArt161(fag,resultat, new BrevDataAnmodningUnntakOgAvslag("Z111111"));
+        assertThat(fag.getAnmodningFritekst()).isNull();
+        assertThat(fag.getArt161AnmodningBegrunnelse()).isEqualTo(Art161AnmodningBegrunnelseKode.ERSTATTER_EN_ANNEN_UNDER_5_AAR);
     }
 }

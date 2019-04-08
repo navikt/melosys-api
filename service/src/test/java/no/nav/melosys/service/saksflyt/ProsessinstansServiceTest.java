@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.junit.Before;
@@ -44,14 +45,14 @@ public class ProsessinstansServiceTest {
 
     @Test
     public void erUnderOppfriskning() {
-        when(prosessinstansRepo.findByTypeAndStegIsNotNullAndStegIsNotAndBehandling_Id(eq(ProsessType.OPPFRISKNING), eq(ProsessSteg.FEILET_MASKINELT), anyLong()))
+        when(prosessinstansRepo.findByTypeAndBehandling_IdAndStegIsNotAndStegIsNot(eq(ProsessType.OPPFRISKNING), anyLong(), eq(ProsessSteg.FEILET_MASKINELT), eq(ProsessSteg.FERDIG)))
             .thenReturn(Optional.of(new Prosessinstans()));
         assertThat(service.erUnderOppfriskning(1L)).isTrue();
     }
 
     @Test
     public void harAktivProsessinstans() {
-        when(prosessinstansRepo.findByStegIsNotNullAndStegIsNotAndBehandling_Id(eq(ProsessSteg.FEILET_MASKINELT), anyLong()))
+        when(prosessinstansRepo.findByBehandling_IdAndStegIsNotAndStegIsNot(anyLong(), eq(ProsessSteg.FEILET_MASKINELT), eq(ProsessSteg.FERDIG)))
             .thenReturn(Optional.of(new Prosessinstans()));
         assertThat(service.harAktivProsessinstans(1L)).isTrue();
     }
@@ -151,6 +152,42 @@ public class ProsessinstansServiceTest {
         assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.IV_FORKORT_PERIODE);
         assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
         assertThat(lagretInstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class)).isEqualTo(Endretperioder.RETURNERT_NORGE);
+    }
+
+    @Test
+    public void opprettProsessinstansJournalføring_skalTilordnesTrue_settesIProsessinstans() {
+        settInnloggetSaksbehandler();
+        JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
+
+        journalfoeringDto.setSkalTilordnes(true);
+
+        Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
+
+        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isTrue();
+    }
+
+    @Test
+    public void opprettProsessinstansJournalføring_skalTilordnesFalse_settesIProsessinstans() {
+        settInnloggetSaksbehandler();
+        JournalfoeringDto journalfoeringDto = lagJournalfoeringDTO();
+
+        journalfoeringDto.setSkalTilordnes(false);
+
+        Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
+
+        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isFalse();
+    }
+
+    private JournalfoeringDto lagJournalfoeringDTO() {
+        JournalfoeringDto journalfoeringDto = new JournalfoeringDto();
+        journalfoeringDto.setJournalpostID("journalpostid");
+        journalfoeringDto.setDokumentID("dokumentid");
+        journalfoeringDto.setOppgaveID("oppgaveid");
+        journalfoeringDto.setBrukerID("brukerid");
+        journalfoeringDto.setAvsenderID("avsenderid");
+        journalfoeringDto.setAvsenderNavn("avsendernavn");
+        journalfoeringDto.setHoveddokumentTittel("hovedkokumenttittel");
+        return journalfoeringDto;
     }
 
     private String settInnloggetSaksbehandler() {

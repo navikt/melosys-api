@@ -5,7 +5,6 @@ import java.util.HashSet;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
@@ -49,14 +48,14 @@ public class HentArbeidsforholdopplysningerTest {
 
         p.setData(ProsessDataKey.BRUKER_ID, brukerID);
         p.setData(ProsessDataKey.SØKNADSPERIODE, periode);
-        when(aaregFasade.finnArbeidsforholdPrArbeidstaker(any(), any(), any(), any())).thenReturn(new Saksopplysning());
+        when(aaregFasade.finnArbeidsforholdPrArbeidstaker(any(), any(), any())).thenReturn(new Saksopplysning());
 
         agent.utførSteg(p);
 
         LocalDate fom = periode.getFom().minusMonths(ARBEIDSFORHOLD_HISTORIKK_ANTALL_MÅNEDER);
         LocalDate tom = LocalDate.now();
 
-        verify(aaregFasade, times(1)).finnArbeidsforholdPrArbeidstaker(brukerID, AaregFasade.REGELVERK_A_ORDNINGEN, fom, tom);
+        verify(aaregFasade).finnArbeidsforholdPrArbeidstaker(brukerID, fom, tom);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.HENT_INNT_OPPL);
     }
 

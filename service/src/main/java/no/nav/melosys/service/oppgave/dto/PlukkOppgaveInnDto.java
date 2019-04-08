@@ -40,5 +40,4 @@ public class PlukkOppgaveInnDto {
     public void setBehandlingstyper(List<String> behandlingstyper) {
         this.behandlingstyper = behandlingstyper;
     }
-
 }

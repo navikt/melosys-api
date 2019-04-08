@@ -49,14 +49,14 @@ public class InnvilgelsesbrevMapperTest {
     @Test
     public void mapArbeidslandFraSøknadsTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml(lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
-                Collections.singleton(lagAvklarteFakta(Avklartefaktatype.AVKLARTE_ARBEIDSGIVER, "123456789"))));
+                Collections.singleton(lagAvklarteFakta(Avklartefaktatype.VIRKSOMHET, "123456789"))));
     }
 
     @Test
     public void mapTilBrevXmlUtenArbeidslandISøknadGirUnntak() {
         Behandling behandlingUtenSaksopplysninger = lagBehandling(lagFagsak(), Collections.emptySet());
         Behandlingsresultat behandlingsresultatUtenAvklartArbeidsland = lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
-                Collections.singleton(lagAvklarteFakta(Avklartefaktatype.AVKLARTE_ARBEIDSGIVER, "123456789")));
+                Collections.singleton(lagAvklarteFakta(Avklartefaktatype.VIRKSOMHET, "123456789")));
         Throwable unntak = catchThrowable(() -> testMapTilBrevXml(behandlingUtenSaksopplysninger,
                 behandlingsresultatUtenAvklartArbeidsland));
         assertThat(unntak).isInstanceOf(TekniskException.class)
@@ -112,7 +112,7 @@ public class InnvilgelsesbrevMapperTest {
     private static StrukturertAdresse lagStrukturertAdresse() {
         StrukturertAdresse vadr = new StrukturertAdresse();
         vadr.gatenavn = "Gate";
-        vadr.landKode = Land.BULGARIA;
+        vadr.landkode = Land.BULGARIA;
         vadr.poststed = "Sted";
         vadr.postnummer = "4321";
         return vadr;
@@ -120,7 +120,7 @@ public class InnvilgelsesbrevMapperTest {
 
     private static Behandlingsresultat lagBehandlingsresultat() {
         Set<Avklartefakta> fakta = new HashSet<>(Arrays.asList(
-                lagAvklarteFakta(Avklartefaktatype.AVKLARTE_ARBEIDSGIVER, "123456789"),
+                lagAvklarteFakta(Avklartefaktatype.VIRKSOMHET, "123456789"),
                 lagAvklarteFakta(Avklartefaktatype.ARBEIDSLAND, "SE")));
         return lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()), fakta);
     }
@@ -180,7 +180,7 @@ public class InnvilgelsesbrevMapperTest {
         SoeknadDokument dokument = new SoeknadDokument();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = new StrukturertAdresse();
-        arbeidUtland.adresse.landKode = Landkoder.AT.getKode();
+        arbeidUtland.adresse.landkode = Landkoder.AT.getKode();
         dokument.arbeidUtland = Collections.singletonList(arbeidUtland);
         return dokument;
     }

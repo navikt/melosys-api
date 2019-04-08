@@ -45,7 +45,7 @@ public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melos
             dto.strukturertAdresse.poststed = kodeverkService.dekod(POSTNUMMER, adresse.poststed, LocalDate.now());
 
             if (midlertidigPostadresse.land != null) {
-                dto.strukturertAdresse.landKode = midlertidigPostadresse.land.getKode();
+                dto.strukturertAdresse.landkode = midlertidigPostadresse.land.getKode();
             }
             dto.adressetype = MidlertidigPostadresse.Adressetype.STRUKTURERT;
 
@@ -66,7 +66,7 @@ public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melos
                 dto.ustrukturertAdresse.adresselinjer.add(adresse.adresselinje4);
             }
             if (midlertidigPostadresse.land != null) {
-                dto.ustrukturertAdresse.landKode = midlertidigPostadresse.land.getKode();
+                dto.ustrukturertAdresse.landkode = midlertidigPostadresse.land.getKode();
             }
             dto.adressetype = MidlertidigPostadresse.Adressetype.USTRUKTURERT;
         }

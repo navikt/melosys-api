@@ -15,5 +15,5 @@ public class ArbeidNorge {
     public String fullmektigPostnr;
     public String fullmektigPoststed;
     public String fullmektigRegion;
-    public String fullmektigLandKode;
+    public String fullmektigLandkode;
 }

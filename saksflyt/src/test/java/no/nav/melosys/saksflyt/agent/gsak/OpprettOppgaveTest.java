@@ -2,10 +2,7 @@ package no.nav.melosys.saksflyt.agent.gsak;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -21,9 +18,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.ProsessSteg.FEILET_MASKINELT;
-import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
-import static no.nav.melosys.domain.oppgave.Behandlingstema.ARB_EØS;
+import static no.nav.melosys.domain.ProsessSteg.*;
+import static no.nav.melosys.domain.oppgave.Behandlingstema.EU_EOS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -71,7 +67,7 @@ public class OpprettOppgaveTest {
         verify(gsakFasade, times(1)).opprettOppgave(oppgave.capture());
 
         assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
-        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(ARB_EØS);
+        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(EU_EOS);
         assertThat(p.getSteg()).isEqualTo(SEND_FORVALTNINGSMELDING);
     }
 
@@ -99,12 +95,43 @@ public class OpprettOppgaveTest {
         verify(gsakFasade, times(1)).opprettOppgave(oppgave.capture());
 
         assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
-        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(ARB_EØS);
-        assertThat(p.getSteg()).isEqualTo(null);
+        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(EU_EOS);
+        assertThat(p.getSteg()).isEqualTo(FERDIG);
+    }
+
+
+    @Test
+    public void utfoerSteg_skalTilordnes_setterTilordnetRessurs() throws FunksjonellException, TekniskException {
+        Fagsak fagsak = new Fagsak();
+        String saksnummer = "MEL-TESTx";
+        fagsak.setSaksnummer(saksnummer);
+        fagsak.setType(Sakstyper.EU_EOS);
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setFagsak(fagsak);
+
+        Prosessinstans p = new Prosessinstans();
+        p.setBehandling(behandling);
+
+        p.getBehandling().setType(Behandlingstyper.SOEKNAD);
+        p.setType(ProsessType.JFR_NY_SAK);
+
+        String bruker = "bruker";
+        p.setData(ProsessDataKey.SKAL_TILORDNES, true);
+        p.setData(ProsessDataKey.SAKSBEHANDLER, bruker);
+
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
+
+        agent.utførSteg(p);
+
+        verify(gsakFasade).opprettOppgave(oppgave.capture());
+
+        assertThat(oppgave.getValue().getTilordnetRessurs()).isEqualTo(bruker);
     }
 
     @Test
-    public void utfoerSteg_nyBehandling_tilNull() throws FunksjonellException, TekniskException {
+    public void utfoerSteg_nyBehandling_tilFerdig() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         String saksnummer = "MEL-TESTx";
         fagsak.setSaksnummer(saksnummer);
@@ -125,8 +152,8 @@ public class OpprettOppgaveTest {
         verify(gsakFasade, times(1)).opprettOppgave(oppgave.capture());
 
         assertThat(oppgave.getValue().getSaksnummer()).isEqualTo(saksnummer);
-        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(ARB_EØS);
-        assertThat(p.getSteg()).isNull();
+        assertThat(oppgave.getValue().getBehandlingstema()).isEqualTo(EU_EOS);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }
 
     @Test

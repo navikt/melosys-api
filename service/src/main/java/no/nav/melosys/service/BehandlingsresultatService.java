@@ -68,6 +68,7 @@ public class BehandlingsresultatService {
             for (VilkaarBegrunnelse vilkaarBegrunnelseOrig : vilkaarsresultatOrig.getBegrunnelser()) {
                 VilkaarBegrunnelse vilkaarBegrunnelsesreplika = (VilkaarBegrunnelse) BeanUtils.cloneBean(vilkaarBegrunnelseOrig);
                 vilkaarBegrunnelsesreplika.setId(null);
+                vilkaarBegrunnelsesreplika.setVilkaarsresultat(vilkaarsresultatreplika);
                 vilkaarsresultatreplika.getBegrunnelser().add(vilkaarBegrunnelsesreplika);
             }
             behandlingsresultatsreplika.getVilkaarsresultater().add(vilkaarsresultatreplika);

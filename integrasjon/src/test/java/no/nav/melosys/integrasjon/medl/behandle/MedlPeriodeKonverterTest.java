@@ -73,4 +73,16 @@ public class MedlPeriodeKonverterTest {
         assertThat(medlemsperiode.getTrygdedekning().getValue()).isEqualTo("Full");
         assertThat(medlemsperiode.getGrunnlagstype().getValue()).isEqualTo("FO_11_3_a");
     }
+
+
+    @Test
+    public void tilGrunnlagMedltype_både_FO_883_2004_ART16_1_og_FO_883_2004_ART16_2_gir_FO_16() throws TekniskException {
+        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1)).isEqualTo(GrunnlagMedl.FO_16);
+        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_2)).isEqualTo(GrunnlagMedl.FO_16);
+    }
+
+    @Test
+    public void tilLovvalgBestemmelse_FO_16_gir_FO_883_2004_ART16_1() throws TekniskException {
+        assertThat(MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.FO_16)).isEqualTo(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1);
+    }
 }

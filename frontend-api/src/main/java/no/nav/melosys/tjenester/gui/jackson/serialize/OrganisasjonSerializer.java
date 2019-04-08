@@ -65,7 +65,7 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
 
         dto.setPostnr(adresse.postnummer);
         dto.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now()));
-        dto.setLand(kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, adresse.landKode, LocalDate.now()));
+        dto.setLand(kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, adresse.landkode, LocalDate.now()));
 
         return  dto;
     }

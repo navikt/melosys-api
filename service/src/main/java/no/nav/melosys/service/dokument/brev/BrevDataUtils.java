@@ -11,13 +11,15 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import org.apache.commons.lang3.StringUtils;
+
 import static no.nav.melosys.service.dokument.brev.BrevDataService.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 public final class BrevDataUtils {
 
     private BrevDataUtils() {
-
+        throw new IllegalStateException("Utility");
     }
 
     static NavAnsatt lagNavAnsatt(String ansattId) {
@@ -40,7 +42,7 @@ public final class BrevDataUtils {
             lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
             lovvalgsperiodeType.setTomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getTom()));
         } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
         return lovvalgsperiodeType;
     }
@@ -51,7 +53,7 @@ public final class BrevDataUtils {
 
         kontaktinformasjon.setBesoksadresse(lagAdresse(new Besoksadresse(), lagNorskPostadresse()));
         kontaktinformasjon.setPostadresse(lagAdresse(new Postadresse(), lagNorskPostadresse()));
-        //Adressen skal benyttes dersom bruker/mottaker har behov for å kontakte NAV per post.
+        //Adressen skal benyttes dersom bruker/mottakerRolle har behov for å kontakte NAV per post.
         kontaktinformasjon.setReturadresse(lagAdresse(new Returadresse(), lagNorskPostadresse()));
 
         return kontaktinformasjon;
@@ -82,10 +84,14 @@ public final class BrevDataUtils {
     }
 
     public static BostedsadresseType lagBostedsadresse(Bostedsadresse bosted) {
-        Gateadresse gateadresse = bosted.getGateadresse();
         BostedsadresseType bostedAdresse = new BostedsadresseType();
-        bostedAdresse.setGatenavn(gateadresse.getGatenavn());
-        bostedAdresse.setHusnummer(gateadresse.getHusnummer() + " " + gateadresse.getHusbokstav());
+        Gateadresse gateadresse = bosted.getGateadresse();
+        if (gateadresse != null && !StringUtils.isEmpty(gateadresse.getGatenavn())) {
+            bostedAdresse.setGatenavn(gateadresse.getGatenavn());
+            bostedAdresse.setHusnummer(gateadresse.getHusnummer() + " " + gateadresse.getHusbokstav());
+        } else {
+            bostedAdresse.setGatenavn(" ");
+        }
         bostedAdresse.setPostnr(bosted.getPostnr());
         bostedAdresse.setPoststed(bosted.getPoststed());
         bostedAdresse.setLandkode(bosted.getLand().getKode());

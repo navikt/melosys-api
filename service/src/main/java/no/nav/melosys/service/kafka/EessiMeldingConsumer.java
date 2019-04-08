@@ -23,7 +23,7 @@ public class EessiMeldingConsumer {
         containerFactory = "eessiMeldingListenerContainerFactory")
     public void mottaMelding(ConsumerRecord<String, MelosysEessiMelding> consumerRecord) {
         MelosysEessiMelding melding = consumerRecord.value();
-        log.info("Mottatt ny melding fra eessi: {}", melding.toString());
+        log.info("Mottatt ny melding fra eessi: {}", melding);
 
         try {
             eessiMottakService.behandleMottattMelding(melding);

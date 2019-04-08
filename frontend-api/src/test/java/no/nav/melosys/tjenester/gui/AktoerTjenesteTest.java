@@ -68,6 +68,7 @@ public class AktoerTjenesteTest extends JsonSchemaTest {
         aktoerDto.setRolleKode("BRUKER");
         aktoerDto.setRepresentererKode("BRUKER");
         aktoerDto.setOrgnr("123456789");
+        aktoerDto.setDatabaseID(2L);
 
         schemaType = AKTOER_SCHEMA;
         validerListe(Collections.singletonList(aktoerDto), log);
@@ -99,6 +100,7 @@ public class AktoerTjenesteTest extends JsonSchemaTest {
     public final void hentAktoer_tilAktoerDto() throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
 
         Aktoer aktoerRep = new Aktoer();
+        aktoerRep.setId(29L);
         aktoerRep.setAktørId("1234");
         aktoerRep.setInstitusjonId("INST1");
         aktoerRep.setRolle(Aktoersroller.REPRESENTANT);
@@ -108,6 +110,7 @@ public class AktoerTjenesteTest extends JsonSchemaTest {
         aktoerRep.setRepresenterer(Representerer.BRUKER);
 
         Aktoer aktoerMyndighet = new Aktoer();
+        aktoerMyndighet.setId(39L);
         aktoerMyndighet.setAktørId("1235");
         aktoerMyndighet.setInstitusjonId("INST2");
         aktoerMyndighet.setRolle(Aktoersroller.MYNDIGHET);

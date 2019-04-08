@@ -27,15 +27,18 @@ public enum ProsessDataKey {
     HOVEDDOKUMENT_TITTEL("hoveddokumentTittel"),
     JFR_INGEN_VURDERING("ingenVurdering"),
     JOURNALPOST_ID("journalpostID"),
-    OPPHOLDSLAND("land"),
+    OPPHOLDSLAND("oppholdsland"),
     OPPGAVE_ID("oppgaveID"),
     REPRESENTANT("representant"),
     REPRESENTANT_KONTAKTPERSON("representantKontakperson"),
     SAKSBEHANDLER("saksbehandler"),
     SAKSNUMMER("saksnummer"),
+    SKAL_TILORDNES("skalTilordnes"),
+    SØKNADSLAND("land"),
     SEDDOKUMENT("melosysmelding"),
     SØKNADSPERIODE("søknadsperiode"),
-    TEMA("tema");
+    TEMA("tema"),
+    VEDLEGG_TITTEL_LISTE("vedleggTittelListe");
 
     private String kode;
 

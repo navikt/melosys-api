@@ -12,6 +12,8 @@ import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -22,6 +24,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import org.apache.commons.lang3.StringUtils;
 
 public abstract class AbstraktDokumentDataBygger {
     protected final KodeverkService kodeverkService;
@@ -76,6 +79,15 @@ public abstract class AbstraktDokumentDataBygger {
             .collect(Collectors.toList());
     }
 
+    protected StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
+        StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
+        if (StringUtils.isEmpty(adresse.gatenavn) || StringUtils.isEmpty(adresse.postnummer)) {
+            adresse = org.getOrganisasjonDetaljer().hentStrukturertPostadresse();
+        }
+        adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
+        return adresse;
+    }
+
     private List<Arbeidssted> hentFysiskearbeidssteder() {
         return søknad.arbeidUtland.stream()
             .map(au -> new Arbeidssted(au.foretakNavn, au.foretakOrgnr, au.adresse))
@@ -83,7 +95,7 @@ public abstract class AbstraktDokumentDataBygger {
     }
 
     private List<Arbeidssted> hentIkkeFysiskeArbeidssteder() {
-        Set<Avklartefakta> avklartefaktaSet = avklartefaktaService.hentAlleAvklarteFlaggland(behandling.getId());
+        Set<Avklartefakta> avklartefaktaSet = avklartefaktaService.hentAlleAvklarteArbeidsland(behandling.getId());
 
         return avklartefaktaSet.stream()
             .map(avklartefakta -> new Arbeidssted(avklartefakta.getSubjekt(), avklartefakta.getFakta(), Yrkesgrupper.SOKKEL_ELLER_SKIP))
@@ -91,7 +103,7 @@ public abstract class AbstraktDokumentDataBygger {
     }
 
     private Arbeidssted utledArbeidsstedFraVirksomhet(AvklartVirksomhet virksomhet) {
-        return new Arbeidssted(virksomhet.navn, virksomhet.orgnr, virksomhet.adresse.landKode);
+        return new Arbeidssted(virksomhet.navn, virksomhet.orgnr, virksomhet.adresse.landkode);
     }
 
     protected Collection<Lovvalgsperiode> hentLovvalgsperioder() throws TekniskException {

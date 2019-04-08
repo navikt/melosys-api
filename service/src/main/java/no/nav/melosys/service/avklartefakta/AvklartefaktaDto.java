@@ -94,9 +94,7 @@ public class AvklartefaktaDto {
         this.avklartefaktaType = avklartefakta.getType();
         this.referanse = avklartefakta.getReferanse();
         this.begrunnelseFritekst = avklartefakta.getBegrunnelseFritekst();
-
-        String[] fakta = avklartefakta.getFakta().split(" ");
-        this.fakta = Arrays.asList(fakta);
+        this.fakta = Arrays.asList(avklartefakta.getFakta().split(" "));
 
         Set<AvklartefaktaRegistrering> registreringer = avklartefakta.getRegistreringer();
         this.begrunnelseKoder = registreringer.stream()

@@ -53,7 +53,7 @@ public class OrganisasjonsDetaljerTest {
         assertThat(resultatAdresse.adresselinjer.get(1)).isEqualTo(linje2);
         assertThat(resultatAdresse.adresselinjer.get(2)).isEqualTo(linje3);
         assertThat(resultatAdresse.adresselinjer.get(3)).isEqualTo(postnr);
-        assertThat(resultatAdresse.landKode).isEqualTo(landkode);
+        assertThat(resultatAdresse.landkode).isEqualTo(landkode);
     }
 
     @Test
@@ -69,7 +69,7 @@ public class OrganisasjonsDetaljerTest {
         assertThat(resultatAdresse.adresselinjer.get(1)).isEqualTo(linje2);
         assertThat(resultatAdresse.adresselinjer.get(2)).isEqualTo(linje3);
         assertThat(resultatAdresse.adresselinjer.get(3)).isEqualTo(poststedUtland);
-        assertThat(resultatAdresse.landKode).isEqualTo(landkode);
+        assertThat(resultatAdresse.landkode).isEqualTo(landkode);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class OrganisasjonsDetaljerTest {
 
         StrukturertAdresse resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse();
         assertThat(resultatAdresse.gatenavn).isEqualTo(linje1.trim() + " " + linje2 + " " + linje3);
-        assertThat(resultatAdresse.landKode).isEqualTo(landkode);
+        assertThat(resultatAdresse.landkode).isEqualTo(landkode);
 
         // Har kun postnummer for norske registeradresses. Slåes opp med kodeverkservice ved behov
         assertThat(resultatAdresse.postnummer).isEqualTo(postnr);
@@ -99,7 +99,7 @@ public class OrganisasjonsDetaljerTest {
 
         StrukturertAdresse resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse();
         assertThat(resultatAdresse.gatenavn).isEqualTo(linje1.trim() + " " + linje2 + " " + linje3);
-        assertThat(resultatAdresse.landKode).isEqualTo(landkode);
+        assertThat(resultatAdresse.landkode).isEqualTo(landkode);
 
         // Har ikke utenlandsk postnummer, kun poststed
         assertThat(resultatAdresse.postnummer).isEmpty();

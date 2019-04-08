@@ -7,8 +7,8 @@ import java.util.Objects;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 
 /**
  * Metoder for å trekke ut opplysninger fra et {@code SoeknadDokument}.
@@ -25,16 +25,19 @@ public final class SoeknadUtils {
     public static List<String> hentLand(SoeknadDokument soeknad) {
         List<String> landkoder = new ArrayList<>();
         if (soeknad.arbeidUtland != null) {
-            soeknad.arbeidUtland.stream().filter(Objects::nonNull).forEach(arbeidUtland -> landkoder.add(arbeidUtland.adresse.landKode));
+            soeknad.arbeidUtland.stream().filter(Objects::nonNull).forEach(arbeidUtland -> landkoder.add(arbeidUtland.adresse.landkode));
         }
         if (soeknad.oppholdUtland != null) {
-            soeknad.oppholdUtland.oppholdslandKoder.stream().filter(Objects::nonNull).forEach(landkoder::add);
+            soeknad.oppholdUtland.oppholdslandkoder.stream().filter(Objects::nonNull).forEach(landkoder::add);
+        }
+        if (soeknad.soeknadsland != null) {
+            soeknad.soeknadsland.landkoder.stream().filter(Objects::nonNull).forEach(landkoder::add);
         }
         return landkoder;
     }
 
     public static Periode hentPeriode(SoeknadDokument soeknadDokument) {
-        return soeknadDokument.oppholdUtland.oppholdsPeriode;
+        return soeknadDokument.periode;
     }
 
     /**
@@ -45,5 +48,12 @@ public final class SoeknadUtils {
             throw new FunksjonellException("Søknad mangler detaljer om Maritimt Arbeid");
         }
         return søknad.maritimtArbeid.get(0);
+    }
+
+    public static Landkoder hentSøknadsland(SoeknadDokument søknad) {
+        if (søknad.soeknadsland.landkoder.isEmpty()) {
+            throw new RuntimeException("Søknad mangler søknadsland");
+        }
+        return Landkoder.valueOf(søknad.soeknadsland.landkoder.get(0));
     }
 }

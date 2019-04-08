@@ -2,9 +2,12 @@ package no.nav.melosys.saksflyt.agent.aou;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.ProsessDataKey;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
@@ -16,14 +19,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_MEDL;
+import static no.nav.melosys.domain.ProsessSteg.AOU_AVKLAR_MYNDIGHET;
 import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_RESULTAT;
 
 /**
  * Oppdaterer behandlingsresultat.
  *
  * Transisjoner:
- * AOU_OPPDATER_RESULTAT -> AOU_OPPDATER_MEDL eller FEILET_MASKINELT hvis feil
+ * AOU_OPPDATER_RESULTAT -> AOU_AVKLAR_MYNDIGHET eller FEILET_MASKINELT hvis feil
  */
 @Component("AnmodningOmUnntakOppdaterBehandlingsresultat")
 public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
@@ -60,7 +63,7 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
         behandlingsresultatRepository.save(behandlingsresultat);
 
-        prosessinstans.setSteg(AOU_OPPDATER_MEDL);
+        prosessinstans.setSteg(AOU_AVKLAR_MYNDIGHET);
         log.info("Oppdatert behandlingsresultat for prosessinstans {}.", prosessinstans.getId());
     }
 }

@@ -83,7 +83,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
 
     private static Avklartefakta lagAvklarteFakta() {
         Avklartefakta faktum = new Avklartefakta();
-        faktum.setType(Avklartefaktatype.AVKLARTE_ARBEIDSGIVER);
+        faktum.setType(Avklartefaktatype.VIRKSOMHET);
         faktum.setFakta("TRUE");
         faktum.setSubjekt("123456789");
         return faktum;
@@ -116,7 +116,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
         SoeknadDokument dokument = new SoeknadDokument();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = new StrukturertAdresse();
-        arbeidUtland.adresse.landKode = Landkoder.AT.getKode();
+        arbeidUtland.adresse.landkode = Landkoder.AT.getKode();
         dokument.arbeidUtland = Collections.singletonList(arbeidUtland);
         return dokument;
     }

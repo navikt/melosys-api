@@ -90,7 +90,7 @@ public class DokumentFactory {
         } catch (TransformerException e) {
             log.error("XSLT transformasjon feilet for type {} og versjon {} ", type , versjon);
             log.error("Exception: ", e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
 
         return outputTarget.getWriter().toString();

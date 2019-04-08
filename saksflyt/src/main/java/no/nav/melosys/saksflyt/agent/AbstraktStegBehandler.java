@@ -11,6 +11,7 @@ import no.nav.melosys.saksflyt.api.StegBehandler;
 import no.nav.melosys.saksflyt.impl.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -21,6 +22,8 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
     private Predicate<Prosessinstans> inngangsvilkår;
     
     private Map<Feilkategori, UnntakBehandler> unntakBehandlere;
+
+    private static final String PID_MELDING = "{}: {}";
     
     protected abstract ProsessSteg inngangsSteg();
     
@@ -48,29 +51,29 @@ public abstract class AbstraktStegBehandler implements StegBehandler {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = MelosysException.class)
     public void utførSteg(Prosessinstans prosessinstans) {
         try {
             utfør(prosessinstans);
         } catch (SikkerhetsbegrensningException e) {
-            String feilmelding = "Uventet SikkerhetsbegrensningException";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            String feilmelding = "SikkerhetsbegrensningException ";
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.INGEN_TILGANG, prosessinstans, feilmelding, e);
         } catch (IkkeFunnetException e) {
-            String feilmelding = "Uventet IkkeFunnetException";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            String feilmelding = "IkkeFunnetException ";
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.IKKE_FUNNET, prosessinstans, feilmelding, e);
         } catch (FunksjonellException e) {
-            String feilmelding = "Uventet FunksjonellException";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            String feilmelding = "FunksjonellException ";
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, e);
         } catch (TekniskException e) {
-            String feilmelding = "Uventet TekniskException";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            String feilmelding = "TekniskException ";
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, e);
         } catch (RuntimeException e) {
-            String feilmelding = "Uventet RuntimeException";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding, e);
+            String feilmelding = "RuntimeException ";
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding, e);
             håndterUnntak(Feilkategori.UVENTET_EXCEPTION, prosessinstans, feilmelding, e);
         }
     }

@@ -19,11 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSSerializer;
 
 import static no.nav.melosys.integrasjon.Fagsystem.GSAK_I_JOARK;
 import static no.nav.melosys.integrasjon.Fagsystem.MELOSYS;
@@ -49,12 +44,13 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public byte[] produserDokumentutkast(DokumentbestillingMetadata metadata, Element brevdata) throws IntegrasjonException {
+    public byte[] produserDokumentutkast(Dokumentbestilling dokumentbestilling) throws IntegrasjonException {
         ProduserDokumentutkastRequest wsRequest = new ProduserDokumentutkastRequest();
+        DokumentbestillingMetadata metadata = dokumentbestilling.getMetadata();
 
         wsRequest.setUtledRegisterInfo(metadata.utledRegisterInfo);
         wsRequest.setDokumenttypeId(metadata.dokumenttypeID);
-        wsRequest.setBrevdata(brevdata);
+        wsRequest.setBrevdata(dokumentbestilling.getBrevData());
 
         try {
             ProduserDokumentutkastResponse wsResponse = dokumentproduksjonConsumer.produserDokumentutkast(wsRequest);
@@ -66,11 +62,12 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public DokumentbestillingResponse produserIkkeredigerbartDokument(DokumentbestillingMetadata metadata, Element brevdata)
+    public DokumentbestillingResponse produserIkkeredigerbartDokument(Dokumentbestilling dokumentbestilling)
         throws FunksjonellException, TekniskException {
         ProduserIkkeredigerbartDokumentRequest wsRequest = new ProduserIkkeredigerbartDokumentRequest();
         Dokumentbestillingsinformasjon info = new Dokumentbestillingsinformasjon();
 
+        DokumentbestillingMetadata metadata = dokumentbestilling.getMetadata();
         info.setDokumenttypeId(metadata.dokumenttypeID);
         info.setUtledRegisterInfo(metadata.utledRegisterInfo);
         // Hvis vedlegg skal sendes, må denne settes først når vedleggene har blitt sendt
@@ -110,11 +107,12 @@ public class DoksysService implements DoksysFasade {
         }
 
         wsRequest.setDokumentbestillingsinformasjon(info);
-        wsRequest.setBrevdata(brevdata);
+        wsRequest.setBrevdata(dokumentbestilling.getBrevData());
 
         try {
-            log.debug("Sender request:{} {}", System.lineSeparator(), wsRequest.toString());
-            log.debug("Bestiller dokument:{} {}", System.lineSeparator(), xmlToString(brevdata));
+            if (log.isDebugEnabled()) {
+                log.debug("Bestiller dokument:{} {}", System.lineSeparator(), wsRequest);
+            }
             ProduserIkkeredigerbartDokumentResponse wsResponse = dokumentproduksjonConsumer.produserIkkeredigerbartDokument(wsRequest);
 
             DokumentbestillingResponse response = new DokumentbestillingResponse();
@@ -134,11 +132,10 @@ public class DoksysService implements DoksysFasade {
     }
 
     private Adresse lagAdresse(DokumentbestillingMetadata metadata) throws TekniskException {
-
-        if (Aktoersroller.MYNDIGHET == metadata.mottakersRolle) {
+        if (metadata.mottaker.erUtenlandskMyndighet()) {
             return lagUtenlandskAdresse(metadata.utenlandskMyndighet);
         } else {
-            throw new TekniskException("Det er ikke planlagt å lage en adresse for mottakersRolle: " + metadata.mottakersRolle);
+            throw new TekniskException("Det er ikke planlagt å lage en adresse for mottakerRolle: " + metadata.mottaker.getRolle());
         }
     }
 
@@ -150,16 +147,15 @@ public class DoksysService implements DoksysFasade {
         return utenlandskPostadresse;
     }
 
-    private Aktoer lagMottaker(DokumentbestillingMetadata metadata) {
-        Aktoersroller mottakersRolle = metadata.mottakersRolle;
-        String mottakerID = metadata.mottakerID;
-
-        if (mottakersRolle == null) {
-            log.error("Brev bør ikke sendes, mottakersRolle er ikke satt.");
-            mottakersRolle = Aktoersroller.BRUKER;
+    private Aktoer lagMottaker(DokumentbestillingMetadata metadata) throws FunksjonellException {
+        if (metadata.mottaker == null) {
+            throw new FunksjonellException("Brev kan ikke sendes, mottaker er ikke satt.");
         }
 
-        switch (mottakersRolle) {
+        Aktoersroller mottakerRolle = metadata.mottaker.getRolle();
+        String mottakerID = metadata.mottakerID;
+
+        switch (mottakerRolle) {
             case BRUKER:
                 return lagPerson(mottakerID);
             case ARBEIDSGIVER:
@@ -168,11 +164,17 @@ public class DoksysService implements DoksysFasade {
                 organisasjon.setOrgnummer(mottakerID);
                 return organisasjon;
             case MYNDIGHET:
-                // Dokprod støtter ikke utenlandske myndigheter så vi lager en falsk person
-                // med mottakerId="11111111111" og dermed blir AvsendMottakId i Joark tom.
-                return lagPerson(FALSK_MOTTAKER_ID, metadata.utenlandskMyndighet.navn);
+                if (metadata.mottaker.erUtenlandskMyndighet()) {
+                    // Dokprod støtter ikke utenlandske myndigheter så vi lager en falsk person
+                    // med mottakerId="11111111111" og dermed blir AvsendMottakId i Joark tom.
+                    return lagPerson(FALSK_MOTTAKER_ID, metadata.utenlandskMyndighet.navn);
+                } else {
+                    Organisasjon myndighet = objectFactory.createOrganisasjon();
+                    myndighet.setOrgnummer(mottakerID);
+                    return myndighet;
+                }
             default:
-                log.warn("MottakersRolle {} er ukjent. PERSON brukes som standard.", mottakersRolle);
+                log.warn("MottakersRolle {} er ukjent. PERSON brukes som standard.", mottakerRolle);
                 return lagPerson(mottakerID);
         }
     }
@@ -186,13 +188,5 @@ public class DoksysService implements DoksysFasade {
         person.setIdent(personID);
         person.setNavn(navn);
         return person;
-    }
-
-    private static String xmlToString(Node node) {
-        Document document = node.getOwnerDocument();
-        DOMImplementationLS domImplLS = (DOMImplementationLS) document
-            .getImplementation();
-        LSSerializer serializer = domImplLS.createLSSerializer();
-        return serializer.writeToString(node);
     }
 }
