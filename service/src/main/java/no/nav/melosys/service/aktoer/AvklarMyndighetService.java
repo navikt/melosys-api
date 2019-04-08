@@ -35,7 +35,7 @@ public class AvklarMyndighetService {
         );
     }
 
-    public Aktoer avklarMyndighet(Behandling behandling) throws TekniskException {
+    public Aktoer hentMyndighetFraBehandling(Behandling behandling) throws TekniskException {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(MYNDIGHET);
         aktoer.setInstitusjonId(lagInstitusjonsId(behandling));

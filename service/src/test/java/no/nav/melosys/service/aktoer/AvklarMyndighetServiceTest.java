@@ -59,7 +59,7 @@ public class AvklarMyndighetServiceTest {
 
     @Test
     public void avklarMyndighet_forventAktoerMedGyldigInstitusjonsId() throws Exception {
-        Aktoer aktoer = avklarMyndighetService.avklarMyndighet(behandling);
+        Aktoer aktoer = avklarMyndighetService.hentMyndighetFraBehandling(behandling);
         assertThat(aktoer).isNotNull();
         assertThat(aktoer.getInstitusjonId()).isEqualTo(forventetInstitusjonId);
     }

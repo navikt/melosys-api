@@ -120,7 +120,7 @@ public class DokumentService {
         Aktoer mottaker = behandling.getFagsak().hentAktørMedRolleType(mottakerRolle);
         // Myndighet avklares ikke endelig før i Saksflyt
         if (mottaker == null && MYNDIGHET.equals(mottakerRolle)) {
-            mottaker = avklarMyndighetService.avklarMyndighet(behandling);
+            mottaker = avklarMyndighetService.hentMyndighetFraBehandling(behandling);
         }
 
         return dokSysFasade.produserDokumentutkast(lagDokumentbestilling(produserbartDokument, mottaker, behandling, brevData));
