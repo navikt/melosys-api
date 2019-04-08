@@ -7,8 +7,10 @@ import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -19,7 +21,6 @@ import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
-import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
 import org.junit.Before;
@@ -30,10 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -72,6 +70,7 @@ public class OppgaveplukkerTest {
     public void plukkOppgave_høy_prio() throws MelosysException {
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave();
+        oppgave1.setOppgavetype(Oppgavetyper.VUR);
         oppgave1.setOppgaveId("1");
         oppgave1.setPrioritet(PrioritetType.LAV);
         oppgave1.setFristFerdigstillelse(LocalDate.of(2017, 8, 7));
@@ -80,6 +79,7 @@ public class OppgaveplukkerTest {
 
         Oppgave oppgave2 = new Oppgave();
         oppgave2.setOppgaveId("2");
+        oppgave2.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         oppgave2.setPrioritet(PrioritetType.HOY);
         oppgave2.setFristFerdigstillelse(LocalDate.of(2018, 8, 7));
         oppgave2.setSaksnummer("MEL-12");
@@ -87,6 +87,7 @@ public class OppgaveplukkerTest {
 
         Oppgave oppgave3 = new Oppgave();
         oppgave3.setOppgaveId("3");
+        oppgave3.setOppgavetype(Oppgavetyper.JFR);
         oppgave3.setFristFerdigstillelse(LocalDate.of(2018, 8, 10));
         oppgave3.setPrioritet(PrioritetType.NORM);
         oppgave3.setSaksnummer("MEL-123");
@@ -94,6 +95,7 @@ public class OppgaveplukkerTest {
 
         Oppgave oppgave4 = new Oppgave();
         oppgave4.setOppgaveId("4");
+        oppgave4.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         oppgave4.setFristFerdigstillelse(LocalDate.of(2018, 8, 5));
         oppgave4.setPrioritet(PrioritetType.HOY);
         oppgave4.setSaksnummer("MEL-1234");
@@ -108,8 +110,8 @@ public class OppgaveplukkerTest {
         behandlingstyper.add(Behandlingstyper.SOEKNAD.getKode());
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
-        plukkOppgaveInnDto.setOppgavetype("BEH_SAK_MK");
-        plukkOppgaveInnDto.setFagomrade("MED");
+        plukkOppgaveInnDto.setOppgavetype(Oppgavetyper.BEH_SAK_MK.getKode());
+        plukkOppgaveInnDto.setFagomrade(Tema.MED.getKode());
         plukkOppgaveInnDto.setSakstyper(sakstyper);
         plukkOppgaveInnDto.setBehandlingstyper(behandlingstyper);
 
@@ -185,6 +187,7 @@ public class OppgaveplukkerTest {
         List<Oppgave> oppgaver = new ArrayList<>();
         Oppgave oppgave1 = new Oppgave();
         oppgave1.setOppgaveId("1");
+        oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         oppgave1.setPrioritet(PrioritetType.NORM);
         oppgave1.setSaksnummer("MEL-1");
         oppgave1.setFristFerdigstillelse(LocalDate.of(2018, 8, 7));
@@ -192,12 +195,15 @@ public class OppgaveplukkerTest {
 
         Oppgave oppgave2 = new Oppgave();
         oppgave2.setOppgaveId("2");
+        oppgave2.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         oppgave2.setPrioritet(PrioritetType.NORM);
         oppgave2.setSaksnummer("MEL-2");
         oppgave2.setFristFerdigstillelse(LocalDate.of(2018, 8, 8));
         oppgaver.add(oppgave2);
+
         Oppgave oppgave3 = new Oppgave();
         oppgave3.setOppgaveId("3");
+        oppgave3.setOppgavetype(Oppgavetyper.VUR);
         oppgave3.setPrioritet(PrioritetType.NORM);
         oppgave3.setSaksnummer("MEL-3");
         oppgave3.setFristFerdigstillelse(LocalDate.of(2018, 8, 9));
@@ -224,10 +230,10 @@ public class OppgaveplukkerTest {
         sakstyper.add(Sakstyper.FTRL.getKode());
 
         List<String> behandlingstyper = new ArrayList<>();
-        behandlingstyper.add(Behandlingstyper.NY_VURDERING.getKode());
+        behandlingstyper.add(Behandlingstyper.SOEKNAD.getKode());
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
-        plukkOppgaveInnDto.setOppgavetype("BEH_SAK_MK");
+        plukkOppgaveInnDto.setOppgavetype(Oppgavetyper.BEH_SAK_MK.getKode());
         plukkOppgaveInnDto.setSakstyper(sakstyper);
         plukkOppgaveInnDto.setBehandlingstyper(behandlingstyper);
 
