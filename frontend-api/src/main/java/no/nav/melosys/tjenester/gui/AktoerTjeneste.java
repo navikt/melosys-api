@@ -53,7 +53,7 @@ public class AktoerTjeneste extends RestTjeneste {
         response = AktoerDto.class,
         responseContainer = "List")
     public List<AktoerDto> hentAktoerer(@PathParam("saksnummer") String saksnummer,
-                                        @QueryParam("aktoersrolle") String aktoersrolle,
+                                        @QueryParam("rolleKode") String rolleKode,
                                         @QueryParam("representerer") String representerer)
         throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
 
@@ -62,8 +62,8 @@ public class AktoerTjeneste extends RestTjeneste {
 
         Aktoersroller rolle = null;
         Representerer representantRepresenterer = null;
-        if (!StringUtils.isEmpty(aktoersrolle)) {
-            rolle = Aktoersroller.valueOf(aktoersrolle);
+        if (!StringUtils.isEmpty(rolleKode)) {
+            rolle = Aktoersroller.valueOf(rolleKode);
         }
         if (!StringUtils.isEmpty(representerer)) {
             representantRepresenterer = Representerer.valueOf(representerer);
@@ -90,7 +90,7 @@ public class AktoerTjeneste extends RestTjeneste {
     @ApiOperation(
         value = "Sletter aktøren med en gitt database-id.",
         response = AktoerDto.class)
-    public Response slettAktoer(@PathParam("databaseID") long databaseID) {
+    public Response slettAktoer(@PathParam("databaseID") long databaseID) throws TekniskException, FunksjonellException {
         aktoerService.slettAktoer(databaseID);
         return Response.ok().build();
     }
