@@ -28,8 +28,7 @@ create table behandling_dvh
 	dml_flagg 		               varchar(1)   not null, 
     kildetabell                    varchar(30)  not null, 
 	constraint pk_behandling_dvh primary key (trans_id)
-) column store compress for query high
-  partition by range(funksjonell_tid) interval(numtoyminterval(1,'month'))
+) partition by range(funksjonell_tid) interval(numtoyminterval(1,'month'))
 ( partition p0 values less than ( to_date('20060101','yyyymmdd') ) )
 ;
 
@@ -48,8 +47,7 @@ create table fagsak_dvh
 	funksjonell_av  varchar2(99) ,
 	dml_flagg 		varchar(1)   not null, -- I(nsert), U(pdate), D(elete)
 	constraint pk_fagsak_dvh primary key (trans_id)
-) column store compress for query high
-  partition by range(funksjonell_tid) interval(numtoyminterval(1,'month'))
+) partition by range(funksjonell_tid) interval(numtoyminterval(1,'month'))
 ( partition p0 values less than ( to_date('20060101','yyyymmdd') ) )
 ;
 create table aktor_dvh 
@@ -70,8 +68,7 @@ create table aktor_dvh
 	funksjonell_av       varchar2(99),
 	dml_flagg 		     varchar(1)   not null, -- I(nsert), U(pdate), D(elete)
 	constraint pk_aktor_dvh primary key (trans_id)
-) column store compress for query high
-  partition by range(funksjonell_tid) interval(numtoyminterval(1,'month'))
+) partition by range(funksjonell_tid) interval(numtoyminterval(1,'month'))
 ( partition p0 values less than ( to_date('20060101','yyyymmdd') ) )
 ;
 create table feillogg_dvh
