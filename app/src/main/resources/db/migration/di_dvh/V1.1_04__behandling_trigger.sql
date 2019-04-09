@@ -1,11 +1,11 @@
 --alter session set current_schema=<onsket_schema>;
 create or replace trigger melosys_behandling_trg
-after insert or update or delete on melosys_behandling
+after insert or update or delete on behandling
 for each row
 declare
   l_behandling_dvh  behandling_dvh%rowtype; 
   l_feillogg_dvh    feillogg_dvh%rowtype;
-  l_resultat_dvh    melosys_behandlingsresultat%rowtype;
+  l_resultat_dvh    behandlingsresultat%rowtype;
 begin
     
     case 
@@ -24,7 +24,7 @@ begin
         begin
             select r.*
             into l_resultat_dvh
-            from melosys_behandlingsresultat r
+            from behandlingsresultat r
             where behandling_id = :new.id;
         exception 
             when no_data_found

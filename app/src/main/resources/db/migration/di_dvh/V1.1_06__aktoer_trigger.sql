@@ -1,6 +1,6 @@
 --alter session set current_schema=<onsket_schema>;
 create or replace trigger melosys_aktoer_trg
-after insert or update or delete on melosys_aktoer
+after insert or update or delete on aktoer
 for each row
 declare
   l_aktoer_dvh    aktor_dvh%rowtype;

@@ -1,14 +1,14 @@
 --alter session set current_schema=<onsket_schema>;
 create or replace trigger melosys_resultat_trg
-after insert or update or delete on melosys_behandlingsresultat
+after insert or update or delete on behandlingsresultat
 for each row
 declare
   l_behandling_dvh  behandling_dvh%rowtype;
   l_feillogg_dvh    feillogg_dvh%rowtype;
   l_behandling      melosys_behandling%rowtype;
 begin
-    
-case 
+
+case
     when inserting then l_behandling_dvh.dml_flagg := 'I';
     when updating  then l_behandling_dvh.dml_flagg := 'U';
     when deleting  then l_behandling_dvh.dml_flagg := 'D';
@@ -16,16 +16,16 @@ case
 
     l_behandling_dvh.enhet       := '4530';
     l_behandling_dvh.kildetabell := 'RESULTAT';
-    
-    case 
+
+    case
     when inserting or updating
-    then 
+    then
         begin
             select b.*
             into l_behandling
-            from melosys_behandling b
+            from behandling b
             where id = :new.behandling_id;
-        exception 
+        exception
             when no_data_found
             then null;
         end;
@@ -59,23 +59,23 @@ case
         l_behandling_dvh.henleggelse_grunn              := :old.henleggelse_grunn;
 
     end case;
-    
+
 
     insert into behandling_dvh
     (
 	behandling_id,
 	fagsak_id,
-	-- beskrivende_koder           
+	-- beskrivende_koder
 	enhet,
 	status,
 	beh_type,
 	resultat_type,
-	-- tidsstyringsparameter                            
+	-- tidsstyringsparameter
 	registrert_tid,
 	funksjonell_tid,
 	registrert_av,
 	funksjonell_av,
-	-- 
+	--
 	behandlingsmaate,
 	fastsatt_av_land,
 	henleggelse_grunn,
@@ -90,17 +90,17 @@ case
     (
 	l_behandling_dvh.behandling_id,
 	l_behandling_dvh.fagsak_id,
-	-- beskrivende_koder           
+	-- beskrivende_koder
 	l_behandling_dvh.enhet,
 	l_behandling_dvh.status,
 	l_behandling_dvh.beh_type,
 	l_behandling_dvh.resultat_type,
-	-- tidsstyringsparameter                            
+	-- tidsstyringsparameter
 	l_behandling_dvh.registrert_tid,
 	l_behandling_dvh.funksjonell_tid,
 	l_behandling_dvh.registrert_av,
 	l_behandling_dvh.funksjonell_av,
-	-- 
+	--
 	l_behandling_dvh.behandlingsmaate,
 	l_behandling_dvh.fastsatt_av_land,
 	l_behandling_dvh.henleggelse_grunn,
@@ -113,14 +113,14 @@ case
     );
 
 exception
-    when others 
-    then 
- 
+    when others
+    then
+
         l_feillogg_dvh.kilde_tabell := 'BEHANDLING';
         l_feillogg_dvh.kilde_pk     := l_behandling_dvh.behandling_id;
         l_feillogg_dvh.sqlcode      := substr(sqlcode,1,20);
         l_feillogg_dvh.sqlerrm      := substr(sqlerrm,1,1000);
-        
+
         insert into feillogg_dvh
         (
         kilde_tabell,

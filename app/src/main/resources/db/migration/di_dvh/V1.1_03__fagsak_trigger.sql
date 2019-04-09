@@ -1,6 +1,6 @@
 --alter session set current_schema=<onsket_schema>;
 create or replace trigger melosys_fagsak_trg
-after insert or update or delete on melosys_fagsak
+after insert or update or delete on fagsak
 for each row
 declare
   l_fagsak_dvh    fagsak_dvh%rowtype;
