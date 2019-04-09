@@ -34,6 +34,14 @@ public class AktoerIdCache {
     }
 
     public void leggTilCache(String ident, String aktørId) {
+        if (ident == null) {
+            log.warn("Forsøk å cache null for aktørId {}!", aktørId);
+            return;
+        }
+        if (aktørId == null) {
+            log.warn("Forsøk å cache null for ident {}!", ident);
+            return;
+        }
         identTilAktørIdCache.put(ident, aktørId);
         aktørIdTilIdentCache.put(aktørId, ident);
         utløpskø.put(new AktoerIdCacheElement(ident, millisLevetidICache));
@@ -48,6 +56,7 @@ public class AktoerIdCache {
     }
 
     @EventListener
+    @SuppressWarnings("unused")
     public void onApplicationEvent(ApplicationReadyEvent event) {
         new TømCacheScheduler().start();
     }

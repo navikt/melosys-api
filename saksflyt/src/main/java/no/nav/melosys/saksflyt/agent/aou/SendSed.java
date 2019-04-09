@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.agent.aou;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneOffset;
-import java.time.temporal.TemporalAmount;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
@@ -31,6 +30,8 @@ public class SendSed extends AbstraktSendSed {
 
     private static final Logger log = LoggerFactory.getLogger(SendSed.class);
 
+    private static final int SVARFRIST_MÅNEDER = 2;
+
     @Autowired
     public SendSed(BehandlingRepository behandlingRepository, SedService sedService, BehandlingsresultatService behandlingsresultatService) {
         super(behandlingRepository, sedService, behandlingsresultatService);
@@ -49,13 +50,11 @@ public class SendSed extends AbstraktSendSed {
             prosessinstans.setSteg(ProsessSteg.FERDIG);
 
             Behandling behandling = prosessinstans.getBehandling();
-            TemporalAmount dokumentasjonSvarfrist = Period.ofMonths(2);
-            if (dokumentasjonSvarfrist != null) {
-                behandling.setDokumentasjonSvarfristDato(
-                    LocalDateTime.now().plus(dokumentasjonSvarfrist).toInstant(ZoneOffset.UTC)
-                );
-                behandlingRepository.save(behandling);
-            }
+
+            behandling.setDokumentasjonSvarfristDato(
+                LocalDateTime.now().plus(Period.ofMonths(SVARFRIST_MÅNEDER)).toInstant(ZoneOffset.UTC)
+            );
+            behandlingRepository.save(behandling);
         } catch (Exception ex) {
             prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
             log.error("Kan ikke opprette og sende sed for behandling {}", prosessinstans.getBehandling().getId(), ex);

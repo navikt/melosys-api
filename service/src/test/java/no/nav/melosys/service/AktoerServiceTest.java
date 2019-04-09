@@ -9,11 +9,14 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -28,6 +31,9 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AktoerServiceTest {
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private AktoerRepository aktørRepository;
@@ -101,6 +107,31 @@ public class AktoerServiceTest {
         aktoer.setRolle(Aktoersroller.ARBEIDSGIVER);
         aktoer.setOrgnr("123456789");
         verify(aktørRepository).save(eq(aktoer));
+    }
+
+    @Test
+    public void slettAktør_sletteBruker_kasterException() throws FunksjonellException, TekniskException {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        Optional<Aktoer> optionalAktoer = Optional.of(aktoer);
+        doReturn(optionalAktoer).when(aktørRepository).findById(10L);
+        expectedException.expect(FunksjonellException.class);
+
+        aktørService.slettAktoer(10L);
+
+        verify(aktørRepository, never()).deleteById(optionalAktoer.get());
+    }
+
+    @Test
+    public void slettAktør_sletteRepresentant_fungerer() throws FunksjonellException, TekniskException {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.REPRESENTANT);
+        Optional<Aktoer> optionalAktoer = Optional.of(aktoer);
+        doReturn(optionalAktoer).when(aktørRepository).findById(10L);
+
+        aktørService.slettAktoer(10L);
+
+        verify(aktørRepository).deleteById(optionalAktoer.get());
     }
 
     @Test
