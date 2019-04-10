@@ -5,7 +5,7 @@ for each row
 declare
   l_behandling_dvh  behandling_dvh%rowtype;
   l_feillogg_dvh    feillogg_dvh%rowtype;
-  l_behandling      melosys_behandling%rowtype;
+  l_behandling      behandling%rowtype;
 begin
 
 case
