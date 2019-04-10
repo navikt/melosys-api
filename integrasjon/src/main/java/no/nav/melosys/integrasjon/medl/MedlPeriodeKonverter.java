@@ -8,6 +8,7 @@ import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
@@ -20,6 +21,7 @@ import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriode
 public class MedlPeriodeKonverter {
 
     private static final BiMap<LovvalgBestemmelse, GrunnlagMedl> lovvalgsbestemmelseTilGrunnlagMedlTabell;
+    private static final Kildedokumenttype KILDEDOKUMENTTYPE_HENV_SOKNAD = new Kildedokumenttype().withValue("Henv_Soknad");
 
     static {
         BiMap<LovvalgBestemmelse, GrunnlagMedl> tbl = HashBiMap.create();
@@ -28,7 +30,8 @@ public class MedlPeriodeKonverter {
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3B, GrunnlagMedl.FO_11_3_B);
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3C, GrunnlagMedl.FO_11_3_C);
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3E, GrunnlagMedl.FO_11_3_E);
-        tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_4_2, GrunnlagMedl.FO_11_4);
+        tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_4_2, GrunnlagMedl.FO_11_4_2);
+        tbl.put(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1, GrunnlagMedl.FO_11_4_1);
         // Article 12
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1, GrunnlagMedl.FO_12_1);
         tbl.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_2, GrunnlagMedl.FO_12_2);
@@ -143,10 +146,25 @@ public class MedlPeriodeKonverter {
             periode.setLand(new Landkode().withValue(lovvalgLand));
         }
 
-        if (lovvalgsperiode.getBestemmelse() != null) {
-            GrunnlagMedl grunnlagMedl = tilGrunnlagMedltype(lovvalgsperiode.getBestemmelse());
+        LovvalgBestemmelse bestemmelse = hentLovvalgBestemmelse(lovvalgsperiode);
+        if (bestemmelse != null) {
+            GrunnlagMedl grunnlagMedl = tilGrunnlagMedltype(bestemmelse);
             periode.setGrunnlagstype(new Grunnlagstype().withValue(grunnlagMedl.getKode()));
         }
+
+        periode.setKildedokumenttype(KILDEDOKUMENTTYPE_HENV_SOKNAD);
         return periode;
+    }
+
+    private static LovvalgBestemmelse hentLovvalgBestemmelse(Lovvalgsperiode lovvalgsperiode) {
+        final boolean harTilleggsbestemmelseART11_4_1 = lovvalgsperiode.getTilleggsbestemmelse() != null && lovvalgsperiode.getTilleggsbestemmelse().equals(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1);
+
+        LovvalgBestemmelse bestemmelse;
+        if (harTilleggsbestemmelseART11_4_1) {
+            bestemmelse = TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1;
+        } else {
+            bestemmelse = lovvalgsperiode.getBestemmelse();
+        }
+        return bestemmelse;
     }
 }
