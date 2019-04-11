@@ -135,6 +135,7 @@ public class BehandlingService {
         behandlingsreplika.setId(null);
         behandlingsreplika.setType(behandlingstype);
         behandlingsreplika.setStatus(behandlingsstatus);
+        behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
 
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         for (Saksopplysning saksopplysning : tidligsteInaktiveBehandling.getSaksopplysninger()) {
