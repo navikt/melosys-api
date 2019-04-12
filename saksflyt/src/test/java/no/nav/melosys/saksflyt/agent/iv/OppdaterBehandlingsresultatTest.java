@@ -6,6 +6,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,7 @@ public class OppdaterBehandlingsresultatTest {
     }
 
     @Test
-    public void utfør() {
+    public void utfør() throws FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(1L);
@@ -63,7 +64,7 @@ public class OppdaterBehandlingsresultatTest {
     }
 
     @Test
-    public void utfør_annenProsesstypeEnnIverksettVedtak_setterIkkeResultattypeOgLand() {
+    public void utfør_annenProsesstypeEnnIverksettVedtak_setterIkkeResultattypeOgLand() throws FunksjonellException {
         Prosessinstans p = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(1L);
