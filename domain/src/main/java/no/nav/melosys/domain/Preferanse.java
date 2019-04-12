@@ -14,13 +14,13 @@ public class Preferanse {
     private Preferanse() {
     }
 
-    public Preferanse(long id, PreferanseEnum preferanse) {
+    public Preferanse(Long id, PreferanseEnum preferanse) {
         this.id = id;
         this.preferanse = preferanse;
     }
 
     @Id
-    private long id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "kode")
