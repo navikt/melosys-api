@@ -13,7 +13,7 @@ public class UtenlandskMyndighet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     public String institusjonskode;
 

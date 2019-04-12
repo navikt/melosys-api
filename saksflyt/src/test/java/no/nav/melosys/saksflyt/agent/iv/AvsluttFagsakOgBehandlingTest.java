@@ -59,7 +59,7 @@ public class AvsluttFagsakOgBehandlingTest {
 
         assertThat(p.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
         assertThat(p.getBehandling().getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
-        assertThat(p.getBehandling().getFagsak().getStatus()).isEqualTo(Saksstatuser.AVSLUTTET);
+        assertThat(p.getBehandling().getFagsak().getStatus()).isEqualTo(Saksstatuser.LOVVALG_AVKLART);
 
     }
 } 

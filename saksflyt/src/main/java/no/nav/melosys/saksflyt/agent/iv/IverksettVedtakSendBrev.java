@@ -109,13 +109,15 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
             if (endretPeriodeBegrunnelseKode != null) {
                 begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
             }
-            Brevbestilling innvilgelseBruker = new Brevbestilling.Builder().medDokumentType(INNVILGELSE_YRKESAKTIV)
-                .medAvsender(saksbehandler)
-                .medMottaker(Mottaker.av(BRUKER))
-                .medBehandling(behandling)
-                .medBegrunnelseKode(begrunnelseKode).build();
 
+            Brevbestilling.Builder innvilgelseBuilder = new Brevbestilling.Builder().medDokumentType(INNVILGELSE_YRKESAKTIV)
+                .medAvsender(saksbehandler)
+                .medBehandling(behandling)
+                .medBegrunnelseKode(begrunnelseKode);
+            Brevbestilling innvilgelseBruker = innvilgelseBuilder.medMottaker(Mottaker.av(BRUKER)).build();
             brevBestiller.bestill(innvilgelseBruker);
+            Brevbestilling innvilgelseSkatt = innvilgelseBuilder.medMottaker(FastMottaker.av(SKATT)).build();
+            brevBestiller.bestill(innvilgelseSkatt);
 
             if (fagsak.harAktørMedRolleType(ARBEIDSGIVER)) {
                 brevBestiller.bestill(INNVILGELSE_ARBEIDSGIVER, saksbehandler, Mottaker.av(ARBEIDSGIVER), behandling);

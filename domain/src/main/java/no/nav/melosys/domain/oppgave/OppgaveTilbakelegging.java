@@ -14,7 +14,7 @@ public class OppgaveTilbakelegging {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "oppgave_id", nullable = false, updatable = false)
     private String oppgaveId;

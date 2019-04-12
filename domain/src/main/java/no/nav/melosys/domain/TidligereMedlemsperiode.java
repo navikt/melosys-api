@@ -14,7 +14,7 @@ public class TidligereMedlemsperiode {
 
     public TidligereMedlemsperiode() {}
 
-    public TidligereMedlemsperiode(long behandlingId, long periodeId) {
+    public TidligereMedlemsperiode(Long behandlingId, Long periodeId) {
         id = new TidligereMedlemsperiodeId(behandlingId, periodeId);
     }
 

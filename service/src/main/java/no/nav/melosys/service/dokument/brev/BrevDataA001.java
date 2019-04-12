@@ -32,7 +32,7 @@ public class BrevDataA001 extends BrevData {
 
     public List<Arbeidssted> arbeidssteder;
 
-    // TODO: Kommer fra Joark. Kun relevant når purring er implementer
+    // Kommer fra Joark. Kun relevant når purring er implementer
     public List<LocalDate> tidligereAnmodninger = new ArrayList<>();
 
     public Collection<Lovvalgsperiode> lovvalgsperioder;

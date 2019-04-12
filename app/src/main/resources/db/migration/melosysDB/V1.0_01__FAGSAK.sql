@@ -28,7 +28,7 @@ CREATE TABLE fagsak_status (
     CONSTRAINT pk_fagsak_status PRIMARY KEY (kode)
 );
 INSERT INTO fagsak_status (kode, navn) VALUES ('OPPRETTET', 'Saken har blitt opprettet men behandlingen har ikke startet eller er ikke ferdigstilt ennå.');
-INSERT INTO fagsak_status (kode, navn) VALUES ('LOVVALG_AVKLART', '	Avklart hvilket landstrygdeloving bruker skal omfattes av.');
+INSERT INTO fagsak_status (kode, navn) VALUES ('LOVVALG_AVKLART', 'Avklart hvilket landstrygdeloving bruker skal omfattes av.');
 INSERT INTO fagsak_status (kode, navn) VALUES ('AVSLUTTET', 'Saken er avsluttet');
 INSERT INTO fagsak_status (kode, navn) VALUES ('HENLAGT', 'Saken har blitt henlagt');
 

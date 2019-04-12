@@ -9,31 +9,31 @@ import javax.persistence.Embeddable;
 public class TidligereMedlemsperiodeId implements Serializable {
 
     @Column(name = "behandling_id")
-    private long behandlingId;
+    private Long behandlingId;
 
     @Column(name = "periode_id")
-    private long periodeId;
+    private Long periodeId;
 
     public TidligereMedlemsperiodeId() {}
 
-    public TidligereMedlemsperiodeId(long behandlingId, long periodeId) {
+    public TidligereMedlemsperiodeId(Long behandlingId, Long periodeId) {
         this.behandlingId = behandlingId;
         this.periodeId = periodeId;
     }
 
-    public long getBehandlingId() {
+    public Long getBehandlingId() {
         return behandlingId;
     }
 
-    public void setBehandlingId(long behandlingId) {
+    public void setBehandlingId(Long behandlingId) {
         this.behandlingId = behandlingId;
     }
 
-    public long getPeriodeId() {
+    public Long getPeriodeId() {
         return periodeId;
     }
 
-    public void setPeriodeId(long periodeId) {
+    public void setPeriodeId(Long periodeId) {
         this.periodeId = periodeId;
     }
 

@@ -31,13 +31,13 @@ public class InnvilgelseArbeidsgiverMapper implements BrevDataMapper {
                                 BrevData brevdata) throws JAXBException, SAXException {
 
         BrevDataInnvilgelse brevDataInnvilgelse = (BrevDataInnvilgelse) brevdata;
-        Fag fag = mapFag(behandling, resultat, brevDataInnvilgelse);
+        Fag fag = mapFag(behandling, brevDataInnvilgelse);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelse brevDataInnvilgelse) {
+    private Fag mapFag(Behandling behandling, BrevDataInnvilgelse brevDataInnvilgelse) {
         Fag fag = new Fag();
 
         fag.setArbeidsland(brevDataInnvilgelse.arbeidsland);

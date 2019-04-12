@@ -51,14 +51,15 @@ public class JournalfoerInngaaendeConsumer {
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, Class<T> clazz) throws SikkerhetsbegrensningException, IntegrasjonException {
         try {
             return restTemplate.exchange(uri, method, entity, clazz).getBody();
-        } catch (RestClientException ex) {
-            if (ex instanceof HttpStatusCodeException) {
-                switch (((HttpStatusCodeException) ex).getStatusCode()) {
+        } catch (HttpStatusCodeException ex) {
+                switch (ex.getStatusCode()) {
                     case UNAUTHORIZED:
                     case FORBIDDEN:
                         throw new SikkerhetsbegrensningException(ex);
+                    default:
+                        throw new IntegrasjonException(ex);
                 }
-            }
+        } catch (RestClientException ex) {
             throw new IntegrasjonException(ex);
         }
     }
