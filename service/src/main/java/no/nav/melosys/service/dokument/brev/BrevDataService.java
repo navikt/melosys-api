@@ -170,7 +170,7 @@ public class BrevDataService {
 
         navFelles.setBehandlendeEnhet(lagNavEnhet());
         navFelles.setKontaktinformasjon(BrevDataUtils.lagKontaktInformasjon());
-        navFelles.setMottaker(lagMottaker(mottaker, kontaktopplysning, behandling));
+        navFelles.setMottaker(lagMottaker(mottaker, kontaktopplysning));
         navFelles.setSakspart(lagSakspart(behandling));
         navFelles.setSignerendeBeslutter(lagSaksbehandler(brevData.saksbehandler));
         navFelles.setSignerendeSaksbehandler(lagSaksbehandler(brevData.saksbehandler));
@@ -178,7 +178,7 @@ public class BrevDataService {
         return navFelles;
     }
 
-    Mottaker lagMottaker(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling) throws TekniskException {
+    Mottaker lagMottaker(Aktoer mottaker, Kontaktopplysning kontaktopplysning) throws TekniskException {
         Aktoersroller mottakerRolle = mottaker.getRolle();
         String mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
 

@@ -7,7 +7,12 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
-public class JsonResourceLoader {
+public final class JsonResourceLoader {
+
+    private JsonResourceLoader() {
+        throw new IllegalStateException("Utility");
+    }
+
     public static String load(ResourceLoader resourceLoader, String filename) throws IOException {
         Resource resource = resourceLoader.getResource("classpath:" + filename);
 
@@ -16,7 +21,7 @@ public class JsonResourceLoader {
         StringBuilder stringBuilder = new StringBuilder();
         try (Reader reader = new BufferedReader(new InputStreamReader
                 (inputStream, Charset.forName(StandardCharsets.UTF_8.name())))) {
-            int c = 0;
+            int c;
             while ((c = reader.read()) != -1) {
                 stringBuilder.append((char) c);
             }

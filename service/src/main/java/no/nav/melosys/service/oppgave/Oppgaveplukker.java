@@ -18,6 +18,7 @@ import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -60,7 +61,7 @@ public class Oppgaveplukker {
      * 4) Oppgaven tildeles til saksbehandleren.
      * 5) Behandlingen endrer status hvis oppgaven er en behandlingsoppgave.
      */
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
         String type = plukkDto.getOppgavetype();
         Oppgavetyper oppgavetype = KodeverkUtils.dekod(Oppgavetyper.class, type);
@@ -97,12 +98,13 @@ public class Oppgaveplukker {
         
         if (valg.isPresent()) {
             Oppgave oppgave = valg.get();
-            // Tildeler oppgaven
-            gsakFasade.tildelOppgave(oppgave.getOppgaveId(), saksbehandlerID);
 
-            if (oppgavetype == Oppgavetyper.BEH_SAK_MK) {
+            if (oppgave.erBehandling() || oppgave.erVurderDokument()) {
                 settBehandlingsstatusUnderBehandling(oppgave.getSaksnummer());
             }
+
+            // Tildeler oppgaven
+            gsakFasade.tildelOppgave(oppgave.getOppgaveId(), saksbehandlerID);
         }
         return valg;
     }
@@ -124,7 +126,7 @@ public class Oppgaveplukker {
             }
             Behandling behandling = fagsak.getAktivBehandling();
 
-            if (erVenterForDokumentasjon(behandling.getStatus())
+            if (behandling.erVenterForDokumentasjon()
                 && behandling.getDokumentasjonSvarfristDato() != null
                 && behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
                 iter.remove();
@@ -132,7 +134,7 @@ public class Oppgaveplukker {
         }
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public synchronized void leggTilbakeOppgave(String saksbehandlerID, TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingRepository.findById(tilbakelegging.getBehandlingID())
             .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandling med behandlingID " + tilbakelegging.getBehandlingID()));
@@ -142,8 +144,6 @@ public class Oppgaveplukker {
             .orElseThrow(() -> new IkkeFunnetException("Fant ingen oppgave for fagsak " + fagsak.getSaksnummer()));
 
         String oppgaveId = oppgave.getOppgaveId();
-        gsakFasade.leggTilbakeOppgave(oppgaveId);
-
         if (!tilbakelegging.isVenterPåDokumentasjon()) {
             OppgaveTilbakelegging oppgaveTilbakelegging = new OppgaveTilbakelegging();
             oppgaveTilbakelegging.setOppgaveId(oppgaveId);
@@ -152,6 +152,8 @@ public class Oppgaveplukker {
             oppgaveTilbakelegging.setRegistrertDato(LocalDateTime.now());
             oppgaveTilbakkeleggingRepo.save(oppgaveTilbakelegging);
         }
+
+        gsakFasade.leggTilbakeOppgave(oppgaveId);
         log.info("Oppgave med oppgaveId {} er lagt tilbake. ", oppgaveId);
     }
 
@@ -189,9 +191,5 @@ public class Oppgaveplukker {
             behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
             behandlingRepository.save(behandling);
         }
-    }
-
-    public static boolean erVenterForDokumentasjon(Behandlingsstatus behandlingsstatus) {
-        return (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_PART) || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL);
     }
 }

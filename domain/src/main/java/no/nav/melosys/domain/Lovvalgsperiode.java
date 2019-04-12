@@ -84,7 +84,7 @@ public class Lovvalgsperiode implements ErPeriode {
     private Trygdedekninger dekning;
 
     @Column(name = "medlperiode_id")
-    private long medlPeriodeID;
+    private Long medlPeriodeID;
 
     public Long getId() {
         return id;
@@ -184,11 +184,11 @@ public class Lovvalgsperiode implements ErPeriode {
         this.dekning = dekning;
     }
 
-    public long getMedlPeriodeID() {
+    public Long getMedlPeriodeID() {
         return medlPeriodeID;
     }
 
-    public void setMedlPeriodeID(long medlPeriodeID) {
+    public void setMedlPeriodeID(Long medlPeriodeID) {
         this.medlPeriodeID = medlPeriodeID;
     }
 

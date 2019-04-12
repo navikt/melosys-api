@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
@@ -45,7 +46,7 @@ public class JournalfoeringService {
         return joarkFasade.hentJournalpost(journalpostID);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException, TekniskException {
         log.info("{} oppretter ny sak etter journalføring av journalpost {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID());
 
@@ -74,7 +75,7 @@ public class JournalfoeringService {
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) throws FunksjonellException, TekniskException {
         String saksnummer = journalfoeringDto.getSaksnummer();
         log.info("{} knytter journalpost {} til sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);

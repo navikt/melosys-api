@@ -7,7 +7,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -43,8 +42,9 @@ public class BehandlingsresultatService {
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: " + behandlingsid));
     }
 
-    @Transactional
-    public void replikerBehandlingsresultat(Behandling tidligsteInaktiveBehandling, Behandling behandlingsreplika) throws IkkeFunnetException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, TekniskException {
+    @Transactional(rollbackFor = Exception.class)
+    public void replikerBehandlingsresultat(Behandling tidligsteInaktiveBehandling, Behandling behandlingsreplika)
+        throws IkkeFunnetException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(tidligsteInaktiveBehandling.getId());
 
         Behandlingsresultat behandlingsresultatsreplika = (Behandlingsresultat) BeanUtils.cloneBean(behandlingsresultat);
@@ -58,7 +58,8 @@ public class BehandlingsresultatService {
         behandlingsresultatRepository.save(behandlingsresultatsreplika);
     }
 
-    private void replikerVilkaarsresultat(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
+    private void replikerVilkaarsresultat(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika)
+        throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
         behandlingsresultatsreplika.setVilkaarsresultater(new HashSet<>());
         for (Vilkaarsresultat vilkaarsresultatOrig : behandlingsresultat.getVilkaarsresultater()) {
             Vilkaarsresultat vilkaarsresultatreplika = (Vilkaarsresultat) BeanUtils.cloneBean(vilkaarsresultatOrig);
@@ -75,7 +76,8 @@ public class BehandlingsresultatService {
         }
     }
 
-    private void replikerLovvalgsperioder(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
+    private void replikerLovvalgsperioder(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika)
+        throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
         behandlingsresultatsreplika.setLovvalgsperioder(new HashSet<>());
         for (Lovvalgsperiode lovvalgsperiodeOrig : behandlingsresultat.getLovvalgsperioder()) {
             Lovvalgsperiode lovvalgsperiodereplika = (Lovvalgsperiode) BeanUtils.cloneBean(lovvalgsperiodeOrig);
@@ -85,7 +87,8 @@ public class BehandlingsresultatService {
         }
     }
 
-    private void replikerAvklartefakta(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
+    private void replikerAvklartefakta(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika)
+        throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
         behandlingsresultatsreplika.setAvklartefakta(new HashSet<>());
         for (Avklartefakta avklartefaktaOrig : behandlingsresultat.getAvklartefakta()) {
             Avklartefakta avklartefaktareplika = (Avklartefakta) BeanUtils.cloneBean(avklartefaktaOrig);

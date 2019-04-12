@@ -7,6 +7,8 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AktoerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -31,7 +33,7 @@ public class AktoerService {
         return aktørRepository.findAll(Example.of(aktør));
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void lagEllerOppdaterAktoer(Fagsak fagsak, AktoerDto aktoerDto) throws FunksjonellException {
         if (aktoerDto.getRolleKode() == null) {
             throw new FunksjonellException("Kan ikke lagre aktør uten rolle. Saksnummer: " + fagsak.getSaksnummer());
@@ -57,10 +59,13 @@ public class AktoerService {
         aktoerDto.setDatabaseID(aktoer.getId());
     }
 
-    public void slettAktoer(long databaseID) {
-        //det virker ikke å slette direkte på id-en.
-        Aktoer aktoer = new Aktoer();
-        aktoer.setId(databaseID);
+    public void slettAktoer(long databaseID) throws TekniskException, FunksjonellException {
+        Aktoer aktoer = aktørRepository.findById(databaseID).
+            orElseThrow(() -> new TekniskException("Klarte ikke slette aktøren. Fant ingen aktør på id: " + databaseID));
+
+        if (aktoer.getRolle().equals(Aktoersroller.BRUKER)) {
+            throw new FunksjonellException("Aktøren er en bruker. Det er ikke lov til å slette denne");
+        }
         aktørRepository.deleteById(aktoer);
     }
 

@@ -11,6 +11,7 @@ CREATE TABLE behandling (
     endret_av       VARCHAR2(99) NULL,
     initierende_journalpost_id VARCHAR2(99) NULL,
     initierende_dokument_id VARCHAR2(99) NULL,
+    opprinnelig_behandling_id NUMBER(19) NULL,
     CONSTRAINT pk_behandling PRIMARY KEY (id)
 );
 
@@ -53,3 +54,6 @@ INSERT INTO behandling_type (kode, navn) VALUES ('ENDRET_PERIODE', 'Behandle for
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_fagsak FOREIGN KEY (saksnummer) REFERENCES fagsak;
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_status FOREIGN KEY (status) REFERENCES behandling_status;
 ALTER TABLE behandling ADD CONSTRAINT fk_behandling_type FOREIGN KEY (beh_type) REFERENCES behandling_type;
+
+ALTER TABLE behandling
+    ADD CONSTRAINT fk_behandling FOREIGN KEY (opprinnelig_behandling_id) REFERENCES behandling;

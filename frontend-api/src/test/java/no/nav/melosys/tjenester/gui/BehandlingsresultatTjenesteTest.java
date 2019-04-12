@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BehandlingsresultatTjenesteTest extends JsonSchemaTest {
+public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
 
     private static final Logger log = LoggerFactory.getLogger(BehandlingsresultatTjenesteTest.class);
 

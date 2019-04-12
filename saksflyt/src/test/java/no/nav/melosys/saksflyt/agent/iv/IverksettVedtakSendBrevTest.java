@@ -255,13 +255,23 @@ public class IverksettVedtakSendBrevTest {
     }
 
     @Test
-    public void utførStegPåInnvilgelsesBrevBestemtAv12_1_vedtakOgA1Sendes() throws Exception {
+    public void utførSteg_innvilgelses12_1_vedtakOgKopiTilSkattSendes() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
         AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
 
         instans.utførSteg(prosessinstans);
 
         verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(Mottaker.av(BRUKER)), anyLong(), any());
+        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(FastMottaker.av(SKATT)), anyLong(), any());
+    }
+
+    @Test
+    public void utførSteg_innvilgelses12_1_kopiAvA1Sendes() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
+        AbstraktStegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+
+        instans.utførSteg(prosessinstans);
+
         verify(dokService).produserDokument(eq(ATTEST_A1), eq(Mottaker.av(MYNDIGHET)), anyLong(), any());
     }
 

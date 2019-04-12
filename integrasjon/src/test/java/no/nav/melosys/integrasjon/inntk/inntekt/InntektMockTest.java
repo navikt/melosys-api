@@ -1,22 +1,14 @@
 package no.nav.melosys.integrasjon.inntk.inntekt;
 
-import static no.nav.melosys.integrasjon.inntk.InntektFasade.FILTER;
-import static no.nav.melosys.integrasjon.inntk.InntektFasade.FILTER_URI;
-import static no.nav.melosys.integrasjon.inntk.InntektFasade.FORMAALSKODE;
-import static no.nav.melosys.integrasjon.inntk.InntektFasade.FORMAALSKODE_URI;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import javax.xml.datatype.DatatypeFactory;
 
-import org.junit.Test;
-
-import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Ainntektsfilter;
-import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Formaal;
-import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.ObjectFactory;
-import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.PersonIdent;
-import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Uttrekksperiode;
+import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.*;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkRequest;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkResponse;
+import org.junit.Test;
+
+import static no.nav.melosys.integrasjon.inntk.InntektService.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class InntektMockTest {
     @Test

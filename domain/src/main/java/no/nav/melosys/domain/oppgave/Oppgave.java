@@ -60,18 +60,6 @@ public class Oppgave {
         this.tilordnetRessurs = tilordnetRessurs;
     }
 
-    public boolean erBehandling() {
-        return oppgavetype == Oppgavetyper.BEH_SAK_MK;
-    }
-
-    public boolean erJournalFøring() {
-        return oppgavetype == Oppgavetyper.JFR;
-    }
-
-    public boolean erVurderDokument() {
-        return oppgavetype == Oppgavetyper.VUR;
-    }
-
     public String getOppgaveId() {
         return oppgaveId;
     }
@@ -142,6 +130,18 @@ public class Oppgave {
 
     public void setBehandlesAvApplikasjon(String behandlesAvApplikasjon) {
         this.behandlesAvApplikasjon = behandlesAvApplikasjon;
+    }
+
+    public boolean erBehandling() {
+        return oppgavetype == Oppgavetyper.BEH_SAK_MK;
+    }
+
+    public boolean erJournalFøring() {
+        return oppgavetype == Oppgavetyper.JFR;
+    }
+
+    public boolean erVurderDokument() {
+        return oppgavetype == Oppgavetyper.VUR;
     }
 
     /**

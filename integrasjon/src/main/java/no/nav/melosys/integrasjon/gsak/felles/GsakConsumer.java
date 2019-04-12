@@ -15,7 +15,7 @@ public interface GsakConsumer {
     /**
      * Mapper HTTP status til en MelosysException
      */
-    default void statusTilException(int status, String feilmelding) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException, FunksjonellException {
+    default void statusTilException(int status, String feilmelding) throws TekniskException, FunksjonellException {
         if (status == 401 || status == 403) {
             throw new SikkerhetsbegrensningException(feilmelding);
         } else if (status == 404) {
@@ -27,5 +27,5 @@ public interface GsakConsumer {
         }
     }
 
-    void håndterEvFeil(Response response) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException, FunksjonellException;
+    void håndterEvFeil(Response response) throws TekniskException, FunksjonellException;
 }

@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
@@ -71,7 +72,7 @@ public class FagsakService {
         }
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void henleggFagsak(String saksnummer, String begrunnelseKodeString, String fritekst) throws TekniskException, FunksjonellException {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
 
@@ -149,7 +150,7 @@ public class FagsakService {
      * - Oppretter bruker, arbeidsgiver og representanter.
      * - Oppretter tom behandlingsresultat.
      */
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) throws FunksjonellException {
         Fagsak fagsak = new Fagsak();
         String saksnummer = hentNesteSaksnummer();

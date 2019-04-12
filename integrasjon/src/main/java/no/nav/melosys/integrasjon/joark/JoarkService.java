@@ -83,7 +83,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
+    public Journalpost hentJournalpost(String journalpostID) throws IntegrasjonException, SikkerhetsbegrensningException {
 
         GetJournalpostResponse response = journalfoerInngaaendeConsumer.hentJournalpost(journalpostID);
 
@@ -176,7 +176,8 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void oppdaterJournalpost(String journalpostId, String dokumentID, Long gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, List<String> vedleggTittelListe, boolean medDokumentkategori) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public void oppdaterJournalpost(String journalpostId, String dokumentID, Long gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn, String tittel, List<String> vedleggTittelListe, boolean medDokumentkategori)
+        throws SikkerhetsbegrensningException, IntegrasjonException {
 
         oppdaterDokument(journalpostId, dokumentID, tittel, medDokumentkategori);
         if (!CollectionUtils.isEmpty(vedleggTittelListe)) {

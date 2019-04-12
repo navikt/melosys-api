@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("resource")
-public class SoeknadTjenesteTest extends JsonSchemaTest {
+public class SoeknadTjenesteTest extends JsonSchemaTestParent {
 
     private static final Logger log = LoggerFactory.getLogger(SoeknadTjenesteTest.class);
 

@@ -2,11 +2,8 @@ package no.nav.melosys.integrasjon.medl.behandle;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.*;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
@@ -84,5 +81,28 @@ public class MedlPeriodeKonverterTest {
     @Test
     public void tilLovvalgBestemmelse_FO_16_gir_FO_883_2004_ART16_1() throws TekniskException {
         assertThat(MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.FO_16)).isEqualTo(LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1);
+    }
+
+    @Test
+    public void opprettPeriodeRequest_medBådeTillegsbestemmelseFO_883_2004_ART11_4_1ogBestemmelse_velgerGrunnlagMedlFO_11_4_1() throws TekniskException {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.FO_883_2004_ART11_4_1);
+        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_4_2);
+        OpprettPeriodeRequest opprettPeriodeRequest = MedlPeriodeKonverter.konverterTilOpprettPeriodRequest("12345678910", lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL);
+
+        no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Medlemsperiode medlemsperiode = opprettPeriodeRequest.getPeriode();
+
+        assertThat(medlemsperiode.getGrunnlagstype().getValue()).isEqualTo("FO_11_4_1");
+    }
+
+    @Test
+    public void opprettPeriodeRequest_BestemmelseFO_883_2004_ART11_4_2_velgerGrunnlagMedlFO_11_4_2() throws TekniskException {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_4_2);
+        OpprettPeriodeRequest opprettPeriodeRequest = MedlPeriodeKonverter.konverterTilOpprettPeriodRequest("12345678910", lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL);
+
+        no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Medlemsperiode medlemsperiode = opprettPeriodeRequest.getPeriode();
+
+        assertThat(medlemsperiode.getGrunnlagstype().getValue()).isEqualTo("FO_11_4_2");
     }
 }

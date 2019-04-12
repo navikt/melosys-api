@@ -14,7 +14,7 @@ public interface JoarkFasade {
     /**
      * Ferdigstiller journalføring
      */
-    void ferdigstillJournalføring(String journalpostId) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, IntegrasjonException;
+    void ferdigstillJournalføring(String journalpostId) throws FunksjonellException, IntegrasjonException;
 
     /**
      * Henter et dokument fra Joark
@@ -24,22 +24,22 @@ public interface JoarkFasade {
     /**
      * Henter en journalpost fra Joark
      */
-    Journalpost hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, IntegrasjonException;
+    Journalpost hentJournalpost(String journalpostID) throws IntegrasjonException, SikkerhetsbegrensningException;
 
     /**
      * Henter en liste med journalposter knyttet til en sak.
      */
-    List<Journalpost> hentKjerneJournalpostListe(Long gsakSakID) throws SikkerhetsbegrensningException, IntegrasjonException;
+    List<Journalpost> hentKjerneJournalpostListe(Long gsakSakID) throws IntegrasjonException, SikkerhetsbegrensningException;
 
     /**
      * Oppdaterer en journalpost i Joark
      * @param medDokumentkategori Om dokumentkategori skal oppdatteres med standardverdi "IS", Ikke tolkbart skjema
      */
     void oppdaterJournalpost(String journalpostId, String dokumentID, Long gsakSaksnummer, String brukerID, String avsenderID, String avsenderNavn,String tittel, List<String> vedleggTittelListe, boolean medDokumentkategori)
-        throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, IntegrasjonException;
+        throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
 
     /**
      * Returnerer en liste av mangler i journalposten med den oppgitte IDen
      */
-    List<JournalfoeringMangel> utledJournalfoeringsbehov(String journalpostID) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
+    List<JournalfoeringMangel> utledJournalfoeringsbehov(String journalpostID) throws FunksjonellException;
 }

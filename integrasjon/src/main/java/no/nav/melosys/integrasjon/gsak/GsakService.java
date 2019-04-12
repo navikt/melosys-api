@@ -142,8 +142,7 @@ public class GsakService implements GsakFasade {
         } else if (oppgave.erVurderDokument()) {
             oppgaveDto.setFristFerdigstillelse(idag.plusWeeks(FRIST_VUR_DAGER));
         } else {
-            // FristFerdigstillelse er påkrevd, opprettelsen vil feile.
-            log.warn("Type " + oppgave.getOppgavetype().getKode() + " er ikke støttet.");
+            throw new FunksjonellException("Type " + oppgave.getOppgavetype().getKode() + " støttes ikke.");
         }
         if (oppgave.getBehandlingstema() != null) {
             oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema().getKode());
@@ -307,7 +306,7 @@ public class GsakService implements GsakFasade {
             case NY_VURDERING: return "ae0028";
             case PAASTAND_UTL: return "ae0113";
             case UNNTAK_FRA_MEDLEMSKAP: return "ab0154";
-            default: throw new RuntimeException(this + " er ikke implementert i felleskodeverk.");
+            default: throw new IllegalArgumentException(this + " er ikke implementert i felleskodeverk.");
         }
     }
 }

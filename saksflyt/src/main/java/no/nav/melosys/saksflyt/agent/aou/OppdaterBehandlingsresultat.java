@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessSteg.AOU_AVKLAR_MYNDIGHET;
 import static no.nav.melosys.domain.ProsessSteg.AOU_OPPDATER_RESULTAT;
@@ -51,7 +50,6 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
         return FeilStrategi.standardFeilHåndtering();
     }
 
-    @Transactional
     @Override
     public void utfør(Prosessinstans prosessinstans) throws IkkeFunnetException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());

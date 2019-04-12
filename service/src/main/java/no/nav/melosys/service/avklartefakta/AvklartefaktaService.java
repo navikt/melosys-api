@@ -9,8 +9,8 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -27,7 +27,7 @@ public class AvklartefaktaService {
 
     private final AvklartefaktaDtoKonverterer faktaKonverterer;
 
-    private final String valgtFakta = "TRUE";
+    private static final String VALGT_FAKTA = "TRUE";
 
     @Autowired
     public AvklartefaktaService(AvklarteFaktaRepository avklarteFaktaRepository, BehandlingsresultatRepository behandlingsresultatRepository, AvklartefaktaDtoKonverterer faktaKonverterer) {
@@ -41,11 +41,6 @@ public class AvklartefaktaService {
         Set<Avklartefakta> avklartefakta = avklarteFaktaRepository.findByBehandlingsresultatId(behandlingsid);
 
         return avklartefakta.stream().map(AvklartefaktaDto::new).collect(Collectors.toSet());
-    }
-
-    public Avklartefakta hentAvklarteFakta(long behandlingsresultatID, Avklartefaktatype type) throws FunksjonellException {
-        return avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsresultatID, type)
-            .orElseThrow(() -> new FunksjonellException("Avklartefakta " + type + " mangler for behandlingsresultat " + behandlingsresultatID));
     }
 
     public Set<Avklartefakta> hentAlleAvklarteArbeidsland(long behandlingsid) {
@@ -66,9 +61,7 @@ public class AvklartefaktaService {
 
     public Set<String> hentAvklarteOrganisasjoner(long behandlingsid) {
         Set<Avklartefakta> avklartefakta =
-                avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid,
-                                                                                   Avklartefaktatype.VIRKSOMHET,
-                                                                                   valgtFakta);
+                avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid, Avklartefaktatype.VIRKSOMHET, VALGT_FAKTA);
         return avklartefakta.stream()
                 .map(Avklartefakta::getSubjekt)
                 .collect(Collectors.toSet());
@@ -90,7 +83,7 @@ public class AvklartefaktaService {
         return avklartefaktaOpt.map(af -> Maritimtyper.valueOf(af.getFakta()));
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void lagreAvklarteFakta(long behandlingsid, Set<AvklartefaktaDto> avklartefaktaDtos) throws IkkeFunnetException {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandlingsresultat for behandlingsid: " + behandlingsid));
@@ -119,7 +112,7 @@ public class AvklartefaktaService {
         avklarteFaktaRepository.save(avklartefakta);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void leggTilÅrsakEndringPeriode(long behandlingsid, Endretperioder endretperiode) throws IkkeFunnetException {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandlingsresultat for behandlingsid: " + behandlingsid));

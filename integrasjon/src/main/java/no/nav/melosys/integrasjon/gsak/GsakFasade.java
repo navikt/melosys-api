@@ -16,7 +16,7 @@ public interface GsakFasade {
     /**
      * Ferdigstiller en opprettet oppgave i GSAK
      */
-    void ferdigstillOppgave(String oppgaveId) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, FunksjonellException;
+    void ferdigstillOppgave(String oppgaveId) throws TekniskException, FunksjonellException;
 
     /**
      * Finner aktive og utildelte oppgaver som svarer til noen gitt kriterier.
@@ -33,13 +33,13 @@ public interface GsakFasade {
      * Finner Oppgaver basert på ansvarlig saksbehandler
      * GSAK sorterer oppgavene stigende etter frist.
      */
-    List<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
+    List<Oppgave> finnOppgaveListeMedAnsvarlig(String ansvarligId) throws TekniskException, FunksjonellException;
 
     /**
      * Finner Oppgaver basert på bruker.
      * GSAK sorterer oppgavene stigende etter frist.
      */
-    List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
+    List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws TekniskException, FunksjonellException;
 
     /**
      * Finner Oppgave med gitt saksnummer.
@@ -50,31 +50,31 @@ public interface GsakFasade {
      * Finner Behandlingsoppgaver basert på bruker.
      * GSAK sorterer oppgavene stigende etter frist.
      */
-    List<Oppgave> finnBehandlingsoppgaverMedBruker(String aktørId) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
+    List<Oppgave> finnBehandlingsoppgaverMedBruker(String aktørId) throws TekniskException, FunksjonellException;
 
     /**
      * Hent oppgave fra GSAK på en gitt oppgaveId
      */
-    Oppgave hentOppgave(String oppgaveId) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException;
+    Oppgave hentOppgave(String oppgaveId) throws TekniskException, FunksjonellException;
 
     /**
      * Oppretter en oppgave i GSAK for å få en unik oppgaveId
      */
-    String opprettOppgave(Oppgave request) throws SikkerhetsbegrensningException, FunksjonellException, TekniskException;
+    String opprettOppgave(Oppgave request) throws FunksjonellException, TekniskException;
 
     /**
      * Legger tilbake en oppgave i GSAK
      */
-    void leggTilbakeOppgave(String oppgaveId) throws SikkerhetsbegrensningException, FunksjonellException, TekniskException, IkkeFunnetException;
+    void leggTilbakeOppgave(String oppgaveId) throws FunksjonellException, TekniskException;
 
     /**
      * Oppretter en sak i GSAK
      */
-    Long opprettSak(String saksnummer, Behandlingstyper behandlingstype, String aktørId) throws TekniskException, IntegrasjonException, SikkerhetsbegrensningException, FunksjonellException;
+    Long opprettSak(String saksnummer, Behandlingstyper behandlingstype, String aktørId) throws TekniskException, FunksjonellException;
 
     /**
      * Tildeler en oppgaver til en saksbehandler
      */
-    void tildelOppgave(String oppgaveId, String saksbehandlerID) throws IkkeFunnetException, SikkerhetsbegrensningException, FunksjonellException, TekniskException;
+    void tildelOppgave(String oppgaveId, String saksbehandlerID) throws FunksjonellException, TekniskException;
 
 }

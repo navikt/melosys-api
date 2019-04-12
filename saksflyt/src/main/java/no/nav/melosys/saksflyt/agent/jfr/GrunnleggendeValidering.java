@@ -31,6 +31,8 @@ import static no.nav.melosys.feil.Feilkategori.FUNKSJONELL_FEIL;
 public class GrunnleggendeValidering extends AbstraktStegBehandler {
     
     private static final Logger log = LoggerFactory.getLogger(GrunnleggendeValidering.class);
+    private static final String PID_MELDING = "{}: {}";
+
     private FagsakRepository fagsakRepository;
 
     public GrunnleggendeValidering() {
@@ -60,7 +62,7 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
         ProsessType prosessType = prosessinstans.getType();
         if (prosessType != ProsessType.JFR_NY_SAK && prosessType != ProsessType.JFR_KNYTT) {
             String feilmelding = "ProsessType " + prosessType + " er ikke støttet";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding);
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
             return;
         }
@@ -90,12 +92,12 @@ public class GrunnleggendeValidering extends AbstraktStegBehandler {
                 Behandling tidligsteInaktiveBehandling = fagsak.getTidligsteInaktiveBehandling();
                 if (aktivBehandling != null) {
                     String feilmelding = "Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som har en aktiv behandling";
-                    log.error("{}: {}", prosessinstans.getId(), feilmelding);
+                    log.error(PID_MELDING, prosessinstans.getId(), feilmelding);
                     håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
                 }
                 if (tidligsteInaktiveBehandling == null) {
                     String feilmelding = "Ulovlig behandlingstype. Du kan ikke ha ENDRET_PERIODE på en sak som mangler en inaktiv behandling";
-                    log.error("{}: {}", prosessinstans.getId(), feilmelding);
+                    log.error(PID_MELDING, prosessinstans.getId(), feilmelding);
                     håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
                 }
             }

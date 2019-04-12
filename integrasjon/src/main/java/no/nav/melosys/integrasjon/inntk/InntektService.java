@@ -43,6 +43,12 @@ public class InntektService implements InntektFasade {
 
     private final JAXBContext jaxbContext;
 
+    public static final String FILTER = "MedlemskapA-inntekt";
+    public static final String FILTER_URI = "http://nav.no/kodeverk/Kode/A-inntektsfilter/MedlemskapA-inntekt?v=6";
+
+    public static final String FORMAALSKODE = "Medlemskap";
+    public static final String FORMAALSKODE_URI = "http://nav.no/kodeverk/Kode/Formaal/Medlemskap?v=5";
+
     @Autowired
     public InntektService(InntektConsumer consumer, DokumentFactory dokumentFactory) {
         this.inntektConsumer = consumer;
@@ -54,7 +60,7 @@ public class InntektService implements InntektFasade {
             jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.inntekt.v3.HentInntektListeBolkResponse.class);
         } catch (JAXBException e) {
             log.error("", e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -73,7 +79,7 @@ public class InntektService implements InntektFasade {
             uttrekksperiode.setMaanedTom(convertToXMLGregorianCalendar(tom));
         } catch (DatatypeConfigurationException e) {
             log.error("Fatal feil ved konvertering", e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
         request.setUttrekksperiode(uttrekksperiode);
 
@@ -90,7 +96,7 @@ public class InntektService implements InntektFasade {
         request.setFormaal(formaal);
 
         // Kall til Inntektskomponenten
-        HentInntektListeBolkResponse response = null;
+        HentInntektListeBolkResponse response;
         try {
             response = inntektConsumer.hentInntektListeBolk(request);
         } catch (HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter e) {

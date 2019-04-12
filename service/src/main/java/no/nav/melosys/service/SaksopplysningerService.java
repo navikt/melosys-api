@@ -9,10 +9,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -80,7 +77,7 @@ public class SaksopplysningerService {
         return (ArbeidsforholdDokument) saksopplysning.getDokument();
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void oppfriskSaksopplysning(long behandlingID) throws IkkeFunnetException, TekniskException {
         log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);
 

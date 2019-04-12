@@ -49,6 +49,10 @@ public class Behandling extends RegistreringsInfo {
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<BehandlingHistorikk> behandlingshistorikk = new HashSet<>(1);
 
+    @ManyToOne()
+    @JoinColumn(name="opprinnelig_behandling_id")
+    private Behandling opprinneligBehandling;
+
     public Long getId() {
         return id;
     }
@@ -125,6 +129,14 @@ public class Behandling extends RegistreringsInfo {
         this.initierendeDokumentId = initierendeDokumentId;
     }
 
+    public Behandling getOpprinneligBehandling() {
+        return opprinneligBehandling;
+    }
+
+    public void setOpprinneligBehandling(Behandling opprinneligBehandling) {
+        this.opprinneligBehandling = opprinneligBehandling;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -150,5 +162,9 @@ public class Behandling extends RegistreringsInfo {
         return !(status == Behandlingsstatus.IVERKSETTER_VEDTAK
                     || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT
                     || status == Behandlingsstatus.AVSLUTTET);
+    }
+
+    public boolean erVenterForDokumentasjon() {
+        return status == Behandlingsstatus.AVVENT_DOK_PART || status == Behandlingsstatus.AVVENT_DOK_UTL;
     }
 }
