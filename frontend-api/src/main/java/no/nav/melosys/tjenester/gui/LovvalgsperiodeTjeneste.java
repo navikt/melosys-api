@@ -17,6 +17,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.tjenester.gui.dto.LovvalgsperiodeDto;
+import no.nav.melosys.tjenester.gui.dto.PeriodeDto;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
@@ -64,4 +65,14 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
         return lovvalgsperiodeDtoer;
     }
 
+    @GET
+    @Path("{behandlingsid}/opprinneligPeriode")
+    @ApiOperation(value = "Henter den opprinnelig lovvalgsperioden en replikert avsluttet behandling har", response = LovvalgsperiodeDto.class)
+    @ApiResponses({ @ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.") })
+    public Response hentOpprinneligLovvalgsperiode(@PathParam("behandlingsid") long behandlingsid) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        tilgang.sjekk(behandlingsid);
+        Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(behandlingsid);
+        PeriodeDto periodeDto = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
+        return Response.ok(periodeDto).build();
+    }
 }
