@@ -8,7 +8,7 @@ node {
 
     properties([
         parameters([
-            choice(choices: ['t8', 'q1', 'prod'],
+            choice(choices: ['t8', 'q1', 'p'],
                 description: 'Hvilket miljø skal applikasjon deployes til.', name: 'ENV')
         ])
     ])
