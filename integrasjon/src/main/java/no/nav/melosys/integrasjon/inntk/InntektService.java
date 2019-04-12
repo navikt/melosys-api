@@ -43,6 +43,12 @@ public class InntektService implements InntektFasade {
 
     private final JAXBContext jaxbContext;
 
+    public static String FILTER = "MedlemskapA-inntekt";
+    public static String FILTER_URI = "http://nav.no/kodeverk/Kode/A-inntektsfilter/MedlemskapA-inntekt?v=6";
+
+    public static String FORMAALSKODE = "Medlemskap";
+    public static String FORMAALSKODE_URI = "http://nav.no/kodeverk/Kode/Formaal/Medlemskap?v=5";
+
     @Autowired
     public InntektService(InntektConsumer consumer, DokumentFactory dokumentFactory) {
         this.inntektConsumer = consumer;
