@@ -15,9 +15,9 @@ import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 public class ValiderStatsborgerskap extends RegistreringUnntakValiderer {
 
     ValiderStatsborgerskap(SaksopplysningRepository saksopplysningRepository, AvklartefaktaService avklartefaktaService) {

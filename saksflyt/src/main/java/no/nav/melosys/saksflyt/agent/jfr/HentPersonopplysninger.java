@@ -21,7 +21,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.BRUKER_ID;
-import static no.nav.melosys.domain.ProsessSteg.*;
+import static no.nav.melosys.domain.ProsessSteg.JFR_HENT_PERS_OPPL;
+import static no.nav.melosys.domain.ProsessSteg.JFR_VURDER_INNGANGSVILKÅR;
 
 /**
  * Steget sørger for å hente personinfo fra TPS
@@ -77,11 +78,8 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
         saksopplysning.setEndretDato(nå);
         saksopplysningRepo.save(saksopplysning);
 
-        if (prosessinstans.getType() == ProsessType.REGISTRERING_UNNTAK) {
-            prosessinstans.setSteg(HENT_ARBF_OPPL);
-        } else {
-            prosessinstans.setSteg(JFR_VURDER_INNGANGSVILKÅR);
-        }
+        prosessinstans.setSteg(JFR_VURDER_INNGANGSVILKÅR);
+
         log.info("Hentet personopplysninger for prosessinstans {}", prosessinstans.getId());
     }
 }

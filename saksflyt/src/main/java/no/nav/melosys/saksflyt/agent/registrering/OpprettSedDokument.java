@@ -7,6 +7,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.SaksopplysningRepository;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class OpprettSedDokument extends AbstraktStegBehandler {
@@ -43,6 +45,7 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
     }
 
     @Override
+    @Transactional(rollbackFor = MelosysException.class)
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
 
         SedDokument sedDokument = prosessinstans.getData(ProsessDataKey.SED_DOKUMENT, SedDokument.class);
