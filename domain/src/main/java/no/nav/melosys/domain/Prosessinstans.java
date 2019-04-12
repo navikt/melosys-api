@@ -10,10 +10,19 @@ import java.util.Properties;
 import java.util.UUID;
 import javax.persistence.*;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_987_2009;
+import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -64,7 +73,7 @@ public class Prosessinstans {
     @OneToMany(mappedBy = "prosessinstans", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProsessinstansHendelse> hendelser;
     
-    private static ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private static ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule()).registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()));
 
     public UUID getId() {
         return id;
@@ -246,5 +255,29 @@ public class Prosessinstans {
             ", endretDato=" + endretDato +
             ", hendelser=" + hendelser +
             '}';
+    }
+
+    private static class LovvalgBestemmelseDeserializer extends StdDeserializer<LovvalgBestemmelse> {
+
+        public LovvalgBestemmelseDeserializer() {
+            super((Class)null);
+        }
+
+        @Override
+        public LovvalgBestemmelse deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+            JsonNode node = jsonParser.getCodec().readTree(jsonParser);
+            String name = node.textValue();
+            try {
+                return LovvalgsBestemmelser_883_2004.valueOf(name);
+            } catch (IllegalArgumentException e) {
+                // Bevisst NOOP for å fortsette oppslaget i andre oppramstyper.
+            }
+            try {
+                return LovvalgsBestemmelser_987_2009.valueOf(name);
+            } catch (IllegalArgumentException e) {
+                // Bevisst NOOP for å fortsette oppslaget i andre oppramstyper.
+            }
+            return TilleggsBestemmelser_883_2004.valueOf(name);
+        }
     }
 }

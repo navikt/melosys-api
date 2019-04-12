@@ -1,6 +1,7 @@
 package no.nav.melosys.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -11,6 +12,8 @@ import org.springframework.data.repository.query.Param;
 public interface FagsakRepository extends CrudRepository<Fagsak, Long> {
 
     Fagsak findBySaksnummer(String saksnummer);
+
+    Optional<Fagsak> findByGsakSaksnummer(Long gsakSaksnummer);
 
     @Query("select f from Fagsak f, Aktoer a where a.fagsak = f and a.rolle = :rolle  and a.aktørId = :id") //$NON-NLS-1$
     List<Fagsak> findByRolleAndAktør(@Param("rolle") Aktoersroller rolle, @Param("id") String aktørID);

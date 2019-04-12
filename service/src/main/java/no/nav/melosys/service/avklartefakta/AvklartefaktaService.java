@@ -8,11 +8,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
-import no.nav.melosys.domain.kodeverk.Endretperioder;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Maritimtyper;
-import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -106,6 +102,21 @@ public class AvklartefaktaService {
             .collect(Collectors.toList());
 
         avklarteFaktaRepository.saveAll(avklartefaktaList);
+    }
+
+    @Transactional
+    public void leggTilAvklarteFakta(long behandlingsid, Avklartefaktatype type, String referanse, String subjekt, String fakta) throws IkkeFunnetException {
+        Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
+            .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandlingsresultat for behandlingsid: " + behandlingsid));
+
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setType(type);
+        avklartefakta.setReferanse(referanse);
+        avklartefakta.setSubjekt(subjekt);
+        avklartefakta.setFakta(fakta);
+        avklartefakta.setBehandlingsresultat(resultat);
+
+        avklarteFaktaRepository.save(avklartefakta);
     }
 
     @Transactional

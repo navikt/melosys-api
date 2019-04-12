@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.agent.sob;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
@@ -13,7 +12,8 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
 import static no.nav.melosys.domain.ProsessDataKey.SAKSNUMMER;
-import static no.nav.melosys.domain.ProsessSteg.*;
+import static no.nav.melosys.domain.ProsessSteg.JFR_OPPDATER_JOURNALPOST;
+import static no.nav.melosys.domain.ProsessSteg.STATUS_BEH_OPPR;
 
 /**
  * Steget sørger for å skrive til Sak og Behandling når behandling opprettes
@@ -50,11 +50,7 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
 
         sakOgBehandlingFasade.sendBehandlingOpprettet(lagBehandlingStatusMapper(saksnummer, behandling.getId(), aktørID));
 
-        if (prosessinstans.getType() == ProsessType.REGISTRERING_UNNTAK) {
-            prosessinstans.setSteg(JFR_FERDIGSTILL_JOURNALPOST); //Journalpost er fullstendig oppdatert i melosys-eessi
-        } else {
-            prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
-        }
+        prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
         log.info("Oppdatert sob-status til opprettet for prosessinstans {}", prosessinstans.getId());
     }
 }

@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument.sed.mapper;
 
+import java.util.Arrays;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
@@ -35,8 +37,10 @@ public class LovvalgTilBestemmelseDtoMapper {
         throw new RuntimeException("Støtte for kode: " + lovvalgBestemmelse.getKode() + " er ikke implementert");
     }
 
-    public static LovvalgBestemmelse mapBestemmelseDtoTilMelosysLovvalgBestemmelse(String bestemmelse) {
-        return mapBestemmelseDtoTilMelosysLovvalgBestemmelse(Bestemmelse.valueOf(bestemmelse));
+    public static LovvalgBestemmelse mapBestemmelseVerdiTilMelosysLovvalgBestemmelse(String bestemmelse) {
+        Bestemmelse bestemmelseEnum = Arrays.stream(Bestemmelse.values()).filter(b -> b.getValue().equals(bestemmelse))
+            .findFirst().orElseThrow(() -> new IllegalArgumentException("Enum Bestemmelse finnes ikke av verdi " + bestemmelse));
+        return mapBestemmelseDtoTilMelosysLovvalgBestemmelse(bestemmelseEnum);
     }
 
     public static LovvalgBestemmelse mapBestemmelseDtoTilMelosysLovvalgBestemmelse(Bestemmelse bestemmelse) {

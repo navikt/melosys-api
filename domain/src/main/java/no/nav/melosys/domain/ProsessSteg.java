@@ -67,8 +67,19 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev"),
 
     //Unntak medlemskap
-    OPPRETT_SEDINFO("OPPRETT_SEDINFO", "Oppretter sedinfo dokument"),
-    VALIDER_UNNTAK("VALIDER_UNNTAK", "Validerer tidligere perioder, inntekt og arbeidsforhold");
+    REG_UNNTAK_OPPRETT_SAK_OG_BEH("REG_UNNTAK_OPPRETT_SAK_OG_BEH","Opprett sak og behandling"),
+    REG_UNNTAK_FERDIGSTILL_JOURNALPOST("REG_UNNTAK_FERDIGSTILL_JOURNALPOST","Ferdigstiller journalpost"),
+    REG_UNNTAK_HENT_PERSON("REG_UNNTAK_HENT_PERSON","Henter person tilknyttet SED"),
+    REG_UNNTAK_OPPRETT_SEDDOKUMENT("REG_UNNTAK_OPPRETT_SEDDOKUMENT", "Oppretter sedinfo dokument"),
+    REG_UNNTAK_OPPDATER_BEHANDLING("REG_UNNTAK_OPPDATER_BEHANDLING", "Oppdaterer behandling og setter lovvalgsperiode"),
+    REG_UNNTAK_VALIDER_PERIODE("REG_UNNTAK_VALIDER_PERIODE", "Validerer periode mottatt i søknad"),
+    REG_UNNTAK_VALIDER_MEDLEMSKAP("REG_UNNTAK_VALIDER_MEDLEMSKAP", "Validerer tidligere medlemskap mot MEDL"),
+    REG_UNNTAK_VALIDER_YTELSER("REG_UNNTAK_VALIDER_YTELSER", "Sjekker offentlige ytelser for en person"),
+    REG_UNNTAK_VALIDER_STATSBORGERSKAP("REG_UNNTAK_VALIDER_STATSBORGERSKAP", "Validerer om person har gyldig statsborgerskap for unntaksregel"),
+    REG_UNNTAK_BESTEM_BEHANDLINGSMAATE("REG_UNNTAK_BESTEM_BEHANDLINGSMAATE", "Bestem om søknad skal registreres automatisk eller behandles manuelt"),
+    REG_UNNTAK_OPPDATER_MEDL("REG_UNNTAK_OPPDATER_MEDL", "Sett periode endelig i MEDL"),
+    REG_UNNTAK_OPPRETT_OPPGAVE("REG_UNNTAK_OPPRETT_OPPGAVE","Opprett oppgave for manuell behandling"),
+    REG_UNNTAK_AVSLUTT_BEHANDLING("REG_UNNTAK_AVSLUTT_BEHANDLING", "Avslutt behandling"),
 
     FERDIG("FERDIG", "Prosessen er ferdig");
 

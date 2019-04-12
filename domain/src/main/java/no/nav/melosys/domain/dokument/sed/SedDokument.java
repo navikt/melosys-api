@@ -1,13 +1,15 @@
 package no.nav.melosys.domain.dokument.sed;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.soeknad.UtenlandskIdent;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 
+@XmlRootElement
 public class SedDokument extends SaksopplysningDokument {
 
     private String rinaSaksnummer;
@@ -16,15 +18,15 @@ public class SedDokument extends SaksopplysningDokument {
 
     private String fnr;
 
-    private UtenlandskIdent utenlandskIdent;
-
     private Periode periode;
 
     private LovvalgBestemmelse lovvalgBestemmelse;
 
     private Landkoder lovvalgsland;
 
-    private Set<String> treffRegisterkontroll;
+    private boolean erEndring;
+
+    private List<String> statsborgerskap = new ArrayList<>();
 
     public String getRinaSaksnummer() {
         return rinaSaksnummer;
@@ -48,14 +50,6 @@ public class SedDokument extends SaksopplysningDokument {
 
     public void setFnr(String fnr) {
         this.fnr = fnr;
-    }
-
-    public UtenlandskIdent getUtenlandskIdent() {
-        return utenlandskIdent;
-    }
-
-    public void setUtenlandskIdent(UtenlandskIdent utenlandskIdent) {
-        this.utenlandskIdent = utenlandskIdent;
     }
 
     public Periode getPeriode() {
@@ -82,11 +76,20 @@ public class SedDokument extends SaksopplysningDokument {
         this.lovvalgsland = lovvalgsland;
     }
 
-    public Set<String> getTreffRegisterkontroll() {
-        return treffRegisterkontroll;
+    public boolean getErEndring() {
+        return erEndring;
     }
 
-    public void setTreffRegisterkontroll(Set<String> treffRegisterkontroll) {
-        this.treffRegisterkontroll = treffRegisterkontroll;
+    public void setErEndring(boolean erEndring) {
+        this.erEndring = erEndring;
     }
+
+    public List<String> getStatsborgerskap() {
+        return statsborgerskap;
+    }
+
+    public void setStatsborgerskap(List<String> statsborgerskap) {
+        this.statsborgerskap = statsborgerskap;
+    }
+
 }

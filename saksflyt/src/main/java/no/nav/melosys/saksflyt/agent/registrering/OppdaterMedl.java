@@ -1,0 +1,47 @@
+package no.nav.melosys.saksflyt.agent.registrering;
+
+import java.util.Map;
+
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.feil.Feilkategori;
+import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
+import no.nav.melosys.saksflyt.agent.UnntakBehandler;
+import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+@Component("RegistreringUnntakOppdaterMedl")
+public class OppdaterMedl extends AbstraktStegBehandler {
+
+    private final MedlFasade medlFasade;
+    private final OppdaterMedlFelles felles;
+
+    public OppdaterMedl(MedlFasade medlFasade, OppdaterMedlFelles felles) {
+        this.medlFasade = medlFasade;
+        this.felles = felles;
+    }
+
+    @Override
+    protected ProsessSteg inngangsSteg() {
+        return ProsessSteg.REG_UNNTAK_OPPDATER_MEDL;
+    }
+
+    @Override
+    protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
+        return FeilStrategi.standardFeilHåndtering();
+    }
+
+    @Override
+    @Transactional(rollbackFor = MelosysException.class)
+    protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+
+        //TODO: MELOSYS-2077
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
+    }
+}

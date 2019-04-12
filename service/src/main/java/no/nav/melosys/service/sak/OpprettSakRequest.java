@@ -10,9 +10,9 @@ public class OpprettSakRequest {
     private Behandlingstyper behandlingstype;
     private String initierendeJournalpostId;
     private String initierendeDokumentId;
-    private String gsakSaksnummer;
+    private Long gsakSaksnummer;
 
-    private OpprettSakRequest(String aktørID, String arbeidsgiver, String representant, String representantKontaktperson, Behandlingstyper behandlingstype, String initierendeJournalpostId, String initierendeDokumentId, String gsakSaksnummer) {
+    private OpprettSakRequest(String aktørID, String arbeidsgiver, String representant, String representantKontaktperson, Behandlingstyper behandlingstype, String initierendeJournalpostId, String initierendeDokumentId, Long gsakSaksnummer) {
         this.aktørID = aktørID;
         this.arbeidsgiver = arbeidsgiver;
         this.representant = representant;
@@ -51,7 +51,7 @@ public class OpprettSakRequest {
         return initierendeDokumentId;
     }
 
-    public String getGsakSaksnummer() {
+    public Long getGsakSaksnummer() {
         return gsakSaksnummer;
     }
 
@@ -63,7 +63,7 @@ public class OpprettSakRequest {
         private Behandlingstyper behandlingstype;
         private String initierendeJournalpostId;
         private String initierendeDokumentId;
-        private String gsakSaksnummer;
+        private Long gsakSaksnummer;
 
         public Builder medAktørID(String aktørID) {
             this.aktørID = aktørID;
@@ -100,7 +100,7 @@ public class OpprettSakRequest {
             return this;
         }
 
-        public Builder medGsakSaksnummer(String gsakSaksnummer) {
+        public Builder medGsakSaksnummer(Long gsakSaksnummer) {
             this.gsakSaksnummer = gsakSaksnummer;
             return this;
         }

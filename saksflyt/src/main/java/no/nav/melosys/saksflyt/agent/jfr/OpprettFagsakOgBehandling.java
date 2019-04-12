@@ -73,7 +73,6 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         String endretAv = prosessinstans.getData(SAKSBEHANDLER);
         String initierendeJournalpostId = prosessinstans.getData(JOURNALPOST_ID);
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
-        String gsakSaksnummer = prosessinstans.getData(GSAK_SAK_ID);
         auditorAware.setSaksbehanlderID(endretAv);
 
         if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
@@ -96,19 +95,6 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
             prosessinstans.setSteg(JFR_OPPRETT_SØKNAD);
             log.info("Opprettet fagsak {} for prosessinstans {}", fagsak.getSaksnummer(), prosessinstans.getId());
-        } else if(prosessinstans.getType() == ProsessType.REGISTRERING_UNNTAK) {
-            OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID(aktørId)
-                .medBehandlingstype(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP)
-                .medInitierendeJournalpostId(initierendeJournalpostId)
-                .medInitierendeDokumentId(initierendeDokumentId)
-                .medGsakSaksnummer(gsakSaksnummer)
-                .build();
-
-            Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
-            prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
-            prosessinstans.setBehandling(fagsak.getBehandlinger().get(0));
-
-            prosessinstans.setSteg(STATUS_BEH_OPPR);
         } else {
             String feilmelding = "ProsessType " + prosessinstans.getType() + " er ikke støttet";
             log.error("{}: {}", prosessinstans.getId(), feilmelding);

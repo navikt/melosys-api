@@ -3,7 +3,10 @@ package no.nav.melosys.saksflyt.agent.sob;
 import java.time.Instant;
 import java.util.Map;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
@@ -17,7 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.AKTØR_ID;
-import static no.nav.melosys.domain.ProsessSteg.*;
+import static no.nav.melosys.domain.ProsessSteg.HENT_SOB_SAKER;
+import static no.nav.melosys.domain.ProsessSteg.OPPFRISK_SAKSOPPLYSNINGER;
 
 /**
  * Steget sørger for å hente saker fra SOB
@@ -66,11 +70,7 @@ public class HentSakOgBehandlingSaker extends AbstraktStegBehandler {
         saksopplysning.setEndretDato(nå);
         saksopplysningRepo.save(saksopplysning);
 
-        if (prosessinstans.getType() == ProsessType.REGISTRERING_UNNTAK) {
-            prosessinstans.setSteg(OPPRETT_SEDINFO);
-        } else  {
-            prosessinstans.setSteg(OPPFRISK_SAKSOPPLYSNINGER);
-        }
+        prosessinstans.setSteg(OPPFRISK_SAKSOPPLYSNINGER);
         log.info("Hentet saker fra Sak og behandling for prosessinstans {}", prosessinstans.getId());
     }
 }
