@@ -64,7 +64,7 @@ public class MedlService implements MedlFasade {
             jaxbContext = JAXBContext.newInstance(HentPeriodeListeResponseWrapper.class);
         } catch (JAXBException e) {
             log.error("", e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -108,7 +108,7 @@ public class MedlService implements MedlFasade {
         return opprettPeriode(fnr, lovvalgsperiode, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK) ;
     }
 
-    public Long opprettPeriode(String fnr, Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    Long opprettPeriode(String fnr, Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         try {
             OpprettPeriodeRequest request = MedlPeriodeKonverter.konverterTilOpprettPeriodRequest(fnr, lovvalgsperiode, periodestatusMedl, lovvalgMedl);
             OpprettPeriodeResponse response = behandleMedlemskapConsumer.opprettPeriode(request);

@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("resource")
-public class JournalfoeringTjenesteTest extends JsonSchemaTest {
+public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
 
     private static final Logger log = LoggerFactory.getLogger(JournalfoeringTjenesteTest.class);
 

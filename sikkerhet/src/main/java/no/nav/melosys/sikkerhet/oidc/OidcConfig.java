@@ -66,6 +66,7 @@ public class OidcConfig {
             web.ignoring().antMatchers("/static/**", "/internal/**", "/frontendlogger/**");
         }
 
+        @Override
         protected void configure(final HttpSecurity http) throws Exception {
 
             final SecurityFilter securityFilter = new SecurityFilter(config, OIDC_CLIENT_NAME);

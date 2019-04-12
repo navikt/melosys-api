@@ -1,10 +1,7 @@
 package no.nav.melosys.service;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -15,8 +12,10 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
@@ -32,13 +31,15 @@ import static no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.tilLovvalgBes
 public class LovvalgsperiodeService {
 
     private final BehandlingsresultatRepository behandlingsresultatRepo;
+    private final BehandlingRepository behandlingRepository;
     private final LovvalgsperiodeRepository lovvalgsperiodeRepo;
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
 
-    public LovvalgsperiodeService(BehandlingsresultatRepository behandlingsresultatRepo, LovvalgsperiodeRepository lovvalgsperiodeRepo, TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository) {
+    public LovvalgsperiodeService(BehandlingsresultatRepository behandlingsresultatRepo, LovvalgsperiodeRepository lovvalgsperiodeRepo, TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository, BehandlingRepository behandlingRepository) {
         this.behandlingsresultatRepo = behandlingsresultatRepo;
         this.lovvalgsperiodeRepo = lovvalgsperiodeRepo;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
     public Collection<Lovvalgsperiode> hentLovvalgsperioder(long behandlingsid) {
@@ -95,5 +96,18 @@ public class LovvalgsperiodeService {
             tidligereLovvalgsperioder.add(lovvalgsperiode);
         }
         return tidligereLovvalgsperioder;
+    }
+
+    public Lovvalgsperiode hentOpprinneligLovvalgsperiode(long behandlingId) throws IkkeFunnetException {
+        Behandling behandling = behandlingRepository.findById(behandlingId)
+            .orElseThrow(() -> new IkkeFunnetException("Fant ingen behandling for " + behandlingId));
+
+        Behandling opprinneligBehandling = Optional.ofNullable(behandling.getOpprinneligBehandling())
+            .orElseThrow(() -> new IkkeFunnetException("Fant ingen opprinnelig behandling for " + behandlingId));
+
+        List<Lovvalgsperiode> lovvalgsperiodeList = lovvalgsperiodeRepo.findByBehandlingsresultatId(opprinneligBehandling.getId());
+        return lovvalgsperiodeList.stream()
+            .findFirst()
+            .orElseThrow(() -> new IkkeFunnetException("Fant ingen opprinnelig lovvalgsperiode for " + behandlingId));
     }
 }

@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class VilkaarTjenesteTest extends JsonSchemaTest {
+public class VilkaarTjenesteTest extends JsonSchemaTestParent {
 
     private static final Logger log = LoggerFactory.getLogger(VilkaarTjenesteTest.class);
 

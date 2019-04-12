@@ -18,7 +18,11 @@ import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.kodeverk.*;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OppdaterPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
 
-public class MedlPeriodeKonverter {
+public final class MedlPeriodeKonverter {
+
+    private MedlPeriodeKonverter() {
+        throw new IllegalStateException("Utility");
+    }
 
     private static final BiMap<LovvalgBestemmelse, GrunnlagMedl> lovvalgsbestemmelseTilGrunnlagMedlTabell;
     private static final Kildedokumenttype KILDEDOKUMENTTYPE_HENV_SOKNAD = new Kildedokumenttype().withValue("Henv_Soknad");
@@ -104,9 +108,9 @@ public class MedlPeriodeKonverter {
         return request;
     }
 
-    public static OppdaterPeriodeRequest konverterTilOppdaterPeriodeRequest(Lovvalgsperiode lovvalgsperiode,
-                                                                            PeriodestatusMedl periodestatusMedl,
-                                                                            LovvalgMedl lovvalgMedl, int versjon) throws TekniskException {
+    static OppdaterPeriodeRequest konverterTilOppdaterPeriodeRequest(Lovvalgsperiode lovvalgsperiode,
+                                                                     PeriodestatusMedl periodestatusMedl,
+                                                                     LovvalgMedl lovvalgMedl, int versjon) throws TekniskException {
         OppdaterPeriodeRequest request = new OppdaterPeriodeRequest();
 
         request.setPeriodeId(lovvalgsperiode.getMedlPeriodeID());
@@ -126,7 +130,7 @@ public class MedlPeriodeKonverter {
             periode.setTilOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(lovvalgsperiode.getTom()));
             periode.setDatoRegistrert(KonverteringsUtils.localDateToXMLGregorianCalendar(LocalDate.now()));
         } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
+            throw new TekniskException(e);
         }
         if (periodestatusMedl != null) {
             periode.setStatus(new Statuskode().withValue(periodestatusMedl.getKode()));

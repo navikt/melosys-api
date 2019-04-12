@@ -54,8 +54,6 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
 
         sedDataDto.setBruker(hentBrukerFraPersonDokument(this.person));
 
-        sedDataDto.setEgenAnsatt(this.person.erEgenAnsatt);
-
         sedDataDto.setFamilieMedlem(this.person.familiemedlemmer.stream()
             .filter(f -> f.familierelasjon.equals(Familierelasjon.FARA) || f.familierelasjon.equals(Familierelasjon.MORA))
             .map(this::hentFamilieMedlem).collect(Collectors.toList()));
@@ -65,7 +63,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         sedDataDto.setSelvstendigeVirksomheter(map(avklarteVirksomheterService.hentSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter)));
 
         sedDataDto.setUtenlandskeVirksomheter(hentUtenlandskeVirksomheter().stream().map(
-            this::tilUtenlandsVirksomhetDto).collect(Collectors.toList()));//TODO - riktig?
+            this::tilUtenlandsVirksomhetDto).collect(Collectors.toList()));
 
         sedDataDto.setUtenlandskIdent(this.søknad.personOpplysninger.utenlandskIdent.stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));

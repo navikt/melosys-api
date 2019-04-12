@@ -5,10 +5,14 @@ import java.util.Map;
 
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_987_2009;
 import no.nav.melosys.integrasjon.eessi.dto.Bestemmelse;
+import org.springframework.util.Assert;
 
 public class LovvalgTilBestemmelseDtoMapper {
+
+    private LovvalgTilBestemmelseDtoMapper() {
+        throw new IllegalArgumentException("Utility");
+    }
 
     private static final Map<LovvalgBestemmelse, Bestemmelse> mapper = new HashMap<>();
 
@@ -29,11 +33,12 @@ public class LovvalgTilBestemmelseDtoMapper {
     }
 
     public static Bestemmelse mapMelosysLovvalgTilBestemmelseDto(LovvalgBestemmelse lovvalgBestemmelse) {
+        Assert.notNull(lovvalgBestemmelse, "LovvalgBestemmelse er null.");
 
-        if (lovvalgBestemmelse != null && mapper.containsKey(lovvalgBestemmelse)) {
+        if (mapper.containsKey(lovvalgBestemmelse)) {
             return mapper.get(lovvalgBestemmelse);
         }
 
-        throw new RuntimeException("Støtte for kode: " + lovvalgBestemmelse.getKode() + " er ikke implementert");
+        throw new IllegalArgumentException("Støtte for kode: " + lovvalgBestemmelse.getKode() + " er ikke implementert");
     }
 }

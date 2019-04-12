@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AvklartefaktaTjenesteTest extends JsonSchemaTest {
+public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
 
     private static final Logger log = LoggerFactory.getLogger(AvklartefaktaTjenesteTest.class);
 

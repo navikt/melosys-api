@@ -26,7 +26,7 @@ public class KodeverkRegisterImpl implements KodeverkRegister {
     }
 
     @Override
-    public Kodeverk hentKodeverk(String kodeverkNavn) throws UkjentKodeverkException {
+    public Kodeverk hentKodeverk(String kodeverkNavn) {
         try {
             KodeDto kodeDto = kodeverkConsumer.hentKodeverk(kodeverkNavn);
             Map<String, List<Kode>> koder = new HashMap<>();

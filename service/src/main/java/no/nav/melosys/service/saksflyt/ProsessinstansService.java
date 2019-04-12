@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.domain.ProsessSteg.HS_OPPDATER_RESULTAT;
@@ -74,7 +73,6 @@ public class ProsessinstansService {
         return prosessinstansRepo.findByBehandling_IdAndStegIsNotAndStegIsNot(behandlingID, ProsessSteg.FEILET_MASKINELT, ProsessSteg.FERDIG).isPresent();
     }
 
-    @Transactional
     public void lagre(Prosessinstans prosessinstans) {
         lagre(prosessinstans, SubjectHandler.getInstance().getUserID());
     }

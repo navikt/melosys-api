@@ -123,7 +123,7 @@ public class RegelmodulService {
                     dokumentnoder.get("organisasjonDokumenter").appendChild(dokumentnode);
                     break;
                 case PERSONHISTORIKK:
-                    // FIXME: Regelmodul skal bruke historisk statsborgerskap ved søknad tilbake i tid
+                    // Regelmodul skal bruke historisk statsborgerskap ved søknad tilbake i tid
                     break;
                 case PERSONOPPLYSNING:
                     dokumentnoder.put("personDokument", dokumentnode);

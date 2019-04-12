@@ -38,7 +38,7 @@ public class PersonConsumerTestIT extends Gen3WsProxyServiceITBase {
     PersonSelftestConsumer selftestConsumer;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         PersonConsumerProducer producer = new PersonConsumerProducer();
         producer.setConfig(config);
 
@@ -73,8 +73,7 @@ public class PersonConsumerTestIT extends Gen3WsProxyServiceITBase {
         assertThat(personConsumer.hentPersonerMedSammeAdresse(request)).isExactlyInstanceOf(Integer.class);
     }
 
-    @Ignore
-    @Test
+    //@Test
     public void xml() throws JAXBException, HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
         JAXBContext jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.person.v3.HentPerson.class, no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse.class);
         Marshaller marshaller = jaxbContext.createMarshaller();

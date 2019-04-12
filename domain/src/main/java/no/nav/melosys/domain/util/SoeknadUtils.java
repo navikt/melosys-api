@@ -52,7 +52,7 @@ public final class SoeknadUtils {
 
     public static Landkoder hentSøknadsland(SoeknadDokument søknad) {
         if (søknad.soeknadsland.landkoder.isEmpty()) {
-            throw new RuntimeException("Søknad mangler søknadsland");
+            throw new IllegalStateException("Søknad mangler søknadsland");
         }
         return Landkoder.valueOf(søknad.soeknadsland.landkoder.get(0));
     }

@@ -25,7 +25,8 @@ public class LovvalgsperiodeDtoTest {
             "  \"lovvalgsland\": \"NO\"," +
             "  \"unntakFraLovvalgsland\": %s," +
             "  \"trygdeDekning\": %s," +
-            "  \"medlemskapstype\": \"PLIKTIG\"" +
+            "  \"medlemskapstype\": \"PLIKTIG\"," +
+            "  \"medlemskapsperiodeID\": 20" +
             "}";
 
     private static final String JSON_EKSEMPEL = String.format(JSON_MAL, "\"FO_883_2004_ART11_1\"", "\"NO\"", "\"FULL_DEKNING_EOSFO\"");
@@ -62,7 +63,8 @@ public class LovvalgsperiodeDtoTest {
             enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
             InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
             enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
-            enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")));
+            enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")),
+            20L);
         return forventet;
     }
 

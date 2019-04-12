@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
@@ -42,14 +43,15 @@ public final class LovvalgsperiodeTjenesteTest {
             null,
             InnvilgelsesResultat.AVSLAATT,
             null,
-            Medlemskapstyper.FRIVILLIG);
+            Medlemskapstyper.FRIVILLIG,
+            10L);
 
     private static final long BEHANDLING_UTEN_TILGANG = 238L;
     private static final long BEHANDLING_MED_TEKNISK_FEIL = 832L;
-    private final JsonSchemaTest jsonSchemaTest;
+    private final JsonSchemaTestParent jsonSchemaTest;
 
     public LovvalgsperiodeTjenesteTest() {
-        jsonSchemaTest = new JsonSchemaTest("lovvalgsperioder-schema.json");
+        jsonSchemaTest = new JsonSchemaTestParent("lovvalgsperioder-schema.json");
     }
 
     @Test
@@ -74,8 +76,25 @@ public final class LovvalgsperiodeTjenesteTest {
                 Collections.emptyList(), new TekniskException("ignorert"));
     }
 
+    @Test
+    public void hentOpprinneligLovvalgsperiode_returnererPeriode() throws Exception {
+        LovvalgsperiodeService lovvalgsperiodeService = spy(lagLovvalgsperiodeService());
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        LocalDate fomDato = LocalDate.of(2018, 12, 12);
+        LocalDate tomDato = LocalDate.of(2019, 12, 12);
+        lovvalgsperiode.setFom(fomDato);
+        lovvalgsperiode.setTom(tomDato);
+        doReturn(lovvalgsperiode).when(lovvalgsperiodeService).hentOpprinneligLovvalgsperiode(5L);
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, mock(Tilgang.class));
+
+        PeriodeDto periodeDto = (PeriodeDto) instans.hentOpprinneligLovvalgsperiode(5L).getEntity();
+
+        assertThat(periodeDto.getFom()).isEqualTo(fomDato);
+        assertThat(periodeDto.getTom()).isEqualTo(tomDato);
+    }
+
     private void testUnntakIhentLovvalgsperiode(long behandlingsid,
-            Collection<LovvalgsperiodeDto> forventet, Throwable forventetUnntak) throws Exception {
+            Collection<LovvalgsperiodeDto> forventet, Throwable forventetUnntak) {
         Throwable unntak = catchThrowable(() -> testHentLovvalgsperioder(behandlingsid, Collections.emptyList()));
         assertThat(unntak).isInstanceOf(forventetUnntak.getClass());
         if (forventetUnntak.getCause() != null) {
@@ -123,7 +142,7 @@ public final class LovvalgsperiodeTjenesteTest {
         BehandlingsresultatRepository behandlingsresultatRepo = mock(BehandlingsresultatRepository.class);
         LovvalgsperiodeRepository lovvalgsperiodeRepo = mock(LovvalgsperiodeRepository.class);
         TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository = mock(TidligereMedlemsperiodeRepository.class);
-        LovvalgsperiodeService lovvalgsperiodeService = new LovvalgsperiodeService(behandlingsresultatRepo, lovvalgsperiodeRepo, tidligereMedlemsperiodeRepository);
+        LovvalgsperiodeService lovvalgsperiodeService = new LovvalgsperiodeService(behandlingsresultatRepo, lovvalgsperiodeRepo, tidligereMedlemsperiodeRepository, mock(BehandlingRepository.class));
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(FORVENTET.periode.getFom());
         lovvalgsperiode.setTom(FORVENTET.periode.getTom());
@@ -132,8 +151,7 @@ public final class LovvalgsperiodeTjenesteTest {
         lovvalgsperiode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.valueOf(FORVENTET.tilleggBestemmelse));
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET.innvilgelsesResultat));
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET.medlemskapstype));
-        when(behandlingsresultatRepo.findById(eq(42L))).thenReturn(Optional.of(lagBehandlingsresultat()));
-        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET.medlemskapstype));
+        lovvalgsperiode.setMedlPeriodeID(5L);
         when(behandlingsresultatRepo.findById(eq(42L))).thenReturn(Optional.of(lagBehandlingsresultat()));
         List<Lovvalgsperiode> ingenPerioder = Collections.<Lovvalgsperiode> emptyList();
         List<Lovvalgsperiode> enPeriode = Collections.singletonList(lovvalgsperiode);

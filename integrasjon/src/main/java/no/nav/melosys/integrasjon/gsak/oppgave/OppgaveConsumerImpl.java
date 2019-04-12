@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.gsak.oppgave;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.List;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
@@ -12,7 +13,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
 import no.nav.melosys.integrasjon.felles.RestClientLoggingFilter;
@@ -30,6 +33,7 @@ import org.slf4j.LoggerFactory;
 public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(OppgaveConsumerImpl.class);
+    private static final String CORRELATION_ID = "X-Correlation-ID";
 
     private final boolean erSystem;
 
@@ -56,13 +60,13 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
     }
 
     @Override
-    public OppgaveDto hentOppgave(String oppgaveId) throws SikkerhetsbegrensningException, IkkeFunnetException, FunksjonellException, TekniskException {
+    public OppgaveDto hentOppgave(String oppgaveId) throws FunksjonellException, TekniskException {
         try {
             return target
                 .path(oppgaveId)
                 .request()
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-                .header("X-Correlation-ID", getCallID())
+                .header(CORRELATION_ID, getCallID())
                 .header(HttpHeaders.AUTHORIZATION, getAuth())
                 .get(OppgaveDto.class);
         } catch (RuntimeException e) {
@@ -94,13 +98,13 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
         try {
             OppgaveSvar oppgaveSvar = lokalTarget.request()
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-                .header("X-Correlation-ID", getCallID())
+                .header(CORRELATION_ID, getCallID())
                 .header(HttpHeaders.AUTHORIZATION, getAuth())
                 .get(OppgaveSvar.class);
             return oppgaveSvar.getOppgaver();
         } catch (RuntimeException e) {
             ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
-            return null; // Død kode
+            return  Collections.emptyList(); // Død kode
         }
     }
 
@@ -118,10 +122,10 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
     }
 
     @Override
-    public void oppdaterOppgave(OppgaveDto request) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException, FunksjonellException {
+    public void oppdaterOppgave(OppgaveDto request) throws FunksjonellException, TekniskException {
         try (Response response = target.path(request.getId())
             .request(MediaType.APPLICATION_JSON)
-            .header("X-Correlation-ID", getCallID())
+            .header(CORRELATION_ID, getCallID())
             .header(HttpHeaders.AUTHORIZATION, getAuth())
             .put(Entity.json(request))) {
             håndterEvFeil(response);
@@ -131,10 +135,10 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
     }
 
     @Override
-    public String opprettOppgave(OpprettOppgaveDto request) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException, FunksjonellException {
+    public String opprettOppgave(OpprettOppgaveDto request) throws FunksjonellException, TekniskException {
         try (Response response = target
             .request(MediaType.APPLICATION_JSON)
-            .header("X-Correlation-ID", getCallID())
+            .header(CORRELATION_ID, getCallID())
             .header(HttpHeaders.AUTHORIZATION, getAuth())
             .post(Entity.json(request))) {
             håndterEvFeil(response);
@@ -146,7 +150,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
     }
 
     @Override
-    public void håndterEvFeil(Response response) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException, FunksjonellException {
+    public void håndterEvFeil(Response response) throws FunksjonellException, TekniskException {
         if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) return;
         FeilResponseDto feilResponseDto = response.readEntity(FeilResponseDto.class);
         log.error("Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());

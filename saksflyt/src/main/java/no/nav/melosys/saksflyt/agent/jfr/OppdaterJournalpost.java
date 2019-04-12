@@ -7,7 +7,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -57,7 +56,7 @@ public class OppdaterJournalpost extends AbstraktStegBehandler {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, IkkeFunnetException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws IntegrasjonException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         boolean medDokumentkategori = false;
