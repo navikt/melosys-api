@@ -27,7 +27,7 @@ node {
     def branchName, commit, commitId, imageVersion
     def application = "melosys", springProfiles = "nais"
 
-    if (environment == 'prod') {
+    if (environment == 'p') {
         namespace = 'default'
         cluster = 'prod-fss'
     } else if (environment == 'q1') {
@@ -70,13 +70,13 @@ node {
 
             try {
                 def deployer = getBuildUser(DEFAULT_BUILD_USER)
-                sh "curl -i -s --header \"Content-Type: application/json\" --request POST --data \'{\"environment\": \"${namespace}\",\"application\": \"${application}\",\"version\": \"${imageVersion}\",\"deployedBy\": \"${deployer}\"}\' ${VERA_UPDATE_URL}"
+                sh "curl -i -s --header \"Content-Type: application/json\" --request POST --data \'{\"environment\": \"${environment}\",\"application\": \"${application}\",\"version\": \"${imageVersion}\",\"deployedBy\": \"${deployer}\"}\' ${VERA_UPDATE_URL}"
             } catch (e) {
                 println("[ERROR] Feil ved oppdatering av Vera. Exception: " + e)
             }
         }
 
-        if (namespace == 'q1' || namespace == 'prod') {
+        if (namespace == 'q1' || namespace == 'p') {
 
             stage("Publish to Nexus") {
                 configFileProvider([configFile(fileId: "$mvnSettings", variable: "MAVEN_SETTINGS")]) {
