@@ -27,6 +27,7 @@ public final class LovvalgsperiodeDto {
     public final String innvilgelsesResultat;
     public final String trygdeDekning;
     public final String medlemskapstype;
+    private final Long medlemskapsperiodeID;
 
     public LovvalgsperiodeDto(PeriodeDto periode,
             LovvalgBestemmelse lovvalgBestemmelse,
@@ -36,7 +37,8 @@ public final class LovvalgsperiodeDto {
             Landkoder unntakFraLovvalgsland,
             InnvilgelsesResultat innvilgelsesResultat,
             Trygdedekninger trygdeDekning,
-            Medlemskapstyper medlemskapstype) {
+            Medlemskapstyper medlemskapstype,
+            Long medlemskapsperiodeID) {
         this.periode = periode;
         this.lovvalgBestemmelse = lovvalgBestemmelse != null ? lovvalgBestemmelse.name() : null;
         this.tilleggBestemmelse = tilleggBestemmelse != null ? tilleggBestemmelse.name() : null;
@@ -46,6 +48,7 @@ public final class LovvalgsperiodeDto {
         this.innvilgelsesResultat = innvilgelsesResultat.name();
         this.trygdeDekning = trygdeDekning != null ? trygdeDekning.name() : null;
         this.medlemskapstype = medlemskapstype != null ? medlemskapstype.name() : null;
+        this.medlemskapsperiodeID = medlemskapsperiodeID;
     }
 
     @JsonCreator
@@ -59,7 +62,8 @@ public final class LovvalgsperiodeDto {
                 enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
                 InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
                 enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
-                enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")));
+                enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")),
+                json.get("medlemskapsperiodeID") != null ? Long.valueOf(json.get("medlemskapsperiodeID")) : null);
     }
 
     /**
@@ -70,15 +74,18 @@ public final class LovvalgsperiodeDto {
      * @return en ny DTO-instanse.
      */
     public static LovvalgsperiodeDto av(Lovvalgsperiode lovvalgsperiode) {
-        return new LovvalgsperiodeDto(new PeriodeDto(lovvalgsperiode.getFom(),
-                lovvalgsperiode.getTom()),
-                lovvalgsperiode.getBestemmelse(),
-                lovvalgsperiode.getTilleggsbestemmelse(),
-                lovvalgsperiode.getLovvalgsland(),
-                lovvalgsperiode.getUnntakFraBestemmelse(),
-                lovvalgsperiode.getUnntakFraLovvalgsland(),
-                lovvalgsperiode.getInnvilgelsesresultat(),
-                lovvalgsperiode.getDekning(), lovvalgsperiode.getMedlemskapstype());
+        return new LovvalgsperiodeDto(new PeriodeDto(
+            lovvalgsperiode.getFom(),
+            lovvalgsperiode.getTom()),
+            lovvalgsperiode.getBestemmelse(),
+            lovvalgsperiode.getTilleggsbestemmelse(),
+            lovvalgsperiode.getLovvalgsland(),
+            lovvalgsperiode.getUnntakFraBestemmelse(),
+            lovvalgsperiode.getUnntakFraLovvalgsland(),
+            lovvalgsperiode.getInnvilgelsesresultat(),
+            lovvalgsperiode.getDekning(),
+            lovvalgsperiode.getMedlemskapstype(),
+            lovvalgsperiode.getMedlPeriodeID());
     }
 
     /**
@@ -98,6 +105,7 @@ public final class LovvalgsperiodeDto {
         resultat.setInnvilgelsesresultat(enumVerdiEllerNull(InnvilgelsesResultat.class, innvilgelsesResultat));
         resultat.setDekning(enumVerdiEllerNull(Trygdedekninger.class, trygdeDekning));
         resultat.setMedlemskapstype(enumVerdiEllerNull(Medlemskapstyper.class, medlemskapstype));
+        resultat.setMedlPeriodeID(medlemskapsperiodeID);
         return resultat;
     }
 
@@ -109,5 +117,4 @@ public final class LovvalgsperiodeDto {
         return nøkkel == null ? null : Enum.valueOf(enumKlasse, nøkkel);
 
     }
-
 }
