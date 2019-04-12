@@ -38,7 +38,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OppgaveTjenesteTest extends JsonSchemaTest {
+public class OppgaveTjenesteTest extends JsonSchemaTestParent {
 
     private static final Logger logger = LoggerFactory.getLogger(OppgaveTjenesteTest.class);
 

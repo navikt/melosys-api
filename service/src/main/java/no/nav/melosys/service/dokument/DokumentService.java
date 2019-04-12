@@ -44,6 +44,9 @@ public class DokumentService {
     private static final Set<Produserbaredokumenter> DOKUMENTER_TIL_BRUKER = Collections.unmodifiableSet(EnumSet.of(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
         AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK, INNVILGELSE_YRKESAKTIV));
 
+    private static final String BEHANDLING_ID = "Behandling med ID ";
+    private static final String FINNES_IKKE = " finnes ikke.";
+
     private final BehandlingRepository behandlingRepository;
 
     private final FagsakRepository fagsakRepository;
@@ -93,7 +96,7 @@ public class DokumentService {
     public List<Journalpost> hentDokumenter(String saksnummer) throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
         if (fagsak == null) {
-            throw new IkkeFunnetException("Fagsak med saksnummer " + saksnummer + " finnes ikke");
+            throw new IkkeFunnetException("Fagsak med saksnummer " + saksnummer + FINNES_IKKE);
         }
 
         return joarkFasade.hentKjerneJournalpostListe(fagsak.getGsakSaksnummer());
@@ -111,7 +114,7 @@ public class DokumentService {
         throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingID);
         if (behandling == null) {
-            throw new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke");
+            throw new IkkeFunnetException(BEHANDLING_ID + behandlingID + FINNES_IKKE);
         }
 
         BrevDataBygger bygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
@@ -148,7 +151,7 @@ public class DokumentService {
         throws TekniskException, FunksjonellException {
         Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument");
         Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke"));
+            .orElseThrow(() -> new IkkeFunnetException(BEHANDLING_ID + behandlingID + FINNES_IKKE));
 
         Aktoersroller mottakerRolle = mottaker.getRolle();
         Fagsak fagsak = behandling.getFagsak();
@@ -213,7 +216,7 @@ public class DokumentService {
     public void produserDokumentISaksflyt(long behandlingID, Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto) throws FunksjonellException {
         Assert.notNull(brevbestillingDto, "BrevbestillingDto brukes til å bestille brev i saksflyt.");
         Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Behandling med ID " + behandlingID + " finnes ikke."));
+            .orElseThrow(() -> new IkkeFunnetException(BEHANDLING_ID + behandlingID + FINNES_IKKE));
 
         if (produserbartDokument == MELDING_MANGLENDE_OPPLYSNINGER) {
             prosessinstansService.opprettProsessinstansMangelbrev(behandling, new BrevData(brevbestillingDto));

@@ -46,10 +46,10 @@ public final class LovvalgsperiodeTjenesteTest {
 
     private static final long BEHANDLING_UTEN_TILGANG = 238L;
     private static final long BEHANDLING_MED_TEKNISK_FEIL = 832L;
-    private final JsonSchemaTest jsonSchemaTest;
+    private final JsonSchemaTestParent jsonSchemaTest;
 
     public LovvalgsperiodeTjenesteTest() {
-        jsonSchemaTest = new JsonSchemaTest("lovvalgsperioder-schema.json");
+        jsonSchemaTest = new JsonSchemaTestParent("lovvalgsperioder-schema.json");
     }
 
     @Test

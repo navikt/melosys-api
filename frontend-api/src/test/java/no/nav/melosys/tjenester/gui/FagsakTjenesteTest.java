@@ -50,7 +50,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FagsakTjenesteTest extends JsonSchemaTest {
+public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     private static final Logger log = LoggerFactory.getLogger(FagsakTjenesteTest.class);
 

@@ -28,9 +28,9 @@ import org.springframework.core.io.DefaultResourceLoader;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class JsonSchemaTest {
+public class JsonSchemaTestParent {
 
-    private static final Logger log = LoggerFactory.getLogger(JsonSchemaTest.class);
+    private static final Logger log = LoggerFactory.getLogger(JsonSchemaTestParent.class);
 
     protected static final String FEILMELDING = "Schemavalidering feilet for schema {}";
 
@@ -42,11 +42,11 @@ public class JsonSchemaTest {
 
     private final String schemaNavn;
 
-    protected JsonSchemaTest() {
+    protected JsonSchemaTestParent() {
         this(null);
     }
 
-    public JsonSchemaTest(String schemaNavn) {
+    public JsonSchemaTestParent(String schemaNavn) {
         this.schemaNavn = schemaNavn;
     }
 

@@ -16,8 +16,8 @@ import static no.nav.melosys.integrasjon.kodeverk.impl.KodeverkRegisterImpl.BOKM
 
 public class KodeverkConsumerImpl implements RestConsumer {
 
-    private final String VERSJON = "v1";
-    private final String CONSUMER_ID = "srvmelosys";
+    private static final String VERSJON = "v1";
+    private static final String CONSUMER_ID = "srvmelosys";
 
     private final WebTarget target;
 

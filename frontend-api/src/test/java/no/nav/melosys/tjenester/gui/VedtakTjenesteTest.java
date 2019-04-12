@@ -23,7 +23,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class VedtakTjenesteTest extends JsonSchemaTest {
+public class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
