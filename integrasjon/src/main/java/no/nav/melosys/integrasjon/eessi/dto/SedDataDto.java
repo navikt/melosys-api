@@ -9,7 +9,6 @@ public class SedDataDto {
 
     //Persondok.
     private List<FamilieMedlem> familieMedlem;
-    private boolean egenAnsatt;
     private Bruker bruker;
 
     //Andre medlemsvariabler
@@ -38,14 +37,6 @@ public class SedDataDto {
 
     public void setFamilieMedlem(List<FamilieMedlem> familieMedlem) {
         this.familieMedlem = familieMedlem;
-    }
-
-    public boolean isEgenAnsatt() {
-        return egenAnsatt;
-    }
-
-    public void setEgenAnsatt(boolean egenAnsatt) {
-        this.egenAnsatt = egenAnsatt;
     }
 
     public Bruker getBruker() {
