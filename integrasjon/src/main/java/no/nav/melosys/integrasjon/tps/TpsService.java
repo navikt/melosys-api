@@ -65,7 +65,7 @@ public class TpsService implements TpsFasade {
                 no.nav.tjeneste.virksomhet.person.v3.HentPersonhistorikkResponse.class);
         } catch (JAXBException e) {
             log.error("", e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 

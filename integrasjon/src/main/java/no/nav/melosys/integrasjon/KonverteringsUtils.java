@@ -11,6 +11,10 @@ import java.time.format.DateTimeFormatter;
 
 public final class KonverteringsUtils {
 
+    private KonverteringsUtils() {
+        throw new IllegalArgumentException("Utility");
+    }
+
     public static XMLGregorianCalendar localDateTimeToXMLGregorianCalendar(LocalDateTime localDateTime) throws DatatypeConfigurationException {
         if (localDateTime == null) {
             return null;

@@ -17,11 +17,11 @@ public class NaisOppstart implements Oppstart, EnvironmentAware {
 
     private static final Logger log = LoggerFactory.getLogger(NaisOppstart.class);
 
-    private static Environment environment;
+    private Environment environment;
 
     @Override
     public void setEnvironment(Environment environment) {
-        NaisOppstart.environment = environment;
+        this.environment = environment;
         // Navikt javabaseimaget setter keystore/passord automatisk
         log.debug("Truststore: {}", System.getProperty(TRUST_STORE_KEY));
         loadSystemProperties();

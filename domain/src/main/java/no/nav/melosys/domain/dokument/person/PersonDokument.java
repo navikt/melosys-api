@@ -69,6 +69,6 @@ public class PersonDokument extends SaksopplysningDokument {
 
     @XmlTransient
     @JsonProperty(defaultValue = "false" )
-    public boolean erEgenAnsatt; // FIXME : MELOSYS-1580
+    public boolean erEgenAnsatt; // MELOSYS-1580
 
 }

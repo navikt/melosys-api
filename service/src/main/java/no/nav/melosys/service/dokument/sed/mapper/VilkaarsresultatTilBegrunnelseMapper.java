@@ -10,7 +10,11 @@ import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.kodeverk.Art12_1_Begrunnelser;
 import no.nav.melosys.domain.kodeverk.Art16_1_Anmodning_Begrunnelser;
 
-public class VilkaarsresultatTilBegrunnelseMapper {
+public final class VilkaarsresultatTilBegrunnelseMapper {
+
+    private VilkaarsresultatTilBegrunnelseMapper() {
+        throw new IllegalStateException("Utility");
+    }
 
     public static String mapVilkaarsresultatTilBegrunnelseString(Vilkaarsresultat vilkaarsresultat) {
 

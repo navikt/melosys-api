@@ -81,7 +81,7 @@ public class KodeverkService {
      */
     public String dekod(FellesKodeverk kodeverk, String kode, LocalDate dato) {
         if (StringUtils.isEmpty(kode)) {
-            log.error("Metode dekod kalt med kode " + kode);
+            log.error("Metode dekod kalt med kode {}", kode);
             return UKJENT;
         }
 
@@ -116,18 +116,18 @@ public class KodeverkService {
         return kodeverk;
     }
 
-    /**
-     * Denne methoden tømmer cache og henter kodeverk på nytt
-     */
-    private synchronized void henteAlleKodeVerkData() {
-        log.info("Tømmer cache og henter Kodeverk på nytt");
-        kodeverkCache.clear();
-        for (FellesKodeverk kodeverk : FellesKodeverk.values()) {
-            hentKodeverk(kodeverk.getNavn());
-        }
-    }
 
     private class TømCacheScheduler extends Thread {
+
+        // Denne methoden tømmer cache og henter kodeverk på nytt
+        private synchronized void henteAlleKodeVerkData() {
+            log.info("Tømmer cache og henter Kodeverk på nytt");
+            kodeverkCache.clear();
+            for (FellesKodeverk kodeverk : FellesKodeverk.values()) {
+                hentKodeverk(kodeverk.getNavn());
+            }
+        }
+
         @Override
         public void run() {
             henteAlleKodeVerkData(); // Hente FellesKodeverk når applikasjon starter
@@ -138,7 +138,7 @@ public class KodeverkService {
                 try {
                     sleep(MILLIS_MELLOM_VÅKNE_OPP);
                 } catch (InterruptedException e) {
-                    return;
+                    Thread.currentThread().interrupt();
                 }
 
             }

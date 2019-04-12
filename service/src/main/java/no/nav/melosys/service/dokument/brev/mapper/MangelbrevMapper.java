@@ -50,7 +50,7 @@ public class MangelbrevMapper implements BrevDataMapper {
             throw new TekniskException("Konverteringsfeil", e);
         }
         fag.setManglendeOpplysninger(manglendeOpplysningerType);
-        // FIXME: Kan ikke utledes for behandling som ikke initieres av SED, og må registreres i journalføringen
+        // Obs: Kan ikke utledes for behandling som ikke initieres av SED, og må registreres i journalføringen
         AvsenderType avsenderType = new AvsenderType();
         avsenderType.setRolle(RolleKode.BRUKER);
         fag.setAvsender(avsenderType);

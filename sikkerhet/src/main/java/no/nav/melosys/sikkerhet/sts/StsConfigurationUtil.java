@@ -30,6 +30,7 @@ public class StsConfigurationUtil {
 
     private static final String STS_URL_KEY = "securityTokenService.url";
     private static final String STS_USER_USERNAME = "systemuser.username";
+    @SuppressWarnings("squid:S2068")
     private static final String STS_USER_PASSWORD = "systemuser.password";
 
     private StsConfigurationUtil() {
@@ -51,7 +52,7 @@ public class StsConfigurationUtil {
         return port;
     }
 
-    public static void configureStsForOnBehalfOfWithOidc(Client client) {
+    private static void configureStsForOnBehalfOfWithOidc(Client client) {
         String location = requireProperty(STS_URL_KEY);
         String username = requireProperty(STS_USER_USERNAME);
         String password = requireProperty(STS_USER_PASSWORD);
@@ -63,7 +64,7 @@ public class StsConfigurationUtil {
         setEndpointPolicyReference(client, "classpath:stsPolicy.xml");
     }
 
-    public static void configureStsForSystemUser(Client client) {
+    private static void configureStsForSystemUser(Client client) {
         String location = requireProperty(STS_URL_KEY);
         String username = requireProperty(STS_USER_USERNAME);
         String password = requireProperty(STS_USER_PASSWORD);
@@ -97,7 +98,7 @@ public class StsConfigurationUtil {
             // when creating the client from WSDL (ref cxf-users mailinglist)
             stsClient.getClient().getRequestContext().put(Message.ENDPOINT_ADDRESS, location);
         } catch (BusException | EndpointException e) {
-            throw new RuntimeException("Failed to set endpoint address of STSClient", e);
+            throw new IllegalStateException("Failed to set endpoint address of STSClient", e);
         }
 
         stsClient.getOutInterceptors().add(new LoggingOutInterceptor());

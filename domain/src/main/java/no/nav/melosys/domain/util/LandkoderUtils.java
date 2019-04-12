@@ -5,6 +5,11 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.exception.TekniskException;
 
 public final class LandkoderUtils {
+
+    private LandkoderUtils() {
+        throw new IllegalArgumentException("Utility");
+    }
+
     public static String tilIso3(String l) throws TekniskException {
 
         Landkoder iso2Kode = Landkoder.valueOf(l);

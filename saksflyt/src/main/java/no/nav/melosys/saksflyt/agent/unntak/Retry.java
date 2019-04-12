@@ -40,7 +40,6 @@ public class Retry implements UnntakBehandler {
         }
         Instant skalSoveTil = Instant.now().plus(Duration.ofMillis(millisMellomForsøk));
         prosessinstans.setSoverTil(skalSoveTil);
-        return;
     }
 
 }
