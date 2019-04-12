@@ -71,6 +71,6 @@ public class ValiderPeriode extends RegistreringUnntakValiderer {
     }
 
     private boolean periodeForGammel(Periode periode) {
-        return periode.getTom().isBefore(LocalDate.now().minusYears(5L));
+        return periode.getFom().isBefore(LocalDate.now().minusYears(5L));
     }
 }

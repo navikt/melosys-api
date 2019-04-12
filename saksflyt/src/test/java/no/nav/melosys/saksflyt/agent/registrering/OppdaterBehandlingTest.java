@@ -59,6 +59,7 @@ public class OppdaterBehandlingTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.ER_ENDRING, true);
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "12312322");
 
         oppdaterBehandling.utfør(prosessinstans);

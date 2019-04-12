@@ -43,7 +43,7 @@ public class ValiderPeriodeTest {
         validerPeriode.utfør(prosessinstans);
 
         verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_STATSBORGERSKAP);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
     }
 
     @Test
@@ -55,7 +55,7 @@ public class ValiderPeriodeTest {
         validerPeriode.utfør(prosessinstans);
 
         verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_STATSBORGERSKAP);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class ValiderPeriodeTest {
         validerPeriode.utfør(prosessinstans);
 
         verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_STATSBORGERSKAP);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_BESTEM_BEHANDLINGSMAATE);
     }
 
     @Test
@@ -79,7 +79,7 @@ public class ValiderPeriodeTest {
         validerPeriode.utfør(prosessinstans);
 
         verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_STATSBORGERSKAP);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
     }
 
     @Test
@@ -91,7 +91,7 @@ public class ValiderPeriodeTest {
         validerPeriode.utfør(prosessinstans);
 
         verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_STATSBORGERSKAP);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
     }
 
     private Prosessinstans hentProsessinstans() {
