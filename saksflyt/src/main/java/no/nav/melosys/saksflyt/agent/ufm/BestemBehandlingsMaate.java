@@ -10,7 +10,6 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
@@ -22,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class BestemBehandlingsMaate extends AbstraktStegBehandler {
@@ -49,8 +47,8 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
     }
 
     @Override
-    @Transactional(rollbackFor = MelosysException.class)
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(prosessinstans.getBehandling().getId())
             .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat for behandling " + prosessinstans.getBehandling().getId()));

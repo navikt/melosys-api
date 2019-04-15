@@ -43,6 +43,7 @@ public class ValiderPeriode extends RegistreringUnntakValiderer {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         SedDokument sedDokument = (SedDokument) hentSedSaksopplysning(prosessinstans).getDokument();
         Periode periode = sedDokument.getPeriode();

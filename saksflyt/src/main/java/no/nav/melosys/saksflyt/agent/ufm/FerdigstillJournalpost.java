@@ -12,11 +12,15 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("RegistreringUnntakFerdigstillJournalpost")
 public class FerdigstillJournalpost extends AbstraktStegBehandler {
+
+    private static final Logger log = LoggerFactory.getLogger(FerdigstillJournalpost.class);
 
     private final JoarkFasade joarkFasade;
 
@@ -37,6 +41,7 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         joarkFasade.ferdigstillJournalføring(journalpostId);
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_HENT_PERSON);

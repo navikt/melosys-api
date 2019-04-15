@@ -14,11 +14,15 @@ import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("RegistreringUnntakOpprettOppgave")
 public class OpprettOppgave extends AbstraktStegBehandler {
+
+    private static final Logger log = LoggerFactory.getLogger(OpprettOppgave.class);
 
     private final GsakFasade gsakFasade;
 
@@ -39,6 +43,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
 
         //Foreløpig satt verdier for oppgave. Avklares nærmere med MELOSYS-2280

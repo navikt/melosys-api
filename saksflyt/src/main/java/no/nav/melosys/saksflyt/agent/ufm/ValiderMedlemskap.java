@@ -14,7 +14,6 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
@@ -26,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ValiderMedlemskap extends RegistreringUnntakValiderer {
@@ -53,8 +51,8 @@ public class ValiderMedlemskap extends RegistreringUnntakValiderer {
     }
 
     @Override
-    @Transactional(rollbackFor = MelosysException.class)
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Instant nå = Instant.now();
         boolean erEndring = prosessinstans.getData(ProsessDataKey.ER_ENDRING, Boolean.class);

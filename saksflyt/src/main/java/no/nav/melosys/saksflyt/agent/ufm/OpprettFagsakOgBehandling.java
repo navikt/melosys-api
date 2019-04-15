@@ -6,7 +6,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
@@ -15,15 +14,18 @@ import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
 import static no.nav.melosys.domain.ProsessSteg.REG_UNNTAK_FERDIGSTILL_JOURNALPOST;
 
 @Component("RegistreringUnntakOpprettFagsakOgBehandling")
 public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
+
+    private static final Logger log = LoggerFactory.getLogger(OpprettFagsakOgBehandling.class);
 
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
@@ -45,8 +47,8 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
     }
 
     @Override
-    @Transactional(rollbackFor = MelosysException.class)
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         //Verifiser prosessType
         if (prosessinstans.getType() != ProsessType.REGISTRERING_UNNTAK) {

@@ -9,7 +9,6 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -18,12 +17,15 @@ import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.sak.FagsakService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class HentPerson extends AbstraktStegBehandler {
+
+    private static final Logger log = LoggerFactory.getLogger(HentPerson.class);
 
     private final TpsFasade tpsFasade;
     private final FagsakService fagsakService;
@@ -47,8 +49,8 @@ public class HentPerson extends AbstraktStegBehandler {
     }
 
     @Override
-    @Transactional(rollbackFor = MelosysException.class)
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         String aktørId = prosessinstans.getData(ProsessDataKey.AKTØR_ID);
         String ident = tpsFasade.hentIdentForAktørId(aktørId);

@@ -16,11 +16,15 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AvsluttBehandling extends AbstraktStegBehandler {
+
+    private static final Logger log = LoggerFactory.getLogger(AvsluttBehandling.class);
 
     private final FagsakRepository fagsakRepository;
     private final BehandlingRepository behandlingRepository;
@@ -43,6 +47,8 @@ public class AvsluttBehandling extends AbstraktStegBehandler {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
+
         Behandling behandling = prosessinstans.getBehandling();
 
         Fagsak fagsak = behandling.getFagsak();
