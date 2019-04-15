@@ -121,7 +121,7 @@ public class OrganisasjonsDetaljer {
         }
         else {
             // Enhetsregistret har bare SemistrukturertAdresser
-            throw new RuntimeException("Adresse ikke støttet " + adresse.getClass().getSimpleName());
+            throw new IllegalArgumentException("Adresse ikke støttet " + adresse.getClass().getSimpleName());
         }
         return ustrukturertAdresse;
     }
@@ -162,7 +162,7 @@ public class OrganisasjonsDetaljer {
         }
         else {
             // Enhetsregistret har bare SemistrukturertAdresser
-            throw new RuntimeException("GeografiskAdresse ikke støttet " + adresse.getClass().getSimpleName());
+            throw new IllegalArgumentException("GeografiskAdresse ikke støttet " + adresse.getClass().getSimpleName());
         }
         return strukturertAdresse;
     }

@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OidcTokenClientRequestInterceptor implements ClientHttpRequestInterceptor {
+    private static final Logger logger = LoggerFactory.getLogger(OidcTokenClientRequestInterceptor.class);
 
     private final RestStsClient restStsClient;
 
@@ -23,14 +26,12 @@ public class OidcTokenClientRequestInterceptor implements ClientHttpRequestInter
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body,
             ClientHttpRequestExecution execution) throws IOException {
-        String token;
         try {
-            token = restStsClient.collectToken();
+            request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + restStsClient.collectToken());
         } catch (MelosysException e) {
-            throw new RuntimeException("Kunne ikke hente oidc-token fra sts", e);
+            logger.error("Kunne ikke hente oidc-token fra sts", e);
         }
 
-        request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         return execution.execute(request, body);
     }
 }

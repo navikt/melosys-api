@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.env.Environment;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
@@ -24,13 +23,10 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class SwaggerConfig implements
     ApplicationListener<ContextRefreshedEvent> {
 
-    private final Environment environment;
-
     private final JerseyConfig jerseyConfig;
 
     @Autowired
-    public SwaggerConfig(Environment environment, JerseyConfig jerseyConfig) {
-        this.environment = environment;
+    public SwaggerConfig(JerseyConfig jerseyConfig) {
         this.jerseyConfig = jerseyConfig;
     }
 

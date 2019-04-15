@@ -68,7 +68,9 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandling behandling = behandlingRepository.findById(prosessinstans.getBehandling().getId()).orElse(null);
+        Long behandlingID = prosessinstans.getBehandling().getId();
+        Behandling behandling = behandlingRepository.findById(behandlingID)
+            .orElseThrow(() -> new FunksjonellException("Behandling " + behandlingID + " finnes ikke."));
         Behandlingstyper behandlingstype = behandling.getType();
 
         Fagsak fagsak = behandling.getFagsak();

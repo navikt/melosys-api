@@ -18,7 +18,7 @@ public class PropertiesConverter implements AttributeConverter<Properties, Strin
             properties.store(writer, null);
         } catch (IOException e) {
             // Dette skal ikke skje, siden StringWriter
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
         return writer.toString();
     }

@@ -7,6 +7,7 @@ import java.util.Map;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
@@ -52,11 +53,12 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) {
+    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Long behandlingID = prosessinstans.getBehandling().getId();
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID).orElse(null);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
+            .orElseThrow(() -> new FunksjonellException("Behandlingsresultat " + behandlingID + " finnes ikke."));
 
         if (prosessinstans.getType() == ProsessType.IVERKSETT_VEDTAK) {
             behandlingsresultat.setType(Behandlingsresultattyper.valueOf(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE)));

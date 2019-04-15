@@ -44,7 +44,7 @@ public class OrganisasjonTjeneste extends RestTjeneste {
         try {
             organisasjonDokument = registerOppslag.hentOrganisasjon(orgnummer);
         } catch (IkkeFunnetException e) {
-            return Response.ok(RestTjeneste.TOM_JSON).build();
+            return Response.ok(tomJson()).build();
         }
 
         return Response.ok(organisasjonDokument).build();

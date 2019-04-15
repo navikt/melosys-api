@@ -16,9 +16,8 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public class SoeknadDokumentTest {
 
-    //Testen bruktes til å validere json søknaden som kom fra frontend
-    @Ignore
-    @Test
+    // @Test Testen bruktes til å validere json søknaden som kom fra frontend
+    @SuppressWarnings("unused")
     public void lesSoeknad() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);

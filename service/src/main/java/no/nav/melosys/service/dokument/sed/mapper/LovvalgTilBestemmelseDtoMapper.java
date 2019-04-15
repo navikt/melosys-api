@@ -7,10 +7,17 @@ import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.integrasjon.eessi.dto.Bestemmelse;
+import org.springframework.util.Assert;
 
 public class LovvalgTilBestemmelseDtoMapper {
 
     private static final BiMap<LovvalgBestemmelse, Bestemmelse> mapper = HashBiMap.create();
+
+    private LovvalgTilBestemmelseDtoMapper() {
+        throw new IllegalArgumentException("Utility");
+    }
+
+    private static final Map<LovvalgBestemmelse, Bestemmelse> mapper = new HashMap<>();
 
     static {
         mapper.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_1, Bestemmelse.ART_11_1);
@@ -29,12 +36,13 @@ public class LovvalgTilBestemmelseDtoMapper {
     }
 
     public static Bestemmelse mapMelosysLovvalgTilBestemmelseDto(LovvalgBestemmelse lovvalgBestemmelse) {
+        Assert.notNull(lovvalgBestemmelse, "LovvalgBestemmelse er null.");
 
-        if (lovvalgBestemmelse != null && mapper.containsKey(lovvalgBestemmelse)) {
+        if (mapper.containsKey(lovvalgBestemmelse)) {
             return mapper.get(lovvalgBestemmelse);
         }
 
-        throw new RuntimeException("Støtte for kode: " + lovvalgBestemmelse.getKode() + " er ikke implementert");
+        throw new IllegalArgumentException("Støtte for kode: " + lovvalgBestemmelse.getKode() + " er ikke implementert");
     }
 
     public static LovvalgBestemmelse mapBestemmelseVerdiTilMelosysLovvalgBestemmelse(String bestemmelse) {
@@ -44,6 +52,8 @@ public class LovvalgTilBestemmelseDtoMapper {
     }
 
     public static LovvalgBestemmelse mapBestemmelseDtoTilMelosysLovvalgBestemmelse(Bestemmelse bestemmelse) {
+        Assert.notNull(bestemmelse, "LovvalgBestemmelse er null.");
+
         if (bestemmelse != null && mapper.inverse().containsKey(bestemmelse)) {
             return mapper.inverse().get(bestemmelse);
         }

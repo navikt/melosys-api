@@ -38,7 +38,7 @@ public class NAVSTSClient extends STSClient {
         final String userId = subjectHandler.getUserID();
         final String key = getTokenStoreKey();
         if (key == null) {
-            throw new RuntimeException("Cannot retrieve SAML without security token!");
+            throw new IllegalStateException("Cannot retrieve SAML without security token!");
         }
 
         SecurityToken token = tokenStore.getToken(key);
@@ -67,7 +67,7 @@ public class NAVSTSClient extends STSClient {
                 jwt = "systemSAML";
                 break;
             default:
-                throw new RuntimeException("STS client with type: " + type + " is not supported.");
+                throw new IllegalStateException("STS client with type: " + type + " is not supported.");
         }
 
         return jwt;

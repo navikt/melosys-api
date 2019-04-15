@@ -7,13 +7,17 @@ import java.util.function.Predicate;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 
-public abstract class Utils {
+public final class Utils {
+
+    private Utils() {
+        throw new IllegalStateException("Utility");
+    }
 
     /**
      * Kvalifiserer kun prosessinstanser som har en gitt steg
      */
     public static Predicate<Prosessinstans> medSteg(ProsessSteg steg) {
-        return (pi) -> pi.getSteg() == steg;
+        return pi -> pi.getSteg() == steg;
     }
     
     /**
@@ -24,7 +28,7 @@ public abstract class Utils {
     /**
      * Sorterer prosessinstanser etter alder, eldste først
      */
-    public static Comparator<Prosessinstans> eldsteFørst() {
+    static Comparator<Prosessinstans> eldsteFørst() {
         return (pi1, pi2) -> {
             if (pi1.getRegistrertDato() == null && pi2.getRegistrertDato() == null) {
                 return 0;

@@ -15,11 +15,11 @@ public class LocalOppstart implements Oppstart, EnvironmentAware {
 
     private static final Logger log = LoggerFactory.getLogger(LocalOppstart.class);
 
-    private static Environment environment;
+    private Environment environment;
 
     @Override
     public void setEnvironment(Environment environment) {
-        LocalOppstart.environment = environment;
+        this.environment = environment;
         loadSystemProperties();
     }
 

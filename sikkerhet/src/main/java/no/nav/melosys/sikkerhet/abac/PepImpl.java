@@ -25,9 +25,9 @@ public class PepImpl implements Pep {
 
     private static final Logger abacLog = LoggerFactory.getLogger(PepImpl.class);
 
-    public final static String READ = "read";
-    public final static String WRITE = "write";
-    public final static String IKKE_TILGANG = "ABAC: Brukeren har ikke tilgang til ressurs";
+    public static final String READ = "read";
+    public static final String WRITE = "write";
+    public static final String IKKE_TILGANG = "ABAC: Brukeren har ikke tilgang til ressurs";
 
     private AbacService abacService;
     private AbacContext abacContext;

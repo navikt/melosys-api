@@ -103,10 +103,12 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
         List<String> søknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class);
         søknadsland = tilIso3Landkoder(søknadsland);
 
-        log.debug("Kaller regelmodul for prosessinstans {}", prosessinstans.getId());
-        log.debug("satsborgerskap: {}", statsborgerskap.toString());
-        log.debug("søknadsland: {}", String.join(" ", søknadsland));
-        log.debug("periode: {}", periode.toString());
+        if (log.isDebugEnabled()) {
+            log.debug("Kaller regelmodul for prosessinstans {}", prosessinstans.getId());
+            log.debug("satsborgerskap: {}", statsborgerskap);
+            log.debug("søknadsland: {}", String.join(" ", søknadsland));
+            log.debug("periode: {}", periode);
+        }
         VurderInngangsvilkaarReply res = regelmodulService.vurderInngangsvilkår(statsborgerskap, søknadsland, periode);
 
         // Legg på evt. feil og varsler...
@@ -115,7 +117,7 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
             if (melding.kategori.alvorlighetsgrad == Alvorlighetsgrad.FEIL) {
                 detErMeldtFeil = true;
             }
-            log.info("Kall til regelmodul for prosessinstans {} returnerte {}", prosessinstans.getId(), melding.toString());
+            log.info("Kall til regelmodul for prosessinstans {} returnerte {}", prosessinstans.getId(), melding);
             prosessinstans.leggTilHendelse(melding.kategori.name(), melding.melding);
         }
 
