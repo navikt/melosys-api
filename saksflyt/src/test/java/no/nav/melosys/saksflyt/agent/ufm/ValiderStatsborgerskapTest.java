@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.registrering;
+package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -35,7 +35,7 @@ public class ValiderStatsborgerskapTest {
 
     @Test
     public void utførSteg_gyldigStatsborgerskap_ingenNyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(hentSedSaksopplysning("SE")));
 
         Prosessinstans prosessinstans = hentProsessinstans();
@@ -47,7 +47,7 @@ public class ValiderStatsborgerskapTest {
 
     @Test
     public void utførSteg_flereGyldigeStatsborgerskap_ingenNyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(hentSedSaksopplysning("SE", "IT", "GB")));
 
         Prosessinstans prosessinstans = hentProsessinstans();
@@ -59,7 +59,7 @@ public class ValiderStatsborgerskapTest {
 
     @Test
     public void utførSteg_ikkeGyldigStatsborgerskap_NyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(hentSedSaksopplysning("US")));
 
         Prosessinstans prosessinstans = hentProsessinstans();
@@ -71,7 +71,7 @@ public class ValiderStatsborgerskapTest {
 
     @Test
     public void utførSteg_bådeGyldigOgIkkeGyldigStatsborgerskap_NyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(hentSedSaksopplysning("US", "SE")));
 
         Prosessinstans prosessinstans = hentProsessinstans();

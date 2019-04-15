@@ -4,7 +4,11 @@ import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.util.LovvalgBestemmelseUtil;
 
 @Entity
 @Table(name = "lovvalg_periode")
@@ -19,22 +23,8 @@ public class Lovvalgsperiode implements ErPeriode {
 
         @Override
         public LovvalgBestemmelse convertToEntityAttribute(String dbData) {
-            if (dbData == null) {
-                return null;
-            }
-            try {
-                return LovvalgsBestemmelser_883_2004.valueOf(dbData);
-            } catch (IllegalArgumentException e) {
-                // Bevisst NOOP for å fortsette oppslaget i andre oppramstyper.
-            }
-            try {
-                return LovvalgsBestemmelser_987_2009.valueOf(dbData);
-            } catch (IllegalArgumentException e) {
-                // Bevisst NOOP for å fortsette oppslaget i andre oppramstyper.
-            }
-            return TilleggsBestemmelser_883_2004.valueOf(dbData);
+            return LovvalgBestemmelseUtil.dbDataTilLovvalgBestemmelse(dbData);
         }
-
     }
 
     @Id

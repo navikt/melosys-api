@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.registrering;
+package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.util.Collections;
 import java.util.Map;
@@ -77,6 +77,6 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
     }
 
     private Optional<Saksopplysning> hentSedSaksopplysningFraBehandling(Behandling behandling) {
-        return saksopplysningRepository.findByBehandlingAndType(behandling, SaksopplysningType.SEDOPPLYSNINGER);
+        return saksopplysningRepository.findByBehandlingAndType(behandling, SaksopplysningType.SED_OPPLYSNINGER);
     }
 }

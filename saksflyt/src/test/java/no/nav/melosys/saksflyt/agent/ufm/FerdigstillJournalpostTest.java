@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.registrering;
+package no.nav.melosys.saksflyt.agent.ufm;
 
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;

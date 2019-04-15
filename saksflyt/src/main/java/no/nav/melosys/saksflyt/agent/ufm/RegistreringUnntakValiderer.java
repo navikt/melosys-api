@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.registrering;
+package no.nav.melosys.saksflyt.agent.ufm;
 
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.Saksopplysning;
@@ -30,7 +30,7 @@ public abstract class RegistreringUnntakValiderer extends AbstraktStegBehandler 
     }
 
     Saksopplysning hentSedSaksopplysning(Prosessinstans prosessinstans) throws TekniskException {
-        return saksopplysningRepository.findByBehandlingAndType(prosessinstans.getBehandling(), SaksopplysningType.SEDOPPLYSNINGER)
+        return saksopplysningRepository.findByBehandlingAndType(prosessinstans.getBehandling(), SaksopplysningType.SED_OPPLYSNINGER)
             .orElseThrow(() -> new TekniskException("Seddokument finnes ikke for behandling " + prosessinstans.getBehandling().getId()));
     }
 }

@@ -93,8 +93,8 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     søknadsperiode = hentPeriode((SoeknadDokument) dokument);
                     // N.B. Frontend ønsker ikke å få søknaden på /fagsaker slik at opplysninger fra registrene er adskilt
                     break;
-                case SEDOPPLYSNINGER:
-                    //TODO: MELOSYS-2280
+                case SED_OPPLYSNINGER:
+                    //TODO: MELOSYS-2535
                     break;
                 default:
                     throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");

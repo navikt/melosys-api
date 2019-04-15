@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.registrering;
+package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -36,7 +36,7 @@ public class ValiderPeriodeTest {
 
     @Test
     public void utførSteg_gyldigPeriode_ingenNyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now().plusYears(1), LocalDate.now().plusYears(2))));
 
         Prosessinstans prosessinstans = hentProsessinstans();
@@ -48,7 +48,7 @@ public class ValiderPeriodeTest {
 
     @Test
     public void utførSteg_ingenTilDato_nyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now().plusYears(1), null)));
 
         Prosessinstans prosessinstans = hentProsessinstans();
@@ -60,7 +60,7 @@ public class ValiderPeriodeTest {
 
     @Test
     public void utførSteg_tomFørFom_nyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now().plusYears(1), LocalDate.now())));
 
         Prosessinstans prosessinstans = hentProsessinstans();
@@ -72,7 +72,7 @@ public class ValiderPeriodeTest {
 
     @Test
     public void utførSteg_periodeOver24Mnd_nyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now(), LocalDate.now().plusYears(3))));
 
         Prosessinstans prosessinstans = hentProsessinstans();
@@ -84,7 +84,7 @@ public class ValiderPeriodeTest {
 
     @Test
     public void utførSteg_periodeEldreEnn5År_nyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now().minusYears(6L), LocalDate.now().minusYears(5L))));
 
         Prosessinstans prosessinstans = hentProsessinstans();

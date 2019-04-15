@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.registrering;
+package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.time.Instant;
 import java.util.Map;
@@ -57,7 +57,7 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
         Instant nå = Instant.now();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(sedDokument);
-        saksopplysning.setType(SaksopplysningType.SEDOPPLYSNINGER);
+        saksopplysning.setType(SaksopplysningType.SED_OPPLYSNINGER);
         saksopplysning.setBehandling(prosessinstans.getBehandling());
         saksopplysning.setKilde(SaksopplysningKilde.EESSI);
         saksopplysning.setVersjon("0.2-SNAPSHOT");

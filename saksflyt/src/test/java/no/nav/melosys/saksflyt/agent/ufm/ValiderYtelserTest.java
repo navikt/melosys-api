@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.agent.registrering;
+package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -43,7 +43,7 @@ public class ValiderYtelserTest {
 
     @Test
     public void utførSteg_finnerIngenTreff_ingenNyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1))));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(false));
 
@@ -56,7 +56,7 @@ public class ValiderYtelserTest {
 
     @Test
     public void utførSteg_finnerTreff_nyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1))));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true));
 
@@ -69,7 +69,7 @@ public class ValiderYtelserTest {
 
     @Test
     public void utførSteg_tomTilDato_forespørTomTilDato() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now().minusYears(2), null)));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true));
 

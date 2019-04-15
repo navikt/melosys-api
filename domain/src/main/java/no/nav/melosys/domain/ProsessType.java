@@ -16,7 +16,7 @@ public enum ProsessType implements InterntKodeverkTabell<ProsessType> {
     JFR_NY_SAK("JFR_NY_SAK", "Journalføring med ny sak og søknad"),
     MANGELBREV("MANGELBREV", "Opprett mangelbrev"),
     OPPFRISKNING("OPPFRISKNING", "Oppfriskning av saksopplysninger"),
-    REGISTRERING_UNNTAK("REGISTRERING", "Registrering av unntak");
+    REGISTRERING_UNNTAK("REGISTRERING_UNNTAK", "Registrering av unntak");
 
     private String kode;
     private String beskrivelse;
