@@ -15,11 +15,13 @@ import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ValiderStatsborgerskap extends RegistreringUnntakValiderer {
 
+    @Autowired
     ValiderStatsborgerskap(SaksopplysningRepository saksopplysningRepository, AvklartefaktaService avklartefaktaService) {
         super(saksopplysningRepository, avklartefaktaService);
     }

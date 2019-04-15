@@ -18,6 +18,7 @@ import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.sak.FagsakService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ public class HentPerson extends AbstraktStegBehandler {
     private final FagsakService fagsakService;
     private final SaksopplysningRepository saksopplysningRepository;
 
+    @Autowired
     public HentPerson(TpsFasade tpsFasade, FagsakService fagsakService, SaksopplysningRepository saksopplysningRepository) {
         this.tpsFasade = tpsFasade;
         this.fagsakService = fagsakService;

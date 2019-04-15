@@ -15,6 +15,7 @@ import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
 
+    @Autowired
     public OpprettFagsakOgBehandling(FagsakService fagsakService, BehandlingService behandlingService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;

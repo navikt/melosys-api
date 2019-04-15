@@ -14,6 +14,7 @@ import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("RegistreringUnntakOpprettOppgave")
@@ -21,6 +22,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
 
     private final GsakFasade gsakFasade;
 
+    @Autowired
     public OpprettOppgave(GsakFasade gsakFasade) {
         this.gsakFasade = gsakFasade;
     }

@@ -12,6 +12,7 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("RegistreringUnntakFerdigstillJournalpost")
@@ -19,6 +20,7 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
 
     private final JoarkFasade joarkFasade;
 
+    @Autowired
     public FerdigstillJournalpost(JoarkFasade joarkFasade) {
         this.joarkFasade = joarkFasade;
     }

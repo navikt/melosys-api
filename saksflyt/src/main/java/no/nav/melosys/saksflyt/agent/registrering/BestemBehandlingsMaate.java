@@ -20,6 +20,7 @@ import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final AvklarteFaktaRepository avklarteFaktaRepository;
 
+    @Autowired
     public BestemBehandlingsMaate(BehandlingsresultatRepository behandlingsresultatRepository, AvklarteFaktaRepository avklarteFaktaRepository) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.avklarteFaktaRepository = avklarteFaktaRepository;
@@ -56,13 +58,13 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
         Set<Avklartefakta> treffRegisterKontroll = avklarteFaktaRepository
             .findAllByBehandlingsresultatIdAndType(behandlingsresultat.getId(), Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
 
-        if (!treffRegisterKontroll.isEmpty()) {
-            log.info("Kan ikke registrere perioder for behandling {} automatisk. Flyttet til manuell behandling.", prosessinstans.getBehandling().getId());
+        if (treffRegisterKontroll.isEmpty()) {
             behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.AUTOMATISERT);
-            prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_OPPGAVE);
-        } else {
-            behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.DELVIS_AUTOMATISERT);
             prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
+        } else {
+            log.info("Kan ikke registrere perioder for behandling {} automatisk. Flyttet til manuell behandling.", prosessinstans.getBehandling().getId());
+            behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.DELVIS_AUTOMATISERT);
+            prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_OPPGAVE);
         }
 
         behandlingsresultatRepository.save(behandlingsresultat);

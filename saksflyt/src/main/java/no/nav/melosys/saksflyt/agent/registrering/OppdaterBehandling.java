@@ -18,6 +18,7 @@ import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
     private final MedlFasade medlFasade;
     private final SaksopplysningRepository saksopplysningRepository;
 
+    @Autowired
     public OppdaterBehandling(LovvalgsperiodeService lovvalgsperiodeService, OppdaterMedlFelles felles, MedlFasade medlFasade, SaksopplysningRepository saksopplysningRepository) {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.felles = felles;

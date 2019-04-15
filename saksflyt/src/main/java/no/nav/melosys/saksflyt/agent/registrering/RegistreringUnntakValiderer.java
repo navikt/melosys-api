@@ -10,12 +10,14 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class RegistreringUnntakValiderer extends AbstraktStegBehandler {
 
     protected final SaksopplysningRepository saksopplysningRepository;
     private final AvklartefaktaService avklartefaktaService;
 
+    @Autowired
     RegistreringUnntakValiderer(SaksopplysningRepository saksopplysningRepository, AvklartefaktaService avklartefaktaService) {
         this.saksopplysningRepository = saksopplysningRepository;
         this.avklartefaktaService = avklartefaktaService;

@@ -16,6 +16,7 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,6 +25,7 @@ public class AvsluttBehandling extends AbstraktStegBehandler {
     private final FagsakRepository fagsakRepository;
     private final BehandlingRepository behandlingRepository;
 
+    @Autowired
     public AvsluttBehandling(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;

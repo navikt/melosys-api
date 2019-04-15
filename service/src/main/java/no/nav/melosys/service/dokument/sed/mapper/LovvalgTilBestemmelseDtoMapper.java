@@ -17,8 +17,6 @@ public class LovvalgTilBestemmelseDtoMapper {
         throw new IllegalArgumentException("Utility");
     }
 
-    private static final Map<LovvalgBestemmelse, Bestemmelse> mapper = new HashMap<>();
-
     static {
         mapper.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_1, Bestemmelse.ART_11_1);
         mapper.put(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_3A, Bestemmelse.ART_11_3_a);
@@ -54,10 +52,10 @@ public class LovvalgTilBestemmelseDtoMapper {
     public static LovvalgBestemmelse mapBestemmelseDtoTilMelosysLovvalgBestemmelse(Bestemmelse bestemmelse) {
         Assert.notNull(bestemmelse, "LovvalgBestemmelse er null.");
 
-        if (bestemmelse != null && mapper.inverse().containsKey(bestemmelse)) {
+        if (mapper.inverse().containsKey(bestemmelse)) {
             return mapper.inverse().get(bestemmelse);
         }
 
-        throw new RuntimeException("Støtte for kode: " + bestemmelse + " er ikke implementert");
+        throw new IllegalArgumentException("Støtte for kode: " + bestemmelse + " er ikke implementert");
     }
 }

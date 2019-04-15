@@ -13,6 +13,7 @@ import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private final MedlFasade medlFasade;
     private final OppdaterMedlFelles felles;
 
+    @Autowired
     public OppdaterMedl(MedlFasade medlFasade, OppdaterMedlFelles felles) {
         this.medlFasade = medlFasade;
         this.felles = felles;
