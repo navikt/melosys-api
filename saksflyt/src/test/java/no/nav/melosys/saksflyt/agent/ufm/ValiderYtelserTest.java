@@ -117,7 +117,7 @@ public class ValiderYtelserTest {
 
     private SedDokument hentSedDokument(LocalDate fom, LocalDate tom) {
         SedDokument sedDokument = new SedDokument();
-        sedDokument.setPeriode(new no.nav.melosys.domain.dokument.felles.Periode(fom, tom));
+        sedDokument.setPeriode(new no.nav.melosys.domain.dokument.medlemskap.Periode(fom, tom));
         return sedDokument;
 
     }

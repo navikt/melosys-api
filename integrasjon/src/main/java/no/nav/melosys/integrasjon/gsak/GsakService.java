@@ -305,7 +305,7 @@ public class GsakService implements GsakFasade {
             case NORGE_UTPEKT: return "ae0112";
             case NY_VURDERING: return "ae0028";
             case PAASTAND_UTL: return "ae0113";
-            case UNNTAK_FRA_MEDLEMSKAP: return "ab0154";
+            case UNNTAK_FRA_MEDLEMSKAP: return "ae0111"; //TODO: avklar om korrekt kode eller trenger ny
             default: throw new IllegalArgumentException(this + " er ikke implementert i felleskodeverk.");
         }
     }

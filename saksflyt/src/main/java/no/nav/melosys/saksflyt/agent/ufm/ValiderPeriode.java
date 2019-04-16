@@ -6,7 +6,7 @@ import java.util.Map;
 
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;

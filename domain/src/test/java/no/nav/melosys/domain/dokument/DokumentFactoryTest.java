@@ -1,27 +1,32 @@
 package no.nav.melosys.domain.dokument;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-
-import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import java.time.LocalDate;
+import java.util.Collections;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
+import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DokumentFactoryTest {
 
@@ -97,6 +102,32 @@ public class DokumentFactoryTest {
         Telefonnummer telefon = organisasjonDokument.getOrganisasjonDetaljer().getTelefon().get(0);
         assertThat(telefon).isInstanceOf(Telefonnummer.class);
         assertThat(telefon.getIdentifikator()).isEqualTo("55 58 75 00");
+    }
+
+    @Test
+    public void lagSedDokument_xmlBlirProdusert() {
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setStatsborgerskap(Collections.singletonList("NO"));
+        sedDokument.setPeriode(new Periode(LocalDate.now(), LocalDate.now()));
+        sedDokument.setLovvalgBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        sedDokument.setErEndring(false);
+        sedDokument.setRinaDokumentId("123");
+        sedDokument.setRinaSaksnummer("saksnummer123");
+        sedDokument.setFnr("333");
+        sedDokument.setLovvalgsland(Landkoder.DE);
+
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(sedDokument);
+
+        String xml = factory.lagInternXml(saksopplysning);
+
+        saksopplysning.setDokumentXml(saksopplysning.getInternXml());
+        SaksopplysningDokument saksopplysningDokument = factory.lagDokument(saksopplysning);
+
+        assertThat(xml).isNotNull();
+        assertThat(saksopplysningDokument).isNotNull();
+
+
     }
 
 }

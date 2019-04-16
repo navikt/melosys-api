@@ -3,9 +3,12 @@ package no.nav.melosys.domain.dokument.sed;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.jaxb.LovvalgBestemmelseXmlAdapter;
+import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 
@@ -20,6 +23,7 @@ public class SedDokument extends SaksopplysningDokument {
 
     private Periode periode;
 
+    @XmlJavaTypeAdapter(LovvalgBestemmelseXmlAdapter.class)
     private LovvalgBestemmelse lovvalgBestemmelse;
 
     private Landkoder lovvalgsland;
@@ -60,6 +64,7 @@ public class SedDokument extends SaksopplysningDokument {
         this.periode = periode;
     }
 
+    @XmlTransient
     public LovvalgBestemmelse getLovvalgBestemmelse() {
         return lovvalgBestemmelse;
     }

@@ -7,6 +7,8 @@ import java.util.Optional;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -65,12 +67,16 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
         lovvalgsperiode.setTom(sedDokument.getPeriode().getTom());
         lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.NO);
         lovvalgsperiode.setLovvalgsland(sedDokument.getLovvalgsland());
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        lovvalgsperiode.setLovvalgsland(sedDokument.getLovvalgsland());
+        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
+        lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING); //TODO: avklar
 
         if (erEndring) {
             //TODO: MELOSYS-2532. Bruke medl-periode fra tidligere behandling
         }
 
-        lovvalgsperiodeService.lagreLovvalgsperioder(prosessinstans.getBehandling().getId(), Collections.singletonList(lovvalgsperiode));
+        lovvalgsperiode = lovvalgsperiodeService.lagreLovvalgsperioder(prosessinstans.getBehandling().getId(), Collections.singletonList(lovvalgsperiode)).iterator().next();
 
         Long medlId = medlFasade.opprettPeriodeUnderAvklaring(prosessinstans.getData(ProsessDataKey.BRUKER_ID), lovvalgsperiode);
         felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, prosessinstans.getBehandling().getId());

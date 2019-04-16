@@ -9,7 +9,7 @@ import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.ProsessType;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.eessi.avro.MelosysEessiMelding;

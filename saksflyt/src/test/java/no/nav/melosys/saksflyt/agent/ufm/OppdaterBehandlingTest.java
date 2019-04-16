@@ -1,10 +1,11 @@
 package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
@@ -18,8 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,6 +49,8 @@ public class OppdaterBehandlingTest {
 
         when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(saksopplysning));
+        when(lovvalgsperiodeService.lagreLovvalgsperioder(anyLong(),anyCollection()))
+            .thenReturn(Collections.singletonList(new Lovvalgsperiode()));
     }
 
     @Test

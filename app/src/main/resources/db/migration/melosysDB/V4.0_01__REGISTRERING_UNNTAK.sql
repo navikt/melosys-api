@@ -13,3 +13,6 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('REG_UNNTAK_BESTEM_BEHANDLINGSMAAT
 INSERT INTO prosess_steg (kode, navn) VALUES ('REG_UNNTAK_OPPDATER_MEDL', 'Sett periode endelig i MEDL');
 INSERT INTO prosess_steg (kode, navn) VALUES ('REG_UNNTAK_OPPRETT_OPPGAVE', 'Opprett oppgave for manuell behandling');
 INSERT INTO prosess_steg (kode, navn) VALUES ('REG_UNNTAK_AVSLUTT_BEHANDLING', 'Avslutt behandling');
+
+INSERT INTO saksopplysning_type (kode, navn) VALUES ('SEDOPPL', 'SED-opplysninger');
+INSERT INTO saksopplysning_kilde (kode, navn) VALUES ('EESSI', 'EESSI-prosjektet');
