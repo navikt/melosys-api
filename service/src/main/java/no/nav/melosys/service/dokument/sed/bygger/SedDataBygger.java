@@ -1,8 +1,6 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -59,6 +57,8 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
             .map(this::hentFamilieMedlem).collect(Collectors.toList()));
 
         sedDataDto.setLovvalgsperioder(Collections.singletonList(hentLovvalgsperiodeDto()));
+
+        sedDataDto.setTidligereLovvalgsperioder(hentTidligereLovvalgsperioderDto(behandling));
 
         sedDataDto.setSelvstendigeVirksomheter(map(avklarteVirksomheterService.hentSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter)));
 
@@ -128,6 +128,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         adresse.setLand(strukturertAdresse.landkode);
         adresse.setPostnr(strukturertAdresse.postnummer);
         adresse.setPoststed(strukturertAdresse.poststed);
+        adresse.setRegion(strukturertAdresse.region);
         return adresse;
     }
 
@@ -146,6 +147,24 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         }
 
         return lovvalgsperiodeDto;
+    }
+
+    private List<Lovvalgsperiode> hentTidligereLovvalgsperioderDto(Behandling behandling) throws TekniskException {
+        List<Lovvalgsperiode> tidligereLovvalgsperioderDto = new ArrayList<>();
+        Collection<no.nav.melosys.domain.Lovvalgsperiode> tidligereLovvalgsperioder =
+            lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling);
+
+        tidligereLovvalgsperioder.forEach(tlp -> {
+            Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+            lovvalgsperiode.setFom(tlp.getFom());
+            lovvalgsperiode.setTom(tlp.getTom());
+            lovvalgsperiode.setBestemmelse(tlp.getBestemmelse() != null
+                ? LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(tlp.getBestemmelse()) : null);
+
+            tidligereLovvalgsperioderDto.add(lovvalgsperiode);
+        });
+
+        return tidligereLovvalgsperioderDto;
     }
 
     private String hentBeskrivelse(no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode) {
