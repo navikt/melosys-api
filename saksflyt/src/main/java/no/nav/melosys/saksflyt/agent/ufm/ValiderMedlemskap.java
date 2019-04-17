@@ -76,9 +76,6 @@ public class ValiderMedlemskap extends RegistreringUnntakValiderer {
     }
 
     private boolean harOverlappendePerioder(MedlemskapDokument medlemskapDokument, LocalDate fom, LocalDate tom) throws TekniskException {
-        if (fom == null) {
-            throw new TekniskException("Mottatt en SED uten fra-dato");
-        }
         //Kan motta SED med åpen periode
         if (tom == null) {
             for (Medlemsperiode medlemsperiode : medlemskapDokument.getMedlemsperiode()) {

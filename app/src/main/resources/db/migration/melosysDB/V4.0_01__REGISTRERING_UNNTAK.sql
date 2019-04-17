@@ -4,7 +4,7 @@ INSERT INTO prosess_steg (kode, navn) VALUES ('REG_UNNTAK_OPPRETT_SAK_OG_BEH', '
 INSERT INTO prosess_steg (kode, navn) VALUES ('REG_UNNTAK_FERDIGSTILL_JOURNALPOST', 'Ferdigstiller journalpost');
 INSERT INTO prosess_steg (kode, navn) VALUES ('REG_UNNTAK_HENT_PERSON', 'Henter person tilknyttet SED');
 INSERT INTO prosess_steg (kode, navn) VALUES ('REG_UNNTAK_OPPRETT_SEDDOKUMENT', 'Oppretter sedinfo dokument');
-INSERT INTO prosess_steg (kode, navn) VALUES ('REG_UNNTAK_OPPDATER_BEHANDLING', 'Oppdaterer behandling og setter lovvalgsperiode');
+INSERT INTO prosess_steg (kode, navn) VALUES ('REG_UNNTAK_OPPDATER_BEHANDLING_OG_MEDL', 'Oppdaterer behandling og setter lovvalgsperiode');
 INSERT INTO prosess_steg (kode, navn) VALUES ('REG_UNNTAK_VALIDER_PERIODE', 'Validerer periode mottatt i søknad');
 INSERT INTO prosess_steg (kode, navn) VALUES ('REG_UNNTAK_VALIDER_MEDLEMSKAP', 'Validerer tidligere medlemskap mot MEDL');
 INSERT INTO prosess_steg (kode, navn) VALUES ('REG_UNNTAK_VALIDER_YTELSER', 'Sjekker offentlige ytelser for en person');

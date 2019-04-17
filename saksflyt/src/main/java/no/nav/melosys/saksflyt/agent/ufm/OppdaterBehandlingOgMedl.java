@@ -25,9 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OppdaterBehandling extends AbstraktStegBehandler {
+public class OppdaterBehandlingOgMedl extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OppdaterBehandling.class);
+    private static final Logger log = LoggerFactory.getLogger(OppdaterBehandlingOgMedl.class);
 
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final OppdaterMedlFelles felles;
@@ -35,7 +35,7 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
     private final SaksopplysningRepository saksopplysningRepository;
 
     @Autowired
-    public OppdaterBehandling(LovvalgsperiodeService lovvalgsperiodeService, OppdaterMedlFelles felles, MedlFasade medlFasade, SaksopplysningRepository saksopplysningRepository) {
+    public OppdaterBehandlingOgMedl(LovvalgsperiodeService lovvalgsperiodeService, OppdaterMedlFelles felles, MedlFasade medlFasade, SaksopplysningRepository saksopplysningRepository) {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.felles = felles;
         this.medlFasade = medlFasade;
@@ -44,7 +44,7 @@ public class OppdaterBehandling extends AbstraktStegBehandler {
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.REG_UNNTAK_OPPDATER_BEHANDLING;
+        return ProsessSteg.REG_UNNTAK_OPPDATER_BEHANDLING_OG_MEDL;
     }
 
     @Override

@@ -68,6 +68,6 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
         saksopplysningRepository.save(saksopplysning);
         log.info("Saksopplysning: SedDokument opprettet for behandling {}", prosessinstans.getBehandling().getId());
 
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPDATER_BEHANDLING);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPDATER_BEHANDLING_OG_MEDL);
     }
 }

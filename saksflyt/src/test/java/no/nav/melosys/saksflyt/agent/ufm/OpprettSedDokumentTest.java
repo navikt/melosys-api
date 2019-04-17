@@ -45,7 +45,7 @@ public class OpprettSedDokumentTest {
         opprettSedDokument.utfør(prosessinstans);
 
         verify(saksopplysningRepository, times(1)).save(any(Saksopplysning.class));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPDATER_BEHANDLING);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPDATER_BEHANDLING_OG_MEDL);
     }
 
     @Test(expected = TekniskException.class)

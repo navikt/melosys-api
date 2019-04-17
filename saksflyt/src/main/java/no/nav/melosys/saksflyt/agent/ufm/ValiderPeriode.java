@@ -51,7 +51,7 @@ public class ValiderPeriode extends RegistreringUnntakValiderer {
         if (periode.getTom() == null) {
             registrerFeil(prosessinstans,Unntak_periode_begrunnelser.FEIL_I_PERIODEN);
             prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
-        } else if (fomErEtterTom(periode)) {
+        } else if (periode.getFom() == null || fomErEtterTom(periode)) {
             registrerFeil(prosessinstans, Unntak_periode_begrunnelser.FEIL_I_PERIODEN);
             prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_BESTEM_BEHANDLINGSMAATE);
         } else if (!periodeInnenfor24Mnd(periode)) {

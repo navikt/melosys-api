@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OppdaterBehandlingTest {
+public class OppdaterBehandlingOgMedlTest {
 
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
@@ -35,11 +35,11 @@ public class OppdaterBehandlingTest {
     private SaksopplysningRepository saksopplysningRepository;
 
 
-    private OppdaterBehandling oppdaterBehandling;
+    private OppdaterBehandlingOgMedl oppdaterBehandlingOgMedl;
 
     @Before
     public void setUp() {
-        oppdaterBehandling = new OppdaterBehandling(lovvalgsperiodeService, oppdaterMedlFelles,medlFasade, saksopplysningRepository);
+        oppdaterBehandlingOgMedl = new OppdaterBehandlingOgMedl(lovvalgsperiodeService, oppdaterMedlFelles,medlFasade, saksopplysningRepository);
         SedDokument sedDokument = new SedDokument();
         sedDokument.setLovvalgBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
         sedDokument.setPeriode(new Periode(LocalDate.now(), LocalDate.now()));
@@ -64,7 +64,7 @@ public class OppdaterBehandlingTest {
         prosessinstans.setData(ProsessDataKey.ER_ENDRING, true);
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "12312322");
 
-        oppdaterBehandling.utfør(prosessinstans);
+        oppdaterBehandlingOgMedl.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_PERIODE);
     }
 }

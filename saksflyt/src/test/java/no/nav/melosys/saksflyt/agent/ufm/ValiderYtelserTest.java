@@ -81,6 +81,40 @@ public class ValiderYtelserTest {
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_STATSBORGERSKAP);
     }
 
+    @Test
+    public void utførSteg_periodePåbegynt_verifiserInntektPeriode() throws Exception {
+        LocalDate fom = LocalDate.now().minusYears(1);
+        LocalDate tom = LocalDate.now().plusYears(1);
+
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
+            .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
+        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true));
+
+        Prosessinstans prosessinstans = hentProsessinstans();
+        validerYtelser.utfør(prosessinstans);
+
+        verify(inntektService).hentInntektListe(anyString(),eq(YearMonth.from(fom.minusMonths(2))), eq(YearMonth.from(tom)));
+        verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_STATSBORGERSKAP);
+    }
+
+    @Test
+    public void utførSteg_periodeIkkePåbegynt_verifiserInntektPeriode() throws Exception {
+        LocalDate fom = LocalDate.now().plusYears(1);
+        LocalDate tom = LocalDate.now().plusYears(2);
+
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
+            .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
+        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true));
+
+        Prosessinstans prosessinstans = hentProsessinstans();
+        validerYtelser.utfør(prosessinstans);
+
+        verify(inntektService).hentInntektListe(anyString(),eq(YearMonth.from(LocalDate.now().minusMonths(2))), eq(YearMonth.from(LocalDate.now())));
+        verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_STATSBORGERSKAP);
+    }
+
     private Prosessinstans hentProsessinstans() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "123123");
