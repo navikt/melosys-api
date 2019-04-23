@@ -87,7 +87,7 @@ public final class LovvalgsperiodeTjenesteTest {
         doReturn(lovvalgsperiode).when(lovvalgsperiodeService).hentOpprinneligLovvalgsperiode(5L);
         LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, mock(Tilgang.class));
 
-        PeriodeDto periodeDto = (PeriodeDto) instans.hentOpprinneligLovvalgsperiode(5L).getEntity();
+        PeriodeDto periodeDto = instans.hentOpprinneligLovvalgsperiode(5L).get("opprinneligLovvalgsperiode");
 
         assertThat(periodeDto.getFom()).isEqualTo(fomDato);
         assertThat(periodeDto.getTom()).isEqualTo(tomDato);
