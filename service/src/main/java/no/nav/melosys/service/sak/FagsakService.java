@@ -103,7 +103,9 @@ public class FagsakService {
     }
 
     public Fagsak hentFagsakFraGsakSaksnummer(Long gsakSaksnummer) throws IkkeFunnetException {
-        return fagsakRepository.findByGsakSaksnummer(gsakSaksnummer).orElse(null);
+        return fagsakRepository.findByGsakSaksnummer(gsakSaksnummer).orElseThrow(
+            () -> new IkkeFunnetException("Finner ikke fagsak med gsak-saksnummer " + gsakSaksnummer)
+        );
     }
 
     public List<Fagsak> hentFagsakerMedAktør(Aktoersroller rolleType, String ident) throws IkkeFunnetException {

@@ -52,7 +52,7 @@ public class AvsluttBehandling extends AbstraktStegBehandler {
         Behandling behandling = prosessinstans.getBehandling();
 
         Fagsak fagsak = behandling.getFagsak();
-        fagsak.setStatus(Saksstatuser.AVSLUTTET);
+        fagsak.setStatus(Saksstatuser.LOVVALG_AVKLART);
         fagsakRepository.save(fagsak);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);

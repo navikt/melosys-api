@@ -20,6 +20,7 @@ import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -32,7 +33,7 @@ public class HentPerson extends AbstraktStegBehandler {
     private final SaksopplysningRepository saksopplysningRepository;
 
     @Autowired
-    public HentPerson(TpsFasade tpsFasade, FagsakService fagsakService, SaksopplysningRepository saksopplysningRepository) {
+    public HentPerson(@Qualifier("system") TpsFasade tpsFasade, FagsakService fagsakService, SaksopplysningRepository saksopplysningRepository) {
         this.tpsFasade = tpsFasade;
         this.fagsakService = fagsakService;
         this.saksopplysningRepository = saksopplysningRepository;

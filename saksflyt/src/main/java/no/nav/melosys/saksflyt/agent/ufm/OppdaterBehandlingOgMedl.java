@@ -59,8 +59,6 @@ public class OppdaterBehandlingOgMedl extends AbstraktStegBehandler {
             .orElseThrow(() -> new TekniskException("Finner ikke SED-saksopplysning for behandling " + prosessinstans.getBehandling().getId()))
             .getDokument();
 
-        boolean erEndring = prosessinstans.getData(ProsessDataKey.ER_ENDRING, Boolean.class);
-
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(sedDokument.getLovvalgBestemmelse());
         lovvalgsperiode.setFom(sedDokument.getPeriode().getFom());
@@ -72,7 +70,7 @@ public class OppdaterBehandlingOgMedl extends AbstraktStegBehandler {
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
         lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING); //TODO: avklar
 
-        if (erEndring) {
+        if (prosessinstans.getData(ProsessDataKey.ER_ENDRING, Boolean.class)) {
             //TODO: MELOSYS-2532. Bruke medl-periode fra tidligere behandling
         }
 
