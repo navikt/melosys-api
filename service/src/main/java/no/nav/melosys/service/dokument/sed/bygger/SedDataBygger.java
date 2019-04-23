@@ -23,6 +23,7 @@ import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import org.apache.commons.lang3.StringUtils;
 
 public class SedDataBygger extends AbstraktDokumentDataBygger {
 
@@ -137,9 +138,10 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
         lovvalgsperiodeDto.setFom(lovvalgsperiode.getFom());
         lovvalgsperiodeDto.setTom(lovvalgsperiode.getTom());
-        lovvalgsperiodeDto.setLandkode(lovvalgsperiode.getLovvalgsland().getKode());
+        lovvalgsperiodeDto.setLovvalgsland(lovvalgsperiode.getLovvalgsland().getKode());
+        lovvalgsperiodeDto.setUnntakFraLovvalgsland(lovvalgsperiode.getUnntakFraLovvalgsland().getKode());
         lovvalgsperiodeDto.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(lovvalgsperiode.getBestemmelse()));
-        lovvalgsperiodeDto.setBeskrivelse(hentBeskrivelse(lovvalgsperiode));
+        lovvalgsperiodeDto.setUnntaksBegrunnelse(hentUnntaksBegrunnelse(lovvalgsperiode));
 
         if (lovvalgsperiode.getUnntakFraBestemmelse() != null) {
             lovvalgsperiodeDto.setUnntakFraBestemmelse(LovvalgTilBestemmelseDtoMapper
@@ -167,11 +169,12 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         return tidligereLovvalgsperioderDto;
     }
 
-    private String hentBeskrivelse(no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode) {
+    private String hentUnntaksBegrunnelse(no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode) {
         Set<Vilkaarsresultat> vilkaarsresultater = lovvalgsperiode.getBehandlingsresultat().getVilkaarsresultater();
 
         return vilkaarsresultater == null ? null : vilkaarsresultater.stream()
             .map(VilkaarsresultatTilBegrunnelseMapper::mapVilkaarsresultatTilBegrunnelseString)
+            .filter(StringUtils::isNotEmpty)
             .collect(Collectors.joining("\n\n"));
     }
 

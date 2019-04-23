@@ -11,7 +11,8 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 public class Lovvalgsperiode {
 
-    private String landkode;
+    private String lovvalgsland;
+    private String unntakFraLovvalgsland;
     private Bestemmelse bestemmelse;
 
     @JsonDeserialize(using = LocalDateDeserializer.class)
@@ -24,16 +25,24 @@ public class Lovvalgsperiode {
     @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate tom;
 
-    private String beskrivelse;
+    private String unntaksBegrunnelse;
 
     private Bestemmelse unntakFraBestemmelse;
 
-    public String getLandkode() {
-        return landkode;
+    public String getLovvalgsland() {
+        return lovvalgsland;
     }
 
-    public void setLandkode(String landkode) {
-        this.landkode = landkode;
+    public void setLovvalgsland(String lovvalgsland) {
+        this.lovvalgsland = lovvalgsland;
+    }
+
+    public String getUnntakFraLovvalgsland() {
+        return unntakFraLovvalgsland;
+    }
+
+    public void setUnntakFraLovvalgsland(String unntakFraLovvalgsland) {
+        this.unntakFraLovvalgsland = unntakFraLovvalgsland;
     }
 
     public Bestemmelse getBestemmelse() {
@@ -60,12 +69,12 @@ public class Lovvalgsperiode {
         this.tom = tom;
     }
 
-    public String getBeskrivelse() {
-        return beskrivelse;
+    public String getUnntaksBegrunnelse() {
+        return unntaksBegrunnelse;
     }
 
-    public void setBeskrivelse(String beskrivelse) {
-        this.beskrivelse = beskrivelse;
+    public void setUnntaksBegrunnelse(String unntaksBegrunnelse) {
+        this.unntaksBegrunnelse = unntaksBegrunnelse;
     }
 
     public Bestemmelse getUnntakFraBestemmelse() {
