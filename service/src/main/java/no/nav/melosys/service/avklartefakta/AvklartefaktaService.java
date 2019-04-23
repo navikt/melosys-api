@@ -97,6 +97,21 @@ public class AvklartefaktaService {
         avklarteFaktaRepository.saveAll(avklartefaktaList);
     }
 
+    @Transactional
+    public void leggTilAvklarteFakta(long behandlingsid, Avklartefaktatype type, String referanse, String subjekt, String fakta) throws IkkeFunnetException {
+        Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
+            .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandlingsresultat for behandlingsid: " + behandlingsid));
+
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setType(type);
+        avklartefakta.setReferanse(referanse);
+        avklartefakta.setSubjekt(subjekt);
+        avklartefakta.setFakta(fakta);
+        avklartefakta.setBehandlingsresultat(resultat);
+
+        avklarteFaktaRepository.save(avklartefakta);
+    }
+
     @Transactional(rollbackFor = MelosysException.class)
     public void leggTilÅrsakEndringPeriode(long behandlingsid, Endretperioder endretperiode) throws IkkeFunnetException {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)

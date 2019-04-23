@@ -10,8 +10,9 @@ public class OpprettSakRequest {
     private Behandlingstyper behandlingstype;
     private String initierendeJournalpostId;
     private String initierendeDokumentId;
+    private Long gsakSaksnummer;
 
-    private OpprettSakRequest(String aktørID, String arbeidsgiver, String representant, String representantKontaktperson, Behandlingstyper behandlingstype, String initierendeJournalpostId, String initierendeDokumentId) {
+    private OpprettSakRequest(String aktørID, String arbeidsgiver, String representant, String representantKontaktperson, Behandlingstyper behandlingstype, String initierendeJournalpostId, String initierendeDokumentId, Long gsakSaksnummer) {
         this.aktørID = aktørID;
         this.arbeidsgiver = arbeidsgiver;
         this.representant = representant;
@@ -19,6 +20,7 @@ public class OpprettSakRequest {
         this.behandlingstype = behandlingstype;
         this.initierendeJournalpostId = initierendeJournalpostId;
         this.initierendeDokumentId = initierendeDokumentId;
+        this.gsakSaksnummer = gsakSaksnummer;
     }
 
     public String getAktørID() {
@@ -49,6 +51,10 @@ public class OpprettSakRequest {
         return initierendeDokumentId;
     }
 
+    public Long getGsakSaksnummer() {
+        return gsakSaksnummer;
+    }
+
     public static class Builder {
         private String aktørID;
         private String arbeidsgiver;
@@ -57,6 +63,7 @@ public class OpprettSakRequest {
         private Behandlingstyper behandlingstype;
         private String initierendeJournalpostId;
         private String initierendeDokumentId;
+        private Long gsakSaksnummer;
 
         public Builder medAktørID(String aktørID) {
             this.aktørID = aktørID;
@@ -93,8 +100,13 @@ public class OpprettSakRequest {
             return this;
         }
 
+        public Builder medGsakSaksnummer(Long gsakSaksnummer) {
+            this.gsakSaksnummer = gsakSaksnummer;
+            return this;
+        }
+
         public OpprettSakRequest build() {
-            return new OpprettSakRequest(aktørID, arbeidsgiver, representant, representantKontaktperson, behandlingstype, initierendeJournalpostId, initierendeDokumentId);
+            return new OpprettSakRequest(aktørID, arbeidsgiver, representant, representantKontaktperson, behandlingstype, initierendeJournalpostId, initierendeDokumentId, gsakSaksnummer);
         }
     }
 }

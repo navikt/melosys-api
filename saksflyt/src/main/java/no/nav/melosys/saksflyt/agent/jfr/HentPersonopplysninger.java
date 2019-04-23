@@ -79,6 +79,7 @@ public class HentPersonopplysninger extends AbstraktStegBehandler {
         saksopplysningRepo.save(saksopplysning);
 
         prosessinstans.setSteg(JFR_VURDER_INNGANGSVILKÅR);
+
         log.info("Hentet personopplysninger for prosessinstans {}", prosessinstans.getId());
     }
 }

@@ -13,6 +13,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +39,7 @@ public class JaxbConfig {
 
     private static Class<?>[] getClassesToBeBound() {
         List<Class<? extends Dokument>> dokumentKlasser =
-            Arrays.asList(ArbeidsforholdDokument.class, InntektDokument.class, MedlemskapDokument.class, OrganisasjonDokument.class, PersonDokument.class, PersonhistorikkDokument.class, SobSakDokument.class, SoeknadDokument.class);
+            Arrays.asList(ArbeidsforholdDokument.class, InntektDokument.class, MedlemskapDokument.class, OrganisasjonDokument.class, PersonDokument.class, PersonhistorikkDokument.class, SedDokument.class, SobSakDokument.class, SoeknadDokument.class);
 
         return new ArrayList<>(dokumentKlasser).toArray(new Class[0]);
     }
