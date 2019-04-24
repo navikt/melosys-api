@@ -7,6 +7,7 @@ public class Adresse {
     private String postnr;
     private String land;
     private String gateadresse;
+    private String region;
 
     public String getPoststed() {
         return poststed;
@@ -38,5 +39,13 @@ public class Adresse {
 
     public void setGateadresse(String gateadresse) {
         this.gateadresse = gateadresse;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 }

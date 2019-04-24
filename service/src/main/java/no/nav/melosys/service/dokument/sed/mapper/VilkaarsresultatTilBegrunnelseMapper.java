@@ -18,6 +18,7 @@ public final class VilkaarsresultatTilBegrunnelseMapper {
 
     public static String mapVilkaarsresultatTilBegrunnelseString(Vilkaarsresultat vilkaarsresultat) {
 
+        // TODO: Denne bruker nå norsk tekst, men vi ønsker å mappe til engelsk tekst
         List<String> begrunnelser = vilkaarsresultat.getBegrunnelser().stream()
             .map(VilkaarBegrunnelse::getKode)
             .map(VilkaarsresultatTilBegrunnelseMapper::getBeskrivelse)

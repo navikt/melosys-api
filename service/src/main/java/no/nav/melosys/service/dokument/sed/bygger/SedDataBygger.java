@@ -1,8 +1,6 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -25,6 +23,7 @@ import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import org.apache.commons.lang3.StringUtils;
 
 public class SedDataBygger extends AbstraktDokumentDataBygger {
 
@@ -59,6 +58,8 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
             .map(this::hentFamilieMedlem).collect(Collectors.toList()));
 
         sedDataDto.setLovvalgsperioder(Collections.singletonList(hentLovvalgsperiodeDto()));
+
+        sedDataDto.setTidligereLovvalgsperioder(hentTidligereLovvalgsperioderDto(behandling));
 
         sedDataDto.setSelvstendigeVirksomheter(map(avklarteVirksomheterService.hentSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter)));
 
@@ -128,17 +129,18 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         adresse.setLand(strukturertAdresse.landkode);
         adresse.setPostnr(strukturertAdresse.postnummer);
         adresse.setPoststed(strukturertAdresse.poststed);
+        adresse.setRegion(strukturertAdresse.region);
         return adresse;
     }
 
-    private Lovvalgsperiode hentLovvalgsperiodeDto() throws FunksjonellException, TekniskException {
-        no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode = hentLovvalgsperiode();
+    private Lovvalgsperiode hentLovvalgsperiodeDto(no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode) {
         Lovvalgsperiode lovvalgsperiodeDto = new Lovvalgsperiode();
         lovvalgsperiodeDto.setFom(lovvalgsperiode.getFom());
         lovvalgsperiodeDto.setTom(lovvalgsperiode.getTom());
-        lovvalgsperiodeDto.setLandkode(lovvalgsperiode.getLovvalgsland().getKode());
+        lovvalgsperiodeDto.setLovvalgsland(lovvalgsperiode.getLovvalgsland() != null ? lovvalgsperiode.getLovvalgsland().getKode() : null);
+        lovvalgsperiodeDto.setUnntakFraLovvalgsland(lovvalgsperiode.getUnntakFraLovvalgsland() != null ? lovvalgsperiode.getUnntakFraLovvalgsland().getKode() : null);
         lovvalgsperiodeDto.setBestemmelse(LovvalgTilBestemmelseDtoMapper.mapMelosysLovvalgTilBestemmelseDto(lovvalgsperiode.getBestemmelse()));
-        lovvalgsperiodeDto.setBeskrivelse(hentBeskrivelse(lovvalgsperiode));
+        lovvalgsperiodeDto.setUnntaksBegrunnelse(hentUnntaksBegrunnelse(lovvalgsperiode));
 
         if (lovvalgsperiode.getUnntakFraBestemmelse() != null) {
             lovvalgsperiodeDto.setUnntakFraBestemmelse(LovvalgTilBestemmelseDtoMapper
@@ -148,11 +150,33 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         return lovvalgsperiodeDto;
     }
 
-    private String hentBeskrivelse(no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode) {
+    private Lovvalgsperiode hentLovvalgsperiodeDto() throws FunksjonellException, TekniskException {
+        no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode = hentLovvalgsperiode();
+        return hentLovvalgsperiodeDto(lovvalgsperiode);
+    }
+
+    private List<Lovvalgsperiode> hentTidligereLovvalgsperioderDto(Behandling behandling) throws TekniskException {
+        List<Lovvalgsperiode> tidligereLovvalgsperioderDto = new ArrayList<>();
+        Collection<no.nav.melosys.domain.Lovvalgsperiode> tidligereLovvalgsperioder =
+            lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling);
+
+        tidligereLovvalgsperioder.stream()
+            .map(this::hentLovvalgsperiodeDto)
+            .forEach(tidligereLovvalgsperioderDto::add);
+
+        return tidligereLovvalgsperioderDto;
+    }
+
+    private String hentUnntaksBegrunnelse(no.nav.melosys.domain.Lovvalgsperiode lovvalgsperiode) {
+        if (lovvalgsperiode.getBehandlingsresultat() == null) {
+            return null;
+        }
+
         Set<Vilkaarsresultat> vilkaarsresultater = lovvalgsperiode.getBehandlingsresultat().getVilkaarsresultater();
 
         return vilkaarsresultater == null ? null : vilkaarsresultater.stream()
             .map(VilkaarsresultatTilBegrunnelseMapper::mapVilkaarsresultatTilBegrunnelseString)
+            .filter(StringUtils::isNotEmpty)
             .collect(Collectors.joining("\n\n"));
     }
 

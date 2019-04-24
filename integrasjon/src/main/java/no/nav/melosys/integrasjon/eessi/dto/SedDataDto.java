@@ -22,6 +22,7 @@ public class SedDataDto {
 
     //Lovvalg
     private List<Lovvalgsperiode> lovvalgsperioder;
+    private List<Lovvalgsperiode> tidligereLovvalgsperioder;
 
     public List<Ident> getUtenlandskIdent() {
         return utenlandskIdent;
@@ -101,5 +102,13 @@ public class SedDataDto {
 
     public void setGsakSaksnummer(Long gsakSaksnummer) {
         this.gsakSaksnummer = gsakSaksnummer;
+    }
+
+    public List<Lovvalgsperiode> getTidligereLovvalgsperioder() {
+        return tidligereLovvalgsperioder;
+    }
+
+    public void setTidligereLovvalgsperioder(List<Lovvalgsperiode> tidligereLovvalgsperioder) {
+        this.tidligereLovvalgsperioder = tidligereLovvalgsperioder;
     }
 }
