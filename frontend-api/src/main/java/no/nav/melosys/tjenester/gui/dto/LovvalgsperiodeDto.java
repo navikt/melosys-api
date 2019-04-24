@@ -27,7 +27,7 @@ public final class LovvalgsperiodeDto {
     public final String innvilgelsesResultat;
     public final String trygdeDekning;
     public final String medlemskapstype;
-    private final Long medlemskapsperiodeID;
+    public final Long medlemskapsperiodeID;
 
     public LovvalgsperiodeDto(PeriodeDto periode,
             LovvalgBestemmelse lovvalgBestemmelse,
