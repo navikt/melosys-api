@@ -5,10 +5,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.Endretperioder;
-import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
@@ -128,11 +125,12 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansMangelbrev(Behandling behandling, BrevData brevData) {
+    public void opprettProsessinstansMangelbrev(Behandling behandling, Aktoersroller mottaker, BrevData brevData) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setType(ProsessType.MANGELBREV);
         prosessinstans.setSteg(ProsessSteg.MANGELBREV);
+        prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker);
         prosessinstans.setData(ProsessDataKey.BREVDATA, brevData);
 
         lagre(prosessinstans);

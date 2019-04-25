@@ -149,7 +149,7 @@ public class DokumentService {
      */
     public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker, long behandlingID, BrevData brevData)
         throws TekniskException, FunksjonellException {
-        Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument");
+        Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument.");
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException(BEHANDLING_ID + behandlingID + FINNES_IKKE));
 
@@ -166,6 +166,9 @@ public class DokumentService {
             }
         } else if (mottakerRolle == ARBEIDSGIVER) {
             Aktoer arbeidsgiver = fagsak.hentAktørMedRolleType(ARBEIDSGIVER);
+            if (arbeidsgiver == null) {
+                throw new FunksjonellException("Arbeidsgiver eer ikke registrert.");
+            }
             Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.ARBEIDSGIVER);
             if (representant.isPresent()) {
                 produserIkkeredigerbartDokument(produserbartDokument, representant.get(), behandling, brevData);
@@ -213,13 +216,13 @@ public class DokumentService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void produserDokumentISaksflyt(long behandlingID, Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto) throws FunksjonellException {
-        Assert.notNull(brevbestillingDto, "BrevbestillingDto brukes til å bestille brev i saksflyt.");
+    public void produserDokumentISaksflyt(Produserbaredokumenter produserbartDokument, Aktoersroller mottaker, long behandlingID, BrevData brevdata) throws FunksjonellException {
+        Assert.notNull(mottaker, "Dokument uten mottaker.");
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException(BEHANDLING_ID + behandlingID + FINNES_IKKE));
 
         if (produserbartDokument == MELDING_MANGLENDE_OPPLYSNINGER) {
-            prosessinstansService.opprettProsessinstansMangelbrev(behandling, new BrevData(brevbestillingDto));
+            prosessinstansService.opprettProsessinstansMangelbrev(behandling, mottaker, brevdata);
         } else {
             throw new FunksjonellException("Produserbaredokumenter " + produserbartDokument + " er ikke støttet.");
         }

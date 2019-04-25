@@ -66,9 +66,10 @@ public class SendMangelbrev extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
+        Aktoersroller mottaker = prosessinstans.getData(ProsessDataKey.MOTTAKER, Aktoersroller.class);
         BrevData brevData = prosessinstans.getData(ProsessDataKey.BREVDATA, BrevData.class);
 
-        dokumentService.produserDokument(MELDING_MANGLENDE_OPPLYSNINGER, Mottaker.av(Aktoersroller.BRUKER), behandling.getId(), brevData);
+        dokumentService.produserDokument(MELDING_MANGLENDE_OPPLYSNINGER, Mottaker.av(mottaker), behandling.getId(), brevData);
 
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
         behandling.setDokumentasjonSvarfristDato(LocalDateTime.now().plusWeeks(DOKUMENTASJON_SVARFRIST_UKER).toInstant(ZoneOffset.UTC));

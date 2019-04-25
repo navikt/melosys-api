@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
+import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,8 +78,11 @@ public class DokumentTjeneste extends RestTjeneste {
                                      @PathParam("behandlingID") long behandlingID,
                                      @PathParam("produserbartDokument") Produserbaredokumenter produserbartDokument,
             BrevbestillingDto brevBestillingDto) throws FunksjonellException, TekniskException {
+        if (brevBestillingDto.mottaker == null) {
+            throw new FunksjonellException("Mottaker trengs for å bestille.");
+        }
         tilgang.sjekk(behandlingID);
-        dokumentService.produserDokumentISaksflyt(behandlingID, produserbartDokument, brevBestillingDto);
+        dokumentService.produserDokumentISaksflyt(produserbartDokument, brevBestillingDto.mottaker, behandlingID, new BrevData(brevBestillingDto));
         return Response.noContent().build();
     }
 

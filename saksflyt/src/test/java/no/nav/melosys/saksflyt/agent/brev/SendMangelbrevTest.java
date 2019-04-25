@@ -5,6 +5,7 @@ import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -41,12 +42,14 @@ public class SendMangelbrevTest {
         behandling.setId(1L);
         p.setBehandling(behandling);
 
+        Aktoersroller mottaker = Aktoersroller.ARBEIDSGIVER;
+        p.setData(ProsessDataKey.MOTTAKER, mottaker);
         BrevData brevData = new BrevData("Z123456");
         p.setData(ProsessDataKey.BREVDATA, brevData);
 
         agent.utførSteg(p);
 
-        verify(dokumentService).produserDokument(eq(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER), any(Mottaker.class), anyLong(), any(BrevData.class));
+        verify(dokumentService).produserDokument(eq(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER), eq(Mottaker.av(Aktoersroller.ARBEIDSGIVER)), anyLong(), any(BrevData.class));
         verify(behandlingRepo).save(any(Behandling.class));
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
