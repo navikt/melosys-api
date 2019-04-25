@@ -35,6 +35,7 @@ public class DoksysService implements DoksysFasade {
     private static final Logger log = LoggerFactory.getLogger(DoksysService.class);
 
     private static final String FALSK_MOTTAKER_ID = "11111111111";
+    private static final String LINE_SEPARATOR = System.lineSeparator();
 
     private final DokumentproduksjonConsumer dokumentproduksjonConsumer;
 
@@ -43,7 +44,6 @@ public class DoksysService implements DoksysFasade {
     @Autowired
     public DoksysService(DokumentproduksjonConsumer dokumentproduksjonConsumer) {
         this.dokumentproduksjonConsumer = dokumentproduksjonConsumer;
-
         this.objectFactory = new ObjectFactory();
     }
 
@@ -57,6 +57,10 @@ public class DoksysService implements DoksysFasade {
         wsRequest.setBrevdata(dokumentbestilling.getBrevData());
 
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Sender request:{} {}", LINE_SEPARATOR, wsRequest);
+                log.debug("Bestiller utkast:{} {}", LINE_SEPARATOR, xmlToString(dokumentbestilling.getBrevData()));
+            }
             ProduserDokumentutkastResponse wsResponse = dokumentproduksjonConsumer.produserDokumentutkast(wsRequest);
             return wsResponse.getDokumentutkast();
         } catch (ProduserDokumentutkastBrevdataValideringFeilet | ProduserDokumentutkastInputValideringFeilet e) {
@@ -115,8 +119,8 @@ public class DoksysService implements DoksysFasade {
 
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Sender request:{} {}", System.lineSeparator(), wsRequest);
-                log.debug("Bestiller dokument:{} {}", System.lineSeparator(), xmlToString(dokumentbestilling.getBrevData()));
+                log.debug("Sender request:{} {}", LINE_SEPARATOR, wsRequest);
+                log.debug("Bestiller dokument:{} {}", LINE_SEPARATOR, xmlToString(dokumentbestilling.getBrevData()));
             }
             ProduserIkkeredigerbartDokumentResponse wsResponse = dokumentproduksjonConsumer.produserIkkeredigerbartDokument(wsRequest);
 
