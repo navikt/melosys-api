@@ -175,7 +175,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         Set<Vilkaarsresultat> vilkaarsresultater = lovvalgsperiode.getBehandlingsresultat().getVilkaarsresultater();
 
         return vilkaarsresultater == null ? null : vilkaarsresultater.stream()
-            .map(VilkaarsresultatTilBegrunnelseMapper::mapVilkaarsresultatTilBegrunnelseString)
+            .map(VilkaarsresultatTilBegrunnelseMapper::tilEngelskBegrunnelseString)
             .filter(StringUtils::isNotEmpty)
             .collect(Collectors.joining("\n\n"));
     }
