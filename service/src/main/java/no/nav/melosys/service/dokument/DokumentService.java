@@ -23,6 +23,7 @@ import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.aktoer.AvklarMyndighetService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
@@ -51,17 +52,12 @@ public class DokumentService {
     private static final String FINNES_IKKE = " finnes ikke.";
 
     private final BehandlingRepository behandlingRepository;
-
     private final BrevDataService brevDataService;
-
     private final DoksysFasade dokSysFasade;
-
     private final KontaktopplysningService kontaktopplysningService;
-
     private final ProsessinstansService prosessinstansService;
-
     private final BrevDataByggerVelger brevDataByggerVelger;
-
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final AvklarMyndighetService avklarMyndighetService;
 
     @Autowired
@@ -69,13 +65,14 @@ public class DokumentService {
                            BrevDataService brevDataService, DoksysFasade dokSysFasade,
                            KontaktopplysningService kontaktopplysningService,
                            ProsessinstansService prosessinstansService, BrevDataByggerVelger brevDataByggerVelger,
-                           AvklarMyndighetService avklarMyndighetService) {
+                           AvklarteVirksomheterService avklarteVirksomheterService, AvklarMyndighetService avklarMyndighetService) {
         this.behandlingRepository = behandlingRepository;
         this.brevDataService = brevDataService;
-        this.kontaktopplysningService = kontaktopplysningService;
         this.dokSysFasade = dokSysFasade;
+        this.kontaktopplysningService = kontaktopplysningService;
         this.prosessinstansService = prosessinstansService;
         this.brevDataByggerVelger = brevDataByggerVelger;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarMyndighetService = avklarMyndighetService;
     }
 
@@ -131,39 +128,74 @@ public class DokumentService {
             .orElseThrow(() -> new IkkeFunnetException(BEHANDLING_ID + behandlingID + FINNES_IKKE));
 
         Aktoersroller mottakerRolle = mottaker.getRolle();
-        Fagsak fagsak = behandling.getFagsak();
-        if (mottakerRolle == BRUKER) {
-            // Dokumenter sendes til både bruker og representant
-            Aktoer bruker = fagsak.hentAktørMedRolleType(BRUKER);
-            produserIkkeredigerbartDokument(produserbartDokument, bruker, behandling, brevData);
 
-            Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.BRUKER);
-            if (representant.isPresent()) {
-                produserIkkeredigerbartDokument(produserbartDokument, representant.get(), behandling, brevData);
-            }
+        if (mottakerRolle == BRUKER) {
+            sendTilBruker(produserbartDokument, behandling, brevData);
         } else if (mottakerRolle == ARBEIDSGIVER) {
-            Aktoer arbeidsgiver = fagsak.hentAktørMedRolleType(ARBEIDSGIVER);
-            if (arbeidsgiver == null) {
-                throw new FunksjonellException("Arbeidsgiver er ikke registrert.");
-            }
-            Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.ARBEIDSGIVER);
-            if (representant.isPresent()) {
-                produserIkkeredigerbartDokument(produserbartDokument, representant.get(), behandling, brevData);
-            } else {
-                produserIkkeredigerbartDokument(produserbartDokument, arbeidsgiver, behandling, brevData);
-            }
+            sendTilArbeidsgiver(produserbartDokument, behandling, brevData);
         } else if (mottakerRolle == MYNDIGHET) {
-            Aktoer myndighet;
-            if (mottaker.getAktør().getOrgnr() != null) {
-                myndighet = mottaker.getAktør();
-            } else {
-                // Utenlandsk myndighet
-                myndighet = fagsak.hentAktørMedRolleType(mottakerRolle);
-            }
-            produserIkkeredigerbartDokument(produserbartDokument, myndighet, behandling, brevData);
+            sendTilMyndighet(produserbartDokument, mottaker, behandling, brevData);
         } else {
             throw new FunksjonellException(mottakerRolle + " støttes ikke.");
         }
+    }
+
+    // Dokumenter til bruker sendes til både bruker og representant.
+    private void sendTilBruker(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws FunksjonellException, TekniskException {
+        Fagsak fagsak = behandling.getFagsak();
+        Aktoer bruker = fagsak.hentAktørMedRolleType(BRUKER);
+        if (bruker == null) {
+            throw new FunksjonellException("Bruker er ikke registrert.");
+        }
+        produserIkkeredigerbartDokument(produserbartDokument, bruker, behandling, brevData);
+
+        Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.BRUKER);
+        if (representant.isPresent()) {
+            produserIkkeredigerbartDokument(produserbartDokument, representant.get(), behandling, brevData);
+        }
+    }
+
+    // Dokumenter til arbeidsgiver sendes bare til representant når representant finnes.
+    private void sendTilArbeidsgiver(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws FunksjonellException, TekniskException {
+        Fagsak fagsak = behandling.getFagsak();
+        Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.ARBEIDSGIVER);
+        if (representant.isPresent()) {
+            produserIkkeredigerbartDokument(produserbartDokument, representant.get(), behandling, brevData);
+        } else {
+            produserIkkeredigerbartDokument(produserbartDokument, avklarArbeidsgiver(behandling), behandling, brevData);
+        }
+    }
+
+    private Aktoer avklarArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
+        Aktoer arbeidsgiver = behandling.getFagsak().hentAktørMedRolleType(ARBEIDSGIVER);
+        if (arbeidsgiver == null) {
+            Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(behandling);
+            if (arbeidsgivendeOrgnumre.isEmpty()) {
+                throw new FunksjonellException("Arbeidsgiver er ikke registrert.");
+            } else if (arbeidsgivendeOrgnumre.size() > 1) {
+                throw new FunksjonellException("Flere arbeidsgivere er avklart.");
+            } else {
+                String orgnr = arbeidsgivendeOrgnumre.iterator().next();
+                Aktoer avklartArbeidsgiver = new Aktoer();
+                avklartArbeidsgiver.setRolle(ARBEIDSGIVER);
+                avklartArbeidsgiver.setOrgnr(orgnr);
+                return avklartArbeidsgiver;
+            }
+        }
+        return arbeidsgiver;
+    }
+
+    private void sendTilMyndighet(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, BrevData brevData)
+        throws FunksjonellException, TekniskException {
+        Aktoer myndighet;
+        if (mottaker.getAktør().getOrgnr() != null) {
+            // Norsk myndighet har orgnummer.
+            myndighet = mottaker.getAktør();
+        } else {
+            // Utenlandsk myndighet.
+            myndighet = behandling.getFagsak().hentAktørMedRolleType(mottaker.getRolle());
+        }
+        produserIkkeredigerbartDokument(produserbartDokument, myndighet, behandling, brevData);
     }
 
     private Kontaktopplysning hentKontaktopplysning(String saksnumner, Aktoer mottaker) {
@@ -180,7 +212,8 @@ public class DokumentService {
         }
     }
 
-    private Dokumentbestilling lagDokumentbestilling(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData) throws FunksjonellException, TekniskException {
+    private Dokumentbestilling lagDokumentbestilling(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData)
+        throws FunksjonellException, TekniskException {
         Kontaktopplysning kontaktopplysning = hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker);
         DokumentbestillingMetadata metadata = brevDataService.lagBestillingMetadata(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
         Element brevinnhold = brevDataService.lagBrevXML(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
@@ -193,7 +226,8 @@ public class DokumentService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void produserDokumentISaksflyt(Produserbaredokumenter produserbartDokument, Aktoersroller mottaker, long behandlingID, BrevData brevdata) throws FunksjonellException {
+    public void produserDokumentISaksflyt(Produserbaredokumenter produserbartDokument, Aktoersroller mottaker, long behandlingID, BrevData brevdata)
+        throws FunksjonellException {
         Assert.notNull(mottaker, "Dokument uten mottaker.");
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException(BEHANDLING_ID + behandlingID + FINNES_IKKE));
