@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
+import no.nav.melosys.service.dokument.DokumentVisningService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
@@ -26,14 +27,14 @@ import org.springframework.web.context.WebApplicationContext;
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class DokumentTjeneste extends RestTjeneste {
-    
-    private DokumentService dokumentService;
-
+    private final DokumentService dokumentService;
+    private final DokumentVisningService dokumentVisningService;
     private final Tilgang tilgang;
 
     @Autowired
-    public DokumentTjeneste(DokumentService dokumentService, Tilgang tilgang) {
+    public DokumentTjeneste(DokumentService dokumentService, DokumentVisningService dokumentVisningService, Tilgang tilgang) {
         this.dokumentService = dokumentService;
+        this.dokumentVisningService = dokumentVisningService;
         this.tilgang = tilgang;
     }
 
@@ -44,7 +45,7 @@ public class DokumentTjeneste extends RestTjeneste {
     public Response hentDokument(@ApiParam @PathParam("journalpostID") String journalpostID, @ApiParam @PathParam("dokumentID") String dokumentID)
             throws SikkerhetsbegrensningException, IkkeFunnetException {
         byte[] dokument;
-        dokument = dokumentService.hentDokument(journalpostID, dokumentID);
+        dokument = dokumentVisningService.hentDokument(journalpostID, dokumentID);
         return lagResponseAvDokument(dokument, String.format("journalpost-dok-%s.pdf", dokumentID));
     }
 
@@ -52,7 +53,7 @@ public class DokumentTjeneste extends RestTjeneste {
     @Path("/oversikt/{saksnummer}")
     @ApiOperation(value = "Henter alle dokumenter knyttet til en fagsak", response = JournalpostInfoDto.class, responseContainer = "List")
     public Response hentDokumenter(@PathParam("saksnummer") String saksnummer) throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
-        List<JournalpostInfoDto> dokumentListe = dokumentService.hentDokumenter(saksnummer)
+        List<JournalpostInfoDto> dokumentListe = dokumentVisningService.hentDokumenter(saksnummer)
             .stream()
             .map(JournalpostInfoDto::av)
             .sorted(Comparator.comparing(JournalpostInfoDto::hentGjeldendeTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())))

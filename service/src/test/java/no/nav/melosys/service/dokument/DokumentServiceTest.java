@@ -27,7 +27,6 @@ import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
@@ -37,6 +36,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.aktoer.AvklarMyndighetService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -186,8 +186,9 @@ public final class DokumentServiceTest {
 
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository);
-        return new DokumentService(behandlingRepository, mock(FagsakRepository.class), brevDataService, dokSysFasade, mock(JoarkFasade.class),
-            mock(KontaktopplysningService.class), mock(ProsessinstansService.class), brevdatabyggervelger, mock(AvklarMyndighetService.class));
+        return new DokumentService(behandlingRepository, brevDataService, dokSysFasade,
+            mock(KontaktopplysningService.class), mock(ProsessinstansService.class), brevdatabyggervelger,
+            mock(AvklarteVirksomheterService.class), mock(AvklarMyndighetService.class));
     }
 
     private static Behandling lagBehandling() {
