@@ -168,7 +168,9 @@ public class DokumentService {
 
     private Aktoer avklarArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
         Aktoer arbeidsgiver = behandling.getFagsak().hentAktørMedRolleType(ARBEIDSGIVER);
-        if (arbeidsgiver == null) {
+        if (arbeidsgiver != null) {
+            return arbeidsgiver;
+        } else {
             Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentArbeidsgivendeOrgnumre(behandling);
             if (arbeidsgivendeOrgnumre.isEmpty()) {
                 throw new FunksjonellException("Arbeidsgiver er ikke registrert.");
@@ -182,7 +184,6 @@ public class DokumentService {
                 return avklartArbeidsgiver;
             }
         }
-        return arbeidsgiver;
     }
 
     private void sendTilMyndighet(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, BrevData brevData)
