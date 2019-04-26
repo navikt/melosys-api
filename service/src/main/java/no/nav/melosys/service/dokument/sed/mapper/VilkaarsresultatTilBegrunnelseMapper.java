@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.sed.mapper;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
@@ -17,16 +16,12 @@ public final class VilkaarsresultatTilBegrunnelseMapper {
     }
 
     public static String tilEngelskBegrunnelseString(Vilkaarsresultat vilkaarsresultat) {
-        return getVilkaarBegrunnelseKoder(vilkaarsresultat)
+        return vilkaarsresultat.getBegrunnelser().stream()
+            .map(VilkaarBegrunnelse::getKode)
             .map(VilkaarsresultatTilBegrunnelseMapper::getEngelskBeskrivelse)
             .filter(Objects::nonNull)
             .map(begrunnelse -> tilFritekst(begrunnelse, vilkaarsresultat.getBegrunnelseFritekst()))
             .collect(Collectors.joining("\n"));
-    }
-
-    private static Stream<String> getVilkaarBegrunnelseKoder(Vilkaarsresultat vilkaarsresultat) {
-        return vilkaarsresultat.getBegrunnelser().stream()
-            .map(VilkaarBegrunnelse::getKode);
     }
 
     private static String getEngelskBeskrivelse(String kode) {
