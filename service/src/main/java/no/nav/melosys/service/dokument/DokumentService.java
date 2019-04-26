@@ -1,23 +1,26 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.AvklarMyndighetService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -49,13 +52,9 @@ public class DokumentService {
 
     private final BehandlingRepository behandlingRepository;
 
-    private final FagsakRepository fagsakRepository;
-
     private final BrevDataService brevDataService;
 
     private final DoksysFasade dokSysFasade;
-
-    private final JoarkFasade joarkFasade;
 
     private final KontaktopplysningService kontaktopplysningService;
 
@@ -67,39 +66,17 @@ public class DokumentService {
 
     @Autowired
     public DokumentService(BehandlingRepository behandlingRepository,
-                           FagsakRepository fagsakRepository,
-                           BrevDataService brevDataService,
-                           DoksysFasade dokSysFasade, JoarkFasade joarkFasade,
+                           BrevDataService brevDataService, DoksysFasade dokSysFasade,
                            KontaktopplysningService kontaktopplysningService,
-                           ProsessinstansService prosessinstansService, BrevDataByggerVelger brevDataByggerVelger, AvklarMyndighetService avklarMyndighetService) {
+                           ProsessinstansService prosessinstansService, BrevDataByggerVelger brevDataByggerVelger,
+                           AvklarMyndighetService avklarMyndighetService) {
         this.behandlingRepository = behandlingRepository;
-        this.fagsakRepository = fagsakRepository;
         this.brevDataService = brevDataService;
-        this.joarkFasade = joarkFasade;
         this.kontaktopplysningService = kontaktopplysningService;
         this.dokSysFasade = dokSysFasade;
         this.prosessinstansService = prosessinstansService;
         this.brevDataByggerVelger = brevDataByggerVelger;
         this.avklarMyndighetService = avklarMyndighetService;
-    }
-
-    /**
-     * Henter et dokument fra Joark
-     */
-    public byte[] hentDokument(String journalpostID, String dokumentID) throws IkkeFunnetException, SikkerhetsbegrensningException {
-        return joarkFasade.hentDokument(journalpostID, dokumentID);
-    }
-
-    /**
-     * Henter dokumenter knyttet til en sak med et gitt saksnummer
-     */
-    public List<Journalpost> hentDokumenter(String saksnummer) throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
-        if (fagsak == null) {
-            throw new IkkeFunnetException("Fagsak med saksnummer " + saksnummer + FINNES_IKKE);
-        }
-
-        return joarkFasade.hentKjerneJournalpostListe(fagsak.getGsakSaksnummer());
     }
 
     /**

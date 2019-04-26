@@ -1,9 +1,7 @@
 package no.nav.melosys.service.dokument;
 
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
@@ -16,9 +14,8 @@ public class DokumentSystemService extends DokumentService {
 
     @Autowired
     public DokumentSystemService(BehandlingRepository behandlingRepository,
-                                 FagsakRepository fagsakRepository, BrevDataService brevDataService,
-                                 @Qualifier("system") DoksysFasade dokSysFasade, JoarkFasade joarkFasade,
+                                 BrevDataService brevDataService, @Qualifier("system") DoksysFasade dokSysFasade,
                                  KontaktopplysningService kontaktopplysningService, BrevDataByggerVelger brevDataByggerVelger) {
-        super(behandlingRepository, fagsakRepository, brevDataService, dokSysFasade, joarkFasade, kontaktopplysningService, null, brevDataByggerVelger, null);
+        super(behandlingRepository, brevDataService, dokSysFasade, kontaktopplysningService, null, brevDataByggerVelger, null);
     }
 }

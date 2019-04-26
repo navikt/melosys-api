@@ -13,6 +13,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.dokument.DokumentService;
+import no.nav.melosys.service.dokument.DokumentVisningService;
 import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,17 +45,20 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     private DokumentService dokumentService;
 
     @Mock
+    private DokumentVisningService dokumentVisningService;
+
+    @Mock
     private Tilgang tilgang;
 
     @Before
     public void setUp() {
-        dokumentTjeneste = new DokumentTjeneste(dokumentService, tilgang);
+        dokumentTjeneste = new DokumentTjeneste(dokumentService, dokumentVisningService, tilgang);
     }
 
     @Test
     public void hentDokumenter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException, IOException {
         List<Journalpost> journalposter = EnhancedRandom.randomListOf(3, Journalpost.class);
-        given(dokumentService.hentDokumenter(anyString())).willReturn(journalposter);
+        given(dokumentVisningService.hentDokumenter(anyString())).willReturn(journalposter);
 
         Response response = dokumentTjeneste.hentDokumenter("MEL-1873");
         List<JournalpostInfoDto> dtos = (List<JournalpostInfoDto>) response.getEntity();

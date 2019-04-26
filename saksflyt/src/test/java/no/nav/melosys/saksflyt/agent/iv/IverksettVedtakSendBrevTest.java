@@ -117,8 +117,7 @@ public class IverksettVedtakSendBrevTest {
         DoksysFasade dokSysFasade = mock(DoksysFasade.class);
         JoarkFasade joarkFasade = mock(JoarkFasade.class);
         KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
-        return spy(new DokumentSystemService(behandlingRepository, fagsakRepository,
-            brevDataService, dokSysFasade, joarkFasade, kontaktopplysningService, brevDataByggerVelger));
+        return spy(new DokumentSystemService(behandlingRepository, brevDataService, dokSysFasade, kontaktopplysningService, brevDataByggerVelger));
     }
 
     private static BehandlingsresultatRepository mockBehandlingsresultatRepository() {
