@@ -5,8 +5,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandlingFelles;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -14,15 +13,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HenleggSakTest {
     @Mock
-    FagsakRepository fagsakRepository;
-
-    @Mock
-    BehandlingRepository behandlingRepository;
+    OppdaterFagsakOgBehandlingFelles felles;
 
     @InjectMocks
     HenleggSak henleggSak;
@@ -38,10 +35,7 @@ public class HenleggSakTest {
 
         henleggSak.utfør(prosessinstans);
 
-        assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
-        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.HENLAGT);
+        verify(felles).avsluttFagsakOgBehandling(eq(behandling), eq(Saksstatuser.HENLAGT), eq(Behandlingsstatus.AVSLUTTET));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.HS_SEND_BREV);
-        verify(fagsakRepository).save(fagsak);
-        verify(behandlingRepository).save(behandling);
     }
 }

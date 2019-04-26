@@ -47,7 +47,6 @@ public class EessiMottakService {
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, melosysEessiMelding.getDokumentId());
         prosessinstans.setData(ProsessDataKey.ER_ENDRING, melosysEessiMelding.getErEndring());
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, melosysEessiMelding.getGsakSaksnummer());
-        prosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, "NO"); //todo alltid norge?
         prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, tilPeriode(melosysEessiMelding.getPeriode()));
         prosessinstans.setData(ProsessDataKey.SED_DOKUMENT, opprettSedDokument(melosysEessiMelding));
         prosessinstansService.lagre(prosessinstans);

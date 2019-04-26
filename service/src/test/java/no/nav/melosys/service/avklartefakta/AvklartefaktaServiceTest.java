@@ -18,6 +18,8 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -42,6 +44,9 @@ public class AvklartefaktaServiceTest {
 
     @Mock
     AvklartefaktaDtoKonverterer avklartefaktaDtoKonverterer;
+
+    @Captor
+    private ArgumentCaptor<Avklartefakta> captor;
 
     @Before
     public void setUp() {
@@ -164,6 +169,18 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
+    public void hentVurderingUnntakPeriode_forcentVurderingUnntakPeriodeType() {
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setType(Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatype.VURDERING_UNNTAK_PERIODE)))
+            .thenReturn(Optional.of(avklartefakta));
+
+        Optional<Avklartefakta> avklartefaktaOptional = avklartefaktaService.hentVurderingUnntakPeriode(2L);
+        assertThat(avklartefaktaOptional.isPresent()).isTrue();
+        assertThat(avklartefaktaOptional.get().getType()).isEqualTo(Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
+    }
+
+    @Test
     public void testAvklarteOrganisasjoner() {
         String orgnr1 = "12345678910";
         Avklartefakta avklartefakta = new Avklartefakta();
@@ -175,5 +192,26 @@ public class AvklartefaktaServiceTest {
 
         Set<String> avklarteOrgnumre = avklartefaktaService.hentAvklarteOrganisasjoner(1L);
         assertThat(avklarteOrgnumre).containsOnly(orgnr1);
+    }
+
+    @Test
+    public void leggTilRegistrering_forventLagret() throws Exception {
+
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any(Avklartefaktatype.class)))
+            .thenReturn(Optional.of(new Avklartefakta()));
+
+        avklartefaktaService.leggTilRegistrering(1, Avklartefaktatype.VURDERING_UNNTAK_PERIODE, "kode");
+
+        verify(avklarteFaktaRepository).save(captor.capture());
+
+        Avklartefakta capturedAvklarteFakta = captor.getValue();
+
+        assertThat(capturedAvklarteFakta.getRegistreringer()).isNotEmpty();
+        assertThat(capturedAvklarteFakta.getRegistreringer().size()).isEqualTo(1);
+
+        AvklartefaktaRegistrering registrering = capturedAvklarteFakta.getRegistreringer().iterator().next();
+        assertThat(registrering.getBegrunnelseKode()).isEqualTo("kode");
+
+
     }
 }

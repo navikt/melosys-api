@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -51,8 +52,13 @@ public class BestemBehandlingsMaateTest {
 
     @Test
     public void utførSteg_treffIRegister_verifiserNesteSteg() throws Exception {
+
+        Avklartefakta avklartefakta = new Avklartefakta();
+        avklartefakta.setType(Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
+        avklartefakta.getRegistreringer().add(new AvklartefaktaRegistrering());
+
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatype.VURDERING_UNNTAK_PERIODE)))
-            .thenReturn(Sets.newSet(new Avklartefakta()));
+            .thenReturn(Sets.newSet(avklartefakta));
 
         Prosessinstans prosessinstans = hentProsessinstans();
         bestemBehandlingsMaate.utfør(prosessinstans);

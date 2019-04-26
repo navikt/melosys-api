@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.util.Map;
 
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -45,7 +46,9 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        //TODO: MELOSYS-2077
+        Lovvalgsperiode lovvalgsperiode = felles.hentLovvalgsperiode(prosessinstans.getBehandling());
+        medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode);
+
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 }

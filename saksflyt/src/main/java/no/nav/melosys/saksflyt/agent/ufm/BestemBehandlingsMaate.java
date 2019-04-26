@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandlingsmaate;
@@ -56,7 +57,10 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
         Set<Avklartefakta> treffRegisterKontroll = avklarteFaktaRepository
             .findAllByBehandlingsresultatIdAndType(behandlingsresultat.getId(), Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
 
-        if (treffRegisterKontroll.isEmpty()) {
+        boolean harTreffFraRegisterkontroll = treffRegisterKontroll.stream()
+            .flatMap(a -> a.getRegistreringer().stream()).anyMatch(Objects::nonNull);
+
+        if (!harTreffFraRegisterkontroll) {
             behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.AUTOMATISERT);
             prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
         } else {

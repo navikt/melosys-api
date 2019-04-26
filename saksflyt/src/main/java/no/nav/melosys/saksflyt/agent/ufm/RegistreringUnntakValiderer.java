@@ -24,9 +24,14 @@ public abstract class RegistreringUnntakValiderer extends AbstraktStegBehandler 
     }
 
     void registrerFeil(Prosessinstans prosessinstans, Unntak_periode_begrunnelser treffBegrunnelse) throws IkkeFunnetException {
+        long behandlingsId = prosessinstans.getBehandling().getId();
 
-        avklartefaktaService.leggTilAvklarteFakta(prosessinstans.getBehandling().getId(),
-            Avklartefaktatype.VURDERING_UNNTAK_PERIODE, Avklartefaktatype.VURDERING_UNNTAK_PERIODE.name(), null, treffBegrunnelse.getKode());
+        if (!avklartefaktaService.hentVurderingUnntakPeriode(behandlingsId).isPresent()) {
+            avklartefaktaService.leggTilAvklarteFakta(prosessinstans.getBehandling().getId(),
+                Avklartefaktatype.VURDERING_UNNTAK_PERIODE, Avklartefaktatype.VURDERING_UNNTAK_PERIODE.name(), null, "TRUE");
+        }
+
+        avklartefaktaService.leggTilRegistrering(behandlingsId, Avklartefaktatype.VURDERING_UNNTAK_PERIODE, treffBegrunnelse.getKode());
     }
 
     Saksopplysning hentSedSaksopplysning(Prosessinstans prosessinstans) throws TekniskException {
