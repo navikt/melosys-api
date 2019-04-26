@@ -167,7 +167,7 @@ public class DokumentService {
         } else if (mottakerRolle == ARBEIDSGIVER) {
             Aktoer arbeidsgiver = fagsak.hentAktørMedRolleType(ARBEIDSGIVER);
             if (arbeidsgiver == null) {
-                throw new FunksjonellException("Arbeidsgiver eer ikke registrert.");
+                throw new FunksjonellException("Arbeidsgiver er ikke registrert.");
             }
             Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.ARBEIDSGIVER);
             if (representant.isPresent()) {
