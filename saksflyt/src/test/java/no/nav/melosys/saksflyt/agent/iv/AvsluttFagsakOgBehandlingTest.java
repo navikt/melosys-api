@@ -53,7 +53,7 @@ public class AvsluttFagsakOgBehandlingTest {
 
         agent.utførSteg(p);
 
-        verify(felles).avsluttFagsakOgBehandling(eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART), eq(Behandlingsstatus.AVSLUTTET));
+        verify(felles).oppdaterFagsakOgBehandlingStatuser(eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART), eq(Behandlingsstatus.AVSLUTTET));
         assertThat(p.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
 
     }

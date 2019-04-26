@@ -21,7 +21,7 @@ public class OppdaterFagsakOgBehandlingFelles {
         this.behandlingRepository = behandlingRepository;
     }
 
-    public void avsluttFagsakOgBehandling(Behandling behandling, Saksstatuser saksstatus, Behandlingsstatus behandlingsstatus) {
+    public void oppdaterFagsakOgBehandlingStatuser(Behandling behandling, Saksstatuser saksstatus, Behandlingsstatus behandlingsstatus) {
         Fagsak fagsak = behandling.getFagsak();
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);

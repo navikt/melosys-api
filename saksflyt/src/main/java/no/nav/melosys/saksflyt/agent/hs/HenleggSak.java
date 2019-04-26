@@ -54,7 +54,7 @@ public class HenleggSak extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
-        felles.avsluttFagsakOgBehandling(behandling, Saksstatuser.HENLAGT, Behandlingsstatus.AVSLUTTET);
+        felles.oppdaterFagsakOgBehandlingStatuser(behandling, Saksstatuser.HENLAGT, Behandlingsstatus.AVSLUTTET);
 
         log.info("Satt sak til henlagt for prosessinstans {}", prosessinstans.getId());
         prosessinstans.setSteg(HS_SEND_BREV);

@@ -41,7 +41,7 @@ public class AvsluttFagsakOgBehandlingTest {
 
         avsluttFagsakOgBehandling.utfør(prosessinstans);
 
-        verify(felles).avsluttFagsakOgBehandling(eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART), eq(Behandlingsstatus.AVSLUTTET));
+        verify(felles).oppdaterFagsakOgBehandlingStatuser(eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART), eq(Behandlingsstatus.AVSLUTTET));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
     }
 

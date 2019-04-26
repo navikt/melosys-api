@@ -46,7 +46,7 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
-        felles.avsluttFagsakOgBehandling(behandling, Saksstatuser.LOVVALG_AVKLART, Behandlingsstatus.AVSLUTTET);
+        felles.oppdaterFagsakOgBehandlingStatuser(behandling, Saksstatuser.LOVVALG_AVKLART, Behandlingsstatus.AVSLUTTET);
         log.info("Periode suksessfult regisrert for fagsak {},behandling {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }

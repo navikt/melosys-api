@@ -35,7 +35,7 @@ public class HenleggSakTest {
 
         henleggSak.utfør(prosessinstans);
 
-        verify(felles).avsluttFagsakOgBehandling(eq(behandling), eq(Saksstatuser.HENLAGT), eq(Behandlingsstatus.AVSLUTTET));
+        verify(felles).oppdaterFagsakOgBehandlingStatuser(eq(behandling), eq(Saksstatuser.HENLAGT), eq(Behandlingsstatus.AVSLUTTET));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.HS_SEND_BREV);
     }
 }

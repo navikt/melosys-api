@@ -169,7 +169,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentVurderingUnntakPeriode_forcentVurderingUnntakPeriodeType() {
+    public void hentVurderingUnntakPeriode_forventVurderingUnntakPeriodeType() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setType(Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatype.VURDERING_UNNTAK_PERIODE)))
@@ -206,12 +206,9 @@ public class AvklartefaktaServiceTest {
 
         Avklartefakta capturedAvklarteFakta = captor.getValue();
 
-        assertThat(capturedAvklarteFakta.getRegistreringer()).isNotEmpty();
-        assertThat(capturedAvklarteFakta.getRegistreringer().size()).isEqualTo(1);
+        assertThat(capturedAvklarteFakta.getRegistreringer()).hasSize(1);
 
         AvklartefaktaRegistrering registrering = capturedAvklarteFakta.getRegistreringer().iterator().next();
         assertThat(registrering.getBegrunnelseKode()).isEqualTo("kode");
-
-
     }
 }

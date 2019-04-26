@@ -85,25 +85,25 @@ public class ValiderYtelser extends RegistreringUnntakValiderer {
 
     private Saksopplysning hentInntektListe(String fnr, LocalDate fom, LocalDate tom) throws SikkerhetsbegrensningException, IntegrasjonException {
 
-        YearMonth fra;
-        YearMonth til;
+        YearMonth fomMnd;
+        YearMonth tomMnd;
 
         LocalDate nå = LocalDate.now();
         if(tom == null) {
-            fra = YearMonth.from(fom);
-            til = null;
+            fomMnd = YearMonth.from(fom);
+            tomMnd = null;
         } else if (fom.isBefore(nå) && tom.isAfter(nå)) { //1. Periode påbegynt: utbetalinger periode med 2 mnd tilbake
-            fra = YearMonth.from(fom.minusMonths(2L));
-            til = YearMonth.from(tom);
+            fomMnd = YearMonth.from(fom.minusMonths(2L));
+            tomMnd = YearMonth.from(tom);
         } else if (fom.isAfter(nå)) { //2. Periode ikke påbegynt. Inneværende mnd og 2 mnd tilbake
-            fra = YearMonth.from(nå.minusMonths(2L));
-            til = YearMonth.from(nå);
+            fomMnd = YearMonth.from(nå.minusMonths(2L));
+            tomMnd = YearMonth.from(nå);
         } else { //3. Avsluttet: sjekker hele periode
-            fra = YearMonth.from(fom);
-            til = YearMonth.from(tom);
+            fomMnd = YearMonth.from(fom);
+            tomMnd = YearMonth.from(tom);
         }
 
-        return inntektService.hentInntektListe(fnr, fra, til);
+        return inntektService.hentInntektListe(fnr, fomMnd, tomMnd);
     }
 
     private boolean validerInntekt(InntektDokument inntektDokument, LocalDate fom, LocalDate tom) {
