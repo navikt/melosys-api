@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandlingsmaate;
@@ -18,6 +17,7 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
             .findAllByBehandlingsresultatIdAndType(behandlingsresultat.getId(), Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
 
         boolean harTreffFraRegisterkontroll = treffRegisterKontroll.stream()
-            .flatMap(a -> a.getRegistreringer().stream()).anyMatch(Objects::nonNull);
+            .map(Avklartefakta::getRegistreringer).anyMatch(CollectionUtils::isNotEmpty);
 
         if (!harTreffFraRegisterkontroll) {
             behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.AUTOMATISERT);

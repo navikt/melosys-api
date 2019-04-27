@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandlingFelles;
+import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +27,7 @@ public class AvsluttFagsakOgBehandlingTest {
     private AvsluttFagsakOgBehandling agent;
 
     @Mock
-    private OppdaterFagsakOgBehandlingFelles felles;
+    private OppdaterFagsakOgBehandling felles;
 
 
     @Before

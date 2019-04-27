@@ -13,7 +13,7 @@ import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandlingFelles;
+import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +34,12 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(AvsluttFagsakOgBehandling.class);
 
-    private final OppdaterFagsakOgBehandlingFelles felles;
+    private final OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling;
 
     @Autowired
-    public AvsluttFagsakOgBehandling(OppdaterFagsakOgBehandlingFelles felles) {
+    public AvsluttFagsakOgBehandling(OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling) {
         log.info("IverksetteVedtakAvsluttBehandling initialisert");
-        this.felles = felles;
+        this.oppdaterFagsakOgBehandling = oppdaterFagsakOgBehandling;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
-        felles.oppdaterFagsakOgBehandlingStatuser(behandling, Saksstatuser.LOVVALG_AVKLART, Behandlingsstatus.AVSLUTTET);
+        oppdaterFagsakOgBehandling.oppdaterFagsakOgBehandlingStatuser(behandling, Saksstatuser.LOVVALG_AVKLART, Behandlingsstatus.AVSLUTTET);
 
         prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
     }

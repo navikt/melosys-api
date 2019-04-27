@@ -10,13 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OppdaterFagsakOgBehandlingFelles {
+public class OppdaterFagsakOgBehandling {
 
     private final FagsakRepository fagsakRepository;
     private final BehandlingRepository behandlingRepository;
 
     @Autowired
-    public OppdaterFagsakOgBehandlingFelles(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository) {
+    public OppdaterFagsakOgBehandling(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
     }

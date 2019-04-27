@@ -5,7 +5,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandlingFelles;
+import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class HenleggSakTest {
     @Mock
-    OppdaterFagsakOgBehandlingFelles felles;
+    OppdaterFagsakOgBehandling felles;
 
     @InjectMocks
     HenleggSak henleggSak;

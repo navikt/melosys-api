@@ -13,7 +13,7 @@ import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandlingFelles;
+import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +32,11 @@ import static no.nav.melosys.domain.ProsessSteg.HS_SEND_BREV;
 public class HenleggSak extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(HenleggSak.class);
 
-    private final OppdaterFagsakOgBehandlingFelles felles;
+    private final OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling;
 
     @Autowired
-    public HenleggSak(OppdaterFagsakOgBehandlingFelles felles) {
-        this.felles = felles;
+    public HenleggSak(OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling) {
+        this.oppdaterFagsakOgBehandling = oppdaterFagsakOgBehandling;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class HenleggSak extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
-        felles.oppdaterFagsakOgBehandlingStatuser(behandling, Saksstatuser.HENLAGT, Behandlingsstatus.AVSLUTTET);
+        oppdaterFagsakOgBehandling.oppdaterFagsakOgBehandlingStatuser(behandling, Saksstatuser.HENLAGT, Behandlingsstatus.AVSLUTTET);
 
         log.info("Satt sak til henlagt for prosessinstans {}", prosessinstans.getId());
         prosessinstans.setSteg(HS_SEND_BREV);

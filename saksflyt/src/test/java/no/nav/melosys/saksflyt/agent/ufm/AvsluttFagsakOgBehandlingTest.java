@@ -6,7 +6,7 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandlingFelles;
+import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verify;
 public class AvsluttFagsakOgBehandlingTest {
 
     @Mock
-    private OppdaterFagsakOgBehandlingFelles felles;
+    private OppdaterFagsakOgBehandling felles;
 
     private AvsluttFagsakOgBehandling avsluttFagsakOgBehandling;
 

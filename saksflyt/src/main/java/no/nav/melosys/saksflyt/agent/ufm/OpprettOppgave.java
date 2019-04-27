@@ -28,7 +28,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
     private final GsakFasade gsakFasade;
 
     @Autowired
-    public OpprettOppgave(@Qualifier("gsakSystemService") GsakFasade gsakFasade) {
+    public OpprettOppgave(@Qualifier("system") GsakFasade gsakFasade) {
         this.gsakFasade = gsakFasade;
     }
 
