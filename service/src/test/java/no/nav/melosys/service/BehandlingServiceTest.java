@@ -173,6 +173,17 @@ public class BehandlingServiceTest {
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getEndretDato().toString().equals("2020-02-11T09:37:30Z"));
     }
 
+    @Test
+    public void avsluttBehandling() throws Exception {
+        long behandlingID = 1L;
+        Behandling behandling = new Behandling();
+        when(behandlingRepo.findById(eq(behandlingID))).thenReturn(Optional.of(behandling));
+
+        behandlingService.avsluttBehandling(behandlingID);
+
+        verify(behandlingRepo).findById(eq(behandlingID));
+    }
+
     private Behandling opprettBehandlingMedData() {
         Behandling behandling = opprettTomBehandlingMedId();
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);

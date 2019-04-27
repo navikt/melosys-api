@@ -17,7 +17,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OpprettFagsakOgBehandlingTest {
@@ -34,7 +35,6 @@ public class OpprettFagsakOgBehandlingTest {
         opprettFagsakOgBehandling = new OpprettFagsakOgBehandling(fagsakService,behandlingService);
         when(fagsakService.nyFagsakOgBehandling(any())).thenReturn(hentFagsak());
         when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(hentFagsak());
-        doNothing().when(behandlingService).avsluttBehandling(anyLong());
     }
 
     @Test
