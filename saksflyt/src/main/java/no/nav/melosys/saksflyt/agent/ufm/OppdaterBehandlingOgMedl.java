@@ -70,15 +70,9 @@ public class OppdaterBehandlingOgMedl extends AbstraktStegBehandler {
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
         lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING); //TODO: avklar
 
-        if (prosessinstans.getData(ProsessDataKey.ER_ENDRING, Boolean.class)) {
-            //TODO: MELOSYS-2532. Bruke medl-periode fra tidligere behandling
-        }
-
         lovvalgsperiode = lovvalgsperiodeService.lagreLovvalgsperioder(prosessinstans.getBehandling().getId(), Collections.singletonList(lovvalgsperiode)).iterator().next();
-
         Long medlId = medlFasade.opprettPeriodeUnderAvklaring(prosessinstans.getData(ProsessDataKey.BRUKER_ID), lovvalgsperiode);
         felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, prosessinstans.getBehandling().getId());
-
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VALIDER_PERIODE);
     }
 

@@ -1,11 +1,13 @@
 package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.util.Map;
+import java.util.Objects;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
@@ -62,6 +64,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
         if (erEndring) {
             fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer);
+            avsluttTidligereBehandling(fagsak);
             behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP,
                 prosessinstans.getData(JOURNALPOST_ID), prosessinstans.getData(DOKUMENT_ID));
         } else {
@@ -81,5 +84,17 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
         prosessinstans.setBehandling(behandling);
         prosessinstans.setSteg(REG_UNNTAK_FERDIGSTILL_JOURNALPOST);
+    }
+
+    private void avsluttTidligereBehandling(Fagsak fagsak) {
+        fagsak.getBehandlinger().stream().filter(Objects::nonNull)
+            .filter(b -> !Behandlingsstatus.AVSLUTTET.equals(b.getStatus()))
+            .findFirst().ifPresent(behandling -> {
+            try {
+                behandlingService.avsluttBehandling(behandling.getId());
+            } catch (IkkeFunnetException e) {
+                log.error("Behandling med id " + behandling.getId() + " ble ikke funnet", e);
+            }
+        });
     }
 }

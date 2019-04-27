@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.agent.ufm;
 
+import java.util.Collections;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
@@ -15,8 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OpprettFagsakOgBehandlingTest {
@@ -33,6 +34,7 @@ public class OpprettFagsakOgBehandlingTest {
         opprettFagsakOgBehandling = new OpprettFagsakOgBehandling(fagsakService,behandlingService);
         when(fagsakService.nyFagsakOgBehandling(any())).thenReturn(hentFagsak());
         when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(hentFagsak());
+        doNothing().when(behandlingService).avsluttBehandling(anyLong());
     }
 
     @Test
@@ -71,6 +73,11 @@ public class OpprettFagsakOgBehandlingTest {
     private Fagsak hentFagsak() {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-123");
+
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
         return fagsak;
     }
 }

@@ -147,4 +147,13 @@ public class BehandlingService {
         behandlingRepository.save(behandlingsreplika);
         return behandlingsreplika;
     }
+
+    public void avsluttBehandling(long behandlingId) throws IkkeFunnetException {
+        Behandling behandling = behandlingRepository.findById(behandlingId)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
+
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        behandling.setEndretDato(Instant.now());
+        behandlingRepository.save(behandling);
+    }
 }

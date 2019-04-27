@@ -5,16 +5,16 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.ProsessType;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.eessi.avro.MelosysEessiMelding;
 import no.nav.melosys.eessi.avro.Statsborgerskap;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
+import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.stereotype.Service;
 
@@ -25,15 +25,45 @@ import org.springframework.stereotype.Service;
 public class EessiMottakService {
 
     private final ProsessinstansService prosessinstansService;
+    private final FagsakService fagsakService;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
 
     static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-    public EessiMottakService(ProsessinstansService prosessinstansService) {
+    public EessiMottakService(ProsessinstansService prosessinstansService, FagsakService fagsakService, LovvalgsperiodeService lovvalgsperiodeService) {
         this.prosessinstansService = prosessinstansService;
+        this.fagsakService = fagsakService;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
     public void behandleMottattMelding(MelosysEessiMelding melosysEessiMelding) {
+        if (skalBehandles(melosysEessiMelding)) {
+            opprettProsessinstans(melosysEessiMelding);
+        }
+    }
 
+    private boolean skalBehandles(MelosysEessiMelding melosysEessiMelding) {
+        return !melosysEessiMelding.getErEndring() || periodeErEndret(melosysEessiMelding);
+    }
+
+    private boolean periodeErEndret(MelosysEessiMelding melosysEessiMelding) {
+        Periode periode = tilPeriode(melosysEessiMelding.getPeriode());
+        Lovvalgsperiode lovvalgsperiode;
+
+        try {
+            Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(melosysEessiMelding.getGsakSaksnummer());
+            Behandling behandling = fagsak.getTidligsteInaktiveBehandling();
+            lovvalgsperiode = lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(behandling.getId());
+        } catch (IkkeFunnetException ex) {
+            // Om ikke finner fagsak -> behandle på nytt
+            return true;
+        }
+
+        return !lovvalgsperiode.getFom().equals(periode.getFom()) &&
+            (periode.getTom() == null || !lovvalgsperiode.getTom().equals(periode.getTom()));
+    }
+
+    private void opprettProsessinstans(MelosysEessiMelding melosysEessiMelding) {
         LocalDateTime nå = LocalDateTime.now();
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -72,8 +102,8 @@ public class EessiMottakService {
 
     private Periode tilPeriode(no.nav.melosys.eessi.avro.Periode periode) {
         return new Periode(
-            LocalDate.parse(periode.getFom(),dateTimeFormatter),
-            LocalDate.parse(periode.getTom(),dateTimeFormatter)
+            LocalDate.parse(periode.getFom(), dateTimeFormatter),
+            periode.getTom() != null ? LocalDate.parse(periode.getTom(), dateTimeFormatter) : null
         );
     }
 }
