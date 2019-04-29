@@ -3,9 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -33,6 +31,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Rule;
@@ -71,7 +70,6 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     @Before
     public void setUp() {
-
         random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
             .overrideDefaultInitialization(true)
             .collectionSizeRange(1, 4)
@@ -80,6 +78,8 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
             .exclude(FieldDefinitionBuilder.field().named("tilleggsinformasjonDetaljer").ofType(TilleggsinformasjonDetaljer.class).inClass(Tilleggsinformasjon.class).get())
             .stringLengthRange(2, 10)
             .randomize(MidlertidigPostadresse.class, (Randomizer<MidlertidigPostadresse>) () -> Math.random() > 0.5 ? random.nextObject(MidlertidigPostadresseNorge.class) : random.nextObject(MidlertidigPostadresseUtland.class))
+            .randomize(FieldDefinitionBuilder.field().named("fnr").ofType(String.class).get(), new NumericStringRandomizer(11))
+            .randomize(FieldDefinitionBuilder.field().named("orgnummer").ofType(String.class).get(), new NumericStringRandomizer(9))
             .build();
     }
 
@@ -271,5 +271,4 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         resultat.setSaksstatus(fagsak.getStatus());
         return resultat;
     }
-
 }

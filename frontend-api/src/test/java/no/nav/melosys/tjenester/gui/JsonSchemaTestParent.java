@@ -9,11 +9,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.benas.randombeans.EnhancedRandomBuilder;
+import io.github.benas.randombeans.FieldDefinitionBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.jackson.MelosysModule;
 import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
+import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaClient;
@@ -60,9 +62,12 @@ public class JsonSchemaTestParent {
 
     protected static EnhancedRandom defaultEnhancedRandom() {
         if (enhancedRandom == null) {
-            enhancedRandom =  EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
+            enhancedRandom = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
                 .collectionSizeRange(1, 4)
                 .overrideDefaultInitialization(true)
+                .stringLengthRange(2, 10)
+                .randomize(FieldDefinitionBuilder.field().named("fnr").ofType(String.class).get(), new NumericStringRandomizer(11))
+                .randomize(FieldDefinitionBuilder.field().named("orgnummer").ofType(String.class).get(), new NumericStringRandomizer(9))
                 .build();
         }
         return enhancedRandom;

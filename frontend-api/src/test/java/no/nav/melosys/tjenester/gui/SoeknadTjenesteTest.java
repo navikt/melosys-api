@@ -6,6 +6,7 @@ import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.benas.randombeans.EnhancedRandomBuilder;
+import io.github.benas.randombeans.FieldDefinitionBuilder;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import io.github.benas.randombeans.api.Randomizer;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -21,6 +22,7 @@ import no.nav.melosys.service.SoeknadService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.tjenester.gui.dto.SoeknadDto;
 import no.nav.melosys.tjenester.gui.dto.SoeknadTilleggsDataDto;
+import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
@@ -63,6 +65,9 @@ public class SoeknadTjenesteTest extends JsonSchemaTestParent {
             .collectionSizeRange(1, 4)
             .randomize(GeografiskAdresse.class, (Randomizer<GeografiskAdresse>) () -> EnhancedRandom.random(SemistrukturertAdresse.class))
             .stringLengthRange(2, 10)
+            .randomize(FieldDefinitionBuilder.field().named("fnr").ofType(String.class).get(), new NumericStringRandomizer(11))
+            .randomize(FieldDefinitionBuilder.field().named("orgnr").ofType(String.class).get(), new NumericStringRandomizer(9))
+            .randomize(FieldDefinitionBuilder.field().named("orgnummer").ofType(String.class).get(), new NumericStringRandomizer(9))
             .build();
 
         soeknadDokument = random.nextObject(SoeknadDokument.class);

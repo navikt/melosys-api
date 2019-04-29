@@ -40,7 +40,7 @@
         <!-- Melosys -->
         <melosys-eessi-avro.version>0.2-SNAPSHOT</melosys-eessi-avro.version>
         <melosys.frontend.version>0.21.0-PR-552-SNAPSHOT</melosys.frontend.version>
-        <melosys.jsonschema.version>1.15.0-1036</melosys.jsonschema.version>
+        <melosys.jsonschema.version>1.19.0-3646</melosys.jsonschema.version>
         <melosys.frontendlogger.version>0.16.1-SNAPSHOT</melosys.frontendlogger.version>
         <melosys.internt.kodeverk.version>1.2.10</melosys.internt.kodeverk.version>
         <melosys.regler.version>0.43.0</melosys.regler.version>

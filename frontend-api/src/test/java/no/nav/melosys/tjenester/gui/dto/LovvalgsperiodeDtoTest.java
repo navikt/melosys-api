@@ -64,7 +64,7 @@ public class LovvalgsperiodeDtoTest {
             InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
             enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
             enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")),
-            20L);
+            "20");
         return forventet;
     }
 
