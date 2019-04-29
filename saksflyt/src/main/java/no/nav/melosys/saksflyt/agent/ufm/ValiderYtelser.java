@@ -3,13 +3,19 @@ package no.nav.melosys.saksflyt.agent.ufm;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
+import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
+import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
@@ -70,7 +76,7 @@ public class ValiderYtelser extends RegistreringUnntakValiderer {
         InntektDokument inntektDokument = (InntektDokument) saksopplysning.getDokument();
 
         //TODO: skal også sjekke mot UR. Sjekker nå kun mot inntektskomponent. MELOSYS-2496
-        if (!validerInntekt(inntektDokument)) {
+        if (!validerInntekt(inntektDokument, fom, tom)) {
             registrerFeil(prosessinstans, Unntak_periode_begrunnelser.MOTTAR_YTELSER);
         }
 
@@ -79,27 +85,72 @@ public class ValiderYtelser extends RegistreringUnntakValiderer {
 
     private Saksopplysning hentInntektListe(String fnr, LocalDate fom, LocalDate tom) throws SikkerhetsbegrensningException, IntegrasjonException {
 
-        YearMonth fra, til;
+        YearMonth fomMnd;
+        YearMonth tomMnd;
 
         LocalDate nå = LocalDate.now();
         if(tom == null) {
-            fra = YearMonth.from(fom);
-            til = null;
+            fomMnd = YearMonth.from(fom);
+            tomMnd = null;
         } else if (fom.isBefore(nå) && tom.isAfter(nå)) { //1. Periode påbegynt: utbetalinger periode med 2 mnd tilbake
-            fra = YearMonth.from(fom.minusMonths(2L));
-            til = YearMonth.from(tom);
+            fomMnd = YearMonth.from(fom.minusMonths(2L));
+            tomMnd = YearMonth.from(tom);
         } else if (fom.isAfter(nå)) { //2. Periode ikke påbegynt. Inneværende mnd og 2 mnd tilbake
-            fra = YearMonth.from(nå.minusMonths(2L));
-            til = YearMonth.from(nå);
+            fomMnd = YearMonth.from(nå.minusMonths(2L));
+            tomMnd = YearMonth.from(nå);
         } else { //3. Avsluttet: sjekker hele periode
-            fra = YearMonth.from(fom);
-            til = YearMonth.from(tom);
+            fomMnd = YearMonth.from(fom);
+            tomMnd = YearMonth.from(tom);
         }
 
-        return inntektService.hentInntektListe(fnr, fra, til);
+        return inntektService.hentInntektListe(fnr, fomMnd, tomMnd);
     }
 
-    private boolean validerInntekt(InntektDokument inntektDokument) {
-        return inntektDokument == null || inntektDokument.getArbeidsInntektMaanedListe().isEmpty();
+    private boolean validerInntekt(InntektDokument inntektDokument, LocalDate fom, LocalDate tom) {
+
+        YearMonth fra = YearMonth.from(fom);
+        YearMonth til = tom != null ? YearMonth.from(tom) : null;
+
+        if(inntektDokument == null || inntektDokument.getArbeidsInntektMaanedListe().isEmpty()) {
+            return true;
+        }
+
+        for (YtelseFraOffentlige ytelseFraOffentlige : hentYtelseFraOffentlige(inntektDokument)) {
+            if (erUtbetaltIPeriode(ytelseFraOffentlige, fra, til)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean erUtbetaltIPeriode(YtelseFraOffentlige ytelseFraOffentlige, YearMonth fom, YearMonth tom) {
+        YearMonth utbetaltIPeriode = ytelseFraOffentlige.utbetaltIPeriode;
+
+        if (utbetaltIPeriode == null) {
+            return false;
+        }
+
+        if (tom == null) {
+            tom = fom.plusYears(2);
+        }
+
+        if (utbetaltIPeriode.isAfter(fom) && utbetaltIPeriode.isBefore(tom)) {
+            return true;
+        } else {
+            return utbetaltIPeriode.equals(fom) || utbetaltIPeriode.equals(tom);
+        }
+    }
+
+    private Collection<YtelseFraOffentlige> hentYtelseFraOffentlige(InntektDokument inntektDokument) {
+        return inntektDokument.getArbeidsInntektMaanedListe().stream()
+            .map(ArbeidsInntektMaaned::getArbeidsInntektInformasjon)
+            .filter(Objects::nonNull)
+            .map(ArbeidsInntektInformasjon::getInntektListe)
+            .flatMap(Collection::stream)
+            .filter(YtelseFraOffentlige.class::isInstance)
+            .map(YtelseFraOffentlige.class::cast)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 }

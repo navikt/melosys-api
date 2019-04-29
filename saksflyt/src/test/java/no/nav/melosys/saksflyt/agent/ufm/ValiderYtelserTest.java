@@ -3,12 +3,15 @@ package no.nav.melosys.saksflyt.agent.ufm;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
+import no.nav.melosys.domain.dokument.inntekt.Inntekt;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
+import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.integrasjon.inntk.InntektService;
@@ -43,9 +46,13 @@ public class ValiderYtelserTest {
 
     @Test
     public void utførSteg_finnerIngenTreff_ingenNyAvklarteFakta() throws Exception {
+
+        LocalDate fom = LocalDate.now().minusYears(2);
+        LocalDate tom = LocalDate.now().minusYears(1);
+
         when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
-            .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1))));
-        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(false));
+            .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
+        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(false, fom));
 
         Prosessinstans prosessinstans = hentProsessinstans();
         validerYtelser.utfør(prosessinstans);
@@ -56,9 +63,13 @@ public class ValiderYtelserTest {
 
     @Test
     public void utførSteg_finnerTreff_nyAvklarteFakta() throws Exception {
+
+        LocalDate fom = LocalDate.now().minusYears(2);
+        LocalDate tom = LocalDate.now().minusYears(1);
+
         when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
-            .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1))));
-        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true));
+            .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
+        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom.minusMonths(1)));
 
         Prosessinstans prosessinstans = hentProsessinstans();
         validerYtelser.utfør(prosessinstans);
@@ -68,10 +79,30 @@ public class ValiderYtelserTest {
     }
 
     @Test
-    public void utførSteg_tomTilDato_forespørTomTilDato() throws Exception {
+    public void utførSteg_periodeFerdigIngenOffentligeYtelser_ingenNyAvklarteFakta() throws Exception {
+
+        LocalDate fom = LocalDate.now().minusYears(2);
+        LocalDate tom = LocalDate.now().minusYears(1);
+
         when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
-            .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now().minusYears(2), null)));
-        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true));
+            .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
+        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom.minusYears(4)));
+
+        Prosessinstans prosessinstans = hentProsessinstans();
+        validerYtelser.utfør(prosessinstans);
+
+        verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_STATSBORGERSKAP);
+    }
+
+    @Test
+    public void utførSteg_tomTilDato_forespørTomTilDato() throws Exception {
+
+        LocalDate fom = LocalDate.now().minusYears(2);
+
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
+            .thenReturn(Optional.of(hentSedSaksopplysning(fom, null)));
+        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom));
 
         Prosessinstans prosessinstans = hentProsessinstans();
         validerYtelser.utfør(prosessinstans);
@@ -88,7 +119,7 @@ public class ValiderYtelserTest {
 
         when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
-        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true));
+        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom));
 
         Prosessinstans prosessinstans = hentProsessinstans();
         validerYtelser.utfør(prosessinstans);
@@ -105,7 +136,7 @@ public class ValiderYtelserTest {
 
         when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
             .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
-        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true));
+        when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom));
 
         Prosessinstans prosessinstans = hentProsessinstans();
         validerYtelser.utfør(prosessinstans);
@@ -126,21 +157,40 @@ public class ValiderYtelserTest {
         return prosessinstans;
     }
 
-    private Saksopplysning hentInntektSaksopplysning(boolean medInnhold) {
+    private Saksopplysning hentInntektSaksopplysning(boolean medYtelserFraOffentlig, LocalDate fom) {
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(hentInntektDokument(medInnhold));
+        saksopplysning.setDokument(hentInntektDokument(medYtelserFraOffentlig, fom));
         return saksopplysning;
     }
 
-    private InntektDokument hentInntektDokument(boolean medInnhold) {
+    private InntektDokument hentInntektDokument(boolean medYtelserFraOffentlig, LocalDate fom) {
         InntektDokument inntektDokument = new InntektDokument();
-        if (medInnhold) {
-            inntektDokument.arbeidsInntektMaanedListe = new ArrayList<>();
-            inntektDokument.arbeidsInntektMaanedListe.add(new ArbeidsInntektMaaned());
-        } else {
-            inntektDokument.arbeidsInntektMaanedListe = Collections.emptyList();
-        }
+
+        inntektDokument.arbeidsInntektMaanedListe = new ArrayList<>();
+        inntektDokument.arbeidsInntektMaanedListe.add(hentArbeidsInntektMaaned(medYtelserFraOffentlig, fom));
+
         return inntektDokument;
+    }
+
+    private ArbeidsInntektMaaned hentArbeidsInntektMaaned(boolean medYtelserFraOffentlig, LocalDate fom) {
+        ArbeidsInntektMaaned arbeidsInntektMaaned = new ArbeidsInntektMaaned();
+        arbeidsInntektMaaned.arbeidsInntektInformasjon = new ArbeidsInntektInformasjon();
+        arbeidsInntektMaaned.arbeidsInntektInformasjon.inntektListe = hentInntektsListe(medYtelserFraOffentlig, fom);
+
+        return arbeidsInntektMaaned;
+    }
+
+    private List<Inntekt> hentInntektsListe(boolean medYtelserFraOffentlig, LocalDate fom) {
+        List<Inntekt> inntektsListe = new ArrayList<>();
+        inntektsListe.add(new Inntekt());
+
+        if (medYtelserFraOffentlig) {
+            YtelseFraOffentlige ytelseFraOffentlige = new YtelseFraOffentlige();
+            ytelseFraOffentlige.utbetaltIPeriode = YearMonth.from(fom).plusMonths(1);
+            inntektsListe.add(ytelseFraOffentlige);
+        }
+
+        return inntektsListe;
     }
 
     private Saksopplysning hentSedSaksopplysning(LocalDate fom, LocalDate tom) {

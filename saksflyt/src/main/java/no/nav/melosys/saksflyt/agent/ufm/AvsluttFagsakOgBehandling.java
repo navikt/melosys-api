@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.agent.ufm;
 import java.util.Map;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
@@ -11,28 +10,25 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component
-public class AvsluttBehandling extends AbstraktStegBehandler {
+@Component("avsluttFagsakOgBehandlingUnntakFraMedlemskap")
+public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(AvsluttBehandling.class);
+    private static final Logger log = LoggerFactory.getLogger(AvsluttFagsakOgBehandling.class);
 
-    private final FagsakRepository fagsakRepository;
-    private final BehandlingRepository behandlingRepository;
+    private final OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling;
 
     @Autowired
-    public AvsluttBehandling(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository) {
-        this.fagsakRepository = fagsakRepository;
-        this.behandlingRepository = behandlingRepository;
+    public AvsluttFagsakOgBehandling(OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling) {
+        this.oppdaterFagsakOgBehandling = oppdaterFagsakOgBehandling;
     }
 
     @Override
@@ -50,13 +46,8 @@ public class AvsluttBehandling extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
-
-        Fagsak fagsak = behandling.getFagsak();
-        fagsak.setStatus(Saksstatuser.LOVVALG_AVKLART);
-        fagsakRepository.save(fagsak);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandlingRepository.save(behandling);
-
+        oppdaterFagsakOgBehandling.oppdaterFagsakOgBehandlingStatuser(behandling, Saksstatuser.LOVVALG_AVKLART, Behandlingsstatus.AVSLUTTET);
+        log.info("Periode regisrert og behandling avsluttet for fagsak {}, behandling {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
 }

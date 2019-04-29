@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -83,6 +84,10 @@ public class AvklartefaktaService {
         return avklartefaktaOpt.map(af -> Maritimtyper.valueOf(af.getFakta()));
     }
 
+    public Optional<Avklartefakta> hentVurderingUnntakPeriode(long behandlingsid) {
+        return avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
+    }
+
     @Transactional(rollbackFor = MelosysException.class)
     public void lagreAvklarteFakta(long behandlingsid, Set<AvklartefaktaDto> avklartefaktaDtos) throws IkkeFunnetException {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
@@ -125,5 +130,19 @@ public class AvklartefaktaService {
         avklartefakta.setReferanse(Avklartefaktatype.AARSAK_ENDRING_PERIODE.getKode());
         avklartefaktaSet.add(avklartefakta);
         avklarteFaktaRepository.saveAll(avklartefaktaSet);
+    }
+
+    public void leggTilRegistrering(long behandlingsid, Avklartefaktatype avklartefaktatype, String begrunnelseKode) throws IkkeFunnetException {
+
+        Avklartefakta avklartefakta = avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, avklartefaktatype)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke avklarte fakta av type " + avklartefaktatype.name() + "for behandling " + behandlingsid));
+
+        AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
+        registrering.setBegrunnelseKode(begrunnelseKode);
+        registrering.setAvklartefakta(avklartefakta);
+        
+        avklartefakta.getRegistreringer().add(registrering);
+
+        avklarteFaktaRepository.save(avklartefakta);
     }
 }

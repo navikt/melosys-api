@@ -66,9 +66,8 @@ public class OppdaterBehandlingOgMedl extends AbstraktStegBehandler {
         lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.NO);
         lovvalgsperiode.setLovvalgsland(sedDokument.getLovvalgsland());
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        lovvalgsperiode.setLovvalgsland(sedDokument.getLovvalgsland());
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
-        lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING); //TODO: avklar
+        lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
 
         if (prosessinstans.getData(ProsessDataKey.ER_ENDRING, Boolean.class)) {
             //TODO: MELOSYS-2532. Bruke medl-periode fra tidligere behandling
