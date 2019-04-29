@@ -2,7 +2,9 @@ package no.nav.melosys.service.eessi;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
@@ -11,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.eessi.avro.MelosysEessiMelding;
 import no.nav.melosys.eessi.avro.Periode;
 import no.nav.melosys.eessi.avro.Statsborgerskap;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -28,6 +29,8 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EessiMottakServiceTest {
+
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     @Captor
     private ArgumentCaptor<Prosessinstans> captor;
@@ -80,7 +83,7 @@ public class EessiMottakServiceTest {
         when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(anyLong()))
             .thenReturn(lovvalgsperiode);
         when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong()))
-            .thenReturn(hentFagsak());
+            .thenReturn(Optional.of(hentFagsak()));
 
         eessiMottakService.behandleMottattMelding(eessiMelding);
 
@@ -98,7 +101,7 @@ public class EessiMottakServiceTest {
         lovvalgsperiode.setTom(tom);
 
         when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong()))
-            .thenThrow(new IkkeFunnetException(""));
+            .thenReturn(Optional.empty());
         eessiMottakService.behandleMottattMelding(eessiMelding);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
@@ -117,7 +120,7 @@ public class EessiMottakServiceTest {
         when(lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(anyLong()))
             .thenReturn(lovvalgsperiode);
         when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong()))
-            .thenReturn(hentFagsak());
+            .thenReturn(Optional.of(hentFagsak()));
         eessiMottakService.behandleMottattMelding(eessiMelding);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
@@ -145,8 +148,8 @@ public class EessiMottakServiceTest {
         melding.setLovvalgsland("SE");
         melding.setPeriode(
             Periode.newBuilder()
-                .setFom(EessiMottakService.dateTimeFormatter.format(fom))
-                .setTom(tom != null ? EessiMottakService.dateTimeFormatter.format(tom) : null)
+                .setFom(dateTimeFormatter.format(fom))
+                .setTom(tom != null ? dateTimeFormatter.format(tom) : null)
                 .build()
         );
         melding.setRinaSaksnummer("r123");

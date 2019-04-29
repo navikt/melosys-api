@@ -146,6 +146,19 @@ public class MedlService implements MedlFasade {
 
     }
 
+    @Override
+    public void avvisPeriode(Lovvalgsperiode lovvalgsperiode, StatusaarsakMedl årsak) throws SikkerhetsbegrensningException, IkkeFunnetException {
+        try {
+            behandleMedlemskapConsumer.avvisPeriode(
+                MedlPeriodeKonverter.konverterTilAvvisPeriodeRequest(lovvalgsperiode.getMedlPeriodeID(), årsak)
+            );
+        } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.Sikkerhetsbegrensning ex) {
+            throw new SikkerhetsbegrensningException(ex);
+        } catch (PeriodeIkkeFunnet ex) {
+            throw new IkkeFunnetException(ex);
+        }
+    }
+
     private HentPeriodeRequest lagHentPeriodeRequest(long medlPeriodeID) {
         HentPeriodeRequest hentPeriodeRequest = new HentPeriodeRequest();
         hentPeriodeRequest.setPeriodeId(medlPeriodeID);

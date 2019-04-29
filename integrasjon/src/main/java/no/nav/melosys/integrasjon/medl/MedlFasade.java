@@ -15,4 +15,6 @@ public interface MedlFasade {
     Long opprettPeriodeUnderAvklaring(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
 
     void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException;
+
+    void avvisPeriode(Lovvalgsperiode lovvalgsperiode, StatusaarsakMedl årsak) throws SikkerhetsbegrensningException, IkkeFunnetException;
 }

@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
@@ -57,13 +57,14 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             throw new TekniskException("Prosessinstans er ikke av type " + ProsessType.REGISTRERING_UNNTAK);
         }
 
-        boolean erEndring = prosessinstans.getData(ER_ENDRING, Boolean.class);
         Long gsakSaksnummer = prosessinstans.getData(GSAK_SAK_ID, Long.class);
         Fagsak fagsak;
         Behandling behandling;
 
-        if (erEndring) {
-            fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer);
+        Optional<Fagsak> eksisterendeFagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer);
+
+        if (eksisterendeFagsak.isPresent()) {
+            fagsak = eksisterendeFagsak.get();
             avsluttTidligereBehandling(fagsak);
             behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP,
                 prosessinstans.getData(JOURNALPOST_ID), prosessinstans.getData(DOKUMENT_ID));
@@ -86,15 +87,11 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         prosessinstans.setSteg(REG_UNNTAK_FERDIGSTILL_JOURNALPOST);
     }
 
-    private void avsluttTidligereBehandling(Fagsak fagsak) {
-        fagsak.getBehandlinger().stream().filter(Objects::nonNull)
-            .filter(b -> !Behandlingsstatus.AVSLUTTET.equals(b.getStatus()))
-            .findFirst().ifPresent(behandling -> {
-            try {
-                behandlingService.avsluttBehandling(behandling.getId());
-            } catch (IkkeFunnetException e) {
-                log.error("Behandling med id " + behandling.getId() + " ble ikke funnet", e);
-            }
-        });
+    private void avsluttTidligereBehandling(Fagsak fagsak) throws TekniskException, IkkeFunnetException {
+        Behandling aktivBehandling = fagsak.getAktivBehandling();
+
+        if (aktivBehandling != null) {
+            behandlingService.avsluttBehandling(aktivBehandling.getId());
+        }
     }
 }

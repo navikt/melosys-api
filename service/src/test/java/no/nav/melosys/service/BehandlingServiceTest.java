@@ -21,6 +21,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -47,6 +49,9 @@ public class BehandlingServiceTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    @Captor
+    private ArgumentCaptor<Behandling> behandlingCaptor;
 
     @Before
     public void setUp() {
@@ -181,7 +186,9 @@ public class BehandlingServiceTest {
 
         behandlingService.avsluttBehandling(behandlingID);
 
-        verify(behandlingRepo).findById(eq(behandlingID));
+        verify(behandlingRepo).save(behandlingCaptor.capture());
+        Behandling lagretBehandling = behandlingCaptor.getValue();
+        assertThat(lagretBehandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
     }
 
     private Behandling opprettBehandlingMedData() {

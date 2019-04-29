@@ -153,7 +153,6 @@ public class BehandlingService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
 
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling.setEndretDato(Instant.now());
         behandlingRepository.save(behandling);
     }
 }

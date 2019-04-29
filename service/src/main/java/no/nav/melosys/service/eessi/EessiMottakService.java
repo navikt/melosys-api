@@ -3,6 +3,7 @@ package no.nav.melosys.service.eessi;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
@@ -16,6 +17,8 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,11 +27,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class EessiMottakService {
 
+    private static final Logger log = LoggerFactory.getLogger(EessiMottakService.class);
+
     private final ProsessinstansService prosessinstansService;
     private final FagsakService fagsakService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public EessiMottakService(ProsessinstansService prosessinstansService, FagsakService fagsakService, LovvalgsperiodeService lovvalgsperiodeService) {
         this.prosessinstansService = prosessinstansService;
@@ -38,6 +43,7 @@ public class EessiMottakService {
 
     public void behandleMottattMelding(MelosysEessiMelding melosysEessiMelding) {
         if (skalBehandles(melosysEessiMelding)) {
+            log.info("Behandler mottatt EESSI-medling. Buc: {}, SED: {}", melosysEessiMelding.getRinaSaksnummer(), melosysEessiMelding.getSedId());
             opprettProsessinstans(melosysEessiMelding);
         }
     }
@@ -51,16 +57,20 @@ public class EessiMottakService {
         Lovvalgsperiode lovvalgsperiode;
 
         try {
-            Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(melosysEessiMelding.getGsakSaksnummer());
-            Behandling behandling = fagsak.getTidligsteInaktiveBehandling();
-            lovvalgsperiode = lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(behandling.getId());
+            Optional<Fagsak> eksisterendeFagsak = fagsakService.hentFagsakFraGsakSaksnummer(melosysEessiMelding.getGsakSaksnummer());
+            if (eksisterendeFagsak.isPresent()) {
+                Fagsak fagsak = eksisterendeFagsak.get();
+                Behandling behandling = fagsak.getTidligsteInaktiveBehandling();
+                lovvalgsperiode = lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(behandling.getId());
+                return !lovvalgsperiode.getFom().equals(periode.getFom()) &&
+                    (periode.getTom() == null || !lovvalgsperiode.getTom().equals(periode.getTom()));
+            }
         } catch (IkkeFunnetException ex) {
             // Om ikke finner fagsak -> behandle på nytt
             return true;
         }
 
-        return !lovvalgsperiode.getFom().equals(periode.getFom()) &&
-            (periode.getTom() == null || !lovvalgsperiode.getTom().equals(periode.getTom()));
+        return true;
     }
 
     private void opprettProsessinstans(MelosysEessiMelding melosysEessiMelding) {
