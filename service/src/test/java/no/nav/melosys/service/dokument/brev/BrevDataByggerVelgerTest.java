@@ -67,17 +67,27 @@ public class BrevDataByggerVelgerTest {
     }
 
     @Test
+    public final void hent_medDokumentTypeMELDING_MANGLENDE_OPPLYSNINGER_girBrevDataByggerForsendelseMottattDato() {
+        testHent(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER, BrevDataByggerForsendelseMottattDato.class);
+    }
+
+    @Test
+    public final void hent_medDokumentTypeMELDING_FORVENTET_SAKSBEHANDLINGSTID_girBrevDataByggerForsendelseMottattDato() {
+        testHent(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, BrevDataByggerForsendelseMottattDato.class);
+    }
+
+    @Test
     public void testMangelbrev() {
         BrevbestillingDto bestilling = new BrevbestillingDto();
         BrevDataBygger bygger = brevDataByggerVelger.hent(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER, bestilling);
-        assertThat(bygger).isInstanceOf(BrevDataByggerStandard.class);
+        assertThat(bygger).isInstanceOf(BrevDataByggerForsendelseMottattDato.class);
     }
 
     @Test
     public void testForvaltningsmelding() {
         BrevbestillingDto bestilling = new BrevbestillingDto();
         BrevDataBygger bygger = brevDataByggerVelger.hent(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, bestilling);
-        assertThat(bygger).isInstanceOf(BrevDataByggerStandard.class);
+        assertThat(bygger).isInstanceOf(BrevDataByggerForsendelseMottattDato.class);
     }
 
     private void testHent(Produserbaredokumenter type, Class<? extends BrevDataBygger> forventetKlasse) {

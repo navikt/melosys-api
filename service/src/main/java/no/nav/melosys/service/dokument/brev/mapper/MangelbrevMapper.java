@@ -18,6 +18,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataHenleggelse;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -31,12 +32,12 @@ public class MangelbrevMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
-        Fag fag = mapFag(behandling, brevData);
+        Fag fag = mapFag(brevData);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    public Fag mapFag(Behandling behandling, BrevData brevData) throws TekniskException {
+    public Fag mapFag(BrevData brevData) throws TekniskException {
         if (brevData.fritekst == null) {
             throw new IntegrasjonException("Mangelbrev mangler informasjon om manglende opplysninger.");
         }
@@ -44,10 +45,11 @@ public class MangelbrevMapper implements BrevDataMapper {
         ManglendeOpplysningerType manglendeOpplysningerType = new ManglendeOpplysningerType();
         manglendeOpplysningerType.setManglendeOpplysningerFritekst(brevData.fritekst);
         try {
-            fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(behandling.getRegistrertDato()));
+            BrevDataHenleggelse brevDataHenleggelse = (BrevDataHenleggelse) brevData;
+            fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(brevDataHenleggelse.initierendeJournalpostForsendelseMottattTidspunkt));
             manglendeOpplysningerType.setFristDato(convertToXMLGregorianCalendarRemoveTimezone(LocalDate.now().plusWeeks(FRIST_UKER)));
-        } catch (DatatypeConfigurationException e) {
-            throw new TekniskException("Konverteringsfeil", e);
+        } catch (DatatypeConfigurationException | ClassCastException e) {
+            throw new TekniskException(e);
         }
         fag.setManglendeOpplysninger(manglendeOpplysningerType);
         // Obs: Kan ikke utledes for behandling som ikke initieres av SED, og må registreres i journalføringen
