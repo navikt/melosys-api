@@ -9,7 +9,7 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.JoarkService;
-import no.nav.melosys.service.dokument.brev.BrevDataHenleggelse;
+import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +53,7 @@ public class BrevDataByggerHenleggelseTest {
         sisteBehandling.setFagsak(fagsak);
         String saksbehandler = "saksbehandler";
 
-        BrevDataHenleggelse brevData = (BrevDataHenleggelse) brevDataByggerHenleggelse.lag(sisteBehandling, saksbehandler);
+        BrevDataMottattDato brevData = (BrevDataMottattDato) brevDataByggerHenleggelse.lag(sisteBehandling, saksbehandler);
 
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
         assertThat(brevData.initierendeJournalpostForsendelseMottattTidspunkt).isEqualTo(forsendelseMottatt);

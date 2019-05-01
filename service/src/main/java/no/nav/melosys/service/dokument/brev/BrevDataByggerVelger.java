@@ -73,6 +73,9 @@ public class BrevDataByggerVelger {
                                                     brevbestillingDto);
             case MELDING_HENLAGT_SAK:
                 return new BrevDataByggerHenleggelse(joarkService, brevbestillingDto);
+            case MELDING_MANGLENDE_OPPLYSNINGER:
+            case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
+                return new BrevDataByggerMedMottattDato(brevbestillingDto, joarkService);
             default:
                 return new BrevDataByggerStandard(brevbestillingDto);
         }

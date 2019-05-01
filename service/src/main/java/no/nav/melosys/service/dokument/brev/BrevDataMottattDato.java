@@ -2,9 +2,9 @@ package no.nav.melosys.service.dokument.brev;
 
 import java.time.Instant;
 
-public class BrevDataHenleggelse extends BrevData {
+public class BrevDataMottattDato extends BrevData {
 
-    public BrevDataHenleggelse(String saksbehandler, BrevbestillingDto brevbestillingDto) {
+    public BrevDataMottattDato(String saksbehandler, BrevbestillingDto brevbestillingDto) {
         super(brevbestillingDto, saksbehandler);
     }
 
