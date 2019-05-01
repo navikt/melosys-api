@@ -18,7 +18,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.BrevDataHenleggelse;
+import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -45,8 +45,8 @@ public class MangelbrevMapper implements BrevDataMapper {
         ManglendeOpplysningerType manglendeOpplysningerType = new ManglendeOpplysningerType();
         manglendeOpplysningerType.setManglendeOpplysningerFritekst(brevData.fritekst);
         try {
-            BrevDataHenleggelse brevDataHenleggelse = (BrevDataHenleggelse) brevData;
-            fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(brevDataHenleggelse.initierendeJournalpostForsendelseMottattTidspunkt));
+            BrevDataMottattDato brevDataMottattDato = (BrevDataMottattDato) brevData;
+            fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(brevDataMottattDato.initierendeJournalpostForsendelseMottattTidspunkt));
             manglendeOpplysningerType.setFristDato(convertToXMLGregorianCalendarRemoveTimezone(LocalDate.now().plusWeeks(FRIST_UKER)));
         } catch (DatatypeConfigurationException e) {
             throw new TekniskException(e);

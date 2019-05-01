@@ -12,7 +12,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.service.dokument.brev.BrevDataHenleggelse;
+import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Test;
 
@@ -60,7 +60,7 @@ public class HenleggelsesbrevMapperTest {
         brevbestillingDto.begrunnelseKode = "ANNET";
         brevbestillingDto.fritekst = "something";
 
-        BrevDataHenleggelse brevdata = new BrevDataHenleggelse("saksbehandler", brevbestillingDto);
+        BrevDataMottattDato brevdata = new BrevDataMottattDato("saksbehandler", brevbestillingDto);
         brevdata.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         HenleggelsesbrevMapper instans = new HenleggelsesbrevMapper();

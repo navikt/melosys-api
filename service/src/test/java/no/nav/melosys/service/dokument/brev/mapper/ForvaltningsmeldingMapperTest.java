@@ -7,7 +7,7 @@ import no.nav.dok.melosysbrev._000082.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.service.dokument.brev.BrevDataHenleggelse;
+import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +40,7 @@ public class ForvaltningsmeldingMapperTest {
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
         Behandling behandling = new Behandling();
-        BrevDataHenleggelse brevData = new BrevDataHenleggelse("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, brevData);
@@ -50,7 +50,7 @@ public class ForvaltningsmeldingMapperTest {
 
     @Test
     public void mapFag() throws Exception {
-        BrevDataHenleggelse brevData = new BrevDataHenleggelse("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         Fag fag = mapper.mapFag(brevData);

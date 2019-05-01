@@ -107,7 +107,7 @@ public class BrevDataServiceTest {
     @Test
     public void lagForvaltningsmelding_representantErNull_tilBruker() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling();
-        BrevDataHenleggelse brevData = new BrevDataHenleggelse("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
 
@@ -140,7 +140,7 @@ public class BrevDataServiceTest {
         Behandling behandling = lagBehandling();
         behandling.getFagsak().getAktører().add(hentRepresentantAktør());
 
-        BrevDataHenleggelse brevData = new BrevDataHenleggelse("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         Aktoer mottaker = lagAktør(Aktoersroller.REPRESENTANT);
@@ -158,7 +158,7 @@ public class BrevDataServiceTest {
     @Test
     public void lagMangelbrevXml_mottakerErbrukerID() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling();
-        BrevDataHenleggelse brevData = new BrevDataHenleggelse("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         Aktoer mottakerAktør = lagAktør(Aktoersroller.BRUKER);
@@ -184,7 +184,7 @@ public class BrevDataServiceTest {
     @Test
     public void lagMangelbrevXml_mottakerErArbeidsgiver() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling();
-        BrevDataHenleggelse brevData = new BrevDataHenleggelse("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         Aktoer mottakerAktør = lagAktør(Aktoersroller.ARBEIDSGIVER);
