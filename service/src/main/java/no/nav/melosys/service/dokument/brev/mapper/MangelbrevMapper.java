@@ -48,7 +48,7 @@ public class MangelbrevMapper implements BrevDataMapper {
             BrevDataHenleggelse brevDataHenleggelse = (BrevDataHenleggelse) brevData;
             fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(brevDataHenleggelse.initierendeJournalpostForsendelseMottattTidspunkt));
             manglendeOpplysningerType.setFristDato(convertToXMLGregorianCalendarRemoveTimezone(LocalDate.now().plusWeeks(FRIST_UKER)));
-        } catch (DatatypeConfigurationException | ClassCastException e) {
+        } catch (DatatypeConfigurationException e) {
             throw new TekniskException(e);
         }
         fag.setManglendeOpplysninger(manglendeOpplysningerType);

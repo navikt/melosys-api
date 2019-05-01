@@ -5,6 +5,7 @@ import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -12,6 +13,7 @@ import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,7 +47,9 @@ public class SendMangelbrevTest {
 
         agent.utførSteg(p);
 
-        verify(brevBestiller).bestill(any(Brevbestilling.class));
+        ArgumentCaptor<Brevbestilling> brevbestillingArgumentCaptor = ArgumentCaptor.forClass(Brevbestilling.class);
+        verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
+        assertThat(brevbestillingArgumentCaptor.getValue().getDokumentType()).isEqualTo(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER);
         verify(behandlingRepo).save(any(Behandling.class));
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);

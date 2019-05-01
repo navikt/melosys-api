@@ -41,7 +41,7 @@ public class ForvaltningsmeldingMapper implements BrevDataMapper {
             BrevDataHenleggelse brevDataHenleggelse = (BrevDataHenleggelse) brevData;
             fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(brevDataHenleggelse.initierendeJournalpostForsendelseMottattTidspunkt));
             fag.setSaksbehandlingstidDato(convertToXMLGregorianCalendarRemoveTimezone(LocalDate.now().plusWeeks(SAKSBEHANDLINGSTID_UKER)));
-        } catch (DatatypeConfigurationException | ClassCastException e) {
+        } catch (DatatypeConfigurationException e) {
             throw new TekniskException(e);
         }
         AvsenderType avsenderType = new AvsenderType();

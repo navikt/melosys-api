@@ -16,7 +16,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 public class BrevDataByggerForsendelseMottattDato implements BrevDataBygger {
 
     private final BrevbestillingDto brevbestillingDto;
-    private JoarkService joarkService;
+    private final JoarkService joarkService;
 
     public BrevDataByggerForsendelseMottattDato(BrevbestillingDto brevbestillingDto, JoarkService joarkService) {
         this.brevbestillingDto = brevbestillingDto;
