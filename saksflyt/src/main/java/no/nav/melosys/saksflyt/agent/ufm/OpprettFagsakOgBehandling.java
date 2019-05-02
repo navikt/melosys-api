@@ -1,11 +1,13 @@
 package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.util.Map;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
@@ -55,13 +57,15 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             throw new TekniskException("Prosessinstans er ikke av type " + ProsessType.REGISTRERING_UNNTAK);
         }
 
-        boolean erEndring = prosessinstans.getData(ER_ENDRING, Boolean.class);
         Long gsakSaksnummer = prosessinstans.getData(GSAK_SAK_ID, Long.class);
         Fagsak fagsak;
         Behandling behandling;
 
-        if (erEndring) {
-            fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer);
+        Optional<Fagsak> eksisterendeFagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer);
+
+        if (eksisterendeFagsak.isPresent()) {
+            fagsak = eksisterendeFagsak.get();
+            avsluttTidligereBehandling(fagsak);
             behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP,
                 prosessinstans.getData(JOURNALPOST_ID), prosessinstans.getData(DOKUMENT_ID));
         } else {
@@ -81,5 +85,13 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
         prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
         prosessinstans.setBehandling(behandling);
         prosessinstans.setSteg(REG_UNNTAK_FERDIGSTILL_JOURNALPOST);
+    }
+
+    private void avsluttTidligereBehandling(Fagsak fagsak) throws TekniskException, IkkeFunnetException {
+        Behandling aktivBehandling = fagsak.getAktivBehandling();
+
+        if (aktivBehandling != null) {
+            behandlingService.avsluttBehandling(aktivBehandling.getId());
+        }
     }
 }

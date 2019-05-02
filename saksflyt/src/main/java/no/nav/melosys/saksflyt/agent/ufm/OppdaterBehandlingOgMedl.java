@@ -13,6 +13,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
@@ -70,15 +71,22 @@ public class OppdaterBehandlingOgMedl extends AbstraktStegBehandler {
         lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
 
         if (prosessinstans.getData(ProsessDataKey.ER_ENDRING, Boolean.class)) {
-            //TODO: MELOSYS-2532. Bruke medl-periode fra tidligere behandling
+            avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak());
         }
 
         lovvalgsperiode = lovvalgsperiodeService.lagreLovvalgsperioder(prosessinstans.getBehandling().getId(), Collections.singletonList(lovvalgsperiode)).iterator().next();
-
         Long medlId = medlFasade.opprettPeriodeUnderAvklaring(prosessinstans.getData(ProsessDataKey.BRUKER_ID), lovvalgsperiode);
         felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, prosessinstans.getBehandling().getId());
-
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VALIDER_PERIODE);
+    }
+
+    private void avsluttTidligerMedlPeriode(Fagsak fagsak) throws FunksjonellException {
+        Behandling tidligereBehandling = fagsak.getTidligsteInaktiveBehandling();
+
+        if (tidligereBehandling != null) {
+            Lovvalgsperiode lovvalgsperiode = felles.hentLovvalgsperiode(tidligereBehandling);
+            medlFasade.avvisPeriode(lovvalgsperiode, StatusaarsakMedl.OPPHORT);
+        }
     }
 
     private Optional<Saksopplysning> hentSedSaksopplysningFraBehandling(Behandling behandling) {

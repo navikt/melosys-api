@@ -15,6 +15,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Medlemsperiode;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.kodeverk.*;
+import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.AvvisPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OppdaterPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
 
@@ -170,5 +171,12 @@ public final class MedlPeriodeKonverter {
             bestemmelse = lovvalgsperiode.getBestemmelse();
         }
         return bestemmelse;
+    }
+
+    public static AvvisPeriodeRequest konverterTilAvvisPeriodeRequest(Long medlId, StatusaarsakMedl årsak) {
+        AvvisPeriodeRequest request = new AvvisPeriodeRequest();
+        request.setPeriodeId(medlId);
+        request.setAarsak(new Statusaarsak().withValue(årsak.getKode()));
+        return request;
     }
 }

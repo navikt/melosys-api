@@ -21,6 +21,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -47,6 +49,9 @@ public class BehandlingServiceTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    @Captor
+    private ArgumentCaptor<Behandling> behandlingCaptor;
 
     @Before
     public void setUp() {
@@ -171,6 +176,19 @@ public class BehandlingServiceTest {
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getDokumentXml().equals("dokxml"));
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getType().equals(SaksopplysningType.INNTEKT));
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getEndretDato().toString().equals("2020-02-11T09:37:30Z"));
+    }
+
+    @Test
+    public void avsluttBehandling() throws Exception {
+        long behandlingID = 1L;
+        Behandling behandling = new Behandling();
+        when(behandlingRepo.findById(eq(behandlingID))).thenReturn(Optional.of(behandling));
+
+        behandlingService.avsluttBehandling(behandlingID);
+
+        verify(behandlingRepo).save(behandlingCaptor.capture());
+        Behandling lagretBehandling = behandlingCaptor.getValue();
+        assertThat(lagretBehandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
     }
 
     private Behandling opprettBehandlingMedData() {

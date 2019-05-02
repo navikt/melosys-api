@@ -1,5 +1,8 @@
 package no.nav.melosys.saksflyt.agent.ufm;
 
+import java.util.Optional;
+
+import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
@@ -32,7 +35,6 @@ public class OpprettFagsakOgBehandlingTest {
     public void setUp() throws Exception {
         opprettFagsakOgBehandling = new OpprettFagsakOgBehandling(fagsakService,behandlingService);
         when(fagsakService.nyFagsakOgBehandling(any())).thenReturn(hentFagsak());
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(hentFagsak());
     }
 
     @Test
@@ -45,6 +47,7 @@ public class OpprettFagsakOgBehandlingTest {
 
     @Test
     public void utførSteg_erEndring_verifiserNyBehandling() throws Exception {
+        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
         Prosessinstans prosessinstans = hentProsessinstans(true);
         opprettFagsakOgBehandling.utfør(prosessinstans);
         verify(behandlingService).nyBehandling(any(Fagsak.class), eq(Behandlingsstatus.UNDER_BEHANDLING), eq(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP), eq("123"), eq("321"));
@@ -71,6 +74,13 @@ public class OpprettFagsakOgBehandlingTest {
     private Fagsak hentFagsak() {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-123");
+
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        behandling.setFagsak(fagsak);
+
+        fagsak.setBehandlinger(Lists.newArrayList(behandling));
         return fagsak;
     }
 }
