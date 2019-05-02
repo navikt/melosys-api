@@ -68,7 +68,7 @@ public class LovvalgsperiodeTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("/opprinneliglovvalgsPeriode/{behandlingsid}")
+    @Path("/opprinneligLovvalgsperiode/{behandlingsid}")
     @ApiOperation(value = "Henter den opprinnelig lovvalgsperioden en replikert avsluttet behandling har", response = LovvalgsperiodeDto.class)
     @ApiResponses({ @ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.") })
     public Map<String, PeriodeDto> hentOpprinneligLovvalgsperiode(@PathParam("behandlingsid") long behandlingsid) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
