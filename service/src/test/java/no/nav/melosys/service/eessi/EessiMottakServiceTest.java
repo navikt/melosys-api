@@ -146,12 +146,12 @@ public class EessiMottakServiceTest {
         melding.setGsakSaksnummer(432432L);
         melding.setJournalpostId("j123");
         melding.setLovvalgsland("SE");
-        melding.setPeriode(
-            Periode.newBuilder()
-                .setFom(dateTimeFormatter.format(fom))
-                .setTom(tom != null ? dateTimeFormatter.format(tom) : null)
-                .build()
-        );
+
+        Periode periode = new Periode();
+        periode.setFom(dateTimeFormatter.format(fom));
+        periode.setTom(tom != null ? dateTimeFormatter.format(tom) : null);
+        melding.setPeriode(periode);
+
         melding.setRinaSaksnummer("r123");
         melding.setSedId("s123");
         melding.setStatsborgerskap(
