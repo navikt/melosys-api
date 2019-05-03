@@ -1,16 +1,10 @@
 package no.nav.melosys.service.dokument.brev.mapper.felles;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Set;
+import java.time.*;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-
-import no.nav.melosys.domain.Lovvalgsperiode;
 
 public final class BrevMapperUtils {
 
@@ -22,13 +16,6 @@ public final class BrevMapperUtils {
             return convertToXMLGregorianCalendarRemoveTimezone(dato);
         } catch (DatatypeConfigurationException e) {
             throw new IllegalStateException("Feil ved konvertering av Instant til XmlGregorianCalendar", e);
-        }
-    }
-
-    public static void validerLovvalgsperioder(Set<Lovvalgsperiode> perioder) {
-        if (perioder.size() != 1) {
-            throw new UnsupportedOperationException(String.format("Antall lovvalgsperioder (%s) ulik 1 støttes ikke i første versjon av Melosys.",
-                perioder.size()));
         }
     }
 
@@ -53,7 +40,7 @@ public final class BrevMapperUtils {
             return null;
         }
         try {
-            return convertToXMLGregorianCalendarRemoveTimezone(LocalDate.from(LocalDateTime.ofInstant(instant, ZoneOffset.UTC)));
+            return convertToXMLGregorianCalendarRemoveTimezone(LocalDate.from(LocalDateTime.ofInstant(instant, ZoneId.systemDefault())));
         } catch (DatatypeConfigurationException e) {
             throw new IllegalStateException("Feil ved konvertering av Instant til XmlGregorianCalendar", e);
         }

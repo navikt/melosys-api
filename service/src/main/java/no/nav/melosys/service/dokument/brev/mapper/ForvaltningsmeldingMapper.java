@@ -16,6 +16,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -29,18 +30,19 @@ public class ForvaltningsmeldingMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
-        Fag fag = mapFag(behandling);
+        Fag fag = mapFag(brevData);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    public Fag mapFag(Behandling behandling) throws TekniskException {
+    Fag mapFag(BrevData brevData) throws TekniskException {
         Fag fag = new Fag();
         try {
-            fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(behandling.getRegistrertDato()));
+            BrevDataMottattDato brevDataMottattDato = (BrevDataMottattDato) brevData;
+            fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(brevDataMottattDato.initierendeJournalpostForsendelseMottattTidspunkt));
             fag.setSaksbehandlingstidDato(convertToXMLGregorianCalendarRemoveTimezone(LocalDate.now().plusWeeks(SAKSBEHANDLINGSTID_UKER)));
         } catch (DatatypeConfigurationException e) {
-            throw new TekniskException("Konverteringsfeil", e);
+            throw new TekniskException(e);
         }
         AvsenderType avsenderType = new AvsenderType();
         avsenderType.setRolle(RolleKode.BRUKER);

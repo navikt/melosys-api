@@ -4,19 +4,20 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.service.dokument.DokumentSystemService;
+import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -26,13 +27,13 @@ public class SendMangelbrevTest {
 
     private SendMangelbrev agent;
 
-    private DokumentSystemService dokumentService;
+    private BrevBestiller brevBestiller;
 
     @Before
     public void setUp() {
         behandlingRepo = mock(BehandlingRepository.class);
-        dokumentService = mock(DokumentSystemService.class);
-        agent = new SendMangelbrev(behandlingRepo, dokumentService);
+        brevBestiller = mock(BrevBestiller.class);
+        agent = new SendMangelbrev(behandlingRepo, brevBestiller);
     }
 
     @Test
@@ -49,7 +50,9 @@ public class SendMangelbrevTest {
 
         agent.utførSteg(p);
 
-        verify(dokumentService).produserDokument(eq(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER), eq(Mottaker.av(Aktoersroller.ARBEIDSGIVER)), anyLong(), any(BrevData.class));
+        ArgumentCaptor<Brevbestilling> brevbestillingArgumentCaptor = ArgumentCaptor.forClass(Brevbestilling.class);
+        verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
+        assertThat(brevbestillingArgumentCaptor.getValue().getDokumentType()).isEqualTo(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER);
         verify(behandlingRepo).save(any(Behandling.class));
 
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);

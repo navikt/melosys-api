@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
@@ -18,7 +19,7 @@ import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import no.nav.melosys.service.dokument.DokumentSystemService;
+import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,14 +42,13 @@ public class SendMangelbrev extends AbstraktStegBehandler {
 
     private final BehandlingRepository behandlingRepo;
 
-    private final DokumentSystemService dokumentService;
-
     private static final int DOKUMENTASJON_SVARFRIST_UKER = 4;
 
+    private final BrevBestiller brevBestiller;
     @Autowired
-    public SendMangelbrev(BehandlingRepository behandlingRepo, DokumentSystemService dokumentService) {
+    public SendMangelbrev(BehandlingRepository behandlingRepo, BrevBestiller brevBestiller) {
         this.behandlingRepo = behandlingRepo;
-        this.dokumentService = dokumentService;
+        this.brevBestiller = brevBestiller;
     }
 
     @Override
@@ -69,7 +69,15 @@ public class SendMangelbrev extends AbstraktStegBehandler {
         Aktoersroller mottaker = prosessinstans.getData(ProsessDataKey.MOTTAKER, Aktoersroller.class);
         BrevData brevData = prosessinstans.getData(ProsessDataKey.BREVDATA, BrevData.class);
 
-        dokumentService.produserDokument(MELDING_MANGLENDE_OPPLYSNINGER, Mottaker.av(mottaker), behandling.getId(), brevData);
+        String saksbehandler = brevData.saksbehandler;
+        String fritekst = brevData.fritekst;
+
+        Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(MELDING_MANGLENDE_OPPLYSNINGER)
+            .medAvsender(saksbehandler)
+            .medMottaker(Mottaker.av(mottaker))
+            .medBehandling(behandling)
+            .medFritekst(fritekst).build();
+        brevBestiller.bestill(brevbestilling);
 
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
         behandling.setDokumentasjonSvarfristDato(LocalDateTime.now().plusWeeks(DOKUMENTASJON_SVARFRIST_UKER).toInstant(ZoneOffset.UTC));

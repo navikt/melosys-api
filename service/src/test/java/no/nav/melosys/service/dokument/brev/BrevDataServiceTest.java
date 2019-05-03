@@ -107,7 +107,8 @@ public class BrevDataServiceTest {
     @Test
     public void lagForvaltningsmelding_representantErNull_tilBruker() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling();
-        BrevData brevData = new BrevData("Z123456");
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, mottaker, null, behandling, brevData);
@@ -139,7 +140,9 @@ public class BrevDataServiceTest {
         Behandling behandling = lagBehandling();
         behandling.getFagsak().getAktører().add(hentRepresentantAktør());
 
-        BrevData brevData = new BrevData("Z123456");
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
+
         Aktoer mottaker = lagAktør(Aktoersroller.REPRESENTANT);
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID, mottaker, null, behandling, brevData);
@@ -155,7 +158,9 @@ public class BrevDataServiceTest {
     @Test
     public void lagMangelbrevXml_mottakerErbrukerID() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling();
-        BrevData brevData = new BrevData("Z123456");
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
+
         Aktoer mottakerAktør = lagAktør(Aktoersroller.BRUKER);
         brevData.fritekst = "Test";
 
@@ -179,7 +184,9 @@ public class BrevDataServiceTest {
     @Test
     public void lagMangelbrevXml_mottakerErArbeidsgiver() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling();
-        BrevData brevData = new BrevData("Z123456");
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
+
         Aktoer mottakerAktør = lagAktør(Aktoersroller.ARBEIDSGIVER);
         brevData.fritekst = "Test";
 

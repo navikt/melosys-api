@@ -12,7 +12,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.RolleKode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.BrevDataHenleggelse;
+import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
@@ -29,8 +29,8 @@ public class HenleggelsesbrevMapper implements BrevDataMapper {
     }
 
     private static Fag mapFag(BrevData brevData) {
-        BrevDataHenleggelse brevDataHenleggelse = (BrevDataHenleggelse) brevData;
-        XMLGregorianCalendar datoMottatt = convertToXMLGregorianCalendarRemoveTimezone(brevDataHenleggelse.initierendeJournalpostForsendelseMottattTidspunkt);
+        BrevDataMottattDato brevDataMottattDato = (BrevDataMottattDato) brevData;
+        XMLGregorianCalendar datoMottatt = convertToXMLGregorianCalendarRemoveTimezone(brevDataMottattDato.initierendeJournalpostForsendelseMottattTidspunkt);
         HenleggelseGrunnType henleggelseGrunn = HenleggelseGrunnType.builder()
             .withHenleggelseGrunn(HenleggelseGrunnKode.fromValue(brevData.begrunnelseKode))
             .withFritekstBegrunnelse(brevData.fritekst)
