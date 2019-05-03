@@ -2,10 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -101,13 +98,7 @@ public class A001MapperTest {
         when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(saksopplysning)));
         when(behandling.getFagsak()).thenReturn(new Fagsak());
 
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.husnummer = "25";
-        strukturertAdresse.gatenavn = "Gatenavn";
-        strukturertAdresse.postnummer = "0165";
-        strukturertAdresse.poststed = "Poststed";
-        strukturertAdresse.region = "Region";
-        strukturertAdresse.landkode = "Land";
+        StrukturertAdresse strukturertAdresse = lagStrukturertAdresse();
 
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = strukturertAdresse;
@@ -150,7 +141,7 @@ public class A001MapperTest {
     }
 
     @Test
-    public void mapTilBrevXML() throws Exception {
+    public void mapTilBrevXMLUtenSelvstendigVirksomhet() throws Exception {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-2");
 
@@ -162,7 +153,37 @@ public class A001MapperTest {
         assertThat(xml).isNotNull();
     }
 
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
+    @Test
+    public void mapTilBrevXML_MedSelvstendigVirksomhet_tarIkkeMedArbeidsgivendeVirkomsheter() throws Exception {
+        FellesType fellesType = new FellesType();
+        fellesType.setFagsaksnummer("MELTEST-2");
+
+        MelosysNAVFelles navFelles = enhancedRandom.nextObject(MelosysNAVFelles.class);
+        navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
+        navFelles.setKontaktinformasjon(lagKontaktInformasjon());
+
+        AvklartVirksomhet avklartVirksomhet = new AvklartVirksomhet("Ranselbygg AS",
+            "998877665",
+            lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
+        brevData.selvstendigeVirksomheter = Collections.singletonList(avklartVirksomhet);
+
+        String xml = mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
+        assertThat(xml).doesNotContain("JARLSBERG AS");
+        assertThat(xml).contains("Ranselbygg AS");
+    }
+
+    private StrukturertAdresse lagStrukturertAdresse() {
+        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
+        strukturertAdresse.husnummer = "25";
+        strukturertAdresse.gatenavn = "Gatenavn";
+        strukturertAdresse.postnummer = "0165";
+        strukturertAdresse.poststed = "Poststed";
+        strukturertAdresse.region = "Region";
+        strukturertAdresse.landkode = "Land";
+        return strukturertAdresse;
+    }
+
+    private String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
         final String XSD_LOCATION = "melosysbrev/melosys_000116.xsd";
 
         Fag fag = mapFag();

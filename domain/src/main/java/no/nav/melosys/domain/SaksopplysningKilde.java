@@ -7,6 +7,7 @@ import no.nav.melosys.domain.kodeverk.InterntKodeverkTabell;
 public enum SaksopplysningKilde implements InterntKodeverkTabell<SaksopplysningKilde> {
 
     AAREG("AAREG", "Aa-registeret"),
+    EESSI("EESSI", "EESSI-prosjektet"),
     EREG("EREG", "Enhetsregisteret"),
     INNTK("INNTK", "Inntektskomponenten"),
     MEDL("MEDL", "Medlemskapsunntak"),

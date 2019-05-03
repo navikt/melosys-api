@@ -2,17 +2,18 @@ package no.nav.melosys.saksflyt.agent.hs;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ProsessSteg;
+import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +32,11 @@ import static no.nav.melosys.domain.ProsessSteg.HS_SEND_BREV;
 public class HenleggSak extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(HenleggSak.class);
 
-    private final BehandlingRepository behandlingRepo;
-    private final FagsakRepository fagsakRepo;
+    private final OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling;
 
     @Autowired
-    public HenleggSak(BehandlingRepository behandlingRepo, FagsakRepository fagsakRepo) {
-        this.behandlingRepo = behandlingRepo;
-        this.fagsakRepo = fagsakRepo;
+    public HenleggSak(OppdaterFagsakOgBehandling oppdaterFagsakOgBehandling) {
+        this.oppdaterFagsakOgBehandling = oppdaterFagsakOgBehandling;
     }
 
     @Override
@@ -55,12 +54,7 @@ public class HenleggSak extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
-
-        Fagsak fagsak = behandling.getFagsak();
-        fagsak.setStatus(Saksstatuser.HENLAGT);
-        fagsakRepo.save(fagsak);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandlingRepo.save(behandling);
+        oppdaterFagsakOgBehandling.oppdaterFagsakOgBehandlingStatuser(behandling, Saksstatuser.HENLAGT, Behandlingsstatus.AVSLUTTET);
 
         log.info("Satt sak til henlagt for prosessinstans {}", prosessinstans.getId());
         prosessinstans.setSteg(HS_SEND_BREV);

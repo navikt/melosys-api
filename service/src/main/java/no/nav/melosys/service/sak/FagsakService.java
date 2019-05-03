@@ -3,7 +3,10 @@ package no.nav.melosys.service.sak;
 import java.time.Instant;
 import java.util.*;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -99,6 +102,10 @@ public class FagsakService {
         return fagsak;
     }
 
+    public Optional<Fagsak> hentFagsakFraGsakSaksnummer(Long gsakSaksnummer) {
+        return fagsakRepository.findByGsakSaksnummer(gsakSaksnummer);
+    }
+
     public List<Fagsak> hentFagsakerMedAktør(Aktoersroller rolleType, String ident) throws IkkeFunnetException {
         String aktørID = tpsFasade.hentAktørIdForIdent(ident);
         return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
@@ -178,6 +185,7 @@ public class FagsakService {
 
         Instant nå = Instant.now();
 
+        fagsak.setGsakSaksnummer(opprettSakRequest.getGsakSaksnummer());
         fagsak.setAktører(aktører);
         fagsak.setRegistrertDato(nå);
         fagsak.setEndretDato(nå);

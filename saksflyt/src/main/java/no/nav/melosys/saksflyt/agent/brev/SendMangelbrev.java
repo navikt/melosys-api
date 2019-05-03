@@ -66,7 +66,7 @@ public class SendMangelbrev extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         Behandling behandling = prosessinstans.getBehandling();
-
+        Aktoersroller mottaker = prosessinstans.getData(ProsessDataKey.MOTTAKER, Aktoersroller.class);
         BrevData brevData = prosessinstans.getData(ProsessDataKey.BREVDATA, BrevData.class);
 
         String saksbehandler = brevData.saksbehandler;
@@ -74,7 +74,7 @@ public class SendMangelbrev extends AbstraktStegBehandler {
 
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(MELDING_MANGLENDE_OPPLYSNINGER)
             .medAvsender(saksbehandler)
-            .medMottaker(Mottaker.av(Aktoersroller.BRUKER))
+            .medMottaker(Mottaker.av(mottaker))
             .medBehandling(behandling)
             .medFritekst(fritekst).build();
         brevBestiller.bestill(brevbestilling);

@@ -12,6 +12,7 @@ public enum SaksopplysningType implements InterntKodeverkTabell<SaksopplysningTy
     ORGANISASJON("ORG", "Arbeidsgiver"),
     PERSONHISTORIKK("PERSHIST", "Personhistorikk"),
     PERSONOPPLYSNING("PERSOPL", "Personopplysning"),
+    SED_OPPLYSNINGER("SEDOPPL", "SED-opplysninger"),
     SOB_SAK("SOB_SAK", "Sak og behandling-sak"),
     SØKNAD("SØKNAD", "Søknad");
 

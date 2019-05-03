@@ -27,7 +27,6 @@ import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
@@ -37,6 +36,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.aktoer.AvklarMyndighetService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -51,8 +51,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatype.*;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.ATTEST_A1;
-import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.INNVILGELSE_YRKESAKTIV;
+import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -98,7 +97,7 @@ public final class DokumentServiceTest {
     @Test
     public final void produserMangelbrevISaksflyt() throws Exception {
         BrevbestillingDto brevbestilling = lagBrevBestillingDto();
-        instans.produserDokumentISaksflyt(BEHANDLINGSID, Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER, brevbestilling);
+        instans.produserDokumentISaksflyt(MELDING_MANGLENDE_OPPLYSNINGER, brevbestilling.mottaker, BEHANDLINGSID, new BrevData(brevbestilling));
     }
 
     private static BrevbestillingDto lagBrevBestillingDto() {
@@ -108,23 +107,20 @@ public final class DokumentServiceTest {
     }
 
     @Test
-    public final void produserMangelbrevISaksflyt_utenBrevdata_kasterUnntak() {
-        Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(BEHANDLINGSID,
-            Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER, null));
+    public final void produserMangelbrevISaksflyt_utenMottaker_kasterUnntak() {
+        Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(MELDING_MANGLENDE_OPPLYSNINGER, null, BEHANDLINGSID, null));
         assertThat(unntak).isInstanceOfAny(IllegalArgumentException.class);
     }
 
     @Test
     public final void produserInnvilgelsesbrevISaksflytUtenBehandlingKasterUnntak() {
-        Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(~BEHANDLINGSID,
-                INNVILGELSE_YRKESAKTIV, lagBrevBestillingDto()));
+        Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(INNVILGELSE_YRKESAKTIV, BRUKER, ~BEHANDLINGSID, null));
         assertThat(unntak).isInstanceOfAny(IkkeFunnetException.class).hasNoCause().hasMessageContaining("finnes ikke");
     }
 
     @Test
     public final void produserUkjentDokumenttypeISaksflytKasterUnntak() {
-        Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(BEHANDLINGSID,
-                Produserbaredokumenter.MELDING_HENLAGT_SAK, lagBrevBestillingDto()));
+        Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(MELDING_HENLAGT_SAK, ARBEIDSGIVER, BEHANDLINGSID, null));
         assertThat(unntak).isInstanceOfAny(FunksjonellException.class).hasNoCause().hasMessageContaining("er ikke støttet");
     }
 
@@ -190,8 +186,9 @@ public final class DokumentServiceTest {
 
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         BrevDataService brevDataService = new BrevDataService(tpsFasade, behandlingsresultatRepository, utenlandskMyndighetRepository);
-        return new DokumentService(behandlingRepository, mock(FagsakRepository.class), brevDataService, dokSysFasade, mock(JoarkFasade.class),
-            mock(KontaktopplysningService.class), mock(ProsessinstansService.class), brevdatabyggervelger, mock(AvklarMyndighetService.class));
+        return new DokumentService(behandlingRepository, brevDataService, dokSysFasade,
+            mock(KontaktopplysningService.class), mock(ProsessinstansService.class), brevdatabyggervelger,
+            mock(AvklarteVirksomheterService.class), mock(AvklarMyndighetService.class));
     }
 
     private static Behandling lagBehandling() {

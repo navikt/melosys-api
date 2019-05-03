@@ -12,8 +12,11 @@ import javax.persistence.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -64,7 +67,8 @@ public class Prosessinstans {
     @OneToMany(mappedBy = "prosessinstans", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProsessinstansHendelse> hendelser;
     
-    private static ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private static ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule())
+        .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()));
 
     public UUID getId() {
         return id;

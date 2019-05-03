@@ -8,12 +8,14 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.repository.*;
+import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.brev.FastMottaker;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAnmodningUnntakOgAvslag;
@@ -111,14 +113,12 @@ public class IverksettVedtakSendBrevTest {
     }
 
     private static DokumentSystemService lagDokumentService(BrevDataByggerVelger brevDataByggerVelger) {
+        AvklarteVirksomheterService avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
         BehandlingRepository behandlingRepository = mockBehandlingRepository();
-        FagsakRepository fagsakRepository = mock(FagsakRepository.class);
         BrevDataService brevDataService = mock(BrevDataService.class);
         DoksysFasade dokSysFasade = mock(DoksysFasade.class);
-        JoarkFasade joarkFasade = mock(JoarkFasade.class);
         KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
-        return spy(new DokumentSystemService(behandlingRepository, fagsakRepository,
-            brevDataService, dokSysFasade, joarkFasade, kontaktopplysningService, brevDataByggerVelger));
+        return spy(new DokumentSystemService(behandlingRepository, brevDataService, dokSysFasade, kontaktopplysningService, brevDataByggerVelger, avklarteVirksomheterService));
     }
 
     private static BehandlingsresultatRepository mockBehandlingsresultatRepository() {

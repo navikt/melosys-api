@@ -12,6 +12,7 @@ import no.nav.melosys.integrasjon.medl.behandle.BehandleMedlemskapConsumer;
 import no.nav.melosys.integrasjon.medl.behandle.BehandleMedlemskapConsumerImpl;
 import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapMock;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.*;
+import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.AvvisPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OppdaterPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeResponse;
@@ -103,5 +104,20 @@ public class MedlServiceTest {
 
         assertThat(oppdaterPeriodeRequest.getPeriodeId()).isEqualTo(periodeId);
         assertThat(oppdaterPeriodeRequest.getVersjon()).isEqualTo(0);
+    }
+
+    @Test
+    public void avvisPeriode_senderRequestMedKorrektAarsak() throws Exception {
+        long periodeId = 10L;
+        lovvalgsperiode.setMedlPeriodeID(periodeId);
+
+        ArgumentCaptor<AvvisPeriodeRequest> captor = ArgumentCaptor.forClass(AvvisPeriodeRequest.class);
+
+        medlService.avvisPeriode(lovvalgsperiode, StatusaarsakMedl.OPPHORT);
+        verify(behandleMedlemskapV2).avvisPeriode(captor.capture());
+
+        AvvisPeriodeRequest request = captor.getValue();
+        assertThat(request.getPeriodeId()).isEqualTo(periodeId);
+        assertThat(request.getAarsak().getValue()).isEqualTo(StatusaarsakMedl.OPPHORT.getKode());
     }
 }
