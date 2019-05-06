@@ -4,10 +4,12 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.TekniskException;
 import org.assertj.core.util.Sets;
 import org.junit.Test;
@@ -146,6 +148,46 @@ public class FagsakTest {
         Aktoer bruker = fagsak.hentAktørMedRolleType(Aktoersroller.BRUKER);
 
         assertThat(bruker).isEqualTo(a1);
+    }
+
+    @Test
+    public void hentRepresentant_arbeidsgiver_funker() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(new HashSet<>());
+        Aktoer a1 = new Aktoer();
+        a1.setRolle(Aktoersroller.REPRESENTANT);
+        a1.setRepresenterer(Representerer.BRUKER);
+        a1.setAktørId("123");
+        fagsak.getAktører().add(a1);
+        Aktoer a2 = new Aktoer();
+        a2.setRolle(Aktoersroller.REPRESENTANT);
+        a2.setRepresenterer(Representerer.ARBEIDSGIVER);
+        a2.setAktørId("456");
+        fagsak.getAktører().add(a2);
+
+        Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.ARBEIDSGIVER);
+
+        assertThat(representant).isEqualTo(Optional.of(a2));
+    }
+
+    @Test
+    public void hentRepresentant_begge_funker() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(new HashSet<>());
+        Aktoer a1 = new Aktoer();
+        a1.setRolle(Aktoersroller.REPRESENTANT);
+        a1.setRepresenterer(Representerer.ARBEIDSGIVER);
+        a1.setAktørId("123");
+        fagsak.getAktører().add(a1);
+        Aktoer a2 = new Aktoer();
+        a2.setRolle(Aktoersroller.REPRESENTANT);
+        a2.setRepresenterer(Representerer.BEGGE);
+        a2.setAktørId("456");
+        fagsak.getAktører().add(a2);
+
+        Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.BRUKER);
+
+        assertThat(representant).isEqualTo(Optional.of(a2));
     }
 
     @Test

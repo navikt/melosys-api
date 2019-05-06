@@ -74,10 +74,10 @@ public final class DokumentServiceTest {
     }
 
     @Test
-    public final void produserInnvilgelsesbrevFunker() throws Exception {
+    public final void produserInnvilgelsesbrev_medFullmektig_senderTilBrukerOgFullmektig() throws Exception {
         BrevData brevData = lagBrevData();
         instans.produserDokument(INNVILGELSE_YRKESAKTIV, Mottaker.av(BRUKER), BEHANDLINGSID, brevData);
-        verify(dokSysFasade).produserIkkeredigerbartDokument(any(Dokumentbestilling.class));
+        verify(dokSysFasade, times(2)).produserIkkeredigerbartDokument(any(Dokumentbestilling.class));
     }
 
     @Test
@@ -383,6 +383,9 @@ public final class DokumentServiceTest {
         aktør.setAktørId("123");
         aktør.setOrgnr("999");
         aktør.setRolle(type);
+        if (type == REPRESENTANT) {
+            aktør.setRepresenterer(Representerer.BEGGE);
+        }
         return aktør;
     }
 }

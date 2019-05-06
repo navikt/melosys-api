@@ -139,19 +139,29 @@ public class DokumentService {
             throw new FunksjonellException(mottakerRolle + " støttes ikke.");
         }
     }
-
-    // Dokumenter til bruker sendes til både bruker og representant.
+    
     private void sendTilBruker(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws FunksjonellException, TekniskException {
         Fagsak fagsak = behandling.getFagsak();
         Aktoer bruker = fagsak.hentAktørMedRolleType(BRUKER);
         if (bruker == null) {
             throw new FunksjonellException("Bruker er ikke registrert.");
         }
-        produserIkkeredigerbartDokument(produserbartDokument, bruker, behandling, brevData);
+
+        // Dokumenter til bruker sendes i utgangspunkt bare til fullmektig dersom fullmektig finnes.
+        // Vedtaksbrevene er imidlertid sendt til både bruker og fullmektig.
+        boolean sendTilBegge = false;
+        if (produserbartDokument == INNVILGELSE_YRKESAKTIV || produserbartDokument == AVSLAG_YRKESAKTIV) {
+            sendTilBegge = true;
+        }
 
         Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.BRUKER);
         if (representant.isPresent()) {
             produserIkkeredigerbartDokument(produserbartDokument, representant.get(), behandling, brevData);
+            if (sendTilBegge) {
+                produserIkkeredigerbartDokument(produserbartDokument, bruker, behandling, brevData);
+            }
+        } else {
+            produserIkkeredigerbartDokument(produserbartDokument, bruker, behandling, brevData);
         }
     }
 
