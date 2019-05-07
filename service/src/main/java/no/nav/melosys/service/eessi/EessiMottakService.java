@@ -33,7 +33,7 @@ public class EessiMottakService {
     private final FagsakService fagsakService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public EessiMottakService(ProsessinstansService prosessinstansService, FagsakService fagsakService, LovvalgsperiodeService lovvalgsperiodeService) {
         this.prosessinstansService = prosessinstansService;

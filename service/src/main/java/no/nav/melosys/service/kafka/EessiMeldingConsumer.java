@@ -28,7 +28,7 @@ public class EessiMeldingConsumer {
         try {
             eessiMottakService.behandleMottattMelding(melding);
         } catch (Exception e) {
-            log.error("Feil ved mottak av SED! ConsumerRecord.key: {}", consumerRecord.key());
+            log.error("Feil ved mottak av SED! ConsumerRecord.key: {}", consumerRecord.key(), e);
         }
     }
 }
