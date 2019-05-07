@@ -10,11 +10,11 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.eessi.avro.MelosysEessiMelding;
-import no.nav.melosys.eessi.avro.Statsborgerskap;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper;
+import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
+import no.nav.melosys.service.kafka.model.Statsborgerskap;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
@@ -109,7 +109,7 @@ public class EessiMottakService {
         return sedDokument;
     }
 
-    private Periode tilPeriode(no.nav.melosys.eessi.avro.Periode periode) {
+    private Periode tilPeriode(no.nav.melosys.service.kafka.model.Periode periode) {
         return new Periode(
             LocalDate.parse(periode.getFom(), dateTimeFormatter),
             periode.getTom() != null ? LocalDate.parse(periode.getTom(), dateTimeFormatter) : null
