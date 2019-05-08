@@ -31,7 +31,6 @@ INSERT INTO fagsak_status (kode, navn) VALUES ('OPPRETTET', 'Saken har blitt opp
 INSERT INTO fagsak_status (kode, navn) VALUES ('LOVVALG_AVKLART', 'Avklart hvilket landstrygdeloving bruker skal omfattes av.');
 INSERT INTO fagsak_status (kode, navn) VALUES ('AVSLUTTET', 'Saken er avsluttet');
 INSERT INTO fagsak_status (kode, navn) VALUES ('HENLAGT', 'Saken har blitt henlagt');
-INSERT INTO fagsak_status (kode, navn) VALUES ('HENLAGT_BORTFALT', 'Saken er henlagt som bortfalt i Melosys');
 
 ALTER TABLE fagsak ADD CONSTRAINT fk_fagsak_type FOREIGN KEY (fagsak_type) REFERENCES fagsak_type;
 ALTER TABLE fagsak ADD CONSTRAINT fk_fagsak_satus FOREIGN KEY (status) REFERENCES fagsak_status;

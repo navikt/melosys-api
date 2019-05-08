@@ -232,7 +232,7 @@ public class FagsakService {
             .orElseThrow(() -> new IllegalStateException("Sak " + fagsak.getSaksnummer() + " har ingen behandlinger eller bare avsluttede behandlinger."));
     }
 
-    @Transactional(rollbackFor=TekniskException.class)
+    @Transactional(rollbackFor=MelosysException.class)
     public void avsluttSakSomBortfalt(Fagsak fagsak) throws FunksjonellException, TekniskException {
         fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
 
