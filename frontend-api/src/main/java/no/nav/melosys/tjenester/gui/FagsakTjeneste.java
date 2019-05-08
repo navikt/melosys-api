@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import io.swagger.annotations.Api;
@@ -114,6 +115,19 @@ public class FagsakTjeneste extends RestTjeneste {
 
         fagsakService.henleggFagsak(saksnummer, henleggelseDto.getBegrunnelseKode(), henleggelseDto.getFritekst());
         return Response.ok().build();
+    }
+
+    @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("{saksnr}/avsluttsaksombortfalt")
+    @ApiOperation(value = "Avslutter en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys")
+    public Response avsluttSakSomBortfalt(@PathParam("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+        tilgang.sjekkSak(fagsak);
+
+        fagsakService.avsluttSakSomBortfalt(fagsak);
+        return Response.noContent().build();
     }
 
     private FagsakDto tilDto(Fagsak fagsak, String ident) throws FunksjonellException, TekniskException {

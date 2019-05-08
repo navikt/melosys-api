@@ -176,7 +176,6 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         assertThat(resultat.getStatusInfo()).isEqualTo(Status.OK);
         verify(fagsakService).henleggFagsak(saksnummer, begrunnelseKode, fritekst);
     }
-
     @Test
     public final void henleggFagsak_ingenSakFinnes_kasterIkkeFunnet() throws Exception {
         FagsakTjeneste instans = lagFagsakTjeneste(null);
@@ -234,6 +233,29 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
         assertThat(behandlingFørst.getSoknadsperiode().getFom()).isEqualTo(LocalDate.of(2019,1,1));
         assertThat(behandlingFørst.getSoknadsperiode().getTom()).isEqualTo(LocalDate.of(2019,2,1));
+    }
+
+    @Test
+    public final void avsluttSakSomBortfalt_sakEksisterer_kallerFagservice() throws Exception {
+        Fagsak fagsak = lagFagsak();
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+        String saksnummer = "123";
+        Response resultat = instans.avsluttSakSomBortfalt(saksnummer);
+
+        assertThat(resultat.getStatusInfo()).isEqualTo(Status.NO_CONTENT);
+        verify(fagsakService).avsluttSakSomBortfalt(fagsak);
+    }
+
+    @Test
+    public final void avsluttSakSomBortfalt_sakEksistererIkke_kasterException() throws Exception {
+        Fagsak fagsak = lagFagsak();
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+        doThrow(SikkerhetsbegrensningException.class).when(tilgang).sjekkSak(fagsak);
+
+        expectedException.expect(SikkerhetsbegrensningException.class);
+        instans.avsluttSakSomBortfalt("123");
+
+        verify(fagsakService, never()).henleggFagsak(anyString(), anyString(), anyString());
     }
 
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {

@@ -124,6 +124,25 @@ public class BehandlingsresultatServiceTest {
         assertThat(vilkaarBegrunnelse.getKode()).isEqualTo("kode");
     }
 
+    @Test
+    public void oppdaterBehandlingsresultattype_idEksisterer_oppdatererBehandlingsresultattype() {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
+        doReturn(Optional.of(behandlingsresultat)).when(behandlingsresultatRepo).findById(1L);
+
+        behandlingsresultatService.oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.IKKE_FASTSATT);
+
+        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.IKKE_FASTSATT);
+        verify(behandlingsresultatRepo).save(behandlingsresultat);
+    }
+
+    @Test
+    public void oppdaterBehandlingsresultattype_idEksistererIkke_gjørIngenting() {
+        behandlingsresultatService.oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.IKKE_FASTSATT);
+        verify(behandlingsresultatRepo).findById(1L);
+        verify(behandlingsresultatRepo, never()).save(any());
+    }
+
     private Lovvalgsperiode opprettLovvalgsperiode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setId(32L);
