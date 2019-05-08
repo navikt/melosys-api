@@ -2,10 +2,12 @@ package no.nav.melosys.service;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.apache.commons.beanutils.BeanUtils;
@@ -104,4 +106,13 @@ public class BehandlingsresultatService {
         }
     }
 
+    public void oppdaterBehandlingsresultattype(Long id, Behandlingsresultattyper behandlingsresultattype) {
+        Optional<Behandlingsresultat> optionalBehandlingsresultat = behandlingsresultatRepository.findById(id);
+        if (optionalBehandlingsresultat.isPresent()){
+            Behandlingsresultat behandlingsresultat = optionalBehandlingsresultat.get();
+            log.info("Setter behandlingsresultattype på {} til {}", id, behandlingsresultattype);
+            behandlingsresultat.setType(behandlingsresultattype);
+            behandlingsresultatRepository.save(behandlingsresultat);
+        }
+    }
 }
