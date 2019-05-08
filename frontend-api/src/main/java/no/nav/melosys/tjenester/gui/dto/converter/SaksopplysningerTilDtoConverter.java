@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui.dto.converter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.Set;
 
@@ -33,7 +33,7 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
  * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
  */
 public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplysning>, SaksopplysningerDto> {
-
+    private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
 
     //Medlemsperioder sorteres fra nyest til eldst.
      static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
@@ -106,11 +106,11 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
         - Ved søknad framover i tid, brukes statsborgerskap fra TPS med gjeldende dato, avgrenset
             av dato for henting av opplysninger (hvis tilstede) eller endring av behandling
         */
-        LocalDate gjeldendeDato = null;
+        LocalDate gjeldendeDato;
         if (behandling.getSistOpplysningerHentetDato() != null) {
-            gjeldendeDato = LocalDateTime.ofInstant(behandling.getSistOpplysningerHentetDato(), ZoneOffset.UTC).toLocalDate();
+            gjeldendeDato = LocalDateTime.ofInstant(behandling.getSistOpplysningerHentetDato(), TIME_ZONE_ID).toLocalDate();
         } else {
-            gjeldendeDato = LocalDateTime.ofInstant(behandling.getEndretDato(), ZoneOffset.UTC).toLocalDate();
+            gjeldendeDato = LocalDateTime.ofInstant(behandling.getEndretDato(), TIME_ZONE_ID).toLocalDate();
         }
 
         if (søknadsperiode != null && søknadsperiode.getFom() != null && søknadsperiode.getFom().isBefore(gjeldendeDato)) {
