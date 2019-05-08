@@ -10,11 +10,11 @@ public interface MedlFasade {
 
     Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException;
 
-    Long opprettPeriodeEndelig(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
+    Long opprettPeriodeEndelig(String fnr, Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
 
-    Long opprettPeriodeUnderAvklaring(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
+    Long opprettPeriodeUnderAvklaring(String fnr, Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException;
 
-    void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException;
+    void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws FunksjonellException, TekniskException;
 
     void avvisPeriode(Lovvalgsperiode lovvalgsperiode, StatusaarsakMedl årsak) throws SikkerhetsbegrensningException, IkkeFunnetException;
 }

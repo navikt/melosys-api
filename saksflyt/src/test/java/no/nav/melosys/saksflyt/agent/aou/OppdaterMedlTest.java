@@ -100,7 +100,7 @@ public class OppdaterMedlTest {
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
         agent.utførSteg(p);
-        verify(medlFasade ,times(1)).opprettPeriodeUnderAvklaring(any(), any());
+        verify(medlFasade ,times(1)).opprettPeriodeUnderAvklaring(any(), any(), any());
     }
 
     @Test

@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
+import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.repository.SaksopplysningRepository;
@@ -75,7 +76,7 @@ public class OppdaterBehandlingOgMedl extends AbstraktStegBehandler {
         }
 
         lovvalgsperiode = lovvalgsperiodeService.lagreLovvalgsperioder(prosessinstans.getBehandling().getId(), Collections.singletonList(lovvalgsperiode)).iterator().next();
-        Long medlId = medlFasade.opprettPeriodeUnderAvklaring(prosessinstans.getData(ProsessDataKey.BRUKER_ID), lovvalgsperiode);
+        Long medlId = medlFasade.opprettPeriodeUnderAvklaring(prosessinstans.getData(ProsessDataKey.BRUKER_ID), lovvalgsperiode, KildedokumenttypeMedl.SED);
         felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, prosessinstans.getBehandling().getId());
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VALIDER_PERIODE);
     }
