@@ -7,6 +7,10 @@ import no.nav.melosys.domain.kodeverk.TilleggsBestemmelser_883_2004;
 
 public final class LovvalgBestemmelseUtil {
 
+    private LovvalgBestemmelseUtil() {
+        throw new IllegalStateException("Utility");
+    }
+
     public static LovvalgBestemmelse dbDataTilLovvalgBestemmelse(String dbData) {
         if (dbData == null) {
             return null;

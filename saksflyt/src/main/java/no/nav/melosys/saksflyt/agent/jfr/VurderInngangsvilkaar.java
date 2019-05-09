@@ -7,11 +7,11 @@ import java.util.Map;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
+import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.util.LandkoderUtils;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.regler.api.lovvalg.rep.Alvorlighetsgrad;
@@ -79,20 +79,14 @@ public class VurderInngangsvilkaar extends AbstraktStegBehandler {
             brukHistoriskStatsborgerskap = true;
         }
 
-        Land statsborgerskap = null;
-        for (Saksopplysning kandidat : behandling.getSaksopplysninger()) {
-            if (!brukHistoriskStatsborgerskap && kandidat.getDokument() instanceof PersonDokument) {
-                statsborgerskap = ((PersonDokument) kandidat.getDokument()).statsborgerskap;
-                break;
-            }
-            if (brukHistoriskStatsborgerskap && kandidat.getDokument() instanceof PersonhistorikkDokument) {
-                PersonhistorikkDokument personhistorikk = (PersonhistorikkDokument) kandidat.getDokument();
-                if (!personhistorikk.statsborgerskapListe.isEmpty()) {
-                    statsborgerskap = personhistorikk.statsborgerskapListe.get(0).statsborgerskap;
-                }
-                break;
-            }
+        Land statsborgerskap;
+        if (brukHistoriskStatsborgerskap) {
+            List<StatsborgerskapPeriode> statsborgerskapListe = SaksopplysningerUtils.hentPersonhistorikkDokument(behandling).statsborgerskapListe;
+            statsborgerskap = statsborgerskapListe.isEmpty() ? null : statsborgerskapListe.get(0).statsborgerskap;
+        } else {
+            statsborgerskap = SaksopplysningerUtils.hentPersonDokument(behandling).statsborgerskap;
         }
+
         if (statsborgerskap == null) {
             log.error("Funksjonell feil for prosessinstans {}: Kunne ikke hente brukers statsborgerskap fra saksopplysningene.", prosessinstans.getId());
             håndterUnntak(FUNKSJONELL_FEIL, prosessinstans, "Ingen informasjon om statsborgerskap", null);
