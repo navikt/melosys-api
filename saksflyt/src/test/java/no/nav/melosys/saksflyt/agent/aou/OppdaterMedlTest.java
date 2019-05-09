@@ -8,6 +8,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -92,7 +93,7 @@ public class OppdaterMedlTest {
     @Test
     public void lagreMedlPeriodeId() {
         agent.utførSteg(p);
-        verify(lovvalgsperiodeRepository ,times(1)).save(any(Lovvalgsperiode.class));
+        verify(lovvalgsperiodeRepository).save(any(Lovvalgsperiode.class));
     }
 
     @Test
@@ -100,7 +101,7 @@ public class OppdaterMedlTest {
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
         agent.utførSteg(p);
-        verify(medlFasade ,times(1)).opprettPeriodeUnderAvklaring(any(), any(), any());
+        verify(medlFasade).opprettPeriodeUnderAvklaring(any(), any(), eq(KildedokumenttypeMedl.HENV_SOKNAD));
     }
 
     @Test
