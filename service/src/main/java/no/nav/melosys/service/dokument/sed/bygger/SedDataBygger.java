@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.UtenlandskIdent;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -69,7 +70,13 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         sedDataDto.setUtenlandskIdent(this.søknad.personOpplysninger.utenlandskIdent.stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));
 
+        sedDataDto.setMottakerLand(hentMyndighetLandFraBehandling(behandling));
+
         return sedDataDto;
+    }
+
+    private String hentMyndighetLandFraBehandling(Behandling behandling) throws TekniskException {
+        return behandling.getFagsak().hentAktørMedRolleType(Aktoersroller.MYNDIGHET).getInstitusjonId().split(":")[0];
     }
 
     private List<Virksomhet> map(List<AvklartVirksomhet> avklarteArbeidsgivere) {
