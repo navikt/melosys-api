@@ -42,44 +42,49 @@ public class AktoerServiceTest {
 
     @Captor
     private ArgumentCaptor<Example> exampleCaptor;
+    private long aktoerId = 234L;
 
     @Before
     public void setUp() {
         aktørService = new AktoerService(aktørRepository);
         Aktoer aktoer = new Aktoer();
-        aktoer.setId(234L);
+        aktoer.setId(aktoerId);
         doReturn(aktoer).when(aktørRepository).save(any());
     }
 
     @Test
     public final void lagEllerOppdater_nyAktoer() throws FunksjonellException {
-        AktoerDto aktoerDto = new AktoerDto();
-        aktoerDto.setAktoerID("1234");
-        aktoerDto.setRolleKode("BRUKER");
+        AktoerDto aktoerDto = spy(lagAktoerDto());
+        Fagsak fagsak = lagFagsak();
+        Long databaseId = aktørService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
 
-        when(aktørRepository.findByFagsakAndRolleAndRepresenterer(any(), any(), any())).thenReturn(Optional.empty());
-        aktørService.lagEllerOppdaterAktoer(lagFagsak(), aktoerDto);
-        verify(aktørRepository).save(any(Aktoer.class));
+        ArgumentCaptor<Aktoer> captor = ArgumentCaptor.forClass(Aktoer.class);
+        verify(aktørRepository).save(captor.capture());
+        Aktoer aktoer = captor.getValue();
+
+        assertAktoerData(aktoerDto, fagsak, aktoer);
+        assertThat(aktoer.getId()).isNull();
+        assertThat(databaseId).isEqualTo(aktoerId);
     }
 
     @Test
     public final void lagEllerOppdater_oppdaterAktoer() throws FunksjonellException {
-        AktoerDto aktoerDto = new AktoerDto();
-        aktoerDto.setAktoerID("1234");
-        aktoerDto.setRolleKode("BRUKER");
+        AktoerDto aktoerDto = lagAktoerDto();
+        aktoerDto.setDatabaseID(aktoerId);
+        Fagsak fagsak = lagFagsak();
+        Aktoer aktoerFromDatabase = new Aktoer();
+        aktoerFromDatabase.setId(aktoerId);
+        doReturn(Optional.of(aktoerFromDatabase)).when(aktørRepository).findById(aktoerDto.getDatabaseID());
 
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId("1235");
+        Long databaseId = aktørService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
 
-        when(aktørRepository.findByFagsakAndRolleAndRepresenterer(any(), any(), any())).thenReturn(Optional.of(aktoer));
+        ArgumentCaptor<Aktoer> captor = ArgumentCaptor.forClass(Aktoer.class);
+        verify(aktørRepository).save(captor.capture());
+        Aktoer aktoer = captor.getValue();
 
-        Aktoer aktoerFraApiLag = new Aktoer();
-        aktoerFraApiLag.setRolle(Aktoersroller.BRUKER);
-        aktørService.lagEllerOppdaterAktoer(lagFagsak(), aktoerDto);
-        verify(aktørRepository).deleteById(aktoer);
-        verify(aktørRepository).save(any(Aktoer.class));
-
+        assertAktoerData(aktoerDto, fagsak, aktoer);
+        assertThat(aktoer.getId()).isEqualTo(aktoerId);
+        assertThat(databaseId).isEqualTo(aktoerId);
     }
 
     @Test
@@ -146,5 +151,24 @@ public class AktoerServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-1");
         return fagsak;
+    }
+
+    private void assertAktoerData(AktoerDto aktoerDto, Fagsak fagsak, Aktoer aktoer) {
+        assertThat(aktoer.getFagsak()).isEqualTo(fagsak);
+        assertThat(aktoer.getInstitusjonId()).isEqualTo(aktoerDto.getInstitusjonsID());
+        assertThat(aktoer.getUtenlandskPersonId()).isEqualTo(aktoerDto.getUtenlandskPersonID());
+        assertThat(aktoer.getOrgnr()).isEqualTo(aktoerDto.getOrgnr());
+        assertThat(aktoer.getRolle().toString()).isEqualTo(aktoerDto.getRolleKode());
+        assertThat(aktoer.getRepresenterer().toString()).isEqualTo(aktoerDto.getRepresentererKode());
+    }
+
+    private AktoerDto lagAktoerDto() {
+        AktoerDto aktoerDto = new AktoerDto();
+        aktoerDto.setRolleKode("BRUKER");
+        aktoerDto.setInstitusjonsID("institusjonsID");
+        aktoerDto.setUtenlandskPersonID("utenlandskPersonID");
+        aktoerDto.setOrgnr("orgnr");
+        aktoerDto.setRepresentererKode("BRUKER");
+        return aktoerDto;
     }
 }
