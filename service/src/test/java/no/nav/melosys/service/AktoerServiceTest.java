@@ -42,12 +42,13 @@ public class AktoerServiceTest {
 
     @Captor
     private ArgumentCaptor<Example> exampleCaptor;
+    private long aktoerId = 234L;
 
     @Before
     public void setUp() {
         aktørService = new AktoerService(aktørRepository);
         Aktoer aktoer = new Aktoer();
-        aktoer.setId(234L);
+        aktoer.setId(aktoerId);
         doReturn(aktoer).when(aktørRepository).save(any());
     }
 
@@ -55,7 +56,7 @@ public class AktoerServiceTest {
     public final void lagEllerOppdater_nyAktoer() throws FunksjonellException {
         AktoerDto aktoerDto = spy(lagAktoerDto());
         Fagsak fagsak = lagFagsak();
-        aktørService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
+        Long databaseId = aktørService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
 
         ArgumentCaptor<Aktoer> captor = ArgumentCaptor.forClass(Aktoer.class);
         verify(aktørRepository).save(captor.capture());
@@ -63,20 +64,19 @@ public class AktoerServiceTest {
 
         assertAktoerData(aktoerDto, fagsak, aktoer);
         assertThat(aktoer.getId()).isNull();
-        verify(aktoerDto).setDatabaseID(any());
+        assertThat(databaseId).isEqualTo(aktoerId);
     }
 
     @Test
     public final void lagEllerOppdater_oppdaterAktoer() throws FunksjonellException {
         AktoerDto aktoerDto = lagAktoerDto();
-        long aktoerId = 1L;
         aktoerDto.setDatabaseID(aktoerId);
         Fagsak fagsak = lagFagsak();
         Aktoer aktoerFromDatabase = new Aktoer();
         aktoerFromDatabase.setId(aktoerId);
         doReturn(Optional.of(aktoerFromDatabase)).when(aktørRepository).findById(aktoerDto.getDatabaseID());
 
-        aktørService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
+        Long databaseId = aktørService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
 
         ArgumentCaptor<Aktoer> captor = ArgumentCaptor.forClass(Aktoer.class);
         verify(aktørRepository).save(captor.capture());
@@ -84,6 +84,7 @@ public class AktoerServiceTest {
 
         assertAktoerData(aktoerDto, fagsak, aktoer);
         assertThat(aktoer.getId()).isEqualTo(aktoerId);
+        assertThat(databaseId).isEqualTo(aktoerId);
     }
 
     @Test

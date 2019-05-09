@@ -81,7 +81,8 @@ public class AktoerTjeneste extends RestTjeneste {
     public Response lagAktoerer(@PathParam("saksnummer") String saksnummer, @ApiParam AktoerDto aktoerDto) throws FunksjonellException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgang.sjekkSak(fagsak);
-        aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
+        Long databaseId = aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
+        aktoerDto.setDatabaseID(databaseId);
         return Response.ok(aktoerDto).build();
     }
 

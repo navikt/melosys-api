@@ -35,7 +35,7 @@ public class AktoerService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void lagEllerOppdaterAktoer(Fagsak fagsak, AktoerDto aktoerDto) throws FunksjonellException {
+    public Long lagEllerOppdaterAktoer(Fagsak fagsak, AktoerDto aktoerDto) throws FunksjonellException {
         if (aktoerDto.getRolleKode() == null) {
             throw new FunksjonellException("Kan ikke lagre aktør uten rolle. Saksnummer: " + fagsak.getSaksnummer());
         }
@@ -59,8 +59,7 @@ public class AktoerService {
             aktoer.setRepresenterer(Representerer.valueOf(aktoerDto.getRepresentererKode()));
         }
 
-        Long databaseID = aktørRepository.save(aktoer).getId();
-        aktoerDto.setDatabaseID(databaseID);
+        return aktørRepository.save(aktoer).getId();
     }
 
     public void slettAktoer(long databaseID) throws TekniskException, FunksjonellException {
