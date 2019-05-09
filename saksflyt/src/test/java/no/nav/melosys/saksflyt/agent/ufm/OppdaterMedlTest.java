@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import org.junit.Before;
@@ -45,7 +46,7 @@ public class OppdaterMedlTest {
         oppdaterMedl.utfør(prosessinstans);
 
         verify(oppdaterMedlFelles).hentLovvalgsperiode(eq(behandling));
-        verify(medlFasade).oppdaterPeriodeEndelig(eq(lovvalgsperiode));
+        verify(medlFasade).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(KildedokumenttypeMedl.SED));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 }

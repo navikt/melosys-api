@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
+import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
@@ -63,7 +64,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         String fnr = felles.hentFnr(behandling);
         Lovvalgsperiode lovvalgsperiode = felles.hentLovvalgsperiode(behandling);
 
-        Long medlPeriodeID = medlFasade.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode);
+        Long medlPeriodeID = medlFasade.opprettPeriodeUnderAvklaring(fnr, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
         felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
 
         prosessinstans.setSteg(AOU_SEND_BREV);
