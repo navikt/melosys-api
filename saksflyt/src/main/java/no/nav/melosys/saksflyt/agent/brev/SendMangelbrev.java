@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.agent.brev;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.Instant;
+import java.time.Period;
 import java.util.Map;
 
 import no.nav.melosys.domain.Behandling;
@@ -80,7 +80,7 @@ public class SendMangelbrev extends AbstraktStegBehandler {
         brevBestiller.bestill(brevbestilling);
 
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
-        behandling.setDokumentasjonSvarfristDato(LocalDateTime.now().plusWeeks(DOKUMENTASJON_SVARFRIST_UKER).toInstant(ZoneOffset.UTC));
+        behandling.setDokumentasjonSvarfristDato(Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER)));
         behandlingRepo.save(behandling);
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);

@@ -7,6 +7,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 public final class BrevMapperUtils {
+    private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
 
     private BrevMapperUtils() {
     }
@@ -40,7 +41,7 @@ public final class BrevMapperUtils {
             return null;
         }
         try {
-            return convertToXMLGregorianCalendarRemoveTimezone(LocalDate.from(LocalDateTime.ofInstant(instant, ZoneId.systemDefault())));
+            return convertToXMLGregorianCalendarRemoveTimezone(LocalDate.from(LocalDateTime.ofInstant(instant, TIME_ZONE_ID)));
         } catch (DatatypeConfigurationException e) {
             throw new IllegalStateException("Feil ved konvertering av Instant til XmlGregorianCalendar", e);
         }

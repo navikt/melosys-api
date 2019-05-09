@@ -1,8 +1,7 @@
 package no.nav.melosys.saksflyt.agent.aou;
 
 import java.time.LocalDateTime;
-import java.time.Period;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
@@ -30,6 +29,7 @@ public class SendSed extends AbstraktSendSed {
 
     private static final Logger log = LoggerFactory.getLogger(SendSed.class);
 
+    private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
     private static final int SVARFRIST_MÅNEDER = 2;
 
     @Autowired
@@ -50,10 +50,8 @@ public class SendSed extends AbstraktSendSed {
             prosessinstans.setSteg(ProsessSteg.FERDIG);
 
             Behandling behandling = prosessinstans.getBehandling();
-
-            behandling.setDokumentasjonSvarfristDato(
-                LocalDateTime.now().plus(Period.ofMonths(SVARFRIST_MÅNEDER)).toInstant(ZoneOffset.UTC)
-            );
+            LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(SVARFRIST_MÅNEDER);
+            behandling.setDokumentasjonSvarfristDato(svarFristDato.atZone(TIME_ZONE_ID).toInstant());
             behandlingRepository.save(behandling);
         } catch (Exception ex) {
             prosessinstans.setSteg(ProsessSteg.FEILET_MASKINELT);
