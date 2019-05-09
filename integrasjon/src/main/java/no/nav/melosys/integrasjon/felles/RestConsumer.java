@@ -9,12 +9,9 @@ import org.springframework.core.env.Environment;
 
 public interface RestConsumer {
 
-    String SYSTEM_USERNAME = "systemuser.username";
-    String SYSTEM_PASSWORD = "systemuser.password";
-
     default String basicAuth() {
         return "Basic " + Base64.getEncoder().encodeToString(
-            String.format("%s:%s", getEnv().getRequiredProperty(SYSTEM_USERNAME), getEnv().getRequiredProperty(SYSTEM_PASSWORD))
+            String.format("%s:%s", getEnv().getRequiredProperty("systemuser.username"), getEnv().getRequiredProperty("systemuser.password"))
                 .getBytes(StandardCharsets.UTF_8));
     }
 
@@ -36,7 +33,7 @@ public interface RestConsumer {
 
     default Environment getEnv() {
         return EnvironmentHandler.getInstance().getEnv();
-    };
+    }
 
     default String getUserID() {
         return SubjectHandler.getInstance().getUserID();

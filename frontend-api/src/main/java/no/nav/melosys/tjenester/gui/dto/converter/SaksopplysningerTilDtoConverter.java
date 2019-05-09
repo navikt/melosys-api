@@ -127,7 +127,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
      * - Åpent arbeidsforhold uten sluttdato sorteres foran/over arbeidsforhold med sluttdato.
      * - Arbeidsforhold må ellers sorteres med nyeste fra-og-med-dato øverst.
      */
-    final static class ArbeidsforholdComparator implements Comparator<Arbeidsforhold> {
+    static final class ArbeidsforholdComparator implements Comparator<Arbeidsforhold> {
 
         @Override
         public int compare(Arbeidsforhold a, Arbeidsforhold b) {

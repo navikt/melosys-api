@@ -26,7 +26,6 @@ public final class MedlPeriodeKonverter {
     }
 
     private static final BiMap<LovvalgBestemmelse, GrunnlagMedl> lovvalgsbestemmelseTilGrunnlagMedlTabell;
-    private static final Kildedokumenttype KILDEDOKUMENTTYPE_HENV_SOKNAD = new Kildedokumenttype().withValue("Henv_Soknad");
 
     static {
         BiMap<LovvalgBestemmelse, GrunnlagMedl> tbl = HashBiMap.create();
@@ -177,7 +176,7 @@ public final class MedlPeriodeKonverter {
         return bestemmelse;
     }
 
-    public static AvvisPeriodeRequest konverterTilAvvisPeriodeRequest(Long medlId, StatusaarsakMedl årsak) {
+    static AvvisPeriodeRequest konverterTilAvvisPeriodeRequest(Long medlId, StatusaarsakMedl årsak) {
         AvvisPeriodeRequest request = new AvvisPeriodeRequest();
         request.setPeriodeId(medlId);
         request.setAarsak(new Statusaarsak().withValue(årsak.getKode()));

@@ -37,7 +37,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
     private final MedlFasade medlFasade;
-    private OppdaterMedlFelles felles;
+    private final OppdaterMedlFelles felles;
 
     @Autowired
     public OppdaterMedl(MedlFasade medlFasade, OppdaterMedlFelles felles) {

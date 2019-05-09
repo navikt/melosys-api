@@ -17,7 +17,7 @@ public class RestClientLoggingFilter implements ClientRequestFilter {
             sb.append(" - Headers: ").append(requestContext.getHeaders());
         }
         sb.append(" - Entity: ").append(requestContext.getEntity());
-        LOGGER.debug("HTTP REQUEST : " + sb.toString());
+        LOGGER.debug("HTTP REQUEST : {}", sb);
     }
 
 }
