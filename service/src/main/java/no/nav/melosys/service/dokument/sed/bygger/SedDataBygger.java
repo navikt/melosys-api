@@ -69,6 +69,8 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         sedDataDto.setUtenlandskIdent(this.søknad.personOpplysninger.utenlandskIdent.stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));
 
+        sedDataDto.setMottakerLand(behandling.getFagsak().hentMyndighetLandkode().getKode());
+
         return sedDataDto;
     }
 
