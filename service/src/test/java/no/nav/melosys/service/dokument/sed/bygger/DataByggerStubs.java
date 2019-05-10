@@ -6,9 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
@@ -16,6 +14,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.*;
 import no.nav.melosys.domain.dokument.soeknad.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -27,6 +26,13 @@ public class DataByggerStubs {
     public static Behandling hentBehandlingStub() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+
+        Fagsak fagsak = new Fagsak();
+        Aktoer myndighet = new Aktoer();
+        myndighet.setRolle(Aktoersroller.MYNDIGHET);
+        myndighet.setInstitusjonId("SE:123321");
+        fagsak.setAktører(Collections.singleton(myndighet));
+        behandling.setFagsak(fagsak);
 
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
         behandling.setSaksopplysninger(saksopplysninger);
