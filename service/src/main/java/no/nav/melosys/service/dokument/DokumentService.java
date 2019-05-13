@@ -1,9 +1,6 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
@@ -31,6 +28,8 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -44,6 +43,7 @@ import static no.nav.melosys.domain.kodeverk.Produserbaredokumenter.*;
 @Service
 @Primary
 public class DokumentService {
+    private static final Logger log = LoggerFactory.getLogger(DokumentService.class);
 
     private static final Set<Produserbaredokumenter> DOKUMENTER_TIL_BRUKER = Collections.unmodifiableSet(EnumSet.of(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
         AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK, INNVILGELSE_YRKESAKTIV));
@@ -94,14 +94,15 @@ public class DokumentService {
         BrevDataBygger bygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
         BrevData brevData = bygger.lag(behandling, SubjectHandler.getInstance().getUserID());
 
-        Aktoersroller mottakerRolle = avklarMottakerRolleFraDokument(produserbartDokument);
-        Aktoer mottaker = behandling.getFagsak().hentAktørMedRolleType(mottakerRolle);
-        // Myndighet avklares ikke endelig før i Saksflyt
-        if (mottaker == null && MYNDIGHET.equals(mottakerRolle)) {
-            mottaker = avklarMyndighetService.hentMyndighetFraBehandling(behandling);
-        }
+        Aktoersroller mottakerRolle = brevbestillingDto.mottaker == null ? avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.mottaker;
+        List<Aktoer> mottakere = avklarMottakere(produserbartDokument, Mottaker.av(mottakerRolle), behandling, true);
 
-        return dokSysFasade.produserDokumentutkast(lagDokumentbestilling(produserbartDokument, mottaker, behandling, brevData));
+        if (mottakere.isEmpty()) {
+            log.info("Ingen mottaker funnet for {}, {}", produserbartDokument, brevbestillingDto);
+            throw new FunksjonellException("Ingen mottaker funnet for sak " + behandling.getFagsak().getSaksnummer());
+        } else {
+            return dokSysFasade.produserDokumentutkast(lagDokumentbestilling(produserbartDokument, mottakere.get(0), behandling, brevData));
+        }
     }
 
     private Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
@@ -113,7 +114,7 @@ public class DokumentService {
         } else if (produserbartDokument == ANMODNING_UNNTAK || produserbartDokument == ATTEST_A1) {
             mottakerRolle = MYNDIGHET;
         } else {
-            throw new TekniskException("Valg av mottakerRolle støtter ikke " + produserbartDokument);
+            throw new TekniskException("Valg av mottakerRolle støttes ikke for " + produserbartDokument);
         }
         return mottakerRolle;
     }
@@ -127,20 +128,34 @@ public class DokumentService {
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException(BEHANDLING_ID + behandlingID + FINNES_IKKE));
 
-        Aktoersroller mottakerRolle = mottaker.getRolle();
+        List<Aktoer> mottakere = avklarMottakere(produserbartDokument, mottaker, behandling);
+        for (Aktoer aktør : mottakere) {
+            produserIkkeredigerbartDokument(produserbartDokument, aktør, behandling, brevData);
+        }
+    }
 
+    private List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
+        return avklarMottakere(produserbartDokument, mottaker, behandling, false);
+    }
+
+    private List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning)
+        throws FunksjonellException, TekniskException {
+        List<Aktoer> mottakere;
+        Aktoersroller mottakerRolle = mottaker.getRolle();
         if (mottakerRolle == BRUKER) {
-            sendTilBruker(produserbartDokument, behandling, brevData);
+            mottakere = avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
         } else if (mottakerRolle == ARBEIDSGIVER) {
-            sendTilArbeidsgiver(produserbartDokument, behandling, brevData);
+            mottakere = avklarMottakereForArbeidsgiver(behandling);
         } else if (mottakerRolle == MYNDIGHET) {
-            sendTilMyndighet(produserbartDokument, mottaker, behandling, brevData);
+            mottakere = avklarMottakereForMyndighet(mottaker, behandling);
         } else {
             throw new FunksjonellException(mottakerRolle + " støttes ikke.");
         }
+        return mottakere;
     }
-    
-    private void sendTilBruker(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws FunksjonellException, TekniskException {
+
+    private List<Aktoer> avklarMottakereForBruker(Produserbaredokumenter produserbartDokument, Behandling behandling, boolean forhåndsvisning)
+        throws FunksjonellException, TekniskException {
         Fagsak fagsak = behandling.getFagsak();
         Aktoer bruker = fagsak.hentAktørMedRolleType(BRUKER);
         if (bruker == null) {
@@ -148,32 +163,36 @@ public class DokumentService {
         }
 
         // Dokumenter til bruker sendes i utgangspunkt bare til fullmektig dersom fullmektig finnes.
-        // Vedtaksbrevene er imidlertid sendt til både bruker og fullmektig.
-        boolean sendTilBegge = false;
+        // Vedtaksbrevene er imidlertid sendt til både bruker og fullmektig (gjelder ikke forhåndsvisning).
+        boolean tilBegge = false;
         if (produserbartDokument == INNVILGELSE_YRKESAKTIV || produserbartDokument == AVSLAG_YRKESAKTIV) {
-            sendTilBegge = true;
+            tilBegge = !forhåndsvisning;
         }
 
+        List<Aktoer> mottakere = new ArrayList<>();
         Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.BRUKER);
         if (representant.isPresent()) {
-            produserIkkeredigerbartDokument(produserbartDokument, representant.get(), behandling, brevData);
-            if (sendTilBegge) {
-                produserIkkeredigerbartDokument(produserbartDokument, bruker, behandling, brevData);
+            mottakere.add(representant.get());
+            if (tilBegge) {
+                mottakere.add(bruker);
             }
         } else {
-            produserIkkeredigerbartDokument(produserbartDokument, bruker, behandling, brevData);
+            mottakere.add(bruker);
         }
+        return mottakere;
     }
 
     // Dokumenter til arbeidsgiver sendes bare til representant når representant finnes.
-    private void sendTilArbeidsgiver(Produserbaredokumenter produserbartDokument, Behandling behandling, BrevData brevData) throws FunksjonellException, TekniskException {
+    private List<Aktoer> avklarMottakereForArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
+        List<Aktoer> mottakere = new ArrayList<>();
         Fagsak fagsak = behandling.getFagsak();
         Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.ARBEIDSGIVER);
         if (representant.isPresent()) {
-            produserIkkeredigerbartDokument(produserbartDokument, representant.get(), behandling, brevData);
+            mottakere.add(representant.get());
         } else {
-            produserIkkeredigerbartDokument(produserbartDokument, avklarArbeidsgiver(behandling), behandling, brevData);
+            mottakere.add(avklarArbeidsgiver(behandling));
         }
+        return mottakere;
     }
 
     private Aktoer avklarArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
@@ -196,17 +215,29 @@ public class DokumentService {
         }
     }
 
-    private void sendTilMyndighet(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, BrevData brevData)
-        throws FunksjonellException, TekniskException {
-        Aktoer myndighet;
+    private List<Aktoer> avklarMottakereForMyndighet(Mottaker mottaker, Behandling behandling) throws TekniskException {
+        List<Aktoer> mottakere = new ArrayList<>();
         if (mottaker.getAktør().getOrgnr() != null) {
             // Norsk myndighet har orgnummer.
-            myndighet = mottaker.getAktør();
+            mottakere.add(mottaker.getAktør());
         } else {
             // Utenlandsk myndighet.
-            myndighet = behandling.getFagsak().hentAktørMedRolleType(mottaker.getRolle());
+            Aktoer myndighet = behandling.getFagsak().hentAktørMedRolleType(mottaker.getRolle());
+            if (myndighet == null) {
+                // Myndighet lagres ikke før kjøring i saksflyt
+                myndighet = avklarMyndighetService.hentMyndighetFraBehandling(behandling);
+            }
+            mottakere.add(myndighet);
         }
-        produserIkkeredigerbartDokument(produserbartDokument, myndighet, behandling, brevData);
+        return mottakere;
+    }
+
+    private Dokumentbestilling lagDokumentbestilling(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData)
+        throws FunksjonellException, TekniskException {
+        Kontaktopplysning kontaktopplysning = hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker);
+        DokumentbestillingMetadata metadata = brevDataService.lagBestillingMetadata(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
+        Element brevinnhold = brevDataService.lagBrevXML(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
+        return new Dokumentbestilling(metadata, brevinnhold);
     }
 
     private Kontaktopplysning hentKontaktopplysning(String saksnumner, Aktoer mottaker) {
@@ -221,14 +252,6 @@ public class DokumentService {
         } else {
             return null;
         }
-    }
-
-    private Dokumentbestilling lagDokumentbestilling(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData)
-        throws FunksjonellException, TekniskException {
-        Kontaktopplysning kontaktopplysning = hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker);
-        DokumentbestillingMetadata metadata = brevDataService.lagBestillingMetadata(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
-        Element brevinnhold = brevDataService.lagBrevXML(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
-        return new Dokumentbestilling(metadata, brevinnhold);
     }
 
     private void produserIkkeredigerbartDokument(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData)
