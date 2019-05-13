@@ -1,19 +1,25 @@
 package no.nav.melosys.saksflyt.agent.ufm;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +32,15 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
     private final MedlFasade medlFasade;
     private final OppdaterMedlFelles felles;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final SaksopplysningRepository saksopplysningRepository;
 
     @Autowired
-    public OppdaterMedl(MedlFasade medlFasade, OppdaterMedlFelles felles) {
+    public OppdaterMedl(MedlFasade medlFasade, OppdaterMedlFelles felles, LovvalgsperiodeService lovvalgsperiodeService, SaksopplysningRepository saksopplysningRepository) {
         this.medlFasade = medlFasade;
         this.felles = felles;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.saksopplysningRepository = saksopplysningRepository;
     }
 
     @Override
@@ -47,9 +57,28 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Lovvalgsperiode lovvalgsperiode = felles.hentLovvalgsperiode(prosessinstans.getBehandling());
-        medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.SED);
+        SedDokument sedDokument = (SedDokument) hentSedSaksopplysningFraBehandling(prosessinstans.getBehandling())
+            .orElseThrow(() -> new TekniskException("Finner ikke SED-saksopplysning for behandling " + prosessinstans.getBehandling().getId()))
+            .getDokument();
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(sedDokument.getLovvalgBestemmelse());
+        lovvalgsperiode.setFom(sedDokument.getPeriode().getFom());
+        lovvalgsperiode.setTom(sedDokument.getPeriode().getTom());
+        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setLovvalgsland(sedDokument.getLovvalgsland());
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
+        lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
+
+        lovvalgsperiode = lovvalgsperiodeService.lagreLovvalgsperioder(prosessinstans.getBehandling().getId(), Collections.singletonList(lovvalgsperiode)).iterator().next();
+        Long medlId = medlFasade.opprettPeriodeEndelig(prosessinstans.getData(ProsessDataKey.BRUKER_ID), lovvalgsperiode, KildedokumenttypeMedl.SED);
+        felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, prosessinstans.getBehandling().getId());
 
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
+    }
+
+    private Optional<Saksopplysning> hentSedSaksopplysningFraBehandling(Behandling behandling) {
+        return saksopplysningRepository.findByBehandlingAndType(behandling, SaksopplysningType.SED_OPPLYSNINGER);
     }
 }
