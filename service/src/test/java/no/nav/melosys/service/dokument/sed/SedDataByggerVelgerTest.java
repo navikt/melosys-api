@@ -1,8 +1,6 @@
 package no.nav.melosys.service.dokument.sed;
 
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -29,10 +27,6 @@ public class SedDataByggerVelgerTest {
     private KodeverkService kodeverkService;
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
-    @Mock
-    private UtenlandskMyndighetRepository utenlandskMyndighetRepository;
-    @Mock
-    private VilkaarsresultatRepository vilkaarsresultatRepository;
 
     @InjectMocks
     private SedDataByggerVelger sedDataByggerVelger;
@@ -44,7 +38,7 @@ public class SedDataByggerVelgerTest {
         assertThat(bygger, is(instanceOf(SedDataBygger.class)));
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = UnsupportedOperationException.class)
     public void hentDatabygger_ikkeImplementert_forventException() {
         sedDataByggerVelger.hent(LovvalgsBestemmelser_883_2004.FO_883_2004_ART11_1);
     }
