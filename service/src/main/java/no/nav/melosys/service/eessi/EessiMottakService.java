@@ -20,6 +20,7 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Starter behandling av mottatte meldinger fra EESSI
@@ -41,6 +42,7 @@ public class EessiMottakService {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
+    @Transactional
     public void behandleMottattMelding(MelosysEessiMelding melosysEessiMelding) {
         if (skalBehandles(melosysEessiMelding)) {
             log.info("Behandler mottatt EESSI-medling. Buc: {}, SED: {}", melosysEessiMelding.getRinaSaksnummer(), melosysEessiMelding.getSedId());
