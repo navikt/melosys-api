@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.agent.ufm;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -60,6 +61,19 @@ public class OppdaterMedl extends AbstraktStegBehandler {
             .orElseThrow(() -> new TekniskException("Finner ikke SED-saksopplysning for behandling " + prosessinstans.getBehandling().getId()))
             .getDokument();
 
+
+        Collection<Lovvalgsperiode> lagretLovvalgsperiode = lovvalgsperiodeService.lagreLovvalgsperioder(
+            prosessinstans.getBehandling().getId(), Collections.singletonList(opprettLovvalgsperiode(sedDokument))
+        );
+
+        Lovvalgsperiode lovvalgsperiode = lagretLovvalgsperiode.iterator().next();
+        Long medlId = medlFasade.opprettPeriodeEndelig(prosessinstans.getData(ProsessDataKey.BRUKER_ID), lovvalgsperiode, KildedokumenttypeMedl.SED);
+        felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, prosessinstans.getBehandling().getId());
+
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
+    }
+
+    private Lovvalgsperiode opprettLovvalgsperiode(SedDokument sedDokument) {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(sedDokument.getLovvalgBestemmelse());
         lovvalgsperiode.setFom(sedDokument.getPeriode().getFom());
@@ -69,11 +83,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
         lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
 
-        lovvalgsperiode = lovvalgsperiodeService.lagreLovvalgsperioder(prosessinstans.getBehandling().getId(), Collections.singletonList(lovvalgsperiode)).iterator().next();
-        Long medlId = medlFasade.opprettPeriodeEndelig(prosessinstans.getData(ProsessDataKey.BRUKER_ID), lovvalgsperiode, KildedokumenttypeMedl.SED);
-        felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, prosessinstans.getBehandling().getId());
-
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
+        return lovvalgsperiode;
     }
 
     private Optional<Saksopplysning> hentSedSaksopplysningFraBehandling(Behandling behandling) {

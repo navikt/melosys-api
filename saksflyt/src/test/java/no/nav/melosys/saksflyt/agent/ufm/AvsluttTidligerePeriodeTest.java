@@ -31,7 +31,7 @@ public class AvsluttTidligerePeriodeTest {
 
     @Before
     public void setUp() throws Exception {
-        avsluttTidligerePeriode = new AvsluttTidligerePeriode(oppdaterMedlFelles,medlFasade);
+        avsluttTidligerePeriode = new AvsluttTidligerePeriode(oppdaterMedlFelles, medlFasade);
         when(oppdaterMedlFelles.hentLovvalgsperiode(any(Behandling.class))).thenReturn(new Lovvalgsperiode());
     }
 
