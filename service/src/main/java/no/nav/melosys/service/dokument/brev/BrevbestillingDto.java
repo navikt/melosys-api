@@ -9,4 +9,13 @@ public class BrevbestillingDto {
     public String fritekst;
 
     public String begrunnelseKode;
+
+    @Override
+    public String toString() {
+        return "BrevbestillingDto{" +
+            "mottaker=" + mottaker +
+            ", fritekst='" + fritekst + '\'' +
+            ", begrunnelseKode='" + begrunnelseKode + '\'' +
+            '}';
+    }
 }
