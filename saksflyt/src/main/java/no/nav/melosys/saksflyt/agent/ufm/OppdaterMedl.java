@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
@@ -65,7 +64,6 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         lovvalgsperiode.setBestemmelse(sedDokument.getLovvalgBestemmelse());
         lovvalgsperiode.setFom(sedDokument.getPeriode().getFom());
         lovvalgsperiode.setTom(sedDokument.getPeriode().getTom());
-        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.NO);
         lovvalgsperiode.setLovvalgsland(sedDokument.getLovvalgsland());
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);

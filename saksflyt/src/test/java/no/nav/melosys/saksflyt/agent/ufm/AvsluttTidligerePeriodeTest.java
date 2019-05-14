@@ -20,18 +20,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OppdaterBehandlingOgMedlTest {
+public class AvsluttTidligerePeriodeTest {
 
     @Mock
     private OppdaterMedlFelles oppdaterMedlFelles;
     @Mock
     private MedlFasade medlFasade;
 
-    private OppdaterBehandlingOgMedl oppdaterBehandlingOgMedl;
+    private AvsluttTidligerePeriode avsluttTidligerePeriode;
 
     @Before
     public void setUp() throws Exception {
-        oppdaterBehandlingOgMedl = new OppdaterBehandlingOgMedl(oppdaterMedlFelles,medlFasade);
+        avsluttTidligerePeriode = new AvsluttTidligerePeriode(oppdaterMedlFelles,medlFasade);
         when(oppdaterMedlFelles.hentLovvalgsperiode(any(Behandling.class))).thenReturn(new Lovvalgsperiode());
     }
 
@@ -46,7 +46,7 @@ public class OppdaterBehandlingOgMedlTest {
         prosessinstans.setData(ProsessDataKey.ER_ENDRING, false);
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "12312322");
 
-        oppdaterBehandlingOgMedl.utfør(prosessinstans);
+        avsluttTidligerePeriode.utfør(prosessinstans);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_PERIODE);
     }
 
@@ -58,7 +58,7 @@ public class OppdaterBehandlingOgMedlTest {
         behandling.setFagsak(hentFagsak());
 
         Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
-        oppdaterBehandlingOgMedl.utfør(prosessinstans);
+        avsluttTidligerePeriode.utfør(prosessinstans);
         verify(medlFasade).avvisPeriode(any(Lovvalgsperiode.class), any(StatusaarsakMedl.class));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_PERIODE);
     }

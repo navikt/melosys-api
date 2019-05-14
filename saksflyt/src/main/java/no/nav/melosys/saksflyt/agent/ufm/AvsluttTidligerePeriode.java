@@ -18,22 +18,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OppdaterBehandlingOgMedl extends AbstraktStegBehandler {
+public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OppdaterBehandlingOgMedl.class);
+    private static final Logger log = LoggerFactory.getLogger(AvsluttTidligerePeriode.class);
 
     private final OppdaterMedlFelles felles;
     private final MedlFasade medlFasade;
 
     @Autowired
-    public OppdaterBehandlingOgMedl(OppdaterMedlFelles felles, MedlFasade medlFasade) {
+    public AvsluttTidligerePeriode(OppdaterMedlFelles felles, MedlFasade medlFasade) {
         this.felles = felles;
         this.medlFasade = medlFasade;
     }
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.REG_UNNTAK_OPPDATER_BEHANDLING_OG_MEDL;
+        return ProsessSteg.REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class OppdaterBehandlingOgMedl extends AbstraktStegBehandler {
         if (tidligereBehandling != null) {
             log.info("Avslutter tidligere periode for fagsak {}", fagsak.getSaksnummer());
             Lovvalgsperiode lovvalgsperiode = felles.hentLovvalgsperiode(tidligereBehandling);
-            medlFasade.avvisPeriode(lovvalgsperiode, StatusaarsakMedl.OPPHORT);
+            medlFasade.avvisPeriode(lovvalgsperiode, StatusaarsakMedl.AVVIST);
         }
     }
 }
