@@ -71,7 +71,7 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     REG_UNNTAK_FERDIGSTILL_JOURNALPOST("REG_UNNTAK_FERDIGSTILL_JOURNALPOST","Ferdigstiller journalpost"),
     REG_UNNTAK_HENT_PERSON("REG_UNNTAK_HENT_PERSON","Henter person tilknyttet SED"),
     REG_UNNTAK_OPPRETT_SEDDOKUMENT("REG_UNNTAK_OPPRETT_SEDDOKUMENT", "Oppretter sedinfo dokument"),
-    REG_UNNTAK_OPPDATER_BEHANDLING_OG_MEDL("REG_UNNTAK_OPPDATER_BEHANDLING_OG_MEDL", "Oppdaterer behandling og setter lovvalgsperiode"),
+    REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE("REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE", "Avslutter tidligere periode i Medl hvis SED er endring"),
     REG_UNNTAK_VALIDER_PERIODE("REG_UNNTAK_VALIDER_PERIODE", "Validerer periode mottatt i søknad"),
     REG_UNNTAK_VALIDER_MEDLEMSKAP("REG_UNNTAK_VALIDER_MEDLEMSKAP", "Validerer tidligere medlemskap mot MEDL"),
     REG_UNNTAK_VALIDER_YTELSER("REG_UNNTAK_VALIDER_YTELSER", "Sjekker offentlige ytelser for en person"),
