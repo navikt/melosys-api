@@ -19,7 +19,7 @@ public enum SaksopplysningType implements InterntKodeverkTabell<SaksopplysningTy
     private String kode;
     private String beskrivelse;
 
-    private SaksopplysningType(String kode, String beskrivelse) {
+    SaksopplysningType(String kode, String beskrivelse) {
         this.kode = kode;
         this.beskrivelse = beskrivelse;
     }
@@ -35,7 +35,7 @@ public enum SaksopplysningType implements InterntKodeverkTabell<SaksopplysningTy
     }
 
     @Converter
-    public static class DbKonverterer extends InterntKodeverkTabell.DbKonverterer<SaksopplysningType> {
+    public static class DbConverter extends InterntKodeverkTabell.DbKonverterer<SaksopplysningType> {
         @Override
         protected SaksopplysningType[] getLovligeVerdier() {
             return SaksopplysningType.values();
