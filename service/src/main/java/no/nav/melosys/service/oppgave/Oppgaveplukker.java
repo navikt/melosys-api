@@ -119,16 +119,21 @@ public class Oppgaveplukker {
         Iterator<Oppgave> iter = oppgaver.iterator();
         while (iter.hasNext()) {
             Oppgave oppgave = iter.next();
-            Fagsak fagsak = fagsakRepository.findBySaksnummer(oppgave.getSaksnummer());
+            String saksnummer = oppgave.getSaksnummer();
+            Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
             if (fagsak == null) {
-                log.error("Fant ikke fagsak {} for oppgave {}", oppgave.getSaksnummer(), oppgave.getOppgaveId());
-                throw new TekniskException("Fant ikke fagsak " + oppgave.getSaksnummer());
+                log.error("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
+                throw new TekniskException("Fant ikke fagsak " + saksnummer);
             }
             Behandling behandling = fagsak.getAktivBehandling();
+            if (behandling == null) {
+                throw new TekniskException("Fant ingen aktiv behandling på fagsak " + saksnummer);
+            }
 
-            if (behandling.erVenterForDokumentasjon()
-                && behandling.getDokumentasjonSvarfristDato() != null
-                && behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
+            if (behandling.erVenterForDokumentasjon() && behandling.getDokumentasjonSvarfristDato() == null) {
+                throw new TekniskException("Behandling " + behandling.getId() + " tilhørende " + saksnummer + " avventer dokumentasjon, men har ingen svarfristdato");
+            }
+            if (behandling.erVenterForDokumentasjon() && behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
                 iter.remove();
             }
         }
