@@ -146,7 +146,7 @@ public class Fagsak extends RegistreringsInfo {
     public Optional<Aktoer> hentRepresentant(Representerer representerer) {
         Assert.notNull(representerer, "Representerer trengs for å hente representant.");
         return aktører.stream().filter(a -> REPRESENTANT.equals(a.getRolle()))
-            .filter(a -> (representerer.equals(a.getRepresenterer()) || representerer.equals(Representerer.BEGGE)))
+            .filter(a -> (representerer.equals(a.getRepresenterer()) || Representerer.BEGGE.equals(a.getRepresenterer())))
             .findFirst();
     }
 

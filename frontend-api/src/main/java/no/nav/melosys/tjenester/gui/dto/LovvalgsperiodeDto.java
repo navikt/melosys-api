@@ -27,7 +27,7 @@ public final class LovvalgsperiodeDto {
     public final String innvilgelsesResultat;
     public final String trygdeDekning;
     public final String medlemskapstype;
-    private final Long medlemskapsperiodeID;
+    public final String medlemskapsperiodeID;
 
     public LovvalgsperiodeDto(PeriodeDto periode,
             LovvalgBestemmelse lovvalgBestemmelse,
@@ -38,7 +38,7 @@ public final class LovvalgsperiodeDto {
             InnvilgelsesResultat innvilgelsesResultat,
             Trygdedekninger trygdeDekning,
             Medlemskapstyper medlemskapstype,
-            Long medlemskapsperiodeID) {
+            String medlemskapsperiodeID) {
         this.periode = periode;
         this.lovvalgBestemmelse = lovvalgBestemmelse != null ? lovvalgBestemmelse.name() : null;
         this.tilleggBestemmelse = tilleggBestemmelse != null ? tilleggBestemmelse.name() : null;
@@ -63,7 +63,7 @@ public final class LovvalgsperiodeDto {
                 InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
                 enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
                 enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")),
-                json.get("medlemskapsperiodeID") != null ? Long.valueOf(json.get("medlemskapsperiodeID")) : null);
+                json.get("medlemskapsperiodeID"));
     }
 
     /**
@@ -85,7 +85,7 @@ public final class LovvalgsperiodeDto {
             lovvalgsperiode.getInnvilgelsesresultat(),
             lovvalgsperiode.getDekning(),
             lovvalgsperiode.getMedlemskapstype(),
-            lovvalgsperiode.getMedlPeriodeID());
+            lovvalgsperiode.getMedlPeriodeID() != null ? lovvalgsperiode.getMedlPeriodeID().toString() : null);
     }
 
     /**
@@ -105,7 +105,7 @@ public final class LovvalgsperiodeDto {
         resultat.setInnvilgelsesresultat(enumVerdiEllerNull(InnvilgelsesResultat.class, innvilgelsesResultat));
         resultat.setDekning(enumVerdiEllerNull(Trygdedekninger.class, trygdeDekning));
         resultat.setMedlemskapstype(enumVerdiEllerNull(Medlemskapstyper.class, medlemskapstype));
-        resultat.setMedlPeriodeID(medlemskapsperiodeID);
+        resultat.setMedlPeriodeID(medlemskapsperiodeID != null ? Long.valueOf(medlemskapsperiodeID) : null);
         return resultat;
     }
 

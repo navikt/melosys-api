@@ -44,7 +44,7 @@ public final class LovvalgsperiodeTjenesteTest {
             InnvilgelsesResultat.AVSLAATT,
             null,
             Medlemskapstyper.FRIVILLIG,
-            10L);
+            "10");
 
     private static final long BEHANDLING_UTEN_TILGANG = 238L;
     private static final long BEHANDLING_MED_TEKNISK_FEIL = 832L;
@@ -87,7 +87,7 @@ public final class LovvalgsperiodeTjenesteTest {
         doReturn(lovvalgsperiode).when(lovvalgsperiodeService).hentOpprinneligLovvalgsperiode(5L);
         LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, mock(Tilgang.class));
 
-        PeriodeDto periodeDto = (PeriodeDto) instans.hentOpprinneligLovvalgsperiode(5L).getEntity();
+        PeriodeDto periodeDto = instans.hentOpprinneligLovvalgsperiode(5L).get("opprinneligLovvalgsperiode");
 
         assertThat(periodeDto.getFom()).isEqualTo(fomDato);
         assertThat(periodeDto.getTom()).isEqualTo(tomDato);
@@ -151,7 +151,7 @@ public final class LovvalgsperiodeTjenesteTest {
         lovvalgsperiode.setTilleggsbestemmelse(TilleggsBestemmelser_883_2004.valueOf(FORVENTET.tilleggBestemmelse));
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET.innvilgelsesResultat));
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET.medlemskapstype));
-        lovvalgsperiode.setMedlPeriodeID(5L);
+        lovvalgsperiode.setMedlPeriodeID(Long.valueOf(FORVENTET.medlemskapsperiodeID));
         when(behandlingsresultatRepo.findById(eq(42L))).thenReturn(Optional.of(lagBehandlingsresultat()));
         List<Lovvalgsperiode> ingenPerioder = Collections.<Lovvalgsperiode> emptyList();
         List<Lovvalgsperiode> enPeriode = Collections.singletonList(lovvalgsperiode);

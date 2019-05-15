@@ -16,7 +16,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -33,7 +32,6 @@ public class SedServiceTest {
     @Mock
     private EessiConsumer eessiConsumer;
 
-    @InjectMocks
     private SedService sedService;
 
     private Behandling behandling;
@@ -44,6 +42,7 @@ public class SedServiceTest {
 
     @Before
     public void setup() throws Exception {
+        sedService = new SedService(sedDataByggerVelger,eessiConsumer,"true");
 
         behandling = new Behandling();
         behandling.setFagsak(new Fagsak());

@@ -13,6 +13,7 @@ import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,37 +23,40 @@ public class SedService {
 
     private final SedDataByggerVelger sedDataByggerVelger;
     private final EessiConsumer eessiConsumer;
+    private final boolean skalSendeSed;
 
-    public SedService(SedDataByggerVelger sedDataByggerVelger, EessiConsumer eessiConsumer) {
+    public SedService(SedDataByggerVelger sedDataByggerVelger, EessiConsumer eessiConsumer, @Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed) {
         this.sedDataByggerVelger = sedDataByggerVelger;
         this.eessiConsumer = eessiConsumer;
+        this.skalSendeSed = Boolean.valueOf(skalSendeSed);
     }
 
     public void opprettOgSendSed(Behandling behandling, Behandlingsresultat behandlingsresultat) {
 
-        try {
-            Lovvalgsperiode lovvalgsperiode = behandlingsresultat.getLovvalgsperioder().stream()
-                .findFirst().orElseThrow(() -> new TekniskException("Finner ingen lovvalgsperiode!")); //TODO: flere lovvalgsperioder
+        if (skalSendeSed) {
+            try {
+                Lovvalgsperiode lovvalgsperiode = behandlingsresultat.getLovvalgsperioder().stream()
+                    .findFirst().orElseThrow(() -> new TekniskException("Finner ingen lovvalgsperiode!")); //TODO: flere lovvalgsperioder
 
-            LovvalgBestemmelse lovvalgBestemmelse = lovvalgsperiode.getBestemmelse();
-            Fagsak fagsak = behandling.getFagsak();
+                LovvalgBestemmelse lovvalgBestemmelse = lovvalgsperiode.getBestemmelse();
+                Fagsak fagsak = behandling.getFagsak();
 
-            SedDataBygger sedDataBygger = sedDataByggerVelger.hent(lovvalgsperiode.getBestemmelse());
-            SedDataDto sedData = sedDataBygger.lag(behandling);
-            sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
+                SedDataBygger sedDataBygger = sedDataByggerVelger.hent(lovvalgsperiode.getBestemmelse());
+                SedDataDto sedData = sedDataBygger.lag(behandling);
+                sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
-            log.info("Oppretter buc og sed med artikkel {} for fagsak {}", lovvalgBestemmelse.getKode(), fagsak.getSaksnummer());
-            Map<String, String> rinaSakInfo = eessiConsumer.opprettOgSendSed(sedData);
+                log.info("Oppretter buc og sed med artikkel {} for fagsak {}", lovvalgBestemmelse.getKode(), fagsak.getSaksnummer());
+                Map<String, String> rinaSakInfo = eessiConsumer.opprettOgSendSed(sedData);
 
-            log.info("Buc opprettet med id {} for behandling {}", rinaSakInfo.get("rinaCaseId"), behandling.getId());
-        } catch (Exception e) {
-            log.error(
-                "Feil ved opprettelse av SED: \n" +
-                "Behandling {}\n" +
-                "Behandlingsresultat {}\n" +
-                "Fagsak {}\n",
-                behandling.getId(), behandlingsresultat.getId(), behandling.getFagsak().getSaksnummer(), e);
+                log.info("Buc opprettet med id {} for behandling {}", rinaSakInfo.get("rinaCaseId"), behandling.getId());
+            } catch (Exception e) {
+                log.error(
+                    "Feil ved opprettelse av SED: \n" +
+                        "Behandling {}\n" +
+                        "Behandlingsresultat {}\n" +
+                        "Fagsak {}\n",
+                    behandling.getId(), behandlingsresultat.getId(), behandling.getFagsak().getSaksnummer(), e);
+            }
         }
-
     }
 }

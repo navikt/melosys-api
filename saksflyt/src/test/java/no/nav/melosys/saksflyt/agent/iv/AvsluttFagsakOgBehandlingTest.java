@@ -9,10 +9,7 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.saksflyt.felles.OppdaterFagsakOgBehandling;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +18,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.domain.ProsessSteg.IV_STATUS_BEH_AVSL;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AvsluttFagsakOgBehandlingTest {
@@ -28,15 +27,12 @@ public class AvsluttFagsakOgBehandlingTest {
     private AvsluttFagsakOgBehandling agent;
 
     @Mock
-    private BehandlingRepository behandlingRepository;
-
-    @Mock
-    private FagsakRepository fagsakRepository;
+    private OppdaterFagsakOgBehandling felles;
 
 
     @Before
     public void setUp() {
-        agent = new AvsluttFagsakOgBehandling(behandlingRepository, fagsakRepository);
+        agent = new AvsluttFagsakOgBehandling(felles);
     }
 
     @Test
@@ -57,9 +53,8 @@ public class AvsluttFagsakOgBehandlingTest {
 
         agent.utførSteg(p);
 
+        verify(felles).oppdaterFagsakOgBehandlingStatuser(eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART), eq(Behandlingsstatus.AVSLUTTET));
         assertThat(p.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
-        assertThat(p.getBehandling().getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
-        assertThat(p.getBehandling().getFagsak().getStatus()).isEqualTo(Saksstatuser.LOVVALG_AVKLART);
 
     }
 } 

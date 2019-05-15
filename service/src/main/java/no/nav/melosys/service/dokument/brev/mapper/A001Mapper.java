@@ -44,12 +44,16 @@ public class A001Mapper {
 
         seda001.setPerson(mapPerson(brevData.personDokument, brevData.bostedsadresse, brevData.utenlandskIdent));
 
-        // Foretakliste = Identifikasjon av arbeidsgiver (Kun arbeidsgivere)
-        List<AvklartVirksomhet> arbeidsgivendeVirksomheter = brevData.arbeidsgivendeVirkomsheter;
-        seda001.setForetakListe(mapForetakliste(arbeidsgivendeVirksomheter));
-
         List<AvklartVirksomhet> selvstendigeVirksomheter = brevData.selvstendigeVirksomheter;
-        seda001.setSelvstendigNæringsvirksomhetListe(mapSelvstendigvirksometliste(selvstendigeVirksomheter));
+
+        //A001 Skal ikke inneholde både Identifikasjon av arbeidsgiveren og Identifikasjon av selvstendig næringsvirksomhet
+        if (!selvstendigeVirksomheter.isEmpty()) {
+            seda001.setSelvstendigNæringsvirksomhetListe(mapSelvstendigvirksometliste(selvstendigeVirksomheter));
+        } else {
+            // Foretakliste = Identifikasjon av arbeidsgiver (Kun arbeidsgivere)
+            List<AvklartVirksomhet> arbeidsgivendeVirksomheter = brevData.arbeidsgivendeVirkomsheter;
+            seda001.setForetakListe(mapForetakliste(arbeidsgivendeVirksomheter));
+        }
 
         seda001.setArbeidsstedListe(mapArbeidsstedliste(brevData.arbeidssteder));
 
