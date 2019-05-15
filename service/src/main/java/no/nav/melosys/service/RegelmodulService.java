@@ -111,22 +111,22 @@ public class RegelmodulService {
             Element dokumentnode = xmlTilNode(saksopplysning.getInternXml(), documentBuilder, document);
 
             switch (type) {
-                case ARBEIDSFORHOLD:
+                case ARBFORH:
                     dokumentnoder.get(ARBEIDSFORHOLDDOKUMENTER).appendChild(dokumentnode);
                     break;
-                case INNTEKT:
+                case INNTK:
                     dokumentnoder.get(INNTEKTDOKUMENTER).appendChild(dokumentnode);
                     break;
-                case MEDLEMSKAP:
+                case MEDL:
                     dokumentnoder.get(MEDLEMSKAPDOKUMENTER).appendChild(dokumentnode);
                     break;
-                case ORGANISASJON:
+                case ORG:
                     dokumentnoder.get(ORGANISASJONDOKUMENTER).appendChild(dokumentnode);
                     break;
-                case PERSONHISTORIKK:
+                case PERSHIST:
                     // Regelmodul skal bruke historisk statsborgerskap ved søknad tilbake i tid
                     break;
-                case PERSONOPPLYSNING:
+                case PERSOPL:
                     dokumentnoder.put("personDokument", dokumentnode);
                     break;
                 case SOB_SAK:

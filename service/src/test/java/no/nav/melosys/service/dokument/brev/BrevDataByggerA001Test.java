@@ -113,7 +113,7 @@ public class BrevDataByggerA001Test {
         medlDokument = new MedlemskapDokument();
         Saksopplysning medl = new Saksopplysning();
         medl.setDokument(medlDokument);
-        medl.setType(SaksopplysningType.MEDLEMSKAP);
+        medl.setType(SaksopplysningType.MEDL);
 
         arbDokument = new ArbeidsforholdDokument();
         lagArbeidsforhold(orgnr2,
@@ -122,12 +122,12 @@ public class BrevDataByggerA001Test {
 
         Saksopplysning aareg = new Saksopplysning();
         aareg.setDokument(arbDokument);
-        aareg.setType(SaksopplysningType.ARBEIDSFORHOLD);
+        aareg.setType(SaksopplysningType.ARBFORH);
 
         Saksopplysning person = new Saksopplysning();
         PersonDokument personDok = new PersonDokument();
         person.setDokument(personDok);
-        person.setType(SaksopplysningType.PERSONOPPLYSNING);
+        person.setType(SaksopplysningType.PERSOPL);
         when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(soeknad, person, medl, aareg)));
 
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
@@ -152,7 +152,7 @@ public class BrevDataByggerA001Test {
         orgDok.setOrgnummer(orgnummer);
         orgDok.setOrganisasjonDetaljer(detaljer);
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.ORGANISASJON);
+        saksopplysning.setType(SaksopplysningType.ORG);
         saksopplysning.setDokument(orgDok);
         when(ereg.hentOrganisasjon(eq(orgnummer))).thenReturn(saksopplysning);
     }

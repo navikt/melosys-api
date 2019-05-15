@@ -20,8 +20,8 @@ public class ProsessinstansHendelse {
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime dato;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "steg", nullable = false, updatable = false)
-    @Convert(converter = ProsessSteg.DbKonverterer.class)
     private ProsessSteg steg;
 
     @Column(name = "type", updatable = false)

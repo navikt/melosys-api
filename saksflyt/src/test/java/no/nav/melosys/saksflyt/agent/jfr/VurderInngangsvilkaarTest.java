@@ -102,11 +102,11 @@ public class VurderInngangsvilkaarTest {
         PersonDokument pDok = new PersonDokument();
         pDok.statsborgerskap = new Land("NOR");
         Saksopplysning sopp = new Saksopplysning();
-        sopp.setType(SaksopplysningType.PERSONOPPLYSNING);
+        sopp.setType(SaksopplysningType.PERSOPL);
         sopp.setDokument(pDok);
 
         Saksopplysning historiskSopp = new Saksopplysning();
-        historiskSopp.setType(SaksopplysningType.PERSONHISTORIKK);
+        historiskSopp.setType(SaksopplysningType.PERSHIST);
         PersonhistorikkDokument personhistorikkDokument = new PersonhistorikkDokument();
         historiskSopp.setDokument(personhistorikkDokument);
         StatsborgerskapPeriode statsborgerskapPeriode = new StatsborgerskapPeriode();
@@ -144,7 +144,7 @@ public class VurderInngangsvilkaarTest {
         PersonDokument pDok = new PersonDokument();
         pDok.statsborgerskap = new Land("NOR");
         Saksopplysning sopp = new Saksopplysning();
-        sopp.setType(SaksopplysningType.PERSONOPPLYSNING);
+        sopp.setType(SaksopplysningType.PERSOPL);
         sopp.setDokument(pDok);
         p.getBehandling().setSaksopplysninger(Collections.singleton(sopp));
         p.setData(ProsessDataKey.SØKNADSLAND, Collections.singletonList(Landkoder.PL.getKode()));

@@ -87,6 +87,6 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     }
 
     private Optional<Saksopplysning> hentSedSaksopplysningFraBehandling(Behandling behandling) {
-        return saksopplysningRepository.findByBehandlingAndType(behandling, SaksopplysningType.SED_OPPLYSNINGER);
+        return saksopplysningRepository.findByBehandlingAndType(behandling, SaksopplysningType.SEDOPPL);
     }
 }

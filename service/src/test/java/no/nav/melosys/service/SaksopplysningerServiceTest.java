@@ -76,7 +76,7 @@ public class SaksopplysningerServiceTest {
         HashSet<Saksopplysning> saksopplysninger = new HashSet<>();
 
         Saksopplysning saksopplysningPerson = new Saksopplysning();
-        saksopplysningPerson.setType(SaksopplysningType.PERSONOPPLYSNING);
+        saksopplysningPerson.setType(SaksopplysningType.PERSOPL);
         saksopplysninger.add(saksopplysningPerson);
 
         SoeknadDokument soeknadDokument = new SoeknadDokument();

@@ -56,7 +56,7 @@ public class FagsakBehandlingFactory {
 
     private static Saksopplysning lagPersonSaksopplysning() {
         Saksopplysning saksopplysningPerson = new Saksopplysning();
-        saksopplysningPerson.setType(SaksopplysningType.PERSONOPPLYSNING);
+        saksopplysningPerson.setType(SaksopplysningType.PERSOPL);
         PersonDokument personDokument = new PersonDokument();
         personDokument.sammensattNavn = "Joe Moe";
         saksopplysningPerson.setDokument(personDokument);

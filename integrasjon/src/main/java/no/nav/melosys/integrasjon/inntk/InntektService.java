@@ -119,7 +119,7 @@ public class InntektService implements InntektFasade {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
         saksopplysning.setKilde(SaksopplysningKilde.INNTK);
-        saksopplysning.setType(SaksopplysningType.INNTEKT);
+        saksopplysning.setType(SaksopplysningType.INNTK);
         saksopplysning.setVersjon(INNTEKT_VERSJON);
 
         // xml -> java objekter

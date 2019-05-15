@@ -57,33 +57,33 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
             SaksopplysningDokument dokument = saksopplysning.getDokument();
 
             switch (type) {
-                case PERSONOPPLYSNING:
+                case PERSOPL:
                     dto.setPerson((PersonDokument)dokument);
                     break;
-                case ARBEIDSFORHOLD:
+                case ARBFORH:
                     ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) dokument;
                     if (arbeidsforholdDokument != null && arbeidsforholdDokument.getArbeidsforhold() != null) {
                         arbeidsforholdDokument.getArbeidsforhold().sort(new ArbeidsforholdComparator());
                     }
                     dto.setArbeidsforhold(arbeidsforholdDokument);
                     break;
-                case ORGANISASJON:
+                case ORG:
                     dto.getOrganisasjoner().add((OrganisasjonDokument)dokument);
                     break;
-                case MEDLEMSKAP:
+                case MEDL:
                     MedlemskapDokument medlemskapDokument = (MedlemskapDokument) dokument;
                     if (medlemskapDokument != null && medlemskapDokument.getMedlemsperiode() != null) {
                         medlemskapDokument.getMedlemsperiode().sort(Comparator.comparing(Medlemsperiode::getType).thenComparing(medlemsperiodeKomparator));
                     }
                     dto.setMedlemskap(medlemskapDokument);
                     break;
-                case INNTEKT:
+                case INNTK:
                     dto.setInntekt(new InntektDto((InntektDokument) dokument));
                     break;
                 case SOB_SAK:
                     dto.setSakOgBehandling((SobSakDokument) dokument);
                     break;
-                case PERSONHISTORIKK:
+                case PERSHIST:
                     PersonhistorikkDokument personhistorikk = (PersonhistorikkDokument) dokument;
                     if (!personhistorikk.statsborgerskapListe.isEmpty()) {
                         historiskStatsborgerskap = personhistorikk.statsborgerskapListe.get(0).statsborgerskap;
@@ -93,7 +93,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     søknadsperiode = hentPeriode((SoeknadDokument) dokument);
                     // N.B. Frontend ønsker ikke å få søknaden på /fagsaker slik at opplysninger fra registrene er adskilt
                     break;
-                case SED_OPPLYSNINGER:
+                case SEDOPPL:
                     //TODO: MELOSYS-2535
                     break;
                 default:

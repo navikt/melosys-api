@@ -124,7 +124,7 @@ public class AaregService implements AaregFasade {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
         saksopplysning.setKilde(SaksopplysningKilde.AAREG);
-        saksopplysning.setType(SaksopplysningType.ARBEIDSFORHOLD);
+        saksopplysning.setType(SaksopplysningType.ARBFORH);
         saksopplysning.setVersjon(ARBEIDSFORHOLD_VERSJON);
 
         // xml -> java objekter
@@ -161,7 +161,7 @@ public class AaregService implements AaregFasade {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
         saksopplysning.setKilde(SaksopplysningKilde.AAREG);
-        saksopplysning.setType(SaksopplysningType.ARBEIDSFORHOLD);
+        saksopplysning.setType(SaksopplysningType.ARBFORH);
         saksopplysning.setVersjon(ARBEIDSFORHOLD_VERSJON);
 
         // xml -> java objekter

@@ -60,7 +60,7 @@ public class DataByggerStubs {
         saksopplysninger.add(saksopplysning);
 
         saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.ARBEIDSFORHOLD);
+        saksopplysning.setType(SaksopplysningType.ARBFORH);
         saksopplysning.setDokument(new ArbeidsforholdDokument());
         saksopplysninger.add(saksopplysning);
 
@@ -88,7 +88,7 @@ public class DataByggerStubs {
         personDokument.statsborgerskap = new Land(Land.NORGE);
 
         saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.PERSONOPPLYSNING);
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysning.setDokument(personDokument);
         saksopplysninger.add(saksopplysning);
 

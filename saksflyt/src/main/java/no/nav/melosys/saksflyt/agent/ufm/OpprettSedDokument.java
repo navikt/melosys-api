@@ -55,7 +55,7 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
         Instant nå = Instant.now();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(sedDokument);
-        saksopplysning.setType(SaksopplysningType.SED_OPPLYSNINGER);
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
         saksopplysning.setBehandling(prosessinstans.getBehandling());
         saksopplysning.setKilde(SaksopplysningKilde.EESSI);
         saksopplysning.setVersjon("0.2-SNAPSHOT");

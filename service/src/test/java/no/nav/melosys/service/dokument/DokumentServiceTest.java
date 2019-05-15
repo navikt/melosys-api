@@ -211,7 +211,7 @@ public final class DokumentServiceTest {
         dok.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = Collections.singletonList(ORGNR);
         dok.oppholdUtland.oppholdslandkoder.add("DK");
         Saksopplysning søknad = lagSaksopplysning(SaksopplysningType.SØKNAD, dok);
-        Saksopplysning personopplysninger = lagSaksopplysning(SaksopplysningType.PERSONOPPLYSNING, lagPersonDokument());
+        Saksopplysning personopplysninger = lagSaksopplysning(SaksopplysningType.PERSOPL, lagPersonDokument());
         behandling.setSaksopplysninger(new HashSet<>(Arrays.asList(søknad, personopplysninger)));
         return behandling;
     }
@@ -308,7 +308,7 @@ public final class DokumentServiceTest {
         organisasjonDetaljer.forretningsadresse = Collections.singletonList(adresse);
         orgDok.setOrganisasjonDetaljer(organisasjonDetaljer);
         orgDok.setOrgnummer(ORGNR);
-        when(eregFasade.hentOrganisasjon(ORGNR)).thenReturn(lagSaksopplysning(SaksopplysningType.ORGANISASJON, orgDok));
+        when(eregFasade.hentOrganisasjon(ORGNR)).thenReturn(lagSaksopplysning(SaksopplysningType.ORG, orgDok));
         return eregFasade;
     }
 

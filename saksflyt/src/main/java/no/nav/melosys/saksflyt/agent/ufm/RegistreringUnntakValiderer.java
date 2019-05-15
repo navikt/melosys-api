@@ -38,7 +38,7 @@ public abstract class RegistreringUnntakValiderer extends AbstraktStegBehandler 
     }
 
     Saksopplysning hentSedSaksopplysning(Prosessinstans prosessinstans) throws TekniskException {
-        return saksopplysningRepository.findByBehandlingAndType(prosessinstans.getBehandling(), SaksopplysningType.SED_OPPLYSNINGER)
+        return saksopplysningRepository.findByBehandlingAndType(prosessinstans.getBehandling(), SaksopplysningType.SEDOPPL)
             .orElseThrow(() -> new TekniskException("Seddokument finnes ikke for behandling " + prosessinstans.getBehandling().getId()));
     }
 }

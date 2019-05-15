@@ -78,7 +78,7 @@ public class EregService implements EregFasade {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
         saksopplysning.setKilde(SaksopplysningKilde.EREG);
-        saksopplysning.setType(SaksopplysningType.ORGANISASJON);
+        saksopplysning.setType(SaksopplysningType.ORG);
         saksopplysning.setVersjon(ORGANISASJON_VERSJON);
 
         // xml -> java objekter

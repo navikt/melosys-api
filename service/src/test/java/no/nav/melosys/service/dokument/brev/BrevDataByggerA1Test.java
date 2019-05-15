@@ -77,7 +77,7 @@ public class BrevDataByggerA1Test {
         Saksopplysning person = new Saksopplysning();
         PersonDokument personDok = new PersonDokument();
         person.setDokument(personDok);
-        person.setType(SaksopplysningType.PERSONOPPLYSNING);
+        person.setType(SaksopplysningType.PERSOPL);
 
         Saksopplysning arbeidsforhold = lagArbeidsforholdOpplysning(Collections.singletonList(orgnr1));
 
@@ -111,7 +111,7 @@ public class BrevDataByggerA1Test {
         org.setOrganisasjonDetaljer(detaljer);
         org.setNavn(Collections.singletonList(navn));
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.ORGANISASJON);
+        saksopplysning.setType(SaksopplysningType.ORG);
         saksopplysning.setDokument(org);
         return org;
     }

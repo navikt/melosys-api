@@ -191,7 +191,7 @@ public class FagsakTjeneste extends RestTjeneste {
     }
 
     private void setSammensattNavn(FagsakOppsummeringDto fagsakOppsummeringDto, Behandling behandling) {
-        Optional<SaksopplysningDokument> saksopplysningDokumentPerson = hentDokument(behandling, SaksopplysningType.PERSONOPPLYSNING);
+        Optional<SaksopplysningDokument> saksopplysningDokumentPerson = hentDokument(behandling, SaksopplysningType.PERSOPL);
 
         if( saksopplysningDokumentPerson.isPresent()) {
                 PersonDokument personDokument = (PersonDokument) saksopplysningDokumentPerson.get();

@@ -32,13 +32,13 @@ public final class SaksopplysningerUtils {
     }
 
     public static PersonDokument hentPersonDokument(Behandling behandling) throws TekniskException {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.PERSONOPPLYSNING);
+        Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.PERSOPL);
         return (PersonDokument) saksopplysning
                 .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
     }
 
     public static PersonhistorikkDokument hentPersonhistorikkDokument(Behandling behandling) throws TekniskException {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.PERSONHISTORIKK);
+        Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.PERSHIST);
         return (PersonhistorikkDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke personhistorikkDokument"));
     }
@@ -50,13 +50,13 @@ public final class SaksopplysningerUtils {
     }
 
     public static MedlemskapDokument hentMedlemskapDokument(Behandling behandling) throws TekniskException {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.MEDLEMSKAP);
+        Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.MEDL);
         return (MedlemskapDokument) saksopplysning
                 .orElseThrow(() -> new TekniskException("Finner ikke medlemskapdokument"));
     }
 
     public static ArbeidsforholdDokument hentArbeidsforholdDokument(Behandling behandling) throws TekniskException {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.ARBEIDSFORHOLD);
+        Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.ARBFORH);
         return (ArbeidsforholdDokument) saksopplysning
                 .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
     }
