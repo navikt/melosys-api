@@ -169,7 +169,7 @@ public class InnvilgelsesbrevMapperTest {
         pdok.statsborgerskap = new Land(Land.BELGIA);
         pdok.fødselsdato = LocalDate.ofYearDay(1900, 1);
         Saksopplysning søknad = lagSoeknadssaksopplysning();
-        return lagBehandling(fagsak, new HashSet<>(Arrays.asList(søknad, lagSaksopplysning(SaksopplysningType.PERSONOPPLYSNING, pdok))));
+        return lagBehandling(fagsak, new HashSet<>(Arrays.asList(søknad, lagSaksopplysning(SaksopplysningType.PERSOPL, pdok))));
     }
 
     private static Saksopplysning lagSoeknadssaksopplysning() {

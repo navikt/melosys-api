@@ -41,7 +41,7 @@ public class OppdaterMedlTest {
     @Before
     public void setUp() {
         oppdaterMedl = new OppdaterMedl(medlFasade, oppdaterMedlFelles, lovvalgsperiodeService, saksopplysningRepository);
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
             .thenReturn(Optional.of(hentSaksopplysning()));
     }
 

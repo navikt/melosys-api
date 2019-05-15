@@ -50,7 +50,7 @@ public class HentOrganisasjonsopplysningerTest {
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
 
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.ARBEIDSFORHOLD);
+        saksopplysning.setType(SaksopplysningType.ARBFORH);
 
         ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument();
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();

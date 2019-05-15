@@ -5,14 +5,14 @@ import javax.persistence.Converter;
 import no.nav.melosys.domain.kodeverk.InterntKodeverkTabell;
 
 public enum SaksopplysningType implements InterntKodeverkTabell<SaksopplysningType> {
-    
-    ARBEIDSFORHOLD("ARBFORH", "Arbeidsforhold"),
-    INNTEKT("INNTK", "Inntekt"),
-    MEDLEMSKAP("MEDL", "Medlemskap"),
-    ORGANISASJON("ORG", "Arbeidsgiver"),
-    PERSONHISTORIKK("PERSHIST", "Personhistorikk"),
-    PERSONOPPLYSNING("PERSOPL", "Personopplysning"),
-    SED_OPPLYSNINGER("SEDOPPL", "SED-opplysninger"),
+
+    ARBFORH("ARBFORH", "Arbeidsforhold"),
+    INNTK("INNTK", "Inntekt"),
+    MEDL("MEDL", "Medlemskap"),
+    ORG("ORG", "Arbeidsgiver"),
+    PERSHIST("PERSHIST", "Personhistorikk"),
+    PERSOPL("PERSOPL", "Personopplysning"),
+    SEDOPPL("SEDOPPL", "SED-opplysninger"),
     SOB_SAK("SOB_SAK", "Sak og behandling-sak"),
     SØKNAD("SØKNAD", "Søknad");
 

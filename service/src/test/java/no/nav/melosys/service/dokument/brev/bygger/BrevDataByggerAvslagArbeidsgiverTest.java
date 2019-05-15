@@ -75,7 +75,7 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         personDokument.sammensattNavn = "Navn Navnesen";
         Saksopplysning person = new Saksopplysning();
         person.setDokument(personDokument);
-        person.setType(SaksopplysningType.PERSONOPPLYSNING);
+        person.setType(SaksopplysningType.PERSOPL);
 
         Set<Saksopplysning> saksopplysninger = lagSøknadOgArbeidsforholdOpplysninger(Arrays.asList("987654321"),
             Collections.emptyList(),

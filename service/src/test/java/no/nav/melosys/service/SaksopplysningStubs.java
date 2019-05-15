@@ -21,7 +21,7 @@ public class SaksopplysningStubs {
         when(arbeidsforholdDokument.hentOrgnumre()).thenReturn(new HashSet<>(registrereArbeidsgiverOrgnumre));
         Saksopplysning arbeidsforhold = new Saksopplysning();
         arbeidsforhold.setDokument(arbeidsforholdDokument);
-        arbeidsforhold.setType(SaksopplysningType.ARBEIDSFORHOLD);
+        arbeidsforhold.setType(SaksopplysningType.ARBFORH);
         return arbeidsforhold;
     }
 

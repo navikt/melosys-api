@@ -48,7 +48,7 @@ public class Ereg4KonverteringTest {
             }
         }
         test.setDokumentXml(stringBuilder.toString());
-        test.setType(SaksopplysningType.ORGANISASJON);
+        test.setType(SaksopplysningType.ORG);
         test.setVersjon("4.0");
 
         factory.lagDokument(test);
@@ -120,7 +120,7 @@ public class Ereg4KonverteringTest {
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
             saksopplysning.setDokumentXml(xmlStr);
-            saksopplysning.setType(SaksopplysningType.ORGANISASJON);
+            saksopplysning.setType(SaksopplysningType.ORG);
             saksopplysning.setVersjon("4.0");
 
             factory.lagDokument(saksopplysning);

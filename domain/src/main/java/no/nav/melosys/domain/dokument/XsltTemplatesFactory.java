@@ -30,7 +30,7 @@ public class XsltTemplatesFactory {
 
     /**
      * Returnerer bearbeidet xslt ({@code Templates}) for en angitt type saksopplysning og en angitt tjenesteversjon.
-     * F.eks. getXsltTemplates med parametere {@code SaksopplysningType.PERSONOPPLYSNING} og versjon {@code 3.0}
+     * F.eks. getXsltTemplates med parametere {@code SaksopplysningType.PERSOPL} og versjon {@code 3.0}
      * returnerer xslt for TPS tjenesten Person_v3.0.
      *
      * @param type Den typen saksopplysning

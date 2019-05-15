@@ -26,8 +26,8 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
-import static no.nav.melosys.domain.SaksopplysningType.PERSONHISTORIKK;
-import static no.nav.melosys.domain.SaksopplysningType.PERSONOPPLYSNING;
+import static no.nav.melosys.domain.SaksopplysningType.PERSHIST;
+import static no.nav.melosys.domain.SaksopplysningType.PERSOPL;
 import static no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter.medlemsperiodeKomparator;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -105,8 +105,8 @@ public class SaksopplysningerTilDtoConverterTest {
     @Test
     public void testKonverteringPersonMedStatsborgerskap() throws Exception {
 
-        Saksopplysning personDokument = lagDokument("88888888882.xml", PERSONOPPLYSNING, "3.0");
-        Saksopplysning personhistorikkDokument = lagDokument("88888888882_historikk.xml", PERSONHISTORIKK, "3.4");
+        Saksopplysning personDokument = lagDokument("88888888882.xml", PERSOPL, "3.0");
+        Saksopplysning personhistorikkDokument = lagDokument("88888888882_historikk.xml", PERSHIST, "3.4");
 
         assertThat(personDokument).isNotNull();
         assertThat(personhistorikkDokument).isNotNull();

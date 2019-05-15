@@ -150,7 +150,7 @@ public class OppgaveService {
                 behOppgaveDto.setLand(hentLand(søknadDokument));
                 behOppgaveDto.setSoknadsperiode(mapPeriode(søknadDokument));
             });
-            hentDokument(behandling, SaksopplysningType.PERSONOPPLYSNING).ifPresent(
+            hentDokument(behandling, SaksopplysningType.PERSOPL).ifPresent(
                 saksopplysningDokument -> {
                     PersonDokument personDokument = (PersonDokument) saksopplysningDokument;
                     behOppgaveDto.setSammensattNavn(personDokument.sammensattNavn);

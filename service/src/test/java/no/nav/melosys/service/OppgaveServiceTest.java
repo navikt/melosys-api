@@ -142,7 +142,7 @@ public class OppgaveServiceTest {
         personDokument.sammensattNavn = "sammensattNavn";
 
         Saksopplysning personOpplysning = new Saksopplysning();
-        personOpplysning.setType(SaksopplysningType.PERSONOPPLYSNING);
+        personOpplysning.setType(SaksopplysningType.PERSOPL);
         personOpplysning.setDokument(personDokument);
         saksopplysninger.add(personOpplysning);
 

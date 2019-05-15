@@ -98,7 +98,7 @@ public class SoeknadServiceTest {
         Saksopplysning saksopplysning_1 = lagSøknadssaksopplysning(SaksopplysningType.SØKNAD);
 
         Saksopplysning saksopplysning_2 = new Saksopplysning();
-        saksopplysning_2.setType(SaksopplysningType.PERSONOPPLYSNING);
+        saksopplysning_2.setType(SaksopplysningType.PERSOPL);
         saksopplysning_2.setRegistrertDato(LocalDateTime.now().minusMonths(1).toInstant(ZoneOffset.UTC));
         saksopplysning_2.setEndretDato(LocalDateTime.now().minusMonths(1).toInstant(ZoneOffset.UTC));
         saksopplysning_2.setKilde(SaksopplysningKilde.TPS);

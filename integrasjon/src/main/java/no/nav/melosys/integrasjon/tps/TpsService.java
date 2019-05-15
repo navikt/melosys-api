@@ -148,7 +148,7 @@ public class TpsService implements TpsFasade {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
         saksopplysning.setKilde(SaksopplysningKilde.TPS);
-        saksopplysning.setType(SaksopplysningType.PERSONOPPLYSNING);
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysning.setVersjon(PERSON_VERSJON);
 
         // xml -> java objekter
@@ -218,7 +218,7 @@ public class TpsService implements TpsFasade {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
         saksopplysning.setKilde(SaksopplysningKilde.TPS);
-        saksopplysning.setType(SaksopplysningType.PERSONHISTORIKK);
+        saksopplysning.setType(SaksopplysningType.PERSHIST);
         saksopplysning.setVersjon(PERSONHISTORIKK_VERSJON);
 
         // xml -> java objekter

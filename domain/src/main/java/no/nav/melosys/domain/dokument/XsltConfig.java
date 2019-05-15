@@ -62,12 +62,12 @@ public final class XsltConfig {
 
     private static String getTjenesteNavn(SaksopplysningType type) {
         switch (type){
-            case PERSONOPPLYSNING: return XsltConfig.PERSON_TJENESTE;
-            case PERSONHISTORIKK: return XsltConfig.PERSONHISTORIKK_TJENESTE;
-            case ORGANISASJON: return XsltConfig.ORGANISASJON_TJENESTE;
-            case ARBEIDSFORHOLD: return XsltConfig.ARBEIDSFORHOLD_TJENESTE;
-            case INNTEKT: return XsltConfig.INNTEKT_TJENESTE;
-            case MEDLEMSKAP: return XsltConfig.MEDLEMSKAP_TJENESTE;
+            case PERSOPL: return XsltConfig.PERSON_TJENESTE;
+            case PERSHIST: return XsltConfig.PERSONHISTORIKK_TJENESTE;
+            case ORG: return XsltConfig.ORGANISASJON_TJENESTE;
+            case ARBFORH: return XsltConfig.ARBEIDSFORHOLD_TJENESTE;
+            case INNTK: return XsltConfig.INNTEKT_TJENESTE;
+            case MEDL: return XsltConfig.MEDLEMSKAP_TJENESTE;
             case SOB_SAK: return XsltConfig.SAKOGBEHANDLING_TJENESTE;
             case SØKNAD: return XsltConfig.SØKNAD;
             default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
@@ -76,11 +76,11 @@ public final class XsltConfig {
 
     private static String getXsltMappe(SaksopplysningType type) {
         switch (type){
-            case PERSONOPPLYSNING: case PERSONHISTORIKK: return XsltConfig.TPS_MAPPE;
-            case ORGANISASJON: return XsltConfig.EREG_MAPPE;
-            case ARBEIDSFORHOLD: return XsltConfig.AAREG_MAPPE;
-            case INNTEKT: return XsltConfig.INNTK_MAPPE;
-            case MEDLEMSKAP: return XsltConfig.MEDL_MAPPE;
+            case PERSOPL: case PERSHIST: return XsltConfig.TPS_MAPPE;
+            case ORG: return XsltConfig.EREG_MAPPE;
+            case ARBFORH: return XsltConfig.AAREG_MAPPE;
+            case INNTK: return XsltConfig.INNTK_MAPPE;
+            case MEDL: return XsltConfig.MEDL_MAPPE;
             case SOB_SAK: return XsltConfig.SOB_MAPPE;
             case SØKNAD: return XsltConfig.SØKNAD_MAPPE;
             default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
