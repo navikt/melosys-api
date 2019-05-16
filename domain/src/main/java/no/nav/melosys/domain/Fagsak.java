@@ -135,7 +135,7 @@ public class Fagsak extends RegistreringsInfo {
     public Landkoder hentMyndighetLandkode() throws TekniskException {
         Aktoer myndighet = hentAktørMedRolleType(MYNDIGHET);
         if (myndighet == null) {
-            throw new TekniskException("Finnes ingen aktør med rolle " + MYNDIGHET + " for fagsak" + saksnummer);
+            throw new TekniskException("Finner ingen aktør med rolle " + MYNDIGHET + " for fagsak " + saksnummer);
         }
         return myndighet.hentMyndighetLandkode();
     }
