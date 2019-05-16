@@ -155,4 +155,9 @@ public class BehandlingService {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
     }
+
+    public Behandling hentBehandling(long behandlingId) throws IkkeFunnetException {
+        return behandlingRepository.findById(behandlingId)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
+    }
 }
