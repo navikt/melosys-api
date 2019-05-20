@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.converter;
+package no.nav.melosys.tjenester.gui.dto.tilDto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,14 +30,15 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 /**
  * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
  */
-public class SaksopplysningerTilDtoConverter{
+public class SaksopplysningerTilDto {
     private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
 
     //Medlemsperioder sorteres fra nyest til eldst.
      static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
             (o1, o2) -> o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());
 
-    public SaksopplysningerDto getSaksopplysningerDto(Set<Saksopplysning> saksopplysningSet, Behandling behandling, SaksopplysningerDto dto) {
+    public SaksopplysningerDto getSaksopplysningerDto(Set<Saksopplysning> saksopplysningSet, Behandling behandling) {
+        SaksopplysningerDto dto = new SaksopplysningerDto();
         Periode søknadsperiode = null;
         Land historiskStatsborgerskap = null;
 

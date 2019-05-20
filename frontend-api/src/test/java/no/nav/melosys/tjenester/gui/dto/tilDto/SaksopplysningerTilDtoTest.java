@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.converter;
+package no.nav.melosys.tjenester.gui.dto.tilDto;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -26,10 +26,10 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static no.nav.melosys.domain.SaksopplysningType.PERSHIST;
 import static no.nav.melosys.domain.SaksopplysningType.PERSOPL;
-import static no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter.medlemsperiodeKomparator;
+import static no.nav.melosys.tjenester.gui.dto.tilDto.SaksopplysningerTilDto.medlemsperiodeKomparator;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SaksopplysningerTilDtoConverterTest {
+public class SaksopplysningerTilDtoTest {
 
     private DokumentFactory dokumentFactory;
 
@@ -56,7 +56,7 @@ public class SaksopplysningerTilDtoConverterTest {
         a4.ansettelsesPeriode = new Periode(LocalDate.now().plusYears(2), LocalDate.MAX);
         arbeidsforholdListe.add(a4);
 
-        SaksopplysningerTilDtoConverter.ArbeidsforholdComparator arbeidsforholdComparator = new SaksopplysningerTilDtoConverter.ArbeidsforholdComparator();
+        SaksopplysningerTilDto.ArbeidsforholdComparator arbeidsforholdComparator = new SaksopplysningerTilDto.ArbeidsforholdComparator();
         arbeidsforholdListe.sort(arbeidsforholdComparator);
         assertThat(arbeidsforholdListe.get(0)).isEqualTo(a3);
         assertThat(arbeidsforholdListe.get(arbeidsforholdListe.size() - 1)).isEqualTo(a1);
@@ -111,7 +111,7 @@ public class SaksopplysningerTilDtoConverterTest {
         behandling.setSisteOpplysningerHentetDato(LocalDate.of(2018, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC));
         behandling.setSaksopplysninger(saksopplysninger);
 
-        SaksopplysningerDto saksopplysningerDto = new SaksopplysningerTilDtoConverter().getSaksopplysningerDto(saksopplysninger, behandling, new SaksopplysningerDto());
+        SaksopplysningerDto saksopplysningerDto = new SaksopplysningerTilDto().getSaksopplysningerDto(saksopplysninger, behandling);
 
         PersonDokument person = saksopplysningerDto.getPerson();
 

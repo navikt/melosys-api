@@ -16,7 +16,7 @@ import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
-import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
+import no.nav.melosys.tjenester.gui.dto.tilDto.SaksopplysningerTilDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,8 +98,7 @@ public class BehandlingTjeneste extends RestTjeneste {
         behandlingDto.setBehandlingID(behandling.getId());
         behandlingDto.setRedigerbart(behandling.isAktiv());
         behandlingDto.setOppsummering(tilOppsummeringDto(behandling));
-        SaksopplysningerTilDtoConverter saksopplysningerTilDtoConverter = new SaksopplysningerTilDtoConverter();
-        SaksopplysningerDto saksopplysningerDto = saksopplysningerTilDtoConverter.getSaksopplysningerDto(behandling.getSaksopplysninger(), behandling, new SaksopplysningerDto());
+        SaksopplysningerDto saksopplysningerDto = new SaksopplysningerTilDto().getSaksopplysningerDto(behandling.getSaksopplysninger(), behandling);
         behandlingDto.setSaksopplysninger(saksopplysningerDto);
         return behandlingDto;
     }
