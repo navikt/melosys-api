@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.tilDto;
+package no.nav.melosys.tjenester.gui.dto.tildto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

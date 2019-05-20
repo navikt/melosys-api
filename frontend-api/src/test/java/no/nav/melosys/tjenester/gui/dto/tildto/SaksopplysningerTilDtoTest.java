@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.tilDto;
+package no.nav.melosys.tjenester.gui.dto.tildto;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -26,7 +26,7 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static no.nav.melosys.domain.SaksopplysningType.PERSHIST;
 import static no.nav.melosys.domain.SaksopplysningType.PERSOPL;
-import static no.nav.melosys.tjenester.gui.dto.tilDto.SaksopplysningerTilDto.medlemsperiodeKomparator;
+import static no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto.medlemsperiodeKomparator;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SaksopplysningerTilDtoTest {

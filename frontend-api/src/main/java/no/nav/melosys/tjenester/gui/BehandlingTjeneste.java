@@ -16,7 +16,7 @@ import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
-import no.nav.melosys.tjenester.gui.dto.tilDto.SaksopplysningerTilDto;
+import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
