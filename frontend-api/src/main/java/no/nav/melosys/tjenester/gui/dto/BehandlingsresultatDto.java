@@ -8,29 +8,24 @@ import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 
 public class BehandlingsresultatDto {
 
-    private List<String> begrunnelser;
-    private String begrunnelseFritekst;
+    private final List<String> begrunnelser;
+    private final String begrunnelseFritekst;
+
+    private BehandlingsresultatDto(List<String> begrunnelser, String begrunnelseFritekst) {
+        this.begrunnelser = begrunnelser;
+        this.begrunnelseFritekst = begrunnelseFritekst;
+    }
 
     public List<String> getBegrunnelser() {
         return begrunnelser;
-    }
-
-    public void setBegrunnelser(List<String> begrunnelser) {
-        this.begrunnelser = begrunnelser;
     }
 
     public String getBegrunnelseFritekst() {
         return begrunnelseFritekst;
     }
 
-    public void setBegrunnelseFritekst(String begrunnelseFritekst) {
-        this.begrunnelseFritekst = begrunnelseFritekst;
-    }
-
     public static BehandlingsresultatDto av(Behandlingsresultat behandlingsresultat) {
-        BehandlingsresultatDto dto = new BehandlingsresultatDto();
-        dto.setBegrunnelseFritekst(behandlingsresultat.getBegrunnelseFritekst());
-        dto.setBegrunnelser(new ArrayList<>());
+        BehandlingsresultatDto dto = new BehandlingsresultatDto(new ArrayList<>(), behandlingsresultat.getBegrunnelseFritekst());
 
         behandlingsresultat.getBehandlingsresultatBegrunnelser().stream()
             .map(BehandlingsresultatBegrunnelse::getKode)
