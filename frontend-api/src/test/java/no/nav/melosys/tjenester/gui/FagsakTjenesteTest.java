@@ -27,6 +27,7 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingOversiktDto;
@@ -40,6 +41,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +62,9 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
+
+    @Mock
+    private static BehandlingService behandlingService;
 
     private static Tilgang tilgang;
 
@@ -255,7 +260,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         ArrayList<Fagsak> fagsaker = new ArrayList<>();
         fagsaker.add(fagsak);
         doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(eq(Aktoersroller.BRUKER), eq(FNR));
-        return new FagsakTjeneste(fagsakService, tilgang);
+        return new FagsakTjeneste(fagsakService, tilgang, behandlingService);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto() {

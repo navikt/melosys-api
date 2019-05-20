@@ -23,6 +23,7 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.tjenester.gui.dto.*;
@@ -48,9 +49,10 @@ public class FagsakTjeneste extends RestTjeneste {
     private final FagsakService fagsakService;
 
     private final Tilgang tilgang;
+    private BehandlingService behandlingService;
 
     @Autowired
-    public FagsakTjeneste(FagsakService fagsakService, Tilgang tilgang) {
+    public FagsakTjeneste(FagsakService fagsakService, Tilgang tilgang, BehandlingService behandlingService) {
         this.fagsakService = fagsakService;
         this.tilgang = tilgang;
     }
@@ -61,6 +63,7 @@ public class FagsakTjeneste extends RestTjeneste {
     public Response hentFagsak(@ApiParam @PathParam("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgang.sjekkSak(sak);
+        behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(sak.getAktivBehandling());
         FagsakDto fagsakDto = tilFagsakDto(sak);
         return Response.ok(fagsakDto).build();
     }
