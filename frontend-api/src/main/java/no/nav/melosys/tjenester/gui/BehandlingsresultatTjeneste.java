@@ -41,6 +41,6 @@ public class BehandlingsresultatTjeneste extends RestTjeneste {
         tilgang.sjekk(behandlingID);
 
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        return Response.ok(new BehandlingsresultatDto(resultat)).build();
+        return Response.ok(BehandlingsresultatDto.av(resultat)).build();
     }
 }
