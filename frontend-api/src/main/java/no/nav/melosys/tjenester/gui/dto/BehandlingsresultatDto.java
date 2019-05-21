@@ -8,16 +8,16 @@ import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 
 public class BehandlingsresultatDto {
 
-    private final List<String> begrunnelser;
+    private final List<String> begrunnelseKoder;
     private final String begrunnelseFritekst;
 
-    private BehandlingsresultatDto(List<String> begrunnelser, String begrunnelseFritekst) {
-        this.begrunnelser = begrunnelser;
+    private BehandlingsresultatDto(List<String> begrunnelseKoder, String begrunnelseFritekst) {
+        this.begrunnelseKoder = begrunnelseKoder;
         this.begrunnelseFritekst = begrunnelseFritekst;
     }
 
-    public List<String> getBegrunnelser() {
-        return begrunnelser;
+    public List<String> getBegrunnelseKoder() {
+        return begrunnelseKoder;
     }
 
     public String getBegrunnelseFritekst() {
@@ -29,7 +29,7 @@ public class BehandlingsresultatDto {
 
         behandlingsresultat.getBehandlingsresultatBegrunnelser().stream()
             .map(BehandlingsresultatBegrunnelse::getKode)
-            .forEach(dto.getBegrunnelser()::add);
+            .forEach(dto.getBegrunnelseKoder()::add);
 
         return dto;
     }
