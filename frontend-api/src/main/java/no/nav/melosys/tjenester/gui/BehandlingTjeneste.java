@@ -88,7 +88,7 @@ public class BehandlingTjeneste extends RestTjeneste {
         tilgang.sjekk(behandlingID);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-
+        behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
         BehandlingDto behandlingDto = tilBehandlingDto(behandling);
         return Response.ok(behandlingDto).build();
     }
