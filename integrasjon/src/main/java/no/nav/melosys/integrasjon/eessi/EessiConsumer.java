@@ -14,5 +14,5 @@ public interface EessiConsumer {
 
     OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, String bucType) throws MelosysException;
 
-    List<SedinfoDto> hentTilknyttedeSeder(long gsakSaksnummer) throws MelosysException;
+    List<SedinfoDto> hentTilknyttedeSedUtkast(long gsakSaksnummer) throws MelosysException;
 }

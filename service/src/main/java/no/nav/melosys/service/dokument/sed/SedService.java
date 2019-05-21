@@ -89,7 +89,7 @@ public class SedService {
     public List<SedinfoDto> hentTilknyttedeSeder(long gsakSaksnummer) {
         if (skalSendeSed) {
             try {
-                return eessiConsumer.hentTilknyttedeSeder(gsakSaksnummer);
+                return eessiConsumer.hentTilknyttedeSedUtkast(gsakSaksnummer);
             } catch (MelosysException e) {
                 log.error(e.getMessage());
             }

@@ -36,8 +36,8 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public List<SedinfoDto> hentTilknyttedeSeder(long gsakSaksnummer) throws MelosysException {
-        return exchange("/sed/hentTilknyttedeSeder/" + gsakSaksnummer, HttpMethod.GET,
+    public List<SedinfoDto> hentTilknyttedeSedUtkast(long gsakSaksnummer) throws MelosysException {
+        return exchange("/sed/hentTilknyttedeSedUtkast/" + gsakSaksnummer, HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<SedinfoDto>>() {});
     }
 
