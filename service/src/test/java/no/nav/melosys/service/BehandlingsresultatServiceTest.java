@@ -61,11 +61,14 @@ public class BehandlingsresultatServiceTest {
     @Test
     public void hentBehandlingsresultat_returnererBehandlingsresultat() throws IkkeFunnetException {
         Behandlingsresultat resultat = new Behandlingsresultat();
-        resultat.setHenleggelsesgrunn(Henleggelsesgrunner.ANNET);
+        BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
+        begrunnelse.setKode(Henleggelsesgrunner.ANNET.getKode());
+        resultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(resultat));
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(4L);
-        assertThat(behandlingsresultat.getHenleggelsesgrunn()).isEqualTo(Henleggelsesgrunner.ANNET);
+        begrunnelse = behandlingsresultat.getBehandlingsresultatBegrunnelser().iterator().next();
+        assertThat(begrunnelse.getKode()).isEqualTo(Henleggelsesgrunner.ANNET.getKode());
     }
 
     private Behandlingsresultat opprettTomtBehandlingsresultatMedId() {
