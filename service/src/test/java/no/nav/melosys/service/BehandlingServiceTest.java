@@ -191,6 +191,27 @@ public class BehandlingServiceTest {
         assertThat(lagretBehandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
     }
 
+    @Test
+    public void endreBehandlingsstatusFraOpprettetTilUnderBehandling_harStatusOpprettet_statusBlirSattTilUnderBehandling() {
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+
+        behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
+
+        assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
+        verify(behandlingRepo).save(behandling);
+    }
+
+    @Test
+    public void endreBehandlingsstatusFraOpprettetTilUnderBehandling_harStatusAvventerSvar_ingenStatusendring() {
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
+
+        behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
+
+        verify(behandlingRepo, never()).save(any());
+    }
+
     private Behandling opprettBehandlingMedData() {
         Behandling behandling = opprettTomBehandlingMedId();
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);

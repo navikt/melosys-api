@@ -2,10 +2,7 @@ package no.nav.melosys.saksflyt.agent.hs;
 
 import java.util.Map;
 
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.ProsessDataKey;
-import no.nav.melosys.domain.ProsessSteg;
-import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -58,8 +55,13 @@ public class OppdaterBehandlingsresultat extends AbstraktStegBehandler {
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke oppdatere behandlingsresultatet for henleggelsen fordi behandling " + behandlingID + " ikke finnes."));
         behandlingsresultat.setType(Behandlingsresultattyper.HENLEGGELSE);
         behandlingsresultat.setEndretAv(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
-        behandlingsresultat.setHenleggelsesgrunn(prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Henleggelsesgrunner.class));
-        behandlingsresultat.setHenleggelseFritekst(prosessinstans.getData(ProsessDataKey.FRITEKST));
+        behandlingsresultat.setBegrunnelseFritekst(prosessinstans.getData(ProsessDataKey.FRITEKST));
+
+        BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
+        begrunnelse.setBehandlingsresultat(behandlingsresultat);
+        begrunnelse.setKode(prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Henleggelsesgrunner.class).getKode());
+        behandlingsresultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
+
         behandlingsresultatRepository.save(behandlingsresultat);
 
         log.info("Oppdatert behandlingsresultat for prosessinstans {}. Satt til henleggelse", prosessinstans.getId());

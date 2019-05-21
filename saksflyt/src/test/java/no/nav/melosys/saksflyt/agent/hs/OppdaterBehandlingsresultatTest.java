@@ -65,8 +65,10 @@ public class OppdaterBehandlingsresultatTest {
         Behandlingsresultat capture = behandlingsresultatArgumentCaptor.getValue();
         assertThat(capture.getType()).isEqualTo(Behandlingsresultattyper.HENLEGGELSE);
         assertThat(capture.getEndretAv()).isEqualTo(testbruker);
-        assertThat(capture.getHenleggelsesgrunn()).isEqualTo(henleggelsesgrunn);
-        assertThat(capture.getHenleggelseFritekst()).isEqualTo(henleggelsesfritekst);
+
+        BehandlingsresultatBegrunnelse begrunnelse = capture.getBehandlingsresultatBegrunnelser().iterator().next();
+        assertThat(begrunnelse.getKode()).isEqualTo(henleggelsesgrunn.getKode());
+        assertThat(capture.getBegrunnelseFritekst()).isEqualTo(henleggelsesfritekst);
         assertThat(capture.getEndretAv()).isEqualTo(testbruker);
         assertThat(prosessinstans.getSteg()).isEqualTo(HS_HENLEGG_SAK);
     }

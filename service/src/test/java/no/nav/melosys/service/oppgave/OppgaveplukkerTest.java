@@ -106,7 +106,6 @@ public class OppgaveplukkerTest {
 
         assertThat(oppgave.isPresent()).isTrue();
         oppgave.ifPresent(o -> assertThat(o.getOppgaveId()).isEqualTo("4"));
-        assertThat(fagsak.getAktivBehandling().getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
     }
 
     @Test
@@ -182,7 +181,6 @@ public class OppgaveplukkerTest {
 
         assertThat(oppgave.isPresent()).isTrue();
         oppgave.ifPresent(o -> assertThat(o.getOppgaveId()).isEqualTo("2"));
-        assertThat(fagsak.getAktivBehandling().getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
     }
 
     @Test
@@ -223,7 +221,6 @@ public class OppgaveplukkerTest {
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
         assertThat(oppgave.isPresent()).isFalse();
-        assertThat(fagsak.getAktivBehandling().getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
     }
 
     @Test

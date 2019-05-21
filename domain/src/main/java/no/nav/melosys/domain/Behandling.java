@@ -167,4 +167,8 @@ public class Behandling extends RegistreringsInfo {
     public boolean erVenterForDokumentasjon() {
         return status == Behandlingsstatus.AVVENT_DOK_PART || status == Behandlingsstatus.AVVENT_DOK_UTL;
     }
+
+    public boolean isAktiv() {
+        return status != Behandlingsstatus.AVSLUTTET;
+    }
 }
