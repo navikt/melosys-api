@@ -2,13 +2,15 @@ package no.nav.melosys.service.oppgave;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -99,10 +101,6 @@ public class Oppgaveplukker {
         if (valg.isPresent()) {
             Oppgave oppgave = valg.get();
 
-            if (oppgave.erBehandling() || oppgave.erVurderDokument()) {
-                settBehandlingsstatusUnderBehandling(oppgave.getSaksnummer());
-            }
-
             // Tildeler oppgaven
             gsakFasade.tildelOppgave(oppgave.getOppgaveId(), saksbehandlerID);
         }
@@ -181,20 +179,5 @@ public class Oppgaveplukker {
     private boolean erTilbakeLagt(String saksbehandlerID, String oppgaveId) {
         List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(saksbehandlerID, oppgaveId);
         return !tilbakelegging.isEmpty();
-    }
-
-    private void settBehandlingsstatusUnderBehandling(String saksnummer) throws TekniskException {
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
-        if (fagsak == null) {
-            throw new TekniskException("Fagsak med saksnummer " + saksnummer + " finnes ikke.");
-        }
-        Behandling behandling = fagsak.getAktivBehandling();
-        if (behandling == null) {
-            throw new TekniskException("En behandlingsoppgave eksisterer i GSAK for sak " + saksnummer + " men ingen aktive behandlinger finnes.");
-        }
-        if (behandling.getStatus() == Behandlingsstatus.OPPRETTET) {
-            behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-            behandlingRepository.save(behandling);
-        }
     }
 }
