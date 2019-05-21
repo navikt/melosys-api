@@ -1,16 +1,22 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import java.util.List;
-
 public class BehandlingDto {
+
+    private Long behandlingID;
 
     private BehandlingOppsummeringDto oppsummering;
 
     private SaksopplysningerDto saksopplysninger;
 
-    private List<BehandlingHistorikkDto> behandlingshistorikk;
-
     private boolean redigerbart = false;
+
+    public Long getBehandlingID() {
+        return behandlingID;
+    }
+
+    public void setBehandlingID(Long behandlingID) {
+        this.behandlingID = behandlingID;
+    }
 
     public BehandlingOppsummeringDto getOppsummering() {
         return oppsummering;
@@ -27,15 +33,6 @@ public class BehandlingDto {
     public void setSaksopplysninger(SaksopplysningerDto saksopplysninger) {
         this.saksopplysninger = saksopplysninger;
     }
-
-    public List<BehandlingHistorikkDto> getBehandlingshistorikk() {
-        return behandlingshistorikk;
-    }
-
-    public void setBehandlingshistorikk(List<BehandlingHistorikkDto> behandlingshistorikk) {
-        this.behandlingshistorikk = behandlingshistorikk;
-    }
-
     public boolean isRedigerbart() {
         return redigerbart;
     }

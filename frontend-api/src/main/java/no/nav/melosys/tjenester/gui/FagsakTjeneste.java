@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -22,17 +21,11 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
-import no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -54,38 +47,21 @@ public class FagsakTjeneste extends RestTjeneste {
 
     private final FagsakService fagsakService;
 
-    private ModelMapper modelMapper;
-
     private final Tilgang tilgang;
 
     @Autowired
     public FagsakTjeneste(FagsakService fagsakService, Tilgang tilgang) {
         this.fagsakService = fagsakService;
         this.tilgang = tilgang;
-
-        this.modelMapper = new ModelMapper();
-
-        TypeMap<Fagsak, FagsakDto> typeMapFagsakUt = modelMapper.createTypeMap(Fagsak.class, FagsakDto.class);
-        typeMapFagsakUt.addMapping(Fagsak::getType, FagsakDto::setSakstype);
-        typeMapFagsakUt.addMapping(Fagsak::getStatus, FagsakDto::setSaksstatus);
-        TypeMap<Behandling, BehandlingDto> typeMapBehandlingUt = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
-        typeMapBehandlingUt.<Long>addMapping(Behandling::getId, (dest, id) -> dest.getOppsummering().setBehandlingID(id));
-        typeMapBehandlingUt.<Behandlingsstatus>addMapping(Behandling::getStatus, (dest, status) -> dest.getOppsummering().setBehandlingsstatus(status));
-        typeMapBehandlingUt.<Behandlingstyper>addMapping(Behandling::getType, (dest, type) -> dest.getOppsummering().setBehandlingstype(type));
-        typeMapBehandlingUt.<Instant>addMapping(Behandling::getRegistrertDato, (dest, dato) -> dest.getOppsummering().setRegistrertDato(dato));
-        typeMapBehandlingUt.<Instant>addMapping(Behandling::getEndretDato, (dest, dato) -> dest.getOppsummering().setEndretDato(dato));
-        typeMapBehandlingUt.<Instant>addMapping(Behandling::getSistOpplysningerHentetDato, (dest, dato) -> dest.getOppsummering().setSisteOpplysningerHentetDato(dato));
-        typeMapBehandlingUt.addMappings(mapper -> mapper.using(new SaksopplysningerTilDtoConverter()).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
     }
 
     @GET
     @Path("{saksnr}")
     @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."), response = Fagsak.class)
     public Response hentFagsak(@ApiParam @PathParam("saksnr") String saksnummer) throws FunksjonellException, TekniskException {
-        String ident = SubjectHandler.getInstance().getUserID();
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgang.sjekkSak(sak);
-        FagsakDto fagsakDto = tilDto(sak, ident);
+        FagsakDto fagsakDto = tilFagsakDto(sak);
         return Response.ok(fagsakDto).build();
     }
 
@@ -103,7 +79,7 @@ public class FagsakTjeneste extends RestTjeneste {
         }
         tilgang.sjekkFnr(fnr);
         saker = fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fnr);
-        return tilDtoer(saker);
+        return tilFagsakOppsummeringDtoer(saker);
     }
 
     @POST
@@ -130,25 +106,19 @@ public class FagsakTjeneste extends RestTjeneste {
         return Response.noContent().build();
     }
 
-    private FagsakDto tilDto(Fagsak fagsak, String ident) throws FunksjonellException, TekniskException {
+    private FagsakDto tilFagsakDto(Fagsak fagsak) {
         FagsakDto fagsakDto = new FagsakDto();
-        modelMapper.map(fagsak, fagsakDto);
         fagsakDto.setSaksnummer(fagsak.getSaksnummer());
-
-        Optional<Behandling> behandling = fagsakService.finnRedigerbarBehandling(ident, fagsak);
-
-        behandling.ifPresent(aktivBehandling -> fagsakDto.getBehandlinger().stream()
-                .filter(behandlingDto -> behandlingDto.getOppsummering().getBehandlingID().equals(aktivBehandling.getId()))
-                .findAny()
-                .ifPresent(behandlingDto -> behandlingDto.setRedigerbart(true))
-        );
-        //Vi ønsker å ha redigerbare behandlinger først, fordi GUI henter bare ut det første behandlingselementet
-        fagsakDto.getBehandlinger().sort(Comparator.comparing(BehandlingDto::isRedigerbart).reversed());
+        fagsakDto.setGsakSaksnummer(fagsak.getGsakSaksnummer());
+        fagsakDto.setSakstype(fagsak.getType());
+        fagsakDto.setSaksstatus(fagsak.getStatus());
+        fagsakDto.setRegistrertDato(fagsak.getRegistrertDato());
+        fagsakDto.setEndretDato(fagsak.getEndretDato());
 
         return fagsakDto;
     }
 
-    private List<FagsakOppsummeringDto> tilDtoer(Iterable<Fagsak> saker) {
+    private List<FagsakOppsummeringDto> tilFagsakOppsummeringDtoer(Iterable<Fagsak> saker) {
         List<FagsakOppsummeringDto> fagsakListe = new ArrayList<>();
         for (Fagsak fagsak : saker) {
             FagsakOppsummeringDto fagsakOppsummeringDto = new FagsakOppsummeringDto();
