@@ -111,7 +111,7 @@ public class SaksopplysningerTilDtoTest {
         behandling.setSisteOpplysningerHentetDato(LocalDate.of(2018, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC));
         behandling.setSaksopplysninger(saksopplysninger);
 
-        SaksopplysningerDto saksopplysningerDto = new SaksopplysningerTilDto().getSaksopplysningerDto(saksopplysninger, behandling);
+        SaksopplysningerDto saksopplysningerDto = SaksopplysningerTilDto.getSaksopplysningerDto(saksopplysninger, behandling);
 
         PersonDokument person = saksopplysningerDto.getPerson();
 

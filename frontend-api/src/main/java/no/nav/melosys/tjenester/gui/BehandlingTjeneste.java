@@ -98,7 +98,7 @@ public class BehandlingTjeneste extends RestTjeneste {
         behandlingDto.setBehandlingID(behandling.getId());
         behandlingDto.setRedigerbart(behandling.isAktiv());
         behandlingDto.setOppsummering(tilOppsummeringDto(behandling));
-        SaksopplysningerDto saksopplysningerDto = new SaksopplysningerTilDto().getSaksopplysningerDto(behandling.getSaksopplysninger(), behandling);
+        SaksopplysningerDto saksopplysningerDto = SaksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger(), behandling);
         behandlingDto.setSaksopplysninger(saksopplysningerDto);
         return behandlingDto;
     }

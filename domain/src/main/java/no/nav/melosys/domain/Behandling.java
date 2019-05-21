@@ -43,7 +43,7 @@ public class Behandling extends RegistreringsInfo {
     @Column(name = "initierende_dokument_id")
     private String initierendeDokumentId;
 
-    @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)

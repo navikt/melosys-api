@@ -37,7 +37,7 @@ public class SaksopplysningerTilDto {
      static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
             (o1, o2) -> o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());
 
-    public SaksopplysningerDto getSaksopplysningerDto(Set<Saksopplysning> saksopplysningSet, Behandling behandling) {
+    public static SaksopplysningerDto getSaksopplysningerDto(Set<Saksopplysning> saksopplysningSet, Behandling behandling) {
         SaksopplysningerDto dto = new SaksopplysningerDto();
         Periode søknadsperiode = null;
         Land historiskStatsborgerskap = null;
