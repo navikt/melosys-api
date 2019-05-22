@@ -56,6 +56,7 @@ public class BehandlingsresultatService {
         replikerAvklartefakta(behandlingsresultat, behandlingsresultatsreplika);
         replikerLovvalgsperioder(behandlingsresultat, behandlingsresultatsreplika);
         replikerVilkaarsresultat(behandlingsresultat, behandlingsresultatsreplika);
+        replikerBehandlingsresultatBegrunnelser(behandlingsresultat, behandlingsresultatsreplika);
 
         behandlingsresultatRepository.save(behandlingsresultatsreplika);
     }
@@ -86,6 +87,18 @@ public class BehandlingsresultatService {
             lovvalgsperiodereplika.setBehandlingsresultat(behandlingsresultatsreplika);
             lovvalgsperiodereplika.setId(null);
             behandlingsresultatsreplika.getLovvalgsperioder().add(lovvalgsperiodereplika);
+        }
+    }
+
+    private void replikerBehandlingsresultatBegrunnelser(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika)
+        throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
+        behandlingsresultatsreplika.setBehandlingsresultatBegrunnelser(new HashSet<>());
+        for (BehandlingsresultatBegrunnelse behandlingsresultatBegrunnelseOrig : behandlingsresultat.getBehandlingsresultatBegrunnelser()) {
+            BehandlingsresultatBegrunnelse behandlingsresultatBegrunnelsesreplika = (BehandlingsresultatBegrunnelse) BeanUtils.cloneBean(behandlingsresultatBegrunnelseOrig);
+            behandlingsresultatBegrunnelsesreplika.setBehandlingsresultat(behandlingsresultatsreplika);
+            behandlingsresultatBegrunnelsesreplika.setId(null);
+            behandlingsresultatBegrunnelsesreplika.setKode(behandlingsresultatBegrunnelseOrig.getKode());
+            behandlingsresultatsreplika.getBehandlingsresultatBegrunnelser().add(behandlingsresultatBegrunnelsesreplika);
         }
     }
 
