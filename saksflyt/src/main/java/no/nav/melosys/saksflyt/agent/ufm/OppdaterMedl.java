@@ -9,6 +9,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -66,8 +67,10 @@ public class OppdaterMedl extends AbstraktStegBehandler {
             prosessinstans.getBehandling().getId(), Collections.singletonList(opprettLovvalgsperiode(sedDokument))
         );
 
+        String ident = SaksopplysningerUtils.hentPersonDokument(prosessinstans.getBehandling()).fnr;
+
         Lovvalgsperiode lovvalgsperiode = lagretLovvalgsperiode.iterator().next();
-        Long medlId = medlFasade.opprettPeriodeEndelig(prosessinstans.getData(ProsessDataKey.BRUKER_ID), lovvalgsperiode, KildedokumenttypeMedl.SED);
+        Long medlId = medlFasade.opprettPeriodeEndelig(ident, lovvalgsperiode, KildedokumenttypeMedl.SED);
         felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, prosessinstans.getBehandling().getId());
 
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);

@@ -1,6 +1,7 @@
 package no.nav.melosys.service.saksflyt;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
@@ -164,5 +165,23 @@ public class ProsessinstansService {
         nyprosessinstans.setSteg(ProsessSteg.IV_FORKORT_PERIODE);
 
         lagre(nyprosessinstans);
+    }
+
+    public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansUnntaksperiodeAvvist(Behandling behandling, Collection<IkkeGodkjentBegrunnelser> begrunnelser, String begrunnelseFritekst) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_PERIODE_IKKE_GODKJENT);
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE, begrunnelser);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, begrunnelseFritekst);
+        lagre(prosessinstans);
     }
 }

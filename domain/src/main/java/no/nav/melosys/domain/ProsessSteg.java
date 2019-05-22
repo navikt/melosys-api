@@ -78,6 +78,7 @@ public enum ProsessSteg implements Kodeverk {
     REG_UNNTAK_OPPDATER_MEDL("REG_UNNTAK_OPPDATER_MEDL", "Sett periode endelig i MEDL"),
     REG_UNNTAK_OPPRETT_OPPGAVE("REG_UNNTAK_OPPRETT_OPPGAVE","Opprett oppgave for manuell behandling"),
     REG_UNNTAK_AVSLUTT_BEHANDLING("REG_UNNTAK_AVSLUTT_BEHANDLING", "Avslutt behandling"),
+    REG_UNNTAK_PERIODE_IKKE_GODKJENT("REG_UNNTAK_PERIODE_IKKE_GODKJENT", "Unntaksperiode avvist av saksbehandler"),
 
     FERDIG("FERDIG", "Prosessen er ferdig");
 

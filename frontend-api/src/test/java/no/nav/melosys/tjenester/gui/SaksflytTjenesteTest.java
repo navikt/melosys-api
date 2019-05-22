@@ -7,7 +7,9 @@ import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.service.vedtak.VedtakService;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
@@ -23,7 +25,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class VedtakTjenesteTest extends JsonSchemaTestParent {
+public class SaksflytTjenesteTest extends JsonSchemaTestParent {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -34,7 +36,13 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private Tilgang tilgang;
 
-    private VedtakTjeneste vedtakTjeneste;
+    @Mock
+    private UnntaksperiodeService unntaksperiodeService;
+
+    @Mock
+    private BehandlingRepository behandlingRepository;
+
+    private SaksflytTjeneste saksflytTjeneste;
 
     private static final String schemaType = "vedtak-post-schema.json";
 
@@ -50,7 +58,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Before
     public void setUp() {
-        vedtakTjeneste = new VedtakTjeneste(vedtakService, tilgang);
+        saksflytTjeneste = new SaksflytTjeneste(vedtakService, unntaksperiodeService, behandlingRepository, tilgang);
         fattVedtakDto = new FattVedtakDto();
         endreVedtakDto = new EndreVedtakDto();
         behandlingID = 3;
@@ -59,7 +67,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void fattVedtak_henleggelse_fungerer() throws FunksjonellException, TekniskException, IOException {
         fattVedtakDto.setBehandlingsresultattype(Behandlingsresultattyper.HENLEGGELSE);
-        vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
+        saksflytTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgang).sjekk(behandlingID);
         verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultattype());
@@ -70,7 +78,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void fattVedtak_anmodningOmUnntak_fungerer() throws FunksjonellException, TekniskException, IOException {
         fattVedtakDto.setBehandlingsresultattype(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
-        vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
+        saksflytTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgang).sjekk(behandlingID);
         verify(vedtakService).anmodningOmUnntak(behandlingID);
@@ -80,7 +88,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test(expected = BadRequestException.class)
     public void fattVedtak_dtoManglerBehandlingresultat_girException() throws FunksjonellException, TekniskException, IOException {
-        vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
+        saksflytTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgang).sjekk(behandlingID);
         valider(fattVedtakDto);
@@ -89,7 +97,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void endreVedtak_fungerer() throws FunksjonellException, TekniskException, IOException {
         endreVedtakDto.setBegrunnelseKode(Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
-        vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
+        saksflytTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
         verify(tilgang).sjekk(behandlingID);
         verify(vedtakService).endreVedtak(behandlingID, Endretperioder.ENDRINGER_ARBEIDSSITUASJON);
@@ -99,7 +107,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     public void endreVedtak_dtoManglerBehandlingresultat_girException() throws FunksjonellException, TekniskException, IOException {
         expectedException.expect(BadRequestException.class);
-        vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
+        saksflytTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
         verify(tilgang, never()).sjekk(behandlingID);
         valider(fattVedtakDto);

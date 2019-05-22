@@ -20,6 +20,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
@@ -94,7 +95,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     // N.B. Frontend ønsker ikke å få søknaden på /fagsaker slik at opplysninger fra registrene er adskilt
                     break;
                 case SEDOPPL:
-                    //TODO: MELOSYS-2535
+                    dto.setSed((SedDokument) dokument);
                     break;
                 default:
                     throw new IllegalArgumentException("Type " + type.getKode() + " ikke støttet.");
