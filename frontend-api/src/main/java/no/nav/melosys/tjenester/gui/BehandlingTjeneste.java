@@ -84,19 +84,20 @@ public class BehandlingTjeneste extends RestTjeneste {
     @ApiOperation(value = "Hent en spesifikk behandling",
         response = TidligereMedlemsperioderDto.class)
     public Response hentBehandling(@PathParam("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
-        log.info("Saksbehandler {} ber om å hente behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
+        String saksbehandler = SubjectHandler.getInstance().getUserID();
+        log.info("Saksbehandler {} ber om å hente behandling {}.", saksbehandler, behandlingID);
         tilgang.sjekk(behandlingID);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
-        BehandlingDto behandlingDto = tilBehandlingDto(behandling);
+        BehandlingDto behandlingDto = tilBehandlingDto(behandling, saksbehandler);
         return Response.ok(behandlingDto).build();
     }
 
-    private BehandlingDto tilBehandlingDto(Behandling behandling) {
+    private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
         BehandlingDto behandlingDto = new BehandlingDto();
         behandlingDto.setBehandlingID(behandling.getId());
-        behandlingDto.setRedigerbart(behandling.isAktiv());
+        behandlingDto.setRedigerbart(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler));
         behandlingDto.setOppsummering(tilOppsummeringDto(behandling));
         SaksopplysningerDto saksopplysningerDto = SaksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger(), behandling);
         behandlingDto.setSaksopplysninger(saksopplysningerDto);

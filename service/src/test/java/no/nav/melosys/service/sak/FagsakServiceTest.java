@@ -62,8 +62,6 @@ public class FagsakServiceTest {
     @InjectMocks
     private FagsakService fagsakService;
 
-    private static final String SAKSBEHANDLER = "Z990007";
-
     @Test
     public void hentFagsak() throws IkkeFunnetException {
         String saksnummer = "saksnummer";
@@ -190,38 +188,6 @@ public class FagsakServiceTest {
         fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
 
         doReturn(fagsak).when(fagsakRepo).findBySaksnummer(saksnummer);
-    }
-
-    @Test
-    public final void testErBehandlingRedigerBar() throws FunksjonellException, TekniskException {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("12345678901");
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-
-        Oppgave oppgave = new Oppgave();
-        oppgave.setTilordnetRessurs(SAKSBEHANDLER);
-
-        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.of(oppgave));
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak).filter(behandling1 -> behandling1 == behandling).isPresent())
-            .isEqualTo(true);
-
-        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
-
-        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
-
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        assertThat(fagsakService.finnRedigerbarBehandling("", fagsak)).isEqualTo(Optional.empty());
-
-        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.empty());
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
-
-        fagsak.setBehandlinger(null);
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
     }
 
     @Test
