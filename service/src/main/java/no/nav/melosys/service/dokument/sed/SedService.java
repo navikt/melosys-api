@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
+import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedinfoDto;
@@ -66,6 +67,16 @@ public class SedService {
         }
     }
 
+    public List<InstitusjonDto> hentMottakerinstitusjoner(String bucType) {
+        try {
+            log.info("Henter mottakerinstitusjoner for BUC {}", bucType);
+            return eessiConsumer.hentMottakerinstitusjoner(bucType);
+        } catch (MelosysException e) {
+            log.error("Feil ved henting av mottakerinstitusjoner for BUC {}", bucType, e);
+            return Collections.emptyList();
+        }
+    }
+
     public OpprettSedDto opprettBucOgSed(Behandling behandling, String bucType, String mottakerLand, String mottakerId) {
         if (skalSendeSed) {
             try {
@@ -79,7 +90,11 @@ public class SedService {
 
                 return eessiConsumer.opprettBucOgSed(sedDataDto, bucType);
             } catch (MelosysException e) {
-                e.printStackTrace();
+                log.error(
+                    "Feil ved opprettelse av SED: \n" +
+                        "Behandling {}\n" +
+                        "Fagsak {}\n",
+                    behandling.getId(), behandling.getFagsak().getSaksnummer(), e);
             }
         }
 
@@ -87,14 +102,12 @@ public class SedService {
     }
 
     public List<SedinfoDto> hentTilknyttedeSeder(long gsakSaksnummer) {
-        if (skalSendeSed) {
-            try {
-                return eessiConsumer.hentTilknyttedeSedUtkast(gsakSaksnummer);
-            } catch (MelosysException e) {
-                log.error(e.getMessage());
-            }
+        try {
+            log.info("Henter tilknyttede seder for gsak {}", gsakSaksnummer);
+            return eessiConsumer.hentTilknyttedeSedUtkast(gsakSaksnummer);
+        } catch (MelosysException e) {
+            log.error("Feil ved henting av seder for gsak {}", gsakSaksnummer, e);
+            return Collections.emptyList();
         }
-
-        return Collections.emptyList();
     }
 }

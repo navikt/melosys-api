@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedinfoDto;
@@ -31,13 +32,19 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
+    public List<InstitusjonDto> hentMottakerinstitusjoner(String bucType) throws MelosysException {
+        return exchange("/sed/mottakerinstitusjoner/" + bucType, HttpMethod.GET,
+            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<InstitusjonDto>>() {});
+    }
+
+    @Override
     public OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, String bucType) throws MelosysException {
         return exchange("/sed/create/" + bucType, HttpMethod.POST, new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<OpprettSedDto>() {});
     }
 
     @Override
     public List<SedinfoDto> hentTilknyttedeSedUtkast(long gsakSaksnummer) throws MelosysException {
-        return exchange("/sed/hentTilknyttedeSedUtkast/" + gsakSaksnummer, HttpMethod.GET,
+        return exchange(String.format("/sak/%s/sed/?status=utkast", gsakSaksnummer), HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<SedinfoDto>>() {});
     }
 

@@ -13,6 +13,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedinfoDto;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -43,22 +44,21 @@ public class SedTjeneste extends RestTjeneste {
     }
 
     @GET
-    @Path("/informasjonombuc")
+    @Path("/mottakerinstitusjoner/{bucType}")
     @ApiOperation(
-        value = "Henter land, mottakerinstitusjoner og første SED for hver av de oppgitte BUCene.",
-        // notes = "",
-        response = Object.class
+        value = "Henter mottakerinstitusjoner for alle land for den oppgitte BUCen.",
+        response = InstitusjonDto.class,
+        responseContainer = "List"
     )
-    public Response hentBucerMedLandOgMottakerinstitusjoner() {
-        // Hent mottakerinstitusjoner
-        // Hent buc og første sed
-        return null;
+    public Response hentMottakerinstitusjoner(@PathParam("bucType") String bucType) {
+        List<InstitusjonDto> mottakerinstitusjoner = sedService.hentMottakerinstitusjoner(bucType);
+        return Response.ok(mottakerinstitusjoner).build();
     }
 
     @POST
     @Path("/opprettbuc/{behandlingID}")
     @ApiOperation(
-        value = "Oppretter en sak i RINA og sakens første tilgjengelige SED. Returnerer rinaUrl.",
+        value = "Oppretter en sak i RINA og sakens første tilgjengelige SED. Returnerer en URL til saken i RINA.",
         response = String.class
     )
     public Response opprettBuc(@ApiParam NyBucDto nyBucDto, @PathParam("behandlingID") long behandlingID) {
@@ -67,7 +67,10 @@ public class SedTjeneste extends RestTjeneste {
         OpprettSedDto opprettSedDto =
             sedService.opprettBucOgSed(behandling, nyBucDto.getBucType(), nyBucDto.getMottakerLand(), nyBucDto.getMottakerId());
 
-        // TODO: nullsjekk + error obj
+        if (opprettSedDto == null) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+
         return Response.ok(opprettSedDto.getRinaUrl()).build();
     }
 
@@ -92,7 +95,6 @@ public class SedTjeneste extends RestTjeneste {
         List<SedUnderArbeidDto> seder = sedService.hentTilknyttedeSeder(behandling.getFagsak().getGsakSaksnummer()).stream()
             .map(tilSedUnderArbeidDto).collect(Collectors.toList());
 
-        // TODO: nullsjekk + error obj
         return Response.ok(seder).build();
     }
 }
