@@ -8,12 +8,15 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,13 +33,15 @@ public class BehandlingService {
 
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
     private BehandlingsresultatService behandlingsresultatService;
+    private OppgaveService oppgaveService;
 
     @Autowired
-    public BehandlingService(BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository, TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository, BehandlingsresultatService behandlingsresultatService) {
+    public BehandlingService(BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository, TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository, BehandlingsresultatService behandlingsresultatService, OppgaveService oppgaveService) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.oppgaveService = oppgaveService;
     }
 
     /**
@@ -163,5 +168,17 @@ public class BehandlingService {
             aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
             behandlingRepository.save(aktivBehandling);
         }
+    }
+
+    public boolean erBehandlingRedigerbarOgTilordnetSaksbehandler(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
+        if (!behandling.erRedigerbar()) {
+            return false;
+        }
+
+        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())
+            .orElseThrow(() -> new FunksjonellException("Fagsak " + behandling.getFagsak().getSaksnummer() + " har ingen tilknyttet oppgave."));
+
+        String tilordnetRessurs = oppgave.getTilordnetRessurs();
+        return tilordnetRessurs != null && tilordnetRessurs.equalsIgnoreCase(saksbehandler);
     }
 }
