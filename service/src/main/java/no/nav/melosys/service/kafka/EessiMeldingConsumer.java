@@ -19,7 +19,7 @@ public class EessiMeldingConsumer {
         this.eessiMottakService = eessiMottakService;
     }
 
-    @KafkaListener(clientIdPrefix = "melosys-eessi-consumer", topics = "privat-melosys-eessi-v1",
+    @KafkaListener(clientIdPrefix = "melosys-eessi-consumer", topics = "${kafka.topic.eessi}",
         containerFactory = "eessiMeldingListenerContainerFactory")
     public void mottaMelding(ConsumerRecord<String, MelosysEessiMelding> consumerRecord) {
         MelosysEessiMelding melding = consumerRecord.value();
