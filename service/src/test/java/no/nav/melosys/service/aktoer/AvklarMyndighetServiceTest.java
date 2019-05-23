@@ -1,5 +1,7 @@
 package no.nav.melosys.service.aktoer;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -51,7 +53,7 @@ public class AvklarMyndighetServiceTest {
         utenlandskMyndighet.institusjonskode = "IT123";
         utenlandskMyndighet.land = "IT";
 
-        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.IT))).thenReturn(utenlandskMyndighet);
+        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.IT))).thenReturn(Optional.of(utenlandskMyndighet));
         when(landvelgerService.hentTrygdemyndighetsland(any(Behandling.class))).thenReturn(Landkoder.IT);
 
         forventetInstitusjonId = Landkoder.IT + ":" + utenlandskMyndighet.institusjonskode;

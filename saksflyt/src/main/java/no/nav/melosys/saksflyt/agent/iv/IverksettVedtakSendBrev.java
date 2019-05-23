@@ -141,8 +141,9 @@ public class IverksettVedtakSendBrev extends AbstraktStegBehandler {
         }
     }
 
-    private boolean myndighetØnskerInnvilgelsesbrev(Landkoder land) {
-        return utenlandskMyndighetRepository.findByLandkode(land)
+    private boolean myndighetØnskerInnvilgelsesbrev(Landkoder landkode) throws TekniskException {
+        return utenlandskMyndighetRepository.findByLandkode(landkode)
+            .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."))
             .preferanser.stream().map(Preferanse::getPreferanse)
             .noneMatch(p -> p.equals(Preferanse.PreferanseEnum.RESERVERT_FRA_A1));
     }

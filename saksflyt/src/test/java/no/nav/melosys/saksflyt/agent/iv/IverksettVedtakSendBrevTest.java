@@ -95,8 +95,8 @@ public class IverksettVedtakSendBrevTest {
         utenlandskMyndighetReservert.preferanser.add(reservertMotA1Preferanse);
 
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
-        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.SE))).thenReturn(utenlandskMyndighet);
-        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.CZ))).thenReturn(utenlandskMyndighetReservert);
+        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.SE))).thenReturn(Optional.of(utenlandskMyndighet));
+        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.CZ))).thenReturn(Optional.of(utenlandskMyndighetReservert));
 
         dokService = Mockito.spy(lagDokumentService(byggerVelger));
         BrevBestiller brevBestiller = new BrevBestiller(dokService, byggerVelger);

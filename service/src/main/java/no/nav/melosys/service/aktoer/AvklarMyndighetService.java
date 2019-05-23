@@ -44,7 +44,8 @@ public class AvklarMyndighetService {
 
     private String lagInstitusjonsId(Behandling behandling) throws TekniskException {
         Landkoder landkode = landvelgerService.hentTrygdemyndighetsland(behandling);
-        UtenlandskMyndighet myndighet = utenlandskMyndighetRepository.findByLandkode(landkode);
+        UtenlandskMyndighet myndighet = utenlandskMyndighetRepository.findByLandkode(landkode)
+            .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
         return landkode.getKode() + ":" + myndighet.institusjonskode;
     }
 }
