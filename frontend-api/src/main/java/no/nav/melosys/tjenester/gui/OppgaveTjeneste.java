@@ -68,6 +68,8 @@ public class OppgaveTjeneste extends RestTjeneste {
             }
             dto.setJournalpostID(oppgave.getJournalpostId());
 
+            dto.setBehandlingID(oppgaveService.hentAktivBehandlingId(oppgave.getSaksnummer()));
+
             return Response.ok(dto).build();
         } else {
             return Response.ok().build();
