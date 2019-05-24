@@ -11,9 +11,9 @@ import java.util.stream.Stream;
  * De er bare relevant når det gjelder utsendt arbeidstaker og pre-utfyllingen fra informasjon innsendt tidligere (fra samme arbeidsgiver) er eldre enn 12 måneder.
  */
 public class JuridiskArbeidsgiverNorge {
-    public int utsendteNeste12Mnd;
-    public int antallAdmAnsatte;
-    public int antallAnsatte;
+    public Integer utsendteNeste12Mnd;
+    public Integer antallAdmAnsatte;
+    public Integer antallAnsatte;
     public BigDecimal andelOmsetningINorge;
     public BigDecimal andelOppdragINorge;
     public BigDecimal andelKontrakterINorge;

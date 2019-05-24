@@ -2,10 +2,7 @@ package no.nav.melosys.service;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
@@ -154,5 +151,17 @@ public class BehandlingService {
 
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
+    }
+
+    public Behandling hentBehandling(long behandlingId) throws IkkeFunnetException {
+        return Optional.ofNullable(behandlingRepository.findWithSaksopplysningerById(behandlingId))
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id " + behandlingId));
+    }
+
+    public void endreBehandlingsstatusFraOpprettetTilUnderBehandling(Behandling aktivBehandling) {
+        if (aktivBehandling.getStatus() == Behandlingsstatus.OPPRETTET) {
+            aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+            behandlingRepository.save(aktivBehandling);
+        }
     }
 }

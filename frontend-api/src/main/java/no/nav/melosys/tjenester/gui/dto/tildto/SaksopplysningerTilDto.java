@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.converter;
+package no.nav.melosys.tjenester.gui.dto.tildto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,35 +25,25 @@ import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
-import org.modelmapper.Converter;
-import org.modelmapper.spi.MappingContext;
 
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 
 /**
  * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
  */
-public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplysning>, SaksopplysningerDto> {
+public class SaksopplysningerTilDto {
     private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
 
     //Medlemsperioder sorteres fra nyest til eldst.
      static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
             (o1, o2) -> o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());
 
-    @Override
-    public SaksopplysningerDto convert(MappingContext<Set<Saksopplysning>, SaksopplysningerDto> context) {
-        Behandling behandling = (Behandling) context.getParent().getSource();
+    public static SaksopplysningerDto getSaksopplysningerDto(Set<Saksopplysning> saksopplysningSet, Behandling behandling) {
         SaksopplysningerDto dto = new SaksopplysningerDto();
-
-        if (context.getSource() == null) {
-            // Frontend ønsker å motta et objekt, selv når saksopplysninger ikke finnes.
-            return dto;
-        }
-
         Periode søknadsperiode = null;
         Land historiskStatsborgerskap = null;
 
-        for (Saksopplysning saksopplysning : context.getSource()) {
+        for (Saksopplysning saksopplysning : saksopplysningSet) {
             SaksopplysningType type = saksopplysning.getType();
             SaksopplysningDokument dokument = saksopplysning.getDokument();
 

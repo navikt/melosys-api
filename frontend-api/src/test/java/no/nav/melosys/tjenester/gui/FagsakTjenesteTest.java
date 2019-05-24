@@ -3,7 +3,9 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -14,11 +16,8 @@ import io.github.benas.randombeans.api.EnhancedRandom;
 import io.github.benas.randombeans.api.Randomizer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
@@ -30,7 +29,10 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.dto.BehandlingOversiktDto;
+import no.nav.melosys.tjenester.gui.dto.FagsakDto;
+import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
+import no.nav.melosys.tjenester.gui.dto.HenleggelseDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.json.JSONException;
 import org.junit.Before;
@@ -91,19 +93,6 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void fagsakSchemaValidering() throws IOException, JSONException {
         FagsakDto fagsakDto = random.nextObject(FagsakDto.class);
-
-        for (BehandlingDto b : fagsakDto.getBehandlinger()) {
-            // Gyldige adresser
-            for (OrganisasjonDokument org : b.getSaksopplysninger().getOrganisasjoner()) {
-                SemistrukturertAdresse adresse = random.nextObject(SemistrukturertAdresse.class);
-                adresse.setGyldighetsperiode(new Periode(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1)));
-                org.getOrganisasjonDetaljer().forretningsadresse = new ArrayList<>();
-                org.getOrganisasjonDetaljer().forretningsadresse.add(adresse);
-                org.getOrganisasjonDetaljer().postadresse = new ArrayList<>();
-                org.getOrganisasjonDetaljer().postadresse.add(adresse);
-            }
-
-        }
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
         schemaType = FAGSAKER_SCHEMA;

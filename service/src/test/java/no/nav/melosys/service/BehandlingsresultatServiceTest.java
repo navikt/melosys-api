@@ -96,6 +96,9 @@ public class BehandlingsresultatServiceTest {
         Lovvalgsperiode lovvalgsperiode = opprettLovvalgsperiode();
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
+        BehandlingsresultatBegrunnelse behandlingsresultatBegrunnelse = opprettBehandlingsresultatBegrunnelse();
+        behandlingsresultat.getBehandlingsresultatBegrunnelser().add(behandlingsresultatBegrunnelse);
+
         doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
 
         behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
@@ -119,13 +122,16 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getFakta().equals("fakta"));
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getType().equals(Avklartefaktatype.ARBEIDSLAND));
-
         assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getId() == null);
         assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getBegrunnelseFritekst().equals("fritekst"));
         VilkaarBegrunnelse vilkaarBegrunnelse = behandlingsresultatreplika.getVilkaarsresultater().stream().findFirst().get().getBegrunnelser().stream().findFirst().get();
         assertThat(vilkaarBegrunnelse.getId()).isNull();
         assertThat(vilkaarBegrunnelse.getKode()).isEqualTo("kode");
+
+        assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser()).allMatch(a -> a.getId() == null);
+        assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
+        assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser()).allMatch(a -> a.getKode().equals("begrunnelsekode"));
     }
 
     @Test
@@ -163,6 +169,14 @@ public class BehandlingsresultatServiceTest {
         avklartefakta.setFakta("fakta");
         avklartefakta.setType(Avklartefaktatype.ARBEIDSLAND);
         return avklartefakta;
+    }
+
+    private BehandlingsresultatBegrunnelse opprettBehandlingsresultatBegrunnelse() {
+        BehandlingsresultatBegrunnelse behandlingsresultatBegrunnelse = new BehandlingsresultatBegrunnelse();
+        behandlingsresultatBegrunnelse.setId(32L);
+        behandlingsresultatBegrunnelse.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
+        behandlingsresultatBegrunnelse.setKode("begrunnelsekode");
+        return behandlingsresultatBegrunnelse;
     }
 
     private Vilkaarsresultat opprettVilkaarsresultat() {
