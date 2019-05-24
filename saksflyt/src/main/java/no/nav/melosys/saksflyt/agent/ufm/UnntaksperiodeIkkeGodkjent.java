@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
+import no.nav.melosys.domain.kodeverk.UtfallRegistreringUnntak;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -17,12 +19,12 @@ import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PeriodeIkkeGodkjent extends AbstraktStegBehandler {
+public class UnntaksperiodeIkkeGodkjent extends AbstraktStegBehandler {
 
     private final BehandlingRepository behandlingRepository;
     private final BehandlingsresultatRepository behandlingsresultatRepository;
 
-    public PeriodeIkkeGodkjent(BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository) {
+    public UnntaksperiodeIkkeGodkjent(BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
     }
@@ -48,14 +50,19 @@ public class PeriodeIkkeGodkjent extends AbstraktStegBehandler {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
             .orElseThrow(() -> new TekniskException("Ingen behandlingsresultat for behandling " + behandling.getId()));
 
+        behandlingsresultat.setType(Behandlingsresultattyper.REGISTRERT_UNNTAK);
+        behandlingsresultat.setUtfallRegistreringUnntak(UtfallRegistreringUnntak.IKKE_GODKJENT);
+
         List<String> begrunnelser = prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE, List.class);
+        if (begrunnelser == null || begrunnelser.isEmpty()) {
+            throw new TekniskException("Registrering av ikke-godkjent unntaksperiode krever minst en begrunnelse! Behandlingid: " + behandling.getId());
+        }
         begrunnelser.forEach(begrunnelse -> {
             BehandlingsresultatBegrunnelse behandlingsresultatBegrunnelse = new BehandlingsresultatBegrunnelse();
             behandlingsresultatBegrunnelse.setKode(begrunnelse);
             behandlingsresultatBegrunnelse.setBehandlingsresultat(behandlingsresultat);
             behandlingsresultat.getBehandlingsresultatBegrunnelser().add(behandlingsresultatBegrunnelse);
         });
-
         if (begrunnelser.contains(IkkeGodkjentBegrunnelser.ANNET.getKode())) {
             behandlingsresultat.setBegrunnelseFritekst(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST));
         }

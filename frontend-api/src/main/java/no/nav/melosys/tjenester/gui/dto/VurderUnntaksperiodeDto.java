@@ -6,18 +6,12 @@ import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
 
 public class VurderUnntaksperiodeDto {
 
-    private final Resultat resultat;
     private final Set<IkkeGodkjentBegrunnelser> ikkeGodkjentBegrunnelseKoder;
     private final String begrunnelseFritekst;
 
-    public VurderUnntaksperiodeDto(Resultat resultat, Set<IkkeGodkjentBegrunnelser> ikkeGodkjentBegrunnelseKoder, String begrunnelseFritekst) {
-        this.resultat = resultat;
+    public VurderUnntaksperiodeDto(Set<IkkeGodkjentBegrunnelser> ikkeGodkjentBegrunnelseKoder, String begrunnelseFritekst) {
         this.ikkeGodkjentBegrunnelseKoder = ikkeGodkjentBegrunnelseKoder;
         this.begrunnelseFritekst = begrunnelseFritekst;
-    }
-
-    public Resultat getResultat() {
-        return resultat;
     }
 
     public Set<IkkeGodkjentBegrunnelser> getIkkeGodkjentBegrunnelseKoder() {
@@ -28,9 +22,4 @@ public class VurderUnntaksperiodeDto {
         return begrunnelseFritekst;
     }
 
-    public enum Resultat {
-        GODKJENT,
-        VURDER_DOKUMENT,
-        IKKE_GODKJENT
-    }
 }

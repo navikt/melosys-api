@@ -1,12 +1,15 @@
 package no.nav.melosys.service.saksflyt;
 
+import java.util.List;
 import java.util.Optional;
 
+import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
+import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -176,6 +179,30 @@ public class ProsessinstansServiceTest {
         Prosessinstans prosessinstans = ProsessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isFalse();
+    }
+
+    @Test
+    public void opprettProsessinstansGodkjennUnntaksperiode() {
+        service.opprettProsessinstansGodkjennUnntaksperiode(new Behandling());
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
+    }
+
+    @Test
+    public void opprettProsessinstansIkkeGodkjennUnntaksperiode() {
+        service.opprettProsessinstansUnntaksperiodeAvvist(new Behandling(),
+            Lists.newArrayList(IkkeGodkjentBegrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND), "fritekst");
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_PERIODE_IKKE_GODKJENT);
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE, List.class))
+            .contains(IkkeGodkjentBegrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name());
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST)).isEqualTo("fritekst");
     }
 
     private JournalfoeringDto lagJournalfoeringDTO() {

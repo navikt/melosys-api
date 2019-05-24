@@ -1,11 +1,14 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.util.Optional;
 import javax.ws.rs.BadRequestException;
 
-import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Endretperioder;
+import com.google.common.collect.Sets;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.abac.Tilgang;
@@ -13,6 +16,7 @@ import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.service.vedtak.VedtakService;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.VurderUnntaksperiodeDto;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,8 +25,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SaksflytTjenesteTest extends JsonSchemaTestParent {
@@ -111,5 +114,80 @@ public class SaksflytTjenesteTest extends JsonSchemaTestParent {
 
         verify(tilgang, never()).sjekk(behandlingID);
         valider(fattVedtakDto);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void godkjennUnntaksperiode_feilBehandlingstype_kasterException() throws IkkeFunnetException {
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.ENDRET_PERIODE);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
+
+        saksflytTjeneste.godkjennUnntaksperiode(1L);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void godkjennUnntaksperiode_feilStatus_kasterException() throws IkkeFunnetException {
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
+
+        saksflytTjeneste.godkjennUnntaksperiode(1L);
+    }
+
+    @Test
+    public void godkjennUnntaksperiode_korrektStatus_ingenFeil() throws IkkeFunnetException {
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
+
+        saksflytTjeneste.godkjennUnntaksperiode(1L);
+        verify(unntaksperiodeService).godkjennPeriode(any());
+    }
+
+    @Test
+    public void innhentInfoUnntaksperiode_korrektStatus_ingenFeil() throws IkkeFunnetException {
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
+
+        saksflytTjeneste.godkjennUnntaksperiode(1L);
+        verify(unntaksperiodeService).godkjennPeriode(any());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void ikkeGodkjennUnntaksperiode_ingenBegrunnelser_kasterException() throws IkkeFunnetException {
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
+
+        saksflytTjeneste.ikkeGodkjennUnntaksperiode(1L, new VurderUnntaksperiodeDto(Sets.newHashSet(), ""));
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void ikkeGodkjennUnntaksperiode_begrunnelseAnnetIngenFritekst_kasterException() throws IkkeFunnetException {
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
+
+        saksflytTjeneste.ikkeGodkjennUnntaksperiode(1L,
+            new VurderUnntaksperiodeDto(Sets.newHashSet(IkkeGodkjentBegrunnelser.ANNET),
+                null));
+    }
+
+    @Test
+    public void ikkeGodkjennUnntaksperiode_medBegrunnelse_ingenFeil() throws IkkeFunnetException {
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
+
+        saksflytTjeneste.ikkeGodkjennUnntaksperiode(1L,
+            new VurderUnntaksperiodeDto(Sets.newHashSet(IkkeGodkjentBegrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND),
+                null));
     }
 }

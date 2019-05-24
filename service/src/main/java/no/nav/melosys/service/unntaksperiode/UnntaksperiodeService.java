@@ -30,6 +30,6 @@ public class UnntaksperiodeService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void behandlingUnderAvklaring(Behandling behandling) {
-        //TODO: MELOSYS-2589
+        //TODO: MELOSYS-2678
     }
 }

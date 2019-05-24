@@ -83,8 +83,34 @@ public class SaksflytTjeneste extends RestTjeneste {
     }
 
     @POST
-    @Path("/unntaksperiode/{behandlingID}")
-    public Response vurderPeriode(@PathParam("behandlingID") Long behandlingId, @ApiParam("vurderUnntaksperiodeDto") VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws IkkeFunnetException {
+    @Path("/unntaksperiode/{behandlingID}/ikkegodkjenn")
+    public Response ikkeGodkjennUnntaksperiode(@PathParam("behandlingID") Long behandlingId, @ApiParam("vurderUnntaksperiodeDto") VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws IkkeFunnetException {
+
+        Behandling behandling = hentOgValiderBehandlingsTypeUnntak(behandlingId);
+        validerBegrunnelser(vurderUnntaksperiodeDto.getIkkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.getBegrunnelseFritekst());
+        unntaksperiodeService.avvisPeriode(behandling, vurderUnntaksperiodeDto.getIkkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.getBegrunnelseFritekst());
+
+        return Response.ok().build();
+    }
+
+
+    @POST
+    @Path("/unntaksperiode/{behandlingID}/godkjenn")
+    public Response godkjennUnntaksperiode(@PathParam("behandlingID") Long behandlingId) throws IkkeFunnetException {
+        Behandling behandling = hentOgValiderBehandlingsTypeUnntak(behandlingId);
+        unntaksperiodeService.godkjennPeriode(behandling);
+        return Response.ok().build();
+    }
+
+    @POST
+    @Path("/unntaksperiode/{behandlingID}/innhentinfo")
+    public Response innhentInformasjonUnntaksperiode(@PathParam("behandlingID") Long behandlingId) throws IkkeFunnetException {
+        Behandling behandling = hentOgValiderBehandlingsTypeUnntak(behandlingId);
+        unntaksperiodeService.behandlingUnderAvklaring(behandling);
+        return Response.ok().build();
+    }
+
+    private Behandling hentOgValiderBehandlingsTypeUnntak(long behandlingId) throws IkkeFunnetException {
         Behandling behandling = behandlingRepository.findById(behandlingId)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandling med id" + behandlingId));
 
@@ -94,16 +120,7 @@ public class SaksflytTjeneste extends RestTjeneste {
             throw new BadRequestException("Behandling har status " + behandling.getStatus());
         }
 
-        if (vurderUnntaksperiodeDto.getResultat() == VurderUnntaksperiodeDto.Resultat.GODKJENT) {
-            unntaksperiodeService.godkjennPeriode(behandling);
-        } else if (vurderUnntaksperiodeDto.getResultat() == VurderUnntaksperiodeDto.Resultat.IKKE_GODKJENT) {
-            validerBegrunnelser(vurderUnntaksperiodeDto.getIkkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.getBegrunnelseFritekst());
-            unntaksperiodeService.avvisPeriode(behandling, vurderUnntaksperiodeDto.getIkkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.getBegrunnelseFritekst());
-        } else {
-            unntaksperiodeService.behandlingUnderAvklaring(behandling);
-        }
-
-        return Response.ok().build();
+        return behandling;
     }
 
     private void validerBegrunnelser(Set<IkkeGodkjentBegrunnelser> begrunnelser, String fritekst) {
