@@ -43,7 +43,7 @@ public class ProsessinstansService {
         prosessinstans.setType(type);
         prosessinstans.setSteg(ProsessSteg.JFR_VALIDERING);
 
-        if (!StringUtils.isEmpty(journalfoeringDto.getBehandlingstypeKode())) {
+        if (StringUtils.isNotEmpty(journalfoeringDto.getBehandlingstypeKode())) {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()));
         }
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalfoeringDto.getJournalpostID());
@@ -56,7 +56,8 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringDto.isSkalTilordnes());
 
         if (!CollectionUtils.isEmpty(journalfoeringDto.getVedlegg())) {
-            prosessinstans.setData(ProsessDataKey.VEDLEGG_TITTEL_LISTE, journalfoeringDto.getVedlegg().stream().map(DokumentDto::getTittel).collect(Collectors.toList()));
+            prosessinstans.setData(ProsessDataKey.VEDLEGG_TITTEL_LISTE,
+                journalfoeringDto.getVedlegg().stream().map(DokumentDto::getTittel).filter(StringUtils::isNotEmpty).collect(Collectors.toList()));
         }
 
         return prosessinstans;

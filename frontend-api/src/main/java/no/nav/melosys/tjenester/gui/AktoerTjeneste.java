@@ -62,10 +62,10 @@ public class AktoerTjeneste extends RestTjeneste {
 
         Aktoersroller rolle = null;
         Representerer representantRepresenterer = null;
-        if (!StringUtils.isEmpty(rolleKode)) {
+        if (StringUtils.isNotEmpty(rolleKode)) {
             rolle = Aktoersroller.valueOf(rolleKode);
         }
-        if (!StringUtils.isEmpty(representerer)) {
+        if (StringUtils.isNotEmpty(representerer)) {
             representantRepresenterer = Representerer.valueOf(representerer);
         }
 
