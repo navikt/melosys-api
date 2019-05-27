@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
@@ -47,11 +48,18 @@ public class OppdaterMedlTest {
 
     @Test
     public void utfør() throws Exception {
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.fnr = "123";
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(personDokument);
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
+
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.lagreLovvalgsperioder(anyLong(), any())).thenReturn(Collections.singleton(lovvalgsperiode));
 
         Behandling behandling = new Behandling();
         behandling.setId(12L);
+        behandling.getSaksopplysninger().add(saksopplysning);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
