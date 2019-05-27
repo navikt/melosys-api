@@ -98,7 +98,15 @@ public class OppgaveService {
     }
 
     public Optional<Oppgave> hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
-        return  gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
+        return gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
+    }
+
+    public Long hentAktivBehandlingId(String saksnummer) throws TekniskException {
+        Fagsak fagsak = Optional.ofNullable(fagsakRepository.findBySaksnummer(saksnummer))
+            .orElseThrow(() -> new TekniskException("Fagsak med saksnummer " + saksnummer + " ikke funnet"));
+        return Optional.ofNullable(fagsak.getAktivBehandling())
+            .orElseThrow(() -> new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen aktive behandlinger"))
+            .getId();
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) throws TekniskException, FunksjonellException {
