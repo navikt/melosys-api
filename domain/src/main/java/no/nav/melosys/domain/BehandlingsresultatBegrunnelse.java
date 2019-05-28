@@ -8,6 +8,7 @@ import javax.persistence.*;
 public class BehandlingsresultatBegrunnelse {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(optional = false)
