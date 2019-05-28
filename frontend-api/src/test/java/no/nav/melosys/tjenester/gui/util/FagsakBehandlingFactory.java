@@ -71,7 +71,7 @@ public class FagsakBehandlingFactory {
         soeknadDokument.soeknadsland.landkoder.add(Landkoder.DK.getKode());
         soeknadDokument.arbeidUtland = new ArrayList<>();
         soeknadDokument.arbeidUtland.add(arbeidUtland);
-        soeknadDokument.oppholdUtland.oppholdslandkoder.add("NO");
+        soeknadDokument.oppholdUtland.oppholdslandkoder.add("FI");
         soeknadDokument.periode = new no.nav.melosys.domain.dokument.soeknad.Periode(
             LocalDate.of(2019,1,1), LocalDate.of(2019,2,1));
         Saksopplysning saksopplysningSøknad = new Saksopplysning();

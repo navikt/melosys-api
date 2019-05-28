@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.util;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
@@ -35,21 +34,19 @@ public final class SoeknadUtils {
 
     /**
      * Returnerer søknadsland som landkoder,
-     * og sjekker at det er minst et søknadsland i oppgitt i søknad
+     * og sjekker at det er minst et søknadsland oppgitt i søknad
      */
     public static List<Landkoder> hentSøknadslandkoder(SoeknadDokument søknad) {
-        if (søknad.soeknadsland.landkoder.isEmpty()) {
+        List<String> søknadsland = hentSøknadsland(søknad);
+        if (søknadsland.isEmpty()) {
             throw new IllegalStateException("Søknad mangler søknadsland");
         }
-        return søknad.soeknadsland.landkoder.stream()
-            .filter(Objects::nonNull)
+        return søknadsland.stream()
             .map(Landkoder::valueOf)
             .collect(Collectors.toList());
     }
 
     public static List<String> hentSøknadsland(SoeknadDokument søknad) {
-        return søknad.soeknadsland.landkoder.stream()
-            .filter((Objects::nonNull))
-            .collect(Collectors.toList());
+        return søknad.soeknadsland.landkoder;
     }
 }
