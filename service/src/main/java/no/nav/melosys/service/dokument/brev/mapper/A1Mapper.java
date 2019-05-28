@@ -171,9 +171,10 @@ public class A1Mapper {
         AdresseType adresseType = new AdresseType();
         adresseType.setNavn(fysiskArbeidssted.navn);
         StrukturertAdresse adresse = fysiskArbeidssted.adresse;
-        adresseType.setAdresselinje1(adresse.gatenavn);
+        adresseType.setAdresselinje1(adresse.gatenavn + " " + adresse.husnummer);
         adresseType.setAdresselinje2(adresse.postnummer);
         adresseType.setAdresselinje3(adresse.poststed);
+        adresseType.setAdresselinje4(adresse.region);
         adresseType.setLand(adresse.landkode);
         return adresseType;
     }
