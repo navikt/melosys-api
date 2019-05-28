@@ -55,7 +55,7 @@ public class EregService implements EregFasade {
         request.setOrgnummer(orgnummer);
 
         // Kall til E-reg
-        HentOrganisasjonResponse response = null;
+        HentOrganisasjonResponse response;
         try {
             response = organisasjonConsumer.hentOrganisasjon(request);
         } catch (HentOrganisasjonOrganisasjonIkkeFunnet hentOrganisasjonOrganisasjonIkkeFunnet) {

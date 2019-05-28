@@ -21,6 +21,7 @@ public class OrganisasjonsDetaljerTest {
     private String linje2 = "LINJE2";
     private String linje3 = "LINJE3";
     private String postnr = "postnummer";
+    private String poststed = "poststed";
     private String kommunenr = "kommunenr";
     private String poststedUtland = "poststedUtland";
 
@@ -35,6 +36,7 @@ public class OrganisasjonsDetaljerTest {
         adresse.setAdresselinje2(linje2);
         adresse.setAdresselinje3(linje3);
         adresse.setPostnr(postnr);
+        adresse.setPoststed(poststed);
         adresse.setPoststedUtland(poststedUtland);
         adresse.setKommunenr(kommunenr);
         adresse.setGyldighetsperiode(periode);
@@ -52,7 +54,7 @@ public class OrganisasjonsDetaljerTest {
         assertThat(resultatAdresse.adresselinjer.get(0)).isEqualTo(linje1);
         assertThat(resultatAdresse.adresselinjer.get(1)).isEqualTo(linje2);
         assertThat(resultatAdresse.adresselinjer.get(2)).isEqualTo(linje3);
-        assertThat(resultatAdresse.adresselinjer.get(3)).isEqualTo(postnr);
+        assertThat(resultatAdresse.adresselinjer.get(3)).isEqualTo(postnr + " " + poststed);
         assertThat(resultatAdresse.landkode).isEqualTo(landkode);
     }
 
@@ -84,9 +86,9 @@ public class OrganisasjonsDetaljerTest {
         assertThat(resultatAdresse.gatenavn).isEqualTo(linje1.trim() + " " + linje2 + " " + linje3);
         assertThat(resultatAdresse.landkode).isEqualTo(landkode);
 
-        // Har kun postnummer for norske registeradresses. Slåes opp med kodeverkservice ved behov
         assertThat(resultatAdresse.postnummer).isEqualTo(postnr);
-        assertThat(resultatAdresse.poststed).isEmpty();
+        // Ikke alltid poststed for norske registeradresser. Slåes opp med kodeverkservice ved behov
+        assertThat(resultatAdresse.poststed).isEqualTo(poststed);
     }
 
     @Test
