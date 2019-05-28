@@ -51,6 +51,7 @@ public class LandvelgerServiceTest {
         Saksopplysning soeknad = new Saksopplysning();
         soeknad.setDokument(søknad);
         soeknad.setType(SaksopplysningType.SØKNAD);
+        søknad.oppholdUtland.oppholdslandkoder.add("NO");
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
         søknad.bosted.oppgittAdresse = new StrukturertAdresse();
         søknad.bosted.oppgittAdresse.landkode = bostedsland.getKode();
@@ -72,7 +73,7 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentArbeidsland_utenAvklartArbeidsland_girOppholdsland() throws TekniskException {
+    public void hentArbeidsland_utenAvklartArbeidsland_girSøknadsland() throws TekniskException {
         String land = landvelgerService.hentArbeidsland(behandling).getBeskrivelse();
         assertThat(land).isEqualTo(søknadsland.getBeskrivelse());
     }
@@ -86,7 +87,7 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentTrygdemyndighetsland_medArt121_girOppholdsland() throws TekniskException {
+    public void hentTrygdemyndighetsland_medArt121_girSøknadsland() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART12_1);
         String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
         assertThat(land).isEqualTo(søknadsland.getBeskrivelse());
@@ -101,14 +102,14 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentTrygdemyndighetsland_medArt122_girOppholdsland() throws TekniskException {
+    public void hentTrygdemyndighetsland_medArt122_girSøknadsland() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART12_2);
         String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();
         assertThat(land).isEqualTo(søknadsland.getBeskrivelse());
     }
 
     @Test
-    public void hentTrygdemyndighetsland_medArt161_girOppholdsland() throws TekniskException {
+    public void hentTrygdemyndighetsland_medArt161_girSøknadsland() throws TekniskException {
         oppfyll(Vilkaar.FO_883_2004_ART16_1);
 
         String land = landvelgerService.hentTrygdemyndighetsland(behandling).getBeskrivelse();

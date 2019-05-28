@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART11_3A;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART11_4_2;
-import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
+import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadslandkoder;
 
 @Service
 public class LandvelgerService {
@@ -38,7 +38,7 @@ public class LandvelgerService {
     public Landkoder hentArbeidsland(Behandling behandling) throws TekniskException {
         Optional<Landkoder> arbeidslandOpt = avklartefaktaService.hentArbeidsland(behandling.getId());
         SoeknadDokument søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
-        return arbeidslandOpt.orElseGet(() -> hentSøknadsland(søknad));
+        return arbeidslandOpt.orElseGet(() -> hentSøknadslandkoder(søknad).get(0));
     }
 
     public Landkoder hentTrygdemyndighetsland(Behandling behandling) throws TekniskException {

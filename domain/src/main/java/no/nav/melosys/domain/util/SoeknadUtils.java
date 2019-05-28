@@ -1,8 +1,8 @@
 package no.nav.melosys.domain.util;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
@@ -19,23 +19,6 @@ public final class SoeknadUtils {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * Henter arbeidsland og oppholdsland samlet i en liste av landkoder.
-     */
-    public static List<String> hentLand(SoeknadDokument soeknad) {
-        List<String> landkoder = new ArrayList<>();
-        if (soeknad.arbeidUtland != null) {
-            soeknad.arbeidUtland.stream().filter(Objects::nonNull).forEach(arbeidUtland -> landkoder.add(arbeidUtland.adresse.landkode));
-        }
-        if (soeknad.oppholdUtland != null) {
-            soeknad.oppholdUtland.oppholdslandkoder.stream().filter(Objects::nonNull).forEach(landkoder::add);
-        }
-        if (soeknad.soeknadsland != null) {
-            soeknad.soeknadsland.landkoder.stream().filter(Objects::nonNull).forEach(landkoder::add);
-        }
-        return landkoder;
-    }
-
     public static Periode hentPeriode(SoeknadDokument soeknadDokument) {
         return soeknadDokument.periode;
     }
@@ -50,10 +33,23 @@ public final class SoeknadUtils {
         return søknad.maritimtArbeid.get(0);
     }
 
-    public static Landkoder hentSøknadsland(SoeknadDokument søknad) {
+    /**
+     * Returnerer søknadsland som landkoder,
+     * og sjekker at det er minst et søknadsland i oppgitt i søknad
+     */
+    public static List<Landkoder> hentSøknadslandkoder(SoeknadDokument søknad) {
         if (søknad.soeknadsland.landkoder.isEmpty()) {
             throw new IllegalStateException("Søknad mangler søknadsland");
         }
-        return Landkoder.valueOf(søknad.soeknadsland.landkoder.get(0));
+        return søknad.soeknadsland.landkoder.stream()
+            .filter(Objects::nonNull)
+            .map(Landkoder::valueOf)
+            .collect(Collectors.toList());
+    }
+
+    public static List<String> hentSøknadsland(SoeknadDokument søknad) {
+        return søknad.soeknadsland.landkoder.stream()
+            .filter((Objects::nonNull))
+            .collect(Collectors.toList());
     }
 }

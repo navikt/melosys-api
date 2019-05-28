@@ -21,10 +21,7 @@ import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDet
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.abac.Tilgang;
@@ -103,7 +100,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     public void fagsakSøkSchemaValidering() throws IOException, JSONException {
         List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = EnhancedRandom.randomListOf(1, FagsakOppsummeringDto.class);
         List<BehandlingOversiktDto> behandlingOversiktDtoer = EnhancedRandom.randomListOf(1, BehandlingOversiktDto.class);
-        behandlingOversiktDtoer.get(0).setLand(Collections.singletonList("NO"));
+        behandlingOversiktDtoer.get(0).setLand(Collections.singletonList(Landkoder.NO.getKode()));
         fagsakOppsummeringDtoList.get(0).setBehandlingOversikter(behandlingOversiktDtoer);
 
         schemaType = SOK_FAGSAKER_SCHEMA;
@@ -218,7 +215,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         assertThat(behandlingFørst.getBehandlingsstatus().getKode()).isEqualTo("UNDER_BEHANDLING");
         assertThat(behandlingFørst.getBehandlingstype().getKode()).isEqualTo("SOEKNAD");
         assertThat(behandlingFørst.getOpprettetDato()).isEqualTo(Instant.parse("2019-01-10T10:37:30.00Z"));
-        assertThat(behandlingFørst.getLand().get(0)).isEqualTo("NO");
+        assertThat(behandlingFørst.getLand().get(0)).isEqualTo("DK");
 
         assertThat(behandlingFørst.getSoknadsperiode().getFom()).isEqualTo(LocalDate.of(2019,1,1));
         assertThat(behandlingFørst.getSoknadsperiode().getTom()).isEqualTo(LocalDate.of(2019,2,1));
