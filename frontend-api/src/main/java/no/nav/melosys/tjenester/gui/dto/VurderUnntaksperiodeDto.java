@@ -2,19 +2,17 @@ package no.nav.melosys.tjenester.gui.dto;
 
 import java.util.Set;
 
-import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
-
 public class VurderUnntaksperiodeDto {
 
-    private final Set<IkkeGodkjentBegrunnelser> ikkeGodkjentBegrunnelseKoder;
+    private final Set<String> ikkeGodkjentBegrunnelseKoder;
     private final String begrunnelseFritekst;
 
-    public VurderUnntaksperiodeDto(Set<IkkeGodkjentBegrunnelser> ikkeGodkjentBegrunnelseKoder, String begrunnelseFritekst) {
+    public VurderUnntaksperiodeDto(Set<String> ikkeGodkjentBegrunnelseKoder, String begrunnelseFritekst) {
         this.ikkeGodkjentBegrunnelseKoder = ikkeGodkjentBegrunnelseKoder;
         this.begrunnelseFritekst = begrunnelseFritekst;
     }
 
-    public Set<IkkeGodkjentBegrunnelser> getIkkeGodkjentBegrunnelseKoder() {
+    public Set<String> getIkkeGodkjentBegrunnelseKoder() {
         return ikkeGodkjentBegrunnelseKoder;
     }
 

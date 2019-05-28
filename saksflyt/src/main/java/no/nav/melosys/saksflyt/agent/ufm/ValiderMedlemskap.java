@@ -59,8 +59,8 @@ public class ValiderMedlemskap extends RegistreringUnntakValiderer {
 
         SedDokument sedDokument = (SedDokument) hentSedSaksopplysning(prosessinstans).getDokument();
         String fnr = prosessinstans.getData(ProsessDataKey.BRUKER_ID);
-        LocalDate fom = sedDokument.getPeriode().getFom();
-        LocalDate tom = sedDokument.getPeriode().getTom();
+        LocalDate fom = sedDokument.getLovvalgsperiode().getFom();
+        LocalDate tom = sedDokument.getLovvalgsperiode().getTom();
 
         Saksopplysning saksopplysningMedlemskap = medlFasade.hentPeriodeListe(fnr, fom, tom);
         saksopplysningMedlemskap.setBehandling(prosessinstans.getBehandling());

@@ -46,7 +46,7 @@ public class ValiderPeriode extends RegistreringUnntakValiderer {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         SedDokument sedDokument = (SedDokument) hentSedSaksopplysning(prosessinstans).getDokument();
-        Periode periode = sedDokument.getPeriode();
+        Periode periode = sedDokument.getLovvalgsperiode();
 
         if (periode.getTom() == null) {
             registrerFeil(prosessinstans,Unntak_periode_begrunnelser.FEIL_I_PERIODEN);

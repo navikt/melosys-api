@@ -47,7 +47,7 @@ public class SaksflytTjenesteTest extends JsonSchemaTestParent {
 
     private SaksflytTjeneste saksflytTjeneste;
 
-    private static final String schemaType = "vedtak-post-schema.json";
+    private String schemaType = "saksflyt-vedtak-post-schema.json";
 
     private FattVedtakDto fattVedtakDto;
     private EndreVedtakDto endreVedtakDto;
@@ -157,37 +157,20 @@ public class SaksflytTjenesteTest extends JsonSchemaTestParent {
         verify(unntaksperiodeService).godkjennPeriode(any());
     }
 
-    @Test(expected = BadRequestException.class)
-    public void ikkeGodkjennUnntaksperiode_ingenBegrunnelser_kasterException() throws IkkeFunnetException {
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
-
-        saksflytTjeneste.ikkeGodkjennUnntaksperiode(1L, new VurderUnntaksperiodeDto(Sets.newHashSet(), ""));
-    }
-
-    @Test(expected = BadRequestException.class)
-    public void ikkeGodkjennUnntaksperiode_begrunnelseAnnetIngenFritekst_kasterException() throws IkkeFunnetException {
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
-
-        saksflytTjeneste.ikkeGodkjennUnntaksperiode(1L,
-            new VurderUnntaksperiodeDto(Sets.newHashSet(IkkeGodkjentBegrunnelser.ANNET),
-                null));
-    }
-
     @Test
-    public void ikkeGodkjennUnntaksperiode_medBegrunnelse_ingenFeil() throws IkkeFunnetException {
+    public void ikkeGodkjennUnntaksperiode_gyldigBehandlingIdValiderSchema_ingenFeil() throws FunksjonellException, IOException {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
-        saksflytTjeneste.ikkeGodkjennUnntaksperiode(1L,
-            new VurderUnntaksperiodeDto(Sets.newHashSet(IkkeGodkjentBegrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND),
-                null));
+        VurderUnntaksperiodeDto dto = new VurderUnntaksperiodeDto(
+            Sets.newHashSet(IkkeGodkjentBegrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name()), null
+        );
+
+        saksflytTjeneste.ikkeGodkjennUnntaksperiode(1L, dto);
+
+        schemaType = "saksflyt-unntaksperiode-post-schema.json";
+        valider(dto);
     }
 }

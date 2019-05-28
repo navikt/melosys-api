@@ -96,14 +96,14 @@ public class EessiMottakService {
 
     private SedDokument opprettSedDokument(MelosysEessiMelding melosysEessiMelding) {
         SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgsland(Landkoder.valueOf(melosysEessiMelding.getLovvalgsland()));
+        sedDokument.setLovvalgslandKode(Landkoder.valueOf(melosysEessiMelding.getLovvalgsland()));
         sedDokument.setLovvalgBestemmelse(
             LovvalgTilBestemmelseDtoMapper.mapBestemmelseVerdiTilMelosysLovvalgBestemmelse(melosysEessiMelding.getArtikkel())
         );
         sedDokument.setRinaSaksnummer(melosysEessiMelding.getRinaSaksnummer());
-        sedDokument.setPeriode(tilPeriode(melosysEessiMelding.getPeriode()));
-        sedDokument.setRinaDokumentId(melosysEessiMelding.getSedId());
-        sedDokument.setStatsborgerskap(
+        sedDokument.setLovvalgsperiode(tilPeriode(melosysEessiMelding.getPeriode()));
+        sedDokument.setRinaDokumentID(melosysEessiMelding.getSedId());
+        sedDokument.setStatsborgerskapKoder(
             melosysEessiMelding.getStatsborgerskap().stream().map(Statsborgerskap::getLandkode).collect(Collectors.toList())
         );
         sedDokument.setErEndring(melosysEessiMelding.getErEndring());

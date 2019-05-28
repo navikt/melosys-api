@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.ws.rs.core.Response;
 
 import no.nav.melosys.service.BehandlingService;
@@ -25,7 +24,7 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
     private static final Logger log = LoggerFactory.getLogger(BehandlingTjenesteTest.class);
 
-    private static final String TIDLIGERE_MEDLEMSPERIODER_SCHEMA = "behandlinger-perioder-post-schema.json";
+    private static final String TIDLIGERE_MEDLEMSPERIODER_SCHEMA = "behandlinger-medlemsperioder-post-schema.json";
 
     private BehandlingTjeneste behandlingTjeneste;
 
@@ -77,5 +76,6 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
         assertThat(tidligereMedlemsperioderDto.periodeIder).containsAll(periodeIder);
 
         verify(behandlingService, times(1)).hentMedlemsperioder(behandlingID);
+
     }
 }

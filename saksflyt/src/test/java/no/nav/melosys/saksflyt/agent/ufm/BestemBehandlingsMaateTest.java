@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.internal.util.collections.Sets;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,12 +41,8 @@ public class BestemBehandlingsMaateTest {
 
     @Test
     public void utførSteg_ingenTreffIRegister_verifiserNesteSteg() throws Exception {
-        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatype.VURDERING_UNNTAK_PERIODE)))
-            .thenReturn(Sets.newSet());
-
         Prosessinstans prosessinstans = hentProsessinstans();
         bestemBehandlingsMaate.utfør(prosessinstans);
-
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
     }
 

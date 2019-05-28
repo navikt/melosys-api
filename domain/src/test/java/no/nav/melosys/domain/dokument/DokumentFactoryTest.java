@@ -107,14 +107,14 @@ public class DokumentFactoryTest {
     @Test
     public void lagSedDokument_xmlBlirProdusert() {
         SedDokument sedDokument = new SedDokument();
-        sedDokument.setStatsborgerskap(Collections.singletonList("NO"));
-        sedDokument.setPeriode(new Periode(LocalDate.now(), LocalDate.now()));
+        sedDokument.setStatsborgerskapKoder(Collections.singletonList("NO"));
+        sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now()));
         sedDokument.setLovvalgBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
         sedDokument.setErEndring(false);
-        sedDokument.setRinaDokumentId("123");
+        sedDokument.setRinaDokumentID("123");
         sedDokument.setRinaSaksnummer("saksnummer123");
         sedDokument.setFnr("333");
-        sedDokument.setLovvalgsland(Landkoder.DE);
+        sedDokument.setLovvalgslandKode(Landkoder.DE);
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(sedDokument);

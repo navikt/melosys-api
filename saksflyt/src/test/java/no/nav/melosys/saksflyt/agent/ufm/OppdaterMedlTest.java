@@ -72,8 +72,8 @@ public class OppdaterMedlTest {
 
     private Saksopplysning hentSaksopplysning() {
         SedDokument sedDokument = new SedDokument();
-        sedDokument.setPeriode(new Periode(LocalDate.now(), LocalDate.now().plusYears(1L)));
-        sedDokument.setLovvalgsland(Landkoder.DE);
+        sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now().plusYears(1L)));
+        sedDokument.setLovvalgslandKode(Landkoder.DE);
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(sedDokument);
         return saksopplysning;

@@ -100,7 +100,7 @@ public class ValiderStatsborgerskapTest {
 
     private SedDokument hentSedDokument(String... landkoder) {
         SedDokument sedDokument = new SedDokument();
-        sedDokument.setStatsborgerskap(Arrays.asList(landkoder));
+        sedDokument.setStatsborgerskapKoder(Arrays.asList(landkoder));
         return sedDokument;
 
     }

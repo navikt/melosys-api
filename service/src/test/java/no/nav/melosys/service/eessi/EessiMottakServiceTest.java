@@ -63,8 +63,8 @@ public class EessiMottakServiceTest {
         SedDokument sedDokument = prosessinstans.getData(ProsessDataKey.SED_DOKUMENT, SedDokument.class);
         assertThat(sedDokument).isNotNull();
         assertThat(sedDokument.getLovvalgBestemmelse()).isEqualTo(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
-        assertThat(sedDokument.getPeriode()).isNotNull();
-        assertThat(sedDokument.getPeriode().getFom()).isBeforeOrEqualTo(LocalDate.of(2020, 12, 12));
+        assertThat(sedDokument.getLovvalgsperiode()).isNotNull();
+        assertThat(sedDokument.getLovvalgsperiode().getFom()).isBeforeOrEqualTo(LocalDate.of(2020, 12, 12));
         assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isNotNull();
         assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isNotNull();
         assertThat(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID)).isNotNull();

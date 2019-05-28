@@ -64,8 +64,8 @@ public class ValiderYtelser extends RegistreringUnntakValiderer {
 
         SedDokument sedDokument = (SedDokument) hentSedSaksopplysning(prosessinstans).getDokument();
         String fnr = prosessinstans.getData(ProsessDataKey.BRUKER_ID);
-        LocalDate fom = sedDokument.getPeriode().getFom();
-        LocalDate tom = sedDokument.getPeriode().getTom();
+        LocalDate fom = sedDokument.getLovvalgsperiode().getFom();
+        LocalDate tom = sedDokument.getLovvalgsperiode().getTom();
 
         Saksopplysning saksopplysning = hentInntektListe(fnr, fom ,tom);
         saksopplysning.setBehandling(prosessinstans.getBehandling());

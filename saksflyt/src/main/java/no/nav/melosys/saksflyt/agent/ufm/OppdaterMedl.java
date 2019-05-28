@@ -79,9 +79,9 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private Lovvalgsperiode opprettLovvalgsperiode(SedDokument sedDokument) {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(sedDokument.getLovvalgBestemmelse());
-        lovvalgsperiode.setFom(sedDokument.getPeriode().getFom());
-        lovvalgsperiode.setTom(sedDokument.getPeriode().getTom());
-        lovvalgsperiode.setLovvalgsland(sedDokument.getLovvalgsland());
+        lovvalgsperiode.setFom(sedDokument.getLovvalgsperiode().getFom());
+        lovvalgsperiode.setTom(sedDokument.getLovvalgsperiode().getTom());
+        lovvalgsperiode.setLovvalgsland(sedDokument.getLovvalgslandKode());
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
         lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);

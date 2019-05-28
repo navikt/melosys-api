@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.Set;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -14,7 +13,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -25,7 +23,6 @@ import no.nav.melosys.service.vedtak.VedtakService;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.VurderUnntaksperiodeDto;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -84,11 +81,9 @@ public class SaksflytTjeneste extends RestTjeneste {
 
     @POST
     @Path("/unntaksperiode/{behandlingID}/ikkegodkjenn")
-    public Response ikkeGodkjennUnntaksperiode(@PathParam("behandlingID") Long behandlingId, @ApiParam("vurderUnntaksperiodeDto") VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws IkkeFunnetException {
-
+    public Response ikkeGodkjennUnntaksperiode(@PathParam("behandlingID") Long behandlingId, @ApiParam("vurderUnntaksperiodeDto") VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws FunksjonellException {
         Behandling behandling = hentOgValiderBehandlingsTypeUnntak(behandlingId);
-        validerBegrunnelser(vurderUnntaksperiodeDto.getIkkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.getBegrunnelseFritekst());
-        unntaksperiodeService.avvisPeriode(behandling, vurderUnntaksperiodeDto.getIkkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.getBegrunnelseFritekst());
+        unntaksperiodeService.ikkeGodkjennPeriode(behandling, vurderUnntaksperiodeDto.getIkkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.getBegrunnelseFritekst());
 
         return Response.ok().build();
     }
@@ -121,13 +116,5 @@ public class SaksflytTjeneste extends RestTjeneste {
         }
 
         return behandling;
-    }
-
-    private void validerBegrunnelser(Set<IkkeGodkjentBegrunnelser> begrunnelser, String fritekst) {
-        if (begrunnelser.isEmpty()) {
-            throw new BadRequestException("Ingen begrunnelser for avlag av periode");
-        } else if (begrunnelser.contains(IkkeGodkjentBegrunnelser.ANNET) && StringUtils.isEmpty(fritekst)) {
-            throw new BadRequestException("Begrunnelse " + IkkeGodkjentBegrunnelser.ANNET + " krever fritekst!");
-        }
     }
 }

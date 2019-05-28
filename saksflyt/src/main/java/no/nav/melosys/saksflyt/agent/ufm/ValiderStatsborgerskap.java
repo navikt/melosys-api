@@ -45,7 +45,7 @@ public class ValiderStatsborgerskap extends RegistreringUnntakValiderer {
         //TODO: avklar om dette er ok måte å sjekke på. Dekker behovet slik kodeverket er nå
         SedDokument sedDokument = (SedDokument) hentSedSaksopplysning(prosessinstans).getDokument();
         boolean harStatsborgerskapIGyldigLand = Arrays.stream(Landkoder.values())
-            .anyMatch(landkode -> sedDokument.getStatsborgerskap().contains(landkode.getKode()));
+            .anyMatch(landkode -> sedDokument.getStatsborgerskapKoder().contains(landkode.getKode()));
 
         if (!harStatsborgerskapIGyldigLand) {
             registrerFeil(prosessinstans, Unntak_periode_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND);
