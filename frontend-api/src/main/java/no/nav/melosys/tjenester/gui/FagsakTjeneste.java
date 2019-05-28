@@ -33,8 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
-import static no.nav.melosys.domain.util.SoeknadUtils.hentLand;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
+import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 
 @Api(tags = {"fagsaker"})
 @Path("/fagsaker")
@@ -152,7 +152,7 @@ public class FagsakTjeneste extends RestTjeneste {
             hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(
                 saksopplysningDokument -> {
                     SoeknadDokument soeknadDokument = (SoeknadDokument) saksopplysningDokument;
-                    behandlingOversiktDto.setLand(hentLand(soeknadDokument));
+                    behandlingOversiktDto.setLand(hentSøknadsland(soeknadDokument));
                     Periode periode = hentPeriode(soeknadDokument);
                     behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
                 });

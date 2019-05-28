@@ -20,8 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.domain.ProsessSteg.HS_OPPDATER_RESULTAT;
-import static no.nav.melosys.domain.util.SoeknadUtils.hentLand;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
+import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 
 @Service
 public class ProsessinstansService {
@@ -146,7 +146,7 @@ public class ProsessinstansService {
         nyprosessinstans.setData(ProsessDataKey.BRUKER_ID, brukerID);
 
         nyprosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, hentPeriode(søknadDokument));
-        nyprosessinstans.setData(ProsessDataKey.SØKNADSLAND, hentLand(søknadDokument));
+        nyprosessinstans.setData(ProsessDataKey.SØKNADSLAND, hentSøknadsland(søknadDokument));
 
         nyprosessinstans.setSteg(ProsessSteg.JFR_HENT_PERS_OPPL);
 
