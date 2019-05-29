@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -19,11 +18,12 @@ import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART11_3A;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART11_4_2;
+import static no.nav.melosys.domain.util.SoeknadUtils.hentOppgittBostedsland;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadslandkoder;
 
 @Service
 public class LandvelgerService {
-    private static final String KAN_IKKE_HENTE_BOSTEDSLAND = "Kan ikke hente bostedsland";
+
 
     private AvklartefaktaService avklartefaktaService;
     private VilkaarsresultatRepository vilkaarsresultatRepository;
@@ -60,13 +60,15 @@ public class LandvelgerService {
     }
 
     private Landkoder hentBostedsland(Behandling behandling, SoeknadDokument søknad) {
-        Optional<Landkoder> bostedslandOpt = avklartefaktaService.hentBostedland(behandling.getId());
-        return bostedslandOpt.orElseGet(() -> hentBostedslandFraOppgittAdresse(søknad));
+        Optional<Landkoder> bostedslandOppgittAvSaksbehandler = hentBostedslandOppgittAvSaksbehandler(behandling, søknad);
+        return bostedslandOppgittAvSaksbehandler.orElse(Landkoder.NO);
     }
 
-    private Landkoder hentBostedslandFraOppgittAdresse(SoeknadDokument søknad) {
-        Objects.requireNonNull(søknad, KAN_IKKE_HENTE_BOSTEDSLAND + ", søknad er null.");
-        Objects.requireNonNull(søknad.bosted.oppgittAdresse.landkode, KAN_IKKE_HENTE_BOSTEDSLAND + " fra oppgitt adresse, landkode er null.");
-        return Landkoder.valueOf(søknad.bosted.oppgittAdresse.landkode);
+    private Optional<Landkoder> hentBostedslandOppgittAvSaksbehandler(Behandling behandling, SoeknadDokument søknad) {
+        Optional<Landkoder> bostedsland = avklartefaktaService.hentBostedland(behandling.getId());
+        if (bostedsland.isPresent()) {
+            return bostedsland;
+        }
+        return hentOppgittBostedsland(søknad);
     }
 }
