@@ -1,34 +1,31 @@
 package no.nav.melosys.domain.dokument.organisasjon;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Objects;
-import java.util.stream.Collectors;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.KonverteringTest;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.Gateadresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.junit.Assert.*;
 
 // Denne konverteringen testes også i DokumentFactoryTest, uten strukturert adresse
-public class Ereg4KonverteringTest {
+public class Ereg4KonverteringTest implements KonverteringTest {
     private static final String EREG_4_0_MOCK = "organisasjon/org_med_strukturert_adresse.xml";
+    private static DokumentFactory factory;
 
-    private DokumentFactory factory;
-
-    @Before
-    public void setUp() {
+    @BeforeClass
+    public static void setUp() {
         Jaxb2Marshaller marshaller = new JaxbConfig().jaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
@@ -98,22 +95,10 @@ public class Ereg4KonverteringTest {
         assertEquals("", dokument.getEnhetstype());
     }
 
-    private Saksopplysning getSaksopplysning(String ressurs) throws IOException {
+    @Override
+    public Saksopplysning getSaksopplysning(String ressurs) throws IOException {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
         Objects.requireNonNull(kilde);
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName(StandardCharsets.UTF_8.name())))) {
-            Saksopplysning saksopplysning = new Saksopplysning();
-
-            String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-
-            saksopplysning.setDokumentXml(xmlStr);
-            saksopplysning.setType(SaksopplysningType.ORGANISASJON);
-            saksopplysning.setVersjon("4.0");
-
-            factory.lagDokument(saksopplysning);
-
-            return saksopplysning;
-        }
+        return konverter(kilde, factory, SaksopplysningType.ORGANISASJON, "4.0");
     }
 }
