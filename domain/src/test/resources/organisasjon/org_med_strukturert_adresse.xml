@@ -49,6 +49,10 @@
                         <verdi>5035</verdi>
                     </adresseledd>
                     <adresseledd>
+                        <noekkel kodeRef="poststed"/>
+                        <verdi>Oslo</verdi>
+                    </adresseledd>
+                    <adresseledd>
                         <noekkel kodeRef="kommunenr"/>
                         <verdi>1201</verdi>
                     </adresseledd>

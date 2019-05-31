@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
@@ -22,7 +23,6 @@ import static org.junit.Assert.*;
 
 // Denne konverteringen testes også i DokumentFactoryTest, uten strukturert adresse
 public class Ereg4KonverteringTest {
-
     private static final String EREG_4_0_MOCK = "organisasjon/org_med_strukturert_adresse.xml";
 
     private DokumentFactory factory;
@@ -36,20 +36,7 @@ public class Ereg4KonverteringTest {
 
     @Test
     public void testAdresse() throws Exception {
-        Saksopplysning test = new Saksopplysning();
-
-        InputStream kilde = getClass().getClassLoader().getResourceAsStream(EREG_4_0_MOCK);
-        StringBuilder stringBuilder = new StringBuilder();
-        try (Reader reader = new BufferedReader(new InputStreamReader
-                (kilde, Charset.forName(StandardCharsets.UTF_8.name())))) {
-            int c = 0;
-            while ((c = reader.read()) != -1) {
-                stringBuilder.append((char) c);
-            }
-        }
-        test.setDokumentXml(stringBuilder.toString());
-        test.setType(SaksopplysningType.ORGANISASJON);
-        test.setVersjon("4.0");
+        Saksopplysning test = getSaksopplysning(EREG_4_0_MOCK);
 
         factory.lagDokument(test);
 
@@ -113,8 +100,9 @@ public class Ereg4KonverteringTest {
 
     private Saksopplysning getSaksopplysning(String ressurs) throws IOException {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
+        Objects.requireNonNull(kilde);
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName("UTF-8")))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName(StandardCharsets.UTF_8.name())))) {
             Saksopplysning saksopplysning = new Saksopplysning();
 
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
@@ -128,5 +116,4 @@ public class Ereg4KonverteringTest {
             return saksopplysning;
         }
     }
-
 }
