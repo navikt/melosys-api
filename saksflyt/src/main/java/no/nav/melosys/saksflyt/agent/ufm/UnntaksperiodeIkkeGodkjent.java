@@ -53,7 +53,7 @@ public class UnntaksperiodeIkkeGodkjent extends AbstraktStegBehandler {
         behandlingsresultat.setType(Behandlingsresultattyper.REGISTRERT_UNNTAK);
         behandlingsresultat.setUtfallRegistreringUnntak(UtfallRegistreringUnntak.IKKE_GODKJENT);
 
-        List<String> begrunnelser = prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE, List.class);
+        List<String> begrunnelser = prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, List.class);
         if (begrunnelser == null || begrunnelser.isEmpty()) {
             throw new TekniskException("Registrering av ikke-godkjent unntaksperiode krever minst en begrunnelse! Behandlingid: " + behandling.getId());
         }

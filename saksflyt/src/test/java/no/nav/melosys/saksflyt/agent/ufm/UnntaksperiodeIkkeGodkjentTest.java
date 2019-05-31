@@ -50,7 +50,7 @@ public class UnntaksperiodeIkkeGodkjentTest {
         ikkeGodkjentBegrunnelser.add(IkkeGodkjentBegrunnelser.ANNET);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE, ikkeGodkjentBegrunnelser);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, ikkeGodkjentBegrunnelser);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, "fritekst");
 
         unntaksperiodeIkkeGodkjent.utfør(prosessinstans);

@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 
-import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.*;

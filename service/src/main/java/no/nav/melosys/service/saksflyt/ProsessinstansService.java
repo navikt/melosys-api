@@ -180,7 +180,7 @@ public class ProsessinstansService {
         prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_PERIODE_IKKE_GODKJENT);
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE, begrunnelser);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, begrunnelser);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, begrunnelseFritekst);
         lagre(prosessinstans);
     }

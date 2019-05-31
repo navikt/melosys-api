@@ -200,7 +200,7 @@ public class ProsessinstansServiceTest {
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_PERIODE_IKKE_GODKJENT);
-        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE, List.class))
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, List.class))
             .contains(IkkeGodkjentBegrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name());
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST)).isEqualTo("fritekst");
     }

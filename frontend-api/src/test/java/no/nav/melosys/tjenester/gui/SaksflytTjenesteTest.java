@@ -108,6 +108,7 @@ public class SaksflytTjenesteTest extends JsonSchemaTestParent {
         valider(fattVedtakDto);
     }
 
+    @Test
     public void endreVedtak_dtoManglerBehandlingresultat_girException() throws FunksjonellException, TekniskException, IOException {
         expectedException.expect(BadRequestException.class);
         saksflytTjeneste.endreVedtak(behandlingID, endreVedtakDto);
