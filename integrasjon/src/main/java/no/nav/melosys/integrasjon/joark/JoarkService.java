@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import no.nav.dok.tjenester.journalfoerinngaaende.*;
+import no.nav.dok.tjenester.journalfoerinngaaende.response.Mangler;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -58,7 +59,28 @@ public class JoarkService implements JoarkFasade {
         PutJournalpostRequest journalpostRequest = new PutJournalpostRequest();
         journalpostRequest.setForsoekEndeligJF(true);
         journalpostRequest.setJournalfEnhet(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
-        journalfoerInngaaendeConsumer.oppdaterJournalpost(journalpostRequest, journalpostId);
+        PutJournalpostResponse putJournalpostResponse = journalfoerInngaaendeConsumer.oppdaterJournalpost(journalpostRequest, journalpostId);
+        validerOppdaterJournalpostResponse(putJournalpostResponse);
+    }
+
+    private void validerOppdaterJournalpostResponse(PutJournalpostResponse putJournalpostResponse) throws FunksjonellException {
+        if (!putJournalpostResponse.isHarEndeligJF()) {
+            String exceptionString = "Journalpost " + putJournalpostResponse.getJournalpostId() + " har ikke blitt endelig journalført";
+            Mangler mangler = putJournalpostResponse.getMangler();
+            if (mangler != null) {
+                exceptionString += getManglerString(mangler);
+            }
+            throw new FunksjonellException(exceptionString);
+        }
+    }
+
+    private String getManglerString(Mangler mangler) {
+        String manglerString = "\nAvsendernavn: " + mangler.getAvsenderNavn().value() + "\n";
+        manglerString += "Bruker: " + mangler.getBruker().value() + "\n";
+        manglerString += "Akrivsak: " + mangler.getArkivSak().value() + "\n";
+        manglerString += "Tema: " + mangler.getTema().value() + "\n";
+        manglerString += "Tittel: " + mangler.getTittel().value();
+        return manglerString;
     }
 
     @Override
@@ -189,6 +211,7 @@ public class JoarkService implements JoarkFasade {
         }
 
         PutJournalpostRequest journalpost = new PutJournalpostRequest();
+        journalpost.setTittel(tittel);
 
         ArkivSakWithArkivsakSystemEnum arkivsak = new ArkivSakWithArkivsakSystemEnum();
         arkivsak.setArkivSakId(Long.toString(gsakSaksnummer));

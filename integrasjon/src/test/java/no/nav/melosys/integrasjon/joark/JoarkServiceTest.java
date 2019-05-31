@@ -8,9 +8,12 @@ import java.util.List;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.tjenester.journalfoerinngaaende.*;
+import no.nav.dok.tjenester.journalfoerinngaaende.response.Mangler;
+import no.nav.dok.tjenester.journalfoerinngaaende.response.Status;
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.Konstanter;
@@ -28,8 +31,12 @@ import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostli
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.KorrespendansePart;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeResponse;
+import org.hamcrest.core.AllOf;
+import org.hamcrest.core.StringContains;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -43,6 +50,9 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JoarkServiceTest {
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     private JoarkService joarkService;
 
@@ -140,13 +150,15 @@ public class JoarkServiceTest {
     @Test
     public void oppdaterJournalpost_påkrevdeVerdierUtfylt() throws Exception {
 
+        String tittel = "tittel";
         joarkService.oppdaterJournalpost("123", "1234", 1L, "12345",
-            "12", "321", "tittel", Arrays.asList("dok1", "dok2"), true);
+            "12", "321", tittel, Arrays.asList("dok1", "dok2"), true);
 
         verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), anyString());
         PutJournalpostRequest request = oppdaterJournalpostCaptor.getValue();
 
         assertThat(request).isNotNull();
+        assertThat(request.getTittel()).isEqualTo(tittel);
         assertThat(request.getAvsender()).isNotNull();
         assertThat(request.getAvsender().getNavn()).isNotNull();
 
@@ -163,6 +175,7 @@ public class JoarkServiceTest {
 
         assertThat(dokumentRequest).isNotNull();
         assertThat(dokumentRequest.getDokumentKategori()).isNotNull();
+        assertThat(dokumentRequest.getTittel()).isEqualTo(tittel);
 
         verify(journalfoerInngaaendeConsumer, times(2)).leggTilLogiskVedlegg(logiskVedleggCaptor.capture(), anyString(), anyString());
         List<PostLogiskVedleggRequest> logiskVedleggRequest = logiskVedleggCaptor.getAllValues();
@@ -211,15 +224,51 @@ public class JoarkServiceTest {
     }
 
     @Test
-    public void ferdigstillJournalpost_verifiserAttributterErSatt() throws Exception {
-        joarkService.ferdigstillJournalføring("123");
+    public void ferdigstillJournalpost_journalpostBlirJournalført_ingenException() throws Exception {
+        String journalpostId = "123";
+        PutJournalpostResponse putJournalpostResponse = new PutJournalpostResponse();
+        putJournalpostResponse.setHarEndeligJF(true);
+        doReturn(putJournalpostResponse).when(journalfoerInngaaendeConsumer).oppdaterJournalpost(any(), eq(journalpostId));
 
-        verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), eq("123"));
+        joarkService.ferdigstillJournalføring(journalpostId);
+
+        verify(journalfoerInngaaendeConsumer).oppdaterJournalpost(oppdaterJournalpostCaptor.capture(), eq(journalpostId));
 
         PutJournalpostRequest request = oppdaterJournalpostCaptor.getValue();
 
         assertThat(request).isNotNull();
         assertThat(request.isForsoekEndeligJF()).isTrue();
         assertThat(request.getJournalfEnhet()).isEqualTo(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
+    }
+
+    @Test
+    public void ferdigstillJournalpost_journalpostBlirIkkeJournalført_funksjonellExepctionMedManglerKastes() throws Exception {
+        String journalpostId = "123";
+        PutJournalpostResponse putJournalpostResponse = new PutJournalpostResponse();
+        putJournalpostResponse.setHarEndeligJF(false);
+        putJournalpostResponse.setJournalpostId(journalpostId);
+        Mangler mangler = lagMangler();
+        putJournalpostResponse.setMangler(mangler);
+        doReturn(putJournalpostResponse).when(journalfoerInngaaendeConsumer).oppdaterJournalpost(any(PutJournalpostRequest.class), eq(journalpostId));
+
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage(AllOf.allOf(
+            StringContains.containsString("Journalpost 123 har ikke blitt endelig journalført"),
+            StringContains.containsString("Tittel: MANGLER"),
+            StringContains.containsString("Tema: MANGLER_IKKE")
+        ));
+
+        joarkService.ferdigstillJournalføring(journalpostId);
+
+    }
+
+    private Mangler lagMangler() {
+        Mangler mangler = new Mangler();
+        mangler.setArkivSak(Status.MANGLER_IKKE);
+        mangler.setAvsenderNavn(Status.MANGLER_IKKE);
+        mangler.setBruker(Status.MANGLER);
+        mangler.setTema(Status.MANGLER_IKKE);
+        mangler.setTittel(Status.MANGLER);
+        return mangler;
     }
 }
