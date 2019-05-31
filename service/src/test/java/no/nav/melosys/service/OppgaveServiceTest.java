@@ -9,16 +9,11 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.OppholdUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.MelosysException;
@@ -38,7 +33,6 @@ import org.mockito.stubbing.Answer;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -148,13 +142,13 @@ public class OppgaveServiceTest {
 
         SoeknadDokument soeknadDokument = new SoeknadDokument();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse = new StrukturertAdresse();
         arbeidUtland.adresse.landkode = new Land(Land.NORGE).getKode();
         soeknadDokument.arbeidUtland = Collections.singletonList(arbeidUtland);
 
-        soeknadDokument.oppholdUtland = new OppholdUtland();
-        soeknadDokument.oppholdUtland.oppholdslandkoder = Collections.singletonList(new Land(Land.NORGE).getKode());
+        soeknadDokument.oppholdUtland.oppholdslandkoder = Collections.singletonList(Landkoder.NO.getKode());
         soeknadDokument.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.of(2018, 12, 12));
+
+        soeknadDokument.soeknadsland.landkoder.add(Landkoder.BE.getKode());
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SØKNAD);

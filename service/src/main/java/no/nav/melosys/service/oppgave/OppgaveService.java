@@ -29,8 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
-import static no.nav.melosys.domain.util.SoeknadUtils.hentLand;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
+import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
 
 @Service
 public class OppgaveService {
@@ -98,7 +98,15 @@ public class OppgaveService {
     }
 
     public Optional<Oppgave> hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
-        return  gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
+        return gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
+    }
+
+    public Long hentAktivBehandlingId(String saksnummer) throws TekniskException {
+        Fagsak fagsak = Optional.ofNullable(fagsakRepository.findBySaksnummer(saksnummer))
+            .orElseThrow(() -> new TekniskException("Fagsak med saksnummer " + saksnummer + " ikke funnet"));
+        return Optional.ofNullable(fagsak.getAktivBehandling())
+            .orElseThrow(() -> new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen aktive behandlinger"))
+            .getId();
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(List<Oppgave> oppgaverFraDomain) throws TekniskException, FunksjonellException {
@@ -147,7 +155,7 @@ public class OppgaveService {
 
             hentDokument(behandling, SaksopplysningType.SØKNAD).ifPresent(saksopplysningDokument -> {
                 SoeknadDokument søknadDokument = (SoeknadDokument) saksopplysningDokument;
-                behOppgaveDto.setLand(hentLand(søknadDokument));
+                behOppgaveDto.setLand(hentSøknadsland(søknadDokument));
                 behOppgaveDto.setSoknadsperiode(mapPeriode(søknadDokument));
             });
             hentDokument(behandling, SaksopplysningType.PERSOPL).ifPresent(

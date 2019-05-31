@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.UtenlandskMyndighet;
@@ -31,8 +32,8 @@ public class AdresseTjenesteTest {
         sverige.land = "Sweden";
         sverige.landkode = Landkoder.SE;
 
-        when(utenlandskMyndighetRepo.findByLandkode(Landkoder.DK)).thenReturn(danmark);
-        when(utenlandskMyndighetRepo.findByLandkode(Landkoder.SE)).thenReturn(sverige);
+        when(utenlandskMyndighetRepo.findByLandkode(Landkoder.DK)).thenReturn(Optional.of(danmark));
+        when(utenlandskMyndighetRepo.findByLandkode(Landkoder.SE)).thenReturn(Optional.of(sverige));
         when(utenlandskMyndighetRepo.findAll()).thenReturn(Arrays.asList(sverige, danmark));
     }
 
