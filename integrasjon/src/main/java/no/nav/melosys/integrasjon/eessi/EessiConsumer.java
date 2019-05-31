@@ -4,10 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
-import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
-import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
-import no.nav.melosys.integrasjon.eessi.dto.SedinfoDto;
+import no.nav.melosys.integrasjon.eessi.dto.*;
 
 public interface EessiConsumer {
 
@@ -18,4 +15,6 @@ public interface EessiConsumer {
     List<SedinfoDto> hentTilknyttedeSedUtkast(long gsakSaksnummer) throws MelosysException;
 
     List<InstitusjonDto> hentMottakerinstitusjoner(String bucType) throws MelosysException;
+
+    List<BucSedRelasjonDto> hentBucSedRelasjoner() throws MelosysException;
 }

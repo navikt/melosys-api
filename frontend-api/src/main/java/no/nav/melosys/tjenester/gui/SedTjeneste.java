@@ -13,6 +13,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.integrasjon.eessi.dto.BucSedRelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedinfoDto;
@@ -30,7 +31,6 @@ import org.springframework.web.context.WebApplicationContext;
 @Path("/sed")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-@Transactional // TODO: Liker ikke å ha denne her, men trengs for å hente vilkaarsresultat
 public class SedTjeneste extends RestTjeneste {
 
     private final SedService sedService;
@@ -41,6 +41,18 @@ public class SedTjeneste extends RestTjeneste {
     public SedTjeneste(SedService sedService, BehandlingRepository behandlingRepository) {
         this.sedService = sedService;
         this.behandlingRepository = behandlingRepository;
+    }
+
+    @GET
+    @Path("/bucsedrelasjoner")
+    @ApiOperation(
+        value = "",
+        response = BucSedRelasjonDto.class,
+        responseContainer = "List"
+    )
+    public Response hentBucSedRelasjoner() {
+        List<BucSedRelasjonDto> bucSedRelasjoner = sedService.hentBucSedRelasjoner();
+        return Response.ok(bucSedRelasjoner).build();
     }
 
     @GET
@@ -81,6 +93,7 @@ public class SedTjeneste extends RestTjeneste {
         response = SedUnderArbeidDto.class,
         responseContainer = "List"
     )
+    @Transactional
     public Response hentSederUnderArbeid(@PathParam("behandlingID") long behandlingID) {
         Function<SedinfoDto, SedUnderArbeidDto> tilSedUnderArbeidDto = sedinfoDto -> {
             SedUnderArbeidDto sedUnderArbeidDto = new SedUnderArbeidDto();

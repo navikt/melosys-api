@@ -12,10 +12,7 @@ import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
-import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
-import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
-import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
-import no.nav.melosys.integrasjon.eessi.dto.SedinfoDto;
+import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +104,15 @@ public class SedService {
             return eessiConsumer.hentTilknyttedeSedUtkast(gsakSaksnummer);
         } catch (MelosysException e) {
             log.error("Feil ved henting av seder for gsak {}", gsakSaksnummer, e);
+            return Collections.emptyList();
+        }
+    }
+
+    public List<BucSedRelasjonDto> hentBucSedRelasjoner() {
+        try {
+            return eessiConsumer.hentBucSedRelasjoner();
+        } catch (MelosysException e) {
+            log.error("Feil ved henting av relasjoner mellom BUC og SED", e);
             return Collections.emptyList();
         }
     }
