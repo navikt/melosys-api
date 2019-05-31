@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.util;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -53,11 +52,6 @@ public final class SoeknadUtils {
     }
 
     public static Optional<Landkoder> hentOppgittBostedsland(SoeknadDokument søknad) {
-        Objects.requireNonNull(søknad.bosted.oppgittAdresse, "Kan ikke hente bostedsland fra oppgitt adresse, landkode er null.");
-
-        if (søknad.bosted.oppgittAdresse.landkode != null) {
-            return Optional.of(Landkoder.valueOf(søknad.bosted.oppgittAdresse.landkode));
-        }
-        return Optional.empty();
+        return Optional.ofNullable(Landkoder.valueOf(søknad.bosted.oppgittAdresse.landkode));
     }
 }
