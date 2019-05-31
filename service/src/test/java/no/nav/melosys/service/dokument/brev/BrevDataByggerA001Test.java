@@ -92,7 +92,7 @@ public class BrevDataByggerA001Test {
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Arrays.asList(periode));
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        when(myndighetsRepo.findByLandkode(any())).thenReturn(utenlandskMyndighet);
+        when(myndighetsRepo.findByLandkode(any())).thenReturn(Optional.of(utenlandskMyndighet));
 
         VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
         begrunnelse.setKode("God grunn");

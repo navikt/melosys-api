@@ -86,7 +86,7 @@ public final class BrevDataUtils {
     public static BostedsadresseType lagBostedsadresse(Bostedsadresse bosted) {
         BostedsadresseType bostedAdresse = new BostedsadresseType();
         Gateadresse gateadresse = bosted.getGateadresse();
-        if (gateadresse != null && !StringUtils.isEmpty(gateadresse.getGatenavn())) {
+        if (gateadresse != null && StringUtils.isNotEmpty(gateadresse.getGatenavn())) {
             bostedAdresse.setGatenavn(gateadresse.getGatenavn());
             bostedAdresse.setHusnummer(gateadresse.getHusnummer() + " " + gateadresse.getHusbokstav());
         } else {

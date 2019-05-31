@@ -67,7 +67,7 @@ public class BrevDataServiceTest {
         myndighet.navn = "navn";
         myndighet.gateadresse = "gateadresse 123";
         myndighet.land = "HR";
-        when(utenlandskMyndighetRepository.findByLandkode(Landkoder.HR)).thenReturn(myndighet);
+        when(utenlandskMyndighetRepository.findByLandkode(Landkoder.HR)).thenReturn(Optional.of(myndighet));
 
         String sammensattNavn = "ALTFOR SAMMENSATT";
         when(tpsFasade.hentSammensattNavn(anyString())).thenReturn(sammensattNavn);
@@ -97,7 +97,7 @@ public class BrevDataServiceTest {
         aktoer.setInstitusjonId("DE:TEST");
         UtenlandskMyndighet tyskMyndighet = new UtenlandskMyndighet();
         tyskMyndighet.institusjonskode = "TEST";
-        when(utenlandskMyndighetRepository.findByLandkode(Landkoder.DE)).thenReturn(tyskMyndighet);
+        when(utenlandskMyndighetRepository.findByLandkode(Landkoder.DE)).thenReturn(Optional.of(tyskMyndighet));
 
         UtenlandskMyndighet utenlandskMyndighet = service.hentMyndighetFraAktoer(aktoer);
 

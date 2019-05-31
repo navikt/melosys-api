@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.util.List;
+import java.util.Optional;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -14,6 +15,8 @@ import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
+
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 @Api(tags = {"adresser"})
 @Path("/adresser")
@@ -33,11 +36,8 @@ public class AdresseTjeneste extends RestTjeneste {
         value = "Henter adressen til en gitt utenlandsk myndighet",
         response = UtenlandskMyndighet.class)
     public Response hentMyndighet(@PathParam("landkode") Landkoder landkode) {
-        UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetRepo.findByLandkode(landkode);
-        if (utenlandskMyndighet == null) {
-            Response.status(Response.Status.NOT_FOUND).build();
-        }
-        return Response.ok(utenlandskMyndighet).build();
+        Optional<UtenlandskMyndighet> utenlandskMyndighet = utenlandskMyndighetRepo.findByLandkode(landkode);
+        return utenlandskMyndighet.map(Response::ok).orElse(Response.status(NOT_FOUND)).build();
     }
 
     @GET

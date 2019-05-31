@@ -6,6 +6,7 @@ public class PlukketOppgaveDto {
     private String oppgavetype;
     private String saksnummer;
     private String journalpostID;
+    private Long behandlingID;
 
     public String getOppgaveID() {
         return oppgaveID;
@@ -39,4 +40,11 @@ public class PlukketOppgaveDto {
         this.journalpostID = journalpostId;
     }
 
+    public void setBehandlingID(Long behandlingID) {
+        this.behandlingID = behandlingID;
+    }
+
+    public Long getBehandlingID() {
+        return behandlingID;
+    }
 }

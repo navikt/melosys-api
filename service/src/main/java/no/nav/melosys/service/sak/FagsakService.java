@@ -64,23 +64,6 @@ public class FagsakService {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    public Optional<Behandling> finnRedigerbarBehandling(String ident, Fagsak fagsak) throws FunksjonellException, TekniskException {
-        Behandling behandling = fagsak.getAktivBehandling();
-        if (behandling == null) {
-            return Optional.empty();
-        }
-
-        Optional<Oppgave> oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
-
-        if (oppgave.isPresent()
-            && oppgave.filter(oppgave1 -> ident.equalsIgnoreCase(oppgave1.getTilordnetRessurs())).isPresent()
-            && behandling.erRedigerbar()) {
-            return Optional.of(behandling);
-        } else {
-            return Optional.empty();
-        }
-    }
-
     @Transactional(rollbackFor = MelosysException.class)
     public void henleggFagsak(String saksnummer, String begrunnelseKodeString, String fritekst) throws TekniskException, FunksjonellException {
         Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
