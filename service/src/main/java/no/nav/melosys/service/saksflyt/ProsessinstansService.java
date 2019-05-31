@@ -185,4 +185,12 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, begrunnelseFritekst);
         lagre(prosessinstans);
     }
+
+    public void opprettProsessinstansUnntaksperiodeUnderAvklaring(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_UNDER_AVKLARING);
+        prosessinstans.setBehandling(behandling);
+        lagre(prosessinstans);
+    }
 }
