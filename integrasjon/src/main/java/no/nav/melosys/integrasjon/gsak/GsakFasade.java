@@ -23,7 +23,6 @@ public interface GsakFasade {
      * GSAK sorterer oppgavene stigende etter frist.
      */
     List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetyper oppgavetype,
-                                                  Tema tema,
                                                   List<Sakstyper> sakstyper,
                                                   List<Behandlingstyper> behandlingstyper,
                                                   List<Behandlingstema> behandlingstemaer

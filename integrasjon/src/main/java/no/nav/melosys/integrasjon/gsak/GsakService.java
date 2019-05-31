@@ -94,7 +94,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetyper oppgavetype, Tema tema, List<Sakstyper> sakstyper, List<Behandlingstyper> behandlingstyper, List<Behandlingstema> behandlingstemaer)
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetyper oppgavetype, List<Sakstyper> sakstyper, List<Behandlingstyper> behandlingstyper, List<Behandlingstema> behandlingstemaer)
         throws FunksjonellException, TekniskException {
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOppgaveTyper(oppgavetype.getKode())
@@ -106,9 +106,6 @@ public class GsakService implements GsakFasade {
 
         if (!oppgavetype.equals(Oppgavetyper.JFR)) {
             searchRequestBuilder.medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode());
-        }
-        if (tema != null) {
-            searchRequestBuilder = searchRequestBuilder.medTema(new String[]{tema.getKode()});
         }
 
         List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(searchRequestBuilder.build());

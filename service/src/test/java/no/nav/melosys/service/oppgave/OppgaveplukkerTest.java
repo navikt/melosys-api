@@ -80,7 +80,7 @@ public class OppgaveplukkerTest {
         oppgaver.add(opprettOppgave("3", Oppgavetyper.JFR, PrioritetType.NORM, LocalDate.of(2018, 8, 10), "MEL-123"));
         oppgaver.add(opprettOppgave("4", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 5), "MEL-1234"));
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(Sakstyper.EU_EOS.getKode());
@@ -88,7 +88,7 @@ public class OppgaveplukkerTest {
         List<String> behandlingstyper = new ArrayList<>();
         behandlingstyper.add(Behandlingstyper.SOEKNAD.getKode());
 
-        PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(sakstyper, Oppgavetyper.BEH_SAK_MK.getKode(), Tema.MED.getKode());
+        PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(sakstyper, Oppgavetyper.BEH_SAK_MK.getKode());
         plukkOppgaveInnDto.setBehandlingstyper(behandlingstyper);
 
         Fagsak fagsak = new Fagsak();
@@ -113,7 +113,7 @@ public class OppgaveplukkerTest {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2019, 8, 7), "MEL-1"));
         oppgaver.add(opprettOppgave("2", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2018, 8, 7), "MEL-1"));
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(Sakstyper.EU_EOS.getKode());
@@ -121,7 +121,7 @@ public class OppgaveplukkerTest {
         List<String> behandlingstyper = new ArrayList<>();
         behandlingstyper.add(Behandlingstyper.SOEKNAD.getKode());
 
-        PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(sakstyper, "BEH_SAK_MK", "MED");
+        PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(sakstyper, "BEH_SAK_MK");
         plukkOppgaveInnDto.setBehandlingstyper(behandlingstyper);
 
         Fagsak fagsak = new Fagsak();
@@ -160,7 +160,7 @@ public class OppgaveplukkerTest {
 
         when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
         tilbakelagt.add(new OppgaveTilbakelegging());
@@ -201,7 +201,7 @@ public class OppgaveplukkerTest {
 
         when(fagsakRepository.findBySaksnummer(anyString())).thenReturn(fagsak);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), anyList(), anyList(), anyList())).thenReturn(oppgaver);
 
         List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
         tilbakelagt.add(new OppgaveTilbakelegging());
@@ -281,9 +281,9 @@ public class OppgaveplukkerTest {
 
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), any(), captor.capture())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), anyList(), any(), captor.capture())).thenReturn(oppgaver);
 
-        PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(sakstyper, "BEH_SAK_MK", "MED");
+        PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(sakstyper, "BEH_SAK_MK");
 
         Fagsak fagsak = new Fagsak();
 
@@ -319,9 +319,9 @@ public class OppgaveplukkerTest {
         List<String> sakstyper = new ArrayList<>();
         sakstyper.add(Sakstyper.EU_EOS.getKode());
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), any(), any())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), anyList(), any(), any())).thenReturn(oppgaver);
 
-        PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(sakstyper, "BEH_SAK_MK", "MED");
+        PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(sakstyper, "BEH_SAK_MK");
 
         Fagsak fagsak = new Fagsak();
 
@@ -345,9 +345,9 @@ public class OppgaveplukkerTest {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), "MEL-1"));
 
-        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), any(), anyList(), any(), any())).thenReturn(oppgaver);
+        when(gsakFasade.finnUtildelteOppgaverEtterFrist(any(), anyList(), any(), any())).thenReturn(oppgaver);
 
-        PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Collections.singletonList(Sakstyper.EU_EOS.getKode()), "BEH_SAK_MK", "MED");
+        PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Collections.singletonList(Sakstyper.EU_EOS.getKode()), "BEH_SAK_MK");
 
         Fagsak fagsak = new Fagsak();
 
@@ -374,10 +374,9 @@ public class OppgaveplukkerTest {
         return oppgave1;
     }
 
-    private PlukkOppgaveInnDto opprettPlukkOppgaveInnDto(List<String> sakstyper, String beh_sak_mk, String med) {
+    private PlukkOppgaveInnDto opprettPlukkOppgaveInnDto(List<String> sakstyper, String beh_sak_mk) {
         PlukkOppgaveInnDto plukkOppgaveInnDto = new PlukkOppgaveInnDto();
         plukkOppgaveInnDto.setOppgavetype(beh_sak_mk);
-        plukkOppgaveInnDto.setFagomrade(med);
         plukkOppgaveInnDto.setSakstyper(sakstyper);
         return plukkOppgaveInnDto;
     }

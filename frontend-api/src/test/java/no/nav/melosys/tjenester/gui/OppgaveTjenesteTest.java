@@ -45,6 +45,8 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     private static final String OPPGAVER_OVERSIKT_SCHEMA = "oppgaver-oversikt-schema.json";
     private static final String OPPGAVER_TILBAKELEGGE_SCHEMA = "oppgaver-tilbakelegge-schema.json";
     private static final String OPPGAVER_SOK_SCHEMA = "oppgaver-sok-schema.json";
+    private static final String OPPGAVER_PLUKK_POST_RESPONSE_SCHEMA = "oppgaver-plukk-post-response-schema.json";
+    private static final String OPPGAVER_PLUKK_POST_SCHEMA = "oppgaver-plukk-post-schema.json";
 
     private String schemaType;
 
@@ -91,7 +93,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void plukkOppgave() throws FunksjonellException, TekniskException {
+    public void plukkOppgave() throws FunksjonellException, TekniskException, IOException {
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto();
 
         innData.setOppgavetype("BEH_SAK_MK");
@@ -107,15 +109,24 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
         Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId("1");
         oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        oppgave.setSaksnummer("MEl-1");
+        oppgave.setJournalpostId("123");
+        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
         Optional<Oppgave> plukket = Optional.of(oppgave);
 
         when(oppgaveplukker.plukkOppgave(anyString(), eq(innData))).thenReturn(plukket);
+
+        schemaType = OPPGAVER_PLUKK_POST_SCHEMA;
+        valider(innData);
 
         Response response = tjeneste.plukkOppgave(innData);
 
         assertThat(response.getEntity()).isExactlyInstanceOf(PlukketOppgaveDto.class);
 
         PlukketOppgaveDto entity = (PlukketOppgaveDto) response.getEntity();
+        schemaType = OPPGAVER_PLUKK_POST_RESPONSE_SCHEMA;
+        valider(entity);
+
         assertThat(entity.getOppgaveID()).isEqualTo("1");
     }
 
