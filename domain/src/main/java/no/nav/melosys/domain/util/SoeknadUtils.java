@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.util;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
@@ -48,5 +49,9 @@ public final class SoeknadUtils {
 
     public static List<String> hentSøknadsland(SoeknadDokument søknad) {
         return søknad.soeknadsland.landkoder;
+    }
+
+    public static Optional<Landkoder> hentOppgittBostedsland(SoeknadDokument søknad) {
+        return Optional.ofNullable(Landkoder.valueOf(søknad.bosted.oppgittAdresse.landkode));
     }
 }
