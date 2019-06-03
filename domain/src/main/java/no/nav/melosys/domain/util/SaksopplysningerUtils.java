@@ -65,7 +65,7 @@ public final class SaksopplysningerUtils {
     public static SedDokument hentSedDokument(Behandling behandling) throws TekniskException {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.SEDOPPL);
         return (SedDokument) saksopplysning
-                .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
+                .orElseThrow(() -> new TekniskException("Finner ikke seddokument"));
     }
 
     public static String hentSammensattNavn(Behandling behandling) {
