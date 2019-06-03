@@ -74,6 +74,7 @@ public enum ProsessSteg implements Kodeverk {
     REG_UNNTAK_VALIDER_MEDLEMSKAP("REG_UNNTAK_VALIDER_MEDLEMSKAP", "Validerer tidligere medlemskap mot MEDL"),
     REG_UNNTAK_VALIDER_YTELSER("REG_UNNTAK_VALIDER_YTELSER", "Sjekker offentlige ytelser for en person"),
     REG_UNNTAK_VALIDER_STATSBORGERSKAP("REG_UNNTAK_VALIDER_STATSBORGERSKAP", "Validerer om person har gyldig statsborgerskap for unntaksregel"),
+    REG_UNNTAK_VALIDER_PERSON("REG_UNNTAK_VALIDER_PERSON", "Validerer personinfo"),
     REG_UNNTAK_BESTEM_BEHANDLINGSMAATE("REG_UNNTAK_BESTEM_BEHANDLINGSMAATE", "Bestem om søknad skal registreres automatisk eller behandles manuelt"),
     REG_UNNTAK_OPPDATER_MEDL("REG_UNNTAK_OPPDATER_MEDL", "Sett periode endelig i MEDL"),
     REG_UNNTAK_OPPRETT_OPPGAVE("REG_UNNTAK_OPPRETT_OPPGAVE","Opprett oppgave for manuell behandling"),

@@ -5,10 +5,14 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -24,6 +28,9 @@ public class ValiderPeriodeTest {
 
     private ValiderPeriode validerPeriode;
 
+    @Captor
+    private ArgumentCaptor<String> stringArgumentCaptor;
+
     @Before
     public void setUp() {
         validerPeriode = new ValiderPeriode(avklartefaktaService);
@@ -31,19 +38,22 @@ public class ValiderPeriodeTest {
 
     @Test
     public void utførSteg_gyldigPeriode_ingenNyAvklarteFakta() throws Exception {
-        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now().plusYears(1), LocalDate.now().plusYears(2)));
+        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now().plusMonths(6), LocalDate.now().plusYears(2)));
         validerPeriode.utfør(prosessinstans);
 
-        verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
+        verify(avklartefaktaService, never()).leggTilRegistrering(anyLong(), any(), any());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
     }
 
     @Test
     public void utførSteg_ingenTilDato_nyAvklarteFakta() throws Exception {
-        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now().plusYears(1), null));
+        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now().plusMonths(6), null));
         validerPeriode.utfør(prosessinstans);
 
-        verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
+        verify(avklartefaktaService, atLeastOnce()).leggTilRegistrering(anyLong(), any(Avklartefaktatype.class), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).containsExactly(
+          Unntak_periode_begrunnelser.INGEN_SLUTTDATO.getKode()
+        );
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
     }
 
@@ -52,7 +62,10 @@ public class ValiderPeriodeTest {
         Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now().plusYears(1), LocalDate.now()));
         validerPeriode.utfør(prosessinstans);
 
-        verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
+        verify(avklartefaktaService, atLeastOnce()).leggTilRegistrering(anyLong(), any(Avklartefaktatype.class), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).containsExactly(
+            Unntak_periode_begrunnelser.FEIL_I_PERIODEN.getKode()
+        );
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_BESTEM_BEHANDLINGSMAATE);
     }
 
@@ -61,7 +74,10 @@ public class ValiderPeriodeTest {
         Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now(), LocalDate.now().plusYears(3)));
         validerPeriode.utfør(prosessinstans);
 
-        verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
+        verify(avklartefaktaService, atLeastOnce()).leggTilRegistrering(anyLong(), any(Avklartefaktatype.class), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).containsExactly(
+            Unntak_periode_begrunnelser.PERIODEN_OVER_24_MD.getKode()
+        );
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
     }
 
@@ -70,7 +86,36 @@ public class ValiderPeriodeTest {
         Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now().minusYears(6L), LocalDate.now().minusYears(5L)));
         validerPeriode.utfør(prosessinstans);
 
-        verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
+        verify(avklartefaktaService, atLeastOnce()).leggTilRegistrering(anyLong(), any(Avklartefaktatype.class), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).containsExactly(
+            Unntak_periode_begrunnelser.PERIODE_FOR_GAMMEL.getKode()
+        );
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
+    }
+
+    @Test
+    public void utførSteg_periodeLangtFremITid_nyAvklarteFakta() throws Exception {
+        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now().plusMonths(13L), LocalDate.now().plusYears(2L)));
+        validerPeriode.utfør(prosessinstans);
+
+        verify(avklartefaktaService, atLeastOnce()).leggTilRegistrering(anyLong(), any(Avklartefaktatype.class), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).containsExactly(
+            Unntak_periode_begrunnelser.PERIODE_LANGT_FREM_I_TID.getKode()
+        );
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
+    }
+
+    @Test
+    public void utførSteg_norgeLovvalgsland_nyAvklarteFakta() throws Exception {
+        Saksopplysning saksopplysning = hentSedSaksopplysning(LocalDate.now(), LocalDate.now().plusYears(1L));
+        ((SedDokument)saksopplysning.getDokument()).setLovvalgslandKode(Landkoder.NO);
+        Prosessinstans prosessinstans = hentProsessinstans(saksopplysning);
+        validerPeriode.utfør(prosessinstans);
+
+        verify(avklartefaktaService, atLeastOnce()).leggTilRegistrering(anyLong(), any(Avklartefaktatype.class), stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getAllValues()).containsExactly(
+            Unntak_periode_begrunnelser.LOVVALGSLAND_NORGE.getKode()
+        );
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
     }
 

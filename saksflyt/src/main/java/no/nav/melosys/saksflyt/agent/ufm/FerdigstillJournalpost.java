@@ -44,6 +44,7 @@ public class FerdigstillJournalpost extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         joarkFasade.ferdigstillJournalføring(journalpostId);
+        log.info("Journalpost {} ferdigstilt for behandling {}", journalpostId, prosessinstans.getBehandling().getId());
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_HENT_PERSON);
     }
 }

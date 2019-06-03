@@ -73,9 +73,11 @@ public class OppdaterMedl extends AbstraktStegBehandler {
             Lovvalgsperiode lovvalgsperiode = lagretLovvalgsperiode.iterator().next();
             Long medlId = medlFasade.opprettPeriodeEndelig(ident, lovvalgsperiode, KildedokumenttypeMedl.SED);
             felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, prosessinstans.getBehandling().getId());
+            log.info("Lovvalgsperiode opprettet for behandling {} med medlId {}", prosessinstans.getBehandling().getId(), medlId);
         } else {
             Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
             medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.SED);
+            log.info("Lovvalgsperiode for behandling {} satt til endelig i Medl", prosessinstans.getBehandling().getId());
         }
 
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);

@@ -75,6 +75,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
             avsluttTidligereBehandling(fagsak);
             behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP,
                 prosessinstans.getData(JOURNALPOST_ID), prosessinstans.getData(DOKUMENT_ID));
+            log.info("Opprettet ny behandling for fagsak {}", gsakSaksnummer);
         } else {
 
             OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
@@ -88,6 +89,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
             fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
             behandling = fagsak.getAktivBehandling();
+            log.info("Fagsak og behandling opprettet for EESSI-sak med gsakSaksnummer {}", gsakSaksnummer);
         }
 
         prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());

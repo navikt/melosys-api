@@ -19,10 +19,14 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UnntaksperiodeIkkeGodkjent extends AbstraktStegBehandler {
+
+    private static final Logger log = LoggerFactory.getLogger(UnntaksperiodeIkkeGodkjent.class);
 
     private final BehandlingRepository behandlingRepository;
     private final BehandlingsresultatRepository behandlingsresultatRepository;
@@ -79,6 +83,7 @@ public class UnntaksperiodeIkkeGodkjent extends AbstraktStegBehandler {
             medlFasade.avvisPeriode(lovvalgsperioder.iterator().next(), StatusaarsakMedl.AVVIST);
         }
 
+        log.info("Unntaksperiode avvist i medl og behandling avsluttet for fagsak {}", prosessinstans.getBehandling().getFagsak().getSaksnummer());
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
 }

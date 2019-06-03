@@ -8,6 +8,7 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
@@ -48,21 +49,41 @@ public class ValiderPeriode extends RegistreringUnntakValiderer {
         SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(prosessinstans.getBehandling());
         Periode periode = sedDokument.getLovvalgsperiode();
 
-        if (periode.getTom() == null) {
-            registrerFeil(prosessinstans,Unntak_periode_begrunnelser.FEIL_I_PERIODEN);
-            prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
-        } else if (periode.getFom() == null || fomErEtterTom(periode)) {
+        boolean åpenPeriode = periode.getTom() == null;
+
+
+        if (!åpenPeriode && fomErEtterTom(periode)) {
             registrerFeil(prosessinstans, Unntak_periode_begrunnelser.FEIL_I_PERIODEN);
             prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_BESTEM_BEHANDLINGSMAATE);
-        } else if (!periodeInnenfor24Mnd(periode)) {
+            return;
+        }
+
+        if (åpenPeriode) {
+            registrerFeil(prosessinstans, Unntak_periode_begrunnelser.INGEN_SLUTTDATO);
+        }
+
+        if (!åpenPeriode && !periodeInnenfor24Mnd(periode)) {
             registrerFeil(prosessinstans, Unntak_periode_begrunnelser.PERIODEN_OVER_24_MD);
             prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
-        } else if (periodeForGammel(periode)) {
-            registrerFeil(prosessinstans, Unntak_periode_begrunnelser.PERIODE_FOR_GAMMEL);
-            prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
-        } else {
-            prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
         }
+
+        if (periodeForGammel(periode)) {
+            registrerFeil(prosessinstans, Unntak_periode_begrunnelser.PERIODE_FOR_GAMMEL);
+        }
+
+        if (periodeLangtFremITid(periode)) {
+            registrerFeil(prosessinstans, Unntak_periode_begrunnelser.PERIODE_LANGT_FREM_I_TID);
+        }
+
+        if (sedDokument.getLovvalgslandKode() == Landkoder.NO) {
+            registrerFeil(prosessinstans, Unntak_periode_begrunnelser.LOVVALGSLAND_NORGE);
+        }
+
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
+    }
+
+    private boolean periodeLangtFremITid(Periode periode) {
+        return periode.getFom().isAfter(LocalDate.now().plusYears(1L));
     }
 
     private boolean fomErEtterTom(Periode periode) {

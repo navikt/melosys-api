@@ -58,6 +58,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         oppgave.setBehandlingstype(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
 
         gsakFasade.opprettOppgave(oppgave);
+        log.info("Opprettet oppgave til manuell behandling for sak {}", fagsak.getSaksnummer());
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
