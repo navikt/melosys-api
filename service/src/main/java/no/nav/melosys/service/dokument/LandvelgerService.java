@@ -68,7 +68,8 @@ public class LandvelgerService {
         Optional<Landkoder> bostedsland = avklartefaktaService.hentBostedland(behandling.getId());
         if (bostedsland.isPresent()) {
             return bostedsland;
+        } else {
+            return hentOppgittBostedsland(søknad);
         }
-        return hentOppgittBostedsland(søknad);
     }
 }

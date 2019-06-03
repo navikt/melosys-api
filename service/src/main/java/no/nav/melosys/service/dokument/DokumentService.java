@@ -215,7 +215,7 @@ public class DokumentService {
         }
     }
 
-    private List<Aktoer> avklarMottakereForMyndighet(Mottaker mottaker, Behandling behandling) throws TekniskException {
+    private List<Aktoer> avklarMottakereForMyndighet(Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
         List<Aktoer> mottakere = new ArrayList<>();
         if (mottaker.getAktør().getOrgnr() != null) {
             // Norsk myndighet har orgnummer.
@@ -224,10 +224,12 @@ public class DokumentService {
             // Utenlandsk myndighet.
             Aktoer myndighet = behandling.getFagsak().hentAktørMedRolleType(mottaker.getRolle());
             if (myndighet == null) {
-                // Myndighet lagres ikke før kjøring i saksflyt
-                myndighet = avklarMyndighetService.hentMyndighetFraBehandling(behandling);
+                // Myndighet er ikke lagret og lagres ikke før kjøring i saksflyt
+                avklarMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling).map(mottakere::add)
+                    .orElseThrow(() -> new FunksjonellException("Brev sendes ikke til utenlandske myndigheter for Norge."));
+            } else {
+                mottakere.add(myndighet);
             }
-            mottakere.add(myndighet);
         }
         return mottakere;
     }
