@@ -47,7 +47,7 @@ public class OppdaterMedlTest {
     }
 
     @Test
-    public void utfør() throws Exception {
+    public void utfør_ingenLovvalgsperiode_oppretNyLovvalgsperiode() throws Exception {
         PersonDokument personDokument = new PersonDokument();
         personDokument.fnr = "123";
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -67,6 +67,30 @@ public class OppdaterMedlTest {
 
         verify(medlFasade).opprettPeriodeEndelig(any(), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(12L), any());
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
+    }
+
+    @Test
+    public void utfør_erEksisterendeLovvalgsperiode_oppdaterPeriodeEndeligMedl() throws Exception {
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.fnr = "123";
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(personDokument);
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singleton(lovvalgsperiode));
+
+        Behandling behandling = new Behandling();
+        behandling.setId(12L);
+        behandling.getSaksopplysninger().add(saksopplysning);
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        oppdaterMedl.utfør(prosessinstans);
+
+        verify(medlFasade).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
+        verify(lovvalgsperiodeService).hentLovvalgsperioder(eq(12L));
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 

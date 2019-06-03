@@ -1,0 +1,1 @@
+INSERT INTO PROSESS_STEG(KODE, NAVN) VALUES ('REG_UNNTAK_UNDER_AVKLARING', 'Unntaksperiode under avklaring');

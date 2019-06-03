@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.exception.TekniskException;
 
@@ -58,6 +59,12 @@ public final class SaksopplysningerUtils {
     public static ArbeidsforholdDokument hentArbeidsforholdDokument(Behandling behandling) throws TekniskException {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.ARBFORH);
         return (ArbeidsforholdDokument) saksopplysning
+                .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
+    }
+
+    public static SedDokument hentSedDokument(Behandling behandling) throws TekniskException {
+        Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.SEDOPPL);
+        return (SedDokument) saksopplysning
                 .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
     }
 

@@ -1,12 +1,10 @@
 package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
-import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,14 +14,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ValiderPeriodeTest {
 
-    @Mock
-    private SaksopplysningRepository saksopplysningRepository;
     @Mock
     private AvklartefaktaService avklartefaktaService;
 
@@ -31,15 +26,12 @@ public class ValiderPeriodeTest {
 
     @Before
     public void setUp() {
-        validerPeriode = new ValiderPeriode(saksopplysningRepository, avklartefaktaService);
+        validerPeriode = new ValiderPeriode(avklartefaktaService);
     }
 
     @Test
     public void utførSteg_gyldigPeriode_ingenNyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
-            .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now().plusYears(1), LocalDate.now().plusYears(2))));
-
-        Prosessinstans prosessinstans = hentProsessinstans();
+        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now().plusYears(1), LocalDate.now().plusYears(2)));
         validerPeriode.utfør(prosessinstans);
 
         verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
@@ -48,10 +40,7 @@ public class ValiderPeriodeTest {
 
     @Test
     public void utførSteg_ingenTilDato_nyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
-            .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now().plusYears(1), null)));
-
-        Prosessinstans prosessinstans = hentProsessinstans();
+        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now().plusYears(1), null));
         validerPeriode.utfør(prosessinstans);
 
         verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
@@ -60,10 +49,7 @@ public class ValiderPeriodeTest {
 
     @Test
     public void utførSteg_tomFørFom_nyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
-            .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now().plusYears(1), LocalDate.now())));
-
-        Prosessinstans prosessinstans = hentProsessinstans();
+        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now().plusYears(1), LocalDate.now()));
         validerPeriode.utfør(prosessinstans);
 
         verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
@@ -72,10 +58,7 @@ public class ValiderPeriodeTest {
 
     @Test
     public void utførSteg_periodeOver24Mnd_nyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
-            .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now(), LocalDate.now().plusYears(3))));
-
-        Prosessinstans prosessinstans = hentProsessinstans();
+        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now(), LocalDate.now().plusYears(3)));
         validerPeriode.utfør(prosessinstans);
 
         verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
@@ -84,21 +67,19 @@ public class ValiderPeriodeTest {
 
     @Test
     public void utførSteg_periodeEldreEnn5År_nyAvklarteFakta() throws Exception {
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
-            .thenReturn(Optional.of(hentSedSaksopplysning(LocalDate.now().minusYears(6L), LocalDate.now().minusYears(5L))));
-
-        Prosessinstans prosessinstans = hentProsessinstans();
+        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now().minusYears(6L), LocalDate.now().minusYears(5L)));
         validerPeriode.utfør(prosessinstans);
 
         verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
     }
 
-    private Prosessinstans hentProsessinstans() {
+    private Prosessinstans hentProsessinstans(Saksopplysning saksopplysning) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
         Behandling behandling = new Behandling();
         behandling.setId(2L);
+        behandling.getSaksopplysninger().add(saksopplysning);
 
         prosessinstans.setBehandling(behandling);
         return prosessinstans;
@@ -107,6 +88,7 @@ public class ValiderPeriodeTest {
     private Saksopplysning hentSedSaksopplysning(LocalDate fom, LocalDate tom) {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(hentSedDokument(fom, tom));
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
         return saksopplysning;
     }
 

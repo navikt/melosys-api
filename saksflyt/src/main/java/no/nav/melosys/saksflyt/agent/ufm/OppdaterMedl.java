@@ -62,16 +62,22 @@ public class OppdaterMedl extends AbstraktStegBehandler {
             .orElseThrow(() -> new TekniskException("Finner ikke SED-saksopplysning for behandling " + prosessinstans.getBehandling().getId()))
             .getDokument();
 
+        Collection<Lovvalgsperiode> lovvalgsperioder = lovvalgsperiodeService.hentLovvalgsperioder(prosessinstans.getBehandling().getId());
 
-        Collection<Lovvalgsperiode> lagretLovvalgsperiode = lovvalgsperiodeService.lagreLovvalgsperioder(
-            prosessinstans.getBehandling().getId(), Collections.singletonList(opprettLovvalgsperiode(sedDokument))
-        );
+        if (lovvalgsperioder.isEmpty()) {
+            Collection<Lovvalgsperiode> lagretLovvalgsperiode = lovvalgsperiodeService.lagreLovvalgsperioder(
+                prosessinstans.getBehandling().getId(), Collections.singletonList(opprettLovvalgsperiode(sedDokument))
+            );
 
-        String ident = SaksopplysningerUtils.hentPersonDokument(prosessinstans.getBehandling()).fnr;
+            String ident = SaksopplysningerUtils.hentPersonDokument(prosessinstans.getBehandling()).fnr;
 
-        Lovvalgsperiode lovvalgsperiode = lagretLovvalgsperiode.iterator().next();
-        Long medlId = medlFasade.opprettPeriodeEndelig(ident, lovvalgsperiode, KildedokumenttypeMedl.SED);
-        felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, prosessinstans.getBehandling().getId());
+            Lovvalgsperiode lovvalgsperiode = lagretLovvalgsperiode.iterator().next();
+            Long medlId = medlFasade.opprettPeriodeEndelig(ident, lovvalgsperiode, KildedokumenttypeMedl.SED);
+            felles.lagreMedlPeriodeId(medlId, lovvalgsperiode, prosessinstans.getBehandling().getId());
+        } else {
+            Lovvalgsperiode lovvalgsperiode = lovvalgsperioder.iterator().next();
+            medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.SED);
+        }
 
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }

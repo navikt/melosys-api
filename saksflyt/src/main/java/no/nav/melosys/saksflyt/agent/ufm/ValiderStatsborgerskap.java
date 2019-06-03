@@ -8,10 +8,10 @@ import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
-import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -25,8 +25,8 @@ public class ValiderStatsborgerskap extends RegistreringUnntakValiderer {
 
     private static final Logger log = LoggerFactory.getLogger(ValiderStatsborgerskap.class);
     @Autowired
-    ValiderStatsborgerskap(SaksopplysningRepository saksopplysningRepository, AvklartefaktaService avklartefaktaService) {
-        super(saksopplysningRepository, avklartefaktaService);
+    ValiderStatsborgerskap(AvklartefaktaService avklartefaktaService) {
+        super(avklartefaktaService);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class ValiderStatsborgerskap extends RegistreringUnntakValiderer {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         //TODO: avklar om dette er ok måte å sjekke på. Dekker behovet slik kodeverket er nå
-        SedDokument sedDokument = (SedDokument) hentSedSaksopplysning(prosessinstans).getDokument();
+        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(prosessinstans.getBehandling());
         boolean harStatsborgerskapIGyldigLand = Arrays.stream(Landkoder.values())
             .anyMatch(landkode -> sedDokument.getStatsborgerskapKoder().contains(landkode.getKode()));
 
