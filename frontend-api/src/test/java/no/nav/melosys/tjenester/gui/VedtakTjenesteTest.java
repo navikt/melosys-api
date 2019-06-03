@@ -36,7 +36,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     private VedtakTjeneste vedtakTjeneste;
 
-    private static final String schemaType = "vedtak-post-schema.json";
+    private static final String schemaType = "saksflyt-vedtak-post-schema.json";
 
     private FattVedtakDto fattVedtakDto;
     private EndreVedtakDto endreVedtakDto;
