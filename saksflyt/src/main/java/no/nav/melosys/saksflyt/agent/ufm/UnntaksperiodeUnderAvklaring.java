@@ -5,8 +5,6 @@ import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -18,6 +16,7 @@ import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
+import no.nav.melosys.saksflyt.felles.UnntaksperiodeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -55,15 +54,7 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
         Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
         if (lovvalgsperioder.isEmpty()) {
             SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(prosessinstans.getBehandling());
-
-            Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-            lovvalgsperiode.setBestemmelse(sedDokument.getLovvalgBestemmelse());
-            lovvalgsperiode.setFom(sedDokument.getLovvalgsperiode().getFom());
-            lovvalgsperiode.setTom(sedDokument.getLovvalgsperiode().getTom());
-            lovvalgsperiode.setLovvalgsland(sedDokument.getLovvalgslandKode());
-            lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-            lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
-            lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
+            Lovvalgsperiode lovvalgsperiode = UnntaksperiodeUtils.opprettLovvalgsperiode(sedDokument);
             Long medlperiodeId = medlFasade.opprettPeriodeUnderAvklaring(sedDokument.getFnr(), lovvalgsperiode, KildedokumenttypeMedl.SED);
             felles.lagreMedlPeriodeId(medlperiodeId, lovvalgsperiode, behandling.getId());
         }
