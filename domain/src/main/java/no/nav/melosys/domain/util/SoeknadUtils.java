@@ -52,6 +52,6 @@ public final class SoeknadUtils {
     }
 
     public static Optional<Landkoder> hentOppgittBostedsland(SoeknadDokument søknad) {
-        return Optional.ofNullable(Landkoder.valueOf(søknad.bosted.oppgittAdresse.landkode));
+        return Optional.ofNullable(søknad.bosted.oppgittAdresse.landkode).map(Landkoder::valueOf);
     }
 }
