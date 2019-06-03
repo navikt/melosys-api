@@ -18,6 +18,7 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -39,11 +40,13 @@ public class ValiderYtelser extends RegistreringUnntakValiderer {
     private static final Logger log = LoggerFactory.getLogger(ValiderYtelser.class);
 
     private final InntektService inntektService;
+    private final SaksopplysningRepository saksopplysningRepository;
 
     @Autowired
-    ValiderYtelser(SaksopplysningRepository saksopplysningRepository, AvklartefaktaService avklartefaktaService, InntektService inntektService) {
-        super(saksopplysningRepository, avklartefaktaService);
+    ValiderYtelser(AvklartefaktaService avklartefaktaService, InntektService inntektService, SaksopplysningRepository saksopplysningRepository) {
+        super(avklartefaktaService);
         this.inntektService = inntektService;
+        this.saksopplysningRepository = saksopplysningRepository;
     }
 
     @Override
@@ -62,7 +65,7 @@ public class ValiderYtelser extends RegistreringUnntakValiderer {
 
         Instant nå = Instant.now();
 
-        SedDokument sedDokument = (SedDokument) hentSedSaksopplysning(prosessinstans).getDokument();
+        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(prosessinstans.getBehandling());
         String fnr = prosessinstans.getData(ProsessDataKey.BRUKER_ID);
         LocalDate fom = sedDokument.getLovvalgsperiode().getFom();
         LocalDate tom = sedDokument.getLovvalgsperiode().getTom();

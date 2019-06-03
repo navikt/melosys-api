@@ -13,6 +13,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
+import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
@@ -31,12 +32,14 @@ public class ValiderMedlemskap extends RegistreringUnntakValiderer {
 
     private static final Logger log = LoggerFactory.getLogger(ValiderMedlemskap.class);
 
+    private final SaksopplysningRepository saksopplysningRepository;
     private final MedlFasade medlFasade;
 
     @Autowired
     ValiderMedlemskap(SaksopplysningRepository saksopplysningRepository,
                       AvklartefaktaService avklartefaktaService, MedlFasade medlFasade) {
-        super(saksopplysningRepository, avklartefaktaService);
+        super(avklartefaktaService);
+        this.saksopplysningRepository = saksopplysningRepository;
         this.medlFasade = medlFasade;
     }
 
@@ -57,7 +60,7 @@ public class ValiderMedlemskap extends RegistreringUnntakValiderer {
         Instant nå = Instant.now();
         boolean erEndring = prosessinstans.getData(ProsessDataKey.ER_ENDRING, Boolean.class);
 
-        SedDokument sedDokument = (SedDokument) hentSedSaksopplysning(prosessinstans).getDokument();
+        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(prosessinstans.getBehandling());
         String fnr = prosessinstans.getData(ProsessDataKey.BRUKER_ID);
         LocalDate fom = sedDokument.getLovvalgsperiode().getFom();
         LocalDate tom = sedDokument.getLovvalgsperiode().getTom();

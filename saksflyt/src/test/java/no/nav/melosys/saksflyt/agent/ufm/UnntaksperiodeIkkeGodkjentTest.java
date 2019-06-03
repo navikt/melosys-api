@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.IkkeGodkjentBegrunnelser;
 import no.nav.melosys.domain.kodeverk.UtfallRegistreringUnntak;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.junit.Before;
@@ -29,6 +30,8 @@ public class UnntaksperiodeIkkeGodkjentTest {
     private BehandlingRepository behandlingRepository;
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
+    @Mock
+    private MedlFasade medlFasade;
 
     private UnntaksperiodeIkkeGodkjent unntaksperiodeIkkeGodkjent;
 
@@ -37,8 +40,9 @@ public class UnntaksperiodeIkkeGodkjentTest {
 
     @Before
     public void setup() {
-        unntaksperiodeIkkeGodkjent = new UnntaksperiodeIkkeGodkjent(behandlingRepository, behandlingsresultatRepository);
+        unntaksperiodeIkkeGodkjent = new UnntaksperiodeIkkeGodkjent(behandlingRepository, behandlingsresultatRepository, medlFasade);
 
+        behandlingsresultat.getLovvalgsperioder().add(new Lovvalgsperiode());
         when(behandlingsresultatRepository.findById(any())).thenReturn(Optional.of(behandlingsresultat));
     }
 

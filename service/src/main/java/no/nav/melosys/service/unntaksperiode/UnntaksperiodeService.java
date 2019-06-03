@@ -35,7 +35,7 @@ public class UnntaksperiodeService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void behandlingUnderAvklaring(Behandling behandling) {
-        //TODO: MELOSYS-2678
+        prosessinstansService.opprettProsessinstansUnntaksperiodeUnderAvklaring(behandling);
     }
 
     private Set<IkkeGodkjentBegrunnelser> tilIkkeGodkjentBegrunnelser(Set<String> begrunnelser) {

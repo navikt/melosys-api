@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
@@ -11,6 +12,8 @@ import no.nav.melosys.domain.kodeverk.UtfallRegistreringUnntak;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
+import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
@@ -23,10 +26,12 @@ public class UnntaksperiodeIkkeGodkjent extends AbstraktStegBehandler {
 
     private final BehandlingRepository behandlingRepository;
     private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final MedlFasade medlFasade;
 
-    public UnntaksperiodeIkkeGodkjent(BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository) {
+    public UnntaksperiodeIkkeGodkjent(BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository, MedlFasade medlFasade) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.medlFasade = medlFasade;
     }
 
     @Override
@@ -68,6 +73,11 @@ public class UnntaksperiodeIkkeGodkjent extends AbstraktStegBehandler {
         }
 
         behandlingsresultatRepository.save(behandlingsresultat);
+
+        Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
+        if (!lovvalgsperioder.isEmpty()) {
+            medlFasade.avvisPeriode(lovvalgsperioder.iterator().next(), StatusaarsakMedl.AVVIST);
+        }
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
