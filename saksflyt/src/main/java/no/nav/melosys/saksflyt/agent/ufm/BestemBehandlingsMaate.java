@@ -65,6 +65,8 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
 
         if (registreringer.isEmpty()) {
             behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.AUTOMATISERT);
+            log.info("Behandling {}, type {} blir registrer automatisk",
+                prosessinstans.getBehandling().getId(), prosessinstans.getBehandling().getType());
             prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
         } else {
             String registreringerStr = registreringer.stream()

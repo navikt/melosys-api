@@ -68,6 +68,7 @@ public class HentPerson extends AbstraktStegBehandler {
         saksopplysning.setEndretDato(nå);
         saksopplysningRepository.save(saksopplysning);
 
+        log.info("Persondokument hentet for behandling {}", prosessinstans.getBehandling().getId());
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
     }
 }
