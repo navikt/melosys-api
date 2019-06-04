@@ -10,11 +10,14 @@ public class ServerinfoDto {
 
     private final String longVersionHash;
 
-    public ServerinfoDto(String namespace, String cluster, String branchName, String longVersionHash) {
+    private final String veraUrl;
+
+    public ServerinfoDto(String namespace, String cluster, String branchName, String longVersionHash, String veraUrl) {
         this.namespace = namespace;
         this.cluster = cluster;
         this.branchName = branchName;
         this.longVersionHash = longVersionHash;
+        this.veraUrl = veraUrl;
     }
 
     public String getNamespace() {
@@ -31,5 +34,9 @@ public class ServerinfoDto {
 
     public String getLongVersionHash() {
         return longVersionHash;
+    }
+
+    public String getVeraUrl() {
+        return veraUrl;
     }
 }

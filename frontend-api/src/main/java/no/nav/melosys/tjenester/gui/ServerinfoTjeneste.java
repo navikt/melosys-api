@@ -24,6 +24,7 @@ public class ServerinfoTjeneste {
     private static final String NAMESPACE_ENV = "NAIS_NAMESPACE";
     private static final String CLUSTER_ENV = "NAIS_CLUSTER_NAME";
     private static final String IMAGE_ENV = "NAIS_APP_IMAGE";
+    private static final String VERA_URL = "https://vera.adeo.no/#/log?application=melosys";
 
     private static ServerinfoDto serverinfoDto;
 
@@ -32,7 +33,8 @@ public class ServerinfoTjeneste {
             System.getenv(NAMESPACE_ENV),
             System.getenv(CLUSTER_ENV),
             hentBranch(),
-            hentHash()
+            hentHash(),
+            VERA_URL
         );
     }
 
