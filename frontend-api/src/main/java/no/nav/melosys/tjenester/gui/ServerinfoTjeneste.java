@@ -1,5 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
@@ -25,29 +28,46 @@ public class ServerinfoTjeneste {
     private static ServerinfoDto serverinfoDto;
 
     static {
-        serverinfoDto = new ServerinfoDto();
-        serverinfoDto.setNamespace(System.getenv(NAMESPACE_ENV));
-        serverinfoDto.setCluster(System.getenv(CLUSTER_ENV));
-        serverinfoDto = settBranchOgHash(serverinfoDto);
+        serverinfoDto = new ServerinfoDto(
+            System.getenv(NAMESPACE_ENV),
+            System.getenv(CLUSTER_ENV),
+            hentBranch(),
+            hentHash()
+        );
     }
 
-    private static ServerinfoDto settBranchOgHash(ServerinfoDto serverinfoDto) {
+    private static List<String> hentBranchOgHash() {
         String image = System.getenv(IMAGE_ENV);
 
         if (StringUtils.isNotEmpty(image) && image.split(":").length == 3) {
             String imageTag = image.split(":")[2];
 
             if (StringUtils.isNotEmpty(imageTag)) {
-                String[] branchAndCommit = imageTag.split("-");
-
-                if (branchAndCommit.length == 2) {
-                    serverinfoDto.setBranchName(branchAndCommit[0]);
-                    serverinfoDto.setLongVersionHash(branchAndCommit[1]);
-                }
+                return Arrays.asList(imageTag.split("-"));
             }
         }
 
-        return serverinfoDto;
+        return Collections.emptyList();
+    }
+
+    private static String hentBranch() {
+        List<String> branchOgHash = hentBranchOgHash();
+
+        if (branchOgHash.size() == 2) {
+            return branchOgHash.get(0);
+        }
+
+        return null;
+    }
+
+    private static String hentHash() {
+        List<String> branchOgHash = hentBranchOgHash();
+
+        if (branchOgHash.size() == 2) {
+            return branchOgHash.get(1);
+        }
+
+        return null;
     }
 
     @GET

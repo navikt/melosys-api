@@ -2,43 +2,34 @@ package no.nav.melosys.tjenester.gui.dto;
 
 public class ServerinfoDto {
 
-    private String namespace;
+    private final String namespace;
 
-    private String cluster;
+    private final String cluster;
 
-    private String branchName;
+    private final String branchName;
 
-    private String longVersionHash;
+    private final String longVersionHash;
+
+    public ServerinfoDto(String namespace, String cluster, String branchName, String longVersionHash) {
+        this.namespace = namespace;
+        this.cluster = cluster;
+        this.branchName = branchName;
+        this.longVersionHash = longVersionHash;
+    }
 
     public String getNamespace() {
         return namespace;
-    }
-
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
     }
 
     public String getCluster() {
         return cluster;
     }
 
-    public void setCluster(String cluster) {
-        this.cluster = cluster;
-    }
-
     public String getBranchName() {
         return branchName;
     }
 
-    public void setBranchName(String branchName) {
-        this.branchName = branchName;
-    }
-
     public String getLongVersionHash() {
         return longVersionHash;
-    }
-
-    public void setLongVersionHash(String longVersionHash) {
-        this.longVersionHash = longVersionHash;
     }
 }
