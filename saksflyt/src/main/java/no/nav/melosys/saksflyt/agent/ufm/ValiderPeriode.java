@@ -64,7 +64,6 @@ public class ValiderPeriode extends RegistreringUnntakValiderer {
 
         if (!åpenPeriode && !periodeInnenfor24Mnd(periode)) {
             registrerFeil(prosessinstans, Unntak_periode_begrunnelser.PERIODEN_OVER_24_MD);
-            prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VALIDER_MEDLEMSKAP);
         }
 
         if (periodeForGammel(periode)) {

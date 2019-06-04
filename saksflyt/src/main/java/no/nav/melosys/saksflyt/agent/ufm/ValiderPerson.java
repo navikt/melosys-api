@@ -5,8 +5,6 @@ import java.util.Map;
 
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
@@ -18,6 +16,7 @@ import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,6 +24,7 @@ public class ValiderPerson extends RegistreringUnntakValiderer {
 
     private static final Logger log = LoggerFactory.getLogger(ValiderPerson.class);
 
+    @Autowired
     ValiderPerson(AvklartefaktaService avklartefaktaService) {
         super(avklartefaktaService);
     }
@@ -49,13 +49,5 @@ public class ValiderPerson extends RegistreringUnntakValiderer {
         if (dødsdato != null) {
             registrerFeil(prosessinstans, Unntak_periode_begrunnelser.PERSON_DOD);
         }
-
-        Bostedsadresse bostedsadresse = personDokument.bostedsadresse;
-
-        if (bostedsadresse != null && bostedsadresse.getLand() != null && Land.NORGE.equals(bostedsadresse.getLand().getKode())) {
-            registrerFeil(prosessinstans, Unntak_periode_begrunnelser.BOSATT_I_NORGE);
-        }
-
-
     }
 }
