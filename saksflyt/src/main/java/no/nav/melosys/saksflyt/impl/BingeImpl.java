@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.impl;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
@@ -23,6 +22,7 @@ public class BingeImpl implements Binge {
     private static Logger logger = LoggerFactory.getLogger(BingeImpl.class);
 
     private HashMap<UUID, Prosessinstans> prosessinstanser = new HashMap<>();
+    private HashMap<UUID, Prosessinstans> aktiveProsessinstanser = new HashMap<>();
 
     @Override
     public synchronized boolean leggTil(Prosessinstans prosessinstans) {
@@ -33,7 +33,8 @@ public class BingeImpl implements Binge {
             logger.warn("Forsøk på å legge inn prosessinstans {} med ugyldig steg {} ", prosessinstans.getId(), prosessinstans.getSteg());
             return false;
         }
-        if (prosessinstanser.containsKey(prosessinstans.getId())) {
+        if (prosessinstanser.containsKey(prosessinstans.getId()) ||
+            aktiveProsessinstanser.containsKey(prosessinstans.getId())) {
             logger.warn("Forsøk på å legge inn prosessinstans som allerede finnes i Bingen. prosessinstansId={}", prosessinstans.getId());
             return false;
         }
@@ -42,41 +43,30 @@ public class BingeImpl implements Binge {
     }
 
     @Override
-    public synchronized Prosessinstans hentProsessinstans(long prosessinstansId) {
-        return prosessinstanser.get(prosessinstansId);
+    public synchronized Collection<Prosessinstans> hentProsessinstanser() {
+        List<Prosessinstans> alleProsessinstanser = new ArrayList<>();
+        alleProsessinstanser.addAll(prosessinstanser.values());
+        alleProsessinstanser.addAll(aktiveProsessinstanser.values());
+        return alleProsessinstanser;
     }
 
     @Override
-    public synchronized List<Prosessinstans> hentProsessinstanser() {
-        return new ArrayList<>(prosessinstanser.values());
-    }
+    public synchronized Prosessinstans hentOgSettProsessinstansTilAktiv(Predicate<Prosessinstans> predikat) {
+        Prosessinstans prosessinstans = prosessinstanser.values().stream()
+            .filter(predikat)
+            .sorted(Utils.eldsteFørst())
+            .findFirst().orElse(null);
 
-    @Override
-    public synchronized Collection<Prosessinstans> hentProsessinstanser(Predicate<Prosessinstans> predikat) {
-        return prosessinstanser.values().stream().filter(predikat).collect(Collectors.toList());
-    }
-
-    @Override
-    public synchronized List<Prosessinstans> hentProsessinstanser(Predicate<Prosessinstans> predikat, Comparator<Prosessinstans> rekkefølge) {
-        return prosessinstanser.values().stream().filter(predikat).sorted(rekkefølge).collect(Collectors.toList());
-    }
-
-    @Override
-    public synchronized Prosessinstans fjernFørsteProsessinstans(Predicate<Prosessinstans> predikat) {
-        Prosessinstans prosessinstans = prosessinstanser.values().stream().filter(predikat).findFirst().orElse(null);
         if (prosessinstans != null) {
-            prosessinstanser.remove(prosessinstans.getId());
+            UUID uuid = prosessinstans.getId();
+            aktiveProsessinstanser.put(uuid, prosessinstans);
+            prosessinstanser.remove(uuid);
         }
         return prosessinstans;
     }
 
     @Override
-    public synchronized Prosessinstans fjernFørsteProsessinstans(Predicate<Prosessinstans> predikat, Comparator<Prosessinstans> rekkefølge) {
-        Prosessinstans prosessinstans = prosessinstanser.values().stream().filter(predikat).min(rekkefølge).orElse(null);
-        if (prosessinstans != null) {
-            prosessinstanser.remove(prosessinstans.getId());
-        }
-        return prosessinstans;
+    public synchronized void fjernProsessinstans(Prosessinstans prosessinstans) {
+        aktiveProsessinstanser.remove(prosessinstans.getId());
     }
-
 }

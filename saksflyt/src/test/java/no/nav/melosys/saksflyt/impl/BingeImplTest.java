@@ -32,12 +32,33 @@ public class BingeImplTest {
         assertTrue(binge.leggTil(pi1));
         assertTrue(binge.leggTil(pi2));
         assertFalse(binge.leggTil(pi2)); // Skal ikke kunne legge til samme sak flere ganger
-        assertNull(binge.hentProsessinstans(0)); // Ingen sak med saksId 0 er lagt inn
-        assertEquals(2, binge.hentProsessinstanser((s) -> true).size()); // Skal være 2 saker i bingen
-        assertEquals(0, binge.hentProsessinstanser((s) -> false).size()); // Skal ikke returnere noe hvis predikatet ikke slår til
-        assertEquals(pi2, binge.fjernFørsteProsessinstans((s) -> true, Utils.eldsteFørst())); // b2 har kortest frist
-        assertEquals(pi1, binge.fjernFørsteProsessinstans((s) -> true, Utils.eldsteFørst())); // Nå er det b1 som har kortest frist
-        assertNull(binge.fjernFørsteProsessinstans((s) -> true, Utils.eldsteFørst())); // Alle sakene er hentet ut. Fjern skal returnere null
+        assertEquals(2, binge.hentProsessinstanser().size()); // Skal være 2 saker i bingen
+        assertEquals(pi2, binge.hentOgSettProsessinstansTilAktiv((s) -> true)); // b2 har kortest frist
+        assertEquals(pi1, binge.hentOgSettProsessinstansTilAktiv((s) -> true)); // Nå er det b1 som har kortest frist
+        assertNull(binge.hentOgSettProsessinstansTilAktiv((s) -> true)); // Alle sakene er hentet ut. Fjern skal returnere null
+    }
+
+    @Test
+    public void hentOgSettProsessinstansTilAktiv_Prosessinstans_erFremdelesIBinge() {
+        Prosessinstans pi1 = new Prosessinstans();
+        ReflectionTestUtils.setField(pi1, "id", UUID.randomUUID());
+        pi1.setRegistrertDato(LocalDateTime.of(2017, 1, 2, 0, 0));
+        binge.leggTil(pi1);
+
+        binge.hentOgSettProsessinstansTilAktiv((s) -> true);
+        assertThat(binge.hentProsessinstanser().size()).isEqualTo(1);
+    }
+
+    @Test
+    public void fjernProsessinstans_Prosessinstans_erFjernetFraBinge() {
+        Prosessinstans pi1 = new Prosessinstans();
+        ReflectionTestUtils.setField(pi1, "id", UUID.randomUUID());
+        pi1.setRegistrertDato(LocalDateTime.of(2017, 1, 2, 0, 0));
+        binge.leggTil(pi1);
+        binge.hentOgSettProsessinstansTilAktiv((s) -> true);
+
+        binge.fjernProsessinstans(pi1);
+        assertThat(binge.hentProsessinstanser().size()).isEqualTo(0);
     }
 
     @Test

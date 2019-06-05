@@ -89,7 +89,7 @@ public class ArbeiderTraad implements Runnable {
     }
 
     private void finnProsessinstansOgUtførSteg(StegBehandler stegBehandler) {
-        Prosessinstans pi = binge.fjernFørsteProsessinstans(stegBehandler.inngangsvilkår());
+        Prosessinstans pi = binge.hentOgSettProsessinstansTilAktiv(stegBehandler.inngangsvilkår());
         if (pi == null) {
             return;
         }
@@ -104,6 +104,7 @@ public class ArbeiderTraad implements Runnable {
             pi.setSistForsøkt(LocalDateTime.now());
         }
         pi.setEndretDato(LocalDateTime.now());
+        binge.fjernProsessinstans(pi); // Må være før db-kall for at saksflytkontroll skal ha noen effekt
         prosessinstansRepo.save(pi); // Kan resultere i DataAccessException
 
         if (pi.getSteg() != ProsessSteg.FERDIG && pi.getSteg() != ProsessSteg.FEILET_MASKINELT) {
