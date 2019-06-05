@@ -57,7 +57,7 @@ public class BingeImplTest {
         binge.leggTil(pi1);
         binge.hentOgSettProsessinstansTilAktiv((s) -> true);
 
-        binge.fjernProsessinstans(pi1);
+        binge.fjernFraAktiveProsessinstanser(pi1);
         assertThat(binge.hentProsessinstanser().size()).isEqualTo(0);
     }
 

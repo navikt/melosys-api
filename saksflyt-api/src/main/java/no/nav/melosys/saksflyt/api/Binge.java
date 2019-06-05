@@ -39,5 +39,5 @@ public interface Binge {
     /**
      * Fjerner prosessinstansen fra aktive prosessinstanser
      */
-    void fjernProsessinstans(Prosessinstans prosessinstans);
+    void fjernFraAktiveProsessinstanser(Prosessinstans prosessinstans);
 }

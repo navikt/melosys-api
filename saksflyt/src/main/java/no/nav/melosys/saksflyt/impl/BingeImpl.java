@@ -66,7 +66,7 @@ public class BingeImpl implements Binge {
     }
 
     @Override
-    public synchronized void fjernProsessinstans(Prosessinstans prosessinstans) {
+    public synchronized void fjernFraAktiveProsessinstanser(Prosessinstans prosessinstans) {
         aktiveProsessinstanser.remove(prosessinstans.getId());
     }
 }
