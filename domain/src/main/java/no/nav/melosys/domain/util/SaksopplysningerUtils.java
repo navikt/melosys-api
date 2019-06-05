@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
@@ -66,6 +67,12 @@ public final class SaksopplysningerUtils {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.SEDOPPL);
         return (SedDokument) saksopplysning
                 .orElseThrow(() -> new TekniskException("Finner ikke seddokument"));
+    }
+
+    public static InntektDokument hentInntektDokument(Behandling behandling) throws TekniskException {
+        Optional<SaksopplysningDokument> saksopplysning = hentDokument(behandling, SaksopplysningType.INNTK);
+        return (InntektDokument) saksopplysning
+                .orElseThrow(() -> new TekniskException("Finner ikke inntektdokument"));
     }
 
     public static String hentSammensattNavn(Behandling behandling) {

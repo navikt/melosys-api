@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.agent.ufm;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
@@ -31,6 +32,7 @@ public class FerdigstillJournalpostTest {
     public void utfør_verifiserNesteSteg() throws Exception {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, "123");
+        prosessinstans.setBehandling(new Behandling());
         ferdigstillJournalpost.utfør(prosessinstans);
 
         verify(joarkFasade).ferdigstillJournalføring(eq("123"));
