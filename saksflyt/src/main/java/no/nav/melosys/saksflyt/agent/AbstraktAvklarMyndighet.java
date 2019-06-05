@@ -12,13 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
-
     private static final Logger log = LoggerFactory.getLogger(AbstraktAvklarMyndighet.class);
 
     private final BehandlingRepository behandlingRepository;
-
     private final BehandlingsresultatRepository behandlingsresultatRepository;
-
     private final AvklarMyndighetService avklarMyndighetService;
 
     public AbstraktAvklarMyndighet(BehandlingRepository behandlingRepository,
@@ -47,8 +44,7 @@ public abstract class AbstraktAvklarMyndighet extends AbstraktStegBehandler {
             String saksnummer = fagsak.getSaksnummer();
             Aktoer myndighetPart = fagsak.hentAktørMedRolleType(Aktoersroller.MYNDIGHET);
             if (myndighetPart == null) {
-                avklarMyndighetService.avklarMyndighetOgLagre(behandling);
-                log.info("Avklart myndighet for sak {}.", saksnummer);
+                avklarMyndighetService.avklarUtenlandskMyndighetOgLagre(behandling);
             } else {
                 log.debug("Sak {} har allerede en myndighet med kode {}", saksnummer, myndighetPart.getInstitusjonId());
             }

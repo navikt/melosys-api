@@ -60,15 +60,15 @@ public class AvklarMyndighetServiceTest {
     }
 
     @Test
-    public void avklarMyndighet_forventAktoerMedGyldigInstitusjonsId() throws Exception {
-        Aktoer aktoer = avklarMyndighetService.hentMyndighetFraBehandling(behandling);
-        assertThat(aktoer).isNotNull();
-        assertThat(aktoer.getInstitusjonId()).isEqualTo(forventetInstitusjonId);
+    public void lagUtenlandskMyndighetFraBehandling_forventAktoerMedGyldigInstitusjonsId() throws Exception {
+        Optional<Aktoer> aktoer = avklarMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling);
+        assertThat(aktoer).isNotEmpty();
+        assertThat(aktoer.get().getInstitusjonId()).isEqualTo(forventetInstitusjonId);
     }
 
     @Test
     public void avklarMyndighetOgLagre_forventkorrektInstitusjonsId() throws Exception {
-        avklarMyndighetService.avklarMyndighetOgLagre(behandling);
+        avklarMyndighetService.avklarUtenlandskMyndighetOgLagre(behandling);
         verify(fagsakService).leggTilAktør(eq(behandling.getFagsak().getSaksnummer()), eq(Aktoersroller.MYNDIGHET), eq(forventetInstitusjonId));
     }
 }
