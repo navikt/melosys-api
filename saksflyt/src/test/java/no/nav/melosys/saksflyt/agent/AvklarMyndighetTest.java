@@ -89,7 +89,7 @@ public class AvklarMyndighetTest {
 
         steg.utfør(p);
 
-        verify(avklarMyndighetService).avklarMyndighetOgLagre(any(Behandling.class));
+        verify(avklarMyndighetService).avklarUtenlandskMyndighetOgLagre(any(Behandling.class));
     }
 
     private static Behandlingsresultat lagBehandlingResultat() {
@@ -115,7 +115,7 @@ public class AvklarMyndighetTest {
 
         steg.utfør(p);
 
-        verify(avklarMyndighetService, never()).avklarMyndighetOgLagre(any(Behandling.class));
+        verify(avklarMyndighetService, never()).avklarUtenlandskMyndighetOgLagre(any(Behandling.class));
     }
 
     @Test
