@@ -89,22 +89,26 @@ public class ArbeiderTraad implements Runnable {
     }
 
     private void finnProsessinstansOgUtførSteg(StegBehandler stegBehandler) {
-        Prosessinstans pi = binge.fjernFørsteProsessinstans(stegBehandler.inngangsvilkår());
+        Prosessinstans pi = binge.hentOgSettProsessinstansTilAktiv(stegBehandler.inngangsvilkår());
         if (pi == null) {
             return;
         }
 
         aktivStegBehandler = stegBehandler;
         aktivProsessinstans = pi;
-        ProsessSteg gammeltSteg = pi.getSteg();
-        stegBehandler.utførSteg(pi);
+        try {
+            ProsessSteg gammeltSteg = pi.getSteg();
+            stegBehandler.utførSteg(pi);
 
-        if (pi.getSteg() != gammeltSteg) {
-            pi.setAntallRetry(0);
-            pi.setSistForsøkt(LocalDateTime.now());
+            if (pi.getSteg() != gammeltSteg) {
+                pi.setAntallRetry(0);
+                pi.setSistForsøkt(LocalDateTime.now());
+            }
+            pi.setEndretDato(LocalDateTime.now());
+            prosessinstansRepo.save(pi); // Kan resultere i DataAccessException
+        } finally {
+            binge.fjernFraAktiveProsessinstanser(pi);
         }
-        pi.setEndretDato(LocalDateTime.now());
-        prosessinstansRepo.save(pi); // Kan resultere i DataAccessException
 
         if (pi.getSteg() != ProsessSteg.FERDIG && pi.getSteg() != ProsessSteg.FEILET_MASKINELT) {
             binge.leggTil(pi);
