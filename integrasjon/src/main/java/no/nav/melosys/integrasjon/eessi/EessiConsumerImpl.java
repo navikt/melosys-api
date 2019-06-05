@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.eessi.dto.*;
+import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
+import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
+import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
+import no.nav.melosys.integrasjon.eessi.dto.SedinfoDto;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -30,14 +33,8 @@ public class EessiConsumerImpl implements EessiConsumer {
 
     @Override
     public List<InstitusjonDto> hentMottakerinstitusjoner(String bucType) throws MelosysException {
-        return exchange("/buc/mottakerinstitusjoner/" + bucType, HttpMethod.GET,
+        return exchange(String.format("/buc/%s/institusjoner", bucType), HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<InstitusjonDto>>() {});
-    }
-
-    @Override
-    public List<BucSedRelasjonDto> hentBucSedRelasjoner() throws MelosysException {
-        return exchange("/buc/bucSedRelasjoner/", HttpMethod.GET,
-            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<BucSedRelasjonDto>>() {});
     }
 
     @Override

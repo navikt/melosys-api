@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -13,7 +14,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.integrasjon.eessi.dto.BucSedRelasjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedinfoDto;
@@ -41,18 +41,6 @@ public class SedTjeneste extends RestTjeneste {
     public SedTjeneste(SedService sedService, BehandlingRepository behandlingRepository) {
         this.sedService = sedService;
         this.behandlingRepository = behandlingRepository;
-    }
-
-    @GET
-    @Path("/bucsedrelasjoner")
-    @ApiOperation(
-        value = "",
-        response = BucSedRelasjonDto.class,
-        responseContainer = "List"
-    )
-    public Response hentBucSedRelasjoner() {
-        List<BucSedRelasjonDto> bucSedRelasjoner = sedService.hentBucSedRelasjoner();
-        return Response.ok(bucSedRelasjoner).build();
     }
 
     @GET
@@ -105,6 +93,11 @@ public class SedTjeneste extends RestTjeneste {
         };
 
         Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingID);
+
+        if (behandling == null) {
+            return Response.ok(Collections.emptyList()).build();
+        }
+
         List<SedUnderArbeidDto> seder = sedService.hentTilknyttedeSeder(behandling.getFagsak().getGsakSaksnummer()).stream()
             .map(tilSedUnderArbeidDto).collect(Collectors.toList());
 
