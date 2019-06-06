@@ -40,11 +40,11 @@ public class JerseyConfig extends ResourceConfig {
         register(RyddOppgaverTjeneste.class);
         register(SaksbehandlerTjeneste.class);
         register(SaksopplysningTjeneste.class);
+        register(SedTjeneste.class);
         register(ServerinfoTjeneste.class);
         register(SoeknadTjeneste.class);
         register(VedtakTjeneste.class);
         register(VilkaarTjeneste.class);
-        register(SedTjeneste.class);
 
         // Globale ExceptionMappers (implisitt unntakshåndtering for hyppig
         // forekommende unntak i REST-grensesnittet).

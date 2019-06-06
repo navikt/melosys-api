@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
@@ -23,7 +22,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -34,7 +32,7 @@ import static org.mockito.Mockito.when;
 public class SedServiceTest {
 
     @Mock
-    private SedDataByggerVelger sedDataByggerVelger;
+    private SedDataBygger sedDataBygger;
     @Mock
     private EessiConsumer eessiConsumer;
 
@@ -48,7 +46,7 @@ public class SedServiceTest {
 
     @Before
     public void setup() throws Exception {
-        sedService = new SedService(sedDataByggerVelger, eessiConsumer, "true");
+        sedService = new SedService(sedDataBygger, eessiConsumer, "true");
 
         behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
@@ -61,9 +59,7 @@ public class SedServiceTest {
         lovvalgsperiode.setLovvalgsland(Landkoder.SK);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
 
-        SedDataBygger dataBygger = Mockito.mock(SedDataBygger.class);
-        when(sedDataByggerVelger.hent(any(LovvalgBestemmelse.class))).thenReturn(dataBygger);
-        when(dataBygger.lag(any(Behandling.class))).thenReturn(new SedDataDto());
+        when(sedDataBygger.lag(any(Behandling.class))).thenReturn(new SedDataDto());
     }
 
     @Test

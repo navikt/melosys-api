@@ -21,19 +21,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1;
 
 @Service
 public class SedService {
 
     private static final Logger log = LoggerFactory.getLogger(SedService.class);
 
-    private final SedDataByggerVelger sedDataByggerVelger;
+    private final SedDataBygger sedDataBygger;
     private final EessiConsumer eessiConsumer;
     private final boolean skalSendeSed;
 
-    public SedService(SedDataByggerVelger sedDataByggerVelger, EessiConsumer eessiConsumer, @Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed) {
-        this.sedDataByggerVelger = sedDataByggerVelger;
+    public SedService(SedDataBygger sedDataBygger, EessiConsumer eessiConsumer, @Value("${MelosysEessi.forsokSendSed:true}") String skalSendeSed) {
+        this.sedDataBygger = sedDataBygger;
         this.eessiConsumer = eessiConsumer;
         this.skalSendeSed = Boolean.valueOf(skalSendeSed);
     }
@@ -48,7 +47,6 @@ public class SedService {
                 LovvalgBestemmelse lovvalgBestemmelse = lovvalgsperiode.getBestemmelse();
                 Fagsak fagsak = behandling.getFagsak();
 
-                SedDataBygger sedDataBygger = sedDataByggerVelger.hent(lovvalgsperiode.getBestemmelse());
                 SedDataDto sedData = sedDataBygger.lag(behandling);
                 sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
 
@@ -81,9 +79,7 @@ public class SedService {
         if (skalSendeSed) {
             try {
 
-                SedDataBygger sedDataBygger = sedDataByggerVelger.hent(FO_883_2004_ART12_1); // TODO: Må kunne hente uten lovvalgsbestemmelse
                 SedDataDto sedDataDto = sedDataBygger.lag(behandling);
-
                 sedDataDto.setMottakerLand(mottakerLand);
                 sedDataDto.setMottakerId(mottakerId);
                 sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());

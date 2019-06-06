@@ -71,7 +71,7 @@ public class SedTjeneste extends RestTjeneste {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
 
-        return Response.ok(opprettSedDto.getRinaUrl()).build();
+        return Response.ok("\"" + opprettSedDto.getRinaUrl() + "\"").build();
     }
 
     @GET
