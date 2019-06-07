@@ -1,19 +1,19 @@
 package no.nav.melosys.service.dokument.sed;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.Sedinformasjon;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
-import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
-import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedinfoDto;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
@@ -65,45 +65,40 @@ public class SedService {
         }
     }
 
-    public List<InstitusjonDto> hentMottakerinstitusjoner(String bucType) {
-        try {
-            log.info("Henter mottakerinstitusjoner for BUC {}", bucType);
-            return eessiConsumer.hentMottakerinstitusjoner(bucType);
-        } catch (MelosysException e) {
-            log.error("Feil ved henting av mottakerinstitusjoner for BUC {}", bucType, e);
-            return Collections.emptyList();
-        }
+    public List<Institusjon> hentMottakerinstitusjoner(String bucType) throws MelosysException {
+        return eessiConsumer.hentMottakerinstitusjoner(bucType).stream()
+            .map(institusjonDto -> new Institusjon(institusjonDto.getId(), institusjonDto.getNavn(), institusjonDto.getLandkode()))
+            .collect(Collectors.toList());
     }
 
-    public OpprettSedDto opprettBucOgSed(Behandling behandling, String bucType, String mottakerLand, String mottakerId) {
+    public String opprettBucOgSed(Behandling behandling, String bucType, String mottakerLand, String mottakerId) throws MelosysException {
         if (skalSendeSed) {
-            try {
+            SedDataDto sedDataDto = sedDataBygger.lag(behandling);
+            sedDataDto.setMottakerLand(mottakerLand);
+            sedDataDto.setMottakerId(mottakerId);
+            sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
-                SedDataDto sedDataDto = sedDataBygger.lag(behandling);
-                sedDataDto.setMottakerLand(mottakerLand);
-                sedDataDto.setMottakerId(mottakerId);
-                sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
-
-                return eessiConsumer.opprettBucOgSed(sedDataDto, bucType);
-            } catch (MelosysException e) {
-                log.error(
-                    "Feil ved opprettelse av SED: \n" +
-                        "Behandling {}\n" +
-                        "Fagsak {}\n",
-                    behandling.getId(), behandling.getFagsak().getSaksnummer(), e);
-            }
+            log.info("Oppretter buc og sed for behandling {} med bucType {}", behandling.getId(), bucType);
+            return eessiConsumer.opprettBucOgSed(sedDataDto, bucType).getRinaUrl();
         }
 
-        return null;
+        throw new IllegalStateException("Ikke mulig å sende sed");
     }
 
-    public List<SedinfoDto> hentTilknyttedeSeder(long gsakSaksnummer) {
-        try {
-            log.info("Henter tilknyttede seder for gsak {}", gsakSaksnummer);
-            return eessiConsumer.hentTilknyttedeSedUtkast(gsakSaksnummer);
-        } catch (MelosysException e) {
-            log.error("Feil ved henting av seder for gsak {}", gsakSaksnummer, e);
-            return Collections.emptyList();
-        }
+    public List<Sedinformasjon> hentTilknyttedeSeder(long gsakSaksnummer, String status) throws MelosysException {
+        return eessiConsumer.hentTilknyttedeSeder(gsakSaksnummer, status).stream()
+            .map(SedService::tilSedinformasjon).collect(Collectors.toList());
+    }
+
+    private static Sedinformasjon tilSedinformasjon(SedinfoDto sedinfoDto) {
+        return new Sedinformasjon(
+            sedinfoDto.getBucId(),
+            sedinfoDto.getSedId(),
+            sedinfoDto.getOpprettetDato(),
+            sedinfoDto.getSistOppdatert(),
+            sedinfoDto.getSedType(),
+            sedinfoDto.getStatus(),
+            sedinfoDto.getRinaUrl()
+        );
     }
 }

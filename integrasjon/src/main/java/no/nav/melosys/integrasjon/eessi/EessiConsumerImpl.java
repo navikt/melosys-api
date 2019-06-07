@@ -43,8 +43,8 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public List<SedinfoDto> hentTilknyttedeSedUtkast(long gsakSaksnummer) throws MelosysException {
-        return exchange(String.format("/sak/%s/sed/?status=utkast", gsakSaksnummer), HttpMethod.GET,
+    public List<SedinfoDto> hentTilknyttedeSeder(long gsakSaksnummer, String status) throws MelosysException {
+        return exchange(String.format("/sak/%s/sed/?status=%s", gsakSaksnummer, status), HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<SedinfoDto>>() {});
     }
 

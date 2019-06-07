@@ -1,18 +1,24 @@
 package no.nav.melosys.service.dokument.sed;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.collect.Sets;
+import io.github.benas.randombeans.EnhancedRandomBuilder;
+import io.github.benas.randombeans.api.EnhancedRandom;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.Sedinformasjon;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
+import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedinfoDto;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
@@ -43,6 +49,8 @@ public class SedServiceTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    private EnhancedRandom enhancedRandom = new EnhancedRandomBuilder().build();
 
     @Before
     public void setup() throws Exception {
@@ -78,39 +86,53 @@ public class SedServiceTest {
 
     @Test
     public void opprettBucOgSed_verifiserKorrektSedType() throws Exception {
+        OpprettSedDto opprettSedDto = new OpprettSedDto();
+        opprettSedDto.setRinaUrl("localhost:3000");
+        opprettSedDto.setBucId("123456");
+        when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), anyString())).thenReturn(opprettSedDto);
+
         sedService.opprettBucOgSed(behandling, "LA_BUC_01", "SE", "SE:001");
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), eq("LA_BUC_01"));
     }
 
     @Test
-    public void hentMottakerinstitusjoner_verifiserConsumerKall() throws MelosysException {
-        sedService.hentMottakerinstitusjoner("LA_BUC_01");
+    public void hentMottakerinstitusjoner_forventListeMedRettType() throws MelosysException {
+        when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenReturn(Arrays.asList(
+            enhancedRandom.nextObject(InstitusjonDto.class),
+            enhancedRandom.nextObject(InstitusjonDto.class)
+        ));
+
+        List<Institusjon> mottakerinstitusjoner = sedService.hentMottakerinstitusjoner("LA_BUC_01");
+
         verify(eessiConsumer).hentMottakerinstitusjoner(anyString());
+        assertThat(mottakerinstitusjoner).hasSize(2);
+        assertThat(mottakerinstitusjoner).hasOnlyElementsOfType(Institusjon.class);
     }
 
-    @Test
+    @Test(expected = MelosysException.class)
     public void hentMottakerinstitusjoner_medFeilIConsumer_forventTomListe() throws MelosysException {
         when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenThrow(new IntegrasjonException("Error!"));
-
-        List<InstitusjonDto> institusjonDtoer = sedService.hentMottakerinstitusjoner("LA_BUC_01");
-
-        verify(eessiConsumer).hentMottakerinstitusjoner(anyString());
-        assertThat(institusjonDtoer).isEmpty();
+        List<Institusjon> institusjon = sedService.hentMottakerinstitusjoner("LA_BUC_01");
     }
 
     @Test
-    public void hentTilknyttedeSeder_verifiserConsumerKall() throws MelosysException {
-        sedService.hentTilknyttedeSeder(123L);
-        verify(eessiConsumer).hentTilknyttedeSedUtkast(anyLong());
+    public void hentTilknyttedeSeder_forventListeMedRettType() throws MelosysException {
+        when(eessiConsumer.hentTilknyttedeSeder(anyLong(), anyString())).thenReturn(Arrays.asList(
+            enhancedRandom.nextObject(SedinfoDto.class),
+            enhancedRandom.nextObject(SedinfoDto.class),
+            enhancedRandom.nextObject(SedinfoDto.class)
+        ));
+
+        List<Sedinformasjon> tilknyttedeSeder = sedService.hentTilknyttedeSeder(123L, "utkast");
+
+        verify(eessiConsumer).hentTilknyttedeSeder(anyLong(), anyString());
+        assertThat(tilknyttedeSeder).hasSize(3);
+        assertThat(tilknyttedeSeder).hasOnlyElementsOfType(Sedinformasjon.class);
     }
 
-    @Test
-    public void hentTilknyttedeSeder_medFeilIConsumer_forventTomList() throws MelosysException {
-        when(eessiConsumer.hentTilknyttedeSedUtkast(anyLong())).thenThrow(new IntegrasjonException("Error!"));
-
-        List<SedinfoDto> sedinfoDtoer = sedService.hentTilknyttedeSeder(123L);
-
-        verify(eessiConsumer).hentTilknyttedeSedUtkast(anyLong());
-        assertThat(sedinfoDtoer).isEmpty();
+    @Test(expected = MelosysException.class)
+    public void hentTilknyttedeSeder_medFeilIConsumer_forventException() throws MelosysException {
+        when(eessiConsumer.hentTilknyttedeSeder(anyLong(), anyString())).thenThrow(new IntegrasjonException("Error!"));
+        sedService.hentTilknyttedeSeder(123L, "utkast");
     }
 }

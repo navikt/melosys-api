@@ -1,12 +1,12 @@
-package no.nav.melosys.tjenester.gui.dto.sed;
+package no.nav.melosys.tjenester.gui.dto.eessi;
 
-public class NyBucDto {
+public class BucBestillingDto {
 
     private String bucType;
     private String mottakerLand;
     private String mottakerId;
 
-    public NyBucDto(String bucType, String mottakerLand, String mottakerId) {
+    public BucBestillingDto(String bucType, String mottakerLand, String mottakerId) {
         this.bucType = bucType;
         this.mottakerLand = mottakerLand;
         this.mottakerId = mottakerId;

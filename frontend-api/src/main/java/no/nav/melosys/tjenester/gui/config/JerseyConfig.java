@@ -40,7 +40,7 @@ public class JerseyConfig extends ResourceConfig {
         register(RyddOppgaverTjeneste.class);
         register(SaksbehandlerTjeneste.class);
         register(SaksopplysningTjeneste.class);
-        register(SedTjeneste.class);
+        register(EessiTjeneste.class);
         register(ServerinfoTjeneste.class);
         register(SoeknadTjeneste.class);
         register(VedtakTjeneste.class);

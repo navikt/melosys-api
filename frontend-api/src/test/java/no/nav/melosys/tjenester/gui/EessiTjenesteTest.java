@@ -7,13 +7,13 @@ import javax.ws.rs.core.Response;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
-import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
-import no.nav.melosys.integrasjon.eessi.dto.SedinfoDto;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.Sedinformasjon;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.dokument.sed.SedService;
-import no.nav.melosys.tjenester.gui.dto.sed.NyBucDto;
-import no.nav.melosys.tjenester.gui.dto.sed.SedUnderArbeidDto;
+import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +27,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SedTjenesteTest extends JsonSchemaTestParent {
+public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     private static final Logger log = LoggerFactory.getLogger(OppgaveTjenesteTest.class);
 
@@ -43,10 +43,10 @@ public class SedTjenesteTest extends JsonSchemaTestParent {
     private SedService sedService;
 
     @Mock
-    private BehandlingRepository behandlingRepository;
+    private BehandlingService behandlingService;
 
     @InjectMocks
-    private SedTjeneste sedTjeneste;
+    private EessiTjeneste eessiTjeneste;
 
     @Override
     public String schemaNavn() {
@@ -54,43 +54,40 @@ public class SedTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Before
-    public void setup() {
+    public void setup() throws IkkeFunnetException {
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(123L);
         behandling.setFagsak(fagsak);
 
-        when(behandlingRepository.findWithSaksopplysningerById(eq(123L))).thenReturn(behandling);
+        when(behandlingService.hentBehandling(eq(123L))).thenReturn(behandling);
     }
 
     @Test
-    public void hentMottakerInstitusjoner() throws IOException {
+    public void hentMottakerInstitusjoner() throws IOException, MelosysException {
         when(sedService.hentMottakerinstitusjoner(anyString()))
             .thenReturn(Arrays.asList(
-                defaultEnhancedRandom().nextObject(InstitusjonDto.class),
-                defaultEnhancedRandom().nextObject(InstitusjonDto.class),
-                defaultEnhancedRandom().nextObject(InstitusjonDto.class)
+                defaultEnhancedRandom().nextObject(Institusjon.class),
+                defaultEnhancedRandom().nextObject(Institusjon.class),
+                defaultEnhancedRandom().nextObject(Institusjon.class)
             ));
 
-        Response response = sedTjeneste.hentMottakerinstitusjoner("LA_BUC_01");
+        Response response = eessiTjeneste.hentMottakerinstitusjoner("LA_BUC_01");
         assertThat(response.getEntity()).isInstanceOf(List.class);
-        assertThat(((List) response.getEntity()).iterator().next()).isExactlyInstanceOf(InstitusjonDto.class);
+        assertThat((List) response.getEntity()).hasOnlyElementsOfType(Institusjon.class);
 
-        List<InstitusjonDto> institusjoner = (List<InstitusjonDto>) response.getEntity();
+        List<Institusjon> institusjoner = (List<Institusjon>) response.getEntity();
         assertThat(institusjoner).isNotEmpty();
         schemaType = MOTTAKERINSTITUSJONER_SCHEMA;
         validerListe(institusjoner, log);
     }
 
     @Test
-    public void opprettBuc() throws IOException {
-        OpprettSedDto svar = new OpprettSedDto();
-        svar.setBucId("1234");
-        svar.setRinaUrl(MOCK_RINA_URL);
-        when(sedService.opprettBucOgSed(any(), anyString(), anyString(), anyString())).thenReturn(svar);
+    public void opprettBuc() throws IOException, MelosysException {
+        when(sedService.opprettBucOgSed(any(), anyString(), anyString(), anyString())).thenReturn(MOCK_RINA_URL);
 
-        NyBucDto nyBucDto = new NyBucDto("LA_BUC_01", "NAVT002", "NO");
-        Response response = sedTjeneste.opprettBuc(nyBucDto, 123L);
+        BucBestillingDto nyBucDto = new BucBestillingDto("LA_BUC_01", "NAVT002", "NO");
+        Response response = eessiTjeneste.opprettBuc(nyBucDto, 123L);
         assertThat(response.getEntity()).isExactlyInstanceOf(String.class);
         String rinaUrl = (String) response.getEntity();
 
@@ -100,27 +97,27 @@ public class SedTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentSederUnderArbeid() throws IOException {
-        when(sedService.hentTilknyttedeSeder(anyLong()))
+    public void hentSederUnderArbeid() throws IOException, MelosysException {
+        when(sedService.hentTilknyttedeSeder(anyLong(), anyString()))
             .thenReturn(Arrays.asList(
-                sedinfoDtoMedGyldigUrl(),
-                sedinfoDtoMedGyldigUrl(),
-                sedinfoDtoMedGyldigUrl()
+                sedinformasjonMedGyldigUrl(),
+                sedinformasjonMedGyldigUrl(),
+                sedinformasjonMedGyldigUrl()
             ));
 
-        Response response = sedTjeneste.hentSederUnderArbeid(123L);
+        Response response = eessiTjeneste.hentSeder(123L, "utkast");
         assertThat(response.getEntity()).isInstanceOf(List.class);
-        assertThat(((List) response.getEntity()).iterator().next()).isExactlyInstanceOf(SedUnderArbeidDto.class);
+        assertThat((List) response.getEntity()).hasOnlyElementsOfType(Sedinformasjon.class);
 
-        List<SedinfoDto> sederUnderArbeid = (List<SedinfoDto>) response.getEntity();
+        List<Sedinformasjon> sederUnderArbeid = (List<Sedinformasjon>) response.getEntity();
 
         schemaType = SED_UNDER_ARBEID_SCHEMA;
         validerListe(sederUnderArbeid, log);
     }
 
-    private SedinfoDto sedinfoDtoMedGyldigUrl() {
-        SedinfoDto sedinfoDto = defaultEnhancedRandom().nextObject(SedinfoDto.class);
-        sedinfoDto.setRinaUrl(MOCK_RINA_URL);
-        return sedinfoDto;
+    private Sedinformasjon sedinformasjonMedGyldigUrl() {
+        Sedinformasjon sedinformasjon = defaultEnhancedRandom().nextObject(Sedinformasjon.class);
+        sedinformasjon.setRinaUrl(MOCK_RINA_URL);
+        return sedinformasjon;
     }
 }
