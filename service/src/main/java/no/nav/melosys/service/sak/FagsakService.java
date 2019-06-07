@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -16,9 +15,12 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,36 +42,25 @@ public class FagsakService {
 
     private final ProsessinstansService prosessinstansService;
 
+    private BehandlingsresultatService behandlingsresultatService;
+
+    private static final Logger log = LoggerFactory.getLogger(FagsakService.class);
+
     @Autowired
     public FagsakService(FagsakRepository fagsakRepository,
                          BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService,
                          OppgaveService oppgaveService,
                          TpsFasade tpsFasade,
-                         ProsessinstansService prosessinstansService) {
+                         ProsessinstansService prosessinstansService,
+                         BehandlingsresultatService behandlingsresultatService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.oppgaveService = oppgaveService;
         this.tpsFasade = tpsFasade;
         this.prosessinstansService = prosessinstansService;
-    }
-
-    public Optional<Behandling> finnRedigerbarBehandling(String ident, Fagsak fagsak) throws FunksjonellException, TekniskException {
-        Behandling behandling = fagsak.getAktivBehandling();
-        if (behandling == null) {
-            return Optional.empty();
-        }
-
-        Optional<Oppgave> oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
-
-        if (oppgave.isPresent()
-            && oppgave.filter(oppgave1 -> ident.equalsIgnoreCase(oppgave1.getTilordnetRessurs())).isPresent()
-            && behandling.erRedigerbar()) {
-            return Optional.of(behandling);
-        } else {
-            return Optional.empty();
-        }
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -185,6 +176,7 @@ public class FagsakService {
 
         Instant nå = Instant.now();
 
+        fagsak.setType(opprettSakRequest.getSakstype());
         fagsak.setGsakSaksnummer(opprettSakRequest.getGsakSaksnummer());
         fagsak.setAktører(aktører);
         fagsak.setRegistrertDato(nå);
@@ -221,5 +213,19 @@ public class FagsakService {
             .filter(behandling -> behandling.getStatus() != Behandlingsstatus.AVSLUTTET)
             .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
             .orElseThrow(() -> new IllegalStateException("Sak " + fagsak.getSaksnummer() + " har ingen behandlinger eller bare avsluttede behandlinger."));
+    }
+
+    @Transactional(rollbackFor=MelosysException.class)
+    public void avsluttSakSomBortfalt(Fagsak fagsak) throws FunksjonellException, TekniskException {
+        fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
+
+        fagsak.getBehandlinger().forEach(behandling -> {
+            log.info("Setter behandling {} til {}", behandling.getId(), Behandlingsstatus.AVSLUTTET);
+            behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        });
+        log.info("Setter status på fagsak {} til {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT);
+        fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
+        fagsakRepository.save(fagsak);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 }

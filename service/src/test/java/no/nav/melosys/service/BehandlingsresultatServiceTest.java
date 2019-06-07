@@ -61,11 +61,14 @@ public class BehandlingsresultatServiceTest {
     @Test
     public void hentBehandlingsresultat_returnererBehandlingsresultat() throws IkkeFunnetException {
         Behandlingsresultat resultat = new Behandlingsresultat();
-        resultat.setHenleggelsesgrunn(Henleggelsesgrunner.ANNET);
+        BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
+        begrunnelse.setKode(Henleggelsesgrunner.ANNET.getKode());
+        resultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(resultat));
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(4L);
-        assertThat(behandlingsresultat.getHenleggelsesgrunn()).isEqualTo(Henleggelsesgrunner.ANNET);
+        begrunnelse = behandlingsresultat.getBehandlingsresultatBegrunnelser().iterator().next();
+        assertThat(begrunnelse.getKode()).isEqualTo(Henleggelsesgrunner.ANNET.getKode());
     }
 
     private Behandlingsresultat opprettTomtBehandlingsresultatMedId() {
@@ -92,6 +95,9 @@ public class BehandlingsresultatServiceTest {
         Lovvalgsperiode lovvalgsperiode = opprettLovvalgsperiode();
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
+        BehandlingsresultatBegrunnelse behandlingsresultatBegrunnelse = opprettBehandlingsresultatBegrunnelse();
+        behandlingsresultat.getBehandlingsresultatBegrunnelser().add(behandlingsresultatBegrunnelse);
+
         doReturn(behandlingsresultat).when(behandlingsresultatService).hentBehandlingsresultat(1L);
 
         behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
@@ -115,13 +121,35 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getFakta().equals("fakta"));
         assertThat(behandlingsresultatreplika.getAvklartefakta()).allMatch(a -> a.getType().equals(Avklartefaktatype.ARBEIDSLAND));
-
         assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getId() == null);
         assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getVilkaarsresultater()).allMatch(v -> v.getBegrunnelseFritekst().equals("fritekst"));
         VilkaarBegrunnelse vilkaarBegrunnelse = behandlingsresultatreplika.getVilkaarsresultater().stream().findFirst().get().getBegrunnelser().stream().findFirst().get();
         assertThat(vilkaarBegrunnelse.getId()).isNull();
         assertThat(vilkaarBegrunnelse.getKode()).isEqualTo("kode");
+
+        assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser()).allMatch(a -> a.getId() == null);
+        assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
+        assertThat(behandlingsresultatreplika.getBehandlingsresultatBegrunnelser()).allMatch(a -> a.getKode().equals("begrunnelsekode"));
+    }
+
+    @Test
+    public void oppdaterBehandlingsresultattype_idEksisterer_oppdatererBehandlingsresultattype() {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
+        doReturn(Optional.of(behandlingsresultat)).when(behandlingsresultatRepo).findById(1L);
+
+        behandlingsresultatService.oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.IKKE_FASTSATT);
+
+        assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.IKKE_FASTSATT);
+        verify(behandlingsresultatRepo).save(behandlingsresultat);
+    }
+
+    @Test
+    public void oppdaterBehandlingsresultattype_idEksistererIkke_gjørIngenting() {
+        behandlingsresultatService.oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.IKKE_FASTSATT);
+        verify(behandlingsresultatRepo).findById(1L);
+        verify(behandlingsresultatRepo, never()).save(any());
     }
 
     private Lovvalgsperiode opprettLovvalgsperiode() {
@@ -140,6 +168,14 @@ public class BehandlingsresultatServiceTest {
         avklartefakta.setFakta("fakta");
         avklartefakta.setType(Avklartefaktatype.ARBEIDSLAND);
         return avklartefakta;
+    }
+
+    private BehandlingsresultatBegrunnelse opprettBehandlingsresultatBegrunnelse() {
+        BehandlingsresultatBegrunnelse behandlingsresultatBegrunnelse = new BehandlingsresultatBegrunnelse();
+        behandlingsresultatBegrunnelse.setId(32L);
+        behandlingsresultatBegrunnelse.setBehandlingsresultat(opprettTomtBehandlingsresultatMedId());
+        behandlingsresultatBegrunnelse.setKode("begrunnelsekode");
+        return behandlingsresultatBegrunnelse;
     }
 
     private Vilkaarsresultat opprettVilkaarsresultat() {

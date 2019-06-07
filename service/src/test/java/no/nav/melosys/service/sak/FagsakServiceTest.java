@@ -16,15 +16,14 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.BehandlingService;
+import no.nav.melosys.service.BehandlingsresultatService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -57,16 +56,11 @@ public class FagsakServiceTest {
     @Mock
     private ProsessinstansService prosessinstansService;
 
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+
     @InjectMocks
     private FagsakService fagsakService;
-
-    private static final String SAKSBEHANDLER = "Z990007";
-
-
-    @Before
-    public void setUp() {
-        fagsakService = new FagsakService(fagsakRepo, behandlingService, kontaktopplysningService, oppgaveService, tps, prosessinstansService);
-    }
 
     @Test
     public void hentFagsak() throws IkkeFunnetException {
@@ -197,36 +191,25 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public final void testErBehandlingRedigerBar() throws FunksjonellException, TekniskException {
+    public void avsluttSakSomBortfalt_harFagsakMedFlereBehandlinger_AvslutterAlleBehandlingerOgSetterFagsakstatusTilHENLAGT_BORTFALT() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("12345678901");
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        String saksnummer = "saksnummer";
+        fagsak.setSaksnummer(saksnummer);
+        fagsak.setStatus(Saksstatuser.OPPRETTET);
+        Behandling førsteBehandling = new Behandling();
+        førsteBehandling.setId(1L);
+        førsteBehandling.setStatus(Behandlingsstatus.OPPRETTET);
+        Behandling andreBehandling = new Behandling();
+        andreBehandling.setId(2L);
+        andreBehandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+        fagsak.setBehandlinger(Arrays.asList(førsteBehandling, andreBehandling));
+        fagsakService.avsluttSakSomBortfalt(fagsak);
 
-        Oppgave oppgave = new Oppgave();
-        oppgave.setTilordnetRessurs(SAKSBEHANDLER);
-
-        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.of(oppgave));
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak).filter(behandling1 -> behandling1 == behandling).isPresent())
-            .isEqualTo(true);
-
-        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
-
-        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
-
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        assertThat(fagsakService.finnRedigerbarBehandling("", fagsak)).isEqualTo(Optional.empty());
-
-        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.empty());
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
-
-        fagsak.setBehandlinger(null);
-        assertThat(fagsakService.finnRedigerbarBehandling(SAKSBEHANDLER, fagsak)).isEqualTo(Optional.empty());
-
-
+        verify(fagsakRepo).save(fagsak);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.HENLEGGELSE);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(2L, Behandlingsresultattyper.HENLEGGELSE);
+        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.HENLAGT_BORTFALT);
+        assertThat(fagsak.getBehandlinger()).allSatisfy(behandling -> assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 }

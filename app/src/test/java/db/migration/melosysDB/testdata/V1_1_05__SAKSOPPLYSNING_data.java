@@ -62,19 +62,19 @@ public class V1_1_05__SAKSOPPLYSNING_data implements JdbcMigration {
     private void batchInsertForDirectory(Connection conn, Path dir) throws IOException, SQLException {
         switch (dir.getFileName().toString()) {
             case XsltConfig.AAREG_MAPPE:
-                generateBatch(conn, dir, SaksopplysningType.ARBEIDSFORHOLD, "3.0", SaksopplysningKilde.AAREG);
+                generateBatch(conn, dir, SaksopplysningType.ARBFORH, "3.0", SaksopplysningKilde.AAREG);
                 return;
             case XsltConfig.EREG_MAPPE:
-                generateBatch(conn, dir, SaksopplysningType.ORGANISASJON, "4.0", SaksopplysningKilde.EREG);
+                generateBatch(conn, dir, SaksopplysningType.ORG, "4.0", SaksopplysningKilde.EREG);
                 return;
             case XsltConfig.INNTK_MAPPE:
-                generateBatch(conn, dir, SaksopplysningType.INNTEKT, "3.2", SaksopplysningKilde.INNTK);
+                generateBatch(conn, dir, SaksopplysningType.INNTK, "3.2", SaksopplysningKilde.INNTK);
                 return;
             case XsltConfig.TPS_MAPPE:
-                generateBatch(conn, dir, SaksopplysningType.PERSONOPPLYSNING, "3.0", SaksopplysningKilde.TPS);
+                generateBatch(conn, dir, SaksopplysningType.PERSOPL, "3.0", SaksopplysningKilde.TPS);
                 return;
             case XsltConfig.MEDL_MAPPE:
-                generateBatch(conn, dir, SaksopplysningType.MEDLEMSKAP, "2.0", SaksopplysningKilde.MEDL);
+                generateBatch(conn, dir, SaksopplysningType.MEDL, "2.0", SaksopplysningKilde.MEDL);
                 return;
             case XsltConfig.SØKNAD_MAPPE:
                 generateBatch(conn, dir, SaksopplysningType.SØKNAD, "1.0", SaksopplysningKilde.SBH);

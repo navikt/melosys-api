@@ -75,7 +75,7 @@ public class ValiderMedlemskap extends RegistreringUnntakValiderer {
         prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VALIDER_YTELSER);
     }
 
-    private boolean harOverlappendePerioder(MedlemskapDokument medlemskapDokument, LocalDate fom, LocalDate tom) throws TekniskException {
+    private boolean harOverlappendePerioder(MedlemskapDokument medlemskapDokument, LocalDate fom, LocalDate tom) {
         //Kan motta SED med åpen periode
         if (tom == null) {
             for (Medlemsperiode medlemsperiode : medlemskapDokument.getMedlemsperiode()) {
@@ -85,9 +85,7 @@ public class ValiderMedlemskap extends RegistreringUnntakValiderer {
         } else {
             for (Medlemsperiode medlemsperiode : medlemskapDokument.getMedlemsperiode()) {
                 Periode periode = medlemsperiode.getPeriode();
-                if (fom.isAfter(periode.getFom()) && fom.isBefore(periode.getTom())) return true;
-                if (tom.isAfter(periode.getFom()) && tom.isBefore(periode.getTom())) return true;
-                if (fom.isBefore(periode.getFom()) && tom.isAfter(periode.getTom())) return true;
+                if (fom.isBefore(periode.getTom()) && periode.getFom().isBefore(tom)) return true;
             }
         }
         return false;

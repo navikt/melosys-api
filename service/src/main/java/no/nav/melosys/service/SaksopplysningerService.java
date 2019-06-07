@@ -17,7 +17,6 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -26,27 +25,12 @@ import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
 
 @Service
 public class SaksopplysningerService {
-
     private static final Logger log = LoggerFactory.getLogger(SaksopplysningerService.class);
 
-    // FIXME : Injektere feltene i constructor MELOSYS-1635
-    @Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallMåneder}")
-    private Integer arbeidsforholdhistorikkAntallMåneder;
-
-    @Value("${melosys.service.fagsak.inntektshistorikk.antallMåneder}")
-    private Integer inntektshistorikkAntallMåneder;
-
-    @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}")
-    private Integer medlemskaphistorikkAntallÅr;
-
     private final TpsFasade tpsFasade;
-
     private final AaregFasade aaregFasade;
-
     private final ProsessinstansService prosessinstansService;
-
     private final BehandlingRepository behandlingRepository;
-
     private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
@@ -60,7 +44,6 @@ public class SaksopplysningerService {
         this.prosessinstansService = prosessinstansService;
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatService = behandlingsresultatService;
-
     }
 
     /***
@@ -113,5 +96,4 @@ public class SaksopplysningerService {
         String brukerID = tpsFasade.hentIdentForAktørId(aktørID);
         prosessinstansService.opprettProsessinstansOppfriskning(behandling, aktørID, brukerID, søknadDokument);
     }
-
 }

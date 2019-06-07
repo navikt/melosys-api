@@ -90,7 +90,7 @@ public class A001MapperTest {
         person.statsborgerskap.setKode("NO");
 
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.PERSONOPPLYSNING);
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysning.setDokument(person);
 
         behandling = mock(Behandling.class);

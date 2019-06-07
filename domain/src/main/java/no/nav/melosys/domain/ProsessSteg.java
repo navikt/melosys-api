@@ -1,13 +1,11 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Converter;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 
-import no.nav.melosys.domain.kodeverk.InterntKodeverkTabell;
-
-public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
+public enum ProsessSteg implements Kodeverk {
 
     // NB! Disse skal være i logisk rekkefølge
-    MOT_VURDER_AUTOMATISK_JFR("VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"),
+    MOT_VURDER_AUTOMATISK_JFR("MOT_VURDER_AUTOMATISK_JFR", "Vurder om journalføring kan skje automatisk"),
 
     // Journalføring
     JFR_VALIDERING("JFR_VALIDERING", "Grunnleggende validering"),
@@ -42,7 +40,7 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     //Anmodning om unntak
     AOU_VALIDERING("AOU_VALIDERING", "Validering av data for anmodning om unntak"),
     AOU_OPPDATER_RESULTAT("AOU_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat for anmodning om unntak"),
-    AOU_AVKLAR_MYNDIGHET("IV_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
+    AOU_AVKLAR_MYNDIGHET("AOU_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     AOU_OPPDATER_MEDL("AOU_OPPDATER_MEDL", "Oppdatering av medlemskap med anmodning om unntak"),
     AOU_SEND_BREV("AOU_SEND_BREV", "Send orienteringsbrev og A001 for anmodning om unntak"),
     AOU_SEND_SED("AOU_SEND_SED","Send elektronisk SED A001"),
@@ -71,7 +69,7 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     REG_UNNTAK_FERDIGSTILL_JOURNALPOST("REG_UNNTAK_FERDIGSTILL_JOURNALPOST","Ferdigstiller journalpost"),
     REG_UNNTAK_HENT_PERSON("REG_UNNTAK_HENT_PERSON","Henter person tilknyttet SED"),
     REG_UNNTAK_OPPRETT_SEDDOKUMENT("REG_UNNTAK_OPPRETT_SEDDOKUMENT", "Oppretter sedinfo dokument"),
-    REG_UNNTAK_OPPDATER_BEHANDLING_OG_MEDL("REG_UNNTAK_OPPDATER_BEHANDLING_OG_MEDL", "Oppdaterer behandling og setter lovvalgsperiode"),
+    REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE("REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE", "Avslutter tidligere periode i Medl hvis SED er endring"),
     REG_UNNTAK_VALIDER_PERIODE("REG_UNNTAK_VALIDER_PERIODE", "Validerer periode mottatt i søknad"),
     REG_UNNTAK_VALIDER_MEDLEMSKAP("REG_UNNTAK_VALIDER_MEDLEMSKAP", "Validerer tidligere medlemskap mot MEDL"),
     REG_UNNTAK_VALIDER_YTELSER("REG_UNNTAK_VALIDER_YTELSER", "Sjekker offentlige ytelser for en person"),
@@ -101,13 +99,4 @@ public enum ProsessSteg implements InterntKodeverkTabell<ProsessSteg> {
     public String getBeskrivelse() {
         return beskrivelse;
     }
-
-    @Converter
-    public static class DbKonverterer extends InterntKodeverkTabell.DbKonverterer<ProsessSteg> {
-        @Override
-        protected ProsessSteg[] getLovligeVerdier() {
-            return ProsessSteg.values();
-        }
-    }
-
 }

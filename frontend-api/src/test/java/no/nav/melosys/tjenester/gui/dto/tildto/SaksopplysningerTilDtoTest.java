@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.converter;
+package no.nav.melosys.tjenester.gui.dto.tildto;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -19,33 +19,25 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import org.junit.Before;
 import org.junit.Test;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
-import static no.nav.melosys.domain.SaksopplysningType.PERSONHISTORIKK;
-import static no.nav.melosys.domain.SaksopplysningType.PERSONOPPLYSNING;
-import static no.nav.melosys.tjenester.gui.dto.converter.SaksopplysningerTilDtoConverter.medlemsperiodeKomparator;
+import static no.nav.melosys.domain.SaksopplysningType.PERSHIST;
+import static no.nav.melosys.domain.SaksopplysningType.PERSOPL;
+import static no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto.medlemsperiodeKomparator;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SaksopplysningerTilDtoConverterTest {
+public class SaksopplysningerTilDtoTest {
 
     private DokumentFactory dokumentFactory;
-
-    private ModelMapper modelMapper;
 
     @Before
     public void setUp() {
         Jaxb2Marshaller marshaller = new JaxbConfig().jaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         dokumentFactory = new DokumentFactory(marshaller, xsltTemplatesFactory);
-
-        modelMapper = new ModelMapper();
-        TypeMap<Behandling, BehandlingDto> typeMapBehandlingUt = modelMapper.createTypeMap(Behandling.class, BehandlingDto.class);
-        typeMapBehandlingUt.addMappings(mapper -> mapper.using(new SaksopplysningerTilDtoConverter()).map(Behandling::getSaksopplysninger, BehandlingDto::setSaksopplysninger));
     }
 
     @Test
@@ -64,7 +56,7 @@ public class SaksopplysningerTilDtoConverterTest {
         a4.ansettelsesPeriode = new Periode(LocalDate.now().plusYears(2), LocalDate.MAX);
         arbeidsforholdListe.add(a4);
 
-        SaksopplysningerTilDtoConverter.ArbeidsforholdComparator arbeidsforholdComparator = new SaksopplysningerTilDtoConverter.ArbeidsforholdComparator();
+        SaksopplysningerTilDto.ArbeidsforholdComparator arbeidsforholdComparator = new SaksopplysningerTilDto.ArbeidsforholdComparator();
         arbeidsforholdListe.sort(arbeidsforholdComparator);
         assertThat(arbeidsforholdListe.get(0)).isEqualTo(a3);
         assertThat(arbeidsforholdListe.get(arbeidsforholdListe.size() - 1)).isEqualTo(a1);
@@ -105,8 +97,8 @@ public class SaksopplysningerTilDtoConverterTest {
     @Test
     public void testKonverteringPersonMedStatsborgerskap() throws Exception {
 
-        Saksopplysning personDokument = lagDokument("88888888882.xml", PERSONOPPLYSNING, "3.0");
-        Saksopplysning personhistorikkDokument = lagDokument("88888888882_historikk.xml", PERSONHISTORIKK, "3.4");
+        Saksopplysning personDokument = lagDokument("88888888882.xml", PERSOPL, "3.0");
+        Saksopplysning personhistorikkDokument = lagDokument("88888888882_historikk.xml", PERSHIST, "3.4");
 
         assertThat(personDokument).isNotNull();
         assertThat(personhistorikkDokument).isNotNull();
@@ -119,12 +111,9 @@ public class SaksopplysningerTilDtoConverterTest {
         behandling.setSisteOpplysningerHentetDato(LocalDate.of(2018, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC));
         behandling.setSaksopplysninger(saksopplysninger);
 
-        BehandlingDto behandlingDto = modelMapper.map(behandling, BehandlingDto.class);
+        SaksopplysningerDto saksopplysningerDto = SaksopplysningerTilDto.getSaksopplysningerDto(saksopplysninger, behandling);
 
-        assertThat(behandlingDto).isNotNull();
-        assertThat(behandlingDto.getSaksopplysninger()).isNotNull();
-
-        PersonDokument person = behandlingDto.getSaksopplysninger().getPerson();
+        PersonDokument person = saksopplysningerDto.getPerson();
 
         assertThat(person).isNotNull();
         assertThat(person.statsborgerskap).isNotNull();

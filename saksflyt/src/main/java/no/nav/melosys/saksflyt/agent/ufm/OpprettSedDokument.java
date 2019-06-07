@@ -55,7 +55,7 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
         Instant nå = Instant.now();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(sedDokument);
-        saksopplysning.setType(SaksopplysningType.SED_OPPLYSNINGER);
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
         saksopplysning.setBehandling(prosessinstans.getBehandling());
         saksopplysning.setKilde(SaksopplysningKilde.EESSI);
         saksopplysning.setVersjon("0.2-SNAPSHOT");
@@ -68,6 +68,6 @@ public class OpprettSedDokument extends AbstraktStegBehandler {
         saksopplysningRepository.save(saksopplysning);
         log.info("Saksopplysning: SedDokument opprettet for behandling {}", prosessinstans.getBehandling().getId());
 
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPDATER_BEHANDLING_OG_MEDL);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE);
     }
 }

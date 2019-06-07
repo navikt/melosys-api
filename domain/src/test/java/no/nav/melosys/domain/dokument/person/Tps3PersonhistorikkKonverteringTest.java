@@ -40,7 +40,7 @@ public class Tps3PersonhistorikkKonverteringTest {
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
             saksopplysning.setDokumentXml(xmlStr);
-            saksopplysning.setType(SaksopplysningType.PERSONHISTORIKK);
+            saksopplysning.setType(SaksopplysningType.PERSHIST);
             saksopplysning.setVersjon("3.4");
 
             factory.lagDokument(saksopplysning);

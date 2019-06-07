@@ -2,20 +2,19 @@ package no.nav.melosys.service;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,6 +44,9 @@ public class BehandlingServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
+    @Mock
+    private OppgaveService oppgaveService;
+
     private BehandlingService behandlingService;
 
     @Rule
@@ -53,9 +55,11 @@ public class BehandlingServiceTest {
     @Captor
     private ArgumentCaptor<Behandling> behandlingCaptor;
 
+    private static final String SAKSBEHANDLER = "Z990007";
+
     @Before
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepo, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService);
+        behandlingService = new BehandlingService(behandlingRepo, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService);
     }
 
     @Test
@@ -174,7 +178,7 @@ public class BehandlingServiceTest {
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getId() == null);
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getBehandling().equals(replikertBehandling));
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getDokumentXml().equals("dokxml"));
-        assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getType().equals(SaksopplysningType.INNTEKT));
+        assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getType().equals(SaksopplysningType.INNTK));
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getEndretDato().toString().equals("2020-02-11T09:37:30Z"));
     }
 
@@ -191,6 +195,78 @@ public class BehandlingServiceTest {
         assertThat(lagretBehandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
     }
 
+    @Test
+    public void endreBehandlingsstatusFraOpprettetTilUnderBehandling_harStatusOpprettet_statusBlirSattTilUnderBehandling() {
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+
+        behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
+
+        assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
+        verify(behandlingRepo).save(behandling);
+    }
+
+    @Test
+    public void endreBehandlingsstatusFraOpprettetTilUnderBehandling_harStatusAvventerSvar_ingenStatusendring() {
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
+
+        behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
+
+        verify(behandlingRepo, never()).save(any());
+    }
+
+    @Test
+    public final void testErBehandlingRedigerbarOgTilordnetSaksbehandler() throws FunksjonellException, TekniskException {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("12345678901");
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+
+        Oppgave oppgave = new Oppgave();
+        oppgave.setTilordnetRessurs(SAKSBEHANDLER);
+
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.of(oppgave));
+
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(true);
+
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(true);
+
+        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
+
+        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
+
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
+
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        oppgave.setTilordnetRessurs("noen andre");
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
+
+        oppgave.setTilordnetRessurs(null);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
+    }
+
+    @Test
+    public final void testtestErBehandlingRedigerbarOgTilordnetSaksbehandler_ingenOppgaveFunnet_kasterException() throws FunksjonellException, TekniskException {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("12345678901");
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.empty());
+
+        expectedException.expect(FunksjonellException.class);
+        behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER);
+    }
+
     private Behandling opprettBehandlingMedData() {
         Behandling behandling = opprettTomBehandlingMedId();
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
@@ -198,7 +274,7 @@ public class BehandlingServiceTest {
         behandling.setDokumentasjonSvarfristDato(Instant.parse("2017-12-11T09:37:30.00Z"));
         behandling.setSaksopplysninger(new LinkedHashSet<>());
 
-        behandling.getSaksopplysninger().add(opprettSaksopplysning("dokxml", SaksopplysningType.INNTEKT, "2020-02-11T09:37:30Z"));
+        behandling.getSaksopplysninger().add(opprettSaksopplysning("dokxml", SaksopplysningType.INNTK, "2020-02-11T09:37:30Z"));
         return behandling;
     }
 

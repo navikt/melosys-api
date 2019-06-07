@@ -50,7 +50,7 @@ public class VurderInngangsvilkaarTest {
     }
 
     @Test
-    public void utfoerStegUtenFeil() {
+    public void utfoerSteg_funker() {
         // Sett opp input...
         Prosessinstans p = lagProsessinstans();
 
@@ -63,7 +63,7 @@ public class VurderInngangsvilkaarTest {
 
         agent.utførSteg(p);
 
-        verify(fagsakRepository, times(1)).save(any(Fagsak.class));
+        verify(fagsakRepository).save(any(Fagsak.class));
 
         assertNull(p.getHendelser());
         assertEquals(Sakstyper.EU_EOS, p.getBehandling().getFagsak().getType());
@@ -71,7 +71,7 @@ public class VurderInngangsvilkaarTest {
     }
 
     @Test
-    public void utfoerStegMedFeil() {
+    public void utfoerSteg_feiler() {
         // Sett opp input...
         Prosessinstans p = lagProsessinstans();
 
@@ -86,7 +86,7 @@ public class VurderInngangsvilkaarTest {
 
         agent.utførSteg(p);
 
-        verify(fagsakRepository, times(0)).save(any(Fagsak.class));
+        verify(fagsakRepository, never()).save(any(Fagsak.class));
 
         assertEquals(2, p.getHendelser().size());
         assertNull(p.getBehandling().getFagsak().getType());
@@ -102,11 +102,11 @@ public class VurderInngangsvilkaarTest {
         PersonDokument pDok = new PersonDokument();
         pDok.statsborgerskap = new Land("NOR");
         Saksopplysning sopp = new Saksopplysning();
-        sopp.setType(SaksopplysningType.PERSONOPPLYSNING);
+        sopp.setType(SaksopplysningType.PERSOPL);
         sopp.setDokument(pDok);
 
         Saksopplysning historiskSopp = new Saksopplysning();
-        historiskSopp.setType(SaksopplysningType.PERSONHISTORIKK);
+        historiskSopp.setType(SaksopplysningType.PERSHIST);
         PersonhistorikkDokument personhistorikkDokument = new PersonhistorikkDokument();
         historiskSopp.setDokument(personhistorikkDokument);
         StatsborgerskapPeriode statsborgerskapPeriode = new StatsborgerskapPeriode();
@@ -130,7 +130,7 @@ public class VurderInngangsvilkaarTest {
 
         agent.utførSteg(p);
 
-        verify(fagsakRepository, times(1)).save(any(Fagsak.class));
+        verify(fagsakRepository).save(any(Fagsak.class));
 
         assertNull(p.getHendelser());
         assertEquals(Sakstyper.EU_EOS, p.getBehandling().getFagsak().getType());
@@ -144,6 +144,7 @@ public class VurderInngangsvilkaarTest {
         PersonDokument pDok = new PersonDokument();
         pDok.statsborgerskap = new Land("NOR");
         Saksopplysning sopp = new Saksopplysning();
+        sopp.setType(SaksopplysningType.PERSOPL);
         sopp.setDokument(pDok);
         p.getBehandling().setSaksopplysninger(Collections.singleton(sopp));
         p.setData(ProsessDataKey.SØKNADSLAND, Collections.singletonList(Landkoder.PL.getKode()));

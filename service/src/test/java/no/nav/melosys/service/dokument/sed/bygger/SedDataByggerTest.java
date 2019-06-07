@@ -18,8 +18,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.*;
@@ -42,8 +42,8 @@ public class SedDataByggerTest {
         doReturn(DataByggerStubs.hentOrganisasjonDokumentSetStub()).when(registerOppslagService).hentOrganisasjoner(anySet());
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.SE);
-        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setUnntakFraLovvalgsland(Landkoder.SE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1L));
         lovvalgsperiode.setBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
@@ -79,6 +79,7 @@ public class SedDataByggerTest {
         assertNotNull(sedData.getSelvstendigeVirksomheter());
         assertNotNull(sedData.getUtenlandskeVirksomheter());
         assertNotNull(sedData.getUtenlandskIdent());
+        assertEquals("SE", sedData.getMottakerLand());
 
         assertFalse(sedData.getArbeidsgivendeVirksomheter().isEmpty());
     }

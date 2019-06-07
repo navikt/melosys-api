@@ -7,6 +7,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
+import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
@@ -33,7 +34,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterMedl.class);
 
     private final MedlFasade medlFasade;
-    private OppdaterMedlFelles felles;
+    private final OppdaterMedlFelles felles;
 
     @Autowired
     public OppdaterMedl(MedlFasade medlFasade, OppdaterMedlFelles felles) {
@@ -63,9 +64,9 @@ public class OppdaterMedl extends AbstraktStegBehandler {
 
         Behandlingsresultat behandlingsresultat = felles.hentBehandlingsresultat(behandling);
         if (ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE == prosessType) {
-            medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode);
+            medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
         } else if (erPeriodeEndelig(behandlingsresultat, lovvalgsperiode)) {
-            Long medlPeriodeID = medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode);
+            Long medlPeriodeID = medlFasade.opprettPeriodeEndelig(fnr, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
             felles.lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandling.getId());
         } else if (lovvalgsperiode.getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT) {
             log.debug("Behandling {}: MEDL oppdateres ikke i forbindelse med avslag.", behandling.getId());

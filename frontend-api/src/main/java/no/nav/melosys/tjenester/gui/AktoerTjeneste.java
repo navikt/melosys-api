@@ -62,10 +62,10 @@ public class AktoerTjeneste extends RestTjeneste {
 
         Aktoersroller rolle = null;
         Representerer representantRepresenterer = null;
-        if (!StringUtils.isEmpty(rolleKode)) {
+        if (StringUtils.isNotEmpty(rolleKode)) {
             rolle = Aktoersroller.valueOf(rolleKode);
         }
-        if (!StringUtils.isEmpty(representerer)) {
+        if (StringUtils.isNotEmpty(representerer)) {
             representantRepresenterer = Representerer.valueOf(representerer);
         }
 
@@ -81,7 +81,8 @@ public class AktoerTjeneste extends RestTjeneste {
     public Response lagAktoerer(@PathParam("saksnummer") String saksnummer, @ApiParam AktoerDto aktoerDto) throws FunksjonellException, TekniskException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgang.sjekkSak(fagsak);
-        aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
+        Long databaseId = aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
+        aktoerDto.setDatabaseID(databaseId);
         return Response.ok(aktoerDto).build();
     }
 

@@ -8,6 +8,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -95,7 +96,7 @@ public class OppdaterMedlTest {
     @Test
     public void utførStegNårBehandlingsresultatTypeErFastsatt_lovvalgslandOgInnvilgelsesResultat_Innvilget() throws FunksjonellException, TekniskException {
         agent.utførSteg(p);
-        verify(medlFasade).opprettPeriodeEndelig(any(), any());
+        verify(medlFasade).opprettPeriodeEndelig(any(), any(), any());
     }
 
     @Test
@@ -128,7 +129,7 @@ public class OppdaterMedlTest {
         p.setType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
         agent.utfør(p);
 
-        verify(medlFasade).oppdaterPeriodeEndelig(lovvalgsperiode);
+        verify(medlFasade).oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
         assertThat(p.getSteg()).isEqualTo(IV_SEND_BREV);
     }
 }

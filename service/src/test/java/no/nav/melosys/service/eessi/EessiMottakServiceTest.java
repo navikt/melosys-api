@@ -10,10 +10,10 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
-import no.nav.melosys.eessi.avro.MelosysEessiMelding;
-import no.nav.melosys.eessi.avro.Periode;
-import no.nav.melosys.eessi.avro.Statsborgerskap;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
+import no.nav.melosys.service.kafka.model.Periode;
+import no.nav.melosys.service.kafka.model.Statsborgerskap;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class EessiMottakServiceTest {
 
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Captor
     private ArgumentCaptor<Prosessinstans> captor;
@@ -152,10 +152,13 @@ public class EessiMottakServiceTest {
         periode.setTom(tom != null ? dateTimeFormatter.format(tom) : null);
         melding.setPeriode(periode);
 
+        Statsborgerskap statsborgerskap = new Statsborgerskap();
+        statsborgerskap.setLandkode("SE");
+
         melding.setRinaSaksnummer("r123");
         melding.setSedId("s123");
         melding.setStatsborgerskap(
-            Collections.singletonList(Statsborgerskap.newBuilder().setLandkode("SE").build()));
+            Collections.singletonList(statsborgerskap));
         return melding;
     }
 }

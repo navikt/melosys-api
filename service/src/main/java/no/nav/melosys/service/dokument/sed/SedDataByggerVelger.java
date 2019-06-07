@@ -3,8 +3,6 @@ package no.nav.melosys.service.dokument.sed;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_987_2009;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.RegisterOppslagSystemService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -16,30 +14,21 @@ import org.springframework.stereotype.Service;
 @Service
 public class SedDataByggerVelger {
     private final AvklartefaktaService avklartefaktaService;
-    private final RegisterOppslagSystemService registerOppslagService;
     private final KodeverkService kodeverkService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
-    private final VilkaarsresultatRepository vilkaarsresultatRepository;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     public SedDataByggerVelger(AvklartefaktaService avklartefaktaService, RegisterOppslagSystemService registerOppslagService,
-                               KodeverkService kodeverkService, LovvalgsperiodeService lovvalgsperiodeService,
-                               UtenlandskMyndighetRepository utenlandskMyndighetRepository,
-                               VilkaarsresultatRepository vilkaarsresultatRepository) {
+                               KodeverkService kodeverkService, LovvalgsperiodeService lovvalgsperiodeService) {
         this.avklartefaktaService = avklartefaktaService;
-        this.registerOppslagService = registerOppslagService;
         this.kodeverkService = kodeverkService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
-        this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
     }
 
     public SedDataBygger hent(LovvalgBestemmelse lovvalgBestemmelse) {
 
         if (lovvalgBestemmelse instanceof LovvalgsBestemmelser_883_2004) {
-            LovvalgsBestemmelser_883_2004 lovvalgBestemmelse_883_2004 = (LovvalgsBestemmelser_883_2004) lovvalgBestemmelse;
             switch ((LovvalgsBestemmelser_883_2004) lovvalgBestemmelse) {
 
                 case FO_883_2004_ART12_1:
@@ -72,7 +61,7 @@ public class SedDataByggerVelger {
             }
         }
         //Kaster runtime exception til resten av SED'er er implementert
-        throw new RuntimeException("Støtte for å sende sed for lovvalgsbestemmelse "
+        throw new UnsupportedOperationException("Støtte for å sende sed for lovvalgsbestemmelse "
             + lovvalgBestemmelse.name() + " er ikke implementert enda");
     }
 }

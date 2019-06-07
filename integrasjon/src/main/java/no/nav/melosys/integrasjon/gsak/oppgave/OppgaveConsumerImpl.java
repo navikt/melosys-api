@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.gsak.oppgave;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
@@ -34,6 +34,7 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(OppgaveConsumerImpl.class);
     private static final String CORRELATION_ID = "X-Correlation-ID";
+    private static final int OPPGAVE_ANTALL_LIMIT = 20;
 
     private final boolean erSystem;
 
@@ -77,6 +78,20 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
 
     @Override
     public List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) throws FunksjonellException, TekniskException {
+        OppgaveSvar førsteOppgaveSvar = hentOppgaveListe(oppgaveSearchRequest, 0);
+
+        List<OppgaveDto> alleOppgavene = new ArrayList<>(førsteOppgaveSvar.getOppgaver());
+        int antallTreffTotalt = førsteOppgaveSvar.getAntallTreffTotalt();
+        if (antallTreffTotalt > OPPGAVE_ANTALL_LIMIT) {
+            for (int i = OPPGAVE_ANTALL_LIMIT; i < antallTreffTotalt; i += OPPGAVE_ANTALL_LIMIT) {
+                OppgaveSvar oppgaveSvar = hentOppgaveListe(oppgaveSearchRequest, i);
+                alleOppgavene.addAll(oppgaveSvar.getOppgaver());
+            }
+        }
+        return alleOppgavene;
+    }
+
+    OppgaveSvar hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest, int offset) throws FunksjonellException, TekniskException {
         WebTarget lokalTarget = target;
         if (oppgaveSearchRequest.getAktørId() != null) {
             lokalTarget = lokalTarget.queryParam("aktoerId", oppgaveSearchRequest.getAktørId());
@@ -86,9 +101,11 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
             .queryParam("tildeltRessurs", oppgaveSearchRequest.getTildeltRessurs())
             .queryParam("sorteringsfelt", oppgaveSearchRequest.getSorteringsfelt())
             .queryParam("tilordnetRessurs", oppgaveSearchRequest.getTilordnetRessurs())
-            .queryParam("saksreferanse", oppgaveSearchRequest.getSaksreferanse())
+            .queryParam("saksreferanse", (Object[]) oppgaveSearchRequest.getSaksreferanse())
             .queryParam("statuskategori", oppgaveSearchRequest.getStatusKategori())
-            .queryParam("behandlesAvApplikasjon", oppgaveSearchRequest.getBehandlesAvApplikasjon());
+            .queryParam("behandlesAvApplikasjon", oppgaveSearchRequest.getBehandlesAvApplikasjon())
+            .queryParam("limit", OPPGAVE_ANTALL_LIMIT)
+            .queryParam("offset", offset);
 
         lokalTarget = leggTilQueryParamSomArray(lokalTarget, "tema", oppgaveSearchRequest.getTema());
         lokalTarget = leggTilQueryParamSomArray(lokalTarget, "oppgavetype", oppgaveSearchRequest.getOppgavetype());
@@ -101,10 +118,10 @@ public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
                 .header(CORRELATION_ID, getCallID())
                 .header(HttpHeaders.AUTHORIZATION, getAuth())
                 .get(OppgaveSvar.class);
-            return oppgaveSvar.getOppgaver();
+            return oppgaveSvar;
         } catch (RuntimeException e) {
             ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
-            return  Collections.emptyList(); // Død kode
+            return null; // Død kode
         }
     }
 

@@ -2,13 +2,15 @@ package no.nav.melosys.service.oppgave;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -99,10 +101,6 @@ public class Oppgaveplukker {
         if (valg.isPresent()) {
             Oppgave oppgave = valg.get();
 
-            if (oppgave.erBehandling() || oppgave.erVurderDokument()) {
-                settBehandlingsstatusUnderBehandling(oppgave.getSaksnummer());
-            }
-
             // Tildeler oppgaven
             gsakFasade.tildelOppgave(oppgave.getOppgaveId(), saksbehandlerID);
         }
@@ -119,16 +117,21 @@ public class Oppgaveplukker {
         Iterator<Oppgave> iter = oppgaver.iterator();
         while (iter.hasNext()) {
             Oppgave oppgave = iter.next();
-            Fagsak fagsak = fagsakRepository.findBySaksnummer(oppgave.getSaksnummer());
+            String saksnummer = oppgave.getSaksnummer();
+            Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
             if (fagsak == null) {
-                log.error("Fant ikke fagsak {} for oppgave {}", oppgave.getSaksnummer(), oppgave.getOppgaveId());
-                throw new TekniskException("Fant ikke fagsak " + oppgave.getSaksnummer());
+                log.error("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
+                throw new TekniskException("Fant ikke fagsak " + saksnummer);
             }
             Behandling behandling = fagsak.getAktivBehandling();
+            if (behandling == null) {
+                throw new TekniskException("Fant ingen aktiv behandling på fagsak " + saksnummer);
+            }
 
-            if (behandling.erVenterForDokumentasjon()
-                && behandling.getDokumentasjonSvarfristDato() != null
-                && behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
+            if (behandling.erVenterForDokumentasjon() && behandling.getDokumentasjonSvarfristDato() == null) {
+                throw new TekniskException("Behandling " + behandling.getId() + " tilhørende " + saksnummer + " avventer dokumentasjon, men har ingen svarfristdato");
+            }
+            if (behandling.erVenterForDokumentasjon() && behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now())) {
                 iter.remove();
             }
         }
@@ -176,20 +179,5 @@ public class Oppgaveplukker {
     private boolean erTilbakeLagt(String saksbehandlerID, String oppgaveId) {
         List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(saksbehandlerID, oppgaveId);
         return !tilbakelegging.isEmpty();
-    }
-
-    private void settBehandlingsstatusUnderBehandling(String saksnummer) throws TekniskException {
-        Fagsak fagsak = fagsakRepository.findBySaksnummer(saksnummer);
-        if (fagsak == null) {
-            throw new TekniskException("Fagsak med saksnummer " + saksnummer + " finnes ikke.");
-        }
-        Behandling behandling = fagsak.getAktivBehandling();
-        if (behandling == null) {
-            throw new TekniskException("En behandlingsoppgave eksisterer i GSAK for sak " + saksnummer + " men ingen aktive behandlinger finnes.");
-        }
-        if (behandling.getStatus() == Behandlingsstatus.OPPRETTET) {
-            behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-            behandlingRepository.save(behandling);
-        }
     }
 }

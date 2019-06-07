@@ -37,7 +37,7 @@ public class SendHenleggelsesbrev extends AbstraktStegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(SendHenleggelsesbrev.class);
 
-    private final BrevBestiller brevBestiller;;
+    private final BrevBestiller brevBestiller;
 
     @Autowired
     public SendHenleggelsesbrev(BrevBestiller brevBestiller) {

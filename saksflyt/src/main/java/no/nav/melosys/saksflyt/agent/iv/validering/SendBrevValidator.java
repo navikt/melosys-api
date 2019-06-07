@@ -7,7 +7,8 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
+
+import static no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004.*;
 
 public enum SendBrevValidator {
     INSTANCE;
@@ -54,8 +55,7 @@ public enum SendBrevValidator {
     }
 
     public static boolean erGyldigBestemmelse(LovvalgBestemmelse bestemmelse) {
-        return bestemmelse == LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1
-            || bestemmelse == LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_2
-            || bestemmelse == LovvalgsBestemmelser_883_2004.FO_883_2004_ART16_1;
+        return bestemmelse == FO_883_2004_ART11_3A || bestemmelse == FO_883_2004_ART11_3B || bestemmelse == FO_883_2004_ART11_4_2
+            || bestemmelse == FO_883_2004_ART12_1 || bestemmelse == FO_883_2004_ART12_2 || bestemmelse == FO_883_2004_ART16_1;
     }
 }

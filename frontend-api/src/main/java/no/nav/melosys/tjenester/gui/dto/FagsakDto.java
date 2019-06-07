@@ -1,8 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -15,11 +13,6 @@ public class FagsakDto {
     private Saksstatuser saksstatus;
     private Instant registrertDato;
     private Instant endretDato;
-    private List<BehandlingDto> behandlinger;
-
-    public FagsakDto() {
-        this.behandlinger = new ArrayList<>();
-    }
 
     public String getSaksnummer() {
         return saksnummer;
@@ -67,13 +60,5 @@ public class FagsakDto {
 
     public void setEndretDato(Instant endretDato) {
         this.endretDato = endretDato;
-    }
-
-    public List<BehandlingDto> getBehandlinger() {
-        return behandlinger;
-    }
-
-    public void setBehandlinger(List<BehandlingDto> behandlinger) {
-        this.behandlinger = behandlinger;
     }
 }

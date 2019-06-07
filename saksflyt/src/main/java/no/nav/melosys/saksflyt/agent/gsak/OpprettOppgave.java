@@ -40,12 +40,13 @@ import static no.nav.melosys.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
  */
 @Component
 public class OpprettOppgave extends AbstraktStegBehandler {
-
     private static final Logger log = LoggerFactory.getLogger(OpprettOppgave.class);
 
     private final BehandlingRepository behandlingRepository;
-
     private final GsakFasade gsakFasade;
+
+    private static final String PID_MELDING = "{}: {}";
+    private static final String STØTTES_IKKE = " er ikke støttet";
 
     @Autowired
     public OpprettOppgave(BehandlingRepository behandlingRepository, @Qualifier("system")GsakFasade gsakFasade) {
@@ -85,8 +86,8 @@ public class OpprettOppgave extends AbstraktStegBehandler {
             oppgave.setBehandlingstema(Behandlingstema.EU_EOS);
             oppgave.setBehandlingstype(null);
         } else {
-            String feilmelding = "Sakstyper " + fagsak.getType() + " er ikke støttet";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding);
+            String feilmelding = "Sakstyper " + fagsak.getType() + STØTTES_IKKE;
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
             return;
         }
@@ -96,8 +97,8 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         } else if (behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
             oppgave.setOppgavetype(Oppgavetyper.VUR);
         } else {
-            String feilmelding = "Behandlingstype " + behandlingstype + " er ikke støttet";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding);
+            String feilmelding = "Behandlingstype " + behandlingstype + STØTTES_IKKE;
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
             return;
         }
@@ -119,8 +120,8 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         } else if (prosessinstans.getType() == ProsessType.JFR_NY_BEHANDLING) {
             prosessinstans.setSteg(ProsessSteg.FERDIG);
         } else {
-            String feilmelding = "ProsessType " + prosessinstans.getType() + " er ikke støttet";
-            log.error("{}: {}", prosessinstans.getId(), feilmelding);
+            String feilmelding = "ProsessType " + prosessinstans.getType() + STØTTES_IKKE;
+            log.error(PID_MELDING, prosessinstans.getId(), feilmelding);
             håndterUnntak(Feilkategori.TEKNISK_FEIL, prosessinstans, feilmelding, null);
             return;
         }

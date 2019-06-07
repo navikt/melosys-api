@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OppdaterMedlFelles {
-    private TpsFasade tpsFasade;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
-    private LovvalgsperiodeRepository lovvalgsperiodeRepository;
+    private final TpsFasade tpsFasade;
+    private final BehandlingsresultatRepository behandlingsresultatRepository;
+    private final LovvalgsperiodeRepository lovvalgsperiodeRepository;
 
     public OppdaterMedlFelles(TpsFasade tpsFasade,
                               BehandlingsresultatRepository behandlingsresultatRepository,

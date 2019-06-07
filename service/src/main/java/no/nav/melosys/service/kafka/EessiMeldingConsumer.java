@@ -1,7 +1,7 @@
 package no.nav.melosys.service.kafka;
 
-import no.nav.melosys.eessi.avro.MelosysEessiMelding;
 import no.nav.melosys.service.eessi.EessiMottakService;
+import no.nav.melosys.service.kafka.model.MelosysEessiMelding;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ public class EessiMeldingConsumer {
         this.eessiMottakService = eessiMottakService;
     }
 
-    @KafkaListener(clientIdPrefix = "melosys-eessi-consumer", topics = "privat-melosys-eessi-v1",
+    @KafkaListener(clientIdPrefix = "melosys-eessi-consumer", topics = "${kafka.topic.eessi}",
         containerFactory = "eessiMeldingListenerContainerFactory")
     public void mottaMelding(ConsumerRecord<String, MelosysEessiMelding> consumerRecord) {
         MelosysEessiMelding melding = consumerRecord.value();
@@ -28,7 +28,7 @@ public class EessiMeldingConsumer {
         try {
             eessiMottakService.behandleMottattMelding(melding);
         } catch (Exception e) {
-            log.error("Feil ved mottak av SED! ConsumerRecord.key: {}", consumerRecord.key());
+            log.error("Feil ved mottak av SED! ConsumerRecord.key: {}", consumerRecord.key(), e);
         }
     }
 }

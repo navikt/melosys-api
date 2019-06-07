@@ -48,7 +48,7 @@ public class Inntekt3KonverteringTest {
             }
         }
         test.setDokumentXml(stringBuilder.toString());
-        test.setType(SaksopplysningType.INNTEKT);
+        test.setType(SaksopplysningType.INNTK);
         test.setVersjon("3.2");
 
         factory.lagDokument(test);
@@ -67,7 +67,7 @@ public class Inntekt3KonverteringTest {
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
             saksopplysning.setDokumentXml(xmlStr);
-            saksopplysning.setType(SaksopplysningType.INNTEKT);
+            saksopplysning.setType(SaksopplysningType.INNTK);
             saksopplysning.setVersjon("3.2");
 
             factory.lagDokument(saksopplysning);
@@ -101,7 +101,7 @@ public class Inntekt3KonverteringTest {
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
             saksopplysning.setDokumentXml(xmlStr);
-            saksopplysning.setType(SaksopplysningType.INNTEKT);
+            saksopplysning.setType(SaksopplysningType.INNTK);
             saksopplysning.setVersjon("3.2");
 
             factory.lagDokument(saksopplysning);

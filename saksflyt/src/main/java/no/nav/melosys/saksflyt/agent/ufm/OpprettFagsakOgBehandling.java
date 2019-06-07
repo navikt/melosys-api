@@ -6,6 +6,8 @@ import java.util.Optional;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -65,6 +67,11 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
         if (eksisterendeFagsak.isPresent()) {
             fagsak = eksisterendeFagsak.get();
+
+            if (!Saksstatuser.OPPRETTET.equals(fagsak.getStatus())) {
+                fagsak.setStatus(Saksstatuser.OPPRETTET);
+            }
+
             avsluttTidligereBehandling(fagsak);
             behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP,
                 prosessinstans.getData(JOURNALPOST_ID), prosessinstans.getData(DOKUMENT_ID));
@@ -76,6 +83,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
                 .medInitierendeJournalpostId(prosessinstans.getData(JOURNALPOST_ID))
                 .medInitierendeDokumentId(prosessinstans.getData(DOKUMENT_ID))
                 .medGsakSaksnummer(gsakSaksnummer)
+                .medSakstype(Sakstyper.EU_EOS)
                 .build();
 
             fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);

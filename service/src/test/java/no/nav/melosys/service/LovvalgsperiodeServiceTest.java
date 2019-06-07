@@ -189,7 +189,7 @@ public class LovvalgsperiodeServiceTest {
     private Behandling lagBehandlingMedMedlOpplysning(MedlemskapDokument medlDokument) {
         Saksopplysning medl = new Saksopplysning();
         medl.setDokument(medlDokument);
-        medl.setType(SaksopplysningType.MEDLEMSKAP);
+        medl.setType(SaksopplysningType.MEDL);
 
         Behandling behandling = mock(Behandling.class);
         when(behandling.getId()).thenReturn(1L);

@@ -3,7 +3,9 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -14,23 +16,20 @@ import io.github.benas.randombeans.api.EnhancedRandom;
 import io.github.benas.randombeans.api.Randomizer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.dto.BehandlingOversiktDto;
+import no.nav.melosys.tjenester.gui.dto.FagsakDto;
+import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
+import no.nav.melosys.tjenester.gui.dto.HenleggelseDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.json.JSONException;
 import org.junit.Before;
@@ -92,19 +91,6 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     public void fagsakSchemaValidering() throws IOException, JSONException {
         FagsakDto fagsakDto = random.nextObject(FagsakDto.class);
 
-        for (BehandlingDto b : fagsakDto.getBehandlinger()) {
-            // Gyldige adresser
-            for (OrganisasjonDokument org : b.getSaksopplysninger().getOrganisasjoner()) {
-                SemistrukturertAdresse adresse = random.nextObject(SemistrukturertAdresse.class);
-                adresse.setGyldighetsperiode(new Periode(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1)));
-                org.getOrganisasjonDetaljer().forretningsadresse = new ArrayList<>();
-                org.getOrganisasjonDetaljer().forretningsadresse.add(adresse);
-                org.getOrganisasjonDetaljer().postadresse = new ArrayList<>();
-                org.getOrganisasjonDetaljer().postadresse.add(adresse);
-            }
-
-        }
-
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
         schemaType = FAGSAKER_SCHEMA;
         valider(jsonString, log);
@@ -114,7 +100,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     public void fagsakSøkSchemaValidering() throws IOException, JSONException {
         List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = EnhancedRandom.randomListOf(1, FagsakOppsummeringDto.class);
         List<BehandlingOversiktDto> behandlingOversiktDtoer = EnhancedRandom.randomListOf(1, BehandlingOversiktDto.class);
-        behandlingOversiktDtoer.get(0).setLand(Collections.singletonList("NO"));
+        behandlingOversiktDtoer.get(0).setLand(Collections.singletonList(Landkoder.NO.getKode()));
         fagsakOppsummeringDtoList.get(0).setBehandlingOversikter(behandlingOversiktDtoer);
 
         schemaType = SOK_FAGSAKER_SCHEMA;
@@ -176,7 +162,6 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         assertThat(resultat.getStatusInfo()).isEqualTo(Status.OK);
         verify(fagsakService).henleggFagsak(saksnummer, begrunnelseKode, fritekst);
     }
-
     @Test
     public final void henleggFagsak_ingenSakFinnes_kasterIkkeFunnet() throws Exception {
         FagsakTjeneste instans = lagFagsakTjeneste(null);
@@ -230,10 +215,33 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         assertThat(behandlingFørst.getBehandlingsstatus().getKode()).isEqualTo("UNDER_BEHANDLING");
         assertThat(behandlingFørst.getBehandlingstype().getKode()).isEqualTo("SOEKNAD");
         assertThat(behandlingFørst.getOpprettetDato()).isEqualTo(Instant.parse("2019-01-10T10:37:30.00Z"));
-        assertThat(behandlingFørst.getLand().get(0)).isEqualTo("NO");
+        assertThat(behandlingFørst.getLand().get(0)).isEqualTo("DK");
 
         assertThat(behandlingFørst.getSoknadsperiode().getFom()).isEqualTo(LocalDate.of(2019,1,1));
         assertThat(behandlingFørst.getSoknadsperiode().getTom()).isEqualTo(LocalDate.of(2019,2,1));
+    }
+
+    @Test
+    public final void avsluttSakSomBortfalt_sakEksisterer_kallerFagservice() throws Exception {
+        Fagsak fagsak = lagFagsak();
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+        String saksnummer = "123";
+        Response resultat = instans.avsluttSakSomBortfalt(saksnummer);
+
+        assertThat(resultat.getStatusInfo()).isEqualTo(Status.NO_CONTENT);
+        verify(fagsakService).avsluttSakSomBortfalt(fagsak);
+    }
+
+    @Test
+    public final void avsluttSakSomBortfalt_sakEksistererIkke_kasterException() throws Exception {
+        Fagsak fagsak = lagFagsak();
+        FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
+        doThrow(SikkerhetsbegrensningException.class).when(tilgang).sjekkSak(fagsak);
+
+        expectedException.expect(SikkerhetsbegrensningException.class);
+        instans.avsluttSakSomBortfalt("123");
+
+        verify(fagsakService, never()).henleggFagsak(anyString(), anyString(), anyString());
     }
 
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {

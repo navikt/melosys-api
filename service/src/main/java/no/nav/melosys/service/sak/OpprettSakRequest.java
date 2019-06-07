@@ -1,6 +1,7 @@
 package no.nav.melosys.service.sak;
 
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 
 public class OpprettSakRequest {
     private String aktørID;
@@ -11,8 +12,9 @@ public class OpprettSakRequest {
     private String initierendeJournalpostId;
     private String initierendeDokumentId;
     private Long gsakSaksnummer;
+    private Sakstyper sakstype;
 
-    private OpprettSakRequest(String aktørID, String arbeidsgiver, String representant, String representantKontaktperson, Behandlingstyper behandlingstype, String initierendeJournalpostId, String initierendeDokumentId, Long gsakSaksnummer) {
+    private OpprettSakRequest(String aktørID, String arbeidsgiver, String representant, String representantKontaktperson, Behandlingstyper behandlingstype, String initierendeJournalpostId, String initierendeDokumentId, Long gsakSaksnummer, Sakstyper sakstype) {
         this.aktørID = aktørID;
         this.arbeidsgiver = arbeidsgiver;
         this.representant = representant;
@@ -21,6 +23,7 @@ public class OpprettSakRequest {
         this.initierendeJournalpostId = initierendeJournalpostId;
         this.initierendeDokumentId = initierendeDokumentId;
         this.gsakSaksnummer = gsakSaksnummer;
+        this.sakstype = sakstype;
     }
 
     public String getAktørID() {
@@ -55,6 +58,10 @@ public class OpprettSakRequest {
         return gsakSaksnummer;
     }
 
+    public Sakstyper getSakstype() {
+        return sakstype;
+    }
+
     public static class Builder {
         private String aktørID;
         private String arbeidsgiver;
@@ -64,6 +71,7 @@ public class OpprettSakRequest {
         private String initierendeJournalpostId;
         private String initierendeDokumentId;
         private Long gsakSaksnummer;
+        private Sakstyper sakstype;
 
         public Builder medAktørID(String aktørID) {
             this.aktørID = aktørID;
@@ -105,8 +113,13 @@ public class OpprettSakRequest {
             return this;
         }
 
+        public Builder medSakstype(Sakstyper sakstype) {
+            this.sakstype = sakstype;
+            return this;
+        }
+
         public OpprettSakRequest build() {
-            return new OpprettSakRequest(aktørID, arbeidsgiver, representant, representantKontaktperson, behandlingstype, initierendeJournalpostId, initierendeDokumentId, gsakSaksnummer);
+            return new OpprettSakRequest(aktørID, arbeidsgiver, representant, representantKontaktperson, behandlingstype, initierendeJournalpostId, initierendeDokumentId, gsakSaksnummer, sakstype);
         }
     }
 }

@@ -1,8 +1,8 @@
-package no.nav.melosys.tjenester.gui.dto.converter;
+package no.nav.melosys.tjenester.gui.dto.tildto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.Set;
 
@@ -24,66 +24,56 @@ import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
-import org.modelmapper.Converter;
-import org.modelmapper.spi.MappingContext;
 
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 
 /**
  * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
  */
-public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplysning>, SaksopplysningerDto> {
-
+public class SaksopplysningerTilDto {
+    private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
 
     //Medlemsperioder sorteres fra nyest til eldst.
      static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
             (o1, o2) -> o2.getPeriode().getFom().compareTo(o1.getPeriode().getFom());
 
-    @Override
-    public SaksopplysningerDto convert(MappingContext<Set<Saksopplysning>, SaksopplysningerDto> context) {
-        Behandling behandling = (Behandling) context.getParent().getSource();
+    public static SaksopplysningerDto getSaksopplysningerDto(Set<Saksopplysning> saksopplysningSet, Behandling behandling) {
         SaksopplysningerDto dto = new SaksopplysningerDto();
-
-        if (context.getSource() == null) {
-            // Frontend ønsker å motta et objekt, selv når saksopplysninger ikke finnes.
-            return dto;
-        }
-
         Periode søknadsperiode = null;
         Land historiskStatsborgerskap = null;
 
-        for (Saksopplysning saksopplysning : context.getSource()) {
+        for (Saksopplysning saksopplysning : saksopplysningSet) {
             SaksopplysningType type = saksopplysning.getType();
             SaksopplysningDokument dokument = saksopplysning.getDokument();
 
             switch (type) {
-                case PERSONOPPLYSNING:
+                case PERSOPL:
                     dto.setPerson((PersonDokument)dokument);
                     break;
-                case ARBEIDSFORHOLD:
+                case ARBFORH:
                     ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) dokument;
                     if (arbeidsforholdDokument != null && arbeidsforholdDokument.getArbeidsforhold() != null) {
                         arbeidsforholdDokument.getArbeidsforhold().sort(new ArbeidsforholdComparator());
                     }
                     dto.setArbeidsforhold(arbeidsforholdDokument);
                     break;
-                case ORGANISASJON:
+                case ORG:
                     dto.getOrganisasjoner().add((OrganisasjonDokument)dokument);
                     break;
-                case MEDLEMSKAP:
+                case MEDL:
                     MedlemskapDokument medlemskapDokument = (MedlemskapDokument) dokument;
                     if (medlemskapDokument != null && medlemskapDokument.getMedlemsperiode() != null) {
                         medlemskapDokument.getMedlemsperiode().sort(Comparator.comparing(Medlemsperiode::getType).thenComparing(medlemsperiodeKomparator));
                     }
                     dto.setMedlemskap(medlemskapDokument);
                     break;
-                case INNTEKT:
+                case INNTK:
                     dto.setInntekt(new InntektDto((InntektDokument) dokument));
                     break;
                 case SOB_SAK:
                     dto.setSakOgBehandling((SobSakDokument) dokument);
                     break;
-                case PERSONHISTORIKK:
+                case PERSHIST:
                     PersonhistorikkDokument personhistorikk = (PersonhistorikkDokument) dokument;
                     if (!personhistorikk.statsborgerskapListe.isEmpty()) {
                         historiskStatsborgerskap = personhistorikk.statsborgerskapListe.get(0).statsborgerskap;
@@ -93,7 +83,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
                     søknadsperiode = hentPeriode((SoeknadDokument) dokument);
                     // N.B. Frontend ønsker ikke å få søknaden på /fagsaker slik at opplysninger fra registrene er adskilt
                     break;
-                case SED_OPPLYSNINGER:
+                case SEDOPPL:
                     //TODO: MELOSYS-2535
                     break;
                 default:
@@ -106,11 +96,11 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
         - Ved søknad framover i tid, brukes statsborgerskap fra TPS med gjeldende dato, avgrenset
             av dato for henting av opplysninger (hvis tilstede) eller endring av behandling
         */
-        LocalDate gjeldendeDato = null;
+        LocalDate gjeldendeDato;
         if (behandling.getSistOpplysningerHentetDato() != null) {
-            gjeldendeDato = LocalDateTime.ofInstant(behandling.getSistOpplysningerHentetDato(), ZoneOffset.UTC).toLocalDate();
+            gjeldendeDato = LocalDateTime.ofInstant(behandling.getSistOpplysningerHentetDato(), TIME_ZONE_ID).toLocalDate();
         } else {
-            gjeldendeDato = LocalDateTime.ofInstant(behandling.getEndretDato(), ZoneOffset.UTC).toLocalDate();
+            gjeldendeDato = LocalDateTime.ofInstant(behandling.getEndretDato(), TIME_ZONE_ID).toLocalDate();
         }
 
         if (søknadsperiode != null && søknadsperiode.getFom() != null && søknadsperiode.getFom().isBefore(gjeldendeDato)) {
@@ -127,7 +117,7 @@ public class SaksopplysningerTilDtoConverter implements Converter<Set<Saksopplys
      * - Åpent arbeidsforhold uten sluttdato sorteres foran/over arbeidsforhold med sluttdato.
      * - Arbeidsforhold må ellers sorteres med nyeste fra-og-med-dato øverst.
      */
-    final static class ArbeidsforholdComparator implements Comparator<Arbeidsforhold> {
+    static final class ArbeidsforholdComparator implements Comparator<Arbeidsforhold> {
 
         @Override
         public int compare(Arbeidsforhold a, Arbeidsforhold b) {

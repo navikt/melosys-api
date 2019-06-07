@@ -27,6 +27,7 @@ public class KontaktopplysningTjenesteTest {
 
     private static final String SAK_NUMMER = "MEL-1";
     private static final String ORG_NUMMER = "999";
+    private static final KontaktInfoDto KONTAKT_INFO = new KontaktInfoDto("kontaktnavn", "kontaktorgnr");
 
     @Before
     public void setUp() {
@@ -35,7 +36,7 @@ public class KontaktopplysningTjenesteTest {
 
     @Test
     public void hentKontaktopplysning_kallerPåService_objektFinnes() {
-        doReturn(Optional.of(Kontaktopplysning.class)).when(kontaktopplysningService).hentKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
+        doReturn(Optional.of(new Kontaktopplysning())).when(kontaktopplysningService).hentKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
 
         Response response = kontaktopplysningTjeneste.hentKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
 
@@ -53,12 +54,9 @@ public class KontaktopplysningTjenesteTest {
 
     @Test
     public void lagKontaktopplysning_kallerPåService() {
-        KontaktInfoDto kontaktInfoDto = new KontaktInfoDto();
-        kontaktInfoDto.setKontaktnavn("kontaktnavn");
-        kontaktInfoDto.setKontaktorgnr("kontaktorgnr");
-        Response response = kontaktopplysningTjeneste.lagKontaktopplysning(SAK_NUMMER, ORG_NUMMER, kontaktInfoDto);
+        Response response = kontaktopplysningTjeneste.lagKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO);
 
-        verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, kontaktInfoDto.getKontaktorgnr(), kontaktInfoDto.getKontaktnavn());
+        verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO.getKontaktorgnr(), KONTAKT_INFO.getKontaktnavn());
         assertThat(response.getStatus()).isEqualTo(200);
     }
 

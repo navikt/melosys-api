@@ -26,7 +26,6 @@ public final class MedlPeriodeKonverter {
     }
 
     private static final BiMap<LovvalgBestemmelse, GrunnlagMedl> lovvalgsbestemmelseTilGrunnlagMedlTabell;
-    private static final Kildedokumenttype KILDEDOKUMENTTYPE_HENV_SOKNAD = new Kildedokumenttype().withValue("Henv_Soknad");
 
     static {
         BiMap<LovvalgBestemmelse, GrunnlagMedl> tbl = HashBiMap.create();
@@ -94,14 +93,15 @@ public final class MedlPeriodeKonverter {
     public static OpprettPeriodeRequest konverterTilOpprettPeriodRequest(String fnr,
                                                                          Lovvalgsperiode lovvalgsperiode,
                                                                          PeriodestatusMedl periodestatusMedl,
-                                                                         LovvalgMedl lovvalgMedl) throws TekniskException {
+                                                                         LovvalgMedl lovvalgMedl,
+                                                                         KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
 
         OpprettPeriodeRequest request = new OpprettPeriodeRequest();
 
         no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Foedselsnummer ident = new no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Foedselsnummer();
         ident.setValue(fnr);
 
-        Medlemsperiode periode = opprettPeriode(lovvalgsperiode, periodestatusMedl, lovvalgMedl);
+        Medlemsperiode periode = opprettPeriode(lovvalgsperiode, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl);
 
         request.setIdent(ident);
         request.setPeriode(periode);
@@ -111,20 +111,21 @@ public final class MedlPeriodeKonverter {
 
     static OppdaterPeriodeRequest konverterTilOppdaterPeriodeRequest(Lovvalgsperiode lovvalgsperiode,
                                                                      PeriodestatusMedl periodestatusMedl,
-                                                                     LovvalgMedl lovvalgMedl, int versjon) throws TekniskException {
+                                                                     LovvalgMedl lovvalgMedl,
+                                                                     KildedokumenttypeMedl kildedokumenttypeMedl, int versjon) throws TekniskException {
         OppdaterPeriodeRequest request = new OppdaterPeriodeRequest();
 
         request.setPeriodeId(lovvalgsperiode.getMedlPeriodeID());
         request.setVersjon(versjon);
 
-        Medlemsperiode periode = opprettPeriode(lovvalgsperiode, periodestatusMedl, lovvalgMedl);
+        Medlemsperiode periode = opprettPeriode(lovvalgsperiode, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl);
 
         request.setPeriode(periode);
 
         return request;
     }
 
-    private static Medlemsperiode opprettPeriode(Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl) throws TekniskException {
+    private static Medlemsperiode opprettPeriode(Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
         Medlemsperiode periode = new Medlemsperiode();
         try {
             periode.setFraOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(lovvalgsperiode.getFom()));
@@ -157,7 +158,9 @@ public final class MedlPeriodeKonverter {
             periode.setGrunnlagstype(new Grunnlagstype().withValue(grunnlagMedl.getKode()));
         }
 
-        periode.setKildedokumenttype(KILDEDOKUMENTTYPE_HENV_SOKNAD);
+        if (kildedokumenttypeMedl != null) {
+            periode.setKildedokumenttype(new Kildedokumenttype().withValue(kildedokumenttypeMedl.getKode()));
+        }
         return periode;
     }
 
@@ -173,7 +176,7 @@ public final class MedlPeriodeKonverter {
         return bestemmelse;
     }
 
-    public static AvvisPeriodeRequest konverterTilAvvisPeriodeRequest(Long medlId, StatusaarsakMedl årsak) {
+    static AvvisPeriodeRequest konverterTilAvvisPeriodeRequest(Long medlId, StatusaarsakMedl årsak) {
         AvvisPeriodeRequest request = new AvvisPeriodeRequest();
         request.setPeriodeId(medlId);
         request.setAarsak(new Statusaarsak().withValue(årsak.getKode()));

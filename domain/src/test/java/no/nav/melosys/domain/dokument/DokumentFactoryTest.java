@@ -55,7 +55,7 @@ public class DokumentFactoryTest {
         }
         test.setDokumentXml(stringBuilder.toString());
 
-        test.setType(SaksopplysningType.ARBEIDSFORHOLD);
+        test.setType(SaksopplysningType.ARBFORH);
         test.setVersjon("3.0");
 
         factory.lagDokument(test);
@@ -81,7 +81,7 @@ public class DokumentFactoryTest {
         }
         test.setDokumentXml(stringBuilder.toString());
 
-        test.setType(SaksopplysningType.ORGANISASJON);
+        test.setType(SaksopplysningType.ORG);
         test.setVersjon("4.0");
 
         factory.lagDokument(test);

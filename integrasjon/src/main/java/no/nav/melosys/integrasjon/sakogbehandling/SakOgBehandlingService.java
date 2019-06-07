@@ -45,7 +45,7 @@ public class SakOgBehandlingService implements SakOgBehandlingFasade {
             jaxbContext = JAXBContext.newInstance(no.nav.tjeneste.virksomhet.sakogbehandling.v1.FinnSakOgBehandlingskjedeListeResponse.class);
         } catch (JAXBException e) {
             log.error("", e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 

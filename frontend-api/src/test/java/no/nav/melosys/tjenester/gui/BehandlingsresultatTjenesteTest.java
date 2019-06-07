@@ -3,7 +3,9 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import javax.ws.rs.core.Response;
 
+import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -54,8 +56,10 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void hentBehandlingsresultat_medBehandlingsid_forventerBehandlingsresultatDto() throws FunksjonellException, TekniskException, IOException {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setHenleggelsesgrunn(Henleggelsesgrunner.ANNET);
-        behandlingsresultat.setHenleggelseFritekst("Bruker har fått flyskrekk");
+        behandlingsresultat.setBegrunnelseFritekst("Bruker har fått flyskrekk");
+        BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
+        begrunnelse.setKode(Henleggelsesgrunner.ANNET.getKode());
+        behandlingsresultat.setBehandlingsresultatBegrunnelser(Sets.newHashSet(begrunnelse));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         Response response = behandlingsresultatTjeneste.hentBehandlingsresultat(4L);

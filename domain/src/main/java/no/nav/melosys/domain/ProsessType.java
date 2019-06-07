@@ -1,10 +1,8 @@
 package no.nav.melosys.domain;
 
-import javax.persistence.Converter;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 
-import no.nav.melosys.domain.kodeverk.InterntKodeverkTabell;
-
-public enum ProsessType implements InterntKodeverkTabell<ProsessType> {
+public enum ProsessType implements Kodeverk {
 
     //alfabetisk rekkefølge
     ANMODNING_OM_UNNTAK("ANMODNING_OM_UNNTAK", "Anmodning om unntak"),
@@ -35,13 +33,4 @@ public enum ProsessType implements InterntKodeverkTabell<ProsessType> {
     public String getBeskrivelse() {
         return beskrivelse;
     }
-
-    @Converter
-    public static class DbKonverterer extends InterntKodeverkTabell.DbKonverterer<ProsessType> {
-        @Override
-        protected ProsessType[] getLovligeVerdier() {
-            return ProsessType.values();
-        }
-    }
-
 }

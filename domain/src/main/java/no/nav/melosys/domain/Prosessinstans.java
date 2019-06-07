@@ -33,8 +33,8 @@ public class Prosessinstans {
     @Column(name = "uuid")
     private UUID id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "prosess_type", nullable = false)
-    @Convert(converter = ProsessType.DbKonverterer.class)
     private ProsessType type;
 
     @ManyToOne()
@@ -45,8 +45,8 @@ public class Prosessinstans {
     @Convert(converter = PropertiesConverter.class)
     private Properties data = new Properties();
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "steg", nullable = false)
-    @Convert(converter = ProsessSteg.DbKonverterer.class)
     private ProsessSteg steg;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
@@ -170,10 +170,6 @@ public class Prosessinstans {
 
     public void setSoverTil(Instant soverTil) {
         this.soverTil = soverTil;
-    }
-
-    public LocalDateTime getEndretDato() {
-        return endretDato;
     }
 
     public void setEndretDato(LocalDateTime endretDato) {

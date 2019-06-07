@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
+
 import static no.nav.abac.xacml.StandardAttributter.ACTION_ID;
 
 @Api(tags = {"saksbehandler"})
@@ -41,10 +42,8 @@ public class SaksbehandlerTjeneste extends RestTjeneste {
         LdapBruker ldapBruker;
         ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
 
-        if (ldapBruker != null) {
-            if (!brukerErMedlemAvMelosysGruppe(ldapBruker)) {
-                throw new SikkerhetsbegrensningException("Brukeren er ikke medlem av riktig AD-gruppe");
-            }
+        if (ldapBruker != null && !brukerErMedlemAvMelosysGruppe(ldapBruker)) {
+            throw new SikkerhetsbegrensningException("Brukeren er ikke medlem av riktig AD-gruppe");
         }
 
         String navn = ldapBruker != null ? ldapBruker.getDisplayName() : "FEIL";

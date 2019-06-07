@@ -23,7 +23,7 @@ public class Saksopplysning {
     private Behandling behandling;
 
     @Column(name = "opplysning_type", nullable = false, updatable = false)
-    @Convert(converter = SaksopplysningType.DbKonverterer.class)
+    @Convert(converter = SaksopplysningType.DbConverter.class)
     private SaksopplysningType type;
 
     @Column(name="versjon", nullable = false, updatable = false)

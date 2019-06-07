@@ -46,15 +46,16 @@ import org.xml.sax.SAXException;
  */
 @Service
 public class RegelmodulService {
-
     private static final Logger log = LoggerFactory.getLogger(RegelmodulService.class);
 
-    private final String regelmodulUrl;
+    private static final String ARBEIDSFORHOLDDOKUMENTER = "arbeidsforholdDokumenter";
+    private static final String INNTEKTDOKUMENTER = "inntektDokumenter";
+    private static final String MEDLEMSKAPDOKUMENTER = "medlemskapDokumenter";
+    private static final String ORGANISASJONDOKUMENTER = "organisasjonDokumenter";
 
     private final BehandlingRepository behandlingRepo;
-
     private final DocumentBuilderFactory documentBuilderFactory;
-
+    private final String regelmodulUrl;
     private final TransformerFactory transformerFactory;
 
     @Autowired
@@ -100,32 +101,32 @@ public class RegelmodulService {
 
         Element dokumenter = document.createElement("dokumenter");
         Map<String, Element> dokumentnoder = new HashMap<>();
-        dokumentnoder.put("arbeidsforholdDokumenter", document.createElement("arbeidsforholdDokumenter"));
-        dokumentnoder.put("inntektDokumenter", document.createElement("inntektDokumenter"));
-        dokumentnoder.put("medlemskapDokumenter", document.createElement("medlemskapDokumenter"));
-        dokumentnoder.put("organisasjonDokumenter", document.createElement("organisasjonDokumenter"));
+        dokumentnoder.put(ARBEIDSFORHOLDDOKUMENTER, document.createElement(ARBEIDSFORHOLDDOKUMENTER));
+        dokumentnoder.put(INNTEKTDOKUMENTER, document.createElement(INNTEKTDOKUMENTER));
+        dokumentnoder.put(MEDLEMSKAPDOKUMENTER, document.createElement(MEDLEMSKAPDOKUMENTER));
+        dokumentnoder.put(ORGANISASJONDOKUMENTER, document.createElement(ORGANISASJONDOKUMENTER));
 
         for (Saksopplysning saksopplysning : behandling.getSaksopplysninger()) {
             SaksopplysningType type = saksopplysning.getType();
             Element dokumentnode = xmlTilNode(saksopplysning.getInternXml(), documentBuilder, document);
 
             switch (type) {
-                case ARBEIDSFORHOLD:
-                    dokumentnoder.get("arbeidsforholdDokumenter").appendChild(dokumentnode);
+                case ARBFORH:
+                    dokumentnoder.get(ARBEIDSFORHOLDDOKUMENTER).appendChild(dokumentnode);
                     break;
-                case INNTEKT:
-                    dokumentnoder.get("inntektDokumenter").appendChild(dokumentnode);
+                case INNTK:
+                    dokumentnoder.get(INNTEKTDOKUMENTER).appendChild(dokumentnode);
                     break;
-                case MEDLEMSKAP:
-                    dokumentnoder.get("medlemskapDokumenter").appendChild(dokumentnode);
+                case MEDL:
+                    dokumentnoder.get(MEDLEMSKAPDOKUMENTER).appendChild(dokumentnode);
                     break;
-                case ORGANISASJON:
-                    dokumentnoder.get("organisasjonDokumenter").appendChild(dokumentnode);
+                case ORG:
+                    dokumentnoder.get(ORGANISASJONDOKUMENTER).appendChild(dokumentnode);
                     break;
-                case PERSONHISTORIKK:
+                case PERSHIST:
                     // Regelmodul skal bruke historisk statsborgerskap ved søknad tilbake i tid
                     break;
-                case PERSONOPPLYSNING:
+                case PERSOPL:
                     dokumentnoder.put("personDokument", dokumentnode);
                     break;
                 case SOB_SAK:
@@ -184,18 +185,17 @@ public class RegelmodulService {
 
         return ClientBuilder.newClient(clientConfig)
             .target(regelmodulUrl)
-            .path("/inngangsvilkaar") // FIXME property eller verdi i LovvalgTjeneste?
+            .path("/inngangsvilkaar")
             .request(LovvalgTjeneste.MEDIA_TYPE_CONSUMED)
             .post(Entity.entity(req, LovvalgTjeneste.MEDIA_TYPE_CONSUMED), VurderInngangsvilkaarReply.class);
     }
 
-    // FIXME: Nille-variant i påvente av hva som skjer med regelmodulen.
     private String lagXMLRequest(String statsborgerskap, String fom, String tom, List<String> søknadsland) {
         StringBuilder format = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
             "<FastsettLovvalgRequest><personDokument xmlns:tps3=\"http://nav.no/tjeneste/virksomhet/person/v3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
             "<statsborgerskap><kode>%s</kode></statsborgerskap></personDokument><soeknadDokument><oppholdUtland><oppholdsPeriode><fom>%s</fom><tom>%s</tom></oppholdsPeriode>");
 
-        // FIXME: Vi sender soknadsland som oppholdsland og søknadsperiode som oppholdsperiode
+        // Vi sender soknadsland som oppholdsland og søknadsperiode som oppholdsperiode
         //  til regelmodulen inntil den er oppdatert med en nyere versjon av melosys
         for (String land : søknadsland) {
             format.append("<oppholdslandKoder>").append(land).append("</oppholdslandKoder>");

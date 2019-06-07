@@ -89,7 +89,7 @@ public class MedlService implements MedlFasade {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
         saksopplysning.setKilde(SaksopplysningKilde.MEDL);
-        saksopplysning.setType(SaksopplysningType.MEDLEMSKAP);
+        saksopplysning.setType(SaksopplysningType.MEDL);
         saksopplysning.setVersjon(MEDLEMSKAP_VERSJON);
 
         // xml -> java objekter
@@ -99,18 +99,18 @@ public class MedlService implements MedlFasade {
     }
 
     @Override
-    public Long opprettPeriodeEndelig(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        return opprettPeriode(fnr, lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL) ;
+    public Long opprettPeriodeEndelig(String fnr, Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        return opprettPeriode(fnr, lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl);
     }
 
     @Override
-    public Long opprettPeriodeUnderAvklaring(String fnr, Lovvalgsperiode lovvalgsperiode) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        return opprettPeriode(fnr, lovvalgsperiode, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK) ;
+    public Long opprettPeriodeUnderAvklaring(String fnr, Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        return opprettPeriode(fnr, lovvalgsperiode, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK, kildedokumenttypeMedl);
     }
 
-    Long opprettPeriode(String fnr, Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    Long opprettPeriode(String fnr, Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         try {
-            OpprettPeriodeRequest request = MedlPeriodeKonverter.konverterTilOpprettPeriodRequest(fnr, lovvalgsperiode, periodestatusMedl, lovvalgMedl);
+            OpprettPeriodeRequest request = MedlPeriodeKonverter.konverterTilOpprettPeriodRequest(fnr, lovvalgsperiode, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl);
             OpprettPeriodeResponse response = behandleMedlemskapConsumer.opprettPeriode(request);
             return response.getPeriodeId();
         } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.PersonIkkeFunnet e) {
@@ -123,7 +123,7 @@ public class MedlService implements MedlFasade {
     }
 
     @Override
-    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode) throws TekniskException, FunksjonellException {
+    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException, FunksjonellException {
         try {
             long medlPeriodeID = lovvalgsperiode.getMedlPeriodeID();
             if (medlPeriodeID == 0) {
@@ -132,7 +132,7 @@ public class MedlService implements MedlFasade {
             HentPeriodeResponse hentPeriodeResponse = medlemskapConsumer.hentPeriode(lagHentPeriodeRequest(medlPeriodeID));
             Medlemsperiode periode = Optional.ofNullable(hentPeriodeResponse.getPeriode())
                 .orElseThrow(() -> new TekniskException("Fant ingen eksisterende medlPeriode med id " + medlPeriodeID));
-            OppdaterPeriodeRequest request = MedlPeriodeKonverter.konverterTilOppdaterPeriodeRequest(lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, periode.getVersjon());
+            OppdaterPeriodeRequest request = MedlPeriodeKonverter.konverterTilOppdaterPeriodeRequest(lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl, periode.getVersjon());
             behandleMedlemskapConsumer.oppdaterPeriode(request);
         } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.Sikkerhetsbegrensning | Sikkerhetsbegrensning e) {
             throw new SikkerhetsbegrensningException(e);

@@ -16,6 +16,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -111,11 +112,13 @@ public class BrevDataService {
 
         }
 
-        throw new TekniskException(mottakerRolle + " støttes ikke");
+        throw new TekniskException(mottakerRolle + " støttes ikke.");
     }
 
     UtenlandskMyndighet hentMyndighetFraAktoer(Aktoer aktoer) throws TekniskException {
-        return utenlandskMyndighetRepository.findByLandkode(aktoer.hentMyndighetLandkode());
+        Landkoder landkode = aktoer.hentMyndighetLandkode();
+        return utenlandskMyndighetRepository.findByLandkode(landkode)
+            .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }
 
     // Dokprod kan utlede registerinfo når Melosys ikke trenger å sette adressen sammen.
@@ -130,7 +133,7 @@ public class BrevDataService {
     @Transactional(propagation = Propagation.MANDATORY, readOnly = true)
     public Element lagBrevXML(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) throws TekniskException {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
-            .orElseThrow(() -> new TekniskException("Finner ingen behandlingsresultat for behandlingid"));
+            .orElseThrow(() -> new TekniskException("Finner ingen behandlingsresultat for behandlingid " + behandling.getId()));
 
         Element brevXmlElement;
         try {

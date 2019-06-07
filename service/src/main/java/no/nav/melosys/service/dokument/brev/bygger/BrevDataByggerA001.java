@@ -74,17 +74,14 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
     }
 
     private UtenlandskMyndighet hentUtenlandsMyndighet(Landkoder landkode) throws TekniskException {
-        UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetRepository.findByLandkode(landkode);
-        if (utenlandskMyndighet == null) {
-            throw new TekniskException("Fant ingen utenlandsk myndighet for landkode: "+ landkode.getKode());
-        }
-        return utenlandskMyndighet;
+        return  utenlandskMyndighetRepository.findByLandkode(landkode)
+            .orElseThrow(() -> new TekniskException("Fant ingen utenlandsk myndighet for landkode: " + landkode.getKode()));
     }
 
     private Vilkaarsresultat hentVilkårsresultat() throws TekniskException {
-        Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandling.getId(),Vilkaar.FO_883_2004_ART16_1);
+        Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(behandling.getId(), Vilkaar.FO_883_2004_ART16_1);
         Vilkaarsresultat resultat = vilkårsresultat.orElseThrow(() ->
-                new TekniskException("Fant ingen vilkårbegrunnelse for FO_883_2004_ART16_1"));
+            new TekniskException("Fant ingen vilkårbegrunnelse for FO_883_2004_ART16_1"));
 
         if (resultat.getBegrunnelser().isEmpty()) {
             throw new TekniskException("Brevet A001 trenger en begrunnelsekode for ART16_1");
@@ -94,9 +91,9 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
 
     private Optional<String> hentUtenlandskIdent(Landkoder landkode) {
         return søknad.personOpplysninger.utenlandskIdent.stream()
-                .filter(utenlandskIdent -> !utenlandskIdent.landkode.equals(landkode.getKode()))
-                .map(utenlandskIdent -> utenlandskIdent.ident)
-                .findFirst();
+            .filter(utenlandskIdent -> !utenlandskIdent.landkode.equals(landkode.getKode()))
+            .map(utenlandskIdent -> utenlandskIdent.ident)
+            .findFirst();
     }
 
     @Override
@@ -130,7 +127,7 @@ public class BrevDataByggerA001 extends AbstraktDokumentDataBygger implements Br
         }
 
         Stream<Periode> avklarteAnsettelsesPerioder =
-                arbeidsforholdDok.hentAnsettelsesperioder(avklarteOrgnumre).stream();
+            arbeidsforholdDok.hentAnsettelsesperioder(avklarteOrgnumre).stream();
 
         // Usikkert hva som er formålet med feltet i brevet.
         // Bestemt å bruke den seneste datoen for avklart arbeidsgiver inntil vi vet mer

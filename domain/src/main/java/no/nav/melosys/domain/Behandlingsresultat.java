@@ -11,7 +11,6 @@ import javax.persistence.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -41,13 +40,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Column(name = "fastsatt_av_land")
     private Landkoder fastsattAvLand;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "henleggelse_grunn")
-    private Henleggelsesgrunner henleggelsesgrunn;
+    @Column(name = "begrunnelse_fritekst")
+    private String begrunnelseFritekst;
 
-    @Column(name = "henleggelse_fritekst")
-    private String henleggelseFritekst;
-    
     @Column(name = "vedtak_dato")
     private Instant vedtaksdato;
 
@@ -62,6 +57,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Vilkaarsresultat> vilkaarsresultater = new HashSet<>(1);
+
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser = new HashSet<>(1);
 
     public Long getId() {
         return id;
@@ -103,20 +101,12 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.fastsattAvLand = fastsattAvLand;
     }
 
-    public Henleggelsesgrunner getHenleggelsesgrunn() {
-        return henleggelsesgrunn;
+    public String getBegrunnelseFritekst() {
+        return begrunnelseFritekst;
     }
 
-    public void setHenleggelsesgrunn(Henleggelsesgrunner henleggelsesgrunn) {
-        this.henleggelsesgrunn = henleggelsesgrunn;
-    }
-
-    public String getHenleggelseFritekst() {
-        return henleggelseFritekst;
-    }
-
-    public void setHenleggelseFritekst(String henleggelseFritekst) {
-        this.henleggelseFritekst = henleggelseFritekst;
+    public void setBegrunnelseFritekst(String begrunnelseFritekst) {
+        this.begrunnelseFritekst = begrunnelseFritekst;
     }
 
     public Instant getVedtaksdato() {
@@ -157,6 +147,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setAvklartefakta(Set<Avklartefakta> avklartefakta) {
         this.avklartefakta = avklartefakta;
+    }
+
+    public Set<BehandlingsresultatBegrunnelse> getBehandlingsresultatBegrunnelser() {
+        return behandlingsresultatBegrunnelser;
+    }
+
+    public void setBehandlingsresultatBegrunnelser(Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser) {
+        this.behandlingsresultatBegrunnelser = behandlingsresultatBegrunnelser;
     }
 
     public Optional<Avklartefakta> finnAvklartFaktum(Avklartefaktatype type) {

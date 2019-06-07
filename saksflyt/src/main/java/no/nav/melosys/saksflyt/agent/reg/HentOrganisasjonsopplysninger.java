@@ -67,8 +67,8 @@ public class HentOrganisasjonsopplysninger extends AbstraktStegBehandler {
         Behandling behandling = behandlingRepo.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
         Set<String> orgnumre = new HashSet<>();
 
-        Optional<SaksopplysningDokument> arbeidsforholdDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.ARBEIDSFORHOLD);
-        Optional<SaksopplysningDokument> inntektDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.INNTEKT);
+        Optional<SaksopplysningDokument> arbeidsforholdDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.ARBFORH);
+        Optional<SaksopplysningDokument> inntektDokument = SaksopplysningerUtils.hentDokument(behandling, SaksopplysningType.INNTK);
 
         arbeidsforholdDokument.ifPresent(dokument -> orgnumre.addAll(((ArbeidsforholdDokument)dokument).hentOrgnumre()));
         inntektDokument.ifPresent(dokument -> orgnumre.addAll(((InntektDokument)dokument).hentOrgnumre()));

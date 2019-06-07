@@ -87,7 +87,7 @@ public class Fagsak extends RegistreringsInfo {
             return null;
         }
         List<Behandling> behandlingListe = getBehandlinger().stream()
-            .filter(b -> !b.getStatus().equals(Behandlingsstatus.AVSLUTTET)).collect(Collectors.toList());
+            .filter(Behandling::isAktiv).collect(Collectors.toList());
         if (behandlingListe.size() > 1) {
             throw new TekniskException("Det finnes mer enn en aktive behandling for sak " + saksnummer);
         } else if (behandlingListe.size() == 1) {
@@ -102,7 +102,7 @@ public class Fagsak extends RegistreringsInfo {
      */
     public Behandling getTidligsteInaktiveBehandling() {
         return getBehandlinger().stream()
-            .filter(b -> b.getStatus().equals(Behandlingsstatus.AVSLUTTET))
+            .filter(b -> !b.isAktiv())
             .min(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
             .orElse(null);
     }
@@ -135,7 +135,7 @@ public class Fagsak extends RegistreringsInfo {
     public Landkoder hentMyndighetLandkode() throws TekniskException {
         Aktoer myndighet = hentAktørMedRolleType(MYNDIGHET);
         if (myndighet == null) {
-            throw new TekniskException("Finnes ingen aktør med rolle " + MYNDIGHET + " for fagsak" + saksnummer);
+            throw new TekniskException("Finner ingen aktør med rolle " + MYNDIGHET + " for fagsak " + saksnummer);
         }
         return myndighet.hentMyndighetLandkode();
     }

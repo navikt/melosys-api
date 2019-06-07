@@ -50,7 +50,7 @@ public class ValiderYtelserTest {
         LocalDate fom = LocalDate.now().minusYears(2);
         LocalDate tom = LocalDate.now().minusYears(1);
 
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
             .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(false, fom));
 
@@ -67,7 +67,7 @@ public class ValiderYtelserTest {
         LocalDate fom = LocalDate.now().minusYears(2);
         LocalDate tom = LocalDate.now().minusYears(1);
 
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
             .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom.minusMonths(1)));
 
@@ -84,7 +84,7 @@ public class ValiderYtelserTest {
         LocalDate fom = LocalDate.now().minusYears(2);
         LocalDate tom = LocalDate.now().minusYears(1);
 
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
             .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom.minusYears(4)));
 
@@ -100,7 +100,7 @@ public class ValiderYtelserTest {
 
         LocalDate fom = LocalDate.now().minusYears(2);
 
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
             .thenReturn(Optional.of(hentSedSaksopplysning(fom, null)));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom));
 
@@ -117,7 +117,7 @@ public class ValiderYtelserTest {
         LocalDate fom = LocalDate.now().minusYears(1);
         LocalDate tom = LocalDate.now().plusYears(1);
 
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
             .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom));
 
@@ -134,7 +134,7 @@ public class ValiderYtelserTest {
         LocalDate fom = LocalDate.now().plusYears(1);
         LocalDate tom = LocalDate.now().plusYears(2);
 
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SED_OPPLYSNINGER)))
+        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
             .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom));
 
