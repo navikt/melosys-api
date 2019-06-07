@@ -66,7 +66,6 @@ public class Tps3PersonKonverteringTest implements KonverteringTest {
     @Test
     public void testMidlertidigPostadresseNorge() throws Exception {
         final String kilde = "person/midlertidig_postadresse_norge.xml";
-        //final String kilde = "person/MEL-156.xml";
         PersonDokument dokument = (PersonDokument) getSaksopplysning(kilde).getDokument();
 
         assertThat(dokument).isNotNull();
@@ -81,6 +80,6 @@ public class Tps3PersonKonverteringTest implements KonverteringTest {
     public Saksopplysning getSaksopplysning(String ressurs) throws IOException {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
         Objects.requireNonNull(kilde);
-        return konverter(kilde, factory, SaksopplysningType.PERSONOPPLYSNING, "3.0");
+        return konverter(kilde, factory, SaksopplysningType.PERSOPL, "3.0");
     }
 }

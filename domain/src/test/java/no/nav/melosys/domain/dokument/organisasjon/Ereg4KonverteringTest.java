@@ -99,6 +99,6 @@ public class Ereg4KonverteringTest implements KonverteringTest {
     public Saksopplysning getSaksopplysning(String ressurs) throws IOException {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
         Objects.requireNonNull(kilde);
-        return konverter(kilde, factory, SaksopplysningType.ORGANISASJON, "4.0");
+        return konverter(kilde, factory, SaksopplysningType.ORG, "4.0");
     }
 }
