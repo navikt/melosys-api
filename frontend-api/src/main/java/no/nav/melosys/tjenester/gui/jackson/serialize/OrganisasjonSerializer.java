@@ -14,7 +14,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.AdresseDto;
 import no.nav.melosys.tjenester.gui.dto.GateadresseDto;
 import no.nav.melosys.tjenester.gui.dto.OrganisasjonDto;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> {
 
@@ -32,7 +32,7 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         organisasjonDto.setOrgnr(organisasjon.getOrgnummer());
         organisasjonDto.setNavn(organisasjon.lagSammenslåttNavn());
         organisasjonDto.setOppstartdato(organisasjon.getOppstartsdato());
-        if (!StringUtils.isEmpty(organisasjon.getEnhetstype())) {
+        if (StringUtils.isNotEmpty(organisasjon.getEnhetstype())) {
             organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype(), LocalDate.now()));
         }
 
@@ -64,7 +64,8 @@ public class OrganisasjonSerializer extends StdSerializer<OrganisasjonDokument> 
         gateadresse.setGatenavn(adresse.gatenavn);
 
         dto.setPostnr(adresse.postnummer);
-        dto.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now()));
+        String poststed = StringUtils.isNotEmpty(adresse.poststed) ? adresse.poststed : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
+        dto.setPoststed(poststed);
         dto.setLand(kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, adresse.landkode, LocalDate.now()));
 
         return  dto;

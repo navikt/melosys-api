@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "SemistrukturertAdresse")
@@ -18,6 +19,8 @@ public class SemistrukturertAdresse extends GeografiskAdresse {
     private String adresselinje3;
 
     private String postnr;
+
+    private String poststed;
 
     private String kommunenr;
 
@@ -57,6 +60,14 @@ public class SemistrukturertAdresse extends GeografiskAdresse {
         this.postnr = postnr;
     }
 
+    public String getPoststed() {
+        return poststed;
+    }
+
+    public void setPoststed(String poststed) {
+        this.poststed = poststed;
+    }
+
     public String getKommunenr() {
         return kommunenr;
     }
@@ -71,5 +82,13 @@ public class SemistrukturertAdresse extends GeografiskAdresse {
 
     public void setPoststedUtland(String poststedUtland) {
         this.poststedUtland = poststedUtland;
+    }
+
+    private boolean erNorsk() {
+        return Landkoder.NO.getKode().equals(getLandkode());
+    }
+
+    public boolean erUtenlandsk() {
+        return !erNorsk();
     }
 }
