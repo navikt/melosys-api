@@ -14,16 +14,16 @@ public class OpprettSakRequest {
     private Long gsakSaksnummer;
     private Sakstyper sakstype;
 
-    private OpprettSakRequest(String aktørID, String arbeidsgiver, String representant, String representantKontaktperson, Behandlingstyper behandlingstype, String initierendeJournalpostId, String initierendeDokumentId, Long gsakSaksnummer, Sakstyper sakstype) {
-        this.aktørID = aktørID;
-        this.arbeidsgiver = arbeidsgiver;
-        this.representant = representant;
-        this.representantKontaktperson = representantKontaktperson;
-        this.behandlingstype = behandlingstype;
-        this.initierendeJournalpostId = initierendeJournalpostId;
-        this.initierendeDokumentId = initierendeDokumentId;
-        this.gsakSaksnummer = gsakSaksnummer;
-        this.sakstype = sakstype;
+    private OpprettSakRequest(OpprettSakRequest.Builder builder) {
+        this.aktørID = builder.aktørID;
+        this.arbeidsgiver = builder.arbeidsgiver;
+        this.representant = builder.representant;
+        this.representantKontaktperson = builder.representantKontaktperson;
+        this.behandlingstype = builder.behandlingstype;
+        this.initierendeJournalpostId = builder.initierendeJournalpostId;
+        this.initierendeDokumentId = builder.initierendeDokumentId;
+        this.gsakSaksnummer = builder.gsakSaksnummer;
+        this.sakstype = builder.sakstype;
     }
 
     public String getAktørID() {
@@ -119,7 +119,7 @@ public class OpprettSakRequest {
         }
 
         public OpprettSakRequest build() {
-            return new OpprettSakRequest(aktørID, arbeidsgiver, representant, representantKontaktperson, behandlingstype, initierendeJournalpostId, initierendeDokumentId, gsakSaksnummer, sakstype);
+            return new OpprettSakRequest(this);
         }
     }
 }

@@ -39,7 +39,6 @@ import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 @Service
 @Primary
 public class GsakService implements GsakFasade {
-
     private static final Logger log = LoggerFactory.getLogger(GsakService.class);
 
     private static final int FRIST_JFR_DAGER = 1;
@@ -227,16 +226,6 @@ public class GsakService implements GsakFasade {
         domainOppgave.setBehandlesAvApplikasjon(oppgave.getBehandlesAvApplikasjon());
         domainOppgave.setAktørId(oppgave.getAktørId());
         return domainOppgave;
-    }
-
-    @Override
-    public List<Oppgave> finnOppgaveListeMedBruker(String aktørId) throws FunksjonellException, TekniskException {
-        OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
-            .medAktørId(aktørId)
-            .medSorteringsfelt(SORTERINGSFELT)
-            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN);
-
-        return hentOppgaverAlleTyper(oppgaveSearchRequestBuilder);
     }
 
     @Override
