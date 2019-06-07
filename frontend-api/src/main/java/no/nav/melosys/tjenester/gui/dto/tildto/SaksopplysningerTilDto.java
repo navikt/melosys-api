@@ -81,7 +81,7 @@ public final class SaksopplysningerTilDto {
                     break;
                 case PERSHIST:
                     PersonhistorikkDokument personhistorikk = (PersonhistorikkDokument) dokument;
-                    dto.setPersonhistorikkDto(new PersonhistorikkDto(personhistorikk));
+                    dto.setPersonhistorikk(new PersonhistorikkDto(personhistorikk));
                     if (!personhistorikk.statsborgerskapListe.isEmpty()) {
                         historiskStatsborgerskap = personhistorikk.statsborgerskapListe.get(0).statsborgerskap;
                     }

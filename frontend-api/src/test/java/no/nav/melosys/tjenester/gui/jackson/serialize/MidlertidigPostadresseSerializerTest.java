@@ -10,7 +10,6 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +44,6 @@ public class MidlertidigPostadresseSerializerTest {
 
     @Test
     public void midlertidigPostadresseNorge() throws Exception {
-        PersonDokument personDokument = new PersonDokument();
         MidlertidigPostadresseNorge midlertidigPostadresse = new MidlertidigPostadresseNorge();
 
         Gateadresse gateadresse = new Gateadresse();
@@ -56,25 +54,20 @@ public class MidlertidigPostadresseSerializerTest {
         midlertidigPostadresse.poststed = "0557";
         midlertidigPostadresse.land = new Land(NORGE);
 
-        personDokument.midlertidigPostadresse = midlertidigPostadresse;
-
-        String json = mapper.writeValueAsString(personDokument);
+        String json = mapper.writeValueAsString(midlertidigPostadresse);
 
         assertThat(json).isNotNull();
     }
 
     @Test
     public void midlertidigPostadresseUtland() throws Exception {
-        PersonDokument personDokument = new PersonDokument();
         MidlertidigPostadresseUtland midlertidigPostadresse = new MidlertidigPostadresseUtland();
         midlertidigPostadresse.adresselinje1 = "42 Mock Road";
         midlertidigPostadresse.adresselinje2 = "Mock City";
         midlertidigPostadresse.adresselinje3 = "United Kingdom";
         midlertidigPostadresse.land = new Land(STORBRITANNIA);
 
-        personDokument.midlertidigPostadresse = midlertidigPostadresse;
-
-        String json = mapper.writeValueAsString(personDokument);
+        String json = mapper.writeValueAsString(midlertidigPostadresse);
 
         assertThat(json).isNotNull();
     }

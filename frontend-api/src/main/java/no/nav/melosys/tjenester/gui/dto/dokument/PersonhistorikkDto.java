@@ -5,36 +5,37 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.felles.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.*;
 
 public class PersonhistorikkDto {
 
-    public List<BostedsadressePeriodeDto> bostedsadressePeriodeListe = new ArrayList<>();
+    public List<BostedsadressePeriodeDto> bostedsadressePerioder = new ArrayList<>();
 
-    public List<PostadressePeriodeDto> postadressePeriodeListe = new ArrayList<>();
+    public List<PostadressePeriodeDto> postadressePerioder = new ArrayList<>();
 
-    public List<MidlertidigPostadressePeriodeDto> midlertidigAdressePeriodeListe = new ArrayList<>();
+    public List<MidlertidigPostadressePeriodeDto> midlertidigAdressePerioder = new ArrayList<>();
 
     public PersonhistorikkDto() {
     }
 
     public PersonhistorikkDto(PersonhistorikkDokument personhistorikk) {
-        bostedsadressePeriodeListe = personhistorikk.bostedsadressePeriodeListe.stream()
+        bostedsadressePerioder = personhistorikk.bostedsadressePeriodeListe.stream()
             .map(BostedsadressePeriodeDto::new)
             .collect(Collectors.toList());
 
-        postadressePeriodeListe = personhistorikk.postadressePeriodeListe.stream()
+        postadressePerioder = personhistorikk.postadressePeriodeListe.stream()
             .map(PostadressePeriodeDto::new)
             .collect(Collectors.toList());
 
-        midlertidigAdressePeriodeListe = personhistorikk.midlertidigAdressePeriodeListe.stream()
+        midlertidigAdressePerioder = personhistorikk.midlertidigAdressePeriodeListe.stream()
             .map(MidlertidigPostadressePeriodeDto::new)
             .collect(Collectors.toList());
     }
 
     class BostedsadressePeriodeDto {
-        final Bostedsadresse bostedsadresse;
-        final Periode periode;
+        public final Bostedsadresse bostedsadresse;
+        public final Periode periode;
 
         BostedsadressePeriodeDto(BostedsadressePeriode bostedsadressePeriode) {
             this.bostedsadresse = bostedsadressePeriode.bostedsadresse;
@@ -43,21 +44,21 @@ public class PersonhistorikkDto {
     }
 
     class PostadressePeriodeDto {
-        final UstrukturertAdresse postadresse;
-        final Periode periode;
+        public final UstrukturertAdresse postadresse;
+        public final Periode periode;
 
         PostadressePeriodeDto(PostadressePeriode postadressePeriode) {
-            this.postadresse = postadressePeriode.postadresse;
+            this.postadresse = new UstrukturertAdresse(postadressePeriode.postadresse);
             this.periode = postadressePeriode.periode;
         }
     }
 
     class MidlertidigPostadressePeriodeDto {
-        final MidlertidigPostadresse midlertidigPostadresse;
-        Periode periode;
+        public final MidlertidigPostadresse midlertidigAdresse;
+        public Periode periode;
 
         MidlertidigPostadressePeriodeDto(MidlertidigPostadresse midlertidigPostadresse) {
-            this.midlertidigPostadresse = midlertidigPostadresse;
+            this.midlertidigAdresse = midlertidigPostadresse;
         }
     }
 }

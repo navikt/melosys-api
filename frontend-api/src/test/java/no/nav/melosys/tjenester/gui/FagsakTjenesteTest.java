@@ -10,17 +10,8 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import io.github.benas.randombeans.EnhancedRandomBuilder;
-import io.github.benas.randombeans.FieldDefinitionBuilder;
-import io.github.benas.randombeans.api.EnhancedRandom;
-import io.github.benas.randombeans.api.Randomizer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
-import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -30,9 +21,7 @@ import no.nav.melosys.tjenester.gui.dto.BehandlingOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakDto;
 import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.HenleggelseDto;
-import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.json.JSONException;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -62,25 +51,9 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     private String schemaType;
 
-    private EnhancedRandom random;
-
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
 
-    @Before
-    public void setUp() {
-        random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
-            .overrideDefaultInitialization(true)
-            .collectionSizeRange(1, 4)
-            .objectPoolSize(100)
-            .dateRange(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
-            .exclude(FieldDefinitionBuilder.field().named("tilleggsinformasjonDetaljer").ofType(TilleggsinformasjonDetaljer.class).inClass(Tilleggsinformasjon.class).get())
-            .stringLengthRange(2, 10)
-            .randomize(MidlertidigPostadresse.class, (Randomizer<MidlertidigPostadresse>) () -> Math.random() > 0.5 ? random.nextObject(MidlertidigPostadresseNorge.class) : random.nextObject(MidlertidigPostadresseUtland.class))
-            .randomize(FieldDefinitionBuilder.field().named("fnr").ofType(String.class).get(), new NumericStringRandomizer(11))
-            .randomize(FieldDefinitionBuilder.field().named("orgnummer").ofType(String.class).get(), new NumericStringRandomizer(9))
-            .build();
-    }
 
     @Override
     public String schemaNavn() {
@@ -89,7 +62,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void fagsakSchemaValidering() throws IOException, JSONException {
-        FagsakDto fagsakDto = random.nextObject(FagsakDto.class);
+        FagsakDto fagsakDto = defaultEnhancedRandom().nextObject(FagsakDto.class);
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
         schemaType = FAGSAKER_SCHEMA;
@@ -98,8 +71,8 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void fagsakSøkSchemaValidering() throws IOException, JSONException {
-        List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = EnhancedRandom.randomListOf(1, FagsakOppsummeringDto.class);
-        List<BehandlingOversiktDto> behandlingOversiktDtoer = EnhancedRandom.randomListOf(1, BehandlingOversiktDto.class);
+        List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = defaultEnhancedRandom().randomListOf(1, FagsakOppsummeringDto.class);
+        List<BehandlingOversiktDto> behandlingOversiktDtoer = defaultEnhancedRandom().randomListOf(1, BehandlingOversiktDto.class);
         behandlingOversiktDtoer.get(0).setLand(Collections.singletonList(Landkoder.NO.getKode()));
         fagsakOppsummeringDtoList.get(0).setBehandlingOversikter(behandlingOversiktDtoer);
 

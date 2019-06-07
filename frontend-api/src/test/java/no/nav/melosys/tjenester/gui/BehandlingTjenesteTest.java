@@ -1,13 +1,27 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import javax.ws.rs.core.Response;
 
+import io.github.benas.randombeans.EnhancedRandomBuilder;
+import io.github.benas.randombeans.FieldDefinitionBuilder;
+import io.github.benas.randombeans.api.EnhancedRandom;
+import io.github.benas.randombeans.api.Randomizer;
+import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
+import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
+import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
+import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.abac.Tilgang;
+import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
+import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,20 +39,37 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(BehandlingTjenesteTest.class);
 
     private static final String TIDLIGERE_MEDLEMSPERIODER_SCHEMA = "behandlinger-medlemsperioder-post-schema.json";
+    private static final String BEHANDLINGER_SCHEMA = "behandlinger-behandling-schema.json";
 
     private BehandlingTjeneste behandlingTjeneste;
 
+    private String schemaType;
+
     @Mock
     private BehandlingService behandlingService;
+    private EnhancedRandom random;
 
     @Before
     public void setUp() {
         behandlingTjeneste = new BehandlingTjeneste(behandlingService, mock(Tilgang.class));
+
+        random = EnhancedRandomBuilder.aNewEnhancedRandomBuilder()
+            .overrideDefaultInitialization(true)
+            .collectionSizeRange(1, 4)
+            .objectPoolSize(100)
+            .dateRange(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
+            .exclude(FieldDefinitionBuilder.field().named("tilleggsinformasjonDetaljer").ofType(TilleggsinformasjonDetaljer.class).inClass(Tilleggsinformasjon.class).get())
+            .stringLengthRange(2, 10)
+            .randomize(GeografiskAdresse.class, (Randomizer<GeografiskAdresse>) () -> EnhancedRandom.random(SemistrukturertAdresse.class))
+            .randomize(MidlertidigPostadresse.class, (Randomizer<MidlertidigPostadresse>) () -> Math.random() > 0.5 ? random.nextObject(MidlertidigPostadresseNorge.class) : random.nextObject(MidlertidigPostadresseUtland.class))
+            .randomize(FieldDefinitionBuilder.field().named("fnr").ofType(String.class).get(), new NumericStringRandomizer(11))
+            .randomize(FieldDefinitionBuilder.field().named("orgnummer").ofType(String.class).get(), new NumericStringRandomizer(9))
+            .build();
     }
 
     @Override
     public String schemaNavn() {
-        return TIDLIGERE_MEDLEMSPERIODER_SCHEMA;
+        return schemaType;
     }
 
     @Test
@@ -48,6 +79,16 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
         String jsonString = objectMapper().writeValueAsString(tidligereMedlemsperioderDto);
         assertThat(jsonString).isNotEmpty();
+
+        schemaType = TIDLIGERE_MEDLEMSPERIODER_SCHEMA;
+        valider(jsonString, log);
+    }
+
+    @Test
+    public void hentBehandling_erSchemaValidert() throws IOException {
+        BehandlingDto behandlingDto = random.nextObject(BehandlingDto.class);
+        schemaType = BEHANDLINGER_SCHEMA;
+        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(behandlingDto);
         valider(jsonString, log);
     }
 
