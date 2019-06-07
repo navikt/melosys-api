@@ -62,7 +62,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void journalPostSchemaValidering() throws IOException, MelosysException, JSONException {
+    public void hentJournalpostValidering() throws IOException, MelosysException, JSONException {
         Journalpost journalpost = random.nextObject(Journalpost.class);
         journalpost.setBrukerId(SAMPLE_FNR);
         journalpost.setAvsenderId(SAMPLE_ORGNR);
