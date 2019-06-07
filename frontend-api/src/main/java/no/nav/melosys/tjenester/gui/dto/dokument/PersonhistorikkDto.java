@@ -16,8 +16,7 @@ public class PersonhistorikkDto {
 
     public List<MidlertidigPostadressePeriodeDto> midlertidigAdressePerioder = new ArrayList<>();
 
-    public PersonhistorikkDto() {
-    }
+    public PersonhistorikkDto() { }
 
     public PersonhistorikkDto(PersonhistorikkDokument personhistorikk) {
         bostedsadressePerioder = personhistorikk.bostedsadressePeriodeListe.stream()
@@ -59,6 +58,7 @@ public class PersonhistorikkDto {
 
         MidlertidigPostadressePeriodeDto(MidlertidigPostadresse midlertidigPostadresse) {
             this.midlertidigAdresse = midlertidigPostadresse;
+            this.periode = midlertidigPostadresse.postleveringsPeriode;
         }
     }
 }
