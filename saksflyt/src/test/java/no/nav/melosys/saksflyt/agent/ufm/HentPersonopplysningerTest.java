@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class HentPersonTest {
+public class HentPersonopplysningerTest {
 
     @Mock
     private TpsFasade tpsFasade;
@@ -26,11 +26,11 @@ public class HentPersonTest {
     @Mock
     private SaksopplysningRepository saksopplysningRepository;
 
-    private HentPerson hentPerson;
+    private HentPersonopplysninger hentPersonopplysninger;
 
     @Before
     public void setUp() throws Exception {
-        hentPerson = new HentPerson(tpsFasade, fagsakService, saksopplysningRepository);
+        hentPersonopplysninger = new HentPersonopplysninger(tpsFasade, fagsakService, saksopplysningRepository);
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("432234");
         when(tpsFasade.hentPerson(anyString())).thenReturn(new Saksopplysning());
     }
@@ -45,8 +45,8 @@ public class HentPersonTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, "123321");
-        hentPerson.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
+        hentPersonopplysninger.utfør(prosessinstans);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_HENT_MEDLEMSKAP);
         verify(saksopplysningRepository).save(any(Saksopplysning.class));
     }
 }

@@ -15,25 +15,30 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
+import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.service.unntaksperiode.kontroll.UnntaksperiodeKontroller.gyldigPeriode;
+import static no.nav.melosys.service.unntaksperiode.kontroll.PeriodeKontroller.gyldigPeriode;
 
-public final class UnntaksperiodeKontroll {
+@Service
+public class RegisterkontrollService {
 
-    private UnntaksperiodeKontroll() {
+    private final KontrollFactory kontrollFactory;
+
+    public RegisterkontrollService(KontrollFactory kontrollFactory) {
+        this.kontrollFactory = kontrollFactory;
     }
 
-    public static List<Unntak_periode_begrunnelser> utførKontroller(Behandling behandling, String sedType) throws TekniskException {
+    public List<Unntak_periode_begrunnelser> utførKontroller(Behandling behandling) throws TekniskException {
         SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
         PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
         MedlemskapDokument medlemskapDokument = SaksopplysningerUtils.hentMedlemskapDokument(behandling);
         InntektDokument inntektDokument = SaksopplysningerUtils.hentInntektDokument(behandling);
         KontrollData kontrollData = new KontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument);
 
-        return utførKontroller(kontrollData, KontrollFactory.hentKontrollerForSedType(sedType));
+        return utførKontroller(kontrollData, kontrollFactory.hentKontrollerForSedType(sedDokument.getSedType()));
     }
 
-    private static List<Unntak_periode_begrunnelser> utførKontroller(KontrollData kontrollData,
+    private List<Unntak_periode_begrunnelser> utførKontroller(KontrollData kontrollData,
                                                                      Collection<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller) {
 
         Unntak_periode_begrunnelser feilIPeriode = gyldigPeriode(kontrollData);

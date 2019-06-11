@@ -2,7 +2,9 @@ package no.nav.melosys.saksflyt.agent.ufm;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.sed.BucType;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.SaksopplysningRepository;
@@ -37,6 +39,8 @@ public class OpprettSedDokumentTest {
 
         SedDokument sedDokument = new SedDokument();
         sedDokument.setLovvalgBestemmelse(LovvalgsBestemmelser_883_2004.FO_883_2004_ART12_1);
+        sedDokument.setBucType(BucType.LA_BUC_04);
+        sedDokument.setSedType(SedType.A009);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.SED_DOKUMENT, sedDokument);
@@ -45,7 +49,7 @@ public class OpprettSedDokumentTest {
         opprettSedDokument.utfør(prosessinstans);
 
         verify(saksopplysningRepository, times(1)).save(any(Saksopplysning.class));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_HENT_PERSON);
     }
 
     @Test(expected = TekniskException.class)

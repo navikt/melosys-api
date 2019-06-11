@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
@@ -11,6 +12,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
@@ -25,12 +27,14 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
 
     private final OppdaterMedlFelles felles;
     private final MedlFasade medlFasade;
+    private final BehandlingRepository behandlingRepository;
     private final BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Autowired
-    public UnntaksperiodeUnderAvklaring(OppdaterMedlFelles felles, MedlFasade medlFasade, BehandlingsresultatRepository behandlingsresultatRepository) {
+    public UnntaksperiodeUnderAvklaring(OppdaterMedlFelles felles, MedlFasade medlFasade, BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository) {
         this.felles = felles;
         this.medlFasade = medlFasade;
+        this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
     }
 
@@ -47,16 +51,18 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
 
-        Behandling behandling = prosessinstans.getBehandling();
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
-            .orElseThrow(() -> new TekniskException("Behandlingsresultat ikke funnet for behandling" + behandling.getId()));
+        final long behandlingId = prosessinstans.getBehandling().getId();
+        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingId)
+            .orElseThrow(() -> new TekniskException("Behandlingsresultat ikke funnet for behandling" + behandlingId));
 
         Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
         if (lovvalgsperioder.isEmpty()) {
-            SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(prosessinstans.getBehandling());
+            Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingId);
+            SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
+            PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
             Lovvalgsperiode lovvalgsperiode = UnntaksperiodeUtils.opprettLovvalgsperiode(sedDokument);
-            Long medlperiodeId = medlFasade.opprettPeriodeUnderAvklaring(sedDokument.getFnr(), lovvalgsperiode, KildedokumenttypeMedl.SED);
-            felles.lagreMedlPeriodeId(medlperiodeId, lovvalgsperiode, behandling.getId());
+            Long medlperiodeId = medlFasade.opprettPeriodeUnderAvklaring(personDokument.fnr, lovvalgsperiode, KildedokumenttypeMedl.SED);
+            felles.lagreMedlPeriodeId(medlperiodeId, lovvalgsperiode, behandlingId);
         }
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);

@@ -8,7 +8,9 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.dokument.sed.BucType;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.dokument.sed.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -107,6 +109,8 @@ public class EessiMottakService {
             melosysEessiMelding.getStatsborgerskap().stream().map(Statsborgerskap::getLandkode).collect(Collectors.toList())
         );
         sedDokument.setErEndring(melosysEessiMelding.getErEndring());
+        sedDokument.setSedType(SedType.valueOf(melosysEessiMelding.getSedType()));
+        sedDokument.setBucType(BucType.valueOf(melosysEessiMelding.getBucType()));
 
         return sedDokument;
     }

@@ -47,7 +47,7 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
 
-        //Foreløpig satt verdier for oppgave. Avklares nærmere med MELOSYS-2280
+        //Foreløpig satt verdier for oppgave. Ikke avklart hvilke verdier som skal settes per 07.06.19
         Oppgave oppgave = new Oppgave();
         oppgave.setPrioritet(PrioritetType.NORM);
         oppgave.setTema(Tema.UFM);

@@ -54,6 +54,7 @@ public class UnntaksperiodeIkkeGodkjentTest {
         ikkeGodkjentBegrunnelser.add(IkkeGodkjentBegrunnelser.ANNET);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
+        prosessinstans.getBehandling().setFagsak(new Fagsak());
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, ikkeGodkjentBegrunnelser);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, "fritekst");
 

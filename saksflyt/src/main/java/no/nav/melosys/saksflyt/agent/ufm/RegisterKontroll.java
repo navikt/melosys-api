@@ -12,11 +12,12 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.unntaksperiode.kontroll.UnntaksperiodeKontroll;
+import no.nav.melosys.service.unntaksperiode.kontroll.RegisterkontrollService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +29,19 @@ public class RegisterKontroll extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(RegisterKontroll.class);
 
     private final AvklartefaktaService avklartefaktaService;
+    private final RegisterkontrollService registerkontrollService;
+    private final BehandlingRepository behandlingRepository;
 
     @Autowired
-    public RegisterKontroll(AvklartefaktaService avklartefaktaService) {
+    public RegisterKontroll(AvklartefaktaService avklartefaktaService, RegisterkontrollService registerkontrollService, BehandlingRepository behandlingRepository) {
         this.avklartefaktaService = avklartefaktaService;
+        this.registerkontrollService = registerkontrollService;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.REG_UNNTAK_REGISTER_KONTROLL;
+        return ProsessSteg.REG_UNNTAK_REGISTERKONTROLL;
     }
 
     @Override
@@ -46,21 +51,19 @@ public class RegisterKontroll extends AbstraktStegBehandler {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        Behandling behandling = prosessinstans.getBehandling();
+        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
 
-        List<Unntak_periode_begrunnelser> registrerteTreff = UnntaksperiodeKontroll.utførKontroller(behandling, "A009");
-        if (!registrerteTreff.isEmpty()) {
-            registrerFeil(prosessinstans, registrerteTreff);
-            prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_OPPGAVE);
-        } else {
-            prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
-        }
+        List<Unntak_periode_begrunnelser> registrerteTreff = registerkontrollService.utførKontroller(behandling);
+        registrerFeil(prosessinstans, registrerteTreff);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_BESTEM_BEHANDLINGSMAATE);
     }
 
     private void registrerFeil(Prosessinstans prosessinstans, List<Unntak_periode_begrunnelser> registrerteTreff) throws IkkeFunnetException {
 
+        boolean funnetTreff = !registrerteTreff.isEmpty();
         avklartefaktaService.leggTilAvklarteFakta(prosessinstans.getBehandling().getId(),
-            Avklartefaktatype.VURDERING_UNNTAK_PERIODE, Avklartefaktatype.VURDERING_UNNTAK_PERIODE.name(), null, "TRUE");
+            Avklartefaktatype.VURDERING_UNNTAK_PERIODE, Avklartefaktatype.VURDERING_UNNTAK_PERIODE.name(),
+            null, funnetTreff ? "TRUE" : "FALSE");
 
         long behandlingsId = prosessinstans.getBehandling().getId();
         log.info("Treff ved validering av periode for behandling {}. Treffbegrunnelse: {}", behandlingsId, registrerteTreff);

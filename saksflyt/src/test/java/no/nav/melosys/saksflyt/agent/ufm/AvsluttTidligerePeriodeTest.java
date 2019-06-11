@@ -47,7 +47,7 @@ public class AvsluttTidligerePeriodeTest {
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "12312322");
 
         avsluttTidligerePeriode.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_PERIODE);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class AvsluttTidligerePeriodeTest {
         Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
         avsluttTidligerePeriode.utfør(prosessinstans);
         verify(medlFasade).avvisPeriode(any(Lovvalgsperiode.class), any(StatusaarsakMedl.class));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_PERIODE);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
     }
 
     private Fagsak hentFagsak() {

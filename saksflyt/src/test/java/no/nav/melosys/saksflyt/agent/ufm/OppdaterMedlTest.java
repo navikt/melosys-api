@@ -2,8 +2,8 @@ package no.nav.melosys.saksflyt.agent.ufm;
 
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.Optional;
 
+import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -11,7 +11,7 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import org.junit.Before;
@@ -35,15 +35,16 @@ public class OppdaterMedlTest {
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
-    private SaksopplysningRepository saksopplysningRepository;
+    private BehandlingRepository behandlingRepository;
 
     private OppdaterMedl oppdaterMedl;
 
+    private final Behandling behandling = new Behandling();
+
     @Before
     public void setUp() {
-        oppdaterMedl = new OppdaterMedl(medlFasade, oppdaterMedlFelles, lovvalgsperiodeService, saksopplysningRepository);
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
-            .thenReturn(Optional.of(hentSaksopplysning()));
+        oppdaterMedl = new OppdaterMedl(medlFasade, oppdaterMedlFelles, lovvalgsperiodeService, behandlingRepository);
+        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(behandling);
     }
 
     @Test
@@ -57,9 +58,8 @@ public class OppdaterMedlTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.lagreLovvalgsperioder(anyLong(), any())).thenReturn(Collections.singleton(lovvalgsperiode));
 
-        Behandling behandling = new Behandling();
         behandling.setId(12L);
-        behandling.getSaksopplysninger().add(saksopplysning);
+        behandling.getSaksopplysninger().addAll(Sets.newHashSet(saksopplysning, hentSedSaksopplysning()));
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
@@ -74,16 +74,15 @@ public class OppdaterMedlTest {
     public void utfør_erEksisterendeLovvalgsperiode_oppdaterPeriodeEndeligMedl() throws Exception {
         PersonDokument personDokument = new PersonDokument();
         personDokument.fnr = "123";
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(personDokument);
-        saksopplysning.setType(SaksopplysningType.PERSOPL);
+        Saksopplysning personSaksopplysning = new Saksopplysning();
+        personSaksopplysning.setDokument(personDokument);
+        personSaksopplysning.setType(SaksopplysningType.PERSOPL);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singleton(lovvalgsperiode));
 
-        Behandling behandling = new Behandling();
         behandling.setId(12L);
-        behandling.getSaksopplysninger().add(saksopplysning);
+        behandling.getSaksopplysninger().addAll(Sets.newHashSet(personSaksopplysning, hentSedSaksopplysning()));
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
@@ -94,12 +93,13 @@ public class OppdaterMedlTest {
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 
-    private Saksopplysning hentSaksopplysning() {
+    private Saksopplysning hentSedSaksopplysning() {
         SedDokument sedDokument = new SedDokument();
         sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now().plusYears(1L)));
         sedDokument.setLovvalgslandKode(Landkoder.DE);
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(sedDokument);
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
         return saksopplysning;
     }
 }
