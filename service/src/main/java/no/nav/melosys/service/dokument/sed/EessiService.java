@@ -69,7 +69,7 @@ public class EessiService {
 
     public String opprettBucOgSed(Behandling behandling, String bucType, String mottakerLand, String mottakerId) throws MelosysException {
         if (skalSendeSed) {
-            SedDataDto sedDataDto = sedDataBygger.lag(behandling);
+            SedDataDto sedDataDto = sedDataBygger.lagUtkast(behandling);
             sedDataDto.setMottakerLand(mottakerLand);
             sedDataDto.setMottakerId(mottakerId);
             sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());

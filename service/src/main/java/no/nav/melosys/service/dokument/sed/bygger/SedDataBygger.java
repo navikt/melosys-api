@@ -14,6 +14,8 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.UtenlandskIdent;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -46,6 +48,26 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
         this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
         this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
 
+        SedDataDto sedDataDto = lagPersonopplysninger(behandling);
+
+        sedDataDto.setLovvalgsperioder(Collections.singletonList(hentLovvalgsperiodeDto()));
+
+        sedDataDto.setTidligereLovvalgsperioder(hentTidligereLovvalgsperioderDto(behandling));
+
+        sedDataDto.setMottakerLand(behandling.getFagsak().hentMyndighetLandkode().getKode());
+
+        return sedDataDto;
+    }
+
+    public SedDataDto lagUtkast(Behandling behandling) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+        this.behandling = behandling;
+        this.søknad = SaksopplysningerUtils.hentSøknadDokument(behandling);
+        this.person = SaksopplysningerUtils.hentPersonDokument(behandling);
+
+        return lagPersonopplysninger(behandling);
+    }
+
+    private SedDataDto lagPersonopplysninger(Behandling behandling) throws TekniskException, IkkeFunnetException, SikkerhetsbegrensningException {
         SedDataDto sedDataDto = new SedDataDto();
 
         sedDataDto.setArbeidsgivendeVirksomheter(map(avklarteVirksomheterService.hentArbeidsgivere(behandling, this::utfyllManglendeAdressefelter)));
@@ -61,10 +83,6 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
             .filter(f -> f.familierelasjon.equals(Familierelasjon.FARA) || f.familierelasjon.equals(Familierelasjon.MORA))
             .map(this::hentFamilieMedlem).collect(Collectors.toList()));
 
-        sedDataDto.setLovvalgsperioder(Collections.singletonList(hentLovvalgsperiodeDto()));
-
-        sedDataDto.setTidligereLovvalgsperioder(hentTidligereLovvalgsperioderDto(behandling));
-
         sedDataDto.setSelvstendigeVirksomheter(map(avklarteVirksomheterService.hentSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter)));
 
         sedDataDto.setUtenlandskeVirksomheter(hentUtenlandskeVirksomheter().stream().map(
@@ -72,8 +90,6 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
 
         sedDataDto.setUtenlandskIdent(this.søknad.personOpplysninger.utenlandskIdent.stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));
-
-        sedDataDto.setMottakerLand(behandling.getFagsak().hentMyndighetLandkode().getKode());
 
         return sedDataDto;
     }

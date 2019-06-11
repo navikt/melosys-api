@@ -65,6 +65,7 @@ public class EessiServiceTest {
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
 
         when(sedDataBygger.lag(any(Behandling.class))).thenReturn(new SedDataDto());
+        when(sedDataBygger.lagUtkast(any(Behandling.class))).thenReturn(new SedDataDto());
     }
 
     @Test
