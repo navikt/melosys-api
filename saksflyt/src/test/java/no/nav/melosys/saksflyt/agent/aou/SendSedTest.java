@@ -9,14 +9,13 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.sed.SedService;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -29,7 +28,7 @@ public class SendSedTest {
     @Mock
     private BehandlingRepository behandlingRepository;
     @Mock
-    private SedService sedService;
+    private EessiService eessiService;
 
     @InjectMocks
     private SendSed sendSed;
@@ -53,7 +52,7 @@ public class SendSedTest {
         sendSed.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
-        verify(sedService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
+        verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
     }
 
     @Test
@@ -68,7 +67,7 @@ public class SendSedTest {
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
         assertThat(nå).isBefore(prosessinstans.getBehandling().getDokumentasjonSvarfristDato());
-        verify(sedService, never()).opprettOgSendSed(any(), any());
+        verify(eessiService, never()).opprettOgSendSed(any(), any());
     }
 
     private static Behandlingsresultat hentBehandlingsresultat() {

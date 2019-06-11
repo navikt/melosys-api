@@ -11,7 +11,7 @@ import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.sed.SedService;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,12 +20,12 @@ public abstract class AbstraktSendSed extends AbstraktStegBehandler {
     private static final Logger log = LoggerFactory.getLogger(AbstraktSendSed.class);
 
     protected final BehandlingRepository behandlingRepository;
-    private final SedService sedService;
+    private final EessiService eessiService;
     private final BehandlingsresultatService behandlingsresultatService;
 
-    protected AbstraktSendSed(BehandlingRepository behandlingRepository, SedService sedService, BehandlingsresultatService behandlingsresultatService) {
+    protected AbstraktSendSed(BehandlingRepository behandlingRepository, EessiService eessiService, BehandlingsresultatService behandlingsresultatService) {
         this.behandlingRepository = behandlingRepository;
-        this.sedService = sedService;
+        this.eessiService = eessiService;
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
@@ -39,7 +39,7 @@ public abstract class AbstraktSendSed extends AbstraktStegBehandler {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         if (skalSendeSed(behandlingsresultat)) {
             log.info("Starter sending av SED for behandling {}", behandling.getId());
-            sedService.opprettOgSendSed(behandling, behandlingsresultat);
+            eessiService.opprettOgSendSed(behandling, behandlingsresultat);
         }
     }
 

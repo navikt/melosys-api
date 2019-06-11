@@ -11,7 +11,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktSendSed;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.sed.SedService;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +33,8 @@ public class SendSed extends AbstraktSendSed {
     private static final int SVARFRIST_MÅNEDER = 2;
 
     @Autowired
-    public SendSed(BehandlingRepository behandlingRepository, SedService sedService, BehandlingsresultatService behandlingsresultatService) {
-        super(behandlingRepository, sedService, behandlingsresultatService);
+    public SendSed(BehandlingRepository behandlingRepository, EessiService eessiService, BehandlingsresultatService behandlingsresultatService) {
+        super(behandlingRepository, eessiService, behandlingsresultatService);
         log.info("IverksettVedtakSendSed initialisert");
     }
 

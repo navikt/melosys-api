@@ -24,11 +24,15 @@ import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class SedDataBygger extends AbstraktDokumentDataBygger {
 
     private final AvklarteVirksomheterService avklarteVirksomheterService;
 
+    @Autowired
     public SedDataBygger(KodeverkService kodeverkService,
                          LovvalgsperiodeService lovvalgsperiodeService,
                          AvklartefaktaService avklartefaktaService,

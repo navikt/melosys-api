@@ -7,12 +7,11 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktSendSed;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.sed.SedService;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import static no.nav.melosys.saksflyt.agent.iv.validering.SendBrevValidator.validerLovvalgsperiode;
 import static no.nav.melosys.saksflyt.agent.iv.validering.SendSedValidator.sedSkalSendes;
 
@@ -23,8 +22,8 @@ public class IverksettVedtakSendSed extends AbstraktSendSed {
     private static final Logger log = LoggerFactory.getLogger(IverksettVedtakSendSed.class);
 
     @Autowired
-    public IverksettVedtakSendSed(BehandlingRepository behandlingRepository, SedService sedService, BehandlingsresultatService behandlingsresultatService) {
-        super(behandlingRepository, sedService, behandlingsresultatService);
+    public IverksettVedtakSendSed(BehandlingRepository behandlingRepository, EessiService eessiService, BehandlingsresultatService behandlingsresultatService) {
+        super(behandlingRepository, eessiService, behandlingsresultatService);
         log.info("IverksettVedtakSendSed initialisert");
     }
 
