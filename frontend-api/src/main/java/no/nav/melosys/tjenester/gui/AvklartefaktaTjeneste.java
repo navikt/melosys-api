@@ -50,8 +50,8 @@ public class AvklartefaktaTjeneste extends RestTjeneste {
     @POST
     @Path("{behandlingID}")
     @ApiOperation(value = "Lagre avklartefakta")
-    public Set<AvklartefaktaDto> lagraAvklarteFakta(@PathParam("behandlingID") long behandlingID,
-            @ApiParam("AvklartefaktaData") Set<AvklartefaktaDto> avklartefaktaDtoer) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public Set<AvklartefaktaDto> lagreAvklarteFakta(@PathParam("behandlingID") long behandlingID,
+                                                    @ApiParam("AvklartefaktaData") Set<AvklartefaktaDto> avklartefaktaDtoer) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         tilgang.sjekk(behandlingID);
         avklartefaktaService.lagreAvklarteFakta(behandlingID, avklartefaktaDtoer);
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID);

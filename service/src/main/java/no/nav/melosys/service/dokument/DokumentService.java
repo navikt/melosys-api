@@ -225,11 +225,10 @@ public class DokumentService {
             Aktoer myndighet = behandling.getFagsak().hentAktørMedRolleType(mottaker.getRolle());
             if (myndighet == null) {
                 // Myndighet er ikke lagret og lagres ikke før kjøring i saksflyt
-                avklarMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling).map(mottakere::add)
+                myndighet = avklarMyndighetService.lagUtenlandskMyndighetFraBehandling(behandling)
                     .orElseThrow(() -> new FunksjonellException("Brev sendes ikke til utenlandske myndigheter for Norge."));
-            } else {
-                mottakere.add(myndighet);
             }
+            mottakere.add(myndighet);
         }
         return mottakere;
     }
