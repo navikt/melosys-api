@@ -11,16 +11,13 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.Sedinformasjon;
+import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
-import no.nav.melosys.integrasjon.eessi.dto.InstitusjonDto;
-import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SedDataDto;
-import no.nav.melosys.integrasjon.eessi.dto.SedinfoDto;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
 import org.junit.Before;
 import org.junit.Rule;
@@ -35,14 +32,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SedServiceTest {
+public class EessiServiceTest {
 
     @Mock
     private SedDataBygger sedDataBygger;
     @Mock
     private EessiConsumer eessiConsumer;
 
-    private SedService sedService;
+    private EessiService eessiService;
 
     private Behandling behandling;
     private Behandlingsresultat behandlingsresultat;
@@ -54,7 +51,7 @@ public class SedServiceTest {
 
     @Before
     public void setup() throws Exception {
-        sedService = new SedService(sedDataBygger, eessiConsumer, "true");
+        eessiService = new EessiService(sedDataBygger, eessiConsumer, "true");
 
         behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
@@ -72,7 +69,7 @@ public class SedServiceTest {
 
     @Test
     public void opprettOgSendSed_verifiserKorrektSedType() throws Exception {
-        sedService.opprettOgSendSed(behandling, behandlingsresultat);
+        eessiService.opprettOgSendSed(behandling, behandlingsresultat);
         verify(eessiConsumer).opprettOgSendSed(any(SedDataDto.class));
     }
 
@@ -81,28 +78,25 @@ public class SedServiceTest {
 //        expectedException.expect(TekniskException.class);
 //        expectedException.expectMessage("Finner ingen lovvalgsperiode!");
 //        behandlingsresultat.setLovvalgsperioder(Sets.newHashSet());
-//        sedService.opprettOgSendSed(behandling, behandlingsresultat);
+//        eessiService.opprettOgSendSed(behandling, behandlingsresultat);
 //    } TODO kommenter inn når sed-feilmeldinger blir kastet fra service igjen
 
     @Test
     public void opprettBucOgSed_verifiserKorrektSedType() throws Exception {
-        OpprettSedDto opprettSedDto = new OpprettSedDto();
-        opprettSedDto.setRinaUrl("localhost:3000");
-        opprettSedDto.setBucId("123456");
-        when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), anyString())).thenReturn(opprettSedDto);
+        when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), anyString())).thenReturn("localhost:3000");
 
-        sedService.opprettBucOgSed(behandling, "LA_BUC_01", "SE", "SE:001");
+        eessiService.opprettBucOgSed(behandling, "LA_BUC_01", "SE", "SE:001");
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), eq("LA_BUC_01"));
     }
 
     @Test
     public void hentMottakerinstitusjoner_forventListeMedRettType() throws MelosysException {
         when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenReturn(Arrays.asList(
-            enhancedRandom.nextObject(InstitusjonDto.class),
-            enhancedRandom.nextObject(InstitusjonDto.class)
+            enhancedRandom.nextObject(Institusjon.class),
+            enhancedRandom.nextObject(Institusjon.class)
         ));
 
-        List<Institusjon> mottakerinstitusjoner = sedService.hentMottakerinstitusjoner("LA_BUC_01");
+        List<Institusjon> mottakerinstitusjoner = eessiService.hentMottakerinstitusjoner("LA_BUC_01");
 
         verify(eessiConsumer).hentMottakerinstitusjoner(anyString());
         assertThat(mottakerinstitusjoner).hasSize(2);
@@ -112,27 +106,27 @@ public class SedServiceTest {
     @Test(expected = MelosysException.class)
     public void hentMottakerinstitusjoner_medFeilIConsumer_forventTomListe() throws MelosysException {
         when(eessiConsumer.hentMottakerinstitusjoner(anyString())).thenThrow(new IntegrasjonException("Error!"));
-        List<Institusjon> institusjon = sedService.hentMottakerinstitusjoner("LA_BUC_01");
+        List<Institusjon> institusjon = eessiService.hentMottakerinstitusjoner("LA_BUC_01");
     }
 
     @Test
     public void hentTilknyttedeSeder_forventListeMedRettType() throws MelosysException {
         when(eessiConsumer.hentTilknyttedeSeder(anyLong(), anyString())).thenReturn(Arrays.asList(
-            enhancedRandom.nextObject(SedinfoDto.class),
-            enhancedRandom.nextObject(SedinfoDto.class),
-            enhancedRandom.nextObject(SedinfoDto.class)
+            enhancedRandom.nextObject(SedInformasjon.class),
+            enhancedRandom.nextObject(SedInformasjon.class),
+            enhancedRandom.nextObject(SedInformasjon.class)
         ));
 
-        List<Sedinformasjon> tilknyttedeSeder = sedService.hentTilknyttedeSeder(123L, "utkast");
+        List<SedInformasjon> tilknyttedeSeder = eessiService.hentTilknyttedeSeder(123L, "utkast");
 
         verify(eessiConsumer).hentTilknyttedeSeder(anyLong(), anyString());
         assertThat(tilknyttedeSeder).hasSize(3);
-        assertThat(tilknyttedeSeder).hasOnlyElementsOfType(Sedinformasjon.class);
+        assertThat(tilknyttedeSeder).hasOnlyElementsOfType(SedInformasjon.class);
     }
 
     @Test(expected = MelosysException.class)
     public void hentTilknyttedeSeder_medFeilIConsumer_forventException() throws MelosysException {
         when(eessiConsumer.hentTilknyttedeSeder(anyLong(), anyString())).thenThrow(new IntegrasjonException("Error!"));
-        sedService.hentTilknyttedeSeder(123L, "utkast");
+        eessiService.hentTilknyttedeSeder(123L, "utkast");
     }
 }

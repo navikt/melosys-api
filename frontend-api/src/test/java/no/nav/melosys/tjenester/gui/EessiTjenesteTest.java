@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import javax.ws.rs.core.Response;
@@ -8,11 +9,11 @@ import javax.ws.rs.core.Response;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.Sedinformasjon;
+import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.BehandlingService;
-import no.nav.melosys.service.dokument.sed.SedService;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
     private String schemaType;
 
     @Mock
-    private SedService sedService;
+    private EessiService eessiService;
 
     @Mock
     private BehandlingService behandlingService;
@@ -65,7 +66,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void hentMottakerInstitusjoner() throws IOException, MelosysException {
-        when(sedService.hentMottakerinstitusjoner(anyString()))
+        when(eessiService.hentMottakerinstitusjoner(anyString()))
             .thenReturn(Arrays.asList(
                 defaultEnhancedRandom().nextObject(Institusjon.class),
                 defaultEnhancedRandom().nextObject(Institusjon.class),
@@ -84,7 +85,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void opprettBuc() throws IOException, MelosysException {
-        when(sedService.opprettBucOgSed(any(), anyString(), anyString(), anyString())).thenReturn(MOCK_RINA_URL);
+        when(eessiService.opprettBucOgSed(any(), anyString(), anyString(), anyString())).thenReturn(MOCK_RINA_URL);
 
         BucBestillingDto nyBucDto = new BucBestillingDto("LA_BUC_01", "NAVT002", "NO");
         Response response = eessiTjeneste.opprettBuc(nyBucDto, 123L);
@@ -98,7 +99,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void hentSederUnderArbeid() throws IOException, MelosysException {
-        when(sedService.hentTilknyttedeSeder(anyLong(), anyString()))
+        when(eessiService.hentTilknyttedeSeder(anyLong(), anyString()))
             .thenReturn(Arrays.asList(
                 sedinformasjonMedGyldigUrl(),
                 sedinformasjonMedGyldigUrl(),
@@ -107,17 +108,23 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
         Response response = eessiTjeneste.hentSeder(123L, "utkast");
         assertThat(response.getEntity()).isInstanceOf(List.class);
-        assertThat((List) response.getEntity()).hasOnlyElementsOfType(Sedinformasjon.class);
+        assertThat((List) response.getEntity()).hasOnlyElementsOfType(SedInformasjon.class);
 
-        List<Sedinformasjon> sederUnderArbeid = (List<Sedinformasjon>) response.getEntity();
+        List<SedInformasjon> sederUnderArbeid = (List<SedInformasjon>) response.getEntity();
 
         schemaType = SED_UNDER_ARBEID_SCHEMA;
         validerListe(sederUnderArbeid, log);
     }
 
-    private Sedinformasjon sedinformasjonMedGyldigUrl() {
-        Sedinformasjon sedinformasjon = defaultEnhancedRandom().nextObject(Sedinformasjon.class);
-        sedinformasjon.setRinaUrl(MOCK_RINA_URL);
-        return sedinformasjon;
+    private SedInformasjon sedinformasjonMedGyldigUrl() {
+        return new SedInformasjon(
+            defaultEnhancedRandom().nextObject(String.class),
+            defaultEnhancedRandom().nextObject(String.class),
+            defaultEnhancedRandom().nextObject(LocalDate.class),
+            defaultEnhancedRandom().nextObject(LocalDate.class),
+            defaultEnhancedRandom().nextObject(String.class),
+            defaultEnhancedRandom().nextObject(String.class),
+            MOCK_RINA_URL
+        );
     }
 }

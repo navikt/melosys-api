@@ -7,14 +7,13 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgsBestemmelser_883_2004;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.sed.SedService;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -29,7 +28,7 @@ public class IverksettVedtakSendSedTest {
     @Mock
     private BehandlingRepository behandlingRepository;
     @Mock
-    private SedService sedService;
+    private EessiService eessiService;
 
     @InjectMocks
     private IverksettVedtakSendSed iverksettVedtakSendSed;
@@ -56,7 +55,7 @@ public class IverksettVedtakSendSedTest {
     @Test
     public void utførSteg_suksessfull_ingenRetur() throws Exception{
         iverksettVedtakSendSed.utfør(prosessinstans);
-        verify(sedService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
+        verify(eessiService).opprettOgSendSed(any(Behandling.class), any(Behandlingsresultat.class));
         assertThat(prosessinstans.getSteg(), is(ProsessSteg.IV_AVSLUTT_BEHANDLING));
         assertThat(prosessinstans.getBehandling().getDokumentasjonSvarfristDato(), is(nullValue()));
     }
