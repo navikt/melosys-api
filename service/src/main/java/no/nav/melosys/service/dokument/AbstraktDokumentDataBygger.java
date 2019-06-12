@@ -48,11 +48,18 @@ public abstract class AbstraktDokumentDataBygger {
     protected StrukturertAdresse hentBostedsadresse() throws TekniskException {
         StrukturertAdresse bostedsadresse = SoeknadUtils.hentBostedsadresse(søknad);
         if (bostedsadresse == null) {
-            Bostedsadresse adresseFraTps = person.bostedsadresse;
-            adresseFraTps.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresseFraTps.getPostnr(), LocalDate.now()));
-            bostedsadresse = StrukturertAdresse.of(adresseFraTps);
+            bostedsadresse = hentBostedsadresseFraRegister();
         }
         return bostedsadresse;
+    }
+
+    private StrukturertAdresse hentBostedsadresseFraRegister() throws TekniskException {
+        Bostedsadresse bostedsadresse = person.bostedsadresse;
+        if (StringUtils.isEmpty(bostedsadresse.getLand().getKode())) {
+            throw new TekniskException("Bostedsadressen finnes ikke eller mangler landkode");
+        }
+        bostedsadresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, bostedsadresse.getPostnr(), LocalDate.now()));
+        return StrukturertAdresse.av(bostedsadresse);
     }
 
     protected List<Arbeidssted> hentArbeidssteder() {

@@ -88,6 +88,13 @@ public class AbstraktDokumentDataByggerTest {
         brevDatabyggerbase = new BrevDatabyggerbaseImpl(kodeverkService, avklartefaktaService, person, søknad);
     }
 
+    @Test(expected = TekniskException.class)
+    public void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() throws TekniskException {
+        person.bostedsadresse = new Bostedsadresse();
+        søknad.bosted.oppgittAdresse = new StrukturertAdresse();
+        brevDatabyggerbase.hentBostedsadresse();
+    }
+
     @Test
     public void hentBostedsadresse_brukerBostedFraPersonDokument() throws TekniskException {
         StrukturertAdresse bostedsadresse = brevDatabyggerbase.hentBostedsadresse();

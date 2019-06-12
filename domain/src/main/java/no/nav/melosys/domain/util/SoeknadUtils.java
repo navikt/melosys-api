@@ -61,7 +61,8 @@ public final class SoeknadUtils {
             StringUtils.isNotEmpty(oppgittAdresse.poststed)) &&
             StringUtils.isNotEmpty(oppgittAdresse.landkode)) {
             return oppgittAdresse;
+        } else {
+            return null;
         }
-        return null;
     }
 }

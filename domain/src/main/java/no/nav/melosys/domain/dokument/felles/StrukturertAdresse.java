@@ -20,7 +20,7 @@ public class StrukturertAdresse extends Adresse {
 
     public String poststed;
 
-    public static StrukturertAdresse of(Bostedsadresse bostedsadresse) throws TekniskException {
+    public static StrukturertAdresse av(Bostedsadresse bostedsadresse) throws TekniskException {
         Gateadresse gateadresse = bostedsadresse.getGateadresse();
         StrukturertAdresse adresse = new StrukturertAdresse();
         if (gateadresse != null) {

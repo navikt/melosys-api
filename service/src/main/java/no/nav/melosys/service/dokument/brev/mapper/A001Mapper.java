@@ -229,6 +229,7 @@ public class A001Mapper {
         bostedsadresse.setHusnummer(bosted.husnummer);
         bostedsadresse.setPostnummer(bosted.postnummer);
         bostedsadresse.setPoststed(bosted.poststed);
+        bostedsadresse.setRegion(bosted.region);
         bostedsadresse.setLand(hentIso3Landkode(bosted.landkode));
         bostedsadresse.setAdresseType(BostedsadresseTypeKode.BOSTEDSLAND); // Lev1 kun bostedsland
         return bostedsadresse;
