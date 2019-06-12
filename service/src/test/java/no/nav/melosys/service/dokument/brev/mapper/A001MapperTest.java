@@ -178,7 +178,7 @@ public class A001MapperTest {
         strukturertAdresse.postnummer = "0165";
         strukturertAdresse.poststed = "Poststed";
         strukturertAdresse.region = "Region";
-        strukturertAdresse.landkode = "Land";
+        strukturertAdresse.landkode = Landkoder.NO.getKode();
         return strukturertAdresse;
     }
 

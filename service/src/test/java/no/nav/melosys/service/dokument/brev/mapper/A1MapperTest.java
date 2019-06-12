@@ -81,7 +81,7 @@ public class A1MapperTest {
         boAdresse.postnummer = "0165";
         boAdresse.poststed = "Poststed";
         boAdresse.region = "Region";
-        boAdresse.landkode = "NO";
+        boAdresse.landkode = Landkoder.NO.getKode();
 
         behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
@@ -93,7 +93,7 @@ public class A1MapperTest {
         strukturertAdresse.postnummer = "0165";
         strukturertAdresse.poststed = "Poststed";
         strukturertAdresse.region = "Region";
-        strukturertAdresse.landkode = "NO";
+        strukturertAdresse.landkode = Landkoder.NO.getKode();;
 
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("JARLSBERG INTERNATIONAL",
                                                            "123456789",

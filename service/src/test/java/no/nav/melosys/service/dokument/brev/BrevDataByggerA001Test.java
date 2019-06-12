@@ -106,7 +106,7 @@ public class BrevDataByggerA001Test {
         oppgittAdresse.husnummer = "23B";
         oppgittAdresse.postnummer = "0165";
         oppgittAdresse.poststed = "Oslo";
-        oppgittAdresse.landkode = "NO";
+        oppgittAdresse.landkode = Landkoder.NO.getKode();
 
         søknad = new SoeknadDokument();
         søknad.bosted.oppgittAdresse = oppgittAdresse;

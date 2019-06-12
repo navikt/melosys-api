@@ -75,7 +75,7 @@ public class AttestMapperTest {
         boAdresse.postnummer = "0165";
         boAdresse.poststed = "Poststed";
         boAdresse.region = "Region";
-        boAdresse.landkode = "NO";
+        boAdresse.landkode = Landkoder.NO.getKode();
 
         PersonDokument person = new PersonDokument();
         person.kjønn = new KjoennsType();
@@ -84,7 +84,7 @@ public class AttestMapperTest {
         person.etternavn = "Nordmann";
         person.fødselsdato = LocalDate.now();
         person.statsborgerskap = new Land();
-        person.statsborgerskap.setKode("NO");
+        person.statsborgerskap.setKode(Land.NORGE);
 
         behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
@@ -96,7 +96,7 @@ public class AttestMapperTest {
         strukturertAdresse.postnummer = "0165";
         strukturertAdresse.poststed = "Poststed";
         strukturertAdresse.region = "Region";
-        strukturertAdresse.landkode = "NO";
+        strukturertAdresse.landkode = Landkoder.NO.getKode();
 
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = strukturertAdresse;

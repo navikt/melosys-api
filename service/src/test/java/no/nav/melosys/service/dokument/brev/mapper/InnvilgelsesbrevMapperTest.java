@@ -102,7 +102,7 @@ public class InnvilgelsesbrevMapperTest {
         vadr.husnummer = "12B";
         vadr.poststed = "Sted";
         vadr.postnummer = "4321";
-        vadr.landkode = Land.BULGARIA;
+        vadr.landkode = Landkoder.BG.getKode();
         return vadr;
     }
 

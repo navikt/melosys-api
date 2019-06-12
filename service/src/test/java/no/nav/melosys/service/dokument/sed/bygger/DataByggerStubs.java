@@ -102,7 +102,7 @@ public class DataByggerStubs {
         strukturertAdresse.postnummer = "0165";
         strukturertAdresse.poststed = "Poststed";
         strukturertAdresse.region = "Region";
-        strukturertAdresse.landkode = "Land";
+        strukturertAdresse.landkode = "NO";
         return strukturertAdresse;
     }
 
