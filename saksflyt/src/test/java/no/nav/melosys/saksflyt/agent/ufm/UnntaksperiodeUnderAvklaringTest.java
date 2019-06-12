@@ -8,9 +8,9 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
+import no.nav.melosys.service.BehandlingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +29,7 @@ public class UnntaksperiodeUnderAvklaringTest {
     @Mock
     private MedlFasade medlFasade;
     @Mock
-    private BehandlingRepository behandlingRepository;
+    private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
 
@@ -39,7 +39,7 @@ public class UnntaksperiodeUnderAvklaringTest {
     
     @Before
     public void setUp() {
-        unntaksperiodeUnderAvklaring = new UnntaksperiodeUnderAvklaring(felles, medlFasade, behandlingRepository, behandlingsresultatRepository);
+        unntaksperiodeUnderAvklaring = new UnntaksperiodeUnderAvklaring(felles, medlFasade, behandlingService, behandlingsresultatRepository);
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
     }
 
@@ -52,7 +52,7 @@ public class UnntaksperiodeUnderAvklaringTest {
             hentSedSaksopplysning(LocalDate.now(), LocalDate.now().plusYears(1L)), hentPersonDokument())
         );
         prosessinstans.setBehandling(behandling);
-        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         unntaksperiodeUnderAvklaring.utfør(prosessinstans);
 

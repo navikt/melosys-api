@@ -6,8 +6,8 @@ import java.time.YearMonth;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.integrasjon.inntk.InntektService;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.service.BehandlingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,13 +27,13 @@ public class HentInntektOpplysningerTest {
     @Mock
     private SaksopplysningRepository saksopplysningRepository;
     @Mock
-    private BehandlingRepository behandlingRepository;
+    private BehandlingService behandlingService;
 
     private HentInntektOpplysninger hentInntektOpplysninger;
 
     @Before
     public void setUp() throws Exception {
-        hentInntektOpplysninger = new HentInntektOpplysninger(inntektService, saksopplysningRepository, behandlingRepository);
+        hentInntektOpplysninger = new HentInntektOpplysninger(inntektService, saksopplysningRepository, behandlingService);
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(new Saksopplysning());
     }
 
@@ -43,7 +43,7 @@ public class HentInntektOpplysningerTest {
         LocalDate fom = LocalDate.now().minusYears(2);
 
         Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(fom, null));
-        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(prosessinstans.getBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
         hentInntektOpplysninger.utfør(prosessinstans);
 
         verify(inntektService).hentInntektListe(anyString(),eq(YearMonth.from(fom)), eq(YearMonth.from(fom.plusYears(2))));
@@ -56,7 +56,7 @@ public class HentInntektOpplysningerTest {
         LocalDate tom = LocalDate.now().plusYears(1);
 
         Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(fom, tom));
-        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(prosessinstans.getBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
         hentInntektOpplysninger.utfør(prosessinstans);
 
         verify(inntektService).hentInntektListe(anyString(),eq(YearMonth.from(fom.minusMonths(2))), eq(YearMonth.from(tom)));
@@ -69,7 +69,7 @@ public class HentInntektOpplysningerTest {
         LocalDate tom = LocalDate.now().plusYears(2);
 
         Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(fom, tom));
-        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(prosessinstans.getBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
         hentInntektOpplysninger.utfør(prosessinstans);
 
         verify(inntektService).hentInntektListe(anyString(),eq(YearMonth.from(LocalDate.now().minusMonths(2))), eq(YearMonth.from(LocalDate.now())));
@@ -82,7 +82,7 @@ public class HentInntektOpplysningerTest {
         LocalDate tom = LocalDate.now().minusYears(2);
 
         Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(fom, tom));
-        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(prosessinstans.getBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
         hentInntektOpplysninger.utfør(prosessinstans);
 
         verify(inntektService).hentInntektListe(anyString(),eq(YearMonth.from(fom)), eq(YearMonth.from(tom)));

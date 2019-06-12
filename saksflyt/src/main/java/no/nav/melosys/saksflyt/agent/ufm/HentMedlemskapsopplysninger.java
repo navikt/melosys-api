@@ -11,11 +11,11 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import no.nav.melosys.service.BehandlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +28,13 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
 
     private final SaksopplysningRepository saksopplysningRepository;
     private final MedlFasade medlFasade;
-    private final BehandlingRepository behandlingRepository;
-
+    private final BehandlingService behandlingService;
     @Autowired
     HentMedlemskapsopplysninger(SaksopplysningRepository saksopplysningRepository,
-                                MedlFasade medlFasade, BehandlingRepository behandlingRepository) {
+                                MedlFasade medlFasade, BehandlingService behandlingService) {
         this.saksopplysningRepository = saksopplysningRepository;
         this.medlFasade = medlFasade;
-        this.behandlingRepository = behandlingRepository;
+        this.behandlingService = behandlingService;
     }
 
     @Override
@@ -52,7 +51,7 @@ public class HentMedlemskapsopplysninger extends AbstraktStegBehandler {
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
 
         Instant nå = Instant.now();
         String fnr = prosessinstans.getData(ProsessDataKey.BRUKER_ID);

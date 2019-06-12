@@ -15,12 +15,12 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.saksflyt.felles.UnntaksperiodeUtils;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,14 +35,14 @@ public class OppdaterMedl extends AbstraktStegBehandler {
     private final MedlFasade medlFasade;
     private final OppdaterMedlFelles felles;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final BehandlingRepository behandlingRepository;
+    private final BehandlingService behandlingService;
 
     @Autowired
-    public OppdaterMedl(MedlFasade medlFasade, OppdaterMedlFelles felles, LovvalgsperiodeService lovvalgsperiodeService, BehandlingRepository behandlingRepository) {
+    public OppdaterMedl(MedlFasade medlFasade, OppdaterMedlFelles felles, LovvalgsperiodeService lovvalgsperiodeService, BehandlingService behandlingService) {
         this.medlFasade = medlFasade;
         this.felles = felles;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.behandlingRepository = behandlingRepository;
+        this.behandlingService = behandlingService;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class OppdaterMedl extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
         final long behandlingId = prosessinstans.getBehandling().getId();
-        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingId);
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
 
         SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
 

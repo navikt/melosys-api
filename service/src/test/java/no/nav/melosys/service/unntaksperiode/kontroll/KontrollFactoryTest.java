@@ -25,7 +25,7 @@ public class KontrollFactoryTest {
         assertThat(kontroller).hasSize(8);
     }
 
-    @Test
+    @Test(expected = UnsupportedOperationException.class)
     public void hentKontrollerA008_verifiserIngenKontroller() {
         List<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A008);
         assertThat(kontroller).isEmpty();

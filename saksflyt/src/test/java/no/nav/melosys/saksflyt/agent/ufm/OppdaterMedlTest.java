@@ -11,8 +11,8 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,16 +35,16 @@ public class OppdaterMedlTest {
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
-    private BehandlingRepository behandlingRepository;
+    private BehandlingService behandlingService;
 
     private OppdaterMedl oppdaterMedl;
 
     private final Behandling behandling = new Behandling();
 
     @Before
-    public void setUp() {
-        oppdaterMedl = new OppdaterMedl(medlFasade, oppdaterMedlFelles, lovvalgsperiodeService, behandlingRepository);
-        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(behandling);
+    public void setUp() throws Exception {
+        oppdaterMedl = new OppdaterMedl(medlFasade, oppdaterMedlFelles, lovvalgsperiodeService, behandlingService);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
     }
 
     @Test

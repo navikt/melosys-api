@@ -12,13 +12,13 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
 import no.nav.melosys.saksflyt.felles.OppdaterMedlFelles;
 import no.nav.melosys.saksflyt.felles.UnntaksperiodeUtils;
+import no.nav.melosys.service.BehandlingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,14 +27,14 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
 
     private final OppdaterMedlFelles felles;
     private final MedlFasade medlFasade;
-    private final BehandlingRepository behandlingRepository;
+    private final BehandlingService behandlingService;
     private final BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Autowired
-    public UnntaksperiodeUnderAvklaring(OppdaterMedlFelles felles, MedlFasade medlFasade, BehandlingRepository behandlingRepository, BehandlingsresultatRepository behandlingsresultatRepository) {
+    public UnntaksperiodeUnderAvklaring(OppdaterMedlFelles felles, MedlFasade medlFasade, BehandlingService behandlingService, BehandlingsresultatRepository behandlingsresultatRepository) {
         this.felles = felles;
         this.medlFasade = medlFasade;
-        this.behandlingRepository = behandlingRepository;
+        this.behandlingService = behandlingService;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
     }
 
@@ -57,7 +57,7 @@ public class UnntaksperiodeUnderAvklaring extends AbstraktStegBehandler {
 
         Set<Lovvalgsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
         if (lovvalgsperioder.isEmpty()) {
-            Behandling behandling = behandlingRepository.findWithSaksopplysningerById(behandlingId);
+            Behandling behandling = behandlingService.hentBehandling(behandlingId);
             SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(behandling);
             PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(behandling);
             Lovvalgsperiode lovvalgsperiode = UnntaksperiodeUtils.opprettLovvalgsperiode(sedDokument);

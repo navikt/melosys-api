@@ -12,10 +12,10 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.feil.Feilkategori;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.unntaksperiode.kontroll.RegisterkontrollService;
 import org.slf4j.Logger;
@@ -30,13 +30,13 @@ public class RegisterKontroll extends AbstraktStegBehandler {
 
     private final AvklartefaktaService avklartefaktaService;
     private final RegisterkontrollService registerkontrollService;
-    private final BehandlingRepository behandlingRepository;
+    private final BehandlingService behandlingService;
 
     @Autowired
-    public RegisterKontroll(AvklartefaktaService avklartefaktaService, RegisterkontrollService registerkontrollService, BehandlingRepository behandlingRepository) {
+    public RegisterKontroll(AvklartefaktaService avklartefaktaService, RegisterkontrollService registerkontrollService, BehandlingService behandlingService) {
         this.avklartefaktaService = avklartefaktaService;
         this.registerkontrollService = registerkontrollService;
-        this.behandlingRepository = behandlingRepository;
+        this.behandlingService = behandlingService;
     }
 
     @Override
@@ -51,7 +51,7 @@ public class RegisterKontroll extends AbstraktStegBehandler {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        Behandling behandling = behandlingRepository.findWithSaksopplysningerById(prosessinstans.getBehandling().getId());
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
 
         List<Unntak_periode_begrunnelser> registrerteTreff = registerkontrollService.utførKontroller(behandling);
         registrerFeil(prosessinstans, registrerteTreff);

@@ -5,8 +5,8 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.integrasjon.medl.MedlFasade;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.SaksopplysningRepository;
+import no.nav.melosys.service.BehandlingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,13 +26,13 @@ public class HentMedlemskapsopplysningerTest {
     @Mock
     private MedlFasade medlFasade;
     @Mock
-    private BehandlingRepository behandlingRepository;
+    private BehandlingService behandlingService;
 
     private HentMedlemskapsopplysninger hentMedlemskapsopplysninger;
 
     @Before
     public void setUp() throws Exception {
-        hentMedlemskapsopplysninger = new HentMedlemskapsopplysninger(saksopplysningRepository,medlFasade, behandlingRepository);
+        hentMedlemskapsopplysninger = new HentMedlemskapsopplysninger(saksopplysningRepository,medlFasade, behandlingService);
         when(medlFasade.hentPeriodeListe(anyString(), any(LocalDate.class), any()))
             .thenReturn(new Saksopplysning());
     }
@@ -40,7 +40,7 @@ public class HentMedlemskapsopplysningerTest {
     @Test
     public void utfør() throws Exception {
         Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(LocalDate.now(), LocalDate.now()),false);
-        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(prosessinstans.getBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
         hentMedlemskapsopplysninger.utfør(prosessinstans);
         verify(medlFasade).hentPeriodeListe(anyString(), any(), any());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_HENT_YTELSER);

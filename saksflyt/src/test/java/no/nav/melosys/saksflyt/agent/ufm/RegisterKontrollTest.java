@@ -6,7 +6,7 @@ import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.unntaksperiode.kontroll.RegisterkontrollService;
 import org.junit.Before;
@@ -29,7 +29,7 @@ public class RegisterKontrollTest {
     @Mock
     private RegisterkontrollService registerkontrollServiceService;
     @Mock
-    private BehandlingRepository behandlingRepository;
+    private BehandlingService behandlingService;
 
     private RegisterKontroll registerKontroll;
 
@@ -38,7 +38,7 @@ public class RegisterKontrollTest {
 
     @Before
     public void setup() throws Exception {
-        registerKontroll = new RegisterKontroll(avklartefaktaService, registerkontrollServiceService, behandlingRepository);
+        registerKontroll = new RegisterKontroll(avklartefaktaService, registerkontrollServiceService, behandlingService);
 
         when(registerkontrollServiceService.utførKontroller(any(Behandling.class)))
             .thenReturn(Lists.newArrayList(
@@ -53,7 +53,7 @@ public class RegisterKontrollTest {
         prosessinstans.setBehandling(new Behandling());
         prosessinstans.getBehandling().setId(1L);
 
-        when(behandlingRepository.findWithSaksopplysningerById(anyLong())).thenReturn(new Behandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(new Behandling());
         registerKontroll.utfør(prosessinstans);
 
         verify(registerkontrollServiceService).utførKontroller(any(Behandling.class));

@@ -17,7 +17,7 @@ import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.service.unntaksperiode.kontroll.PeriodeKontroller.gyldigPeriode;
+import static no.nav.melosys.service.unntaksperiode.kontroll.UnntaksperiodeKontroller.feilIPeriode;
 
 @Service
 public class RegisterkontrollService {
@@ -41,7 +41,7 @@ public class RegisterkontrollService {
     private List<Unntak_periode_begrunnelser> utførKontroller(KontrollData kontrollData,
                                                                      Collection<Function<KontrollData, Unntak_periode_begrunnelser>> kontroller) {
 
-        Unntak_periode_begrunnelser feilIPeriode = gyldigPeriode(kontrollData);
+        Unntak_periode_begrunnelser feilIPeriode = feilIPeriode(kontrollData);
         if (feilIPeriode != null) {
             return Collections.singletonList(feilIPeriode);
         }

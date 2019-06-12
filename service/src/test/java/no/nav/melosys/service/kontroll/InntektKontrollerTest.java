@@ -1,19 +1,15 @@
-package no.nav.melosys.service.unntaksperiode.kontroll;
+package no.nav.melosys.service.kontroll;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
 import no.nav.melosys.domain.dokument.inntekt.Inntekt;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,9 +22,8 @@ public class InntektKontrollerTest {
         LocalDate fom = LocalDate.now().minusYears(2);
         LocalDate tom = LocalDate.now().minusYears(1);
 
-        SedDokument sedDokument = hentSedDokument(fom ,tom);
-        assertThat(InntektKontroller.utbetaltYtelserFraOffentligIPeriode(hentKontrollData(sedDokument, hentInntektDokument(false, fom))))
-            .isNull();
+        assertThat(InntektKontroller.utbetaltYtelserFraOffentligIPeriode(hentInntektDokument(false, fom), fom, tom))
+            .isFalse();
     }
 
     @Test
@@ -37,9 +32,8 @@ public class InntektKontrollerTest {
         LocalDate fom = LocalDate.now().minusYears(2);
         LocalDate tom = LocalDate.now().minusYears(1);
 
-        SedDokument sedDokument = hentSedDokument(fom ,tom);
-        assertThat(InntektKontroller.utbetaltYtelserFraOffentligIPeriode(hentKontrollData(sedDokument, hentInntektDokument(true, fom.minusMonths(1)))))
-            .isEqualTo(Unntak_periode_begrunnelser.MOTTAR_YTELSER);
+        assertThat(InntektKontroller.utbetaltYtelserFraOffentligIPeriode(hentInntektDokument(true, fom.minusMonths(1)), fom ,tom))
+            .isTrue();
     }
 
     @Test
@@ -48,9 +42,8 @@ public class InntektKontrollerTest {
         LocalDate fom = LocalDate.now().minusYears(2);
         LocalDate tom = LocalDate.now().minusYears(1);
 
-        SedDokument sedDokument = hentSedDokument(fom ,tom);
-        assertThat(InntektKontroller.utbetaltYtelserFraOffentligIPeriode(hentKontrollData(sedDokument, hentInntektDokument(true,  fom.minusYears(4)))))
-            .isNull();
+        assertThat(InntektKontroller.utbetaltYtelserFraOffentligIPeriode(hentInntektDokument(true,  fom.minusYears(4)), fom, tom))
+            .isFalse();
     }
 
     @Test
@@ -58,9 +51,8 @@ public class InntektKontrollerTest {
 
         LocalDate fom = LocalDate.now().minusYears(2);
 
-        SedDokument sedDokument = hentSedDokument(fom,null);
-        assertThat(InntektKontroller.utbetaltYtelserFraOffentligIPeriode(hentKontrollData(sedDokument, hentInntektDokument(true, fom))))
-            .isEqualTo(Unntak_periode_begrunnelser.MOTTAR_YTELSER);
+        assertThat(InntektKontroller.utbetaltYtelserFraOffentligIPeriode(hentInntektDokument(true, fom), fom, null))
+            .isTrue();
     }
 
     @Test
@@ -68,9 +60,8 @@ public class InntektKontrollerTest {
         LocalDate fom = LocalDate.now().minusYears(1);
         LocalDate tom = LocalDate.now().plusYears(1);
 
-        SedDokument sedDokument = hentSedDokument(fom ,tom);
-        assertThat(InntektKontroller.utbetaltYtelserFraOffentligIPeriode(hentKontrollData(sedDokument, hentInntektDokument(true, fom))))
-            .isEqualTo(Unntak_periode_begrunnelser.MOTTAR_YTELSER);
+        assertThat(InntektKontroller.utbetaltYtelserFraOffentligIPeriode(hentInntektDokument(true, fom), fom, tom))
+            .isTrue();
     }
 
     @Test
@@ -78,9 +69,8 @@ public class InntektKontrollerTest {
         LocalDate fom = LocalDate.now().plusYears(1);
         LocalDate tom = LocalDate.now().plusYears(2);
 
-        SedDokument sedDokument = hentSedDokument(fom ,tom);
-        assertThat(InntektKontroller.utbetaltYtelserFraOffentligIPeriode(hentKontrollData(sedDokument, hentInntektDokument(true, fom))))
-            .isEqualTo(Unntak_periode_begrunnelser.MOTTAR_YTELSER);
+        assertThat(InntektKontroller.utbetaltYtelserFraOffentligIPeriode(hentInntektDokument(true, fom), fom, tom))
+            .isTrue();
     }
 
 
@@ -112,23 +102,5 @@ public class InntektKontrollerTest {
         }
 
         return inntektsListe;
-    }
-
-    private Saksopplysning hentSedSaksopplysning(LocalDate fom, LocalDate tom) {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(hentSedDokument(fom, tom));
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        return saksopplysning;
-    }
-
-    private SedDokument hentSedDokument(LocalDate fom, LocalDate tom) {
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgsperiode(new no.nav.melosys.domain.dokument.medlemskap.Periode(fom, tom));
-        return sedDokument;
-
-    }
-
-    private KontrollData hentKontrollData(SedDokument sedDokument, InntektDokument inntektDokument) {
-        return new KontrollData(sedDokument, null, null, inntektDokument);
     }
 }

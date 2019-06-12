@@ -1,4 +1,4 @@
-package no.nav.melosys.service.unntaksperiode.kontroll;
+package no.nav.melosys.service.kontroll;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -10,22 +10,13 @@ import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
 
-final class InntektKontroller {
+public final class InntektKontroller {
 
     private InntektKontroller() {
     }
 
-    static Unntak_periode_begrunnelser utbetaltYtelserFraOffentligIPeriode(KontrollData kontrollData) {
-        SedDokument sedDokument = kontrollData.sedDokument;
-        InntektDokument inntektDokument = kontrollData.inntektDokument;
-        return harUtbetalingerIPeriode(inntektDokument, sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
-            ? Unntak_periode_begrunnelser.MOTTAR_YTELSER : null;
-    }
-
-    private static boolean harUtbetalingerIPeriode(InntektDokument inntektDokument, LocalDate fom, LocalDate tom) {
+    public static boolean utbetaltYtelserFraOffentligIPeriode(InntektDokument inntektDokument, LocalDate fom, LocalDate tom) {
 
         YearMonth fra = YearMonth.from(fom);
         YearMonth til = tom != null ? YearMonth.from(tom) : null;

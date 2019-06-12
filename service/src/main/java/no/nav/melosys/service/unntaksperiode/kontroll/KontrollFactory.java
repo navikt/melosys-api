@@ -1,6 +1,5 @@
 package no.nav.melosys.service.unntaksperiode.kontroll;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -18,34 +17,35 @@ class KontrollFactory {
                 return a003Kontroller();
             case A009:
                 return a009Kontroller();
+            default:
+                throw new UnsupportedOperationException("SedType: " + sedType + " er ikke støttet for automatiske kontroller");
         }
-        return Collections.emptyList();
     }
 
     private List<Function<KontrollData, Unntak_periode_begrunnelser>> a003Kontroller() {
         return Lists.newArrayList(
-            PeriodeKontroller::periodeErÅpen,
-            PeriodeKontroller::periodeEldreEnn5År,
-            PeriodeKontroller::periodeMaks24Mnd,
-            PeriodeKontroller::periodeOver1ÅrFremITid,
-            MedlemskapKontroller::overlappendeMedlemsperiode,
-            MedlemskapKontroller::statsborgerskapIkkeMedlemsland,
-            PersonKontroller::personDød,
-            PersonKontroller::personBosattINorge,
-            InntektKontroller::utbetaltYtelserFraOffentligIPeriode
+            UnntaksperiodeKontroller::periodeErÅpen,
+            UnntaksperiodeKontroller::periodeEldreEnn5År,
+            UnntaksperiodeKontroller::periodeOver24Mnd,
+            UnntaksperiodeKontroller::periodeOver1ÅrFremITid,
+            UnntaksperiodeKontroller::overlappendeMedlemsperiode,
+            UnntaksperiodeKontroller::statsborgerskapIkkeMedlemsland,
+            UnntaksperiodeKontroller::personDød,
+            UnntaksperiodeKontroller::personBosattINorge,
+            UnntaksperiodeKontroller::utbetaltYtelserFraOffentligIPeriode
         );
     }
 
     private List<Function<KontrollData, Unntak_periode_begrunnelser>> a009Kontroller() {
         return Lists.newArrayList(
-            PeriodeKontroller::periodeErÅpen,
-            PeriodeKontroller::periodeEldreEnn5År,
-            PeriodeKontroller::periodeMaks24Mnd,
-            PeriodeKontroller::periodeOver1ÅrFremITid,
-            MedlemskapKontroller::overlappendeMedlemsperiode,
-            MedlemskapKontroller::lovvalgslandErNorge,
-            MedlemskapKontroller::statsborgerskapIkkeMedlemsland,
-            PersonKontroller::personDød
+            UnntaksperiodeKontroller::periodeErÅpen,
+            UnntaksperiodeKontroller::periodeEldreEnn5År,
+            UnntaksperiodeKontroller::periodeOver24Mnd,
+            UnntaksperiodeKontroller::periodeOver1ÅrFremITid,
+            UnntaksperiodeKontroller::overlappendeMedlemsperiode,
+            UnntaksperiodeKontroller::lovvalgslandErNorge,
+            UnntaksperiodeKontroller::statsborgerskapIkkeMedlemsland,
+            UnntaksperiodeKontroller::personDød
         );
     }
 }

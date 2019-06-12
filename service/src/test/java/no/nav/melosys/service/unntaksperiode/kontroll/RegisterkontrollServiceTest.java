@@ -78,7 +78,4 @@ public class RegisterkontrollServiceTest {
         saksopplysning.setType(type);
         return saksopplysning;
     }
-
-
-
 }
