@@ -10,13 +10,17 @@ import no.nav.melosys.domain.dokument.person.*;
 
 public class PersonhistorikkDto {
 
-    public List<BostedsadressePeriodeDto> bostedsadressePerioder = new ArrayList<>();
+    public final List<BostedsadressePeriodeDto> bostedsadressePerioder;
 
-    public List<PostadressePeriodeDto> postadressePerioder = new ArrayList<>();
+    public final List<PostadressePeriodeDto> postadressePerioder;
 
-    public List<MidlertidigPostadressePeriodeDto> midlertidigAdressePerioder = new ArrayList<>();
+    public final List<MidlertidigPostadressePeriodeDto> midlertidigAdressePerioder;
 
-    public PersonhistorikkDto() { }
+    public PersonhistorikkDto() {
+        bostedsadressePerioder = new ArrayList<>();
+        postadressePerioder = new ArrayList<>();
+        midlertidigAdressePerioder = new ArrayList<>();
+    }
 
     public PersonhistorikkDto(PersonhistorikkDokument personhistorikk) {
         bostedsadressePerioder = personhistorikk.bostedsadressePeriodeListe.stream()
@@ -54,7 +58,7 @@ public class PersonhistorikkDto {
 
     class MidlertidigPostadressePeriodeDto {
         public final MidlertidigPostadresse midlertidigAdresse;
-        public Periode periode;
+        public final Periode periode;
 
         MidlertidigPostadressePeriodeDto(MidlertidigPostadresse midlertidigPostadresse) {
             this.midlertidigAdresse = midlertidigPostadresse;
