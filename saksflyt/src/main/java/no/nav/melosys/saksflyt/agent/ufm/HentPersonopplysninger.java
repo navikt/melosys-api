@@ -23,17 +23,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-@Component
-public class HentPerson extends AbstraktStegBehandler {
+@Component("UnntakFraMedlemskapHentPersonopplysninger")
+public class HentPersonopplysninger extends AbstraktStegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(HentPerson.class);
+    private static final Logger log = LoggerFactory.getLogger(HentPersonopplysninger.class);
 
     private final TpsFasade tpsFasade;
     private final FagsakService fagsakService;
     private final SaksopplysningRepository saksopplysningRepository;
 
     @Autowired
-    public HentPerson(@Qualifier("system") TpsFasade tpsFasade, FagsakService fagsakService, SaksopplysningRepository saksopplysningRepository) {
+    public HentPersonopplysninger(@Qualifier("system") TpsFasade tpsFasade, FagsakService fagsakService, SaksopplysningRepository saksopplysningRepository) {
         this.tpsFasade = tpsFasade;
         this.fagsakService = fagsakService;
         this.saksopplysningRepository = saksopplysningRepository;
@@ -59,7 +59,6 @@ public class HentPerson extends AbstraktStegBehandler {
         fagsakService.leggTilAktør(prosessinstans.getBehandling().getFagsak().getSaksnummer(), Aktoersroller.BRUKER, aktørId);
 
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, ident);
-
         Instant nå = Instant.now();
 
         Saksopplysning saksopplysning = tpsFasade.hentPerson(ident);
@@ -69,6 +68,6 @@ public class HentPerson extends AbstraktStegBehandler {
         saksopplysningRepository.save(saksopplysning);
 
         log.info("Persondokument hentet for behandling {}", prosessinstans.getBehandling().getId());
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_HENT_MEDLEMSKAP);
     }
 }

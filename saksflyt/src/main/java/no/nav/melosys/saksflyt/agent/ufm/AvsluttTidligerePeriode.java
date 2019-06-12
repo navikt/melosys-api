@@ -49,7 +49,7 @@ public class AvsluttTidligerePeriode extends AbstraktStegBehandler {
             avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak());
         }
 
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_VALIDER_PERIODE);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
     }
 
     private void avsluttTidligerMedlPeriode(Fagsak fagsak) throws FunksjonellException {

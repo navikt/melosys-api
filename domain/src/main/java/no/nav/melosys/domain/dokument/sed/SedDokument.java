@@ -30,6 +30,10 @@ public class SedDokument extends SaksopplysningDokument {
 
     private boolean erEndring;
 
+    private SedType sedType;
+
+    private BucType bucType;
+
     private List<String> statsborgerskapKoder = new ArrayList<>();
 
     public String getRinaSaksnummer() {
@@ -97,4 +101,19 @@ public class SedDokument extends SaksopplysningDokument {
         this.statsborgerskapKoder = statsborgerskapKoder;
     }
 
+    public SedType getSedType() {
+        return sedType;
+    }
+
+    public void setSedType(SedType sedType) {
+        this.sedType = sedType;
+    }
+
+    public BucType getBucType() {
+        return bucType;
+    }
+
+    public void setBucType(BucType bucType) {
+        this.bucType = bucType;
+    }
 }

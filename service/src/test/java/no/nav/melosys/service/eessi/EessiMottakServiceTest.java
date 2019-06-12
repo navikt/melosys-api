@@ -159,6 +159,8 @@ public class EessiMottakServiceTest {
         melding.setSedId("s123");
         melding.setStatsborgerskap(
             Collections.singletonList(statsborgerskap));
+        melding.setSedType("A009");
+        melding.setBucType("LA_BUC_04");
         return melding;
     }
 }
