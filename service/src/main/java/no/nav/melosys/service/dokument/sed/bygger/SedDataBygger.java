@@ -7,7 +7,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -24,6 +23,8 @@ import no.nav.melosys.service.dokument.sed.mapper.LovvalgTilBestemmelseDtoMapper
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.apache.commons.lang3.StringUtils;
+
+import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 
 public class SedDataBygger extends AbstraktDokumentDataBygger {
 
@@ -80,15 +81,13 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
             .collect(Collectors.toList());
     }
 
-    private Adresse fraBostedsadresse(Bostedsadresse bostedsadresse) {
+    private Adresse fraBostedsadresse(StrukturertAdresse bostedsadresse) throws TekniskException {
         Adresse adresse = new Adresse();
-        adresse.setPoststed(bostedsadresse.getPoststed());
-        adresse.setPostnr(bostedsadresse.getPostnr());
-        adresse.setLand(bostedsadresse.getLand().getKode());
+        adresse.setPoststed(bostedsadresse.poststed);
+        adresse.setPostnr(bostedsadresse.postnummer);
+        adresse.setLand(tilIso3(bostedsadresse.landkode));
         adresse.setGateadresse(
-            bostedsadresse.getGateadresse().getGatenavn() + " " +
-                (bostedsadresse.getGateadresse().getHusnummer() == null ? "" : bostedsadresse.getGateadresse().getHusnummer()) +
-                (bostedsadresse.getGateadresse().getHusbokstav() == null ? "" : bostedsadresse.getGateadresse().getHusbokstav())
+            bostedsadresse.gatenavn + " " + Objects.toString(bostedsadresse.husnummer, "")
         );
         return adresse;
     }

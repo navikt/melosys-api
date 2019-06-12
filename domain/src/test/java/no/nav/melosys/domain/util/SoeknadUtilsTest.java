@@ -26,6 +26,24 @@ public class SoeknadUtilsTest {
     }
 
     @Test
+    public void hentOppgittAdresse_medGatenavnOgLand_ErIkkeNull() {
+        SoeknadDokument søknad = new SoeknadDokument();
+        StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
+        oppgittAdresse.gatenavn = "HjemGata";
+        oppgittAdresse.landkode = "NO";
+        søknad.bosted.oppgittAdresse = oppgittAdresse;
+        assertThat(SoeknadUtils.hentBostedsadresse(søknad)).isNotNull();
+    }
+
+    @Test
+    public void hentOppgittAdresse_somErTom_ErNull() {
+        SoeknadDokument søknad = new SoeknadDokument();
+        StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
+        søknad.bosted.oppgittAdresse = oppgittAdresse;
+        assertThat(SoeknadUtils.hentBostedsadresse(søknad)).isNull();
+    }
+
+    @Test
     public void hentPeriode_opphold() {
         SoeknadDokument soeknad = new SoeknadDokument();
         leggTilArbeidUtland(soeknad);

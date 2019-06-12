@@ -65,7 +65,16 @@ public class BrevDataByggerA1Test {
         when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong()))
             .thenReturn(avklarteOrganisasjoner);
 
+        StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
+        oppgittAdresse.gatenavn = "HjemmeGata";
+        oppgittAdresse.husnummer = "23B";
+        oppgittAdresse.postnummer = "0165";
+        oppgittAdresse.poststed = "Oslo";
+        oppgittAdresse.landkode = "NO";
+
         søknad = new SoeknadDokument();
+        søknad.bosted.oppgittAdresse = oppgittAdresse;
+
         Saksopplysning soeknad = new Saksopplysning();
         soeknad.setDokument(søknad);
         soeknad.setType(SaksopplysningType.SØKNAD);

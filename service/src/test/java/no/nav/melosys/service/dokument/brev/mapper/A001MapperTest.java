@@ -17,7 +17,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
@@ -72,12 +71,12 @@ public class A001MapperTest {
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());
         when(behandlingsresultat.getLovvalgsperioder()).thenReturn(new HashSet<>(Arrays.asList(lovvalgsperiode)));
 
-        Bostedsadresse boAdresse = new Bostedsadresse();
-        boAdresse.getGateadresse().setGatenavn("Gatenavn");
-        boAdresse.getGateadresse().setHusnummer(23);
-        boAdresse.setPostnr("0165");
-        boAdresse.setPoststed("Oslo");
-        boAdresse.setLand(new Land(Land.NORGE));
+        StrukturertAdresse boAdresse = new StrukturertAdresse();
+        boAdresse.gatenavn = "Gatenavn";
+        boAdresse.husnummer = "23A";
+        boAdresse.postnummer = "0165";
+        boAdresse.poststed = "Oslo";
+        boAdresse.landkode = Landkoder.NO.getKode();
 
         PersonDokument person = new PersonDokument();
         person.kjønn = new KjoennsType();
