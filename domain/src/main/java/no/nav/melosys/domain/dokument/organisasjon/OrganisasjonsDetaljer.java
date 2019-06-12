@@ -98,26 +98,10 @@ public class OrganisasjonsDetaljer {
             return null;
         }
 
-        UstrukturertAdresse ustrukturertAdresse = new UstrukturertAdresse();
+        UstrukturertAdresse ustrukturertAdresse;
         if (adresse instanceof SemistrukturertAdresse) {
             SemistrukturertAdresse sAdresse = (SemistrukturertAdresse) adresse;
-            if (sAdresse.getAdresselinje1() != null) {
-                ustrukturertAdresse.adresselinjer.add(sAdresse.getAdresselinje1());
-            }
-            if (sAdresse.getAdresselinje2() != null) {
-                ustrukturertAdresse.adresselinjer.add(sAdresse.getAdresselinje2());
-            }
-            if (sAdresse.getAdresselinje3() != null) {
-                ustrukturertAdresse.adresselinjer.add(sAdresse.getAdresselinje3());
-            }
-            ustrukturertAdresse.landkode = sAdresse.getLandkode();
-
-            if (sAdresse.erUtenlandsk()) {
-                ustrukturertAdresse.adresselinjer.add(sAdresse.getPoststedUtland());
-            } else {
-                String _poststed = sAdresse.getPoststed() == null ? "" : " " + sAdresse.getPoststed();
-                ustrukturertAdresse.adresselinjer.add(sAdresse.getPostnr() + _poststed);
-            }
+            ustrukturertAdresse = new UstrukturertAdresse(sAdresse);
         }
         else {
             // Enhetsregistret har bare SemistrukturertAdresser
