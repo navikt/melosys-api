@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
@@ -46,12 +47,19 @@ public class OppdaterMedlTest {
     }
 
     @Test
-    public void utfør() throws Exception {
+    public void utfør_ingenLovvalgsperiode_oppretNyLovvalgsperiode() throws Exception {
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.fnr = "123";
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(personDokument);
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
+
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.lagreLovvalgsperioder(anyLong(), any())).thenReturn(Collections.singleton(lovvalgsperiode));
 
         Behandling behandling = new Behandling();
         behandling.setId(12L);
+        behandling.getSaksopplysninger().add(saksopplysning);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
@@ -62,10 +70,34 @@ public class OppdaterMedlTest {
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 
+    @Test
+    public void utfør_erEksisterendeLovvalgsperiode_oppdaterPeriodeEndeligMedl() throws Exception {
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.fnr = "123";
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(personDokument);
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singleton(lovvalgsperiode));
+
+        Behandling behandling = new Behandling();
+        behandling.setId(12L);
+        behandling.getSaksopplysninger().add(saksopplysning);
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        oppdaterMedl.utfør(prosessinstans);
+
+        verify(medlFasade).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
+        verify(lovvalgsperiodeService).hentLovvalgsperioder(eq(12L));
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
+    }
+
     private Saksopplysning hentSaksopplysning() {
         SedDokument sedDokument = new SedDokument();
-        sedDokument.setPeriode(new Periode(LocalDate.now(), LocalDate.now().plusYears(1L)));
-        sedDokument.setLovvalgsland(Landkoder.DE);
+        sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now().plusYears(1L)));
+        sedDokument.setLovvalgslandKode(Landkoder.DE);
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(sedDokument);
         return saksopplysning;

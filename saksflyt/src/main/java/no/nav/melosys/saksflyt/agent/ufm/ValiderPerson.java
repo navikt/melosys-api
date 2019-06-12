@@ -1,12 +1,11 @@
 package no.nav.melosys.saksflyt.agent.ufm;
 
-import java.util.Arrays;
+import java.time.LocalDate;
 import java.util.Map;
 
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Unntak_periode_begrunnelser;
 import no.nav.melosys.domain.util.SaksopplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
@@ -21,17 +20,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ValiderStatsborgerskap extends RegistreringUnntakValiderer {
+public class ValiderPerson extends RegistreringUnntakValiderer {
 
-    private static final Logger log = LoggerFactory.getLogger(ValiderStatsborgerskap.class);
+    private static final Logger log = LoggerFactory.getLogger(ValiderPerson.class);
+
     @Autowired
-    ValiderStatsborgerskap(AvklartefaktaService avklartefaktaService) {
+    ValiderPerson(AvklartefaktaService avklartefaktaService) {
         super(avklartefaktaService);
     }
 
     @Override
     protected ProsessSteg inngangsSteg() {
-        return ProsessSteg.REG_UNNTAK_VALIDER_STATSBORGERSKAP;
+        return ProsessSteg.REG_UNNTAK_VALIDER_PERSON;
     }
 
     @Override
@@ -41,16 +41,13 @@ public class ValiderStatsborgerskap extends RegistreringUnntakValiderer {
 
     @Override
     protected void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        //TODO: avklar om dette er ok måte å sjekke på. Dekker behovet slik kodeverket er nå
-        SedDokument sedDokument = SaksopplysningerUtils.hentSedDokument(prosessinstans.getBehandling());
-        boolean harStatsborgerskapIGyldigLand = Arrays.stream(Landkoder.values())
-            .anyMatch(landkode -> sedDokument.getStatsborgerskapKoder().contains(landkode.getKode()));
 
-        if (!harStatsborgerskapIGyldigLand) {
-            registrerFeil(prosessinstans, Unntak_periode_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND);
+        PersonDokument personDokument = SaksopplysningerUtils.hentPersonDokument(prosessinstans.getBehandling());
+
+        LocalDate dødsdato = personDokument.dødsdato;
+
+        if (dødsdato != null) {
+            registrerFeil(prosessinstans, Unntak_periode_begrunnelser.PERSON_DOD);
         }
-
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_BESTEM_BEHANDLINGSMAATE);
     }
 }

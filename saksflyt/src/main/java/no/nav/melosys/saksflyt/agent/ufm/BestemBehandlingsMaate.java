@@ -1,13 +1,17 @@
 package no.nav.melosys.saksflyt.agent.ufm;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsmaate;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -17,7 +21,6 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
 import no.nav.melosys.saksflyt.agent.unntak.FeilStrategi;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,17 +57,23 @@ public class BestemBehandlingsMaate extends AbstraktStegBehandler {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(prosessinstans.getBehandling().getId())
             .orElseThrow(() -> new TekniskException("Finner ikke behandlingsresultat for behandling " + prosessinstans.getBehandling().getId()));
 
-        Set<Avklartefakta> treffRegisterKontroll = avklarteFaktaRepository
-            .findAllByBehandlingsresultatIdAndType(behandlingsresultat.getId(), Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
+        Optional<Avklartefakta> avklartFaktaUnntaksperiodeTreff = avklarteFaktaRepository
+            .findByBehandlingsresultatIdAndType(behandlingsresultat.getId(), Avklartefaktatype.VURDERING_UNNTAK_PERIODE);
 
-        boolean harTreffFraRegisterkontroll = treffRegisterKontroll.stream()
-            .map(Avklartefakta::getRegistreringer).anyMatch(CollectionUtils::isNotEmpty);
+        Set<AvklartefaktaRegistrering> registreringer = avklartFaktaUnntaksperiodeTreff
+            .map(Avklartefakta::getRegistreringer).orElse(new HashSet<>());
 
-        if (!harTreffFraRegisterkontroll) {
+        if (registreringer.isEmpty()) {
             behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.AUTOMATISERT);
+            log.info("Behandling {}, type {} blir registrer automatisk",
+                prosessinstans.getBehandling().getId(), prosessinstans.getBehandling().getType());
             prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
         } else {
-            log.info("Kan ikke registrere perioder for behandling {} automatisk. Flyttet til manuell behandling.", prosessinstans.getBehandling().getId());
+            String registreringerStr = registreringer.stream()
+                .map(AvklartefaktaRegistrering::getBegrunnelseKode).collect(Collectors.joining(", "));
+            log.info("Funnet treff {} for behandling {}. Flyttet til manuell behandling.",
+                registreringerStr, prosessinstans.getBehandling().getId());
+
             behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.DELVIS_AUTOMATISERT);
             prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_OPPGAVE);
         }

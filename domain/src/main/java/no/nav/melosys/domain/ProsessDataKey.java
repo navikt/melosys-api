@@ -17,6 +17,8 @@ public enum ProsessDataKey {
     AVSENDER_NAVN("avsenderNavn"),
     BEGRUNNELSEKODE("begrunnelsekode"),
     BEHANDLINGSRESULTATTYPE("behandlingsresultatType"),
+    BEHANDLINGSRESULTAT_BEGRUNNELSER("behandlingsresultatBegrunnelse"),
+    BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST("behandlingsresultatBegrunnelseFritekst"),
     BEHANDLINGSTEMA("behandlingstema"),
     BEHANDLINGSTYPE("behandlingstype"),
     BREVDATA("brevData"),

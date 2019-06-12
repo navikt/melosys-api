@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
@@ -41,7 +40,7 @@ public class ValiderYtelserTest {
 
     @Before
     public void setUp() {
-        validerYtelser = new ValiderYtelser(saksopplysningRepository, avklartefaktaService, inntektService);
+        validerYtelser = new ValiderYtelser(avklartefaktaService, inntektService, saksopplysningRepository);
     }
 
     @Test
@@ -50,11 +49,9 @@ public class ValiderYtelserTest {
         LocalDate fom = LocalDate.now().minusYears(2);
         LocalDate tom = LocalDate.now().minusYears(1);
 
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
-            .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(false, fom));
 
-        Prosessinstans prosessinstans = hentProsessinstans();
+        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(fom, tom));
         validerYtelser.utfør(prosessinstans);
 
         verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
@@ -67,11 +64,9 @@ public class ValiderYtelserTest {
         LocalDate fom = LocalDate.now().minusYears(2);
         LocalDate tom = LocalDate.now().minusYears(1);
 
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
-            .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom.minusMonths(1)));
 
-        Prosessinstans prosessinstans = hentProsessinstans();
+        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(fom, tom));
         validerYtelser.utfør(prosessinstans);
 
         verify(avklartefaktaService).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
@@ -84,11 +79,9 @@ public class ValiderYtelserTest {
         LocalDate fom = LocalDate.now().minusYears(2);
         LocalDate tom = LocalDate.now().minusYears(1);
 
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
-            .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom.minusYears(4)));
 
-        Prosessinstans prosessinstans = hentProsessinstans();
+        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(fom, tom));
         validerYtelser.utfør(prosessinstans);
 
         verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatype.class), any(), any(), anyString());
@@ -100,11 +93,9 @@ public class ValiderYtelserTest {
 
         LocalDate fom = LocalDate.now().minusYears(2);
 
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
-            .thenReturn(Optional.of(hentSedSaksopplysning(fom, null)));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom));
 
-        Prosessinstans prosessinstans = hentProsessinstans();
+        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(fom, null));
         validerYtelser.utfør(prosessinstans);
 
         verify(inntektService).hentInntektListe(anyString(),any(YearMonth.class), isNull());
@@ -117,11 +108,9 @@ public class ValiderYtelserTest {
         LocalDate fom = LocalDate.now().minusYears(1);
         LocalDate tom = LocalDate.now().plusYears(1);
 
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
-            .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom));
 
-        Prosessinstans prosessinstans = hentProsessinstans();
+        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(fom, tom));
         validerYtelser.utfør(prosessinstans);
 
         verify(inntektService).hentInntektListe(anyString(),eq(YearMonth.from(fom.minusMonths(2))), eq(YearMonth.from(tom)));
@@ -134,11 +123,9 @@ public class ValiderYtelserTest {
         LocalDate fom = LocalDate.now().plusYears(1);
         LocalDate tom = LocalDate.now().plusYears(2);
 
-        when(saksopplysningRepository.findByBehandlingAndType(any(Behandling.class), eq(SaksopplysningType.SEDOPPL)))
-            .thenReturn(Optional.of(hentSedSaksopplysning(fom, tom)));
         when(inntektService.hentInntektListe(anyString(), any(), any())).thenReturn(hentInntektSaksopplysning(true, fom));
 
-        Prosessinstans prosessinstans = hentProsessinstans();
+        Prosessinstans prosessinstans = hentProsessinstans(hentSedSaksopplysning(fom, tom));
         validerYtelser.utfør(prosessinstans);
 
         verify(inntektService).hentInntektListe(anyString(),eq(YearMonth.from(LocalDate.now().minusMonths(2))), eq(YearMonth.from(LocalDate.now())));
@@ -146,12 +133,13 @@ public class ValiderYtelserTest {
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_VALIDER_STATSBORGERSKAP);
     }
 
-    private Prosessinstans hentProsessinstans() {
+    private Prosessinstans hentProsessinstans(Saksopplysning saksopplysning) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "123123");
 
         Behandling behandling = new Behandling();
         behandling.setId(2L);
+        behandling.getSaksopplysninger().add(saksopplysning);
 
         prosessinstans.setBehandling(behandling);
         return prosessinstans;
@@ -196,12 +184,13 @@ public class ValiderYtelserTest {
     private Saksopplysning hentSedSaksopplysning(LocalDate fom, LocalDate tom) {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(hentSedDokument(fom, tom));
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
         return saksopplysning;
     }
 
     private SedDokument hentSedDokument(LocalDate fom, LocalDate tom) {
         SedDokument sedDokument = new SedDokument();
-        sedDokument.setPeriode(new no.nav.melosys.domain.dokument.medlemskap.Periode(fom, tom));
+        sedDokument.setLovvalgsperiode(new no.nav.melosys.domain.dokument.medlemskap.Periode(fom, tom));
         return sedDokument;
 
     }
