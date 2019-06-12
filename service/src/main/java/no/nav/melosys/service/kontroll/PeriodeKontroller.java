@@ -9,7 +9,7 @@ public final class PeriodeKontroller {
     }
 
     public static boolean feilIPeriode(LocalDate fom, LocalDate tom) {
-        return tom != null && fom.isAfter(tom);
+        return fom == null || tom != null && fom.isAfter(tom);
     }
 
     public static boolean periodeErÅpen(LocalDate fom, LocalDate tom) {
