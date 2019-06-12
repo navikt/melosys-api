@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
 import no.nav.melosys.domain.kodeverk.Endretperioder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -58,7 +59,7 @@ public class ForkortPeriode extends AbstraktStegBehandler {
         Behandling behandling = prosessinstans.getBehandling();
         Endretperioder endretperiode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperioder.class);
 
-        avklartefakteService.leggTilÅrsakEndringPeriode(behandling.getId(), endretperiode);
+        avklartefakteService.leggTilBegrunnelse(behandling.getId(), Avklartefaktatype.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
 
         prosessinstans.setSteg(IV_VALIDERING);
         log.info("Oppdatert avklarteFakta for prosessinstans {}.", prosessinstans.getId());

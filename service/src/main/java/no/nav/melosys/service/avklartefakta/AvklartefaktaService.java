@@ -103,7 +103,7 @@ public class AvklartefaktaService {
         avklarteFaktaRepository.saveAll(avklartefaktaList);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void leggTilAvklarteFakta(long behandlingsid, Avklartefaktatype type, String referanse, String subjekt, String fakta) throws IkkeFunnetException {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingsid));
@@ -119,20 +119,11 @@ public class AvklartefaktaService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void leggTilÅrsakEndringPeriode(long behandlingsid, Endretperioder endretperiode) throws IkkeFunnetException {
-        Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingsid));
-
-        Set<Avklartefakta> avklartefaktaSet = avklarteFaktaRepository.findByBehandlingsresultatId(behandlingsid);
-        Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setBehandlingsresultat(resultat);
-        avklartefakta.setType(Avklartefaktatype.AARSAK_ENDRING_PERIODE);
-        avklartefakta.setFakta(endretperiode.getKode());
-        avklartefakta.setReferanse(Avklartefaktatype.AARSAK_ENDRING_PERIODE.getKode());
-        avklartefaktaSet.add(avklartefakta);
-        avklarteFaktaRepository.saveAll(avklartefaktaSet);
+    public void leggTilBegrunnelse(long behandlingsid, Avklartefaktatype avklartefaktatype, String begrunnelseKode) throws IkkeFunnetException {
+        leggTilAvklarteFakta(behandlingsid, avklartefaktatype, avklartefaktatype.getKode(), null, begrunnelseKode);
     }
 
+    @Transactional(rollbackFor = MelosysException.class)
     public void leggTilRegistrering(long behandlingsid, Avklartefaktatype avklartefaktatype, String begrunnelseKode) throws IkkeFunnetException {
 
         Avklartefakta avklartefakta = avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, avklartefaktatype)
