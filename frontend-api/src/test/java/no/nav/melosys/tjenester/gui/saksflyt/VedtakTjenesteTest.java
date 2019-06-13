@@ -35,9 +35,6 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
     private Tilgang tilgang;
 
     private VedtakTjeneste vedtakTjeneste;
-
-    private String schemaType = "saksflyt-vedtak-post-schema.json";
-
     private FattVedtakDto fattVedtakDto;
     private EndreVedtakDto endreVedtakDto;
 
@@ -45,7 +42,7 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Override
     public String schemaNavn() {
-        return schemaType;
+        return "saksflyt-vedtak-post-schema.json";
     }
 
     @Before
@@ -63,17 +60,6 @@ public class VedtakTjenesteTest extends JsonSchemaTestParent {
 
         verify(tilgang).sjekk(behandlingID);
         verify(vedtakService).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultattype());
-
-        valider(fattVedtakDto);
-    }
-
-    @Test
-    public void fattVedtak_anmodningOmUnntak_fungerer() throws FunksjonellException, TekniskException, IOException {
-        fattVedtakDto.setBehandlingsresultattype(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
-        vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
-
-        verify(tilgang).sjekk(behandlingID);
-        verify(vedtakService).anmodningOmUnntak(behandlingID);
 
         valider(fattVedtakDto);
     }

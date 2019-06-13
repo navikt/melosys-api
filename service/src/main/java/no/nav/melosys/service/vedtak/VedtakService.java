@@ -35,19 +35,6 @@ public class VedtakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void anmodningOmUnntak(long behandlingID) throws FunksjonellException, TekniskException {
-        Behandling behandling = behandlingRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Kan ikke sende andmodning om unntak fordi behandling " + behandlingID + IKKE_FINNES));
-        log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
-
-        behandling.setStatus(Behandlingsstatus.AVVENT_DOK_UTL);
-        behandlingRepository.save(behandling);
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling);
-
-        oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-    }
-
-    @Transactional(rollbackFor = MelosysException.class)
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke fatte vedtak fordi behandling " + behandlingID + IKKE_FINNES));

@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui.config;
 import javax.ws.rs.ApplicationPath;
 
 import no.nav.melosys.tjenester.gui.*;
+import no.nav.melosys.tjenester.gui.saksflyt.UnntakTjeneste;
 import no.nav.melosys.tjenester.gui.saksflyt.VedtakTjeneste;
 import no.nav.melosys.tjenester.gui.unntakshandtering.FunksjonellExceptionMapper;
 import no.nav.melosys.tjenester.gui.unntakshandtering.IkkeFunnetExceptionMapper;
@@ -43,6 +44,7 @@ public class JerseyConfig extends ResourceConfig {
         register(EessiTjeneste.class);
         register(ServerinfoTjeneste.class);
         register(SoeknadTjeneste.class);
+        register(UnntakTjeneste.class);
         register(VedtakTjeneste.class);
         register(VilkaarTjeneste.class);
 

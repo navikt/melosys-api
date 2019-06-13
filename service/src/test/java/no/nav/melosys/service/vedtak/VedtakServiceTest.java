@@ -30,20 +30,16 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VedtakServiceTest {
-
     @Mock
     private BehandlingRepository behandlingRepository;
-
     @Mock
     private OppgaveService oppgaveService;
-
     @Mock
     private ProsessinstansService prosessinstansService;
 
     private VedtakService vedtakService;
 
     private long behandlingID;
-    private Behandling behandling;
 
     @Before
     public void setUp() {
@@ -51,7 +47,7 @@ public class VedtakServiceTest {
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;
-        behandling = new Behandling();
+        Behandling behandling = new Behandling();
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-111");
@@ -74,19 +70,8 @@ public class VedtakServiceTest {
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
 
         Optional<Behandling> behandling = behandlingRepository.findById(behandlingID);
+        assertThat(behandling).isPresent();
         assertThat(behandling.get().getStatus()).isEqualTo(Behandlingsstatus.IVERKSETTER_VEDTAK);
-    }
-
-    @Test
-    public void anmodningOmUnntak_fungerer() throws FunksjonellException, TekniskException {
-        vedtakService.anmodningOmUnntak(behandlingID);
-
-        verify(behandlingRepository).findById(behandlingID);
-        verify(behandlingRepository).save(behandling);
-
-        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class));
-
-        verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
     }
 
     @Test(expected = IkkeFunnetException.class)
