@@ -5,7 +5,6 @@ import java.util.List;
 
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 
 public class UstrukturertAdresse extends Adresse {
 
@@ -41,10 +40,11 @@ public class UstrukturertAdresse extends Adresse {
         }
         landkode = sAdresse.getLandkode();
 
-        if (!landkode.equals(Landkoder.NO.getKode())) {
+        if (sAdresse.erUtenlandsk()) {
             adresselinjer.add(sAdresse.getPoststedUtland());
         } else {
-            adresselinjer.add(sAdresse.getPostnr());
+            String _poststed = sAdresse.getPoststed() == null ? "" : " " + sAdresse.getPoststed();
+            adresselinjer.add(sAdresse.getPostnr() + _poststed);
         }
     }
 

@@ -17,6 +17,7 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.service.BehandlingService;
 import no.nav.melosys.service.abac.Tilgang;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
@@ -59,6 +60,7 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
             .objectPoolSize(100)
             .dateRange(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
             .exclude(FieldDefinitionBuilder.field().named("tilleggsinformasjonDetaljer").ofType(TilleggsinformasjonDetaljer.class).inClass(Tilleggsinformasjon.class).get())
+            .exclude(FieldDefinitionBuilder.field().named("sed").ofType(SedDokument.class).get())
             .stringLengthRange(2, 10)
             .randomize(GeografiskAdresse.class, (Randomizer<GeografiskAdresse>) () -> EnhancedRandom.random(SemistrukturertAdresse.class))
             .randomize(MidlertidigPostadresse.class, (Randomizer<MidlertidigPostadresse>) () -> Math.random() > 0.5 ? random.nextObject(MidlertidigPostadresseNorge.class) : random.nextObject(MidlertidigPostadresseUtland.class))
@@ -87,6 +89,8 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void hentBehandling_erSchemaValidert() throws IOException {
         BehandlingDto behandlingDto = random.nextObject(BehandlingDto.class);
+        behandlingDto.getSaksopplysninger().setSed(null);
+
         schemaType = BEHANDLINGER_SCHEMA;
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(behandlingDto);
         valider(jsonString, log);
