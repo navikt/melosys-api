@@ -3,9 +3,12 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import javax.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000081.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.Art161AvslagBegrunnelse;
+import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
@@ -14,8 +17,17 @@ import no.nav.melosys.domain.kodeverk.Art16_1_Avslag__Begrunnelser;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntakOgAvslag;
+import org.xml.sax.SAXException;
 
 public class AvslagYrkesaktivMapper extends AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
+
+    private static final String XSD_LOCATION = "melosysbrev/melosys_NY_KODE_FOR_AVSLAG.xsd";
+
+    @Override
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
+                                BrevData brevData) throws JAXBException, SAXException, TekniskException {
+        return mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData, XSD_LOCATION);
+    }
 
     @Override
     Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntakOgAvslag brevData) throws TekniskException {

@@ -26,30 +26,27 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
-
 import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.*;
 
 /**
- * Anmodning om unntak og avslag deler samme mal.
+ * Anmodning om unntak og avslag deler samme mal, men har ulik DokumentTypeId.
  */
 abstract class AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
 
     private static final Logger log = LoggerFactory.getLogger(AbstraktAnmodningUnntakOgAvslagMapper.class);
 
-    private static final String XSD_LOCATION = "melosysbrev/melosys_000081.xsd";
-
     static final String JA = "true";
 
     abstract Fag mapArt161(Fag fag, Behandlingsresultat resultat, BrevData brevData) throws TekniskException;
 
-    @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
+    protected String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
+                         BrevData brevData, String xsdLocation) throws TekniskException, JAXBException, SAXException {
         Fag fag = mapFag(behandling, resultat, (BrevDataAnmodningUnntakOgAvslag) brevData);
         fag = mapArt161(fag, resultat, brevData);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
-        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, XSD_LOCATION);
+        return JaxbHelper.marshalAndValidateJaxb(BrevdataType.class, brevdataTypeJAXBElement, xsdLocation);
     }
 
     Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntakOgAvslag brevData) throws TekniskException {
