@@ -77,7 +77,6 @@
         <junit.version>4.12</junit.version>
         <mockito.version>2.20.0</mockito.version>
         <mockrunner.version>2.0.1</mockrunner.version>
-        <modelmapper.version>1.1.0</modelmapper.version>
         <ojdbc.version>12.2.0.1</ojdbc.version>
         <org.json.version>20180813</org.json.version>
         <oxmlparserv2.version>11.2.0.1</oxmlparserv2.version>
@@ -282,11 +281,6 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.modelmapper</groupId>
-                <artifactId>modelmapper</artifactId>
-                <version>${modelmapper.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger</groupId>
