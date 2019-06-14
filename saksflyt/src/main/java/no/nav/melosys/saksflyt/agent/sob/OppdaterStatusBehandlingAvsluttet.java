@@ -26,6 +26,7 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
     private final SakOgBehandlingFasade sakOgBehandlingFasade;
 
     public OppdaterStatusBehandlingAvsluttet(SakOgBehandlingFasade sakOgBehandlingFasade) {
+        super(sakOgBehandlingFasade);
         this.sakOgBehandlingFasade = sakOgBehandlingFasade;
         log.info("OppdaterStatusBehandlingAvsluttet initialisert");
     }
@@ -54,7 +55,7 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
             throw new FunksjonellException("Sak " + saksnummer + " har ingen bruker." );
         }
 
-        sakOgBehandlingFasade.sendBehandlingAvsluttet(lagBehandlingStatusMapper(saksnummer, behandling.getId(), aktørID));
+        sakOgBehandlingAvsluttet(saksnummer, behandling.getId(), aktørID);
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Oppdatert sob-status til avsluttet for prosessinstans {}", prosessinstans.getId());

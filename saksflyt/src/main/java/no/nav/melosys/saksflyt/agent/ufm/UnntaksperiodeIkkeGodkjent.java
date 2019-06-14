@@ -84,6 +84,6 @@ public class UnntaksperiodeIkkeGodkjent extends AbstraktStegBehandler {
         }
 
         log.info("Unntaksperiode avvist i medl og behandling avsluttet for fagsak {}", prosessinstans.getBehandling().getFagsak().getSaksnummer());
-        prosessinstans.setSteg(ProsessSteg.FERDIG);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET);
     }
 }
