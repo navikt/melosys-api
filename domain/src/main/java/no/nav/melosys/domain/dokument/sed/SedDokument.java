@@ -13,7 +13,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 
 @XmlRootElement
-public class SedDokument extends SaksopplysningDokument {
+public class SedDokument implements SaksopplysningDokument {
 
     private String rinaSaksnummer;
 

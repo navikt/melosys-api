@@ -3,6 +3,6 @@ package no.nav.melosys.domain.dokument;
 /**
  * Superklasse for alle dokumenter.
  */
-public abstract class SaksopplysningDokument implements Dokument {
+public interface SaksopplysningDokument extends Dokument {
 
 }
