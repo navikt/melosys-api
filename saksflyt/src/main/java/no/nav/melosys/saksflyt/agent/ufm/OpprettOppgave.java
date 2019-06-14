@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.agent.ufm;
 import java.util.Map;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
@@ -47,18 +47,18 @@ public class OpprettOppgave extends AbstraktStegBehandler {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         Fagsak fagsak = prosessinstans.getBehandling().getFagsak();
 
-        //Foreløpig satt verdier for oppgave. Ikke avklart hvilke verdier som skal settes per 07.06.19
+        //Midlertidige verdier for oppgave satt til disse er nærmere avklart
         Oppgave oppgave = new Oppgave();
         oppgave.setPrioritet(PrioritetType.NORM);
-        oppgave.setTema(Tema.UFM);
+        oppgave.setTema(Tema.MED);
         oppgave.setSaksnummer(fagsak.getSaksnummer());
         oppgave.setAktørId(prosessinstans.getData(ProsessDataKey.AKTØR_ID));
         oppgave.setJournalpostId(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID));
         oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
-        oppgave.setBehandlingstype(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP);
+        oppgave.setBehandlingstema(Behandlingstema.EU_EOS);
 
-        gsakFasade.opprettOppgave(oppgave);
-        log.info("Opprettet oppgave til manuell behandling for sak {}", fagsak.getSaksnummer());
+        String oppgaveId = gsakFasade.opprettOppgave(oppgave);
+        log.info("Opprettet oppgave {} til manuell behandling for sak {}", oppgaveId, fagsak.getSaksnummer());
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
