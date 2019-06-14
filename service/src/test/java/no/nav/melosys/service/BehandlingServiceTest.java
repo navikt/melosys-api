@@ -132,7 +132,7 @@ public class BehandlingServiceTest {
     @Test
     public void finnMedlemsperioder_ingenTidligereMedlemsperioder() {
         long behandlingID = 11L;
-        when(tidligereMedlemsperiodeRepo.findById_BehandlingId(anyLong())).thenReturn(null);
+        when(tidligereMedlemsperiodeRepo.findById_BehandlingId(anyLong())).thenReturn(new ArrayList<>());
 
         List<Long> periodeIder = behandlingService.hentMedlemsperioder(behandlingID);
         assertThat(periodeIder).isNotNull();
@@ -165,7 +165,7 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public void replikerBehandling_replikererObjekterOgCollections() throws NoSuchMethodException, TekniskException, InstantiationException, IkkeFunnetException, IllegalAccessException, InvocationTargetException {
+    public void replikerBehandling_replikererObjekterOgCollections() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
         Behandling replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
 

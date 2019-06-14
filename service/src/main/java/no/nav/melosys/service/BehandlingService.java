@@ -79,6 +79,12 @@ public class BehandlingService {
         behandlingRepository.save(behandling);
     }
 
+    private boolean erLovligNesteStatusEtterDokumentVurdering(Behandlingsstatus behandlingsstatus) {
+        return (behandlingsstatus == Behandlingsstatus.UNDER_BEHANDLING)
+            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_PART)
+            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL);
+    }
+
     /**
      * - Oppretter en ny behandling.
      * - Oppretter tom behandlingsresultat.
@@ -110,19 +116,10 @@ public class BehandlingService {
 
     public List<Long> hentMedlemsperioder(long behandlingID) {
         List<TidligereMedlemsperiode> tidligereMedlemsperioder = tidligereMedlemsperiodeRepository.findById_BehandlingId(behandlingID);
-        if (tidligereMedlemsperioder == null) {
-            return new ArrayList<>();
-        }
         return tidligereMedlemsperioder.stream()
             .map(TidligereMedlemsperiode::getId)
             .map(TidligereMedlemsperiodeId::getPeriodeId)
             .collect(toList());
-    }
-
-    public boolean erLovligNesteStatusEtterDokumentVurdering(Behandlingsstatus behandlingsstatus) {
-        return (behandlingsstatus == Behandlingsstatus.UNDER_BEHANDLING)
-            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_PART)
-            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL);
     }
 
     @Transactional(rollbackFor = Exception.class)

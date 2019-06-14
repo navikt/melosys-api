@@ -31,8 +31,12 @@ import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 /**
  * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
  */
-public class SaksopplysningerTilDto {
+public final class SaksopplysningerTilDto {
     private static final ZoneId TIME_ZONE_ID = ZoneId.systemDefault();
+
+    private SaksopplysningerTilDto() {
+        throw new IllegalStateException("Utility");
+    }
 
     //Medlemsperioder sorteres fra nyest til eldst.
      static final Comparator<Medlemsperiode> medlemsperiodeKomparator =
