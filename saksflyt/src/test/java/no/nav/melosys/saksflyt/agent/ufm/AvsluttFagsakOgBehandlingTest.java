@@ -51,7 +51,7 @@ public class AvsluttFagsakOgBehandlingTest {
         avsluttFagsakOgBehandling.utfør(prosessinstans);
 
         verify(felles).oppdaterFagsakOgBehandlingStatuser(eq(behandling), eq(Saksstatuser.LOVVALG_AVKLART), eq(Behandlingsstatus.AVSLUTTET));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET);
         assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.REGISTRERT_UNNTAK);
         assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isEqualTo(UtfallRegistreringUnntak.GODKJENT);
     }

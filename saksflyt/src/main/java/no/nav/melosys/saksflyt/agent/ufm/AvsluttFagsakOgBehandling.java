@@ -62,6 +62,6 @@ public class AvsluttFagsakOgBehandling extends AbstraktStegBehandler {
         behandlingsresultatRepository.save(behandlingsresultat);
 
         log.info("Periode regisrert og behandling avsluttet for fagsak {}, behandling {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
-        prosessinstans.setSteg(ProsessSteg.FERDIG);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET);
     }
 }

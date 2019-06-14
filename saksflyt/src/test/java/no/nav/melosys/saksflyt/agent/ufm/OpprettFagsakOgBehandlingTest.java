@@ -42,7 +42,7 @@ public class OpprettFagsakOgBehandlingTest {
         Prosessinstans prosessinstans = hentProsessinstans(false);
         opprettFagsakOgBehandling.utfør(prosessinstans);
         verify(fagsakService).nyFagsakOgBehandling(any(OpprettSakRequest.class));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_FERDIGSTILL_JOURNALPOST);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET);
     }
 
     @Test
@@ -51,7 +51,7 @@ public class OpprettFagsakOgBehandlingTest {
         Prosessinstans prosessinstans = hentProsessinstans(true);
         opprettFagsakOgBehandling.utfør(prosessinstans);
         verify(behandlingService).nyBehandling(any(Fagsak.class), eq(Behandlingsstatus.UNDER_BEHANDLING), eq(Behandlingstyper.UNNTAK_FRA_MEDLEMSKAP), eq("123"), eq("321"));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_FERDIGSTILL_JOURNALPOST);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET);
     }
 
     @Test(expected = TekniskException.class)

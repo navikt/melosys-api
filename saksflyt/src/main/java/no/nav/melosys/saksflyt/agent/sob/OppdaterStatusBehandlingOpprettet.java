@@ -27,11 +27,9 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterStatusBehandlingOpprettet.class);
 
-    private final SakOgBehandlingFasade sakOgBehandlingFasade;
-
     @Autowired
     public OppdaterStatusBehandlingOpprettet(SakOgBehandlingFasade sakOgBehandlingFasade) {
-        this.sakOgBehandlingFasade = sakOgBehandlingFasade;
+        super(sakOgBehandlingFasade);
         log.info("OppdaterStatusBehandlingOpprettet initialisert");
     }
 
@@ -48,7 +46,7 @@ public class OppdaterStatusBehandlingOpprettet extends SakOgBehandlingStegBehand
         String saksnummer = prosessinstans.getData(SAKSNUMMER);
         Behandling behandling = prosessinstans.getBehandling();
 
-        sakOgBehandlingFasade.sendBehandlingOpprettet(lagBehandlingStatusMapper(saksnummer, behandling.getId(), aktørID));
+        sakOgBehandlingOpprettet(saksnummer, behandling.getId(), aktørID);
 
         prosessinstans.setSteg(JFR_OPPDATER_JOURNALPOST);
         log.info("Oppdatert sob-status til opprettet for prosessinstans {}", prosessinstans.getId());

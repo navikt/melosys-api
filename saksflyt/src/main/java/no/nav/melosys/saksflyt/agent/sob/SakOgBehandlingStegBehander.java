@@ -3,8 +3,10 @@ package no.nav.melosys.saksflyt.agent.sob;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.feil.Feilkategori;
 import no.nav.melosys.integrasjon.Fagsystem;
+import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
 import no.nav.melosys.saksflyt.agent.AbstraktStegBehandler;
 import no.nav.melosys.saksflyt.agent.UnntakBehandler;
@@ -16,12 +18,18 @@ import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.generateCallId
 
 public abstract class SakOgBehandlingStegBehander extends AbstraktStegBehandler {
 
+    private final SakOgBehandlingFasade sakOgBehandlingFasade;
+
+    protected SakOgBehandlingStegBehander(SakOgBehandlingFasade sakOgBehandlingFasade) {
+        this.sakOgBehandlingFasade = sakOgBehandlingFasade;
+    }
+
     @Override
     protected Map<Feilkategori, UnntakBehandler> unntaksHåndtering() {
         return FeilStrategi.standardFeilHåndtering();
     }
 
-    static BehandlingStatusMapper lagBehandlingStatusMapper(String saksnummer, Long behandlingID, String aktørID) {
+    private static BehandlingStatusMapper lagBehandlingStatusMapper(String saksnummer, Long behandlingID, String aktørID) {
         // BehandlingsId i SOB skal være unik i NAV, så vi prefikser med applikasjonsID.
         String behandlingsId = String.format("%s-%d", Fagsystem.MELOSYS.getKode(), behandlingID);
 
@@ -36,5 +44,13 @@ public abstract class SakOgBehandlingStegBehander extends AbstraktStegBehandler 
         builder.medAnsvarligEnhet(Integer.toString(MELOSYS_ENHET_ID));
 
         return builder.build();
+    }
+
+    protected void sakOgBehandlingOpprettet(String saksnummer, Long behandlingId, String aktørID) throws IntegrasjonException {
+        sakOgBehandlingFasade.sendBehandlingOpprettet(lagBehandlingStatusMapper(saksnummer, behandlingId, aktørID));
+    }
+
+    protected void sakOgBehandlingAvsluttet(String saksnummer, Long behandlingId, String aktørID) throws IntegrasjonException {
+        sakOgBehandlingFasade.sendBehandlingAvsluttet(lagBehandlingStatusMapper(saksnummer, behandlingId, aktørID));
     }
 }

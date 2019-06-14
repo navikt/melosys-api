@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.ProsessDataKey.*;
-import static no.nav.melosys.domain.ProsessSteg.REG_UNNTAK_FERDIGSTILL_JOURNALPOST;
 
 @Component("RegistreringUnntakOpprettFagsakOgBehandling")
 public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
@@ -94,7 +93,7 @@ public class OpprettFagsakOgBehandling extends AbstraktStegBehandler {
 
         prosessinstans.setData(SAKSNUMMER, fagsak.getSaksnummer());
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setSteg(REG_UNNTAK_FERDIGSTILL_JOURNALPOST);
+        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET);
     }
 
     private void avsluttTidligereBehandling(Fagsak fagsak) throws TekniskException, IkkeFunnetException {

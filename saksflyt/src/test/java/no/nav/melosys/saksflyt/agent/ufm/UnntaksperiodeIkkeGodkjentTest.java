@@ -60,6 +60,7 @@ public class UnntaksperiodeIkkeGodkjentTest {
 
         unntaksperiodeIkkeGodkjent.utfør(prosessinstans);
 
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET);
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.AVSLUTTET);
         assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isEqualTo(UtfallRegistreringUnntak.IKKE_GODKJENT);
         assertThat(behandlingsresultat.getBegrunnelseFritekst()).isEqualTo("fritekst");
