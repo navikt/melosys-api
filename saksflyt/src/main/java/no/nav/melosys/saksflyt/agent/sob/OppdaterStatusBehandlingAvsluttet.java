@@ -23,11 +23,8 @@ public class OppdaterStatusBehandlingAvsluttet extends SakOgBehandlingStegBehand
 
     private static final Logger log = LoggerFactory.getLogger(OppdaterStatusBehandlingAvsluttet.class);
 
-    private final SakOgBehandlingFasade sakOgBehandlingFasade;
-
     public OppdaterStatusBehandlingAvsluttet(SakOgBehandlingFasade sakOgBehandlingFasade) {
         super(sakOgBehandlingFasade);
-        this.sakOgBehandlingFasade = sakOgBehandlingFasade;
         log.info("OppdaterStatusBehandlingAvsluttet initialisert");
     }
 
