@@ -27,6 +27,7 @@ import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelse
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,7 +39,7 @@ public class SedDataBygger extends AbstraktDokumentDataBygger {
     public SedDataBygger(KodeverkService kodeverkService,
                          LovvalgsperiodeService lovvalgsperiodeService,
                          AvklartefaktaService avklartefaktaService,
-                         AvklarteVirksomheterService avklarteVirksomheterService) {
+                         @Qualifier("system") AvklarteVirksomheterService avklarteVirksomheterService) {
         super(kodeverkService, lovvalgsperiodeService, avklartefaktaService);
         this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
