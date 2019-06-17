@@ -2,25 +2,26 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000067.*;
+import no.nav.dok.melosysbrev._000067.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.felles.Arbeidssted;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
+import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadresse;
+import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 public class A1Mapper {
@@ -53,14 +54,10 @@ public class A1Mapper {
 
         a1.setBivirksomhetListe(mapBivirksomheter(brevData.arbeidssteder));
 
-        if (harIkkeFysiskArbeidssted(brevData.arbeidssteder)) {
-            a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(Collections.emptyList()));
-            a1.setIkkeFysiskArbeidssted("true");
-        }
-        else {
-            a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.arbeidssteder));
-            a1.setIkkeFysiskArbeidssted("false");
-        }
+        a1.setFysiskArbeidsstedAdresseListe(mapFysiskeAdresser(brevData.arbeidssteder));
+
+        String ikkeFysiskArbeidssted = harIkkeFysiskArbeidssted(brevData.arbeidssteder) ? "true" : "false";
+        a1.setIkkeFysiskArbeidssted(ikkeFysiskArbeidssted);
 
         return a1;
     }
@@ -171,7 +168,7 @@ public class A1Mapper {
         AdresseType adresseType = new AdresseType();
         adresseType.setNavn(fysiskArbeidssted.navn);
         StrukturertAdresse adresse = fysiskArbeidssted.adresse;
-        adresseType.setAdresselinje1(adresse.gatenavn + " " + adresse.husnummer);
+        adresseType.setAdresselinje1(Objects.toString(adresse.gatenavn, "") + " " + Objects.toString(adresse.husnummer, ""));
         adresseType.setAdresselinje2(adresse.postnummer);
         adresseType.setAdresselinje3(adresse.poststed);
         adresseType.setAdresselinje4(adresse.region);
@@ -191,9 +188,7 @@ public class A1Mapper {
      * eller ingen fysiske arbeidssteder.
      */
     private boolean harIkkeFysiskArbeidssted(List<Arbeidssted> fysiskArbeidssteder) {
-        long antallFysiskeArbeidssteder = fysiskArbeidssteder.stream()
-                .filter(fa -> fa.adresse != null)
-                .count();
+        long antallFysiskeArbeidssteder = fysiskArbeidssteder.size();
 
         return antallFysiskeArbeidssteder < 1 ||
                antallFysiskeArbeidssteder > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
