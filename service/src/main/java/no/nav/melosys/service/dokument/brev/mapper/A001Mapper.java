@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import no.nav.dok.melosysbrev._000115.BostedsadresseType;
 import no.nav.dok.melosysbrev._000115.*;
+import no.nav.dok.melosysbrev._000115.BostedsadresseType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
@@ -17,8 +17,6 @@ import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.LandkoderUtils;
@@ -138,12 +136,12 @@ public class A001Mapper {
         return trygdemyndighet;
     }
 
-    private PersonType mapPerson(PersonDokument personDok, Bostedsadresse adresse, Optional<String> utenlandskIdent) throws TekniskException {
+    private PersonType mapPerson(PersonDokument personDok, StrukturertAdresse bostedsadresse, Optional<String> utenlandskIdent) throws TekniskException {
         PersonType person = new PersonType();
         person.setPersonnavn(lagPersonnavn(personDok));
         person.setStatsborgerskapListe(mapStatsborgerskapListe(personDok));
         person.setKjønn(KjoennKode.fromValue(personDok.kjønn.getKode()));
-        person.setBostedsadresse(mapBostedAdresse(adresse));
+        person.setBostedsadresse(mapBostedAdresse(bostedsadresse));
         person.setFødselsnummer(personDok.fnr);
         //Fødeland og Fødested skal ikke fylles ut
         utenlandskIdent.ifPresent(person::setUtenlandskID);
@@ -225,15 +223,14 @@ public class A001Mapper {
         return arbeidsstedBrev;
     }
 
-    private BostedsadresseType mapBostedAdresse(Bostedsadresse bosted) throws TekniskException {
-        Gateadresse gateadresse = bosted.getGateadresse();
-
+    private BostedsadresseType mapBostedAdresse(StrukturertAdresse bosted) throws TekniskException {
         BostedsadresseType bostedsadresse = new BostedsadresseType();
-        bostedsadresse.setGatenavn(gateadresse.getGatenavn());
-        bostedsadresse.setHusnummer(gateadresse.getHusnummer() + " " + gateadresse.getHusbokstav());
-        bostedsadresse.setPostnummer(bosted.getPostnr());
-        bostedsadresse.setPoststed(bosted.getPoststed());
-        bostedsadresse.setLand(hentIso3Landkode(bosted.getLand().getKode()));
+        bostedsadresse.setGatenavn(bosted.gatenavn);
+        bostedsadresse.setHusnummer(bosted.husnummer);
+        bostedsadresse.setPostnummer(bosted.postnummer);
+        bostedsadresse.setPoststed(bosted.poststed);
+        bostedsadresse.setRegion(bosted.region);
+        bostedsadresse.setLand(hentIso3Landkode(bosted.landkode));
         bostedsadresse.setAdresseType(BostedsadresseTypeKode.BOSTEDSLAND); // Lev1 kun bostedsland
         return bostedsadresse;
     }

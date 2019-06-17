@@ -168,7 +168,7 @@ public final class DokumentServiceTest {
         BrevDataA1 brevDataA1 = new BrevDataA1();
         AvklartVirksomhet arbeidsgiver = new AvklartVirksomhet("Virker av og til", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
         brevDataA1.norskeVirksomheter = new ArrayList<>(Arrays.asList(arbeidsgiver, arbeidsgiver));
-        brevDataA1.bostedsadresse = lagBostedsadresse();
+        brevDataA1.bostedsadresse = lagStrukturertAdresse();
         brevDataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;
         brevDataA1.selvstendigeForetak = Collections.emptySet();
         brevDataA1.utenlandskeVirksomheter = Collections.emptyList();

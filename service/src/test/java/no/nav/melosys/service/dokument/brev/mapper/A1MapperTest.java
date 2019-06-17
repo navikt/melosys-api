@@ -24,7 +24,6 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.*;
@@ -76,12 +75,13 @@ public class A1MapperTest {
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());
         when(behandlingsresultat.getLovvalgsperioder()).thenReturn(new HashSet<>(Collections.singletonList(lovvalgsperiode)));
 
-        Bostedsadresse boAdresse = new Bostedsadresse();
-        boAdresse.getGateadresse().setGatenavn("Gatenavn");
-        boAdresse.getGateadresse().setHusnummer(23);
-        boAdresse.setPostnr("0165");
-        boAdresse.setPoststed("Oslo");
-        boAdresse.setLand(new Land(Land.NORGE));
+        StrukturertAdresse boAdresse = new StrukturertAdresse();
+        boAdresse.husnummer = "12B";
+        boAdresse.gatenavn = "Bogata";
+        boAdresse.postnummer = "0165";
+        boAdresse.poststed = "Poststed";
+        boAdresse.region = "Region";
+        boAdresse.landkode = Landkoder.NO.getKode();
 
         behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
@@ -93,7 +93,7 @@ public class A1MapperTest {
         strukturertAdresse.postnummer = "0165";
         strukturertAdresse.poststed = "Poststed";
         strukturertAdresse.region = "Region";
-        strukturertAdresse.landkode = "Land";
+        strukturertAdresse.landkode = Landkoder.NO.getKode();;
 
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("JARLSBERG INTERNATIONAL",
                                                            "123456789",
@@ -154,7 +154,7 @@ public class A1MapperTest {
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
-        brevData.bostedsadresse.getGateadresse().setGatenavn(null);
+        brevData.bostedsadresse.gatenavn = null;
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isEqualTo(" ");
 

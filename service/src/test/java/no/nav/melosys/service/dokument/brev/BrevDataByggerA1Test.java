@@ -15,6 +15,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -65,7 +66,16 @@ public class BrevDataByggerA1Test {
         when(avklartefaktaService.hentAvklarteOrganisasjoner(anyLong()))
             .thenReturn(avklarteOrganisasjoner);
 
+        StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
+        oppgittAdresse.gatenavn = "HjemmeGata";
+        oppgittAdresse.husnummer = "23B";
+        oppgittAdresse.postnummer = "0165";
+        oppgittAdresse.poststed = "Oslo";
+        oppgittAdresse.landkode = Landkoder.NO.getKode();;
+
         søknad = new SoeknadDokument();
+        søknad.bosted.oppgittAdresse = oppgittAdresse;
+
         Saksopplysning soeknad = new Saksopplysning();
         soeknad.setDokument(søknad);
         soeknad.setType(SaksopplysningType.SØKNAD);

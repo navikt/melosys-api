@@ -101,7 +101,16 @@ public class BrevDataByggerA001Test {
         vilkaarsresultat.setBegrunnelser(new HashSet<>(Arrays.asList(begrunnelse)));
         when(vilkårRepo.findByBehandlingsresultatIdAndVilkaar(anyLong(), any())).thenReturn(Optional.of(vilkaarsresultat));
 
+        StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
+        oppgittAdresse.gatenavn = "HjemmeGata";
+        oppgittAdresse.husnummer = "23B";
+        oppgittAdresse.postnummer = "0165";
+        oppgittAdresse.poststed = "Oslo";
+        oppgittAdresse.landkode = Landkoder.NO.getKode();
+
         søknad = new SoeknadDokument();
+        søknad.bosted.oppgittAdresse = oppgittAdresse;
+
         Saksopplysning soeknad = new Saksopplysning();
         soeknad.setDokument(søknad);
         soeknad.setType(SaksopplysningType.SØKNAD);

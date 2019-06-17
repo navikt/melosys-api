@@ -18,6 +18,7 @@ import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
+import no.nav.melosys.domain.util.SoeknadUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -44,10 +45,21 @@ public abstract class AbstraktDokumentDataBygger {
         this.avklartefaktaService = avklartefaktaService;
     }
 
-    protected Bostedsadresse hentBostedsadresse() {
-        Bostedsadresse adresse = person.bostedsadresse;
-        adresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.getPostnr(), LocalDate.now()));
-        return adresse;
+    protected StrukturertAdresse hentBostedsadresse() throws TekniskException {
+        StrukturertAdresse bostedsadresse = SoeknadUtils.hentBostedsadresse(søknad);
+        if (bostedsadresse == null) {
+            bostedsadresse = hentBostedsadresseFraRegister();
+        }
+        return bostedsadresse;
+    }
+
+    private StrukturertAdresse hentBostedsadresseFraRegister() throws TekniskException {
+        Bostedsadresse bostedsadresse = person.bostedsadresse;
+        if (StringUtils.isEmpty(bostedsadresse.getLand().getKode())) {
+            throw new TekniskException("Bostedsadressen finnes ikke eller mangler landkode");
+        }
+        bostedsadresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, bostedsadresse.getPostnr(), LocalDate.now()));
+        return StrukturertAdresse.av(bostedsadresse);
     }
 
     protected List<Arbeidssted> hentArbeidssteder() {

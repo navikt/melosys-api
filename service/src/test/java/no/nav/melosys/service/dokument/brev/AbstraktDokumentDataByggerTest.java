@@ -14,7 +14,9 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatype;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Yrkesgrupper;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.AbstraktDokumentDataBygger;
@@ -52,7 +54,7 @@ public class AbstraktDokumentDataByggerTest {
             this.behandling = mock(Behandling.class);
         }
 
-        public Bostedsadresse hentBostedsadresse() {
+        public StrukturertAdresse hentBostedsadresse() throws TekniskException {
             return super.hentBostedsadresse();
         }
         public List<Arbeidssted> hentArbeidssteder() {
@@ -69,15 +71,15 @@ public class AbstraktDokumentDataByggerTest {
         avklartefaktaService = mock(AvklartefaktaService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
 
-        Bostedsadresse boAdresse = new Bostedsadresse();
-        boAdresse.getGateadresse().setGatenavn("Gatenavn");
-        boAdresse.getGateadresse().setHusnummer(23);
-        boAdresse.setPostnr("0165");
-        boAdresse.setPoststed("Oslo");
-        boAdresse.setLand(new Land(Land.NORGE));
+        Bostedsadresse boAdresseFraRegister = new Bostedsadresse();
+        boAdresseFraRegister.getGateadresse().setGatenavn("Hjemgata");
+        boAdresseFraRegister.getGateadresse().setHusnummer(23);
+        boAdresseFraRegister.setPostnr("0165");
+        boAdresseFraRegister.setPoststed("Oslo");
+        boAdresseFraRegister.setLand(new Land(Land.NORGE));
 
         person = new PersonDokument();
-        person.bostedsadresse = boAdresse;
+        person.bostedsadresse = boAdresseFraRegister;
 
         søknad = new SoeknadDokument();
 
@@ -86,11 +88,41 @@ public class AbstraktDokumentDataByggerTest {
         brevDatabyggerbase = new BrevDatabyggerbaseImpl(kodeverkService, avklartefaktaService, person, søknad);
     }
 
+    @Test(expected = TekniskException.class)
+    public void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() throws TekniskException {
+        person.bostedsadresse = new Bostedsadresse();
+        søknad.bosted.oppgittAdresse = new StrukturertAdresse();
+        brevDatabyggerbase.hentBostedsadresse();
+    }
+
     @Test
-    public void hentBostedsadresse() {
-        Bostedsadresse bostedsadresse = brevDatabyggerbase.hentBostedsadresse();
-        assertThat(bostedsadresse).isEqualTo(person.bostedsadresse);
-        assertThat(bostedsadresse.getPoststed()).isEqualTo("Oslo");
+    public void hentBostedsadresse_brukerBostedFraPersonDokument() throws TekniskException {
+        StrukturertAdresse bostedsadresse = brevDatabyggerbase.hentBostedsadresse();
+        assertThat(bostedsadresse.gatenavn).isEqualTo("Hjemgata");
+        assertThat(bostedsadresse.husnummer).isEqualTo("23");
+        assertThat(bostedsadresse.postnummer).isEqualTo("0165");
+        assertThat(bostedsadresse.poststed).isEqualTo("Oslo");
+        assertThat(bostedsadresse.landkode).isEqualTo(Landkoder.NO.getKode());
+    }
+
+    @Test
+    public void hentBostedsadresse_oppgittAdresseOverstyrerTPS_nårOppgittAdresseISøknad() throws TekniskException {
+        StrukturertAdresse oppgittBosted = new StrukturertAdresse();
+        oppgittBosted.gatenavn = "HerBorJegGata";
+        oppgittBosted.husnummer = "123";
+        oppgittBosted.postnummer = "0166";
+        oppgittBosted.poststed = "Oslo";
+        oppgittBosted.region = "Østlandet";
+        oppgittBosted.landkode = "NO";
+        søknad.bosted.oppgittAdresse = oppgittBosted;
+
+        StrukturertAdresse bostedsadresse = brevDatabyggerbase.hentBostedsadresse();
+        assertThat(bostedsadresse.gatenavn).isEqualTo("HerBorJegGata");
+        assertThat(bostedsadresse.husnummer).isEqualTo("123");
+        assertThat(bostedsadresse.postnummer).isEqualTo("0166");
+        assertThat(bostedsadresse.poststed).isEqualTo("Oslo");
+        assertThat(bostedsadresse.region).isEqualTo("Østlandet");
+        assertThat(bostedsadresse.landkode).isEqualTo(Landkoder.NO.getKode());
     }
 
     @Test

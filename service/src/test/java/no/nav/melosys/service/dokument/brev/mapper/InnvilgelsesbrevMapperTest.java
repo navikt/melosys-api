@@ -15,8 +15,6 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
@@ -77,7 +75,7 @@ public class InnvilgelsesbrevMapperTest {
         BrevDataA1 brevdataA1 = new BrevDataA1();
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("Virker ikke", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
         brevdataA1.norskeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet, virksomhet));
-        brevdataA1.bostedsadresse = lagBostedsadresse();
+        brevdataA1.bostedsadresse = lagStrukturertAdresse();
         brevdataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;
         brevdataA1.selvstendigeForetak = Collections.emptySet();
         brevdataA1.utenlandskeVirksomheter = Collections.emptyList();
@@ -98,23 +96,13 @@ public class InnvilgelsesbrevMapperTest {
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
     }
 
-    private static Bostedsadresse lagBostedsadresse() {
-        Bostedsadresse adresse = new Bostedsadresse();
-        Gateadresse gateadresse = new Gateadresse();
-        gateadresse.setGatenavn("Gate");
-        adresse.setGateadresse(gateadresse);
-        adresse.setPostnr("1234");
-        adresse.setPoststed("Sted");
-        adresse.setLand(new Land(Land.BULGARIA));
-        return adresse;
-    }
-
     private static StrukturertAdresse lagStrukturertAdresse() {
         StrukturertAdresse vadr = new StrukturertAdresse();
         vadr.gatenavn = "Gate";
-        vadr.landkode = Land.BULGARIA;
+        vadr.husnummer = "12B";
         vadr.poststed = "Sted";
         vadr.postnummer = "4321";
+        vadr.landkode = Landkoder.BG.getKode();
         return vadr;
     }
 
