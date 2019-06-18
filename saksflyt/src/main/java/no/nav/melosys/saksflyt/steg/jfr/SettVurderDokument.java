@@ -70,7 +70,12 @@ public class SettVurderDokument extends AbstraktStegBehandler {
             log.info("I prosessinstans {}. Nytt dokument krever ingen vurdering ({}) eller ingen aktiv behandling for sak {}.", prosessinstans.getId(), ingenVurdering, saksnummer);
         }
 
-        prosessinstans.setSteg(ProsessSteg.FERDIG);
+        boolean skalTilordnes = prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class);
+        if (skalTilordnes) {
+            prosessinstans.setSteg(ProsessSteg.JFR_TILDEL_BEHANDLINGSOPPGAVE);
+        } else {
+            prosessinstans.setSteg(ProsessSteg.FERDIG);
+        }
     }
 }
 

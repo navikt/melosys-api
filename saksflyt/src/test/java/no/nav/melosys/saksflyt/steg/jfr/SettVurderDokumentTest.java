@@ -14,7 +14,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -58,6 +57,7 @@ public class SettVurderDokumentTest {
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
+        p.setData(ProsessDataKey.SKAL_TILORDNES, false);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
         verify(behandlingRepository).save(behandlingArgumentCaptor.capture());
@@ -70,6 +70,7 @@ public class SettVurderDokumentTest {
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_UTEN_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
+        p.setData(ProsessDataKey.SKAL_TILORDNES, false);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
         verify(behandlingRepository, never()).save(any(Behandling.class));
@@ -81,9 +82,23 @@ public class SettVurderDokumentTest {
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.JFR_INGEN_VURDERING, true);
+        p.setData(ProsessDataKey.SKAL_TILORDNES, false);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FERDIG);
         verify(behandlingRepository, never()).save(any(Behandling.class));
+    }
+
+    @Test
+    public void utførSteg_sakMedBehandling_skalTildeleBehandlingsoppgave() {
+        Prosessinstans p = new Prosessinstans();
+        p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_MED_BEHANDLING);
+        p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+        p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
+        p.setData(ProsessDataKey.SKAL_TILORDNES, true);
+        agent.utførSteg(p);
+        assertThat(p.getSteg()).isEqualTo(ProsessSteg.JFR_TILDEL_BEHANDLINGSOPPGAVE);
+        verify(behandlingRepository).save(behandlingArgumentCaptor.capture());
+        assertThat(behandlingArgumentCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.VURDER_DOKUMENT);
     }
 
     @Test
@@ -92,6 +107,7 @@ public class SettVurderDokumentTest {
         p.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER_FINNES_IKKE);
         p.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
         p.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
+        p.setData(ProsessDataKey.SKAL_TILORDNES, false);
         agent.utførSteg(p);
         assertThat(p.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
         assertThat(p.getHendelser()).isNotEmpty();
