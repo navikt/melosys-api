@@ -69,10 +69,7 @@ public class DokumentFactory {
 
         SaksopplysningType type = saksopplysning.getType();
         String versjon = saksopplysning.getVersjon();
-
-        if (saksopplysning.getInternXml() == null) {
-            saksopplysning.setInternXml(transformer(dokumentXml, type, versjon));
-        }
+        saksopplysning.setInternXml(transformer(dokumentXml, type, versjon));
 
         return saksopplysning.getInternXml();
     }
@@ -110,7 +107,7 @@ public class DokumentFactory {
         }
 
         // JAXB brukes til å opprette et SaksopplysningDokument
-        String internXml = saksopplysning.getInternXml() == null ? lagInternXml(saksopplysning) : saksopplysning.getInternXml();
+        String internXml = saksopplysning.getInternXml() == null || saksopplysning.getType() == SaksopplysningType.SØKNAD ? lagInternXml(saksopplysning) : saksopplysning.getInternXml();
         StringReader reader = new StringReader(internXml);
 
         SaksopplysningDokument dokument = (SaksopplysningDokument) marshaller.unmarshal(new StreamSource(reader));
