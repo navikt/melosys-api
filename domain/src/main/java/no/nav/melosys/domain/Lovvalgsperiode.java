@@ -4,28 +4,15 @@ import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.*;
 
+import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.util.LovvalgBestemmelseUtil;
 
 @Entity
 @Table(name = "lovvalg_periode")
 public class Lovvalgsperiode implements ErPeriode {
-    
-    public static final class LovvalgBestemmelsekonverterer implements AttributeConverter<LovvalgBestemmelse, String> {
-
-        @Override
-        public String convertToDatabaseColumn(LovvalgBestemmelse attribute) {
-            return attribute != null ? attribute.name() : null;
-        }
-
-        @Override
-        public LovvalgBestemmelse convertToEntityAttribute(String dbData) {
-            return LovvalgBestemmelseUtil.dbDataTilLovvalgBestemmelse(dbData);
-        }
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
