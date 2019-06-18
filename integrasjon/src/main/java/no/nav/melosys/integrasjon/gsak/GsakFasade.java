@@ -2,13 +2,15 @@ package no.nav.melosys.integrasjon.gsak;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 
 public interface GsakFasade {
 
@@ -21,10 +23,10 @@ public interface GsakFasade {
      * Finner aktive og utildelte oppgaver som svarer til noen gitt kriterier.
      * GSAK sorterer oppgavene stigende etter frist.
      */
-    List<Oppgave> finnUtildelteOppgaverEtterFrist(Oppgavetyper oppgavetype,
-                                                  List<Sakstyper> sakstyper,
-                                                  List<Behandlingstyper> behandlingstyper,
-                                                  List<Behandlingstema> behandlingstemaer
+    List<Oppgave> finnUtildelteOppgaverEtterFrist(Set<Oppgavetyper> oppgavetype,
+                                                  Set<Sakstyper> sakstyper,
+                                                  Set<Behandlingstyper> behandlingstyper,
+                                                  Set<Behandlingstema> behandlingstemaer
     ) throws TekniskException, FunksjonellException;
 
     /**

@@ -144,6 +144,23 @@ public class Oppgave {
         return oppgavetype == Oppgavetyper.VUR;
     }
 
+    public static Oppgavetyper hentOppgavetype(Behandlingstyper behandlingstype) {
+        switch (behandlingstype) {
+            case SOEKNAD:
+                return Oppgavetyper.BEH_SAK_MK;
+            case ENDRET_PERIODE:
+                return Oppgavetyper.VUR;
+            case ANKE:
+            case KLAGE:
+            case NORGE_UTPEKT:
+            case NY_VURDERING:
+            case PAASTAND_UTL:
+            case UNNTAK_FRA_MEDLEMSKAP:
+            default:
+                throw new UnsupportedOperationException();
+        }
+    }
+
     /**
      * Sorter oppgaver basert på prioritet (først) og frist.
      */
