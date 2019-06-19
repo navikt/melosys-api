@@ -260,7 +260,7 @@ public class GsakService implements GsakFasade {
             }
             return oppgaver.get(0);
         } else {
-            throw new TekniskException("Det finnes ingen aktive behandlingsoppgaver for sak " + saksnummer);
+            throw new IkkeFunnetException("Det finnes ingen aktive behandlingsoppgaver for sak " + saksnummer);
         }
     }
 
