@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto;
+package no.nav.melosys.tjenester.gui.dto.periode;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -30,15 +30,15 @@ public final class LovvalgsperiodeDto {
     public final String medlemskapsperiodeID;
 
     public LovvalgsperiodeDto(PeriodeDto periode,
-            LovvalgBestemmelse lovvalgBestemmelse,
-            LovvalgBestemmelse tilleggBestemmelse,
-            Landkoder lovvalgsland,
-            LovvalgBestemmelse unntakFraBestemmelse,
-            Landkoder unntakFraLovvalgsland,
-            InnvilgelsesResultat innvilgelsesResultat,
-            Trygdedekninger trygdeDekning,
-            Medlemskapstyper medlemskapstype,
-            String medlemskapsperiodeID) {
+                              LovvalgBestemmelse lovvalgBestemmelse,
+                              LovvalgBestemmelse tilleggBestemmelse,
+                              Landkoder lovvalgsland,
+                              LovvalgBestemmelse unntakFraBestemmelse,
+                              Landkoder unntakFraLovvalgsland,
+                              InnvilgelsesResultat innvilgelsesResultat,
+                              Trygdedekninger trygdeDekning,
+                              Medlemskapstyper medlemskapstype,
+                              String medlemskapsperiodeID) {
         this.periode = periode;
         this.lovvalgBestemmelse = lovvalgBestemmelse != null ? lovvalgBestemmelse.name() : null;
         this.tilleggBestemmelse = tilleggBestemmelse != null ? tilleggBestemmelse.name() : null;
@@ -55,22 +55,21 @@ public final class LovvalgsperiodeDto {
     public LovvalgsperiodeDto(Map<String, String> json) {
         this(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
                 LocalDate.parse(json.get("tomDato"))),
-                konverterLovvalgsBestemmelse(json.get("lovvalgBestemmelse")),
-                konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
-                enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
-                konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
-                enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
-                InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
-                enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
-                enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")),
-                json.get("medlemskapsperiodeID"));
+            konverterLovvalgsBestemmelse(json.get("lovvalgBestemmelse")),
+            konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
+            enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
+            konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
+            enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
+            InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
+            enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
+            enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")),
+            json.get("medlemskapsperiodeID"));
     }
 
     /**
      * Factory-metode for å lage en DTO fra det korresponderende domeneobjektet.
-     * 
-     * @param lovvalgsperiode
-     *            ett domeneobjekt å konvertere.
+     *
+     * @param lovvalgsperiode ett domeneobjekt å konvertere.
      * @return en ny DTO-instanse.
      */
     public static LovvalgsperiodeDto av(Lovvalgsperiode lovvalgsperiode) {
@@ -90,7 +89,7 @@ public final class LovvalgsperiodeDto {
 
     /**
      * Konverter denne instansen til ett korresponderende domeneobjekt.
-     * 
+     *
      * @return ett domeneobjekt initialisert fra denne instansen.
      */
     public final Lovvalgsperiode til() {
@@ -115,6 +114,5 @@ public final class LovvalgsperiodeDto {
 
     static <E extends Enum<E>> E enumVerdiEllerNull(Class<E> enumKlasse, String nøkkel) {
         return nøkkel == null ? null : Enum.valueOf(enumKlasse, nøkkel);
-
     }
 }

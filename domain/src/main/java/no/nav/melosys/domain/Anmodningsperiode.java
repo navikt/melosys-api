@@ -48,8 +48,12 @@ public class Anmodningsperiode implements ErPeriode {
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
 
-    public Anmodningsperiode(Behandlingsresultat behandlingsresultat, LocalDate fom, LocalDate tom, Landkoder lovvalgsland, LovvalgBestemmelse bestemmelse, LovvalgBestemmelse tilleggsbestemmelse, Landkoder unntakFraLovvalgsland, LovvalgBestemmelse unntakFraBestemmelse, Long medlPeriodeID) {
-        this.behandlingsresultat = behandlingsresultat;
+    @SuppressWarnings("unused") // Trengs av Hibernate
+    Anmodningsperiode() {
+    }
+
+    public Anmodningsperiode(LocalDate fom, LocalDate tom, Landkoder lovvalgsland, LovvalgBestemmelse bestemmelse, LovvalgBestemmelse tilleggsbestemmelse,
+                             Landkoder unntakFraLovvalgsland, LovvalgBestemmelse unntakFraBestemmelse) {
         this.fom = fom;
         this.tom = tom;
         this.lovvalgsland = lovvalgsland;
@@ -65,6 +69,10 @@ public class Anmodningsperiode implements ErPeriode {
 
     public Behandlingsresultat getBehandlingsresultat() {
         return behandlingsresultat;
+    }
+
+    public void setBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
+        this.behandlingsresultat = behandlingsresultat;
     }
 
     @Override
