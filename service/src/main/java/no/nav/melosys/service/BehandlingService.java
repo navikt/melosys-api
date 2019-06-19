@@ -2,7 +2,10 @@ package no.nav.melosys.service;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
@@ -21,7 +24,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -172,8 +174,7 @@ public class BehandlingService {
             return false;
         }
 
-        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())
-            .orElseThrow(() -> new FunksjonellException("Fagsak " + behandling.getFagsak().getSaksnummer() + " har ingen tilknyttet oppgave."));
+        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         String tilordnetRessurs = oppgave.getTilordnetRessurs();
         return tilordnetRessurs != null && tilordnetRessurs.equalsIgnoreCase(saksbehandler);

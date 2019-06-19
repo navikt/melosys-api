@@ -24,7 +24,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -227,7 +226,7 @@ public class BehandlingServiceTest {
         Oppgave oppgave = new Oppgave();
         oppgave.setTilordnetRessurs(SAKSBEHANDLER);
 
-        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.of(oppgave));
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(oppgave);
 
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(true);
@@ -261,9 +260,10 @@ public class BehandlingServiceTest {
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.empty());
+        when(oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer()))
+            .thenThrow(new TekniskException("Finner ingen oppgave for fagsak"));
 
-        expectedException.expect(FunksjonellException.class);
+        expectedException.expect(TekniskException.class);
         behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER);
     }
 

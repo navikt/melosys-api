@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.util.Map;
-import java.util.Optional;
 
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
@@ -49,18 +48,11 @@ public class TildelBehandlingsoppgave extends AbstraktStegBehandler {
         String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);
 
         log.info("Henter behandlingsoppgave for fagsak {}", saksnummer);
-        Optional<Oppgave> oppgave = gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
+        Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
+        String behandlingsoppgaveId = oppgave.getOppgaveId();
 
-        if (oppgave.isPresent()) {
-            String behandlingsoppgaveId = oppgave.get().getOppgaveId();
-            log.info("Tildeler behandlingsoppgave {} til saksbehandler {}", behandlingsoppgaveId, saksbehandler);
-            gsakFasade.tildelOppgave(behandlingsoppgaveId, saksbehandler);
-        } else {
-            String feilmelding = "Finner ingen behandlingsoppgaver for fagsak " + saksnummer;
-            log.error(feilmelding);
-            håndterUnntak(Feilkategori.FUNKSJONELL_FEIL, prosessinstans, feilmelding, null);
-            return;
-        }
+        log.info("Tildeler behandlingsoppgave {} til saksbehandler {}", behandlingsoppgaveId, saksbehandler);
+        gsakFasade.tildelOppgave(behandlingsoppgaveId, saksbehandler);
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Prosessinstans {} har tildelt behandlingsoppgave for fagsak {} til saksbehandler {}",

@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import static no.nav.melosys.domain.util.SaksopplysningerUtils.hentDokument;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentPeriode;
 import static no.nav.melosys.domain.util.SoeknadUtils.hentSøknadsland;
@@ -75,14 +74,12 @@ public class OppgaveService {
     }
 
     public void ferdigstillOppgaveMedSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
-        Oppgave oppgave = hentOppgaveMedFagsaksnummer(fagSaksnummer).
-            orElseThrow(() -> new TekniskException("Ingen oppgave funnet for fagsak " + fagSaksnummer));
+        Oppgave oppgave = hentOppgaveMedFagsaksnummer(fagSaksnummer);
         ferdigstillOppgave(oppgave.getOppgaveId());
     }
 
     public void leggTilbakeOppgaveMedSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
-        Oppgave oppgave = hentOppgaveMedFagsaksnummer(fagSaksnummer).
-            orElseThrow(() -> new TekniskException("Ingen oppgave funnet for fagsak " + fagSaksnummer));
+        Oppgave oppgave = hentOppgaveMedFagsaksnummer(fagSaksnummer);
         gsakFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
     }
 
@@ -97,7 +94,7 @@ public class OppgaveService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<Oppgave> hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
+    public Oppgave hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
         return gsakFasade.finnOppgaveMedSaksnummer(saksnummer);
     }
 

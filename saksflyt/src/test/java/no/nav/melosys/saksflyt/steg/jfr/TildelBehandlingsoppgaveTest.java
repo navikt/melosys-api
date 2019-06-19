@@ -1,7 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.util.Optional;
-
 import no.nav.melosys.domain.ProsessDataKey;
 import no.nav.melosys.domain.ProsessSteg;
 import no.nav.melosys.domain.Prosessinstans;
@@ -10,7 +8,9 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -28,6 +28,9 @@ public class TildelBehandlingsoppgaveTest {
     private static final String SAKSNUMMER = "MEL-1234";
 
     private static final String OPPGAVE_ID = "123123";
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private GsakFasade gsakFasade;
@@ -47,7 +50,7 @@ public class TildelBehandlingsoppgaveTest {
         Oppgave oppgave = new Oppgave();
         oppgave.setOppgaveId(OPPGAVE_ID);
 
-        when(gsakFasade.finnOppgaveMedSaksnummer(eq(SAKSNUMMER))).thenReturn(Optional.of(oppgave));
+        when(gsakFasade.finnOppgaveMedSaksnummer(eq(SAKSNUMMER))).thenReturn(oppgave);
     }
 
     @Test
@@ -61,9 +64,21 @@ public class TildelBehandlingsoppgaveTest {
 
     @Test
     public void utførSteg_finnerIngenOppgave_feiler() throws FunksjonellException, TekniskException {
-        when(gsakFasade.finnOppgaveMedSaksnummer(anyString())).thenReturn(Optional.empty());
+        when(gsakFasade.finnOppgaveMedSaksnummer(anyString())).thenThrow(new TekniskException(""));
 
         tildelBehandlingsoppgave.utførSteg(prosessinstans);
+
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
+        verify(gsakFasade).finnOppgaveMedSaksnummer(anyString());
+        verify(gsakFasade, never()).tildelOppgave(anyString(), anyString());
+    }
+
+    @Test
+    public void utfør_finnerIngenOppgave_forventException() throws FunksjonellException, TekniskException {
+        when(gsakFasade.finnOppgaveMedSaksnummer(anyString())).thenThrow(new TekniskException(""));
+
+        expectedException.expect(TekniskException.class);
+        tildelBehandlingsoppgave.utfør(prosessinstans);
 
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FEILET_MASKINELT);
         verify(gsakFasade).finnOppgaveMedSaksnummer(anyString());

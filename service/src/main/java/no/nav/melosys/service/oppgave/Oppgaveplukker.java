@@ -93,7 +93,7 @@ public class Oppgaveplukker {
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
         Optional<Oppgave> valg = velgNeste(saksbehandlerID, ufordelteOppgaver);
-        
+
         if (valg.isPresent()) {
             // Tildeler oppgaven
             gsakFasade.tildelOppgave(valg.get().getOppgaveId(), saksbehandlerID);
@@ -143,8 +143,7 @@ public class Oppgaveplukker {
             .orElseThrow(() -> new IkkeFunnetException("Fant ikke behandling med behandlingID " + tilbakelegging.getBehandlingID()));
 
         Fagsak fagsak = behandling.getFagsak();
-        Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(fagsak.getSaksnummer())
-            .orElseThrow(() -> new IkkeFunnetException("Fant ingen oppgave for fagsak " + fagsak.getSaksnummer()));
+        Oppgave oppgave = gsakFasade.finnOppgaveMedSaksnummer(fagsak.getSaksnummer());
 
         String oppgaveId = oppgave.getOppgaveId();
         if (!tilbakelegging.isVenterPåDokumentasjon()) {

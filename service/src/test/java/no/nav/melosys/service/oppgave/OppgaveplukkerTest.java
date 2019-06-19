@@ -31,7 +31,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -231,7 +230,7 @@ public class OppgaveplukkerTest {
         final String saksbehandlerID = "test";
         final String begrunnelse = "Oppgaven er kjedelig";
 
-        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(Optional.of(oppgave));
+        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgave);
 
         when(oppgaveTilbakkeleggingRepo.save(any(OppgaveTilbakelegging.class))).then(arguments -> {
             OppgaveTilbakelegging oppgaveTilbakelegging = arguments.getArgument(0);
@@ -258,7 +257,7 @@ public class OppgaveplukkerTest {
         oppgave.setPrioritet(PrioritetType.valueOf("HOY"));
         final String saksbehandlerID = "test";
 
-        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(Optional.of(oppgave));
+        when(gsakFasade.finnOppgaveMedSaksnummer(SAKSNUMMER)).thenReturn(oppgave);
 
         TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
         tilbakelegging.setBehandlingID(BEHANDLING_ID);

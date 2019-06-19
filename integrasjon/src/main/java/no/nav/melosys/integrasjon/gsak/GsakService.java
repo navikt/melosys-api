@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-
 import static no.nav.melosys.domain.kodeverk.Behandlingstyper.SOEKNAD;
 import static no.nav.melosys.domain.util.KodeverkUtils.erGyldigKode;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
@@ -242,7 +241,7 @@ public class GsakService implements GsakFasade {
     }
 
     @Override
-    public Optional<Oppgave> finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
+    public Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
             .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode()})
@@ -259,9 +258,9 @@ public class GsakService implements GsakFasade {
             if (oppgaver.size() > 1) {
                 throw new TekniskException("Det finnes flere aktive behandlingsoppgaver for sak " + saksnummer);
             }
-            return Optional.ofNullable(oppgaver.get(0));
+            return oppgaver.get(0);
         } else {
-            return Optional.empty();
+            throw new TekniskException("Det finnes ingen aktive behandlingsoppgaver for sak " + saksnummer);
         }
     }
 

@@ -16,7 +16,9 @@ import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.gsak.GsakFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -30,7 +32,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -56,13 +57,28 @@ public class OppgaveServiceTest {
     private SaksopplysningerService saksopplysningerService;
 
     @Before
-    public void setUp() {
+    public void setUp() throws FunksjonellException, TekniskException {
         this.oppgaveService = new OppgaveService(
                 gsakFasade,
                 fagsakRepository,
                 behandlingRepository,
                 tpsFasade,
             saksopplysningerService);
+
+        Oppgave oppgave = new Oppgave();
+        oppgave.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
+        oppgave.setTilordnetRessurs("Z998877");
+        oppgave.setSaksnummer("MEL-12345");
+
+        when(gsakFasade.finnOppgaveMedSaksnummer(anyString())).
+            thenAnswer((Answer<Oppgave>) invocation -> {
+                String string = invocation.getArgument(0);
+                if (string.equals("MEL-12345")) {
+                    return oppgave;
+                } else {
+                    throw new TekniskException("Finner ingen oppgave for fagsak " + string);
+                }
+            });
     }
 
     @Test
@@ -107,26 +123,14 @@ public class OppgaveServiceTest {
     }
 
     @Test
-    public void testHentOppgaveForFagsaksnummer() throws MelosysException {
-        Oppgave oppgave1 = new Oppgave();
-        oppgave1.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
-        oppgave1.setSaksnummer("MEL-12345");
+    public void hentOppgaveForFagsaksnummer_modOppgaveSomFinnes_forventOppgave() throws MelosysException {
+        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer("MEL-12345");
+        assertThat(oppgave.erBehandling()).isEqualTo(true);
+    }
 
-        when(gsakFasade.finnOppgaveMedSaksnummer(anyString())).
-            thenAnswer((Answer<Optional<Oppgave>>) invocation -> {
-                String string = invocation.getArgument(0);
-                if (string.equals("MEL-12345")) {
-                    return Optional.of(oppgave1);
-                } else {
-                    return Optional.empty();
-                }
-            });
-
-        Optional<Oppgave> oppgave = oppgaveService.hentOppgaveMedFagsaksnummer("MEL-12345");
-        assertThat(oppgave.filter(Oppgave::erBehandling).isPresent()).isEqualTo(true);
-
-        oppgave = oppgaveService.hentOppgaveMedFagsaksnummer("MEL-12346");
-        assertThat(oppgave.isPresent()).isEqualTo(false);
+    @Test(expected = TekniskException.class)
+    public void hentOppgaveForFagsaksnummer_medOppgaveSomIkkeFinnes_forventException() throws MelosysException {
+        oppgaveService.hentOppgaveMedFagsaksnummer("MEL-12346");
     }
 
     private static Behandling lagBehandling() {

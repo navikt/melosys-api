@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.gsak;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.kodeverk.Behandlingstyper;
@@ -37,8 +36,9 @@ public interface GsakFasade {
 
     /**
      * Finner Oppgave med gitt saksnummer.
+     * @return
      */
-    Optional<Oppgave> finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException;
+    Oppgave finnOppgaveMedSaksnummer(String saksnummer) throws TekniskException, FunksjonellException;
 
     /**
      * Finner Behandlingsoppgaver basert på bruker.
