@@ -26,6 +26,7 @@ public class JerseyConfig extends ResourceConfig {
         // N.B. alfabetisk rekkefølge
         register(AdresseTjeneste.class);
         register(AktoerTjeneste.class);
+        register(AnmodningsperiodeTjeneste.class);
         register(AnmodningUnntakTjeneste.class);
         register(ArbeidsforholdHistorikkTjeneste.class);
         register(AvklartefaktaTjeneste.class);

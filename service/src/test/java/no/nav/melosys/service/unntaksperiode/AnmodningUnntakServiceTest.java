@@ -9,6 +9,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
