@@ -17,7 +17,7 @@ import org.xml.sax.SAXException;
 
 public class AnmodningUnntakMapper extends AbstraktAnmodningUnntakOgAvslagMapper implements BrevDataMapper {
 
-    private static final String XSD_LOCATION = "melosysbrev/melosys_000081.xsd";
+    private static final String XSD_LOCATION = "melosysbrev/melosys_000084.xsd";
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,

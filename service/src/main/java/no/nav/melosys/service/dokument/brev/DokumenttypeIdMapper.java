@@ -20,9 +20,9 @@ public enum DokumenttypeIdMapper {
             case INNVILGELSE_ARBEIDSGIVER:
                 return "000127";
             case AVSLAG_YRKESAKTIV:
-                return "NY_KODE_FOR_AVSLAG";
-            case ORIENTERING_ANMODNING_UNNTAK:
                 return "000081";
+            case ORIENTERING_ANMODNING_UNNTAK:
+                return "000084";
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
                 return "000082";
             case MELDING_HENLAGT_SAK:
