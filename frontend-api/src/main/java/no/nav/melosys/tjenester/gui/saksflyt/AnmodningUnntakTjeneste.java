@@ -13,7 +13,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.Tilgang;
-import no.nav.melosys.service.unntaksperiode.AnmodningUnntakService;
+import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.tjenester.gui.RestTjeneste;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import org.springframework.beans.factory.annotation.Autowired;
