@@ -106,15 +106,30 @@ public class DokumentFactory {
             return null;
         }
 
-        // JAXB brukes til å opprette et SaksopplysningDokument
-        String internXml = saksopplysning.getInternXml() == null || saksopplysning.getType() == SaksopplysningType.SØKNAD ? lagInternXml(saksopplysning) : saksopplysning.getInternXml();
+        String internXml = hentInternXml(saksopplysning);
         StringReader reader = new StringReader(internXml);
 
+        // JAXB brukes til å opprette et SaksopplysningDokument
         SaksopplysningDokument dokument = (SaksopplysningDokument) marshaller.unmarshal(new StreamSource(reader));
         saksopplysning.setDokument(dokument);
 
         return dokument;
     }
 
-}
+    /**
+     *  InternXml lages hvis det ikke eksisterer fra før av. (eksterne saksopplysninger)
+     *  Interne saksopplysninger (saksopplysninger som lages av melosys) må generere internXml
+     *  hver gang de lastes fordi de er redigerbare og versjonerte
+     */
+    private String hentInternXml(Saksopplysning saksopplysning) {
+        if (saksopplysning.getType() == SaksopplysningType.SØKNAD) {
+            return lagInternXml(saksopplysning);
+        }
 
+        if (saksopplysning.getInternXml() == null) {
+            return lagInternXml(saksopplysning);
+        }
+
+        return saksopplysning.getInternXml();
+    }
+}
